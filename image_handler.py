@@ -46,6 +46,11 @@ class image_details(set):
             IMAGE_STATISTICS[value]=1
         
         set.add(self,hashresult)
+        
+    def __repr__(self):
+        return f'<{self.__class__.__name__} {self.path}>'
+    
+    __str__=__repr__
     
 image_formats={'jpg','png','bmp','jpeg'}
 video_formats={'mp4','gif'}

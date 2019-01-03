@@ -108,10 +108,11 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
     async def mention_event(client,message):
         m1=message.author.mention(message.guild)
         m2=client.mention(message.guild)
-        rep={re.escape(m1):m2,re.escape(m2):m1}
+        replace={re.escape(m1):m2,re.escape(m2):m1}
         pattern=re.compile("|".join(rep.keys()))
-        result=pattern.sub(lambda x: rep[re.escape(x.group(0))],message.content)
+        result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
         await client.message_create(message.channel,result)
 
 
 start_clients()
+
