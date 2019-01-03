@@ -171,7 +171,7 @@ def process_on_command_image(content):
             return str(len(search_from))
         elif by_index:
             if index<len(search_from):
-                return (image_path+result.path,)
+                return search_from[index]
             else:
                 return 'I could not find any image with that criteria.'
         else:
