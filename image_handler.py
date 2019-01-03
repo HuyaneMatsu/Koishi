@@ -101,7 +101,8 @@ async def on_command_image(client,message,content):
     if type(result)==str:
         await client.message_create(message.channel,result)
     else:
-        await client.message_create_path(message.channel,image_path+result.path)
+        with open(image_path+result.path,'rb') as image:
+            await client.message_create_file(message.channel,image)
     
     
 def process_on_command_image(content):
