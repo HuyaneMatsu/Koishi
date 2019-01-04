@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pers_data import PREFIX
 HELP={}
 

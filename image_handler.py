@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 from random import randint as random
 import os

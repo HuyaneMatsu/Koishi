@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 from random import randint as random
 import os
@@ -13,6 +14,7 @@ from discord_uwu.exceptions import Forbidden
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help
 from pers_data import TOKEN,PREFIX
+from infos import infos
 
 Koishi=Client(TOKEN)
 
@@ -22,6 +24,8 @@ async def ready(client):
 
 
 with Koishi.events(bot_message_event(PREFIX)) as on_message:
+
+    on_message.extend(infos)
     
     @on_message
     async def default_event(client,message):
@@ -41,7 +45,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     @on_message
     async def invalid_command(client,message,command,content):
-        await client.message_create(message.channel,f'Invalid command `{command}`, try using: `{client.prefix}help`')
+        await client.message_create(message.channel,f'Invalid command `{command}`, try using: `{PREFIX}help`')
 
 
     @on_message
@@ -59,7 +63,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         else:
             result=target.id%11
 
-        await client.message_create(message.channel,f'I rate {name} 10/{result}')
+        await client.message_create(message.channel,f'I rate {name} {result}/10')
 
 
     @on_message
@@ -96,8 +100,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             await client.message_delete(message,reason='Used print command')
         except Forbidden:
             pass
-        
-        await client.message_create(message.channel,content)
+        else:
+            await client.message_create(message.channel,content)
 
 
     on_message(on_command_image,'image')
@@ -113,6 +117,28 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
         await client.message_create(message.channel,result)
 
-
+    @on_message
+    async def ping(client,message,content):
+        guild=message.channel.guild
+        if guild:
+            user=guild.get_user(content)
+            if user:
+                await client.message_create(message.channel,user.mention(guild))
+        
+    @on_message.add('emoji')
+    async def emoji_command(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        
+        try:
+            await client.message_delete(message,reason='Used emoji command')
+        except Forbidden:
+            pass
+        
+        emoji=guild.get_emoji(content)
+        if emoji:
+            await client.message_create(message.channel,str(emoji))
+            
 start_clients()
 
