@@ -10,11 +10,13 @@ sys.path.append(os.path.abspath('..'))
 from discord_uwu import Client,start_clients
 from discord_uwu.parsers import bot_message_event
 from discord_uwu.exceptions import Forbidden
+from discord_uwu.emoji import BUILTIN_EMOJIS
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help
 from pers_data import TOKEN,PREFIX
 from infos import infos
+
 
 Koishi=Client(TOKEN)
 
@@ -30,17 +32,23 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
     @on_message
     async def default_event(client,message):
         content=message.content
-        if len(content)!=3:
-            return
-        if re.match(r'^owo$',content,re.IGNORECASE):
-            text='OwO'
-        elif re.match(r'^uwu$',content,re.IGNORECASE):
-            text='UwU'
-        elif re.match(r'^0w0$',content,re.IGNORECASE):
-            text='0w0'
-        else:
-            return
-        await client.message_create(message.channel,text)
+        text=None
+        if re.match(r'n+\s*o+\s*u+',content,re.IGNORECASE) is not None:
+            parts=[]
+            for value in 'nou':
+                emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
+                await client.message_reaction_add(message,emoji)
+                    
+        elif len(content)==3:
+            if re.match(r'^owo$',content,re.IGNORECASE):
+                text='OwO'
+            elif re.match(r'^uwu$',content,re.IGNORECASE):
+                text='UwU'
+            elif re.match(r'^0w0$',content,re.IGNORECASE):
+                text='0w0'
+        
+        if text:
+            await client.message_create(message.channel,text)
 
 
     @on_message
