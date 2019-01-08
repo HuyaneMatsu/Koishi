@@ -11,7 +11,7 @@ from discord_uwu import Client,start_clients
 from discord_uwu.parsers import bot_message_event
 from discord_uwu.exceptions import Forbidden
 from discord_uwu.emoji import BUILTIN_EMOJIS
-
+from discord_uwu.activity import activity_game
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help
 from pers_data import TOKEN,PREFIX
@@ -23,8 +23,9 @@ Koishi=Client(TOKEN)
 @Koishi.events
 async def ready(client):
     print(f'{client.name} ({client.id}) logged in')
-
-
+    activity=activity_game.create(name='with Satori')
+    await client.client_status_edit(activity=activity)
+        
 with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     on_message.extend(infos)

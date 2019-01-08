@@ -6,7 +6,6 @@ from io import BytesIO
 from help_handler import HELP
 from pers_data import SUPREME_LEADER
 from discord_uwu.others import is_mention
-from discord_uwu.dereaddons_local import any_to_any
 from discord_uwu.channel import get_messages
 
 try:
@@ -15,6 +14,8 @@ try:
     UPLOAD=True
 except ImportError:
     UPLOAD=False
+
+splitext=os.path.splitext
 
 IMAGES=[]
 VIDS=[]
@@ -25,11 +26,26 @@ IMAGE_STATISTICS={}
 
 class image_details(set):
     __slots__ = ['path']
-    def __init__(self,iterable,path):
+    def __init__(self,path):
         set.__init__(self)
+
+        name,ext=splitext(path)
+        
+        ext=ext[1:]
+        if ext in image_formats:
+            IMAGES.append(self)
+        elif ext in video_formats:
+            VIDS.append(self)
+
+        ALL_img.append(self)
+        
+        tags=name.split('_')
+        del tags[0]
+
         self.path=path
-        for x in iterable:
-            self.add(x)
+        for tag in tags:
+            self.add(tag)
+            
     def hastags(self,tags):
         for tag in tags:
             if tag not in self:
@@ -57,25 +73,10 @@ image_formats={'jpg','png','bmp','jpeg'}
 video_formats={'mp4','gif'}
 
 image_path=os.path.abspath('.')+'\\images\\'
+
 def load_images():
-    global IMAGES,VIDS
-    image_statistix={}
-    splitext=os.path.splitext
-    
     for filename in os.listdir(image_path):
-        name,ext=splitext(filename)
-        ext=ext[1:]
-        tags=name.split('_')
-        del tags[0]
-        if ext in image_formats:
-            new=image_details(tags,filename)
-            IMAGES.append(new)
-        elif ext in video_formats:
-            new=image_details(tags,filename)
-            VIDS.append(new)
-        else:
-            continue
-        ALL_img.append(new)
+        image_details(filename)
 
 load_images()
 
@@ -259,19 +260,20 @@ async def on_command_upload(client,message,content):
     await client.message_create(message.channel,result)
     
 async def process_on_command_upload(client,message,content):
-    content=[x.lower() for x in split('[ \t]+',content) if not is_mention(x)]
+    tags=[x.lower() for x in re.split('[ \t]+',content) if not is_mention(x)]
 
     source=message.author
     if message.mentions:
-        for mention in mentions:
+        for mention in message.mentions:
             if mention!=client:
                 source=mention        
     
-    if any_to_any(content,RESERVED_TAGS):
-        return f'Reserved tag: {tag}'
+    for tag in tags:
+        if tag in RESERVED_TAGS:
+            return f'Reserved tag: {tag}'
 
     result=None
-    for msg in get_messages(client,channel,end=26):
+    for msg in (await get_messages(client,message.channel,end=26)):
         if msg.author==source and msg.attachments:
             result=msg.attachments[0]
             break
@@ -282,10 +284,11 @@ async def process_on_command_upload(client,message,content):
 
     filename=result.filename
     
-    try:    
-        ext=filename[filename.index('.')+1:].lower()
-    except IndexError:
+    index=filename.rfind('.')
+    if index<0:
         return
+    ext=filename[index+1:].lower()
+
     
     if ext in image_formats:
         img=True
@@ -299,8 +302,7 @@ async def process_on_command_upload(client,message,content):
     index=f'{len(IMAGES)+len(VIDS):08X}'
     if img:
         path=f'{index}_{"_".join(tags)}.png'
-        IMAGES.append(image_details(tags,path))
-        path=image_path+path
+        filename=image_path+path
         if ext!='png':
             #we save everything in png, ~~rasism~~
             if ext in ('jpg','jpeg'):
@@ -319,17 +321,17 @@ async def process_on_command_upload(client,message,content):
             image._open()
             image.save(path)
         else:
-            file=open(path,'wb')
+            file=open(filename,'wb')
             file.write(data)
             file.close()
     else:
         path=f'{image_path,index}_{"_".join(tags)}.{ext}'
-        VIDS.append(image_details(tags,path))
-        path=image_path+path
-        file=open(path,'wb')
+        filename=image_path+path
+        file=open(filename,'wb')
         file.write(data)
         file.close()
-    
+        
+    image_details(path)
     create_help_images()
     
     return 'Done Masuta~!'
