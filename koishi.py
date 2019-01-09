@@ -16,19 +16,20 @@ from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help
 from pers_data import TOKEN,PREFIX
 from infos import infos
-
+from voice import voice
+from discord_uwu import player
 
 Koishi=Client(TOKEN)
+Koishi.activity=activity_game.create(name='with Satori')
 
 @Koishi.events
 async def ready(client):
     print(f'{client.name} ({client.id}) logged in')
-    activity=activity_game.create(name='with Satori')
-    await client.client_status_edit(activity=activity)
         
 with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     on_message.extend(infos)
+    on_message.extend(voice)
     
     @on_message
     async def default_event(client,message):
@@ -77,9 +78,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     @on_message
     async def dice(client,message,content):
-        search_result=re.match(r'([0-9]*) [.]*',content)
+        search_result=re.match(r'([0-9]+).*',content)
         if search_result:
-            times=int(search_result[1])
+            times=int(search_result.groups()[0])
         else:
             times=1
 
@@ -97,8 +98,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             elif result>=5.5*times:
                 luck_text=', so BIG,.. thats what she said... *cough*'
             else:
-                luck_text='.'
-            text='Rolled {result} {luck_text}'
+                luck_text=''
+            text=f'Rolled {result} {luck_text}'
             
         await client.message_create(message.channel,text)
 
@@ -132,7 +133,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         if guild:
             user=guild.get_user(content)
             if user:
-                await client.message_create(message.channel,user.mention(guild))
+                await client.message_create(message.channel,user.mention_at(guild))
         
     @on_message.add('emoji')
     async def emoji_command(client,message,content):
@@ -148,6 +149,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         emoji=guild.get_emoji(content)
         if emoji:
             await client.message_create(message.channel,str(emoji))
-            
+
+                
+        
 start_clients()
 

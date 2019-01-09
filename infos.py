@@ -25,9 +25,9 @@ async def list_roles(client,message,content):
         guild_mode=True
         roles=guild.roles
     if roles:
-        relln=ln=len(roles)-guild_mode
-        for index in range(1,ln+1):
-            role=roles[relln-index]
+        ln=len(roles)
+        for index in range(1,ln+1-guild_mode):
+            role=roles[ln-index]
             result.append(f'Role {index} : `{role.name}`')
             if role.separated or role.mentionable:
                 extra=[]

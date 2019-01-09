@@ -131,7 +131,8 @@ def process_on_command_image(content):
         else:
             search_from=(ALL_img,VIDS,IMAGES)[search_from_index]
             index+=1
-
+    else:
+        search_from=ALL_img
 
     by_index=False
     if index<limit:
