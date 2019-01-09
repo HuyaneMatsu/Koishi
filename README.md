@@ -10,3 +10,6 @@ PREFIX='k!' #prefix (str)
 ```
 
 You should have discord_uwu's folder there too.
+
+Voice needs:
+`ffmpeg.exe` and `youtube_dl` for playing music + from youtube.
