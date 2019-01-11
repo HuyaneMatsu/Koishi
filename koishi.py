@@ -17,7 +17,8 @@ from help_handler import on_command_help
 from pers_data import TOKEN,PREFIX
 from infos import infos
 from voice import voice
-from discord_uwu import player
+from discord_uwu.others import is_channel_mention,is_user_mention
+from discord_uwu.channel import Channel_voice
 
 Koishi=Client(TOKEN)
 Koishi.activity=activity_game.create(name='with Satori')
@@ -150,7 +151,106 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         if emoji:
             await client.message_create(message.channel,str(emoji))
 
-                
+
+    def deside_on_edit(guild,message,content):
+        if not content:
+            return 'huh?'
         
+        content=re.split('[ \t]+',content)
+        limit=len(content)
+        if (limit&1)^1:
+            return 'Pls send 1 mention, then key, value pairs.'
+        if limit==1:
+            return 'And anything to change?'
+        if message.mentions:
+            if len(message.mentions)>1:
+                return 'Pls send 1 mention or 1 name and stuffs to change.'
+            if not is_user_mention(content[0]):
+                return '1st value must be mention,'
+            user=message.mentions[0]
+        else:
+            user=guild.get_user(content[0])
+            if not user:
+                return 'Could not find a user with that name.'
+
+        if message.channel_mentions:
+            if message.channel_mentions>1 or 'voice_channel' not in content[::2]:
+                return 'Not in place channel mention found'
+
+        result={}
+        
+        index=1
+        while index!=limit:
+            key=content[index]
+            index+=1
+            value=content[index]
+            index+=1
+
+            if key in result:
+                return f'Dupe key: "{key}"'
+
+            if key=='nick':
+                result[key]=value
+                continue
+                
+            if key in ('deaf','mute'):
+                value=value.lower()
+                if value=='true':
+                    result[key]=True
+                    continue
+                elif value=='false':
+                    result[key]=False
+                    continue
+                else:
+                    return f'Invalid value for {key}, it can be either True or False'
+                
+            if key=='voice_channel':
+                if is_channel_mention(value):
+                    channel=message.channel_mentions[0]
+                else:
+                    channel=guild.get_channel(value)
+                    if not channel:
+                        return 'Did not find that channel name'
+                if type(channel) is not Channel_voice:
+                    return 'Bad channel type, it must to be voice channel!'
+                result[key]=channel
+                continue
+
+            if key=='role':
+                role=guild.get_role(value)
+                if not role:
+                    return 'Didnt fin that role name!'
+                
+                user_roles=user.guild_profiles[guild].roles
+                    
+                if role in user_roles:
+                    new_roles=user_roles.copy()
+                    new_roles.remove(role)
+                    result['roles']=new_roles
+                else:
+                    new_roles=user_roles.copy()
+                    new_roles.append(role)
+                    result['roles']=new_roles
+                continue
+            
+        return user,result
+        
+        
+    @on_message.add('edit')
+    async def command_edit(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+
+        result=deside_on_edit(guild,message,content)
+        if type(result) is tuple:
+            try:
+                await client.guild_user_edit(guild,result[0],**result[1])
+            except Forbidden:
+                result='Access denied'
+            else:
+                result='OwO'
+        await client.message_create(message.channel,result)
+
 start_clients()
 

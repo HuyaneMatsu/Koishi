@@ -14,8 +14,7 @@ async def join(client,message,content):
         state=guild.voice_states.get(user.id,None)
         if not state:
             return
-        
-        await client.connect_voice(state.channel)
+        await client.join_voice_channel(state.channel)
         
         result=re.match(r'^([0-9]{1,3})[%]{0,1}$',content)
 
@@ -62,18 +61,28 @@ async def leave(client,message,content):
 if player.youtube_dl:
     @voice
     async def play(client,message,content):
+
         voice_client=client.voice_client_for(message)
         if voice_client:
+            if not content:
+                voice_client.resume()
             source = await player.YTaudio(client.loop,content)
-            voice_client.play(source)
-            await client.message_create(message.channel,f'Now playing {source.title}!')
+            if voice_client.append(source):
+                starter='Now playing'
+            else:
+                starter='Added to queue'
+            await client.message_create(message.channel,f'{starter} {source.title}!')
 
 @voice
 async def volume(client,message,content):
     voice_client=client.voice_client_for(message)
     if not voice_client:
         return
-    
+
+    if not content:
+        await client.message_create(message.channel,f'{round(voice_client.volume*100.)}% desu')
+        return
+
     result=re.match(r'^([0-9]{1,3})[%]{0,1}$',content)
     if not result:
         await client.message_create(message.channel,'*Number*% pls')
@@ -84,3 +93,19 @@ async def volume(client,message,content):
         return
     voice_client.volume=result/100.
     await client.message_create(message.channel,f'Volume set to {result}%')
+
+
+@voice
+async def skip(client,message,content):
+    voice_client=client.voice_client_for(message)
+    if not voice_client:
+        return
+    voice_client.skip()
+    await client.message_create(message.channel,'skipped')
+
+@voice
+async def move(client,message,content):
+    voice_client=client.voice_client_for(message)
+    if voice_client:
+        await voice_client.move_to(message.channel)
+    
