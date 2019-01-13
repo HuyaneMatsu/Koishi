@@ -85,3 +85,21 @@ async def guild_details(client,message,content):
     for chunk in chunkify(guild):
         await client.message_create(message.channel,chunk)
         await asyncio.sleep(0.3)
+
+@infos
+async def channels_details(client,message,content):
+    guild=message.guild
+    if not guild:
+        return
+    for chunk in chunkify(guild.channels,write_parents=False):
+        await client.message_create(message.channel,chunk)
+        await asyncio.sleep(0.3)
+
+@infos
+async def roles_details(client,message,content):
+    guild=message.guild
+    if not guild:
+        return
+    for chunk in chunkify(guild.roles,write_parents=False):
+        await client.message_create(message.channel,chunk)
+        await asyncio.sleep(0.3)

@@ -66,11 +66,15 @@ if player.youtube_dl:
         if voice_client:
             if not content:
                 voice_client.resume()
-            source = await player.YTaudio(client.loop,content)
-            if voice_client.append(source):
-                starter='Now playing'
+            try:
+                source = await player.YTaudio(client.loop,content)
+            except player.DownloadError:
+                text=DownloadError.args[0]
             else:
-                starter='Added to queue'
+                if voice_client.append(source):
+                    text='Now playing {source.title}!'
+                else:
+                    starter='Added to queue {source.title}!'
             await client.message_create(message.channel,f'{starter} {source.title}!')
 
 @voice

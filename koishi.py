@@ -19,6 +19,8 @@ from infos import infos
 from voice import voice
 from discord_uwu.others import is_channel_mention,is_user_mention
 from discord_uwu.channel import Channel_voice
+from discord_uwu.color import Color
+from discord_uwu.permission import Permission
 
 Koishi=Client(TOKEN)
 Koishi.activity=activity_game.create(name='with Satori')
@@ -219,7 +221,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             if key=='role':
                 role=guild.get_role(value)
                 if not role:
-                    return 'Didnt fin that role name!'
+                    return 'Didnt find that role name!'
                 
                 user_roles=user.guild_profiles[guild].roles
                     
@@ -252,5 +254,193 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
                 result='OwO'
         await client.message_create(message.channel,result)
 
+    def deside_on_move(guild,message,content):
+
+        content=re.split('[ \t]+',content)
+        if len(content) in (2,3):
+            if is_channel_mention(content[0]):
+                channel=message.channel_mentions[0]
+            else:
+                channel=guild.get_channel(content[0])
+                if not channel:
+                    return 'Channel not found.'
+            try:
+                index=int(content[1])
+            except ValueError:
+                return 'And where?'
+            if len(content)==2:
+                category=None
+            else:
+                if content[2]=='guild':
+                    category=channel.guild
+                else:
+                    if is_channel_mention(content[2]):
+                        category=message.channel_mentions[1]
+                    else:
+                        category=guild.get_channel(content[2])
+                    if not category:
+                        return 'Cagory not found.'
+                    if category.type_lookup!=4:
+                        return 'You can move channels only to Category channel or to the guild.'
+              
+            return channel,index,category
+        return '2 or 3 word!'
+    
+    @on_message 
+    async def move_channel(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+
+        result=deside_on_move(guild,message,content)
+        if type(result) is not str:
+            try:
+                await client.channel_guild_move(*result)
+            except Forbidden:
+                result='Access denied!'
+            else:
+                result='yayyyy'
+        await client.message_create(message.channel,result)
+
+
+    def deside_on_move_role(guild,message,content):
+        content=re.split('[ \t]+',content)
+        if len(content)!=2:
+            return 'Role name and index!'
+        role=guild.get_role(content[0])
+        if not role:
+            return 'Role not found.'
+        try:
+            index=int(content[1])
+        except ValueError:
+            return 'And where?'
+        return role,index
+            
+    @on_message
+    async def move_role(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+
+        result=deside_on_move_role(guild,message,content)
+        if type(result) is not str:
+            try:
+                await client.role_move(*result)
+            except Forbidden:
+                result='Access denied!'
+            else:
+                result='yayyyy'
+        await client.message_create(message.channel,result)
+
+
+    def deside_on_delete_role(guild,message,content):
+        content=re.split('[ \t]+',content)
+        if len(content)!=1:
+            return 'Role name only!'
+        role=guild.get_role(content[0])
+        if not role:
+            return 'Role not found.'
+        return role
+
+    @on_message
+    async def delete_role(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+
+        result=deside_on_delete_role(guild,message,content)
+        if type(result) is not str:
+            try:
+                await client.role_delete(result)
+            except Forbidden:
+                result='Access denied!'
+            else:
+                result='yayyyy'
+        await client.message_create(message.channel,result)
+
+
+    def deside_on_edit_role(guild,message,content):
+        if not content:
+            return 'huh?'
+        
+        content=re.split('[ \t]+',content)
+        limit=len(content)
+        if (limit&1)^1:
+            return 'Pls write a role name, then key, value pairs.'
+        if limit==1:
+            return 'And anything to change?'
+
+        role=guild.get_role(content[0])
+        if not role:
+            return 'Could not find a role with that name.'
+
+        result={}
+        
+        index=1
+        while index!=limit:
+            key=content[index]
+            index+=1
+            value=content[index]
+            index+=1
+
+            if key in result:
+                return f'Dupe key: "{key}"'
+
+            if key=='name':
+                result[key]=value
+                continue
+                
+            if key in ('mentionable','separated'):
+                value=value.lower()
+                if value=='true':
+                    result[key]=True
+                    continue
+                elif value=='false':
+                    result[key]=False
+                    continue
+                else:
+                    return f'Invalid value for {key}, it can be either True or False'
+                
+            if key=='color':
+                try:
+                    result[key]=Color.from_html(value)
+                except ValueError:
+                    return 'Invalid color'
+                continue
+
+            if key=='permissions':
+                if value=='voice':
+                    result[key]=Permission.voice
+                    continue
+                if value=='text':
+                    result[key]=Permission.text
+                    continue
+                if value=='none':
+                    result[key]=Permission.none
+                    continue
+                if value=='general':
+                    result[key]=Permission.general
+                    continue
+                return 'Not predefined permission name'
+            
+        return role,result
+
+    @on_message
+    async def edit_role(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+
+        result=deside_on_edit_role(guild,message,content)
+        if type(result) is not str:
+            try:
+                await client.role_edit(result[0],**result[1])
+            except Forbidden:
+                result='Access denied!'
+            else:
+                result='yayyyy'
+        await client.message_create(message.channel,result)
+
+    
 start_clients()
 
