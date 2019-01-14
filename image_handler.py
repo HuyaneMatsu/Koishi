@@ -109,7 +109,7 @@ async def on_command_image(client,message,content):
     
 def process_on_command_image(content):
     #TODO ignore mentions
-    content=[x.lower() for x in re.split('[ \t]+',content) if not is_mention(x)]
+    content=[x.lower() for x in re.findall(r'\S+',content) if not is_mention(x)]
     limit=len(content)
     if limit==0:
         return 'Need tags!'
@@ -261,7 +261,7 @@ async def on_command_upload(client,message,content):
     await client.message_create(message.channel,result)
     
 async def process_on_command_upload(client,message,content):
-    tags=[x.lower() for x in re.split('[ \t]+',content) if not is_mention(x)]
+    tags=[x.lower() for x in re.findall(r'\S+',content) if not is_mention(x)]
 
     source=message.author
     if message.mentions:

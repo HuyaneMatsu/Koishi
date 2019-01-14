@@ -3,6 +3,7 @@ import sys
 from random import randint as random
 import os
 import re
+import asyncio
 
 #moving to the outer folder, so uwu ll count as a package
 sys.path.append(os.path.abspath('..'))
@@ -12,15 +13,17 @@ from discord_uwu.parsers import bot_message_event
 from discord_uwu.exceptions import Forbidden
 from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.activity import activity_game
-from image_handler import on_command_upload,on_command_image
-from help_handler import on_command_help
-from pers_data import TOKEN,PREFIX
-from infos import infos
-from voice import voice
-from discord_uwu.others import is_channel_mention,is_user_mention
+from discord_uwu.others import is_channel_mention,is_user_mention,filter_content
 from discord_uwu.channel import Channel_voice
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
+
+from image_handler import on_command_upload,on_command_image
+from help_handler import on_command_help,HELP
+from pers_data import TOKEN,PREFIX
+from infos import infos
+from voice import voice
+
 
 Koishi=Client(TOKEN)
 Koishi.activity=activity_game.create(name='with Satori')
@@ -32,8 +35,11 @@ async def ready(client):
 with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     on_message.extend(infos)
-    on_message.extend(voice)
-    
+    on_message(voice)
+    on_message(on_command_image,'image')
+    on_message(on_command_upload,'upload')
+    on_message(on_command_help,'help')
+
     @on_message
     async def default_event(client,message):
         content=message.content
@@ -58,8 +64,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     @on_message
     async def invalid_command(client,message,command,content):
-        await client.message_create(message.channel,f'Invalid command `{command}`, try using: `{PREFIX}help`')
-
+        message = await client.message_create(message.channel,f'Invalid command `{command}`, try using: `{PREFIX}help`')
+        await asyncio.sleep(30.)
+        await client.message_delete(message,reason='Invalid command messages expire after 30s')
 
     @on_message
     async def rate(client,message,content):
@@ -116,11 +123,6 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         else:
             await client.message_create(message.channel,content)
 
-
-    on_message(on_command_image,'image')
-    on_message(on_command_upload,'upload')
-    on_message(on_command_help,'help')
-
     @on_message
     async def mention_event(client,message):
         m1=message.author.mention_at(message.guild)
@@ -137,7 +139,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             user=guild.get_user(content)
             if user:
                 await client.message_create(message.channel,user.mention_at(guild))
-        
+    
     @on_message.add('emoji')
     async def emoji_command(client,message,content):
         guild=message.guild
@@ -153,293 +155,310 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         if emoji:
             await client.message_create(message.channel,str(emoji))
 
-
-    def deside_on_edit(guild,message,content):
-        if not content:
-            return 'huh?'
-        
-        content=re.split('[ \t]+',content)
-        limit=len(content)
-        if (limit&1)^1:
-            return 'Pls send 1 mention, then key, value pairs.'
-        if limit==1:
-            return 'And anything to change?'
-        if message.mentions:
-            if len(message.mentions)>1:
-                return 'Pls send 1 mention or 1 name and stuffs to change.'
-            if not is_user_mention(content[0]):
-                return '1st value must be mention,'
-            user=message.mentions[0]
-        else:
-            user=guild.get_user(content[0])
-            if not user:
-                return 'Could not find a user with that name.'
-
-        if message.channel_mentions:
-            if message.channel_mentions>1 or 'voice_channel' not in content[::2]:
-                return 'Not in place channel mention found'
-
-        result={}
-        
-        index=1
-        while index!=limit:
-            key=content[index]
-            index+=1
-            value=content[index]
-            index+=1
-
-            if key in result:
-                return f'Dupe key: "{key}"'
-
-            if key=='nick':
-                result[key]=value
-                continue
-                
-            if key in ('deaf','mute'):
-                value=value.lower()
-                if value=='true':
-                    result[key]=True
-                    continue
-                elif value=='false':
-                    result[key]=False
-                    continue
+    @on_message
+    async def edit(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        text=''
+        content=filter_content(content)
+        key=''
+        while True:
+            if not content:
+                break
+            key=content.pop(0)
+            if key=='user':
+                if not content:
+                    text='You can edit "nick", "role", "deaf", "mute", "voice_channel".'
+                    break
+                limit=len(content)
+                if (limit&1)^1:
+                    text='Pls send 1 mention, then key, value pairs.'
+                    break
+                if limit==1:
+                    text='You can edit "nick", "role", "deaf", "mute", "voice_channel".'
+                    break
+                if message.mentions:
+                    if len(message.mentions)>1:
+                        text='Pls send 1 mention or 1 name and stuffs to change.'
+                        break
+                    if not is_user_mention(content[0]):
+                        text='1st value must be mention.'
+                        break
+                    user=message.mentions[0]
                 else:
-                    return f'Invalid value for {key}, it can be either True or False'
-                
-            if key=='voice_channel':
-                if is_channel_mention(value):
-                    channel=message.channel_mentions[0]
-                else:
-                    channel=guild.get_channel(value)
-                    if not channel:
-                        return 'Did not find that channel name'
-                if type(channel) is not Channel_voice:
-                    return 'Bad channel type, it must to be voice channel!'
-                result[key]=channel
-                continue
+                    user=guild.get_user(content[0])
+                    if not user:
+                        text='Could not find a user with that name.'
+                        break
 
+                if message.channel_mentions:
+                    if message.channel_mentions>1 or 'voice_channel' not in content[::2]:
+                        text='Not in place channel mention found'
+                        break
+
+                result={}
+                
+                index=1
+                while index!=limit:
+                    name=content[index]
+                    index+=1
+                    value=content[index]
+                    index+=1
+
+                    if name in result:
+                        text=f'Dupe key: "{name}"'
+                        break
+
+                    if name=='nick':
+                        result[name]=value
+                        continue
+                        
+                    if name in ('deaf','mute'):
+                        value=value.lower()
+                        if value=='true':
+                            result[name]=True
+                            continue
+                        elif value=='false':
+                            result[name]=False
+                            continue
+                        else:
+                            text=f'Invalid value for {name}, it can be either True or False'
+                            break
+                        
+                    if name=='voice_channel':
+                        if is_channel_mention(value):
+                            channel=message.channel_mentions[0]
+                        else:
+                            channel=guild.get_channel(value)
+                            if not channel:
+                                text='Did not find that channel name'
+                                break
+                        if type(channel) is not Channel_voice:
+                            text='Bad channel type, it must to be voice channel!'
+                            break
+                        result[name]=channel
+                        continue
+
+                    if name=='role':
+                        role=guild.get_role(value)
+                        if not role:
+                            text='Did not find that role name!'
+                            break
+                        user_roles=user.guild_profiles[guild].roles
+                            
+                        if role in user_roles:
+                            new_roles=user_roles.copy()
+                            new_roles.remove(role)
+                            result['roles']=new_roles
+                        else:
+                            new_roles=user_roles.copy()
+                            new_roles.append(role)
+                            result['roles']=new_roles
+                        continue
+                if not text:
+                    text=(user,result)
+                break
+            
             if key=='role':
-                role=guild.get_role(value)
+                limit=len(content)
+                if (limit&1)^1:
+                    text='Pls write a role\'s name, then key, value pairs.'
+                    break
+                if limit==1:
+                    text='And anything to change?'
+                    break
+                role=guild.get_role(content[0])
                 if not role:
-                    return 'Didnt find that role name!'
+                    text='Could not find a role with that name.'
+                    break
+
+                result={}
                 
-                user_roles=user.guild_profiles[guild].roles
-                    
-                if role in user_roles:
-                    new_roles=user_roles.copy()
-                    new_roles.remove(role)
-                    result['roles']=new_roles
-                else:
-                    new_roles=user_roles.copy()
-                    new_roles.append(role)
-                    result['roles']=new_roles
-                continue
-            
-        return user,result
-        
-        
-    @on_message.add('edit')
-    async def command_edit(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
+                index=1
+                while index!=limit:
+                    name=content[index]
+                    index+=1
+                    value=content[index]
+                    index+=1
 
-        result=deside_on_edit(guild,message,content)
-        if type(result) is tuple:
+                    if name in result:
+                        text=f'Dupe key: "{name}"'
+                        break
+
+                    if name=='name':
+                        result[name]=value
+                        continue
+                        
+                    if name in ('mentionable','separated'):
+                        value=value.lower()
+                        if value=='true':
+                            result[name]=True
+                            continue
+                        elif value=='false':
+                            result[name]=False
+                            continue
+                        else:
+                            text=f'Invalid value for {name}, it can be either True or False'
+                            break
+                        
+                    if name=='color':
+                        try:
+                            result[name]=Color.from_html(value)
+                        except ValueError:
+                            text='Invalid color'
+                            break
+                        continue
+
+                    if name=='permissions':
+                        if value=='voice':
+                            result[name]=Permission.voice
+                            continue
+                        if value=='text':
+                            result[name]=Permission.text
+                            continue
+                        if value=='none':
+                            result[name]=Permission.none
+                            continue
+                        if value=='general':
+                            result[name]=Permission.general
+                            continue
+                        text='Not predefined permission name'
+                        break
+                if not text: 
+                    text=(role,result)
+                break
+            break
+        if type(text) is tuple:
             try:
-                await client.guild_user_edit(guild,result[0],**result[1])
+                if key=='user':
+                    await client.guild_user_edit(guild,text[0],**text[1])
+                elif key=='role':
+                    await client.role_edit(text[0],**text[1])
             except Forbidden:
-                result='Access denied'
+                text='Access denied'
             else:
-                result='OwO'
-        await client.message_create(message.channel,result)
-
-    def deside_on_move(guild,message,content):
-
-        content=re.split('[ \t]+',content)
-        if len(content) in (2,3):
-            if is_channel_mention(content[0]):
-                channel=message.channel_mentions[0]
-            else:
-                channel=guild.get_channel(content[0])
-                if not channel:
-                    return 'Channel not found.'
-            try:
-                index=int(content[1])
-            except ValueError:
-                return 'And where?'
-            if len(content)==2:
-                category=None
-            else:
-                if content[2]=='guild':
-                    category=channel.guild
-                else:
-                    if is_channel_mention(content[2]):
-                        category=message.channel_mentions[1]
-                    else:
-                        category=guild.get_channel(content[2])
-                    if not category:
-                        return 'Cagory not found.'
-                    if category.type_lookup!=4:
-                        return 'You can move channels only to Category channel or to the guild.'
-              
-            return channel,index,category
-        return '2 or 3 word!'
-    
-    @on_message 
-    async def move_channel(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-
-        result=deside_on_move(guild,message,content)
-        if type(result) is not str:
-            try:
-                await client.channel_guild_move(*result)
-            except Forbidden:
-                result='Access denied!'
-            else:
-                result='yayyyy'
-        await client.message_create(message.channel,result)
-
-
-    def deside_on_move_role(guild,message,content):
-        content=re.split('[ \t]+',content)
-        if len(content)!=2:
-            return 'Role name and index!'
-        role=guild.get_role(content[0])
-        if not role:
-            return 'Role not found.'
-        try:
-            index=int(content[1])
-        except ValueError:
-            return 'And where?'
-        return role,index
-            
-    @on_message
-    async def move_role(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-
-        result=deside_on_move_role(guild,message,content)
-        if type(result) is not str:
-            try:
-                await client.role_move(*result)
-            except Forbidden:
-                result='Access denied!'
-            else:
-                result='yayyyy'
-        await client.message_create(message.channel,result)
-
-
-    def deside_on_delete_role(guild,message,content):
-        content=re.split('[ \t]+',content)
-        if len(content)!=1:
-            return 'Role name only!'
-        role=guild.get_role(content[0])
-        if not role:
-            return 'Role not found.'
-        return role
+                text='OwO'
+        if not text:
+            text=HELP['edit']
+        await client.message_create(message.channel,text)
 
     @on_message
-    async def delete_role(client,message,content):
+    async def move(guild,message,content):
         guild=message.guild
-        if guild is None:
+        if not guild:
             return
-
-        result=deside_on_delete_role(guild,message,content)
-        if type(result) is not str:
-            try:
-                await client.role_delete(result)
-            except Forbidden:
-                result='Access denied!'
-            else:
-                result='yayyyy'
-        await client.message_create(message.channel,result)
-
-
-    def deside_on_edit_role(guild,message,content):
-        if not content:
-            return 'huh?'
-        
-        content=re.split('[ \t]+',content)
-        limit=len(content)
-        if (limit&1)^1:
-            return 'Pls write a role name, then key, value pairs.'
-        if limit==1:
-            return 'And anything to change?'
-
-        role=guild.get_role(content[0])
-        if not role:
-            return 'Could not find a role with that name.'
-
-        result={}
-        
-        index=1
-        while index!=limit:
-            key=content[index]
-            index+=1
-            value=content[index]
-            index+=1
-
-            if key in result:
-                return f'Dupe key: "{key}"'
-
-            if key=='name':
-                result[key]=value
-                continue
-                
-            if key in ('mentionable','separated'):
-                value=value.lower()
-                if value=='true':
-                    result[key]=True
-                    continue
-                elif value=='false':
-                    result[key]=False
-                    continue
+        content=filter_content(content)
+        text=''
+        key=''
+        while True:
+            if key=='channel':
+                if not content:
+                    break
+                key=content.pop(0)
+                if len(content) not in (2,3):
+                    text='Moving channel\ss formula: "channel name" ("category name") "position"'
+                    break
+                if is_channel_mention(content[0]):
+                    channel=message.channel_mentions[0] 
                 else:
-                    return f'Invalid value for {key}, it can be either True or False'
-                
-            if key=='color':
+                    channel=guild.get_channel(content[0])
+                    if not channel:
+                        text='Channel not found.'
+                        break
+                if len(content)==3:
+                    index=content[2]
+                else:
+                    index=content[1]
                 try:
-                    result[key]=Color.from_html(value)
+                    index=int(index)
+                except KeyError:
+                    text='Index should be number, right?'
+                    break
+                if len(content)==2:
+                    category=None
+                else:
+                    category=content[1]
+                    if category=='guild':
+                        category=guild
+                    else:
+                        if is_channel_mention(content[2]):
+                            category=message.channel_mentions[-1]
+                        else:
+                            category=guild.get_channel(category)
+                        if not category:
+                            text='Cagory not found.'
+                            break
+                        if category.type_lookup!=4:
+                            text='You can move channels only to Category channel or to the guild.'
+                            break
+
+                if not text:
+                    text=(channel,index,category)
+                break
+            if key=='role':
+                if len(content)!=2:
+                    text='"Role name" and "index" please!'
+                    break
+                role=guild.get_role(content[0])
+                if not role:
+                    text='Role not found.'
+                    break
+                try:
+                    index=int(content[1])
                 except ValueError:
-                    return 'Invalid color'
-                continue
-
-            if key=='permissions':
-                if value=='voice':
-                    result[key]=Permission.voice
-                    continue
-                if value=='text':
-                    result[key]=Permission.text
-                    continue
-                if value=='none':
-                    result[key]=Permission.none
-                    continue
-                if value=='general':
-                    result[key]=Permission.general
-                    continue
-                return 'Not predefined permission name'
-            
-        return role,result
-
-    @on_message
-    async def edit_role(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-
-        result=deside_on_edit_role(guild,message,content)
-        if type(result) is not str:
+                    text='Valid number desu!'
+                    break
+                text=(role,index)
+                break
+            break
+        if type(text) is not str:
             try:
-                await client.role_edit(result[0],**result[1])
+                if key=='channel':
+                    await client.channel_guild_move(*text)
+                elif key=='role':
+                    await client.role_move(*result)
             except Forbidden:
                 result='Access denied!'
             else:
                 result='yayyyy'
-        await client.message_create(message.channel,result)
+        if not text:
+            text=HELP['move']
+        await client.message_create(message.channel,text)
+
+    @on_message
+    async def delete(guild,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        content=filter_content(content)
+        text=''
+        key=''
+        while True:
+            if not content:
+                break
+            key=content.pop(0)
+            if key=='role':
+                if len(content)!=1:
+                    text='Role name only!'
+                    break
+                role=guild.get_role(content[0])
+                if not role:
+                    text='Role not found'
+                    break
+                text=role
+            break
+        if type(text) is not str:
+            try:
+                if key=='role':
+                    await role_delete(text)
+            except Forbidden:
+                result='Access denied!'
+            else:
+                result='yayyyy'
+        if not text:
+            text=HELP['delete']
+        await client.message_create(message.channel,text)
 
     
 start_clients()
