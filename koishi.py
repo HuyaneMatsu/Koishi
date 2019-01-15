@@ -86,17 +86,14 @@ class reaction_book:
             wrapper.timeout+=30.
         
     async def _default_cancel(self,wrapper,exception=None):
-        if exception==Exception:
+        if exception is Exception:
             #we delete the message, so no need to remove reactions
             return
         if exception is TimeoutError:
-            client=wrapper.client
-            message=wrapper.message
-            for emoji in self.emojis:
-                try:
-                    await client.reaction_delete_own(message,emoji)
-                except Forbidden:
-                    pass
+            try:
+                await wrapper.client.reactions_clear(wrapper.message)
+            except Forbidden:
+                pass
             return
         #we do nothing
 
@@ -118,7 +115,7 @@ class wait_and_continue:
             await wrapper.client.message_delete(wrapper.message)
         except Forbidden:
             pass
-        if exception==Exception:
+        if exception is Exception:
             return
         self.future.set_exception(exception)
         #we do nothing
@@ -455,7 +452,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         await client.message_create(message.channel,text)
 
     @on_message
-    async def move(guild,message,content):
+    async def move(client,message,content):
         guild=message.guild
         if not guild:
             return
@@ -583,7 +580,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         await client.message_create(message.channel,text)
 
     @on_message
-    async def delete(guild,message,content):
+    async def delete(client,message,content):
         guild=message.guild
         if guild is None:
             return
@@ -611,7 +608,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
                 if len(content)!=1:
                     text='Channel name only!'
                     break
-                channel=guild.get_channeL(content[0])
+                channel=guild.get_channel(content[0])
                 if not channel:
                     text='Channel not found'
                     break

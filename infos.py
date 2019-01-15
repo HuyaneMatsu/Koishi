@@ -40,7 +40,7 @@ async def parse_list_command(client,message,content):
                 text='There are no pinned messages at the channel.'
                 break
             ln_c_l=len(str(len(messages)-1))+2
-            lines=[f'{f"{index}.:" >ln_c_l} {message:c} id={message.id} length={len(message)} author={message.author:f}' for message in messages]
+            lines=[f'{f"{index}.:": >{ln_c_l}} {message:c} id={message.id} length={len(message.content)} author={message.author:f}' for index,message in enumerate(messages,1)]
             text=cchunkify(lines)
             break
         break
@@ -78,7 +78,7 @@ async def parse_details_command(client,message,content):
                 if index>4194304:
                     #id propably
                     try:
-                        target_message = await client.message_get(message.channel,message_id)
+                        target_message = await client.message_get(message.channel,index)
                     except (Forbidden,HTTPException):
                         text='Acces denied or not existing message'
                         break
