@@ -4,7 +4,7 @@ import asyncio
 from discord_uwu.parsers import eventlist
 from discord_uwu.channel import get_message
 from discord_uwu.prettyprint import pchunkify
-from discord_uwu.others import filter_content,chunkify
+from discord_uwu.others import filter_content,chunkify,cchunkify
 from discord_uwu.exceptions import Forbidden,HTTPException
 from help_handler import HELP
 
@@ -38,6 +38,7 @@ async def parse_list_command(client,message,content):
             messages = await client.channel_pins(message.channel)
             if not messages:
                 text='There are no pinned messages at the channel.'
+                break
             ln_c_l=len(str(len(messages)-1))+2
             lines=[f'{f"{index}.:" >ln_c_l} {message:c} id={message.id} length={len(message)} author={message.author:f}' for message in messages]
             text=cchunkify(lines)

@@ -24,7 +24,7 @@ from pers_data import TOKEN,PREFIX
 from infos import infos
 from voice import voice
 
-class book:
+class reaction_book:
     LEFT2   = BUILTIN_EMOJIS['rewind']
     LEFT    = BUILTIN_EMOJIS['arrow_backward']
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
@@ -32,10 +32,11 @@ class book:
     CROSS   = BUILTIN_EMOJIS['x']
     emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,CROSS]
     
-    __slots__=['page', 'pages']
+    __slots__=['cancel','page', 'pages']
     def __init__(self,pages):
         self.pages=pages
         self.page=0
+        self.cancel=type(self)._default_cancel
         
     async def start(self,wrapper):
         client=wrapper.client
@@ -72,7 +73,7 @@ class book:
         if page>=len(self.pages):
             page=len(self.pages)-1
         try:
-            await client.message_edit(message,*self.pages[page])
+            await client.message_edit(message,**self.pages[page])
         except Forbidden:
             pass
         try:
@@ -84,20 +85,44 @@ class book:
         if wrapper.timeout<360.:
             wrapper.timeout+=30.
         
-        async def cancel(self,wrapper,exception=None):
-            if exception==Exception:
-                #we delete the message, so no need to remove reactions
-                return
-            if exception is TimeoutError:
-                client=wrapper.client
-                message=wrapper.wrapper
-                for emoji in self.emojis:
-                    try:
-                        await client.reaction_delete_own(message,emoji)
-                    except Forbidden:
-                        pass
-                return
-            #we do nothing
+    async def _default_cancel(self,wrapper,exception=None):
+        if exception==Exception:
+            #we delete the message, so no need to remove reactions
+            return
+        if exception is TimeoutError:
+            client=wrapper.client
+            message=wrapper.message
+            for emoji in self.emojis:
+                try:
+                    await client.reaction_delete_own(message,emoji)
+                except Forbidden:
+                    pass
+            return
+        #we do nothing
+
+class wait_and_continue:
+    __slots__=['cancel', 'case', 'future']
+    def __init__(self,future,case,cancel=None):
+        self.cancel=type(self)._default_cancel
+        self.future=future
+        self.case=case
+    async def start(self,wrapper):
+        pass
+
+    async def __call__(self,wrapper,emoji,user):
+        if self.case(emoji,user):
+            self.future.set_result((emoji,user),)
+            wrapper.cancel(Exception)
+    async def _default_cancel(self,wrapper,exception=None):
+        try:
+            await wrapper.client.message_delete(wrapper.message)
+        except Forbidden:
+            pass
+        if exception==Exception:
+            return
+        self.future.set_exception(exception)
+        #we do nothing
+
         
 Koishi=Client(TOKEN)
 Koishi.activity=activity_game.create(name='with Satori')
@@ -610,9 +635,20 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     @on_message.add('book')
     async def on_command_book(client,message,content):
-        pages=(('import base64\n\npage1/3',),('uwu\n\npage2/3',),('text2\n\npage3/3',))
-        message = await client.message_create(message.channel,*pages[0])
-        waitfor_reaction_wrapper(client,message,book(pages),60.)
+        pages=({'content':'import base64\n\npage1/3'},{'content':'uwu\n\npage2/3'},{'content':'text2\n\npage3/3'})
+        message = await client.message_create(message.channel,**pages[0])
+        waitfor_reaction_wrapper(client,message,reaction_book(pages),120.)
+
+    @on_message
+    async def satania(client,message,content):
+        message = await client.message_create(message.channel,'waiting for satania emote')
+        future=asyncio.Future()
+        waitfor_reaction_wrapper(client,message,wait_and_continue(future,lambda emoji,user:('satania' in emoji.name)),60.)
+        try:
+            emoji,user = await future
+        except TimeoutError:
+            return
+        await client.message_create(message.channel,str(emoji)*5)
         
 start_clients()
 
