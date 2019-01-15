@@ -84,8 +84,7 @@ async def voice(client,message,content):
                     text=f'Now playing: {voice_client.player.source.title}'
                 break
             try:
-                #works too, but not with title.
-                #TODO: add auto title detection
+                #works too:
                 #source=player.PCM_volume_transformer(player.FFmpegPCMaudio('songname.mp3'))
                 source = await player.YTaudio(client.loop,' '.join(content))
             except player.DownloadError as err:
@@ -129,11 +128,6 @@ async def voice(client,message,content):
         elif key=='move':
             if content:
                 name=content[0]
-                if name.startswith('"'):
-                    name=name[1:-1]
-                    if not name:
-                        text='Empty name desu!'
-                        break
                 channel=guild.get_channel(name)
                 if not channel:
                     text=f'Not existing channel: "{name}"!'
@@ -162,5 +156,5 @@ async def voice(client,message,content):
         await asyncio.sleep(30.)
         await client.message_delete(message,reason='Voice messages expire after 30s.')
     else:
-        message = await client.message_create(message.channel,HELP['voice'])
+        await client.message_create(message.channel,HELP['voice'])
 

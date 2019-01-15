@@ -9,7 +9,7 @@ import asyncio
 sys.path.append(os.path.abspath('..'))
 
 from discord_uwu import Client,start_clients
-from discord_uwu.parsers import bot_message_event
+from discord_uwu.parsers import bot_message_event,bot_reaction_waitfor,waitfor_reaction_wrapper
 from discord_uwu.exceptions import Forbidden
 from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.activity import activity_game
@@ -24,14 +24,90 @@ from pers_data import TOKEN,PREFIX
 from infos import infos
 from voice import voice
 
+class book:
+    LEFT2   = BUILTIN_EMOJIS['rewind']
+    LEFT    = BUILTIN_EMOJIS['arrow_backward']
+    RIGHT   = BUILTIN_EMOJIS['arrow_forward']
+    RIGHT2  = BUILTIN_EMOJIS['fast_forward']
+    CROSS   = BUILTIN_EMOJIS['x']
+    emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,CROSS]
+    
+    __slots__=['page', 'pages']
+    def __init__(self,pages):
+        self.pages=pages
+        self.page=0
+        
+    async def start(self,wrapper):
+        client=wrapper.client
+        message=wrapper.message
+        for emoji in self.emojis:
+            await client.reaction_add(message,emoji)
 
+    async def __call__(self,wrapper,emoji,user):
+        client=wrapper.client
+        message=wrapper.message
+        while True:
+            if emoji is self.LEFT:
+                page=self.page-1
+                break
+            if emoji is self.RIGHT:
+                page=self.page+1
+                break
+            if emoji is self.CROSS:
+                try:
+                    await client.message_delete(message)
+                except Forbidden:
+                    pass
+                wrapper.cancel(Exception)
+                return
+            if emoji is self.LEFT2:
+                page=self.page-5
+                break
+            if emoji is self.RIGHT2:
+                page=self.page+5
+                break
+            return
+        if page<0:
+            page=0
+        if page>=len(self.pages):
+            page=len(self.pages)-1
+        try:
+            await client.message_edit(message,*self.pages[page])
+        except Forbidden:
+            pass
+        try:
+            await client.reaction_delete(message,emoji,user)
+        except Forbidden:
+            pass
+        self.page=page
+        
+        if wrapper.timeout<360.:
+            wrapper.timeout+=30.
+        
+        async def cancel(self,wrapper,exception=None):
+            if exception==Exception:
+                #we delete the message, so no need to remove reactions
+                return
+            if exception is TimeoutError:
+                client=wrapper.client
+                message=wrapper.wrapper
+                for emoji in self.emojis:
+                    try:
+                        await client.reaction_delete_own(message,emoji)
+                    except Forbidden:
+                        pass
+                return
+            #we do nothing
+        
 Koishi=Client(TOKEN)
 Koishi.activity=activity_game.create(name='with Satori')
 
 @Koishi.events
 async def ready(client):
     print(f'{client.name} ({client.id}) logged in')
-        
+
+Koishi.events(bot_reaction_waitfor())
+
 with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
     on_message.extend(infos)
@@ -48,7 +124,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             parts=[]
             for value in 'nou':
                 emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
-                await client.message_reaction_add(message,emoji)
+                await client.reaction_add(message,emoji)
                     
         elif len(content)==3:
             if re.match(r'^owo$',content,re.IGNORECASE):
@@ -155,6 +231,12 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         if emoji:
             await client.message_create(message.channel,str(emoji))
 
+
+    @on_message
+    async def message_me(client,message,content):
+        channel = await client.channel_private_create(self,message.author)
+        await client.message_create(channel,'Love you!')
+            
     @on_message
     async def edit(client,message,content):
         guild=message.guild
@@ -164,6 +246,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         content=filter_content(content)
         key=''
         while True:
+            if not guild.permissions_for(message.author).can_administrator:
+                text='You do not have permissions granted to use this command'
+                break
             if not content:
                 break
             key=content.pop(0)
@@ -329,12 +414,13 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
                     text=(role,result)
                 break
             break
-        if type(text) is tuple:
+        if type(text) is not str:
             try:
+                reason=f'Executed by {message.author:f}).'
                 if key=='user':
-                    await client.guild_user_edit(guild,text[0],**text[1])
+                    await client.guild_user_edit(guild,text[0],**text[1],reason=reason)
                 elif key=='role':
-                    await client.role_edit(text[0],**text[1])
+                    await client.role_edit(text[0],**text[1],reason=reason)
             except Forbidden:
                 text='Access denied'
             else:
@@ -352,10 +438,13 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         text=''
         key=''
         while True:
+            if not guild.permissions_for(message.author).can_administrator:
+                text='You do not have permissions granted to use this command'
+                break
+            if not content:
+                break
+            key=content.pop(0)
             if key=='channel':
-                if not content:
-                    break
-                key=content.pop(0)
                 if len(content) not in (2,3):
                     text='Moving channel\ss formula: "channel name" ("category name") "position"'
                     break
@@ -411,13 +500,55 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
                     break
                 text=(role,index)
                 break
+            if key=='user':
+                if len(content) not in (1,2):
+                    text='("user name/ping") and "Channel name/ping" desu!'
+                    break
+
+                if len(content)==2:
+                    name=content.pop(0)
+                    if message.mentions and is_user_mention(name):
+                        user=message.mentions[0]
+                    else:
+                        user=guild.get_user(name)
+                        if not user:
+                            text='Could not find a user with that name!'
+                            break
+                else:
+                    user=message.author
+                    
+                state=guild.voice_states.get(user.id,None)
+                if not state:
+                    text='Can move only a user from voice channel'
+                    break
+                
+                name=content[0]
+                if message.channel_mentions and is_channel_mention(name):
+                    channel=message.channel_mentions[0]
+                else:
+                    channel=guild.get_channel(name)
+                    if not channel:
+                        text='Could not find that channel!'
+                        break
+                if channel.type_lookup!=2:
+                    text='Can move user only from voice channel to voice channel!'
+                    break
+                if channel is state.channel:
+                    text='Done, i guess (?)'
+                    break
+                text=(user,channel)
+                
+                    
             break
         if type(text) is not str:
             try:
+                reason=f'Executed by {message.author:f}).'
                 if key=='channel':
-                    await client.channel_guild_move(*text)
+                    await client.channel_guild_move(*text,reason=reason)
                 elif key=='role':
-                    await client.role_move(*result)
+                    await client.role_move(*text,reason=reason)
+                elif key=='user':
+                    await client.user_move(*text,reason=reason)
             except Forbidden:
                 result='Access denied!'
             else:
@@ -435,6 +566,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         text=''
         key=''
         while True:
+            if not guild.permissions_for(message.author).can_administrator:
+                text='You do not have permissions granted to use this command'
+                break
             if not content:
                 break
             key=content.pop(0)
@@ -447,19 +581,38 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
                     text='Role not found'
                     break
                 text=role
+                break
+            if key=='channel':
+                if len(content)!=1:
+                    text='Channel name only!'
+                    break
+                channel=guild.get_channeL(content[0])
+                if not channel:
+                    text='Channel not found'
+                    break
+                text=channel
+                break
             break
         if type(text) is not str:
             try:
+                reason=f'Executed by {message.author:f}).'
                 if key=='role':
-                    await role_delete(text)
+                    await client.role_delete(text,reason)
+                elif key=='channel':
+                    await client.channel_delete(text,reason)                    
             except Forbidden:
-                result='Access denied!'
+                text='Access denied!'
             else:
-                result='yayyyy'
+                text='yayyyy'
         if not text:
             text=HELP['delete']
         await client.message_create(message.channel,text)
 
-    
+    @on_message.add('book')
+    async def on_command_book(client,message,content):
+        pages=(('import base64\n\npage1/3',),('uwu\n\npage2/3',),('text2\n\npage3/3',))
+        message = await client.message_create(message.channel,*pages[0])
+        waitfor_reaction_wrapper(client,message,book(pages),60.)
+        
 start_clients()
 

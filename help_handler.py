@@ -16,6 +16,8 @@ HELP['help']= ( \
     ' - move\n'
     ' - edit\n'
     ' - delete\n'
+    ' - details\n'
+    ' - list\n'
     f'Use {PREFIX}help *command* for more information.'
         )
 HELP['image']=''
@@ -38,9 +40,10 @@ HELP['voice']=( \
     'Use "skip" to skip the actual source\n'
     'Use "move <channel name>" to move the player to an another channel'
         )
-HELP['move']='With move command you can move "role" and "channel" arround.'
+HELP['move']='With move command you can move "role","channel" and "user" arround.'
 HELP['delete']='With delete command you can delete "role" objects.'
-
+HELP['list']='Lits a specific type of object at the guild, it can be "roles", "emojis", "channels", "pins".'
+HELP['details']='Shows details about a specific object, it can be "message" +index, "guild", "pin" + index.'
 async def on_command_help(client,message,content):
     if content:
         try:
