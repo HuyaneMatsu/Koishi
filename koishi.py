@@ -13,10 +13,11 @@ from discord_uwu.parsers import bot_message_event,bot_reaction_waitfor,waitfor_r
 from discord_uwu.exceptions import Forbidden
 from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.activity import activity_game
-from discord_uwu.others import is_channel_mention,is_user_mention,filter_content
+from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify
 from discord_uwu.channel import Channel_voice
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
+from discord_uwu.embed import Embed,Embed_image
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP
@@ -24,11 +25,12 @@ from pers_data import TOKEN,PREFIX
 from infos import infos
 from voice import voice
 
+
 class reaction_book:
-    LEFT2   = BUILTIN_EMOJIS['rewind']
+    LEFT2   = BUILTIN_EMOJIS['track_previous']
     LEFT    = BUILTIN_EMOJIS['arrow_backward']
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
-    RIGHT2  = BUILTIN_EMOJIS['fast_forward']
+    RIGHT2  = BUILTIN_EMOJIS['track_next']
     CROSS   = BUILTIN_EMOJIS['x']
     emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,CROSS]
     
@@ -62,26 +64,32 @@ class reaction_book:
                 wrapper.cancel(Exception)
                 return
             if emoji is self.LEFT2:
-                page=self.page-5
+                page=0
                 break
             if emoji is self.RIGHT2:
-                page=self.page+5
+                page=len(self.pages)-1
                 break
             return
+        
         if page<0:
             page=0
-        if page>=len(self.pages):
+        elif page>=len(self.pages):
             page=len(self.pages)-1
-        try:
-            await client.message_edit(message,**self.pages[page])
-        except Forbidden:
-            pass
+
         try:
             await client.reaction_delete(message,emoji,user)
         except Forbidden:
             pass
-        self.page=page
         
+        if self.page==page:
+            return
+        
+        self.page=page
+        try:
+            await client.message_edit(message,**self.pages[page])
+        except Forbidden:
+            pass
+
         if wrapper.timeout<360.:
             wrapper.timeout+=30.
         
@@ -91,7 +99,7 @@ class reaction_book:
             return
         if exception is TimeoutError:
             try:
-                await wrapper.client.reactions_clear(wrapper.message)
+                await wrapper.client.reaction_clear(wrapper.message)
             except Forbidden:
                 pass
             return
@@ -646,6 +654,66 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         except TimeoutError:
             return
         await client.message_create(message.channel,str(emoji)*5)
+
+    @on_message.add('embed')
+    async def on_command_embed(client,message,content):
+        content='Here\'s a hug for Nyansia ! OwO'
+        embed=Embed( \
+            title='Nyanmatsu hugs Nyansia',
+            url='https://discordapp.com',
+            color=15864673,
+                )
+        embed.image=Embed_image('https://cdn.discordapp.com/embed/avatars/0.png')
         
+        await client.message_create(message.channel,content,embed)
+
+@Koishi.events
+async def emoji_update(client,guild,modifications):
+    result=[]
+    for modtype,emoji,diff in modifications:
+        if modtype=='n':
+            result.append(f'New emoji: "{emoji.name}" : {emoji}')
+            continue
+        if modtype=='d':
+            result.append(f'Deleted emoji: "{emoji.name}" : {emoji}')
+            continue
+        if modtype=='e':
+            result.append(f'Emoji edited: "{emoji.name}" : {emoji}\n{diff}')
+            continue
+        raise RuntimeError #bugged?
+    channel=guild.get_channel('bots')
+    if channel:
+        pages=[{'content':chunk} for chunk in chunkify(result)]
+        message = await client.message_create(channel,**pages[0])
+        waitfor_reaction_wrapper(client,message,reaction_book(pages),120.)
+        
+@Koishi.events
+async def unknown_guild(client,parser,guild_id,data):
+    guild=next(iter(client.guilds.values()))
+    channel=guild.get_channel('bots')
+    if channel:
+        await client.message_create(channel,f'Unknown guild: {guild_id}\n data: {data}')
+
+@Koishi.events
+async def unknown_channel(client,parser,channel_id,data):
+    guild=next(iter(client.guilds.values()))
+    channel=guild.get_channel('bots')
+    if channel:
+        await client.message_create(channel,f'Unknown channel: {channel_id}\n data: {data}')
+
+@Koishi.events
+async def unknown_role(client,parser,guild,role_id,data):
+    guild=next(iter(client.guilds.values()))
+    channel=guild.get_channel('bots')
+    if channel:
+        await client.message_create(channel,f'Unknown guild: {guild}; role: {role_id}\n data: {data}')
+
+@Koishi.events
+async def unknown_voice_client(client,parser,voice_client_id,data):
+    guild=next(iter(client.guilds.values()))
+    channel=guild.get_channel('bots')
+    if channel:
+        await client.message_create(channel,f'Unknown voice client: {voice_client_id}\n data: {data}')
+    
 start_clients()
 
