@@ -98,7 +98,7 @@ async def parse_details_command(client,message,content):
         if key=='guild':
             text=pchunkify(guild)
             break
-
+        
         if key=='pin':
             while True:
                 if not content:
@@ -117,6 +117,23 @@ async def parse_details_command(client,message,content):
                     break
                 text=pchunkify(messages[index])
                 break
+            break
+
+        if key=='role':
+            if not content:
+                role=guild.roles[0]
+            elif content[0].isdecimal():
+                index=int(content[0])
+                if index>=len(guild.roles):
+                    index=len(guild.roles)-1
+                role=guild.roles[index]
+            else:
+                role=guild.get_role(content[0])
+                if role is None:
+                    text='Couldnt find that role by index/name.'
+                    break
+
+            text=pchunkify(role)
             break
         break
     

@@ -119,10 +119,6 @@ class wait_and_continue:
             self.future.set_result((emoji,user),)
             wrapper.cancel(Exception)
     async def _default_cancel(self,wrapper,exception=None):
-        try:
-            await wrapper.client.message_delete(wrapper.message)
-        except Forbidden:
-            pass
         if exception is Exception:
             return
         self.future.set_exception(exception)
@@ -653,6 +649,11 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             emoji,user = await future
         except TimeoutError:
             return
+        finally:
+            try:
+                await client.message_delete(message)
+            except Forbidden:
+                pass
         await client.message_create(message.channel,str(emoji)*5)
 
     @on_message.add('embed')

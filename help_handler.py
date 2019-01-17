@@ -43,7 +43,7 @@ HELP['voice']=( \
 HELP['move']='With move command you can move "role","channel" and "user" arround.'
 HELP['delete']='With delete command you can delete "role" objects.'
 HELP['list']='Lits a specific type of object at the guild, it can be "roles", "emojis", "channels", "pins".'
-HELP['details']='Shows details about a specific object, it can be "message" +index, "guild", "pin" + index.'
+HELP['details']='Shows details about a specific object, it can be "message" +index, "guild", "pin" + index, "role".'
 async def on_command_help(client,message,content):
     if content:
         try:
