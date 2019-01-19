@@ -11,6 +11,7 @@ HELP['help']= ( \
     ' - dice\n'
     ' - emojis\n'
     ' - ping\n'
+    ' - pong\n'
     ' - upload\n'
     ' - emoji\n'
     ' - move\n'
@@ -18,6 +19,8 @@ HELP['help']= ( \
     ' - delete\n'
     ' - details\n'
     ' - list\n'
+    ' - message_me\n'
+    ' - pm\n'
     f'Use {PREFIX}help *command* for more information.'
         )
 HELP['image']=''
@@ -27,6 +30,7 @@ HELP['emojis']='Lists the guild\'s emoojis'
 HELP['message_details']='Loads an older message and shows it\'s deatils'
 HELP['dice']='Throws a/more dices.'
 HELP['ping']='Searches a user by name at the guild, and ping is'
+HELP['pong']='Returns the client\s ping in ms'
 HELP['emoji']='type an :emoji: and I will show it! (works only on emojis which u cant use on the server)'
 HELP['edit']='With edit command u can edit "user", "role".'
 HELP['upload']='You can can upload images with tags, which u can access with the "image" command. On mention it will upload the mentioned\s image. (Supreme leader only!)'
@@ -43,7 +47,9 @@ HELP['voice']=( \
 HELP['move']='With move command you can move "role","channel" and "user" arround.'
 HELP['delete']='With delete command you can delete "role" objects.'
 HELP['list']='Lits a specific type of object at the guild, it can be "roles", "emojis", "channels", "pins".'
-HELP['details']='Shows details about a specific object, it can be "message" +index, "guild", "pin" + index, "role".'
+HELP['details']='Shows details about a specific object, it can be "message" +index, "guild", "pin" + index, "role", "channel".'
+HELP['message_me']='Sends you something nice'
+HELP['pm']='Sends a private message to the user with the text after the line break'
 async def on_command_help(client,message,content):
     if content:
         try:

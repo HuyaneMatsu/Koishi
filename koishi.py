@@ -9,7 +9,6 @@ import asyncio
 sys.path.append(os.path.abspath('..'))
 
 from discord_uwu import Client,start_clients
-from discord_uwu.parsers import bot_message_event,bot_reaction_waitfor,waitfor_reaction_wrapper
 from discord_uwu.exceptions import Forbidden
 from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.activity import activity_game
@@ -18,6 +17,7 @@ from discord_uwu.channel import Channel_voice
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
 from discord_uwu.embed import Embed,Embed_image
+from discord_uwu.events import waitfor_reaction_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,waitfor_reaction_wrapper
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP
@@ -25,104 +25,52 @@ from pers_data import TOKEN,PREFIX
 from infos import infos
 from voice import voice
 
-
-class reaction_book:
-    LEFT2   = BUILTIN_EMOJIS['track_previous']
-    LEFT    = BUILTIN_EMOJIS['arrow_backward']
-    RIGHT   = BUILTIN_EMOJIS['arrow_forward']
-    RIGHT2  = BUILTIN_EMOJIS['track_next']
-    CROSS   = BUILTIN_EMOJIS['x']
-    emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,CROSS]
+class schannel:
+    __slots__=['channel']
+    def __init__(self):
+        self.channel=None
+        
+    async def set_channel(self,client,message,content):
+        if message.author==client.owner:
+            self.channel=message.channel
+            await client.message_create(message.channel,'Now i ll send special messages to this channel')
     
-    __slots__=['cancel','page', 'pages']
-    def __init__(self,pages):
-        self.pages=pages
-        self.page=0
-        self.cancel=type(self)._default_cancel
+    async def emoji_update(self,client,guild,modifications):
+        result=[]
+        for modtype,emoji,diff in modifications:
+            if modtype=='n':
+                result.append(f'New emoji: "{emoji.name}" : {emoji}')
+                continue
+            if modtype=='d':
+                result.append(f'Deleted emoji: "{emoji.name}" : {emoji}')
+                continue
+            if modtype=='e':
+                result.append(f'Emoji edited: "{emoji.name}" : {emoji}\n{diff}')
+                continue
+            raise RuntimeError #bugged?
         
-    async def start(self,wrapper):
-        client=wrapper.client
-        message=wrapper.message
-        for emoji in self.emojis:
-            await client.reaction_add(message,emoji)
+        if self.channel:
+            pages=[{'content':chunk} for chunk in chunkify(result)]
+            message = await client.message_create(self.channel,**pages[0])
+            waitfor_reaction_wrapper(client,message,reaction_book(pages),120.)
+            
+    async def unknown_guild(self,client,parser,guild_id,data):
+        if self.channel:
+            await client.message_create(self.channel,f'Unknown guild: {guild_id}\n data: {data}')
 
-    async def __call__(self,wrapper,emoji,user):
-        client=wrapper.client
-        message=wrapper.message
-        while True:
-            if emoji is self.LEFT:
-                page=self.page-1
-                break
-            if emoji is self.RIGHT:
-                page=self.page+1
-                break
-            if emoji is self.CROSS:
-                try:
-                    await client.message_delete(message)
-                except Forbidden:
-                    pass
-                wrapper.cancel(Exception)
-                return
-            if emoji is self.LEFT2:
-                page=0
-                break
-            if emoji is self.RIGHT2:
-                page=len(self.pages)-1
-                break
-            return
-        
-        if page<0:
-            page=0
-        elif page>=len(self.pages):
-            page=len(self.pages)-1
+    async def unknown_channel(self,client,parser,channel_id,data):
+        if self.channel:
+            await client.message_create(self.channel,f'Unknown channel: {channel_id}\n data: {data}')
 
-        try:
-            await client.reaction_delete(message,emoji,user)
-        except Forbidden:
-            pass
-        
-        if self.page==page:
-            return
-        
-        self.page=page
-        try:
-            await client.message_edit(message,**self.pages[page])
-        except Forbidden:
-            pass
+    async def unknown_role(self,client,parser,guild,role_id,data):
+        if self.channel:
+            await client.message_create(self.channel,f'Unknown guild: {guild}; role: {role_id}\n data: {data}')
 
-        if wrapper.timeout<360.:
-            wrapper.timeout+=30.
-        
-    async def _default_cancel(self,wrapper,exception=None):
-        if exception is Exception:
-            #we delete the message, so no need to remove reactions
-            return
-        if exception is TimeoutError:
-            try:
-                await wrapper.client.reaction_clear(wrapper.message)
-            except Forbidden:
-                pass
-            return
-        #we do nothing
+    async def unknown_voice_client(self,client,parser,voice_client_id,data):
+        if self.channel:
+            await client.message_create(self.channel,f'Unknown voice client: {voice_client_id}\n data: {data}')
 
-class wait_and_continue:
-    __slots__=['cancel', 'case', 'future']
-    def __init__(self,future,case,cancel=None):
-        self.cancel=type(self)._default_cancel
-        self.future=future
-        self.case=case
-    async def start(self,wrapper):
-        pass
-
-    async def __call__(self,wrapper,emoji,user):
-        if self.case(emoji,user):
-            self.future.set_result((emoji,user),)
-            wrapper.cancel(Exception)
-    async def _default_cancel(self,wrapper,exception=None):
-        if exception is Exception:
-            return
-        self.future.set_exception(exception)
-        #we do nothing
+schannel=schannel()
 
         
 Koishi=Client(TOKEN)
@@ -130,12 +78,22 @@ Koishi.activity=activity_game.create(name='with Satori')
 
 @Koishi.events
 async def ready(client):
-    print(f'{client.name} ({client.id}) logged in')
-
+    info = await client.client_application_info()
+    client.owner=info['owner']
+    print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
+    
 Koishi.events(bot_reaction_waitfor())
+
+Koishi.events(schannel.emoji_update)
+Koishi.events(schannel.unknown_guild)
+Koishi.events(schannel.unknown_channel)
+Koishi.events(schannel.unknown_role)
+Koishi.events(schannel.unknown_voice_client)
+
 
 with Koishi.events(bot_message_event(PREFIX)) as on_message:
 
+    on_message(schannel.set_channel,'here')
     on_message.extend(infos)
     on_message(voice)
     on_message(on_command_image,'image')
@@ -241,7 +199,11 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             user=guild.get_user(content)
             if user:
                 await client.message_create(message.channel,user.mention_at(guild))
-    
+
+    @on_message
+    async def pong(client,message,content):
+        await client.message_create(message.channel,f'{int(client.websocket.kokoro.latency*1000.)} ms')
+                              
     @on_message.add('emoji')
     async def emoji_command(client,message,content):
         guild=message.guild
@@ -257,11 +219,50 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         if emoji:
             await client.message_create(message.channel,str(emoji))
 
+    @on_message
+    async def pm(client,message,content):
+        guild=message.guild
+        if not guild:
+            return
+        content=filter_content(content)
+        while True:
+            if len(content)!=1:
+                text='The 1st line must contain a mentionusername of the "lucky" person.'
+                break
+            content=content[0]
+            if message.mentions and is_user_mention(content):
+                taget=message.mentions[0]
+            else:
+                user=guild.get_user(content)
+                if not user:
+                    text='Could not find that user!'
+                    break
 
+            index=message.content.find('\n')+1
+            if not index:
+                text='Unable to send empty message'
+                break
+            text=message.content[index:]
+            if not text:
+                text='Unable to send empty message'
+                break
+            channel = await client.channel_private_create(user)
+            try:
+                await client.message_create(channel,text)
+                text='Big times! Message sent!'
+            except Forbidden:
+                text='Access denied'
+            break
+                                    
+        await client.message_create(message.channel,text)
+        
     @on_message
     async def message_me(client,message,content):
-        channel = await client.channel_private_create(self,message.author)
-        await client.message_create(channel,'Love you!')
+        channel = await client.channel_private_create(message.author)
+        try:
+            await client.message_create(channel,'Love you!')
+        except Forbidden:
+            await client.message_create(message.channel,'Pls turn on private messages from this server!')
             
     @on_message
     async def edit(client,message,content):
@@ -638,7 +639,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
     async def on_command_book(client,message,content):
         pages=({'content':'import base64\n\npage1/3'},{'content':'uwu\n\npage2/3'},{'content':'text2\n\npage3/3'})
         message = await client.message_create(message.channel,**pages[0])
-        waitfor_reaction_wrapper(client,message,reaction_book(pages),120.)
+        waitfor_reaction_wrapper(client,message,pagination(pages),120.)
+
 
     @on_message
     async def satania(client,message,content):
@@ -668,53 +670,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         
         await client.message_create(message.channel,content,embed)
 
-@Koishi.events
-async def emoji_update(client,guild,modifications):
-    result=[]
-    for modtype,emoji,diff in modifications:
-        if modtype=='n':
-            result.append(f'New emoji: "{emoji.name}" : {emoji}')
-            continue
-        if modtype=='d':
-            result.append(f'Deleted emoji: "{emoji.name}" : {emoji}')
-            continue
-        if modtype=='e':
-            result.append(f'Emoji edited: "{emoji.name}" : {emoji}\n{diff}')
-            continue
-        raise RuntimeError #bugged?
-    channel=guild.get_channel('bots')
-    if channel:
-        pages=[{'content':chunk} for chunk in chunkify(result)]
-        message = await client.message_create(channel,**pages[0])
-        waitfor_reaction_wrapper(client,message,reaction_book(pages),120.)
-        
-@Koishi.events
-async def unknown_guild(client,parser,guild_id,data):
-    guild=next(iter(client.guilds.values()))
-    channel=guild.get_channel('bots')
-    if channel:
-        await client.message_create(channel,f'Unknown guild: {guild_id}\n data: {data}')
 
-@Koishi.events
-async def unknown_channel(client,parser,channel_id,data):
-    guild=next(iter(client.guilds.values()))
-    channel=guild.get_channel('bots')
-    if channel:
-        await client.message_create(channel,f'Unknown channel: {channel_id}\n data: {data}')
 
-@Koishi.events
-async def unknown_role(client,parser,guild,role_id,data):
-    guild=next(iter(client.guilds.values()))
-    channel=guild.get_channel('bots')
-    if channel:
-        await client.message_create(channel,f'Unknown guild: {guild}; role: {role_id}\n data: {data}')
-
-@Koishi.events
-async def unknown_voice_client(client,parser,voice_client_id,data):
-    guild=next(iter(client.guilds.values()))
-    channel=guild.get_channel('bots')
-    if channel:
-        await client.message_create(channel,f'Unknown voice client: {voice_client_id}\n data: {data}')
-    
 start_clients()
 

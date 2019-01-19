@@ -4,9 +4,11 @@ import asyncio
 from discord_uwu.parsers import eventlist
 from discord_uwu.channel import get_message
 from discord_uwu.prettyprint import pchunkify
-from discord_uwu.others import filter_content,chunkify,cchunkify
+from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention
 from discord_uwu.exceptions import Forbidden,HTTPException
+from discord_uwu.events import waitfor_reaction_wrapper,pagination
 from help_handler import HELP
+
 
 infos=eventlist()
 
@@ -45,9 +47,9 @@ async def parse_list_command(client,message,content):
             break
         break
     if type(text) is not str:
-        for chunk in text:
-            await client.message_create(message.channel,chunk)
-            await asyncio.sleep(0.3)
+        pages=[{'content':chunk} for chunk in text]
+        message = await client.message_create(message.channel,**pages[0])
+        waitfor_reaction_wrapper(client,message,pagination(pages),180.)
     else:
         if not text:
             text=HELP['list']
@@ -135,12 +137,62 @@ async def parse_details_command(client,message,content):
 
             text=pchunkify(role)
             break
+        if key=='channel':
+            if not content:
+                text='Channel name or mention too pls?'
+                break
+            name=content.pop(0)
+            if is_channel_mention(name) and message.channel_mentions:
+                channel=message.channel_mentions[0]
+            else:
+                channel=guild.get_channel(name)
+                if not channel:
+                    text='Unknown channel name.'
+                    
+            if len(content)<2:
+                text=pchunkify(channel,overwrites=True)
+                break
+            
+            name=content.pop(0)
+            if name not in ('ow','overwrite'):
+                text='After channel the next posible key is "ow"/"overwrite with an index!'
+                break
+            if not channel.overwrites:
+                text='The channel has no overwrites desu'
+                break
+            name=content.pop(0)
+            if name.isdecimal():
+                try:
+                    overwrite=channel.overwrites[int(name)]
+                except IndexError:
+                    text=f'The channel has only {len(channel.overwrites)} overwirtes'
+                    break
+            else:
+                value=guild.get_role(name)
+                if value is None:
+                    value=guild.get_user(name)
+                if value is None:
+                    text='There is no user/role like that'
+                    break
+                overwrite=None
+                for x in channel.overwrites:
+                    if x.target is value:
+                        overwrite=x
+                        break
+                del x
+                if overwrite is None:
+                    text='No overwrite found for that user/role'
+                    break
+            
+            text=pchunkify(overwrite,detailed=True)
+            break
+        
         break
     
     if type(text) is not str:
-        for chunk in text:
-            await client.message_create(message.channel,chunk)
-            await asyncio.sleep(0.3)
+        pages=[{'content':chunk} for chunk in text]
+        message = await client.message_create(message.channel,**pages[0])
+        waitfor_reaction_wrapper(client,message,pagination(pages),180.)
     else:
         if not text:
             text=HELP['details']

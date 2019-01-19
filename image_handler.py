@@ -4,7 +4,6 @@ from random import randint as random
 import os
 from io import BytesIO
 from help_handler import HELP
-from pers_data import SUPREME_LEADER
 from discord_uwu.others import is_mention
 from discord_uwu.channel import get_messages
 
@@ -254,7 +253,7 @@ def process_on_command_image(content):
                 return 'Sowwy, no result.'
 
 async def on_command_upload(client,message,content):
-    if not UPLOAD or message.author.id!=SUPREME_LEADER:
+    if not UPLOAD or message.author.id!=client.owner:
         return
 
     result = await process_on_command_upload(client,message,content)
