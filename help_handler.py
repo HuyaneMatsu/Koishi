@@ -21,6 +21,7 @@ HELP['help']= ( \
     ' - list\n'
     ' - message_me\n'
     ' - pm\n'
+    ' - clear\n'
     f'Use {PREFIX}help *command* for more information.'
         )
 HELP['image']=''
@@ -47,9 +48,10 @@ HELP['voice']=( \
 HELP['move']='With move command you can move "role","channel" and "user" arround.'
 HELP['delete']='With delete command you can delete "role" objects.'
 HELP['list']='Lits a specific type of object at the guild, it can be "roles", "emojis", "channels", "pins".'
-HELP['details']='Shows details about a specific object, it can be "message" +index, "guild", "pin" + index, "role", "channel".'
+HELP['details']='Shows details about a specific object, it can be "message" +index, "guild", "pin" + index, "role", "channel" <> <ow> <>, "permission" <channel> <> <user> <>.'
 HELP['message_me']='Sends you something nice'
 HELP['pm']='Sends a private message to the user with the text after the line break'
+HELP['clear']='clears the set amount of messages (default=100)'
 async def on_command_help(client,message,content):
     if content:
         try:

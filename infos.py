@@ -4,9 +4,9 @@ import asyncio
 from discord_uwu.parsers import eventlist
 from discord_uwu.channel import get_message
 from discord_uwu.prettyprint import pchunkify
-from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention
+from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention
 from discord_uwu.exceptions import Forbidden,HTTPException
-from discord_uwu.events import waitfor_reaction_wrapper,pagination
+from discord_uwu.events import waitfor_wrapper,pagination
 from help_handler import HELP
 
 
@@ -49,7 +49,7 @@ async def parse_list_command(client,message,content):
     if type(text) is not str:
         pages=[{'content':chunk} for chunk in text]
         message = await client.message_create(message.channel,**pages[0])
-        waitfor_reaction_wrapper(client,message,pagination(pages),180.)
+        waitfor_wrapper(client,message,pagination(pages),180.)
     else:
         if not text:
             text=HELP['list']
@@ -85,13 +85,17 @@ async def parse_details_command(client,message,content):
                         text='Acces denied or not existing message'
                         break
                 else:
-                    if index>500:
-                        text='NO U will read that!'
-                        break
+                    if index>message.channel.MC_GC_LIMIT:
+                        if message.author is not client.owner:
+                            text='NO U will read that!'
+                            break
                     try:
                         target_message = await get_message(client,message.channel,index)
                     except IndexError:
                         text='I am not able to reach that message!'
+                        break
+                    except PermissionError:
+                        text='Permission denied!'
                         break
                 text=pchunkify(target_message)
                 break
@@ -187,12 +191,65 @@ async def parse_details_command(client,message,content):
             text=pchunkify(overwrite,detailed=True)
             break
         
+        if key=='permission':
+            if len(content)&1 or len(content)>4:
+                text='Getting info about sometihing should contain user <user> channel <channel> pairs'
+                break
+            
+            user=None
+            channel=None
+            
+            while True:
+                if not content:
+                    break
+                type_=content.pop(0)
+                name=content.pop(0)
+                if type_=='user':
+                    if user is not None:
+                        text='User mentioned more times'
+                        break
+                    if is_user_mention(name) and message.mentions:
+                        user=message.mentions[0]
+                    else:
+                        user=guild.get_user(name)
+                        if not user:
+                            text='User not found'
+                            break
+                    continue
+                
+                if type_=='channel':
+                    if channel is not None:
+                        text='Channel mentioned more times'
+                        break
+                    if is_channel_mention(name) and message.channel.mentions:
+                        channel=message.channel_mentions[0]
+                    else:
+                        channel=guild.get_channel(name)
+                        if not channel:
+                            text='Channel not found'
+                            break
+                    continue
+
+                text=f'Invalid key "{type_}"'
+                break
+
+            if text:
+                break
+            
+            if user is None:
+                user=message.author
+            if channel is None:
+                channel=message.channel
+                
+            text=pchunkify(channel.permissions_for(user))
+            break
+        
         break
     
     if type(text) is not str:
         pages=[{'content':chunk} for chunk in text]
         message = await client.message_create(message.channel,**pages[0])
-        waitfor_reaction_wrapper(client,message,pagination(pages),180.)
+        waitfor_wrapper(client,message,pagination(pages),180.)
     else:
         if not text:
             text=HELP['details']

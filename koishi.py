@@ -4,7 +4,7 @@ from random import randint as random
 import os
 import re
 import asyncio
-
+import time
 #moving to the outer folder, so uwu ll count as a package
 sys.path.append(os.path.abspath('..'))
 
@@ -13,15 +13,16 @@ from discord_uwu.exceptions import Forbidden
 from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.activity import activity_game
 from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify
-from discord_uwu.channel import Channel_voice
+from discord_uwu.channel import Channel_voice,get_message_iterator
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
 from discord_uwu.embed import Embed,Embed_image
-from discord_uwu.events import waitfor_reaction_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,waitfor_reaction_wrapper
+from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,waitfor_wrapper
+from discord_uwu.client_core import GC_client
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP
-from pers_data import TOKEN,PREFIX
+from pers_data import TOKEN,PREFIX,TOKEN2
 from infos import infos
 from voice import voice
 
@@ -52,29 +53,72 @@ class schannel:
         if self.channel:
             pages=[{'content':chunk} for chunk in chunkify(result)]
             message = await client.message_create(self.channel,**pages[0])
-            waitfor_reaction_wrapper(client,message,reaction_book(pages),120.)
+            waitfor_wrapper(client,message,reaction_book(pages),120.)
             
     async def unknown_guild(self,client,parser,guild_id,data):
         if self.channel:
-            await client.message_create(self.channel,f'Unknown guild: {guild_id}\n data: {data}')
+            await client.message_create(self.channel,f'Unknown guild at {parser}: {guild_id}\n data: {data}')
 
     async def unknown_channel(self,client,parser,channel_id,data):
         if self.channel:
-            await client.message_create(self.channel,f'Unknown channel: {channel_id}\n data: {data}')
+            await client.message_create(self.channel,f'Unknown channel at {parser}: {channel_id}\n data: {data}')
 
     async def unknown_role(self,client,parser,guild,role_id,data):
         if self.channel:
-            await client.message_create(self.channel,f'Unknown guild: {guild}; role: {role_id}\n data: {data}')
+            await client.message_create(self.channel,f'Unknown guild: {guild} at {parser}; role: {role_id}\n data: {data}')
 
     async def unknown_voice_client(self,client,parser,voice_client_id,data):
         if self.channel:
-            await client.message_create(self.channel,f'Unknown voice client: {voice_client_id}\n data: {data}')
+            await client.message_create(self.channel,f'Unknown voice client at {parser}: {voice_client_id}\n data: {data}')
 
 schannel=schannel()
 
         
-Koishi=Client(TOKEN)
+Koishi=Client(TOKEN,loop=1)
 Koishi.activity=activity_game.create(name='with Satori')
+
+Mokou=Client(TOKEN2,loop=2)
+
+GC=GC_client(loop=2) #let it run with Mokou, she does nothing anyways
+    
+@Mokou.events
+async def message_create(client,message):
+    content=message.content.lower()
+    if 'show' in content and 'amount of loaded messages' in content:
+        channel=message.channel
+        parts=[f'Amount of loaded messages: {len(channel.messages)}.']
+        if channel.message_history_reached_end:
+            parts.append('The channel is fully loaded.')
+        else:
+            parts.append('There is even more message at this channel however.')
+        if not channel.permissions_for(client).can_read_message_history:
+            parts.append('I have no permission to read older messages.')
+        if channel.turn_GC_on_at:
+            now=time.time()
+            if now>channel.turn_GC_on_at:
+                parts.append('The GC will check the channel at the next cycle.')
+            else:
+                parts.append(f'The channel will fall under GC after {round(channel.turn_GC_on_at-now)} seconds')
+        else:
+            parts.append('There is no reason to run GC on this channel.')
+        if channel.messages.maxlen:
+            parts.append(f'The lenght of the loaded messages at this channel is limited to: {channel.messages.maxlen}')
+        else:
+            parts.append('The amount of messages kept from this channel is unlimited right now')
+            
+        text='\n'.join(parts)
+    else:
+        if random(0,2):
+            return
+        if 'fire' in content and re.match(r'\b(i|u|you|we|iam)\b',content):
+            text='BURN!!!'
+        elif re.match(r'(\b|[^\s\d])(moko[u]{0,1})\b',content):
+            text='Yes, its me..'
+        else:
+            return
+    await client.message_create(message.channel,text)
+
+
 
 @Koishi.events
 async def ready(client):
@@ -91,16 +135,16 @@ Koishi.events(schannel.unknown_role)
 Koishi.events(schannel.unknown_voice_client)
 
 
-with Koishi.events(bot_message_event(PREFIX)) as on_message:
+with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
-    on_message(schannel.set_channel,'here')
-    on_message.extend(infos)
-    on_message(voice)
-    on_message(on_command_image,'image')
-    on_message(on_command_upload,'upload')
-    on_message(on_command_help,'help')
+    on_command(schannel.set_channel,'here')
+    on_command.extend(infos)
+    on_command(voice)
+    on_command(on_command_image,'image')
+    on_command(on_command_upload,'upload')
+    on_command(on_command_help,'help')
 
-    @on_message
+    @on_command
     async def default_event(client,message):
         content=message.content
         text=None
@@ -122,13 +166,13 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             await client.message_create(message.channel,text)
 
 
-    @on_message
+    @on_command
     async def invalid_command(client,message,command,content):
         message = await client.message_create(message.channel,f'Invalid command `{command}`, try using: `{PREFIX}help`')
         await asyncio.sleep(30.)
         await client.message_delete(message,reason='Invalid command messages expire after 30s')
 
-    @on_message
+    @on_command
     async def rate(client,message,content):
         if message.mentions:
             target=message.mentions[0]
@@ -146,7 +190,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         await client.message_create(message.channel,f'I rate {name} {result}/10')
 
 
-    @on_message
+    @on_command
     async def dice(client,message,content):
         search_result=re.match(r'([0-9]+).*',content)
         if search_result:
@@ -174,7 +218,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         await client.message_create(message.channel,text)
 
 
-    @on_message.add('print')
+    @on_command.add('print')
     async def on_print_command(client,message,content):
         try:
             await client.message_delete(message,reason='Used print command')
@@ -183,7 +227,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         else:
             await client.message_create(message.channel,content)
 
-    @on_message
+    @on_command
     async def mention_event(client,message):
         m1=message.author.mention_at(message.guild)
         m2=client.mention_at(message.guild)
@@ -192,7 +236,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
         await client.message_create(message.channel,result)
 
-    @on_message
+    @on_command
     async def ping(client,message,content):
         guild=message.channel.guild
         if guild:
@@ -200,11 +244,11 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             if user:
                 await client.message_create(message.channel,user.mention_at(guild))
 
-    @on_message
+    @on_command
     async def pong(client,message,content):
         await client.message_create(message.channel,f'{int(client.websocket.kokoro.latency*1000.)} ms')
                               
-    @on_message.add('emoji')
+    @on_command.add('emoji')
     async def emoji_command(client,message,content):
         guild=message.guild
         if guild is None:
@@ -219,7 +263,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         if emoji:
             await client.message_create(message.channel,str(emoji))
 
-    @on_message
+    @on_command
     async def pm(client,message,content):
         guild=message.guild
         if not guild:
@@ -227,11 +271,11 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         content=filter_content(content)
         while True:
             if len(content)!=1:
-                text='The 1st line must contain a mentionusername of the "lucky" person.'
+                text='The 1st line must contain a mention/username of the "lucky" person.'
                 break
             content=content[0]
             if message.mentions and is_user_mention(content):
-                taget=message.mentions[0]
+                user=message.mentions[0]
             else:
                 user=guild.get_user(content)
                 if not user:
@@ -256,7 +300,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
                                     
         await client.message_create(message.channel,text)
         
-    @on_message
+    @on_command
     async def message_me(client,message,content):
         channel = await client.channel_private_create(message.author)
         try:
@@ -264,7 +308,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         except Forbidden:
             await client.message_create(message.channel,'Pls turn on private messages from this server!')
             
-    @on_message
+    @on_command
     async def edit(client,message,content):
         guild=message.guild
         if guild is None:
@@ -456,7 +500,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             text=HELP['edit']
         await client.message_create(message.channel,text)
 
-    @on_message
+    @on_command
     async def move(client,message,content):
         guild=message.guild
         if not guild:
@@ -584,7 +628,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             text=HELP['move']
         await client.message_create(message.channel,text)
 
-    @on_message
+    @on_command
     async def delete(client,message,content):
         guild=message.guild
         if guild is None:
@@ -635,18 +679,18 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
             text=HELP['delete']
         await client.message_create(message.channel,text)
 
-    @on_message.add('book')
+    @on_command.add('book')
     async def on_command_book(client,message,content):
         pages=({'content':'import base64\n\npage1/3'},{'content':'uwu\n\npage2/3'},{'content':'text2\n\npage3/3'})
         message = await client.message_create(message.channel,**pages[0])
-        waitfor_reaction_wrapper(client,message,pagination(pages),120.)
+        waitfor_wrapper(client,message,pagination(pages),120.)
 
 
-    @on_message
+    @on_command
     async def satania(client,message,content):
         message = await client.message_create(message.channel,'waiting for satania emote')
         future=asyncio.Future()
-        waitfor_reaction_wrapper(client,message,wait_and_continue(future,lambda emoji,user:('satania' in emoji.name)),60.)
+        waitfor_wrapper(client,message,wait_and_continue(future,lambda emoji,user:('satania' in emoji.name.lower())),60.)
         try:
             emoji,user = await future
         except TimeoutError:
@@ -658,7 +702,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
                 pass
         await client.message_create(message.channel,str(emoji)*5)
 
-    @on_message.add('embed')
+    @on_command.add('embed')
     async def on_command_embed(client,message,content):
         content='Here\'s a hug for Nyansia ! OwO'
         embed=Embed( \
@@ -670,7 +714,38 @@ with Koishi.events(bot_message_event(PREFIX)) as on_message:
         
         await client.message_create(message.channel,content,embed)
 
+    @on_command
+    async def clear(client,message,content):
+        guild=message.guild
+        if not guild:
+            return
+        
+        if not guild.permissions_for(message.author).can_administrator:
+            return
+            
+        channel=message.channel
+        author=message.author
+        content=filter_content(content)
+        
+        if not content:
+            limit=100
+        elif content[0].isdecimal():
+            limit=int(content[0])
+            if limit<=0:
+                return
+        else:
+            await client.message_create(channel,'Excepted int or nothing.')
+            return
+            
+        messages=[]
+        async for message in get_message_iterator(client,message.channel):
+            messages.append(message)
+            limit-=1
+            if limit:
+                continue
+            break
 
+        await client.message_delete_multiple(messages,reason=f'Called by {author:f}')
 
 start_clients()
 
