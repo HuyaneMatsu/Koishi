@@ -86,7 +86,8 @@ async def voice(client,message,content):
             try:
                 #works too:
                 #source=player.PCM_volume_transformer(player.FFmpegPCMaudio('songname.mp3'))
-                source = await player.YTaudio(client.loop,' '.join(content))
+                with client.keep_typing(message.channel,7200.):
+                    source = await player.YTaudio(client.loop,' '.join(content))
             except player.DownloadError as err:
                 text=err.args[0]
             else:

@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath('..'))
 
 from discord_uwu import Client,start_clients
 from discord_uwu.exceptions import Forbidden
-from discord_uwu.emoji import BUILTIN_EMOJIS
+from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
 from discord_uwu.activity import activity_game
 from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify
 from discord_uwu.channel import Channel_voice,get_message_iterator
@@ -37,23 +37,22 @@ class schannel:
             await client.message_create(message.channel,'Now i ll send special messages to this channel')
     
     async def emoji_update(self,client,guild,modifications):
-        result=[]
-        for modtype,emoji,diff in modifications:
-            if modtype=='n':
-                result.append(f'New emoji: "{emoji.name}" : {emoji}')
-                continue
-            if modtype=='d':
-                result.append(f'Deleted emoji: "{emoji.name}" : {emoji}')
-                continue
-            if modtype=='e':
-                result.append(f'Emoji edited: "{emoji.name}" : {emoji}\n{diff}')
-                continue
-            raise RuntimeError #bugged?
-        
         if self.channel:
+            result=[]
+            for modtype,emoji,diff in modifications:
+                if modtype=='n':
+                    result.append(f'New emoji: "{emoji.name}" : {emoji}')
+                    continue
+                if modtype=='d':
+                    result.append(f'Deleted emoji: "{emoji.name}" : {emoji}')
+                    continue
+                if modtype=='e':
+                    result.append(f'Emoji edited: "{emoji.name}" : {emoji}\n{diff}')
+                    continue
+                raise RuntimeError #bugged?
+        
             pages=[{'content':chunk} for chunk in chunkify(result)]
-            message = await client.message_create(self.channel,**pages[0])
-            waitfor_wrapper(client,message,reaction_book(pages),120.)
+            await client.message_create(self.channel,**pages[0])
             
     async def unknown_guild(self,client,parser,guild_id,data):
         if self.channel:
@@ -621,9 +620,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 elif key=='user':
                     await client.user_move(*text,reason=reason)
             except Forbidden:
-                result='Access denied!'
+                text='Access denied!'
             else:
-                result='yayyyy'
+                text='yayyyy'
         if not text:
             text=HELP['move']
         await client.message_create(message.channel,text)
@@ -747,5 +746,193 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
         await client.message_delete_multiple(messages,reason=f'Called by {author:f}')
 
+    MAGIC_PATTERN=re.compile('.*?(p[lw][sz]|p[lw]ea[sz]e|desu|kudasai)[\.\!]*?',re.I)
+    
+    @on_command
+    async def hug(client,message,content):
+        channel=message.channel
+        guild=message.guild
+        target=message.author
+        if content:
+            if message.mentions and is_user_mention(content):
+                target=message.mentions[0]
+            elif guild:
+                user=guild.get_user(content)
+                if user:
+                    target=user
+            
+        await client.message_create(channel,'And what is the magic word?')
+        future=asyncio.Future()
+        waitfor_wrapper(client,channel,wait_and_continue(future,lambda message,pattern=MAGIC_PATTERN,author=message.author:message.author is author and re.match(pattern,message.content)),30.)
+        try:
+            await future
+        except TimeoutError:
+            return
+        await client.message_create(channel,f'{client.mention_at(guild)} hugs {target.mention_at(guild)}')
+
+    @on_command
+    async def say(client,message,content):
+        channel=message.channel
+        
+        message_to_delete1 = await client.message_create(channel,'prepared')
+        future=asyncio.Future()
+        waitfor_wrapper(client,channel,wait_and_continue(future,lambda message:True),30.)
+        try:
+            message_to_delete2 = await future
+        except TimeoutError:
+            try:
+                await client.message_delete(message_to_delete1)
+            except Forbidden:
+                pass
+            return
+        try:
+            await client.message_delete_multiple([message_to_delete1,message_to_delete2])
+        except Forbidden:
+            pass
+            
+        await client.message_create(channel,message_to_delete2.content)
+
+
+    @on_command
+    async def waitemoji(client,message,content):
+        channel=message.channel
+        
+        message_to_delete = await client.message_create(channel,'Waiting!')
+        
+        future=asyncio.Future()
+        waitfor_wrapper(client,channel,wait_and_continue(future,lambda message:parse_emoji(message.content)),30.)
+        try:
+            _,emoji = await future
+        except TimeoutError:
+            return
+        finally:
+            try:
+                await client.message_delete(message_to_delete)
+            except Forbidden:
+                pass
+            
+        await client.message_create(channel,str(emoji)*5)
+
+
+    @on_command
+    async def create(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        text=''
+        content=filter_content(content)
+        key=''
+        while True:
+            if not guild.permissions_for(message.author).can_administrator:
+                text='You do not have permissions granted to use this command'
+                break
+            
+            key=content.pop(0)
+            
+            if not content:
+                break
+            
+            if key=='role':
+                limit=len(content)
+                if (limit&1):
+                    text='Key, value pairs.'
+                    break
+                if limit==1:
+                    text='And anything to change?'
+                    break
+
+                result={}
+                
+                index=0
+                while index!=limit:
+                    name=content[index]
+                    index+=1
+                    value=content[index]
+                    index+=1
+
+                    if name in result:
+                        text=f'Dupe key: "{name}"'
+                        break
+
+                    if name=='name':
+                        role=guild.get_role(name)
+                        if role:
+                            text='A role already häs that name'
+                            break
+                        result[name]=value
+                        continue
+                        
+                    if name in ('mentionable','separated'):
+                        value=value.lower()
+                        if value=='true':
+                            result[name]=True
+                            continue
+                        elif value=='false':
+                            result[name]=False
+                            continue
+                        else:
+                            text=f'Invalid value for {name}, it can be either True or False'
+                            break
+                        
+                    if name=='color':
+                        try:
+                            result[name]=Color.from_html(value)
+                        except ValueError:
+                            text='Invalid color'
+                            break
+                        continue
+
+                    if name=='permissions':
+                        if value=='voice':
+                            result[name]=Permission.voice
+                            continue
+                        if value=='text':
+                            result[name]=Permission.text
+                            continue
+                        if value=='none':
+                            result[name]=Permission.none
+                            continue
+                        if value=='general':
+                            result[name]=Permission.general
+                            continue
+                        text='Not predefined permission name'
+                        break
+                if not text: 
+                    text=result
+                break
+            break
+        if type(text) is not str:
+            try:
+                reason=f'Executed by {message.author:f}).'
+                if key=='role':
+                    await client.role_create(guild,**text,reason=reason)
+            except Forbidden:
+                text='Access denied!'
+            else:
+                text='yayyyy'
+        if not text:
+            text=HELP['create']
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def subscribe(client,message,content):
+        guild=message.guild
+        if not guild:
+            return
+        role=guild.get_role('Announcements')
+        if not role:
+            return
+        if role in message.author.guild_profiles[guild].roles:
+            await client.user_role_delete(message.author,role)
+            text='You succesfully unsubscribed'
+        else:
+            await client.user_role_add(message.author,role)
+            text='You succesfully subscribed'
+        await client.message_create(message.channel,text)
+
+    @on_command.add('type')
+    async def on_command_type(client,message,content):
+        await client.typing(message.channel)
+    
 start_clients()
 

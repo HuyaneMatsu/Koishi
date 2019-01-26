@@ -253,7 +253,7 @@ def process_on_command_image(content):
                 return 'Sowwy, no result.'
 
 async def on_command_upload(client,message,content):
-    if not UPLOAD or message.author.id!=client.owner:
+    if not UPLOAD or message.author is not client.owner:
         return
 
     result = await process_on_command_upload(client,message,content)
