@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import asyncio
-
+import math
 from discord_uwu.parsers import eventlist
 from discord_uwu.channel import get_message
 from discord_uwu.prettyprint import pchunkify
-from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention
+from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left
 from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.events import waitfor_wrapper,pagination
 from help_handler import HELP
-
+from discord_uwu.embed import Embed,Embed_thumbnail
+from datetime import datetime
 
 infos=eventlist()
 
@@ -256,3 +257,67 @@ async def parse_details_command(client,message,content):
         await client.message_create(message.channel,text)
     
 
+@infos.add('user')
+async def user_info(client,message,content):
+    guild=message.guild
+
+    target=message.author
+    if guild and content:
+        if is_user_mention(content) and message.mentions:
+            target=message.mentions[0]
+        else:
+            user=guild.get_user(content)
+            if user:
+                target=user
+    
+    text=[f'**User Information**\nCreated: {time_left(target)} ago\nProfile: {target:m}\nID: {target.id}']
+    
+    if guild:
+        profile=target.guild_profiles[guild]
+        if profile.roles:
+            roles=', '.join(role.mention for role in reversed(profile.roles))
+        else:
+            roles='none'
+        text.append('\n**In guild profile**')
+        if profile.nick:
+            text.append(f'Nick: {profile.nick}')
+        text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
+        
+    embed=Embed( \
+        title       = f'{target:f}',
+        description = '\n'.join(text),
+        color       = target.color(guild),
+            )
+    embed.thumbnail=Embed_thumbnail( \
+        url         = target.avatar_url_as(size=128),
+        height      = 128,
+        width       = 128,
+            )
+
+    await client.message_create(message.channel,embed=embed)
+
+
+@infos
+async def invites(client,message,content):
+    guild=message.guild
+    if not guild or not guild.permissions_for(message.author).can_administrator:
+        return
+
+    channel=None
+    if content:
+        if is_channel_mention(content) and message.channel_mentions[0]:
+            channel=message.channel_mentions[0]
+        else:
+            channel=guild.get_channel(content)
+            
+    try:
+        if channel:
+            invites = await client.invites_of_channel(channel)
+        else:
+            invites = await client.invites_of_guild(guild)
+    except Forbidden:
+        return
+    
+    pages=[{'content':chunk} for chunk in pchunkify(invites,write_parents=False,show_code=False)]
+    message = await client.message_create(message.channel,**pages[0])
+    waitfor_wrapper(client,message,pagination(pages),180.)

@@ -28,6 +28,12 @@ HELP['help']= ( \
     ' - create\n'
     ' - subscribe\n'
     ' - type\n'
+    ' - user\n'
+    ' - invite\n'
+    ' - invites\n'
+    ' - invite_by_code\n'
+    ' - invite_delete_by_code\n'
+    ' - invite_clear\n'
     f'Use {PREFIX}help *command* for more information.'
         )
 HELP['image']=''
@@ -65,6 +71,13 @@ HELP['waitemoji']='Waits fo an emoji at the channel'
 HELP['create']='Creates a new "role"'
 HELP['subscribe']='Subscribes u to Announcements role, if possible'
 HELP['type']='No U, I can only read!'
+HELP['user']='Shows your profile'
+HELP['ivnite']='Sends you an invite (only if u can create invite anyways too)'
+HELP['invites']='Shows the invites of the guild <channel>.'
+HELP['invite_by_code']='Returns the code\' invite'
+HELP['invite_delete_by_code']='Deletes the code\' invite'
+HELP['invite_clear']='Deletes every invite of the guild, might take some time'
+
 async def on_command_help(client,message,content):
     if content:
         try:

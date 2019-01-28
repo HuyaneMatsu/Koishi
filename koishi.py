@@ -9,7 +9,7 @@ import time
 sys.path.append(os.path.abspath('..'))
 
 from discord_uwu import Client,start_clients
-from discord_uwu.exceptions import Forbidden
+from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
 from discord_uwu.activity import activity_game
 from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify
@@ -17,15 +17,18 @@ from discord_uwu.channel import Channel_voice,get_message_iterator
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
 from discord_uwu.embed import Embed,Embed_image
-from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,waitfor_wrapper
+from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,waitfor_wrapper,Future
 from discord_uwu.client_core import GC_client
+from discord_uwu.user import ZEROUSER
+from discord_uwu.prettyprint import pchunkify
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP
 from pers_data import TOKEN,PREFIX,TOKEN2
 from infos import infos
 from voice import voice
-
+#from battleships import battle_manager
+    
 class schannel:
     __slots__=['channel']
     def __init__(self):
@@ -486,7 +489,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             break
         if type(text) is not str:
             try:
-                reason=f'Executed by {message.author:f}).'
+                reason=f'Executed by {message.author:f}'
                 if key=='user':
                     await client.guild_user_edit(guild,text[0],**text[1],reason=reason)
                 elif key=='role':
@@ -612,7 +615,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             break
         if type(text) is not str:
             try:
-                reason=f'Executed by {message.author:f}).'
+                reason=f'Executed by {message.author:f}'
                 if key=='channel':
                     await client.channel_guild_move(*text,reason=reason)
                 elif key=='role':
@@ -665,7 +668,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             break
         if type(text) is not str:
             try:
-                reason=f'Executed by {message.author:f}).'
+                reason=f'Executed by {message.author:f}'
                 if key=='role':
                     await client.role_delete(text,reason)
                 elif key=='channel':
@@ -688,7 +691,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def satania(client,message,content):
         message = await client.message_create(message.channel,'waiting for satania emote')
-        future=asyncio.Future()
+        future=Future(client.loop)
         waitfor_wrapper(client,message,wait_and_continue(future,lambda emoji,user:('satania' in emoji.name.lower())),60.)
         try:
             emoji,user = await future
@@ -762,7 +765,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     target=user
             
         await client.message_create(channel,'And what is the magic word?')
-        future=asyncio.Future()
+        future=Future(client.loop)
         waitfor_wrapper(client,channel,wait_and_continue(future,lambda message,pattern=MAGIC_PATTERN,author=message.author:message.author is author and re.match(pattern,message.content)),30.)
         try:
             await future
@@ -775,7 +778,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         channel=message.channel
         
         message_to_delete1 = await client.message_create(channel,'prepared')
-        future=asyncio.Future()
+        future=Future(client.loop)
         waitfor_wrapper(client,channel,wait_and_continue(future,lambda message:True),30.)
         try:
             message_to_delete2 = await future
@@ -799,7 +802,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         
         message_to_delete = await client.message_create(channel,'Waiting!')
         
-        future=asyncio.Future()
+        future=Future(client.loop)
         waitfor_wrapper(client,channel,wait_and_continue(future,lambda message:parse_emoji(message.content)),30.)
         try:
             _,emoji = await future
@@ -903,7 +906,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             break
         if type(text) is not str:
             try:
-                reason=f'Executed by {message.author:f}).'
+                reason=f'Executed by {message.author:f}'
                 if key=='role':
                     await client.role_create(guild,**text,reason=reason)
             except Forbidden:
@@ -933,6 +936,158 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command.add('type')
     async def on_command_type(client,message,content):
         await client.typing(message.channel)
-    
+
+    @on_command
+    async def invite(client,message,content):
+        guild=message.guild
+        if not guild or not guild.permissions_for(message.author).can_create_instant_invite:
+            return
+
+        if message.author is guild.owner and content=='perma':
+            max_age=0
+            max_use=0
+        else:
+            max_age=21600
+            max_use=1
+        
+        try:
+            invite = await client.invite_create(guild.system_channel,max_age,max_use)
+        except Forbidden:
+            return
+                                                
+        channel = await client.channel_private_create(message.author)
+        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
+
+    @on_command
+    async def invite_by_code(client,message,content):
+        guild=message.guild
+        if not guild or not guild.permissions_for(message.author).can_administrator:
+            return
+        
+        err=False
+        if not content:
+            err=True
+        elif len(content)>8:
+            err=True
+        else:
+            try:
+                invite = await client.invite_get(content)
+            except Forbidden:
+                invite=None
+            except HTTPException:
+                err=True
+
+        if err:
+            text='Invalid Invite code'
+        elif invite:
+            text=f'{pchunkify(invite,show_code=True)[0]}\n{invite.url}'
+        else:
+            text='Permissions denied'
+
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def invite_delete_by_code(client,message,content):
+        guild=message.guild
+        if not guild or not guild.permissions_for(message.author).can_administrator:
+            return
+
+        err=False
+        if not content:
+            err=True
+        elif len(content)>16:
+            err=True
+        else:
+            try:
+                invite = await client.invite_delete_by_code(content)
+            except Forbidden:
+                invite=None
+            except HTTPException:
+                err=True
+
+        if err:
+            text='Invalid Invite code'
+        elif invite:
+            text=f'{pchunkify(invite,show_code=True)[0]}\n{invite.url}'
+        else:
+            text='Permissions denied'
+
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def invite_clear(client,message,content):
+        guild=message.guild
+        if not guild or not guild.permissions_for(message.author).can_administrator:
+            return
+        
+        try:
+            with client.keep_typing(message.channel):
+                invites = await client.invites_of_guild(guild)
+                for invite in invites:
+                    await asyncio.sleep(0.5,loop=client.loop)
+                    try:
+                        await client.invite_delete(invite)
+                    except HTTPException:
+                        pass
+        except Forbidden:
+            text='Failed'
+        else:
+            text=f'Succes, {len(invites)} got deleted'
+            
+        await client.message_create(message.channel,text)
+
+    #client side only. Discord clients request with_count always anyways
+##    @on_command
+##    async def invite_mod(client,message,content):
+##        guild=message.guild
+##        if not guild or not guild.permissions_for(message.author).can_administrator:
+##            return
+##        
+##        try:
+##            with client.keep_typing(message.channel):
+##                invites = await client.invites_of_guild(guild)
+##                for invite in invites:
+##                    await asyncio.sleep(0.5,loop=client.loop)
+##                    if invite.online_count is not None:
+##                        value=False
+##                    else:
+##                        value=True
+##                    try:
+##                        await client.invite_update(invite,value)
+##                    except HTTPException:
+##                        pass
+##        except Forbidden:
+##            text='Failed'
+##        else:
+##            text=f'Succes'
+##            
+##        await client.message_create(message.channel,text)
+
+#    @on_command(battle_manager,case='battleships')
+
+            
+    @on_command
+    async def wait2where(client,message,content):
+        channel=message.channel
+        private = await client.channel_private_create(message.author)
+        await client.message_create(channel,'Waiting on any message from you here and at dm')
+
+        case=lambda message,author=message.author:message.author is author
+        
+        future=Future(client.loop)
+        
+        wrapper1=waitfor_wrapper(client,channel,wait_and_continue(future,case),60.)
+        wrapper2=waitfor_wrapper(client,private,wait_and_continue(future,case),60.)
+        
+        try:
+            result = await future
+        except TimeoutError:
+            await client.message_create(channel,'Time is over')
+            return
+        
+        wrapper1.cancel()
+        wrapper2.cancel()
+        await client.message_create(channel,result.content)
+        
 start_clients()
 
