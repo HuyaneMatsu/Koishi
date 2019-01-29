@@ -6,7 +6,7 @@ from discord_uwu.channel import get_message
 from discord_uwu.prettyprint import pchunkify
 from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left
 from discord_uwu.exceptions import Forbidden,HTTPException
-from discord_uwu.events import waitfor_wrapper,pagination
+from discord_uwu.events import pagination
 from help_handler import HELP
 from discord_uwu.embed import Embed,Embed_thumbnail
 from datetime import datetime
@@ -49,12 +49,11 @@ async def parse_list_command(client,message,content):
         break
     if type(text) is not str:
         pages=[{'content':chunk} for chunk in text]
-        message = await client.message_create(message.channel,**pages[0])
-        waitfor_wrapper(client,message,pagination(pages),180.)
+        pagination(client,message.channel,pages,120.)
+    elif text:
+        await client.message_create(message.channel,text)
     else:
-        if not text:
-            text=HELP['list']
-        await client.message_create(message.channel,)
+        await client.message_create(message.channel,embed=HELP['list'])
 
 @infos.add('details')
 async def parse_details_command(client,message,content):
@@ -249,12 +248,11 @@ async def parse_details_command(client,message,content):
     
     if type(text) is not str:
         pages=[{'content':chunk} for chunk in text]
-        message = await client.message_create(message.channel,**pages[0])
-        waitfor_wrapper(client,message,pagination(pages),180.)
-    else:
-        if not text:
-            text=HELP['details']
+        pagination(client,message.channel,pages,120.)
+    elif text:
         await client.message_create(message.channel,text)
+    else:
+        await client.message_create(message.channel,embed=HELP['details'])
     
 
 @infos.add('user')
@@ -319,5 +317,4 @@ async def invites(client,message,content):
         return
     
     pages=[{'content':chunk} for chunk in pchunkify(invites,write_parents=False,show_code=False)]
-    message = await client.message_create(message.channel,**pages[0])
-    waitfor_wrapper(client,message,pagination(pages),180.)
+    pagination(client,message.channel,pages,120.)

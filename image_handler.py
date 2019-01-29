@@ -81,18 +81,31 @@ load_images()
 
 def create_help_images():
     text=[
-        'Searches image by tags, uploads 1 of the results.\n',
-        'Use tag "count" to see how much possible images are with that tag combination\n',
-        'Use tag "vid" for gifs or "any" for images and gifs.\n',
-        'Use tag "index ~~hex~~ *n*" to not get random result\n',
-        'Count doesnt goes with index\n',
-        f'Total images: {len(IMAGES)}. Total vids: {len(VIDS)}\n',
-        'Tags: '
+        'Searches image by tags, uploads 1 of the results.',
+        'Use tag "count" to see how much possible images are with that tag combination',
+        'Use tag "vid" for gifs or "any" for images and gifs.',
+        'Use tag "index ~~hex~~ *n*" to not get random result',
+        'Count doesnt goes with index',
+        f'Total images: {len(IMAGES)}. Total vids: {len(VIDS)}',
+        'Top Tags: '
             ]
-    for key,value in IMAGE_STATISTICS.items():
-        text.append(f'{key} - {value}, ')
-    HELP['image']=''.join(text)
-
+    textlen=sum(len(l) for l in text)+len(text)
+    
+    items=list(IMAGE_STATISTICS.items())
+    items.sort(key=lambda item: item[1],reverse=True)
+    
+    for index,(key,value) in enumerate(items[:20]):
+        part=f'{index: >2}.: {key} - {value}'
+        newlen=textlen+len(part)+1
+        if newlen>2048:
+            break
+        text.append(part)
+        textlen=newlen
+        
+    image_help=HELP['image']
+    image_help.source.description='\n'.join(text)
+    image_help.rerender()
+    
 create_help_images()
 
 RESERVED_TAGS={'any','vid','count','index','hex',}
@@ -107,7 +120,6 @@ async def on_command_image(client,message,content):
     
     
 def process_on_command_image(content):
-    #TODO ignore mentions
     content=[x.lower() for x in re.findall(r'\S+',content) if not is_mention(x)]
     limit=len(content)
     if limit==0:

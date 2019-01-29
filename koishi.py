@@ -17,9 +17,9 @@ from discord_uwu.channel import Channel_voice,get_message_iterator
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
 from discord_uwu.embed import Embed,Embed_image
-from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,waitfor_wrapper,Future
+from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,wait_for_message,wait_for_emoji
+from discord_uwu.futures import wait_one
 from discord_uwu.client_core import GC_client
-from discord_uwu.user import ZEROUSER
 from discord_uwu.prettyprint import pchunkify
 
 from image_handler import on_command_upload,on_command_image
@@ -498,9 +498,12 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 text='Access denied'
             else:
                 text='OwO'
-        if not text:
-            text=HELP['edit']
-        await client.message_create(message.channel,text)
+                
+        if text:
+            await client.message_create(message.channel,text)
+        else:
+            await client.message_create(message.channel,embed=HELP['edit'])
+
 
     @on_command
     async def move(client,message,content):
@@ -626,10 +629,12 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 text='Access denied!'
             else:
                 text='yayyyy'
-        if not text:
-            text=HELP['move']
-        await client.message_create(message.channel,text)
+        if text:
+            await client.message_create(message.channel,text)
+        else:
+            await client.message_create(message.channel,embed=HELP['move'])
 
+    
     @on_command
     async def delete(client,message,content):
         guild=message.guild
@@ -677,24 +682,23 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 text='Access denied!'
             else:
                 text='yayyyy'
-        if not text:
-            text=HELP['delete']
-        await client.message_create(message.channel,text)
+        if text:
+            await client.message_create(message.channel,text)
+        else:
+            await client.message_create(message.channel,embed=HELP['delete'])
+        
 
     @on_command.add('book')
     async def on_command_book(client,message,content):
         pages=({'content':'import base64\n\npage1/3'},{'content':'uwu\n\npage2/3'},{'content':'text2\n\npage3/3'})
-        message = await client.message_create(message.channel,**pages[0])
-        waitfor_wrapper(client,message,pagination(pages),120.)
+        pagination(client,message.channel,pages)
 
 
     @on_command
     async def satania(client,message,content):
         message = await client.message_create(message.channel,'waiting for satania emote')
-        future=Future(client.loop)
-        waitfor_wrapper(client,message,wait_and_continue(future,lambda emoji,user:('satania' in emoji.name.lower())),60.)
         try:
-            emoji,user = await future
+            emoji,user = await wait_for_emoji(client,message,lambda emoji,user:('satania' in emoji.name.lower()),60.)
         except TimeoutError:
             return
         finally:
@@ -765,10 +769,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     target=user
             
         await client.message_create(channel,'And what is the magic word?')
-        future=Future(client.loop)
-        waitfor_wrapper(client,channel,wait_and_continue(future,lambda message,pattern=MAGIC_PATTERN,author=message.author:message.author is author and re.match(pattern,message.content)),30.)
         try:
-            await future
+            await wait_for_message(client,message.channel,lambda message,pattern=MAGIC_PATTERN,author=message.author:message.author is author and re.match(pattern,message.content),30.)
         except TimeoutError:
             return
         await client.message_create(channel,f'{client.mention_at(guild)} hugs {target.mention_at(guild)}')
@@ -778,10 +780,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         channel=message.channel
         
         message_to_delete1 = await client.message_create(channel,'prepared')
-        future=Future(client.loop)
-        waitfor_wrapper(client,channel,wait_and_continue(future,lambda message:True),30.)
+
         try:
-            message_to_delete2 = await future
+            message_to_delete2 = await wait_for_message(client,channel,lambda message:True,30.)
         except TimeoutError:
             try:
                 await client.message_delete(message_to_delete1)
@@ -802,10 +803,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         
         message_to_delete = await client.message_create(channel,'Waiting!')
         
-        future=Future(client.loop)
-        waitfor_wrapper(client,channel,wait_and_continue(future,lambda message:parse_emoji(message.content)),30.)
         try:
-            _,emoji = await future
+            _,emoji = await wait_for_message(client,channel,lambda message:parse_emoji(message.content),30.)
         except TimeoutError:
             return
         finally:
@@ -913,9 +912,11 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 text='Access denied!'
             else:
                 text='yayyyy'
-        if not text:
-            text=HELP['create']
-        await client.message_create(message.channel,text)
+        if text:
+            await client.message_create(message.channel,text)
+        else:
+            await client.message_create(message.channel,embed=HELP['create'])
+        
 
     @on_command
     async def subscribe(client,message,content):
@@ -1063,7 +1064,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##            
 ##        await client.message_create(message.channel,text)
 
-#    @on_command(battle_manager,case='battleships')
+    #on_command(battle_manager,case='bs')
 
             
     @on_command
@@ -1072,12 +1073,13 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         private = await client.channel_private_create(message.author)
         await client.message_create(channel,'Waiting on any message from you here and at dm')
 
+        
+        future=wait_one(client.loop)
         case=lambda message,author=message.author:message.author is author
+        event=client.events.message_create
         
-        future=Future(client.loop)
-        
-        wrapper1=waitfor_wrapper(client,channel,wait_and_continue(future,case),60.)
-        wrapper2=waitfor_wrapper(client,private,wait_and_continue(future,case),60.)
+        wrapper1=waitfor_wrapper(client,wait_and_continue(future,case,channel,event),60.)
+        wrapper2=waitfor_wrapper(client,wait_and_continue(future,case,private,event),60.)
         
         try:
             result = await future
@@ -1087,7 +1089,25 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         
         wrapper1.cancel()
         wrapper2.cancel()
-        await client.message_create(channel,result.content)
         
+        await client.message_create(channel,result.content)
+
+    @on_command
+    async def prune(client,message,content):
+        guild=message.guild
+        if not guild or not guild.permissions_for(message.author).can_administrator:
+            return
+        try:
+            if len(content)==5 and content.lower()=='prune':
+                result = await client.guild_prune(guild,16,reason=f'Executed by {message.author:f}.')
+                text=f'Pruned {result} users.'
+            else:
+                result = await client.guild_prune_estimate(guild,16)
+                text=f'{result} users to be pruned'
+        except Forbidden:
+            text='Acces denied'
+
+        await client.message_create(message.channel,text)
+            
 start_clients()
 

@@ -157,5 +157,5 @@ async def voice(client,message,content):
         await asyncio.sleep(30.)
         await client.message_delete(message,reason='Voice messages expire after 30s.')
     else:
-        await client.message_create(message.channel,HELP['voice'])
+        await client.message_create(message.channel,embed=HELP['voice'])
 
