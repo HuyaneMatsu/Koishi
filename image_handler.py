@@ -94,8 +94,8 @@ def create_help_images():
     items=list(IMAGE_STATISTICS.items())
     items.sort(key=lambda item: item[1],reverse=True)
     
-    for index,(key,value) in enumerate(items[:20]):
-        part=f'{index: >2}.: {key} - {value}'
+    for index,(key,value) in enumerate(items[:20],1):
+        part=f'{index:}.: {key} - {value}'
         newlen=textlen+len(part)+1
         if newlen>2048:
             break

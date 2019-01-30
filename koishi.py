@@ -714,7 +714,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         embed=Embed( \
             title='Nyanmatsu hugs Nyansia',
             url='https://discordapp.com',
-            color=15864673,
+            color=Color.from_html('#ff4465'),
                 )
         embed.image=Embed_image('https://cdn.discordapp.com/embed/avatars/0.png')
         

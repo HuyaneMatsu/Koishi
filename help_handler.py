@@ -48,10 +48,10 @@ def create_help_help():
     limit=len(pages)
     index=0
     while index<limit:
-        page=Embed(title='Commands:',description=pages[index])
+        page=Embed(title='Commands:',color=HELP_COLOR,description=pages[index])
         index+=1
         page.fields.append(Embed_field(name=f'Use {PREFIX}help *command* for more information.',value=f'page {index}/{limit}'))
-        HELPHELP.append({'embed':page})
+        HELPHELP.append({'embed':rendered_embed(page)})
 
 create_help_help()
 
@@ -93,8 +93,11 @@ HELP['emoji']=rendered_embed(Embed(title='emoji',color=HELP_COLOR,
             )))
 
 HELP['edit']=rendered_embed(Embed(title='edit',color=HELP_COLOR,  
-    description='With edit command u can edit "user", "role".'
-        ))
+    description= ( \
+        'You can edit:\n'
+        '**>>** "user"\n'
+        '**>>** "role"'
+            )))
 
 HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,
     description=( \
@@ -212,8 +215,7 @@ async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
         try:
-            description=HELP[content]
-            result=Embed(title=content,description=description)
+            result=HELP[content]
         except KeyError:
             result=Embed(title=f'Invalid command: {content}')
         await client.message_create(message.channel,embed=result)
