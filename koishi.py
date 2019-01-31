@@ -241,9 +241,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def ping(client,message,content):
         guild=message.channel.guild
-        if guild:
+        if guild is not None:
             user=guild.get_user(content)
-            if user:
+            if user is not None:
                 await client.message_create(message.channel,user.mention_at(guild))
 
     @on_command
@@ -268,7 +268,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def pm(client,message,content):
         guild=message.guild
-        if not guild:
+        if guild is None:
             return
         content=filter_content(content)
         while True:
@@ -280,7 +280,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 user=message.mentions[0]
             else:
                 user=guild.get_user(content)
-                if not user:
+                if user is None:
                     text='Could not find that user!'
                     break
 
@@ -346,7 +346,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     user=message.mentions[0]
                 else:
                     user=guild.get_user(content[0])
-                    if not user:
+                    if user is None:
                         text='Could not find a user with that name.'
                         break
 
@@ -389,7 +389,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                             channel=message.channel_mentions[0]
                         else:
                             channel=guild.get_channel(value)
-                            if not channel:
+                            if channel is None:
                                 text='Did not find that channel name'
                                 break
                         if type(channel) is not Channel_voice:
@@ -400,7 +400,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
                     if name=='role':
                         role=guild.get_role(value)
-                        if not role:
+                        if role is None:
                             text='Did not find that role name!'
                             break
                         user_roles=user.guild_profiles[guild].roles
@@ -427,7 +427,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     text='And anything to change?'
                     break
                 role=guild.get_role(content[0])
-                if not role:
+                if role is None:
                     text='Could not find a role with that name.'
                     break
 
@@ -508,7 +508,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def move(client,message,content):
         guild=message.guild
-        if not guild:
+        if guild is None:
             return
         content=filter_content(content)
         text=''
@@ -528,7 +528,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     channel=message.channel_mentions[0] 
                 else:
                     channel=guild.get_channel(content[0])
-                    if not channel:
+                    if channel is None:
                         text='Channel not found.'
                         break
                 if len(content)==3:
@@ -566,7 +566,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     text='"Role name" and "index" please!'
                     break
                 role=guild.get_role(content[0])
-                if not role:
+                if role is None:
                     text='Role not found.'
                     break
                 try:
@@ -587,7 +587,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                         user=message.mentions[0]
                     else:
                         user=guild.get_user(name)
-                        if not user:
+                        if user is None:
                             text='Could not find a user with that name!'
                             break
                 else:
@@ -603,7 +603,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     channel=message.channel_mentions[0]
                 else:
                     channel=guild.get_channel(name)
-                    if not channel:
+                    if channel is None:
                         text='Could not find that channel!'
                         break
                 if channel.type_lookup!=2:
@@ -655,7 +655,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     text='Role name only!'
                     break
                 role=guild.get_role(content[0])
-                if not role:
+                if role is None:
                     text='Role not found'
                     break
                 text=role
@@ -665,7 +665,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     text='Channel name only!'
                     break
                 channel=guild.get_channel(content[0])
-                if not channel:
+                if channel is None:
                     text='Channel not found'
                     break
                 text=channel
@@ -723,7 +723,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def clear(client,message,content):
         guild=message.guild
-        if not guild:
+        if guild is None:
             return
         
         if not guild.permissions_for(message.author).can_administrator:
@@ -763,9 +763,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         if content:
             if message.mentions and is_user_mention(content):
                 target=message.mentions[0]
-            elif guild:
+            elif guild is not None:
                 user=guild.get_user(content)
-                if user:
+                if user is not None:
                     target=user
             
         await client.message_create(channel,'And what is the magic word?')
@@ -858,8 +858,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
                     if name=='name':
                         role=guild.get_role(name)
-                        if role:
-                            text='A role already häs that name'
+                        if role is not None:
+                            text='A role already hss that name!'
                             break
                         result[name]=value
                         continue
@@ -921,10 +921,10 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def subscribe(client,message,content):
         guild=message.guild
-        if not guild:
+        if guild is None:
             return
         role=guild.get_role('Announcements')
-        if not role:
+        if role is None:
             return
         if role in message.author.guild_profiles[guild].roles:
             await client.user_role_delete(message.author,role)
@@ -941,7 +941,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def invite(client,message,content):
         guild=message.guild
-        if not guild or not guild.permissions_for(message.author).can_create_instant_invite:
+        if guild is None or not guild.permissions_for(message.author).can_create_instant_invite:
             return
 
         if message.author is guild.owner and content=='perma':
@@ -962,7 +962,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def invite_by_code(client,message,content):
         guild=message.guild
-        if not guild or not guild.permissions_for(message.author).can_administrator:
+        if guild is None or not guild.permissions_for(message.author).can_administrator:
             return
         
         err=False
@@ -990,7 +990,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def invite_delete_by_code(client,message,content):
         guild=message.guild
-        if not guild or not guild.permissions_for(message.author).can_administrator:
+        if guild is None or not guild.permissions_for(message.author).can_administrator:
             return
 
         err=False
@@ -1018,7 +1018,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def invite_clear(client,message,content):
         guild=message.guild
-        if not guild or not guild.permissions_for(message.author).can_administrator:
+        if guild is None or not guild.permissions_for(message.author).can_administrator:
             return
         
         try:
@@ -1041,7 +1041,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##    @on_command
 ##    async def invite_mod(client,message,content):
 ##        guild=message.guild
-##        if not guild or not guild.permissions_for(message.author).can_administrator:
+##        if guild is None or not guild.permissions_for(message.author).can_administrator:
 ##            return
 ##        
 ##        try:
@@ -1095,7 +1095,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def prune(client,message,content):
         guild=message.guild
-        if not guild or not guild.permissions_for(message.author).can_administrator:
+        if guild is None or not guild.permissions_for(message.author).can_administrator:
             return
         try:
             if len(content)==5 and content.lower()=='prune':

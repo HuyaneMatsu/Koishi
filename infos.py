@@ -150,7 +150,7 @@ async def parse_details_command(client,message,content):
                 channel=message.channel_mentions[0]
             else:
                 channel=guild.get_channel(name)
-                if not channel:
+                if channel is None:
                     text='Unknown channel name.'
                     
             if len(content)<2:
@@ -212,7 +212,7 @@ async def parse_details_command(client,message,content):
                         user=message.mentions[0]
                     else:
                         user=guild.get_user(name)
-                        if not user:
+                        if user is None:
                             text='User not found'
                             break
                     continue
@@ -225,7 +225,7 @@ async def parse_details_command(client,message,content):
                         channel=message.channel_mentions[0]
                     else:
                         channel=guild.get_channel(name)
-                        if not channel:
+                        if channel is not None:
                             text='Channel not found'
                             break
                     continue
@@ -260,17 +260,17 @@ async def user_info(client,message,content):
     guild=message.guild
 
     target=message.author
-    if guild and content:
+    if guild is not None and content:
         if is_user_mention(content) and message.mentions:
             target=message.mentions[0]
         else:
             user=guild.get_user(content)
-            if user:
+            if user is not None:
                 target=user
     
     text=[f'**User Information**\nCreated: {time_left(target)} ago\nProfile: {target:m}\nID: {target.id}']
     
-    if guild:
+    if guild is not None:
         profile=target.guild_profiles[guild]
         if profile.roles:
             roles=', '.join(role.mention for role in reversed(profile.roles))
@@ -298,7 +298,7 @@ async def user_info(client,message,content):
 @infos
 async def invites(client,message,content):
     guild=message.guild
-    if not guild or not guild.permissions_for(message.author).can_administrator:
+    if guild is None or not guild.permissions_for(message.author).can_administrator:
         return
 
     channel=None
@@ -309,7 +309,7 @@ async def invites(client,message,content):
             channel=guild.get_channel(content)
             
     try:
-        if channel:
+        if channel is not None:
             invites = await client.invites_of_channel(channel)
         else:
             invites = await client.invites_of_guild(guild)

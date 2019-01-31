@@ -8,7 +8,7 @@ import asyncio
 
 async def voice(client,message,content):
     guild=message.guild
-    if not guild:
+    if guild is None:
         return
     content=filter_content(content)
     text=''
@@ -130,7 +130,7 @@ async def voice(client,message,content):
             if content:
                 name=content[0]
                 channel=guild.get_channel(name)
-                if not channel:
+                if channel is None:
                     text=f'Not existing channel: "{name}"!'
                     break
                 if channel.type_lookup!=2:
