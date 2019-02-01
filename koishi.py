@@ -1198,7 +1198,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 elif amount<8:
                     amount=8
         
-        elif not amount:
+        if not amount:
             amount=12
 
             
