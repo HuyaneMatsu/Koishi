@@ -724,7 +724,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         finally:
             try:
                 await client.message_delete(message)
-            except Forbidden:
+            except (Forbidden,HTTPException):
                 pass
         await client.message_create(message.channel,str(emoji)*5)
 
@@ -1168,18 +1168,20 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         
         await client.message_create(message.channel,f'If i can have a guess {target.mention_at(guild)}\' client\'s language is: {target.language}')
 
-    mine_mine=(\
-        f'||{BUILTIN_EMOJIS["white_large_square"].name}||',
-        f'||{BUILTIN_EMOJIS["one"].name}||',
-        f'||{BUILTIN_EMOJIS["two"].name}||',
-        f'||{BUILTIN_EMOJIS["three"].name}||',
-        f'||{BUILTIN_EMOJIS["four"].name}||',
-        f'||{BUILTIN_EMOJIS["five"].name}||',
-        f'||{BUILTIN_EMOJIS["six"].name}||',
-        f'||{BUILTIN_EMOJIS["seven"].name}||',
-        f'||{BUILTIN_EMOJIS["eight"].name}||',
-        f'||{BUILTIN_EMOJIS["bomb"].name}||',
+    mine_mine_clear=( \
+        BUILTIN_EMOJIS['white_large_square'].name,
+        BUILTIN_EMOJIS['one'].name,
+        BUILTIN_EMOJIS['two'].name,
+        BUILTIN_EMOJIS['three'].name,
+        BUILTIN_EMOJIS['four'].name,
+        BUILTIN_EMOJIS['five'].name,
+        BUILTIN_EMOJIS['six'].name,
+        BUILTIN_EMOJIS['seven'].name,
+        BUILTIN_EMOJIS['eight'].name,
+        BUILTIN_EMOJIS['bomb'].name,
             )
+    
+    mine_mine=tuple(f'||{e}||' for e in mine_mine_clear)
     
     @on_command
     async def mine(client,message,content):
@@ -1257,9 +1259,48 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         if text_mode:
             result.insert(0,'```')
             result.append('```')
+        else:
+            emoji=BUILTIN_EMOJIS['anger']
+            user=message.author
         
         text='\n'.join(result)
-        await client.message_create(message.channel,text)
+        result.clear()
+        
+        message = await client.message_create(message.channel,text)
+
+        if text_mode:
+            return
+        
+        await client.reaction_add(message,emoji)
+        
+        try:
+            await wait_for_emoji(client,message,
+                lambda emoji,user,v0=emoji,v1=user:emoji is v0 and user is v1,
+                1200.)
+        except TimeoutError:
+            return
+        finally:
+            try:
+                await client.reaction_clear(message)
+            except (Forbidden,HTTPException):
+                pass
+        
+        y=0
+        while True:
+            x=0
+            while True:
+                result_sub.append(mine_mine_clear[data[x+y]])
+                x+=1
+                if x==10:
+                    break
+            result.append(''.join(result_sub))
+            result_sub.clear()
+            y+=10
+            if y==100:
+                break
+        text='\n'.join(result)
+
+        await client.message_edit(message,text)
             
 start_clients()
 
