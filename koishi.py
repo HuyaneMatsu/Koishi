@@ -35,12 +35,12 @@ class schannel:
         self.channel=None
         
     async def set_channel(self,client,message,content):
-        if message.author==client.owner:
+        if message.author is client.owner:
             self.channel=message.channel
-            await client.message_create(message.channel,'Now i ll send special messages to this channel')
+            await client.message_create(message.channel,'I ll send special messages to this channel')
     
     async def emoji_update(self,client,guild,modifications):
-        if self.channel:
+        if self.channel is not None:
             result=[]
             for modtype,emoji,diff in modifications:
                 if modtype=='n':
@@ -58,21 +58,30 @@ class schannel:
             await client.message_create(self.channel,**pages[0])
             
     async def unknown_guild(self,client,parser,guild_id,data):
-        if self.channel:
+        if self.channel is not None:
             await client.message_create(self.channel,f'Unknown guild at {parser}: {guild_id}\n data: {data}')
 
     async def unknown_channel(self,client,parser,channel_id,data):
-        if self.channel:
+        if self.channel is not None:
             await client.message_create(self.channel,f'Unknown channel at {parser}: {channel_id}\n data: {data}')
 
     async def unknown_role(self,client,parser,guild,role_id,data):
-        if self.channel:
+        if self.channel is not None:
             await client.message_create(self.channel,f'Unknown guild: {guild} at {parser}; role: {role_id}\n data: {data}')
 
     async def unknown_voice_client(self,client,parser,voice_client_id,data):
-        if self.channel:
+        if self.channel is not None:
             await client.message_create(self.channel,f'Unknown voice client at {parser}: {voice_client_id}\n data: {data}')
 
+    async def guild_user_delete(self,client,guild,user,profile):
+        if self.channel is not None:
+            await client.message_create(self.channel,f'A user left a guild: {guild.name} : {user:f}')
+
+    async def guild_user_add(self,client,guild,user):
+        if self.channel is not None:
+            await client.message_create(self.channel,f'A user joined the guild:{guild.name} :  {user:f}')
+            
+            
 schannel=schannel()
 
         
@@ -135,7 +144,8 @@ Koishi.events(schannel.unknown_guild)
 Koishi.events(schannel.unknown_channel)
 Koishi.events(schannel.unknown_role)
 Koishi.events(schannel.unknown_voice_client)
-
+Koishi.events(schannel.guild_user_delete)
+Koishi.events(schannel.guild_user_add)
 
 with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
@@ -145,7 +155,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     on_command(on_command_image,'image')
     on_command(on_command_upload,'upload')
     on_command(on_command_help,'help')
-
+    #on_command(battle_manager,case='bs')
+    
     @on_command
     async def default_event(client,message):
         content=message.content
@@ -176,9 +187,15 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
     @on_command
     async def rate(client,message,content):
-        if message.mentions:
-            target=message.mentions[0]
-        else:
+        target=None
+        if content:
+            if message.mentions:
+                target=message.mentions[0]
+            else:
+                guild=message.guild
+                if guild is not None:
+                    target=guild.get_user(content)
+        if target is None:
             target=message.author
             
         #nickname check
@@ -291,6 +308,9 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             text=message.content[index:]
             if not text:
                 text='Unable to send empty message'
+                break
+            if user is client:
+                text='Ok, i got it!'
                 break
             channel = await client.channel_private_create(user)
             try:
@@ -1063,9 +1083,6 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##            text=f'Succes'
 ##            
 ##        await client.message_create(message.channel,text)
-
-    #on_command(battle_manager,case='bs')
-
             
     @on_command
     async def wait2where(client,message,content):
@@ -1107,6 +1124,141 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         except Forbidden:
             text='Acces denied'
 
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def kick(client,message,content):
+        guild=message.guild
+        if guild is None or not guild.permissions_for(message.author).can_administrator:
+            return
+
+        content=filter_content(content)
+        if not content:
+            await client.message_create(message.channel,'And who, if i can ask so?')
+            return
+
+        name=content.pop(0)
+        if is_user_mention(name) and message.mentions:
+            user=message.mentions[0]
+        else:
+            user=guild.get_user(name)
+            if user is None:
+                await client.message_create(message.channel,'Could not find that user')
+                return
+
+        if content:
+            reason=f'Exectued by {message.author:f}, reason: {" ".join(content)}'
+        else:
+            reason=f'Exectued by {message.author:f}'
+
+        await client.guild_user_kick(guild,user,reason)
+        await client.message_create('ExeCUTEd')
+
+    @on_command
+    async def language(client,message,content):
+        guild=message.guild
+        target=None
+        if content:
+            if message.mentions:
+                target=message.mentions[0]
+            elif guild is not None:
+                target=guild.get_user(content)
+        if target is None:
+            target=message.author
+        
+        await client.message_create(message.channel,f'If i can have a guess {target.mention_at(guild)}\' client\'s language is: {target.language}')
+
+    mine_mine=(\
+        f'||{BUILTIN_EMOJIS["white_large_square"].name}||',
+        f'||{BUILTIN_EMOJIS["one"].name}||',
+        f'||{BUILTIN_EMOJIS["two"].name}||',
+        f'||{BUILTIN_EMOJIS["three"].name}||',
+        f'||{BUILTIN_EMOJIS["four"].name}||',
+        f'||{BUILTIN_EMOJIS["five"].name}||',
+        f'||{BUILTIN_EMOJIS["six"].name}||',
+        f'||{BUILTIN_EMOJIS["seven"].name}||',
+        f'||{BUILTIN_EMOJIS["eight"].name}||',
+        f'||{BUILTIN_EMOJIS["bomb"].name}||',
+            )
+    
+    @on_command
+    async def mine(client,message,content):
+        text_mode=False
+        amount=0
+        if content:
+            content=filter_content(content)
+            if content[0]=='text':
+                text_mode=True
+                content.pop(0)
+                
+            if content and content[0].isdecimal():
+                amount=int(content[0])
+                if amount>24:
+                    amount=24
+                elif amount<8:
+                    amount=8
+        
+        elif not amount:
+            amount=12
+
+            
+        data=[0 for x in range(100)]
+        
+        while amount:
+            x=random(0,9)
+            y=random(0,9)
+            position=x+y*10
+
+            value=data[position]
+            if value==9:
+                continue
+            
+            local_count=0
+
+            for c_x,c_y in ((-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)):
+                local_x=x+c_x
+                local_y=y+c_y
+                if local_x!=10 and local_x!=-1 and local_y!=10 and local_y!=-1 and data[local_x+local_y*10]==9:
+                    local_count+=1
+            
+            if local_count>3:
+                continue
+
+            for c_x,c_y in ((-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)):
+                local_x=x+c_x
+                local_y=y+c_y
+                if local_x!=10 and local_x!=-1 and local_y!=10 and local_y!=-1:
+                    local_position=local_x+local_y*10
+                    local_value=data[local_position]
+                    if local_value==9:
+                        continue
+                    data[local_position]=local_value+1
+                    
+            data[position]=9
+            
+            amount-=1
+
+        result=[]
+        result_sub=[]
+        y=0
+        while True:
+            x=0
+            while True:
+                result_sub.append(mine_mine[data[x+y]])
+                x+=1
+                if x==10:
+                    break
+            result.append(''.join(result_sub))
+            result_sub.clear()
+            y+=10
+            if y==100:
+                break
+        
+        if text_mode:
+            result.insert(0,'```')
+            result.append('```')
+        
+        text='\n'.join(result)
         await client.message_create(message.channel,text)
             
 start_clients()

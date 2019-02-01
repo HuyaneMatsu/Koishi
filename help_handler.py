@@ -15,7 +15,7 @@ def create_help_help():
         ' **>>** image\n'
         ' **>>** rate\n'
         ' **>>** dice\n'
-        ' **>>** emojis\n'
+        ' **>>** mine\n'
         ' **>>** upload\n'
         ' **>>** ping\n'
         ' **>>** pong\n'
@@ -69,9 +69,12 @@ HELP['rate']=rendered_embed(Embed(title='rate',color=HELP_COLOR,
     description='Use this command to rate someone by @mentionning them.'
         ))
 
-HELP['emojis']=rendered_embed(Embed(title='emojis',color=HELP_COLOR,
-    description='Lists the guild\'s emojis'
-        ))
+HELP['mine']=rendered_embed(Embed(title='mine',color=HELP_COLOR,
+    description=( \
+        'Creates a minesweeper game.\n'
+        'U can ask the result as "text" too\n'
+        'Default bomb amount is 12, but you can set it between 8 and 24!'
+            )))
 
 HELP['dice']=rendered_embed(Embed(title='dice',color=HELP_COLOR,
     description='Throws a/more dices.'

@@ -85,10 +85,9 @@ async def parse_details_command(client,message,content):
                         text='Acces denied or not existing message'
                         break
                 else:
-                    if index>message.channel.MC_GC_LIMIT:
-                        if message.author is not client.owner:
-                            text='NO U will read that!'
-                            break
+                    if index>=message.channel.MC_GC_LIMIT and message.author is not client.owner:
+                        text='NO U will read that!'
+                        break
                     try:
                         target_message = await get_message(client,message.channel,index)
                     except IndexError:
