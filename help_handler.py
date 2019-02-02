@@ -42,7 +42,8 @@ def create_help_help():
         ' **>>** invite_delete_by_code\n'
         ' **>>** invite_clear\n'
         ' **>>** wait2where\n'
-        ' **>>** prune', #15
+        ' **>>** prune\n',
+        ' **>>** pinner',#16
             ]
 
     limit=len(pages)
@@ -213,6 +214,9 @@ HELP['prune']=rendered_embed(Embed(title='prune',color=HELP_COLOR,
     description='Use it to estimate pruned members. Using with an additional "prune" gonna exesute the prune too'
         ))
 
+HELP['pinner']=rendered_embed(Embed(title='pinner',color=HELP_COLOR,
+    description='Sends a message, and reaction on it can change it\'s pinned state.'
+        ))
 
 async def on_command_help(client,message,content):
     if 0<len(content)<50:

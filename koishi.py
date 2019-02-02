@@ -84,7 +84,46 @@ class schannel:
             
 schannel=schannel()
 
+class pinner:
+    reset=BUILTIN_EMOJIS['arrows_counterclockwise']
+    __slots__=['cancel', 'channel',]
+    def __init__(self,client,channel):
+        self.channel=channel
+        self.cancel=type(self)._default_cancel
+        waitfor_wrapper(client,self,240.)
         
+    async def start(self,wrapper):
+        client=wrapper.client
+
+        #we add the finishing details to the wrapper
+        wrapper.event=client.events.reaction_add
+        wrapper.target=message= await client.message_create(self.channel,content='Click on the emoji bellow')
+        
+        await client.reaction_add(message,self.reset)
+
+    async def __call__(self,wrapper,args):
+        emoji,user=args
+        if emoji is not self.reset or not self.channel.guild.permissions_for(user).can_administrator:
+            return
+        
+        client=wrapper.client
+        message=wrapper.target
+
+        try:
+            await client.reaction_delete(message,emoji,user)
+        except (Forbidden,HTTPException):
+            pass
+        
+        if message.pinned:
+            await client.message_unpin(message)
+        else:
+            await client.message_pin(message)
+
+        if wrapper.timeout<240.:
+            wrapper.timeout+=30.
+    
+    _default_cancel=pagination._default_cancel
+
 Koishi=Client(TOKEN,loop=1)
 Koishi.activity=activity_game.create(name='with Satori')
 
@@ -1301,6 +1340,14 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         text='\n'.join(result)
 
         await client.message_edit(message,text)
-            
+
+    @on_command.add('pinner')
+    async def on_command_pinner(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        if guild.permissions_for(message.author).can_administrator:
+            pinner(client,message.channel)
+        
 start_clients()
 
