@@ -83,7 +83,7 @@ def create_help_images():
     text=[
         'Searches image by tags, uploads 1 of the results.',
         'Use tag "count" to see how much possible images are with that tag combination',
-        'Use tag "vid" for gifs or "any" for images and gifs.',
+        'Use tag "pic" for pictures only, "vid" for gifs or "any" for any.',
         'Use tag "index ~~hex~~ *n*" to not get random result',
         'Count doesnt goes with index',
         f'Total images: {len(IMAGES)}. Total vids: {len(VIDS)}',
@@ -108,7 +108,7 @@ def create_help_images():
     
 create_help_images()
 
-RESERVED_TAGS={'any','vid','count','index','hex',}
+RESERVED_TAGS={'any','vid','pic','count','index','hex',}
 
 async def on_command_image(client,message,content):
     result=process_on_command_image(content)

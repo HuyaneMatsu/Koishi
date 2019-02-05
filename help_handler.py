@@ -42,8 +42,14 @@ def create_help_help():
         ' **>>** invite_delete_by_code\n'
         ' **>>** invite_clear\n'
         ' **>>** wait2where\n'
-        ' **>>** prune\n',
+        ' **>>** prune\n'
         ' **>>** pinner',#16
+
+        ' **>>** ban\n'
+        ' **>>** bans\n'
+        ' **>>** ban_get_by_id\n'
+        ' **>>** unban\n'
+        ' **>>** leave_guild\n', #5
             ]
 
     limit=len(pages)
@@ -56,7 +62,10 @@ def create_help_help():
 
 create_help_help()
 
-            
+HELP['help']=rendered_embed(Embed(title='rate',color=HELP_COLOR,
+    description='Shows the list of the commands.'
+        ))
+
 HELP['image']=rendered_embed(Embed(title='image',color=HELP_COLOR,description=''))
 
 HELP['upload']=rendered_embed(Embed(title='upload',color=HELP_COLOR,                           
@@ -207,7 +216,7 @@ HELP['invite_clear']=rendered_embed(Embed(title='invite_clear',color=HELP_COLOR,
         ))
 
 HELP['wait2where']=rendered_embed(Embed(title='wait2where',color=HELP_COLOR,
-    description='Waits on your answer at private and at the source channel. If u answers sends a message at the main channel.'
+    description='Waits on your answer at private and at the source channel. If you answers sends a message at the main channel.'
         ))
 
 HELP['prune']=rendered_embed(Embed(title='prune',color=HELP_COLOR,
@@ -218,6 +227,27 @@ HELP['pinner']=rendered_embed(Embed(title='pinner',color=HELP_COLOR,
     description='Sends a message, and reaction on it can change it\'s pinned state.'
         ))
 
+HELP['ban']=rendered_embed(Embed(title='ban',color=HELP_COLOR,
+    description='Bans the mentioned user with the reason following the name/mention.'
+        ))
+
+HELP['bans']=rendered_embed(Embed(title='bans',color=HELP_COLOR,
+    description='Shows the banned users at the guild'
+        ))
+
+HELP['bans']=rendered_embed(Embed(title='ban_get_by_id',color=HELP_COLOR,
+    description='Shows the banned user, with the id'
+        ))
+
+HELP['bans']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
+    description='Unbans the user. You can write reason after the user\'s id'
+        ))
+
+HELP['leave_guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
+    description='Leaves the guild. Guild owner only.'
+        ))
+
+        
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()

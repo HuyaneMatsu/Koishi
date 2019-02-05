@@ -12,11 +12,11 @@ from discord_uwu import Client,start_clients
 from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
 from discord_uwu.activity import activity_game
-from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify
-from discord_uwu.channel import Channel_voice,get_message_iterator
+from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify,is_id
+from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
-from discord_uwu.embed import Embed,Embed_image
+from discord_uwu.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
 from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,wait_for_message,wait_for_emoji
 from discord_uwu.futures import wait_one
 from discord_uwu.client_core import GC_client
@@ -28,7 +28,18 @@ from pers_data import TOKEN,PREFIX,TOKEN2
 from infos import infos
 from voice import voice
 #from battleships import battle_manager
-    
+
+def smart_join(list_,limit):
+    limit-=4
+    result=[]
+    for value in list_:
+        limit-=(len(value)+1)
+        if limit<0:
+            break
+        result.append(value)
+    result.append('...')
+    return ' '.join(result)
+
 class schannel:
     __slots__=['channel']
     def __init__(self):
@@ -79,8 +90,16 @@ class schannel:
 
     async def guild_user_add(self,client,guild,user):
         if self.channel is not None:
-            await client.message_create(self.channel,f'A user joined the guild:{guild.name} :  {user:f}')
+            await client.message_create(self.channel,f'A user joined the guild: {guild.name} :  {user:f}')
             
+    async def guild_ban_add(self,client,guild,user):
+        if self.channel is not None:
+            await client.message_create(self.channel,f'A user got banned from the guild: {guild.name} :  {user:f}')
+
+    async def guild_ban_delete(self,client,guild,user):
+        if self.channel is not None:
+            await client.message_create(self.channel,f'A user got unbanned from the guild: {guild.name} :  {user:f}')
+    
             
 schannel=schannel()
 
@@ -185,6 +204,8 @@ Koishi.events(schannel.unknown_role)
 Koishi.events(schannel.unknown_voice_client)
 Koishi.events(schannel.guild_user_delete)
 Koishi.events(schannel.guild_user_add)
+Koishi.events(schannel.guild_ban_add)
+Koishi.events(schannel.guild_ban_delete)
 
 with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
@@ -747,10 +768,10 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             await client.message_create(message.channel,embed=HELP['delete'])
         
 
-    @on_command.add('book')
-    async def on_command_book(client,message,content):
-        pages=({'content':'import base64\n\npage1/3'},{'content':'uwu\n\npage2/3'},{'content':'text2\n\npage3/3'})
-        pagination(client,message.channel,pages)
+##    @on_command.add('book')
+##    async def on_command_book(client,message,content):
+##        pages=({'content':'import base64\n\npage1/3'},{'content':'uwu\n\npage2/3'},{'content':'text2\n\npage3/3'})
+##        pagination(client,message.channel,pages)
 
 
     @on_command
@@ -767,17 +788,17 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 pass
         await client.message_create(message.channel,str(emoji)*5)
 
-    @on_command.add('embed')
-    async def on_command_embed(client,message,content):
-        content='Here\'s a hug for Nyansia ! OwO'
-        embed=Embed( \
-            title='Nyanmatsu hugs Nyansia',
-            url='https://discordapp.com',
-            color=Color.from_html('#ff4465'),
-                )
-        embed.image=Embed_image('https://cdn.discordapp.com/embed/avatars/0.png')
-        
-        await client.message_create(message.channel,content,embed)
+##    @on_command.add('embed')
+##    async def on_command_embed(client,message,content):
+##        content='Here\'s a hug for Nyansia ! OwO'
+##        embed=Embed( \
+##            title='Nyanmatsu hugs Nyansia',
+##            url='https://discordapp.com',
+##            color=Color.from_html('#ff4465'),
+##                )
+##        embed.image=Embed_image('https://cdn.discordapp.com/embed/avatars/0.png')
+##        
+##        await client.message_create(message.channel,content,embed)
 
     @on_command
     async def clear(client,message,content):
@@ -1011,13 +1032,31 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             max_use=1
         
         try:
-            invite = await client.invite_create(guild.system_channel,max_age,max_use)
+            invite = await client.invite_create_pref(guild,max_age,max_use)
         except Forbidden:
             return
                                                 
         channel = await client.channel_private_create(message.author)
         await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
 
+##    @on_command
+##    async def owner_invite(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##        
+##        guild=client.get_guild(content)
+##        
+##        if guild is None:
+##            return
+##        
+##        try:
+##            invite = await client.invite_create(guild.channels[0],0,1)
+##        except Forbidden:
+##            return
+##        
+##        channel = await client.channel_private_create(message.author)
+##        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
+        
     @on_command
     async def invite_by_code(client,message,content):
         guild=message.guild
@@ -1168,7 +1207,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     @on_command
     async def kick(client,message,content):
         guild=message.guild
-        if guild is None or not guild.permissions_for(message.author).can_administrator:
+        if guild is None or not guild.permissions_for(message.author).can_kick_user:
             return
 
         content=filter_content(content)
@@ -1185,10 +1224,12 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 await client.message_create(message.channel,'Could not find that user')
                 return
 
+        reason=smart_join(content,170)
+            
         if content:
-            reason=f'Exectued by {message.author:f}, reason: {" ".join(content)}'
+            reason=f'Executed by {message.author:f}, reason: {reason}'
         else:
-            reason=f'Exectued by {message.author:f}'
+            reason=f'Executed by {message.author:f}'
 
         await client.guild_user_kick(guild,user,reason)
         await client.message_create('ExeCUTEd')
@@ -1320,7 +1361,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             return
         finally:
             try:
-                await client.reaction_clear(message)
+                await client.reaction_delete_own(message,emoji)
             except (Forbidden,HTTPException):
                 pass
         
@@ -1348,6 +1389,195 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             return
         if guild.permissions_for(message.author).can_administrator:
             pinner(client,message.channel)
+
+    @on_command
+    async def bans(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        ban_data = await client.guild_bans(guild)
+
+        if not ban_data:
+            await client.message_create(message.channel,'None')
+            return
+            
+        ban_index=0
+        embeds=[]
+        maintext=f'Guild bans for {guild.name} {guild.id}:'
+        limit=len(ban_data)
+        index=0
+
+        while True:
+            field_index=0       
+            field_count=0
+            embed_length=len(maintext)
+            embed=Embed(title=maintext)
+            embeds.append(embed)
+            while True:
+                user,reason=ban_data[index]
+                if reason is None:
+                    reason='Not defined.'
+                name=f'{user:f} {user.id}'
+                embed_length+=len(reason)+len(name)
+                if embed_length>7900:
+                    break
+                embed.fields.append(Embed_field(name,reason))
+                field_count+=1
+                if field_count==25:
+                    break
+                index+=1
+                if index==limit:
+                    break
+            if index==limit:
+                break
+        
+        index=0
+        field_count=0
+        embed_ln=len(embeds)
+        result=[]
+        while True:
+            embed=embeds[index]
+            index+=1
+            embed.footer=Embed_footer(f'Page: {index}/{embed_ln}. Bans {field_count+1}-{field_count+len(embed.fields)}/{limit}')
+            field_count+=len(embed.fields)
+            
+            result.append({'embed':embed})
+            
+            if index==embed_ln:
+                break
+        
+        pagination(client,message.channel,result)
+
+    @on_command
+    async def ban(client,message,content):
+        guild=message.guild
+        if guild is None or not guild.permissions_for(message.author).can_ban_user:
+            return
+
+        content=filter_content(content)
+        if not content:
+            await client.message_create(message.channel,'And who, if i can ask so?')
+            return
+
+        name=content.pop(0)
+        if is_user_mention(name) and message.mentions:
+            user=message.mentions[0]
+        else:
+            user=guild.get_user(name)
+            if user is None:
+                await client.message_create(message.channel,'Could not find that user')
+                return
+        days=0
+        if content and content[0].isdecimal():
+            value=int(content[0])
+            if -1<value<8:
+                content.pop(0)
+                days=value
+
+        if content:
+            content.insert(0,'Executed by {message.author:f}, reason:')
+            reason=smart_join(content,255)
+        else:
+            reason=f'Executed by {message.author:f}'
+
+        await client.guild_user_ban(guild,user,days,reason)
+        await client.message_create('ExeCUTEd')
+
+    @on_command
+    async def ban_get_by_id(client,message,content):
+        guild=message.guild
+        if guild is None or not guild.permissions_for(message.author).can_ban_user:
+            return
+        
+        if not is_id(content):
+            message = await client.message_create('Pls type an id too')
+            await asyncio.sleep(30.,loop=client.loop)
+            try:
+                await client.message_delete(message)
+            except (Forbidden,HTTPException):
+                pass
+            return
+        
+        id_=int(content)
+        
+        try:
+            user,reason = await client.guild_ban_get_by_id(guild,id_)
+        except HTTPException:
+            embed=Embed(description=f'{guild.name} {guild.id} has no ban for id: {id_}')
+        except Forbidden:
+            return
+        else:
+            if reason is None:
+                embed=Embed()
+            else:
+                embed=Embed(title='Reason:',description=reason)
+            embed.author=Embed_author(user.avatar_url_as(size=64),user.full_name)
+
+        await client.message_create(message.channel,embed=embed)
+
+    @on_command
+    async def unban(client,message,content):
+        guild=message.guild
+        if guild is None or not guild.permissions_for(message.author).can_ban_user or not content:
+            return
+        
+        content=filter_content(content)
+        value=content.pop(0)
+        
+        if not is_id(value):
+            message = await client.message_create('Pls type an id too')
+            await asyncio.sleep(30.,loop=client.loop)
+            try:
+                await client.message_delete(message)
+            except (Forbidden,HTTPException):
+                pass
+            return
+
+        id_=int(value)
+
+        try:
+            await client.guild_user_unban_by_id(guild,id_,reason)
+        except HTTPException:
+            embed=Embed(description=f'{guild.name} {guild.id} has no ban for id: {id_}')
+        except Forbidden:
+            return
+        else:
+            user = await client.user_get_by_id(id_)
+            if len(content):
+                embed=Embed('Unbanned with reason:',smart_join(content.split(),255))
+            else:
+                embed=Embed('Unbanned')
+            embed.author=Embed_author(user.avatar_url_as(size=64),user.full_name)
+        await client.message_create(message.channel,embed=embed)
+
+
+    @on_command
+    async def leave_guild(client,message,content):
+        guild=message.guild
+        if guild is None or guild.owner is not message.author:
+            return
+        await client.guild_leave(guild)
+
+##    @on_command
+##    async def guild_delete(client,message,content):
+##        guild=message.guild
+##        if guild is None or guild.owner is not client or message.author is not client.owner:
+##            return
+##        await client.guild_delete(guild)
+
+##    @on_command
+##    async def guild_create(client,message,content):
+##        if message.author is not client.owner and len(client.guilds)>9:
+##            return
+##        guild = await client.guild_create(name='uwu yayyyy',
+##            channels=[cr_pg_channel_object(name='channel1',type_=Channel_text),
+##                      cr_pg_channel_object(name='channel2',type_=Channel_text),
+##                      cr_pg_channel_object(name='channel3',type_=Channel_text),])
+##
+##        await asyncio.sleep(2.,loop=client.loop) #wait for dispatch
+##        invite = await client.invite_create_pref(guild,0,0)
+##        channel = await client.channel_private_create(message.author)
+##        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
         
 start_clients()
 

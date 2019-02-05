@@ -16,7 +16,7 @@ infos=eventlist()
 @infos.add('list')
 async def parse_list_command(client,message,content):
     guild=message.guild
-    if guild is None:
+    if guild is None or not self.channel.guild.permissions_for(user).can_administrator:
         return
     key=''
     text=''
@@ -58,7 +58,7 @@ async def parse_list_command(client,message,content):
 @infos.add('details')
 async def parse_details_command(client,message,content):
     guild=message.guild
-    if guild is None:
+    if guild is None or not self.channel.guild.permissions_for(user).can_administrator:
         return
     text=''
     key=''
@@ -280,16 +280,8 @@ async def user_info(client,message,content):
             text.append(f'Nick: {profile.nick}')
         text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
         
-    embed=Embed( \
-        title       = f'{target:f}',
-        description = '\n'.join(text),
-        color       = target.color(guild),
-            )
-    embed.thumbnail=Embed_thumbnail( \
-        url         = target.avatar_url_as(size=128),
-        height      = 128,
-        width       = 128,
-            )
+    embed=Embed(f'{target:f}','\n'.join(text),target.color(guild))
+    embed.thumbnail=Embed_thumbnail(url=target.avatar_url_as(size=64))
 
     await client.message_create(message.channel,embed=embed)
 

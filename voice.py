@@ -89,7 +89,7 @@ async def voice(client,message,content):
                 with client.keep_typing(message.channel,7200.):
                     source = await player.YTaudio(client.loop,' '.join(content))
             except player.DownloadError as err:
-                text=err.args[0]
+                text='Error meanwhile downloading'
             else:
                 if voice_client.append(source):
                     text=f'Now playing {source.title}!'
