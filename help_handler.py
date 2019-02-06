@@ -108,8 +108,9 @@ HELP['emoji']=rendered_embed(Embed(title='emoji',color=HELP_COLOR,
 HELP['edit']=rendered_embed(Embed(title='edit',color=HELP_COLOR,  
     description= ( \
         'You can edit:\n'
-        '**>>** "user"\n'
-        '**>>** "role"'
+        ' **>>** "user"\n'
+        ' **>>** "role"\n'
+        ' **>>** "emoji"'
             )))
 
 HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,
@@ -132,27 +133,28 @@ HELP['move']=rendered_embed(Embed(title='move',color=HELP_COLOR,
 HELP['delete']=rendered_embed(Embed(title='delete',color=HELP_COLOR,
     description=( \
         'Currently can delete:\n'
-        '**>>** role <name/mention>'
+        ' **>>** "role" <name/mention>\n'
+        ' **>>** "emoji" <name/emoji>'
             )))
 
 HELP['list']=rendered_embed(Embed(title='list',color=HELP_COLOR,
     description=( \
         'Lits a specific type of object at the guild, it can be:'
-        '**>>** "roles"\n'
-        '**>>** "emojis"\n'
-        '**>>** "channels"\n'
-        '**>>** "pins"'
+        ' **>>** "roles"\n'
+        ' **>>** "emojis"\n'
+        ' **>>** "channels"\n'
+        ' **>>** "pins"'
             )))
 
 HELP['details']=rendered_embed(Embed(title='details',color=HELP_COLOR,
     description=( \
         'Shows details about a specific object, it can be:\n'
-        '**>>** "message" +index'
-        '**>>** "guild"\n'
-        '**>>** "pin" + index\n'
-        '**>>** "role"\n'
-        '**>>** "channel" <> <ow> <>\n'
-        '**>>** "permission" <channel> <> <user> <>'
+        ' **>>** "message" +index'
+        ' **>>** "guild"\n'
+        ' **>>** "pin" + index\n'
+        ' **>>** "role"\n'
+        ' **>>** "channel" <> <ow> <>\n'
+        ' **>>** "permission" <channel> <> <user> <>'
             )))
 
 HELP['message_me']=rendered_embed(Embed(title='message_me',color=HELP_COLOR,

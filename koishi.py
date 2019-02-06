@@ -398,6 +398,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         text=''
         content=filter_content(content)
         key=''
+        reason=''
+        
         while True:
             if not guild.permissions_for(message.author).can_administrator:
                 text='You do not have permissions granted to use this command'
@@ -494,6 +496,16 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                             new_roles.append(role)
                             result['roles']=new_roles
                         continue
+
+                    if name=='reason':
+                        if reason:
+                            value='Reason key can not be duped.'
+                        reason=value
+                        continue
+
+                    text=f'Invalid attribute to change {name}. You can change "nick", "deaf", "mute", "voice channel", "role" of a user. Additionally you can add "reason" too.'
+                    break
+                
                 if not text:
                     text=(user,result)
                 break
@@ -563,17 +575,103 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                             continue
                         text='Not predefined permission name'
                         break
+
+                    if name=='reason':
+                        if reason:
+                            value='Reason key can not be duped.'
+                        reason=value
+                        continue
+
+                    text='Invalid attribute to change. You can hcnage a role\'s name, "separated" and "mentonable" "value", "color" and "permissions" (to preset "voice", "text", "none", "general".'
+                    break
+                
                 if not text: 
                     text=(role,result)
                 break
+
+            if key=='emoji':
+                if not len(content)&1:
+                    text='After emoji pls type key-value pairs'
+                    break
+                if len(content)==1:
+                    text='Done!!'
+                    break
+
+                value=content.pop(0)
+                
+                emoji=parse_emoji(value)
+                if emoji:
+                    try:
+                        emoji=guild.emojis[emoji.id]
+                    except KeyError:
+                        text='Can not edit that emoji'
+                        break
+                else:
+                    emoji=guild.get_emoji(value)
+                    if emoji is None:
+                        text='Thats not an emoji'
+                        break
+
+                roles=[]
+                ename=None
+
+                while content:
+                    name=content.pop(0)
+                    value=content.pop(0)
+
+                    if name=='name':
+                        if not (1<len(value)<33):
+                            text='Name too long or short'
+                            break
+                        
+                        if ename is not None:
+                            text='Name cannot be duped only role.'
+
+                        ename=value
+                        continue
+
+                    if name=='role':
+                        role=guild.get_role(value)
+                        if role is None:
+                            text=f'Cound not find role {value}.'
+                            break
+                        
+                        if role in roles:
+                            text='You cant add 1 role more times'
+                            break
+
+                        roles.append(role)
+                        continue
+
+                    if name=='reason':
+                        if reason:
+                            value='Reason key can not be duped.'
+                        reason=value
+                        continue
+
+                    text=f'Invalid value to change {name}, you can change an emoji\'s "name", "role" (more too) and give a "reason" too.'
+                    break
+
+
+                if not text: 
+                    text=(emoji,ename,roles)
+                break
+                
+                
+            
             break
         if type(text) is not str:
             try:
-                reason=f'Executed by {message.author:f}'
+                if reason:
+                    reason=smart_join([f'Executed by {message.author:f}, with reason:',*reason.split()],255)
+                else:
+                    reason=f'Executed by {message.author:f}'
                 if key=='user':
                     await client.guild_user_edit(guild,text[0],**text[1],reason=reason)
                 elif key=='role':
                     await client.role_edit(text[0],**text[1],reason=reason)
+                elif key=='emoji':
+                    await client.emoji_edit(*text,reason=reason)
             except Forbidden:
                 text='Access denied'
             else:
@@ -694,8 +792,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     break
                 text=(user,channel)
                 
-                    
             break
+        
         if type(text) is not str:
             try:
                 reason=f'Executed by {message.author:f}'
@@ -727,45 +825,69 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             if not guild.permissions_for(message.author).can_administrator:
                 text='You do not have permissions granted to use this command'
                 break
-            if not content:
+            if len(content) not in (2,3):
+                text='type, value, then reason if you wish to.'
                 break
+            
             key=content.pop(0)
+            value=content.pop(0)
             if key=='role':
-                if len(content)!=1:
-                    text='Role name only!'
-                    break
-                role=guild.get_role(content[0])
+                role=guild.get_role(value)
                 if role is None:
                     text='Role not found'
                     break
                 text=role
                 break
             if key=='channel':
-                if len(content)!=1:
-                    text='Channel name only!'
-                    break
-                channel=guild.get_channel(content[0])
+                channel=guild.get_channel(value)
                 if channel is None:
                     text='Channel not found'
                     break
                 text=channel
                 break
+            if key=='emoji':
+                text=parse_emoji(value)
+                if text:
+                    try:
+                        text=guild.emojis[text.id]
+                    except KeyError:
+                        text='Can not edit that emoji'
+                        break
+                else:
+                    text=guild.get_emoji(value)
+                    if text is None:
+                        text='Thats not an emoji'
+                        break
+
+                break
+            
             break
-        if type(text) is not str:
-            try:
-                reason=f'Executed by {message.author:f}'
-                if key=='role':
-                    await client.role_delete(text,reason)
-                elif key=='channel':
-                    await client.channel_delete(text,reason)                    
-            except Forbidden:
-                text='Access denied!'
+        
+        if type(text) is str:
+            if text:
+                await client.message_create(message.channel,text)
             else:
-                text='yayyyy'
-        if text:
-            await client.message_create(message.channel,text)
+                await client.message_create(message.channel,embed=HELP['delete'])
+            return
+        
+        if content:
+            reason=smart_join([f'Executed by {message.author:f}, with reason:',*content[0].split()],255)
         else:
-            await client.message_create(message.channel,embed=HELP['delete'])
+            reason=f'Executed by {message.author:f}'
+            
+        try:
+            if key=='role':
+                await client.role_delete(text,reason)
+            elif key=='channel':
+                await client.channel_delete(text,reason)
+            elif key=='emoji':
+                await client.emoji_delete(text,reason)
+        except Forbidden:
+            text='Access denied!'
+        else:
+            text='yayyyy'
+        await client.message_create(message.channel,text)
+            
         
 
 ##    @on_command.add('book')
