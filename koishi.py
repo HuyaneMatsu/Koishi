@@ -21,9 +21,10 @@ from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_
 from discord_uwu.futures import wait_one
 from discord_uwu.client_core import GC_client
 from discord_uwu.prettyprint import pchunkify
+from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 
 from image_handler import on_command_upload,on_command_image
-from help_handler import on_command_help,HELP
+from help_handler import on_command_help,HELP,invalid_command
 from pers_data import TOKEN,PREFIX,TOKEN2
 from infos import infos
 from voice import voice
@@ -103,45 +104,45 @@ class schannel:
             
 schannel=schannel()
 
-class pinner:
-    reset=BUILTIN_EMOJIS['arrows_counterclockwise']
-    __slots__=['cancel', 'channel',]
-    def __init__(self,client,channel):
-        self.channel=channel
-        self.cancel=type(self)._default_cancel
-        waitfor_wrapper(client,self,240.)
-        
-    async def start(self,wrapper):
-        client=wrapper.client
-
-        #we add the finishing details to the wrapper
-        wrapper.event=client.events.reaction_add
-        wrapper.target=message= await client.message_create(self.channel,content='Click on the emoji bellow')
-        
-        await client.reaction_add(message,self.reset)
-
-    async def __call__(self,wrapper,args):
-        emoji,user=args
-        if emoji is not self.reset or not self.channel.guild.permissions_for(user).can_administrator:
-            return
-        
-        client=wrapper.client
-        message=wrapper.target
-
-        try:
-            await client.reaction_delete(message,emoji,user)
-        except (Forbidden,HTTPException):
-            pass
-        
-        if message.pinned:
-            await client.message_unpin(message)
-        else:
-            await client.message_pin(message)
-
-        if wrapper.timeout<240.:
-            wrapper.timeout+=30.
-    
-    _default_cancel=pagination._default_cancel
+##class pinner:
+##    reset=BUILTIN_EMOJIS['arrows_counterclockwise']
+##    __slots__=['cancel', 'channel',]
+##    def __init__(self,client,channel):
+##        self.channel=channel
+##        self.cancel=type(self)._default_cancel
+##        waitfor_wrapper(client,self,240.)
+##        
+##    async def start(self,wrapper):
+##        client=wrapper.client
+##
+##        #we add the finishing details to the wrapper
+##        wrapper.event=client.events.reaction_add
+##        wrapper.target=message= await client.message_create(self.channel,content='Click on the emoji bellow')
+##        
+##        await client.reaction_add(message,self.reset)
+##
+##    async def __call__(self,wrapper,args):
+##        emoji,user=args
+##        if emoji is not self.reset or not self.channel.guild.permissions_for(user).can_administrator:
+##            return
+##        
+##        client=wrapper.client
+##        message=wrapper.target
+##
+##        try:
+##            await client.reaction_delete(message,emoji,user)
+##        except (Forbidden,HTTPException):
+##            pass
+##        
+##        if message.pinned:
+##            await client.message_unpin(message)
+##        else:
+##            await client.message_pin(message)
+##
+##        if wrapper.timeout<240.:
+##            wrapper.timeout+=30.
+##    
+##    _default_cancel=pagination._default_cancel
 
 Koishi=Client(TOKEN,loop=1)
 Koishi.activity=activity_game.create(name='with Satori')
@@ -215,6 +216,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     on_command(on_command_image,'image')
     on_command(on_command_upload,'upload')
     on_command(on_command_help,'help')
+    on_command(invalid_command)
+    
     #on_command(battle_manager,case='bs')
     
     @on_command
@@ -237,13 +240,6 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         
         if text:
             await client.message_create(message.channel,text)
-
-
-    @on_command
-    async def invalid_command(client,message,command,content):
-        message = await client.message_create(message.channel,f'Invalid command `{command}`, try using: `{PREFIX}help`')
-        await asyncio.sleep(30.)
-        await client.message_delete(message,reason='Invalid command messages expire after 30s')
 
     @on_command
     async def rate(client,message,content):
@@ -297,14 +293,14 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         await client.message_create(message.channel,text)
 
 
-    @on_command.add('print')
-    async def on_print_command(client,message,content):
-        try:
-            await client.message_delete(message,reason='Used print command')
-        except Forbidden:
-            pass
-        else:
-            await client.message_create(message.channel,content)
+##    @on_command.add('print')
+##    async def on_print_command(client,message,content):
+##        try:
+##            await client.message_delete(message,reason='Used print command')
+##        except Forbidden:
+##            pass
+##        else:
+##            await client.message_create(message.channel,content)
 
     @on_command
     async def mention_event(client,message):
@@ -315,16 +311,16 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
         await client.message_create(message.channel,result)
 
-    @on_command
-    async def ping(client,message,content):
-        guild=message.channel.guild
-        if guild is not None:
-            user=guild.get_user(content)
-            if user is not None:
-                await client.message_create(message.channel,user.mention_at(guild))
+##    @on_command
+##    async def pong(client,message,content):
+##        guild=message.channel.guild
+##        if guild is not None:
+##            user=guild.get_user(content)
+##            if user is not None:
+##                await client.message_create(message.channel,user.mention_at(guild))
 
     @on_command
-    async def pong(client,message,content):
+    async def ping(client,message,content):
         await client.message_create(message.channel,f'{int(client.websocket.kokoro.latency*1000.)} ms')
                               
     @on_command.add('emoji')
@@ -342,45 +338,45 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         if emoji:
             await client.message_create(message.channel,str(emoji))
 
-    @on_command
-    async def pm(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-        content=filter_content(content)
-        while True:
-            if len(content)!=1:
-                text='The 1st line must contain a mention/username of the "lucky" person.'
-                break
-            content=content[0]
-            if message.mentions and is_user_mention(content):
-                user=message.mentions[0]
-            else:
-                user=guild.get_user(content)
-                if user is None:
-                    text='Could not find that user!'
-                    break
-
-            index=message.content.find('\n')+1
-            if not index:
-                text='Unable to send empty message'
-                break
-            text=message.content[index:]
-            if not text:
-                text='Unable to send empty message'
-                break
-            if user is client:
-                text='Ok, i got it!'
-                break
-            channel = await client.channel_private_create(user)
-            try:
-                await client.message_create(channel,text)
-                text='Big times! Message sent!'
-            except Forbidden:
-                text='Access denied'
-            break
-                                    
-        await client.message_create(message.channel,text)
+##    @on_command
+##    async def pm(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        content=filter_content(content)
+##        while True:
+##            if len(content)!=1:
+##                text='The 1st line must contain a mention/username of the "lucky" person.'
+##                break
+##            content=content[0]
+##            if message.mentions and is_user_mention(content):
+##                user=message.mentions[0]
+##            else:
+##                user=guild.get_user(content)
+##                if user is None:
+##                    text='Could not find that user!'
+##                    break
+##
+##            index=message.content.find('\n')+1
+##            if not index:
+##                text='Unable to send empty message'
+##                break
+##            text=message.content[index:]
+##            if not text:
+##                text='Unable to send empty message'
+##                break
+##            if user is client:
+##                text='Ok, i got it!'
+##                break
+##            channel = await client.channel_private_create(user)
+##            try:
+##                await client.message_create(channel,text)
+##                text='Big times! Message sent!'
+##            except Forbidden:
+##                text='Access denied'
+##            break
+##                                    
+##        await client.message_create(message.channel,text)
         
     @on_command
     async def message_me(client,message,content):
@@ -499,7 +495,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
                     if name=='reason':
                         if reason:
-                            value='Reason key can not be duped.'
+                            text='Reason key can not be duped.'
                         reason=value
                         continue
 
@@ -578,7 +574,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
                     if name=='reason':
                         if reason:
-                            value='Reason key can not be duped.'
+                            text='Reason key can not be duped.'
                         reason=value
                         continue
 
@@ -633,7 +629,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     if name=='role':
                         role=guild.get_role(value)
                         if role is None:
-                            text=f'Cound not find role {value}.'
+                            text=f'Could not find role {value}.'
                             break
                         
                         if role in roles:
@@ -645,7 +641,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
                     if name=='reason':
                         if reason:
-                            value='Reason key can not be duped.'
+                            text='Reason key can not be duped.'
                         reason=value
                         continue
 
@@ -674,6 +670,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     await client.emoji_edit(*text,reason=reason)
             except Forbidden:
                 text='Access denied'
+            except ValueError as err:
+                text=err.args[0]
             else:
                 text='OwO'
                 
@@ -896,19 +894,19 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##        pagination(client,message.channel,pages)
 
 
-    @on_command
-    async def satania(client,message,content):
-        message = await client.message_create(message.channel,'waiting for satania emote')
-        try:
-            emoji,user = await wait_for_emoji(client,message,lambda emoji,user:('satania' in emoji.name.lower()),60.)
-        except TimeoutError:
-            return
-        finally:
-            try:
-                await client.message_delete(message)
-            except (Forbidden,HTTPException):
-                pass
-        await client.message_create(message.channel,str(emoji)*5)
+##    @on_command
+##    async def satania(client,message,content):
+##        message = await client.message_create(message.channel,'waiting for satania emote')
+##        try:
+##            emoji,user = await wait_for_emoji(client,message,lambda emoji,user:('satania' in emoji.name.lower()),60.)
+##        except TimeoutError:
+##            return
+##        finally:
+##            try:
+##                await client.message_delete(message)
+##            except (Forbidden,HTTPException):
+##                pass
+##        await client.message_create(message.channel,str(emoji)*5)
 
 ##    @on_command.add('embed')
 ##    async def on_command_embed(client,message,content):
@@ -1026,6 +1024,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         text=''
         content=filter_content(content)
         key=''
+        reason=''
+        
         while True:
             if not guild.permissions_for(message.author).can_administrator:
                 text='You do not have permissions granted to use this command'
@@ -1038,16 +1038,22 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             
             if key=='role':
                 limit=len(content)
-                if (limit&1):
-                    text='Key, value pairs.'
-                    break
-                if limit==1:
-                    text='And anything to change?'
+                if limit&1==0:
+                    text='role name, then key-value pairs.'
                     break
 
                 result={}
                 
-                index=0
+                value=content[0]
+                
+                role=guild.get_role(name)
+                if role is not None:
+                    text='A role already has that name!'
+                    break
+                
+                result[name]=value
+                    
+                index=1
                 while index!=limit:
                     name=content[index]
                     index+=1
@@ -1057,14 +1063,6 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     if name in result:
                         text=f'Dupe key: "{name}"'
                         break
-
-                    if name=='name':
-                        role=guild.get_role(name)
-                        if role is not None:
-                            text='A role already hss that name!'
-                            break
-                        result[name]=value
-                        continue
                         
                     if name in ('mentionable','separated'):
                         value=value.lower()
@@ -1101,19 +1099,132 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                             continue
                         text='Not predefined permission name'
                         break
+
+                    if name=='reason':
+                        if reason:
+                            text='Reason key can not be duped.'
+                        reason=value
+                        continue
+                    
+                    text=f'You can not set {key}, but you can set additionally: "mentionable", "separated",' \
+                          '"color" <html format>, "permissions" <voice/text/nne/genera>, "reason" for now'
+                    break
+                
                 if not text: 
                     text=result
+                    
                 break
+            if key=='emoji':
+                limit=len(content)
+                
+                if limit&1==0:
+                    text='Emoji name followed by key - value pairs (role <rolename> / reason <reason>)'
+                
+                value=content[0]
+                
+                if not (1<len(value)<33):
+                    text='Too short or too long name'
+                    break
+                
+                count_animated=0
+                for emoji in guild.emojis.values():
+                    if emoji.name==value:
+                        exists=True
+                        break
+                    if emoji.animated:
+                        count_animated+=1
+                else:
+                    exists=False
+
+                if exists:
+                    text='An emoji already exists with that name at the guild'
+                    break
+                
+                if not message.attachments:
+                    text='The message has no attachments'
+                    break
+
+                ext=os.path.splitext(message.attachments[0].filename)[1]
+                if len(ext)<2:
+                    text='Missing extension'
+                    break
+                ext=ext[1:].lower()
+                
+                if ext in VALID_ICON_FORMATS:
+                    if len(guild.emojis)-count_animated==50:
+                        text='The guild already reached the limit of non animated emojis'
+                        break
+                    
+                elif ext in VALID_ICON_FORMATS_EXTENDED:
+                    if count_animated==50:
+                        text='The guild already reached the limit of animated emojis'
+                        break
+                else:
+                    text='Invalid format'
+                    break
+
+                roles=[]
+                ename=value
+
+                index=1
+                while index!=limit:
+                    name=content[index]
+                    index+=1
+                    value=content[index]
+                    index+=1
+                    
+                    if name=='role':
+                        role=guild.get_role(value)
+                        if role is None:
+                            text=f'Could not find role: {value}.'
+                            break
+                        
+                        if role in roles:
+                            text='You cant add 1 role more times'
+                            break
+
+                        roles.append(role)
+                        continue
+
+                    if name=='reason':
+                        if reason:
+                            text='Reason key can not be duped.'
+                        reason=value
+                        continue
+
+                    text=f'Invalid value {name}, you can use "role" (more too) and give a "reason" too.'
+                    break
+
+                if text:
+                    break
+                
+                image = await client.download_attachment(message.attachments[0])
+                
+                text=(ename,image,roles)
+
+                break
+                
             break
+        
         if type(text) is not str:
             try:
-                reason=f'Executed by {message.author:f}'
+                if reason:
+                    reason=smart_join([f'Executed by {message.author:f}, with reason:',*reason.split()],255)
+                else:
+                    reason=f'Executed by {message.author:f}'
+                
                 if key=='role':
                     await client.role_create(guild,**text,reason=reason)
+                elif key=='emoji':
+                    await client.emoji_create(guild,*text,reason)
+                    
             except Forbidden:
                 text='Access denied!'
+            except ValueError as err:
+                text=err.args[0]
             else:
                 text='yayyyy'
+        
         if text:
             await client.message_create(message.channel,text)
         else:
@@ -1284,30 +1395,30 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##            
 ##        await client.message_create(message.channel,text)
             
-    @on_command
-    async def wait2where(client,message,content):
-        channel=message.channel
-        private = await client.channel_private_create(message.author)
-        await client.message_create(channel,'Waiting on any message from you here and at dm')
-
-        
-        future=wait_one(client.loop)
-        case=lambda message,author=message.author:message.author is author
-        event=client.events.message_create
-        
-        wrapper1=waitfor_wrapper(client,wait_and_continue(future,case,channel,event),60.)
-        wrapper2=waitfor_wrapper(client,wait_and_continue(future,case,private,event),60.)
-        
-        try:
-            result = await future
-        except TimeoutError:
-            await client.message_create(channel,'Time is over')
-            return
-        
-        wrapper1.cancel()
-        wrapper2.cancel()
-        
-        await client.message_create(channel,result.content)
+##    @on_command
+##    async def wait2where(client,message,content):
+##        channel=message.channel
+##        private = await client.channel_private_create(message.author)
+##        await client.message_create(channel,'Waiting on any message from you here and at dm')
+##
+##        
+##        future=wait_one(client.loop)
+##        case=lambda message,author=message.author:message.author is author
+##        event=client.events.message_create
+##        
+##        wrapper1=waitfor_wrapper(client,wait_and_continue(future,case,channel,event),60.)
+##        wrapper2=waitfor_wrapper(client,wait_and_continue(future,case,private,event),60.)
+##        
+##        try:
+##            result = await future
+##        except TimeoutError:
+##            await client.message_create(channel,'Time is over')
+##            return
+##        
+##        wrapper1.cancel()
+##        wrapper2.cancel()
+##        
+##        await client.message_create(channel,result.content)
 
     @on_command
     async def prune(client,message,content):
@@ -1371,16 +1482,16 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         await client.message_create(message.channel,f'If i can have a guess {target.mention_at(guild)}\' client\'s language is: {target.language}')
 
     mine_mine_clear=( \
-        BUILTIN_EMOJIS['white_large_square'].name,
-        BUILTIN_EMOJIS['one'].name,
-        BUILTIN_EMOJIS['two'].name,
-        BUILTIN_EMOJIS['three'].name,
-        BUILTIN_EMOJIS['four'].name,
-        BUILTIN_EMOJIS['five'].name,
-        BUILTIN_EMOJIS['six'].name,
-        BUILTIN_EMOJIS['seven'].name,
-        BUILTIN_EMOJIS['eight'].name,
-        BUILTIN_EMOJIS['bomb'].name,
+        BUILTIN_EMOJIS['white_large_square'].as_emoji,
+        BUILTIN_EMOJIS['one'].as_emoji,
+        BUILTIN_EMOJIS['two'].as_emoji,
+        BUILTIN_EMOJIS['three'].as_emoji,
+        BUILTIN_EMOJIS['four'].as_emoji,
+        BUILTIN_EMOJIS['five'].as_emoji,
+        BUILTIN_EMOJIS['six'].as_emoji,
+        BUILTIN_EMOJIS['seven'].as_emoji,
+        BUILTIN_EMOJIS['eight'].as_emoji,
+        BUILTIN_EMOJIS['bomb'].as_emoji,
             )
     
     mine_mine=tuple(f'||{e}||' for e in mine_mine_clear)
@@ -1504,13 +1615,13 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 
         await client.message_edit(message,text)
 
-    @on_command.add('pinner')
-    async def on_command_pinner(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-        if guild.permissions_for(message.author).can_administrator:
-            pinner(client,message.channel)
+##    @on_command.add('pinner')
+##    async def on_command_pinner(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if guild.permissions_for(message.author).can_administrator:
+##            pinner(client,message.channel)
 
     @on_command
     async def bans(client,message,content):

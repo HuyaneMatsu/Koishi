@@ -16,7 +16,7 @@ infos=eventlist()
 @infos.add('list')
 async def parse_list_command(client,message,content):
     guild=message.guild
-    if guild is None or not self.channel.guild.permissions_for(user).can_administrator:
+    if guild is None or not guild.permissions_for(message.author).can_administrator:
         return
     key=''
     text=''
@@ -58,7 +58,7 @@ async def parse_list_command(client,message,content):
 @infos.add('details')
 async def parse_details_command(client,message,content):
     guild=message.guild
-    if guild is None or not self.channel.guild.permissions_for(user).can_administrator:
+    if guild is None or not guild.permissions_for(message.author).can_administrator:
         return
     text=''
     key=''

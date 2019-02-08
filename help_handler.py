@@ -10,47 +10,22 @@ HELP_COLOR=Color.from_html('#ffd21e')
 HELPHELP=[]
 
 def create_help_help():
-    pages=[ \
-        ' **>>** help\n'
-        ' **>>** image\n'
-        ' **>>** rate\n'
-        ' **>>** dice\n'
-        ' **>>** mine\n'
-        ' **>>** upload\n'
-        ' **>>** ping\n'
-        ' **>>** pong\n'
-        ' **>>** emoji\n'
-        ' **>>** move\n'
-        ' **>>** edit\n'
-        ' **>>** delete\n'
-        ' **>>** details\n'
-        ' **>>** list\n'
-        ' **>>** message_me\n'
-        ' **>>** pm', #16
+    HELPHELP.clear()
 
-        ' **>>** clear\n'
-        ' **>>** hug\n'
-        ' **>>** say\n'
-        ' **>>** waitemoji\n'
-        ' **>>** create\n'
-        ' **>>** subscribe\n'
-        ' **>>** type\n'
-        ' **>>** user\n'
-        ' **>>** invite\n'
-        ' **>>** invites\n'
-        ' **>>** invite_by_code\n'
-        ' **>>** invite_delete_by_code\n'
-        ' **>>** invite_clear\n'
-        ' **>>** wait2where\n'
-        ' **>>** prune\n'
-        ' **>>** pinner',#16
+    pages=[]
+    part=[]
+    index=0
+    for name in HELP:
+        if index==16:
+            pages.append('\n'.join(part))
+            part.clear()
+            index=0
+        part.append(f' **>>** {name}')
+        index+=1
 
-        ' **>>** ban\n'
-        ' **>>** bans\n'
-        ' **>>** ban_get_by_id\n'
-        ' **>>** unban\n'
-        ' **>>** leave_guild\n', #5
-            ]
+    pages.append('\n'.join(part))
+
+    del part
 
     limit=len(pages)
     index=0
@@ -59,8 +34,6 @@ def create_help_help():
         index+=1
         page.fields.append(Embed_field(name=f'Use {PREFIX}help *command* for more information.',value=f'page {index}/{limit}'))
         HELPHELP.append({'embed':rendered_embed(page)})
-
-create_help_help()
 
 HELP['help']=rendered_embed(Embed(title='rate',color=HELP_COLOR,
     description='Shows the list of the commands.'
@@ -90,11 +63,11 @@ HELP['dice']=rendered_embed(Embed(title='dice',color=HELP_COLOR,
     description='Throws a/more dices.'
         ))
 
-HELP['ping']=rendered_embed(Embed(title='ping',color=HELP_COLOR,
-    description='Searches a user by name at the guild, and pings is'
-        ))
+##HELP['pong']=rendered_embed(Embed(title='ping',color=HELP_COLOR,
+##    description='Searches a user by name at the guild, and pings is'
+##        ))
 
-HELP['pong']=rendered_embed(Embed(title='pong',color=HELP_COLOR,
+HELP['ping']=rendered_embed(Embed(title='pong',color=HELP_COLOR,
     description='Returns the client\s ping in ms'
         ))
 
@@ -161,9 +134,9 @@ HELP['message_me']=rendered_embed(Embed(title='message_me',color=HELP_COLOR,
     description='Sends you something nice'
         ))
 
-HELP['pm']=rendered_embed(Embed(title='pm',color=HELP_COLOR,
-    description='Sends a private message to the user with the text after the line break'
-        ))
+##HELP['pm']=rendered_embed(Embed(title='pm',color=HELP_COLOR,
+##    description='Sends a private message to the user with the text after the line break'
+##        ))
 
 HELP['clear']=rendered_embed(Embed(title='clear',color=HELP_COLOR,
     description='Clears the set amount of messages (default=100)'
@@ -178,12 +151,15 @@ HELP['say']=rendered_embed(Embed(title='say',color=HELP_COLOR,
         ))
 
 HELP['waitemoji']=rendered_embed(Embed(title='waitemoji',color=HELP_COLOR,
-    description='Waits fo an emoji at the channel'
+    description='Waits for an emoji at the channel'
         ))
 
 HELP['create']=rendered_embed(Embed(title='create',color=HELP_COLOR,
-    description='Creates a new "role"'
-        ))
+    description=( \
+        'You can create a new:'
+        ' **>>** "role"'
+        ' **>>** "emoji"'
+            )))
 
 HELP['subscribe']=rendered_embed(Embed(title='subscribe',color=HELP_COLOR,
     description='Subscribes u to Announcements role, if possible'
@@ -217,17 +193,17 @@ HELP['invite_clear']=rendered_embed(Embed(title='invite_clear',color=HELP_COLOR,
     description='Deletes every invite of the guild, might take some time'
         ))
 
-HELP['wait2where']=rendered_embed(Embed(title='wait2where',color=HELP_COLOR,
-    description='Waits on your answer at private and at the source channel. If you answers sends a message at the main channel.'
-        ))
+##HELP['wait2where']=rendered_embed(Embed(title='wait2where',color=HELP_COLOR,
+##    description='Waits on your answer at private and at the source channel. If you answers sends a message at the main channel.'
+##        ))
 
 HELP['prune']=rendered_embed(Embed(title='prune',color=HELP_COLOR,
     description='Use it to estimate pruned members. Using with an additional "prune" gonna exesute the prune too'
         ))
 
-HELP['pinner']=rendered_embed(Embed(title='pinner',color=HELP_COLOR,
-    description='Sends a message, and reaction on it can change it\'s pinned state.'
-        ))
+##HELP['pinner']=rendered_embed(Embed(title='pinner',color=HELP_COLOR,
+##    description='Sends a message, and reaction on it can change it\'s pinned state.'
+##        ))
 
 HELP['ban']=rendered_embed(Embed(title='ban',color=HELP_COLOR,
     description='Bans the mentioned user with the reason following the name/mention.'
@@ -256,8 +232,25 @@ async def on_command_help(client,message,content):
         try:
             result=HELP[content]
         except KeyError:
-            result=Embed(title=f'Invalid command: {content}')
+            try:
+                message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command: {content}',color=HELP_COLOR))
+                await asyncio.sleep(30.,loop=client.loop)
+                await client.message_delete(message)
+            except (Forbidden,HTTPException):
+                pass
+            return
+        
         await client.message_create(message.channel,embed=result)
     else:
         pagination(client,message.channel,HELPHELP)
     
+async def invalid_command(client,message,command,content):
+    try:
+        message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command `{command}`, try using: `{PREFIX}help`',color=HELP_COLOR))
+        await asyncio.sleep(30.,loop=client.loop)
+        await client.message_delete(message)
+    except (Forbidden,HTTPException):
+        pass
+
+
+create_help_help()
