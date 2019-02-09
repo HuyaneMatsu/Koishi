@@ -3,6 +3,9 @@ from pers_data import PREFIX
 from discord_uwu.embed import Embed,Embed_field,Embed_footer,rendered_embed
 from discord_uwu.events import pagination
 from discord_uwu.color import Color
+from discord_uwu.exceptions import Forbidden,HTTPException
+import asyncio
+
 HELP={}
 
 HELP_COLOR=Color.from_html('#ffd21e')
@@ -173,9 +176,11 @@ HELP['user']=rendered_embed(Embed(title='user',color=HELP_COLOR,
     description='Shows your profile'
         ))
 
-HELP['ivnite']=rendered_embed(Embed(title='ivnite',color=HELP_COLOR,
-    description='Sends you an invite (only if u can create invite anyways too)'
-        ))
+HELP['invite']=rendered_embed(Embed(title='ivnite',color=HELP_COLOR,
+    description=( \
+        'Sends you an invite (only if u can create invite anyways too)\n'
+        'Guild owner can create permament invite too with an additinal "perma"'
+        )))
 
 HELP['invites']=rendered_embed(Embed(title='invites',color=HELP_COLOR,
     description='Shows the invites of the guild <channel>.'
@@ -225,7 +230,10 @@ HELP['leave_guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
     description='Leaves the guild. Guild owner only.'
         ))
 
-        
+HELP['guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
+    description='Shows the guild\'s profile.'
+        ))
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()

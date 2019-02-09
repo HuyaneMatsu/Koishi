@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import math
+
 from discord_uwu.parsers import eventlist
-from discord_uwu.channel import get_message
+from discord_uwu.channel import get_message,Channel_text,Channel_category
 from discord_uwu.prettyprint import pchunkify
-from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left
+from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
 from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.events import pagination
-from help_handler import HELP
 from discord_uwu.embed import Embed,Embed_thumbnail
-from datetime import datetime
+from discord_uwu.emoji import BUILTIN_EMOJIS
+
+from help_handler import HELP
 
 infos=eventlist()
 
@@ -281,10 +283,87 @@ async def user_info(client,message,content):
         text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
         
     embed=Embed(f'{target:f}','\n'.join(text),target.color(guild))
-    embed.thumbnail=Embed_thumbnail(url=target.avatar_url_as(size=64))
+    embed.thumbnail=Embed_thumbnail(url=target.avatar_url_as(size=128))
 
     await client.message_create(message.channel,embed=embed)
 
+@infos.add('guild')
+async def guild_info(client,message,content):
+    guild=message.guild
+    if guild is None:
+        return
+
+    #most usual first
+    s_grey  = statuses.offline
+    s_green = statuses.online
+    s_yellow= statuses.idle
+    s_red   = statuses.dnd
+    
+    v_grey  = 0
+    v_green = 0
+    v_yellow= 0
+    v_red   = 0
+
+    for user in guild.users.values():
+        status=user.status
+        if   status is s_grey:
+            v_grey+=1
+        elif status is s_green:
+            v_green+=1
+        elif status is s_yellow:
+            v_yellow+=1
+        elif status is s_red:
+            v_red+=1
+        else: #if we change our satus to invisible, it will be invisible till we get the dispatch event, then it turns offline.
+            v_grey+=1
+        
+    del s_grey
+    del s_green
+    del s_yellow
+    del s_red
+
+    channel_text    = 0
+    channel_category= 0
+    channel_voice   = 0
+
+    for channel in guild.all_channel.values():
+        if type(channel) is Channel_text:
+            channel_text+=1
+        elif type(channel) is Channel_category:
+            channel_category+=1
+        else:
+            channel_voice+=1
+
+    if guild.features:
+        features=', '.join(feature.value for feature in guild.features)
+    else:
+        features='none'
+    
+    color=int(guild.icon,16)&16777215
+    
+    embed=Embed('',f'''
+        **Guild information**
+        Created: {time_left(guild)} ago
+        Voice region: {guild.region}
+        Features: {features}
+
+        **Counts**
+        Users: {guild.user_count}
+        Roles: {len(guild.roles)}
+        Text channels: {channel_text}
+        Voice channels: {channel_voice}
+        Category channels: {channel_category}
+
+        **Users**
+        {BUILTIN_EMOJIS["green_heart"]} {v_green}
+        {BUILTIN_EMOJIS["yellow_heart"]} {v_yellow}
+        {BUILTIN_EMOJIS["heart"]} {v_red}
+        {BUILTIN_EMOJIS["black_heart"]} {v_grey}
+        ''',color)
+    
+    embed.thumbnail=Embed_thumbnail(guild.icon_url_as(size=128))
+
+    await client.message_create(message.channel,embed=embed)
 
 @infos
 async def invites(client,message,content):
