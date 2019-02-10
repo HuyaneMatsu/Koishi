@@ -86,7 +86,8 @@ HELP['edit']=rendered_embed(Embed(title='edit',color=HELP_COLOR,
         'You can edit:\n'
         ' **>>** "user"\n'
         ' **>>** "role"\n'
-        ' **>>** "emoji"'
+        ' **>>** "emoji"\n'
+        ' **>>** "guild"'
             )))
 
 HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,

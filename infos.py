@@ -338,9 +338,12 @@ async def guild_info(client,message,content):
         features=', '.join(feature.value for feature in guild.features)
     else:
         features='none'
-    
-    color=int(guild.icon,16)&16777215
-    
+
+    if guild.icon:
+        color=int(guild.icon,16)&16777215
+    else:
+        color=0
+        
     embed=Embed('',f'''
         **Guild information**
         Created: {time_left(guild)} ago

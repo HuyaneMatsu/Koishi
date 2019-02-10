@@ -12,7 +12,7 @@ from discord_uwu import Client,start_clients
 from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
 from discord_uwu.activity import activity_game
-from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify,is_id
+from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify,is_id,guild_features,message_notification_levels,voice_regions,verification_levels,content_filter_levels
 from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
@@ -578,7 +578,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                         reason=value
                         continue
 
-                    text='Invalid attribute to change. You can hcnage a role\'s name, "separated" and "mentonable" "value", "color" and "permissions" (to preset "voice", "text", "none", "general".'
+                    text='Invalid attribute to change. You can change a role\'s name, "separated" and "mentonable" "value", "color" and "permissions" (to preset "voice", "text", "none", "general".'
                     break
                 
                 if not text: 
@@ -653,7 +653,244 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     text=(emoji,ename,roles)
                 break
                 
+            if key=='guild':
+                limit=len(content)
+                if limit&1:
+                    text='Pls write key, value pairs.'
+                    break
+                if limit==0:
+                    text='And anything to change?'
+                    break
+
+                result={}
                 
+                index=0
+                attach_index=0
+                channel_index=0
+                
+                while index!=limit:
+                    name=content[index].lower()
+                    index+=1
+                    value=content[index]
+                    index+=1
+
+                    if name in result:
+                        text=f'Dupe key: "{name}"'
+                        break
+
+                    if name=='owner':
+                        if message.mentions and is_user_mention(value):
+                            user=message.mentions[0]
+                        else:
+                            user=guild.get_user(value)
+                            if user is None:
+                                text='Could not find that user!'
+                                break
+                        
+                        if client is guild.owner:
+                            if message.author is client.owner:
+                                result[name]=user
+                            else:
+                                text='You do not have permission to do it'
+                                break
+                        else:
+                            'I must be the server owner to change the ownership.'
+                            break
+                        
+                        continue
+                    
+                    if name=='name':
+                        result[name]=value
+                        continue
+
+                    if name=='icon':
+
+                        if value.lower()=='none':
+                            result[name]=b''
+                            continue
+                            
+                        if len(message.attachments)<=attach_index:
+                            text='The message has no attachments to change icon'
+                            break
+                        
+                        ext=os.path.splitext(message.attachments[attach_index].filename)[1]
+                        if len(ext)<2:
+                            text='Missing extension.'
+                            break
+                        ext=ext[1:].lower()
+                        
+                        if ext not in VALID_ICON_FORMATS:
+                            text='Invalid format.'
+                            break
+                        
+                        result[name] = await client.download_attachment(message.attachments[attach_index])
+                        attach_index+=1
+                        continue
+
+                    if name=='splash':
+                        if guild_features.splash not in guild.features:
+                            text='The guild has no splash feature.'
+                            break
+
+                        if value.lower()=='none':
+                            result[name]=b''
+                            continue
+
+                        if len(message.attachments)<=attach_index:
+                            text='The message has no attachments to change splash'
+                            break
+                        
+                        ext=os.path.splitext(message.attachments[attach_index].filename)[1]
+                        if len(ext)<2:
+                            text='Missing extension.'
+                            break
+                        ext=ext[1:].lower()
+                        
+                        if ext not in VALID_ICON_FORMATS:
+                            text='Invalid format'
+                            break
+                        
+                        result[name] = await client.download_attachment(message.attachments[attach_index])
+                        attach_index+=1
+                        continue
+
+                    if name=='afk_channel':
+                        
+                        if value.lower()=='none':
+                            result[name]=False
+                            continue
+
+                        if message.channel_mentions and is_channel_mention(value):
+                            channel=message.channel_mentions[channel_index]
+                        else:
+                            channel=guild.get_channel(value)
+                            if channel is None:
+                                text='Could not find that channel!'
+                                break
+
+                        if type(channel) is not Channel_voice:
+                            text='Afk channel can be only voice channel'
+                            break
+                        
+                        result[name]=channel
+                        channel_index+=1
+                        continue
+
+                    if name=='system_channel':
+                        
+                        if value.lower()=='none':
+                            result[name]=False
+                            continue
+
+                        if message.channel_mentions and is_channel_mention(value):
+                            channel=message.channel_mentions[channel_index]
+                        else:
+                            channel=guild.get_channel(value)
+                            if channel is None:
+                                text='Could not find that channel!'
+                                break
+
+                        if type(channel) is not Text_voice:
+                            text='System channel can be only text channel'
+                            break
+                        
+                        result[name]=channel
+                        channel_index+=1
+                        continue
+
+                    if name in ('region','voice_region'):
+                        try:
+                            region=voice_regions.values[value.lower()]
+                        except KeyError:
+                            text='Unknown voice region'
+                            continue
+
+                        result[name]=region
+                        continue
+
+                    if name=='afk_timeout':
+                        try:
+                            afk_timeout=int(value)
+                        except ValueError:
+                            text='Timeout must be integer.'
+                            break
+
+                        if afk_timeout not  in (60,300,900,1800,3600):
+                            text='Afk timeout should be 60, 300, 900, 1800, 3600 seconds.'
+                            break
+
+                        result[name]=afk_timeout
+                        continue
+
+                    if name in ('verification','verification_level'):
+                        try:
+                            level=verification_levels.values[int(value)]
+                        except KeyError:
+                            text='Invalid verification_level'
+                            break
+                        except ValueError:
+                            for element in verification_levels.values.values():
+                                if value in element.names:
+                                    level=element
+                                    break
+                            else:
+                                text='Invalid verification_level'
+                                break
+                            
+                        result['verification_level']=level
+                        continue
+
+                    if name=='content_filter': 
+                        try:
+                            level=content_filter_levels.values[int(value)]
+                        except KeyError:
+                            text='Invalid content filter'
+                            break
+                        except ValueError:
+                            for element in content_filter_levels.values.values():
+                                if value in element.names:
+                                    level=element
+                                    break
+                            else:
+                                text='Invalid content filter'
+                                break
+                            
+                        result[name]=level
+                        continue
+                        
+                    if name in ('message_notification_level','message_notification'):
+                        try:
+                            level=message_notification_levels.values[int(value)]
+                        except KeyError:
+                            text='Invalid message notification level'
+                            break
+                        except ValueError:
+                            for element in message_notification_levels.values.values():
+                                if value in element.names:
+                                    level=element
+                                    break
+                            else:
+                                text='Invalid message notification level'
+                                break
+                            
+                        result['message_notification_level']=level
+                        continue
+                    
+                    if name=='reason':
+                        if reason:
+                            text='Reason key can not be duped.'
+                        reason=value
+                        continue
+
+                    text='Invalid attribute to change. You can change: "name", "icon", "splash", ' \
+                        '"afk_channel", "system_channel", "owner", "region", "afk_timeout", ' \
+                        '"verification_level", "content_filter", "message_notification_level", ' \
+                        'and add an additional "reason" too.'
+                    break
+                
+                if not text: 
+                    text=result
+                break
             
             break
         if type(text) is not str:
@@ -668,6 +905,8 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     await client.role_edit(text[0],**text[1],reason=reason)
                 elif key=='emoji':
                     await client.emoji_edit(*text,reason=reason)
+                elif key=='guild':
+                    await client.guild_edit(guild,**text,reason=reason)
             except Forbidden:
                 text='Access denied'
             except ValueError as err:
@@ -1467,19 +1706,19 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         await client.guild_user_kick(guild,user,reason)
         await client.message_create('ExeCUTEd')
 
-    @on_command
-    async def language(client,message,content):
-        guild=message.guild
-        target=None
-        if content:
-            if message.mentions:
-                target=message.mentions[0]
-            elif guild is not None:
-                target=guild.get_user(content)
-        if target is None:
-            target=message.author
-        
-        await client.message_create(message.channel,f'If i can have a guess {target.mention_at(guild)}\' client\'s language is: {target.language}')
+##    @on_command
+##    async def language(client,message,content):
+##        guild=message.guild
+##        target=None
+##        if content:
+##            if message.mentions:
+##                target=message.mentions[0]
+##            elif guild is not None:
+##                target=guild.get_user(content)
+##        if target is None:
+##            target=message.author
+##        
+##        await client.message_create(message.channel,f'If i can have a guess {target.mention_at(guild)}\' client\'s language is: {target.language}')
 
     mine_mine_clear=( \
         BUILTIN_EMOJIS['white_large_square'].as_emoji,
