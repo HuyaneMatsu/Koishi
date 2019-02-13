@@ -48,6 +48,20 @@ async def parse_list_command(client,message,content):
             lines=[f'{f"{index}.:": >{ln_c_l}} {message:c} id={message.id} length={len(message.content)} author={message.author:f}' for index,message in enumerate(messages,1)]
             text=cchunkify(lines)
             break
+        if key=='webhooks':
+            channel=None
+            if content:
+                if message.channel_mentions and is_channel_mention(content[0]):
+                    channel=message.channel_mentions[0]
+                else:
+                    channel=guild.get_channel(channel)
+            if channel is None:
+                webhooks = await client.webhook_get_guild(guild)
+            else:
+                webhooks = await client.webhook_get_channel(channel)
+
+            text=pchunkify(webhooks,write_parents=False)
+            break
         break
     if type(text) is not str:
         pages=[{'content':chunk} for chunk in text]

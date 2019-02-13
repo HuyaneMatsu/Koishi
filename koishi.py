@@ -28,7 +28,7 @@ from help_handler import on_command_help,HELP,invalid_command
 from pers_data import TOKEN,PREFIX,TOKEN2
 from infos import infos
 from voice import voice
-#from battleships import battle_manager
+from battleships import battle_manager,bot_reaction_delete_waitfor
 
 def smart_join(list_,limit):
     limit-=4
@@ -197,6 +197,7 @@ async def ready(client):
     print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
     
 Koishi.events(bot_reaction_waitfor())
+Koishi.events(bot_reaction_delete_waitfor())
 
 Koishi.events(schannel.emoji_update)
 Koishi.events(schannel.unknown_guild)
@@ -218,7 +219,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
     on_command(on_command_help,'help')
     on_command(invalid_command)
     
-    #on_command(battle_manager,case='bs')
+    on_command(battle_manager,case='bs')
     
     @on_command
     async def default_event(client,message):
@@ -2050,6 +2051,60 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##        invite = await client.invite_create_pref(guild,0,0)
 ##        channel = await client.channel_private_create(message.author)
 ##        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
+
+##    @on_command
+##    async def load_emotes(client,message,content):
+##        with client.keep_typing(message.channel):
+##            while True:
+##                try:
+##                    id_=int(content)
+##                except ValueError:
+##                    text='Thats not an id.'
+##                    break
+##                try:
+##                    message = await client.message_get(message.channel,id_)
+##                except Forbidden:
+##                    text='I have no permission to do that!'
+##                    break
+##                except HTTPException:
+##                    text='The message does not exsists!'
+##                    break
+##                
+##                #this might take for a while
+##                await client.reaction_load_all(message)
+##
+##                if message.reactions is None:
+##                    text='None'
+##                    break
+##
+##                result=[]
+##                for emoji,line in message.reactions.items():
+##                    for user in line:
+##                        if len(result)==20:
+##                            break
+##                        result.append(f'{emoji:e} - {user:f}')
+##
+##                text='\n'.join(result)
+##                break
+##
+##        await client.message_create(message.channel,text)
+
+    @on_command
+    async def webhook_test(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        if message.author is not client.owner:
+            return
+        
+        webhooks = await client.webhook_get_guild(guild)
+
+        if not webhooks:
+            return
+        
+        webhook=webhooks[0]
+        
+        await client.webhook_send(webhook,content='OwO whats this?')
         
 start_clients()
 

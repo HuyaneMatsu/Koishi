@@ -120,7 +120,8 @@ HELP['list']=rendered_embed(Embed(title='list',color=HELP_COLOR,
         ' **>>** "roles"\n'
         ' **>>** "emojis"\n'
         ' **>>** "channels"\n'
-        ' **>>** "pins"'
+        ' **>>** "pins"\n'
+        ' **>>** "webhooks" (channel)'
             )))
 
 HELP['details']=rendered_embed(Embed(title='details',color=HELP_COLOR,
@@ -233,6 +234,10 @@ HELP['leave_guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
 
 HELP['guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
     description='Shows the guild\'s profile.'
+        ))
+
+HELP['bs']=rendered_embed(Embed(title='bs',color=HELP_COLOR,
+    description='Requests a batlleship game to the mentioned user.'
         ))
 
 async def on_command_help(client,message,content):
