@@ -566,7 +566,7 @@ async def love(client,message,content):
     else:
         target=guild.get_user(name)
         if target is None:
-            if name.isdigit:
+            if name.isdigit():
                 target=USERS.get(int(name),None)
                 if target is None:
                     try:
