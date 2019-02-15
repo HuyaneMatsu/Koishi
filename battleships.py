@@ -573,7 +573,7 @@ class battleships_game:
             result=result.groups()
             
             value=result[0]
-            if value.isdecimal():
+            if value.isdigit():
                 x=int(value)
                 if x>10:
                     text='Bad input format.'
@@ -585,7 +585,7 @@ class battleships_game:
                 y=('abcdefghij').index(value.lower())
 
             value=result[1]
-            if value.isdecimal():
+            if value.isdigit():
                 if x!=100:
                     text='Dupe coordinate'
                     break
@@ -675,7 +675,7 @@ class battleships_game:
         if message.author is not self.actual.user:
             result=re.match('^new$',message.content,re.I)
             if result is not None:
-                await player.process(0x100,None)
+                await player.process(True,None)
             return
 
         data=other.data
@@ -692,7 +692,7 @@ class battleships_game:
             result=result.groups()
         
             value=result[0]
-            if value.isdecimal():
+            if value.isdigit():
                 x=int(value)
                 if x>10:
                     text='Bad input format.'
@@ -704,7 +704,7 @@ class battleships_game:
                 y=('abcdefghij').index(value.lower())
 
             value=result[1]
-            if value.isdecimal():
+            if value.isdigit():
                 if x!=100:
                     text='Dupe coordinate'
                     break

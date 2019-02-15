@@ -1175,7 +1175,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         
         if not content:
             limit=100
-        elif content[0].isdecimal():
+        elif content[0].isdigit():
             limit=int(content[0])
             if limit<=0:
                 return
@@ -1746,7 +1746,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 text_mode=True
                 content.pop(0)
                 
-            if content and content[0].isdecimal():
+            if content and content[0].isdigit():
                 amount=int(content[0])
                 if amount>24:
                     amount=24
@@ -1941,7 +1941,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 await client.message_create(message.channel,'Could not find that user')
                 return
         days=0
-        if content and content[0].isdecimal():
+        if content and content[0].isdigit():
             value=int(content[0])
             if -1<value<8:
                 content.pop(0)
@@ -2104,7 +2104,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         
         webhook=webhooks[0]
         
-        await client.webhook_send(webhook,content='OwO whats this?')
+        await client.webhook_send(webhook,embed=Embed('OwO whats this?'),name=message.author.name,avatar_url=message.author.avatar_url,file=b'UwU',filename='UwU')
         
 start_clients()
 

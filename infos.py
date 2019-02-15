@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import math
+from random import choice
 
 from discord_uwu.parsers import eventlist
 from discord_uwu.channel import get_message,Channel_text,Channel_category
@@ -8,8 +9,10 @@ from discord_uwu.prettyprint import pchunkify
 from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
 from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.events import pagination
-from discord_uwu.embed import Embed,Embed_thumbnail
+from discord_uwu.embed import Embed,Embed_thumbnail,Embed_field
 from discord_uwu.emoji import BUILTIN_EMOJIS
+from discord_uwu.color import Color
+from discord_uwu.user import USERS
 
 from help_handler import HELP
 
@@ -88,7 +91,7 @@ async def parse_details_command(client,message,content):
             while True:
                 if not content:
                     index=1
-                elif content[0].isdecimal():
+                elif content[0].isdigit():
                     index=int(content[0])
                 else:
                     text='Invalid index'
@@ -124,7 +127,7 @@ async def parse_details_command(client,message,content):
             while True:
                 if not content:
                     index=0
-                elif content[0].isdecimal():
+                elif content[0].isdigit():
                     index=int(content[0])
                 else:
                     text='Invalid index'
@@ -143,7 +146,7 @@ async def parse_details_command(client,message,content):
         if key=='role':
             if not content:
                 role=guild.roles[0]
-            elif content[0].isdecimal():
+            elif content[0].isdigit():
                 index=int(content[0])
                 if index>=len(guild.roles):
                     index=len(guild.roles)-1
@@ -180,7 +183,7 @@ async def parse_details_command(client,message,content):
                 text='The channel has no overwrites desu'
                 break
             name=content.pop(0)
-            if name.isdecimal():
+            if name.isdigit():
                 try:
                     overwrite=channel.overwrites[int(name)]
                 except IndexError:
@@ -405,3 +408,184 @@ async def invites(client,message,content):
     
     pages=[{'content':chunk} for chunk in pchunkify(invites,write_parents=False,show_code=False)]
     pagination(client,message.channel,pages,120.)
+
+def generate_love_level():
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["blue_heart"]} There\'s no real connection between you two {BUILTIN_EMOJIS["blue_heart"]}',
+                ),
+        'text': ( \
+            'The chance of this relationship working out is really low. You '
+            'can get it to work, but with high costs and no guarantee of '
+            'working out. Do not sit back, spend as much time together as '
+            'possible, talk a lot with each other to increase the chances of '
+            'this relationship\'s survival.'
+                ),
+            }
+
+    for x in range(0,2):
+        yield value
+
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["blue_heart"]} A small acquaintance {BUILTIN_EMOJIS["blue_heart"]}',
+                ),
+        'text':( \
+            'There might be a chance of this relationship working out somewhat '
+            'well, but it is not very high. With a lot of time and effort '
+            'you\'ll get it to work eventually, however don\'t count on it. It '
+            'might fall apart quicker than you\'d expect.'
+                ),
+            }
+    
+    for x in range(2,6):
+        yield value
+
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["purple_heart"]} You two seem like casual friends {BUILTIN_EMOJIS["purple_heart"]}',
+                ),
+        'text':( \
+            'The chance of this relationship working is not very high. You both '
+            'need to put time and effort into this relationship, if you want it '
+            'to work out well for both of you. Talk with each other about '
+            'everything and don\'t lock yourself up. Spend time together. This '
+            'will improve the chances of this relationship\'s survival by a lot.'
+                ),
+            }
+
+    for x in range(6,21):
+        yield value
+
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["heartpulse"]} You seem like you are good friends {BUILTIN_EMOJIS["heartpulse"]}',
+                ),
+        'text':( \
+            'The chance of this relationship working is not very high, but its '
+            'not that low either. If you both want this relationship to work, '
+            'and put time and effort into it, meaning spending time together, '
+            'talking to each other etc., than nothing shall stand in your way.'
+                ),
+            }
+
+    for x in range(21,31):
+        yield value
+
+
+    value={ \
+        'titles':(
+            f'{BUILTIN_EMOJIS["cupid"]} You two are really close aren\'t you? {BUILTIN_EMOJIS["cupid"]}',
+                ),
+        'text':( \
+            'Your relationship has a reasonable amount of working out. But do '
+            'not overestimate yourself there. Your relationship will suffer '
+            'good and bad times. Make sure to not let the bad times destroy '
+            'your relationship, so do not hesitate to talk to each other, '
+            'figure problems out together etc.'
+                ),
+            }
+
+    for x in range(31,46):
+        yield value
+    
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["heart"]} So when will you two go on a date? {BUILTIN_EMOJIS["heart"]}',
+                ),
+        'text':( \
+            'Your relationship will most likely work out. It won\'t be perfect '
+            'and you two need to spend a lot of time together, but if you keep '
+            'on having contact, the good times in your relationship will '
+            'outweigh the bad ones.'
+                ),
+            }
+
+    for x in range(46,61):
+        yield value
+
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["two_hearts"]} Aww look you two fit so well together {BUILTIN_EMOJIS["two_hearts"]}',
+                ),
+        'text':( \
+            'Your relationship will most likely work out well. Don\'t hesitate '
+            'on making contact with each other though, as your relationship '
+            'might suffer from a lack of time spent together. Talking with '
+            'each other and spending time together is key.'
+                ),
+            }
+
+    for x in range(61,86):
+        yield value
+
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["sparkling_heart"]} Love is in the air {BUILTIN_EMOJIS["sparkling_heart"]}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]} Planned your future yet? {BUILTIN_EMOJIS["sparkling_heart"]}',
+                ),
+        'text':( \
+            'Your relationship will most likely work out perfect. This '
+            'doesn\'t mean thought that you don\'t need to put effort into it. '
+            'Talk to each other, spend time together, and you two won\'t have '
+            'a hard time.'
+                ),
+            }
+
+    for x in range(86,96):
+        yield value
+
+    value={ \
+        'titles':( \
+            f'{BUILTIN_EMOJIS["sparkling_heart"]} When will you two marry? {BUILTIN_EMOJIS["sparkling_heart"]}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]} Now kiss already {BUILTIN_EMOJIS["sparkling_heart"]}',
+                ),
+        'text':( \
+            'You two will most likely have the perfect relationship. But don\'t '
+            'think that this means you don\'t have to do anything for it to '
+            'work. Talking to each other and spending time together is key, '
+            'even in a seemingly perfect relationship.'
+                ),
+            }
+
+    for x in range(96,101):
+        yield value
+
+LOVE_VALUES=tuple(generate_love_level())
+del generate_love_level
+
+@infos
+async def love(client,message,content):
+    guild=message.guild
+    if guild is None:
+        return
+    
+    name=filter_content(content)[0]
+    if message.mentions and is_user_mention(name):
+        target=message.mentions[0]
+    else:
+        target=guild.get_user(name)
+        if target is None:
+            if name.isdigit:
+                target=USERS.get(int(name),None)
+                if target is None:
+                    try:
+                        target = await client.user_get_by_id(int(name))
+                    except HTTPException:
+                        return
+
+    source=message.author
+
+    if target is source:
+        return
+    
+    percent=((source.id|0x1111111111111111111111)+(target.id|0x1111111111111111111111))%101
+            
+    embed=Embed( \
+        choice(LOVE_VALUES[percent]['titles']),
+        f'{source:f} {BUILTIN_EMOJIS["heart"]} {target:f} scored {percent}%!',
+        Color.d_magenta,
+            )
+    embed.fields.append(Embed_field('My advice:',LOVE_VALUES[percent]['text']))
+
+    await client.message_create(message.channel,embed=embed)

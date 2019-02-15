@@ -240,6 +240,10 @@ HELP['bs']=rendered_embed(Embed(title='bs',color=HELP_COLOR,
     description='Requests a batlleship game to the mentioned user.'
         ))
 
+HELP['love']=rendered_embed(Embed(title='love',color=HELP_COLOR,
+    description='How much you two fit together?'
+        ))
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
