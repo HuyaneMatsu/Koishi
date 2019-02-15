@@ -573,6 +573,8 @@ async def love(client,message,content):
                         target = await client.user_get_by_id(int(name))
                     except HTTPException:
                         return
+            else:
+                return
 
     source=message.author
 
