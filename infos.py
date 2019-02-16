@@ -581,7 +581,7 @@ async def love(client,message,content):
     if target is source:
         return
     
-    percent=((source.id|0x1111111111111111111111)+(target.id|0x1111111111111111111111))%101
+    percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
             
     embed=Embed( \
         choice(LOVE_VALUES[percent]['titles']),
