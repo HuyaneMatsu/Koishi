@@ -557,7 +557,7 @@ del generate_love_level
 @infos
 async def love(client,message,content):
     guild=message.guild
-    if guild is None:
+    if guild is None or not content:
         return
     
     name=filter_content(content)[0]
