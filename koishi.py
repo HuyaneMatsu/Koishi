@@ -19,7 +19,6 @@ from discord_uwu.permission import Permission
 from discord_uwu.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
 from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,wait_for_message,wait_for_emoji
 from discord_uwu.futures import wait_one
-from discord_uwu.client_core import GC_client
 from discord_uwu.prettyprint import pchunkify
 from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 
@@ -148,8 +147,6 @@ Koishi=Client(TOKEN,loop=1)
 Koishi.activity=activity_game.create(name='with Satori')
 
 Mokou=Client(TOKEN2,loop=2)
-
-GC=GC_client(loop=2) #let it run with Mokou, she does nothing anyways
     
 @Mokou.events
 async def message_create(client,message):
