@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from random import randint as random
+from random import randint as random,choice
 import os
 import re
 import asyncio
@@ -21,6 +21,7 @@ from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_
 from discord_uwu.futures import wait_one
 from discord_uwu.prettyprint import pchunkify
 from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
+from discord_uwu.webhook import Webhook
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -2085,23 +2086,204 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##                break
 ##
 ##        await client.message_create(message.channel,text)
+##
+##    @on_command
+##    async def webhook_test(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##        
+##        webhooks = await client.webhook_get_guild(guild)
+##
+##        if not webhooks:
+##            return
+##        
+##        webhook=webhooks[0]
+##        
+##        await client.webhook_send(webhook,embed=Embed('OwO whats this?'),name=message.author.name,avatar_url=message.author.avatar_url,file=b'UwU',filename='UwU')
+##
+##    @on_command
+##    async def webhook_get_by_id(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##
+##        try:
+##            id_=int(content)
+##        except ValueError:
+##            return
+##
+##        webhook = await client.webhook_get(id_)
+##
+##        await client.message_create(message.channel,webhook.name)
+##
+##    @on_command
+##    async def webhook_get_by_token(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##
+##        await client.message_delete(message)
+##        
+##        content=filter_content(content)
+##        try:
+##            id_=int(content[0])
+##        except ValueError:
+##            return
+##
+##        token=content[1]
+##        
+##        webhook = await client.webhook_get_token(id_,token)
+##
+##        await client.message_create(message.channel,webhook.name)
+##
+##    @on_command
+##    async def webhook_create(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##
+##        if not (1<len(content)<33):
+##            return
+##        
+##        if message.attachments:
+##            ext=os.path.splitext(message.attachments[0].filename)[1]
+##            if len(ext)<2:
+##                return
+##            ext=ext[1:].lower()
+##            
+##            if ext not in VALID_ICON_FORMATS:
+##                return
+##            
+##            image = await client.download_attachment(message.attachments[0])
+##        else:
+##            image=b''
+##
+##        webhook = await client.webhook_create(message.channel,content,image)
+##        await client.message_create(message.channel,webhook.name)
+##
+##    @on_command
+##    async def webhook_delete_by_id(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##        
+##        try:
+##            id_=int(content)
+##        except ValueError:
+##            return
+##
+##        webhook = await client.webhook_get(id_)
+##        
+##        await client.webhook_delete(webhook)
+##
+##        await client.message_create(message.channel,webhook.name)
+##        
+##        
+##    @on_command
+##    async def webhook_delete_by_token(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##        
+##        content=filter_content(content)
+##        try:
+##            id_=int(content[0])
+##        except ValueError:
+##            return
+##
+##        webhook = await client.webhook_get(id_)
+##
+##        await client.webhook_delete_token(webhook)
+##
+##        await client.message_create(message.channel,webhook.name)
+##
+##    @on_command
+##    async def webhook_edit(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##
+##        content=filter_content(content)
+##
+##        if len(content)<2:
+##            return
+##
+##        try:
+##            id_=int(content[0])
+##        except ValueError:
+##            return
+##
+##        webhook = await client.webhook_get(id_)
+##        
+##        if 'name' in content:
+##            name=''.join([chr(random(65,90)) for i in range(10)])
+##        else:
+##            name=''
+##
+##        if 'avatar' in content:
+##            if message.attachments:
+##                ext=os.path.splitext(message.attachments[0].filename)[1]
+##                if len(ext)<2:
+##                    return
+##                ext=ext[1:].lower()
+##                
+##                if ext not in VALID_ICON_FORMATS:
+##                    return
+##                    
+##                avatar = await client.download_attachment(message.attachments[0])
+##            else:
+##                avatar=None
+##        else:
+##            avatar=b''
+##
+##        token=('token' in content)
+##
+##        if 'channel' in content:
+##            channels=guild.text_channels
+##            try:
+##                channels.remove(webhook.channel)
+##            except ValueError:
+##                pass
+##            channel=choice(channels)
+##        else:
+##            channel=None
+##         
+##        if token:
+##            await client.webhook_edit_token(webhook,name,avatar,channel)
+##        else:
+##            await client.webhook_edit(webhook,name,avatar,channel)
+##
+##        await client.message_create(message.channel,webhook.name,)
+##
+##    @on_command
+##    async def webhook_from_url(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##
+##        await client.message_delete(message)
+##        
+##        webhook = await client.webhook_get(Webhook.from_url(content).id)
+##
+##        await client.message_create(message.channel,webhook.name,)
 
-    @on_command
-    async def webhook_test(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-        if message.author is not client.owner:
-            return
-        
-        webhooks = await client.webhook_get_guild(guild)
 
-        if not webhooks:
-            return
-        
-        webhook=webhooks[0]
-        
-        await client.webhook_send(webhook,embed=Embed('OwO whats this?'),name=message.author.name,avatar_url=message.author.avatar_url,file=b'UwU',filename='UwU')
-        
 start_clients()
 
