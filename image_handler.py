@@ -15,6 +15,7 @@ except ImportError:
     UPLOAD=False
 
 splitext=os.path.splitext
+join=os.path.join
 
 IMAGES=[]
 VIDS=[]
@@ -71,10 +72,10 @@ class image_details(set):
 image_formats={'jpg','png','bmp','jpeg'}
 video_formats={'mp4','gif'}
 
-image_path=os.path.abspath('.')+'\\images\\'
+IMAGE_PATH=join(os.path.abspath('.'),'images')
 
 def load_images():
-    for filename in os.listdir(image_path):
+    for filename in os.listdir(IMAGE_PATH):
         image_details(filename)
 
 load_images()
@@ -115,7 +116,7 @@ async def on_command_image(client,message,content):
     if type(result)==str:
         await client.message_create(message.channel,result)
     else:
-        with open(image_path+result.path,'rb') as image:
+        with open(join(IMAGE_PATH,result.path),'rb') as image:
             await client.message_create_file(message.channel,image)
     
     
@@ -311,10 +312,10 @@ async def process_on_command_upload(client,message,content):
 
     data = await client.download_attachment(result)
     
-    index=f'{len(IMAGES)+len(VIDS):08X}'
+    index=f'{(len(IMAGES)+len(VIDS)):08X}'
     if img:
         path=f'{index}_{"_".join(tags)}.png'
-        filename=image_path+path
+        filename=join(IMAGE_PATH,path)
         if ext!='png':
             #we save everything in png, ~~rasism~~
             if ext in ('jpg','jpeg'):
@@ -337,8 +338,8 @@ async def process_on_command_upload(client,message,content):
             file.write(data)
             file.close()
     else:
-        path=f'{image_path,index}_{"_".join(tags)}.{ext}'
-        filename=image_path+path
+        path=f'{index}_{"_".join(tags)}.{ext}'
+        filename=join(IMAGE_PATH,path)
         file=open(filename,'wb')
         file.write(data)
         file.close()
