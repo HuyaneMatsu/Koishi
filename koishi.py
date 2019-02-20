@@ -2284,18 +2284,19 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##
 ##        await client.message_create(message.channel,webhook.name,)
 
+#TODO: get a working integation id for make tests with it
 
-    @on_command
-    async def create_integration(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-        if message.author is not client.owner:
-            return
-
-        integration = await client.integration_create(guild,'twitch',456456)
-
-        await client.message_create('owo')
+##    @on_command
+##    async def create_integration(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##
+##        integration = await client.integration_create(guild,'twitch',456456)
+##
+##        await client.message_create('owo')
 
 
     @on_command
@@ -2307,32 +2308,31 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
             return
 
         logs = await client.guild_audit_logs(guild)
-        print(logs)
 
-        await client.message_create('owo')
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])
 
-    @on_command
-    async def guild_get(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-        if message.author is not client.owner:
-            return
-
-        if not content:
-            return
-        
-        try:
-            id_=int(content)
-        except ValueError:
-            return
-
-        try:
-            guild = await client.guild_get_by_id(id_)
-        except Forbidden:
-            return
-        
-        await client.message_create(message.channel,f'{guild.name}\n{guild.icon_url}')
+##    @on_command
+##    async def guild_get(client,message,content):
+##        guild=message.guild
+##        if guild is None:
+##            return
+##        if message.author is not client.owner:
+##            return
+##
+##        if not content:
+##            return
+##        
+##        try:
+##            id_=int(content)
+##        except ValueError:
+##            return
+##
+##        try:
+##            guild = await client.guild_get_by_id(id_)
+##        except Forbidden:
+##            return
+##        
+##        await client.message_create(message.channel,f'{guild.name}\n{guild.icon_url}')
     
 start_clients()
 
