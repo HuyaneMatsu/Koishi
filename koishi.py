@@ -12,7 +12,10 @@ from discord_uwu import Client,start_clients
 from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
 from discord_uwu.activity import activity_game
-from discord_uwu.others import is_channel_mention,is_user_mention,filter_content,chunkify,is_id,guild_features,message_notification_levels,voice_regions,verification_levels,content_filter_levels
+from discord_uwu.others import ( \
+    is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
+    guild_features,message_notification_levels,voice_regions,
+    verification_levels,content_filter_levels,audit_log_events)
 from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
@@ -22,6 +25,7 @@ from discord_uwu.futures import wait_one
 from discord_uwu.prettyprint import pchunkify
 from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 from discord_uwu.webhook import Webhook
+from discord_uwu.audit_logs import Audit_log_iterator
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -2307,8 +2311,99 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
         if message.author is not client.owner:
             return
 
-        logs = await client.guild_audit_logs(guild)
+        kwargs={}
+        all_=0
+        text=''
+        
+        while True:
+            if not content:
+                break
+            content=filter_content(content)
+            if len(content)&1:
+                text='key value pairs please'
+                break
+            index=0
+            while index<len(content):
+                key=content[index].lower()
+                index+=1
+                value=content[index]
+                index+=1
 
+                if key=='user':
+                    if key in kwargs:
+                        text=f'dupe key {key}'
+                        break
+                    if message.mentions is not None and is_user_mention(value):
+                        user=message.mentions[0]
+                    else:
+                        user=guild.get_user(value)
+                        if user is None and value.isdigit:
+                            user=guild.users.get(int(value))
+                    if user is None:
+                        text='Could not find that user'
+                        break
+                    kwargs[key]=user
+                    continue
+                
+                if key=='event':
+                    if key in kwargs:
+                        text=f'dupe key {key}'
+                        break
+                    if value.isdigit():
+                        try:
+                            event=audit_log_events.values[int(value)]
+                        except KeyError:
+                            text=f'Unknown event {value}'
+                            break
+                    else:
+                        try:
+                            event=getattr(audit_log_events,value.upper())
+                        except AttributeError:
+                            text=f'Unknown event {value}'
+                            break
+
+                        if type(event) is not audit_log_events:
+                            text=f'Unknown event {value}'
+                            break
+                        continue
+
+                    kwargs[key]=event
+                    continue
+
+                if key=='all':
+                    if all_:
+                        text=f'dupe key {key}'
+                        break
+                    value=value.lower()
+                    if value=='now':
+                        all_=1
+                    elif value=='1b1':
+                        all_=2
+                    else:
+                        text=f'Unknown value {value}'
+                        break
+                    continue
+                
+                text=f'Unknown key {key}'
+                break
+            break
+        
+        if text:
+            await client.message_create(message.channel,text)
+            return
+
+        if all_==0:
+            logs = await client.guild_audit_logs(guild,**kwargs)
+        elif all_==1:
+            iterator=Audit_log_iterator(client,guild,**kwargs)
+            await iterator.load_all()
+            logs=iterator.transform()
+        else: #all_==2
+            iterator=Audit_log_iterator(client,guild,**kwargs)
+            async for entry in iterator:
+                pass
+            logs=iterator.transform()
+            
         pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])
 
 ##    @on_command
