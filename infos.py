@@ -277,18 +277,36 @@ async def parse_details_command(client,message,content):
 async def user_info(client,message,content):
     guild=message.guild
 
-    target=message.author
-    if guild is not None and content:
-        if is_user_mention(content) and message.mentions:
-            target=message.mentions[0]
+    target=None
+    if content:
+        if guild is not None:
+            if is_user_mention(content) and message.mentions:
+                target=message.mentions[0]
+            else:
+                user=guild.get_user(content)
+                if user is not None:
+                    target=user
+            
+        if target is None:
+            if content.isdigit():
+                user=USERS.get(int(content),None)
+                if user is None:
+                    try:
+                        target = await client.user_get_by_id(int(content))
+                    except HTTPException:
+                        pass
+                else:
+                    target=user
         else:
-            user=guild.get_user(content)
-            if user is not None:
-                target=user
+            target=user
+
+    if target is None:
+        target=message.author
     
     text=[f'**User Information**\nCreated: {time_left(target)} ago\nProfile: {target:m}\nID: {target.id}']
     
-    if guild is not None:
+    if guild in target.guild_profiles:
+        color=target.color(guild)
         profile=target.guild_profiles[guild]
         if profile.roles:
             roles=', '.join(role.mention for role in reversed(profile.roles))
@@ -298,8 +316,13 @@ async def user_info(client,message,content):
         if profile.nick:
             text.append(f'Nick: {profile.nick}')
         text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
+    else:
+        if target.avatar:
+            color=target.avatar&0xFFFFFF
+        else:
+            color=target.default_avatar.color
         
-    embed=Embed(f'{target:f}','\n'.join(text),target.color(guild))
+    embed=Embed(f'{target:f}','\n'.join(text),color)
     embed.thumbnail=Embed_thumbnail(url=target.avatar_url_as(size=128))
 
     await client.message_create(message.channel,embed=embed)
@@ -357,7 +380,7 @@ async def guild_info(client,message,content):
         features='none'
 
     if guild.icon:
-        color=int(guild.icon,16)&16777215
+        color=guild.icon&0xFFFFFF
     else:
         color=0
         

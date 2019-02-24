@@ -15,7 +15,7 @@ from discord_uwu.activity import activity_game
 from discord_uwu.others import ( \
     is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
     guild_features,message_notification_levels,voice_regions,
-    verification_levels,content_filter_levels,audit_log_events)
+    verification_levels,content_filter_levels,audit_log_events, Unknown)
 from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
@@ -26,6 +26,7 @@ from discord_uwu.prettyprint import pchunkify
 from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 from discord_uwu.webhook import Webhook
 from discord_uwu.audit_logs import Audit_log_iterator
+from discord_uwu.guild import GUILDS
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -194,9 +195,9 @@ async def message_create(client,message):
 
 @Koishi.events
 async def ready(client):
-    info = await client.client_application_info()
-    client.owner=info['owner']
-    print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
+    print(f'{client:f} ({client.id}) logged in')
+    await client.update_application_info()
+    print(f'owner: {client.owner:f} ({client.owner.id})')
     
 Koishi.events(bot_reaction_waitfor())
 Koishi.events(bot_reaction_delete_waitfor())
@@ -1288,12 +1289,12 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                 
                 value=content[0]
                 
-                role=guild.get_role(name)
+                role=guild.get_role(value)
                 if role is not None:
                     text='A role already has that name!'
                     break
                 
-                result[name]=value
+                result[key]=value
                     
                 index=1
                 while index!=limit:
@@ -2337,7 +2338,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                         user=message.mentions[0]
                     else:
                         user=guild.get_user(value)
-                        if user is None and value.isdigit:
+                        if user is None and value.isdigit():
                             user=guild.users.get(int(value))
                     if user is None:
                         text='Could not find that user'
@@ -2423,11 +2424,51 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##            return
 ##
 ##        try:
-##            guild = await client.guild_get_by_id(id_)
+##            guild = await client.guild_get(id_)
 ##        except Forbidden:
 ##            return
 ##        
 ##        await client.message_create(message.channel,f'{guild.name}\n{guild.icon_url}')
-    
+
+##    @on_command
+##    async def emoji_get(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner or guild is None or not content:
+##            return
+##
+##        content=filter_content(content)
+##        
+##        try:
+##            emoji_id=int(content[0])
+##        except ValueError:
+##            pass
+##
+##        #for testing purpose
+##        if len(content)>1:
+##            try:
+##                guild_id=int(content[1])
+##            except ValueError:
+##                pass
+##            try:
+##                guild=GUILDS[guild_id]
+##            except KeyError:
+##                guild=Unknown('Guild',guild_id) #we will get forbidden
+##        try:
+##            emoji = await client.emoji_get(guild,emoji_id)
+##        except Forbidden:
+##            await client.message_create(message.channel,'not part of that guild')
+##        else:
+##            await client.message_create(message.channel,emoji.as_emoji)
+##
+##    @on_command
+##    async def all_emojis(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner or guild is None:
+##            return
+##
+##        emojis = await client.emoji_get_all(guild)
+##        await client.message_create(message.channel,smart_join((emoji.as_emoji for emoji in emojis),2000))
+
+
 start_clients()
 
