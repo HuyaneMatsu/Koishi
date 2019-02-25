@@ -16,8 +16,8 @@ from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
 from discord_uwu.activity import activity_game
 from discord_uwu.others import ( \
     is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
-    guild_features,message_notification_levels,voice_regions, now_as_id,
-    verification_levels,content_filter_levels,audit_log_events, Unknown,)
+    guild_features,message_notification_levels,voice_regions, Unknown,
+    verification_levels,content_filter_levels,audit_log_events, )
 from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
@@ -236,7 +236,7 @@ async def message_create(client,message):
         else:
             return
     await client.message_create(message.channel,text)
-
+        
 
 
 @Koishi.events
@@ -2545,7 +2545,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @on_command
     async def change_prefix(client,message,content):
         guild=message.guild
-        if guild is None or message.author is not guild.owner:
+        if guild is None or message.author is not guild.owner or not content or len(content)>32:
             return
         
         if PREFIXES.add(guild,content):

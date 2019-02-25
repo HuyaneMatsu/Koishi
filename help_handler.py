@@ -10,10 +10,8 @@ HELP={}
 
 HELP_COLOR=Color.from_html('#ffd21e')
 
-HELPHELP=[]
-
-def create_help_help():
-    HELPHELP.clear()
+def create_help_help(prefix):
+    result=[]
 
     pages=[]
     part=[]
@@ -35,8 +33,10 @@ def create_help_help():
     while index<limit:
         page=Embed(title='Commands:',color=HELP_COLOR,description=pages[index])
         index+=1
-        page.fields.append(Embed_field(name=f'Use {PREFIX}help *command* for more information.',value=f'page {index}/{limit}'))
-        HELPHELP.append({'embed':rendered_embed(page)})
+        page.fields.append(Embed_field(name=f'Use {prefix}help *command* for more information.',value=f'page {index}/{limit}'))
+        result.append({'embed':page})
+
+    return result
 
 HELP['help']=rendered_embed(Embed(title='rate',color=HELP_COLOR,
     description='Shows the list of the commands.'
@@ -244,6 +244,10 @@ HELP['love']=rendered_embed(Embed(title='love',color=HELP_COLOR,
     description='How much you two fit together?'
         ))
 
+HELP['change_prefix']=rendered_embed(Embed(title='change_prefix',color=HELP_COLOR,
+    description='Changes my prefix at the guild (guild owner only)!'
+        ))
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
@@ -260,15 +264,13 @@ async def on_command_help(client,message,content):
         
         await client.message_create(message.channel,embed=result)
     else:
-        pagination(client,message.channel,HELPHELP)
+        pagination(client,message.channel,create_help_help(client.events.message_create.prefix(message)))
     
 async def invalid_command(client,message,command,content):
+    prefix=client.events.message_create.prefix(message)
     try:
-        message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command `{command}`, try using: `{PREFIX}help`',color=HELP_COLOR))
+        message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command `{command}`, try using: `{prefix}help`',color=HELP_COLOR))
         await asyncio.sleep(30.,loop=client.loop)
         await client.message_delete(message)
     except (Forbidden,HTTPException):
         pass
-
-
-create_help_help()
