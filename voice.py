@@ -133,7 +133,7 @@ async def voice(client,message,content):
                 if channel is None:
                     text=f'Not existing channel: "{name}"!'
                     break
-                if channel.type_lookup!=2:
+                if channel.type!=2:
                     text='Not voice channel.'
                     break
             else:

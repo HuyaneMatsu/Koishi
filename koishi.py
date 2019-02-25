@@ -5,6 +5,8 @@ import os
 import re
 import asyncio
 import time
+import json
+#import pickle
 #moving to the outer folder, so uwu ll count as a package
 sys.path.append(os.path.abspath('..'))
 
@@ -14,14 +16,16 @@ from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
 from discord_uwu.activity import activity_game
 from discord_uwu.others import ( \
     is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
-    guild_features,message_notification_levels,voice_regions,
-    verification_levels,content_filter_levels,audit_log_events, Unknown)
+    guild_features,message_notification_levels,voice_regions, now_as_id,
+    verification_levels,content_filter_levels,audit_log_events, Unknown,)
 from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
 from discord_uwu.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
-from discord_uwu.events import waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,bot_message_event,wait_for_message,wait_for_emoji
-from discord_uwu.futures import wait_one
+from discord_uwu.events import ( \
+    waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,
+    bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild)
+from discord_uwu.futures import wait_one,CancelledError
 from discord_uwu.prettyprint import pchunkify
 from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 from discord_uwu.webhook import Webhook
@@ -149,6 +153,48 @@ schannel=schannel()
 ##    
 ##    _default_cancel=pagination._default_cancel
 
+class cooldown_handler:
+    __slots__=['cache']
+    def __init__(self):
+        self.cache={}
+    async def __call__(self,client,message,command,time_left):
+        id_=message.author.id
+        try:
+            notification,waiter=self.cache[id_]
+            if notification.channel is message.channel:
+                await client.message_edit(notification,f'**{message.author:f}** please cool down, {int(time_left)} seconds left!')
+                return
+            waiter.cancel()
+        except KeyError:
+            pass
+        notification = await client.message_create(message.channel,f'**{message.author:f}** please cool down, {int(time_left)} seconds left!')
+        waiter=client.loop.create_task(self.waiter(client,id_,notification))
+        self.cache[id_]=(notification,waiter)
+    async def waiter(self,client,id_,notification):
+        try:
+            await asyncio.sleep(30.,loop=client.loop)
+        except CancelledError:
+            pass
+        del self.cache[id_]
+        try:
+            await client.message_delete(notification)
+        except (Forbidden,HTTPException):
+            pass
+
+PREFIX_FILENAME='prefixes.json'
+try:
+    with open(PREFIX_FILENAME,'r') as file:
+        PREFIXES=prefix_by_guild.from_json_serialization(json.load(file))
+except (FileNotFoundError,OSError,PermissionError,json.decoder.JSONDecodeError):
+    PREFIXES=prefix_by_guild(PREFIX)
+
+##PREFIX_FILENAME='prefixes.pcl'
+##try:
+##    with open(PREFIX_FILENAME,'rb') as file:
+##        PREFIXES=pickle.load(file)
+##except (FileNotFoundError,OSError,PermissionError,pickle.UnpicklingError):
+##    PREFIXES=prefix_by_guild(PREFIX)
+    
 Koishi=Client(TOKEN,loop=1)
 Koishi.activity=activity_game.create(name='with Satori')
 
@@ -212,7 +258,7 @@ Koishi.events(schannel.guild_user_add)
 Koishi.events(schannel.guild_ban_add)
 Koishi.events(schannel.guild_ban_delete)
 
-with Koishi.events(bot_message_event(PREFIX)) as on_command:
+with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
     on_command(schannel.set_channel,'here')
     on_command.extend(infos)
@@ -973,7 +1019,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                         if not category:
                             text='Cagory not found.'
                             break
-                        if category.type_lookup!=4:
+                        if category.type!=4:
                             text='You can move channels only to Category channel or to the guild.'
                             break
 
@@ -1025,7 +1071,7 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
                     if channel is None:
                         text='Could not find that channel!'
                         break
-                if channel.type_lookup!=2:
+                if channel.type!=2:
                     text='Can move user only from voice channel to voice channel!'
                     break
                 if channel is state.channel:
@@ -2469,6 +2515,54 @@ with Koishi.events(bot_message_event(PREFIX)) as on_command:
 ##        emojis = await client.emoji_get_all(guild)
 ##        await client.message_create(message.channel,smart_join((emoji.as_emoji for emoji in emojis),2000))
 
+    @on_command
+    @cooldown(30.,'user',handler=cooldown_handler())
+    async def cheer(client,message,content):
+        await client.message_create(message.channel,embed=Embed('CHEERS!',color=Color.d_purple))
+
+    @on_command
+    @cooldown(60.,'c',case='cheers')
+    async def almost_cheer(client,message,content):
+        await client.message_create(message.channel,embed=Embed(BUILTIN_EMOJIS['cheese'].as_emoji,color=Color.d_purple))
+
+    @on_command
+    @cooldown(60.,'g',)
+    async def cheese(client,message,content):
+        await client.message_create(message.channel,embed=Embed(BUILTIN_EMOJIS['cheese'].as_emoji,color=Color.d_purple))
+
+##    #if we use prefix as str/list
+##    @on_command
+##    async def add_prefix(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##        prefixes=client.events.message_create.prefix
+##        if type(prefixes) is str:
+##            prefixes=[prefixes]
+##        prefixes.append(content)
+##        client.events.message_create.update_prefix(prefixes)
+##        await client.message_create(message.channel,'OwO')
+
+    @on_command
+    async def change_prefix(client,message,content):
+        guild=message.guild
+        if guild is None or message.author is not guild.owner:
+            return
+        
+        if PREFIXES.add(guild,content):
+            try:
+                with open(PREFIX_FILENAME,'w') as file:
+                    json.dump(PREFIXES.to_json_serializable(),file)
+            except (FileNotFoundError,OSError,PermissionError):
+                pass
+##            try:
+##                with open(PREFIX_FILENAME,'wb') as file:
+##                    pickle.dump(PREFIXES,file)
+##            except (FileNotFoundError,OSError,PermissionError):
+##                pass
+            
+            await client.message_create(message.channel,'OwO')
+        else:
+            await client.message_create(message.channel,'Thats the actual prefix')
 
 start_clients()
 

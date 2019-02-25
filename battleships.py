@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import re, random, time, asyncio
 
+from discord_uwu.dereaddons_local import inherit
+
 from discord_uwu.events import waitfor_wrapper,wait_and_continue,bot_reaction_waitfor
 from discord_uwu.others import filter_content,is_user_mention
 from discord_uwu.futures import wait_one,CancelledError,wait_more,future_or_timeout
@@ -8,16 +10,14 @@ from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.embed import Embed,Embed_footer,Embed_author
 from discord_uwu.exceptions import Forbidden,HTTPException
 
-
+@inherit(bot_reaction_waitfor)
 class bot_reaction_delete_waitfor:
     __slots__=['__name__', 'waitfors']
     def __init__(self):
         self.__name__='reaction_delete'
         self.waitfors={}
-        
-    append=bot_reaction_waitfor.append
-    remove=bot_reaction_waitfor.remove
-    __call__=bot_reaction_waitfor.__call__
+
+del inherit
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
 
