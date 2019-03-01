@@ -276,8 +276,8 @@ async def process_on_command_upload(client,message,content):
     tags=[x.lower() for x in re.findall(r'\S+',content) if not is_mention(x)]
 
     source=message.author
-    if message.mentions:
-        for mention in message.mentions:
+    if message.user_mentions is not None:
+        for mention in message.user_mentions:
             if mention!=client:
                 source=mention        
     
@@ -295,7 +295,7 @@ async def process_on_command_upload(client,message,content):
         return 'Huh?'
 
 
-    filename=result.filename
+    filename=result.name
     
     index=filename.rfind('.')
     if index<0:

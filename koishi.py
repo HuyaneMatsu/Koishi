@@ -17,7 +17,8 @@ from discord_uwu.activity import activity_game
 from discord_uwu.others import ( \
     is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
     guild_features,message_notification_levels,voice_regions, Unknown,
-    verification_levels,content_filter_levels,audit_log_events, )
+    verification_levels,content_filter_levels,audit_log_events,
+    is_role_mention,ext_from_base64)
 from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
@@ -26,7 +27,7 @@ from discord_uwu.events import ( \
     waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,
     bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild)
 from discord_uwu.futures import wait_one,CancelledError
-from discord_uwu.prettyprint import pchunkify
+from discord_uwu.prettyprint import pchunkify,connect
 from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 from discord_uwu.webhook import Webhook
 from discord_uwu.audit_logs import Audit_log_iterator
@@ -295,8 +296,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     async def rate(client,message,content):
         target=None
         if content:
-            if message.mentions:
-                target=message.mentions[0]
+            if message.user_mentions:
+                target=message.user_mentions[0]
             else:
                 guild=message.guild
                 if guild is not None:
@@ -399,8 +400,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##                text='The 1st line must contain a mention/username of the "lucky" person.'
 ##                break
 ##            content=content[0]
-##            if message.mentions and is_user_mention(content):
-##                user=message.mentions[0]
+##            if message.user_mentions and is_user_mention(content):
+##                user=message.user_mentions[0]
 ##            else:
 ##                user=guild.get_user(content)
 ##                if user is None:
@@ -464,14 +465,14 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                 if limit==1:
                     text='You can edit "nick", "role", "deaf", "mute", "voice_channel".'
                     break
-                if message.mentions:
-                    if len(message.mentions)>1:
+                if message.user_mentions:
+                    if len(message.user_mentions)>1:
                         text='Pls send 1 mention or 1 name and stuffs to change.'
                         break
                     if not is_user_mention(content[0]):
                         text='1st value must be mention.'
                         break
-                    user=message.mentions[0]
+                    user=message.user_mentions[0]
                 else:
                     user=guild.get_user(content[0])
                     if user is None:
@@ -729,8 +730,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                         break
 
                     if name=='owner':
-                        if message.mentions and is_user_mention(value):
-                            user=message.mentions[0]
+                        if message.user_mentions and is_user_mention(value):
+                            user=message.user_mentions[0]
                         else:
                             user=guild.get_user(value)
                             if user is None:
@@ -756,14 +757,14 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                     if name=='icon':
 
                         if value.lower()=='none':
-                            result[name]=b''
+                            result[name]=None
                             continue
                             
                         if len(message.attachments)<=attach_index:
                             text='The message has no attachments to change icon'
                             break
                         
-                        ext=os.path.splitext(message.attachments[attach_index].filename)[1]
+                        ext=os.path.splitext(message.attachments[attach_index].name)[1]
                         if len(ext)<2:
                             text='Missing extension.'
                             break
@@ -783,14 +784,14 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                             break
 
                         if value.lower()=='none':
-                            result[name]=b''
+                            result[name]=None
                             continue
 
                         if len(message.attachments)<=attach_index:
                             text='The message has no attachments to change splash'
                             break
                         
-                        ext=os.path.splitext(message.attachments[attach_index].filename)[1]
+                        ext=os.path.splitext(message.attachments[attach_index].name)[1]
                         if len(ext)<2:
                             text='Missing extension.'
                             break
@@ -807,7 +808,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                     if name=='afk_channel':
                         
                         if value.lower()=='none':
-                            result[name]=False
+                            result[name]=None
                             continue
 
                         if message.channel_mentions and is_channel_mention(value):
@@ -829,7 +830,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                     if name=='system_channel':
                         
                         if value.lower()=='none':
-                            result[name]=False
+                            result[name]=None
                             continue
 
                         if message.channel_mentions and is_channel_mention(value):
@@ -1048,8 +1049,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
                 if len(content)==2:
                     name=content.pop(0)
-                    if message.mentions and is_user_mention(name):
-                        user=message.mentions[0]
+                    if message.user_mentions and is_user_mention(name):
+                        user=message.user_mentions[0]
                     else:
                         user=guild.get_user(name)
                         if user is None:
@@ -1250,8 +1251,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         guild=message.guild
         target=message.author
         if content:
-            if message.mentions and is_user_mention(content):
-                target=message.mentions[0]
+            if message.user_mentions and is_user_mention(content):
+                target=message.user_mentions[0]
             elif guild is not None:
                 user=guild.get_user(content)
                 if user is not None:
@@ -1433,7 +1434,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                     text='The message has no attachments'
                     break
 
-                ext=os.path.splitext(message.attachments[0].filename)[1]
+                ext=os.path.splitext(message.attachments[0].name)[1]
                 if len(ext)<2:
                     text='Missing extension'
                     break
@@ -1738,8 +1739,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             return
 
         name=content.pop(0)
-        if is_user_mention(name) and message.mentions:
-            user=message.mentions[0]
+        if is_user_mention(name) and message.user_mentions:
+            user=message.user_mentions[0]
         else:
             user=guild.get_user(name)
             if user is None:
@@ -1761,8 +1762,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##        guild=message.guild
 ##        target=None
 ##        if content:
-##            if message.mentions:
-##                target=message.mentions[0]
+##            if message.user_mentions:
+##                target=message.user_mentions[0]
 ##            elif guild is not None:
 ##                target=guild.get_user(content)
 ##        if target is None:
@@ -1982,8 +1983,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             return
 
         name=content.pop(0)
-        if is_user_mention(name) and message.mentions:
-            user=message.mentions[0]
+        if is_user_mention(name) and message.user_mentions:
+            user=message.user_mentions[0]
         else:
             user=guild.get_user(name)
             if user is None:
@@ -2206,7 +2207,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##            return
 ##        
 ##        if message.attachments:
-##            ext=os.path.splitext(message.attachments[0].filename)[1]
+##            ext=os.path.splitext(message.attachments[0].name)[1]
 ##            if len(ext)<2:
 ##                return
 ##            ext=ext[1:].lower()
@@ -2288,7 +2289,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##
 ##        if 'avatar' in content:
 ##            if message.attachments:
-##                ext=os.path.splitext(message.attachments[0].filename)[1]
+##                ext=os.path.splitext(message.attachments[0].name)[1]
 ##                if len(ext)<2:
 ##                    return
 ##                ext=ext[1:].lower()
@@ -2380,8 +2381,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                     if key in kwargs:
                         text=f'dupe key {key}'
                         break
-                    if message.mentions is not None and is_user_mention(value):
-                        user=message.mentions[0]
+                    if message.user_mentions is not None and is_user_mention(value):
+                        user=message.user_mentions[0]
                     else:
                         user=guild.get_user(value)
                         if user is None and value.isdigit():
@@ -2563,6 +2564,404 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             await client.message_create(message.channel,'OwO')
         else:
             await client.message_create(message.channel,'Thats the actual prefix')
+
+    @on_command
+    async def create_pow(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        content=filter_content(content)
+        text=''
+        while True:
+            if not guild.permissions_for(message.author).can_administrator:
+                text='You do not have permissions granted to use this command.'
+                break
+            if len(content)<4:
+                text='And who\'s / what\'s to change and to what to change?\nThe correct formula is the following:\n"Channel Target Allow Deny <reason>".'
+                break
+
+            channel_name=content[0]                            
+            
+            target_name=content[1]
+
+            try:
+                allow=int(content[2])
+            except ValueError:
+                text='Allow must be number'
+                break
+
+            try:
+                deny=int(content[3])
+            except ValueError:
+                text='Deny must be number'
+                break
+
+            if message.channel_mentions is not None and is_channel_mention(channel_name):
+                channel=message.channel_mentions[0]
+            else:
+                if channel_name.isdigit():
+                    try:
+                        channel=guild.all_channel[int(channel_name)]
+                    except KeyError:
+                        channel=guild.get_channel(channel_name)
+                        if channel is None:
+                            text='Could not find that channel'
+                            break
+            while True:
+                if target_name.isdigit():
+                    target_id=int(target_name)
+                    try:
+                        target=guild.users[target_id]
+                        break
+                    except KeyError:
+                        pass
+                    try:
+                        target=guild.all_role[target_id]
+                        break
+                    except KeyError:
+                        pass
+
+                if message.role_mentions is not None and is_role_mention[target_name]:
+                    target=message.role_mentions[0]
+                    break
+                
+                if message.user_mentions is not None and is_user_mention(target_name):
+                    target=message.user_mentions[0]
+                    break
+                
+                target=guild.get_role(target_name)
+                if target is not None:
+                    break
+
+                target=guild.get_user(target_name)
+                if target is not None:
+                    break
+                
+                text='Could not find that target!'
+                break
+            
+            if text:
+                break
+
+            if len(content)>4:
+                reason=content[4]
+            else:
+                reason=None
+
+            try:
+                await client.permission_ow_create(channel,target,allow,deny,reason)
+            except Forbidden:
+                text='Access denied'
+            except HTTPException:
+                text='Cannot do that!'
+            else:
+                text='Pat me!'
+            break
+
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def edit_pow(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        content=filter_content(content)
+        text=''
+        while True:
+            if not guild.permissions_for(message.author).can_administrator:
+                text='You do not have permissions granted to use this command.'
+                break
+            if len(content)<4:
+                text='And who\'s / what\'s to change and to what to change?\nThe correct formula is the following:\n"Channel Target Allow Deny <reason>".'
+                break
+
+            channel_name=content[0]                            
+            
+            target_name=content[1]
+
+            try:
+                allow=int(content[2])
+            except ValueError:
+                text='Allow must be number'
+                break
+
+            try:
+                deny=int(content[3])
+            except ValueError:
+                text='Deny must be number'
+                break
+
+            if message.channel_mentions is not None and is_channel_mention(channel_name):
+                channel=message.channel_mentions[0]
+            else:
+                if channel_name.isdigit():
+                    try:
+                        channel=guild.all_channel[int(channel_name)]
+                    except KeyError:
+                        channel=guild.get_channel(channel_name)
+                        if channel is None:
+                            text='Could not find that channel'
+                            break
+            while True:
+                if target_name.isdigit():
+                    target_id=int(target_name)
+                    try:
+                        target=guild.users[target_id]
+                        break
+                    except KeyError:
+                        pass
+                    try:
+                        target=guild.all_role[target_id]
+                        break
+                    except KeyError:
+                        pass
+
+                if message.role_mentions is not None and is_role_mention[target_name]:
+                    target=message.role_mentions[0]
+                    break
+                
+                if message.user_mentions is not None and is_user_mention(target_name):
+                    target=message.user_mentions[0]
+                    break
+                
+                target=guild.get_role(target_name)
+                if target is not None:
+                    break
+
+                target=guild.get_user(target_name)
+                if target is not None:
+                    break
+                
+                text='Could not find that target!'
+                break
+            
+            if text:
+                break
+
+            for overwrite in channel.overwrites:
+                if overwrite.target is target:
+                    break
+            else:
+                text='Could not find permission overwrite on that user'
+                break
+            
+            if len(content)>4:
+                reason=content[4]
+            else:
+                reason=None
+
+            try:
+                await client.permission_ow_edit(channel,overwrite,allow,deny,reason)
+            except Forbidden:
+                text='Access denied'
+            except HTTPException:
+                text='Cannot do that!'
+            else:
+                text='Pat me!'
+            break
+
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def delete_pow(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
+        content=filter_content(content)
+        text=''
+        while True:
+            if not guild.permissions_for(message.author).can_administrator:
+                text='You do not have permissions granted to use this command.'
+                break
+            if len(content)<4:
+                text='And who\'s / what\'s to change and to what to change?\nThe correct formula is the following:\n"Channel Target Allow Deny <reason>".'
+                break
+
+            channel_name=content[0]                            
+            
+            target_name=content[1]
+
+            if message.channel_mentions is not None and is_channel_mention(channel_name):
+                channel=message.channel_mentions[0]
+            else:
+                if channel_name.isdigit():
+                    try:
+                        channel=guild.all_channel[int(channel_name)]
+                    except KeyError:
+                        channel=guild.get_channel(channel_name)
+                        if channel is None:
+                            text='Could not find that channel'
+                            break
+            while True:
+                if target_name.isdigit():
+                    target_id=int(target_name)
+                    try:
+                        target=guild.users[target_id]
+                        break
+                    except KeyError:
+                        pass
+                    try:
+                        target=guild.all_role[target_id]
+                        break
+                    except KeyError:
+                        pass
+
+                if message.role_mentions is not None and is_role_mention[target_name]:
+                    target=message.role_mentions[0]
+                    break
+                
+                if message.user_mentions is not None and is_user_mention(target_name):
+                    target=message.user_mentions[0]
+                    break
+                
+                target=guild.get_role(target_name)
+                if target is not None:
+                    break
+
+                target=guild.get_user(target_name)
+                if target is not None:
+                    break
+                
+                text='Could not find that target!'
+                break
+            
+            if text:
+                break
+
+            for overwrite in channel.overwrites:
+                if overwrite.target is target:
+                    break
+            else:
+                text='Could not find permission overwrite on that user'
+                break
+            
+            if len(content)>2:
+                reason=content[2]
+            else:
+                reason=None
+
+            try:
+                await client.permission_ow_delete(channel,overwrite,reason)
+            except Forbidden:
+                text='Access denied'
+            except HTTPException:
+                text='Cannot do that!'
+            else:
+                text='Pat me!'
+            break
+
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def test_download(client,message,content):
+        if message.attachments is None or message.author is not client.owner:
+            return
+
+        file = await client.download_url(message.attachments[0].url)
+        await client.message_create_file(message.channel,file,filename=message.attachments[0].name,content='Here is your file!')
+
+    @on_command
+    async def test_files(client,message,content):
+        if message.author is not client.owner:
+            return
+        files=[(b'UwU','UwU'),(b'OwO','OwO'),(b'0w0',None)]
+        await client.message_create_files(message.channel,files,'Did it work OwO?')
+
+    @on_command
+    async def test_files1(client,message,content):
+        if message.author is not client.owner:
+            return
+        files=[(b'UwU','UwU')]
+        await client.message_create_files(message.channel,files,'Did it work OwO?')
+        
+    @on_command
+    async def bypass_connection_check(client,message,content):
+        if message.author is not client.owner:
+            return
+        try:
+            data = await client.http.client_connections(client)
+        except Exception as err:
+            content=repr(err)
+        else:
+            content=repr(data)
+            
+        await client.message_create(message.channel,content)
+
+    @on_command
+    async def test_connection(client,message,content):
+        if message.author is not client.owner:
+            return
+        try:
+            connections = await client.client_connections()
+        except Exception as err:
+            content=repr(err)
+        else:
+            content=connect(connections.values)
+
+        await client.message_create(message.channel,content)
+
+    @on_command
+    async def edit_name(client,message,content):
+        try:
+            await client.client_edit(name=content)
+        except ValueError as err:
+            text=err.args[0]
+        except HTTPException as err:
+            text=err.args[0]
+        except Forbidden:
+            text='Forbidden'
+        else:
+            text='Kyaaaa'
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def edit_avatar(client,message,content):
+        if message.author is not client.owner:
+            return
+
+        if message.attachments is not None:
+            file = await client.download_url(message.attachments[0].url)
+        else:
+            file=None
+
+        try:
+            await client.client_edit(avatar=file)
+        except ValueError as err:
+            text=err.args[0]
+        except HTTPException as err:
+            text=err.args[0]
+        except Forbidden:
+            text='Forbidden'
+        else:
+            text='Kyaaaa'
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def nikki(client,message,content):
+        await client.message_create(message.channel,embed=Embed('YUKI YUKI YUKI!','''
+            ░░░░░░░░░░░▄▄▀▀▀▀▀▀▀▀▄▄░░░░░░░░░░░░░
+            ░░░░░░░░▄▀▀░░░░░░░░░░░░▀▄▄░░░░░░░░░░
+            ░░░░░░▄▀░░░░░░░░░░░░░░░░░░▀▄░░░░░░░░
+            ░░░░░▌░░░░░░░░░░░░░▀▄░░░░░░░▀▀▄░░░░░
+            ░░░░▌░░░░░░░░░░░░░░░░▀▌░░░░░░░░▌░░░░
+            ░░░▐░░░░░░░░░░░░▒░░░░░▌░░░░░░░░▐░░░░
+            ░░░▌▐░░░░▐░░░░▐▒▒░░░░░▌░░░░░░░░░▌░░░
+            ░░▐░▌░░░░▌░░▐░▌▒▒▒░░░▐░░░░░▒░▌▐░▐░░░
+            ░░▐░▌▒░░░▌▄▄▀▀▌▌▒▒░▒░▐▀▌▀▌▄▒░▐▒▌░▌░░
+            ░░░▌▌░▒░░▐▀▄▌▌▐▐▒▒▒▒▐▐▐▒▐▒▌▌░▐▒▌▄▐░░
+            ░▄▀▄▐▒▒▒░▌▌▄▀▄▐░▌▌▒▐░▌▄▀▄░▐▒░▐▒▌░▀▄░
+            ▀▄▀▒▒▌▒▒▄▀░▌█▐░░▐▐▀░░░▌█▐░▀▄▐▒▌▌░░░▀
+            ░▀▀▄▄▐▒▀▄▀░▀▄▀░░░░░░░░▀▄▀▄▀▒▌░▐░░░░░
+            ░░░░▀▐▀▄▒▀▄░░░░░░░░▐░░░░░░▀▌▐░░░░░░░
+            ░░░░░░▌▒▌▐▒▀░░░░░░░░░░░░░░▐▒▐░░░░░░░
+            ░░░░░░▐░▐▒▌░░░░▄▄▀▀▀▀▄░░░░▌▒▐░░░░░░░
+            ░░░░░░░▌▐▒▐▄░░░▐▒▒▒▒▒▌░░▄▀▒░▐░░░░░░░
+            ░░░░░░▐░░▌▐▐▀▄░░▀▄▄▄▀░▄▀▐▒░░▐░░░░░░░
+            ░░░░░░▌▌░▌▐░▌▒▀▄▄░░░░▄▌▐░▌▒░▐░░░░░░░
+            ░░░░░▐▒▐░▐▐░▌▒▒▒▒▀▀▄▀▌▐░░▌▒░▌░░░░░░░
+            ░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░
+            ''',0xffafde,'https://www.youtube.com/watch?v=NI_fgwbmJg0&t=0s'))
+
 
 start_clients()
 

@@ -226,8 +226,8 @@ async def parse_details_command(client,message,content):
                     if user is not None:
                         text='User mentioned more times'
                         break
-                    if is_user_mention(name) and message.mentions:
-                        user=message.mentions[0]
+                    if is_user_mention(name) and message.user_mentions:
+                        user=message.user_mentions[0]
                     else:
                         user=guild.get_user(name)
                         if user is None:
@@ -239,7 +239,7 @@ async def parse_details_command(client,message,content):
                     if channel is not None:
                         text='Channel mentioned more times'
                         break
-                    if is_channel_mention(name) and message.channel.mentions:
+                    if is_channel_mention(name) and message.channel.user_mentions:
                         channel=message.channel_mentions[0]
                     else:
                         channel=guild.get_channel(name)
@@ -280,8 +280,8 @@ async def user_info(client,message,content):
     target=None
     if content:
         if guild is not None:
-            if is_user_mention(content) and message.mentions:
-                target=message.mentions[0]
+            if is_user_mention(content) and message.user_mentions:
+                target=message.user_mentions[0]
             else:
                 user=guild.get_user(content)
                 if user is not None:
@@ -584,8 +584,8 @@ async def love(client,message,content):
         return
     
     name=filter_content(content)[0]
-    if message.mentions and is_user_mention(name):
-        target=message.mentions[0]
+    if message.user_mentions is not None and is_user_mention(name):
+        target=message.user_mentions[0]
     else:
         target=guild.get_user(name)
         if target is None:

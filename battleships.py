@@ -5,7 +5,7 @@ from discord_uwu.dereaddons_local import inherit
 
 from discord_uwu.events import waitfor_wrapper,wait_and_continue,bot_reaction_waitfor
 from discord_uwu.others import filter_content,is_user_mention
-from discord_uwu.futures import wait_one,CancelledError,wait_more,future_or_timeout
+from discord_uwu.futures import wait_one,CancelledError,wait_more,future_or_timeout,sleep
 from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.embed import Embed,Embed_footer,Embed_author
 from discord_uwu.exceptions import Forbidden,HTTPException
@@ -50,12 +50,13 @@ LINE_Y_LEAD=( \
 
 SHIP_VALUES=( \
     OCEAN,
-    BUILTIN_EMOJIS['motorboat'].as_emoji,
-    BUILTIN_EMOJIS['sailboat'].as_emoji,
-    BUILTIN_EMOJIS['ferry'].as_emoji,
     BUILTIN_EMOJIS['cruise_ship'].as_emoji,
+    BUILTIN_EMOJIS['ferry'].as_emoji,
+    BUILTIN_EMOJIS['speedboat'].as_emoji,
+    OCEAN,
     BUILTIN_EMOJIS['cyclone'].as_emoji,
     BUILTIN_EMOJIS['fireworks'].as_emoji,
+    BUILTIN_EMOJIS['boom'].as_emoji,
         )
 
 HIDDEN_VALUES=( \
@@ -66,6 +67,7 @@ HIDDEN_VALUES=( \
     OCEAN,
     BUILTIN_EMOJIS['cyclone'].as_emoji,
     BUILTIN_EMOJIS['fireworks'].as_emoji,
+    BUILTIN_EMOJIS['boom'].as_emoji,
         )
 
 SWITCH=BUILTIN_EMOJIS['arrows_counterclockwise']
@@ -91,7 +93,7 @@ def render_map(data,values):
 
     return result
 
-POS_PATTERN_0=re.compile('^([\d]{1,2}|[a-jA-J]{1}) *[/]{0,1} *([\d]{1,2}|[a-jA-J]{1}) +([1-4]) *([\|-]{0,1})$')
+POS_PATTERN_0=re.compile('^([\d]{1,2}|[a-jA-J]{1}) *[/]{0,1} *([\d]{1,2}|[a-jA-J]{1}) +([1-4])([xX]{0,1}| *)([1-4])$')
 POS_PATTERN_1=re.compile('^([\d]{1,2}|[a-jA-J]{1}) *[/]{0,1} *([\d]{1,2}|[a-jA-J]{1})$')
 
 
@@ -112,8 +114,8 @@ class wait_on_reply:
 
         content=content[1]
 
-        if is_user_mention(content) and message.mentions:
-            user=message.mentions[0]
+        if is_user_mention(content) and message.user_mentions:
+            user=message.user_mentions[0]
         else:
             user=self.guild.get_user(content)
 
@@ -161,8 +163,8 @@ class battle_manager:
                 break
             
             target=None   
-            if message.mentions:
-                target=message.mentions[0]
+            if message.user_mentions:
+                target=message.user_mentions[0]
             else:
                 target=guild.get_user(content)
                 if target is None:
@@ -197,7 +199,7 @@ class battle_manager:
             channel=message.channel
             private = await client.channel_private_create(target)
             
-            await client.message_create(channel,f'Waiting on {target:f}\'s reply here and at here dm.\nType:"accept name/mention" to accept')
+            await client.message_create(channel,f'Waiting on {target:f}\'s reply here and at dm.\nType:"accept name/mention" to accept')
             
             
             future=request.future=wait_one(client.loop)
@@ -249,16 +251,29 @@ class battle_manager:
             await client.message_create(message.channel,text)
             
 class ship_type:
-    __slots__=['size','parts_left']
-    def __init__(self,size):
-        self.size=size
-        self.parts_left=size
+    __slots__=['parts_left', 'size1', 'size2', 'type', 'x', 'y']
+    def __init__(self,x,y,size1,size2,type_):
+        self.x=x
+        self.y=y
+        self.size1=size1
+        self.size2=size2
+        self.type=type_
+        self.parts_left=size1*size2
+
+    def __iter__(self):
+        x_start=self.x
+        x_end=x_start+self.size1
+        y_start=self.y*10
+        y_end=y_start+self.size2*10
+        for n_x in range(x_start,x_end):
+            for n_y in range(y_start,y_end,10):
+                yield n_x+n_y
 
 class user_profile:
     __slots__=['channel', 'client', 'data', 'last_switch', 'other', 'page',
         'process', 'ship_positions', 'ships_left', 'state', 'target', 'text',
         'user', 'won']
-    ships=[2,4,3,2]
+    ships=[0,2,1,1]
     def __init__(self,user,client):
         self.user=user
         self.client=client
@@ -377,7 +392,7 @@ class user_profile:
         
     async def cancel_later(self):
         client=self.client
-        await asyncio.sleep(300.,client.loop)
+        await sleep(300.,client.loop)
         client.events.reaction_add.remove(self)
         client.events.reaction_delete.remove(self)
         del self.other
@@ -387,20 +402,26 @@ class user_profile:
         other=self.other
         text=['''
             Type "new" to show this message up again.
-            Type "A-J" "1-10" "1-3" <- or | (default(|)> to place a ship down.'
-            "1-3" stands for size, "-" and "|" stands for shape.'
+            Type "A-J" "1-10" for coordinate.
+            And "1-3" "1-3" for ship placement
             It always places the ship right-down from the source coordinate'
             ''']
         text.extend(render_map(self.data,SHIP_VALUES))
-        embed=Embed('','\n'.join(text))
+        embed=Embed('','\n'.join(text),0x010101)
         embed.author=Embed_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
         
         text.clear()
         if sum(self.ships_left):
             sub_text=[]
-            for size,amount in enumerate(self.ships_left,1):
-                if amount:
-                    sub_text.append(f'{amount} size {size}')
+            amount=self.ships_left[1]
+            if amount:
+                sub_text.append(f'{amount} size 1x3 ship left')
+            amount=self.ships_left[2]
+            if amount:
+                sub_text.append(f'{amount} size 1x4 ship left')
+            amount=self.ships_left[3]
+            if amount:
+                sub_text.append(f'{amount} size 2x2 ship left')
             text.append(', '.join(sub_text))
             text.append(' ship is left to place. ')
         text.append(self.text)
@@ -430,7 +451,7 @@ class user_profile:
             text.extend(render_map(self.data,SHIP_VALUES))
             footer=f'You have {sum(self.ships_left)} ships left on {len(self.ship_positions)} tiles. {self.text}'
 
-        embed=Embed('','\n'.join(text))
+        embed=Embed('','\n'.join(text),0x010101)
         embed.author=Embed_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
         embed.footer=Embed_footer(footer)
         return embed
@@ -450,7 +471,7 @@ class user_profile:
             text.append('Your ships:')
             text.extend(render_map(self.data,SHIP_VALUES))
                 
-        embed=Embed('','\n'.join(text))
+        embed=Embed('','\n'.join(text),0x010101)
         embed.author=Embed_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
         embed.footer=Embed_footer(self.text)
         return embed
@@ -600,50 +621,72 @@ class battleships_game:
                     break
                 y=('abcdefghij').index(value)
 
-            size=int(result[2])
-            if player.ships_left[size-1]==0:
+            size1=int(result[2])
+            size2=int(result[4])
+            if (size1==1 and size2==3) or (size1==3 and size2==1):
+                type_=1
+            elif (size1==1 and size2==4) or (size1==4 and size2==1):
+                type_=2
+            elif (size1==2 and size2==2):
+                type_=3
+            else:
+                text='Invalid ship size'
+                break
+            
+            if player.ships_left[type_]==0:
                 text='You do not have anymore ships from that size'
                 break
             
-            value=result[3]
-            mode= (value!='-')
-
+            
             text=''
-            if mode:
-                for n_y in range(y,y+size):
-                    if n_y>9:
-                        text=f'Can not set ship to {1+x}{chr(65+y)}, there is not enough space for it.'
-                        break
-                    if player.data[x+n_y*10]:
-                        text=f'Can not set ship to {1+x}/{chr(65+y)}, because coordinate {1+x}/{chr(65+n_y)} is already used.'
-                        break
-            else:
-                for n_x in range(x,x+size):
-                    if n_x>9:
-                        text=f'Can not set ship to {1+x}{chr(65+y)}, there is not enough space for it.'
-                        break
-                    if player.data[n_x+y*10]:
-                        text=f'Can not set ship to {1+x}/{chr(65+y)}, because coordinate {n_x}/{chr(65+y)} is already used.'
-                        break
-                    
+            
+            x_start=x
+            if x_start>0:
+                x_start=x_start-1
+            
+            x_end=x+size1
+            if x_end>10:
+                text='There is not enough space to place that ship!'
+                break
+            elif x_end<10:
+                x_end=x_end+1
+            
+            y_start=y*10
+            if y_start>0:
+                y_start=y_start-10
 
+            y_end=(y+size2)*10
+            if y_end>100:
+                text='There is not enough space to place that ship!'
+                break
+            elif y_end<100:
+                y_end=y_end+10
+
+                
+            data=player.data
+            for n_x in range(x_start,x_end):
+                for n_y in range(y_start,y_end,10):
+                    if data[n_x+n_y]:
+                        text=f'Can not set ship to {1+x}/{chr(65+y)}, because coordinate {1+n_x}/{chr(65+n_y//10)} is already used.'
+                        break
             if text:
                 break
             
-            ship=ship_type(size)
+            ship=ship_type(x,y,size1,size2,type_)
             cords=[]
-            if mode:
-                for n_y in range(y,y+size):
-                    player.data[x+n_y*10]=size
-                    player.ship_positions[x+(n_y<<4)]=ship
-                    cords.append(f'{chr(65+n_y)}/{1+x}')
-            else:
-                for n_x in range(x,x+size):
-                    player.data[n_x+y*10]=size
-                    player.ship_positions[n_x+(y<<4)]=ship
-                    cords.append(f'{chr(65+y)}/{n_x}')
-                    
-            player.ships_left[size-1]-=1
+
+            x_start=x
+            x_end=x+size1
+            y_start=y*10
+            y_end=(y+size2)*10
+            for n_x in range(x_start,x_end):
+                for n_y in range(y_start,y_end,10):
+                    cord=n_x+n_y
+                    data[cord]=type_
+                    player.ship_positions[cord]=ship
+                    cords.append(f'{chr(65+n_y//10)}/{1+n_x}')
+
+            player.ships_left[type_]-=1
 
             if sum(player.ships_left)==0:
                 self.future.set_result(player)
@@ -720,7 +763,7 @@ class battleships_game:
                 y=('abcdefghij').index(value)
 
             value=data[x+y*10]
-            if value in (5,6):
+            if value>4:
                 text='That position is already shot'
                 break
 
@@ -748,10 +791,12 @@ class battleships_game:
         del text
         
         data[x+y*10]=6
-        ship=other.ship_positions.pop(x+(y<<4))
+        ship=other.ship_positions.pop(x+y*10)
         ship.parts_left-=1
         if ship.parts_left==0:
-            other.ships_left[ship.size-1]-=1
+            other.ships_left[ship.type]-=1
+            for cord in ship:
+                data[cord]=7
             if sum(other.ships_left):
                 text1=f'You shot {chr(65+y)}/{1+x} and you sinked 1 of your opponents ships!\n'
                 text2=f'Your opponent shot {chr(65+y)}/{1+x} and your ship sinked :c\n'
