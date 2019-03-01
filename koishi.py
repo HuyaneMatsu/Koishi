@@ -26,7 +26,7 @@ from discord_uwu.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_a
 from discord_uwu.events import ( \
     waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,
     bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild)
-from discord_uwu.futures import wait_one,CancelledError
+from discord_uwu.futures import wait_one,CancelledError,sleep
 from discord_uwu.prettyprint import pchunkify,connect
 from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 from discord_uwu.webhook import Webhook
@@ -173,7 +173,7 @@ class cooldown_handler:
         self.cache[id_]=(notification,waiter)
     async def waiter(self,client,id_,notification):
         try:
-            await asyncio.sleep(30.,loop=client.loop)
+            await sleep(30.,client.loop)
         except CancelledError:
             pass
         del self.cache[id_]
@@ -1646,7 +1646,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             with client.keep_typing(message.channel):
                 invites = await client.invites_of_guild(guild)
                 for invite in invites:
-                    await asyncio.sleep(0.5,loop=client.loop)
+                    await sleep(0.5,client.loop)
                     try:
                         await client.invite_delete(invite)
                     except HTTPException:
@@ -1669,7 +1669,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##            with client.keep_typing(message.channel):
 ##                invites = await client.invites_of_guild(guild)
 ##                for invite in invites:
-##                    await asyncio.sleep(0.5,loop=client.loop)
+##                    await sleep(0.5,client.loop)
 ##                    if invite.online_count is not None:
 ##                        value=False
 ##                    else:
@@ -2014,7 +2014,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         if not is_id(content):
             message = await client.message_create('Pls type an id too')
-            await asyncio.sleep(30.,loop=client.loop)
+            await sleep(30.,client.loop)
             try:
                 await client.message_delete(message)
             except (Forbidden,HTTPException):
@@ -2049,7 +2049,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         if not is_id(value):
             message = await client.message_create('Pls type an id too')
-            await asyncio.sleep(30.,loop=client.loop)
+            await sleep(30.,client.loop)
             try:
                 await client.message_delete(message)
             except (Forbidden,HTTPException):
@@ -2097,7 +2097,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##                      cr_pg_channel_object(name='channel2',type_=Channel_text),
 ##                      cr_pg_channel_object(name='channel3',type_=Channel_text),])
 ##
-##        await asyncio.sleep(2.,loop=client.loop) #wait for dispatch
+##        await sleep(2.,client.loop) #wait for dispatch
 ##        invite = await client.invite_create_pref(guild,0,0)
 ##        channel = await client.channel_private_create(message.author)
 ##        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
