@@ -2,17 +2,20 @@
 import asyncio
 import math
 from random import choice
+import sys
 
 from discord_uwu.parsers import eventlist
-from discord_uwu.channel import get_message,Channel_text,Channel_category
+from discord_uwu.channel import get_message,Channel_text,Channel_category,CHANNELS
 from discord_uwu.prettyprint import pchunkify
 from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
 from discord_uwu.exceptions import Forbidden,HTTPException
 from discord_uwu.events import pagination
-from discord_uwu.embed import Embed,Embed_thumbnail,Embed_field
+from discord_uwu.embed import Embed,Embed_thumbnail,Embed_field,rendered_embed
 from discord_uwu.emoji import BUILTIN_EMOJIS
 from discord_uwu.color import Color
 from discord_uwu.user import USERS
+from discord_uwu.guild import GUILDS
+from discord_uwu.client_core import CLIENTS
 
 from help_handler import HELP
 
@@ -323,7 +326,7 @@ async def user_info(client,message,content):
             color=target.default_avatar.color
         
     embed=Embed(f'{target:f}','\n'.join(text),color)
-    embed.thumbnail=Embed_thumbnail(url=target.avatar_url_as(size=128))
+    embed.thumbnail=Embed_thumbnail(target.avatar_url_as(size=128))
 
     await client.message_create(message.channel,embed=embed)
 
@@ -614,3 +617,42 @@ async def love(client,message,content):
     embed.fields.append(Embed_field('My advice:',LOVE_VALUES[percent]['text']))
 
     await client.message_create(message.channel,embed=embed)
+
+class once:
+    __slots__=['content','embed','ready']
+    def __init__(self,content='',embed=None):
+        self.ready=False
+        self.content=content
+        self.embed=embed
+    async def __call__(self,client,message,content):
+        if self.ready:
+            await client.message_create(message.channel,self.content,self.embed)
+
+ABOUT=once()
+infos(ABOUT,'about')
+def update_about(client):
+    implement=sys.implementation
+    text=''.join([ \
+        f'Me, {client:f}, I am general purpose/test client.',
+        '\n',
+        'My code base is',
+        ' [open source](https://github.com/HuyaneMatsu/Koishi). ',
+        'One of the main goal of my existence is to test the best *cough*',
+        ' [discord API wrapper](https://github.com/HuyaneMatsu/discord_uwu). ',
+        '\n\n',
+        f'My Masutaa is {client.owner:f} (send neko pictures pls).\n\n',
+        '**Client info**\n',
+        f'Python version: {implement.version[0]}.{implement.version[1]}',
+        f'{"" if implement.version[3]=="final" else " "+implement.version[3]}\n',
+        f'Interpreter: {implement.name}\n',
+        f'Clients: {len(CLIENTS)}\n',
+        f'Users: {len(USERS)}\n',
+        f'Guilds: {len(GUILDS)}\n',
+        f'Channels: {len(CHANNELS)}\n',
+        'Power level: over 9000!\n',
+            ])
+    embed=Embed('About',text,0x5dc66f)
+    embed.thumbnail=Embed_thumbnail(client.application.icon_url_as(size=128))
+    ABOUT.embed=rendered_embed(embed)
+    ABOUT.ready=True
+

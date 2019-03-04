@@ -36,9 +36,10 @@ from discord_uwu.guild import GUILDS
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
 from pers_data import TOKEN,PREFIX,TOKEN2
-from infos import infos
+from infos import infos,update_about
 from voice import voice
 from battleships import battle_manager,bot_reaction_delete_waitfor
+from dispatch_tests import dispatch_tester
 
 def smart_join(list_,limit):
     limit-=4
@@ -50,69 +51,6 @@ def smart_join(list_,limit):
         result.append(value)
     result.append('...')
     return ' '.join(result)
-
-class schannel:
-    __slots__=['channel']
-    def __init__(self):
-        self.channel=None
-        
-    async def set_channel(self,client,message,content):
-        if message.author is client.owner:
-            self.channel=message.channel
-            await client.message_create(message.channel,'I ll send special messages to this channel')
-    
-    async def emoji_update(self,client,guild,modifications):
-        if self.channel is not None:
-            result=[]
-            for modtype,emoji,diff in modifications:
-                if modtype=='n':
-                    result.append(f'New emoji: "{emoji.name}" : {emoji}')
-                    continue
-                if modtype=='d':
-                    result.append(f'Deleted emoji: "{emoji.name}" : {emoji}')
-                    continue
-                if modtype=='e':
-                    result.append(f'Emoji edited: "{emoji.name}" : {emoji}\n{diff}')
-                    continue
-                raise RuntimeError #bugged?
-        
-            pages=[{'content':chunk} for chunk in chunkify(result)]
-            await client.message_create(self.channel,**pages[0])
-            
-    async def unknown_guild(self,client,parser,guild_id,data):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'Unknown guild at {parser}: {guild_id}\n data: {data}')
-
-    async def unknown_channel(self,client,parser,channel_id,data):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'Unknown channel at {parser}: {channel_id}\n data: {data}')
-
-    async def unknown_role(self,client,parser,guild,role_id,data):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'Unknown guild: {guild} at {parser}; role: {role_id}\n data: {data}')
-
-    async def unknown_voice_client(self,client,parser,voice_client_id,data):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'Unknown voice client at {parser}: {voice_client_id}\n data: {data}')
-
-    async def guild_user_delete(self,client,guild,user,profile):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'A user left a guild: {guild.name} : {user:f}')
-
-    async def guild_user_add(self,client,guild,user):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'A user joined the guild: {guild.name} :  {user:f}')
-            
-    async def guild_ban_add(self,client,guild,user):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'A user got banned from the guild: {guild.name} :  {user:f}')
-
-    async def guild_ban_delete(self,client,guild,user):
-        if self.channel is not None:
-            await client.message_create(self.channel,f'A user got unbanned from the guild: {guild.name} :  {user:f}')
-    
-            
-schannel=schannel()
 
 ##class pinner:
 ##    reset=BUILTIN_EMOJIS['arrows_counterclockwise']
@@ -245,23 +183,16 @@ async def ready(client):
     print(f'{client:f} ({client.id}) logged in')
     await client.update_application_info()
     print(f'owner: {client.owner:f} ({client.owner.id})')
+    update_about(client)
     
 Koishi.events(bot_reaction_waitfor())
 Koishi.events(bot_reaction_delete_waitfor())
 
-Koishi.events(schannel.emoji_update)
-Koishi.events(schannel.unknown_guild)
-Koishi.events(schannel.unknown_channel)
-Koishi.events(schannel.unknown_role)
-Koishi.events(schannel.unknown_voice_client)
-Koishi.events(schannel.guild_user_delete)
-Koishi.events(schannel.guild_user_add)
-Koishi.events(schannel.guild_ban_add)
-Koishi.events(schannel.guild_ban_delete)
 
 with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
-    on_command(schannel.set_channel,'here')
+    on_command(dispatch_tester.here)
+    on_command(dispatch_tester.switch)
     on_command.extend(infos)
     on_command(voice)
     on_command(on_command_image,'image')
@@ -951,7 +882,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                 else:
                     reason=f'Executed by {message.author:f}'
                 if key=='user':
-                    await client.guild_user_edit(guild,text[0],**text[1],reason=reason)
+                    await client.user_profile_edit(guild,text[0],**text[1],reason=reason)
                 elif key=='role':
                     await client.role_edit(text[0],**text[1],reason=reason)
                 elif key=='emoji':
@@ -2912,6 +2843,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             text='Forbidden'
         else:
             text='Kyaaaa'
+            update_about(client)
         await client.message_create(message.channel,text)
 
     @on_command
@@ -2934,6 +2866,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             text='Forbidden'
         else:
             text='Kyaaaa'
+            update_about(client)
         await client.message_create(message.channel,text)
 
     @on_command
@@ -2962,6 +2895,28 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             ░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░
             ''',0xffafde,'https://www.youtube.com/watch?v=NI_fgwbmJg0&t=0s'))
 
+    @on_command
+    async def sleeper(client,message,content):
+        try:
+            minutes=int(content)
+        except ValueError:
+            return
 
+        if minutes<5:
+            await client.message_create(message.channel,f'Minimum time is 5 minutes!')
+            return
+        
+        target=time.monotonic()+minutes*60.
+        
+        message = await client.message_create(message.channel,f'Game starts in: {minutes} minutes')
+        while True:
+            await sleep((target-time.monotonic())%60,client.loop)
+            minutes-=1
+            if minutes==0:
+                break
+            await client.message_edit(message,f'Game starts in: {minutes} minutes')
+            
+        await client.message_edit(message,'Game started')
+    
 start_clients()
 
