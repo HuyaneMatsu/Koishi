@@ -19,7 +19,7 @@ from discord_uwu.others import ( \
     guild_features,message_notification_levels,voice_regions, Unknown,
     verification_levels,content_filter_levels,audit_log_events,
     is_role_mention,ext_from_base64)
-from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text
+from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category
 from discord_uwu.color import Color
 from discord_uwu.permission import Permission
 from discord_uwu.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
@@ -32,6 +32,8 @@ from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
 from discord_uwu.webhook import Webhook
 from discord_uwu.audit_logs import Audit_log_iterator
 from discord_uwu.guild import GUILDS
+from discord_uwu.role import cr_p_overwrite_object
+from discord_uwu.user import USERS
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -1017,7 +1019,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             try:
                 reason=f'Executed by {message.author:f}'
                 if key=='channel':
-                    await client.channel_guild_move(*text,reason=reason)
+                    await client.channel_move(*text,reason=reason)
                 elif key=='role':
                     await client.role_move(*text,reason=reason)
                 elif key=='user':
@@ -2895,28 +2897,70 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             ░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░
             ''',0xffafde,'https://www.youtube.com/watch?v=NI_fgwbmJg0&t=0s'))
 
-    @on_command
-    async def sleeper(client,message,content):
-        try:
-            minutes=int(content)
-        except ValueError:
-            return
+##    @on_command
+##    async def sleeper(client,message,content):
+##        try:
+##            minutes=int(content)
+##        except ValueError:
+##            return
+##
+##        if minutes<5:
+##            await client.message_create(message.channel,f'Minimum time is 5 minutes!')
+##            return
+##        
+##        target=time.monotonic()+minutes*60.
+##        
+##        message = await client.message_create(message.channel,f'Game starts in: {minutes} minutes')
+##        while True:
+##            await sleep((target-time.monotonic())%60,client.loop)
+##            minutes-=1
+##            if minutes==0:
+##                break
+##            await client.message_edit(message,f'Game starts in: {minutes} minutes')
+##            
+##        await client.message_edit(message,'Game started')
 
-        if minutes<5:
-            await client.message_create(message.channel,f'Minimum time is 5 minutes!')
-            return
-        
-        target=time.monotonic()+minutes*60.
-        
-        message = await client.message_create(message.channel,f'Game starts in: {minutes} minutes')
-        while True:
-            await sleep((target-time.monotonic())%60,client.loop)
-            minutes-=1
-            if minutes==0:
-                break
-            await client.message_edit(message,f'Game starts in: {minutes} minutes')
+##    @on_command
+##    async def channel_create0(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner or guild is None:
+##            return
+##        await client.channel_guild_create(guild,None,'hey',Channel_text,nsfw=True,topic='rip')
+##
+##    @on_command
+##    async def channel_create1(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner or guild is None:
+##            return
+##        await client.channel_guild_create(guild,None,'hay',Channel_category,reason='do u see this?')
+##
+##    @on_command
+##    async def channel_create2(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner or guild is None:
+##            return
+##        await client.channel_guild_create(guild,message.channel.category,'hoy',Channel_voice,overwrites=[cr_p_overwrite_object(USERS[530447673610993674],0,5654546)],user_limit=1)
+##
+##    @on_command
+##    async def channel_edit(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner or guild is None:
+##            return
+##
+##        channel=guild.get_channel('hey')
+##        if channel is not None:
+##            await client.channel_edit(channel,name='heeey',topic='owo',nsfw=False,slowmode=14)
+##            return
+##
+##        channel=guild.get_channel('hay')
+##        if channel is not None:
+##            await client.channel_edit(channel,name='haaaaay',reason='is here anything?')
+##            return
+##
+##        channel=guild.get_channel('hoy')
+##        if channel is not None:
+##            await client.channel_edit(channel,name='brah',bitrate=96000,user_limit=2)
+##            return
             
-        await client.message_edit(message,'Game started')
-    
 start_clients()
 

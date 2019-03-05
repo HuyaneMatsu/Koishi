@@ -161,8 +161,8 @@ HELP['waitemoji']=rendered_embed(Embed(title='waitemoji',color=HELP_COLOR,
 
 HELP['create']=rendered_embed(Embed(title='create',color=HELP_COLOR,
     description=( \
-        'You can create a new:'
-        ' **>>** "role"'
+        'You can create a new:\n'
+        ' **>>** "role"\n'
         ' **>>** "emoji"'
             )))
 

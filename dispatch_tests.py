@@ -166,7 +166,7 @@ class dispatch_tester:
         else:
             if type(activity) is dict:
                 result.append('activity got updated:')
-                for key,value in activity:
+                for key,value in activity.items():
                     result.append(f'- {key} : {value} -> {getattr(user.activity,key)}')
             else:
                 result.append('activity changed from:')
@@ -176,7 +176,16 @@ class dispatch_tester:
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
-        
+
+    @classmethod
+    async def user_edit(self,client,user,old):
+        result=[f'A user got updated: {user:f} {user.id}']
+        for key,value in old. items():
+            result.append(f'- {key} : {value} -> {getattr(user,key)}')
+
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+    
     @classmethod
     async def user_profile_edit(self,client,user,old,guild):
         result=[f'{user:f} {user.id} profile got edited at guild {guild.name!r} {guild.id}:']
@@ -201,6 +210,37 @@ class dispatch_tester:
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def channel_delete(self,client,channel):
+        text=f'A channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})'
+        pages=[{'content':text}]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def channel_edit(self,client,channel,old):
+        result=[f'A channel got edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})']
+        for key,value in old.items():
+            result.append(f'{key} changed: {value!r} -> {getattr(channel,key)!r}')
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def channel_create(self,client,channel):
+        result=pretty_print(channel)
+        result.insert(0,f'A channel got created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def channel_pin_update(self,client,channel):
+        text=f'A channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})'
+        pages=[{'content':text}]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    #need connections:
+    #channel_group_user_add
+    #channel_group_user_delete
         
     @classmethod
     async def emoji_edit(self,client,guild,changes):
@@ -224,9 +264,6 @@ class dispatch_tester:
         
         pages=[{'content':chunk} for chunk in chunkify(result)]
 
-        try:
-            await client.message_create(self.channel,**pages[0])
-        except (HTTPException,Forbidden):
-            self.channel=None
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     
