@@ -263,7 +263,28 @@ class dispatch_tester:
             raise RuntimeError #bugged?
         
         pages=[{'content':chunk} for chunk in chunkify(result)]
-
         pagination(client,self.channel,pages,120.) #does not raises exceptions
 
-    
+    @classmethod
+    async def guild_user_add(self,client,guild,user):
+        if guild.owner  is not client.owner:
+            return
+        channel=guild.system_channel
+        if channel is None:
+            return
+        await client.message_create(channel,f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!')
+
+    @classmethod
+    async def guild_user_delete(self,client,guild,user,profile):
+        if guild.owner is not client.owner:
+            return
+        channel=guild.system_channel
+        if channel is None:
+            return
+        await client.message_create(channel,f'Bai bai {user:f}! with your {len(profile.roles)} roles.\nThe guild is down to {guild.user_count} members!')
+        if guild in user.guild_profiles:
+            raise RuntimeError
+        
+
+        
+        
