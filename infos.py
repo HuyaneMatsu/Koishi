@@ -4,18 +4,18 @@ import math
 from random import choice
 import sys
 
-from discord_uwu.parsers import eventlist
-from discord_uwu.channel import get_message,Channel_text,Channel_category,CHANNELS
-from discord_uwu.prettyprint import pchunkify
-from discord_uwu.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
-from discord_uwu.exceptions import Forbidden,HTTPException
-from discord_uwu.events import pagination
-from discord_uwu.embed import Embed,Embed_thumbnail,Embed_field,rendered_embed
-from discord_uwu.emoji import BUILTIN_EMOJIS
-from discord_uwu.color import Color
-from discord_uwu.user import USERS
-from discord_uwu.guild import GUILDS
-from discord_uwu.client_core import CLIENTS
+from hata.parsers import eventlist
+from hata.channel import get_message,Channel_text,Channel_category,CHANNELS
+from hata.prettyprint import pchunkify
+from hata.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
+from hata.exceptions import Forbidden,HTTPException
+from hata.events import pagination
+from hata.embed import Embed,Embed_thumbnail,Embed_field,rendered_embed
+from hata.emoji import BUILTIN_EMOJIS
+from hata.color import Color
+from hata.user import USERS
+from hata.guild import GUILDS
+from hata.client_core import CLIENTS
 
 from help_handler import HELP
 
@@ -638,7 +638,7 @@ def update_about(client):
         'My code base is',
         ' [open source](https://github.com/HuyaneMatsu/Koishi). ',
         'One of the main goal of my existence is to test the best *cough*',
-        ' [discord API wrapper](https://github.com/HuyaneMatsu/discord_uwu). ',
+        ' [discord API wrapper](https://github.com/HuyaneMatsu/hata). ',
         '\n\n',
         f'My Masutaa is {client.owner:f} (send neko pictures pls).\n\n',
         '**Client info**\n',

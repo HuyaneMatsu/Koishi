@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from discord_uwu.exceptions import HTTPException,Forbidden
-from discord_uwu.parsers import EVENTS,default_event
-from discord_uwu.prettyprint import pchunkify,pretty_print
-from discord_uwu.events import pagination
-from discord_uwu.others import cchunkify
+from hata.exceptions import HTTPException,Forbidden
+from hata.parsers import EVENTS,default_event
+from hata.prettyprint import pchunkify,pretty_print
+from hata.events import pagination
+from hata.others import cchunkify
 
 class dispatch_tester:
     channel=None
@@ -213,7 +213,7 @@ class dispatch_tester:
 
     @classmethod
     async def channel_delete(self,client,channel):
-        text=f'A channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})'
+        text=f'```\nA channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
 
@@ -234,7 +234,7 @@ class dispatch_tester:
 
     @classmethod
     async def channel_pin_update(self,client,channel):
-        text=f'A channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})'
+        text=f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
 
@@ -285,6 +285,90 @@ class dispatch_tester:
         if guild in user.guild_profiles:
             raise RuntimeError
         
+    @classmethod
+    async def guild_create(self,client,guild):
+        if self.channel is None:
+            return
+        result=pretty_print(guild)
+        result.insert(0,f'Guild created: {guild.id}')
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
 
+    #Unknown:
+    #guild_sync
         
+    @classmethod
+    async def guild_edit(self,client,guild,old):
+        if self.channel is None:
+            return
+        result=[f'A guild got edited {guild.name} {guild.id}']
+        for key,value in old.items():
+            if key in ('name','icon','splash','user_count','afk_timeout','available'):
+                result.append(f' - {key} : {value} - > {getattr(guild,key)}')
+                continue
+            if key in ('verification_level','message_notification','mfa','content_filter','region'):
+                other=getattr(guild,key)
+                result.append(f' - {key} : {value!s} {value.value} -> {other!s} {other.value}')
+                continue
+            if key in ('features',):
+                result.append(f'{key}:')
+                removed=value[0]
+                if removed:
+                    result.append(f'- {key} removed: ({len(removed)}')
+                    for subvalue in removed:
+                        result.append(f'- {subvalue.value}')
+                added=value[1]
+                if added:
+                    result.append(f'- {key} added: ({len(added)})')
+                    for subvalue in added:
+                        result.append(f'- {subvalue.value}')
+                continue
+            if key in ('system_channel','afk_channel','widget_channel','embed_channel'):
+                other=getattr(guild,key)
+                if value is None:
+                    result.append(f'- {key} : None -> {other.name} {other.id}')
+                elif other is None:
+                    result.append(f'- {key} : {value.name} {value.id} -> None')
+                else:
+                    result.append(f'- {key} : {value.name} {value.id} -> {other.name} {other.id}')
+                continue
+
+            if key in ('owner',):
+                other=getattr(guild,'owner')
+                result.append(f'- {key} : {value:f} {value.id} -> {other:f} {other.id}')
+                continue
+            raise RuntimeError(key)
+
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
         
+    @classmethod
+    async def guild_delete(self,client,guild):
+        if self.channel is None:
+            return
+        result=pretty_print(guild)
+        result.insert(0,f'Guild deleted {guild.id}')
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+
+    @classmethod
+    async def guild_ban_add(self,client,guild,user):
+        if self.channel is None:
+            return
+        text=f'```\nUser {user:f} {user.id} got banned at {guild.name} {guild.id}.```'
+        pages=[{'content':text}]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def guild_ban_delete(self,client,guild,user):
+        if self.channel is None:
+            return
+        text=f'```\nUser {user:f} {user.id} got UNbanned at {guild.name} {guild.id}.```'
+        pages=[{'content':text}]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    #Auto dispatched:
+    #guild_user_chunk
+    #Need integartion:
+    #integration_edit

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import re, random, time, asyncio
 
-from discord_uwu.dereaddons_local import inherit
+from hata.dereaddons_local import inherit
 
-from discord_uwu.events import waitfor_wrapper,wait_and_continue,bot_reaction_waitfor
-from discord_uwu.others import filter_content,is_user_mention
-from discord_uwu.futures import wait_one,CancelledError,wait_more,future_or_timeout,sleep
-from discord_uwu.emoji import BUILTIN_EMOJIS
-from discord_uwu.embed import Embed,Embed_footer,Embed_author
-from discord_uwu.exceptions import Forbidden,HTTPException
+from hata.events import waitfor_wrapper,wait_and_continue,bot_reaction_waitfor
+from hata.others import filter_content,is_user_mention
+from hata.futures import wait_one,CancelledError,wait_more,future_or_timeout,sleep
+from hata.emoji import BUILTIN_EMOJIS
+from hata.embed import Embed,Embed_footer,Embed_author
+from hata.exceptions import Forbidden,HTTPException
 
 @inherit(bot_reaction_waitfor)
 class bot_reaction_delete_waitfor:

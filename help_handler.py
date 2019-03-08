@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from pers_data import PREFIX
-from discord_uwu.embed import Embed,Embed_field,Embed_footer,rendered_embed
-from discord_uwu.events import pagination
-from discord_uwu.color import Color
-from discord_uwu.exceptions import Forbidden,HTTPException
+from hata.embed import Embed,Embed_field,Embed_footer,rendered_embed
+from hata.events import pagination
+from hata.color import Color
+from hata.exceptions import Forbidden,HTTPException
 import asyncio
 
 HELP={}

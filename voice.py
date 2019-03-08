@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
-from discord_uwu import player
-from discord_uwu.parsers import eventlist
-from discord_uwu.others import filter_content
+from hata import player
+from hata.parsers import eventlist
+from hata.others import filter_content
 from help_handler import HELP
 import asyncio
 

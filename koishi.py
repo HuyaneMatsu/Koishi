@@ -10,30 +10,31 @@ import json
 #moving to the outer folder, so uwu ll count as a package
 sys.path.append(os.path.abspath('..'))
 
-from discord_uwu import Client,start_clients
-from discord_uwu.exceptions import Forbidden,HTTPException
-from discord_uwu.emoji import BUILTIN_EMOJIS,parse_emoji
-from discord_uwu.activity import activity_game
-from discord_uwu.others import ( \
+from hata import Client,start_clients
+from hata.exceptions import Forbidden,HTTPException
+from hata.emoji import BUILTIN_EMOJIS,parse_emoji
+from hata.activity import activity_game
+from hata.others import ( \
     is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
     guild_features,message_notification_levels,voice_regions, Unknown,
     verification_levels,content_filter_levels,audit_log_events,
-    is_role_mention,ext_from_base64)
-from discord_uwu.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category
-from discord_uwu.color import Color
-from discord_uwu.permission import Permission
-from discord_uwu.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
-from discord_uwu.events import ( \
+    is_role_mention,ext_from_base64,random_id)
+from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category
+from hata.color import Color
+from hata.permission import Permission
+from hata.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
+from hata.events import ( \
     waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,
     bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild)
-from discord_uwu.futures import wait_one,CancelledError,sleep
-from discord_uwu.prettyprint import pchunkify,connect
-from discord_uwu.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
-from discord_uwu.webhook import Webhook
-from discord_uwu.audit_logs import Audit_log_iterator
-from discord_uwu.guild import GUILDS
-from discord_uwu.role import cr_p_overwrite_object
-from discord_uwu.user import USERS
+from hata.futures import wait_one,CancelledError,sleep
+from hata.prettyprint import pchunkify,connect
+from hata.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
+from hata.webhook import Webhook
+from hata.audit_logs import Audit_log_iterator
+from hata.guild import GUILDS
+from hata.role import cr_p_overwrite_object
+from hata.user import USERS
+from hata.client_core import KOKORO
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -857,7 +858,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                                 text='Invalid message notification level'
                                 break
                             
-                        result['message_notification_level']=level
+                        result['message_notification']=level
                         continue
                     
                     if name=='reason':
@@ -1495,23 +1496,23 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         channel = await client.channel_private_create(message.author)
         await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
 
-##    @on_command
-##    async def owner_invite(client,message,content):
-##        if message.author is not client.owner:
-##            return
-##        
-##        guild=client.get_guild(content)
-##        
-##        if guild is None:
-##            return
-##        
-##        try:
-##            invite = await client.invite_create(guild.channels[0],0,1)
-##        except Forbidden:
-##            return
-##        
-##        channel = await client.channel_private_create(message.author)
-##        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
+    @on_command
+    async def owner_invite(client,message,content):
+        if message.author is not client.owner:
+            return
+        
+        guild=client.get_guild(content)
+        
+        if guild is None:
+            return
+        
+        try:
+            invite = await client.invite_create(guild.channels[0],0,1)
+        except Forbidden:
+            return
+        
+        channel = await client.channel_private_create(message.author)
+        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
         
     @on_command
     async def invite_by_code(client,message,content):
@@ -1936,7 +1937,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         else:
             reason=f'Executed by {message.author:f}'
 
-        await client.guild_user_ban(guild,user,days,reason)
+        await client.guild_ban_add(guild,user,days,reason)
         await client.message_create('ExeCUTEd')
 
     @on_command
@@ -1992,7 +1993,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         id_=int(value)
 
         try:
-            await client.guild_user_unban_by_id(guild,id_,reason)
+            await client.guild_user_unban(guild,Unknown('User',id_),reason)
         except HTTPException:
             embed=Embed(description=f'{guild.name} {guild.id} has no ban for id: {id_}')
         except Forbidden:
@@ -2014,27 +2015,34 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             return
         await client.guild_leave(guild)
 
-##    @on_command
-##    async def guild_delete(client,message,content):
-##        guild=message.guild
-##        if guild is None or guild.owner is not client or message.author is not client.owner:
-##            return
-##        await client.guild_delete(guild)
+    @on_command
+    async def guild_delete(client,message,content):
+        guild=message.guild
+        if guild is None or guild.owner is not client or message.author is not client.owner:
+            return
+        await client.guild_delete(guild)
 
-##    @on_command
-##    async def guild_create(client,message,content):
-##        if message.author is not client.owner and len(client.guilds)>9:
-##            return
-##        guild = await client.guild_create(name='uwu yayyyy',
-##            channels=[cr_pg_channel_object(name='channel1',type_=Channel_text),
-##                      cr_pg_channel_object(name='channel2',type_=Channel_text),
-##                      cr_pg_channel_object(name='channel3',type_=Channel_text),])
-##
-##        await sleep(2.,client.loop) #wait for dispatch
-##        invite = await client.invite_create_pref(guild,0,0)
-##        channel = await client.channel_private_create(message.author)
-##        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
+    @on_command
+    async def guild_create(client,message,content):
+        if message.author is not client.owner and len(client.guilds)>9:
+            return
+        guild = await client.guild_create(name='uwu yayyyy',
+            channels=[cr_pg_channel_object(name='channel1',type_=Channel_text),
+                      cr_pg_channel_object(name='channel2',type_=Channel_text),
+                      cr_pg_channel_object(name='channel3',type_=Channel_text),])
 
+        await sleep(2.,client.loop) #wait for dispatch
+        invite = await client.invite_create_pref(guild,0,0)
+        channel = await client.channel_private_create(message.author)
+        await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
+
+    @on_command
+    async def transfer_ownership(client,message,content):
+        guild=message.guild
+        if guild is None or message.author is not client.owner or guild.owner is not client:
+            return
+        await client.guild_edit(guild,owner=client.owner)
+        
 ##    @on_command
 ##    async def load_emotes(client,message,content):
 ##        with client.keep_typing(message.channel):
@@ -2919,7 +2927,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##            await client.message_edit(message,f'Game starts in: {minutes} minutes')
 ##            
 ##        await client.message_edit(message,'Game started')
-
+##
 ##    @on_command
 ##    async def channel_create0(client,message,content):
 ##        guild=message.guild
@@ -2961,6 +2969,146 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##        if channel is not None:
 ##            await client.channel_edit(channel,name='brah',bitrate=96000,user_limit=2)
 ##            return
+##
+##    #this command does cooldowned changes too, so pls comment out parts if u run it.
+##    @on_command
+##    async def edit_guild(client,message,content):
+##        guild=message.guild
+##        if guild is None or message.author is not client.owner:
+##            return
+##        toedit={}
+##        text_channels=guild.text_channels
+##        voice_channels=guild.voice_channels
+##        for _ in range(len(text_channels),2):
+##            channel = await client.channel_guild_create(guild,None,random_id().__format__('x'),Channel_text)
+##            text_channels.append(channel)
+##        for _ in range(len(voice_channels),2):
+##            channel = await client.channel_guild_create(guild,None,random_id().__format__('x'),Channel_voice)
+##            voice_channels.append(channel)
+##        with open(os.path.join(os.path.abspath('.'),'images','0000000A_touhou_koishi_kokoro_reversed.png'),'rb') as file:
+##            icon1=file.read()
+##        with open(os.path.join(os.path.abspath('.'),'images','0000000C_touhou_koishi.png'),'rb') as file:
+##            icon2=file.read()
+##
+##        #name
+##        await client.guild_edit(guild,name=random_id().__format__('x'),reason='reason')
+##        await sleep(.5,client.loop)
+##
+##        #icon
+##        if guild.icon:
+##            await client.guild_edit(guild,icon=icon1)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,icon=None)
+##        else:
+##            await client.guild_edit(guild,icon=icon1)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,icon=icon2)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,icon=None)
+##        await sleep(.5,client.loop)
+##
+##        #afk_channel
+##        if guild.afk_channel is None:
+##            await client.guild_edit(guild,afk_channel=voice_channels[0])
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,afk_channel=voice_channels[1])
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,afk_channel=None)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,afk_channel=voice_channels[0])
+##        else:
+##            await client.guild_edit(guild,afk_channel=None)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,afk_channel=voice_channels[0])
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,afk_channel=voice_channels[1])
+##        await sleep(.5,client.loop)
+##            
+##        #system channel
+##        if guild.system_channel is None:
+##            await client.guild_edit(guild,system_channel=text_channels[0])
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,system_channel=text_channels[1])
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,system_channel=None)
+##        else:
+##            await client.guild_edit(guild,system_channel=None)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,system_channel=text_channels[0])
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,system_channel=text_channels[1])
+##        await sleep(.5,client.loop)
+##
+##        #region
+##        if guild.region is voice_regions.eu_central:
+##            await client.guild_edit(guild,region=voice_regions.eu_west)
+##        else:
+##            await client.guild_edit(guild,region=voice_regions.eu_central)
+##        await sleep(.5,client.loop)
+##
+##        #afk_timeout
+##        if guild.afk_timeout==300:
+##            await client.guild_edit(guild,afk_timeout=60)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,afk_timeout=300)
+##        else:
+##            await client.guild_edit(guild,afk_timeout=300)
+##            await sleep(.5,client.loop)
+##            await client.guild_edit(guild,afk_timeout=60)
+##        await sleep(.5,client.loop)
+##
+##        #verification level
+##        if guild.verification_level is verification_levels.medium:
+##            await client.guild_edit(guild,verification_level=verification_levels.low)
+##        else:
+##            await client.guild_edit(guild,verification_level=verification_levels.medium)
+##        await sleep(.5,client.loop) 
+##
+##        #content filter
+##        if guild.content_filter is content_filter_levels.disabled:
+##            await client.guild_edit(guild,content_filter=content_filter_levels.no_role)
+##        else:
+##            await client.guild_edit(guild,content_filter=content_filter_levels.disabled)
+##        await sleep(.5,client.loop)
+##
+##        #message notification
+##        if guild.message_notification is message_notification_levels.all_messages:
+##            await client.guild_edit(guild,message_notification=message_notification_levels.only_mentions)
+##        else:
+##            await client.guild_edit(guild,message_notification=message_notification_levels.all_messages)
+##        await sleep(.5,client.loop)
+##
+##        await client.message_create(message.channel,'DONE')
+##
+##    @on_command
+##    async def ban_and_milk(client,message,content):
+##        guild=message.guild
+##        if guild is None or message.author is not client.owner:
+##            return
+##        
+##        await client.guild_ban_add(guild,client.owner)
+##        await client.guild_ban_delete(guild,client.owner)
+##        await client.guild_delete(guild)
+
+    @on_command
+    async def executor_test(client,message,content):
+        if message.author is not client.owner:
+            return
+        
+        def test_blocking():
+            time.sleep(10)
+            return 'Done'
             
+        async def test_loop(client,channel):
+            for _ in range(5):
+                await client.message_create(channel,'works?')
+                await sleep(2.,client.loop)
+                
+        channel=message.channel
+        
+        client.loop.create_task(test_loop(client,channel))
+        result = await KOKORO.run_in_executor(test_blocking)
+        await client.message_create(channel,result)
+        
 start_clients()
 

@@ -4,8 +4,8 @@ from random import randint as random
 import os
 from io import BytesIO
 from help_handler import HELP
-from discord_uwu.others import is_mention
-from discord_uwu.channel import get_messages
+from hata.others import is_mention
+from hata.channel import get_messages
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
