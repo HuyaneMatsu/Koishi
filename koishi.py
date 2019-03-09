@@ -7,7 +7,7 @@ import asyncio
 import time
 import json
 #import pickle
-#moving to the outer folder, so uwu ll count as a package
+#moving to the outer folder, so hata ll count as a package
 sys.path.append(os.path.abspath('..'))
 
 from hata import Client,start_clients
@@ -21,7 +21,7 @@ from hata.others import ( \
     is_role_mention,ext_from_base64,random_id)
 from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category
 from hata.color import Color
-from hata.permission import Permission
+from hata.permission import Permission,PERM_KEYS
 from hata.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
 from hata.events import ( \
     waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,
@@ -3109,6 +3109,43 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         client.loop.create_task(test_loop(client,channel))
         result = await KOKORO.run_in_executor(test_blocking)
         await client.message_create(channel,result)
+
+    @on_command
+    async def test_kick(client,message,content):
+        guild=message.guild
+        if guild is None or message.author is not client.owner or not content:
+            return
+        content=filter_content(content)
+        value=content[0]
+        if message.user_mentions and is_user_mention(value):
+            user=message.user_mentions[0]
+        else:
+            user=guild.get_user(value)
+            if user is None:
+                try:
+                    user=guild.users[int(value)]
+                except (ValueError,KeyError):
+                    await client.message_create(message.channel,'User could not be found')
+                    
+        await client.guild_user_delete(guild,user)
+        await client.message_create(message.channel,f'Kicked user {user:f} {user.id}')
+
+    @on_command
+    async def role_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
         
+        role = await client.role_create(guild,name='test',permissions=0,color=0x565656,
+            separated=True,mentionable=True,reason='for the future!')
+
+        await sleep(1.5,client.loop)
+        await client.role_edit(role,name='nope',permissions=5465,color=0,
+            separated=False,mentionable=False,position=5,reason='kyaaa')
+
+        await sleep(1.5,client.loop)
+        await client.role_delete(role)
+            
 start_clients()
+
 

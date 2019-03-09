@@ -4,6 +4,7 @@ from hata.parsers import EVENTS,default_event
 from hata.prettyprint import pchunkify,pretty_print
 from hata.events import pagination
 from hata.others import cchunkify
+from hata.permission import PERM_KEYS
 
 class dispatch_tester:
     channel=None
@@ -372,3 +373,45 @@ class dispatch_tester:
     #guild_user_chunk
     #Need integartion:
     #integration_edit
+
+    @classmethod
+    async def role_create(self,client,role):
+        if self.channel is None:
+            return
+        result=pretty_print(role)
+        result.insert(0,f'A role got created at {role.guild.name} {role.guild.id}')
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def role_delete(self,client,role):
+        if self.channel is None:
+            return
+        text=f'```\nA role got deleted at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}```'
+        pages=[{'content':text}]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def role_edit(self,client,role,old):
+        if self.channel is None:
+            return
+        result=[f'A role got edited at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}']
+        for key,value in old.items():
+            if key in ('name','separated','managed','mentionable','position',):
+                result.append(f'- {key} : {value} -> {getattr(role,key)}')
+                continue
+            if key=='color':
+                result.append(f'- {key} : {value.as_html} -> {role.color.as_html}')
+                continue
+            if key=='permissions':
+                result.append('- permissions :')
+                other=role.permissions
+                for name,index in PERM_KEYS.items():
+                    old_value=(value>>index)&1
+                    new_value=(other>>index)&1
+                    if old_value!=new_value:
+                        result.append(f'   {name} : {bool(old_value)} -> {bool(new_value)}')
+                continue
+
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
