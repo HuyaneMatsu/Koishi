@@ -3,8 +3,8 @@ import re
 from hata import player
 from hata.parsers import eventlist
 from hata.others import filter_content
+from hata.futures import sleep
 from help_handler import HELP
-import asyncio
 
 async def voice(client,message,content):
     guild=message.guild
@@ -158,7 +158,7 @@ async def voice(client,message,content):
         break
     if text:
         message = await client.message_create(message.channel,text)
-        await asyncio.sleep(30.)
+        await sleep(30.,client.loop)
         await client.message_delete(message,reason='Voice messages expire after 30s.')
     else:
         await client.message_create(message.channel,embed=HELP['voice'])

@@ -415,3 +415,64 @@ class dispatch_tester:
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
+
+    @classmethod
+    async def webhook_update(self,client,channel):
+        if self.channel is None:
+            return
+        text=f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
+        pages=[{'content':text}]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+        
+    @classmethod
+    async def voice_state_update(self,client,state,action,old):
+        if self.channel is None:
+            return
+        result=[]
+        user=state.user
+        if user.partial:
+            name='partail user'
+        else:
+            name=user.name
+        if action=='l':
+            result.append('Voice state update, action: leave')
+            result.extend(pretty_print(state))
+        elif action=='j':
+            result.append('Voice state update, action: join')
+            result.extend(pretty_print(state))
+        else:
+            result.append('Voice state update, action: update')
+            user=state.user
+            if user.partial:
+                result.append(f'- user : Parital user {user.id}')
+            else:
+                result.append(f'- user : {user:f} ({user.id})')
+            guild=state.channel.guild
+            if guild is not None:
+                result.append(f'- guild : {guild.name} ({guild.id})')
+            result.append(f'- session_id : {state.session_id!r}')
+            result.append('Changes:')
+            for key,value in old.items():
+                if key=='channel':
+                    other=state.channel
+                    result.append(f'- channel : {value.name} {value.id} -> {other.name} {other.id}')
+                    continue
+                result.append(f'- {key} : {value} -> {getattr(state,key)}')
+
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions
+            
+    @classmethod
+    async def typing(self,client,channel,user,timestamp):
+        if self.channel is None:
+            return
+        result=['Typing:']
+        if user.partial:
+            result.append(f'- user : Parital user {user.id}')
+        else:
+            result.append(f'- user : {user:f} ({user.id})')
+        result.append(f'- channel : {channel.name} {channel.id}')
+        result.append(f'- timestamp : {timestamp:%Y.%m.%d-%H:%M:%S}')
+        
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pagination(client,self.channel,pages,120.) #does not raises exceptions        

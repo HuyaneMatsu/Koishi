@@ -9,6 +9,8 @@ import json
 #import pickle
 #moving to the outer folder, so hata ll count as a package
 sys.path.append(os.path.abspath('..'))
+from collections import deque
+from datetime import timedelta
 
 from hata import Client,start_clients
 from hata.exceptions import Forbidden,HTTPException
@@ -19,7 +21,7 @@ from hata.others import ( \
     guild_features,message_notification_levels,voice_regions, Unknown,
     verification_levels,content_filter_levels,audit_log_events,
     is_role_mention,ext_from_base64,random_id)
-from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category
+from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category,Channel_private
 from hata.color import Color
 from hata.permission import Permission,PERM_KEYS
 from hata.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
@@ -141,44 +143,138 @@ Koishi=Client(TOKEN,loop=1)
 Koishi.activity=activity_game.create(name='with Satori')
 
 Mokou=Client(TOKEN2,loop=2)
-    
+
+TYPINGS={}
+class typing_counter:
+    __slots__=['duration', 'timestamp', 'user']
+    def __init__(self,user,timestamp):
+        self.user=user
+        self.timestamp=timestamp
+        self.duration=10.
+
 @Mokou.events
 async def message_create(client,message):
-    content=message.content.lower()
-    if 'show' in content and 'amount of loaded messages' in content:
+    while True:
+        user=message.author
+        if user.is_bot:
+            break
         channel=message.channel
-        parts=[f'Amount of loaded messages: {len(channel.messages)}.']
-        if channel.message_history_reached_end:
-            parts.append('The channel is fully loaded.')
-        else:
-            parts.append('There is even more message at this channel however.')
-        if not channel.permissions_for(client).can_read_message_history:
-            parts.append('I have no permission to read older messages.')
-        if channel.turn_GC_on_at:
-            now=time.time()
-            if now>channel.turn_GC_on_at:
-                parts.append('The GC will check the channel at the next cycle.')
-            else:
-                parts.append(f'The channel will fall under GC after {round(channel.turn_GC_on_at-now)} seconds')
-        else:
-            parts.append('There is no reason to run GC on this channel.')
-        if channel.messages.maxlen:
-            parts.append(f'The lenght of the loaded messages at this channel is limited to: {channel.messages.maxlen}')
-        else:
-            parts.append('The amount of messages kept from this channel is unlimited right now')
-            
-        text='\n'.join(parts)
-    else:
-        if random(0,2):
-            return
-        if 'fire' in content and re.match(r'\b(i|u|you|we|iam)\b',content):
-            text='BURN!!!'
-        elif re.match(r'(\b|[^\s\d])(moko[u]{0,1})\b',content):
-            text='Yes, its me..'
-        else:
-            return
-    await client.message_create(message.channel,text)
+        try:
+            channel_q=TYPINGS[channel.id]
+        except KeyError:
+            TYPINGS[channel.id]=deque()
+            break
+        ln=len(channel_q)
+        if not ln:
+            break
         
+        timestamp=message.created_at
+        limit=timestamp-timedelta(seconds=8)
+        index=0
+        while True:
+            element=channel_q[index]
+            if element.timestamp<limit:
+                break
+            if element.user is user:
+                element.duration=(timestamp-element.timestamp).total_seconds()
+                break
+            index+=1
+            if index==ln:
+                break
+            
+        break
+    
+    while True:
+        content=message.content.lower()
+        if 'show' in content and 'amount of loaded messages' in content:
+            channel=message.channel
+            parts=[f'Amount of loaded messages: {len(channel.messages)}.']
+            if channel.message_history_reached_end:
+                parts.append('The channel is fully loaded.')
+            else:
+                parts.append('There is even more message at this channel however.')
+            if not channel.permissions_for(client).can_read_message_history:
+                parts.append('I have no permission to read older messages.')
+            if channel.turn_GC_on_at:
+                now=time.time()
+                if now>channel.turn_GC_on_at:
+                    parts.append('The GC will check the channel at the next cycle.')
+                else:
+                    parts.append(f'The channel will fall under GC after {round(channel.turn_GC_on_at-now)} seconds')
+            else:
+                parts.append('There is no reason to run GC on this channel.')
+            if channel.messages.maxlen:
+                parts.append(f'The lenght of the loaded messages at this channel is limited to: {channel.messages.maxlen}')
+            else:
+                parts.append('The amount of messages kept from this channel is unlimited right now')
+                
+            text='\n'.join(parts)
+            break
+        else:
+            if random(0,2):
+                text=''
+                break
+            if 'fire' in content and re.match(r'\b(i|u|you|we|iam)\b',content):
+                text='BURN!!!'
+            elif re.match(r'(\b|[^\s\d])(moko[u]{0,1})\b',content):
+                text='Yes, its me..'
+            else:
+                text=''
+            break
+    if text:    
+        await client.message_create(message.channel,text)
+
+@Mokou.events
+async def typing(self,channel,user,timestamp):
+    try:
+        channel_q=TYPINGS[channel.id]
+    except KeyError:
+        channel_q=TYPINGS[channel.id]=deque()
+        channel_q.appendleft(typing_counter(user,timestamp),)
+        return
+    index=len(channel_q)
+    if not index:
+        channel_q.appendleft(typing_counter(user,timestamp),)
+        return
+    limit=timestamp-timedelta(seconds=46)
+    
+    while True:
+        index-=1
+        if channel_q[index].timestamp<limit:
+            del channel_q[index]
+        if index:
+            continue
+        channel_q.appendleft(typing_counter(user,timestamp),)
+        return
+    
+    found=0
+    while True:
+        element=channel_q[index]
+        if element.user is user:
+            if element.duration!=8.:
+                channel_q.appendleft(typing_counter(user,timestamp),)
+                return
+            found+=1
+            if found==4:
+                break
+        index-=1
+        if index:
+            continue
+        break
+    
+    if found<4 or (type(channel) is not Channel_private and found==len(channel_q)):
+        channel_q.appendleft(typing_counter(user,timestamp),)
+        return
+    
+    channel_q.clear()
+    await self.message_create(channel,f'**{user.name_at(channel.guild)}** is typing...')
+
+@Mokou.events
+async def channel_delete(self,channel):
+    try:
+        del TYPINGS[channel.id]
+    except KeyError:
+        pass
 
 
 @Koishi.events
@@ -240,7 +336,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             target=message.author
             
         #nickname check
-        name=target.display_name(message.guild)
+        name=target.name_at(message.guild)
 
         if target==client:
             result=10
@@ -3145,7 +3241,31 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
         await sleep(1.5,client.loop)
         await client.role_delete(role)
-            
+
+    @on_command
+    async def webhook_test(client,message,content):
+        channel=message.channel
+        guild=channel.guild
+        if message.author is not client.owner or guild is None:
+            return
+
+        await client.message_create(channel,f'Webhooks up to date: {guild.webhooks_uptodate}, should be False')
+        await client.webhook_get_guild(guild)
+        await sleep(1.5,client.loop)
+        await client.message_create(channel,f'Webhooks up to date: {guild.webhooks_uptodate}, should be True')
+        webhook = await client.webhook_create(channel,'test')
+        await sleep(1.5,client.loop)
+        await client.message_create(channel,f'Webhooks up to date: {guild.webhooks_uptodate}, should be False')
+        await client.webhook_get_guild(guild)
+        await sleep(1.5,client.loop)
+        await client.message_create(channel,f'Webhooks up to date: {guild.webhooks_uptodate}, should be True')
+        await client.webhook_delete(webhook)
+        await sleep(1.5,client.loop)
+        await client.message_create(channel,f'Webhooks up to date: {guild.webhooks_uptodate}, should be False')
+        await client.webhook_get_guild(guild)
+        await sleep(1.5,client.loop)
+        await client.message_create(channel,f'Webhooks up to date: {guild.webhooks_uptodate}, should be True')
+
 start_clients()
 
 
