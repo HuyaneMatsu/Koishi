@@ -21,7 +21,7 @@ from hata.others import ( \
     guild_features,message_notification_levels,voice_regions, Unknown,
     verification_levels,content_filter_levels,audit_log_events,
     is_role_mention,ext_from_base64,random_id)
-from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category,Channel_private
+from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category,Channel_private,channel_guild_superclass
 from hata.color import Color
 from hata.permission import Permission,PERM_KEYS
 from hata.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
@@ -3266,6 +3266,14 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         await sleep(1.5,client.loop)
         await client.message_create(channel,f'Webhooks up to date: {guild.webhooks_uptodate}, should be True')
 
+    @on_command
+    async def new_type_test(client,message,content):
+        channel=message.channel
+        if message.author is not client.owner or not isinstance(channel,channel_guild_superclass):
+            return
+        await client.channel_edit(channel,type_=(5,0)[channel.type&1])
+        await client.message_create(channel,'yayyy')
+        
 start_clients()
 
 

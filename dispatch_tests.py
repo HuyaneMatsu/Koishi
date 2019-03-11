@@ -220,7 +220,7 @@ class dispatch_tester:
 
     @classmethod
     async def channel_edit(self,client,channel,old):
-        result=[f'A channel got edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})']
+        result=[f'A channel got edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
         for key,value in old.items():
             result.append(f'{key} changed: {value!r} -> {getattr(channel,key)!r}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
