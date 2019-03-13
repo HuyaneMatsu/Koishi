@@ -11,6 +11,7 @@ import json
 sys.path.append(os.path.abspath('..'))
 from collections import deque
 from datetime import timedelta
+import traceback
 
 from hata import Client,start_clients
 from hata.exceptions import Forbidden,HTTPException
@@ -20,7 +21,7 @@ from hata.others import ( \
     is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
     guild_features,message_notification_levels,voice_regions, Unknown,
     verification_levels,content_filter_levels,audit_log_events,
-    is_role_mention,ext_from_base64,random_id)
+    is_role_mention,ext_from_base64,random_id,from_json,to_json)
 from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category,Channel_private,channel_guild_superclass
 from hata.color import Color
 from hata.permission import Permission,PERM_KEYS
@@ -30,7 +31,7 @@ from hata.events import ( \
     bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild)
 from hata.futures import wait_one,CancelledError,sleep
 from hata.prettyprint import pchunkify,connect
-from hata.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED
+from hata.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED,client_session
 from hata.webhook import Webhook
 from hata.audit_logs import Audit_log_iterator
 from hata.guild import GUILDS
@@ -1018,15 +1019,18 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             key=content.pop(0)
             if key=='channel':
                 if len(content) not in (2,3):
-                    text='Moving channel\ss formula: "channel name" ("category name") "position"'
+                    text='Moving channel\n formula: "channel name" ("category name") "position"'
                     break
                 if is_channel_mention(content[0]):
                     channel=message.channel_mentions[0] 
                 else:
                     channel=guild.get_channel(content[0])
                     if channel is None:
-                        text='Channel not found.'
-                        break
+                        try:
+                            channel=guild.all_channel[int(content[0])]
+                        except (KeyError,ValueError):
+                            text='Channel not found.'
+                            break
                 if len(content)==3:
                     index=content[2]
                 else:
@@ -1047,8 +1051,13 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                             category=message.channel_mentions[-1]
                         else:
                             category=guild.get_channel(category)
-                        if not category:
-                            text='Cagory not found.'
+                            if category is None:
+                                try:
+                                    category=guild.all_channel[int(content[1])]
+                                except (KeyError,ValueError):
+                                    pass
+                        if category is None:
+                            text='Category not found.'
                             break
                         if category.type!=4:
                             text='You can move channels only to Category channel or to the guild.'
@@ -3273,7 +3282,57 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             return
         await client.channel_edit(channel,type_=(5,0)[channel.type&1])
         await client.message_create(channel,'yayyy')
-        
+    
+    #didnt work out :c
+##    class new_gateway_test_class1:
+##        def __init__(self,client):
+##            self.client=client
+##            self.loop=client.loop
+##            self.websokcket=None
+##        def feed_websocket(self,websocket):
+##            self.websocket=websocket
+##            return self
+##        #await it
+##        def get_gateway(self):
+##            return self.client.client_gateway()
+##        
+##    @on_command
+##    async def new_gateway_test1(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner:
+##            return
+##        try:
+##            for times in range(2):
+##                gateway = await client.http.ws_connect(new_gateway_test_class1(client))
+##                print('connected')
+##                async for result in gateway.websocket:
+##                    try:
+##                        json=from_json(result)
+##                    except TypeError as err:
+##                        raise result
+##                    ln=len(result)
+##                    print(f'receaved {ln} bytes')
+##                    print(str(json)[:300])
+##                    if json['op']==10:
+##                        json=to_json({'op':client.websocket.HEARTBEAT,'d':json['s'],})
+##                        await gateway.websocket.send_str(json)
+##
+##                print('quit')
+##        except BaseException as err:
+##            print(err)
+##            traceback.print_exc()
+
+##    @on_command
+##    async def channel_move2_test(client,message,content):
+##        guild=message.guild
+##        if message.author is not client.owner or guild is None:
+##            return
+##        await client.channel_move(message.channel,2,guild)
+##        await client.channel_move(message.channel,2,message.channel.category)
+##        await client.channel_move(message.channel,2,guild.get_channel('test_category'))
+##        await client.channel_move(message.channel.category,2,guild)
+##        await client.channel_move(guild.get_channel('Important'),4,guild)
+
 start_clients()
 
 
