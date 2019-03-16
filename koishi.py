@@ -21,7 +21,8 @@ from hata.others import ( \
     is_channel_mention,is_user_mention,filter_content,chunkify,is_id,
     guild_features,message_notification_levels,voice_regions, Unknown,
     verification_levels,content_filter_levels,audit_log_events,
-    is_role_mention,ext_from_base64,random_id,from_json,to_json)
+    is_role_mention,ext_from_base64,random_id,from_json,to_json,
+    parse_oauth2_redirect_url)
 from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category,Channel_private,channel_guild_superclass
 from hata.color import Color
 from hata.permission import Permission,PERM_KEYS
@@ -31,17 +32,18 @@ from hata.events import ( \
     bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild)
 from hata.futures import wait_one,CancelledError,sleep
 from hata.prettyprint import pchunkify,connect
-from hata.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED,client_session
+from hata.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED,client_session,Request_CM
 from hata.webhook import Webhook
 from hata.audit_logs import Audit_log_iterator
 from hata.guild import GUILDS
 from hata.role import cr_p_overwrite_object
 from hata.user import USERS
 from hata.client_core import KOKORO
+from hata.oauth2 import SCOPES
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
-from pers_data import TOKEN,PREFIX,TOKEN2
+from pers_data import TOKEN,PREFIX,TOKEN2,CLIENT_SECRET
 from infos import infos,update_about
 from voice import voice
 from battleships import battle_manager,bot_reaction_delete_waitfor
@@ -140,7 +142,7 @@ except (FileNotFoundError,OSError,PermissionError,json.decoder.JSONDecodeError):
 ##except (FileNotFoundError,OSError,PermissionError,pickle.UnpicklingError):
 ##    PREFIXES=prefix_by_guild(PREFIX)
     
-Koishi=Client(TOKEN,loop=1)
+Koishi=Client(TOKEN,CLIENT_SECRET,loop=1)
 Koishi.activity=activity_game.create(name='with Satori')
 
 Mokou=Client(TOKEN2,loop=2)
@@ -2942,7 +2944,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         except Exception as err:
             content=repr(err)
         else:
-            content=connect(connections.values)
+            content=connect(list(connections.values()))
 
         await client.message_create(message.channel,content)
 
@@ -3333,6 +3335,261 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##        await client.channel_move(message.channel.category,2,guild)
 ##        await client.channel_move(guild.get_channel('Important'),4,guild)
 
+##    @on_command #failed
+##    async def test_oauth2_01(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##        data = await client.http.user_get_by_id(client,message.author.id)
+##        await client.message_create(message.channel,repr(data))
+##
+##    @on_command # found typo, still wont work #<HTTPException METHOD NOT ALLOWED (405) : 405: Method Not Allowed>
+##    async def test_oauth2_02(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##        if content:
+##            id_=int(content)
+##        else:
+##            id_=message.author.id
+##        data = await client.http.user_profle_by_id(client,id_)
+##        await client.message_create(message.channel,repr(data))
+##    @on_command #hata.exceptions.HTTPException: <HTTPException BAD REQUEST (400) : Bots cannot use this endpoint>
+##    async def test_oauth2_03_group_create(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##        content=filter_content(content)
+##
+##        data={'recipients':[int(content[0]),int(content[1])]}
+##        data=await client.http.channel_group_create(client,data)
+##        await client.message_create(message.channel,repr(data))
+##        channel=Channel_group(data,client)
+##
+##        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(channel)])
+##
+##    @on_command
+##    async def test_oauth2_04(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##        data = await client.http.client_application_info(client)
+##        await client.message_create(message.channel,repr(data))
+##
+##    @on_command
+##    async def test_oauth2_04(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##
+##        data={ \
+##            'client_id': client.id,
+##            'client_secret': CLIENT_SECRET,
+##            'grant_type': 'authorization_code',
+##            'code': content,
+##            'redirect_uri': 'https://github.com/HuyaneMatsu', #i have no clue at all
+##            'scope': 'guild',
+##                }
+##
+##        async with Request_CM(client.http.client_tokens(data)) as response:
+##            response_data = await response.text(encoding='utf-8')
+##            data=from_json(response_data)
+##            
+##        await client.message_create(message.channel,repr(data))
+##
+##    @on_command
+##    async def test_oauth2_05(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##
+##        data={ \
+##            'client_id': client.id,
+##            'client_secret': CLIENT_SECRET,
+##            'grant_type': 'client_credentials',
+##            'scope': 'identify connections',
+##                }
+##
+##        async with Request_CM(client.http.client_tokens(data)) as response:
+##            response_data = await response.text(encoding='utf-8')
+##            data=from_json(response_data)
+##            
+##        await client.message_create(message.channel,repr(data))
+##        
+##    @on_command
+##    async def test_oauth2_06(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##
+##        data={ \
+##            'client_id': client.id,
+##            'client_secret': CLIENT_SECRET,
+##            'grant_type': 'client_credentials',
+##            'scope': 'guild',
+##                }
+##        
+##        async with Request_CM(client.http.client_tokens(data)) as response:
+##            response_data = await response.text(encoding='utf-8')
+##            data=from_json(response_data)
+##            
+##        url='https://discordapp.com/api/v7/users/@me/connections'
+##
+##        headers=type(client.header)() #for keeping the type
+##        headers['Authorization']=f'Bearer {data["access_token"]}'
+##            
+##        async with Request_CM(client.http._request2('GET',url,headers=headers)) as response:
+##            response_data = await response.text(encoding='utf-8')
+##            data=from_json(response_data)
+##            
+##        await client.message_create(message.channel,repr(data))
+##
+##    @on_command
+##    async def test_oauth2_07(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##
+##        data={ \
+##            'client_id': client.id,
+##            'client_secret': CLIENT_SECRET,
+##            'grant_type': 'client_credentials',
+##            'scope': 'guild',
+##                }
+##        
+##        async with Request_CM(client.http.client_tokens(data)) as response:
+##            response_data = await response.text(encoding='utf-8')
+##            data=from_json(response_data)
+##            
+##        url='https://discordapp.com/api/v7/users/@me'
+##
+##        headers=type(client.header)() #for keeping the type
+##        headers['Authorization']=f'Bearer censored'
+##        #f'Bearer {data["access_token"]}'
+##            
+##        async with Request_CM(client.http._request2('GET',url,headers=headers)) as response:
+##            response_data = await response.text(encoding='utf-8')
+##            data=from_json(response_data)
+##            
+##        await client.message_create(message.channel,repr(data))
+
+    valuable_scopes=[scope for scope in SCOPES if scope[0] not in 'mrw']
+
+    OA2_accesses={}
+
+    @on_command
+    async def oa2_link(client,message,content): #just a test link
+        await client.message_create(message.channel,'https://discordapp.com/oauth2/authorize?client_id=486565096164687885&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu&response_type=code&scope=identify%20connections%20guilds%20guilds.join%20email')
+    
+    @on_command
+    async def oa2_feed(client,message,content):
+        client.loop.create_task(client.message_delete(message))
+        try:
+            result=parse_oauth2_redirect_url(content)
+        except ValueError:
+            await client.message_create(message.channel,'Bad link')
+            return
+
+        access = await client.activate_authorization_code(*result,valuable_scopes)
+
+        if access is None:
+            await client.message_create(message.channel,'Too old link')
+            return
+        user = await client.user_info(access)
+        OA2_accesses[user.id]=user
+        await client.message_create(message.channel,'Thanks')
+        
+    def oa2_query(message,content):
+        author_id=message.author.id
+        if not (16<len(content)<33):
+            return OA2_accesses.get(author_id,None)
+        try:
+            user_id=int(content)
+        except ValueError:
+            return OA2_accesses.get(author_id,None)
+        
+        user=OA2_accesses.get(user_id,None)
+        if user is None:
+            user=OA2_accesses.get(author_id,None)
+        return user
+
+    @on_command
+    async def oa2_user(client,message,content):
+        user=oa2_query(message,content)
+        if user is None:
+            await client.message_create(message.channel,'Could not find that user')
+
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
+
+
+    @on_command
+    async def oa2_connections(client,message,content):
+        user=oa2_query(message,content)
+        if user is None:
+            await client.message_create(message.channel,'Could not find that user')
+
+        connections = await client.user_connections(user.access)
+        
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
+        
+        
+    @on_command
+    async def oa2_guilds(client,message,content):
+        user=oa2_query(message,content)
+        if user is None:
+            await client.message_create(message.channel,'Could not find that user')
+
+        guilds = await client.user_guilds(user.access)
+        
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
+        
+    @on_command
+    async def oa2_my_guild(client,message,content):
+        user=oa2_query(message,content)
+        if user is None:
+            await client.message_create(message.channel,'Could not find that user')
+        
+        if message.author is not client.owner and user!=message.author:
+            await client.message_create(message.channel,'NOPE, do it on yourself!')
+        
+        try:
+            guild = await client.guild_create(name='Luv ya',
+                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+
+            await sleep(1.,client.loop)
+            await client.guild_user_add(guild,user)
+            await sleep(1.,client.loop)
+            await client.guild_edit(guild,owner=user)
+        except Exception as err:
+            print(err)
+            traceback.print_exc()
+        finally:
+            await sleep(1.,client.loop)
+            if client is guild.owner:
+                await client.guild_delete(guild)
+            else:
+                await client.guild_leave(guild)
+            
+    @on_command
+    async def oa2_owners(client,message,content):
+        if message.author is not client.owner:
+            return
+
+        access = await client.owners_access(valuable_scopes)
+        user = await client.user_info(access)
+        OA2_accesses[user.id]=user
+        result=[f'queried {user:f}']
+        for scope in access.scopes:
+            result.append(f'- {scope}')
+
+        text='\n'.join(result)
+                     
+        await client.message_create(message.channel,text)
+        
+
+    @on_command
+    async def oa2_renew(client,message,content):
+        user=oa2_query(message,content)
+        if user is None:
+            await client.message_create(message.channel,'Could not find that user')
+        access=user.access
+        last=access.created_at
+        await client.renew_access_token(access)
+        new=access.created_at
+        await client.message_create(message.channel,f'{user:f}\' access token got renewed.\nFrom creation time at: {last:%Y.%m.%d-%H:%M:%S}\nTo creation time at: {new:%Y.%m.%d-%H:%M:%S}')
+        
 start_clients()
 
 
