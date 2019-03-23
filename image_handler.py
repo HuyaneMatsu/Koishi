@@ -5,7 +5,7 @@ import os
 from io import BytesIO
 from help_handler import HELP
 from hata.others import is_mention
-from hata.channel import get_messages
+from hata.channel import messages_till_index
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -286,7 +286,7 @@ async def process_on_command_upload(client,message,content):
             return f'Reserved tag: {tag}'
 
     result=None
-    for msg in (await get_messages(client,message.channel,end=26)):
+    for msg in (await messages_till_index(client,message.channel,end=26)):
         if msg.author==source and msg.attachments:
             result=msg.attachments[0]
             break

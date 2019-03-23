@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import asyncio
 import math
 from random import choice
 import sys
 
 from hata.parsers import eventlist
-from hata.channel import get_message,Channel_text,Channel_category,CHANNELS
+from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
 from hata.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
 from hata.exceptions import Forbidden,HTTPException
@@ -111,7 +110,7 @@ async def parse_details_command(client,message,content):
                         text='NO U will read that!'
                         break
                     try:
-                        target_message = await get_message(client,message.channel,index)
+                        target_message = await message_at_index(client,message.channel,index)
                     except IndexError:
                         text='I am not able to reach that message!'
                         break
@@ -295,7 +294,7 @@ async def user_info(client,message,content):
                 user=USERS.get(int(content),None)
                 if user is None:
                     try:
-                        target = await client.user_get_by_id(int(content))
+                        target = await client.user_get(int(content))
                     except HTTPException:
                         pass
                 else:
@@ -596,7 +595,7 @@ async def love(client,message,content):
                 target=USERS.get(int(name),None)
                 if target is None:
                     try:
-                        target = await client.user_get_by_id(int(name))
+                        target = await client.user_get(int(name))
                     except HTTPException:
                         return
             else:

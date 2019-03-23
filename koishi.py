@@ -23,7 +23,7 @@ from hata.others import ( \
     verification_levels,content_filter_levels,audit_log_events,
     is_role_mention,ext_from_base64,random_id,from_json,to_json,
     parse_oauth2_redirect_url)
-from hata.channel import Channel_voice,get_message_iterator,cr_pg_channel_object,Channel_text,Channel_category,Channel_private,channel_guild_superclass
+from hata.channel import Channel_voice,Message_iterator,cr_pg_channel_object,Channel_text,Channel_category,Channel_private,channel_guild_superclass
 from hata.color import Color
 from hata.permission import Permission,PERM_KEYS
 from hata.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
@@ -36,7 +36,7 @@ from hata.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED,client_sess
 from hata.webhook import Webhook
 from hata.audit_logs import Audit_log_iterator
 from hata.guild import GUILDS
-from hata.role import cr_p_overwrite_object
+from hata.role import cr_p_overwrite_object,cr_p_role_object
 from hata.user import USERS
 from hata.client_core import KOKORO
 from hata.oauth2 import SCOPES
@@ -48,6 +48,7 @@ from infos import infos,update_about
 from voice import voice
 from battleships import battle_manager,bot_reaction_delete_waitfor
 from dispatch_tests import dispatch_tester
+from ratelimit_tests import ratelimit_commands
 
 def smart_join(list_,limit):
     limit-=4
@@ -301,7 +302,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     on_command(on_command_upload,'upload')
     on_command(on_command_help,'help')
     on_command(invalid_command)
-    
+    on_command.extend(ratelimit_commands)
     on_command(battle_manager,case='bs')
     
     @on_command
@@ -984,7 +985,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                 else:
                     reason=f'Executed by {message.author:f}'
                 if key=='user':
-                    await client.user_profile_edit(guild,text[0],**text[1],reason=reason)
+                    await client.user_edit(guild,text[0],**text[1],reason=reason)
                 elif key=='role':
                     await client.role_edit(text[0],**text[1],reason=reason)
                 elif key=='emoji':
@@ -1275,7 +1276,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             return
             
         messages=[]
-        async for message in get_message_iterator(client,message.channel):
+        async for message in Message_iterator(client,message.channel):
             messages.append(message)
             limit-=1
             if limit:
@@ -1685,9 +1686,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         try:
             with client.keep_typing(message.channel):
-                invites = await client.invites_of_guild(guild)
+                invites = await client.invite_get_guild(guild)
                 for invite in invites:
-                    await sleep(0.5,client.loop)
                     try:
                         await client.invite_delete(invite)
                     except HTTPException:
@@ -1708,9 +1708,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##        
 ##        try:
 ##            with client.keep_typing(message.channel):
-##                invites = await client.invites_of_guild(guild)
+##                invites = await client.invite_get_guild(guild)
 ##                for invite in invites:
-##                    await sleep(0.5,client.loop)
 ##                    if invite.online_count is not None:
 ##                        value=False
 ##                    else:
@@ -2106,7 +2105,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         except Forbidden:
             return
         else:
-            user = await client.user_get_by_id(id_)
+            user = await client.user_get(id_)
             if len(content):
                 embed=Embed('Unbanned with reason:',smart_join(content.split(),255))
             else:
@@ -2489,7 +2488,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             return
 
         if all_==0:
-            logs = await client.guild_audit_logs(guild,**kwargs)
+            logs = await client.audit_logs(guild,**kwargs)
         elif all_==1:
             iterator=Audit_log_iterator(client,guild,**kwargs)
             await iterator.load_all()
@@ -3040,21 +3039,21 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##        guild=message.guild
 ##        if message.author is not client.owner or guild is None:
 ##            return
-##        await client.channel_guild_create(guild,None,'hey',Channel_text,nsfw=True,topic='rip')
+##        await client.channel_create(guild,None,'hey',Channel_text,nsfw=True,topic='rip')
 ##
 ##    @on_command
 ##    async def channel_create1(client,message,content):
 ##        guild=message.guild
 ##        if message.author is not client.owner or guild is None:
 ##            return
-##        await client.channel_guild_create(guild,None,'hay',Channel_category,reason='do u see this?')
+##        await client.channel_create(guild,None,'hay',Channel_category,reason='do u see this?')
 ##
 ##    @on_command
 ##    async def channel_create2(client,message,content):
 ##        guild=message.guild
 ##        if message.author is not client.owner or guild is None:
 ##            return
-##        await client.channel_guild_create(guild,message.channel.category,'hoy',Channel_voice,overwrites=[cr_p_overwrite_object(USERS[530447673610993674],0,5654546)],user_limit=1)
+##        await client.channel_create(guild,message.channel.category,'hoy',Channel_voice,overwrites=[cr_p_overwrite_object(USERS[530447673610993674],0,5654546)],user_limit=1)
 ##
 ##    @on_command
 ##    async def channel_edit(client,message,content):
@@ -3087,10 +3086,10 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##        text_channels=guild.text_channels
 ##        voice_channels=guild.voice_channels
 ##        for _ in range(len(text_channels),2):
-##            channel = await client.channel_guild_create(guild,None,random_id().__format__('x'),Channel_text)
+##            channel = await client.channel_create(guild,None,random_id().__format__('x'),Channel_text)
 ##            text_channels.append(channel)
 ##        for _ in range(len(voice_channels),2):
-##            channel = await client.channel_guild_create(guild,None,random_id().__format__('x'),Channel_voice)
+##            channel = await client.channel_create(guild,None,random_id().__format__('x'),Channel_voice)
 ##            voice_channels.append(channel)
 ##        with open(os.path.join(os.path.abspath('.'),'images','0000000A_touhou_koishi_kokoro_reversed.png'),'rb') as file:
 ##            icon1=file.read()
@@ -3339,7 +3338,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##    async def test_oauth2_01(client,message,content):
 ##        if message.author is not client.owner:
 ##            return
-##        data = await client.http.user_get_by_id(client,message.author.id)
+##        data = await client.http.user_get(client,message.author.id)
 ##        await client.message_create(message.channel,repr(data))
 ##
 ##    @on_command # found typo, still wont work #<HTTPException METHOD NOT ALLOWED (405) : 405: Method Not Allowed>
@@ -3589,7 +3588,140 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         await client.renew_access_token(access)
         new=access.created_at
         await client.message_create(message.channel,f'{user:f}\' access token got renewed.\nFrom creation time at: {last:%Y.%m.%d-%H:%M:%S}\nTo creation time at: {new:%Y.%m.%d-%H:%M:%S}')
+
+
+##    @on_command
+##    async def profile_test(client,message,content):
+##        if message.author is not client.owner:
+##            return
+##        try:
+##            data= await client.http.user_profile(message.author.id)
+##            print(data)
+##        except Exception as err:
+##            print(err)
+
+    @on_command
+    async def guild_embed_edit_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        await client.guild_embed_edit(guild,True,message.channel)
+        result=connect(guild.embed)
         
+        await client.message_create(message.channel,result)
+
+    @on_command
+    async def guild_embed_get_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        guild_embed = await client.guild_embed_get(guild)
+
+        result=connect(guild_embed)
+
+        await client.message_create(message.channel,result)
+
+    @on_command
+    async def guild_embed_delete_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        
+        guild_embed = await client.guild_embed_edit(guild,False,None)
+        result=connect(guild.embed)
+
+        await client.message_create(message.channel,result)
+
+    @on_command
+    async def guild_embed_image_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        
+        guild_embed_image = await client.guild_embed_image(guild,'banner4')
+
+        await client.message_create_file(message.channel,guild_embed_image,'owo.png')
+
+    @on_command
+    async def guild_widget_image_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        
+        guild_widget_image = await client.guild_widget_image(guild,'banner4')
+
+        await client.message_create_file(message.channel,guild_widget_image,'owo.png')
+
+    @on_command
+    async def spamit(client,message,content):
+        if message.author is not client.owner:
+            return
+        for x in range(10):
+            await client.message_create(message.channel,f'spam {x}')
+
+    @on_command
+    async def integration_get_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        ingegrations = await client.integration_get_all(guild)
+        result=connect(ingegrations)
+        await client.message_create(message.channel,result)
+
+    @on_command
+    async def channels_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        channels = await client.channel_private_get_all()
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(channels)])
+
+    @on_command
+    async def guild_get_all_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        guilds = await client.guild_get_all()
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
+
+    @on_command
+    async def client_edit_nick_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        await client.client_edit_nick(guild,'owo')
+        await sleep(5.,client.loop)
+        await client.client_edit_nick(guild,None)
+
+    @on_command
+    async def guild_create_role_test(client,message,content):
+        if message.author is not client.owner:
+            return
+        try:
+            guild = await client.guild_create(name='Luv ya',
+                channels=[cr_pg_channel_object(name=f'Love u',type_=Channel_text),],
+                roles=[ \
+                    cr_p_role_object(name='test1',position=0),
+                    cr_p_role_object(name='test2',position=1),
+                        ])
+        except HTTPException as err:
+            response=err.response
+            response_data = await response.text(encoding='utf-8')
+            
+            if response.headers['content-type']=='application/json':
+                response_data=from_json(response_data)
+
+            print(response_data)
+            
+        else:
+            access = await client.owners_access(['guilds.join'])
+            user = await client.user_info(access)
+            await client.guild_user_add(guild,user)
+            print(guild.roles)
+            await sleep(60.,client.loop)
+            await client.guild_delete(guild)
+
+
 start_clients()
 
 
