@@ -63,7 +63,7 @@ UNLIMITED  :
     channel_create
     guild_embed_get
     guild_embed_edit
-    emoji_get_all
+    guild_emojis
     emoji_get
     integration_get_all
     invite_get_guild
@@ -87,6 +87,9 @@ UNLIMITED  :
     webhook_get_token
     webhook_edit_token
     webhook_delete_token
+    guild_regions
+    guild_channels
+    guild_roles
     
 group       : reaction
 limit       : 1
@@ -256,6 +259,13 @@ limited by  : webhook
 members     :
     webhook_execute
 
+group       : guild_users
+limit       : 10
+reset       : 10s
+limited by  : webhook
+members     :
+    guild_users
+    
 
 '''
 
@@ -662,7 +672,7 @@ async def guild_create(client,name,icon=None,
     data = { \
         'name'                          : name,
         'icon'                          : None if icon is None else bytes_to_base64(avatar),
-        'region'                        : region.value,
+        'region'                        : region.id,
         'verification_level'            : verification_level.value,
         'default_message_notifications' : message_notification_level.value,
         'explicit_content_filter'       : content_filter_level.value,
@@ -758,7 +768,7 @@ def guild_embed_image(client,guild):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/embed.png',
         params={'style':'shield'},decode=False,header={})
 
-def emoji_get_all(client,guild):
+def guild_emojis(client,guild):
     guild_id=guild.id
     return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis')
@@ -1017,6 +1027,25 @@ def webhook_execute(client,webhook,content,wait=False):
         f'{webhook.url}?wait={wait:d}',
         data={'content':content},header={})
     
+def guild_users(client,guild):
+    guild_id=guild.id
+    return bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/members')
+
+def guild_regions(client,guild):
+    guild_id=guild.id
+    return bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/regions')
+
+def guild_channels(client,guild):
+    guild_id=guild.id
+    return bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/channels')
+
+def guild_roles(client,guild):
+    guild_id=guild.id
+    return bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/roles')
 
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
@@ -2349,8 +2378,8 @@ async def ratelimit_test0101(client,message,content):
         return
     loop=client.loop
     guild1=message.guild
-    await emoji_get_all(client,guild1)
-    #emoji_get_all is UNLIMITED
+    await guild_emojis(client,guild1)
+    #guild_emojis is UNLIMITED
 
 @ratelimit_commands
 async def ratelimit_test0102(client,message,content):
@@ -2880,3 +2909,68 @@ async def ratelimit_test0145(client,message,content):
     await webhook_delete_token(client,webhook1)
     #webhook_edit_token and webhook_delete_token are UNLIMITED
     #webhook_execute is limited by webhook_id
+
+@ratelimit_commands
+async def ratelimit_test0146(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    await guild_users(client,guild1)
+    #guild_users is limited by guild
+
+@ratelimit_commands
+async def ratelimit_test0147(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild_iterator=client.guilds.values().__iter__()
+    guild1=guild_iterator.__next__()
+    guild2=guild_iterator.__next__()
+    await guild_users(client,guild1)
+    await guild_users(client,guild2)
+    #guild_users is not limited by global
+
+@ratelimit_commands
+async def ratelimit_test0148(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    access = await client.owners_access(['guilds.join'])
+    user = await client.user_info(access)
+    guild = await client.guild_create(name='Luv ya',
+                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+    await sleep(.5,loop)
+    await guild_user_add(client,guild,user)
+    await guild_users(client,guild)
+    await sleep(.5,loop)
+    await client.guild_delete(guild)
+    #guild_users is not limited with guild_user_add
+
+@ratelimit_commands
+async def ratelimit_test0149(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    data = await guild_regions(client,guild1)
+    #guild_regions is unlimited
+
+@ratelimit_commands
+async def ratelimit_test0150(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    data = await guild_channels(client,guild1)
+    #guild_channels is unlimited
+
+@ratelimit_commands
+async def ratelimit_test0151(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    data = await guild_roles(client,guild1)
+    #guild_roles is unlimited
+    

@@ -406,7 +406,12 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
     @on_command
     async def ping(client,message,content):
-        await client.message_create(message.channel,f'{int(client.websocket.kokoro.latency*1000.)} ms')
+        kokoro=client.websocket.kokoro
+        if kokoro is None:
+            text='Disconnecting'
+        else:
+            text=f'{int(kokoro.latency*1000.)} ms'
+        await client.message_create(message.channel,text)
                               
     @on_command.add('emoji')
     async def emoji_command(client,message,content):
@@ -2064,7 +2069,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         id_=int(content)
         
         try:
-            user,reason = await client.guild_ban_get_by_id(guild,id_)
+            user,reason = await client.guild_ban_get(guild,id_)
         except HTTPException:
             embed=Embed(description=f'{guild.name} {guild.id} has no ban for id: {id_}')
         except Forbidden:
@@ -2560,8 +2565,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 ##        if message.author is not client.owner or guild is None:
 ##            return
 ##
-##        emojis = await client.emoji_get_all(guild)
-##        await client.message_create(message.channel,smart_join((emoji.as_emoji for emoji in emojis),2000))
+##        emojis = await client.guild_emojis(guild)
+##        await client.message_create(message.channel,smart_join((emoji.as_emoji for emoji in emojis.values()),2000))
 
     @on_command
     @cooldown(30.,'user',handler=cooldown_handler())
@@ -3721,7 +3726,76 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             await sleep(60.,client.loop)
             await client.guild_delete(guild)
 
+    @on_command
+    async def guild_users_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
 
+        users = await client.guild_users(guild)
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(users)])
+
+    #cannot create invite from category channel, we raise ValueError from now!
+    @on_command
+    async def scowez_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        
+        invites=[]
+        try:
+            for channel in guild.all_channel.values():
+                invite = await client.invite_create(channel)
+                invites.append(invite)
+        except Exception as err:
+            print(err)
+            print(f'channel name : {channel.name}\nchannel id : {channel.id}\nchannel type: {channel.type}')
+            traceback.print_exc()
+
+            response=err.response
+            response_data = await response.text(encoding='utf-8')
+            
+            if response.headers['content-type']=='application/json':
+                response_data=from_json(response_data)
+
+            print(response_data)
+            
+        for invite in invites:
+            await client.invite_delete(invite)
+            
+    @on_command
+    async def region_check(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        
+        regions,optimals = await client.guild_regions(guild)
+        result=[f'```Guild\'s name : {guild.name}\nVoice region: {guild.region.name}\nThe guild has {len(regions)} regions available to choose from.']
+        if not optimals:
+            result.append('There is no optimal region available for this guild.')
+        else:
+            result.append('Optimal regions for this guild:')
+            for index,optimal in enumerate(optimals,1):
+                result.append(f'  {index}.: {optimal.name}')
+        result.append('```')
+        await client.message_create(message.channel,'\n'.join(result))
+        
+    @on_command
+    async def guild_channels_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        channels = await client.guild_channels(guild)
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(channels,mixed=True,name='Channels')])
+
+    @on_command
+    async def guild_roles_test(client,message,content):
+        guild=message.guild
+        if message.author is not client.owner or guild is None:
+            return
+        roles = await client.guild_roles(guild)
+        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(roles)])
+        
 start_clients()
 
 
