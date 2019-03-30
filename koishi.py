@@ -3795,6 +3795,41 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             return
         roles = await client.guild_roles(guild)
         pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(roles)])
+
+    @on_command
+    async def users_test(client,message,content):
+        if message.author is not client.owner:
+            raise
+        users=message.channel.users
+        result=[f'i see {len(users)} users at this channel:']
+        
+        index=0
+        limit=len(users)-1
+        while True:
+            if index==20 or index>limit:
+                break
+            user=users[index]
+            index=index+1
+            result.append(f'{index:>2}.: {user:f}')
+
+        if index!=len(users):
+            result.append(f'And {len(users)-index} more')
+
+        await client.message_create(message.channel,'\n'.join(result))
+
+    @on_command
+    async def get_user_from_channel_test(client,message,content):
+        if message.author is not client.owner:
+            raise
+        
+        user=message.channel.get_user(content)
+        if user is None:
+            text='nope'
+        else:
+            text='yespls'
+        
+        await client.message_create(message.channel,text)
+
         
 start_clients()
 

@@ -9,6 +9,7 @@ from hata.prettyprint import pchunkify
 from hata.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
 from hata.exceptions import Forbidden,HTTPException
 from hata.events import pagination
+from hata.events_compiler import content_parser
 from hata.embed import Embed,Embed_thumbnail,Embed_field,rendered_embed
 from hata.emoji import BUILTIN_EMOJIS
 from hata.color import Color
@@ -276,56 +277,31 @@ async def parse_details_command(client,message,content):
     
 
 @infos.add('user')
-async def user_info(client,message,content):
+@content_parser('message','user, flags="mna", default="message.author"')
+async def user_info(client,message,user):
     guild=message.guild
-
-    target=None
-    if content:
-        if guild is not None:
-            if is_user_mention(content) and message.user_mentions:
-                target=message.user_mentions[0]
-            else:
-                user=guild.get_user(content)
-                if user is not None:
-                    target=user
-            
-        if target is None:
-            if content.isdigit():
-                user=USERS.get(int(content),None)
-                if user is None:
-                    try:
-                        target = await client.user_get(int(content))
-                    except HTTPException:
-                        pass
-                else:
-                    target=user
-        else:
-            target=user
-
-    if target is None:
-        target=message.author
     
-    text=[f'**User Information**\nCreated: {time_left(target)} ago\nProfile: {target:m}\nID: {target.id}']
+    text=[f'**User Information**\nCreated: {time_left(user)} ago\nProfile: {user:m}\nID: {user.id}']
     
-    if guild in target.guild_profiles:
-        color=target.color(guild)
-        profile=target.guild_profiles[guild]
+    if guild in user.guild_profiles:
+        color=user.color(guild)
+        profile=user.guild_profiles[guild]
         if profile.roles:
             roles=', '.join(role.mention for role in reversed(profile.roles))
         else:
             roles='none'
         text.append('\n**In guild profile**')
-        if profile.nick:
+        if profile.nick is not None:
             text.append(f'Nick: {profile.nick}')
         text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
     else:
-        if target.avatar:
-            color=target.avatar&0xFFFFFF
+        if user.avatar:
+            color=user.avatar&0xFFFFFF
         else:
-            color=target.default_avatar.color
+            color=user.default_avatar.color
         
-    embed=Embed(f'{target:f}','\n'.join(text),color)
-    embed.thumbnail=Embed_thumbnail(target.avatar_url_as(size=128))
+    embed=Embed(f'{user:f}','\n'.join(text),color)
+    embed.thumbnail=Embed_thumbnail(user.avatar_url_as(size=128))
 
     await client.message_create(message.channel,embed=embed)
 
