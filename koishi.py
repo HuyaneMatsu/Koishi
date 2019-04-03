@@ -29,7 +29,8 @@ from hata.permission import Permission,PERM_KEYS
 from hata.embed import Embed,Embed_image,Embed_field,Embed_footer,Embed_author
 from hata.events import ( \
     waitfor_wrapper,pagination,wait_and_continue,bot_reaction_waitfor,
-    bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild)
+    bot_message_event,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild,
+    bot_reaction_delete_waitfor)
 from hata.futures import wait_one,CancelledError,sleep
 from hata.prettyprint import pchunkify,connect
 from hata.http import VALID_ICON_FORMATS,VALID_ICON_FORMATS_EXTENDED,client_session,Request_CM
@@ -40,15 +41,17 @@ from hata.role import cr_p_overwrite_object,cr_p_role_object
 from hata.user import USERS
 from hata.client_core import KOKORO
 from hata.oauth2 import SCOPES
+from hata.client import ASBytesIO
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
 from pers_data import TOKEN,PREFIX,TOKEN2,CLIENT_SECRET
 from infos import infos,update_about
 from voice import voice
-from battleships import battle_manager,bot_reaction_delete_waitfor
+from battleships import battle_manager
 from dispatch_tests import dispatch_tester
 from ratelimit_tests import ratelimit_commands
+from kanako import kanako_manager
 
 def smart_join(list_,limit):
     limit-=4
@@ -304,6 +307,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     on_command(invalid_command)
     on_command.extend(ratelimit_commands)
     on_command(battle_manager,case='bs')
+    on_command(kanako_manager,'kanako')
     
     @on_command
     async def default_event(client,message):
@@ -3799,7 +3803,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @on_command
     async def users_test(client,message,content):
         if message.author is not client.owner:
-            raise
+            return
         users=message.channel.users
         result=[f'i see {len(users)} users at this channel:']
         
@@ -3820,7 +3824,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @on_command
     async def get_user_from_channel_test(client,message,content):
         if message.author is not client.owner:
-            raise
+            return
         
         user=message.channel.get_user(content)
         if user is None:
@@ -3830,6 +3834,28 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         await client.message_create(message.channel,text)
 
+    @on_command
+    async def embed_image_test(client,message,content):
+        if message.author is not client.owner:
+            return
+        
+        embed=Embed('pure test, no judge')
+        embed.image=Embed_image('attachment://test.png')
+        file=open(os.path.join(os.path.abspath('.'),'images','0000000C_touhou_koishi.png'),'rb')
+        await client.message_create_file(message.channel,file,'test.png',embed=embed)
+
+    @on_command
+    async def bytes_io_test(client,message,content):
+        if message.author is not client.owner:
+            return
+
+        embed=Embed('pure test, no judge')
+        embed.image=Embed_image('attachment://guessme.png')
+        buffer=ASBytesIO()
+        with open(os.path.join(os.path.abspath('.'),'images','0000000C_touhou_koishi.png'),'rb') as file:
+            buffer.write(file.read())
+        buffer.seek(0)
+        await client.message_create_file(message.channel,buffer,'guessme.png',embed=embed)
         
 start_clients()
 

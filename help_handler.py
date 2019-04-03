@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from pers_data import PREFIX
 from hata.embed import Embed,Embed_field,Embed_footer,rendered_embed
 from hata.events import pagination
 from hata.color import Color
 from hata.exceptions import Forbidden,HTTPException
-import asyncio
+from hata.futures import sleep
 
 HELP={}
 
@@ -220,11 +219,7 @@ HELP['bans']=rendered_embed(Embed(title='bans',color=HELP_COLOR,
     description='Shows the banned users at the guild'
         ))
 
-HELP['bans']=rendered_embed(Embed(title='ban_get_by_id',color=HELP_COLOR,
-    description='Shows the banned user, with the id'
-        ))
-
-HELP['bans']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
+HELP['unban']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
     description='Unbans the user. You can write reason after the user\'s id'
         ))
 
@@ -248,6 +243,26 @@ HELP['change_prefix']=rendered_embed(Embed(title='change_prefix',color=HELP_COLO
     description='Changes my prefix at the guild (guild owner only)!'
         ))
 
+HELP['kanako']=rendered_embed(Embed(title='kanako',color=HELP_COLOR,
+    description=(
+        'Start a hiragana or katakana quiz!\n'
+        'There can be only one game each channel.\n\n'
+        '- **create <map> <amount of question> <possibilities (0, 3, 4, 5)>**\n'
+        'Creates a game.\n'
+        '\n'
+        '- **start**\n'
+        'Stats the game, Oldest user at the game only.\n'
+        '\n'
+        '- **join**\n'
+        'Joins to the current game. Cant join if it is already started.\n'
+        '\n'
+        '- **leave**\n'
+        'Leaves from the actual game.\n'
+        '\n'
+        '- **cancel**\n'
+        'Cancels the current game, oldest user at the game only'
+            )))
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
@@ -256,7 +271,7 @@ async def on_command_help(client,message,content):
         except KeyError:
             try:
                 message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command: {content}',color=HELP_COLOR))
-                await asyncio.sleep(30.,loop=client.loop)
+                await sleep(30.,client.loop)
                 await client.message_delete(message)
             except (Forbidden,HTTPException):
                 pass
@@ -270,7 +285,7 @@ async def invalid_command(client,message,command,content):
     prefix=client.events.message_create.prefix(message)
     try:
         message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command `{command}`, try using: `{prefix}help`',color=HELP_COLOR))
-        await asyncio.sleep(30.,loop=client.loop)
+        await sleep(30.,client.loop)
         await client.message_delete(message)
     except (Forbidden,HTTPException):
         pass

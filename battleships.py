@@ -1,23 +1,12 @@
 # -*- coding: utf-8 -*-
-import re, random, time, asyncio
+import re, random, time
 
-from hata.dereaddons_local import inherit
-
-from hata.events import waitfor_wrapper,wait_and_continue,bot_reaction_waitfor
+from hata.events import waitfor_wrapper,wait_and_continue
 from hata.others import filter_content,is_user_mention
 from hata.futures import wait_one,CancelledError,wait_more,future_or_timeout,sleep
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed,Embed_footer,Embed_author
 from hata.exceptions import Forbidden,HTTPException
-
-@inherit(bot_reaction_waitfor)
-class bot_reaction_delete_waitfor:
-    __slots__=['__name__', 'waitfors']
-    def __init__(self):
-        self.__name__='reaction_delete'
-        self.waitfors={}
-
-del inherit
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
 
@@ -559,7 +548,7 @@ class battleships_game:
                 except TimeoutError:
 
                     await self.actual.other.set_state_2(True,'Your opponent timed out!')
-                    awaitself.actual.set_state_2(False,'You timed out!')
+                    await self.actual.set_state_2(False,'You timed out!')
                     return
                 
                 if result:
