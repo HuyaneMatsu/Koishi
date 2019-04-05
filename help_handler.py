@@ -260,7 +260,10 @@ HELP['kanako']=rendered_embed(Embed(title='kanako',color=HELP_COLOR,
         'Leaves from the actual game.\n'
         '\n'
         '- **cancel**\n'
-        'Cancels the current game, oldest user at the game only'
+        'Cancels the current game, oldest user at the game only.\n'
+        '\n'
+        '- **<name>**\n'
+        'Shows you every character at the map.'
             )))
 
 async def on_command_help(client,message,content):

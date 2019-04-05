@@ -85,6 +85,42 @@ _katakana=[('ア','a'),('イ','i'),('ウ','u'),('エ','e'),('オ','o'),('カ','k
 
 MAPS={'hiragana':_hiragana,'katakana':_katakana}
 
+def render_showcase(name,map_):
+    result=[]
+    element_index=0
+    element_limit=len(map_)
+    
+    page_index=1
+    page_limit=(element_limit+29)//30
+
+    field_text=[]
+    
+    while True:
+        if page_index>page_limit:
+            break
+        embed=Embed(name.capitalize(),'',COLOR)
+        embed.footer=Embed_footer(f'page {page_index} / {page_limit}')
+        
+        for _ in range(((element_limit%30)+9)//10 if page_index==page_limit else 3):
+            field_index_limit=element_index+10
+            if field_index_limit>element_limit:
+                field_index_limit=element_limit
+            
+            while element_index<field_index_limit:
+                element=map_[element_index]
+                element_index+=1
+                field_text.append(f'{element_index}.: **{element[0]} - {element[1]}**')
+
+            embed.fields.append(Embed_field(f'{element_index-9} - {element_index}','\n'.join(field_text),inline=True))
+            field_text.clear()
+            
+        result.append(rendered_embed(embed))
+        page_index+=1
+
+    return result
+
+MAP_showcases={name:render_showcase(name,map_) for name,map_ in MAPS.items()}
+
 class history_element():
     __slots__=['answer', 'answers', 'options', 'question']
 
@@ -450,7 +486,7 @@ class game_statistics():
         
         self.cache[0]=rendered_embed(embed)
 
-    def __call__(self,index):
+    def __getitem__(self,index):
         page=self.cache[index]
         if page is None:
             return self.create_page(index)
@@ -500,7 +536,7 @@ async def kanako_manager(client,message,command,*args):
         game=None
         
     command=command.lower()
-    
+
     if command=='info':
         if game is None:
             embed=Embed('','There is no active game at the channel',COLOR)
@@ -551,9 +587,13 @@ async def kanako_manager(client,message,command,*args):
         else:
             game.remove(message.author)
             return
-        
     else:
-        embed=HELP['kanako']
+        try:
+            pages=MAP_showcases[command]
+            embedination(client,channel,pages)
+            return
+        except KeyError:
+            embed=HELP['kanako']
     
     await client.message_create(channel,embed=embed)
 
@@ -616,8 +656,8 @@ class embedination:
         self.cancel=type(self)._cancel
         self.task=None
         self.wrappers=[]
-        waitfor_wrapper(client,self,300.)
-        waitfor_wrapper(client,self,300.)
+        waitfor_wrapper(client,self,150.)
+        waitfor_wrapper(client,self,150.)
         
     async def start(self,wrapper):
         client=wrapper.client
@@ -630,7 +670,7 @@ class embedination:
         self.wrappers.append(wrapper)
         
         if self.task is None:
-            self.task=client.loop.create_task(client.message_create(self.channel,embed=self.pages(0)))
+            self.task=client.loop.create_task(client.message_create(self.channel,embed=self.pages[0]))
             wrapper.target = await self.task
             self.task=None
             if len(self.pages)>1:
@@ -673,12 +713,12 @@ class embedination:
 
         self.page=page
 
-        if wrapper.timeout<600.:
+        if wrapper.timeout<150.:
             for wrapper in self.wrappers:
                 wrapper.timeout+=10.
 
         if self.task is None:
-            self.task=client.loop.create_task(client.message_edit(message,embed=self.pages(page)))
+            self.task=client.loop.create_task(client.message_edit(message,embed=self.pages[page]))
             try:
                 await self.task
             except (Forbidden,HTTPException):

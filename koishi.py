@@ -39,7 +39,7 @@ from hata.audit_logs import Audit_log_iterator
 from hata.guild import GUILDS
 from hata.role import cr_p_overwrite_object,cr_p_role_object
 from hata.user import USERS
-from hata.client_core import KOKORO
+from hata.client_core import KOKORO,stop_clients
 from hata.oauth2 import SCOPES
 from hata.client import ASBytesIO
 
@@ -3856,7 +3856,13 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             buffer.write(file.read())
         buffer.seek(0)
         await client.message_create_file(message.channel,buffer,'guessme.png',embed=embed)
-        
+
+def start_console():
+    import code
+    shell = code.InteractiveConsole(globals().copy())
+    shell.interact()
+    print('closing')
+    stop_clients()
+    
 start_clients()
-
-
+start_console()
