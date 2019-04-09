@@ -87,11 +87,12 @@ POS_PATTERN_1=re.compile('^([\d]{1,2}|[a-jA-J]{1}) *[/]{0,1} *([\d]{1,2}|[a-jA-J
 
 
 class wait_on_reply:
-    __slots__=['guild', 'source', 'target']
+    __slots__=['cancel', 'guild', 'source', 'target']
     def __init__(self,guild,source,target):
         self.guild=guild
         self.source=source
         self.target=target
+        self.cancel=type(self)._default_cancel
     def __call__(self,message):
         if message.author is not self.target:
             return False
@@ -110,6 +111,9 @@ class wait_on_reply:
 
         return self.source is user
 
+    def _default_cancel(self,wrapper,exception):
+        wrapper.cancel()
+        
 class active_request:
     __slots__=['future', 'hash', 'source', 'target']
     def __init__(self,source,target):
@@ -213,7 +217,6 @@ class battle_manager:
                 except KeyError:
                     pass
                 
-            
             wrapper1.cancel()
             wrapper2.cancel()
 
