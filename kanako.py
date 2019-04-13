@@ -521,8 +521,7 @@ class game_statistics():
         self.cache[index]=result
         return result
 
-@content_parser('message, flags=g',
-                'str, default="\'\'"',
+@content_parser('str, flags=g, default="\'\'"',
                 'condition, flags=r, default="index==limit"',
                 'str, default="\'hiragana\'"',
                 'int, default=20',

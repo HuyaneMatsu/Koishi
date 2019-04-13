@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-import math
 from random import choice
 import sys
 
 from hata.parsers import eventlist
 from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
-from hata.others import filter_content,chunkify,cchunkify,is_channel_mention,is_user_mention,time_left,statuses
+from hata.others import time_left,statuses,audit_log_events
 from hata.exceptions import Forbidden,HTTPException
 from hata.events import pagination
 from hata.events_compiler import content_parser
@@ -17,267 +16,14 @@ from hata.user import USERS
 from hata.guild import GUILDS
 from hata.client_core import CLIENTS
 
-from help_handler import HELP
+async def no_permission(client,message,args):
+    if args:
+        await client.message_create(message.channel,'You do not have permission to use this command!')
 
 infos=eventlist()
 
-@infos.add('list')
-async def parse_list_command(client,message,content):
-    guild=message.guild
-    if guild is None or not guild.permissions_for(message.author).can_administrator:
-        return
-    key=''
-    text=''
-    while True:
-        content=filter_content(content)
-        if len(content)==0:
-            break
-        key=content.pop(0)
-        if key=='emojis':
-            list_=[str(emoji) for emoji in guild.emojis.values()]
-            iterator=iter(list_)
-            lines=[''.join(v for v,c in zip(iterator,range(10))) for i in range((len(list_)+9)//10)]
-            text=chunkify(lines)
-            break
-        if key=='channels':
-            text=pchunkify(guild.channels,write_parents=False)
-            break
-        if key=='roles':
-            text=pchunkify(guild.roles,write_parents=False)
-            break
-        if key=='pins':
-            messages = await client.channel_pins(message.channel)
-            if not messages:
-                text='There are no pinned messages at the channel.'
-                break
-            ln_c_l=len(str(len(messages)-1))+2
-            lines=[f'{f"{index}.:": >{ln_c_l}} {message:c} id={message.id} length={len(message.content)} author={message.author:f}' for index,message in enumerate(messages,1)]
-            text=cchunkify(lines)
-            break
-        if key=='webhooks':
-            channel=None
-            if content:
-                if message.channel_mentions and is_channel_mention(content[0]):
-                    channel=message.channel_mentions[0]
-                else:
-                    channel=guild.get_channel(channel)
-            if channel is None:
-                webhooks = await client.webhook_get_guild(guild)
-            else:
-                webhooks = await client.webhook_get_channel(channel)
-
-            text=pchunkify(webhooks,write_parents=False)
-            break
-        break
-    if type(text) is not str:
-        pages=[{'content':chunk} for chunk in text]
-        pagination(client,message.channel,pages,120.)
-    elif text:
-        await client.message_create(message.channel,text)
-    else:
-        await client.message_create(message.channel,embed=HELP['list'])
-
-@infos.add('details')
-async def parse_details_command(client,message,content):
-    guild=message.guild
-    if guild is None or not guild.permissions_for(message.author).can_administrator:
-        return
-    text=''
-    key=''
-    while True:
-        content=filter_content(content)
-        if len(content)==0:
-            break
-        key=content.pop(0)
-        if key=='message':
-            #alternative function definition right here
-            while True:
-                if not content:
-                    index=1
-                elif content[0].isdigit():
-                    index=int(content[0])
-                else:
-                    text='Invalid index'
-                    break
-                if index>4194304:
-                    #id propably
-                    try:
-                        target_message = await client.message_get(message.channel,index)
-                    except (Forbidden,HTTPException):
-                        text='Acces denied or not existing message'
-                        break
-                else:
-                    if index>=message.channel.MC_GC_LIMIT and message.author is not client.owner:
-                        text='NO U will read that!'
-                        break
-                    try:
-                        target_message = await message_at_index(client,message.channel,index)
-                    except IndexError:
-                        text='I am not able to reach that message!'
-                        break
-                    except PermissionError:
-                        text='Permission denied!'
-                        break
-                text=pchunkify(target_message)
-                break
-            break
-        
-        if key=='guild':
-            text=pchunkify(guild)
-            break
-        
-        if key=='pin':
-            while True:
-                if not content:
-                    index=0
-                elif content[0].isdigit():
-                    index=int(content[0])
-                else:
-                    text='Invalid index'
-                    break
-                messages = await client.channel_pins(message.channel)
-                if not messages:
-                    text='There are no pins at this channel'
-                    break
-                if len(messages)<=index:
-                    text=f'Index out of range, there is only {len(messages)} pins at the channel'
-                    break
-                text=pchunkify(messages[index])
-                break
-            break
-
-        if key=='role':
-            if not content:
-                role=guild.roles[0]
-            elif content[0].isdigit():
-                index=int(content[0])
-                if index>=len(guild.roles):
-                    index=len(guild.roles)-1
-                role=guild.roles[index]
-            else:
-                role=guild.get_role(content[0])
-                if role is None:
-                    text='Couldnt find that role by index/name.'
-                    break
-
-            text=pchunkify(role)
-            break
-        if key=='channel':
-            if not content:
-                text='Channel name or mention too pls?'
-                break
-            name=content.pop(0)
-            if is_channel_mention(name) and message.channel_mentions:
-                channel=message.channel_mentions[0]
-            else:
-                channel=guild.get_channel(name)
-                if channel is None:
-                    text='Unknown channel name.'
-                    
-            if len(content)<2:
-                text=pchunkify(channel,overwrites=True)
-                break
-            
-            name=content.pop(0)
-            if name not in ('ow','overwrite'):
-                text='After channel the next posible key is "ow"/"overwrite with an index!'
-                break
-            if not channel.overwrites:
-                text='The channel has no overwrites desu'
-                break
-            name=content.pop(0)
-            if name.isdigit():
-                try:
-                    overwrite=channel.overwrites[int(name)]
-                except IndexError:
-                    text=f'The channel has only {len(channel.overwrites)} overwirtes'
-                    break
-            else:
-                value=guild.get_role(name)
-                if value is None:
-                    value=guild.get_user(name)
-                if value is None:
-                    text='There is no user/role like that'
-                    break
-                overwrite=None
-                for x in channel.overwrites:
-                    if x.target is value:
-                        overwrite=x
-                        break
-                del x
-                if overwrite is None:
-                    text='No overwrite found for that user/role'
-                    break
-            
-            text=pchunkify(overwrite,detailed=True)
-            break
-        
-        if key=='permission':
-            if len(content)&1 or len(content)>4:
-                text='Getting info about sometihing should contain user <user> channel <channel> pairs'
-                break
-            
-            user=None
-            channel=None
-            
-            while True:
-                if not content:
-                    break
-                type_=content.pop(0)
-                name=content.pop(0)
-                if type_=='user':
-                    if user is not None:
-                        text='User mentioned more times'
-                        break
-                    if is_user_mention(name) and message.user_mentions:
-                        user=message.user_mentions[0]
-                    else:
-                        user=guild.get_user(name)
-                        if user is None:
-                            text='User not found'
-                            break
-                    continue
-                
-                if type_=='channel':
-                    if channel is not None:
-                        text='Channel mentioned more times'
-                        break
-                    if is_channel_mention(name) and message.channel.user_mentions:
-                        channel=message.channel_mentions[0]
-                    else:
-                        channel=guild.get_channel(name)
-                        if channel is not None:
-                            text='Channel not found'
-                            break
-                    continue
-
-                text=f'Invalid key "{type_}"'
-                break
-
-            if text:
-                break
-            
-            if user is None:
-                user=message.author
-            if channel is None:
-                channel=message.channel
-                
-            text=pchunkify(channel.permissions_for(user))
-            break
-        
-        break
-    
-    if type(text) is not str:
-        pages=[{'content':chunk} for chunk in text]
-        pagination(client,message.channel,pages,120.)
-    elif text:
-        await client.message_create(message.channel,text)
-    else:
-        await client.message_create(message.channel,embed=HELP['details'])
-    
-
 @infos.add('user')
-@content_parser('message','user, flags="mna", default="message.author"')
+@content_parser('user, flags="mna", default="message.author"')
 async def user_info(client,message,user):
     guild=message.guild
     
@@ -387,23 +133,16 @@ async def guild_info(client,message,content):
     await client.message_create(message.channel,embed=embed)
 
 @infos
-async def invites(client,message,content):
-    guild=message.guild
-    if guild is None or not guild.permissions_for(message.author).can_administrator:
-        return
-
-    channel=None
-    if content:
-        if is_channel_mention(content) and message.channel_mentions[0]:
-            channel=message.channel_mentions[0]
-        else:
-            channel=guild.get_channel(content)
-            
+@content_parser('guild',
+                'condition, default="not guild.permissions_for(message.author).can_administrator"',
+                'channel, flags=mni, default=None',
+                on_failure=no_permission)
+async def invites(client,message,guild,channel):
     try:
-        if channel is not None:
-            invites = await client.invites_of_channel(channel)
-        else:
+        if channel is None:
             invites = await client.invites_of_guild(guild)
+        else:
+            invites = await client.invites_of_channel(channel)
     except Forbidden:
         return
     
@@ -556,32 +295,8 @@ LOVE_VALUES=tuple(generate_love_level())
 del generate_love_level
 
 @infos
-async def love(client,message,content):
-    guild=message.guild
-    if guild is None or not content:
-        return
-    
-    name=filter_content(content)[0]
-    if message.user_mentions is not None and is_user_mention(name):
-        target=message.user_mentions[0]
-    else:
-        target=guild.get_user(name)
-        if target is None:
-            if name.isdigit():
-                target=USERS.get(int(name),None)
-                if target is None:
-                    try:
-                        target = await client.user_get(int(name))
-                    except HTTPException:
-                        return
-            else:
-                return
-
-    source=message.author
-
-    if target is source:
-        return
-    
+@content_parser('user, flags="mnag", default="message.author"')
+async def love(client,message,user):
     percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
             
     embed=Embed( \
@@ -631,3 +346,47 @@ def update_about(client):
     ABOUT.embed=rendered_embed(embed)
     ABOUT.ready=True
 
+
+@infos
+@content_parser('guild',
+                'condition, default="not guild.permissions_for(message.author).can_view_audit_log"',
+                'ensure',
+                'condition, flags=r, default="not part"',
+                'user, flags=nmi, default=part',
+                'ensure',
+                'condition, flags=r, default="not part"',
+                'str',
+                on_failure=no_permission)
+async def logs(client,message,guild,*args):
+    user=None
+    event=None
+
+    while True:
+        if not args:
+            break
+        if type(args[0]) is str:
+            event_iter=(event_as_str,user)
+        else:
+            user,*args=args
+        if not args:
+            break
+        for event_name in args:
+            try:
+                event=audit_log_events.values[int(event_name)]
+                break
+            except (KeyError,ValueError):
+                pass
+            try:
+                event=getattr(audit_log_events,event_name.upper())
+                break
+            except AttributeError:
+                continue
+            break
+        break
+
+    with client.keep_typing(message.channel):
+        iterator = client.audit_log_iterator(guild,user,event)
+        await iterator.load_all()
+        logs = iterator.transform()
+    
+    pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])

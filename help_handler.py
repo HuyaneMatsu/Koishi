@@ -80,15 +80,6 @@ HELP['emoji']=rendered_embed(Embed(title='emoji',color=HELP_COLOR,
         '(works only on emojis which u cant use on the server)'
             )))
 
-HELP['edit']=rendered_embed(Embed(title='edit',color=HELP_COLOR,  
-    description= ( \
-        'You can edit:\n'
-        ' **>>** "user"\n'
-        ' **>>** "role"\n'
-        ' **>>** "emoji"\n'
-        ' **>>** "guild"'
-            )))
-
 HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,
     description=( \
         'Use "join (n%)" to make the bot to join your voice channel\n'
@@ -100,38 +91,6 @@ HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,
         'Use "skip" to skip the actual source\n'
         'Use "move <channel name>" to move the player to an another channel\n'
         'Use "leave" to make me leave the channel'
-            )))
-
-HELP['move']=rendered_embed(Embed(title='move',color=HELP_COLOR,
-    description='With move command you can move "role","channel" and "user" arround.'
-        ))
-
-HELP['delete']=rendered_embed(Embed(title='delete',color=HELP_COLOR,
-    description=( \
-        'Currently can delete:\n'
-        ' **>>** "role" <name/mention>\n'
-        ' **>>** "emoji" <name/emoji>'
-            )))
-
-HELP['list']=rendered_embed(Embed(title='list',color=HELP_COLOR,
-    description=( \
-        'Lits a specific type of object at the guild, it can be:'
-        ' **>>** "roles"\n'
-        ' **>>** "emojis"\n'
-        ' **>>** "channels"\n'
-        ' **>>** "pins"\n'
-        ' **>>** "webhooks" (channel)'
-            )))
-
-HELP['details']=rendered_embed(Embed(title='details',color=HELP_COLOR,
-    description=( \
-        'Shows details about a specific object, it can be:\n'
-        ' **>>** "message" +index'
-        ' **>>** "guild"\n'
-        ' **>>** "pin" + index\n'
-        ' **>>** "role"\n'
-        ' **>>** "channel" <> <ow> <>\n'
-        ' **>>** "permission" <channel> <> <user> <>'
             )))
 
 HELP['message_me']=rendered_embed(Embed(title='message_me',color=HELP_COLOR,
@@ -186,22 +145,6 @@ HELP['invite']=rendered_embed(Embed(title='ivnite',color=HELP_COLOR,
 HELP['invites']=rendered_embed(Embed(title='invites',color=HELP_COLOR,
     description='Shows the invites of the guild <channel>.'
         ))
-
-HELP['invite_by_code']=rendered_embed(Embed(title='invite_by_code',color=HELP_COLOR,
-    description='Returns the code\' invite'
-        ))
-
-HELP['invite_delete_by_code']=rendered_embed(Embed(title='invite_delete_by_code',color=HELP_COLOR,
-    description='Deletes the code\' invite'
-        ))
-
-HELP['invite_clear']=rendered_embed(Embed(title='invite_clear',color=HELP_COLOR,
-    description='Deletes every invite of the guild, might take some time'
-        ))
-
-##HELP['wait2where']=rendered_embed(Embed(title='wait2where',color=HELP_COLOR,
-##    description='Waits on your answer at private and at the source channel. If you answers sends a message at the main channel.'
-##        ))
 
 HELP['prune']=rendered_embed(Embed(title='prune',color=HELP_COLOR,
     description='Use it to estimate pruned members. Using with an additional "prune" gonna exesute the prune too'
