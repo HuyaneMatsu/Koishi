@@ -65,10 +65,6 @@ HELP['dice']=rendered_embed(Embed(title='dice',color=HELP_COLOR,
     description='Throws a/more dices.'
         ))
 
-##HELP['pong']=rendered_embed(Embed(title='ping',color=HELP_COLOR,
-##    description='Searches a user by name at the guild, and pings is'
-##        ))
-
 HELP['ping']=rendered_embed(Embed(title='pong',color=HELP_COLOR,
     description='Returns the client\s ping in ms'
         ))
@@ -97,9 +93,6 @@ HELP['message_me']=rendered_embed(Embed(title='message_me',color=HELP_COLOR,
     description='Sends you something nice'
         ))
 
-##HELP['pm']=rendered_embed(Embed(title='pm',color=HELP_COLOR,
-##    description='Sends a private message to the user with the text after the line break'
-##        ))
 
 HELP['clear']=rendered_embed(Embed(title='clear',color=HELP_COLOR,
     description='Clears the set amount of messages (default=100)'
@@ -109,27 +102,12 @@ HELP['hug']=rendered_embed(Embed(title='hug',color=HELP_COLOR,
     description='After u said the magic word hugs the choosen one'
         ))
 
-HELP['say']=rendered_embed(Embed(title='say',color=HELP_COLOR,
-    description='Write something after I prepared for to say it!'
-        ))
-
 HELP['waitemoji']=rendered_embed(Embed(title='waitemoji',color=HELP_COLOR,
     description='Waits for an emoji at the channel'
         ))
 
-HELP['create']=rendered_embed(Embed(title='create',color=HELP_COLOR,
-    description=( \
-        'You can create a new:\n'
-        ' **>>** "role"\n'
-        ' **>>** "emoji"'
-            )))
-
 HELP['subscribe']=rendered_embed(Embed(title='subscribe',color=HELP_COLOR,
     description='Subscribes u to Announcements role, if possible'
-        ))
-
-HELP['type']=rendered_embed(Embed(title='type',color=HELP_COLOR,
-    description='No U, I can only read!'
         ))
 
 HELP['user']=rendered_embed(Embed(title='user',color=HELP_COLOR,
@@ -146,24 +124,8 @@ HELP['invites']=rendered_embed(Embed(title='invites',color=HELP_COLOR,
     description='Shows the invites of the guild <channel>.'
         ))
 
-HELP['prune']=rendered_embed(Embed(title='prune',color=HELP_COLOR,
-    description='Use it to estimate pruned members. Using with an additional "prune" gonna exesute the prune too'
-        ))
-
-##HELP['pinner']=rendered_embed(Embed(title='pinner',color=HELP_COLOR,
-##    description='Sends a message, and reaction on it can change it\'s pinned state.'
-##        ))
-
-HELP['ban']=rendered_embed(Embed(title='ban',color=HELP_COLOR,
-    description='Bans the mentioned user with the reason following the name/mention.'
-        ))
-
 HELP['bans']=rendered_embed(Embed(title='bans',color=HELP_COLOR,
     description='Shows the banned users at the guild'
-        ))
-
-HELP['unban']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
-    description='Unbans the user. You can write reason after the user\'s id'
         ))
 
 HELP['leave_guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,

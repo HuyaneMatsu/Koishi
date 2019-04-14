@@ -16,9 +16,19 @@ from hata.user import USERS
 from hata.guild import GUILDS
 from hata.client_core import CLIENTS
 
+from help_handler import HELP
+
 async def no_permission(client,message,args):
     if args:
         await client.message_create(message.channel,'You do not have permission to use this command!')
+
+class show_help:
+    __slots__=['embed']
+    __async_call__=True
+    def __init__(self,name):
+        self.embed=HELP[name]
+    def __call__(self,client,message,args):
+        return client.message_create(message.channel,embed=self.embed)
 
 infos=eventlist()
 
@@ -140,9 +150,9 @@ async def guild_info(client,message,content):
 async def invites(client,message,guild,channel):
     try:
         if channel is None:
-            invites = await client.invites_of_guild(guild)
+            invites = await client.invite_get_guild(guild)
         else:
-            invites = await client.invites_of_channel(channel)
+            invites = await client.invite_get_channel(channel)
     except Forbidden:
         return
     
@@ -295,8 +305,11 @@ LOVE_VALUES=tuple(generate_love_level())
 del generate_love_level
 
 @infos
-@content_parser('user, flags="mnag", default="message.author"')
-async def love(client,message,user):
+@content_parser('user, flags="mna"',
+                on_failure=show_help('love'))
+async def love(client,message,target):
+    source=message.author
+
     percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
             
     embed=Embed( \

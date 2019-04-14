@@ -17,7 +17,7 @@ from hata.exceptions import Forbidden,HTTPException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
 from hata.activity import activity_game
 from hata.others import (filter_content,from_json,to_json,parse_oauth2_redirect_url)
-from hata.channel import cr_pg_channel_object,Channel_text,Channel_private
+from hata.channel import cr_pg_channel_object,Channel_text,Channel_private,Message_iterator
 from hata.embed import Embed,Embed_field,Embed_footer
 from hata.events import (
     pagination,bot_reaction_waitfor,bot_message_event,wait_for_message,
