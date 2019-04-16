@@ -3196,4 +3196,19 @@ async def parse_details_command(client,message,content):
                     on_failure=failure_test_on_failure)
     async def failure_test(self,message,guild):
         await self.message_create(message.channel,'Nothing interesting here')
-    
+
+    @on_command
+    async def file_test1(client,message,content):
+        if message.author is not client.owner:
+            return
+        with open(os.path.join(os.path.abspath('.'),'images','0000000A_touhou_koishi_kokoro_reversed.png'),'rb') as file:
+            await client.message_create_file(message.channel,file)
+            await client.message_create_file(message.channel,file)
+
+    @on_command
+    async def file_test2(client,message,content):
+        if message.author is not client.owner:
+            return
+        with ASFile(os.path.join(os.path.abspath('.'),'images','0000000A_touhou_koishi_kokoro_reversed.png')) as file:
+            await client.message_create_file(message.channel,file)
+            await client.message_create_file(message.channel,file)

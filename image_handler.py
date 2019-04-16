@@ -6,6 +6,7 @@ from io import BytesIO
 from help_handler import HELP
 from hata.others import is_mention
 from hata.channel import messages_till_index
+from hata.client import ASFile
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -113,10 +114,10 @@ RESERVED_TAGS={'any','vid','pic','count','index','hex',}
 
 async def on_command_image(client,message,content):
     result=process_on_command_image(content)
-    if type(result)==str:
+    if type(result) is str:
         await client.message_create(message.channel,result)
     else:
-        with open(join(IMAGE_PATH,result.path),'rb') as image:
+        with ASFile(join(IMAGE_PATH,result.path)) as image:
             await client.message_create_file(message.channel,image)
     
     
