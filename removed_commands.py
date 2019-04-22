@@ -3212,3 +3212,13 @@ async def parse_details_command(client,message,content):
         with ASFile(os.path.join(os.path.abspath('.'),'images','0000000A_touhou_koishi_kokoro_reversed.png')) as file:
             await client.message_create_file(message.channel,file)
             await client.message_create_file(message.channel,file)
+
+    @on_command
+    async def reaction_remove_test(client,message,content):
+        if message.author is not client.owner:
+            return
+
+        await client.reaction_add(message,BUILTIN_EMOJIS['x'])
+        await client.reaction_delete_own(message,BUILTIN_EMOJIS['x'])
+        await client.reaction_delete_own(message,BUILTIN_EMOJIS['x'])
+        #does not drops error

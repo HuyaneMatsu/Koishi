@@ -12,22 +12,30 @@ from collections import deque
 from datetime import timedelta
 import traceback
 
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup=None
+    
 from hata import Client,start_clients
 from hata.exceptions import Forbidden,HTTPException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
 from hata.activity import activity_game
-from hata.others import (filter_content,from_json,to_json,parse_oauth2_redirect_url)
+from hata.others import (filter_content,from_json,to_json,
+    parse_oauth2_redirect_url,cchunkify)
 from hata.channel import cr_pg_channel_object,Channel_text,Channel_private,Message_iterator
 from hata.embed import Embed,Embed_field,Embed_footer
 from hata.events import (
     pagination,bot_reaction_waitfor,bot_message_event,wait_for_message,
-    wait_for_emoji,prefix_by_guild,bot_reaction_delete_waitfor,cooldown)
+    wait_for_emoji,prefix_by_guild,bot_reaction_delete_waitfor,cooldown,
+    waitfor_wrapper)
 from hata.futures import CancelledError,sleep
 from hata.prettyprint import pchunkify
 from hata.user import USERS
 from hata.client_core import KOKORO,stop_clients
 from hata.oauth2 import SCOPES
 from hata.events_compiler import content_parser
+from hata.webhook import Webhook
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -38,6 +46,7 @@ from battleships import battle_manager
 from dispatch_tests import dispatch_tester
 from ratelimit_tests import ratelimit_commands
 from kanako import kanako_manager
+from dungeon_sweeper import ds_manager
 
 def smart_join(list_,limit):
     limit-=4
@@ -229,6 +238,55 @@ async def channel_delete(self,channel):
     except KeyError:
         pass
 
+class commit_extractor:
+    __slots__=['client', 'color', 'target', 'webhook']
+    def __init__(self,client,target,webhook,color=0):
+        self.client=client
+        self.target=target
+        self.webhook=webhook
+        self.color=color
+
+    async def __call__(self,args):
+        message=args[0]
+        webhook=self.webhook
+        client=self.client
+
+        if message.author!=webhook and message.author.name=='GitHub':
+            return
+        
+        embed=message.embeds[0]
+
+        if ':master' not in embed.title:
+            return
+
+        result = await client.download_url(embed.url)
+        soup=BeautifulSoup(result,'html.parser',from_encoding='utf-8')
+        
+        description_container=soup.find(class_='commit-desc')
+        if description_container is None:
+            return
+        
+        title_container=soup.find(class_='commit-title')
+
+        if webhook.partial:
+            await client.webhook_get(webhook.id)
+
+        result_embed=Embed(
+            title       = title_container.getText('\n'),
+            desciption  = description_container.getText('\n'),
+            color       = self.color,
+            url         = embed.url,
+                )
+        
+        webhook_name = embed.author.name
+        webhook_avatar_url = await client.download_url(embed.author.proxy_icon)
+
+        await client.webhook_send(webhook,
+            embed=result_embed,
+            name=webhook_name,
+            avatar_url=webhook_avatar_url
+                )
+        
 
 @Koishi.events
 async def ready(client):
@@ -242,7 +300,15 @@ Koishi.events(bot_reaction_delete_waitfor())
 
 
 with Koishi.events(bot_message_event(PREFIXES)) as on_command:
-
+    
+    Koishi.events.message_create.append(
+        commit_extractor(
+            Koishi,
+            Channel_text.precreate(555476090382974999),
+            Webhook.precreate(555476334210580508),
+            color=0x2ad300,
+                ))
+        
     on_command(dispatch_tester.here)
     on_command(dispatch_tester.switch)
     on_command.extend(infos)
@@ -254,6 +320,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     on_command.extend(ratelimit_commands)
     on_command(battle_manager,case='bs')
     on_command(kanako_manager,'kanako')
+    on_command(ds_manager,'ds')
     
     @on_command
     async def default_event(client,message):
@@ -277,22 +344,12 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             await client.message_create(message.channel,text)
 
     @on_command
-    async def rate(client,message,content):
-        target=None
-        if content:
-            if message.user_mentions:
-                target=message.user_mentions[0]
-            else:
-                guild=message.guild
-                if guild is not None:
-                    target=guild.get_user(content)
-        if target is None:
-            target=message.author
-            
+    @content_parser('user, flags=mna, default="message.author"')
+    async def rate(client,message,target):
         #nickname check
         name=target.name_at(message.guild)
 
-        if target==client:
+        if target is client:
             result=10
         else:
             result=target.id%11
@@ -832,7 +889,22 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         new=access.created_at
         await client.message_create(message.channel,f'{user:f}\' access token got renewed.\nFrom creation time at: {last:%Y.%m.%d-%H:%M:%S}\nTo creation time at: {new:%Y.%m.%d-%H:%M:%S}')
 
-    
+    @on_command
+    async def OG(client,message,content):
+        if message.author is not client.owner:
+            return
+        
+        access = await client.owners_access(valuable_scopes)
+        user = await client.user_info(access)
+
+        guild = await client.guild_create(name=content,
+            channels=[cr_pg_channel_object(name='general',type_=Channel_text),])
+
+        await sleep(1.,client.loop)
+        role = await client.role_create(guild,'my dear',8)
+        await client.guild_user_add(guild,user,roles=[role])
+        await sleep(1.,client.loop)
+                    
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())

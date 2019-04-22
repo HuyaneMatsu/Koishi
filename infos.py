@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from random import choice
 import sys
+import json
 
 from hata.parsers import eventlist
 from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
-from hata.others import time_left,statuses,audit_log_events
+from hata.others import time_left,statuses,audit_log_events,cchunkify
 from hata.exceptions import Forbidden,HTTPException
 from hata.events import pagination
 from hata.events_compiler import content_parser
@@ -403,3 +404,31 @@ async def logs(client,message,guild,*args):
         logs = iterator.transform()
     
     pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])
+
+
+@infos
+@content_parser('condition, default="not guild.permissions_for(message.author).can_administrator"',
+                'int',
+                'channel, flags=mnig, default="message.channel"',
+                on_failure=no_permission)
+async def message(client,message,message_id,channel):
+    try:
+        target_message = await client.message_get(channel,message_id)
+    except (Forbidden,HTTPException):
+        await client.message_create(message.channel,'Acces denied or not existing message')
+        return
+    pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
+
+@infos
+@content_parser('condition, default="not guild.permissions_for(message.author).can_administrator"',
+                'int',
+                'channel, flags=mnig, default="message.channel"',
+                on_failure=no_permission)
+async def message_pure(client,message,message_id,channel):
+    try:
+        data = await client.http.message_get(channel.id,message_id)
+    except (Forbidden,HTTPException):
+        await client.message_create(message.channel,'Acces denied or not existing message')
+        return
+    
+    pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
