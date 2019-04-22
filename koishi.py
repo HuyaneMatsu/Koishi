@@ -273,7 +273,7 @@ class commit_extractor:
 
         result_embed=Embed(
             title       = title_container.getText('\n'),
-            desciption  = description_container.getText('\n'),
+            description = description_container.getText('\n'),
             color       = self.color,
             url         = embed.url,
                 )
