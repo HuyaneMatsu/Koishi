@@ -273,11 +273,15 @@ class commit_extractor:
         if webhook.partial:
             await client.webhook_update(webhook)
 
+        guild=webhook.guild
+        
         if self.role is None:
             result_content=''
+            needs_unlock=False
         else:
             result_content=self.role.mention
-        
+            needs_unlock = (not self.role.mentinable) and guild.permissions_for(Koishi).can_manage_roles
+            
         result_embed=Embed(
             title       = title_container.getText('\n'),
             description = description_container.getText('\n'),
@@ -288,12 +292,25 @@ class commit_extractor:
         webhook_name = embed.author.name
         webhook_avatar_url = embed.author.proxy_icon
         
-        await client.webhook_send(webhook,
-            result_content,
-            result_embed,
-            name=webhook_name,
-            avatar_url=webhook_avatar_url
-                )
+        if needs_unlock:
+            try:
+                await Koishi.role_edit(self.role,mentionable=True)
+                await client.webhook_send(webhook,
+                    result_content,
+                    result_embed,
+                    name=webhook_name,
+                    avatar_url=webhook_avatar_url
+                        )
+            finally:
+                await Koishi.role_edit(self.role,mentionable=False)
+
+        else:
+            await client.webhook_send(webhook,
+                result_content,
+                result_embed,
+                name=webhook_name,
+                avatar_url=webhook_avatar_url
+                    )
         
 
 @Koishi.events
