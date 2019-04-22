@@ -279,7 +279,7 @@ class commit_extractor:
                 )
         
         webhook_name = embed.author.name
-        webhook_avatar_url = await client.download_url(embed.author.proxy_icon)
+        webhook_avatar_url = embed.author.proxy_icon
 
         await client.webhook_send(webhook,
             embed=result_embed,
