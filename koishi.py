@@ -36,6 +36,7 @@ from hata.client_core import KOKORO,stop_clients
 from hata.oauth2 import SCOPES
 from hata.events_compiler import content_parser
 from hata.webhook import Webhook
+from hata.role import Role
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -239,11 +240,12 @@ async def channel_delete(self,channel):
         pass
 
 class commit_extractor:
-    __slots__=['client', 'color', 'target', 'webhook']
-    def __init__(self,client,target,webhook,color=0):
+    __slots__=['client', 'color', 'role', 'target', 'webhook']
+    def __init__(self,client,target,webhook,role=None,color=0):
         self.client=client
         self.target=target
         self.webhook=webhook
+        self.role=role
         self.color=color
 
     async def __call__(self,args):
@@ -251,7 +253,7 @@ class commit_extractor:
         webhook=self.webhook
         client=self.client
 
-        if message.author!=webhook and message.author.name=='GitHub':
+        if message.author!=webhook or message.author.name!='GitHub':
             return
         
         embed=message.embeds[0]
@@ -271,6 +273,11 @@ class commit_extractor:
         if webhook.partial:
             await client.webhook_update(webhook)
 
+        if self.role is None:
+            result_content=''
+        else:
+            result_content=self.role.mention
+        
         result_embed=Embed(
             title       = title_container.getText('\n'),
             description = description_container.getText('\n'),
@@ -280,9 +287,9 @@ class commit_extractor:
         
         webhook_name = embed.author.name
         webhook_avatar_url = embed.author.proxy_icon
-
+        
         await client.webhook_send(webhook,
-            embed=result_embed,
+            result_embed,
             name=webhook_name,
             avatar_url=webhook_avatar_url
                 )
@@ -306,6 +313,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             Koishi,
             Channel_text.precreate(555476090382974999),
             Webhook.precreate(555476334210580508),
+            role=Role.precreate(538397994421190657),
             color=0x2ad300,
                 ))
         
