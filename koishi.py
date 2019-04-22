@@ -269,7 +269,7 @@ class commit_extractor:
         title_container=soup.find(class_='commit-title')
 
         if webhook.partial:
-            await client.webhook_get(webhook.id)
+            await client.webhook_update(webhook)
 
         result_embed=Embed(
             title       = title_container.getText('\n'),
