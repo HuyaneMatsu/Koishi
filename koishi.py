@@ -280,7 +280,7 @@ class commit_extractor:
             needs_unlock=False
         else:
             result_content=self.role.mention
-            needs_unlock = (not self.role.mentinable) and guild.permissions_for(Koishi).can_manage_roles
+            needs_unlock = (not self.role.mentionable) and guild.permissions_for(Koishi).can_manage_roles
             
         result_embed=Embed(
             title       = title_container.getText('\n'),
@@ -930,7 +930,9 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         role = await client.role_create(guild,'my dear',8)
         await client.guild_user_add(guild,user,roles=[role])
         await sleep(1.,client.loop)
-                    
+
+
+    
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())

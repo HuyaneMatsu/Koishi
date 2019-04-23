@@ -428,7 +428,7 @@ async def message_pure(client,message,message_id,channel):
     try:
         data = await client.http.message_get(channel.id,message_id)
     except (Forbidden,HTTPException):
-        await client.message_create(message.channel,'Acces denied or not existing message')
+        await client.message_create(message.channel,'Access denied or not existing message')
         return
     
     pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])

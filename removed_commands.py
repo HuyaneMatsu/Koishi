@@ -3222,3 +3222,81 @@ async def parse_details_command(client,message,content):
         await client.reaction_delete_own(message,BUILTIN_EMOJIS['x'])
         await client.reaction_delete_own(message,BUILTIN_EMOJIS['x'])
         #does not drops error
+
+    @on_command
+    @content_parser('condition, default="message.author is not client.owner"',
+                'int',
+                'channel, flags=mnig, default="message.channel"',)
+    async def emojis_get_0(client,message,message_id,channel):
+        try:
+            target_message = await client.message_get(channel,message_id)
+        except (Forbidden,HTTPException):
+            await client.message_create(message.channel,'Access denied or not existing message')
+            return
+        if target_message.reactions is None:
+            await client.message_create(message.channel,'No reaction on that message.')
+            return
+        
+        await Koishi.reaction_users(target_message,target_message.reactions.__iter__().__next__())
+
+        result=[]
+        for emoji,list_ in target_message.reactions.items():
+            for user in list_:
+                result.append(f'{emoji:e} {user:f}')
+            if list_.unknown:
+                result.append(f'{emoji:e} + {list_.unknown}')
+        
+        pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(result)])
+    
+    @on_command
+    @content_parser('condition, default="message.author is not client.owner"',
+                'int',
+                'channel, flags=mnig, default="message.channel"',)
+    async def emojis_get_1(client,message,message_id,channel):
+        try:
+            target_message = await client.message_get(channel,message_id)
+        except (Forbidden,HTTPException):
+            await client.message_create(message.channel,'Access denied or not existing message')
+            return
+        if target_message.reactions is None:
+            await client.message_create(message.channel,'No reaction on that message.')
+            return
+        
+        await Koishi.reaction_users_all(target_message,target_message.reactions.__iter__().__next__())
+
+        result=[]
+        for emoji,list_ in target_message.reactions.items():
+            for user in list_:
+                result.append(f'{emoji:e} {user:f}')
+            if list_.unknown:
+                result.append(f'{emoji:e} + {list_.unknown}')
+        
+        pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(result)])
+
+    @on_command
+    @content_parser('condition, default="message.author is not client.owner"',
+                'int',
+                'channel, flags=mnig, default="message.channel"',)
+    async def emojis_get_2(client,message,message_id,channel):
+        try:
+            target_message = await client.message_get(channel,message_id)
+        except (Forbidden,HTTPException):
+            await client.message_create(message.channel,'Access denied or not existing message')
+            return
+        
+        if target_message.reactions is None:
+            await client.message_create(message.channel,'No reaction on that message.')
+            return
+        
+        await Koishi.reaction_load_all(target_message)
+
+        result=[]
+        for emoji,list_ in target_message.reactions.items():
+            for user in list_:
+                result.append(f'{emoji:e} {user:f}')
+            if list_.unknown:
+                result.append(f'{emoji:e} + {list_.unknown}')
+        
+        pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(result)])
+
+        
