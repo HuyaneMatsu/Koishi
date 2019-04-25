@@ -32,7 +32,7 @@ from hata.events import (
 from hata.futures import CancelledError,sleep
 from hata.prettyprint import pchunkify
 from hata.user import USERS
-from hata.client_core import KOKORO,stop_clients
+from hata.client_core import KOKORO,stop_clients,CLIENTS
 from hata.oauth2 import SCOPES
 from hata.events_compiler import content_parser
 from hata.webhook import Webhook
@@ -113,15 +113,19 @@ class typing_counter:
     def __init__(self,user,timestamp):
         self.user=user
         self.timestamp=timestamp
-        self.duration=10.
+        self.duration=8.
 
 @Mokou.events
 async def message_create(client,message):
     while True:
+        channel=message.channel
+        if type(channel) is Channel_private:
+            break
+        
         user=message.author
         if user.is_bot:
             break
-        channel=message.channel
+        
         try:
             channel_q=TYPINGS[channel.id]
         except KeyError:
@@ -139,7 +143,8 @@ async def message_create(client,message):
             if element.timestamp<limit:
                 break
             if element.user is user:
-                element.duration=(timestamp-element.timestamp).total_seconds()
+                #we dont actually look the corect time, so lets just put there a 0.
+                element.duration=0. #(timestamp-element.timestamp).total_seconds() 
                 break
             index+=1
             if index==ln:
@@ -189,6 +194,9 @@ async def message_create(client,message):
 
 @Mokou.events
 async def typing(self,channel,user,timestamp):
+    if type(channel) is Channel_private:
+        return
+    
     try:
         channel_q=TYPINGS[channel.id]
     except KeyError:
@@ -199,33 +207,31 @@ async def typing(self,channel,user,timestamp):
     if not index:
         channel_q.appendleft(typing_counter(user,timestamp),)
         return
-    limit=timestamp-timedelta(seconds=46)
+    limit=timestamp-timedelta(seconds=34)
     
     while True:
         index-=1
         if channel_q[index].timestamp<limit:
             del channel_q[index]
-        if index:
-            continue
-        channel_q.appendleft(typing_counter(user,timestamp),)
-        return
+            if index:
+                continue
+            channel_q.appendleft(typing_counter(user,timestamp),)
+            return
+        break
     
     found=0
-    while True:
+    while index:
         element=channel_q[index]
         if element.user is user:
             if element.duration!=8.:
                 channel_q.appendleft(typing_counter(user,timestamp),)
                 return
             found+=1
-            if found==4:
+            if found==3:
                 break
         index-=1
-        if index:
-            continue
-        break
     
-    if found<4 or (type(channel) is not Channel_private and found==len(channel_q)):
+    if found!=3 or found==len(channel_q):
         channel_q.appendleft(typing_counter(user,timestamp),)
         return
     
@@ -295,12 +301,14 @@ class commit_extractor:
         if needs_unlock:
             try:
                 await Koishi.role_edit(self.role,mentionable=True)
+                await sleep(0.5,client.loop)
                 await client.webhook_send(webhook,
                     result_content,
                     result_embed,
                     name=webhook_name,
                     avatar_url=webhook_avatar_url
                         )
+                await sleep(0.5,client.loop)
             finally:
                 await Koishi.role_edit(self.role,mentionable=False)
 
@@ -373,14 +381,12 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @content_parser('user, flags=mna, default="message.author"')
     async def rate(client,message,target):
         #nickname check
-        name=target.name_at(message.guild)
-
-        if target is client:
+        if target in CLIENTS or target is client.owner:
             result=10
         else:
             result=target.id%11
 
-        await client.message_create(message.channel,f'I rate {name} {result}/10')
+        await client.message_create(message.channel,f'I rate {target.name_at(message.guild)} {result}/10')
 
 
     @on_command
