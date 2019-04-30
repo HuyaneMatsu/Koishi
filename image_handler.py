@@ -118,7 +118,7 @@ async def on_command_image(client,message,content):
         await client.message_create(message.channel,result)
     else:
         with ASFile(join(IMAGE_PATH,result.path)) as image:
-            await client.message_create_file(message.channel,image)
+            await client.message_create(message.channel,file=image)
     
     
 def process_on_command_image(content):
@@ -158,13 +158,13 @@ def process_on_command_image(content):
             
             index+=1
             
-            if index>=limit:
+            if index==limit:
                 return '"index" needs after it a number!'
 
             value=content[index]
             if value=='hex':
                 index+=1
-                if index>=limit:
+                if index==limit:
                     return '"hex" needs after it a number!'
                 value=content[index]
                 try:
@@ -188,7 +188,7 @@ def process_on_command_image(content):
             return str(len(search_from))
         elif by_index:
             if index<len(search_from):
-                return search_from[index]
+                return search_from[number]
             else:
                 return 'I could not find any image with that criteria.'
         else:

@@ -70,10 +70,10 @@ HELP['ping']=rendered_embed(Embed(title='pong',color=HELP_COLOR,
         ))
 
 
-HELP['emoji']=rendered_embed(Embed(title='emoji',color=HELP_COLOR,  
-    description=( \
-        'type an :emoji: and I will show it!'
-        '(works only on emojis which u cant use on the server)'
+HELP['nitro']=rendered_embed(Embed(title='emoji',color=HELP_COLOR,  
+    description=(
+        'Type an emoji what I can use with my nitro. If I find it I will'
+        'send it'
             )))
 
 HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,
@@ -170,6 +170,10 @@ HELP['kanako']=rendered_embed(Embed(title='kanako',color=HELP_COLOR,
         '- **<name>**\n'
         'Shows you every character at the map.'
             )))
+
+HELP['se']=rendered_embed(Embed(title='se',color=HELP_COLOR,
+    description='`se` stands for `show emoji`!'
+        ))
 
 async def on_command_help(client,message,content):
     if 0<len(content)<50:

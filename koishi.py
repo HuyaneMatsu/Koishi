@@ -22,7 +22,7 @@ from hata.exceptions import Forbidden,HTTPException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
 from hata.activity import activity_game
 from hata.others import (filter_content,from_json,to_json,
-    parse_oauth2_redirect_url,cchunkify)
+    parse_oauth2_redirect_url,cchunkify,chunkify)
 from hata.channel import cr_pg_channel_object,Channel_text,Channel_private,Message_iterator
 from hata.embed import Embed,Embed_field,Embed_footer
 from hata.events import (
@@ -37,6 +37,7 @@ from hata.oauth2 import SCOPES
 from hata.events_compiler import content_parser
 from hata.webhook import Webhook
 from hata.role import Role
+from hata.guild import Guild
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
@@ -135,18 +136,14 @@ async def message_create(client,message):
         if not ln:
             break
         
-        timestamp=message.created_at
-        limit=timestamp-timedelta(seconds=8)
         index=0
         while True:
             element=channel_q[index]
-            if element.timestamp<limit:
-                break
             if element.user is user:
-                #we dont actually look the corect time, so lets just put there a 0.
-                element.duration=0. #(timestamp-element.timestamp).total_seconds() 
-                break
-            index+=1
+                del channel_q[index]
+                ln-=1
+            else:
+                index+=1
             if index==ln:
                 break
             
@@ -182,7 +179,7 @@ async def message_create(client,message):
             if randint(0,2):
                 text=''
                 break
-            if 'fire' in content and re.match(r'\b(i|u|you|we|iam)\b',content):
+            if 'fire' in content and re.match(r'(i|u|you|we|iam)\b',content):
                 text='BURN!!!'
             elif re.match(r'(\b|[^\s\d])(moko[u]{0,1})\b',content):
                 text='Yes, its me..'
@@ -203,11 +200,12 @@ async def typing(self,channel,user,timestamp):
         channel_q=TYPINGS[channel.id]=deque()
         channel_q.appendleft(typing_counter(user,timestamp),)
         return
+    
     index=len(channel_q)
     if not index:
         channel_q.appendleft(typing_counter(user,timestamp),)
         return
-    limit=timestamp-timedelta(seconds=34)
+    limit=timestamp-timedelta(seconds=40)
     
     while True:
         index-=1
@@ -218,25 +216,44 @@ async def typing(self,channel,user,timestamp):
             channel_q.appendleft(typing_counter(user,timestamp),)
             return
         break
-    
+
+    ln=len(channel_q)
+    index=0
+    limit=timestamp-timedelta(seconds=8)
+    while True:
+        element=channel_q[index]
+        if element.timestamp<=limit:
+            break
+        
+        if element.user is user:
+            element.duration=(timestamp-element.timestamp).total_seconds()
+            break
+
+        index+=1
+        if index==ln:
+            channel_q.appendleft(typing_counter(user,timestamp),)
+            return
+        
+
+    index=ln-1
+    duration=0
     found=0
     while index:
         element=channel_q[index]
         if element.user is user:
-            if element.duration!=8.:
-                channel_q.appendleft(typing_counter(user,timestamp),)
-                return
+            duration+=element.duration
             found+=1
-            if found==3:
+            if duration>=30:
                 break
         index-=1
     
-    if found!=3 or found==len(channel_q):
+    if duration<30 or found==len(channel_q):
         channel_q.appendleft(typing_counter(user,timestamp),)
         return
-    
+
     channel_q.clear()
-    await self.message_create(channel,f'**{user.name_at(channel.guild)}** is typing...')
+    if not randint(0,3):
+        await self.message_create(channel,f'**{user.name_at(channel.guild)}** is typing...')
 
 @Mokou.events
 async def channel_delete(self,channel):
@@ -267,7 +284,8 @@ class commit_extractor:
         if ':master' not in embed.title:
             return
 
-        result = await client.download_url(embed.url)
+        url=re.match('^\[`[a-zA-Z0-9]*\`]\(([^\)]*)\)',embed.description.splitlines()[-1]).groups()[0]
+        result = await client.download_url(url)
         soup=BeautifulSoup(result,'html.parser',from_encoding='utf-8')
         
         description_container=soup.find(class_='commit-desc')
@@ -287,17 +305,30 @@ class commit_extractor:
         else:
             result_content=self.role.mention
             needs_unlock = (not self.role.mentionable) and guild.permissions_for(Koishi).can_manage_roles
-            
-        result_embed=Embed(
-            title       = title_container.getText('\n'),
-            description = description_container.getText('\n'),
-            color       = self.color,
-            url         = embed.url,
-                )
+
+        embed_text=chunkify(description_container.getText('\n').splitlines())
+        result_embed=[
+            Embed(
+                title       = title_container.getText('\n').strip(),
+                description = embed_text[0],
+                color       = self.color,
+                url         = url,
+                    )
+            ]
         
+        for index in range(1,min(len(embed_text),9)):
+            result_embed.append(
+                Embed(
+                    title       = '',
+                    description = embed_text[index],
+                    color       = self.color,
+                    url         = '',
+                        )
+                )
+            
         webhook_name = embed.author.name
         webhook_avatar_url = embed.author.proxy_icon
-        
+
         if needs_unlock:
             try:
                 await Koishi.role_edit(self.role,mentionable=True)
@@ -319,7 +350,6 @@ class commit_extractor:
                 name=webhook_name,
                 avatar_url=webhook_avatar_url
                     )
-        
 
 @Koishi.events
 async def ready(client):
@@ -331,6 +361,15 @@ async def ready(client):
 Koishi.events(bot_reaction_waitfor())
 Koishi.events(bot_reaction_delete_waitfor())
 
+AOE2_S=Guild.precreate(564093916152856576)
+AOE2_S_role=Role.precreate(566693615544434706)
+
+@Koishi.events
+async def guild_user_add(client,guild,user):
+    if user.is_bot:
+        return
+    if guild is AOE2_S:
+        await client.user_role_add(user,AOE2_S_role)
 
 with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     
@@ -436,21 +475,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         else:
             text=f'{int(kokoro.latency*1000.)} ms'
         await client.message_create(message.channel,text)
-                              
-    @on_command.add('emoji')
-    async def emoji_command(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-        
-        try:
-            await client.message_delete(message,reason='Used emoji command')
-        except Forbidden:
-            pass
-        
-        emoji=guild.get_emoji(content)
-        if emoji:
-            await client.message_create(message.channel,str(emoji))
+    
 
     @on_command
     async def message_me(client,message,content):
@@ -842,7 +867,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         user=oa2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
-
+            return
+        
         pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
 
 
@@ -851,7 +877,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         user=oa2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
-
+            return
+        
         connections = await client.user_connections(user.access)
         
         pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
@@ -862,7 +889,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         user=oa2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
-
+            return
+        
         guilds = await client.user_guilds(user.access)
         
         pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
@@ -872,9 +900,11 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         user=oa2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
+            return
         
         if message.author is not client.owner and user!=message.author:
             await client.message_create(message.channel,'NOPE, do it on yourself!')
+            return
         
         try:
             guild = await client.guild_create(name='Luv ya',
@@ -915,6 +945,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         user=oa2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
+            return
+        
         access=user.access
         last=access.created_at
         await client.renew_access_token(access)
@@ -936,9 +968,64 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         role = await client.role_create(guild,'my dear',8)
         await client.guild_user_add(guild,user,roles=[role])
         await sleep(1.,client.loop)
+        
+    @on_command
+    async def download(self,message,content):
+        if message.author is not self.owner:
+            return
+        data = await self.download_url(content)
+        soup = BeautifulSoup(data,'html.parser',from_encoding='utf-8')
+        text = soup.prettify()
+        result = [{'content':element} for element in cchunkify(text.splitlines())]
+        pagination(self,message.channel,result)
 
+    @on_command
+    async def se(client,message,content):
+        content=filter_content(content)
+        if not content:
+            return
+        emoji=parse_emoji(content[0])
+        
+        if emoji is None or emoji.is_unicode_emoji:
+            return
+        
+        await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
 
-    
+    @on_command
+    async def nitro(client,message,content):
+        client.loop.create_task(client.message_delete(message))
+        content=filter_content(content)
+        
+        if not content:
+            return
+        
+        text_form=content[0]
+        
+        emoji=parse_emoji(text_form)
+        
+        if emoji is None:
+            
+            for guild in client.guilds.values():
+                emoji=guild.get_emoji(text_form)
+                if emoji is not None:
+                    break
+            
+            if emoji is None:
+                return
+            
+        else:
+            if emoji.is_custom_emoji:
+                found=False
+                for guild in client.guilds.values():
+                    if emoji.id in guild.emojis:
+                        found=True
+                        break
+                
+                if found==False:
+                    return
+        
+        await client.message_create(message.channel,emoji.as_emoji)
+            
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())

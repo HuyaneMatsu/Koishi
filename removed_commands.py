@@ -3299,4 +3299,48 @@ async def parse_details_command(client,message,content):
         
         pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(result)])
 
+
+    @on_command
+    async def webhook_test00(client,message,content):
+        if message.author is not client.owner:
+            return
+        webhook = await client.webhook_get(555476334210580508)
+        result = await client.webhook_send(webhook,'test0',wait=False)
+        await client.message_create(message.channel,f'test0: {result!r}')
+        result = await client.webhook_send(webhook,'test1',wait=True)
+        await client.message_create(message.channel,f'test1: {result!r}')
+
+
+    @on_command
+    async def message_file_test_00(client,message,content):
+        if message.author is not client.owner:
+            return
+        await client.message_create(message.channel,'1 file no name',file=b'owo')
+        await client.message_create(message.channel,'2 file with name',file=('owo.txt',b'owo'))
+        await client.message_create(message.channel,'3 file in list',file=[b'owo'])
+        await client.message_create(message.channel,'4 files in list',file=[b'owo',b'nom'])
+        await client.message_create(message.channel,'5 files in list mixed pair',file=[('owo.txt',b'owo'),b'nom'])
+        await client.message_create(message.channel,'6 files in list pair',file=[('owo.txt',b'owo'),('nom.txt',b'nom')])
+        await client.message_create(message.channel,'7 file in dict',file={'owo.txt':b'owo'})
+        await client.message_create(message.channel,'8 files in dict',file={'owo.txt':b'owo','nom.txt':b'nom'})
+
+    @on_command
+    async def typingbreak(client,message,content):
+        if message.author is client.owner:
+            with client.keep_typing(message.channel):
+                await sleep(30.,client.loop)
+
+    @on_command.add('emoji')
+    async def emoji_command(client,message,content):
+        guild=message.guild
+        if guild is None:
+            return
         
+        try:
+            await client.message_delete(message,reason='Used emoji command')
+        except Forbidden:
+            pass
+        
+        emoji=guild.get_emoji(content)
+        if emoji:
+            await client.message_create(message.channel,str(emoji))

@@ -268,7 +268,7 @@ class kanako_game:
                 embed.description='\n'.join([f'**{index}.: {value}**' for index,value in enumerate(self.options,1)])
 
             try:
-                await client.message_create_file(channel,draw(buffer,question),'guessme.png',embed=embed)
+                await client.message_create(channel,embed=embed,file=('guessme.png',draw(buffer,question)))
             except (HTTPException,Forbidden):
                 return self.cancel()
             

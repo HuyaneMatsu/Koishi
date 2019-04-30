@@ -39,8 +39,13 @@ async def user_info(client,message,user):
     guild=message.guild
     
     text=[f'**User Information**\nCreated: {time_left(user)} ago\nProfile: {user:m}\nID: {user.id}']
-    
-    if guild in user.guild_profiles:
+
+    if guild is None:
+        if user.avatar:
+            color=user.avatar&0xFFFFFF
+        else:
+            color=user.default_avatar.color
+    else:
         color=user.color(guild)
         profile=user.guild_profiles[guild]
         if profile.roles:
@@ -51,11 +56,6 @@ async def user_info(client,message,user):
         if profile.nick is not None:
             text.append(f'Nick: {profile.nick}')
         text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
-    else:
-        if user.avatar:
-            color=user.avatar&0xFFFFFF
-        else:
-            color=user.default_avatar.color
         
     embed=Embed(f'{user:f}','\n'.join(text),color)
     embed.thumbnail=Embed_thumbnail(user.avatar_url_as(size=128))
