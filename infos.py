@@ -39,15 +39,16 @@ async def user_info(client,message,user):
     guild=message.guild
     
     text=[f'**User Information**\nCreated: {time_left(user)} ago\nProfile: {user:m}\nID: {user.id}']
-
-    if guild is None:
+    
+    try:
+        profile=user.guild_profiles[guild]
+    except KeyError:
         if user.avatar:
             color=user.avatar&0xFFFFFF
         else:
             color=user.default_avatar.color
     else:
         color=user.color(guild)
-        profile=user.guild_profiles[guild]
         if profile.roles:
             roles=', '.join(role.mention for role in reversed(profile.roles))
         else:
@@ -312,13 +313,14 @@ async def love(client,message,target):
     source=message.author
 
     percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
-            
+    element=LOVE_VALUES[percent]
+    
     embed=Embed( \
-        choice(LOVE_VALUES[percent]['titles']),
+        choice(element['titles']),
         f'{source:f} {BUILTIN_EMOJIS["heart"]} {target:f} scored {percent}%!',
         Color.d_magenta,
             )
-    embed.fields.append(Embed_field('My advice:',LOVE_VALUES[percent]['text']))
+    embed.fields.append(Embed_field('My advice:',element['text']))
 
     await client.message_create(message.channel,embed=embed)
 
