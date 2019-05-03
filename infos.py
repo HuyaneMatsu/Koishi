@@ -39,7 +39,7 @@ async def user_info(client,message,user):
     guild=message.guild
     
     text=[f'**User Information**\nCreated: {time_left(user)} ago\nProfile: {user:m}\nID: {user.id}']
-    
+
     try:
         profile=user.guild_profiles[guild]
     except KeyError:

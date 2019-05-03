@@ -107,7 +107,6 @@ class ds_game:
             self.task.set_result(None)
             self.target.weakrefer()
             client.events.reaction_add.append(self)
-            client.events.reaction_delete.append(self)
     
     async def __call__(self,args):
         if self.task.pending() or args[1] is not self.user:
@@ -155,6 +154,8 @@ class ds_game:
             return
 
         self.task.clear()
+
+        self.client.loop.create_task(self.reaction_remove(emoji))
         
         try:
             if self.stage.done():
@@ -181,7 +182,6 @@ class ds_game:
         client=self.client
         
         client.events.reaction_add.remove(self)
-        client.events.reaction_delete.remove(self)
         
         try:
             await client.message_create(self.channel,'',Embed('','Game cancelled'))
@@ -209,14 +209,12 @@ class ds_game:
             return
         else:
             client.events.reaction_add.remove(self)
-            client.events.reaction_delete.remove(self)
 
             target.weakrefer()
             self.target=target
             self.channel=channel
             
             client.events.reaction_add.append(self)
-            client.events.reaction_delete.append(self)
         finally:
             self.task.set_result(None)
         
@@ -248,6 +246,12 @@ class ds_game:
         embed.footer=Embed_footer(f'steps : {len(stage.history)}')
 
         return embed
+
+    async def reaction_remove(self,emoji):
+        try:
+            await self.client.reaction_delete(self.target,emoji,self.user)
+        except (Forbidden,HTTPException):
+            pass
     
 #:-> @ <-:#}{#:-> @ <-:#{ game }#:-> @ <-:#}{#:-> @ <-:#
     
@@ -279,25 +283,25 @@ YOU_E       = 0b0000010100000000
 YOU_S       = 0b0000011000000000
 YOU_W       = 0b0000011100000000
 
-UN_FLOOR    = 0b0000010000000001
-UE_FLOOR    = 0b0000010100000001
-US_FLOOR    = 0b0000011000000001
-UW_FLOOR    = 0b0000011100000001
-
-UN_TARGET   = 0b0000010000000010
-UE_TARGET   = 0b0000010100000010
-US_TARGET   = 0b0000011000000010
-UW_TARGET   = 0b0000011100000010
-
-UN_OBJECT_P = 0b0000010000000011
-UE_OBJECT_P = 0b0000010100000011
-US_OBJECT_P = 0b0000011000000011
-UW_OBJECT_P = 0b0000011100000011
-
-UN_HOLE_P   = 0b0000010000000100
-UE_HOLE_P   = 0b0000010100000100
-US_HOLE_P   = 0b0000011000000100
-UW_HOLE_P   = 0b0000011100000100
+##UN_FLOOR    = 0b0000010000000001
+##UE_FLOOR    = 0b0000010100000001
+##US_FLOOR    = 0b0000011000000001
+##UW_FLOOR    = 0b0000011100000001
+##
+##UN_TARGET   = 0b0000010000000010
+##UE_TARGET   = 0b0000010100000010
+##US_TARGET   = 0b0000011000000010
+##UW_TARGET   = 0b0000011100000010
+##
+##UN_OBJECT_P = 0b0000010000000011
+##UE_OBJECT_P = 0b0000010100000011
+##US_OBJECT_P = 0b0000011000000011
+##UW_OBJECT_P = 0b0000011100000011
+##
+##UN_HOLE_P   = 0b0000010000000100
+##UE_HOLE_P   = 0b0000010100000100
+##US_HOLE_P   = 0b0000011000000100
+##UW_HOLE_P   = 0b0000011100000100
 
 WALL        = 0b1111100000000000
 
@@ -310,7 +314,8 @@ WALL_A      = 0b0011000000000000
 WALL_SE     = 0b0011100000000000
 WALL_SW     = 0b0100000000000000
 
-UNPUSHABLE  = 0b1111100011000000
+UNPUSHABLE  = WALL|SPECIAL
+BLOCKS_LOS  = WALL|PUSHABLE|OBJECT_U
 
 class history_element:
     __slots__=['changes', 'position', 'was_skill']
@@ -371,49 +376,51 @@ class stage_solvable:
     def move_west(self):
         return self.move(-1,YOU_W)
             
-    def move(self,direction,align):
+    def move(self,step,align):
         if self.next_skill:
             self.next_skill=False
-            return self.source.use_skill(self,direction,align)
+            return self.source.use_skill(self,step,align)
         
         map_=self.map
         position=self.position
 
         actual_tile=map_[position]
-        target_tile=map_[position+direction]
+        target_tile=map_[position+step]
         
         if target_tile&UNPUSHABLE:
-            if actual_tile&YOU==align:
-                return False
-            else:
-                map_[position]=actual_tile&PASSABLE|align
-                return True
+            return False
         
         if target_tile&PASSABLE:
-            self.history.append(history_element(position,False,((position,actual_tile),(position+direction,target_tile))))
+            self.history.append(history_element(position,False,((position,actual_tile),(position+step,target_tile))))
             
             map_[position]=actual_tile&PASSABLE
-            self.position=position=position+direction
+            self.position=position=position+step
             map_[position]=target_tile|align
             
             return True
 
-        after_tile=map_[position+(direction<<1)]
+        after_tile=map_[position+(step<<1)]
 
         if target_tile&PUSHABLE and after_tile&(PASSABLE|HOLE_U):
-            self.history.append(history_element(self.position,False,((position,actual_tile),(position+direction,target_tile),(position+(direction<<1),after_tile))))
+            self.history.append(history_element(self.position,False,((position,actual_tile),(position+step,target_tile),(position+(step<<1),after_tile))))
             
             map_[position]=actual_tile&PASSABLE
-            self.position=position=position+direction
+            self.position=position=position+step
             map_[position]=(target_tile>>3)|align
-            map_[position+direction]=after_tile<<3
+            map_[position+step]=after_tile<<3
 
             return True
         
         return False
 
     def activate_skill(self):
-        return self.source.activate_skill(self)
+        if not self.has_skill:
+            return False
+        if self.source.activate_skill(self):
+            self.next_skill=True
+            return True
+        return False
+        
 
     def render(self):
         style=self.source.style
@@ -464,95 +471,207 @@ class stage_solvable:
         return True
 
 REIMU_STYLE = {
-    FLOOR       : Emoji.precreate(568838448027533333,name='FLOOR').as_emoji,
-    TARGET      : Emoji.precreate(568838476884082718,name='TARGET').as_emoji,
-    OBJECT_P    : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    BOX         : Emoji.precreate(568838416406544395,name='BOX').as_emoji,
-    BOX_TARGET  : Emoji.precreate(568838435759063068,name='BOX_TARGET').as_emoji,
-    BOX_HOLE    : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    HOLE_U      : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    OBJECT_U    : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    UN_FLOOR    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UE_FLOOR    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    US_FLOOR    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UW_FLOOR    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UN_TARGET   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UE_TARGET   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    US_TARGET   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UW_TARGET   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UN_OBJECT_P : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UE_OBJECT_P : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    US_OBJECT_P : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UW_OBJECT_P : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UN_HOLE_P   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UE_HOLE_P   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    US_HOLE_P   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    UW_HOLE_P   : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    NOTHING     : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    WALL_N      : Emoji.precreate(568838500669980712,name='WALL_N').as_emoji,
-    WALL_E      : Emoji.precreate(568838488464687169,name='WALL_E').as_emoji,
-    WALL_S      : Emoji.precreate(568838546853462035,name='WALL_S').as_emoji,
-    WALL_W      : Emoji.precreate(568838580278132746,name='WALL_W').as_emoji,
-    WALL_A      : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    WALL_SE     : Emoji.precreate(568838557318250499,name='WALL_SE').as_emoji,
-    WALL_SW     : Emoji.precreate(568838569087598627,name='WALL_SW').as_emoji,
+    FLOOR           : Emoji.precreate(568838448027533333,name='FLOOR').as_emoji,
+    TARGET          : Emoji.precreate(568838476884082718,name='TARGET').as_emoji,
+    OBJECT_P        : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
+    BOX             : Emoji.precreate(568838416406544395,name='BOX').as_emoji,
+    BOX_TARGET      : Emoji.precreate(568838435759063068,name='BOX_TARGET').as_emoji,
+    BOX_HOLE        : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
+    HOLE_U          : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
+    OBJECT_U        : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
+    YOU_N|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_E|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_S|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_W|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_N|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_E|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_S|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_W|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_N|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_E|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_S|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_W|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_N|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_E|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_S|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    YOU_W|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
+    NOTHING         : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
+    WALL_N          : Emoji.precreate(568838500669980712,name='WALL_N').as_emoji,
+    WALL_E          : Emoji.precreate(568838488464687169,name='WALL_E').as_emoji,
+    WALL_S          : Emoji.precreate(568838546853462035,name='WALL_S').as_emoji,
+    WALL_W          : Emoji.precreate(568838580278132746,name='WALL_W').as_emoji,
+    WALL_A          : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
+    WALL_SE         : Emoji.precreate(568838557318250499,name='WALL_SE').as_emoji,
+    WALL_SW         : Emoji.precreate(568838569087598627,name='WALL_SW').as_emoji,
         }
 
 def REIMU_SKILL_ACTIVATE(self):
-    if not self.has_skill:
-        return False
-
     size=self.source.size
     position=self.position
     map_=self.map
     
-    for direction in (-size,1,size,-1):
-        target_tile=map_[position+direction]
+    for step in (-size,1,size,-1):
+        target_tile=map_[position+step]
         
         if not target_tile&(PUSHABLE|SPECIAL):
             continue
         
-        after_tile=map_[position+(direction<<1)]
+        after_tile=map_[position+(step<<1)]
 
         if not after_tile&PASSABLE:
             continue
         
-        self.next_skill=True
         return True
     
     return False
     
-def REIMU_SKILL_USE(self,direction,align):
+def REIMU_SKILL_USE(self,step,align):
     map_=self.map
     position=self.position
     
-    target_tile=map_[position+direction]
+    target_tile=map_[position+step]
     
     if not target_tile&(PUSHABLE|SPECIAL):
         return False
     
-    after_tile=map_[position+(direction<<1)]
+    after_tile=map_[position+(step<<1)]
 
     if not after_tile&PASSABLE:
         return False
 
     actual_tile=map_[position]
-    self.history.append(history_element(position,True,((position,actual_tile),(position+(direction<<1),after_tile))))
+    self.history.append(history_element(position,True,((position,actual_tile),(position+(step<<1),after_tile))))
     
     map_[position]=actual_tile&PASSABLE
-    self.position=position=position+(direction<<1)
+    self.position=position=position+(step<<1)
 
     map_[position]=after_tile|align
     self.has_skill=False
     
     return True
 
+def SUKAARETTO_SKILL_ACTIVATE(self):
+    size=self.source.size
+    position=self.position
+    map_=self.map
+    
+    for step in (-size,1,size,-1):
+        target_tile=map_[position+step]
+        
+        if target_tile==OBJECT_U:
+            return True
+    
+    return False
+
+def SUKAARETTO_SKILL_USE(self,step,align):
+    map_=self.map
+    position=self.position
+    
+    target_tile=map_[position+step]
+    
+    if target_tile!=OBJECT_U:
+        return False
+
+    actual_tile=map_[position]
+    self.history.append(history_element(position,True,((position,actual_tile),(position+step,target_tile))))
+    
+    map_[position]=actual_tile&PASSABLE|align
+    map_[position+step]=OBJECT_P
+    self.has_skill=False
+    
+    return True
+
+def YUKARI_SKILL_ACTIVATE(self):
+    map_=self.map
+    
+    x_size=self.source.size
+    y_size=len(map_)//x_size
+
+    position=self.position
+    y_position,x_position=divmod(position,x_size)
+
+##    x_min=x_size*y_position
+##    x_max=x_size*(y_position+1)-1
+##    y_min=x_position
+##    y_max=x_position+(x_size*(y_size-1))
+    
+    for step,limit in (
+            (-1,x_size*y_position),
+            (1,x_size*(y_position+1)-1),
+            (-x_size,-x_size),
+            (x_size,x_position+(x_size*(y_size-1))),
+                 ):
+        target_position=position+step
+        if target_position==limit:
+            continue
+        if not map_[target_position]&BLOCKS_LOS:
+            continue
+        while True:
+            target_position=target_position+step
+            if target_position==limit:
+                break
+            target_tile=map_[target_position]
+            if target_tile&BLOCKS_LOS:
+                continue
+            if target_tile&PASSABLE:
+                return True
+            break
+    return False
+
+def YUKARI_SKILL_USE(self,step,align):
+    map_=self.map
+
+    x_size=self.source.size
+    y_size=len(map_)//x_size
+    
+    position=self.position
+    y_position,x_position=divmod(position,x_size)
+
+    if step>0:
+        if step==1:
+            limit=x_size*(y_position+1)-1
+        else:
+            limit=x_position+(x_size*(y_size-1))
+    else:
+        if step==-1:
+            limit=x_size*y_position
+        else:
+            limit=-x_size
+
+    target_position=position+step
+    if target_position==limit:
+        return False
+    if not map_[target_position]&BLOCKS_LOS:
+        return False
+    while True:
+        target_position=target_position+step
+        if target_position==limit:
+            return False
+        target_tile=map_[target_position]
+        if target_tile&BLOCKS_LOS:
+            continue
+        if target_tile&PASSABLE:
+            break
+        return False
+
+    actual_tile=map_[position]
+    self.history.append(history_element(position,True,((position,actual_tile),(target_position,target_tile))))
+    
+    map_[position]=actual_tile&PASSABLE
+    self.position=target_position
+
+    map_[target_position]=target_tile|align
+    self.has_skill=False
+    
+    return True
+
+
 MAP_LAYOUT_C1_T_1 = [
     WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
     WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      TARGET,     WALL_E,
     WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      FLOOR,      WALL_E,
     WALL_W,     FLOOR,      FLOOR,      BOX,        FLOOR,      FLOOR,      WALL_E,
-    WALL_W,     FLOOR,      US_FLOOR,   FLOOR,      FLOOR,      FLOOR,      WALL_E,
+    WALL_W,     FLOOR,      YOU_S|FLOOR,FLOOR,      FLOOR,      FLOOR,      WALL_E,
     WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      FLOOR,      WALL_E,
     NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
         ]

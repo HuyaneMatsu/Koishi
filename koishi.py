@@ -679,6 +679,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         if text_mode:
             return
         
+        message.weakrefer()
         await client.reaction_add(message,emoji)
         
         try:
@@ -980,16 +981,11 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         pagination(self,message.channel,result)
 
     @on_command
-    async def se(client,message,content):
-        content=filter_content(content)
-        if not content:
-            return
-        emoji=parse_emoji(content[0])
-        
-        if emoji is None or emoji.is_unicode_emoji:
-            return
-        
-        await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
+    @content_parser('emoji')
+    async def se(client,message,emoji):
+        if emoji.is_custom_emoji:
+            await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
+
 
     @on_command
     async def nitro(client,message,content):
@@ -1025,7 +1021,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                     return
         
         await client.message_create(message.channel,emoji.as_emoji)
-            
+
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())

@@ -670,17 +670,20 @@ class embedination:
         
         if self.task is None:
             self.task=client.loop.create_task(client.message_create(self.channel,embed=self.pages[0]))
-            wrapper.target = await self.task
+            wrapper.target = target = await self.task
             self.task=None
+            target.weakrefer()
             if len(self.pages)>1:
                 for emoji in self.emojis:
-                    await client.reaction_add(wrapper.target,emoji)
+                    await client.reaction_add(target,emoji)
             return
         
         wrapper.target = await self.task
         
 
     async def __call__(self,wrapper,args):
+        if self.task is not None:
+            return
         emoji,user=args
         client=wrapper.client
         message=wrapper.target
@@ -716,14 +719,13 @@ class embedination:
             for wrapper in self.wrappers:
                 wrapper.timeout+=10.
 
-        if self.task is None:
-            self.task=client.loop.create_task(client.message_edit(message,embed=self.pages[page]))
-            try:
-                await self.task
-            except (Forbidden,HTTPException):
-                pass
-            finally:
-                self.task=None
+        try:
+            self.task = client.loop.create_task(client.message_edit(message,embed=self.pages[page]))
+            await self.task
+        except (Forbidden,HTTPException):
+            pass
+        finally:
+            self.task=None
     
     async def _cancel(self,wrapper,exception):
         client=wrapper.client
