@@ -175,6 +175,10 @@ HELP['se']=rendered_embed(Embed(title='se',color=HELP_COLOR,
     description='`se` stands for `show emoji`!'
         ))
 
+HELP['nikki']=rendered_embed(Embed(title='nikki',color=HELP_COLOR,
+    description='Your personal yandere <3'
+        ))
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()

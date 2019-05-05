@@ -67,7 +67,7 @@ async def ds_manager(self,message,command,stage):
 
 class ds_game:
     
-    NORTH=BUILTIN_EMOJIS['arrow_up_small']
+    NORTH=BUILTIN_EMOJIS['arrow_up']
     EAST=BUILTIN_EMOJIS['arrow_right']
     SOUTH=BUILTIN_EMOJIS['arrow_down']
     WEST=BUILTIN_EMOJIS['arrow_left']
@@ -109,50 +109,51 @@ class ds_game:
             client.events.reaction_add.append(self)
     
     async def __call__(self,args):
-        if self.task.pending() or args[1] is not self.user:
+        if args[1] is not self.user:
             return
 
         emoji=args[0]
+        
+        if self.task.pending() and (emoji in self.emojis_b1 or emoji in self.emojis_b2 or emoji is self.stage.source.emoji):
+            return self.client.loop.create_task(self.reaction_remove(emoji))
 
         while True:
             if emoji is self.WEST:
-                if self.stage.move_west():
-                    break
-                return
+                result=self.stage.move_west()
+                break
             
             if emoji is self.NORTH:
-                if self.stage.move_north():
-                    break
-                return
+                result=self.stage.move_north()
+                break
 
             if emoji is self.SOUTH:
-                if self.stage.move_south():
-                    break
-                return
+                result=self.stage.move_south()
+                break
 
             if emoji is self.EAST:
-                if self.stage.move_east():
-                     break
-                return
+                result=self.stage.move_east()
+                break
             
             if emoji is self.stage.source.emoji:
-                if self.stage.activate_skill():
-                    break
-                return
+                result=self.stage.activate_skill()
+                break
 
             if emoji is self.BACK:
-                if self.stage.back():
-                    break
+                result=self.stage.back()
+                break
 
             if emoji is self.RESET:
-                if self.stage.reset():
-                    break
+                result=self.stage.reset()
+                break
 
             if emoji is self.CANCEL:
                 return await self.cancel()
 
             return
 
+        if not result:
+            return self.client.loop.create_task(self.reaction_remove(emoji))
+        
         self.task.clear()
 
         self.client.loop.create_task(self.reaction_remove(emoji))
@@ -277,45 +278,47 @@ HOLE_U      = 0b0000000001000000
 OBJECT_U    = 0b0000000010000000
 
 
-YOU         = 0b0000011100000000
-YOU_N       = 0b0000010000000000
-YOU_E       = 0b0000010100000000
-YOU_S       = 0b0000011000000000
-YOU_W       = 0b0000011100000000
+CHAR        = 0b0000011100000000
+CHAR_N      = 0b0000010000000000
+CHAR_E      = 0b0000010100000000
+CHAR_S      = 0b0000011000000000
+CHAR_W      = 0b0000011100000000
 
-##UN_FLOOR    = 0b0000010000000001
-##UE_FLOOR    = 0b0000010100000001
-##US_FLOOR    = 0b0000011000000001
-##UW_FLOOR    = 0b0000011100000001
+##CN_FLOOR    = 0b0000010000000001
+##CE_FLOOR    = 0b0000010100000001
+##CS_FLOOR    = 0b0000011000000001
+##CW_FLOOR    = 0b0000011100000001
 ##
-##UN_TARGET   = 0b0000010000000010
-##UE_TARGET   = 0b0000010100000010
-##US_TARGET   = 0b0000011000000010
-##UW_TARGET   = 0b0000011100000010
+##CN_TARGET   = 0b0000010000000010
+##CE_TARGET   = 0b0000010100000010
+##CS_TARGET   = 0b0000011000000010
+##CW_TARGET   = 0b0000011100000010
 ##
-##UN_OBJECT_P = 0b0000010000000011
-##UE_OBJECT_P = 0b0000010100000011
-##US_OBJECT_P = 0b0000011000000011
-##UW_OBJECT_P = 0b0000011100000011
+##CN_OBJECT_P = 0b0000010000000011
+##CE_OBJECT_P = 0b0000010100000011
+##CS_OBJECT_P = 0b0000011000000011
+##CW_OBJECT_P = 0b0000011100000011
 ##
-##UN_HOLE_P   = 0b0000010000000100
-##UE_HOLE_P   = 0b0000010100000100
-##US_HOLE_P   = 0b0000011000000100
-##UW_HOLE_P   = 0b0000011100000100
+##CN_HOLE_P   = 0b0000010000000100
+##CE_HOLE_P   = 0b0000010100000100
+##CS_HOLE_P   = 0b0000011000000100
+##CW_HOLE_P   = 0b0000011100000100
 
 WALL        = 0b1111100000000000
 
 NOTHING     = 0b0000100000000000
 WALL_N      = 0b0001000000000000
-WALL_E      = 0b0001100000000000
-WALL_S      = 0b0010000000000000
-WALL_W      = 0b0010100000000000
-WALL_A      = 0b0011000000000000
-WALL_SE     = 0b0011100000000000
-WALL_SW     = 0b0100000000000000
+WALL_E      = 0b0010000000000000
+WALL_S      = 0b0100000000000000
+WALL_W      = 0b1000000000000000
+##WALL_A      = 0b1111000000000000
+##WALL_SE     = 0b0110000000000000
+##WALL_SW     = 0b1100000000000000
 
 UNPUSHABLE  = WALL|SPECIAL
 BLOCKS_LOS  = WALL|PUSHABLE|OBJECT_U
+
+
 
 class history_element:
     __slots__=['changes', 'position', 'was_skill']
@@ -326,21 +329,28 @@ class history_element:
         self.changes=changes
         
 class stage_sourse:
+    CHARS={}
     __slots__=['activate_skill', 'best', 'emoji', 'map', 'name', 'size',
         'start', 'style', 'targets', 'use_skill']
     
-    def __init__(self,name,style,map_,targets,activate_skill,use_skill,size,start,best,emoji):
-        STAGES[name]=self
-        self.name=name
-        self.style=style
-        self.map=map_
-        self.targets=targets
-        self.activate_skill=activate_skill
-        self.use_skill=use_skill
-        self.size=size
-        self.start=start
-        self.best=best
-        self.emoji=emoji
+    def __init__(self,header,map_):
+        self.name=header[0]
+        
+        char=self.CHARS[header[1]]
+        
+        self.style=char[0]
+        self.activate_skill=char[1]
+        self.use_skill=char[2]
+        self.emoji=char[3]
+        
+        self.targets=int(header[2])
+        self.size=int(header[3])
+        self.start=int(header[4])
+        self.best=int(header[5])
+        
+        self.map=map_.copy()
+
+        STAGES[self.name]=self
         
 class stage_solvable:
     __slots__=['has_skill', 'history', 'map', 'next_skill', 'position',
@@ -365,16 +375,16 @@ class stage_solvable:
         return False
 
     def move_north(self):
-        return self.move(-self.source.size,YOU_N)
+        return self.move(-self.source.size,CHAR_N)
 
     def move_east(self):
-        return self.move(1,YOU_E)
+        return self.move(1,CHAR_E)
 
     def move_south(self):
-        return self.move(self.source.size,YOU_S)
+        return self.move(self.source.size,CHAR_S)
 
     def move_west(self):
-        return self.move(-1,YOU_W)
+        return self.move(-1,CHAR_W)
             
     def move(self,step,align):
         if self.next_skill:
@@ -407,8 +417,10 @@ class stage_solvable:
             map_[position]=actual_tile&PASSABLE
             self.position=position=position+step
             map_[position]=(target_tile>>3)|align
-            map_[position+step]=after_tile<<3
-
+            if after_tile&PASSABLE:
+                map_[position+step]=after_tile<<3
+            else:
+                map_[position+step]=HOLE_P
             return True
         
         return False
@@ -470,39 +482,45 @@ class stage_solvable:
 
         return True
 
+NOTHING_EMOJI=Emoji.precreate(568838460434284574,name='NOTHING')
+
 REIMU_STYLE = {
-    FLOOR           : Emoji.precreate(568838448027533333,name='FLOOR').as_emoji,
-    TARGET          : Emoji.precreate(568838476884082718,name='TARGET').as_emoji,
-    OBJECT_P        : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    BOX             : Emoji.precreate(568838416406544395,name='BOX').as_emoji,
-    BOX_TARGET      : Emoji.precreate(568838435759063068,name='BOX_TARGET').as_emoji,
-    BOX_HOLE        : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    HOLE_U          : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    OBJECT_U        : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    YOU_N|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_E|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_S|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_W|FLOOR     : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_N|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_E|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_S|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_W|TARGET    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_N|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_E|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_S|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_W|OBJECT_P  : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_N|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_E|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_S|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    YOU_W|HOLE_P    : Emoji.precreate(403585482686070795,name='reimulewd').as_emoji,
-    NOTHING         : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    WALL_N          : Emoji.precreate(568838500669980712,name='WALL_N').as_emoji,
-    WALL_E          : Emoji.precreate(568838488464687169,name='WALL_E').as_emoji,
-    WALL_S          : Emoji.precreate(568838546853462035,name='WALL_S').as_emoji,
-    WALL_W          : Emoji.precreate(568838580278132746,name='WALL_W').as_emoji,
-    WALL_A          : Emoji.precreate(568838460434284574,name='NOTHING').as_emoji,
-    WALL_SE         : Emoji.precreate(568838557318250499,name='WALL_SE').as_emoji,
-    WALL_SW         : Emoji.precreate(568838569087598627,name='WALL_SW').as_emoji,
+    FLOOR                       : Emoji.precreate(574211101638656010,name='C1F').as_emoji,
+    TARGET                      : Emoji.precreate(574234087645249546,name='C1T').as_emoji,
+    OBJECT_P                    : NOTHING_EMOJI.as_emoji,
+    HOLE_P                      : Emoji.precreate(574202754134835200,name='C1HP').as_emoji,
+    BOX                         : Emoji.precreate(574212211434717214,name='C1B').as_emoji,
+    BOX_TARGET                  : Emoji.precreate(574213002190913536,name='C1BT').as_emoji,
+    BOX_HOLE                    : Emoji.precreate(574212211434717214,name='C1BOX').as_emoji,
+    BOX_OBJECT                  : NOTHING_EMOJI.as_emoji,
+    HOLE_U                      : Emoji.precreate(574187906642477066,name='C1HU').as_emoji,
+    OBJECT_U                    : NOTHING_EMOJI.as_emoji,
+    CHAR_N|FLOOR                : Emoji.precreate(574214258871500800,name='C1CNFHR').as_emoji,
+    CHAR_E|FLOOR                : Emoji.precreate(574213472347226114,name='C1CEFHR').as_emoji,
+    CHAR_S|FLOOR                : Emoji.precreate(574220751662612502,name='C1CSFHR').as_emoji,
+    CHAR_W|FLOOR                : Emoji.precreate(574218036156825629,name='C1CWFHR').as_emoji,
+    CHAR_N|TARGET               : Emoji.precreate(574249292496371732,name='C1CNTHR').as_emoji,
+    CHAR_E|TARGET               : Emoji.precreate(574249292026478595,name='C1CETHR').as_emoji,
+    CHAR_S|TARGET               : Emoji.precreate(574249292261490690,name='C1CSTHR').as_emoji,
+    CHAR_W|TARGET               : Emoji.precreate(574249292487720970,name='C1CWTHR').as_emoji,
+    CHAR_N|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_E|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_S|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_W|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_N|HOLE_P               : Emoji.precreate(574249293662388264,name='C1CNHPHR').as_emoji,
+    CHAR_E|HOLE_P               : Emoji.precreate(574249291074240523,name='C1CEHPHR').as_emoji,
+    CHAR_S|HOLE_P               : Emoji.precreate(574249291145543681,name='C1CSHPHR').as_emoji,
+    CHAR_W|HOLE_P               : Emoji.precreate(574249292957614090,name='C1CWHPHR').as_emoji,
+    NOTHING                     : NOTHING_EMOJI.as_emoji,
+    WALL_N                      : Emoji.precreate(568838500669980712,name='C1WN').as_emoji,
+    WALL_E                      : Emoji.precreate(568838488464687169,name='WE').as_emoji,
+    WALL_S                      : Emoji.precreate(568838546853462035,name='WS').as_emoji,
+    WALL_W                      : Emoji.precreate(568838580278132746,name='WW').as_emoji,
+    WALL_N|WALL_E|WALL_S|WALL_W : NOTHING_EMOJI.as_emoji,
+    WALL_S|WALL_E               : Emoji.precreate(568838557318250499,name='WSE').as_emoji,
+    WALL_S|WALL_W               : Emoji.precreate(568838569087598627,name='WSW').as_emoji,
+    WALL_N|WALL_E               : Emoji.precreate(574312331849498624,name='WNE').as_emoji,
+    WALL_N|WALL_W               : Emoji.precreate(574312332453216256,name='WNW').as_emoji,
         }
 
 def REIMU_SKILL_ACTIVATE(self):
@@ -549,6 +567,13 @@ def REIMU_SKILL_USE(self,step,align):
     self.has_skill=False
     
     return True
+
+stage_sourse.CHARS['REIMU']=(REIMU_STYLE,REIMU_SKILL_ACTIVATE,REIMU_SKILL_USE,Emoji.precreate(574307645347856384,name='REIMU'))
+
+del REIMU_STYLE
+del REIMU_SKILL_ACTIVATE
+del REIMU_SKILL_USE
+
 
 def SUKAARETTO_SKILL_ACTIVATE(self):
     size=self.source.size
@@ -665,17 +690,61 @@ def YUKARI_SKILL_USE(self,step,align):
     
     return True
 
+def loader(filename):
+    import re
+    PATTERN_HEADER=re.compile('[a-zA-Z0-9_]+')
+    PATTERN_MAP=re.compile('[A-Z_]+')
 
-MAP_LAYOUT_C1_T_1 = [
-    WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
-    WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      TARGET,     WALL_E,
-    WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      FLOOR,      WALL_E,
-    WALL_W,     FLOOR,      FLOOR,      BOX,        FLOOR,      FLOOR,      WALL_E,
-    WALL_W,     FLOOR,      YOU_S|FLOOR,FLOOR,      FLOOR,      FLOOR,      WALL_E,
-    WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      FLOOR,      WALL_E,
-    NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
-        ]
+    PATTERNS = {
+        'FLOOR'     : FLOOR,
+        'TARGET'    : TARGET,
+        'BOX'       : BOX,
+        'HOLE_U'    : HOLE_U,
+        'OBJECT_U'  : OBJECT_U,
+        'CN_FLOOR'  : CHAR_N|FLOOR,
+        'CE_FLOOR'  : CHAR_E|FLOOR,
+        'CS_FLOOR'  : CHAR_S|FLOOR,
+        'CW_FLOOR'  : CHAR_W|FLOOR,
+        'NOTHING'   : NOTHING,
+        'WALL_N'    : WALL_N,
+        'WALL_E'    : WALL_E,
+        'WALL_S'    : WALL_S,
+        'WALL_W'    : WALL_W,
+        'WALL_A'    : WALL_N|WALL_E|WALL_S|WALL_W,
+        'WALL_SE'   : WALL_S|WALL_E,
+        'WALL_SW'   : WALL_S|WALL_W,
+        'WALL_NE'   : WALL_N|WALL_E,
+        'WALL_NW'   : WALL_N|WALL_W,
+            }
 
-stage_sourse('C1_T_1',REIMU_STYLE,MAP_LAYOUT_C1_T_1,1,REIMU_SKILL_ACTIVATE,REIMU_SKILL_USE,7,30,7,Emoji.precreate(403585482686070795))
-
-del MAP_LAYOUT_C1_T_1
+    STATE=0
+    map_=[]
+    
+    with open(filename,'r') as file:
+        for line in file:
+            if STATE==0:
+                if len(line)>2:
+                    header=re.findall(PATTERN_HEADER,line)
+                    STATE=1
+                
+                continue
+            
+            if STATE==1:
+                if len(line)>2:
+                    STATE=2
+                else:
+                    continue
+                
+            if STATE==2:
+                if len(line)>2:
+                    map_.extend(PATTERNS[element] for element in re.findall(PATTERN_MAP,line))
+                else:
+                    stage_sourse(header,map_)
+                    map_.clear()
+                    STATE=0
+                continue
+        
+        if map_:
+            stage_sourse(header,map_)
+                
+loader('ds.txt')
