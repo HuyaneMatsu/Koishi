@@ -537,7 +537,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             except Forbidden:
                 pass
             
-        await client.message_create(channel,str(emoji)*5)
+        await client.message_create(channel,emoji.as_emoji*5)
 
     @on_command
     async def subscribe(client,message,content):

@@ -1,8 +1,8 @@
 # Koishi
-Test client for discord_uwu
+Test client for hata
 
-Have a "pers_data.py" outside of koishi's folder, which contains:
 
+"pers_data.py":
 ```python
 TOKEN= #bot_token (str)
 TOKEN2= #bot_token (str) for second bot
@@ -10,7 +10,17 @@ PREFIX='k!' #prefix (str)
 CLIENT_SECRET= #client_secret (str) for oauth2, can be None.
 ```
 
-hata's folder can be there too.
 
-Voice needs:
-`ffmpeg.exe` and `youtube_dl` for playing music + from youtube.
+Voice requirements:
+- `ffmpeg.exe`
+- `youtube_dl` (from youtube)
+
+Hata's requirements:
+- websockets
+
+Koishi requirements:
+- BeautifulSoup
+- sqlalchemy
+- sqlalchemy_aio
+- PIL
+

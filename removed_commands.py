@@ -3344,3 +3344,28 @@ async def parse_details_command(client,message,content):
         emoji=guild.get_emoji(content)
         if emoji:
             await client.message_create(message.channel,str(emoji))
+
+
+
+# - : - # dungeon_sweeper.py # - : - #
+
+##STAGE_NAME_PATTERN_RE=re.compile(
+##    '^(chapter|chapte|chapt|chap|cha|ch|c)[ \-_\.\,;\+]*(\d)[ \-_\.\,;\+]*'
+##    '(tutorial|tutoria|tutori|normal|tutor|norma|tuto|easy|norm|hard|'
+##    'tut|eas|nor|har|tu|ea|no|ha|t|e|n|h)[ \-_\.\,;\+]*(\d{1,2})',re.I)
+##
+##def convert_stage_name(value):
+##    parsed=re.match(STAGE_NAME_PATTERN_RE,value)
+##    if parsed is None:
+##        raise IndexError
+##    
+##    groups=parsed.groups()
+##    
+##    try:
+##        i1=int(groups[1])
+##        i2=('TNEH').index(groups[2][0].upper())
+##        i3=int(groups[3])
+##    except ValueError:
+##        raise IndexError from None
+##
+##    return i1,i2,i3
