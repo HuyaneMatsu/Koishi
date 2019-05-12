@@ -179,6 +179,21 @@ HELP['nikki']=rendered_embed(Embed(title='nikki',color=HELP_COLOR,
     description='Your personal yandere <3'
         ))
 
+HELP['ds']=rendered_embed(Embed(title='ds',color=HELP_COLOR,
+    description=(
+        'Play **Dungeon sweeper** game!\n'
+        'A user can have only one activate game at a time.\n'
+        '\n'
+        '- *nothing*\n'
+        'Starts a game at this channel or moves your actual game.\n'
+        '\n'
+        '- **rules**\n'
+        'The rules of the game desu!\n'
+        '\n'
+        '- **help**\n'
+        'Shows you this message\n'
+            )))
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()

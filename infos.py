@@ -134,10 +134,10 @@ async def guild_info(client,message,content):
         Category channels: {channel_category}
 
         **Users**
-        {BUILTIN_EMOJIS["green_heart"]} {v_green}
-        {BUILTIN_EMOJIS["yellow_heart"]} {v_yellow}
-        {BUILTIN_EMOJIS["heart"]} {v_red}
-        {BUILTIN_EMOJIS["black_heart"]} {v_grey}
+        {BUILTIN_EMOJIS["green_heart"]:e} {v_green}
+        {BUILTIN_EMOJIS["yellow_heart"]:e} {v_yellow}
+        {BUILTIN_EMOJIS["heart"]:e} {v_red}
+        {BUILTIN_EMOJIS["black_heart"]:e} {v_grey}
         ''',color)
     
     embed.thumbnail=Embed_thumbnail(guild.icon_url_as(size=128))
@@ -164,7 +164,7 @@ async def invites(client,message,guild,channel):
 def generate_love_level():
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["blue_heart"]} There\'s no real connection between you two {BUILTIN_EMOJIS["blue_heart"]}',
+            f'{BUILTIN_EMOJIS["blue_heart"]:e} There\'s no real connection between you two {BUILTIN_EMOJIS["blue_heart"]:e}',
                 ),
         'text': ( \
             'The chance of this relationship working out is really low. You '
@@ -180,7 +180,7 @@ def generate_love_level():
 
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["blue_heart"]} A small acquaintance {BUILTIN_EMOJIS["blue_heart"]}',
+            f'{BUILTIN_EMOJIS["blue_heart"]:e} A small acquaintance {BUILTIN_EMOJIS["blue_heart"]:e}',
                 ),
         'text':( \
             'There might be a chance of this relationship working out somewhat '
@@ -195,7 +195,7 @@ def generate_love_level():
 
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["purple_heart"]} You two seem like casual friends {BUILTIN_EMOJIS["purple_heart"]}',
+            f'{BUILTIN_EMOJIS["purple_heart"]:e} You two seem like casual friends {BUILTIN_EMOJIS["purple_heart"]:e}',
                 ),
         'text':( \
             'The chance of this relationship working is not very high. You both '
@@ -211,7 +211,7 @@ def generate_love_level():
 
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["heartpulse"]} You seem like you are good friends {BUILTIN_EMOJIS["heartpulse"]}',
+            f'{BUILTIN_EMOJIS["heartpulse"]:e} You seem like you are good friends {BUILTIN_EMOJIS["heartpulse"]:e}',
                 ),
         'text':( \
             'The chance of this relationship working is not very high, but its '
@@ -227,7 +227,7 @@ def generate_love_level():
 
     value={ \
         'titles':(
-            f'{BUILTIN_EMOJIS["cupid"]} You two are really close aren\'t you? {BUILTIN_EMOJIS["cupid"]}',
+            f'{BUILTIN_EMOJIS["cupid"]:e} You two are really close aren\'t you? {BUILTIN_EMOJIS["cupid"]:e}',
                 ),
         'text':( \
             'Your relationship has a reasonable amount of working out. But do '
@@ -243,7 +243,7 @@ def generate_love_level():
     
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["heart"]} So when will you two go on a date? {BUILTIN_EMOJIS["heart"]}',
+            f'{BUILTIN_EMOJIS["heart"]:e} So when will you two go on a date? {BUILTIN_EMOJIS["heart"]:e}',
                 ),
         'text':( \
             'Your relationship will most likely work out. It won\'t be perfect '
@@ -258,7 +258,7 @@ def generate_love_level():
 
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["two_hearts"]} Aww look you two fit so well together {BUILTIN_EMOJIS["two_hearts"]}',
+            f'{BUILTIN_EMOJIS["two_hearts"]:e} Aww look you two fit so well together {BUILTIN_EMOJIS["two_hearts"]:e}',
                 ),
         'text':( \
             'Your relationship will most likely work out well. Don\'t hesitate '
@@ -273,8 +273,8 @@ def generate_love_level():
 
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["sparkling_heart"]} Love is in the air {BUILTIN_EMOJIS["sparkling_heart"]}',
-            f'{BUILTIN_EMOJIS["sparkling_heart"]} Planned your future yet? {BUILTIN_EMOJIS["sparkling_heart"]}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Love is in the air {BUILTIN_EMOJIS["sparkling_heart"]:e}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Planned your future yet? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
                 ),
         'text':( \
             'Your relationship will most likely work out perfect. This '
@@ -289,8 +289,8 @@ def generate_love_level():
 
     value={ \
         'titles':( \
-            f'{BUILTIN_EMOJIS["sparkling_heart"]} When will you two marry? {BUILTIN_EMOJIS["sparkling_heart"]}',
-            f'{BUILTIN_EMOJIS["sparkling_heart"]} Now kiss already {BUILTIN_EMOJIS["sparkling_heart"]}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} When will you two marry? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Now kiss already {BUILTIN_EMOJIS["sparkling_heart"]:e}',
                 ),
         'text':( \
             'You two will most likely have the perfect relationship. But don\'t '
@@ -317,7 +317,7 @@ async def love(client,message,target):
     
     embed=Embed( \
         choice(element['titles']),
-        f'{source:f} {BUILTIN_EMOJIS["heart"]} {target:f} scored {percent}%!',
+        f'{source:f} {BUILTIN_EMOJIS["heart"]:e} {target:f} scored {percent}%!',
         Color.d_magenta,
             )
     embed.fields.append(Embed_field('My advice:',element['text']))
