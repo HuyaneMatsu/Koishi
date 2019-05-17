@@ -41,7 +41,7 @@ from hata.guild import Guild
 
 from image_handler import on_command_upload,on_command_image
 from help_handler import on_command_help,HELP,invalid_command
-from pers_data import TOKEN,PREFIX,TOKEN2,CLIENT_SECRET
+import pers_data
 from infos import infos,update_about
 from voice import voice
 from battleships import battle_manager
@@ -103,10 +103,15 @@ except (FileNotFoundError,OSError,PermissionError,json.decoder.JSONDecodeError):
 ##except (FileNotFoundError,OSError,PermissionError,pickle.UnpicklingError):
 ##    PREFIXES=prefix_by_guild(PREFIX)
     
-Koishi=Client(TOKEN,CLIENT_SECRET,loop=1)
-Koishi.activity=activity_game.create(name='with Satori')
+Koishi=Client(pers_data.TOKEN1,
+    secret=pers_data.CLIENT_SECRET,
+    client_id=pers_data.ID1,
+    activity=activity_game.create(name='with Satori'),
+    loop=1)
 
-Mokou=Client(TOKEN2,loop=2)
+Mokou=Client(pers_data.TOKEN2,
+    client_id=pers_data.ID2,
+    loop=2)
 
 TYPINGS={}
 class typing_counter:
@@ -716,6 +721,9 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         guild=message.guild
         if guild is None:
             return
+        if not guild.permissions_for(client).can_ban_user:
+            return await client.message_create(message.channel,embed=Embed(description='I have no permissions to check it.'))
+                                     
         ban_data = await client.guild_bans(guild)
 
         if not ban_data:
