@@ -3,7 +3,7 @@ from hata.exceptions import HTTPException,Forbidden
 from hata.parsers import EVENTS,default_event
 from hata.prettyprint import pchunkify,pretty_print
 from hata.events import pagination
-from hata.others import cchunkify
+from hata.others import cchunkify,Statuses
 from hata.permission import PERM_KEYS
 
 class dispatch_tester:
@@ -59,7 +59,7 @@ class dispatch_tester:
             return
         result=[]
         result.append(f'Me, {client:f} got edited')
-        for key,value in old.times():
+        for key,value in old.items():
             result.append(f'- {key} got changed: {value} -> {getattr(client,key)}')
 
         try:
@@ -154,26 +154,49 @@ class dispatch_tester:
     async def user_presence_update(self,client,user,old):
         result=[f'Presence update on user: {user:f} {user.id}']
         try:
-            status=old['status']
+            statuses=old['statuses']
         except KeyError:
             pass
         else:
-            result.append(f'- status changed: {status} -> {user.status}')
+            for key in ('desktop','mobile','web'):
+                result.append(f'- {key} status: {statuses.get(key,Statuses.offline)} -> {user.statuses.get(key,Statuses.offline)}')
 
+            try:
+                status=old['status']
+            except KeyError:
+                pass
+            else:
+                result.append(f'- status changed: {status} -> {user.status}')
+            
         try:
-            activity=old['activity']
+            activities=old['activities']
         except KeyError:
             pass
         else:
-            if type(activity) is dict:
-                result.append('activity got updated:')
+            ignore=[]
+            for activity in activities:
+                if type(activity) is dict:
+                    ignore.append(activity)
+                    
+            for activity in ignore:
+                result.append('Activity updated:')
+                activity=activity.pop('activity')
                 for key,value in activity.items():
-                    result.append(f'- {key} : {value} -> {getattr(user.activity,key)}')
-            else:
-                result.append('activity changed from:')
-                result.extend(pretty_print(activity))
-                result.append('To:')
-                result.extend(pretty_print(user.activity))
+                    result.append(f'- {key} : {value} -> {getattr(activity,key)}')
+            
+            if len(ignore)!=len(activities):
+                for activity in activities:
+                    if activity in ignore:
+                        continue
+                    result.append('Removed activity:')
+                    result.extend(pretty_print(activity))
+
+            if len(ignore)!=len(user.activities):
+                for activity in user.activities:
+                    if activity in ignore:
+                        continue
+                    result.append('Added activity:')
+                    result.extend(pretty_print(activity))
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
@@ -198,7 +221,7 @@ class dispatch_tester:
             if key=='roles':
                 removed=value[0]
                 if removed:
-                    result.append(f'Roles removed: ({len(removed)}')
+                    result.append(f'Roles removed: ({len(removed)})')
                     for role in removed:
                         result.append(f'- {role.name} {role.id}')
                 added=value[1]
@@ -239,9 +262,6 @@ class dispatch_tester:
         pages=[{'content':text}]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
 
-    #need connections:
-    #channel_group_user_add
-    #channel_group_user_delete
         
     @classmethod
     async def emoji_edit(self,client,guild,changes):

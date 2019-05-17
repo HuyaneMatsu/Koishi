@@ -309,7 +309,7 @@ class kanako_game:
     
     async def __call__(self,args):
         message=args[0]
-        if self.waiter.done() or message.author.id in self.answers or len(message.content)>4:
+        if message.author not in self.users or self.waiter.done() or message.author.id in self.answers or len(message.content)>4:
             return
         
         content=message.content.strip().lower()

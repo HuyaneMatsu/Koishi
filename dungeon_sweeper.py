@@ -38,11 +38,11 @@ def GC_games():
 
     if to_delete:
         loop=to_delete[0].client.loop
-        ensure_elsewhere(_keep_await(ds_game.cancel,games))
+        ensure_elsewhere(_keep_await(ds_game.cancel,to_delete),loop)
 
     if to_save:
         loop=to_save[0].client.loop
-        ensure_elsewhere(_keep_await(ds_game.save_position,games))
+        ensure_elsewhere(_keep_await(ds_game.save_position,to_save),loop)
 
 GC_process.functions.append(GC_games)
 
@@ -132,6 +132,7 @@ class ds_game:
         self.task           = Future(client.loop)
         self.call           = type(self).call_menu
         self.cache          = [None for _ in range(len(CHARS))]
+        self.last           = monotonic()
         client.loop.create_task(self.start())
         
     async def start(self):
@@ -482,7 +483,7 @@ class ds_game:
         else:
             return_=True
         
-        if return_ or self.position!=self.position_ori:
+        if return_ and self.position==self.position_ori:
             return
         
         async with DB_ENGINE.connect() as connector:
@@ -549,9 +550,9 @@ class ds_game:
         stage=self.stage
         steps=len(stage.history)
 
-        raiting=stage.source.rate(steps)
+        rating=stage.source.rate(steps)
             
-        embed=Embed(f'{stage.source.name} finished with {steps} steps with {raiting} raiting!',stage.render(),COLORS[stage.source.difficulty])
+        embed=Embed(f'{stage.source.name} finished with {steps} steps with {rating} rating!',stage.render(),COLORS[stage.source.difficulty])
         embed.footer=Embed_footer(f'steps : {len(stage.history)}')
 
         return embed
@@ -645,7 +646,7 @@ class ds_game:
                 if steps==0:
                     field_value='No results recorded yet!'
                 else:
-                    field_value=f'Raiting {stage.rate(steps)}; steps : {steps}'
+                    field_value=f'rating {stage.rate(steps)}; steps : {steps}'
 
 
                 if stage.difficulty==i2 and stage.level==i3:
@@ -786,11 +787,11 @@ class stage_source:
     
     def rate(self,steps):
         best=float(self.best) #stick using to one datatype
-        for raiting in ('S','A','B','C','D','E'):
+        for rating in ('S','A','B','C','D','E'):
             if steps<=best:
                 break
             best=best*1.2+2.
-        return raiting
+        return rating
 
     @property
     def position(self):
@@ -966,12 +967,19 @@ REIMU_STYLE = {
     WALL_E                      : Emoji.precreate(568838488464687169,name='0P').as_emoji,
     WALL_S                      : Emoji.precreate(568838546853462035,name='0N').as_emoji,
     WALL_W                      : Emoji.precreate(568838580278132746,name='0K').as_emoji,
-    WALL_N|WALL_E|WALL_S|WALL_W : NOTHING_EMOJI.as_emoji,
-    WALL_S|WALL_E               : Emoji.precreate(568838557318250499,name='0M').as_emoji,
+    WALL_N|WALL_E|WALL_S|WALL_W : Emoji.precreate(578678249518006272,name='0X').as_emoji,
+    WALL_E|WALL_S               : Emoji.precreate(568838557318250499,name='0M').as_emoji,
     WALL_S|WALL_W               : Emoji.precreate(568838569087598627,name='0L').as_emoji,
     WALL_N|WALL_E               : Emoji.precreate(574312331849498624,name='01').as_emoji,
     WALL_N|WALL_W               : Emoji.precreate(574312332453216256,name='00').as_emoji,
+    WALL_N|WALL_E|WALL_S        : Emoji.precreate(578648597621506048,name='0R').as_emoji,
+    WALL_N|WALL_S|WALL_W        : Emoji.precreate(578648597546139652,name='0S').as_emoji,
+    WALL_N|WALL_S               : Emoji.precreate(578654051848421406,name='0T').as_emoji,
+    WALL_E|WALL_W               : Emoji.precreate(578674409968238613,name='0U').as_emoji,
+    WALL_N|WALL_E|WALL_W        : Emoji.precreate(578676096829227027,name='0V').as_emoji,
+    WALL_E|WALL_S|WALL_W        : Emoji.precreate(578676650389274646,name='0W').as_emoji,
         }
+
 
 def REIMU_SKILL_ACTIVATE(self):
     size=self.source.size
@@ -1266,11 +1274,21 @@ def loader(filename):
         'WALL_E'    : WALL_E,
         'WALL_S'    : WALL_S,
         'WALL_W'    : WALL_W,
-        'WALL_A'    : WALL_N|WALL_E|WALL_S|WALL_W,
-        'WALL_SE'   : WALL_S|WALL_E,
+        'WALL_HV'   : WALL_N|WALL_E|WALL_S|WALL_W,
+        'WALL_SE'   : WALL_E|WALL_S,
         'WALL_SW'   : WALL_S|WALL_W,
         'WALL_NE'   : WALL_N|WALL_E,
         'WALL_NW'   : WALL_N|WALL_W,
+        'WALL_HE'   : WALL_N|WALL_E|WALL_S,
+        'WALL_HW'   : WALL_N|WALL_S|WALL_W,
+        'WALL_H'    : WALL_N|WALL_S,
+        'CN_TARGET' : CHAR_N|TARGET,
+        'CE_TARGET' : CHAR_E|TARGET,
+        'CS_TARGET' : CHAR_S|TARGET,
+        'CW_TARGET' : CHAR_W|TARGET,
+        'WALL_V'    : WALL_E|WALL_W,
+        'WALL_NV'   : WALL_E|WALL_S|WALL_W,
+        'WALL_SV'   : WALL_N|WALL_E|WALL_W,
             }
 
     STATE=0

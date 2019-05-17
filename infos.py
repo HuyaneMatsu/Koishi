@@ -6,7 +6,7 @@ import json
 from hata.parsers import eventlist
 from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
-from hata.others import time_left,statuses,audit_log_events,cchunkify
+from hata.others import time_left,Statuses,audit_log_events,cchunkify
 from hata.exceptions import Forbidden,HTTPException
 from hata.events import pagination
 from hata.events_compiler import content_parser
@@ -70,10 +70,10 @@ async def guild_info(client,message,content):
         return
 
     #most usual first
-    s_grey  = statuses.offline
-    s_green = statuses.online
-    s_yellow= statuses.idle
-    s_red   = statuses.dnd
+    s_grey  = Statuses.offline
+    s_green = Statuses.online
+    s_yellow= Statuses.idle
+    s_red   = Statuses.dnd
     
     v_grey  = 0
     v_green = 0
