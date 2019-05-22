@@ -729,7 +729,7 @@ class embedination:
     
     async def _cancel(self,wrapper,exception):
         client=wrapper.client
-        if exception is TimeoutError:
+        if isinstance(exception,TimeoutError):
             self.wrappers.clear()
             del self.pages
             if self.channel.guild is not None:

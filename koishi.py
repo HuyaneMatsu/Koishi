@@ -48,7 +48,7 @@ from battleships import battle_manager
 from dispatch_tests import dispatch_tester
 from ratelimit_tests import ratelimit_commands
 from kanako import kanako_manager
-from dungeon_sweeper import ds_manager
+from dungeon_sweeper import ds_manager,_DS_modify_best
 
 def smart_join(list_,limit):
     limit-=4
@@ -107,11 +107,11 @@ Koishi=Client(pers_data.TOKEN1,
     secret=pers_data.CLIENT_SECRET,
     client_id=pers_data.ID1,
     activity=activity_game.create(name='with Satori'),
-    loop=1)
+        )
 
 Mokou=Client(pers_data.TOKEN2,
     client_id=pers_data.ID2,
-    loop=2)
+        )
 
 TYPINGS={}
 class typing_counter:
@@ -399,6 +399,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     on_command(battle_manager,case='bs')
     on_command(kanako_manager,'kanako')
     on_command(ds_manager,'ds')
+    on_command(_DS_modify_best)
     
     @on_command
     async def default_event(client,message):
@@ -1030,6 +1031,28 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         await client.message_create(message.channel,emoji.as_emoji)
 
+    @on_command
+    @content_parser('int',
+                    'channel, flags=mnig, default="message.channel"',)
+    async def resend_webhook(client,message,message_id,channel):
+        if message.author is not client.owner:
+            return
+
+        try:
+            target_message = await client.message_get(channel,message_id)
+        except Exception as err:
+            await client.message_create(message.channel,err.__class__.__name__)
+            return
+
+        webhooks = await client.webhook_get_channel(channel)
+        webhook=webhooks[0]
+
+        await client.webhook_send(webhook,
+            embed=target_message.embeds,
+            name=target_message.author.name,
+            avatar_url=target_message.author.avatar_url)
+        
+    
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())

@@ -18,7 +18,7 @@ from models import DB_ENGINE,DS_TABLE,ds_model
 DS_GAMES={}
 STAGES=[]
 CHARS=[]
-COLORS=(0xa000c4,0xffe502,0xffa407,0xe50016)
+COLORS=(0xa000c4,0x00cc03,0xffe502,0xe50016)
 
 #:-> @ <-:#}{#:-> @ <-:#{ GC }#:-> @ <-:#}{#:-> @ <-:#
 
@@ -595,7 +595,7 @@ class ds_game:
             break
 
         
-        if len(cache)==3 and cache[2][1]:
+        if len(cache)==len(levels) and cache[-1][1]:
             additional-=7
             for diff_index in range(1,4):
                 additional+=10
@@ -625,7 +625,7 @@ class ds_game:
         embed=Embed(f'Chapter {chr(i1+49)}')
         embed.thumbnail=Embed_thumbnail(CHARS[i1][3].url)
 
-        if (i1==0) or len(cache)>1:
+        if len(cache)>1 or (i1==0) or self.value_from_position(i1*33-21):
 
             for target_index,element in enumerate(cache):
                 stage=element[0]
@@ -634,7 +634,7 @@ class ds_game:
                     embed.color=COLORS[stage.difficulty]
                     break
 
-            if target_index<2:
+            if target_index<3:
                 to_render=cache[4::-1]
             elif target_index>len(cache)-3:
                 to_render=cache[:-6:-1]
@@ -674,9 +674,9 @@ class ds_game:
             await self.client.reaction_delete(self.target,emoji,self.user)
         except (Forbidden,HTTPException):
             pass
-    
+
 #:-> @ <-:#}{#:-> @ <-:#{ game }#:-> @ <-:#}{#:-> @ <-:#
-    
+
 PASSABLE    = 0b0000000000000111
 
 FLOOR       = 0b0000000000000001
@@ -803,6 +803,7 @@ class stage_source:
     @property
     def name(self):
         return f'Chapter {chr(49+self.chapter)} {("Tutorial","Easy","Normal","Hard")[self.difficulty]} level {self.level+1}'
+
 class stage_backend:
     __slots__=['has_skill', 'history', 'map', 'next_skill', 'position',
         'source']
@@ -891,13 +892,21 @@ class stage_backend:
         map_=self.map
         limit=len(map_)
         step=self.source.size
-        
-        start=0
-        while start<limit:
-            end=start+step
-            result.append(''.join([style[element] for element in map_[start:end]]))
-            start=end
 
+        if limit<82:
+            start=0
+            while start<limit:
+                end=start+step
+                result.append(''.join([style[element] for element in map_[start:end]]))
+                start=end
+        else:
+            start=1
+            step=step-2
+            while start<limit:
+                end=start+step
+                result.append(''.join([style[element] for element in map_[start:end]]))
+                start=end+2
+        
         return '\n'.join(result)
 
     def back(self):
@@ -935,7 +944,26 @@ class stage_backend:
 
 NOTHING_EMOJI=Emoji.precreate(568838460434284574,name='0Q')
 
+DEFAULT_STYLE_PARTS = {
+    NOTHING                     : NOTHING_EMOJI.as_emoji,
+    WALL_E                      : Emoji.precreate(568838488464687169,name='0P').as_emoji,
+    WALL_S                      : Emoji.precreate(568838546853462035,name='0N').as_emoji,
+    WALL_W                      : Emoji.precreate(568838580278132746,name='0K').as_emoji,
+    WALL_N|WALL_E|WALL_S|WALL_W : Emoji.precreate(578678249518006272,name='0X').as_emoji,
+    WALL_E|WALL_S               : Emoji.precreate(568838557318250499,name='0M').as_emoji,
+    WALL_S|WALL_W               : Emoji.precreate(568838569087598627,name='0L').as_emoji,
+    WALL_N|WALL_E               : Emoji.precreate(574312331849498624,name='01').as_emoji,
+    WALL_N|WALL_W               : Emoji.precreate(574312332453216256,name='00').as_emoji,
+    WALL_N|WALL_E|WALL_S        : Emoji.precreate(578648597621506048,name='0R').as_emoji,
+    WALL_N|WALL_S|WALL_W        : Emoji.precreate(578648597546139652,name='0S').as_emoji,
+    WALL_N|WALL_S               : Emoji.precreate(578654051848421406,name='0T').as_emoji,
+    WALL_E|WALL_W               : Emoji.precreate(578674409968238613,name='0U').as_emoji,
+    WALL_N|WALL_E|WALL_W        : Emoji.precreate(578676096829227027,name='0V').as_emoji,
+    WALL_E|WALL_S|WALL_W        : Emoji.precreate(578676650389274646,name='0W').as_emoji,
+        }
+
 REIMU_STYLE = {
+    WALL_N                      : Emoji.precreate(580141387631165450,name='0O').as_emoji,
     FLOOR                       : Emoji.precreate(574211101638656010,name='0H').as_emoji,
     TARGET                      : Emoji.precreate(574234087645249546,name='0A').as_emoji,
     OBJECT_P                    : NOTHING_EMOJI.as_emoji,
@@ -954,32 +982,16 @@ REIMU_STYLE = {
     CHAR_E|TARGET               : Emoji.precreate(574249292026478595,name='07').as_emoji,
     CHAR_S|TARGET               : Emoji.precreate(574249292261490690,name='06').as_emoji,
     CHAR_W|TARGET               : Emoji.precreate(574249292487720970,name='05').as_emoji,
-    CHAR_N|OBJECT_P             : NOTHING_EMOJI.as_emoji,
-    CHAR_E|OBJECT_P             : NOTHING_EMOJI.as_emoji,
-    CHAR_S|OBJECT_P             : NOTHING_EMOJI.as_emoji,
-    CHAR_W|OBJECT_P             : NOTHING_EMOJI.as_emoji,
     CHAR_N|HOLE_P               : Emoji.precreate(574249293662388264,name='02').as_emoji,
     CHAR_E|HOLE_P               : Emoji.precreate(574249291074240523,name='09').as_emoji,
     CHAR_S|HOLE_P               : Emoji.precreate(574249291145543681,name='08').as_emoji,
     CHAR_W|HOLE_P               : Emoji.precreate(574249292957614090,name='03').as_emoji,
-    NOTHING                     : NOTHING_EMOJI.as_emoji,
-    WALL_N                      : Emoji.precreate(568838500669980712,name='0O').as_emoji,
-    WALL_E                      : Emoji.precreate(568838488464687169,name='0P').as_emoji,
-    WALL_S                      : Emoji.precreate(568838546853462035,name='0N').as_emoji,
-    WALL_W                      : Emoji.precreate(568838580278132746,name='0K').as_emoji,
-    WALL_N|WALL_E|WALL_S|WALL_W : Emoji.precreate(578678249518006272,name='0X').as_emoji,
-    WALL_E|WALL_S               : Emoji.precreate(568838557318250499,name='0M').as_emoji,
-    WALL_S|WALL_W               : Emoji.precreate(568838569087598627,name='0L').as_emoji,
-    WALL_N|WALL_E               : Emoji.precreate(574312331849498624,name='01').as_emoji,
-    WALL_N|WALL_W               : Emoji.precreate(574312332453216256,name='00').as_emoji,
-    WALL_N|WALL_E|WALL_S        : Emoji.precreate(578648597621506048,name='0R').as_emoji,
-    WALL_N|WALL_S|WALL_W        : Emoji.precreate(578648597546139652,name='0S').as_emoji,
-    WALL_N|WALL_S               : Emoji.precreate(578654051848421406,name='0T').as_emoji,
-    WALL_E|WALL_W               : Emoji.precreate(578674409968238613,name='0U').as_emoji,
-    WALL_N|WALL_E|WALL_W        : Emoji.precreate(578676096829227027,name='0V').as_emoji,
-    WALL_E|WALL_S|WALL_W        : Emoji.precreate(578676650389274646,name='0W').as_emoji,
+    CHAR_N|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_E|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_S|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_W|OBJECT_P             : NOTHING_EMOJI.as_emoji,
         }
-
+REIMU_STYLE.update(DEFAULT_STYLE_PARTS)
 
 def REIMU_SKILL_ACTIVATE(self):
     size=self.source.size
@@ -1032,6 +1044,37 @@ CHARS.append((REIMU_STYLE,REIMU_SKILL_ACTIVATE,REIMU_SKILL_USE,REIMU_EMOJI),)
 
 FURANDOORU_STYLE = {
         }
+
+FURANDOORU_STYLE = {
+    WALL_N                      : Emoji.precreate(580143707534262282,name='0X').as_emoji,
+    FLOOR                       : Emoji.precreate(580150656501940245,name='0Y').as_emoji,
+    TARGET                      : Emoji.precreate(580153111545511967,name='0b').as_emoji,
+    OBJECT_P                    : Emoji.precreate(580163014045728818,name='0e').as_emoji,
+    HOLE_P                      : Emoji.precreate(580159124466303001,name='0d').as_emoji,
+    BOX                         : Emoji.precreate(580151963937931277,name='0a').as_emoji,
+    BOX_TARGET                  : Emoji.precreate(580188214086598667,name='0f').as_emoji,
+    BOX_HOLE                    : Emoji.precreate(580151963937931277,name='0a').as_emoji,
+    BOX_OBJECT                  : Emoji.precreate(580151963937931277,name='0a').as_emoji,
+    HOLE_U                      : Emoji.precreate(580156463888990218,name='0c').as_emoji,
+    OBJECT_U                    : Emoji.precreate(580151385258065925,name='0Z').as_emoji,
+    CHAR_N|FLOOR                : Emoji.precreate(580357693022142485,name='0g').as_emoji,
+    CHAR_E|FLOOR                : Emoji.precreate(580357693093576714,name='0h').as_emoji,
+    CHAR_S|FLOOR                : Emoji.precreate(580357693160685578,name='0i').as_emoji,
+    CHAR_W|FLOOR                : Emoji.precreate(580357693152165900,name='0j').as_emoji,
+    CHAR_N|TARGET               : Emoji.precreate(580357693018210305,name='0k').as_emoji,
+    CHAR_E|TARGET               : Emoji.precreate(580357693085188109,name='0l').as_emoji,
+    CHAR_S|TARGET               : Emoji.precreate(580357693181657089,name='0m').as_emoji,
+    CHAR_W|TARGET               : Emoji.precreate(580357693361881089,name='0n').as_emoji,
+    CHAR_N|HOLE_P               : Emoji.precreate(580357693324132352,name='0o').as_emoji,
+    CHAR_E|HOLE_P               : Emoji.precreate(580357693072736257,name='0p').as_emoji,
+    CHAR_S|HOLE_P               : Emoji.precreate(580357693131456513,name='0q').as_emoji,
+    CHAR_W|HOLE_P               : Emoji.precreate(580357693366337536,name='0r').as_emoji,
+    CHAR_N|OBJECT_P             : Emoji.precreate(580357693143777300,name='0s').as_emoji,
+    CHAR_E|OBJECT_P             : Emoji.precreate(580357692711763973,name='0t').as_emoji,
+    CHAR_S|OBJECT_P             : Emoji.precreate(580357693269606410,name='0u').as_emoji,
+    CHAR_W|OBJECT_P             : Emoji.precreate(580357693387177984,name='0v').as_emoji,
+        }
+FURANDOORU_STYLE.update(DEFAULT_STYLE_PARTS)
 
 def FURANDOORU_SKILL_ACTIVATE(self):
     size=self.source.size
@@ -1239,7 +1282,23 @@ RULES_HELP.fields.append(Embed_field(f'Chapter 2 {FURANDOORU_EMOJI:e}',
     'Furandooru), who has some ruined renmants at her mansion and those does not '
     'let her put each *bookshelves* on their desired place.\n'
     'Flandre can destroy absolutely anything and everything, but she will get '
-    'rid of only the ruined stuffs for you.'
+    'rid of only the ruined stuffs for you.\n'
+    f'{FURANDOORU_STYLE[CHAR_E|FLOOR]}'
+    f'{FURANDOORU_STYLE[OBJECT_U]}'
+    f'{BUILTIN_EMOJIS["arrow_right"]:e}'
+    f'{FURANDOORU_STYLE[CHAR_E|FLOOR]}'
+    f'{FURANDOORU_STYLE[OBJECT_P]}'
+    f'{BUILTIN_EMOJIS["arrow_right"]:e}'
+    f'{FURANDOORU_STYLE[FLOOR]}'
+    f'{FURANDOORU_STYLE[CHAR_E|OBJECT_P]}'
+    '\n'
+    f'{FURANDOORU_STYLE[CHAR_E|FLOOR]}'
+    f'{FURANDOORU_STYLE[BOX]}'
+    f'{FURANDOORU_STYLE[OBJECT_P]}'
+    f'{BUILTIN_EMOJIS["arrow_right"]:e}'
+    f'{FURANDOORU_STYLE[FLOOR]}'
+    f'{FURANDOORU_STYLE[CHAR_E|FLOOR]}'
+    f'{FURANDOORU_STYLE[BOX_OBJECT]}'
         ))
 RULES_HELP.fields.append(Embed_field(f'Chapter 3 {YUKARI_EMOJI:e}',
     'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some '
@@ -1325,6 +1384,8 @@ loader('ds.txt')
 
 del rendered_embed
 
+del DEFAULT_STYLE_PARTS
+
 del REIMU_STYLE
 del REIMU_SKILL_ACTIVATE
 del REIMU_SKILL_USE
@@ -1340,6 +1401,47 @@ del YUKARI_SKILL_ACTIVATE
 del YUKARI_SKILL_USE
 del YUKARI_EMOJI
 
+async def _DS_modify_best(client,message,content):
+    if message.author is not client.owner:
+        return
+    try:
+        position=int(content)
+    except ValueError:
+        return
 
+    i1,rest=divmod(position,33)
+    if rest<3:
+        i2=0
+        i3=rest
+    else:
+        i2,i3=divmod(rest+7,10)
+        
+    best=STAGES[i1][i2][i3].best
+        
+    position=position<<1
+
+    count=0
     
+    async with DB_ENGINE.connect() as connector:
+        result = await connector.execute(DS_TABLE.select())
+        stats = await result.fetchall()
+        for obj in stats:
+            data=obj.data
+            amount=int.from_bytes(data[position:position+2],byteorder='big')
+
+            if amount==0:
+                continue
+            if amount>=best:
+                continue
+            
+            data=bytearray(data)
+            data[position:position+2]=best.to_bytes(2,byteorder='big')
+        
+            await connector.execute(DS_TABLE.update(). \
+                values(data=data). \
+                where(ds_model.user_id==obj.user_id))
+
+            count+=1
+
+    await client.message_create(message.channel,f'modified : {count}')
     
