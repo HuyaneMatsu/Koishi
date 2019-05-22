@@ -266,7 +266,12 @@ limited by  : webhook
 members     :
     guild_users
     
-
+group       : guild_user_get
+limit       : 5
+reset       : 2
+limited by  : global
+members:
+    guild_user_get
 '''
 
 def parsedate_to_datetime(data):
@@ -1046,6 +1051,11 @@ def guild_roles(client,guild):
     guild_id=guild.id
     return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/roles')
+
+def guild_user_get(client,guild,user_id):
+    guild_id=guild.id
+    return bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}')
 
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
@@ -2974,3 +2984,36 @@ async def ratelimit_test0151(client,message,content):
     data = await guild_roles(client,guild1)
     #guild_roles is unlimited
     
+@ratelimit_commands
+async def ratelimit_test0152(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    user1_id=message.author.id
+    await user_get_profile(client,guild1,user1_id)
+    #user_get_profile is limited
+
+@ratelimit_commands
+async def ratelimit_test0153(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    guild2=client.guilds[guild2_id]
+    user1_id=message.author.id
+    for x in range(6):
+        loop.create_task(guild_user_get(client,guild1,user1_id))
+    #2s ratelimit
+
+@ratelimit_commands
+async def ratelimit_test0154(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    guild2=client.guilds[guild2_id]
+    user1_id=message.author.id
+    loop.create_task(guild_user_get(client,guild1,user1_id))
+    loop.create_task(guild_user_get(client,guild2,user1_id))
+    #limited globally

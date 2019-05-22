@@ -3345,7 +3345,27 @@ async def parse_details_command(client,message,content):
         if emoji:
             await client.message_create(message.channel,str(emoji))
 
+    @on_command
+    async def guild_user_get_test(client,message,content):
+        user=message.author
+        if user is not client.owner:
+            return
+        guild=message.guild
+        if guild is None:
+            return
 
+        profile=user.guild_profiles[guild]
+        
+        user.name='dom'
+        profile.nick='nom'
+
+        await client.message_create(message.channel,f'name changed to : {user.name!r}\nnick changed to : {profile.nick!r}')
+
+        await client.guild_user_get(guild,user.id)
+
+        await client.message_create(message.channel,f'After request name is : {user.name!r}\nnick is : {profile.nick!r}')
+
+        
 
 # - : - # dungeon_sweeper.py # - : - #
 
