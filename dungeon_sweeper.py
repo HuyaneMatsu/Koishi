@@ -4,7 +4,7 @@ import re
 from time import monotonic
     
 from hata.events_compiler import content_parser
-from hata.embed import Embed,Embed_field,Embed_footer,rendered_embed,Embed_thumbnail
+from hata.embed import Embed
 from hata.color import Color
 from hata.exceptions import Forbidden,HTTPException
 from hata.emoji import BUILTIN_EMOJIS,Emoji
@@ -197,7 +197,7 @@ class ds_game:
         else:
             i2,i3=divmod(rest+7,10)
 
-        self.stage=stage_backend(STAGES[i1][i2][i3])
+        self.stage=stage_backend(STAGES[i1][i2][i3],self.value_from_position(self.position))
 
         client=self.client
         loop=client.loop  
@@ -456,11 +456,10 @@ class ds_game:
         self.position_ori=position
         
     async def save_done(self):
-        new_steps=len(self.stage.history)
-        old_steps=self.value_from_position(self.position)
-
+        best_steps=self.stage.best
         position=self.position
-        
+        old_steps=self.value_from_position(position)
+
         if position%33!=32:
             relative_position=position+1
             i1,rest=divmod(relative_position,33)
@@ -476,8 +475,8 @@ class ds_game:
                 if i3<len(levels):
                     self.position=relative_position
         
-        if old_steps==0 or new_steps<old_steps:
-            self.write_value(position,new_steps)
+        if old_steps!=best_steps:
+            self.write_value(position,best_steps)
             self.cache[self.stage.source.chapter]=None
             return_=False
         else:
@@ -548,13 +547,13 @@ class ds_game:
         
     def render_done(self):
         stage=self.stage
-        steps=len(stage.history)
+        steps=stage.best
 
         rating=stage.source.rate(steps)
             
         embed=Embed(f'{stage.source.name} finished with {steps} steps with {rating} rating!',stage.render(),COLORS[stage.source.difficulty])
-        embed.footer=Embed_footer(f'steps : {len(stage.history)}')
-
+        embed.add_footer(f'steps : {len(stage.history)}, best : {stage.best}')
+        embed.add_author(self.user.avatar_url_as('png',32),self.user.full_name)
         return embed
     
     def render_game(self):
@@ -567,8 +566,11 @@ class ds_game:
                 title_parts.append('READY')
             
         embed=Embed(' '.join(title_parts),stage.render(),COLORS[stage.source.difficulty])
-        embed.footer=Embed_footer(f'steps : {len(stage.history)}')
-
+        footer=f'steps : {len(stage.history)}'
+        if stage.best:
+            footer=f'{footer}, best : {stage.best}'
+        embed.add_footer(footer)
+        embed.add_author(self.user.avatar_url_as('png',32),self.user.full_name)
         return embed
 
     def get_cache(self,chapter,force=False):
@@ -623,7 +625,7 @@ class ds_game:
         cache=self.get_cache(i1)
 
         embed=Embed(f'Chapter {chr(i1+49)}')
-        embed.thumbnail=Embed_thumbnail(CHARS[i1][3].url)
+        embed.add_thumbnail(CHARS[i1][3].url)
 
         if len(cache)>1 or (i1==0) or self.value_from_position(i1*33-21):
 
@@ -653,12 +655,13 @@ class ds_game:
                     field_name=f'**{field_name}**'
                     field_value=f'**{field_value}**'
 
-                embed.fields.append(Embed_field(field_name,field_value))
+                embed.add_field(field_name,field_value)
             
         else:
             embed.color=COLORS[0]
             embed.description=f'**You must finish chapter {chr(i1+48)} Easy 10 first.**'
-
+        
+        embed.add_author(self.user.avatar_url_as('png',32),self.user.full_name)
         return embed                     
 
     def value_from_position(self,position):
@@ -805,16 +808,17 @@ class stage_source:
         return f'Chapter {chr(49+self.chapter)} {("Tutorial","Easy","Normal","Hard")[self.difficulty]} level {self.level+1}'
 
 class stage_backend:
-    __slots__=['has_skill', 'history', 'map', 'next_skill', 'position',
+    __slots__=['best', 'has_skill', 'history', 'map', 'next_skill', 'position',
         'source']
     
-    def __init__(self,source):
+    def __init__(self,source,best):
         self.source=source
         self.map=source.map.copy()
         self.position=source.start
         self.history=[]
         self.has_skill=True
         self.next_skill=False
+        self.best=best
         
     def done(self):
         targets=self.source.targets
@@ -822,6 +826,8 @@ class stage_backend:
             if tile==BOX_TARGET:
                 targets-=1
                 if targets==0:
+                    if self.best==0 or self.best>len(self.history):
+                        self.best=len(self.history)
                     return True
         
         return False
@@ -840,8 +846,10 @@ class stage_backend:
             
     def move(self,step,align):
         if self.next_skill:
-            self.next_skill=False
-            return self.source.use_skill(self,step,align)
+            result=self.source.use_skill(self,step,align)
+            if result:
+                self.next_skill=False
+            return result
         
         map_=self.map
         position=self.position
@@ -1204,13 +1212,13 @@ CHARS.append((YUKARI_STYLE,YUKARI_SKILL_ACTIVATE,YUKARI_SKILL_USE,YUKARI_EMOJI),
 
 RULES_HELP=Embed('Rules of Dungeon sweeper',
     'Your quest is to help our cute Touhou characters to put their stuffs on '
-    'places, where those supposed be. Theese places are market with an '
+    'places, where they supposed be. Theese places are marked with an '
     f'{BUILTIN_EMOJIS["x"]:e} on the floor. Because our caharcters are lazy, '
-    'the less step it requires to sort their stuffs, makes them give you '
+    'the less steps required to sort their stuffs, makes them give you a'
     'better rating.\n'
     '\n'
-    'You can move with the reactions under the embed, activate your '
-    'character\' skill, or go back, reset the map or cancel the game:\n'
+    'You can move with the reactions under the embed, to activate your '
+    'characters\' skill, or go back, reset the map or cancel the game:\n'
     f'{ds_game.WEST:e}{ds_game.NORTH:e}{ds_game.SOUTH:e}{ds_game.EAST:e}'
     f'{REIMU_EMOJI:e}{ds_game.BACK:e}{ds_game.RESET:e}{ds_game.CANCEL:e}\n'
     'You can show push boxes by moving towards them, but you cannot push '
@@ -1223,8 +1231,8 @@ RULES_HELP=Embed('Rules of Dungeon sweeper',
     f'{REIMU_STYLE[CHAR_E|FLOOR]}'
     f'{REIMU_STYLE[BOX]}'
     '\n'
-    'You can push the boxes into the holes to pass them, but care, you '
-    'might lose too much boxes to finish the stage!\n'
+    'You can push the boxes into the holes to pass them, but be careful, you '
+    'might lose too much boxes to finish the stages!\n'
     f'{REIMU_STYLE[CHAR_E|FLOOR]}'
     f'{REIMU_STYLE[BOX]}'
     f'{REIMU_STYLE[HOLE_U]}'
@@ -1257,7 +1265,7 @@ RULES_HELP=Embed('Rules of Dungeon sweeper',
     'The game has 3 chapters. *(not 3 now and there will be more.)*'
     'Each chapter introduces a different charater to play with.',
     COLORS[0])
-RULES_HELP.fields.append(Embed_field(f'Chapter 1 {REIMU_EMOJI:e}',
+RULES_HELP.add_field(f'Chapter 1 {REIMU_EMOJI:e}',
     'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her '
     'basement to sort her *boxes* out.\n'
     'Reimu can jump over a box or hole.\n'
@@ -1276,13 +1284,12 @@ RULES_HELP.fields.append(Embed_field(f'Chapter 1 {REIMU_EMOJI:e}',
     f'{REIMU_STYLE[FLOOR]}'
     f'{REIMU_STYLE[HOLE_U]}'
     f'{REIMU_STYLE[CHAR_E|FLOOR]}'
-        ))
-RULES_HELP.fields.append(Embed_field(f'Chapter 2 {FURANDOORU_EMOJI:e}',
+        )
+RULES_HELP.add_field(f'Chapter 2 {FURANDOORU_EMOJI:e}',
     'Your character is Scarlet Flandre (スカーレット・フランドール Sukaaretto '
-    'Furandooru), who has some ruined renmants at her mansion and those does not '
-    'let her put each *bookshelves* on their desired place.\n'
-    'Flandre can destroy absolutely anything and everything, but she will get '
-    'rid of only the ruined stuffs for you.\n'
+    'Furandooru), who want to put her *bookshelves* on their desired place.\n'
+    'Flandre can destroy absolutely anything and everything, and she will get '
+    'rid of the pillars stuffs for you.\n'
     f'{FURANDOORU_STYLE[CHAR_E|FLOOR]}'
     f'{FURANDOORU_STYLE[OBJECT_U]}'
     f'{BUILTIN_EMOJIS["arrow_right"]:e}'
@@ -1299,16 +1306,14 @@ RULES_HELP.fields.append(Embed_field(f'Chapter 2 {FURANDOORU_EMOJI:e}',
     f'{FURANDOORU_STYLE[FLOOR]}'
     f'{FURANDOORU_STYLE[CHAR_E|FLOOR]}'
     f'{FURANDOORU_STYLE[BOX_OBJECT]}'
-        ))
-RULES_HELP.fields.append(Embed_field(f'Chapter 3 {YUKARI_EMOJI:e}',
+        )
+RULES_HELP.add_field(f'Chapter 3 {YUKARI_EMOJI:e}',
     'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some '
     'replacing at her home.\n'
     'Yukari can create gaps and travel trough them. She will open gap to the '
     'closest place straightforward, which is separated by a bedding or with '
     'wall from her.'
-        ))
-
-RULES_HELP=rendered_embed(RULES_HELP)
+        )
 
 def loader(filename):
 
@@ -1354,35 +1359,41 @@ def loader(filename):
     map_=[]
     
     with open(filename,'r') as file:
-        for line in file:
-            if STATE==0:
-                if len(line)>2:
-                    header=re.findall(PATTERN_HEADER,line)
-                    STATE=1
-                
-                continue
-            
-            if STATE==1:
-                if len(line)>2:
-                    STATE=2
-                else:
+        for debug_index,line in enumerate(file,1):
+            try:
+                if STATE==0:
+                    if len(line)>2:
+                        header=re.findall(PATTERN_HEADER,line)
+                        STATE=1
+                    
                     continue
                 
-            if STATE==2:
-                if len(line)>2:
-                    map_.extend(PATTERNS[element] for element in re.findall(PATTERN_MAP,line))
-                else:
-                    stage_source(header,map_)
-                    map_.clear()
-                    STATE=0
-                continue
-        
+                if STATE==1:
+                    if len(line)>2:
+                        STATE=2
+                    else:
+                        continue
+                    
+                if STATE==2:
+                    if len(line)>2:
+                        map_.extend(PATTERNS[element] for element in re.findall(PATTERN_MAP,line))
+                    else:
+                        stage_source(header,map_)
+                        map_.clear()
+                        STATE=0
+                    continue
+                
+            except KeyError as err:
+                print(f'Exception at line {debug_index}:\n{err!r}')
+                if STATE==2:
+                    print(', '.join(re.findall(PATTERN_MAP,line)))
+                map_.clear()
+                break
+                
         if map_:
             stage_source(header,map_)
                 
 loader('ds.txt')
-
-del rendered_embed
 
 del DEFAULT_STYLE_PARTS
 

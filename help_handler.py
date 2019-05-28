@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from hata.embed import Embed,Embed_field,Embed_footer,rendered_embed
+from hata.embed import Embed
 from hata.events import pagination
 from hata.color import Color
 from hata.exceptions import Forbidden,HTTPException
@@ -32,52 +32,52 @@ def create_help_help(prefix):
     while index<limit:
         page=Embed(title='Commands:',color=HELP_COLOR,description=pages[index])
         index+=1
-        page.fields.append(Embed_field(name=f'Use {prefix}help *command* for more information.',value=f'page {index}/{limit}'))
+        page.add_field(f'Use {prefix}help *command* for more information.',f'page {index}/{limit}')
         result.append({'embed':page})
 
     return result
 
-HELP['help']=rendered_embed(Embed(title='rate',color=HELP_COLOR,
+HELP['help']=Embed(title='rate',color=HELP_COLOR,
     description='Shows the list of the commands.'
-        ))
+        )
 
-HELP['image']=rendered_embed(Embed(title='image',color=HELP_COLOR,description=''))
+HELP['image']=Embed(title='image',color=HELP_COLOR,description='')
 
-HELP['upload']=rendered_embed(Embed(title='upload',color=HELP_COLOR,                           
-    description=( \
-        'You can can upload images with tags, which you can access with the "image" command.'
-        'On mention it will upload the mentioned\s image.'
+HELP['upload']=Embed(title='upload',color=HELP_COLOR,                           
+    description=(
+        'You can can upload images with tags, which you can access with the "image" command.\n'
+        'On mention it will upload the mentioned\'s image.\n'
         '(Owner only!)'
-            )))
+            ))
 
-HELP['rate']=rendered_embed(Embed(title='rate',color=HELP_COLOR,
+HELP['rate']=Embed(title='rate',color=HELP_COLOR,
     description='Use this command to rate someone by @mentionning them.'
-        ))
+        )
 
-HELP['mine']=rendered_embed(Embed(title='mine',color=HELP_COLOR,
-    description=( \
+HELP['mine']=Embed(title='mine',color=HELP_COLOR,
+    description=(
         'Creates a minesweeper game.\n'
         'U can ask the result as "text" too\n'
         'Default bomb amount is 12, but you can set it between 8 and 24!'
-            )))
+            ))
 
-HELP['dice']=rendered_embed(Embed(title='dice',color=HELP_COLOR,
+HELP['dice']=Embed(title='dice',color=HELP_COLOR,
     description='Throws a/more dices.'
-        ))
+        )
 
-HELP['ping']=rendered_embed(Embed(title='pong',color=HELP_COLOR,
+HELP['ping']=Embed(title='pong',color=HELP_COLOR,
     description='Returns the client\s ping in ms'
-        ))
+        )
 
 
-HELP['nitro']=rendered_embed(Embed(title='emoji',color=HELP_COLOR,  
+HELP['nitro']=Embed(title='emoji',color=HELP_COLOR,  
     description=(
         'Type an emoji what I can use with my nitro. If I find it I will'
         'send it'
-            )))
+            ))
 
-HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,
-    description=( \
+HELP['voice']=Embed(title='voice',color=HELP_COLOR,
+    description=(
         'Use "join (n%)" to make the bot to join your voice channel\n'
         'Use "pause" to pause the player\n'
         'Use "stop" to stop the player\n'
@@ -87,68 +87,68 @@ HELP['voice']=rendered_embed(Embed(title='voice',color=HELP_COLOR,
         'Use "skip" to skip the actual source\n'
         'Use "move <channel name>" to move the player to an another channel\n'
         'Use "leave" to make me leave the channel'
-            )))
+            ))
 
-HELP['message_me']=rendered_embed(Embed(title='message_me',color=HELP_COLOR,
+HELP['message_me']=Embed(title='message_me',color=HELP_COLOR,
     description='Sends you something nice'
-        ))
+        )
 
 
-HELP['clear']=rendered_embed(Embed(title='clear',color=HELP_COLOR,
-    description='Clears the set amount of messages (default=100)'
-        ))
+HELP['clear']=Embed(title='clear',color=HELP_COLOR,
+    description='Clears the set amount of messages (default=1)'
+        )
 
-HELP['hug']=rendered_embed(Embed(title='hug',color=HELP_COLOR,
+HELP['hug']=Embed(title='hug',color=HELP_COLOR,
     description='After u said the magic word hugs the choosen one'
-        ))
+        )
 
-HELP['waitemoji']=rendered_embed(Embed(title='waitemoji',color=HELP_COLOR,
+HELP['waitemoji']=Embed(title='waitemoji',color=HELP_COLOR,
     description='Waits for an emoji at the channel'
-        ))
+        )
 
-HELP['subscribe']=rendered_embed(Embed(title='subscribe',color=HELP_COLOR,
+HELP['subscribe']=Embed(title='subscribe',color=HELP_COLOR,
     description='Subscribes u to Announcements role, if possible'
-        ))
+        )
 
-HELP['user']=rendered_embed(Embed(title='user',color=HELP_COLOR,
+HELP['user']=Embed(title='user',color=HELP_COLOR,
     description='Shows your profile'
-        ))
+        )
 
-HELP['invite']=rendered_embed(Embed(title='ivnite',color=HELP_COLOR,
-    description=( \
+HELP['invite']=Embed(title='ivnite',color=HELP_COLOR,
+    description=(
         'Sends you an invite (only if u can create invite anyways too)\n'
         'Guild owner can create permament invite too with an additinal "perma"'
-        )))
+        ))
 
-HELP['invites']=rendered_embed(Embed(title='invites',color=HELP_COLOR,
+HELP['invites']=Embed(title='invites',color=HELP_COLOR,
     description='Shows the invites of the guild <channel>.'
-        ))
+        )
 
-HELP['bans']=rendered_embed(Embed(title='bans',color=HELP_COLOR,
+HELP['bans']=Embed(title='bans',color=HELP_COLOR,
     description='Shows the banned users at the guild'
-        ))
+        )
 
-HELP['leave_guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
+HELP['leave_guild']=Embed(title='unban',color=HELP_COLOR,
     description='Leaves the guild. Guild owner only.'
-        ))
+        )
 
-HELP['guild']=rendered_embed(Embed(title='unban',color=HELP_COLOR,
+HELP['guild']=Embed(title='unban',color=HELP_COLOR,
     description='Shows the guild\'s profile.'
-        ))
+        )
 
-HELP['bs']=rendered_embed(Embed(title='bs',color=HELP_COLOR,
+HELP['bs']=Embed(title='bs',color=HELP_COLOR,
     description='Requests a batlleship game to the mentioned user.'
-        ))
+        )
 
-HELP['love']=rendered_embed(Embed(title='love',color=HELP_COLOR,
+HELP['love']=Embed(title='love',color=HELP_COLOR,
     description='How much you two fit together?'
-        ))
+        )
 
-HELP['change_prefix']=rendered_embed(Embed(title='change_prefix',color=HELP_COLOR,
+HELP['change_prefix']=Embed(title='change_prefix',color=HELP_COLOR,
     description='Changes my prefix at the guild (guild owner only)!'
-        ))
+        )
 
-HELP['kanako']=rendered_embed(Embed(title='kanako',color=HELP_COLOR,
+HELP['kanako']=Embed(title='kanako',color=HELP_COLOR,
     description=(
         'Start a hiragana or katakana quiz!\n'
         'There can be only one game each channel.\n\n'
@@ -169,17 +169,17 @@ HELP['kanako']=rendered_embed(Embed(title='kanako',color=HELP_COLOR,
         '\n'
         '- **<name>**\n'
         'Shows you every character at the map.'
-            )))
+            ))
 
-HELP['se']=rendered_embed(Embed(title='se',color=HELP_COLOR,
+HELP['se']=Embed(title='se',color=HELP_COLOR,
     description='`se` stands for `show emoji`!'
-        ))
+        )
 
-HELP['nikki']=rendered_embed(Embed(title='nikki',color=HELP_COLOR,
+HELP['nikki']=Embed(title='nikki',color=HELP_COLOR,
     description='Your personal yandere <3'
-        ))
+        )
 
-HELP['ds']=rendered_embed(Embed(title='ds',color=HELP_COLOR,
+HELP['ds']=Embed(title='ds',color=HELP_COLOR,
     description=(
         'Play **Dungeon sweeper** game!\n'
         'A user can have only one activate game at a time.\n'
@@ -192,7 +192,7 @@ HELP['ds']=rendered_embed(Embed(title='ds',color=HELP_COLOR,
         '\n'
         '- **help**\n'
         'Shows you this message\n'
-            )))
+            ))
 
 async def on_command_help(client,message,content):
     if 0<len(content)<50:

@@ -104,9 +104,7 @@ def create_help_images():
         text.append(part)
         textlen=newlen
         
-    image_help=HELP['image']
-    image_help.source.description='\n'.join(text)
-    image_help.rerender()
+    HELP['image'].description='\n'.join(text)
     
 create_help_images()
 

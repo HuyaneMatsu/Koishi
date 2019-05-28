@@ -10,7 +10,7 @@ from hata.others import time_left,Statuses,audit_log_events,cchunkify
 from hata.exceptions import Forbidden,HTTPException
 from hata.events import pagination
 from hata.events_compiler import content_parser
-from hata.embed import Embed,Embed_thumbnail,Embed_field,rendered_embed
+from hata.embed import Embed
 from hata.emoji import BUILTIN_EMOJIS
 from hata.color import Color
 from hata.user import USERS
@@ -59,7 +59,7 @@ async def user_info(client,message,user):
         text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
         
     embed=Embed(f'{user:f}','\n'.join(text),color)
-    embed.thumbnail=Embed_thumbnail(user.avatar_url_as(size=128))
+    embed.add_thumbnail(user.avatar_url_as(size=128))
 
     await client.message_create(message.channel,embed=embed)
 
@@ -120,33 +120,33 @@ async def guild_info(client,message,content):
     else:
         color=0
         
-    embed=Embed('',f'''
-        **Guild information**
-        Created: {time_left(guild)} ago
-        Voice region: {guild.region}
-        Features: {features}
-
-        **Counts**
-        Users: {guild.user_count}
-        Roles: {len(guild.roles)}
-        Text channels: {channel_text}
-        Voice channels: {channel_voice}
-        Category channels: {channel_category}
-
-        **Users**
-        {BUILTIN_EMOJIS["green_heart"]:e} {v_green}
-        {BUILTIN_EMOJIS["yellow_heart"]:e} {v_yellow}
-        {BUILTIN_EMOJIS["heart"]:e} {v_red}
-        {BUILTIN_EMOJIS["black_heart"]:e} {v_grey}
-        ''',color)
+    embed=Embed('',
+        '**Guild information**\n'
+        f'Created: {time_left(guild)} ago\n'
+        f'Voice region: {guild.region}\n'
+        f'Features: {features}\n'
+        '\n'
+        '**Counts**\n'
+        f'Users: {guild.user_count}\n'
+        f'Roles: {len(guild.roles)}\n'
+        f'Text channels: {channel_text}\n'
+        f'Voice channels: {channel_voice}\n'
+        f'Category channels: {channel_category}\n'
+        '\n'
+        '**Users**\n'
+        f'{BUILTIN_EMOJIS["green_heart"]:e} {v_green}\n'
+        f'{BUILTIN_EMOJIS["yellow_heart"]:e} {v_yellow}\n'
+        f'{BUILTIN_EMOJIS["heart"]:e} {v_red}\n'
+        f'{BUILTIN_EMOJIS["black_heart"]:e} {v_grey}\n'
+            ,color)
     
-    embed.thumbnail=Embed_thumbnail(guild.icon_url_as(size=128))
+    embed.add_thumbnail(guild.icon_url_as(size=128))
 
     await client.message_create(message.channel,embed=embed)
 
 @infos
 @content_parser('guild',
-                'condition, default="not guild.permissions_for(message.author).can_administrator"',
+                'condition, default="not guild.permissions_for(message.author).can_manage_channel"',
                 'channel, flags=mni, default=None',
                 on_failure=no_permission)
 async def invites(client,message,guild,channel):
@@ -162,11 +162,11 @@ async def invites(client,message,guild,channel):
     pagination(client,message.channel,pages,120.)
 
 def generate_love_level():
-    value={ \
-        'titles':( \
+    value = {
+        'titles' : (
             f'{BUILTIN_EMOJIS["blue_heart"]:e} There\'s no real connection between you two {BUILTIN_EMOJIS["blue_heart"]:e}',
                 ),
-        'text': ( \
+        'text' : (
             'The chance of this relationship working out is really low. You '
             'can get it to work, but with high costs and no guarantee of '
             'working out. Do not sit back, spend as much time together as '
@@ -178,11 +178,11 @@ def generate_love_level():
     for x in range(0,2):
         yield value
 
-    value={ \
-        'titles':( \
+    valu = { 
+        'titles' : (
             f'{BUILTIN_EMOJIS["blue_heart"]:e} A small acquaintance {BUILTIN_EMOJIS["blue_heart"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'There might be a chance of this relationship working out somewhat '
             'well, but it is not very high. With a lot of time and effort '
             'you\'ll get it to work eventually, however don\'t count on it. It '
@@ -193,11 +193,11 @@ def generate_love_level():
     for x in range(2,6):
         yield value
 
-    value={ \
-        'titles':( \
+    valu = { 
+        'titles' : (
             f'{BUILTIN_EMOJIS["purple_heart"]:e} You two seem like casual friends {BUILTIN_EMOJIS["purple_heart"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'The chance of this relationship working is not very high. You both '
             'need to put time and effort into this relationship, if you want it '
             'to work out well for both of you. Talk with each other about '
@@ -209,11 +209,11 @@ def generate_love_level():
     for x in range(6,21):
         yield value
 
-    value={ \
-        'titles':( \
+    valu = { 
+        'titles' : (
             f'{BUILTIN_EMOJIS["heartpulse"]:e} You seem like you are good friends {BUILTIN_EMOJIS["heartpulse"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'The chance of this relationship working is not very high, but its '
             'not that low either. If you both want this relationship to work, '
             'and put time and effort into it, meaning spending time together, '
@@ -225,11 +225,11 @@ def generate_love_level():
         yield value
 
 
-    value={ \
+    valu = { 
         'titles':(
             f'{BUILTIN_EMOJIS["cupid"]:e} You two are really close aren\'t you? {BUILTIN_EMOJIS["cupid"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'Your relationship has a reasonable amount of working out. But do '
             'not overestimate yourself there. Your relationship will suffer '
             'good and bad times. Make sure to not let the bad times destroy '
@@ -241,11 +241,11 @@ def generate_love_level():
     for x in range(31,46):
         yield value
     
-    value={ \
-        'titles':( \
+    valu = { 
+        'titles' : (
             f'{BUILTIN_EMOJIS["heart"]:e} So when will you two go on a date? {BUILTIN_EMOJIS["heart"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'Your relationship will most likely work out. It won\'t be perfect '
             'and you two need to spend a lot of time together, but if you keep '
             'on having contact, the good times in your relationship will '
@@ -256,11 +256,11 @@ def generate_love_level():
     for x in range(46,61):
         yield value
 
-    value={ \
-        'titles':( \
+    valu = { 
+        'titles' : (
             f'{BUILTIN_EMOJIS["two_hearts"]:e} Aww look you two fit so well together {BUILTIN_EMOJIS["two_hearts"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'Your relationship will most likely work out well. Don\'t hesitate '
             'on making contact with each other though, as your relationship '
             'might suffer from a lack of time spent together. Talking with '
@@ -271,12 +271,12 @@ def generate_love_level():
     for x in range(61,86):
         yield value
 
-    value={ \
-        'titles':( \
+    valu = { 
+        'titles' : (
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Love is in the air {BUILTIN_EMOJIS["sparkling_heart"]:e}',
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Planned your future yet? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'Your relationship will most likely work out perfect. This '
             'doesn\'t mean thought that you don\'t need to put effort into it. '
             'Talk to each other, spend time together, and you two won\'t have '
@@ -287,12 +287,12 @@ def generate_love_level():
     for x in range(86,96):
         yield value
 
-    value={ \
-        'titles':( \
+    valu = { 
+        'titles' : (
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} When will you two marry? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Now kiss already {BUILTIN_EMOJIS["sparkling_heart"]:e}',
                 ),
-        'text':( \
+        'text' : (
             'You two will most likely have the perfect relationship. But don\'t '
             'think that this means you don\'t have to do anything for it to '
             'work. Talking to each other and spending time together is key, '
@@ -315,12 +315,12 @@ async def love(client,message,target):
     percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
     element=LOVE_VALUES[percent]
     
-    embed=Embed( \
+    embed=Embed(
         choice(element['titles']),
         f'{source:f} {BUILTIN_EMOJIS["heart"]:e} {target:f} scored {percent}%!',
         Color.d_magenta,
             )
-    embed.fields.append(Embed_field('My advice:',element['text']))
+    embed.add_field('My advice:',element['text'])
 
     await client.message_create(message.channel,embed=embed)
 
@@ -358,8 +358,8 @@ def update_about(client):
         'Power level: over 9000!\n',
             ])
     embed=Embed('About',text,0x5dc66f)
-    embed.thumbnail=Embed_thumbnail(client.application.icon_url_as(size=128))
-    ABOUT.embed=rendered_embed(embed)
+    embed.add_thumbnail(client.application.icon_url_as(size=128))
+    ABOUT.embed=embed
     ABOUT.ready=True
 
 

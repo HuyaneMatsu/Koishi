@@ -120,6 +120,76 @@ WALL_W,     CE_FLOOR,   FLOOR,      OBJECT_U,   BOX,        TARGET,     WALL_E,
 WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      FLOOR,      WALL_E,
 NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
 
+1,          1,          1,          7,          22,         14,
+WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
+WALL_W,     OBJECT_U,   FLOOR,      OBJECT_U,   FLOOR,      TARGET,     WALL_E,
+WALL_W,     FLOOR,      BOX,        HOLE_U,     FLOOR,      FLOOR,      WALL_E,
+WALL_W,     CS_FLOOR,   FLOOR,      HOLE_U,     BOX,        FLOOR,      WALL_E,
+WALL_W,     FLOOR,      FLOOR,      OBJECT_U,   FLOOR,      FLOOR,      WALL_E,
+NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
+
+1,          1,          1,          5,          8,          18,
+WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
+WALL_W,     OBJECT_U,   FLOOR,      CS_FLOOR,   WALL_E,
+WALL_W,     OBJECT_U,   BOX,        FLOOR,      WALL_E,
+WALL_W,     OBJECT_U,   FLOOR,      BOX,        WALL_E,
+WALL_W,     OBJECT_U,   HOLE_U,     FLOOR,      WALL_E,
+WALL_W,     OBJECT_U,   BOX,        OBJECT_U,   WALL_E,
+WALL_W,     FLOOR,      FLOOR,      FLOOR,      WALL_E,
+WALL_W,     TARGET,     FLOOR,      HOLE_U,     WALL_E,
+NOTHING,    WALL_S,     WALL_S,     WALL_S,     NOTHING,
+
+1,          1,          2,          8,          49,         31,
+NOTHING,    WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
+WALL_W,     WALL_N,     OBJECT_U,   FLOOR,      FLOOR,      FLOOR,      FLOOR,      WALL_E,
+WALL_W,     OBJECT_U,   OBJECT_U,   FLOOR,      FLOOR,      BOX,        FLOOR,      WALL_E,
+WALL_W,     TARGET,     FLOOR,      FLOOR,      OBJECT_U,   BOX,        FLOOR,      WALL_E,
+WALL_W,     FLOOR,      OBJECT_U,   OBJECT_U,   OBJECT_U,   FLOOR,      OBJECT_U,   WALL_E,
+WALL_W,     FLOOR,      FLOOR,      FLOOR,      FLOOR,      FLOOR,      TARGET,     WALL_E,
+WALL_W,     CN_FLOOR,   FLOOR,      OBJECT_U,   OBJECT_U,   OBJECT_U,   OBJECT_U,   WALL_E,
+NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
+
+1,          1,          2,          7,          24,         18,
+WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,     NOTHING,
+WALL_W,     FLOOR,      FLOOR,      FLOOR,      OBJECT_U,   WALL_N,     WALL_E,
+WALL_W,     HOLE_U,     OBJECT_U,   BOX,        FLOOR,      OBJECT_U,   WALL_E,
+WALL_W,     TARGET,     FLOOR,      CS_FLOOR,   BOX,        FLOOR,      WALL_E,
+WALL_W,     OBJECT_U,   FLOOR,      BOX,        OBJECT_U,   FLOOR,      WALL_E,
+NOTHING,    WALL_SW,    OBJECT_U,   FLOOR,      FLOOR,      TARGET,     WALL_E,
+NOTHING,    NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
+
+1,          1,          3,          7,          29,         35
+WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
+WALL_W,     TARGET,     FLOOR,      FLOOR,      FLOOR,      TARGET,     WALL_E,
+WALL_W,     FLOOR,      FLOOR,      OBJECT_U,   OBJECT_U,   OBJECT_U,   WALL_E,
+WALL_W,     FLOOR,      BOX,        FLOOR,      BOX,        FLOOR,      WALL_E,
+WALL_W,     CS_FLOOR,   FLOOR,      BOX,        OBJECT_U,   FLOOR,      WALL_E,
+WALL_W,     OBJECT_U,   OBJECT_U,   FLOOR,      FLOOR,      TARGET,     WALL_E,
+NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
+
+1,          1,          2,          8,          57,         36,
+NOTHING,    NOTHING,    WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
+WALL_W,     WALL_N,     WALL_N,     OBJECT_U,   FLOOR,      FLOOR,      FLOOR,      WALL_E,
+WALL_W,     OBJECT_U,   OBJECT_U,   OBJECT_U,   FLOOR,      OBJECT_U,   FLOOR,      WALL_E,
+WALL_W,     FLOOR,      FLOOR,      FLOOR,      BOX,        FLOOR,      FLOOR,      WALL_E,
+WALL_W,     FLOOR,      FLOOR,      FLOOR,      OBJECT_U,   FLOOR,      FLOOR,      WALL_E,
+WALL_W,     TARGET,     OBJECT_U,   BOX,        OBJECT_U,   OBJECT_U,   OBJECT_U,   WALL_E,
+WALL_W,     FLOOR,      FLOOR,      FLOOR,      HOLE_U,     BOX,        TARGET,     WALL_E,
+WALL_W,     CN_FLOOR,   FLOOR,      FLOOR,      OBJECT_U,   OBJECT_U,   OBJECT_U,   WALL_E,
+NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
+
+1,          1,          2,          8,          45,         36,
+WALL_W,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_N,     WALL_E,
+WALL_W,     BOX,        OBJECT_U,   FLOOR,      FLOOR,      HOLE_U,     OBJECT_U,   WALL_E,
+WALL_W,     FLOOR,      BOX,        OBJECT_U,   FLOOR,      FLOOR,      FLOOR,      WALL_E,
+WALL_W,     FLOOR,      FLOOR,      BOX,        OBJECT_U,   TARGET,     FLOOR,      WALL_E,
+WALL_W,     FLOOR,      FLOOR,      FLOOR,      BOX,        HOLE_U,     FLOOR,      WALL_E,
+WALL_W,     TARGET,     FLOOR,      FLOOR,      FLOOR,      CN_FLOOR,   OBJECT_U,   WALL_E,
+NOTHING,    WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     WALL_S,     NOTHING,
+
+
+
+
 
 
 

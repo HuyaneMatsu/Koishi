@@ -24,7 +24,7 @@ from hata.activity import activity_game
 from hata.others import (filter_content,from_json,to_json,
     parse_oauth2_redirect_url,cchunkify,chunkify)
 from hata.channel import cr_pg_channel_object,Channel_text,Channel_private,Message_iterator
-from hata.embed import Embed,Embed_field,Embed_footer
+from hata.embed import Embed
 from hata.events import (
     pagination,bot_reaction_waitfor,bot_message_event,wait_for_message,
     wait_for_emoji,prefix_by_guild,bot_reaction_delete_waitfor,cooldown,
@@ -239,7 +239,6 @@ async def typing(self,channel,user,timestamp):
             channel_q.appendleft(typing_counter(user,timestamp),)
             return
         
-
     index=ln-1
     duration=0
     found=0
@@ -332,7 +331,7 @@ class commit_extractor:
                 )
             
         webhook_name = embed.author.name
-        webhook_avatar_url = embed.author.proxy_icon
+        webhook_avatar_url = embed.author.proxy_icon_url
 
         if needs_unlock:
             try:
@@ -492,37 +491,11 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             await client.message_create(message.channel,'Pls turn on private messages from this server!')
 
     @on_command
-    async def clear(client,message,content):
-        guild=message.guild
-        if guild is None:
-            return
-        
-        if not guild.permissions_for(message.author).can_administrator:
-            return
-            
-        channel=message.channel
-        author=message.author
-        content=filter_content(content)
-        
-        if not content:
-            limit=100
-        elif content[0].isdigit():
-            limit=int(content[0])
-            if limit<=0:
-                return
-        else:
-            await client.message_create(channel,'Excepted int or nothing.')
-            return
-            
-        messages=[]
-        async for message in Message_iterator(client,message.channel):
-            messages.append(message)
-            limit-=1
-            if limit:
-                continue
-            break
-
-        await client.message_delete_multiple(messages,reason=f'Called by {author:f}')
+    @content_parser('condition, flags=g, default="not message.channel.permissions_for(message.author).can_manage_messages"',
+                    'int, default=1',
+                    'rest, default="f\'{message.author:f} asked for it\'"')
+    async def clear(client,message,limit,reason):
+        await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
 
     MAGIC_PATTERN=re.compile('.*?(p[lw][sz]|p[lw]ea[sz]e|desu|kudasai)[\.\!]*?',re.I)
 
@@ -751,7 +724,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                 embed_length+=len(reason)+len(name)
                 if embed_length>7900:
                     break
-                embed.fields.append(Embed_field(name,reason))
+                embed.add_field(name,reason)
                 field_count+=1
                 if field_count==25:
                     break
@@ -768,7 +741,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         while True:
             embed=embeds[index]
             index+=1
-            embed.footer=Embed_footer(f'Page: {index}/{embed_ln}. Bans {field_count+1}-{field_count+len(embed.fields)}/{limit}')
+            embed.add_footer(f'Page: {index}/{embed_ln}. Bans {field_count+1}-{field_count+len(embed.fields)}/{limit}')
             field_count+=len(embed.fields)
             
             result.append({'embed':embed})

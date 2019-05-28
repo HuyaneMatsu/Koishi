@@ -38,7 +38,6 @@ guild2_id=388267636661682178
 '''
 UNLIMITED  :
     reaction_users
-    message_delete
     message_logs
     message_get
     download_attachment
@@ -268,10 +267,20 @@ members     :
     
 group       : guild_user_get
 limit       : 5
-reset       : 2
+reset       : 2s
 limited by  : global
 members:
     guild_user_get
+
+group       : message_delete 
+case 1      : newer than 2 week or own
+    limit   : 3
+    reset   : 2s
+case 2      : older than 2 week and not own
+    limit   : 30
+    reset   : 120s
+members     :
+    message_delete
 '''
 
 def parsedate_to_datetime(data):
@@ -1418,7 +1427,7 @@ async def ratelimit_test0022(client,message,content):
     await sleep(5.,loop)
     loop.create_task(message_create(client,channel1,'test'))
     loop.create_task(message_delete(client,message1))
-    # - is message_create limited with message_delete
+    #message_create limited is not limited with message_delete
 
 @ratelimit_commands
 async def ratelimit_test0023(client,message,content):
@@ -3017,3 +3026,23 @@ async def ratelimit_test0154(client,message,content):
     loop.create_task(guild_user_get(client,guild1,user1_id))
     loop.create_task(guild_user_get(client,guild2,user1_id))
     #limited globally
+
+@ratelimit_commands
+async def ratelimit_test155(client,message,content):
+    if message.author is not client.owner:
+        return
+    messages = await client.messages_till_index(message.channel)
+    for message in messages:
+        await message_delete(client,message)
+
+    #message_delete ratelimit is known only after the first request
+
+@ratelimit_commands
+async def ratelimit_test0156(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    for _ in range(10):
+        data = await guild_roles(client,guild1)
+    #guild_roles is UNLIMITED #just a check for making sure about the others

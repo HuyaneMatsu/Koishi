@@ -5,7 +5,7 @@ from hata.events import waitfor_wrapper,wait_and_continue
 from hata.others import filter_content,is_user_mention
 from hata.futures import wait_one,CancelledError,wait_more,future_or_timeout,sleep
 from hata.emoji import BUILTIN_EMOJIS
-from hata.embed import Embed,Embed_footer,Embed_author
+from hata.embed import Embed
 from hata.exceptions import Forbidden,HTTPException
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
@@ -400,7 +400,7 @@ class user_profile:
             ''']
         text.extend(render_map(self.data,SHIP_VALUES))
         embed=Embed('','\n'.join(text),0x010101)
-        embed.author=Embed_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
+        embed.add_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
         
         text.clear()
         if sum(self.ships_left):
@@ -417,7 +417,7 @@ class user_profile:
             text.append(', '.join(sub_text))
             text.append(' ship is left to place. ')
         text.append(self.text)
-        embed.footer=Embed_footer(''.join(text))
+        embed.add_footer(''.join(text))
         return embed
 
     def render_state_1(self):
@@ -428,11 +428,10 @@ class user_profile:
         else:
             text.append('**It is your opponent\'s turn!**')
         
-        text.append('''
-            Type "new" to show this message up again.'
-            Type "A-J" "1-10" to torpedo a ship.'
-            If you hit your opponent, then it is your turn again.'
-            ''',)
+        text.append(
+            'Type "new" to show this message up again.'
+            'Type "A-J" "1-10" to torpedo a ship.'
+            'If you hit your opponent, then it is your turn again.',)
 
         if self.page:
             text.append('**Your opponents ship:**')
@@ -444,8 +443,8 @@ class user_profile:
             footer=f'You have {sum(self.ships_left)} ships left on {len(self.ship_positions)} tiles. {self.text}'
 
         embed=Embed('','\n'.join(text),0x010101)
-        embed.author=Embed_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
-        embed.footer=Embed_footer(footer)
+        embed.add_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
+        embed.add_footer(footer)
         return embed
 
     def render_state_2(self):
@@ -464,8 +463,8 @@ class user_profile:
             text.extend(render_map(self.data,SHIP_VALUES))
                 
         embed=Embed('','\n'.join(text),0x010101)
-        embed.author=Embed_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
-        embed.footer=Embed_footer(self.text)
+        embed.add_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
+        embed.add_footer(self.text)
         return embed
 
 class battleships_game:

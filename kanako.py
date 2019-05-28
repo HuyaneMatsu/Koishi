@@ -8,7 +8,7 @@ from hata.exceptions import Forbidden,HTTPException
 from hata.emoji import BUILTIN_EMOJIS
 from hata.events import waitfor_wrapper
 from hata.color import Color
-from hata.embed import Embed,rendered_embed,Embed_field,Embed_image,Embed_footer
+from hata.embed import Embed
 from io import BytesIO
 from PIL import Image as PIL
 from PIL.ImageDraw import ImageDraw
@@ -99,7 +99,7 @@ def render_showcase(name,map_):
         if page_index>page_limit:
             break
         embed=Embed(name.capitalize(),'',COLOR)
-        embed.footer=Embed_footer(f'page {page_index} / {page_limit}')
+        embed.add_footer(f'page {page_index} / {page_limit}')
         
         for _ in range(((element_limit%30)+9)//10 if page_index==page_limit else 3):
             field_index_limit=element_index+10
@@ -111,10 +111,10 @@ def render_showcase(name,map_):
                 element_index+=1
                 field_text.append(f'{element_index}.: **{element[0]} - {element[1]}**')
 
-            embed.fields.append(Embed_field(f'{element_index-9} - {element_index}','\n'.join(field_text),inline=True))
+            embed.add_field(f'{element_index-9} - {element_index}','\n'.join(field_text),inline=True)
             field_text.clear()
             
-        result.append(rendered_embed(embed))
+        result.append(embed)
         page_index+=1
 
     return result
@@ -257,8 +257,8 @@ class kanako_game:
         answers=self.answers
         buffer=ASBytesIO()
         embed=Embed(color=COLOR)
-        embed.image=Embed_image('attachment://guessme.png')
-        embed.footer=Embed_footer('')
+        embed.add_image('attachment://guessme.png')
+        embed.add_footer('')
         time_till_notify=CIRCLE_TIME-10
         
         for index,(question,answer) in enumerate(self.map,1):
@@ -473,18 +473,18 @@ class game_statistics():
             total-=(((2**.5)-1.)-((((CIRCLE_TIME+lose_median)/CIRCLE_TIME)**.5)-1.))*lose_count*2.
             total-=lose_first/2.5
             
-            embed.fields.append(Embed_field(f'{user:f} :',
+            embed.add:field(f'{user:f} :',
                 f'Correct answers : {win_count}\n'
                 f'Bad answers : {lose_count}\n'
                 f'Good answer time median : {win_median:.2f} s\n'
                 f'Bad answer time median : {lose_median:.2f} s\n'
                 f'Answered first: {win_first} GOOD / {lose_first} BAD\n'
                 f'Raited : {total:.2f}'
-                    ))
+                    )
 
-        embed.footer=Embed_footer(f'Page 1 /  {len(self.cache)}')
+        embed.add_footer(f'Page 1 /  {len(self.cache)}')
         
-        self.cache[0]=rendered_embed(embed)
+        self.cache[0]=embed
 
     def __getitem__(self,index):
         page=self.cache[index]
@@ -512,14 +512,13 @@ class game_statistics():
                 value,time=element.answers[user_index]
                 shard.append(f'\n{"+" if element.answer==value else "-"} {user:f} : {value} ( {time:.2f} s )')
             shard.append('\n```')
-            embed.fields.append(Embed_field(f'{question_index}.: {element.question} - {element.answer}',''.join(shard)))
+            embed.add_field(f'{question_index}.: {element.question} - {element.answer}',''.join(shard))
             shard.clear()
         
-        embed.footer=Embed_footer(f'Page {index+1} /  {len(self.cache)}')
+        embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
 
-        result=rendered_embed(embed)
-        self.cache[index]=result
-        return result
+        self.cache[embed]=embed
+        return embed
 
 @content_parser('str, flags=g, default="\'\'"',
                 'condition, flags=r, default="index==limit"',

@@ -34,44 +34,44 @@ async def voice(client,message,content):
                     voice_client.volume=amount/100.
                     text=f'{text}; Volume set to {amount}%'
             break
-        elif key=='pause':
+        if key=='pause':
             voice_client=client.voice_client_for(message)
-            if voice_client:
+            if voice_client is None:
+                text='There is no voice client at your guild'
+            else:
                 voice_client.pause()
                 text='Voice paused.'
-            else:
-                text='There is no voice client at your guild'
             break
-        elif key=='stop':
+        if key=='stop':
             voice_client=client.voice_client_for(message)
-            if voice_client:
+            if voice_client is None:
+                text='There is no voice client at your guild'
+            else:
                 voice_client.stop()
                 text='Voice stopped'
-            else:
-                text='There is no voice client at your guild'
             break
-        elif key=='resume':
+        if key=='resume':
             voice_client=client.voice_client_for(message)
-            if voice_client:
+            if voice_client is None:
+                text='There is no voice client at your guild'
+            else:
                 voice_client.resume()
                 text='Voice resumed'
-            else:
-                text='There is no voice client at your guild'
             break
-        elif key=='leave':
+        if key=='leave':
             voice_client=client.voice_client_for(message)
-            if voice_client:
+            if voice_client is None:
+                text='There is no voice client at your guild'
+            else:
                 await voice_client.disconnect()
                 text=f'{client.name} disconnects, bai bai nya!'
-            else:
-                text='There is no voice client at your guild'
             break
-        elif key=='play':
+        if key=='play':
             if not player.youtube_dl:
                 text='You need to install youtube_dl 1st!'
                 break
             voice_client=client.voice_client_for(message)
-            if not voice_client:
+            if voice_client is None:
                 text='There is no voice client at your guild'
                 break
             if not content:
@@ -100,9 +100,9 @@ async def voice(client,message,content):
                 else:
                     text=f'Added to queue {source.title}!'
             break
-        elif key=='volume':
+        if key=='volume':
             voice_client=client.voice_client_for(message)
-            if not voice_client:
+            if voice_client is None:
                 text='There is no voice client at your guild'
                 break
             if not content:
@@ -120,9 +120,9 @@ async def voice(client,message,content):
             voice_client.volume=amount/100.
             text=f'Volume set to {amount}%'
             break
-        elif key=='skip':
+        if key=='skip':
             voice_client=client.voice_client_for(message)
-            if not voice_client:
+            if voice_client is None:
                 text='There is no voice client at your guild'
                 break
             if not voice_client.player:
@@ -130,7 +130,7 @@ async def voice(client,message,content):
             text=f'Skipping: {voice_client.player.source.title}'
             voice_client.skip()
             break
-        elif key=='move':
+        if key=='move':
             if content:
                 name=content[0]
                 channel=guild.get_channel(name)
@@ -148,14 +148,32 @@ async def voice(client,message,content):
                 channel=state.channel
             
             voice_client=client.voice_client_for(message)
-            if voice_client:
+            if voice_client is None:
+                voice_client = await client.join_voice_channel(channel)
+            else:
                 #client.join_voice_channel works too, if u wanna move, but this is an option too
                 await voice_client.move_to(message.channel)
-            else:
-                voice_client = await client.join_voice_channel(channel)
             text=f'Joined channel: {channel.name}.'
             break
+        if key=='partyisover':
+            voice_client=client.voice_client_for(message)
+            if voice_client is None:
+                text='I dont see any parties arround me.'
+                break
+            
+            if guild.permissions_for(message.author).can_move_users and guild.permissions_for(client).can_move_users:
+                channel=voice_client.channel
+                for state in guild.voice_states.values():
+                    if state.channel is channel and state.user is not client:
+                        client.loop.create_task(client.user_voice_kick(state.user,guild))
+                client.loop.create_task(voice_client.disconnect())
+                return
+            
+            text='Missing permissions.'
+            break
+
         break
+
     if text:
         message = await client.message_create(message.channel,text)
         await sleep(30.,client.loop)
