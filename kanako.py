@@ -307,8 +307,7 @@ class kanako_game:
 
         game_statistics(self)
     
-    async def __call__(self,args):
-        message=args[0]
+    async def __call__(self,message):
         if message.author not in self.users or self.waiter.done() or message.author.id in self.answers or len(message.content)>4:
             return
         
@@ -473,7 +472,7 @@ class game_statistics():
             total-=(((2**.5)-1.)-((((CIRCLE_TIME+lose_median)/CIRCLE_TIME)**.5)-1.))*lose_count*2.
             total-=lose_first/2.5
             
-            embed.add:field(f'{user:f} :',
+            embed.add_field(f'{user:f} :',
                 f'Correct answers : {win_count}\n'
                 f'Bad answers : {lose_count}\n'
                 f'Good answer time median : {win_median:.2f} s\n'
@@ -517,7 +516,7 @@ class game_statistics():
         
         embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
 
-        self.cache[embed]=embed
+        self.cache[index]=embed
         return embed
 
 @content_parser('str, flags=g, default="\'\'"',
@@ -680,10 +679,9 @@ class embedination:
         wrapper.target = await self.task
         
 
-    async def __call__(self,wrapper,args):
+    async def __call__(self,wrapper,emoji,user):
         if self.task is not None:
             return
-        emoji,user=args
         client=wrapper.client
         message=wrapper.target
         while True:

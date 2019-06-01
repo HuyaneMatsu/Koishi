@@ -16,7 +16,8 @@ try:
     from bs4 import BeautifulSoup
 except ImportError:
     BeautifulSoup=None
-    
+
+from hata.dereaddons_local import inherit
 from hata import Client,start_clients
 from hata.exceptions import Forbidden,HTTPException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
@@ -31,7 +32,7 @@ from hata.events import (
     waitfor_wrapper)
 from hata.futures import CancelledError,sleep
 from hata.prettyprint import pchunkify
-from hata.user import USERS
+from hata.user import USERS,User
 from hata.client_core import KOKORO,stop_clients,CLIENTS
 from hata.oauth2 import SCOPES
 from hata.events_compiler import content_parser
@@ -275,8 +276,7 @@ class commit_extractor:
         self.role=role
         self.color=color
 
-    async def __call__(self,args):
-        message=args[0]
+    async def __call__(self,message):
         webhook=self.webhook
         client=self.client
 
@@ -288,7 +288,7 @@ class commit_extractor:
         if ':master' not in embed.title:
             return
 
-        url=re.match('^\[`[a-zA-Z0-9]*\`]\(([^\)]*)\)',embed.description.splitlines()[-1]).groups()[0]
+        url=re.match('^\[`[\da-f]*`\]\((https://github.com/[^/]*/[^/]*/)commit',embed.description).group(1)+'commit/master'
         result = await client.download_url(url)
         soup=BeautifulSoup(result,'html.parser',from_encoding='utf-8')
         
@@ -355,6 +355,238 @@ class commit_extractor:
                 avatar_url=webhook_avatar_url
                     )
 
+@inherit(bot_message_event)
+class message_delete_waitfor():
+    __slots__=['__name__', 'waitfors']
+    def __init__(self):
+        self.__name__='message_delete'
+        self.waitfors={}
+
+    async def __call__(self,client,message):
+        try:
+            event=self.waitfors[message.channel.id]
+        except KeyError:
+            return
+        await event(message)
+
+class Channeller_v_del():
+    __slots__=['index', 'parent']
+    def __init__(self,parent):
+        self.parent=parent
+        self.index=0
+
+    @property
+    def target(self):
+        pairs=self.parent.pairs
+        index=self.index
+        if index>=len(pairs):
+            index=0
+        self.index=index+1
+
+        return pairs[index][0]
+
+    async def __call__(self,message):
+        nonwebhook=(Client,User)
+        if type(message.author) not in nonwebhook:
+            return
+
+        client=self.parent.client
+        source_channel=message.channel
+        
+        content     = message.clean_content
+        embed       = message.clean_embeds
+        file        = None if message.attachments is None else [attachment.name for attachment in message.attachments]
+        tts         = message.tts
+        name        = message.author.name_at(source_channel.guild)
+        #avatar_url  = message.author.avatar_url #cannot compare avatar urls.
+                
+        for channel,webhook in self.parent.pairs:
+            if channel is source_channel:
+                print('non client')
+                continue
+        
+            for message in channel.messages:
+                if type(message.author) in nonwebhook:
+                    continue
+                if (name        != message.author.name_at(webhook.guild) or \
+                    #avatar_url  != message.author.avatar_url or \
+                    content     != message.clean_content or \
+                    file        != (None if message.attachments is None else [attachment.name for attachment in message.attachments]) or \
+                    embed       != message.clean_embeds or \
+                    tts         != message.tts \
+                        ):
+                    print(name,message.author.name_at(webhook.guild),'\n',content, message.clean_content,'\n', embed, message.clean_embeds, '\n', tts,message.tts)
+                    continue
+                print('deleting?',message.id)
+                client.loop.create_task(client.message_delete(message))
+                break
+                    
+class Channeller():
+    __slots__=['client', 'deleter', 'index', 'pairs']
+    def __init__(self,client,pairs):
+        self.client=client
+        self.pairs=pairs
+        self.deleter=deleter=Channeller_v_del(self)
+        self.index=0
+        
+        event_1=client.events.message_create
+        event_2=client.events.message_delete
+        for pair in pairs:
+            event_1.append(self)
+            event_2.append(deleter)
+            CHANNELINGS[pair[0].id]=self
+
+    def cancel(self,channel):
+        event_1=self.client.events.message_create
+        event_2=self.client.events.message_delete
+        pairs=self.pairs
+        deleter=self.deleter
+        if channel is None:
+            pass
+        elif len(pairs)<3:
+            for pair in pairs:
+                del CHANNELINGS[pair[0].id]
+        else:
+            for index,pair in enumerate(pairs):
+                if pair[0] is channel:
+                    break
+            self.index=index
+            deleter.index=index
+            event_1.remove(self)
+            event_2.remove(deleter)
+            del CHANNELINGS[channel[1][0].id]
+            return
+
+        for pair in pairs:
+            event_1.remove(self)
+            event_2.remove(deleter)
+            
+        deleter.parent=None
+        self.deleter=None
+        
+    @property
+    def target(self):
+        pairs=self.pairs
+        index=self.index
+        if index>=len(pairs):
+            index=0
+        self.index=index+1
+
+        return pairs[index][0]
+    
+    async def __call__(self,message):
+        if type(message.author) not in (Client,User):
+            return
+
+        client=self.client
+        
+        attachments=message.attachments
+        if attachments is None:
+            files=None
+        else:
+            files=[]
+            for attachment in attachments:
+                file = await client.download_attachment(attachment)
+                files.append((attachment.name,file))
+
+        source_channel=message.channel
+        
+        for channel,webhook in self.pairs:
+            if channel is source_channel:
+                continue
+            client.loop.create_task(
+                client.webhook_send(webhook,
+                    content     = message.clean_content,
+                    embed       = message.clean_embeds,
+                    file        = files,
+                    tts         = message.tts,
+                    name        = message.author.name_at(webhook.guild),
+                    avatar_url  = message.author.avatar_url,
+                        )
+                    )
+
+CHANNELINGS={}
+
+@content_parser('condition, default="message.author is not client.owner"',
+                'int, flags="g"',)
+async def channeling_start(client,message,channel_id):
+    channel_1=message.channel
+    while True:
+        permission=channel_1.permissions_for(client)
+        if not (permission.can_manage_webhooks and permission.can_manage_messages):
+            text='I have no permission at this channel to invoke this command!'
+            break
+
+        try:
+            channel_2=client.channels[channel_id]
+        except KeyError:
+            text=f'Unknown channel : {channel_id}'
+            break
+        
+        if channel_1 is channel_2:
+            text='Same channel...'
+            break
+        
+        permission=channel_2.permissions_for(client)
+        if not (permission.can_manage_webhooks and permission.can_manage_messages):
+            text='I have no permission at that channel to invoke this command!'
+            break
+
+        channeling_1=CHANNELINGS.get(channel_1.id,None)
+        channeling_2=CHANNELINGS.get(channel_2.id,None)
+        
+        if channeling_1 is not None and channeling_2 is not None and channeling_1 is channeling_2:
+            text='This connection is already set up'
+            break
+
+        pairs=[]
+        if channeling_1 is None:
+            webhooks = await client.webhook_get_channel(channel_1)
+            if webhooks:
+                webhook=webhooks[0]
+            else:
+                webhook = await client.webhook_create(channel_1,'Love You')
+            pairs.append((channel_1,webhook,),)
+        else:
+            channeling_1.cancel(None)
+            pairs.extend(channeling_1.pairs)
+
+        if channeling_2 is None:
+            webhooks = await client.webhook_get_channel(channel_2)
+            if webhooks:
+                webhook=webhooks[0]
+            else:
+                webhook = await client.webhook_create(channel_2,'Love You')
+            pairs.append((channel_2,webhook,),)
+        else:
+            channeling_2.cancel(None)
+            pairs.extend(channeling_2.pairs)
+
+
+        Channeller(client,pairs)
+        text=f'Channelling between `{channel_1.guild}/{channel_1}` and `{channel_2.guild}/{channel_2}`'
+        break
+    
+    await client.message_create(channel_1,text)
+    
+async def channeling_stop(client,message,content):
+    if message.author is not client.owner:
+        return
+    channel=message.channel
+    while True:
+        try:
+            channeller=CHANNELINGS[channel.id]
+        except KeyError:
+            text='There is no active channeller at this channel'
+            break
+
+        channeller.cancel(channel)
+        text='Success'
+        break
+
+    await client.message_create(channel,text)
+    
+    
 @Koishi.events
 async def ready(client):
     print(f'{client:f} ({client.id}) logged in')
@@ -364,6 +596,7 @@ async def ready(client):
     
 Koishi.events(bot_reaction_waitfor())
 Koishi.events(bot_reaction_delete_waitfor())
+Koishi.events(message_delete_waitfor())
 
 AOE2_S=Guild.precreate(564093916152856576)
 AOE2_S_role=Role.precreate(566693615544434706)
@@ -399,6 +632,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     on_command(kanako_manager,'kanako')
     on_command(ds_manager,'ds')
     on_command(_DS_modify_best)
+    on_command(channeling_start)
+    on_command(channeling_stop)
     
     @on_command
     async def default_event(client,message):
@@ -555,7 +790,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         channel = await client.channel_private_create(message.author)
         await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
 
-    mine_mine_clear=( \
+    mine_mine_clear = (
         BUILTIN_EMOJIS['white_large_square'].as_emoji,
         BUILTIN_EMOJIS['one'].as_emoji,
         BUILTIN_EMOJIS['two'].as_emoji,
@@ -1005,12 +1240,10 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         await client.message_create(message.channel,emoji.as_emoji)
 
     @on_command
-    @content_parser('int',
+    @content_parser('condition, default="message.author is not client.owner"',
+                    'int',
                     'channel, flags=mnig, default="message.channel"',)
     async def resend_webhook(client,message,message_id,channel):
-        if message.author is not client.owner:
-            return
-
         try:
             target_message = await client.message_get(channel,message_id)
         except Exception as err:
@@ -1024,8 +1257,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             embed=target_message.embeds,
             name=target_message.author.name,
             avatar_url=target_message.author.avatar_url)
-        
-    
+
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())

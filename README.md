@@ -25,6 +25,5 @@ Hata's requirements:
 Koishi requirements:
 - BeautifulSoup
 - sqlalchemy
-- sqlalchemy_aio
 - PIL
 

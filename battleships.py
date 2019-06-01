@@ -10,7 +10,7 @@ from hata.exceptions import Forbidden,HTTPException
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
 
-LINE_X_LEAD=''.join([ \
+LINE_X_LEAD=''.join( [
     BUILTIN_EMOJIS['black_large_square'].as_emoji,
     BUILTIN_EMOJIS['one'].as_emoji,
     BUILTIN_EMOJIS['two'].as_emoji,
@@ -24,7 +24,7 @@ LINE_X_LEAD=''.join([ \
     BUILTIN_EMOJIS['keycap_ten'].as_emoji,
         ])
 
-LINE_Y_LEAD=( \
+LINE_Y_LEAD = (
     BUILTIN_EMOJIS['regional_indicator_a'].as_emoji,
     BUILTIN_EMOJIS['regional_indicator_b'].as_emoji,
     BUILTIN_EMOJIS['regional_indicator_c'].as_emoji,
@@ -37,7 +37,7 @@ LINE_Y_LEAD=( \
     BUILTIN_EMOJIS['regional_indicator_j'].as_emoji,
         )
 
-SHIP_VALUES=( \
+SHIP_VALUES = (
     OCEAN,
     BUILTIN_EMOJIS['cruise_ship'].as_emoji,
     BUILTIN_EMOJIS['ferry'].as_emoji,
@@ -48,7 +48,7 @@ SHIP_VALUES=( \
     BUILTIN_EMOJIS['boom'].as_emoji,
         )
 
-HIDDEN_VALUES=( \
+HIDDEN_VALUES =(
     OCEAN,
     OCEAN,
     OCEAN,
@@ -355,8 +355,10 @@ class user_profile:
         
         self.last_switch=0.
         
-    async def __call__(self,args):
-        user,emoji=args
+    async def __call__(self,user,emoji):
+        if user is self.client:
+            return
+        
         now=time.time()
         if now<self.last_switch+1.2:
             return
@@ -811,8 +813,11 @@ class battleships_game:
         await other.process(True,text2)
         self.future.set_result(False)
     
-    async def __call__(self,args):
-        await self.process(args[0])
+    async def __call__(self,message):
+        if message.author is self.client:
+            return
+        
+        await self.process(message)
         
     def cancel(self):
         #self.target=self.player2.channel

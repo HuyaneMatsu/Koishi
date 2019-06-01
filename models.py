@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, BINARY, create_engine
+from hata.kokoro_sqlalchemy import KOKORO_STRATEGY
 
 BASE = declarative_base()
 DATABASE_NAME='sqlite:///_sqlite.db'
@@ -22,13 +23,12 @@ del DB_ENGINE
 
 
 #create future engine
-from sqlalchemy_aio import ASYNCIO_STRATEGY
-DB_ENGINE = create_engine(DATABASE_NAME,strategy=ASYNCIO_STRATEGY)
+
+DB_ENGINE = create_engine(DATABASE_NAME,strategy=KOKORO_STRATEGY)
 
 
 #clearing namespace
 del declarative_base
-del ASYNCIO_STRATEGY 
 del create_engine
 del Column
 del Integer

@@ -72,8 +72,8 @@ HELP['ping']=Embed(title='pong',color=HELP_COLOR,
 
 HELP['nitro']=Embed(title='emoji',color=HELP_COLOR,  
     description=(
-        'Type an emoji what I can use with my nitro. If I find it I will'
-        'send it'
+        'Type an emoji what I can use with my nitro. If I find it, I will '
+        'send it.'
             ))
 
 HELP['voice']=Embed(title='voice',color=HELP_COLOR,

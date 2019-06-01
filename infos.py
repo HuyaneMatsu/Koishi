@@ -28,7 +28,7 @@ class show_help:
     __async_call__=True
     def __init__(self,name):
         self.embed=HELP[name]
-    def __call__(self,client,message,args):
+    def __call__(self,client,message,*args):
         return client.message_create(message.channel,embed=self.embed)
 
 infos=eventlist()
