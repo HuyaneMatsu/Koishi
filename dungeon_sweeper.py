@@ -136,11 +136,9 @@ class ds_game:
         client.loop.create_task(self.start())
         
     async def start(self):
-
         async with DB_ENGINE.connect() as connector:
             result = await connector.execute(DS_TABLE.select(ds_model.user_id==self.user.id))
             stats = await result.fetchall()
-
         if stats:
             stats=stats[0]
             self.position=self.position_ori=stats.position

@@ -392,32 +392,31 @@ class Channeller_v_del():
 
         client=self.parent.client
         source_channel=message.channel
+        user=message.author
         
         content     = message.clean_content
         embed       = message.clean_embeds
         file        = None if message.attachments is None else [attachment.name for attachment in message.attachments]
         tts         = message.tts
-        name        = message.author.name_at(source_channel.guild)
         #avatar_url  = message.author.avatar_url #cannot compare avatar urls.
                 
         for channel,webhook in self.parent.pairs:
             if channel is source_channel:
-                print('non client')
                 continue
         
             for message in channel.messages:
                 if type(message.author) in nonwebhook:
                     continue
-                if (name        != message.author.name_at(webhook.guild) or \
+                if (user.name_at(webhook.guild) != message.author.name or \
                     #avatar_url  != message.author.avatar_url or \
                     content     != message.clean_content or \
                     file        != (None if message.attachments is None else [attachment.name for attachment in message.attachments]) or \
                     embed       != message.clean_embeds or \
                     tts         != message.tts \
                         ):
-                    print(name,message.author.name_at(webhook.guild),'\n',content, message.clean_content,'\n', embed, message.clean_embeds, '\n', tts,message.tts)
+                    
                     continue
-                print('deleting?',message.id)
+
                 client.loop.create_task(client.message_delete(message))
                 break
                     
