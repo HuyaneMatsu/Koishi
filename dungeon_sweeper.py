@@ -790,7 +790,7 @@ class stage_source:
         for rating in ('S','A','B','C','D','E'):
             if steps<=best:
                 break
-            best=best*1.2+2.
+            best=best*1.05+2.
         return rating
 
     @property

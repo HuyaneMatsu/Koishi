@@ -680,7 +680,7 @@ class embedination:
         
 
     async def __call__(self,wrapper,emoji,user):
-        if self.task is not None:
+        if self.task is not None or user.is_bot:
             return
         client=wrapper.client
         message=wrapper.target

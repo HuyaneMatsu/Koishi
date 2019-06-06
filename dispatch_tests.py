@@ -215,7 +215,7 @@ class dispatch_tester:
         result=[f'{user:f} {user.id} profile got edited at guild {guild.name!r} {guild.id}:']
         profile=user.guild_profiles[guild]
         for key,value in old.items():
-            if key in ('nick',):
+            if key in ('nick', 'premium_since'):
                 result.append(f'{key} changed: {value!r} -> {getattr(profile,key)!r}')
                 continue
             if key=='roles':
@@ -245,6 +245,17 @@ class dispatch_tester:
     async def channel_edit(self,client,channel,old):
         result=[f'A channel got edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
         for key,value in old.items():
+            if key in ('overwrites',):
+                removed,added=value
+                if removed:
+                    result.append(f'Removed {key}: ({len(removed)})')
+                    for value in removed:
+                        result.append(f'- {value.target!r} : {value.allow} {value.deny}')
+                if added:
+                    result.append(f'added {key}: ({len(removed)})')
+                    for value in added:
+                        result.append(f'- {value.target!r} : {value.allow} {value.deny}')
+                continue
             result.append(f'{key} changed: {value!r} -> {getattr(channel,key)!r}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
@@ -324,7 +335,10 @@ class dispatch_tester:
             return
         result=[f'A guild got edited {guild.name} {guild.id}']
         for key,value in old.items():
-            if key in ('name','icon','splash','user_count','afk_timeout','available'):
+            if key in ('name','icon','splash','user_count','afk_timeout',
+                    'available','has_animated_icon','description',
+                    'vanity_code','banner','max_members','max_presences',
+                    'premium_tier','sub_count'):
                 result.append(f' - {key} : {value} - > {getattr(guild,key)}')
                 continue
             if key in ('verification_level','message_notification','mfa','content_filter','region'):

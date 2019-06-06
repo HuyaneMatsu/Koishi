@@ -24,7 +24,7 @@ del DB_ENGINE
 
 #create future engine
 
-DB_ENGINE = create_engine(DATABASE_NAME,strategy=KOKORO_STRATEGY)
+DB_ENGINE = create_engine(DATABASE_NAME,strategy=KOKORO_STRATEGY,single_worker=True)
 
 
 #clearing namespace
