@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, BINARY, create_engine
+from sqlalchemy import Column, Integer, BINARY, create_engine, String
 from hata.kokoro_sqlalchemy import KOKORO_STRATEGY
 
 BASE = declarative_base()
@@ -15,6 +15,13 @@ class ds_model(BASE):
 
 DS_TABLE=ds_model.__table__
 
+class pefix_model(BASE):
+    __tablename__ = 'PREFIXES'
+    id          = Column(Integer,primary_key=True)
+    guild_id    = Column(Integer,unique = True)
+    prefix      = Column(String(32))
+
+PREFIX_TABLE=pefix_model.__table__
 
 #creating tables
 DB_ENGINE = create_engine(DATABASE_NAME)

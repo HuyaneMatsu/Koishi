@@ -6,9 +6,9 @@ import json
 from hata.parsers import eventlist
 from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
-from hata.others import time_left,Statuses,audit_log_events,cchunkify
-from hata.exceptions import Forbidden,HTTPException
-from hata.events import pagination
+from hata.others import elapsed_time,Status,Audit_log_event,cchunkify
+from hata.exceptions import DiscordException
+from hata.events import pagination,waitfor_wrapper
 from hata.events_compiler import content_parser
 from hata.embed import Embed
 from hata.emoji import BUILTIN_EMOJIS
@@ -37,28 +37,35 @@ infos=eventlist()
 @content_parser('user, flags="mna", default="message.author"')
 async def user_info(client,message,user):
     guild=message.guild
-    
-    text=[f'**User Information**\nCreated: {time_left(user)} ago\nProfile: {user:m}\nID: {user.id}']
+
+    embed=Embed(user.full_name)
+    embed.add_field('User Information',
+        f'Created: {elapsed_time(user.created_at)} ago\n'
+        f'Profile: {user:m}\n'
+        f'ID: {user.id}')
 
     try:
         profile=user.guild_profiles[guild]
     except KeyError:
         if user.avatar:
-            color=user.avatar&0xFFFFFF
+            embed.color=user.avatar&0xFFFFFF
         else:
-            color=user.default_avatar.color
+            embed.color=user.default_avatar.color
     else:
-        color=user.color(guild)
+        embed.color=user.color(guild)
         if profile.roles:
             roles=', '.join(role.mention for role in reversed(profile.roles))
         else:
             roles='none'
-        text.append('\n**In guild profile**')
+        text=[]
         if profile.nick is not None:
             text.append(f'Nick: {profile.nick}')
-        text.append(f'Joined: {time_left(profile)} ago\nRoles: {roles}')
-        
-    embed=Embed(f'{user:f}','\n'.join(text),color)
+        text.append(f'Joined: {elapsed_time(profile.joined_at)} ago')
+        if user.boosts is guild:
+            text.append(f'Booster since: {elapsed_time(user.boosts_since)}')
+        text.append(f'Roles: {roles}')
+        embed.add_field('In guild profile','\n'.join(text))
+    
     embed.add_thumbnail(user.avatar_url_as(size=128))
 
     await client.message_create(message.channel,embed=embed)
@@ -70,10 +77,10 @@ async def guild_info(client,message,content):
         return
 
     #most usual first
-    s_grey  = Statuses.offline
-    s_green = Statuses.online
-    s_yellow= Statuses.idle
-    s_red   = Statuses.dnd
+    s_grey  = Status.offline
+    s_green = Status.online
+    s_yellow= Status.idle
+    s_red   = Status.dnd
     
     v_grey  = 0
     v_green = 0
@@ -111,34 +118,40 @@ async def guild_info(client,message,content):
             channel_voice+=1
 
     if guild.features:
-        features=', '.join(feature.value for feature in guild.features)
+        features=', '.join(feature.name for feature in guild.features)
     else:
         features='none'
 
-    if guild.icon:
-        color=guild.icon&0xFFFFFF
-    else:
-        color=0
-        
-    embed=Embed('',
-        '**Guild information**\n'
-        f'Created: {time_left(guild)} ago\n'
+    embed=Embed(guild.name,color=guild.icon&0xFFFFFF if guild.icon else (guild.id>>22)&0xFFFFFF)
+    embed.add_field('Guild information',
+        f'Created: {elapsed_time(guild.created_at)} ago\n'
         f'Voice region: {guild.region}\n'
-        f'Features: {features}\n'
-        '\n'
-        '**Counts**\n'
+        f'Features: {features}\n')
+    embed.add_field('Counts',
         f'Users: {guild.user_count}\n'
         f'Roles: {len(guild.roles)}\n'
         f'Text channels: {channel_text}\n'
         f'Voice channels: {channel_voice}\n'
-        f'Category channels: {channel_category}\n'
-        '\n'
-        '**Users**\n'
+        f'Category channels: {channel_category}\n')
+    embed.add_field('Users',
         f'{BUILTIN_EMOJIS["green_heart"]:e} {v_green}\n'
         f'{BUILTIN_EMOJIS["yellow_heart"]:e} {v_yellow}\n'
         f'{BUILTIN_EMOJIS["heart"]:e} {v_red}\n'
-        f'{BUILTIN_EMOJIS["black_heart"]:e} {v_grey}\n'
-            ,color)
+        f'{BUILTIN_EMOJIS["black_heart"]:e} {v_grey}\n')
+
+    boosters=guild.boosters
+    if boosters:
+        emoji=BUILTIN_EMOJIS['gift_heart']
+        count=len(boosters)
+        to_render=count if count<21 else 21
+        
+        embed.add_field('Most awesome people of the guild',
+                        f'{to_render} {emoji:e} out of {count} {emoji:e}')
+
+        for user in boosters[:21]:
+            embed.add_field(user.full_name,
+                f'since: {elapsed_time(user.boosts_since)}',
+                inline=True)
     
     embed.add_thumbnail(guild.icon_url_as(size=128))
 
@@ -155,7 +168,7 @@ async def invites(client,message,guild,channel):
             invites = await client.invite_get_guild(guild)
         else:
             invites = await client.invite_get_channel(channel)
-    except Forbidden:
+    except DiscordException:
         return
     
     pages=[{'content':chunk} for chunk in pchunkify(invites,write_parents=False,show_code=False)]
@@ -178,7 +191,7 @@ def generate_love_level():
     for x in range(0,2):
         yield value
 
-    valu = { 
+    value = { 
         'titles' : (
             f'{BUILTIN_EMOJIS["blue_heart"]:e} A small acquaintance {BUILTIN_EMOJIS["blue_heart"]:e}',
                 ),
@@ -193,7 +206,7 @@ def generate_love_level():
     for x in range(2,6):
         yield value
 
-    valu = { 
+    value = { 
         'titles' : (
             f'{BUILTIN_EMOJIS["purple_heart"]:e} You two seem like casual friends {BUILTIN_EMOJIS["purple_heart"]:e}',
                 ),
@@ -209,7 +222,7 @@ def generate_love_level():
     for x in range(6,21):
         yield value
 
-    valu = { 
+    value = { 
         'titles' : (
             f'{BUILTIN_EMOJIS["heartpulse"]:e} You seem like you are good friends {BUILTIN_EMOJIS["heartpulse"]:e}',
                 ),
@@ -225,7 +238,7 @@ def generate_love_level():
         yield value
 
 
-    valu = { 
+    value = { 
         'titles':(
             f'{BUILTIN_EMOJIS["cupid"]:e} You two are really close aren\'t you? {BUILTIN_EMOJIS["cupid"]:e}',
                 ),
@@ -241,7 +254,7 @@ def generate_love_level():
     for x in range(31,46):
         yield value
     
-    valu = { 
+    value = { 
         'titles' : (
             f'{BUILTIN_EMOJIS["heart"]:e} So when will you two go on a date? {BUILTIN_EMOJIS["heart"]:e}',
                 ),
@@ -256,7 +269,7 @@ def generate_love_level():
     for x in range(46,61):
         yield value
 
-    valu = { 
+    value = { 
         'titles' : (
             f'{BUILTIN_EMOJIS["two_hearts"]:e} Aww look you two fit so well together {BUILTIN_EMOJIS["two_hearts"]:e}',
                 ),
@@ -271,7 +284,7 @@ def generate_love_level():
     for x in range(61,86):
         yield value
 
-    valu = { 
+    value = { 
         'titles' : (
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Love is in the air {BUILTIN_EMOJIS["sparkling_heart"]:e}',
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Planned your future yet? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
@@ -287,7 +300,7 @@ def generate_love_level():
     for x in range(86,96):
         yield value
 
-    valu = { 
+    value = { 
         'titles' : (
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} When will you two marry? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Now kiss already {BUILTIN_EMOJIS["sparkling_heart"]:e}',
@@ -388,12 +401,12 @@ async def logs(client,message,guild,*args):
             break
         for event_name in args:
             try:
-                event=audit_log_events.values[int(event_name)]
+                event=Audit_log_event.values[int(event_name)]
                 break
             except (KeyError,ValueError):
                 pass
             try:
-                event=getattr(audit_log_events,event_name.upper())
+                event=getattr(Audit_log_event,event_name.upper())
                 break
             except AttributeError:
                 continue
@@ -416,7 +429,7 @@ async def logs(client,message,guild,*args):
 async def message(client,message,message_id,channel):
     try:
         target_message = await client.message_get(channel,message_id)
-    except (Forbidden,HTTPException):
+    except DiscordException:
         await client.message_create(message.channel,'Acces denied or not existing message')
         return
     pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
@@ -429,8 +442,183 @@ async def message(client,message,message_id,channel):
 async def message_pure(client,message,message_id,channel):
     try:
         data = await client.http.message_get(channel.id,message_id)
-    except (Forbidden,HTTPException):
+    except DiscordException:
         await client.message_create(message.channel,'Access denied or not existing message')
         return
     
     pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
+
+
+class role_details():
+    __slots__=['cache','guild','roles']
+    def __init__(self,client,channel):
+        self.roles=list(reversed(channel.guild.roles))
+        self.cache=[None for _ in range(self.roles.__len__()+1)]
+        self.createpage0(channel.guild)
+        embedination_rr(client,channel,self)
+        
+    def __len__(self):
+        return self.cache.__len__()
+    
+    def createpage0(self,guild):
+        embed=Embed(f'Roles of **{guild.name}**:',
+            '\n'.join([role.mention for role in self.roles]),
+            color=guild.icon&0xFFFFFF if guild.icon else (guild.id>>22)&0xFFFFFF)
+        embed.add_footer(f'Page 1 /  {len(self.cache)}')
+        self.cache[0]=embed
+    
+    def __getitem__(self,index):
+        page=self.cache[index]
+        if page is None:
+            return self.create_page(index)
+        return page
+
+    def create_page(self,index):
+        role=self.roles[index-1]
+        embed=Embed(role.name,
+            '\n'.join([
+                f'id : {role.id!r}',
+                f'color : {role.color.as_html}',
+                f'permission number : {role.permissions}',
+                f'managed : {role.managed}',
+                f'separated : {role.separated}',
+                f'mentionable : {role.mentionable}',
+                '\nPermissions:\n```diff',
+                *(f'{"+" if value else "-"}{key}' for key,value in role.permissions.items()),
+                '```',
+                    ]),
+            color=role.color)
+        embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
+
+        self.cache[index]=embed
+        return embed
+
+class embedination_rr:
+    LEFT2   = BUILTIN_EMOJIS['rewind']
+    LEFT    = BUILTIN_EMOJIS['arrow_backward']
+    RIGHT   = BUILTIN_EMOJIS['arrow_forward']
+    RIGHT2  = BUILTIN_EMOJIS['fast_forward']
+    RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
+    CROSS   = BUILTIN_EMOJIS['x']
+    emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET,CROSS]
+    
+    __slots__=['cancel', 'channel', 'page', 'pages', 'task_flag']
+    def __init__(self,client,channel,pages):
+        self.pages=pages
+        self.page=0
+        self.channel=channel
+        self.cancel=type(self)._cancel
+        self.task_flag=0
+        
+        waitfor_wrapper(client,self,150.)
+        
+    async def start(self,wrapper):
+        client=wrapper.client
+
+        wrapper.event=client.events.reaction_add
+        wrapper.target=message = await client.message_create(self.channel,embed=self.pages[0])
+        message.weakrefer()
+        
+        if len(self.pages)>1:
+            for emoji in self.emojis:
+                await client.reaction_add(message,emoji)
+        else:
+            await client.reaction_add(message,self.CROSS)
+            
+    async def __call__(self,wrapper,emoji,user):
+        if user.is_bot:
+            return
+        
+        client=wrapper.client
+        message=wrapper.target
+
+        if self.task_flag:
+            if self.task_flag==1:
+                if emoji is self.CROSS:
+                    self.task_flag=2
+                elif emoji in self.emojis:
+                    client.loop.create_task(self.reaction_remove(client,message,emoji,user))
+            return
+        
+        while True:
+            if emoji is self.LEFT:
+                page=self.page-1
+                break
+            if emoji is self.RIGHT:
+                page=self.page+1
+                break
+            if emoji is self.RESET:
+                page=0
+                break
+            if emoji is self.CROSS:
+                self.task_flag=3
+                try:
+                    await client.message_delete(message)
+                except DiscordException:
+                    pass
+                return wrapper.cancel()
+            if emoji is self.LEFT2:
+                page=self.page-10
+                break
+            if emoji is self.RIGHT2:
+                page=self.page+10
+                break
+
+            return
+
+        client.loop.create_task(self.reaction_remove(client,message,emoji,user))
+
+        if page<0:
+            page=0
+        elif page>=len(self.pages):
+            page=len(self.pages)-1
+        
+        if self.page==page:
+            return
+
+        self.page=page
+        self.task_flag=1
+        try:
+            await client.message_edit(message,embed=self.pages[page])
+        except DiscordException:
+            self.task_flag=3
+            return wrapper.cancel()
+        else:
+            if self.task_flag==2:
+                self.task_flag=3
+                try:
+                    await client.message_delete(message)
+                except DiscordException:
+                    pass
+                return wrapper.cancel()
+            else:
+                self.task_flag=0
+
+        if wrapper.timeout<150.:
+            wrapper.timeout+=10.
+
+    @staticmethod
+    async def reaction_remove(client,message,emoji,user):
+        try:
+            await client.reaction_delete(message,emoji,user)
+        except DiscordException:
+            pass
+        
+    async def _cancel(self,wrapper,exception):
+        self.task_flag=3
+        if exception is None:
+            #we delete the message, so no need to remove reactions
+            return
+        if isinstance(exception,TimeoutError):
+            if self.channel.guild is not None:
+                try:
+                    await wrapper.client.reaction_clear(wrapper.target)
+                except DiscordException:
+                    pass
+            return
+
+@infos
+async def roles(client,message,content):
+    if message.guild is None:
+        return
+    role_details(client,message.channel)

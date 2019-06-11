@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from hata.exceptions import HTTPException,Forbidden
+from hata.exceptions import DiscordException
 from hata.parsers import EVENTS,default_event
 from hata.prettyprint import pchunkify,pretty_print
 from hata.events import pagination
-from hata.others import cchunkify,Statuses
+from hata.others import cchunkify,Status
 from hata.permission import PERM_KEYS
 
 class dispatch_tester:
@@ -16,13 +16,13 @@ class dispatch_tester:
         if message.channel is self.channel:
             try:
                 await client.message_create(message.channel,'Current channel removed')
-            except (HTTPException,Forbidden):
+            except DiscordException:
                 return
             self.channel=None
         else:
             try:
                 await client.message_create(message.channel,f'Channel set to {message.channel.name} {message.channel.id}')
-            except (HTTPException,Forbidden):
+            except DiscordException:
                 return
             self.channel=message.channel
             
@@ -43,13 +43,13 @@ class dispatch_tester:
         if actual is default_event:
             try:
                 await client.message_create(message.channel,'Event set')
-            except (HTTPException,Forbidden):
+            except DiscordException:
                 return
             setattr(client.events,content,event)
         else:
             try:
                 await client.message_create(message.channel,'Event removed')
-            except (HTTPException,Forbidden):
+            except DiscordException:
                 return
             setattr(client.events,content,default_event)
 
@@ -64,7 +64,7 @@ class dispatch_tester:
 
         try:
             await client.message_create(self.channel,'\n'.join(result))
-        except (HTTPException,Forbidden):
+        except DiscordException:
             self.channel=None
 
     @classmethod
@@ -159,7 +159,7 @@ class dispatch_tester:
             pass
         else:
             for key in ('desktop','mobile','web'):
-                result.append(f'- {key} status: {statuses.get(key,Statuses.offline)} -> {user.statuses.get(key,Statuses.offline)}')
+                result.append(f'- {key} status: {statuses.get(key,Status.offline)} -> {user.statuses.get(key,Status.offline)}')
 
             try:
                 status=old['status']
@@ -215,9 +215,10 @@ class dispatch_tester:
         result=[f'{user:f} {user.id} profile got edited at guild {guild.name!r} {guild.id}:']
         profile=user.guild_profiles[guild]
         for key,value in old.items():
-            if key in ('nick', 'premium_since'):
+            if key in ('nick',):
                 result.append(f'{key} changed: {value!r} -> {getattr(profile,key)!r}')
                 continue
+            
             if key=='roles':
                 removed=value[0]
                 if removed:
@@ -229,8 +230,13 @@ class dispatch_tester:
                     result.append(f'Roles added: ({len(added)})')
                     for role in added:
                         result.append(f'- {role.name} {role.id}')
-            continue
-
+                continue
+            
+            if key=='boosts_since':
+                result.append(f'{key} changed: {value!r} -> {user.boosts_since!r}')
+                continue
+            
+            raise RuntimeError(key)
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
@@ -280,42 +286,39 @@ class dispatch_tester:
             return
     
         result=[]
-        for modtype,emoji,diff in modifications:
+        for modtype,emoji,diff in changes:
             if modtype=='n':
-                result.append(f'New emoji: "{emoji.name}" : {emoji}')
+                result.append(f'New emoji: {emoji.name!r} : {emoji:e}')
                 continue
             if modtype=='d':
-                result.append(f'Deleted emoji: "{emoji.name}" : {emoji}')
+                result.append(f'Deleted emoji: {emoji.name!r} : {emoji:e}')
                 continue
             if modtype=='e':
-                result.append(f'Emoji edited: "{emoji.name}" : {emoji}\n')
+                result.append(f'Emoji edited:{emoji.name!r} : {emoji:e}\n')
                 for key,value in diff.items():
                     result.append(f'- {key}: {value} -> {getattr(emoji,key)}')
                 continue
-            raise RuntimeError #bugged?
+            raise RuntimeError(modtype) #bugged?
         
-        pages=[{'content':chunk} for chunk in chunkify(result)]
+        pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def guild_user_add(self,client,guild,user):
-        if guild.owner  is not client.owner:
+        if self.channel is None:
             return
-        channel=guild.system_channel
-        if channel is None:
-            return
-        await client.message_create(channel,f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!')
+        await client.message_create(self.channel,f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!')
 
     @classmethod
-    async def guild_user_delete(self,client,guild,user,profile):
-        if guild.owner is not client.owner:
+    async def guild_user_delete(self,client,guild,user,profile,boosted_since):
+        if self.channel is None:
             return
-        channel=guild.system_channel
-        if channel is None:
-            return
-        await client.message_create(channel,f'Bai bai {user:f}! with your {len(profile.roles)} roles.\nThe guild is down to {guild.user_count} members!')
-        if guild in user.guild_profiles:
-            raise RuntimeError
+        text=[f'Bai bai {user:f}! with your {len(profile.roles)} roles.']
+        if boosted_since is not None:
+            text.append('Also rip your boost :c')
+        text.append(f'The guild is down to {guild.user_count} members!')
+        
+        await client.message_create(self.channel,'\n'.join(text))
         
     @classmethod
     async def guild_create(self,client,guild):
@@ -338,13 +341,16 @@ class dispatch_tester:
             if key in ('name','icon','splash','user_count','afk_timeout',
                     'available','has_animated_icon','description',
                     'vanity_code','banner','max_members','max_presences',
-                    'premium_tier','sub_count'):
-                result.append(f' - {key} : {value} - > {getattr(guild,key)}')
+                    'premium_tier','booster_count','widget_enabled',
+                    'embed_enabled'):
+                result.append(f'- {key} : {value} - > {getattr(guild,key)}')
                 continue
+            
             if key in ('verification_level','message_notification','mfa','content_filter','region'):
                 other=getattr(guild,key)
-                result.append(f' - {key} : {value!s} {value.value} -> {other!s} {other.value}')
+                result.append(f'- {key} : {value!s} {value.value} -> {other!s} {other.value}')
                 continue
+            
             if key in ('features',):
                 result.append(f'{key}:')
                 removed=value[0]
@@ -358,6 +364,7 @@ class dispatch_tester:
                     for subvalue in added:
                         result.append(f'- {subvalue.value}')
                 continue
+            
             if key in ('system_channel','afk_channel','widget_channel','embed_channel'):
                 other=getattr(guild,key)
                 if value is None:
@@ -367,22 +374,32 @@ class dispatch_tester:
                 else:
                     result.append(f'- {key} : {value.name} {value.id} -> {other.name} {other.id}')
                 continue
-
+            
+            if key in ('system_channel_flags',):
+                added=list(value)
+                removed=list(getattr(guild,key))
+                result.append(f'- {key} : {", ".join(added) if added else "NONE"} -> {", ".join(removed) if removed else "NONE"}')
+                continue
+            
             if key in ('owner',):
                 other=getattr(guild,'owner')
                 result.append(f'- {key} : {value:f} {value.id} -> {other:f} {other.id}')
                 continue
+            
             raise RuntimeError(key)
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
         
     @classmethod
-    async def guild_delete(self,client,guild):
+    async def guild_delete(self,client,guild,profile,boosted_since):
         if self.channel is None:
             return
         result=pretty_print(guild)
         result.insert(0,f'Guild deleted {guild.id}')
+        result.insert(1,f'I had {len(profile.roles)} roles there')
+        result.insert(2,'At least i did not boost' if boosted_since is None else 'Rip by boost ahhhh...')
+
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions
 
@@ -510,3 +527,16 @@ class dispatch_tester:
         
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         pagination(client,self.channel,pages,120.) #does not raises exceptions        
+
+    @classmethod
+    async def client_edit_settings(self,client,old):
+        if self.channel is None:
+            return
+        result=['The client\'s settings got updated:','```']
+        for key,value in old.items():
+            result.append(f' {key} : {value!r} -> {getattr(client.settings,key)!r}')
+        result.append('```')
+        await client.message_create(self.channel,'\n'.join(result))
+
+
+    

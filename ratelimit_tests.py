@@ -12,12 +12,12 @@ METH_DELETE = hdrs.METH_DELETE
 METH_POST   = hdrs.METH_POST
 METH_PUT    = hdrs.METH_PUT
 from hata.py_reqrep import Request_CM
-from hata.exceptions import HTTPException,Forbidden,NotFound
+from hata.exceptions import DiscordException
 from hata.others import to_json,from_json,quote
 from hata.emoji import BUILTIN_EMOJIS
 from hata.message import Message
-from hata.others import (ext_from_base64,bytes_to_base64,voice_regions,
-    verification_levels,message_notification_levels,content_filter_levels,
+from hata.others import (ext_from_base64,bytes_to_base64,Voice_region,
+    Verification_level,Message_notification_level,Content_filter_level,
     parse_oauth2_redirect_url)
 from hata.user import Partial_user,User
 from hata.role import Role
@@ -89,6 +89,7 @@ UNLIMITED  :
     guild_regions
     guild_channels
     guild_roles
+    guild_widget_get
     
 group       : reaction
 limit       : 1
@@ -358,30 +359,25 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
         print('\n'.join(result))
 
         
-        if 300>status>=200:
+        if 199<status<305:
             if headers.get('X-Ratelimit-Remaining','1')=='0':
                 print(f'reached 0\n try again after {delay}')
             return response_data
-        elif status==429:
+        
+        if status==429:
             retry_after=response_data['retry_after']/1000.
             print(f'RATE LIMITED\nretry after : {retry_after}')
             await sleep(retry_after,self.loop)
             continue
-        elif status<405:
-            #if the request was succesfull
-            if status==403:
-                raise Forbidden(response,response_data)
-            if status==404:
-                raise HTTPException(response,response_data)
-            if status==400 and isinstance(response_data,dict) and 'message' in response_data and response_data['message']=='Missing Permissions':
-                raise Forbidden(response,response_data)
+        
         elif status==500 or status==502:
             await sleep(10./try_again+1.,self.loop)
             continue
-        raise HTTPException(response,response_data)
+        
+        raise DiscordException(response,response_data)
 
     try:
-        raise HTTPException(response,response_data)
+        raise DiscordException(response,response_data)
     except UnboundLocalError:
         raise ConnectionError('Invalid adress')
 
@@ -671,10 +667,10 @@ def webhook_get_channel(client,channel):
         f'https://discordapp.com/api/v7/channels/{channel_id}/webhooks')
 
 async def guild_create(client,name,icon=None,
-        region=voice_regions.eu_central,
-        verification_level=verification_levels.medium,
-        message_notification_level=message_notification_levels.only_mentions,
-        content_filter_level=content_filter_levels.disabled,
+        region=Voice_region.eu_central,
+        verification_level=Verification_level.medium,
+        message_notification_level=Message_notification_level.only_mentions,
+        content_filter_level=Content_filter_level.disabled,
         roles=[],channels=[]):
         
     if client.is_bot and len(client.guilds)>9:
@@ -1065,6 +1061,11 @@ def guild_user_get(client,guild,user_id):
     guild_id=guild.id
     return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}')
+
+def guild_widget_get(client,guild_id):
+    return bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/widget.json',
+        header={})
 
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
@@ -3046,3 +3047,12 @@ async def ratelimit_test0156(client,message,content):
     for _ in range(10):
         data = await guild_roles(client,guild1)
     #guild_roles is UNLIMITED #just a check for making sure about the others
+
+@ratelimit_commands
+async def ratelimit_test0157(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    guild1=message.guild
+    for _ in range(2):
+        await guild_widget_get(client,guild1.id)

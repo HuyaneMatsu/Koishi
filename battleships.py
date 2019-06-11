@@ -6,7 +6,7 @@ from hata.others import filter_content,is_user_mention
 from hata.futures import wait_one,CancelledError,wait_more,future_or_timeout,sleep
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed
-from hata.exceptions import Forbidden,HTTPException
+from hata.exceptions import DiscordException
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
 
@@ -559,7 +559,7 @@ class battleships_game:
                     self.actual=self.actual.other
 
                 
-        except (Forbidden,HTTPException):
+        except DiscordException:
             #what should i put here?
             pass
         finally:

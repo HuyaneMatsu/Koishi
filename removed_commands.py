@@ -3365,7 +3365,274 @@ async def parse_details_command(client,message,content):
 
         await client.message_create(message.channel,f'After request name is : {user.name!r}\nnick is : {profile.nick!r}')
 
+    @on_command
+    async def query_guild_widget_info(client,message,content):
+        if message.author is not client.owner:
+            return
+        guild=message.guild
+        if guild is None:
+            return
         
+        parsed=re.match(others.IS_ID_RP,content)
+        if parsed is not None:
+            guild=int(parsed.group(0))
+        try:
+            widget = await Koishi.guild_widget_get(guild)
+        except BaseException as err:
+            await client.message_create(message.channel,str(err))
+        else:
+            if widget is None:
+                await client.message_create(message.channel,'The widget is disabled for this guild')
+            else:
+                pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(widget,render_flag=0b1111)])
+
+    @on_command
+    async def show_settings(client,message,content):
+        if message.author is not client.owner:
+            return
+        
+        result=['```']
+        for name in client.settings.__slots__:
+            result.append(f'{name} : {getattr(client.settings,name)!r}')
+        result.append('```')
+        
+        await client.message_create(message.channel,'\n'.join(result))
+
+    @on_command
+    async def update_settings(client,message,content):
+        if message.author is not client.owner or message.guild is None:
+            return
+        sent = {
+            'afk_timeout'               : 1,
+            'animate_emojis'            : False,
+            'message_display_compact'   : True,
+            'explicit_content_filter'   : 1,
+            'convert_emoticons'         : False,
+            'detect_platform_accounts'  : False,
+            'developer_mode'            : True,
+            'enable_tts_command'        : True,
+            'friend_source_flags'       : 1,
+            'disable_games_tab'         : True,
+            'guild_positions'           : [str(message.guild.id)],
+            'locale'                    : 'owo',
+            'default_guilds_restricted' : True,
+            'restricted_guilds'         : [str(message.guild.id)],
+            'gif_auto_play'             : False,
+            'inline_attachment_media'   : False,
+            'render_embeds'             : False,
+            'inline_embed_media'        : False,
+            'render_reactions'          : False,
+            'show_current_game'         : False,
+            'status'                    : 'dnd',
+            'theme'                     : 'light',
+            'timezone_offset'           : 12,
+                }
+
+        expected = {
+            'afk_timeout'               : 1,
+            'animate_emojis'            : False,
+            'compact_mode'              : True,
+            'content_filter'            : others.content_filter_levels.values[1],
+            'convert_emojis'            : False,
+            'detect_platform_accounts'  : False,
+            'developer_mode'            : True,
+            'enable_tts_command'        : True,
+            'friend_request_flag'       : others.Friend_request_flag.values[1],
+            'games_tab'                 : False,
+            'guild_order_ids'           : [message.guild.id],
+            'language'                  : 'owo',
+            'no_DM_from_new_guilds'     : True,
+            'no_DM_guild_ids'           : [message.guild.id],
+            'play_gifs'                 : False,
+            'render_attachments'        : False,
+            'render_embeds'             : False,
+            'render_links'              : False,
+            'render_reactions'          : False,
+            'show_current_game'         : False,
+            'status'                    : others.Statuses.dnd,
+            'theme'                     : others.Theme.values['light'],
+            'timezone_offset'           : 12,
+                }
+            
+        try:
+            client.settings._update_no_return(sent)
+            text='All gud'
+            for name in client.settings.__slots__:
+                if expected[name]==getattr(client.settings,name):
+                    del expected[name]
+                    continue
+                text=f'not matching {name} : {expected[name]} with {getattr(client.settings,name)}'
+                break
+            else:
+                if expected:
+                    text=f'Not used up elements : \n{expected!r}'
+        except Exception as err:
+            text=traceback.format_exc()
+     
+        await client.message_create(message.channel,text)
+        
+    @on_command
+    async def dispatch_settings(client,message,content):
+        if message.author is not client.owner or message.guild is None:
+            return
+        
+        from hata.parsers import PARSERS
+        
+        sent = {
+            'afk_timeout'               : 1,
+            'animate_emojis'            : False,
+            'message_display_compact'   : True,
+            'explicit_content_filter'   : 1,
+            'convert_emoticons'         : False,
+            'detect_platform_accounts'  : False,
+            'developer_mode'            : True,
+            'enable_tts_command'        : True,
+            'friend_source_flags'       : 1,
+            'disable_games_tab'         : True,
+            'guild_positions'           : [str(message.guild.id)],
+            'locale'                    : 'owo',
+            'default_guilds_restricted' : True,
+            'restricted_guilds'         : [str(message.guild.id)],
+            'gif_auto_play'             : False,
+            'inline_attachment_media'   : False,
+            'render_embeds'             : False,
+            'inline_embed_media'        : False,
+            'render_reactions'          : False,
+            'show_current_game'         : False,
+            'status'                    : 'dnd',
+            'theme'                     : 'light',
+            'timezone_offset'           : 12,
+                }
+
+        expected = {
+            'afk_timeout'               : 1,
+            'animate_emojis'            : False,
+            'compact_mode'              : True,
+            'content_filter'            : others.content_filter_levels.values[1],
+            'convert_emojis'            : False,
+            'detect_platform_accounts'  : False,
+            'developer_mode'            : True,
+            'enable_tts_command'        : True,
+            'friend_request_flag'       : others.Friend_request_flag.values[1],
+            'games_tab'                 : False,
+            'guild_order_ids'           : [message.guild.id],
+            'language'                  : 'owo',
+            'no_DM_from_new_guilds'     : True,
+            'no_DM_guild_ids'           : [message.guild.id],
+            'play_gifs'                 : False,
+            'render_attachments'        : False,
+            'render_embeds'             : False,
+            'render_links'              : False,
+            'render_reactions'          : False,
+            'show_current_game'         : False,
+            'status'                    : others.Statuses.dnd,
+            'theme'                     : others.Theme.values['light'],
+            'timezone_offset'           : 12,
+                }
+
+        PARSERS['USER_SETTINGS_UPDATE'](client,sent)
+        await sleep(0.5,client.loop)
+        
+        text='All gud'
+        for name in client.settings.__slots__:
+            if expected[name]==getattr(client.settings,name):
+                del expected[name]
+                continue
+            text=f'not matching {name} : {expected[name]} with {getattr(client.settings,name)}'
+            break
+        else:
+            if expected:
+                text=f'Not used up elements : \n{expected!r}'
+                    
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def edit_settings(client,message,content):
+        if message.author is not client.owner or message.guild is None:
+            return
+        
+        sent = {
+            'afk_timeout'               : 1,
+            'animate_emojis'            : False,
+            'compact_mode'              : True,
+            'content_filter'            : others.content_filter_levels.values[1],
+            'convert_emojis'            : False,
+            'detect_platform_accounts'  : False,
+            'developer_mode'            : True,
+            'enable_tts_command'        : True,
+            'friend_request_flag'       : others.Friend_request_flag.values[1],
+            'games_tab'                 : False,
+            'guild_order_ids'           : [message.guild.id],
+            'language'                  : 'owo',
+            'no_DM_from_new_guilds'     : True,
+            'no_DM_guild_ids'           : [message.guild.id],
+            'play_gifs'                 : False,
+            'render_attachments'        : False,
+            'render_embeds'             : False,
+            'render_links'              : False,
+            'render_reactions'          : False,
+            'show_current_game'         : False,
+            'status'                    : others.Statuses.dnd,
+            'theme'                     : others.Theme.values['light'],
+            'timezone_offset'           : 12,
+                }
+
+        def request_catcher(http,data):
+            expected = {
+                'afk_timeout'               : 1,
+                'animate_emojis'            : False,
+                'message_display_compact'   : True,
+                'explicit_content_filter'   : 1,
+                'convert_emoticons'         : False,
+                'detect_platform_accounts'  : False,
+                'developer_mode'            : True,
+                'enable_tts_command'        : True,
+                'friend_source_flags'       : 1,
+                'disable_games_tab'         : True,
+                'guild_positions'           : [message.guild.id],
+                'locale'                    : 'owo',
+                'default_guilds_restricted' : True,
+                'restricted_guilds'         : [message.guild.id],
+                'gif_auto_play'             : False,
+                'inline_attachment_media'   : False,
+                'render_embeds'             : False,
+                'inline_embed_media'        : False,
+                'render_reactions'          : False,
+                'show_current_game'         : False,
+                'status'                    : 'dnd',
+                'theme'                     : 'light',
+                'timezone_offset'           : 12,
+                    }
+        
+            text='All gud'
+            for key,value in data.items():
+                if value==expected[key]:
+                    del expected[key]
+                    continue
+                text=f'not matching {key} : {value} with {expected[key]}'
+                break
+            else:
+                if expected:
+                    text=f'Not used up elements : \n{expected!r}'
+
+            raise ValueError(text)
+        
+        type(Koishi.http).client_edit_settings=request_catcher
+
+        text='unset'
+        try:
+            await Koishi.client_edit_settings(**sent)
+        except Exception as err:
+            text=traceback.format_exc()
+            
+        await client.message_create(message.channel,text)
+        
+    @on_command
+    async def reset_settings(client,message,content):
+        if message.author is not client.owner:
+            return
+        client.settings=type(client.settings)()
+        await client.message_create(message.channel,'done')
 
 # - : - # dungeon_sweeper.py # - : - #
 

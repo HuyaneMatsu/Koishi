@@ -2,7 +2,7 @@
 from hata.embed import Embed
 from hata.events import pagination
 from hata.color import Color
-from hata.exceptions import Forbidden,HTTPException
+from hata.exceptions import DiscordException
 from hata.futures import sleep
 
 HELP={}
@@ -194,6 +194,10 @@ HELP['ds']=Embed(title='ds',color=HELP_COLOR,
         'Shows you this message\n'
             ))
 
+HELP['roles']=Embed(title='roles',color=HELP_COLOR,
+    description='Show the roles of the guild.'
+        )
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
@@ -204,7 +208,7 @@ async def on_command_help(client,message,content):
                 message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command: {content}',color=HELP_COLOR))
                 await sleep(30.,client.loop)
                 await client.message_delete(message)
-            except (Forbidden,HTTPException):
+            except DiscordException:
                 pass
             return
         
@@ -218,5 +222,5 @@ async def invalid_command(client,message,command,content):
         message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command `{command}`, try using: `{prefix}help`',color=HELP_COLOR))
         await sleep(30.,client.loop)
         await client.message_delete(message)
-    except (Forbidden,HTTPException):
+    except DiscordException:
         pass

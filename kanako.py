@@ -4,7 +4,7 @@ from hata.futures import Future,CancelledError,InvalidStateError
 from random import randint
 from hata.dereaddons_local import any_to_any
 from time import monotonic
-from hata.exceptions import Forbidden,HTTPException
+from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS
 from hata.events import waitfor_wrapper
 from hata.color import Color
@@ -269,7 +269,7 @@ class kanako_game:
 
             try:
                 await client.message_create(channel,embed=embed,file=('guessme.png',draw(buffer,question)))
-            except (HTTPException,Forbidden):
+            except DiscordException:
                 return self.cancel()
             
             circle_start=monotonic()
@@ -332,13 +332,13 @@ class kanako_game:
             
         try:
             await self.client.message_delete(message)
-        except (HTTPException,Forbidden):
+        except DiscordException:
             pass
 
     async def send_or_except(self,embed):
         try:
             await self.client.message_create(self.target,embed=embed)
-        except (HTTPException,Forbidden):
+        except DiscordException:
             self.cacncel()
         
     def calculate_leavers(self):
@@ -719,7 +719,7 @@ class embedination:
         try:
             self.task = client.loop.create_task(client.message_edit(message,embed=self.pages[page]))
             await self.task
-        except (Forbidden,HTTPException):
+        except DiscordException:
             pass
         finally:
             self.task=None
@@ -733,7 +733,7 @@ class embedination:
                 try:
                     self.task=client.loop.create_task(client.reaction_clear(wrapper.target))
                     await self.task
-                except (Forbidden,HTTPException):
+                except DiscordException:
                     pass
         
 del BUILTIN_EMOJIS

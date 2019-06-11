@@ -6,7 +6,7 @@ from time import monotonic
 from hata.events_compiler import content_parser
 from hata.embed import Embed
 from hata.color import Color
-from hata.exceptions import Forbidden,HTTPException
+from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS,Emoji
 from hata.futures import Future,CancelledError
 from hata.client_core import GC_process
@@ -68,7 +68,7 @@ async def ds_manager(self,message,command):
         game=DS_GAMES.get(message.author.id)
         
         if command=='':
-            if not (permissions.can_add_reactions and permissions.can_external_emojis and permissions.can_manage_messages):
+            if not (permissions.can_add_reactions and permissions.can_use_external_emojis and permissions.can_manage_messages):
                 embed=Embed('Permissions denied','I have not all permissions to start a game at this channel.')
                 break
             
@@ -78,7 +78,7 @@ async def ds_manager(self,message,command):
                 return await game.renew(message.channel)
             
         if command=='rules':
-            if permissions.can_external_emojis:
+            if permissions.can_use_external_emojis:
                 embed=RULES_HELP
             else:
                 embed=('Permissions denied','I have no permissions at this channel to render this message.')
@@ -155,11 +155,11 @@ class ds_game:
             self.target = await client.message_create(self.channel,embed=self.render_menu())
             for emoji in self.emojis_menu:
                 loop.create_task(client.reaction_add(self.target,emoji))
-        except (Forbidden,HTTPException):
+        except DiscordException:
             try:
                 if self.target is not None:
                     await client.message_create(self.channel,'',Embed('','Error meanwhile initializing'))
-            except (Forbidden,HTTPException):
+            except DiscordException:
                 pass
             del DS_GAMES[self.user.id]
         else:
@@ -178,7 +178,7 @@ class ds_game:
                 loop.create_task(client.reaction_add(self.target,emoji))
             
             await client.message_edit(self.target,embed=self.render_menu())
-        except (Forbidden,HTTPException):
+        except DiscordException:
             return loop.create_task(self.cancel())
         finally:
             self.last=monotonic()
@@ -205,7 +205,7 @@ class ds_game:
                 loop.create_task(client.reaction_add(self.target,emoji))
             
             await client.message_edit(self.target,embed=self.render_game())
-        except (Forbidden,HTTPException):
+        except DiscordException:
             return loop.create_task(self.cancel())
         finally:
             self.last=monotonic()
@@ -224,7 +224,7 @@ class ds_game:
             loop.create_task(client.reaction_add(self.target,self.CANCEL))
             
             await client.message_edit(self.target,embed=self.render_done())
-        except (Forbidden,HTTPException):
+        except DiscordException:
             return loop.create_task(self.cancel())
         finally:
             await task
@@ -341,7 +341,7 @@ class ds_game:
 
         try:
             await self.client.message_edit(self.target,embed=self.render_menu())
-        except (Forbidden,HTTPException):
+        except DiscordException:
             return self.client.loop.create_task(self.cancel())
         finally:
             self.task.set_result(None)
@@ -398,7 +398,7 @@ class ds_game:
         
         try:
             await self.client.message_edit(self.target,embed=self.render_game())
-        except (Forbidden,HTTPException):
+        except DiscordException:
             return self.client.loop.create_task(self.cancel())
         finally:
             self.last=monotonic()
@@ -517,17 +517,17 @@ class ds_game:
                 loop.create_task(client.reaction_add(target,self.RESET))
                 loop.create_task(client.reaction_add(target,self.CANCEL))
                 
-        except (Forbidden,HTTPException):
+        except DiscordException:
             try:
                 if self.target is not None:
                     await client.message_create(channel,'',Embed('','Error meanwhile initializing'))
-            except (Forbidden,HTTPException):
+            except DiscordException:
                 pass
             return
         else:
             try:
                 await client.reaction_clear(self.target)
-            except (Forbidden,HTTPException):
+            except DiscordException:
                 pass
                 
             client.events.reaction_add.remove(self)
@@ -672,7 +672,7 @@ class ds_game:
     async def reaction_delete(self,emoji):
         try:
             await self.client.reaction_delete(self.target,emoji,self.user)
-        except (Forbidden,HTTPException):
+        except DiscordException:
             pass
 
 #:-> @ <-:#}{#:-> @ <-:#{ game }#:-> @ <-:#}{#:-> @ <-:#

@@ -4,8 +4,7 @@ from random import randint
 import os
 import re
 import time
-import json
-#import pickle
+
 #moving to the outer folder, so hata ll count as a package
 sys.path.append(os.path.abspath('..'))
 from collections import deque
@@ -19,11 +18,12 @@ except ImportError:
 
 from hata.dereaddons_local import inherit
 from hata import Client,start_clients
-from hata.exceptions import Forbidden,HTTPException
+from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
-from hata.activity import activity_game
-from hata.others import (filter_content,from_json,to_json,
-    parse_oauth2_redirect_url,cchunkify,chunkify)
+from hata.activity import Activity_game
+from hata.others import filter_content
+from hata import others
+
 from hata.channel import cr_pg_channel_object,Channel_text,Channel_private,Message_iterator
 from hata.embed import Embed
 from hata.events import (
@@ -50,6 +50,7 @@ from dispatch_tests import dispatch_tester
 from ratelimit_tests import ratelimit_commands
 from kanako import kanako_manager
 from dungeon_sweeper import ds_manager,_DS_modify_best
+import models
 
 def smart_join(list_,limit):
     limit-=4
@@ -87,27 +88,15 @@ class cooldown_handler:
         del self.cache[id_]
         try:
             await client.message_delete(notification)
-        except (Forbidden,HTTPException):
+        except DiscordException:
             pass
 
-PREFIX_FILENAME='prefixes.json'
-try:
-    with open(PREFIX_FILENAME,'r') as file:
-        PREFIXES=prefix_by_guild.from_json_serialization(json.load(file))
-except (FileNotFoundError,OSError,PermissionError,json.decoder.JSONDecodeError):
-    PREFIXES=prefix_by_guild(PREFIX)
+PREFIXES=prefix_by_guild(pers_data.PREFIX,models.DB_ENGINE,models.PREFIX_TABLE,models.pefix_model)
 
-##PREFIX_FILENAME='prefixes.pcl'
-##try:
-##    with open(PREFIX_FILENAME,'rb') as file:
-##        PREFIXES=pickle.load(file)
-##except (FileNotFoundError,OSError,PermissionError,pickle.UnpicklingError):
-##    PREFIXES=prefix_by_guild(PREFIX)
-    
 Koishi=Client(pers_data.TOKEN1,
     secret=pers_data.CLIENT_SECRET,
     client_id=pers_data.ID1,
-    activity=activity_game.create(name='with Satori'),
+    activity=Activity_game.create(name='with Satori'),
         )
 
 Mokou=Client(pers_data.TOKEN2,
@@ -167,7 +156,7 @@ async def message_create(client,message):
             if not channel.permissions_for(client).can_read_message_history:
                 parts.append('I have no permission to read older messages.')
             if channel.turn_GC_on_at:
-                now=time.time()
+                now=time.monotonic()
                 if now>channel.turn_GC_on_at:
                     parts.append('The GC will check the channel at the next cycle.')
                 else:
@@ -310,18 +299,17 @@ class commit_extractor:
             result_content=self.role.mention
             needs_unlock = (not self.role.mentionable) and guild.permissions_for(Koishi).can_manage_roles
 
-        embed_text=chunkify(description_container.getText('\n').splitlines())
-        result_embed=[
-            Embed(
-                title       = title_container.getText('\n').strip(),
-                description = embed_text[0],
-                color       = self.color,
-                url         = url,
-                    )
-            ]
-        
+        embed_text=others.chunkify(description_container.getText('\n').splitlines())
+        result_embed=Embed(
+            title       = title_container.getText('\n').strip(),
+            description = embed_text[0],
+            color       = self.color,
+            url         = url,
+                )
+
+        extra_embeds=[]
         for index in range(1,min(len(embed_text),9)):
-            result_embed.append(
+            extra_embeds.append(
                 Embed(
                     title       = '',
                     description = embed_text[index],
@@ -343,6 +331,13 @@ class commit_extractor:
                     name=webhook_name,
                     avatar_url=webhook_avatar_url
                         )
+                for embed in extra_embeds:
+                    await client.webhook_send(webhook,
+                        '',
+                        embed,
+                        name=webhook_name,
+                        avatar_url=webhook_avatar_url
+                            )
                 await sleep(0.5,client.loop)
             finally:
                 await Koishi.role_edit(self.role,mentionable=False)
@@ -721,7 +716,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         channel = await client.channel_private_create(message.author)
         try:
             await client.message_create(channel,'Love you!')
-        except Forbidden:
+        except DiscordException:
             await client.message_create(message.channel,'Pls turn on private messages from this server!')
 
     @on_command
@@ -743,14 +738,19 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         try:
             _,emoji = await wait_for_message(client,channel,lambda message:parse_emoji(message.content),30.)
         except TimeoutError:
+            emoji=None
+        except Exception as err:
+            print(err)
+            traceback.print_exc()
             return
-        finally:
-            try:
-                await client.message_delete(message_to_delete)
-            except Forbidden:
-                pass
-            
-        await client.message_create(channel,emoji.as_emoji*5)
+        
+        try:
+            await client.message_delete(message_to_delete)
+        except DiscordException:
+            pass
+        
+        if emoji is not None:
+            await client.message_create(channel,emoji.as_emoji*5)
 
     @on_command
     async def subscribe(client,message,content):
@@ -783,7 +783,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         try:
             invite = await client.invite_create_pref(guild,max_age,max_use)
-        except Forbidden:
+        except DiscordException:
             return
                                                 
         channel = await client.channel_private_create(message.author)
@@ -904,7 +904,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         finally:
             try:
                 await client.reaction_delete_own(message,emoji)
-            except (Forbidden,HTTPException):
+            except DiscordException:
                 pass
         
         y=0
@@ -995,25 +995,40 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @on_command
     async def change_prefix(client,message,content):
         guild=message.guild
-        if guild is None or message.author is not guild.owner or not content or len(content)>32:
+        if guild is None or message.author is not guild.owner:
+            return
+        content=filter_content(content)[0]
+        if not (0<len(content)<33):
+            text=f'Prefix lenght should be between 1 and 32, got {len(content)}.'
+        elif PREFIXES.add(guild,content):
+            text='Prefix modified.'
+        else:
+            text='Thats the frefix already.'
+        await client.message_create(message.channel,text)
+
+    @on_command
+    async def _change_prefix(client,message,content):
+        if message.author is not client.owner:
+            return
+        content=filter_content(content)
+        if len(content)<2:
+            return
+        if not (0<len(content[1])<33):
             return
         
-        if PREFIXES.add(guild,content):
-            try:
-                with open(PREFIX_FILENAME,'w') as file:
-                    json.dump(PREFIXES.to_json_serializable(),file)
-            except (FileNotFoundError,OSError,PermissionError):
-                pass
-##            try:
-##                with open(PREFIX_FILENAME,'wb') as file:
-##                    pickle.dump(PREFIXES,file)
-##            except (FileNotFoundError,OSError,PermissionError):
-##                pass
-            
-            await client.message_create(message.channel,'OwO')
+        try:
+            guild=client.guilds[int(content[0])]
+        except (ValueError,KeyError):
+            guild=client.get_guild(content[0])
+            if guild is None:
+                return
+        if PREFIXES.add(guild,content[1]):
+            text='Done.'
         else:
-            await client.message_create(message.channel,'Thats the actual prefix')
+            text='No modifications took place.'
 
+        await client.message_create(message.channel,text)
+    
     @on_command
     async def nikki(client,message,content):
         await client.message_create(message.channel,embed=Embed('YUKI YUKI YUKI!','''
@@ -1051,7 +1066,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     async def oa2_feed(client,message,content):
         client.loop.create_task(client.message_delete(message))
         try:
-            result=parse_oauth2_redirect_url(content)
+            result=others.parse_oauth2_redirect_url(content)
         except ValueError:
             await client.message_create(message.channel,'Bad link')
             return
@@ -1135,6 +1150,10 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             print(err)
             traceback.print_exc()
         finally:
+            try:
+                guild
+            except UnboundLocalError:
+                return
             await sleep(1.,client.loop)
             if client is guild.owner:
                 await client.guild_delete(guild)
@@ -1193,7 +1212,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         data = await self.download_url(content)
         soup = BeautifulSoup(data,'html.parser',from_encoding='utf-8')
         text = soup.prettify()
-        result = [{'content':element} for element in cchunkify(text.splitlines())]
+        result = [{'content':element} for element in others.cchunkify(text.splitlines())]
         pagination(self,message.channel,result)
 
     @on_command
@@ -1257,6 +1276,12 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             name=target_message.author.name,
             avatar_url=target_message.author.avatar_url)
 
+    @on_command
+    @content_parser('int', 'int, default="0"',)
+    async def random(client,message,v1,v2):
+        result=randint(v2,v1) if v1>v2 else randint(v1,v2)
+        await client.message_create(message.channel,str(result))
+        
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())
