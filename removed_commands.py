@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#note : most of theese commands are outdated, even the most recent ones!
 
 # - : - # infos.py # - : - #
 
@@ -3634,6 +3635,130 @@ async def parse_details_command(client,message,content):
         client.settings=type(client.settings)()
         await client.message_create(message.channel,'done')
 
+    @on_command
+    async def skin_tones(client,message,content):
+        if message.author is not client.owner:
+            return
+
+        tones = (
+            (':raised_hands::skin-tone-{index}:','raised_hands_skin_tone_{index}',),
+            (':clap::skin-tone-{index}:','clap_skin_tone_{index}',),
+            (':wave::skin-tone-{index}:','wave_skin_tone_{index}',),
+            (':thumbup::skin-tone-{index}:','thumbup_skin_tone_{index}',),
+            (':thumbdown::skin-tone-{index}:','thumbdown_skin_tone_{index}',),
+            (':punch::skin-tone-{index}:','punch_skin_tone_{index}',),
+            (':fist::skin-tone-{index}:','fist_skin_tone_{index}',),
+            (':v::skin-tone-{index}:','v_skin_tone_{index}',),
+            (':ok_hand::skin-tone-{index}:','ok_hand_skin_tone_{index}',),
+            (':raised_hand::skin-tone-{index}:','raised_hand_skin_tone_{index}',),
+            (':open_hands::skin-tone-{index}:','open_hands_skin_tone_{index}',),
+            (':muscle::skin-tone-{index}:','muscle_skin_tone_{index}',),
+            (':pray::skin-tone-{index}:','pray_skin_tone_{index}',),
+            (':point_up::skin-tone-{index}:','point_up_skin_tone_{index}',),
+            (':point_up_2::skin-tone-{index}:','point_up_2_skin_tone_{index}',),
+            (':point_down::skin-tone-{index}:','point_down_skin_tone_{index}',),
+            (':point_left::skin-tone-{index}:','point_left_skin_tone_{index}',),
+            (':point_right::skin-tone-{index}:','point_right_skin_tone_{index}',),
+            (':hand_splayed::skin-tone-{index}:','hand_splayed_skin_tone_{index}',),
+            (':hand_splayed::skin-tone-{index}:','hand_splayed_skin_tone_{index}',),
+            (':metal::skin-tone-{index}:','metal_skin_tone_{index}',),
+            (':vulcan::skin-tone-{index}:','vulcan_skin_tone_{index}',),
+            (':writing_hand::skin-tone-{index}:','writing_hand_skin_tone_{index}',),
+            (':nail_care::skin-tone-{index}:','nail_care_skin_tone_{index}',),
+            (':ear::skin-tone-{index}:','ear_skin_tone_{index}',),
+            (':nose::skin-tone-{index}:','nose_skin_tone_{index}',),
+            (':baby::skin-tone-{index}:','baby_skin_tone_{index}',),
+            (':boy::skin-tone-{index}:','boy_skin_tone_{index}',),
+            (':girl::skin-tone-{index}:','girl_skin_tone_{index}',),
+            (':man::skin-tone-{index}:','man_skin_tone_{index}',),
+            (':woman::skin-tone-{index}:','woman_skin_tone_{index}',),
+            (':person_with_blond_hair::skin-tone-{index}:','person_with_blond_hair_skin_tone_{index}',),
+            (':older_man::skin-tone-{index}:','older_man_skin_tone_{index}',),
+            (':older_woman::skin-tone-{index}:','older_woman_skin_tone_{index}',),
+            (':man_with_gua_pi_mao::skin-tone-{index}:','man_with_gua_pi_mao_skin_tone_{index}',),
+            (':man_with_turban::skin-tone-{index}:','man_with_turban_skin_tone_{index}',),
+            (':cop::skin-tone-{index}:','cop_skin_tone_{index}',),
+            (':construction_worker::skin-tone-{index}:','construction_worker_skin_tone_{index}',),
+            (':guardsman::skin-tone-{index}:','guardsman_skin_tone_{index}',),
+            (':spy::skin-tone-{index}:','spy_skin_tone_{index}',),
+            (':santa::skin-tone-{index}:','santa_skin_tone_{index}',),
+            (':angel::skin-tone-{index}:','angel_skin_tone_{index}',),
+            (':princess::skin-tone-{index}:','princess_skin_tone_{index}',),
+            (':bride_with_veil::skin-tone-{index}:','bride_with_veil_skin_tone_{index}',),
+            (':walking::skin-tone-{index}:','walking_skin_tone_{index}',),
+            (':runner::skin-tone-{index}:','runner_skin_tone_{index}',),
+            (':dancer::skin-tone-{index}:','dancer_skin_tone_{index}',),
+            (':bow::skin-tone-{index}:','bow_skin_tone_{index}',),
+            (':information_desk_person::skin-tone-{index}:','information_desk_person_skin_tone_{index}',),
+            (':no_good::skin-tone-{index}:','no_good_skin_tone_{index}',),
+            (':ok_woman::skin-tone-{index}:','ok_woman_skin_tone_{index}',),
+            (':raising_hand::skin-tone-{index}:','raising_hand_skin_tone_{index}',),
+            (':person_with_pouting_face::skin-tone-{index}:','person_with_pouting_face_skin_tone_{index}',),
+            (':person_frowning::skin-tone-{index}:','person_frowning_skin_tone_{index}',),
+            (':haircut::skin-tone-{index}:','haircut_skin_tone_{index}',),
+            (':massage::skin-tone-{index}:','massage_skin_tone_{index}',),
+            (':prince::skin-tone-{index}:','prince_skin_tone_{index}',),
+            (':man_in_tuxedo::skin-tone-{index}:','man_in_tuxedo_skin_tone_{index}',),
+            (':mrs_claus::skin-tone-{index}:','mrs_claus_skin_tone_{index}',),
+            (':face_palm::skin-tone-{index}:','face_palm_skin_tone_{index}',),
+            (':shrug::skin-tone-{index}:','shrug_skin_tone_{index}',),
+            (':pregnant_woman::skin-tone-{index}:','pregnant_woman_skin_tone_{index}',),
+            (':selfie::skin-tone-{index}:','selfie_skin_tone_{index}',),
+            (':man_dancing::skin-tone-{index}:','man_dancing_skin_tone_{index}',),
+            (':call_me::skin-tone-{index}:','call_me_skin_tone_{index}',),
+            (':raised_back_of_hand::skin-tone-{index}:','raised_back_of_hand_skin_tone_{index}',),
+            (':left_facing_fist::skin-tone-{index}:','left_facing_fist_skin_tone_{index}',),
+            (':right_facing_fist::skin-tone-{index}:','right_facing_fist_skin_tone_{index}',),
+            (':fingers_crossed::skin-tone-{index}:','fingers_crossed_skin_tone_{index}',),
+            (':golfer::skin-tone-{index}:','golfer_skin_tone_{index}',),
+            (':skier::skin-tone-{index}:','skier_skin_tone_{index}',),
+            (':snowboarder::skin-tone-{index}:','snowboarder_skin_tone_{index}',),
+            (':rowboat::skin-tone-{index}:','rowboat_skin_tone_{index}',),
+            (':swimmer::skin-tone-{index}:','swimmer_skin_tone_{index}',),
+            (':surfer::skin-tone-{index}:','surfer_skin_tone_{index}',),
+            (':bath::skin-tone-{index}:','bath_skin_tone_{index}',),
+            (':basketball_player::skin-tone-{index}:','basketball_player_skin_tone_{index}',),
+            (':lifter::skin-tone-{index}:','lifter_skin_tone_{index}',),
+            (':bicyclist::skin-tone-{index}:','bicyclist_skin_tone_{index}',),
+            (':mountain_bicyclist::skin-tone-{index}:','mountain_bicyclist_skin_tone_{index}',),
+            (':horse_racing::skin-tone-{index}:','horse_racing_skin_tone_{index}',),
+            (':levitate::skin-tone-{index}:','levitate_skin_tone_{index}',),
+            (':cartwheel::skin-tone-{index}:','cartwheel_skin_tone_{index}',),
+            (':juggling::skin-tone-{index}:','juggling_skin_tone_{index}',),
+            (':water_polo::skin-tone-{index}:','water_polo_skin_tone_{index}',),
+            (':handball::skin-tone-{index}:','handball_skin_tone_{index}',),
+            (':skin-tone-{index}:','skin_tone_{index}',),
+                )
+
+        channel=message.channel
+        received=[]
+        for index in range(1,6):
+            for start,end in zip(range(0,45,44),range(44,89,44)):
+                lines=[]
+                for tone,_ in tones[start:end]:
+                    lines.append(tone.format(index=index))
+
+                await client.message_create(channel,'\n'.join(lines))
+                
+                try:
+                    message = await wait_for_message(client,channel,lambda message,client=client:message.author is client.owner,30.)
+                except TimeoutError:
+                    await client.message_create(channel,'U cannot be this slow!')
+                except Exception as err:
+                    print(err)
+                    traceback.print_exc()
+                    return
+
+                emojis=message.content.split()
+
+                for (_,name),unicode in zip(tones[start:end],emojis):
+                    received.append((name.format(index=index),unicode.encode(),),)
+
+        for name,unicode in received:
+            print(f'{name}:{unicode!r}')
+
+        await client.message_create(channel,'thanks')
+        
 # - : - # dungeon_sweeper.py # - : - #
 
 ##STAGE_NAME_PATTERN_RE=re.compile(

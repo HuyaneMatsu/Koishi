@@ -80,7 +80,6 @@ HELP['voice']=Embed(title='voice',color=HELP_COLOR,
     description=(
         'Use "join (n%)" to make the bot to join your voice channel\n'
         'Use "pause" to pause the player\n'
-        'Use "stop" to stop the player\n'
         'Use "resume" to resume the player\n'
         'Use "play <link or title>" to play music\n'
         'Use "volume (n%)" to get/set volume\n'
@@ -198,6 +197,12 @@ HELP['roles']=Embed(title='roles',color=HELP_COLOR,
     description='Show the roles of the guild.'
         )
 
+HELP['random']=Embed(title='random',color=HELP_COLOR,
+    description=(
+        'Tell me 2 numbers and I tell you a totally not rigged random '
+        'number between them.'
+            ))
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
@@ -214,7 +219,7 @@ async def on_command_help(client,message,content):
         
         await client.message_create(message.channel,embed=result)
     else:
-        pagination(client,message.channel,create_help_help(client.events.message_create.prefix(message)))
+        await pagination(client,message.channel,create_help_help(client.events.message_create.prefix(message)))
     
 async def invalid_command(client,message,command,content):
     prefix=client.events.message_create.prefix(message)

@@ -3,6 +3,7 @@ from random import choice
 import sys
 import json
 
+from hata.dereaddons_local import asyncinit
 from hata.parsers import eventlist
 from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
@@ -19,7 +20,7 @@ from hata.client_core import CLIENTS
 
 from help_handler import HELP
 
-async def no_permission(client,message,args):
+async def no_permission(client,message,*args):
     if args:
         await client.message_create(message.channel,'You do not have permission to use this command!')
 
@@ -331,7 +332,7 @@ async def love(client,message,target):
     embed=Embed(
         choice(element['titles']),
         f'{source:f} {BUILTIN_EMOJIS["heart"]:e} {target:f} scored {percent}%!',
-        Color.d_magenta,
+        0xad1457,
             )
     embed.add_field('My advice:',element['text'])
 
@@ -449,13 +450,14 @@ async def message_pure(client,message,message_id,channel):
     pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
 
 
-class role_details():
+class role_details(metaclass=asyncinit):
     __slots__=['cache','guild','roles']
     def __init__(self,client,channel):
         self.roles=list(reversed(channel.guild.roles))
         self.cache=[None for _ in range(self.roles.__len__()+1)]
         self.createpage0(channel.guild)
-        embedination_rr(client,channel,self)
+        #we return awaitable, so it is OK
+        return embedination_rr(client,channel,self)
         
     def __len__(self):
         return self.cache.__len__()
@@ -493,7 +495,7 @@ class role_details():
         self.cache[index]=embed
         return embed
 
-class embedination_rr:
+class embedination_rr(metaclass=asyncinit):
     LEFT2   = BUILTIN_EMOJIS['rewind']
     LEFT    = BUILTIN_EMOJIS['arrow_backward']
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
@@ -503,20 +505,14 @@ class embedination_rr:
     emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET,CROSS]
     
     __slots__=['cancel', 'channel', 'page', 'pages', 'task_flag']
-    def __init__(self,client,channel,pages):
+    async def __init__(self,client,channel,pages):
         self.pages=pages
         self.page=0
         self.channel=channel
         self.cancel=type(self)._cancel
         self.task_flag=0
         
-        waitfor_wrapper(client,self,150.)
-        
-    async def start(self,wrapper):
-        client=wrapper.client
-
-        wrapper.event=client.events.reaction_add
-        wrapper.target=message = await client.message_create(self.channel,embed=self.pages[0])
+        message = await client.message_create(self.channel,embed=self.pages[0])
         message.weakrefer()
         
         if len(self.pages)>1:
@@ -524,7 +520,9 @@ class embedination_rr:
                 await client.reaction_add(message,emoji)
         else:
             await client.reaction_add(message,self.CROSS)
-            
+
+        waitfor_wrapper(client,self,150.,client.events.reaction_add,message)
+        
     async def __call__(self,wrapper,emoji,user):
         if user.is_bot:
             return
@@ -621,4 +619,4 @@ class embedination_rr:
 async def roles(client,message,content):
     if message.guild is None:
         return
-    role_details(client,message.channel)
+    await role_details(client,message.channel)

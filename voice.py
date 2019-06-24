@@ -42,14 +42,6 @@ async def voice(client,message,content):
                 voice_client.pause()
                 text='Voice paused.'
             break
-        if key=='stop':
-            voice_client=client.voice_client_for(message)
-            if voice_client is None:
-                text='There is no voice client at your guild'
-            else:
-                voice_client.stop()
-                text='Voice stopped'
-            break
         if key=='resume':
             voice_client=client.voice_client_for(message)
             if voice_client is None:

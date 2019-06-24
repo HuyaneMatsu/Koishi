@@ -4,6 +4,7 @@ from random import randint
 import os
 import re
 import time
+from weakref import WeakKeyDictionary
 
 #moving to the outer folder, so hata ll count as a package
 sys.path.append(os.path.abspath('..'))
@@ -30,7 +31,7 @@ from hata.events import (
     pagination,bot_reaction_waitfor,bot_message_event,wait_for_message,
     wait_for_emoji,prefix_by_guild,bot_reaction_delete_waitfor,cooldown,
     waitfor_wrapper)
-from hata.futures import CancelledError,sleep
+from hata.futures import CancelledError,sleep,wait_more
 from hata.prettyprint import pchunkify
 from hata.user import USERS,User
 from hata.client_core import KOKORO,stop_clients,CLIENTS
@@ -111,6 +112,9 @@ class typing_counter:
         self.timestamp=timestamp
         self.duration=8.
 
+_MOKOU_FIRE_RP=re.compile('i|u|you|we|iam')
+_MOKOU_MOKOU_RP=re.compile('mokou?')
+
 @Mokou.events
 async def message_create(client,message):
     while True:
@@ -174,9 +178,9 @@ async def message_create(client,message):
             if randint(0,2):
                 text=''
                 break
-            if 'fire' in content and re.match(r'(i|u|you|we|iam)\b',content):
+            if 'fire' in content and _MOKOU_FIRE_RP.search(content) is not None:
                 text='BURN!!!'
-            elif re.match(r'(\b|[^\s\d])(moko[u]{0,1})\b',content):
+            elif _MOKOU_MOKOU_RP.search(content) is not None:
                 text='Yes, its me..'
             else:
                 text=''
@@ -257,10 +261,11 @@ async def channel_delete(self,channel):
         pass
 
 class commit_extractor:
-    __slots__=['client', 'color', 'role', 'target', 'webhook']
-    def __init__(self,client,target,webhook,role=None,color=0):
+    _GIT_RP=re.compile('^\[`[\da-f]*`\]\((https://github.com/[^/]*/[^/]*/)commit')
+    __slots__=['channel', 'client', 'color', 'role', 'webhook']
+    def __init__(self,client,channel,webhook,role=None,color=0):
         self.client=client
-        self.target=target
+        self.channel=channel
         self.webhook=webhook
         self.role=role
         self.color=color
@@ -277,7 +282,7 @@ class commit_extractor:
         if ':master' not in embed.title:
             return
 
-        url=re.match('^\[`[\da-f]*`\]\((https://github.com/[^/]*/[^/]*/)commit',embed.description).group(1)+'commit/master'
+        url=self._GIT_RP.match(embed.description).group(1)+'commit/master'
         result = await client.download_url(url)
         soup=BeautifulSoup(result,'html.parser',from_encoding='utf-8')
         
@@ -324,7 +329,7 @@ class commit_extractor:
         if needs_unlock:
             try:
                 await Koishi.role_edit(self.role,mentionable=True)
-                await sleep(0.5,client.loop)
+                await sleep(0.8,client.loop)
                 await client.webhook_send(webhook,
                     result_content,
                     result_embed,
@@ -338,7 +343,7 @@ class commit_extractor:
                         name=webhook_name,
                         avatar_url=webhook_avatar_url
                             )
-                await sleep(0.5,client.loop)
+                await sleep(0.8,client.loop)
             finally:
                 await Koishi.role_edit(self.role,mentionable=False)
 
@@ -355,30 +360,19 @@ class message_delete_waitfor():
     __slots__=['__name__', 'waitfors']
     def __init__(self):
         self.__name__='message_delete'
-        self.waitfors={}
+        self.waitfors=WeakKeyDictionary()
 
     async def __call__(self,client,message):
         try:
-            event=self.waitfors[message.channel.id]
+            event=self.waitfors[message.channel]
         except KeyError:
             return
         await event(message)
 
 class Channeller_v_del():
-    __slots__=['index', 'parent']
+    __slots__=['parent']
     def __init__(self,parent):
         self.parent=parent
-        self.index=0
-
-    @property
-    def target(self):
-        pairs=self.parent.pairs
-        index=self.index
-        if index>=len(pairs):
-            index=0
-        self.index=index+1
-
-        return pairs[index][0]
 
     async def __call__(self,message):
         nonwebhook=(Client,User)
@@ -416,19 +410,19 @@ class Channeller_v_del():
                 break
                     
 class Channeller():
-    __slots__=['client', 'deleter', 'index', 'pairs']
+    __slots__=['client', 'deleter', 'pairs']
     def __init__(self,client,pairs):
         self.client=client
         self.pairs=pairs
         self.deleter=deleter=Channeller_v_del(self)
-        self.index=0
         
         event_1=client.events.message_create
         event_2=client.events.message_delete
         for pair in pairs:
-            event_1.append(self)
-            event_2.append(deleter)
-            CHANNELINGS[pair[0].id]=self
+            channel=pair[0]
+            event_1.append(self,channel)
+            event_2.append(deleter,channel)
+            CHANNELINGS[channel.id]=self
 
     def cancel(self,channel):
         event_1=self.client.events.message_create
@@ -443,30 +437,21 @@ class Channeller():
         else:
             for index,pair in enumerate(pairs):
                 if pair[0] is channel:
+                    del pairs[index]
                     break
-            self.index=index
-            deleter.index=index
-            event_1.remove(self)
-            event_2.remove(deleter)
-            del CHANNELINGS[channel[1][0].id]
+            event_1.remove(self,channel)
+            event_2.remove(deleter,channel)
+            del CHANNELINGS[channel.id]
             return
 
         for pair in pairs:
-            event_1.remove(self)
-            event_2.remove(deleter)
+            channel=pair[0]
+            event_1.remove(self,channel)
+            event_2.remove(deleter,channel)
             
         deleter.parent=None
         self.deleter=None
-        
-    @property
-    def target(self):
-        pairs=self.pairs
-        index=self.index
-        if index>=len(pairs):
-            index=0
-        self.index=index+1
 
-        return pairs[index][0]
     
     async def __call__(self,message):
         if type(message.author) not in (Client,User):
@@ -603,15 +588,17 @@ async def guild_user_add(client,guild,user):
         await client.user_role_add(user,AOE2_S_role)
 
 with Koishi.events(bot_message_event(PREFIXES)) as on_command:
+
+    webhook_sender=commit_extractor(
+        Koishi,
+        Channel_text.precreate(555476090382974999),
+        Webhook.precreate(555476334210580508),
+        role=Role.precreate(538397994421190657),
+        color=0x2ad300,
+            )
     
-    Koishi.events.message_create.append(
-        commit_extractor(
-            Koishi,
-            Channel_text.precreate(555476090382974999),
-            Webhook.precreate(555476334210580508),
-            role=Role.precreate(538397994421190657),
-            color=0x2ad300,
-                ))
+    Koishi.events.message_create.append(webhook_sender,webhook_sender.channel)
+
         
     on_command(dispatch_tester.here)
     on_command(dispatch_tester.switch)
@@ -628,24 +615,23 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     on_command(_DS_modify_best)
     on_command(channeling_start)
     on_command(channeling_stop)
-    
+
+    _KOISHI_NOU_RP=re.compile(r'n+\s*o+\s*u+',re.I)
+    _KOISHI_OWO_RP=re.compile('(owo|uwu|0w0)',re.I)
     @on_command
     async def default_event(client,message):
         content=message.content
         text=None
-        if re.match(r'n+\s*o+\s*u+',content,re.IGNORECASE) is not None:
+        if _KOISHI_NOU_RP.match(content) is not None:
             parts=[]
             for value in 'nou':
                 emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
                 await client.reaction_add(message,emoji)
                     
         elif len(content)==3:
-            if re.match(r'^owo$',content,re.IGNORECASE):
-                text='OwO'
-            elif re.match(r'^uwu$',content,re.IGNORECASE):
-                text='UwU'
-            elif re.match(r'^0w0$',content,re.IGNORECASE):
-                text='0w0'
+            matched=_KOISHI_OWO_RP.match(content,)
+            if matched is not None:
+                text=f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
         
         if text:
             await client.message_create(message.channel,text)
@@ -663,13 +649,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
 
     @on_command
-    async def dice(client,message,content):
-        search_result=re.match(r'([0-9]+).*',content)
-        if search_result:
-            times=int(search_result.groups()[0])
-        else:
-            times=1
-
+    @content_parser('int, default="1"')
+    async def dice(client,message,times):
         if times==0:
             text='0 KEK'
         elif times>6:
@@ -703,12 +684,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @on_command
     @cooldown(30.,'user',handler=cooldown_handler())
     async def ping(client,message,content):
-        kokoro=client.websocket.kokoro
-        if kokoro is None:
-            text='Disconnecting'
-        else:
-            text=f'{int(kokoro.latency*1000.)} ms'
-        await client.message_create(message.channel,text)
+        await client.message_create(message.channel,f'{int(client.kokoro.latency*1000.)} ms')
     
 
     @on_command
@@ -725,9 +701,6 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                     'rest, default="f\'{message.author:f} asked for it\'"')
     async def clear(client,message,limit,reason):
         await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
-
-    MAGIC_PATTERN=re.compile('.*?(p[lw][sz]|p[lw]ea[sz]e|desu|kudasai)[\.\!]*?',re.I)
-
 
     @on_command
     async def waitemoji(client,message,content):
@@ -983,7 +956,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             if index==embed_ln:
                 break
         
-        pagination(client,message.channel,result)
+        await pagination(client,message.channel,result)
 
     @on_command
     async def leave_guild(client,message,content):
@@ -995,7 +968,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @on_command
     async def change_prefix(client,message,content):
         guild=message.guild
-        if guild is None or message.author is not guild.owner:
+        if (guild is None) or (message.author is not guild.owner) or (not content):
             return
         content=filter_content(content)[0]
         if not (0<len(content)<33):
@@ -1101,7 +1074,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             await client.message_create(message.channel,'Could not find that user')
             return
         
-        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
+        await pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
 
 
     @on_command
@@ -1113,7 +1086,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         connections = await client.user_connections(user.access)
         
-        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
+        await pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
         
         
     @on_command
@@ -1125,7 +1098,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         guilds = await client.user_guilds(user.access)
         
-        pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
+        await pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
         
     @on_command
     async def oa2_my_guild(client,message,content):
@@ -1213,7 +1186,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         soup = BeautifulSoup(data,'html.parser',from_encoding='utf-8')
         text = soup.prettify()
         result = [{'content':element} for element in others.cchunkify(text.splitlines())]
-        pagination(self,message.channel,result)
+        await pagination(self,message.channel,result)
 
     @on_command
     @content_parser('emoji')
@@ -1281,7 +1254,111 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     async def random(client,message,v1,v2):
         result=randint(v2,v1) if v1>v2 else randint(v1,v2)
         await client.message_create(message.channel,str(result))
+
+    async def pararell_load(client,channel,future):
+        try:
+            await client.message_at_index(channel,256256256) #gl
+        except (IndexError,PermissionError) as err:
+            pass
+        except BaseException as err:
+            traceback.print_exc()
+        finally:
+            future.set_result(None)
         
+    @on_command
+    async def count_messages(client,message,content):
+        if message.author is not client.owner:
+            return
+        source_channel=message.channel
+        guild=source_channel.guild
+        if guild is None:
+            return
+        
+        loop=client.loop
+        channels=guild.messageable_channels
+        future=wait_more(loop,len(channels))
+        users={}
+        
+        with client.keep_typing(source_channel):
+            for channel in channels:
+                client.loop.create_task(pararell_load(client,channel,future))
+
+            await future
+            
+            for channel in channels:
+                for message in channel.messages:
+                    user=message.author
+                    if type(user) in (Client,User):
+                        users[user]=users.get(user,0)+1
+        users=list(users.items())
+        users.sort(reverse=True,key=lambda item:item[1])
+        text=[f'{index}.: {user:f} : {count}' for index,(user,count) in enumerate(users,1)]
+        chunks=[{'content':chunk} for chunk in others.chunkify(text)]
+        await pagination(client,source_channel,chunks)
+
+    async def pararell_load_reactions(client,channel,future,reactions):
+        try:
+            await client.message_at_index(channel,256256256) #gl
+        except (IndexError,PermissionError) as err:
+            pass
+        except BaseException as err:
+            traceback.print_exc()
+        finally:
+            messages=[message for message in channel.messages if message.reactions]
+            for message in messages:
+                try:
+                    await client.reaction_load_all(message)
+                except DiscordException:
+                    continue
+                for emoji,reacters in message.reactions.items():
+                    for user in reacters:
+                        try:
+                            user_s=reactions[user]
+                        except KeyError:
+                            user_s=reactions[user]={}
+                        user_s[emoji]=user_s.get(emoji,0)+1
+
+            future.set_result(None)
+        
+    @on_command
+    async def count_reactions(client,message,content):
+        if message.author is not client.owner:
+            return
+        source_channel=message.channel
+        guild=source_channel.guild
+        if guild is None:
+            return
+        
+        loop=client.loop
+        channels=guild.messageable_channels
+        future=wait_more(loop,len(channels))
+        reactions={}
+        
+        with client.keep_typing(source_channel):
+            for channel in channels:
+                client.loop.create_task(pararell_load_reactions(client,channel,future,reactions))
+
+            await future
+
+        sorted_reactions=[]
+        for user,emojis in reactions.items():
+            emoji_count=sum(emojis.values())
+            emojis=list(emojis.items())
+            emojis.sort(reverse=True,key=lambda item:item[1])
+            sorted_reactions.append((user,emojis,emoji_count),)
+            
+        sorted_reactions.sort(reverse=True,key=lambda item:item[2])
+
+        text=[]
+        for index,(user,emojis,amount) in enumerate(sorted_reactions,1):
+            text.append(f'{index}.: {user:f} {amount}')
+            for index,(emoji,emoji_count) in enumerate(emojis,1):
+                text.append(f' - {index} {emoji:e} {emoji_count}')
+        
+        chunks=[{'content':chunk} for chunk in others.chunkify(text)]
+        await pagination(client,source_channel,chunks)
+    
+    
 ##def start_console():
 ##    import code
 ##    shell = code.InteractiveConsole(globals().copy())

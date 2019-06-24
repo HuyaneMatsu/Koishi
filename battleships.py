@@ -128,7 +128,7 @@ class active_request:
         return self.hash!=other.hash
     
 class battle_manager:
-    __slots__=['games','requesters','requests']
+    __slots__=['games', 'requesters', 'requests']
     def __init__(self):
         self.games={}
         self.requesters=set()
@@ -262,8 +262,8 @@ class ship_type:
                 yield n_x+n_y
 
 class user_profile:
-    __slots__=['channel', 'client', 'data', 'last_switch', 'other', 'page',
-        'process', 'ship_positions', 'ships_left', 'state', 'target', 'text',
+    __slots__=['channel', 'client', 'data', 'last_switch', 'message', 'other',
+        'page', 'process', 'ship_positions', 'ships_left', 'state', 'text',
         'user', 'won']
     ships=[0,2,1,1]
     def __init__(self,user,client):
@@ -280,32 +280,34 @@ class user_profile:
         if new:
             if text is not None:
                 self.text=text
-            self.target = await client.message_create(self.channel,embed=self.render_state_0())
+            self.message = await client.message_create(self.channel,embed=self.render_state_0())
         else:
             if self.text==text:
                 #we do nothing
                 pass
             else:
                 self.text=text
-                await client.message_edit(self.target,embed=self.render_state_0())
+                await client.message_edit(self.message,embed=self.render_state_0())
 
     async def process_state_1(self,new,text):
         client=self.client
 
         if text is not None:
             self.text=text
-                
-        if new:
-            client.events.reaction_add.remove(self)
-            client.events.reaction_delete.remove(self)
 
-            self.target = await client.message_create(self.channel,embed=self.render_state_1())
-            client.loop.create_task(client.reaction_add(self.target,SWITCH))
+        message=self.message
+        if new:
+            client.events.reaction_add.remove(self,message)
+            client.events.reaction_delete.remove(self,message)
+
+            message = await client.message_create(self.channel,embed=self.render_state_1())
+            self.message=message
+            client.loop.create_task(client.reaction_add(message,SWITCH))
             
-            client.events.reaction_add.append(self)
-            client.events.reaction_delete.append(self)
+            client.events.reaction_add.append(self,message)
+            client.events.reaction_delete.append(self,message)
         else:
-            await client.message_edit(self.target,embed=self.render_state_1())
+            await client.message_edit(message,embed=self.render_state_1())
 
         self.last_switch=0.
 
@@ -327,11 +329,12 @@ class user_profile:
         
         client=self.client
         
-        self.target = await client.message_create(self.channel,embed=self.render_state_1())
+        message = await client.message_create(self.channel,embed=self.render_state_1())
+        self.message=message
         client.loop.create_task(client.reaction_add(self.target,SWITCH))
         
-        client.events.reaction_add.append(self)
-        client.events.reaction_delete.append(self)
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
 
         self.last_switch=0.
         
@@ -344,14 +347,16 @@ class user_profile:
         
         client=self.client
 
-        client.events.reaction_add.remove(self)
-        client.events.reaction_delete.remove(self)
+        message=self.target
+        client.events.reaction_add.remove(self,message)
+        client.events.reaction_delete.remove(self,message)
         
-        self.target = await client.message_create(self.channel,embed=self.render_state_2())
-        client.loop.create_task(client.reaction_add(self.target,SWITCH))
+        message = await client.message_create(self.channel,embed=self.render_state_2())
+        self.message=message
+        client.loop.create_task(client.reaction_add(message,SWITCH))
 
-        client.events.reaction_add.append(self)
-        client.events.reaction_delete.append(self)
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
         
         self.last_switch=0.
         
@@ -370,7 +375,7 @@ class user_profile:
         else:
             embed=self.render_state_1()
         
-        await self.client.message_edit(self.target,embed=embed)
+        await self.client.message_edit(message,embed=embed)
 
 
     def cancel(self):
@@ -381,14 +386,14 @@ class user_profile:
 
         del self.other
         if self.process.__func__ is type(self).process_state_1:
-            client.events.reaction_add.remove(self)
-            client.events.reaction_delete.remove(self)
+            client.events.reaction_add.remove(self,self.message)
+            client.events.reaction_delete.remove(self,self.message)
         
     async def cancel_later(self):
         client=self.client
         await sleep(300.,client.loop)
-        client.events.reaction_add.remove(self)
-        client.events.reaction_delete.remove(self)
+        client.events.reaction_add.remove(self,self.message)
+        client.events.reaction_delete.remove(self,self.message)
         del self.other
 
 
@@ -471,7 +476,7 @@ class user_profile:
 
 class battleships_game:
     __slots__=['actual', 'client', 'future', 'manager', 'player1', 'player2',
-        'process', 'target']
+        'process']
     def __init__(self,manager,client,user1,user2,channel2):
 
         manager.games[user1]=self
@@ -502,10 +507,8 @@ class battleships_game:
             player1.channel = await client.channel_private_create(player1.user)
 
             #adding channels to the event to notify us
-            self.target=player1.channel
-            client.events.message_create.append(self)
-            self.target=player2.channel
-            client.events.message_create.append(self)
+            client.events.message_create.append(self,player1.channel)
+            client.events.message_create.append(self,player2.channel)
             
             #game starts            
             self.future=wait_more(loop,2)
@@ -820,13 +823,9 @@ class battleships_game:
         await self.process(message)
         
     def cancel(self):
-        #self.target=self.player2.channel
         event=self.client.events.message_create
-        #self.target should be channel2
-        event.remove(self)
-        #now from the other channell
-        self.target=self.player1.channel
-        event.remove(self)
+        event.remove(self,self.player1.channel)
+        event.remove(self,self.player2.channel)
         
         del self.manager.games[self.player1.user]
         del self.manager.games[self.player2.user]

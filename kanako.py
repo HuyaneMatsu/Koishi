@@ -2,19 +2,18 @@
 from hata.events_compiler import content_parser
 from hata.futures import Future,CancelledError,InvalidStateError
 from random import randint
-from hata.dereaddons_local import any_to_any
+from hata.dereaddons_local import any_to_any,asyncinit
 from time import monotonic
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS
 from hata.events import waitfor_wrapper
 from hata.color import Color
 from hata.embed import Embed
-from io import BytesIO
 from PIL import Image as PIL
 from PIL.ImageDraw import ImageDraw
 from PIL.ImageFont import truetype
 import os
-from hata.client import ASBytesIO
+from hata.ios import ReuBytesIO
 from help_handler import HELP
 
 class ms_cache(object):
@@ -23,7 +22,7 @@ class ms_cache(object):
     def get_doc(self):
         return self.parent.klass.__doc__
     def set_doc(self,value):
-        self.parent.klass.__doc__==value
+        self.parent.klass.__doc__=value
     __doc__=property(get_doc,set_doc)
     del get_doc,set_doc
 
@@ -124,13 +123,13 @@ MAP_showcases={name:render_showcase(name,map_) for name,map_ in MAPS.items()}
 class history_element():
     __slots__=['answer', 'answers', 'options', 'question']
 
-class kanako_game:
+class kanako_game():
     __slots__=['amount', 'answers', 'client', 'history', 'map', 'map_name',
-        'options', 'possibilities', 'romajis', 'running', 'target', 'users',
+        'options', 'possibilities', 'romajis', 'running', 'channel', 'users',
         'waiter']
     def __init__(self,client,channel,user,map_name,amount,possibilities):
         self.client=client
-        self.target=channel
+        self.channel=channel
         self.users=[user]
 
         self.map_name=map_name
@@ -139,9 +138,11 @@ class kanako_game:
         
         self.running=False
         self.waiter=Future(client.loop)
-        client.loop.create_task(self.start())
+
+        client.loop.create_task(self.start_waiting())
         
-    async def start(self):
+    async def start_waiting(self):
+    
         try:
             await self.waiter.sleep(300.)
         except CancelledError:
@@ -163,7 +164,7 @@ class kanako_game:
         self.history=[]
         self.answers={}
         self.running=True
-        self.client.events.message_create.append(self)
+        self.client.events.message_create.append(self,self.channel)
         
         self.client.loop.create_task(self.run())
 
@@ -253,9 +254,9 @@ class kanako_game:
             
     async def run(self):
         client=self.client
-        channel=self.target
+        channel=self.channel
         answers=self.answers
-        buffer=ASBytesIO()
+        buffer=ReuBytesIO()
         embed=Embed(color=COLOR)
         embed.add_image('attachment://guessme.png')
         embed.add_footer('')
@@ -302,10 +303,10 @@ class kanako_game:
         await self.send_or_except(Embed(embed.title,'',COLOR))
             
         del ACTIVE_GAMES[channel.id]
-        client.events.message_create.remove(self)
+        client.events.message_create.remove(self,self.channel)
         self.running=False
 
-        game_statistics(self)
+        await game_statistics(self)
     
     async def __call__(self,message):
         if message.author not in self.users or self.waiter.done() or message.author.id in self.answers or len(message.content)>4:
@@ -337,7 +338,7 @@ class kanako_game:
 
     async def send_or_except(self,embed):
         try:
-            await self.client.message_create(self.target,embed=embed)
+            await self.client.message_create(self.channel,embed=embed)
         except DiscordException:
             self.cacncel()
         
@@ -366,7 +367,7 @@ class kanako_game:
                 self.waiter.cancel()
                 
             break
-        self.client.loop.create_task(self.client.message_create(self.target,embed=Embed('',message,COLOR)))
+        self.client.loop.create_task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)))
         
     def remove(self,user):
         while True:
@@ -395,17 +396,17 @@ class kanako_game:
                     except InvalidStateError:
                         pass
             break
-        self.client.loop.create_task(self.client.message_create(self.target,embed=Embed('',message,COLOR)))
+        self.client.loop.create_task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)))
 
     def cancel(self):
         client=self.client
-        del ACTIVE_GAMES[self.target.id]
+        del ACTIVE_GAMES[self.channel.id]
         if self.running:
-            client.events.message_create.remove(self)
+            client.events.message_create.remove(self,self.channel)
             self.running=False
-        client.loop.create_task(client.message_create(self.target,embed=Embed('','Game cancelled',COLOR)))
+        client.loop.create_task(client.message_create(self.channel,embed=Embed('','Game cancelled',COLOR)))
 
-class game_statistics():
+class game_statistics(metaclass=asyncinit):
     __slots__=['cache', 'source']
     def __len__(self):
         return self.cache.__len__()
@@ -413,7 +414,8 @@ class game_statistics():
         self.source=source
         self.cache=[None for _ in range((self.source.history.__len__()+9)//10+1)]
         self.createpage0()
-        embedination(source.client,source.target,self)
+        #we return a coro, so it is valid ^.^
+        return embedination(source.client,source.channel,self)
 
     def createpage0(self):
         user_count  = len(self.source.users)
@@ -587,7 +589,7 @@ async def kanako_manager(client,message,command,*args):
     else:
         try:
             pages=MAP_showcases[command]
-            embedination(client,channel,pages)
+            await embedination(client,channel,pages)
             return
         except KeyError:
             embed=HELP['kanako']
@@ -626,6 +628,7 @@ def kanako_create(client,game,message,args):
             possibilities=5
 
         game=kanako_game(client,message.channel,message.author,map_name,amount,possibilities)
+        
         ACTIVE_GAMES[message.channel.id]=game
         embed=game.info
         embed.title='Game succesfully created'
@@ -637,7 +640,7 @@ def kanako_create(client,game,message,args):
         return Embed('',text,COLOR)
 
 
-class embedination:
+class embedination(metaclass=asyncinit):
     LEFT2   = BUILTIN_EMOJIS['rewind']
     LEFT    = BUILTIN_EMOJIS['arrow_backward']
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
@@ -646,38 +649,24 @@ class embedination:
     emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET]
     
     __slots__=['cancel', 'channel', 'page', 'pages', 'task', 'wrappers']
-    def __init__(self,client,channel,pages):
+    async def __init__(self,client,channel,pages):
         self.pages=pages
         self.page=0
         self.channel=channel
         self.cancel=type(self)._cancel
         self.task=None
         self.wrappers=[]
-        waitfor_wrapper(client,self,150.)
-        waitfor_wrapper(client,self,150.)
-        
-    async def start(self,wrapper):
-        client=wrapper.client
 
-        if self.wrappers:
-            wrapper.event=client.events.reaction_add
-        else:
-            wrapper.event=client.events.reaction_delete
-            
-        self.wrappers.append(wrapper)
+        message = await client.message_create(self.channel,embed=self.pages[0])
+        message.weakrefer()
         
-        if self.task is None:
-            self.task=client.loop.create_task(client.message_create(self.channel,embed=self.pages[0]))
-            wrapper.target = target = await self.task
-            self.task=None
-            target.weakrefer()
-            if len(self.pages)>1:
-                for emoji in self.emojis:
-                    await client.reaction_add(target,emoji)
-            return
-        
-        wrapper.target = await self.task
-        
+        if len(self.pages)>1:
+            for emoji in self.emojis:
+                await client.reaction_add(message,emoji)
+
+        for event in (client.events.reaction_add,client.events.reaction_delete):
+            wrapper=waitfor_wrapper(client,self,150.,event,message)
+            self.wrappers.append(wrapper)
 
     async def __call__(self,wrapper,emoji,user):
         if self.task is not None or user.is_bot:

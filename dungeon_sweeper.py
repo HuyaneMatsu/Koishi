@@ -2,7 +2,8 @@
 from itertools import chain
 import re
 from time import monotonic
-    
+
+from hata.dereaddons_local import asyncinit
 from hata.events_compiler import content_parser
 from hata.embed import Embed
 from hata.color import Color
@@ -73,9 +74,9 @@ async def ds_manager(self,message,command):
                 break
             
             if game is None:
-                return ds_game(self,message.channel,message.author)
+                return (await ds_game(self,message.channel,message.author))
             else:
-                return await game.renew(message.channel)
+                return (await game.renew(message.channel))
             
         if command=='rules':
             if permissions.can_use_external_emojis:
@@ -91,7 +92,7 @@ async def ds_manager(self,message,command):
 
 #:-> @ <-:#}{#:-> @ <-:#{ backend }#:-> @ <-:#}{#:-> @ <-:#
 
-class ds_game:
+class ds_game(metaclass=asyncinit):
 
     WEST    = BUILTIN_EMOJIS['arrow_left']
     NORTH   = BUILTIN_EMOJIS['arrow_up']
@@ -116,26 +117,24 @@ class ds_game:
     
     emojis_menu=(UP,DOWN,UP2,DOWN2,LEFT,RIGHT,SELECT)
     
-    __slots__ = ['call', 'cache', 'channel', 'client', 'data', 'last',
-        'position', 'position_ori', 'stage', 'target', 'task', 'user']
+    __slots__ = ['cache', 'call', 'channel', 'client', 'data', 'last', 'message',
+        'position', 'position_ori', 'stage', 'task', 'user']
 
     __async_call__ = True
     
-    def __init__(self,client,channel,user):
+    async def __init__(self,client,channel,user):
         
         DS_GAMES[user.id]   = self
         self.client         = client
         self.user           = user
         self.channel        = channel
-        self.target         = None
+        self.message        = None
         self.stage          = None
         self.task           = Future(client.loop)
         self.call           = type(self).call_menu
         self.cache          = [None for _ in range(len(CHARS))]
         self.last           = monotonic()
-        client.loop.create_task(self.start())
         
-    async def start(self):
         async with DB_ENGINE.connect() as connector:
             result = await connector.execute(DS_TABLE.select(ds_model.user_id==self.user.id))
             stats = await result.fetchall()
@@ -148,36 +147,37 @@ class ds_game:
             self.position_ori=-1
             self.data=bytearray(800)
 
-        client=self.client
         loop=client.loop
         
         try:
-            self.target = await client.message_create(self.channel,embed=self.render_menu())
+            message = await client.message_create(self.channel,embed=self.render_menu())
+            self.message=message
             for emoji in self.emojis_menu:
-                loop.create_task(client.reaction_add(self.target,emoji))
+                loop.create_task(client.reaction_add(message,emoji))
         except DiscordException:
             try:
-                if self.target is not None:
+                if message is not None:
                     await client.message_create(self.channel,'',Embed('','Error meanwhile initializing'))
             except DiscordException:
                 pass
             del DS_GAMES[self.user.id]
         else:
-            self.target.weakrefer()
+            message.weakrefer()
             self.task.set_result(None)
-            client.events.reaction_add.append(self)
+            client.events.reaction_add.append(self,message)
             
     async def start_menu(self):
         self.stage=None
         
         client=self.client
         loop=client.loop
+        message=self.message
         try:
-            loop.create_task(client.reaction_clear(self.target))
+            loop.create_task(client.reaction_clear(message))
             for emoji in self.emojis_menu:
-                loop.create_task(client.reaction_add(self.target,emoji))
+                loop.create_task(client.reaction_add(message,emoji))
             
-            await client.message_edit(self.target,embed=self.render_menu())
+            await client.message_edit(message,embed=self.render_menu())
         except DiscordException:
             return loop.create_task(self.cancel())
         finally:
@@ -186,7 +186,6 @@ class ds_game:
             self.task.set_result(None)
 
     async def start_game(self):
-        
         
         i1,rest=divmod(self.position,33)
         if rest<3:
@@ -198,13 +197,14 @@ class ds_game:
         self.stage=stage_backend(STAGES[i1][i2][i3],self.value_from_position(self.position))
 
         client=self.client
-        loop=client.loop  
+        loop=client.loop
+        message=self.message
         try:
-            loop.create_task(client.reaction_clear(self.target))
+            loop.create_task(client.reaction_clear(message))
             for emoji in chain(self.emojis_game_p1,(self.stage.source.emoji,),self.emojis_game_p2):
-                loop.create_task(client.reaction_add(self.target,emoji))
+                loop.create_task(client.reaction_add(message,emoji))
             
-            await client.message_edit(self.target,embed=self.render_game())
+            await client.message_edit(message,embed=self.render_game())
         except DiscordException:
             return loop.create_task(self.cancel())
         finally:
@@ -217,13 +217,13 @@ class ds_game:
         loop=client.loop
         
         task=loop.create_task(self.save_done())
-        
+        message=self.message
         try:
-            loop.create_task(client.reaction_clear(self.target))
-            loop.create_task(client.reaction_add(self.target,self.RESET))
-            loop.create_task(client.reaction_add(self.target,self.CANCEL))
+            loop.create_task(client.reaction_clear(message))
+            loop.create_task(client.reaction_add(message,self.RESET))
+            loop.create_task(client.reaction_add(message,self.CANCEL))
             
-            await client.message_edit(self.target,embed=self.render_done())
+            await client.message_edit(message,embed=self.render_done())
         except DiscordException:
             return loop.create_task(self.cancel())
         finally:
@@ -273,7 +273,7 @@ class ds_game:
                 break
 
             if emoji is self.SELECT:
-                if self.target.embeds[0].fields:
+                if self.message.embeds[0].fields:
                     self.task.clear()
                     await self.start_game()
                 else:
@@ -340,7 +340,7 @@ class ds_game:
         self.task.clear()
 
         try:
-            await self.client.message_edit(self.target,embed=self.render_menu())
+            await self.client.message_edit(self.message,embed=self.render_menu())
         except DiscordException:
             return self.client.loop.create_task(self.cancel())
         finally:
@@ -397,7 +397,7 @@ class ds_game:
         client.loop.create_task(self.reaction_delete(emoji))
         
         try:
-            await self.client.message_edit(self.target,embed=self.render_game())
+            await self.client.message_edit(self.message,embed=self.render_game())
         except DiscordException:
             return self.client.loop.create_task(self.cancel())
         finally:
@@ -430,7 +430,7 @@ class ds_game:
         except KeyError:
             return #already cancelled
         
-        self.client.events.reaction_add.remove(self)
+        self.client.events.reaction_add.remove(self,self.message)
 
         await self.save_position()
 
@@ -505,38 +505,38 @@ class ds_game:
         loop=client.loop
         try:
             if self.call is type(self).call_game:
-                target = await client.message_create(channel,embed=self.render_game())
+                message = await client.message_create(channel,embed=self.render_game())
                 for emoji in chain(self.emojis_game_p1,(self.stage.source.emoji,),self.emojis_game_p2):
-                    loop.create_task(client.reaction_add(target,emoji))
+                    loop.create_task(client.reaction_add(message,emoji))
             elif self.call is type(self).call_menu:
-                target = await client.message_create(channel,embed=self.render_menu())
+                message = await client.message_create(channel,embed=self.render_menu())
                 for emoji in self.emojis_menu:
-                    loop.create_task(client.reaction_add(target,emoji))
+                    loop.create_task(client.reaction_add(message,emoji))
             else:
-                target = await client.message_create(channel,embed=self.render_done())
-                loop.create_task(client.reaction_add(target,self.RESET))
-                loop.create_task(client.reaction_add(target,self.CANCEL))
+                message = await client.message_create(channel,embed=self.render_done())
+                loop.create_task(client.reaction_add(message,self.RESET))
+                loop.create_task(client.reaction_add(message,self.CANCEL))
                 
         except DiscordException:
             try:
-                if self.target is not None:
+                if message is not None:
                     await client.message_create(channel,'',Embed('','Error meanwhile initializing'))
             except DiscordException:
                 pass
             return
         else:
             try:
-                await client.reaction_clear(self.target)
+                await client.reaction_clear(self.message)
             except DiscordException:
                 pass
                 
-            client.events.reaction_add.remove(self)
+            client.events.reaction_add.remove(self,self.message)
 
-            target.weakrefer()
-            self.target=target
+            message.weakrefer()
+            self.message=message
             self.channel=channel
             
-            client.events.reaction_add.append(self)
+            client.events.reaction_add.append(self,message)
 
         finally:
             self.last=monotonic()
@@ -671,7 +671,7 @@ class ds_game:
                                        
     async def reaction_delete(self,emoji):
         try:
-            await self.client.reaction_delete(self.target,emoji,self.user)
+            await self.client.reaction_delete(self.message,emoji,self.user)
         except DiscordException:
             pass
 
@@ -786,11 +786,11 @@ class stage_source:
         return self.char[3]
     
     def rate(self,steps):
-        best=float(self.best) #stick using to one datatype
+        best=self.best
         for rating in ('S','A','B','C','D','E'):
             if steps<=best:
                 break
-            best=best*1.05+2.
+            best+=5
         return rating
 
     @property
