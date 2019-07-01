@@ -37,7 +37,7 @@ def create_help_help(prefix):
 
     return result
 
-HELP['help']=Embed(title='rate',color=HELP_COLOR,
+HELP['help']=Embed(title='help',color=HELP_COLOR,
     description='Shows the list of the commands.'
         )
 
@@ -95,10 +95,6 @@ HELP['message_me']=Embed(title='message_me',color=HELP_COLOR,
 
 HELP['clear']=Embed(title='clear',color=HELP_COLOR,
     description='Clears the set amount of messages (default=1)'
-        )
-
-HELP['hug']=Embed(title='hug',color=HELP_COLOR,
-    description='After u said the magic word hugs the choosen one'
         )
 
 HELP['waitemoji']=Embed(title='waitemoji',color=HELP_COLOR,

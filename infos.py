@@ -322,6 +322,7 @@ del generate_love_level
 
 @infos
 @content_parser('user, flags="mna"',
+                'condition, default="message.author is user_0"',
                 on_failure=show_help('love'))
 async def love(client,message,target):
     source=message.author

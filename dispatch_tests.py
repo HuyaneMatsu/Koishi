@@ -235,6 +235,12 @@ class dispatch_tester:
             if key=='boosts_since':
                 result.append(f'{key} changed: {value!r} -> {user.boosts_since!r}')
                 continue
+
+            if key=='boosts':
+                added='None' if value is None else f'\'{value.name}\''
+                removed='None' if user.boosts is None else f'\'{user.boosts.name}\''
+                result.append(f'{key} changed: {added} ->  {removed}')
+                continue
             
             raise RuntimeError(key)
 

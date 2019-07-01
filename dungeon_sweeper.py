@@ -1048,9 +1048,6 @@ REIMU_EMOJI=Emoji.precreate(574307645347856384,name='REIMU')
 CHARS.append((REIMU_STYLE,REIMU_SKILL_ACTIVATE,REIMU_SKILL_USE,REIMU_EMOJI),)
 
 FURANDOORU_STYLE = {
-        }
-
-FURANDOORU_STYLE = {
     WALL_N                      : Emoji.precreate(580143707534262282,name='0X').as_emoji,
     FLOOR                       : Emoji.precreate(580150656501940245,name='0Y').as_emoji,
     TARGET                      : Emoji.precreate(580153111545511967,name='0b').as_emoji,
@@ -1117,7 +1114,35 @@ FURANDOORU_EMOJI=Emoji.precreate(575387120147890210,name='FURANDOORU')
 CHARS.append((FURANDOORU_STYLE,FURANDOORU_SKILL_ACTIVATE,FURANDOORU_SKILL_USE,FURANDOORU_EMOJI),)
 
 YUKARI_STYLE = {
+    WALL_N                      : Emoji.precreate(593179300270702593,name='0w').as_emoji,
+    FLOOR                       : Emoji.precreate(593179300426022914,name='0x').as_emoji,
+    TARGET                      : Emoji.precreate(593179300019306556,name='0y').as_emoji,
+    OBJECT_P                    : NOTHING_EMOJI.as_emoji,
+    HOLE_P                      : Emoji.precreate(593179300287479833,name='0z').as_emoji,
+    BOX                         : Emoji.precreate(593179300296130561,name='10').as_emoji,
+    BOX_TARGET                  : Emoji.precreate(593179300136615936,name='11').as_emoji,
+    BOX_HOLE                    : Emoji.precreate(593179300149067790,name='12').as_emoji,
+    BOX_OBJECT                  : NOTHING_EMOJI.as_emoji,
+    HOLE_U                      : Emoji.precreate(593179300153262196,name='13').as_emoji,
+    OBJECT_U                    : NOTHING_EMOJI.as_emoji,
+    CHAR_N|FLOOR                : Emoji.precreate(593179300161650871,name='14').as_emoji,
+    CHAR_E|FLOOR                : Emoji.precreate(593179300153262257,name='15').as_emoji,
+    CHAR_S|FLOOR                : Emoji.precreate(593179300300324887,name='16').as_emoji,
+    CHAR_W|FLOOR                : Emoji.precreate(593179300237410314,name='17').as_emoji,
+    CHAR_N|TARGET               : Emoji.precreate(593179300207919125,name='18').as_emoji,
+    CHAR_E|TARGET               : Emoji.precreate(593179300145135646,name='19').as_emoji,
+    CHAR_S|TARGET               : Emoji.precreate(593179300170301451,name='1A').as_emoji,
+    CHAR_W|TARGET               : Emoji.precreate(593179300153262189,name='1B').as_emoji,
+    CHAR_N|HOLE_P               : Emoji.precreate(593179300199399531,name='1C').as_emoji,
+    CHAR_E|HOLE_P               : Emoji.precreate(593179300300193800,name='1D').as_emoji,
+    CHAR_S|HOLE_P               : Emoji.precreate(593179300216176760,name='1E').as_emoji,
+    CHAR_W|HOLE_P               : Emoji.precreate(593179300153524224,name='1F').as_emoji,
+    CHAR_N|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_E|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_S|OBJECT_P             : NOTHING_EMOJI.as_emoji,
+    CHAR_W|OBJECT_P             : NOTHING_EMOJI.as_emoji,
         }
+YUKARI_STYLE.update(DEFAULT_STYLE_PARTS)
 
 def YUKARI_SKILL_ACTIVATE(self):
     map_=self.map

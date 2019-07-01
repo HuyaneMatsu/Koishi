@@ -357,9 +357,9 @@ class commit_extractor:
 
 @inherit(bot_message_event)
 class message_delete_waitfor():
-    __slots__=['__name__', 'waitfors']
+    __slots__=['waitfors']
+    __event_name__='message_delete'
     def __init__(self):
-        self.__name__='message_delete'
         self.waitfors=WeakKeyDictionary()
 
     async def __call__(self,client,message):
@@ -567,11 +567,20 @@ async def channeling_stop(client,message,content):
     
     
 @Koishi.events
-async def ready(client):
-    print(f'{client:f} ({client.id}) logged in')
-    await client.update_application_info()
-    print(f'owner: {client.owner:f} ({client.owner.id})')
-    update_about(client)
+class once_on_ready:
+    __slots__ = ['called',]
+    __event_name__='ready'
+    def __init__(self):
+        self.called=False
+    async def __call__(self,client):
+        if self.called:
+            return
+        self.called=True
+
+        print(f'{client:f} ({client.id}) logged in')
+        await client.update_application_info()
+        print(f'owner: {client.owner:f} ({client.owner.id})')
+        update_about(client)
     
 Koishi.events(bot_reaction_waitfor())
 Koishi.events(bot_reaction_delete_waitfor())
@@ -713,8 +722,6 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         except TimeoutError:
             emoji=None
         except Exception as err:
-            print(err)
-            traceback.print_exc()
             return
         
         try:
@@ -1197,7 +1204,8 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
     @on_command
     async def nitro(client,message,content):
-        client.loop.create_task(client.message_delete(message))
+        if message.channel.permissions_for(client).can_manage_messages:
+            client.loop.create_task(client.message_delete(message))
         content=filter_content(content)
         
         if not content:
@@ -1357,7 +1365,13 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         chunks=[{'content':chunk} for chunk in others.chunkify(text)]
         await pagination(client,source_channel,chunks)
-    
+
+    @on_command
+    @content_parser('delta, default="None"')
+    async def parse_timedelta(client,message,delta):
+        await client.message_create(message.channel,(repr(delta)))
+
+            
     
 ##def start_console():
 ##    import code
