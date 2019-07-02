@@ -157,7 +157,7 @@ async def message_create(client,message):
                 parts.append('The channel is fully loaded.')
             else:
                 parts.append('There is even more message at this channel however.')
-            if not channel.permissions_for(client).can_read_message_history:
+            if not channel.cached_permissions_for(client).can_read_message_history:
                 parts.append('I have no permission to read older messages.')
             if channel.turn_GC_on_at:
                 now=time.monotonic()
@@ -491,7 +491,7 @@ CHANNELINGS={}
 async def channeling_start(client,message,channel_id):
     channel_1=message.channel
     while True:
-        permission=channel_1.permissions_for(client)
+        permission=channel_1.cached_permissions_for(client)
         if not (permission.can_manage_webhooks and permission.can_manage_messages):
             text='I have no permission at this channel to invoke this command!'
             break
@@ -506,7 +506,7 @@ async def channeling_start(client,message,channel_id):
             text='Same channel...'
             break
         
-        permission=channel_2.permissions_for(client)
+        permission=channel_2.cached_permissions_for(client)
         if not (permission.can_manage_webhooks and permission.can_manage_messages):
             text='I have no permission at that channel to invoke this command!'
             break
@@ -1204,7 +1204,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
     @on_command
     async def nitro(client,message,content):
-        if message.channel.permissions_for(client).can_manage_messages:
+        if message.permissions.can_manage_messages:
             client.loop.create_task(client.message_delete(message))
         content=filter_content(content)
         

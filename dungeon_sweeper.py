@@ -54,7 +54,7 @@ del GC_games
 
 @content_parser('str, default="\'\'"')
 async def ds_manager(self,message,command):
-    permissions=message.channel.permissions_for(self)
+    permissions=message.channel.cached_permissions_for(self)
     if not permissions.can_send_messages:
         return
     
@@ -1335,6 +1335,26 @@ RULES_HELP.add_field(f'Chapter 3 {YUKARI_EMOJI:e}',
     'Yukari can create gaps and travel trough them. She will open gap to the '
     'closest place straightforward, which is separated by a bedding or with '
     'wall from her.'
+    '\n'
+    f'{YUKARI_STYLE[CHAR_E|FLOOR]}'
+    f'{YUKARI_STYLE[WALL_N]}'
+    f'{YUKARI_STYLE[WALL_N]}'
+    f'{YUKARI_STYLE[FLOOR]}'
+    f'{BUILTIN_EMOJIS["arrow_right"]:e}'
+    f'{YUKARI_STYLE[FLOOR]}'
+    f'{YUKARI_STYLE[WALL_N]}'
+    f'{YUKARI_STYLE[WALL_N]}'
+    f'{YUKARI_STYLE[CHAR_E|FLOOR]}'
+    '\n'
+    f'{YUKARI_STYLE[CHAR_E|FLOOR]}'
+    f'{YUKARI_STYLE[BOX]}'
+    f'{YUKARI_STYLE[BOX]}'
+    f'{YUKARI_STYLE[FLOOR]}'
+    f'{BUILTIN_EMOJIS["arrow_right"]:e}'
+    f'{YUKARI_STYLE[FLOOR]}'
+    f'{YUKARI_STYLE[BOX]}'
+    f'{YUKARI_STYLE[BOX]}'
+    f'{YUKARI_STYLE[CHAR_E|FLOOR]}'
         )
 
 def loader(filename):
