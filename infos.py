@@ -4,12 +4,13 @@ import sys
 import json
 
 from hata.dereaddons_local import asyncinit
+from hata.futures import Task
 from hata.parsers import eventlist
 from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
 from hata.others import elapsed_time,Status,Audit_log_event,cchunkify
 from hata.exceptions import DiscordException
-from hata.events import pagination,waitfor_wrapper
+from hata.events import Pagination,waitfor_wrapper
 from hata.events_compiler import content_parser
 from hata.embed import Embed
 from hata.emoji import BUILTIN_EMOJIS
@@ -173,7 +174,7 @@ async def invites(client,message,guild,channel):
         return
     
     pages=[{'content':chunk} for chunk in pchunkify(invites,write_parents=False,show_code=False)]
-    pagination(client,message.channel,pages,120.)
+    await Pagination(client,message.channel,pages,120.)
 
 def generate_love_level():
     value = {
@@ -420,7 +421,7 @@ async def logs(client,message,guild,*args):
         await iterator.load_all()
         logs = iterator.transform()
     
-    pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])
+    await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])
 
 
 @infos
@@ -434,7 +435,7 @@ async def message(client,message,message_id,channel):
     except DiscordException:
         await client.message_create(message.channel,'Acces denied or not existing message')
         return
-    pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
+    await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
 
 @infos
 @content_parser('condition, default="not guild.permissions_for(message.author).can_administrator"',
@@ -448,7 +449,7 @@ async def message_pure(client,message,message_id,channel):
         await client.message_create(message.channel,'Access denied or not existing message')
         return
     
-    pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
+    await Pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
 
 
 class role_details(metaclass=asyncinit):
@@ -536,7 +537,7 @@ class embedination_rr(metaclass=asyncinit):
                 if emoji is self.CROSS:
                     self.task_flag=2
                 elif emoji in self.emojis:
-                    client.loop.create_task(self.reaction_remove(client,message,emoji,user))
+                    Task(self.reaction_remove(client,message,emoji,user),client.loop)
             return
         
         while True:
@@ -565,7 +566,7 @@ class embedination_rr(metaclass=asyncinit):
 
             return
 
-        client.loop.create_task(self.reaction_remove(client,message,emoji,user))
+        Task(self.reaction_remove(client,message,emoji,user),client.loop)
 
         if page<0:
             page=0

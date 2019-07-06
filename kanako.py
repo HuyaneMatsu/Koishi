@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from hata.events_compiler import content_parser
-from hata.futures import Future,CancelledError,InvalidStateError
+from hata.futures import Future,CancelledError,InvalidStateError,Task
 from random import randint
 from hata.dereaddons_local import any_to_any,asyncinit
 from time import monotonic
@@ -139,7 +139,7 @@ class kanako_game():
         self.running=False
         self.waiter=Future(client.loop)
 
-        client.loop.create_task(self.start_waiting())
+        Task(self.start_waiting(),client.loop)
         
     async def start_waiting(self):
     
@@ -166,7 +166,7 @@ class kanako_game():
         self.running=True
         self.client.events.message_create.append(self,self.channel)
         
-        self.client.loop.create_task(self.run())
+        Task(self.run(),self.client.loop)
 
     @property
     def info(self):
@@ -277,10 +277,10 @@ class kanako_game():
             self.waiter.clear()
             try:
                 await self.waiter.sleep(time_till_notify)
-                client.loop.create_task(self.send_or_except(
+                Task(self.send_or_except(
                     Embed('Hurry! Only 10 seconds left!',
                         '\n'.join([user.__format__('f') for user in self.users if user.id not in answers]),
-                        COLOR)))
+                        COLOR)),client.loop)
                 self.waiter.clear()
                 await self.waiter.sleep(10.)
                 self.calculate_leavers()
@@ -367,7 +367,7 @@ class kanako_game():
                 self.waiter.cancel()
                 
             break
-        self.client.loop.create_task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)))
+        Task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)),self.client.loop)
         
     def remove(self,user):
         while True:
@@ -396,7 +396,7 @@ class kanako_game():
                     except InvalidStateError:
                         pass
             break
-        self.client.loop.create_task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)))
+        Task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)),self.client.loop)
 
     def cancel(self):
         client=self.client
@@ -404,7 +404,7 @@ class kanako_game():
         if self.running:
             client.events.message_create.remove(self,self.channel)
             self.running=False
-        client.loop.create_task(client.message_create(self.channel,embed=Embed('','Game cancelled',COLOR)))
+        Task(client.message_create(self.channel,embed=Embed('','Game cancelled',COLOR)),client.loop)
 
 class game_statistics(metaclass=asyncinit):
     __slots__=['cache', 'source']
@@ -706,7 +706,7 @@ class embedination(metaclass=asyncinit):
                 wrapper.timeout+=10.
 
         try:
-            self.task = client.loop.create_task(client.message_edit(message,embed=self.pages[page]))
+            self.task = Task(client.message_edit(message,embed=self.pages[page]),client.loop)
             await self.task
         except DiscordException:
             pass
@@ -720,7 +720,7 @@ class embedination(metaclass=asyncinit):
             del self.pages
             if self.channel.guild is not None:
                 try:
-                    self.task=client.loop.create_task(client.reaction_clear(wrapper.target))
+                    self.task=Task(client.reaction_clear(wrapper.target),client.loop)
                     await self.task
                 except DiscordException:
                     pass

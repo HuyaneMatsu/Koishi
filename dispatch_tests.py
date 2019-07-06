@@ -2,7 +2,7 @@
 from hata.exceptions import DiscordException
 from hata.parsers import EVENTS,default_event
 from hata.prettyprint import pchunkify,pretty_print
-from hata.events import pagination
+from hata.events import Pagination
 from hata.others import cchunkify,Status
 from hata.permission import PERM_KEYS
 
@@ -72,7 +72,7 @@ class dispatch_tester:
         text=pretty_print(message)
         text.insert(0,f'Message {message.id} got deleted')
         pages=[{'content':chunk} for chunk in cchunkify(text)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def message_edit(self,client,message,old):
@@ -139,7 +139,7 @@ class dispatch_tester:
             
         text=cchunkify(result)
         pages=[{'content':chunk} for chunk in text]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def reaction_clear(self,client,message,old):
@@ -148,7 +148,7 @@ class dispatch_tester:
         text=pretty_print(old)
         text.insert(0,f'Reactions got cleared from message {message.id}:')
         pages=[{'content':chunk} for chunk in cchunkify(text)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def user_presence_update(self,client,user,old):
@@ -199,7 +199,7 @@ class dispatch_tester:
                     result.extend(pretty_print(activity))
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def user_edit(self,client,user,old):
@@ -208,7 +208,7 @@ class dispatch_tester:
             result.append(f'- {key} : {value} -> {getattr(user,key)}')
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
     
     @classmethod
     async def user_profile_edit(self,client,user,old,guild):
@@ -245,13 +245,13 @@ class dispatch_tester:
             raise RuntimeError(key)
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def channel_delete(self,client,channel):
         text=f'```\nA channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def channel_edit(self,client,channel,old):
@@ -270,20 +270,20 @@ class dispatch_tester:
                 continue
             result.append(f'{key} changed: {value!r} -> {getattr(channel,key)!r}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def channel_create(self,client,channel):
         result=pretty_print(channel)
         result.insert(0,f'A channel got created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def channel_pin_update(self,client,channel):
         text=f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
         
     @classmethod
@@ -307,7 +307,7 @@ class dispatch_tester:
             raise RuntimeError(modtype) #bugged?
         
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def guild_user_add(self,client,guild,user):
@@ -333,7 +333,7 @@ class dispatch_tester:
         result=pretty_print(guild)
         result.insert(0,f'Guild created: {guild.id}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     #Unknown:
     #guild_sync
@@ -395,7 +395,7 @@ class dispatch_tester:
             raise RuntimeError(key)
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
         
     @classmethod
     async def guild_delete(self,client,guild,profile,boosted_since):
@@ -407,7 +407,7 @@ class dispatch_tester:
         result.insert(2,'At least i did not boost' if boosted_since is None else 'Rip by boost ahhhh...')
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
 
     @classmethod
@@ -416,7 +416,7 @@ class dispatch_tester:
             return
         text=f'```\nUser {user:f} {user.id} got banned at {guild.name} {guild.id}.```'
         pages=[{'content':text}]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def guild_ban_delete(self,client,guild,user):
@@ -424,7 +424,7 @@ class dispatch_tester:
             return
         text=f'```\nUser {user:f} {user.id} got UNbanned at {guild.name} {guild.id}.```'
         pages=[{'content':text}]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     #Auto dispatched:
     #guild_user_chunk
@@ -438,7 +438,7 @@ class dispatch_tester:
         result=pretty_print(role)
         result.insert(0,f'A role got created at {role.guild.name} {role.guild.id}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def role_delete(self,client,role):
@@ -446,7 +446,7 @@ class dispatch_tester:
             return
         text=f'```\nA role got deleted at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}```'
         pages=[{'content':text}]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def role_edit(self,client,role,old):
@@ -471,7 +471,7 @@ class dispatch_tester:
                 continue
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
     async def webhook_update(self,client,channel):
@@ -479,7 +479,7 @@ class dispatch_tester:
             return
         text=f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
         pages=[{'content':text}]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
         
     @classmethod
     async def voice_state_update(self,client,state,action,old):
@@ -517,7 +517,7 @@ class dispatch_tester:
                 result.append(f'- {key} : {value} -> {getattr(state,key)}')
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
             
     @classmethod
     async def typing(self,client,channel,user,timestamp):
@@ -532,7 +532,7 @@ class dispatch_tester:
         result.append(f'- timestamp : {timestamp:%Y.%m.%d-%H:%M:%S}')
         
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await pagination(client,self.channel,pages,120.) #does not raises exceptions        
+        await Pagination(client,self.channel,pages,120.) #does not raises exceptions        
 
     @classmethod
     async def client_edit_settings(self,client,old):

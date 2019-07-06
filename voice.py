@@ -3,7 +3,7 @@ import re
 from hata import player
 from hata.parsers import eventlist
 from hata.others import filter_content
-from hata.futures import sleep
+from hata.futures import sleep,Task
 from help_handler import HELP
 
 async def voice(client,message,content):
@@ -119,8 +119,20 @@ async def voice(client,message,content):
                 break
             if not voice_client.player:
                 text='There is nothing to skip now'
+                break
             text=f'Skipping: {voice_client.player.source.title}'
             voice_client.skip()
+            break
+        if key=='stop':
+            voice_client=client.voice_client_for(message)
+            if voice_client is None:
+                text='There is no voice client at your guild'
+                break
+            if not voice_client.player:
+                text='I dont play anything, so i cant stop it.'
+                break
+            text='Stopped playing'
+            voice_client.stop()
             break
         if key=='move':
             if content:
@@ -157,8 +169,8 @@ async def voice(client,message,content):
                 channel=voice_client.channel
                 for state in guild.voice_states.values():
                     if state.channel is channel and state.user is not client:
-                        client.loop.create_task(client.user_voice_kick(state.user,guild))
-                client.loop.create_task(voice_client.disconnect())
+                        Task(client.user_voice_kick(state.user,guild),client.loop)
+                Task(voice_client.disconnect(),client.loop)
                 return
             
             text='Missing permissions.'

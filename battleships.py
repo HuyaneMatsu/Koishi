@@ -3,7 +3,7 @@ import re, random, time
 
 from hata.events import waitfor_wrapper,wait_and_continue
 from hata.others import filter_content,is_user_mention
-from hata.futures import wait_one,CancelledError,wait_more,future_or_timeout,sleep
+from hata.futures import Future_WO,CancelledError,Future_WM,future_or_timeout,sleep,Task
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed
 from hata.exceptions import DiscordException
@@ -195,7 +195,7 @@ class battle_manager:
             await client.message_create(channel,f'Waiting on {target:f}\'s reply here and at dm.\nType:"accept name/mention" to accept')
             
             
-            future=request.future=wait_one(client.loop)
+            future=request.future=Future_WO(client.loop)
             case=wait_on_reply(guild,source,target)
             event=client.events.message_create
             
@@ -302,7 +302,7 @@ class user_profile:
 
             message = await client.message_create(self.channel,embed=self.render_state_1())
             self.message=message
-            client.loop.create_task(client.reaction_add(message,SWITCH))
+            Task(client.reaction_add(message,SWITCH),client.loop)
             
             client.events.reaction_add.append(self,message)
             client.events.reaction_delete.append(self,message)
@@ -331,7 +331,7 @@ class user_profile:
         
         message = await client.message_create(self.channel,embed=self.render_state_1())
         self.message=message
-        client.loop.create_task(client.reaction_add(self.target,SWITCH))
+        Task(client.reaction_add(self.target,SWITCH),client.loop)
         
         client.events.reaction_add.append(self,message)
         client.events.reaction_delete.append(self,message)
@@ -353,7 +353,7 @@ class user_profile:
         
         message = await client.message_create(self.channel,embed=self.render_state_2())
         self.message=message
-        client.loop.create_task(client.reaction_add(message,SWITCH))
+        Task(client.reaction_add(message,SWITCH),client.loop)
 
         client.events.reaction_add.append(self,message)
         client.events.reaction_delete.append(self,message)
@@ -381,7 +381,7 @@ class user_profile:
     def cancel(self):
         client=self.client
         if self.process is None:
-            client.loop.create_task(self.cancel_later())
+            Task(self.cancel_later(),client.loop)
             return
 
         del self.other
@@ -489,7 +489,7 @@ class battleships_game:
         self.player2=user_profile(user2,client)
         self.player2.channel=channel2
 
-        self.client.loop.create_task(self.start())
+        Task(self.start(),self.client.loop)
 
     #compability
     async def start(self):
@@ -511,13 +511,13 @@ class battleships_game:
             client.events.message_create.append(self,player2.channel)
             
             #game starts            
-            self.future=wait_more(loop,2)
+            self.future=Future_WM(loop,2)
             future_or_timeout(self.future,300.)
 
             #startup
             self.process=self.process_state_0
-            loop.create_task(player1.set_state_0())
-            loop.create_task(player2.set_state_0())
+            Task(player1.set_state_0(),loop)
+            Task(player2.set_state_0(),loop)
             
             try:
                 await self.future
@@ -530,8 +530,8 @@ class battleships_game:
                 else:
                     text1='You timed out'
                     text2='The other player timed out'
-                loop.create_task(client.message_create(player1.channel,text1))
-                loop.create_task(client.message_create(player2.channel,text2))
+                Task(client.message_create(player1.channel,text1),loop)
+                Task(client.message_create(player2.channel,text2),loop)
                 return
 
             self.process=self.process_state_1
@@ -548,7 +548,7 @@ class battleships_game:
             
 
             while self.process is not None:
-                self.future=wait_one(loop)
+                self.future=Future_WO(loop)
                 future_or_timeout(self.future,300.)
                 try:
                     result = await self.future

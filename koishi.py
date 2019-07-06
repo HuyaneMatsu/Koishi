@@ -28,10 +28,10 @@ from hata import others
 from hata.channel import cr_pg_channel_object,Channel_text,Channel_private,Message_iterator
 from hata.embed import Embed
 from hata.events import (
-    pagination,bot_reaction_waitfor,bot_message_event,wait_for_message,
+    Pagination,bot_reaction_waitfor,bot_message_event,wait_for_message,
     wait_for_emoji,prefix_by_guild,bot_reaction_delete_waitfor,cooldown,
     waitfor_wrapper)
-from hata.futures import CancelledError,sleep,wait_more
+from hata.futures import CancelledError,sleep,Future_WM,Task
 from hata.prettyprint import pchunkify
 from hata.user import USERS,User
 from hata.client_core import KOKORO,stop_clients,CLIENTS
@@ -79,7 +79,7 @@ class cooldown_handler:
         except KeyError:
             pass
         notification = await client.message_create(message.channel,f'**{message.author:f}** please cool down, {int(time_left)} seconds left!')
-        waiter=client.loop.create_task(self.waiter(client,id_,notification))
+        waiter=Task(self.waiter(client,id_,notification),client.loop)
         self.cache[id_]=(notification,waiter)
     async def waiter(self,client,id_,notification):
         try:
@@ -405,8 +405,7 @@ class Channeller_v_del():
                         ):
                     
                     continue
-
-                client.loop.create_task(client.message_delete(message))
+                Task(client.message_delete(message),client.loop)
                 break
                     
 class Channeller():
@@ -473,16 +472,14 @@ class Channeller():
         for channel,webhook in self.pairs:
             if channel is source_channel:
                 continue
-            client.loop.create_task(
-                client.webhook_send(webhook,
+            Task(client.webhook_send(webhook,
                     content     = message.clean_content,
                     embed       = message.clean_embeds,
                     file        = files,
                     tts         = message.tts,
                     name        = message.author.name_at(webhook.guild),
                     avatar_url  = message.author.avatar_url,
-                        )
-                    )
+                        ),client.loop)
 
 CHANNELINGS={}
 
@@ -627,23 +624,39 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
 
     _KOISHI_NOU_RP=re.compile(r'n+\s*o+\s*u+',re.I)
     _KOISHI_OWO_RP=re.compile('(owo|uwu|0w0)',re.I)
+    _KOISHI_OMAE_RP=re.compile('omae wa mou',re.I)
     @on_command
     async def default_event(client,message):
-        content=message.content
-        text=None
-        if _KOISHI_NOU_RP.match(content) is not None:
-            parts=[]
-            for value in 'nou':
-                emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
-                await client.reaction_add(message,emoji)
-                    
-        elif len(content)==3:
-            matched=_KOISHI_OWO_RP.match(content,)
-            if matched is not None:
+        if message.user_mentions is not None and client in message.user_mentions:
+            m1=message.author.mention_at(message.guild)
+            m2=client.mention_at(message.guild)
+            replace={re.escape(m1):m2,re.escape(m2):m1}
+            pattern=re.compile("|".join(replace.keys()))
+            result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
+            await client.message_create(message.channel,result)
+        else:
+            content=message.content
+            if _KOISHI_NOU_RP.match(content) is not None:
+                parts=[]
+                for value in 'nou':
+                    emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
+                    await client.reaction_add(message,emoji)
+                return
+            
+            if len(content)==3:
+                matched=_KOISHI_OWO_RP.match(content,)
+                if matched is None:
+                    return
                 text=f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
-        
-        if text:
-            await client.message_create(message.channel,text)
+
+            elif _KOISHI_OMAE_RP.match(content) is not None:
+                text='NANI?'
+
+            else:
+                return
+            
+            if text:
+                await client.message_create(message.channel,text)
 
     @on_command
     @content_parser('user, flags=mna, default="message.author"')
@@ -679,17 +692,6 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             
         await client.message_create(message.channel,text)
 
-
-    @on_command
-    async def mention_event(client,message):
-        m1=message.author.mention_at(message.guild)
-        m2=client.mention_at(message.guild)
-        replace={re.escape(m1):m2,re.escape(m2):m1}
-        pattern=re.compile("|".join(replace.keys()))
-        result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
-        await client.message_create(message.channel,result)
-
-    
     @on_command
     @cooldown(30.,'user',handler=cooldown_handler())
     async def ping(client,message,content):
@@ -963,7 +965,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             if index==embed_ln:
                 break
         
-        await pagination(client,message.channel,result)
+        await Pagination(client,message.channel,result)
 
     @on_command
     async def leave_guild(client,message,content):
@@ -1044,7 +1046,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     
     @on_command
     async def oa2_feed(client,message,content):
-        client.loop.create_task(client.message_delete(message))
+        Task(client.message_delete(message),client.loop)
         try:
             result=others.parse_oauth2_redirect_url(content)
         except ValueError:
@@ -1081,7 +1083,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
             await client.message_create(message.channel,'Could not find that user')
             return
         
-        await pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
+        await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
 
 
     @on_command
@@ -1093,7 +1095,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         connections = await client.user_connections(user.access)
         
-        await pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
+        await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
         
         
     @on_command
@@ -1105,7 +1107,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         guilds = await client.user_guilds(user.access)
         
-        await pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
+        await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
         
     @on_command
     async def oa2_my_guild(client,message,content):
@@ -1193,7 +1195,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         soup = BeautifulSoup(data,'html.parser',from_encoding='utf-8')
         text = soup.prettify()
         result = [{'content':element} for element in others.cchunkify(text.splitlines())]
-        await pagination(self,message.channel,result)
+        await Pagination(self,message.channel,result)
 
     @on_command
     @content_parser('emoji')
@@ -1205,7 +1207,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
     @on_command
     async def nitro(client,message,content):
         if message.permissions.can_manage_messages:
-            client.loop.create_task(client.message_delete(message))
+            Task(client.message_delete(message),client.loop)
         content=filter_content(content)
         
         if not content:
@@ -1284,12 +1286,12 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         loop=client.loop
         channels=guild.messageable_channels
-        future=wait_more(loop,len(channels))
+        future=Future_WM(loop,len(channels))
         users={}
         
         with client.keep_typing(source_channel):
             for channel in channels:
-                client.loop.create_task(pararell_load(client,channel,future))
+                Task(pararell_load(client,channel,future),client.loop)
 
             await future
             
@@ -1302,7 +1304,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         users.sort(reverse=True,key=lambda item:item[1])
         text=[f'{index}.: {user:f} : {count}' for index,(user,count) in enumerate(users,1)]
         chunks=[{'content':chunk} for chunk in others.chunkify(text)]
-        await pagination(client,source_channel,chunks)
+        await Pagination(client,source_channel,chunks)
 
     async def pararell_load_reactions(client,channel,future,reactions):
         try:
@@ -1339,12 +1341,12 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
         
         loop=client.loop
         channels=guild.messageable_channels
-        future=wait_more(loop,len(channels))
+        future=Future_WM(loop,len(channels))
         reactions={}
         
         with client.keep_typing(source_channel):
             for channel in channels:
-                client.loop.create_task(pararell_load_reactions(client,channel,future,reactions))
+                Task(pararell_load_reactions(client,channel,future,reactions),client.loop)
 
             await future
 
@@ -1364,7 +1366,7 @@ with Koishi.events(bot_message_event(PREFIXES)) as on_command:
                 text.append(f' - {index} {emoji:e} {emoji_count}')
         
         chunks=[{'content':chunk} for chunk in others.chunkify(text)]
-        await pagination(client,source_channel,chunks)
+        await Pagination(client,source_channel,chunks)
 
     @on_command
     @content_parser('delta, default="None"')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from hata.embed import Embed
-from hata.events import pagination
+from hata.events import Pagination
 from hata.color import Color
 from hata.exceptions import DiscordException
 from hata.futures import sleep
@@ -85,7 +85,8 @@ HELP['voice']=Embed(title='voice',color=HELP_COLOR,
         'Use "volume (n%)" to get/set volume\n'
         'Use "skip" to skip the actual source\n'
         'Use "move <channel name>" to move the player to an another channel\n'
-        'Use "leave" to make me leave the channel'
+        'Use "leave" to make me leave the channel\n'
+        'Use "stop" to cancel teh current player and clear the queue'
             ))
 
 HELP['message_me']=Embed(title='message_me',color=HELP_COLOR,
@@ -215,7 +216,7 @@ async def on_command_help(client,message,content):
         
         await client.message_create(message.channel,embed=result)
     else:
-        await pagination(client,message.channel,create_help_help(client.events.message_create.prefix(message)))
+        await Pagination(client,message.channel,create_help_help(client.events.message_create.prefix(message)))
     
 async def invalid_command(client,message,command,content):
     prefix=client.events.message_create.prefix(message)

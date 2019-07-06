@@ -2,7 +2,7 @@ import os, re, time
 from collections import deque
 from time import time as time_now
 from hata.dereaddons_local import multidict_titled
-from hata.futures import Future,sleep,elsewhere_await_coro
+from hata.futures import Future,sleep,elsewhere_await_coro,Task
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
 from hata import py_hdrs as hdrs
@@ -1077,9 +1077,9 @@ async def ratelimit_test0000(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     message3 = await client.message_create(channel3,'test')
-    loop.create_task(reaction_add(client,message1,emoji1))
-    loop.create_task(reaction_add(client,message2,emoji1))
-    loop.create_task(reaction_add(client,message3,emoji1))
+    Task(reaction_add(client,message1,emoji1),loop)
+    Task(reaction_add(client,message2,emoji1),loop)
+    Task(reaction_add(client,message3,emoji1),loop)
     #reaction_add is not per guild
 
 @ratelimit_commands
@@ -1093,9 +1093,9 @@ async def ratelimit_test0001(client,message,content):
     message2 = await client.message_create(channel1,'test')
     message3 = await client.message_create(channel1,'test')
     loop=client.loop
-    loop.create_task(reaction_add(client,message1,emoji1))
-    loop.create_task(reaction_add(client,message2,emoji1))
-    loop.create_task(reaction_add(client,message3,emoji1))
+    Task(reaction_add(client,message1,emoji1),loop)
+    Task(reaction_add(client,message2,emoji1),loop)
+    Task(reaction_add(client,message3,emoji1),loop)
     #reaction_add is per channel -> no pm tests needed
 
 @ratelimit_commands
@@ -1111,9 +1111,9 @@ async def ratelimit_test0002(client,message,content):
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
     await client.reaction_add(message3,emoji1)
-    loop.create_task(reaction_delete_own(client,message1,emoji1))
-    loop.create_task(reaction_delete_own(client,message2,emoji1))
-    loop.create_task(reaction_delete_own(client,message3,emoji1))
+    Task(reaction_delete_own(client,message1,emoji1),loop)
+    Task(reaction_delete_own(client,message2,emoji1),loop)
+    Task(reaction_delete_own(client,message3,emoji1),loop)
     #reaction_delete_own not limited per guild
     
 @ratelimit_commands
@@ -1129,9 +1129,9 @@ async def ratelimit_test0003(client,message,content):
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
     await client.reaction_add(message3,emoji1)
-    loop.create_task(reaction_delete_own(client,message1,emoji1))
-    loop.create_task(reaction_delete_own(client,message2,emoji1))
-    loop.create_task(reaction_delete_own(client,message3,emoji1))
+    Task(reaction_delete_own(client,message1,emoji1),loop)
+    Task(reaction_delete_own(client,message2,emoji1),loop)
+    Task(reaction_delete_own(client,message3,emoji1),loop)
     #reaction_delete_own limited per chanel
 
 @ratelimit_commands
@@ -1146,10 +1146,10 @@ async def ratelimit_test0004(client,message,content):
     message2 = await client.message_create(channel1,'test')
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
-    loop.create_task(reaction_delete_own(client,message1,emoji1))
-    loop.create_task(reaction_delete_own(client,message2,emoji1))
-    loop.create_task(reaction_add(client,message1,emoji2))
-    loop.create_task(reaction_add(client,message2,emoji2))
+    Task(reaction_delete_own(client,message1,emoji1),loop)
+    Task(reaction_delete_own(client,message2,emoji1),loop)
+    Task(reaction_add(client,message1,emoji2),loop)
+    Task(reaction_add(client,message2,emoji2),loop)
     #reaction_delete_own and reaction_add share the same category
 
 @ratelimit_commands
@@ -1166,9 +1166,9 @@ async def ratelimit_test0005(client,message,content):
     await elsewhere_await_coro(client2.reaction_add(message1,emoji1),loop,client2.loop)
     await elsewhere_await_coro(client2.reaction_add(message2,emoji1),loop,client2.loop)
     await elsewhere_await_coro(client2.reaction_add(message3,emoji1),loop,client2.loop)
-    loop.create_task(reaction_delete(client,message1,emoji1,client2))
-    loop.create_task(reaction_delete(client,message2,emoji1,client2))
-    loop.create_task(reaction_delete(client,message3,emoji1,client2))
+    Task(reaction_delete(client,message1,emoji1,client2),loop)
+    Task(reaction_delete(client,message2,emoji1,client2),loop)
+    Task(reaction_delete(client,message3,emoji1,client2),loop)
     #reaction_delete is not guild limited
 
 @ratelimit_commands
@@ -1185,9 +1185,9 @@ async def ratelimit_test0006(client,message,content):
     await elsewhere_await_future(client2.reaction_add(message1,emoji1),loop,client2.loop)
     await elsewhere_await_future(client2.reaction_add(message2,emoji1),loop,client2.loop)
     await elsewhere_await_future(client2.reaction_add(message3,emoji1),loop,client2.loop)
-    loop.create_task(reaction_delete(client,message1,emoji1,client2))
-    loop.create_task(reaction_delete(client,message2,emoji1,client2))
-    loop.create_task(reaction_delete(client,message3,emoji1,client2))
+    Task(reaction_delete(client,message1,emoji1,client2),loop)
+    Task(reaction_delete(client,message2,emoji1,client2),loop)
+    Task(reaction_delete(client,message3,emoji1,client2),loop)
     #reaction_delete is channel limited
 
 @ratelimit_commands
@@ -1203,10 +1203,10 @@ async def ratelimit_test0007(client,message,content):
     message2 = await client.message_create(channel1,'test')
     await elsewhere_await_future(client2.reaction_add(message1,emoji1),loop,client2.loop)
     await elsewhere_await_future(client2.reaction_add(message2,emoji1),loop,client2.loop)
-    loop.create_task(reaction_delete(client,message1,emoji1,client2))
-    loop.create_task(reaction_delete(client,message2,emoji1,client2))
-    loop.create_task(reaction_add(client,message1,emoji2))
-    loop.create_task(reaction_add(client,message2,emoji2))
+    Task(reaction_delete(client,message1,emoji1,client2),loop)
+    Task(reaction_delete(client,message2,emoji1,client2),loop)
+    Task(reaction_add(client,message1,emoji2),loop)
+    Task(reaction_add(client,message2,emoji2),loop)
     #reaction_delete is limited with reaction_add
 
 @ratelimit_commands
@@ -1222,9 +1222,9 @@ async def ratelimit_test0008(client,message,content):
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
     await client.reaction_add(message3,emoji1)
-    loop.create_task(reaction_clear(client,message1))
-    loop.create_task(reaction_clear(client,message2))
-    loop.create_task(reaction_clear(client,message3))
+    Task(reaction_clear(client,message1),loop)
+    Task(reaction_clear(client,message2),loop)
+    Task(reaction_clear(client,message3),loop)
     #reaction_clear is not guild limited
     
 @ratelimit_commands
@@ -1240,9 +1240,9 @@ async def ratelimit_test0009(client,message,content):
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
     await client.reaction_add(message3,emoji1)
-    loop.create_task(reaction_clear(client,message1))
-    loop.create_task(reaction_clear(client,message2))
-    loop.create_task(reaction_clear(client,message3))
+    Task(reaction_clear(client,message1),loop)
+    Task(reaction_clear(client,message2),loop)
+    Task(reaction_clear(client,message3),loop)
     #reaction_clear is channel limited
 
 @ratelimit_commands
@@ -1257,10 +1257,10 @@ async def ratelimit_test0010(client,message,content):
     message2 = await client.message_create(channel1,'test')
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
-    loop.create_task(reaction_clear(client,message1))
-    loop.create_task(reaction_clear(client,message2))
-    loop.create_task(reaction_add(client,message1,emoji2))
-    loop.create_task(reaction_add(client,message2,emoji2))
+    Task(reaction_clear(client,message1),loop)
+    Task(reaction_clear(client,message2),loop)
+    Task(reaction_add(client,message1,emoji2),loop)
+    Task(reaction_add(client,message2,emoji2),loop)
     #reaction_clear is limited with reaction_add
     
 @ratelimit_commands
@@ -1276,9 +1276,9 @@ async def ratelimit_test0011(client,message,content):
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
     await client.reaction_add(message3,emoji1)
-    loop.create_task(reaction_users(client,message1,emoji1))
-    loop.create_task(reaction_users(client,message2,emoji1))
-    loop.create_task(reaction_users(client,message3,emoji1))
+    Task(reaction_users(client,message1,emoji1),loop)
+    Task(reaction_users(client,message2,emoji1),loop)
+    Task(reaction_users(client,message3,emoji1),loop)
     #reaction_users is not guild limited
     
     
@@ -1295,9 +1295,9 @@ async def ratelimit_test0012(client,message,content):
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
     await client.reaction_add(message3,emoji1)
-    loop.create_task(reaction_users(client,message1,emoji1))
-    loop.create_task(reaction_users(client,message2,emoji1))
-    loop.create_task(reaction_users(client,message3,emoji1))
+    Task(reaction_users(client,message1,emoji1),loop)
+    Task(reaction_users(client,message2,emoji1),loop)
+    Task(reaction_users(client,message3,emoji1),loop)
     #reaction_users is not channel limited
     #REACTION_USERS is NOT limited at all!
     
@@ -1313,10 +1313,10 @@ async def ratelimit_test0013(client,message,content):
     message2 = await client.message_create(channel1,'test')
     await client.reaction_add(message1,emoji1)
     await client.reaction_add(message2,emoji1)
-    loop.create_task(reaction_users(client,message1,emoji1))
-    loop.create_task(reaction_users(client,message2,emoji1))
-    loop.create_task(reaction_add(client,message1,emoji2))
-    loop.create_task(reaction_add(client,message2,emoji2))
+    Task(reaction_users(client,message1,emoji1),loop)
+    Task(reaction_users(client,message2,emoji1),loop)
+    Task(reaction_add(client,message1,emoji2),loop)
+    Task(reaction_add(client,message2,emoji2),loop)
     # - is reaction_users limited with reaction_add
 
 @ratelimit_commands
@@ -1325,8 +1325,8 @@ async def ratelimit_test0014(client,message,content):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_create(client,channel2,'test'))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_create(client,channel2,'test'),loop)
     #message_create is not guild limited
 
 @ratelimit_commands
@@ -1335,8 +1335,8 @@ async def ratelimit_test0015(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_create(client,channel1,'test'))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_create(client,channel1,'test'),loop)
     # - message_create is channel limited
 
 @ratelimit_commands
@@ -1347,8 +1347,8 @@ async def ratelimit_test0016(client,message,content):
     channel1=message.channel
     channel2 = await client.channel_private_create(message.author)
     await sleep(5.,loop)
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_create(client,channel2,'test'))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_create(client,channel2,'test'),loop)
     #message_create is not global limited
 
 @ratelimit_commands
@@ -1359,8 +1359,8 @@ async def ratelimit_test0017(client,message,content):
     channel1 = await client.channel_private_create(message.author)
     channel2 = await client.channel_private_create(Partial_user(user1_id))
     await sleep(5.,loop)
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_create(client,channel2,'test'))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_create(client,channel2,'test'),loop)
     #message_create is not global PM limited
                      
 @ratelimit_commands
@@ -1372,8 +1372,8 @@ async def ratelimit_test0018(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_delete(client,message1))
-    loop.create_task(message_delete(client,message2))
+    Task(message_delete(client,message1),loop)
+    Task(message_delete(client,message2),loop)
     #message_delete is not guild limited
     #MESSAGE_DELETE is NOT limited
 
@@ -1386,8 +1386,8 @@ async def ratelimit_test0019(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_delete(client,message1))
-    loop.create_task(message_delete(client,message2))
+    Task(message_delete(client,message1),loop)
+    Task(message_delete(client,message2),loop)
     # - is message_delete channel limited
 
 @ratelimit_commands
@@ -1400,8 +1400,8 @@ async def ratelimit_test0020(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_delete(client,message1))
-    loop.create_task(message_delete(client,message2))
+    Task(message_delete(client,message1),loop)
+    Task(message_delete(client,message2),loop)
     # - is message_delete global limited
 
 @ratelimit_commands
@@ -1414,8 +1414,8 @@ async def ratelimit_test0021(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_delete(client,message1))
-    loop.create_task(message_delete(client,message2))
+    Task(message_delete(client,message1),loop)
+    Task(message_delete(client,message2),loop)
     # - is message_delete global PM limited
 
 @ratelimit_commands
@@ -1426,8 +1426,8 @@ async def ratelimit_test0022(client,message,content):
     channel1=message.channel
     message1=await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_delete(client,message1))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_delete(client,message1),loop)
     #message_create limited is not limited with message_delete
 
 @ratelimit_commands
@@ -1441,8 +1441,8 @@ async def ratelimit_test0023(client,message,content):
     message3 = await client.message_create(channel2,'test')
     message4 = await client.message_create(channel2,'test')
     await sleep(5.,loop) #wait for potential ratelimits
-    loop.create_task(message_delete_multiple(client,[message1,message2]))
-    loop.create_task(message_delete_multiple(client,[message3,message4]))
+    Task(message_delete_multiple(client,[message1,message2]),loop)
+    Task(message_delete_multiple(client,[message3,message4]),loop)
     #message_delete_multiple is not guild limited
 
     
@@ -1457,8 +1457,8 @@ async def ratelimit_test0024(client,message,content):
     message3 = await client.message_create(channel1,'test')
     message4 = await client.message_create(channel1,'test')
     await sleep(5.,loop) #wait for potential ratelimits
-    loop.create_task(message_delete_multiple(client,[message1,message2]))
-    loop.create_task(message_delete_multiple(client,[message3,message4]))
+    Task(message_delete_multiple(client,[message1,message2]),loop)
+    Task(message_delete_multiple(client,[message3,message4]),loop)
     #message_delete_multiple is channel limited
                      
 @ratelimit_commands
@@ -1472,9 +1472,9 @@ async def ratelimit_test0025(client,message,content):
     message3 = await client.message_create(channel1,'test')
     message4 = await client.message_create(channel1,'test')
     await sleep(5.,loop) #wait for potential ratelimits
-    loop.create_task(message_delete(client,message1))
-    loop.create_task(message_delete_multiple(client,[message2,message3]))
-    loop.create_task(message_delete(client,message4))
+    Task(message_delete(client,message1),loop)
+    Task(message_delete_multiple(client,[message2,message3]),loop)
+    Task(message_delete(client,message4),loop)
     # - is message_delete_multiple limited with message_delete
     
 @ratelimit_commands
@@ -1486,8 +1486,8 @@ async def ratelimit_test0026(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(message_edit(client,message2,'notsotest'))
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(message_edit(client,message2,'notsotest'),loop)
     #message_edit is not guild limited
 
 @ratelimit_commands
@@ -1499,8 +1499,8 @@ async def ratelimit_test0027(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(message_edit(client,message2,'notsotest'))
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(message_edit(client,message2,'notsotest'),loop)
     #is message_edit channel limited
 
 @ratelimit_commands
@@ -1513,8 +1513,8 @@ async def ratelimit_test0028(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(message_edit(client,message2,'notsotest'))
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(message_edit(client,message2,'notsotest'),loop)
     #message_edit is not global limited
 
 @ratelimit_commands
@@ -1527,8 +1527,8 @@ async def ratelimit_test0029(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(message_edit(client,message2,'notsotest'))
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(message_edit(client,message2,'notsotest'),loop)
     #message_edit is not global PM limited
 
 @ratelimit_commands
@@ -1539,10 +1539,10 @@ async def ratelimit_test0030(client,message,content):
     channel1=message.channel
     message1=await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_edit(client,message1,'yessotest'))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_edit(client,message1,'yessotest'),loop)
     #message_create is not limited with message_edit
 
 @ratelimit_commands
@@ -1553,8 +1553,8 @@ async def ratelimit_test0031(client,message,content):
     channel1=message.channel
     message1 = await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(message_edit(client,message1,'yessotest'))
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(message_edit(client,message1,'yessotest'),loop)
     #message_edit is message limited (channel too, so this is ignored)
     
 @ratelimit_commands
@@ -1566,8 +1566,8 @@ async def ratelimit_test0032(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_pin(client,message1,))
-    loop.create_task(message_pin(client,message2,))
+    Task(message_pin(client,message1,),loop)
+    Task(message_pin(client,message2,),loop)
     #message_pin is not guild limited
 
 @ratelimit_commands
@@ -1579,8 +1579,8 @@ async def ratelimit_test0033(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_pin(client,message1))
-    loop.create_task(message_pin(client,message2))
+    Task(message_pin(client,message1),loop)
+    Task(message_pin(client,message2),loop)
     #message_pin is channel limited
 
 @ratelimit_commands
@@ -1593,8 +1593,8 @@ async def ratelimit_test0034(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_pin(client,message1))
-    loop.create_task(message_pin(client,message2))
+    Task(message_pin(client,message1),loop)
+    Task(message_pin(client,message2),loop)
     # - is message_pin global limited
 
 @ratelimit_commands
@@ -1607,8 +1607,8 @@ async def ratelimit_test0035(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_pin(client,message1))
-    loop.create_task(message_pin(client,message2))
+    Task(message_pin(client,message1),loop)
+    Task(message_pin(client,message2),loop)
     # - is message_pin global PM limited
 
 @ratelimit_commands
@@ -1619,8 +1619,8 @@ async def ratelimit_test0036(client,message,content):
     channel1=message.channel
     message1=await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(message_pin(client,message1))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(message_pin(client,message1),loop)
     #message_create is not limited with message_pin
     
 @ratelimit_commands
@@ -1647,8 +1647,8 @@ async def ratelimit_test0038(client,message,content):
     await client.message_pin(message1)
     await client.message_pin(message2)
     await sleep(5.,loop)
-    loop.create_task(message_unpin(client,message1,))
-    loop.create_task(message_unpin(client,message2,))
+    Task(message_unpin(client,message1,),loop)
+    Task(message_unpin(client,message2,),loop)
     # - is message_unpin guild limited
 
 @ratelimit_commands
@@ -1662,8 +1662,8 @@ async def ratelimit_test0039(client,message,content):
     await client.message_pin(message1)
     await client.message_pin(message2)
     await sleep(5.,loop)
-    loop.create_task(message_pin(client,message1))
-    loop.create_task(message_pin(client,message2))
+    Task(message_pin(client,message1),loop)
+    Task(message_pin(client,message2),loop)
     # - is message_unpin channel limited
 
 @ratelimit_commands
@@ -1678,8 +1678,8 @@ async def ratelimit_test0040(client,message,content):
     await client.message_pin(message1)
     await client.message_pin(message2)
     await sleep(5.,loop)
-    loop.create_task(message_unpin(client,message1))
-    loop.create_task(message_unpin(client,message2))
+    Task(message_unpin(client,message1),loop)
+    Task(message_unpin(client,message2),loop)
     # - is message_unpin global limited
 
 @ratelimit_commands
@@ -1694,8 +1694,8 @@ async def ratelimit_test0041(client,message,content):
     await client.message_pin(message1)
     await client.message_pin(message2)
     await sleep(5.,loop)
-    loop.create_task(message_unpin(client,message1))
-    loop.create_task(message_unpin(client,message2))
+    Task(message_unpin(client,message1),loop)
+    Task(message_unpin(client,message2),loop)
     # - is message_unpin global PM limited
 
 @ratelimit_commands
@@ -1708,8 +1708,8 @@ async def ratelimit_test0042(client,message,content):
     message1=await client.message_create(channel2,'test')
     await client.message_pin(message2)
     await sleep(5.,loop)
-    loop.create_task(message_pin(client,message1))
-    loop.create_task(message_unpin(client,message2))
+    Task(message_pin(client,message1),loop)
+    Task(message_unpin(client,message2),loop)
     # - is message_unpin limited with message_unpin
     
 @ratelimit_commands
@@ -1732,8 +1732,8 @@ async def ratelimit_test0044(client,message,content):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
-    loop.create_task(message_pinneds(client,channel1))
-    loop.create_task(message_pinneds(client,channel2))
+    Task(message_pinneds(client,channel1),loop)
+    Task(message_pinneds(client,channel2),loop)
     #message_pinneds is guild limited
 
 @ratelimit_commands
@@ -1742,8 +1742,8 @@ async def ratelimit_test0045(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(message_pinneds(client,channel1))
-    loop.create_task(message_pinneds(client,channel1))
+    Task(message_pinneds(client,channel1),loop)
+    Task(message_pinneds(client,channel1),loop)
     # - is message_pinneds channel limited
     
 @ratelimit_commands
@@ -1753,8 +1753,8 @@ async def ratelimit_test0046(client,message,content):
     loop=client.loop
     channel1=message.channel
     channel2 = await client.channel_private_create(message.author)
-    loop.create_task(message_pinneds(client,channel1))
-    loop.create_task(message_pinneds(client,channel2))
+    Task(message_pinneds(client,channel1),loop)
+    Task(message_pinneds(client,channel2),loop)
     #message_pinneds is global limited
 
 @ratelimit_commands
@@ -1764,8 +1764,8 @@ async def ratelimit_test0047(client,message,content):
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
     channel2 = await client.channel_private_create(Partial_user(user1_id))
-    loop.create_task(message_pinneds(client,channel1))
-    loop.create_task(message_pinneds(client,channel2))
+    Task(message_pinneds(client,channel1),loop)
+    Task(message_pinneds(client,channel2),loop)
     # - is message_pinneds global PM limited
     
 @ratelimit_commands
@@ -1774,8 +1774,8 @@ async def ratelimit_test0048(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(message_pinneds(client,channel1))
-    loop.create_task(message_create(client,channel1,'test'))
+    Task(message_pinneds(client,channel1),loop)
+    Task(message_create(client,channel1,'test'),loop)
     # - is message_pinneds limited with message_create
 
 @ratelimit_commands
@@ -1784,8 +1784,8 @@ async def ratelimit_test0049(client,message,content):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
-    loop.create_task(message_logs(client,channel1))
-    loop.create_task(message_logs(client,channel2))
+    Task(message_logs(client,channel1),loop)
+    Task(message_logs(client,channel2),loop)
     #message_logs is not guild limited
     #MESSAGE_LOGS is NOT limited
 
@@ -1795,8 +1795,8 @@ async def ratelimit_test0050(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(message_logs(client,channel1))
-    loop.create_task(message_logs(client,channel1))
+    Task(message_logs(client,channel1),loop)
+    Task(message_logs(client,channel1),loop)
     # - is message_logs channel limited
     
 @ratelimit_commands
@@ -1805,8 +1805,8 @@ async def ratelimit_test0051(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(message_pinneds(client,channel1))
-    loop.create_task(message_logs(client,channel1))
+    Task(message_pinneds(client,channel1),loop)
+    Task(message_logs(client,channel1),loop)
     # - is message_logs limited with message_pinneds
 
 
@@ -1819,8 +1819,8 @@ async def ratelimit_test0052(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
-    loop.create_task(message_get(client,channel1,message1.id))
-    loop.create_task(message_get(client,channel2,message2.id))
+    Task(message_get(client,channel1,message1.id),loop)
+    Task(message_get(client,channel2,message2.id),loop)
     #message_get is not guild limited
     #MESSAGE_GET is NOT limited
     
@@ -1832,8 +1832,8 @@ async def ratelimit_test0053(client,message,content):
     channel1=message.channel
     message1 = await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_get(client,channel1,message1.id))
-    loop.create_task(message_get(client,channel1,message.id))
+    Task(message_get(client,channel1,message1.id),loop)
+    Task(message_get(client,channel1,message.id),loop)
     # - is message_get channel limited
 
 @ratelimit_commands
@@ -1842,8 +1842,8 @@ async def ratelimit_test0054(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(message_get(client,channel1,message.id))
-    loop.create_task(message_create(client,channel1,'test'))
+    Task(message_get(client,channel1,message.id),loop)
+    Task(message_create(client,channel1,'test'),loop)
     # - is message_get limited with message_create
 
 @ratelimit_commands
@@ -1855,7 +1855,7 @@ async def ratelimit_test0055(client,message,content):
     message1 = await client.message_create_file(channel1, \
         open(os.path.join(os.path.abspath('.'),'images',
             '0000000A_touhou_koishi_kokoro_reversed.png'),'rb'))
-    loop.create_task(download_attachment(client,message1.attachments[0]))
+    Task(download_attachment(client,message1.attachments[0]),loop)
     #download_attachment is not limited
 
 @ratelimit_commands
@@ -1868,8 +1868,8 @@ async def ratelimit_test0056(client,message,content):
         open(os.path.join(os.path.abspath('.'),'images',
             '0000000A_touhou_koishi_kokoro_reversed.png'),'rb'))
     await sleep(5.,loop)
-    loop.create_task(download_attachment(client,message1))
-    loop.create_task(message_get(client,message1))
+    Task(download_attachment(client,message1),loop)
+    Task(message_get(client,message1),loop)
     # - is download_attachment limited with message_get
 
 @ratelimit_commands
@@ -1878,8 +1878,8 @@ async def ratelimit_test0057(client,message,content):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
-    loop.create_task(typing(client,channel1))
-    loop.create_task(typing(client,channel2))
+    Task(typing(client,channel1),loop)
+    Task(typing(client,channel2),loop)
     #typing is not guild limited
 
 @ratelimit_commands
@@ -1888,8 +1888,8 @@ async def ratelimit_test0058(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(typing(client,channel1))
-    loop.create_task(typing(client,channel1))
+    Task(typing(client,channel1),loop)
+    Task(typing(client,channel1),loop)
     #typing is channel limited
 
 @ratelimit_commands
@@ -1900,8 +1900,8 @@ async def ratelimit_test0059(client,message,content):
     channel1=message.channel
     channel2 = await client.channel_private_create(message.author)
     await sleep(5.,loop)
-    loop.create_task(typing(client,channel1))
-    loop.create_task(typing(client,channel2))
+    Task(typing(client,channel1),loop)
+    Task(typing(client,channel2),loop)
     #typing is not global limited
 
 @ratelimit_commands
@@ -1912,8 +1912,8 @@ async def ratelimit_test0060(client,message,content):
     channel1 = await client.channel_private_create(message.author)
     channel2 = await client.channel_private_create(Partial_user(user1_id))
     await sleep(5.,loop)
-    loop.create_task(typing(client,channel1))
-    loop.create_task(typing(client,channel2))
+    Task(typing(client,channel1),loop)
+    Task(typing(client,channel2),loop)
     #typing is not global PM limited
     
 @ratelimit_commands
@@ -1922,8 +1922,8 @@ async def ratelimit_test0061(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(message_create(client,channel1,'test'))
-    loop.create_task(typing(client,channel1))
+    Task(message_create(client,channel1,'test'),loop)
+    Task(typing(client,channel1),loop)
     # - is typing limited with message_create
 
 @ratelimit_commands
@@ -1934,8 +1934,8 @@ async def ratelimit_test0062(client,message,content):
     channel1=message.channel
     message1 = await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(typing(client,channel1))
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(typing(client,channel1),loop)
     # - is typing limited with message_edit
                      
 @ratelimit_commands
@@ -2042,8 +2042,8 @@ async def ratelimit_test0071(client,message,content):
     if message.author is not client.owner:
         return
     loop=client.loop
-    loop.create_task(client_connections(client))
-    loop.create_task(client_application_info(client))
+    Task(client_connections(client),loop)
+    Task(client_application_info(client),loop)
     # - is client_connections limited with client_application_info
 
 @ratelimit_commands
@@ -2067,8 +2067,8 @@ async def ratelimit_test0074(client,message,cotent):
     if message.author is not client.owner:
         return
     loop=client.loop
-    loop.create_task(client_login_static(client))
-    loop.create_task(client_logout(client))
+    Task(client_login_static(client),loop)
+    Task(client_logout(client),loop)
     # - is client_logout limited with client_login_static
     
 @ratelimit_commands
@@ -2079,8 +2079,8 @@ async def ratelimit_test0075(client,message,content):
     channel1=message.channel
     message1=await client.message_create(channel1,'test')
     await sleep(5.,loop)
-    loop.create_task(message_edit(client,message1,'notsotest'))
-    loop.create_task(message_pin(client,message1))
+    Task(message_edit(client,message1,'notsotest'),loop)
+    Task(message_pin(client,message1),loop)
     #message_edit is not limited with message_pin
 
 @ratelimit_commands
@@ -2089,13 +2089,13 @@ async def ratelimit_test0076(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    loop.create_task(typing(client,channel1))
+    Task(typing(client,channel1),loop)
     await sleep(3.,loop)
-    loop.create_task(typing(client,channel1))
+    Task(typing(client,channel1),loop)
     await sleep(2.,loop)
-    loop.create_task(typing(client,channel1))
+    Task(typing(client,channel1),loop)
     await sleep(1.,loop)
-    loop.create_task(typing(client,channel1))
+    Task(typing(client,channel1),loop)
     #await crashed for me, did every await 3 times, till pc restart.
     
 @ratelimit_commands
@@ -2815,9 +2815,9 @@ async def ratelimit_test0135(client,message,content):
         return
     loop=client.loop
     access = await client.owners_access(['guilds'])
-    loop.create_task(user_guilds(client,access))
-    loop.create_task(user_guilds(client,access))
-    loop.create_task(user_guilds(client,access))
+    Task(user_guilds(client,access),loop)
+    Task(user_guilds(client,access),loop)
+    Task(user_guilds(client,access),loop)
     #user_guilds is limited GLOBALLY (cant be other)
 
 @ratelimit_commands
@@ -2833,9 +2833,9 @@ async def ratelimit_test0137(client,message,content):
     if message.author is not client.owner:
         return
     loop=client.loop
-    loop.create_task(guild_get_all(client))
-    loop.create_task(guild_get_all(client))
-    loop.create_task(guild_get_all(client))
+    Task(guild_get_all(client),loop)
+    Task(guild_get_all(client),loop)
+    Task(guild_get_all(client),loop)
     #guild_get_all is limited globally
 
 @ratelimit_commands
@@ -2844,10 +2844,10 @@ async def ratelimit_test0138(client,message,content):
         return
     loop=client.loop
     access = await client.owners_access(['guilds'])
-    loop.create_task(user_guilds(client,access))
-    loop.create_task(user_guilds(client,access))
-    loop.create_task(guild_get_all(client))
-    loop.create_task(guild_get_all(client))
+    Task(user_guilds(client,access),loop)
+    Task(user_guilds(client,access),loop)
+    Task(guild_get_all(client),loop)
+    Task(guild_get_all(client),loop)
     #guild_get_all is not limited with user_guilds
 
 @ratelimit_commands
@@ -2875,10 +2875,10 @@ async def ratelimit_test0141(client,message,content):
         return
     loop=client.loop
     user1=message.author
-    loop.create_task(user_get(client,user1))
-    loop.create_task(user_get(client,user1))
-    loop.create_task(user_get(client,user1))
-    loop.create_task(user_get(client,user1))
+    Task(user_get(client,user1),loop)
+    Task(user_get(client,user1),loop)
+    Task(user_get(client,user1),loop)
+    Task(user_get(client,user1),loop)
     #user_get is limited globally probs
 
 @ratelimit_commands
@@ -3013,7 +3013,7 @@ async def ratelimit_test0153(client,message,content):
     guild2=client.guilds[guild2_id]
     user1_id=message.author.id
     for x in range(6):
-        loop.create_task(guild_user_get(client,guild1,user1_id))
+        Task(guild_user_get(client,guild1,user1_id),loop)
     #2s ratelimit
 
 @ratelimit_commands
@@ -3024,8 +3024,8 @@ async def ratelimit_test0154(client,message,content):
     guild1=message.guild
     guild2=client.guilds[guild2_id]
     user1_id=message.author.id
-    loop.create_task(guild_user_get(client,guild1,user1_id))
-    loop.create_task(guild_user_get(client,guild2,user1_id))
+    Task(guild_user_get(client,guild1,user1_id),loop)
+    Task(guild_user_get(client,guild2,user1_id),loop)
     #limited globally
 
 @ratelimit_commands
