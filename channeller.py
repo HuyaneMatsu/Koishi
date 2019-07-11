@@ -2,11 +2,8 @@ import time
 from weakref import WeakKeyDictionary
 from hata.futures import Task
 from hata.events_compiler import content_parser
-
-try:
-    from bs4 import BeautifulSoup
-except ImportError:
-    BeautifulSoup=None
+from hata.client import Client
+from hata.user import User
 
 class Channeller_v_del:
     __slots__=['parent']
