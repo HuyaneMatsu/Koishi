@@ -17,6 +17,7 @@ from hata.emoji import BUILTIN_EMOJIS,parse_emoji
 from hata.others import filter_content
 from hata.guild import Guild
 from hata.role import Role
+from hata.embed import Embed
 
 import image_handler
 from help_handler import on_command_help,HELP,invalid_command
