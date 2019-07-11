@@ -3193,7 +3193,7 @@ async def parse_details_command(client,message,content):
             await self.message_create(message.channel,'Guild only')
     @on_command
     @content_parser('guild',
-                    'condition, default="message.author is client.owner"',
+                    'condition, flags=r, default="message.author is client.owner"',
                     on_failure=failure_test_on_failure)
     async def failure_test(self,message,guild):
         await self.message_create(message.channel,'Nothing interesting here')
@@ -3225,7 +3225,7 @@ async def parse_details_command(client,message,content):
         #does not drops error
 
     @on_command
-    @content_parser('condition, default="message.author is not client.owner"',
+    @content_parser('condition, flags=r, default="message.author is not client.owner"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
     async def emojis_get_0(client,message,message_id,channel):
@@ -3275,7 +3275,7 @@ async def parse_details_command(client,message,content):
         pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(result)])
 
     @on_command
-    @content_parser('condition, default="message.author is not client.owner"',
+    @content_parser('condition, flags=r, default="message.author is not client.owner"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
     async def emojis_get_2(client,message,message_id,channel):

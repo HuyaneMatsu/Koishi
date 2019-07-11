@@ -279,7 +279,7 @@ class kanako_game():
                 await self.waiter.sleep(time_till_notify)
                 Task(self.send_or_except(
                     Embed('Hurry! Only 10 seconds left!',
-                        '\n'.join([user.__format__('f') for user in self.users if user.id not in answers]),
+                        '\n'.join([user.full_name for user in self.users if user.id not in answers]),
                         COLOR)),client.loop)
                 self.waiter.clear()
                 await self.waiter.sleep(10.)
@@ -522,7 +522,7 @@ class game_statistics(metaclass=asyncinit):
         return embed
 
 @content_parser('str, flags=g, default="\'\'"',
-                'condition, flags=r, default="index==limit"',
+                'condition, default="index==limit"',
                 'str, default="\'hiragana\'"',
                 'int, default=20',
                 'int, default=5',)

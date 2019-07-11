@@ -86,7 +86,7 @@ HELP['voice']=Embed(title='voice',color=HELP_COLOR,
         'Use "skip" to skip the actual source\n'
         'Use "move <channel name>" to move the player to an another channel\n'
         'Use "leave" to make me leave the channel\n'
-        'Use "stop" to cancel teh current player and clear the queue'
+        'Use "stop" to cancel the current player and clear the queue'
             ))
 
 HELP['message_me']=Embed(title='message_me',color=HELP_COLOR,
