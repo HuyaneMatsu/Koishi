@@ -5,6 +5,7 @@ from hata.prettyprint import pchunkify,pretty_print
 from hata.events import Pagination
 from hata.others import cchunkify,Status
 from hata.permission import PERM_KEYS
+from hata.embed import EXTRA_EMBED_TYPES
 
 class dispatch_tester:
     channel=None
@@ -80,6 +81,12 @@ class dispatch_tester:
             return
         result=[f'Message {message.id} got edited']
 
+        channel=message.channel
+        result.append(f'- At channel : {channel:d} {channel.id}')
+        guild=channel.guild
+        if guild is not None:
+            result.append(f'- At guild : {guild.name} {guild.id}')
+
         for key,value in old.items():
             if key in ('pinned','activity_party_id','everyone_mention'): 
                 result.append(f'- {key} got changed: {value!r} -> {getattr(message,key)!r}')
@@ -139,8 +146,57 @@ class dispatch_tester:
             
         text=cchunkify(result)
         pages=[{'content':chunk} for chunk in text]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
+    @classmethod
+    async def embed_update(self,client,message,flag):
+        if self.channel is None:
+            return
+        result=[f'Message {message.id} got embed update:']
+
+        channel=message.channel
+        result.append(f'- At channel : {channel:d} {channel.id}')
+        guild=channel.guild
+        if guild is not None:
+            result.append(f'- At guild : {guild.name} {guild.id}')
+
+        if flag==1:
+            result.append('Only sizes got update.')
+        else:
+            result.append('Links! Links everywhere...')
+
+        embeds=message.embeds
+        if embeds is None:
+            result.append('This should not happen, there are no embeds...')
+        else:
+            for index,embed in enumerate(embeds,1):
+                if embed.type in EXTRA_EMBED_TYPES:
+                    result.append(f'New embed appeared at index {index}:')
+                    result.extend(pretty_print(embed))
+                else:
+                    collected=[]
+                    image=embed.image
+                    if image is not None:
+                        collected.append(('image.height',image.height))
+                        collected.append(('image.width',image.width))
+                    thumbnail=embed.thumbnail
+                    if thumbnail is not None:
+                        collected.append(('thumbnail.height',thumbnail.height))
+                        collected.append(('thumbnail.width',thumbnail.width))
+                    video=embed.video
+                    if video is not None:
+                        collected.append(('video.height',video.height))
+                        collected.append(('video.width',video.width))
+                    if collected:
+                        result.append(f'Sizes got update at embed {index}:')
+                        for name,value in collected:
+                            result.append(f'- {name} : {value}')
+                        
+        text=cchunkify(result)
+        pages=[{'content':chunk} for chunk in text]
+        await Pagination(client,self.channel,pages,120.)
+
+        
     @classmethod
     async def reaction_clear(self,client,message,old):
         if self.channel is None:
@@ -148,7 +204,7 @@ class dispatch_tester:
         text=pretty_print(old)
         text.insert(0,f'Reactions got cleared from message {message.id}:')
         pages=[{'content':chunk} for chunk in cchunkify(text)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def user_presence_update(self,client,user,old):

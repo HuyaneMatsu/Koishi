@@ -161,7 +161,7 @@ async def guild_info(client,message,content):
 
 @infos
 @content_parser('guild',
-                'condition, default="guild.permissions_for(message.author).can_manage_channel"',
+                'condition, flags=r, default="not guild.permissions_for(message.author).can_manage_channel"',
                 'channel, flags=mni, default=None',
                 on_failure=no_permission)
 async def invites(client,message,guild,channel):
@@ -381,7 +381,7 @@ def update_about(client):
 
 @infos
 @content_parser('guild',
-                'condition, default="guild.permissions_for(message.author).can_view_audit_log"',
+                'condition, flags=r, default="not guild.permissions_for(message.author).can_view_audit_log"',
                 'ensure',
                 'condition, default="not part"',
                 'user, flags=nmi, default=part',
@@ -425,7 +425,7 @@ async def logs(client,message,guild,*args):
 
 
 @infos
-@content_parser('condition, default="guild.permissions_for(message.author).can_administrator"',
+@content_parser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',
                 on_failure=no_permission)
@@ -438,7 +438,7 @@ async def message(client,message,message_id,channel):
     await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
 
 @infos
-@content_parser('condition, default="guild.permissions_for(message.author).can_administrator"',
+@content_parser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',
                 on_failure=no_permission)
