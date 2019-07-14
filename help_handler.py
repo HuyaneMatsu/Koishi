@@ -20,7 +20,7 @@ def create_help_help(prefix):
             pages.append('\n'.join(part))
             part.clear()
             index=0
-        part.append(f' **>>** {name}')
+        part.append(f'**>>** {name}')
         index+=1
 
     pages.append('\n'.join(part))

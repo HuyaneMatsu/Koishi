@@ -132,8 +132,8 @@ class dispatch_tester:
                 result.append(f'- {key} got changed from:')
                 break_=False
                 while True:
-                    if vlaue is None:
-                        resutl.append('    - None -')
+                    if value is None:
+                        result.append('    - None -')
                     else:
                         for index,obj in enumerate(1,value):
                             result.append(f'    - {obj.name} {obj.id}')

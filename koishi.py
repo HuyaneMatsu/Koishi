@@ -9,7 +9,7 @@ from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
 from hata.futures import CancelledError,sleep,Future_WM,Task
-from hata.events import Pagination,wait_for_message,wait_for_emoji,cooldown
+from hata.events import Pagination,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild
 from hata.channel import cr_pg_channel_object,Channel_text
 from hata import others
 from hata.exceptions import DiscordException
@@ -30,6 +30,14 @@ from battleships import battle_manager
 from infos import infos,update_about
 from tools import cooldown_handler, BeautifulSoup
 import channeller
+import pers_data
+import models
+
+PREFIXES=prefix_by_guild(pers_data.PREFIX,models.DB_ENGINE,models.PREFIX_TABLE,models.pefix_model)
+
+del pers_data
+del prefix_by_guild
+del models
 
 class once_on_ready:
     __slots__ = ['called',]

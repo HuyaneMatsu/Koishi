@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath('..'))
 from hata import Client,start_clients
 from hata.activity import Activity_game
 from hata.channel import Channel_text
-from hata.events import (bot_reaction_waitfor,bot_message_event,prefix_by_guild,
+from hata.events import (bot_reaction_waitfor,bot_message_event,
     bot_reaction_delete_waitfor,)
 from hata.webhook import Webhook
 from hata.role import Role
@@ -17,7 +17,6 @@ import koishi
 import mokou
 import elphelt
 
-import models
 from tools import commit_extractor,message_delete_waitfor
 
 ############################## SETUP KOISHI ##############################
@@ -34,9 +33,7 @@ Koishi.events(message_delete_waitfor)
 Koishi.events(koishi.once_on_ready)
 Koishi.events(koishi.guild_user_add)
 
-PREFIXES=prefix_by_guild(pers_data.PREFIX,models.DB_ENGINE,models.PREFIX_TABLE,models.pefix_model)
-
-koishi_commands=Koishi.events(bot_message_event(PREFIXES)).shortcut
+koishi_commands=Koishi.events(bot_message_event(koishi.PREFIXES)).shortcut
 koishi_commands.extend(koishi.commands)
 
 webhook_sender=commit_extractor(
@@ -72,6 +69,20 @@ Elphelt.events(bot_reaction_delete_waitfor)
 
 elphelt_commands=Elphelt.events(bot_message_event('/')).shortcut
 elphelt_commands.extend(elphelt.commands)
+
+############################## TEST COMMANDS ##############################
+
+from hata.guild import Guild
+from hata.futures import Task
+dungeon=Guild.precreate(388267636661682178)
+@koishi_commands
+async def write_on_mokou(self,message,client):
+    if self.owner is not message.author:
+        return
+    if message.guild is not dungeon:
+        return
+    Task(Mokou.message_create(message.channel,'Write on me?'),Mokou.loop)
+    Mokou.loop.wakeup()
 
 ############################## START ##############################
 
