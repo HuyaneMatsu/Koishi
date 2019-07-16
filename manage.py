@@ -72,18 +72,6 @@ elphelt_commands.extend(elphelt.commands)
 
 ############################## TEST COMMANDS ##############################
 
-from hata.guild import Guild
-from hata.futures import Task
-dungeon=Guild.precreate(388267636661682178)
-@koishi_commands
-async def write_on_mokou(self,message,client):
-    if self.owner is not message.author:
-        return
-    if message.guild is not dungeon:
-        return
-    Task(Mokou.message_create(message.channel,'Write on me?'),Mokou.loop)
-    Mokou.loop.wakeup()
-
 ############################## START ##############################
 
 start_clients()

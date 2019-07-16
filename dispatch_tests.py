@@ -6,6 +6,7 @@ from hata.events import Pagination
 from hata.others import cchunkify,Status
 from hata.permission import PERM_KEYS
 from hata.embed import EXTRA_EMBED_TYPES
+from hata.dereaddons_local import listdifference
 
 class dispatch_tester:
     channel=None
@@ -143,7 +144,16 @@ class dispatch_tester:
                 value=getattr(message,key)
                 break_=True
                 continue
-            
+            if key in ('flags',):
+                old=list(value)
+                new=list(getattr(message,key))
+                old,new=listdifference(old,new)
+                result.append(f'- {key} changed:')
+                if old:
+                    result.append(f'    - removed : {", ".join(old)}')
+                if new:
+                    result.append(f'    - added : {", ".join(new)}')
+                
         text=cchunkify(result)
         pages=[{'content':chunk} for chunk in text]
         await Pagination(client,self.channel,pages,120.)

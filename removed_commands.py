@@ -3758,7 +3758,47 @@ async def parse_details_command(client,message,content):
             print(f'{name}:{unicode!r}')
 
         await client.message_create(channel,'thanks')
-        
+
+# after rework commands from manage.py
+
+from hata.guild import Guild
+from hata.futures import Task
+dungeon=Guild.precreate(388267636661682178)
+@koishi_commands
+async def write_on_mokou(self,message,content):
+    if self.owner is not message.author:
+        return
+    if message.guild is not dungeon:
+        return
+    Task(Mokou.message_create(message.channel,'Write on me?'),Mokou.loop)
+    Mokou.loop.wakeup()
+
+from hata.events import wait_for_message
+from hata.embed import Embed
+
+@koishi_commands
+async def suppress_test(client,message,content):
+    if message.author is not client.owner:
+        return
+    
+    channel=message.channel
+    
+    embed_message = await client.message_create(channel,embed=Embed('testing'))
+    
+    try:
+        await wait_for_message(client,channel,lambda message:message.author is client.owner,30.)
+    except Exception as err:
+        return
+    
+    await client.message_suppress_embeds(embed_message)
+
+    try:
+        await wait_for_message(client,channel,lambda message:message.author is client.owner,30.)
+    except Exception as err:
+        return
+
+    await client.message_suppress_embeds(embed_message,False)
+
 # - : - # dungeon_sweeper.py # - : - #
 
 ##STAGE_NAME_PATTERN_RE=re.compile(

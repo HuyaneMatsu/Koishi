@@ -29,6 +29,7 @@ from hata.http import VALID_ICON_FORMATS
 from hata.integration import Integration
 from email._parseaddr import _parsedate_tz
 from datetime import datetime,timedelta,timezone
+from hata.embed import Embed
 
 user1_id=189702078958927872
 user2_id=184405311681986560
@@ -282,6 +283,13 @@ case 2      : older than 2 week and not own
     reset   : 120s
 members     :
     message_delete
+
+group       : message_suppress_embeds
+limit       : 3
+reset       : 1
+limited by  : global
+members:
+    message_suppress_embeds
 '''
 
 def parsedate_to_datetime(data):
@@ -604,7 +612,7 @@ def channel_edit(client,channel,name='',topic='',nsfw=None,slowmode=None,user_li
             data['rate_limit_per_user']=slowmode
 
     elif value==2:
-        if bitrate<8000 or bitrate>(96000,128000)['VIP' in chanel.guild.feautres]:
+        if bitrate<8000 or bitrate>(96000,128000)['VIP' in channel.guild.feautres]:
             raise ValueError(f'Invalid bitrate {bitrate!r}, should be 8000-96000 (128000 for vip)')
         data['bitrate']=bitrate
         
@@ -666,7 +674,7 @@ def webhook_get_channel(client,channel):
     return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/channels/{channel_id}/webhooks')
 
-async def guild_create(client,name,icon=None,
+async def guild_create(client,name,icon=None,avatar=b'',
         region=Voice_region.eu_central,
         verification_level=Verification_level.medium,
         message_notification_level=Message_notification_level.only_mentions,
@@ -1067,6 +1075,13 @@ def guild_widget_get(client,guild_id):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/widget.json',
         header={})
 
+def message_suppress_embeds(client,message,suppress=True):
+    message_id=message.id
+    channel_id=message.channel.id
+    return bypass_request(client,METH_POST,
+        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/suppress-embeds',
+        data={'suppress':suppress})
+
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
     if message.author is not client.owner:
@@ -1182,9 +1197,9 @@ async def ratelimit_test0006(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel1,'test')
     message3 = await client.message_create(channel1,'test')
-    await elsewhere_await_future(client2.reaction_add(message1,emoji1),loop,client2.loop)
-    await elsewhere_await_future(client2.reaction_add(message2,emoji1),loop,client2.loop)
-    await elsewhere_await_future(client2.reaction_add(message3,emoji1),loop,client2.loop)
+    await elsewhere_await_coro(client2.reaction_add(message1,emoji1),loop,client2.loop)
+    await elsewhere_await_coro(client2.reaction_add(message2,emoji1),loop,client2.loop)
+    await elsewhere_await_coro(client2.reaction_add(message3,emoji1),loop,client2.loop)
     Task(reaction_delete(client,message1,emoji1,client2),loop)
     Task(reaction_delete(client,message2,emoji1,client2),loop)
     Task(reaction_delete(client,message3,emoji1,client2),loop)
@@ -1201,8 +1216,8 @@ async def ratelimit_test0007(client,message,content):
     channel1=message.channel
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel1,'test')
-    await elsewhere_await_future(client2.reaction_add(message1,emoji1),loop,client2.loop)
-    await elsewhere_await_future(client2.reaction_add(message2,emoji1),loop,client2.loop)
+    await elsewhere_await_coro(client2.reaction_add(message1,emoji1),loop,client2.loop)
+    await elsewhere_await_coro(client2.reaction_add(message2,emoji1),loop,client2.loop)
     Task(reaction_delete(client,message1,emoji1,client2),loop)
     Task(reaction_delete(client,message2,emoji1,client2),loop)
     Task(reaction_add(client,message1,emoji2),loop)
@@ -1705,7 +1720,7 @@ async def ratelimit_test0042(client,message,content):
     loop=client.loop
     channel1=message.channel
     message1=await client.message_create(channel1,'test')
-    message1=await client.message_create(channel2,'test')
+    message2=await client.message_create(channel1,'test')
     await client.message_pin(message2)
     await sleep(5.,loop)
     Task(message_pin(client,message1),loop)
@@ -2172,7 +2187,7 @@ async def ratelimit_test0083(client,message,content):
     loop=client.loop
     guild1=message.guild
     channel1 = await client.channel_create(guild1,category=None,type_=0,name='tesuto_channel15')
-    await channel_edit(client,channe2,name='tesuto-channel9')
+    await channel_edit(client,channel1,name='tesuto-channel9')
     await channel_delete(client,channel1)
     # - is channel_delete limited with channel_edit
 
@@ -3056,3 +3071,94 @@ async def ratelimit_test0157(client,message,content):
     guild1=message.guild
     for _ in range(2):
         await guild_widget_get(client,guild1.id)
+        # guild_widget_get is UNLIMITED
+
+@ratelimit_commands
+async def ratelimit_test0159(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    channel1,channel2=message.channel.category.channels[1:3]
+    
+    message1 = await client.message_create(channel1,embed=Embed('owo'))
+    message2 = await client.message_create(channel2,embed=Embed('uwu'))
+
+    await message_suppress_embeds(client,message1)
+    await message_suppress_embeds(client,message2)
+    #message_suppress_embeds is over guild limited
+    
+@ratelimit_commands
+async def ratelimit_test0160(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    message1 = await client.message_create(message.channel,embed=Embed('owo'))
+    message2 = await client.message_create(message.channel,embed=Embed('uwu'))
+
+    await message_suppress_embeds(client,message1)
+    await message_suppress_embeds(client,message2)
+    #message_suppress_embeds has limit over channel
+
+@ratelimit_commands
+async def ratelimit_test0161(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    channel1=message.channel
+    channel2=Channel_text.precreate(572079522065678336) #different guild
+    
+    message1 = await client.message_create(channel1,embed=Embed('owo'))
+    message2 = await client.message_create(channel2,embed=Embed('uwu'))
+
+    await message_suppress_embeds(client,message1)
+    await message_suppress_embeds(client,message2)
+    #message_suppress_embeds is Globally limited
+
+    
+@ratelimit_commands
+async def ratelimit_test0162(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    channel1=message.channel
+    
+    message1 = await client.message_create(channel1,embed=Embed('owo'))
+    message2 = await client.message_create(channel1,embed=Embed('uwu'))
+    message3 = await client.message_create(channel1,embed=Embed('nom'))
+    message4 = await client.message_create(channel1,embed=Embed('kya'))
+    message5 = await client.message_create(channel1,embed=Embed('heh'))
+    
+    Task(message_suppress_embeds(client,message1),client.loop)
+    Task(message_suppress_embeds(client,message2),client.loop)
+    Task(message_suppress_embeds(client,message3),client.loop)
+    Task(message_suppress_embeds(client,message4),client.loop)
+    Task(message_suppress_embeds(client,message5),client.loop)
+    #message_suppress_embeds has 1s cooldown, but it shows 2s
+
+@ratelimit_commands
+async def ratelimit_test0163(client,message,content):
+    if message.author is not client.owner:
+        return
+    loop=client.loop
+    channel1=message.channel
+    
+    message1 = await client.message_create(channel1,embed=Embed('owo'))
+    message2 = await client.message_create(channel1,embed=Embed('uwu'))
+    message3 = await client.message_create(channel1,embed=Embed('nom'))
+    message4 = await client.message_create(channel1,embed=Embed('kya'))
+    message5 = await client.message_create(channel1,embed=Embed('kyun'))
+    message6 = await client.message_create(channel1,embed=Embed('wow'))
+    
+    await message_suppress_embeds(client,message1)
+    await message_suppress_embeds(client,message2)
+    await message_suppress_embeds(client,message3)
+    
+    await sleep(2.,client.loop)
+
+    Task(message_suppress_embeds(client,message1,False),client.loop)
+    Task(message_suppress_embeds(client,message4,True ),client.loop)
+    Task(message_suppress_embeds(client,message2,False),client.loop)
+    Task(message_suppress_embeds(client,message5,True ),client.loop)
+    Task(message_suppress_embeds(client,message3,False),client.loop)
+    Task(message_suppress_embeds(client,message6,True ),client.loop)
+    #just felt like True / False has some diff, but nope
