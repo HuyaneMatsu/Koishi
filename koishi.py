@@ -1,4 +1,4 @@
-import re
+import re, traceback
 from random import randint
 
 from hata.parsers import eventlist

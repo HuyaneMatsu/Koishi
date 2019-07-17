@@ -315,7 +315,7 @@ class user_profile:
         self.process=self.process_state_0
         
         self.text='Good luck!'
-        self.target = await self.client.message_create(self.channel,embed=self.render_state_0())
+        self.message = await self.client.message_create(self.channel,embed=self.render_state_0())
         
     async def set_state_1(self,starts):
         self.process=self.process_state_1
@@ -347,7 +347,7 @@ class user_profile:
         
         client=self.client
 
-        message=self.target
+        message=self.message
         client.events.reaction_add.remove(self,message)
         client.events.reaction_delete.remove(self,message)
         
@@ -375,7 +375,7 @@ class user_profile:
         else:
             embed=self.render_state_1()
         
-        await self.client.message_edit(message,embed=embed)
+        await self.client.message_edit(self.message,embed=embed)
 
 
     def cancel(self):

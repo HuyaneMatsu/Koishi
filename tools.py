@@ -5,6 +5,7 @@ from hata.embed import Embed
 from hata.futures import CancelledError,sleep,Task
 from hata.dereaddons_local import inherit
 from hata import others
+from hata.exceptions import DiscordException
 
 try:
     from bs4 import BeautifulSoup

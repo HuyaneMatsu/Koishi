@@ -62,7 +62,7 @@ class dispatch_tester:
         result=[]
         result.append(f'Me, {client:f} got edited')
         for key,value in old.items():
-            result.append(f'- {key} got changed: {value} -> {getattr(client,key)}')
+            result.append(f'- {key} changed: {value} -> {getattr(client,key)}')
 
         try:
             await client.message_create(self.channel,'\n'.join(result))
@@ -90,16 +90,16 @@ class dispatch_tester:
 
         for key,value in old.items():
             if key in ('pinned','activity_party_id','everyone_mention'): 
-                result.append(f'- {key} got changed: {value!r} -> {getattr(message,key)!r}')
+                result.append(f'- {key} changed: {value!r} -> {getattr(message,key)!r}')
                 continue
             if key in ('edited',):
                 if value is None:
-                    result.append(f'- {key} got changed: None -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
+                    result.append(f'- {key} changed: None -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
                 else:
-                    result.append(f'- {key} got changed: {value:%Y.%m.%d-%H:%M:%S} -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
+                    result.append(f'- {key} changed: {value:%Y.%m.%d-%H:%M:%S} -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
                 continue
             if key in ('application','activity','attachments','embeds'):
-                result.append(f'- {key} got changed:')
+                result.append(f'- {key} changed:')
                 if value is None:
                     result.append('From None')
                 else:
@@ -111,7 +111,7 @@ class dispatch_tester:
                     result.extend(pretty_print(value))
                 continue
             if key in ('content',):
-                result.append(f'- {key} got changed from:')
+                result.append(f'- {key} changed from:')
                 content=value
                 break_=False
                 while True:
@@ -130,7 +130,7 @@ class dispatch_tester:
                     result.append('To:')
                 continue
             if key in ('user_mentions','role_mentions'):
-                result.append(f'- {key} got changed from:')
+                result.append(f'- {key} changed from:')
                 break_=False
                 while True:
                     if value is None:
@@ -138,22 +138,26 @@ class dispatch_tester:
                     else:
                         for index,obj in enumerate(1,value):
                             result.append(f'    - {obj.name} {obj.id}')
-                if break_:
-                    break
-                result.append('To:')
-                value=getattr(message,key)
-                break_=True
+                    if break_:
+                        break
+                    result.append('To:')
+                    value=getattr(message,key)
+                    break_=True
                 continue
             if key in ('flags',):
                 old=list(value)
-                new=list(getattr(message,key))
+                old.sort()
+                value=getattr(message,key)
+                new=list(value)
+                new.sort()
                 old,new=listdifference(old,new)
                 result.append(f'- {key} changed:')
                 if old:
                     result.append(f'    - removed : {", ".join(old)}')
                 if new:
                     result.append(f'    - added : {", ".join(new)}')
-                
+                continue
+
         text=cchunkify(result)
         pages=[{'content':chunk} for chunk in text]
         await Pagination(client,self.channel,pages,120.)
@@ -172,36 +176,47 @@ class dispatch_tester:
 
         if flag==1:
             result.append('Only sizes got update.')
-        else:
+        elif flag==2:
             result.append('Links! Links everywhere...')
+        else: #flag==3
+            result.append('Unsuppressed embed on suppressed message')
 
         embeds=message.embeds
         if embeds is None:
             result.append('This should not happen, there are no embeds...')
         else:
-            for index,embed in enumerate(embeds,1):
-                if embed.type in EXTRA_EMBED_TYPES:
-                    result.append(f'New embed appeared at index {index}:')
-                    result.extend(pretty_print(embed))
-                else:
-                    collected=[]
-                    image=embed.image
-                    if image is not None:
-                        collected.append(('image.height',image.height))
-                        collected.append(('image.width',image.width))
-                    thumbnail=embed.thumbnail
-                    if thumbnail is not None:
-                        collected.append(('thumbnail.height',thumbnail.height))
-                        collected.append(('thumbnail.width',thumbnail.width))
-                    video=embed.video
-                    if video is not None:
-                        collected.append(('video.height',video.height))
-                        collected.append(('video.width',video.width))
-                    if collected:
-                        result.append(f'Sizes got update at embed {index}:')
-                        for name,value in collected:
-                            result.append(f'- {name} : {value}')
-                        
+            if flag==1:
+                for index,embed in enumerate(embeds,1):
+                    if flag==1:
+                        collected=[]
+                        image=embed.image
+                        if image is not None:
+                            collected.append(('image.height',image.height))
+                            collected.append(('image.width',image.width))
+                        thumbnail=embed.thumbnail
+                        if thumbnail is not None:
+                            collected.append(('thumbnail.height',thumbnail.height))
+                            collected.append(('thumbnail.width',thumbnail.width))
+                        video=embed.video
+                        if video is not None:
+                            collected.append(('video.height',video.height))
+                            collected.append(('video.width',video.width))
+                        if collected:
+                            result.append(f'Sizes got update at embed {index}:')
+                            for name,value in collected:
+                                result.append(f'- {name} : {value}')
+            elif flag==2:
+                for index,embed in enumerate(embeds,1):
+                    if embed.type in EXTRA_EMBED_TYPES:
+                        result.append(f'New embed appeared at index {index}:')
+                        result.extend(pretty_print(embed))
+            else: #flag==3:
+                for index,embed in enumerate(embeds,1):
+                    if not embed.suppressed:
+                        result.append(f'Unsuppressed embed appeared at {index}:')
+                        result.extend(pretty_print(embed))
+
+
         text=cchunkify(result)
         pages=[{'content':chunk} for chunk in text]
         await Pagination(client,self.channel,pages,120.)
@@ -265,7 +280,7 @@ class dispatch_tester:
                     result.extend(pretty_print(activity))
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def user_edit(self,client,user,old):
@@ -274,7 +289,7 @@ class dispatch_tester:
             result.append(f'- {key} : {value} -> {getattr(user,key)}')
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
     
     @classmethod
     async def user_profile_edit(self,client,user,old,guild):
@@ -311,13 +326,13 @@ class dispatch_tester:
             raise RuntimeError(key)
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def channel_delete(self,client,channel):
         text=f'```\nA channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def channel_edit(self,client,channel,old):
@@ -336,20 +351,20 @@ class dispatch_tester:
                 continue
             result.append(f'{key} changed: {value!r} -> {getattr(channel,key)!r}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def channel_create(self,client,channel):
         result=pretty_print(channel)
         result.insert(0,f'A channel got created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def channel_pin_update(self,client,channel):
         text=f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
         
     @classmethod
@@ -373,7 +388,7 @@ class dispatch_tester:
             raise RuntimeError(modtype) #bugged?
         
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def guild_user_add(self,client,guild,user):
@@ -399,7 +414,7 @@ class dispatch_tester:
         result=pretty_print(guild)
         result.insert(0,f'Guild created: {guild.id}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     #Unknown:
     #guild_sync
@@ -461,7 +476,7 @@ class dispatch_tester:
             raise RuntimeError(key)
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
         
     @classmethod
     async def guild_delete(self,client,guild,profile,boosted_since):
@@ -473,7 +488,7 @@ class dispatch_tester:
         result.insert(2,'At least i did not boost' if boosted_since is None else 'Rip by boost ahhhh...')
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
 
     @classmethod
@@ -482,7 +497,7 @@ class dispatch_tester:
             return
         text=f'```\nUser {user:f} {user.id} got banned at {guild.name} {guild.id}.```'
         pages=[{'content':text}]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def guild_ban_delete(self,client,guild,user):
@@ -490,7 +505,7 @@ class dispatch_tester:
             return
         text=f'```\nUser {user:f} {user.id} got UNbanned at {guild.name} {guild.id}.```'
         pages=[{'content':text}]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     #Auto dispatched:
     #guild_user_chunk
@@ -504,7 +519,7 @@ class dispatch_tester:
         result=pretty_print(role)
         result.insert(0,f'A role got created at {role.guild.name} {role.guild.id}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def role_delete(self,client,role):
@@ -512,7 +527,7 @@ class dispatch_tester:
             return
         text=f'```\nA role got deleted at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}```'
         pages=[{'content':text}]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def role_edit(self,client,role,old):
@@ -537,7 +552,7 @@ class dispatch_tester:
                 continue
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def webhook_update(self,client,channel):
@@ -545,7 +560,7 @@ class dispatch_tester:
             return
         text=f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
         pages=[{'content':text}]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
         
     @classmethod
     async def voice_state_update(self,client,state,action,old):
@@ -553,10 +568,6 @@ class dispatch_tester:
             return
         result=[]
         user=state.user
-        if user.partial:
-            name='partail user'
-        else:
-            name=user.name
         if action=='l':
             result.append('Voice state update, action: leave')
             result.extend(pretty_print(state))
@@ -583,7 +594,7 @@ class dispatch_tester:
                 result.append(f'- {key} : {value} -> {getattr(state,key)}')
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions
+        await Pagination(client,self.channel,pages,120.)
             
     @classmethod
     async def typing(self,client,channel,user,timestamp):
@@ -598,7 +609,7 @@ class dispatch_tester:
         result.append(f'- timestamp : {timestamp:%Y.%m.%d-%H:%M:%S}')
         
         pages=[{'content':chunk} for chunk in cchunkify(result)]
-        await Pagination(client,self.channel,pages,120.) #does not raises exceptions        
+        await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def client_edit_settings(self,client,old):

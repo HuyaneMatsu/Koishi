@@ -74,6 +74,20 @@ elphelt_commands.extend(elphelt.commands)
 
 ############################## START ##############################
 
+from hata.events_compiler import content_parser
+@koishi_commands
+@content_parser('condition, flags=r, default="message.author is not client.owner"',
+                'int')
+async def desuppress(client,message,id_):
+    for message in message.channel.messages:
+        if message.id==id_:
+            break
+    else:
+        await client.message_create(message.channel,'Message too old, or bad id')
+        return
+
+    await client.message_suppress_embeds(message,False)
+
 start_clients()
 
 ##def start_console():
