@@ -130,20 +130,28 @@ class dispatch_tester:
                     result.append('To:')
                 continue
             if key in ('user_mentions','role_mentions'):
-                result.append(f'- {key} changed from:')
-                break_=False
-                while True:
+                result.append(f'- {key} changed:')
+                if type(value) is tuple:
+                    old,new=value
+                    if old:
+                        result.append(f'    - removed : {", ".join([f"{obj.name} {obj.id}" for obj in old])}')
+                    if new:
+                        result.append(f'    - added : {", ".join([f"{obj.name} {obj.id}" for obj in new])}')
+                else:
                     if value is None:
-                        result.append('    - None -')
+                        str_form='None'
                     else:
-                        for index,obj in enumerate(1,value):
-                            result.append(f'    - {obj.name} {obj.id}')
-                    if break_:
-                        break
-                    result.append('To:')
-                    value=getattr(message,key)
-                    break_=True
+                        str_form=', '.join([f'{obj.name} {obj.id}' for obj in value])
+                    result.append(f'    - from: {str_form}')
+                    
+                    new=getattr(message,key)
+                    if new is None:
+                        str_form='None'
+                    else:
+                        str_form=', '.join([f'{obj.name} {obj.id}' for obj in new])
+                    result.append(f'    - to: {str_form}')
                 continue
+            
             if key in ('flags',):
                 old=list(value)
                 old.sort()
