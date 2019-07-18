@@ -6,7 +6,8 @@ from io import BytesIO
 from help_handler import HELP
 from hata.others import is_mention
 from hata.channel import messages_till_index
-from hata.ios import ReuAsyncIO
+from hata.ios import ReuAsyncIO,AsyncIO
+import functools
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -331,17 +332,15 @@ async def process_on_command_upload(client,message,content):
             image.decoderconfig=()
             image.decodermaxblock=65536
             image._open()
-            image.save(path)
+            await client.loop.run_in_executor(functools.partial(image.save,filename))
         else:
-            file=open(filename,'wb')
-            file.write(data)
-            file.close()
+            with (await AsyncIO(filename,'wb')) as file:
+                await file.write(data)
     else:
         path=f'{index}_{"_".join(tags)}.{ext}'
         filename=join(IMAGE_PATH,path)
-        file=open(filename,'wb')
-        file.write(data)
-        file.close()
+        with (await AsyncIO(filename,'wb')) as file:
+            await file.write(data)
         
     image_details(path)
     create_help_images()
