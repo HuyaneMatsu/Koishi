@@ -15,7 +15,7 @@ from hata import others
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
 from hata.others import filter_content
-from hata.guild import Guild
+from hata.guild import Guild,GUILDS
 from hata.role import Role
 from hata.embed import Embed
 
@@ -125,12 +125,11 @@ async def default_event(client,message):
 @commands
 @content_parser('user, flags=mna, default="message.author"')
 async def rate(client,message,target):
-    #nickname check
     if target in CLIENTS or target is client.owner:
         result=10
     else:
         result=target.id%11
-
+    #nickname check
     await client.message_create(message.channel,f'I rate {target.name_at(message.guild)} {result}/10')
 
 
@@ -463,7 +462,7 @@ async def _change_prefix(client,message,content):
         return
     
     try:
-        guild=client.guilds[int(content[0])]
+        guild=GUILDS[int(content[0])]
     except (ValueError,KeyError):
         guild=client.get_guild(content[0])
         if guild is None:

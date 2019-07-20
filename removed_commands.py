@@ -3799,6 +3799,21 @@ async def suppress_test(client,message,content):
 
     await client.message_suppress_embeds(embed_message,False)
 
+from hata.events_compiler import content_parser
+@koishi_commands
+@content_parser('condition, flags=r, default="message.author is not client.owner"',
+                'int')
+async def desuppress(client,message,id_):
+    for message in message.channel.messages:
+        if message.id==id_:
+            break
+    else:
+        await client.message_create(message.channel,'Message too old, or bad id')
+        return
+
+    await client.message_suppress_embeds(message,False)
+
+    
 # - : - # dungeon_sweeper.py # - : - #
 
 ##STAGE_NAME_PATTERN_RE=re.compile(

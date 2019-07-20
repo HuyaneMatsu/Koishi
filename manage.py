@@ -69,24 +69,92 @@ Elphelt.events(bot_reaction_delete_waitfor)
 
 elphelt_commands=Elphelt.events(bot_message_event('/')).shortcut
 elphelt_commands.extend(elphelt.commands)
+elphelt_commands(Koishi.events.message_create.commands['random'])
 
 ############################## TEST COMMANDS ##############################
 
-############################## START ##############################
+from hata.others import filter_content
+from hata.prettyprint import pchunkify
+from hata.ios import ReuAsyncIO
+join=os.path.join
 
-from hata.events_compiler import content_parser
 @koishi_commands
-@content_parser('condition, flags=r, default="message.author is not client.owner"',
-                'int')
-async def desuppress(client,message,id_):
-    for message in message.channel.messages:
-        if message.id==id_:
+async def achievement_create(client,message,content):
+    while True:
+        if message.author is not client.owner:
+            text='Owner only'
             break
-    else:
-        await client.message_create(message.channel,'Message too old, or bad id')
+        content=filter_content(content)
+        if len(content)<2:
+            text='expected at least 2 content parts'
+            break
+
+        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        try:
+            with (await ReuAsyncIO(image_path)) as file:
+                image = await file.read()
+                await client.achievement_create(client.id,
+                    content[0],content[1],False,False,image)
+        except BaseException as err:
+            text='at create: '+str(err)
+            break
+        
+        try:
+            achievements = await client.achievement_get_all(client.id)
+        except BaseException as err:
+            text='at get all: '+str(err)
+            break
+
+        chunks=pchunkify(achievements)
+        pages=[{'content':chunk} for chunk in chunks]
+        await Pagination(client,message.channel,pages)
         return
 
-    await client.message_suppress_embeds(message,False)
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def achievement_get(client,message,content):
+    while True:
+        if message.author is not client.owner:
+            text='Owner only'
+            break
+        try:
+            achievements = await client.achievement_get_all(client.id)
+        except BaseException as err:
+            text='at get all: '+str(err)
+            break
+
+        chunks=pchunkify(achievements)
+        pages=[{'content':chunk} for chunk in chunks]
+        await Pagination(client,message.channel,pages)
+        return
+
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def achievements_of_mine(client,message,content):
+    if message.author is not client.owner:
+        text='Owner only'
+        await client.message_create(message.channel,text)
+        return
+
+    access=koishi.OA2_accesses[client.owner.id].access
+
+    try:
+        achievements = await client.user_achievements(access,client.id)
+    except BaseException as err:
+        text='at user_achievements: '+str(err)
+        await client.message_create(message.channel,text)
+        return
+
+    chunks=pchunkify(achievements)
+    pages=[{'content':chunk} for chunk in chunks]
+    await Pagination(client,message.channel,pages)
+
+
+    
+    
+############################## START ##############################
 
 start_clients()
 

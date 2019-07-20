@@ -12,6 +12,18 @@ try:
 except ImportError:
     BeautifulSoup=None
 
+def smart_join(list_,limit=2000,sep='\n'):
+    result=[]
+    seplen=len(sep)
+    limit-=(3+seplen)
+    for value in list_:
+        limit-=(len(value)+seplen)
+        if limit<0:
+            result.append('...')
+            break
+        result.append(value)
+    return sep.join(result)
+
 @inherit(bot_message_event)
 class message_delete_waitfor():
     __slots__=['waitfors']
