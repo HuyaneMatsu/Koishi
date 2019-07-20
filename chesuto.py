@@ -11,11 +11,10 @@
 #   0b00100000 <- could special
 
 class Puppet_meta(object):
-    __slots__=['generate_moves', 'name', 'piercees']
-    def __init__(self,name,generate_moves,piercees):
+    __slots__=['generate_moves', 'name',]
+    def __init__(self,name,generate_moves):
         self.name=name
         self.generate_moves=generate_moves
-        self.pierces=pierces
         setattr(type(self),name,self)
 
 def rook_moves(self,field):
@@ -113,7 +112,7 @@ def rook_pierce(self,target,field):
 
 
         
-def knight_move(self,field):
+def knight_moves(self,field):
     position=self.position
     y,x=divmod(position,8)
     moves=self.moves
@@ -147,7 +146,7 @@ def knight_move(self,field):
         if can_do!=0b00001011:
             break
 
-def bishop_move(self,field):
+def bishop_moves(self,field):
     position=self.position
     y,x=divmod(position,8)
     moves=self.moves
@@ -183,7 +182,7 @@ def bishop_move(self,field):
             if can_do!=0b00001011:
                 break
 
-def queen_move(self,field):
+def queen_moves(self,field):
     position=self.position
     y,x=divmod(position,8)
     moves=self.moves
@@ -223,7 +222,7 @@ def queen_move(self,field):
                 break
             break
 
-def king_move(self,field):
+def king_moves(self,field):
     position=self.position
     y,x=divmod(position,8)
     moves=self.moves
@@ -325,7 +324,7 @@ def pawn_moves(self,field):
                 else:
                     other.killers.append(self)
                     can_do=0b00111101 #hit
-                moves.append(((x-1)<<16)|can_do) #hit
+                moves.append(((x-1)<<16)|can_do)
                 
             if x<7:
                 other=field[position-7]
@@ -351,7 +350,7 @@ def pawn_moves(self,field):
                 else:
                     other.killers.append(self)
                     can_do=0b00001101 #hit
-                moves.append(((x-1)<<16)|((y-1)<<8)|can_do) 
+                moves.append(((x-1)<<16)|((y-1)<<8)|can_do)
             
             if x<7:
                 other=field[position-7]
@@ -360,9 +359,9 @@ def pawn_moves(self,field):
                 else:
                     other.killers.append(self)
                     can_do=0b00001101 #hit
-                moves.append(((x+1)<<16)|((y-1)<<8)|can_do) #hit
+                moves.append(((x+1)<<16)|((y-1)<<8)|can_do)
 
-def check_king_moves(puppet,player,others):
+def check_king_moves(puppet,player,others,field):
     moves=puppet.moves
     for index in reversed(range(len(moves))):
         element=moves[index]
@@ -391,15 +390,75 @@ def check_king_moves(puppet,player,others):
                 move_index=0
                 move_limit=len(other_moves)
 
+    moves=[]
+    found=None
+    for x_diff,y_diff,pos_diff,x_limit,y_limit in (
+            (-1,-1,-9,0,0),
+            ( 0,-1,-8,8,0),
+            (+1,-1,-7,7,0),
+            (+1, 0,+1,7,8),
+            (+1,+1,+9,7,7),
+            ( 0,+1,+8,8,7),
+            (-1,+1,+7,0,7),
+            (-1, 0,-1,0,8),
+                ):
+        
+        local_x=x
+        local_y=y
+        local_pos=position
+        while True:
+            if local_x==x_limit or local_y==y_limit:
+                break
+            local_x+=x_diff
+            local_y+=y_diff
+            local_pos+=pos_diff
+            
+            if found is None:
+                other=field[local_pos]
+                #empty
+                if other is None:
+                    moves.append((local_x<<16)|(local_y<<8))
+                    continue
+                #same side
+                if self.side==other.side:
+                    found=other
+                    continue
+                #enemy:
+                break
+
+            #empty
+            if other is None:
+                moves.append((local_x<<16)|(local_y<<8))
+                continue
+            #same side
+            if self.side==other.side:
+               break
+            #enemy!
+            if other.meta is not Puppet_meta.queen:
+                if x_diff==0 or y_diff==0: #front
+                    if other.meta is not Puppet_meta.rook:
+                        break
+                else: #size
+                    if other.meta is not Puppet_meta.bishop:
+                        break
+
+            other_moves=found.moves
+            for index in reversed(range(len(other_moves))):
+                move=other_moves[index]
+                if move@0xffff00 not in moves:
+                    del move[index]
+
+        moves.clear()
+
     #TODO: calculate blocking moves to defend the king
             
 
-Puppet_meta('rook',     rook_moves,     True)
-Puppet_meta('knight',   knight_moves,   False)
-Puppet_meta('bishop',   bishop_moves,   True)
-Puppet_meta('queen',    queen_moves,    True)
-Puppet_meta('king',     king_moves,     False)
-Puppet_meta('pawn',     pawn_moves,     False)
+Puppet_meta('rook',     rook_moves,     )
+Puppet_meta('knight',   knight_moves,   )
+Puppet_meta('bishop',   bishop_moves,   )
+Puppet_meta('queen',    queen_moves,    )
+Puppet_meta('king',     king_moves,     )
+Puppet_meta('pawn',     pawn_moves,     )
 
 del rook_moves
 del knight_moves
@@ -415,7 +474,7 @@ class Puppet(object):
         self.position   = position
         self.side       = side
         self.effects    = []
-        self.moved      = 0 #needs for special checks
+        self.moved      = [] #needs for special checks
         self.moves      = []
         self.killers    = []
 
@@ -487,6 +546,9 @@ class chesuto_backend(object):
         for player in players:
             for puppet in player.puppets:
                 puppet.update(field)
+                
+        check_king_moves(player.king,players[0],players[1],field)
+        check_king_moves(player.king,players[1],players[0],field)
 
     def __repr__(self):
         result=[]

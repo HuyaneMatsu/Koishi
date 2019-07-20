@@ -31,7 +31,6 @@ Koishi.events(bot_reaction_waitfor)
 Koishi.events(bot_reaction_delete_waitfor)
 Koishi.events(message_delete_waitfor)
 Koishi.events(koishi.once_on_ready)
-Koishi.events(koishi.guild_user_add)
 
 koishi_commands=Koishi.events(bot_message_event(koishi.PREFIXES)).shortcut
 koishi_commands.extend(koishi.commands)

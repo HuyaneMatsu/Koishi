@@ -54,17 +54,7 @@ class once_on_ready:
         await client.update_application_info()
         print(f'owner: {client.owner:f} ({client.owner.id})')
         update_about(client)
-        
-AOE2_S=Guild.precreate(564093916152856576)
-AOE2_S_role=Role.precreate(566693615544434706)
 
-async def guild_user_add(client,guild,user):
-    if user.is_bot:
-        return
-    if guild is AOE2_S:
-        await client.user_role_add(user,AOE2_S_role)
-
-        
 commands=eventlist()
 
 commands(image_handler.on_command_upload,'upload')
@@ -174,7 +164,8 @@ async def message_me(client,message,content):
                 'int, default=1',
                 'rest, default="f\'{message.author:f} asked for it\'"')
 async def clear(client,message,limit,reason):
-    await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
+    if limit>0:
+        await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
 
 @commands
 async def waitemoji(client,message,content):
