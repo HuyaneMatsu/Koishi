@@ -1,6 +1,6 @@
 import re
 from weakref import WeakKeyDictionary
-from hata.events import bot_message_event
+from hata.events import command_processer
 from hata.embed import Embed
 from hata.futures import CancelledError,sleep,Task
 from hata.dereaddons_local import inherit
@@ -24,7 +24,7 @@ def smart_join(list_,limit=2000,sep='\n'):
         result.append(value)
     return sep.join(result)
 
-@inherit(bot_message_event)
+@inherit(command_processer)
 class message_delete_waitfor():
     __slots__=['waitfors']
     __event_name__='message_delete'
@@ -160,7 +160,6 @@ class commit_extractor:
                 name=webhook_name,
                 avatar_url=webhook_avatar_url
                     )
-
+del command_processer
 del inherit
 del re
-del bot_message_event

@@ -6,8 +6,8 @@ sys.path.append(os.path.abspath('..'))
 from hata import Client,start_clients
 from hata.activity import Activity_game
 from hata.channel import Channel_text
-from hata.events import (bot_reaction_waitfor,bot_message_event,
-    bot_reaction_delete_waitfor,)
+from hata.events import (reaction_add_waitfor,command_processer,
+    reaction_delete_waitfor,)
 from hata.webhook import Webhook
 from hata.role import Role
 
@@ -27,12 +27,12 @@ Koishi=Client(pers_data.KOISHI_TOKEN,
     activity=Activity_game.create(name='with Satori'),
         )
 
-Koishi.events(bot_reaction_waitfor)
-Koishi.events(bot_reaction_delete_waitfor)
+Koishi.events(reaction_add_waitfor)
+Koishi.events(reaction_delete_waitfor)
 Koishi.events(message_delete_waitfor)
 Koishi.events(koishi.once_on_ready)
 
-koishi_commands=Koishi.events(bot_message_event(koishi.PREFIXES)).shortcut
+koishi_commands=Koishi.events(command_processer(koishi.PREFIXES)).shortcut
 koishi_commands.extend(koishi.commands)
 
 webhook_sender=commit_extractor(
@@ -61,12 +61,13 @@ Mokou.events(mokou.channel_delete)
 
 Elphelt=Client(pers_data.ELPHELT_TOKEN,
     client_id=pers_data.ELPHELT_ID,
+               status='idle'
         )
 
-Elphelt.events(bot_reaction_waitfor)
-Elphelt.events(bot_reaction_delete_waitfor)
+Elphelt.events(reaction_add_waitfor)
+Elphelt.events(reaction_delete_waitfor)
 
-elphelt_commands=Elphelt.events(bot_message_event('/')).shortcut
+elphelt_commands=Elphelt.events(command_processer('/')).shortcut
 elphelt_commands.extend(elphelt.commands)
 elphelt_commands(Koishi.events.message_create.commands['random'])
 
