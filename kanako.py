@@ -6,7 +6,7 @@ from hata.dereaddons_local import any_to_any,asyncinit
 from time import monotonic
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS
-from hata.events import waitfor_wrapper
+from hata.events import waitfor_wrapper,multievent
 from hata.color import Color
 from hata.embed import Embed
 from PIL import Image as PIL
@@ -648,14 +648,13 @@ class embedination(metaclass=asyncinit):
     RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
     emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET]
     
-    __slots__=['cancel', 'channel', 'page', 'pages', 'task', 'wrappers']
+    __slots__=['cancel', 'channel', 'page', 'pages', 'task']
     async def __init__(self,client,channel,pages):
         self.pages=pages
         self.page=0
         self.channel=channel
         self.cancel=type(self)._cancel
         self.task=None
-        self.wrappers=[]
 
         message = await client.message_create(self.channel,embed=self.pages[0])
         message.weakrefer()
@@ -664,9 +663,10 @@ class embedination(metaclass=asyncinit):
             for emoji in self.emojis:
                 await client.reaction_add(message,emoji)
 
-        for event in (client.events.reaction_add,client.events.reaction_delete):
-            wrapper=waitfor_wrapper(client,self,150.,event,message)
-            self.wrappers.append(wrapper)
+        events=multievent(client.events.reaction_add,
+                          client.events.reaction_delete)
+        
+        waitfor_wrapper(client,self,150.,events,message)
 
     async def __call__(self,wrapper,emoji,user):
         if self.task is not None or user.is_bot:
@@ -701,9 +701,7 @@ class embedination(metaclass=asyncinit):
 
         self.page=page
 
-        if wrapper.timeout<150.:
-            for wrapper in self.wrappers:
-                wrapper.timeout+=10.
+        wrapper.timeout+=10.
 
         try:
             self.task = Task(client.message_edit(message,embed=self.pages[page]),client.loop)
@@ -716,9 +714,8 @@ class embedination(metaclass=asyncinit):
     async def _cancel(self,wrapper,exception):
         client=wrapper.client
         if isinstance(exception,TimeoutError):
-            self.wrappers.clear()
-            del self.pages
-            if self.channel.guild is not None:
+            self.pages=None
+            if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     self.task=Task(client.reaction_clear(wrapper.target),client.loop)
                     await self.task

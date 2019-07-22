@@ -73,85 +73,77 @@ elphelt_commands(Koishi.events.message_create.commands['random'])
 
 ############################## TEST COMMANDS ##############################
 
-from hata.others import filter_content
+from hata.dereaddons_local import asyncinit
 from hata.prettyprint import pchunkify
-from hata.ios import ReuAsyncIO
-join=os.path.join
+from tools import smart_join
 
 @koishi_commands
-async def achievement_create(client,message,content):
-    while True:
+class unknown_emojier(metaclass=asyncinit):
+    __slots__=['events','client','message']
+    async def __init__(self,client,message,content):
         if message.author is not client.owner:
-            text='Owner only'
-            break
-        content=filter_content(content)
-        if len(content)<2:
-            text='expected at least 2 content parts'
-            break
-
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
-        try:
-            with (await ReuAsyncIO(image_path)) as file:
-                image = await file.read()
-                await client.achievement_create(client.id,
-                    content[0],content[1],False,False,image)
-        except BaseException as err:
-            text='at create: '+str(err)
-            break
+            return
+        self.client=client
+        self.message=message
+        message.weakrefer()
+        message.channel.messages.clear()
+        message.reactions.clear()
+        client.events.message_create.append(self,message.channel)
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
         
-        try:
-            achievements = await client.achievement_get_all(client.id)
-        except BaseException as err:
-            text='at get all: '+str(err)
-            break
+    def __call__(self,*args):
+        if len(args)==1:
+            return self._process_message(*args)
+        else:
+            return self.render_emojis()
 
-        chunks=pchunkify(achievements)
-        pages=[{'content':chunk} for chunk in chunks]
-        await Pagination(client,message.channel,pages)
-        return
+    async def _process_message(self,message):
+        if message.author is not self.client.owner:
+            return
 
-    await client.message_create(message.channel,text)
+        content=message.content
+        if len(content)>10:
+            return
+        
+        content=content.lower()
+        client=self.client
+        
+        if content=='cancel':
+            
+            client.events.message_create.remove(self,message.channel)
+            client.events.reaction_add.remove(self,self.message)
+            client.events.reaction_delete.remove(self,self.message)
+            await client.message_create(message.channel,'cancelled')
+            return
 
-@koishi_commands
-async def achievement_get(client,message,content):
-    while True:
-        if message.author is not client.owner:
-            text='Owner only'
-            break
-        try:
-            achievements = await client.achievement_get_all(client.id)
-        except BaseException as err:
-            text='at get all: '+str(err)
-            break
+        if content=='clear':
+            self.message.reactions.clear()
+            await client.message_create(message.channel,'reactions \'cleared\'')
+            await self.render_emojis()
+            return
 
-        chunks=pchunkify(achievements)
-        pages=[{'content':chunk} for chunk in chunks]
-        await Pagination(client,message.channel,pages)
-        return
+        if content=='load':
+            await client.reaction_load_all(self.message)
+            await self.render_emojis()
+            return
 
-    await client.message_create(message.channel,text)
-
-@koishi_commands
-async def achievements_of_mine(client,message,content):
-    if message.author is not client.owner:
-        text='Owner only'
-        await client.message_create(message.channel,text)
-        return
-
-    access=koishi.OA2_accesses[client.owner.id].access
-
-    try:
-        achievements = await client.user_achievements(access,client.id)
-    except BaseException as err:
-        text='at user_achievements: '+str(err)
-        await client.message_create(message.channel,text)
-        return
-
-    chunks=pchunkify(achievements)
-    pages=[{'content':chunk} for chunk in chunks]
-    await Pagination(client,message.channel,pages)
-
-
+    #await it
+    def render_emojis(self):
+        result=['reactions on the message:']
+        reactions=self.message.reactions
+        if reactions:
+            for emoji,line in reactions.items():
+                result.append(f'\n{emoji.name} : {len(line)}')
+                if line.unknown:
+                    result.append(f'\n - *{line.unknown} unknown*')
+                for user in line:
+                    result.append(f'\n - {user:f}')
+        else:
+            result.append('*none*')
+        content=smart_join(result,sep='')
+        return self.client.message_create(self.message.channel,content)
+        
     
     
 ############################## START ##############################
