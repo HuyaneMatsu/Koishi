@@ -26,6 +26,8 @@ gambling=eventlist()
 @content_parser('user, flags=mni, default="message.author"')
 async def daily(client,message,target_user):
     source_user=message.author
+    if target_user.is_bot:
+        target_user=source_user
     now=datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
         while True:
@@ -123,9 +125,7 @@ async def daily(client,message,target_user):
                     streak_text=f'You are in a {daily_streak} day streak! Keep up the good work!'
                 
                 await connector.execute(CURRENCY_TABLE.update().values(
-                    user_id     = source_user.id,
-                    total_love  = 0,
-                    daily_streak= daily_streak,
+                    daily_streak= daily_streak+1,
                         ).where(currency_model.user_id==source_user.id))
                 
             received=DAILY_REWARD+daily_streak*DAILY_STREAK_BONUS
@@ -141,7 +141,7 @@ async def daily(client,message,target_user):
             else:
                 total_love=target_result.total_love+received
 
-                await connector.execute(CURRENCY_TABLE.insert().update(
+                await connector.execute(CURRENCY_TABLE.update().values(
                     total_love  = total_love,
                         ).where(currency_model.user_id==target_user.id))
             
