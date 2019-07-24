@@ -29,6 +29,7 @@ from dispatch_tests import dispatch_tester
 from battleships import battle_manager
 from infos import infos,update_about
 from tools import cooldown_handler, BeautifulSoup
+from gambling import gambling
 import channeller
 import pers_data
 import models
@@ -72,7 +73,7 @@ commands(ds_manager,'ds')
 commands(_DS_modify_best)
 commands(channeller.channeling_start)
 commands(channeller.channeling_stop)
-
+commands.extend(gambling)
 
 _KOISHI_NOU_RP=re.compile(r'n+\s*o+\s*u+',re.I)
 _KOISHI_OWO_RP=re.compile('(owo|uwu|0w0)',re.I)

@@ -361,8 +361,8 @@ def pawn_moves(self,field):
                     can_do=0b00001101 #hit
                 moves.append(((x+1)<<16)|((y-1)<<8)|can_do)
 
-def check_king_moves(puppet,player,others,field):
-    moves=puppet.moves
+def check_king_moves(king,player,others,field):
+    moves=king.moves
     for index in reversed(range(len(moves))):
         element=moves[index]
         if element&0b00000001:
@@ -390,68 +390,148 @@ def check_king_moves(puppet,player,others,field):
                 move_index=0
                 move_limit=len(other_moves)
 
-    moves=[]
-    found=None
-    for x_diff,y_diff,pos_diff,x_limit,y_limit in (
-            (-1,-1,-9,0,0),
-            ( 0,-1,-8,8,0),
-            (+1,-1,-7,7,0),
-            (+1, 0,+1,7,8),
-            (+1,+1,+9,7,7),
-            ( 0,+1,+8,8,7),
-            (-1,+1,+7,0,7),
-            (-1, 0,-1,0,8),
-                ):
-        
-        local_x=x
-        local_y=y
-        local_pos=position
-        while True:
-            if local_x==x_limit or local_y==y_limit:
-                break
-            local_x+=x_diff
-            local_y+=y_diff
-            local_pos+=pos_diff
+    if len(king.killers)==0:
+        moves=[]
+        found=None
+        for x_diff,y_diff,pos_diff,x_limit,y_limit in (
+                (-1,-1,-9,0,0),
+                ( 0,-1,-8,8,0),
+                (+1,-1,-7,7,0),
+                (+1, 0,+1,7,8),
+                (+1,+1,+9,7,7),
+                ( 0,+1,+8,8,7),
+                (-1,+1,+7,0,7),
+                (-1, 0,-1,0,8),
+                    ):
             
-            if found is None:
-                other=field[local_pos]
+            local_x=x
+            local_y=y
+            local_pos=position
+            while True:
+                if local_x==x_limit or local_y==y_limit:
+                    break
+                local_x+=x_diff
+                local_y+=y_diff
+                local_pos+=pos_diff
+                
+                if found is None:
+                    other=field[local_pos]
+                    #empty
+                    if other is None:
+                        moves.append((local_x<<16)|(local_y<<8))
+                        continue
+                    #same side
+                    if self.side==other.side:
+                        found=other
+                        continue
+                    #enemy:
+                    break
+
                 #empty
                 if other is None:
                     moves.append((local_x<<16)|(local_y<<8))
                     continue
                 #same side
                 if self.side==other.side:
-                    found=other
-                    continue
-                #enemy:
-                break
+                   break
+                #enemy!
+                if other.meta is not Puppet_meta.queen:
+                    if x_diff==0 or y_diff==0: #front
+                        if other.meta is not Puppet_meta.rook:
+                            break
+                    else: #size
+                        if other.meta is not Puppet_meta.bishop:
+                            break
 
-            #empty
-            if other is None:
-                moves.append((local_x<<16)|(local_y<<8))
-                continue
-            #same side
-            if self.side==other.side:
-               break
-            #enemy!
-            if other.meta is not Puppet_meta.queen:
-                if x_diff==0 or y_diff==0: #front
-                    if other.meta is not Puppet_meta.rook:
-                        break
-                else: #size
-                    if other.meta is not Puppet_meta.bishop:
-                        break
+                other_moves=found.moves
+                for index in reversed(range(len(other_moves))):
+                    move=other_moves[index]
+                    if move&0xffff00 not in moves:
+                        del move[index]
 
-            other_moves=found.moves
-            for index in reversed(range(len(other_moves))):
-                move=other_moves[index]
-                if move@0xffff00 not in moves:
-                    del move[index]
-
-        moves.clear()
-
-    #TODO: calculate blocking moves to defend the king
+            moves.clear()
+        return
+    
+    if len(king.killers)==1:
+        killer=king.killers[0]
             
+        if killer.meta in (Puppet_meta.rook,Puppet_meta.bishop,Puppet_meta.queen):
+            local_y,  local_x=divmod(position,8)
+            killer_y,killer_x=divmod(killer.position,8)
+            pos_diff=0
+            if   local_x>killer_x:
+                x_diff=-1
+                pos_diff=pos_diff-1
+            elif local_x<killer_x:
+                x_diff=+1
+                pos_diff=pos_diff+1
+            else:
+                x_diff= 0
+            if   local_y>killer_y:
+                y_diff=-1
+                pos_diff=pos_diff-8
+            elif local_y<killer_y:
+                y_diff=+1
+                pos_diff=pos_diff+8
+            else:
+                y_diff= 0
+
+            moves=[]
+            while True:
+                local_pos=local_pos+pos_diff
+                other=field[local_pos]
+
+                if other is not None:
+                    break
+                
+                local_x=local_x+x_diff
+                local_y=local_y+y_diff
+                moves.append((local_x<<16)|(local_y<<8))
+            
+            if moves:
+                killer_pos=(killer_x<<16)|(killer_y<<8)
+                
+                for puppet in player.puppets:
+                    if puppet is king:
+                        continue
+                    other_moves=puppet.moves
+                    for index in reversed(range(len(other_moves))):
+                        move=other_moves[index]
+                        partial_move=move&0xffff00
+                        if partial_move in moves:
+                            continue
+
+                        if partial_move==killer_pos and move&0b00000100:
+                            continue
+                        
+                        del move[index]
+                return
+
+        killers=killer.killers
+        killer_pos=killer.position
+        killer_pos=((killer_pos&0b00000111)<<16)|((killer_pos&0b00111000)<<5)
+        if killers:
+            for puppet in player.puppets:
+                if puppet is king:
+                    continue
+                if puppet in killers:
+                    other_moves=puppet.moves
+                    for move in other_moves:
+                        if move&0xffff00==killer_pos:
+                            break
+                    
+                    other_moves.clear()
+                    other_moves.append(move)
+                    continue
+                
+                puppet.moves.clear()
+        return
+    
+    for puppet in player.puppets:
+        if puppet is king:
+            continue
+        puppet.moves.clear()
+        
 
 Puppet_meta('rook',     rook_moves,     )
 Puppet_meta('knight',   knight_moves,   )
@@ -595,6 +675,3 @@ class chesuto_player(object):
             self.king   =backend.field[60]
             self.puppets=backend.field[48:]
         return self
-            
-
-

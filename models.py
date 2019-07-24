@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, BINARY, create_engine, String
+from sqlalchemy import Column, Integer, BINARY, create_engine, String, DateTime
 from hata.kokoro_sqlalchemy import KOKORO_STRATEGY
 
 BASE = declarative_base()
@@ -23,6 +24,16 @@ class pefix_model(BASE):
 
 PREFIX_TABLE=pefix_model.__table__
 
+class currency_model(BASE):
+    __tablename__ = 'CURRENCY'
+    id          = Column(Integer,primary_key=True)
+    user_id     = Column(Integer,unique = True)
+    total_love  = Column(Integer)
+    daily_next  = Column(DateTime)
+    daily_streak= Column(Integer)
+
+CURRENCY_TABLE=currency_model.__table__
+
 #creating tables
 DB_ENGINE = create_engine(DATABASE_NAME)
 BASE.metadata.create_all(DB_ENGINE)
@@ -39,4 +50,5 @@ del declarative_base
 del create_engine
 del Column
 del Integer
+del DateTime
 del BINARY

@@ -8,7 +8,7 @@ from hata.futures import Task
 from hata.parsers import eventlist
 from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
 from hata.prettyprint import pchunkify
-from hata.others import elapsed_time,Status,Audit_log_event,cchunkify
+from hata.others import elapsed_time,Status,Audit_log_event,cchunkify,Status
 from hata.exceptions import DiscordException
 from hata.events import Pagination,waitfor_wrapper
 from hata.events_compiler import content_parser
@@ -18,7 +18,7 @@ from hata.color import Color
 from hata.user import USERS
 from hata.guild import GUILDS
 from hata.client_core import CLIENTS
-
+from hata.activity import Activity_unknown
 from help_handler import HELP
 
 async def no_permission(client,message,*args):
@@ -35,6 +35,74 @@ class show_help:
 
 infos=eventlist()
 
+
+def add_activity(text,activity):
+    ACTIVITY_FLAG=activity.ACTIVITY_FLAG
+    text.append(activity.name)
+    text.append('\n')
+    text.append(f'**>>** type : {("game","stream","spotify","watching")[activity.type]} ({activity.type})\n')
+
+    if ACTIVITY_FLAG&0b0000000000000001:
+        if activity.timestamp_start:
+            text.append(f'**>>** started : {elapsed_time(activity.start)} ago\n')
+        if activity.timestamp_end:
+            text.append(f'**>>** ends after : {elapsed_time(activity.end)}\n')
+
+    if ACTIVITY_FLAG&0b0000000000000010:
+        if activity.details:
+            text.append(f'**>>** details : {activity.details}\n')
+
+    if ACTIVITY_FLAG&0b0000000000000100:
+        if activity.state:
+            text.append(f'**>>** state : {activity.state}\n')
+            
+    if ACTIVITY_FLAG&0b0000000000001000:
+        if activity.party_id:
+            text.append(f'**>>** party id : {activity.party_id}\n')
+        if activity.party_size:
+            text.append(f'**>>** party size : {activity.party_size}\n')
+        if activity.party_max:
+            text.append(f'**>>** party limit : {activity.party_max}\n')
+
+    if ACTIVITY_FLAG&0b0000000000010000:
+        if activity.asset_image_large:
+            text.append(f'**>>** asset image large url : {activity.image_large_url}\n')
+        if activity.asset_text_large:
+            text.append(f'**>>** asset text large : {activity.asset_text_large}\n')
+        if activity.asset_image_small:
+            text.append(f'**>>** asset image small url : {activity.image_small_url}\n')
+        if activity.asset_text_small:
+            text.append(f'**>>** asset text small : {activity.asset_text_small}\n')
+
+    if ACTIVITY_FLAG&0b0000000000100000:
+        if activity.secret_join:
+            text.append(f'**>>** secret join : {activity.secret_join}\n')
+        if activity.secret_spectate:
+            text.append(f'**>>** secret spectate : {activity.secret_spectate}\n')
+        if activity.secret_match:
+            text.append(f'**>>** secret match : {activity.secret_match}\n')
+            
+    if ACTIVITY_FLAG&0b0000000001000000:
+        if activity.url:
+            text.append(f'**>>** url : {activity.url}\n')
+
+    if ACTIVITY_FLAG&0b0000000010000000:
+        if activity.sync_id:
+            text.append(f'**>>** sync id : {activity.sync_id}\n')
+
+    if ACTIVITY_FLAG&0b0000000100000000:
+        if activity.session_id:
+            text.append(f'**>>** session id : {activity.session_id}\n')
+
+    if ACTIVITY_FLAG&0b0000001000000000:
+        if activity.flags:
+            text.append(f'**>>** flags : {activity.flags} ({", ".join(list(activity.flags))})\n')
+
+    if ACTIVITY_FLAG&0b0000010000000000:
+        if activity.application_id:
+            text.append(f'**>>** application id : {activity.application_id}\n')
+
+    
 @infos.add('user')
 @content_parser('user, flags="mna", default="message.author"')
 async def user_info(client,message,user):
@@ -70,6 +138,30 @@ async def user_info(client,message,user):
     
     embed.add_thumbnail(user.avatar_url_as(size=128))
 
+    if user.activity is not Activity_unknown or user.status is not Status.offline:
+        text=[]
+        
+        if user.status is Status.offline:
+            text.append('Status : offline\n')
+        elif len(user.statuses)==1:
+            for platform,status in user.statuses.items():
+                text.append(f'Status : {status} ({platform})\n')
+        elif len(user.statuses)==1:
+            text.append('Statuses :\n')
+            for platform,status in user.statuses.items():
+                text.append(f'**>>** {status} ({platform})\n')
+        
+        if user.activity is Activity_unknown:
+            text.append('Activity : *unknown*\n')
+        elif len(user.activities)==1:
+            text.append('Activity : ')
+            add_activity(text,user.activities[0])
+        else:
+            text.append('Activities : \n')
+            for index,activity in enumerate(user.activities,1):
+                text.append('{index}.: ')
+
+        embed.add_field('Status and Activity',''.join(text))
     await client.message_create(message.channel,embed=embed)
 
 @infos.add('guild')

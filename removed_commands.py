@@ -3891,6 +3891,77 @@ async def achievements_of_mine(client,message,content):
     pages=[{'content':chunk} for chunk in chunks]
     await Pagination(client,message.channel,pages)
 
+from hata.dereaddons_local import asyncinit
+from tools import smart_join
+
+@koishi_commands
+class unknown_emojier(metaclass=asyncinit):
+    __slots__=['events','client','message']
+    async def __init__(self,client,message,content):
+        if message.author is not client.owner:
+            return
+        self.client=client
+        self.message=message
+        message.weakrefer()
+        message.channel.messages.clear()
+        message.reactions.clear()
+        client.events.message_create.append(self,message.channel)
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
+        
+    def __call__(self,*args):
+        if len(args)==1:
+            return self._process_message(*args)
+        else:
+            return self.render_emojis()
+
+    async def _process_message(self,message):
+        if message.author is not self.client.owner:
+            return
+
+        content=message.content
+        if len(content)>10:
+            return
+        
+        content=content.lower()
+        client=self.client
+        
+        if content=='cancel':
+            
+            client.events.message_create.remove(self,message.channel)
+            client.events.reaction_add.remove(self,self.message)
+            client.events.reaction_delete.remove(self,self.message)
+            await client.message_create(message.channel,'cancelled')
+            return
+
+        if content=='clear':
+            self.message.reactions.clear()
+            await client.message_create(message.channel,'reactions \'cleared\'')
+            await self.render_emojis()
+            return
+
+        if content=='load':
+            await client.reaction_load_all(self.message)
+            await self.render_emojis()
+            return
+
+    #await it
+    def render_emojis(self):
+        result=['reactions on the message:']
+        reactions=self.message.reactions
+        if reactions:
+            for emoji,line in reactions.items():
+                result.append(f'\n{emoji.name} : {len(line)}')
+                if line.unknown:
+                    result.append(f'\n - *{line.unknown} unknown*')
+                for user in line:
+                    result.append(f'\n - {user:f}')
+        else:
+            result.append('*none*')
+        content=smart_join(result,sep='')
+        return self.client.message_create(self.message.channel,content)
+
+
 
 # - : - # dungeon_sweeper.py # - : - #
 
