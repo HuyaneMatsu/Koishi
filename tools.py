@@ -6,11 +6,22 @@ from hata.futures import CancelledError,sleep,Task
 from hata.dereaddons_local import inherit
 from hata import others
 from hata.exceptions import DiscordException
+from random import random
 
 try:
     from bs4 import BeautifulSoup
 except ImportError:
     BeautifulSoup=None
+
+def choose(list_):
+    return list_[(random()*list_.__len__()).__int__()]
+
+def pop_one(list_):
+    return list_.pop((random()*list_.__len__()).__int__())
+
+def mark_as_async(func):
+    func.__async_call__=True
+    return func
 
 def smart_join(list_,limit=2000,sep='\n'):
     result=[]

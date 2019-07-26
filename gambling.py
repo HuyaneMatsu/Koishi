@@ -179,3 +179,6 @@ async def hearts(client,message,target_user):
             GAMBLING_COLOR)
         
     await client.message_create(message.channel,embed=embed)
+
+
+del Emoji, Color, cooldown, content_parser, eventlist, timedelta

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
-from random import randint as random
 import os
 from io import BytesIO
-from help_handler import HELP
 from hata.others import is_mention
 from hata.channel import messages_till_index
 from hata.ios import ReuAsyncIO,AsyncIO
@@ -15,6 +13,9 @@ try:
     UPLOAD=True
 except ImportError:
     UPLOAD=False
+
+from help_handler import HELP
+from tools import choose
 
 splitext=os.path.splitext
 join=os.path.join
@@ -192,7 +193,7 @@ def process_on_command_image(content):
                 return 'I could not find any image with that criteria.'
         else:
             #must have at least 1 vid and img
-            return search_from[random(0,len(search_from)-1)]
+            return choose(search_from)
 
     left=limit-index-1
 
@@ -227,7 +228,7 @@ def process_on_command_image(content):
                 if value in image:
                     results.append(image)
             if results:
-                return results[random(0,len(results)-1)]
+                return choose(results)
             else:
                 return 'Sowwy, no result.'
     else:
@@ -261,7 +262,7 @@ def process_on_command_image(content):
                 if values.issubset(image):
                     results.append(image)
             if results:
-                return results[random(0,len(results)-1)]
+                return choose(results)
             else:
                 return 'Sowwy, no result.'
 

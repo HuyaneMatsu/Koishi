@@ -18,7 +18,7 @@ import mokou
 import elphelt
 
 from tools import commit_extractor,message_delete_waitfor
-
+from booru import booru_commands
 ############################## SETUP KOISHI ##############################
 
 Koishi=Client(pers_data.KOISHI_TOKEN,
@@ -34,6 +34,7 @@ Koishi.events(koishi.once_on_ready)
 
 koishi_commands=Koishi.events(command_processer(koishi.PREFIXES)).shortcut
 koishi_commands.extend(koishi.commands)
+koishi_commands.extend(booru_commands)
 
 webhook_sender=commit_extractor(
     Koishi,
@@ -95,9 +96,3 @@ async def getapp(client,message,content):
 
 start_clients()
 
-##def start_console():
-##    import code
-##    shell = code.InteractiveConsole(globals().copy())
-##    shell.interact()
-    
-#start_console()

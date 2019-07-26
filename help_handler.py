@@ -15,7 +15,7 @@ def create_help_help(prefix):
     pages=[]
     part=[]
     index=0
-    for name in HELP:
+    for name in sorted(HELP):
         if index==16:
             pages.append('\n'.join(part))
             part.clear()
@@ -200,6 +200,28 @@ HELP['random']=Embed(title='random',color=HELP_COLOR,
         'number between them.'
             ))
 
+HELP['daily']=Embed(title='daily',color=HELP_COLOR,
+    description=(
+        'Claim everyday your share of Koishi\'s love, or gift it to your lovely imouto\~'
+            ))
+
+HELP['hearts']=Embed(title='hearts',color=HELP_COLOR,
+    description=(
+        'How many hearts do you have?'
+            ))
+
+HELP['safebooru']=Embed(title='safebooru',color=HELP_COLOR,
+    description=(
+        'Let\'s you search SFW ( Safe For Work ) images of any tag you want.'
+            ))
+
+HELP['nsfwbooru']=Embed(title='nsfwbooru',color=HELP_COLOR,
+    description=(
+        'Let\'s you search NSFW ( Not Safe For Work ) images of any tag '
+        'you want... you perv~\n'
+        '~~NSFW channel only~~'
+            ))
+                    
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
