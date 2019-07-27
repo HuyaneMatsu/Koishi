@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+import sys, os
+sys.path.append(os.path.abspath('..'))
+
+from hata.emoji import Emoji, BUILTIN_EMOJIS
+
 #each added move is from 3 elements for a total of 24 bits:
 # x coordinate 1st 8 bit
 # y coordinate middle 8 bit
@@ -11,10 +16,11 @@
 #   0b00100000 <- could special
 
 class Puppet_meta(object):
-    __slots__=['generate_moves', 'name',]
-    def __init__(self,name,generate_moves):
+    __slots__=['generate_moves', 'name', 'outlooks']
+    def __init__(self,name,generate_moves,outlooks):
         self.name=name
         self.generate_moves=generate_moves
+        self.outlooks=outlooks
         setattr(type(self),name,self)
 
 def rook_moves(self,field):
@@ -531,21 +537,84 @@ def check_king_moves(king,player,others,field):
         if puppet is king:
             continue
         puppet.moves.clear()
-        
 
-Puppet_meta('rook',     rook_moves,     )
-Puppet_meta('knight',   knight_moves,   )
-Puppet_meta('bishop',   bishop_moves,   )
-Puppet_meta('queen',    queen_moves,    )
-Puppet_meta('king',     king_moves,     )
-Puppet_meta('pawn',     pawn_moves,     )
+Puppet_meta('rook',     rook_moves,     (
+    Emoji.precreate(604652042635706416,name='a0').as_emoji,
+    Emoji.precreate(604657343950487562,name='a1').as_emoji,
+    Emoji.precreate(604652042669129788,name='a2').as_emoji,
+    Emoji.precreate(604652042652483591,name='a3').as_emoji,
+        ))
+            
+Puppet_meta('knight',   knight_moves,   (
+    Emoji.precreate(604652042350362625,name='a4').as_emoji,
+    Emoji.precreate(604652042413146113,name='a5').as_emoji,
+    Emoji.precreate(604652042853548042,name='a6').as_emoji,
+    Emoji.precreate(604652042740301835,name='a7').as_emoji,
+        ))
+    
+Puppet_meta('bishop',   bishop_moves,   (
+    Emoji.precreate(604652042694426634,name='a8').as_emoji,
+    Emoji.precreate(604652042715398144,name='a9').as_emoji,
+    Emoji.precreate(604652042253762571,name='aa').as_emoji,
+    Emoji.precreate(604652042581180425,name='ab').as_emoji,
+        ))
 
+Puppet_meta('queen',    queen_moves,    (
+    Emoji.precreate(604657915038793728,name='ac').as_emoji,
+    Emoji.precreate(604657914820558849,name='ad').as_emoji,
+    Emoji.precreate(604652042732175390,name='ae').as_emoji,
+    Emoji.precreate(604652042639638550,name='af').as_emoji,
+        ))
+    
+Puppet_meta('king',     king_moves,     (
+    Emoji.precreate(604658587117027328,name='ag').as_emoji,
+    Emoji.precreate(604658587121221642,name='ah').as_emoji,
+    Emoji.precreate(604652042790895616,name='ai').as_emoji,
+    Emoji.precreate(604658586978746378,name='aj').as_emoji,
+        ))
+    
+Puppet_meta('pawn',     pawn_moves,     (
+    Emoji.precreate(604652042656677918,name='ak').as_emoji,
+    Emoji.precreate(604652042731913216,name='al').as_emoji,
+    Emoji.precreate(604652042702815313,name='am').as_emoji,
+    Emoji.precreate(604652042484711424,name='an').as_emoji,
+        ))
+    
 del rook_moves
 del knight_moves
 del bishop_moves
 del queen_moves
 del king_moves
 del pawn_moves
+
+EMPTY_TILE=(
+    Emoji.precreate(604652042639900672,name='ao').as_emoji,
+    Emoji.precreate(604652044246188065,name='ap').as_emoji,
+        )
+
+NUMBERS=(
+    Emoji.precreate(604698116427350016,name='aq').as_emoji,
+    Emoji.precreate(604698116444258469,name='ar').as_emoji,
+    Emoji.precreate(604698116431675406,name='as').as_emoji,
+    Emoji.precreate(604698116444258475,name='at').as_emoji,
+    Emoji.precreate(604698116226285589,name='au').as_emoji,
+    Emoji.precreate(604698116578476149,name='av').as_emoji,
+    Emoji.precreate(604698116448452674,name='aw').as_emoji,
+    Emoji.precreate(604698116494590202,name='ax').as_emoji,
+        )
+
+LETTERS=(
+    Emoji.precreate(604698116129816586,name='ay').as_emoji,
+    Emoji.precreate(604698116675076106,name='az').as_emoji,
+    Emoji.precreate(604698116482007194,name='aA').as_emoji,
+    Emoji.precreate(604698116435738625,name='aB').as_emoji,
+    Emoji.precreate(604698116163371009,name='aC').as_emoji,
+    Emoji.precreate(604698116490264586,name='aD').as_emoji,
+    Emoji.precreate(604698116548984832,name='aE').as_emoji,
+    Emoji.precreate(604698116540596252,name='aF').as_emoji,
+        )
+
+EDGE=Emoji.precreate(604698116658167808,name='aG').as_emoji
 
 class Puppet(object):
     __slots__=['effects', 'meta', 'moved', 'position', 'side','moves','killers']
@@ -605,7 +674,6 @@ class chesuto_backend(object):
             binary_pos=(x<<16)+(y<<8)
             moves=[]
             killers=[]
-            
             player2=self.players[player.side^1]
             
             for puppet_ in player.puppets:
@@ -648,7 +716,7 @@ class chesuto_backend(object):
                 if puppet is None:
                     line.append('   ')
                 else:
-                    line.append(f'{("L","D")[puppet.side]}{puppet.meta.name[:2]}')
+                    line.append(f'{("B","D")[puppet.side]}{puppet.meta.name[:2]}')
             line.append('|\n')
             
             result.append(''.join(line))
@@ -657,6 +725,32 @@ class chesuto_backend(object):
         result.append(line_breaker)
         return ''.join(result)
     
+    def render(self):
+        field=self.field
+        result=[]
+        position=0
+        color=0
+        while True:
+            limit=position+8
+            while True:
+                puppet=field[position]
+                if puppet is None:
+                    result.append(EMPTY_TILE[color])
+                else:
+                    result.append(puppet.meta.outlooks[color|(puppet.side<<1)])
+                position=position+1
+                if position==limit:
+                    break
+                color=color^1
+            result.append(NUMBERS[8-(position>>3)])
+            result.append('\n')
+            if position==64:
+                break
+            
+        result.extend(LETTERS)
+        result.append(EDGE)
+        return ''.join(result)
+            
 class chesuto_player(object):
     __slots__=['backend', 'channel', 'puppets', 'side', 'user','king','in_check']
     def __init__(self,user,channel):

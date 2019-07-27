@@ -5,6 +5,7 @@ from random import random
 import re
 from hata.others import filter_content
 from tools import smart_join
+from hata.emoji import BUILTIN_EMOJIS
 
 commands=eventlist()
 
@@ -13,7 +14,7 @@ commands=eventlist()
 async def ping(client,message,content):
     await client.message_create(message.channel,f'{int(client.kokoro.latency*1000.)} ms')
 
-DECK_LINE_RP=re.compile('(\d*) *(.*?) *\n?')
+DECK_LINE_RP=re.compile('(\d+) *(.*?) *\n?')
 
 USER_CARDS={}
 
@@ -87,7 +88,7 @@ async def inputdeck(client,message,content):
         line=lines[index]
         parsed=DECK_LINE_RP.fullmatch(line)
         if parsed is None:
-            await client.message_create(mssage.channel,'Could not parse line {index} :\n\'{line}\'\n succesfully.')
+            await client.message_create(message.channel,f'Could not parse line {index} :\n\'{line}\'')
             return
         times,name=parsed.groups()
         result.append(name,int(times))
@@ -96,6 +97,18 @@ async def inputdeck(client,message,content):
     
     await client.message_create(message.channel,'Deck created!')
 
+@commands
+async def addcard(client,message,content):
+    user_cards=USER_CARDS.get(message.author.id)
+    if user_cards is None:
+        await client.message_create(message.channel,'You do not have a deck added.')
+        return
+    if not content:
+        await client.message_create(message.channel,'Write what you want to add after the command, no linebreaks either.')
+        return
+    user_cards.deck.append_1(content)
+    await client.message_create(message.channel,BUILTIN_EMOJIS['ok_hand_skin_tone_1'].as_emoji)
+    
 @commands
 async def draw(client,message,content):
     user_cards=USER_CARDS.get(message.author.id)
