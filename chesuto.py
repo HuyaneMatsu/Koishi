@@ -2,7 +2,10 @@
 import sys, os
 sys.path.append(os.path.abspath('..'))
 
-from hata.emoji import Emoji, BUILTIN_EMOJIS
+from hata.emoji import Emoji
+from hata.futures import Task
+from hata.events import cooldown
+from tools import cooldown_handler
 
 #each added move is from 3 elements for a total of 24 bits:
 # x coordinate 1st 8 bit
@@ -396,6 +399,8 @@ def check_king_moves(king,player,others,field):
                 move_index=0
                 move_limit=len(other_moves)
 
+    position=king.position
+    x,y=divmod(position,8)
     if len(king.killers)==0:
         moves=[]
         found=None
@@ -427,7 +432,7 @@ def check_king_moves(king,player,others,field):
                         moves.append((local_x<<16)|(local_y<<8))
                         continue
                     #same side
-                    if self.side==other.side:
+                    if king.side==other.side:
                         found=other
                         continue
                     #enemy:
@@ -438,7 +443,7 @@ def check_king_moves(king,player,others,field):
                     moves.append((local_x<<16)|(local_y<<8))
                     continue
                 #same side
-                if self.side==other.side:
+                if king.side==other.side:
                    break
                 #enemy!
                 if other.meta is not Puppet_meta.queen:
@@ -769,3 +774,37 @@ class chesuto_player(object):
             self.king   =backend.field[60]
             self.puppets=backend.field[48:]
         return self
+
+WAITERS={}
+
+class Game_waiter():
+    __slots__=['channel', 'client', 'user', 'timeout_handle']
+    def __init__(self,client,channel,user):
+        self.client=client
+        self.channel=channel
+        self.user=user
+        self.waiter=client.loop.call_later(300.,self.at_timeout)
+
+    def at_timeout(self):
+        channel=self.channel
+        del WAITERS[self.channel]
+        client=self.client
+        Task(client.message_create(channel,f'{self.user:m} timeout'),client.loop)
+
+    def reset_waiter(self):
+        self.waiter.cancel()
+        self.waiter=self.client.loop.call_later(300.,self.at_timeout)
+
+@cooldown(60.,'user',handler=cooldown_handler())
+async def chesuto_manager(client,message,content):
+    channel=message.channel
+    user=message.author
+    try:
+        game_waiter=WAITERS[channel.id]
+    except KeyError:
+        WAITERS[channel.id]=Game_waiter(client,channel,user)
+        return
+    if game_waiter.user==user:
+        await client.message_create(channel,'Your waiter is reseted')
+        return
+

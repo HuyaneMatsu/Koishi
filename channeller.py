@@ -1,5 +1,3 @@
-import time
-from weakref import WeakKeyDictionary
 from hata.futures import Task
 from hata.events_compiler import content_parser
 from hata.client import Client
@@ -55,9 +53,10 @@ class Channeller():
         event_2=client.events.message_delete
         for pair in pairs:
             channel=pair[0]
+            channel.mc_gc_limit=30 #if caching is diabled we turn this on
             event_1.append(self,channel)
             event_2.append(deleter,channel)
-            ChannelINGS[channel.id]=self
+            CHANNELINGS[channel.id]=self
 
     def cancel(self,channel):
         event_1=self.client.events.message_create
@@ -68,19 +67,23 @@ class Channeller():
             pass
         elif len(pairs)<3:
             for pair in pairs:
-                del ChannelINGS[pair[0].id]
+                channel = pair[0]
+                channel.mc_gc_limit = channel.MC_GC_LIMIT
+                del CHANNELINGS[channel.id]
         else:
             for index,pair in enumerate(pairs):
                 if pair[0] is channel:
                     del pairs[index]
                     break
+            channel.mc_gc_limit = channel.MC_GC_LIMIT
             event_1.remove(self,channel)
             event_2.remove(deleter,channel)
-            del ChannelINGS[channel.id]
+            del CHANNELINGS[channel.id]
             return
 
         for pair in pairs:
             channel=pair[0]
+            channel.mc_gc_limit=channel.MC_GC_LIMIT
             event_1.remove(self,channel)
             event_2.remove(deleter,channel)
             
@@ -117,9 +120,9 @@ class Channeller():
                     avatar_url  = message.author.avatar_url,
                         ),client.loop)
 
-ChannelINGS={}
+CHANNELINGS={}
 
-@content_parser('condition, flags=r, default="message.author is not client.owner"',
+@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'int, flags="g"',)
 async def channeling_start(client,message,channel_id):
     channel_1=message.channel
@@ -144,8 +147,8 @@ async def channeling_start(client,message,channel_id):
             text='I have no permission at that channel to invoke this command!'
             break
 
-        channeling_1=ChannelINGS.get(channel_1.id,None)
-        channeling_2=ChannelINGS.get(channel_2.id,None)
+        channeling_1=CHANNELINGS.get(channel_1.id,None)
+        channeling_2=CHANNELINGS.get(channel_2.id,None)
         
         if channeling_1 is not None and channeling_2 is not None and channeling_1 is channeling_2:
             text='This connection is already set up'
@@ -182,12 +185,12 @@ async def channeling_start(client,message,channel_id):
     await client.message_create(channel_1,text)
     
 async def channeling_stop(client,message,content):
-    if message.author is not client.owner:
+    if client.is_owner(message.author):
         return
     channel=message.channel
     while True:
         try:
-            channeller=ChannelINGS[channel.id]
+            channeller=CHANNELINGS[channel.id]
         except KeyError:
             text='There is no active channeller at this channel'
             break

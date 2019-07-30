@@ -104,7 +104,7 @@ def add_activity(text,activity):
 
     
 @infos.add('user')
-@content_parser('user, flags="mna", default="message.author"')
+@content_parser('user, flags="mnap", default="message.author"')
 async def user_info(client,message,user):
     guild=message.guild
 

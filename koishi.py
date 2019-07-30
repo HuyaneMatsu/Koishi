@@ -116,7 +116,7 @@ async def default_event(client,message):
 @commands
 @content_parser('user, flags=mna, default="message.author"')
 async def rate(client,message,target):
-    if target in CLIENTS or target is client.owner:
+    if target in CLIENTS or client.is_owner(target):
         result=10
     else:
         result=target.id%11
@@ -445,7 +445,7 @@ async def change_prefix(client,message,content):
 
 @commands
 async def _change_prefix(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     content=filter_content(content)
     if len(content)<2:
@@ -571,7 +571,7 @@ async def oa2_my_guild(client,message,content):
         await client.message_create(message.channel,'Could not find that user')
         return
     
-    if message.author is not client.owner and user!=message.author:
+    if (not client.is_owner(message.author)) and user!=message.author:
         await client.message_create(message.channel,'NOPE, do it on yourself!')
         return
     
@@ -599,7 +599,7 @@ async def oa2_my_guild(client,message,content):
         
 @commands
 async def oa2_owners(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
 
     access = await client.owners_access(valuable_scopes)
@@ -628,7 +628,7 @@ async def oa2_renew(client,message,content):
 
 @commands
 async def OG(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     
     access = await client.owners_access(valuable_scopes)
@@ -696,7 +696,7 @@ async def nitro(client,message,content):
     await client.message_create(message.channel,emoji.as_emoji)
 
 @commands
-@content_parser('condition, flags=r, default="message.author is not client.owner"',
+@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
 async def resend_webhook(client,message,message_id,channel):
@@ -732,7 +732,7 @@ async def pararell_load(client,channel,future):
     
 @commands
 async def count_messages(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     source_channel=message.channel
     guild=source_channel.guild
@@ -787,7 +787,7 @@ async def pararell_load_reactions(client,channel,future,reactions):
     
 @commands
 async def count_reactions(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     source_channel=message.channel
     guild=source_channel.guild

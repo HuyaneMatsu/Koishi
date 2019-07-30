@@ -1457,7 +1457,7 @@ del YUKARI_SKILL_USE
 del YUKARI_EMOJI
 
 async def _DS_modify_best(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     try:
         position=int(content)

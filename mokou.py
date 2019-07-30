@@ -58,12 +58,12 @@ async def message_create(client,message):
                 parts.append('There is even more message at this channel however.')
             if not channel.cached_permissions_for(client).can_read_message_history:
                 parts.append('I have no permission to read older messages.')
-            if channel.turn_GC_on_at:
+            if channel._turn_gc_on_at:
                 now=time.monotonic()
-                if now>channel.turn_GC_on_at:
+                if now>channel._turn_gc_on_at:
                     parts.append('The GC will check the channel at the next cycle.')
                 else:
-                    parts.append(f'The channel will fall under GC after {round(channel.turn_GC_on_at-now)} seconds')
+                    parts.append(f'The channel will fall under GC after {round(channel._turn_gc_on_at-now)} seconds')
             else:
                 parts.append('There is no reason to run GC on this channel.')
             if channel.messages.maxlen:

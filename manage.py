@@ -79,7 +79,7 @@ from hata.exceptions import DiscordException
 
 @koishi_commands
 async def getapp(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     try:
         result = await client.http.request(ratelimit_handler.unlimited(client.loop),'GET',

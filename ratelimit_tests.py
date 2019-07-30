@@ -1084,7 +1084,7 @@ def message_suppress_embeds(client,message,suppress=True):
 
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1099,7 +1099,7 @@ async def ratelimit_test0000(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0001(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1115,7 +1115,7 @@ async def ratelimit_test0001(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0002(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1133,7 +1133,7 @@ async def ratelimit_test0002(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0003(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1151,7 +1151,7 @@ async def ratelimit_test0003(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0004(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1169,7 +1169,7 @@ async def ratelimit_test0004(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0005(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     client2=other_client(client)
@@ -1188,7 +1188,7 @@ async def ratelimit_test0005(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0006(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     client2=other_client(client)
@@ -1207,7 +1207,7 @@ async def ratelimit_test0006(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0007(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     client2=other_client(client)
@@ -1226,7 +1226,7 @@ async def ratelimit_test0007(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0008(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1244,7 +1244,7 @@ async def ratelimit_test0008(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0009(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1262,7 +1262,7 @@ async def ratelimit_test0009(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0010(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1280,7 +1280,7 @@ async def ratelimit_test0010(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0011(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1299,7 +1299,7 @@ async def ratelimit_test0011(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0012(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1318,7 +1318,7 @@ async def ratelimit_test0012(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0013(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     emoji1=BUILTIN_EMOJIS['x']
@@ -1336,7 +1336,7 @@ async def ratelimit_test0013(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0014(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1346,7 +1346,7 @@ async def ratelimit_test0014(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0015(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1356,7 +1356,7 @@ async def ratelimit_test0015(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0016(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1368,7 +1368,7 @@ async def ratelimit_test0016(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0017(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
@@ -1380,7 +1380,7 @@ async def ratelimit_test0017(client,message,content):
                      
 @ratelimit_commands
 async def ratelimit_test0018(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1394,7 +1394,7 @@ async def ratelimit_test0018(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0019(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1407,7 +1407,7 @@ async def ratelimit_test0019(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0020(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1421,7 +1421,7 @@ async def ratelimit_test0020(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0021(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
@@ -1435,7 +1435,7 @@ async def ratelimit_test0021(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0022(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1447,7 +1447,7 @@ async def ratelimit_test0022(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0023(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1463,7 +1463,7 @@ async def ratelimit_test0023(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0024(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel           
@@ -1478,7 +1478,7 @@ async def ratelimit_test0024(client,message,content):
                      
 @ratelimit_commands
 async def ratelimit_test0025(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel           
@@ -1494,7 +1494,7 @@ async def ratelimit_test0025(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0026(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1507,7 +1507,7 @@ async def ratelimit_test0026(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0027(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1520,7 +1520,7 @@ async def ratelimit_test0027(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0028(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1534,7 +1534,7 @@ async def ratelimit_test0028(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0029(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
@@ -1548,7 +1548,7 @@ async def ratelimit_test0029(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0030(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1562,7 +1562,7 @@ async def ratelimit_test0030(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0031(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1574,7 +1574,7 @@ async def ratelimit_test0031(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0032(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1587,7 +1587,7 @@ async def ratelimit_test0032(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0033(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1600,7 +1600,7 @@ async def ratelimit_test0033(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0034(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1614,7 +1614,7 @@ async def ratelimit_test0034(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0035(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
@@ -1628,7 +1628,7 @@ async def ratelimit_test0035(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0036(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1640,7 +1640,7 @@ async def ratelimit_test0036(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0037(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1653,7 +1653,7 @@ async def ratelimit_test0037(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0038(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1668,7 +1668,7 @@ async def ratelimit_test0038(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0039(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1683,7 +1683,7 @@ async def ratelimit_test0039(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0040(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1699,7 +1699,7 @@ async def ratelimit_test0040(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0041(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
@@ -1715,7 +1715,7 @@ async def ratelimit_test0041(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0042(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1729,7 +1729,7 @@ async def ratelimit_test0042(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0043(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1743,7 +1743,7 @@ async def ratelimit_test0043(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0044(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1753,7 +1753,7 @@ async def ratelimit_test0044(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0045(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1763,7 +1763,7 @@ async def ratelimit_test0045(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0046(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1774,7 +1774,7 @@ async def ratelimit_test0046(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0047(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
@@ -1785,7 +1785,7 @@ async def ratelimit_test0047(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0048(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1795,7 +1795,7 @@ async def ratelimit_test0048(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0049(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1806,7 +1806,7 @@ async def ratelimit_test0049(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0050(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1816,7 +1816,7 @@ async def ratelimit_test0050(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0051(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1827,7 +1827,7 @@ async def ratelimit_test0051(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0052(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1841,7 +1841,7 @@ async def ratelimit_test0052(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0053(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1853,7 +1853,7 @@ async def ratelimit_test0053(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0054(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1863,7 +1863,7 @@ async def ratelimit_test0054(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0055(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1875,7 +1875,7 @@ async def ratelimit_test0055(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0056(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1889,7 +1889,7 @@ async def ratelimit_test0056(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0057(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -1899,7 +1899,7 @@ async def ratelimit_test0057(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0058(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1909,7 +1909,7 @@ async def ratelimit_test0058(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0059(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1921,7 +1921,7 @@ async def ratelimit_test0059(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0060(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
@@ -1933,7 +1933,7 @@ async def ratelimit_test0060(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0061(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1943,7 +1943,7 @@ async def ratelimit_test0061(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0062(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -1955,7 +1955,7 @@ async def ratelimit_test0062(client,message,content):
                      
 @ratelimit_commands
 async def ratelimit_test0063(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await client_edit(client,name='Kemoji Koishi')
@@ -1964,7 +1964,7 @@ async def ratelimit_test0063(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0064(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     with open(os.path.join(os.path.abspath('.'),'images',
@@ -1975,7 +1975,7 @@ async def ratelimit_test0064(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0065(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     with open(os.path.join(os.path.abspath('.'),'avatar.png'),'rb') as file:
@@ -1985,7 +1985,7 @@ async def ratelimit_test0065(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0066(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await client_connections(client)
@@ -1993,7 +1993,7 @@ async def ratelimit_test0066(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0067(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2007,7 +2007,7 @@ async def ratelimit_test0067(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0068(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2025,7 +2025,7 @@ async def ratelimit_test0068(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0069(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2046,7 +2046,7 @@ async def ratelimit_test0069(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0070(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await client_application_info(client)
@@ -2054,7 +2054,7 @@ async def ratelimit_test0070(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0071(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     Task(client_connections(client),loop)
@@ -2063,7 +2063,7 @@ async def ratelimit_test0071(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0072(client,message,cotent):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await client_login_static(client)
@@ -2071,7 +2071,7 @@ async def ratelimit_test0072(client,message,cotent):
 
 @ratelimit_commands
 async def ratelimit_test0073(client,message,cotent):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await client_logout(client)
@@ -2079,7 +2079,7 @@ async def ratelimit_test0073(client,message,cotent):
 
 @ratelimit_commands
 async def ratelimit_test0074(client,message,cotent):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     Task(client_login_static(client),loop)
@@ -2088,7 +2088,7 @@ async def ratelimit_test0074(client,message,cotent):
     
 @ratelimit_commands
 async def ratelimit_test0075(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2100,7 +2100,7 @@ async def ratelimit_test0075(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0076(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2115,7 +2115,7 @@ async def ratelimit_test0076(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0077(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
@@ -2126,7 +2126,7 @@ async def ratelimit_test0077(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0078(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2136,7 +2136,7 @@ async def ratelimit_test0078(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0079(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2147,7 +2147,7 @@ async def ratelimit_test0079(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0080(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel.category.channels[-1]
@@ -2159,7 +2159,7 @@ async def ratelimit_test0080(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0081(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel.category.channels[-2]
@@ -2169,7 +2169,7 @@ async def ratelimit_test0081(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0082(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2182,7 +2182,7 @@ async def ratelimit_test0082(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0083(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2193,7 +2193,7 @@ async def ratelimit_test0083(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0084(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await oauth2_token(client)
@@ -2201,7 +2201,7 @@ async def ratelimit_test0084(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0085(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2212,7 +2212,7 @@ async def ratelimit_test0085(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0086(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2226,7 +2226,7 @@ async def ratelimit_test0086(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0087(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2236,7 +2236,7 @@ async def ratelimit_test0087(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0088(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     
@@ -2249,7 +2249,7 @@ async def ratelimit_test0088(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0089(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2261,7 +2261,7 @@ async def ratelimit_test0089(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0090(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild = await client.guild_create(name='Luv ya')
@@ -2271,7 +2271,7 @@ async def ratelimit_test0090(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0091(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1 = await client.guild_create(name='Luv ya1')
@@ -2286,7 +2286,7 @@ async def ratelimit_test0091(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0092(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     with open(os.path.join(os.path.abspath('.'),'images',
@@ -2303,7 +2303,7 @@ async def ratelimit_test0092(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0093(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     with open(os.path.join(os.path.abspath('.'),'images',
@@ -2316,7 +2316,7 @@ async def ratelimit_test0093(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0094(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2330,7 +2330,7 @@ async def ratelimit_test0094(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0095(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2344,7 +2344,7 @@ async def ratelimit_test0095(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0096(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild2_id]
@@ -2370,7 +2370,7 @@ async def ratelimit_test0096(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0097(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2379,7 +2379,7 @@ async def ratelimit_test0097(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0098(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2388,7 +2388,7 @@ async def ratelimit_test0098(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0099(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2400,7 +2400,7 @@ async def ratelimit_test0099(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0100(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2409,7 +2409,7 @@ async def ratelimit_test0100(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0101(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2418,7 +2418,7 @@ async def ratelimit_test0101(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0102(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2429,7 +2429,7 @@ async def ratelimit_test0102(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0103(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2438,7 +2438,7 @@ async def ratelimit_test0103(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0104(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2448,7 +2448,7 @@ async def ratelimit_test0104(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0105(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2459,7 +2459,7 @@ async def ratelimit_test0105(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0106(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild2_id]
@@ -2472,7 +2472,7 @@ async def ratelimit_test0106(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0107(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild2_id]
@@ -2485,7 +2485,7 @@ async def ratelimit_test0107(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0108(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2496,7 +2496,7 @@ async def ratelimit_test0108(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0109(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2505,7 +2505,7 @@ async def ratelimit_test0109(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0110(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2514,7 +2514,7 @@ async def ratelimit_test0110(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0111(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2525,7 +2525,7 @@ async def ratelimit_test0111(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0112(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2538,7 +2538,7 @@ async def ratelimit_test0112(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0113(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2549,7 +2549,7 @@ async def ratelimit_test0113(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0114(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2563,7 +2563,7 @@ async def ratelimit_test0114(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0115(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds.join'])
@@ -2578,7 +2578,7 @@ async def ratelimit_test0115(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0116(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds.join'])
@@ -2594,7 +2594,7 @@ async def ratelimit_test0116(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0117(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds.join'])
@@ -2614,7 +2614,7 @@ async def ratelimit_test0117(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0117(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds.join'])
@@ -2634,7 +2634,7 @@ async def ratelimit_test0117(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0118(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2648,7 +2648,7 @@ async def ratelimit_test0118(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0119(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2666,7 +2666,7 @@ async def ratelimit_test0119(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0120(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2684,7 +2684,7 @@ async def ratelimit_test0120(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0121(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2697,7 +2697,7 @@ async def ratelimit_test0121(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0122(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2707,7 +2707,7 @@ async def ratelimit_test0122(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0123(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2718,7 +2718,7 @@ async def ratelimit_test0123(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0124(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2729,7 +2729,7 @@ async def ratelimit_test0124(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0125(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2738,7 +2738,7 @@ async def ratelimit_test0125(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0126(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2747,7 +2747,7 @@ async def ratelimit_test0126(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0127(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2758,7 +2758,7 @@ async def ratelimit_test0127(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0128(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=client.guilds[guild1_id]
@@ -2775,7 +2775,7 @@ async def ratelimit_test0128(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0129(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['email','identify'])
@@ -2784,7 +2784,7 @@ async def ratelimit_test0129(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0130(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await client_user(client)
@@ -2792,7 +2792,7 @@ async def ratelimit_test0130(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0131(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await channel_private_get_all(client)
@@ -2800,7 +2800,7 @@ async def ratelimit_test0131(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0132(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await channel_private_create(client,client.owner)
@@ -2808,7 +2808,7 @@ async def ratelimit_test0132(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0133(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['connections'])
@@ -2817,7 +2817,7 @@ async def ratelimit_test0133(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0134(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds'])
@@ -2826,7 +2826,7 @@ async def ratelimit_test0134(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0135(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds'])
@@ -2837,7 +2837,7 @@ async def ratelimit_test0135(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0136(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     await guild_get_all(client)
@@ -2845,7 +2845,7 @@ async def ratelimit_test0136(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0137(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     Task(guild_get_all(client),loop)
@@ -2855,7 +2855,7 @@ async def ratelimit_test0137(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0138(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds'])
@@ -2867,7 +2867,7 @@ async def ratelimit_test0138(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0139(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1 = await client.guild_create(name='pls kill me')
@@ -2877,7 +2877,7 @@ async def ratelimit_test0139(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0140(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     user1=message.author
@@ -2886,7 +2886,7 @@ async def ratelimit_test0140(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0141(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     user1=message.author
@@ -2898,7 +2898,7 @@ async def ratelimit_test0141(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0142(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     
@@ -2910,7 +2910,7 @@ async def ratelimit_test0142(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0143(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2921,7 +2921,7 @@ async def ratelimit_test0143(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0144(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     
@@ -2933,7 +2933,7 @@ async def ratelimit_test0144(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0145(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -2947,7 +2947,7 @@ async def ratelimit_test0145(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0146(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2956,7 +2956,7 @@ async def ratelimit_test0146(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0147(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild_iterator=client.guilds.values().__iter__()
@@ -2968,7 +2968,7 @@ async def ratelimit_test0147(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0148(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     access = await client.owners_access(['guilds.join'])
@@ -2984,7 +2984,7 @@ async def ratelimit_test0148(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0149(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -2993,7 +2993,7 @@ async def ratelimit_test0149(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0150(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -3002,7 +3002,7 @@ async def ratelimit_test0150(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0151(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -3011,7 +3011,7 @@ async def ratelimit_test0151(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0152(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -3021,7 +3021,7 @@ async def ratelimit_test0152(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0153(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -3033,7 +3033,7 @@ async def ratelimit_test0153(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0154(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -3045,7 +3045,7 @@ async def ratelimit_test0154(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test155(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     messages = await client.messages_till_index(message.channel)
     for message in messages:
@@ -3055,7 +3055,7 @@ async def ratelimit_test155(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0156(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -3065,7 +3065,7 @@ async def ratelimit_test0156(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0157(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     guild1=message.guild
@@ -3075,7 +3075,7 @@ async def ratelimit_test0157(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0159(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[1:3]
@@ -3089,7 +3089,7 @@ async def ratelimit_test0159(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0160(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     message1 = await client.message_create(message.channel,embed=Embed('owo'))
@@ -3101,7 +3101,7 @@ async def ratelimit_test0160(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0161(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -3117,7 +3117,7 @@ async def ratelimit_test0161(client,message,content):
     
 @ratelimit_commands
 async def ratelimit_test0162(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
@@ -3137,7 +3137,7 @@ async def ratelimit_test0162(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test0163(client,message,content):
-    if message.author is not client.owner:
+    if not client.is_owner(message.author):
         return
     loop=client.loop
     channel1=message.channel
