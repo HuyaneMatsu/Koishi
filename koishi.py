@@ -9,7 +9,7 @@ from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
 from hata.futures import CancelledError,sleep,Future_WM,Task
-from hata.events import Pagination,wait_for_message,wait_for_emoji,cooldown,prefix_by_guild
+from hata.events import Pagination,wait_for_message,wait_for_reaction,cooldown,prefix_by_guild
 from hata.channel import cr_pg_channel_object,Channel_text
 from hata import others
 from hata.exceptions import DiscordException
@@ -333,7 +333,7 @@ async def mine(client,message,content):
     await client.reaction_add(message,emoji)
     
     try:
-        await wait_for_emoji(client,message,
+        await wait_for_reaction(client,message,
             lambda emoji,user,v0=emoji,v1=user:emoji is v0 and user is v1,
             1200.)
     except TimeoutError:

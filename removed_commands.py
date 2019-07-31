@@ -3961,7 +3961,22 @@ class unknown_emojier(metaclass=asyncinit):
         content=smart_join(result,sep='')
         return self.client.message_create(self.message.channel,content)
 
+from hata.ratelimit import ratelimit_handler
+from hata.exceptions import DiscordException
 
+@koishi_commands
+async def getapp(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    try:
+        result = await client.http.request(ratelimit_handler.unlimited(client.loop),'GET',
+            f'https://discordapp.com/api/v6/applications/{content}')
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(result)
+
+    await client.message_create(message.channel,result)
 
 # - : - # dungeon_sweeper.py # - : - #
 

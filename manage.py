@@ -62,7 +62,7 @@ Mokou.events(mokou.channel_delete)
 
 Elphelt=Client(pers_data.ELPHELT_TOKEN,
     client_id=pers_data.ELPHELT_ID,
-               status='idle'
+    status='idle'
         )
 
 Elphelt.events(reaction_add_waitfor)
@@ -74,24 +74,7 @@ elphelt_commands(Koishi.events.message_create.commands['random'])
 
 ############################## TEST COMMANDS ##############################
 
-from hata.ratelimit import ratelimit_handler
-from hata.exceptions import DiscordException
-
-@koishi_commands
-async def getapp(client,message,content):
-    if not client.is_owner(message.author):
-        return
-    try:
-        result = await client.http.request(ratelimit_handler.unlimited(client.loop),'GET',
-            f'https://discordapp.com/api/v6/applications/{content}')
-    except DiscordException as err:
-        result=repr(err)
-    else:
-        result=repr(result)
-
-    await client.message_create(message.channel,result)
         
-    
 ############################## START ##############################
 
 start_clients()

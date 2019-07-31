@@ -5,7 +5,6 @@ import re
 from hata.http import HTTP_client
 from hata.embed import Embed
 from hata.parsers import eventlist
-from hata.client_core import KOKORO
 from hata.color import Color
 from hata.emoji import BUILTIN_EMOJIS
 from hata.dereaddons_local import asyncinit
@@ -14,9 +13,6 @@ from hata.futures import Task
 from hata.exceptions import DiscordException
 
 from tools import BeautifulSoup, choose, pop_one, cooldown_handler, mark_as_async
-
-def request_booru_commands(client):
-    KOKORO.create_task_threadsafe(_request_booro_commands(client,KOKORO))
 
 BOORU_COLOR=Color.from_html('#138a50')
 

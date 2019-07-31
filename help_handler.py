@@ -221,7 +221,15 @@ HELP['nsfwbooru']=Embed(title='nsfwbooru',color=HELP_COLOR,
         'you want... you perv~\n'
         '~~NSFW channel only~~'
             ))
-                    
+
+HELP['heartevent']=Embed(title='heartevent',color=HELP_COLOR,
+    description=(
+        'Starts a heart event at the channel. Usage:\n'
+        '- **heartevent duration amount <users limit>**\n'
+        '*Owner only.*'
+            ))
+
+
 async def on_command_help(client,message,content):
     if 0<len(content)<50:
         content=content.lower()
