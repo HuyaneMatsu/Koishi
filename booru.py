@@ -84,7 +84,9 @@ class Shuffled_shelter(metaclass=asyncinit):
         message=wrapper.target
         can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
 
-        if message.did_react(emoji,user) and can_manage_messages:
+        if can_manage_messages:
+            if not message.did_react(emoji,user):
+                return
             Task(self.reaction_remove(client,message,emoji,user),client.loop)
 
         if self.task_flag:
