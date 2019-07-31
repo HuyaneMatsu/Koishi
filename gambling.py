@@ -57,7 +57,7 @@ async def daily(client,message,target_user):
                     daily_streak=source_result.daily_streak
                     daily_next=daily_next-DAILY_STREAK_BREAK
                     if daily_next<now:
-                        daily_streak=((now-daily_next)//DAILY_STREAK_LOSE)-1
+                        daily_streak=daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
                         if daily_streak<0:
                             daily_streak=0
                         streak_text=f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
@@ -134,7 +134,7 @@ async def daily(client,message,target_user):
                 daily_streak=source_result.daily_streak
                 daily_next=daily_next-DAILY_STREAK_BREAK
                 if daily_next<now:
-                    daily_streak=((now-daily_next)//DAILY_STREAK_LOSE)-1
+                    daily_streak=daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
                     if daily_streak<0:
                         daily_streak=0
                     streak_text=f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
