@@ -55,7 +55,7 @@ async def daily(client,message,target_user):
                             GAMBLING_COLOR)
                         break
                     daily_streak=source_result.daily_streak
-                    daily_next=daily_next-DAILY_STREAK_BREAK
+                    daily_next=daily_next+DAILY_STREAK_BREAK
                     if daily_next<now:
                         daily_streak=daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
                         if daily_streak<0:
@@ -132,7 +132,7 @@ async def daily(client,message,target_user):
                         GAMBLING_COLOR)
                     break
                 daily_streak=source_result.daily_streak
-                daily_next=daily_next-DAILY_STREAK_BREAK
+                daily_next=daily_next+DAILY_STREAK_BREAK
                 if daily_next<now:
                     daily_streak=daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
                     if daily_streak<0:
