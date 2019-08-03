@@ -12,7 +12,7 @@ commands=eventlist()
 @commands
 @cooldown(30.,'user',handler=cooldown_handler())
 async def ping(client,message,content):
-    await client.message_create(message.channel,f'{int(client.kokoro.latency*1000.)} ms')
+    await client.message_create(message.channel,f'{int(client.gateway.kokoro.latency*1000.)} ms')
 
 DECK_LINE_RP=re.compile('(\d+) *(.*?) *\n?')
 

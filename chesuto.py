@@ -778,7 +778,7 @@ class chesuto_player(object):
 WAITERS={}
 
 class Game_waiter():
-    __slots__=['channel', 'client', 'user', 'timeout_handle']
+    __slots__=['channel', 'client', 'user', 'timeout_handle', 'waiter']
     def __init__(self,client,channel,user):
         self.client=client
         self.channel=channel

@@ -74,7 +74,7 @@ class Shuffled_shelter(metaclass=asyncinit):
         message.weakrefer()
         await client.reaction_add(message,self.RESET)
 
-        waitfor_wrapper(client,self,300,multievent(client.events.reaction_add,client.events.reaction_delete),message,)
+        waitfor_wrapper(client,self,300.,multievent(client.events.reaction_add,client.events.reaction_delete),message,)
 
     async def __call__(self,wrapper,emoji,user):
         if user.is_bot or emoji is not self.RESET:

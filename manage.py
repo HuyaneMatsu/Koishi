@@ -74,6 +74,15 @@ elphelt_commands(Koishi.events.message_create.commands['random'])
 
 ############################## TEST COMMANDS ##############################
 
+from hata.events_compiler import content_parser
+
+@koishi_commands
+@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+    'user, mode="0+"')
+async def i_love(client,message,users):
+    for user in users:
+        await client.message_create(message.channel,f'{user:m} I love u!')
+
         
 ############################## START ##############################
 

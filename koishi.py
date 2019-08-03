@@ -149,7 +149,7 @@ async def dice(client,message,times):
 @commands
 @cooldown(30.,'user',handler=cooldown_handler())
 async def ping(client,message,content):
-    await client.message_create(message.channel,f'{int(client.kokoro.latency*1000.)} ms')
+    await client.message_create(message.channel,f'{int(client.gateway.kokoro.latency*1000.)} ms')
 
 
 @commands
@@ -661,7 +661,7 @@ async def se(client,message,emoji):
 
 @commands
 async def nitro(client,message,content):
-    if message.permissions.can_manage_messages:
+    if message.channel.cached_permissions_for(client).can_manage_messages:
         Task(client.message_delete(message),client.loop)
     content=filter_content(content)
     
@@ -821,9 +821,4 @@ async def count_reactions(client,message,content):
             text.append(f' - {index} {emoji:e} {emoji_count}')
     
     chunks=[{'content':chunk} for chunk in others.chunkify(text)]
-    await Pagination(client,source_channel,chunks)
-
-@commands
-@content_parser('delta, default="None"')
-async def parse_timedelta(client,message,delta):
-    await client.message_create(message.channel,(repr(delta)))            
+    await Pagination(client,source_channel,chunks)        
