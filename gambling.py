@@ -29,6 +29,7 @@ EVENT_MIN_DURATION=timedelta(minutes=30)
 EVENT_MIN_AMOUNT=DAILY_REWARD//2 #half day of min
 EVENT_MAX_AMOUNT=7*DAILY_REWARD_LIMIT #1 week of max
 EVENT_OK_EMOJI=BUILTIN_EMOJIS['ok_hand']
+EVENT_ABORT_EMOJI=BUILTIN_EMOJIS['x']
 
 gambling=eventlist()
 
@@ -222,7 +223,7 @@ class heartevent_start_checker:
         self.client=client
 
     def __call__(self,emoji,user):
-        return (emoji is EVENT_OK_EMOJI) and self.client.is_owner(user)
+        return self.client.is_owner(user) and ((emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI))
 
 @gambling
 @content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
@@ -287,8 +288,9 @@ class heartevent(metaclass=asyncinit):
         
         to_check = await client.message_create(channel,embed=embed)
         await client.reaction_add(to_check,EVENT_OK_EMOJI)
+        await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
         try:
-            await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+            emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
         except TimeoutError:
             return
         finally:
@@ -297,6 +299,9 @@ class heartevent(metaclass=asyncinit):
                 await client.message_delete(message)
             except DiscordException:
                 pass
+
+        if emoji is EVENT_ABORT_EMOJI:
+            return
 
         self.user_ids=set()
         self.user_limit=user_limit

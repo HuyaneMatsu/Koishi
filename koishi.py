@@ -822,3 +822,14 @@ async def count_reactions(client,message,content):
     
     chunks=[{'content':chunk} for chunk in others.chunkify(text)]
     await Pagination(client,source_channel,chunks)        
+
+@commands
+@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+                'user, flags=mna, default="client"',)
+async def update_application_info(client,message,user):
+    if type(user) is Client:
+        await user.update_application_info()
+        text=f'Application info of `{user:f}` is updated succesfully!'
+    else:
+        text='I can update application info only of a client'
+    await client.message_create(message.channel,text)
