@@ -3978,6 +3978,86 @@ async def getapp(client,message,content):
 
     await client.message_create(message.channel,result)
 
+from hata.events_compiler import content_parser
+
+@koishi_commands
+@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+    'user, mode="0+"')
+async def i_love(client,message,users):
+    for user in users:
+        await client.message_create(message.channel,f'{user:m} I love u!')
+
+@koishi_commands
+async def guess_user(client,message,content):
+    guild=message.guild
+    if (guild is None) or (not client.is_owner(message.author)):
+        return
+    users = await client.request_member(guild,content,10)
+    if users:
+        text=', '.join([user.full_name for user in users])
+    else:
+        text='No result'
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def get_users_like_guild(client,message,content):
+    guild=message.guild
+    if (guild is None) or (not client.is_owner(message.author)):
+        return
+    users=guild.get_users_like(content)
+    if users:
+        text=', '.join([user.full_name for user in users])
+    else:
+        text='No result'
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def get_user_like_guild(client,message,content):
+    guild=message.guild
+    if (guild is None) or (not client.is_owner(message.author)):
+        return
+    user=guild.get_user_like(content)
+    if user is None:
+        text='No result'
+    else:
+        text=user.full_name
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def get_users_like_channel(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    users=message.channel.get_users_like(content)
+    if users:
+        text=', '.join([user.full_name for user in users])
+    else:
+        text='No result'
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def get_user_like_channel(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    user=message.channel.get_user_like(content)
+    if user is None:
+        text='No result'
+    else:
+        text=user.full_name
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def get_users_like_ordered(client,message,content):
+    guild=message.guild
+    if (guild is None) or (not client.is_owner(message.author)):
+        return
+    users=guild.get_users_like_ordered(content)
+    if users:
+        text=', '.join([user.full_name for user in users])
+    else:
+        text='No result'
+    await client.message_create(message.channel,text)
+
+
 # - : - # dungeon_sweeper.py # - : - #
 
 ##STAGE_NAME_PATTERN_RE=re.compile(

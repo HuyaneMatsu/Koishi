@@ -143,6 +143,7 @@ async def daily(client,message,target_user):
                     streak_text=f'You are in a {daily_streak} day streak! Keep up the good work!'
                 
                 await connector.execute(CURRENCY_TABLE.update().values(
+                    daily_next  = now+DAILY_INTERVAL,
                     daily_streak= daily_streak+1,
                         ).where(currency_model.user_id==source_user.id))
                 
