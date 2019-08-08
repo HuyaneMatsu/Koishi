@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from hata.exceptions import DiscordException
-from hata.parsers import EVENTS,default_event
+from hata.parsers import EVENTS
 from hata.prettyprint import pchunkify,pretty_print
 from hata.events import Pagination
 from hata.others import cchunkify,Status
@@ -42,7 +42,7 @@ class dispatch_tester:
         
         actual=getattr(client.events,content)
 
-        if actual is default_event:
+        if actual is client.events.default_event:
             try:
                 await client.message_create(message.channel,'Event set')
             except DiscordException:
@@ -53,7 +53,7 @@ class dispatch_tester:
                 await client.message_create(message.channel,'Event removed')
             except DiscordException:
                 return
-            setattr(client.events,content,default_event)
+            setattr(client.events,content,client.events.default_event)
 
     @classmethod
     async def client_edit(self,client,old):
