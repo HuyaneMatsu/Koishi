@@ -1,7 +1,7 @@
 import os, re, time
 from collections import deque
 from time import time as time_now
-from hata.dereaddons_local import multidict_titled
+from hata.dereaddons_local import multidict_titled, titledstr
 from hata.futures import Future,sleep,elsewhere_await_coro,Task
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
@@ -300,7 +300,7 @@ def parsedate_to_datetime(data):
 
 def parse_header_ratelimit(headers):
     return ( \
-        datetime.fromtimestamp(int(headers['X-Ratelimit-Reset']),timezone.utc)
+        datetime.fromtimestamp(float(headers['X-Ratelimit-Reset']),timezone.utc)
         -parsedate_to_datetime(headers['Date']) 
             ).total_seconds()
 
@@ -319,7 +319,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
     self=client.http
     if header is None:
         header=self.header.copy()
-
+    header[titledstr.by_pass_titling('X-RateLimit-Precision')]='millisecond'
     
     if hdrs.CONTENT_TYPE not in header and data and isinstance(data,(dict,list)):
         header[hdrs.CONTENT_TYPE]='application/json'
@@ -346,21 +346,20 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
         
         headers=response.headers
         status=response.status
-        
         if headers['content-type']=='application/json':
             response_data=from_json(response_data)
         
         result=['\nrate limits:',f'{url} {method}']
-        value=headers.get('X-RateLimit-Global',None)
+        value=headers.get('X-Ratelimit-Global',None)
         if value is not None:
             result.append(f'global : {value}')
-        value=headers.get('X-RateLimit-Limit',None)
+        value=headers.get('X-Ratelimit-Limit',None)
         if value is not None:
             result.append(f'limit : {value}')
-        value=headers.get('X-RateLimit-Remaining',None)
+        value=headers.get('X-Ratelimit-Remaining',None)
         if value is not None:
             result.append(f'remaining : {value}')
-        value=headers.get('X-RateLimit-Reset',None)
+        value=headers.get('X-Ratelimit-Reset',None)
         if value is not None:
             delay=parse_header_ratelimit(headers)
             result.append(f'reset : {value}, after {delay} seconds')

@@ -129,7 +129,7 @@ class dispatch_tester:
                     content=getattr(message,key)
                     result.append('To:')
                 continue
-            if key in ('user_mentions','role_mentions'):
+            if key in ('user_mentions','role_mentions','cross_mentions'):
                 result.append(f'- {key} changed:')
                 if type(value) is tuple:
                     old,new=value
@@ -437,11 +437,11 @@ class dispatch_tester:
                     'available','has_animated_icon','description',
                     'vanity_code','banner','max_members','max_presences',
                     'premium_tier','booster_count','widget_enabled',
-                    'embed_enabled'):
+                    'embed_enabled','preferred_language'):
                 result.append(f'- {key} : {value} - > {getattr(guild,key)}')
                 continue
             
-            if key in ('verification_level','message_notification','mfa','content_filter','region'):
+            if key in ('verification_level','message_notification','mfa','content_filter','region','preferred_language'):
                 other=getattr(guild,key)
                 result.append(f'- {key} : {value!s} {value.value} -> {other!s} {other.value}')
                 continue
