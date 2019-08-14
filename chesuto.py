@@ -5,6 +5,8 @@ sys.path.append(os.path.abspath('..'))
 from hata.emoji import Emoji
 from hata.futures import Task
 from hata.events import cooldown
+from hata.events_compiler import content_parser
+
 from tools import cooldown_handler
 
 #each added move is from 3 elements for a total of 24 bits:
@@ -777,7 +779,7 @@ class chesuto_player(object):
 
 WAITERS={}
 
-class Game_waiter():
+class chesuto_waiter():
     __slots__=['channel', 'client', 'user', 'timeout_handle', 'waiter']
     def __init__(self,client,channel,user):
         self.client=client
@@ -787,24 +789,41 @@ class Game_waiter():
 
     def at_timeout(self):
         channel=self.channel
-        del WAITERS[self.channel]
+        del WAITERS[self.user.id]
         client=self.client
         Task(client.message_create(channel,f'{self.user:m} timeout'),client.loop)
 
-    def reset_waiter(self):
+    def reset_waiter(self,channel):
+        self.channel=channel
         self.waiter.cancel()
         self.waiter=self.client.loop.call_later(300.,self.at_timeout)
 
 @cooldown(60.,'user',handler=cooldown_handler())
-async def chesuto_manager(client,message,content):
+async def chesuto_wait(client,message,content):
     channel=message.channel
     user=message.author
     try:
-        game_waiter=WAITERS[channel.id]
+        game_waiter=WAITERS[user.id]
     except KeyError:
-        WAITERS[channel.id]=Game_waiter(client,channel,user)
-        return
-    if game_waiter.user==user:
-        await client.message_create(channel,'Your waiter is reseted')
+        WAITERS[user.id]=chesuto_waiter(client,channel,user)
         return
 
+    game_waiter.reset_waiter(channel)
+    await client.message_create(channel,'Your waiter is reseted')
+    return
+
+@cooldown(15.,'user',handler=cooldown_handler())
+@content_parser('user')
+async def chesuto_fight(client,message,user):
+    if message.author is user:
+        return
+    try:
+        game_waiter=WAITERS[user.id]
+    except KeyError:
+        pass
+    else:
+        if game_waiter.channel is message.channel:
+            game_waiter.waiter.cancel()
+            Chesuto_backend(message.channel,message.author,user)
+            return
+    await client.message_create(message.channel,f'{user:f} is not waiiting, or nto at this channel.')

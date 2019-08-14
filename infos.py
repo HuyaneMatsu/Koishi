@@ -130,6 +130,8 @@ async def user_info(client,message,user):
         text=[]
         if profile.nick is not None:
             text.append(f'Nick: {profile.nick}')
+        if profile.joined_at is None:
+            await client.guild_user_get(user.id)
         text.append(f'Joined: {elapsed_time(profile.joined_at)} ago')
         if user.boosts is guild:
             text.append(f'Booster since: {elapsed_time(user.boosts_since)}')
@@ -488,9 +490,7 @@ async def logs(client,message,guild,*args):
     while True:
         if not args:
             break
-        if type(args[0]) is str:
-            event_iter=(event_as_str,user)
-        else:
+        if type(args[0]) is not str:
             user,*args=args
         if not args:
             break
