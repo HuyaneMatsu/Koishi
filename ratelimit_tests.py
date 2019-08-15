@@ -1,6 +1,6 @@
 import os, re, time
 from collections import deque
-from time import time as time_now
+from time import perf_counter
 from hata.dereaddons_local import multidict_titled, titledstr
 from hata.futures import Future,sleep,elsewhere_await_coro,Task
 from hata.parsers import eventlist
@@ -363,6 +363,9 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
         if value is not None:
             delay=parse_header_ratelimit(headers)
             result.append(f'reset : {value}, after {delay} seconds')
+        value=headers.get('X-Ratelimit-Reset-After',None)
+        if value is not None:
+            result.append(f'reset after : {value}')
         print('\n'.join(result))
 
         
@@ -3161,3 +3164,29 @@ async def ratelimit_test0163(client,message,content):
     Task(message_suppress_embeds(client,message3,False),client.loop)
     Task(message_suppress_embeds(client,message6,True ),client.loop)
     #just felt like True / False has some diff, but nope
+
+
+@ratelimit_commands
+async def ratelimit_test164(client,message,content):
+    amount=10
+    reactions=[BUILTIN_EMOJIS['regional_indicator_'+chr(x)] for x in range(98,108)]
+    await client.reaction_add(message,BUILTIN_EMOJIS['regional_indicator_a'])
+    last=perf_counter()
+    times=[]
+    for x in range(98,98+amount):
+        await client.reaction_add(message,BUILTIN_EMOJIS['regional_indicator_'+chr(x)])
+        new=perf_counter()
+        times.append(new-last)
+        last=new
+    
+    result=['Times:']
+    for index in range(amount):
+        result.append(f'> {index} : {times[index]:.2f} s')
+
+    avg=sum(times)/amount
+    
+    result.append(f'average : {avg}')
+
+    await client.message_create(message.channel,'\n'.join(result))
+
+    

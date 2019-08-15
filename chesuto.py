@@ -6,6 +6,7 @@ from hata.emoji import Emoji
 from hata.futures import Task
 from hata.events import cooldown
 from hata.events_compiler import content_parser
+from hata.exceptions import DiscordException
 
 from tools import cooldown_handler
 
@@ -372,7 +373,8 @@ def pawn_moves(self,field):
                     can_do=0b00001101 #hit
                 moves.append(((x+1)<<16)|((y-1)<<8)|can_do)
 
-def check_king_moves(king,player,others,field):
+def check_king_moves(player,others,field):
+    king=player.king
     moves=king.moves
     for index in reversed(range(len(moves))):
         element=moves[index]
@@ -489,6 +491,7 @@ def check_king_moves(king,player,others,field):
             else:
                 y_diff= 0
 
+            local_pos=position
             moves=[]
             while True:
                 local_pos=local_pos+pos_diff
@@ -532,6 +535,8 @@ def check_king_moves(king,player,others,field):
                     for move in other_moves:
                         if move&0xffff00==killer_pos:
                             break
+                    else:
+                        continue
                     
                     other_moves.clear()
                     other_moves.append(move)
@@ -647,8 +652,10 @@ class Puppet(object):
         return f'<{("light","dark")[self.side]} {self.meta.name} effetcts=[{", ".join([repr(effect) for effect in self.effects])}]>'
 
 class chesuto_backend(object):
-    __slots__=['field','players']
-    def __init__(self,player_0,player_1):
+    __slots__=['client', 'field','players']
+    def __init__(self,client,player_0,player_1):
+        self.client=client()
+
         self.field=[
             Puppet(Puppet_meta.rook,    0,  1),
             Puppet(Puppet_meta.knight,  1,  1),
@@ -672,28 +679,33 @@ class chesuto_backend(object):
                 ]
 
         self.players=(player_0(self,0),player_1(self,1))
+        self.update_puppets()
+        Task(self.run(),client.loop)
 
-        def check(self,player,x,y):
-            puppet=self.field[x+(y<<3)]
-            if puppet is not None:
-                return puppet.moves,puppet.killers
+    def run(self):
+        pass
 
-            binary_pos=(x<<16)+(y<<8)
-            moves=[]
-            killers=[]
-            player2=self.players[player.side^1]
-            
-            for puppet_ in player.puppets:
-                for move in puppet.moves:
-                    if move&0xffff00==binary_pos and move&0b00000001:
-                        position=puppet.position
-                        moves.append(((position&0b00000111)<<16)|((position&0b00111000)<<5)|0b00000001)
-            for puppet_ in player2.puppets:
-                for move in puppet.moves:
-                    if move&0xffff00==binary_pos and move&0b00001000:
-                        killers.append(puppet)
+    def check(self,player,x,y):
+        puppet=self.field[x+(y<<3)]
+        if puppet is not None:
+            return puppet.moves,puppet.killers
 
-            return moves,killers
+        binary_pos=(x<<16)+(y<<8)
+        moves=[]
+        killers=[]
+        player2=self.players[player.side^1]
+
+        for puppet_ in player.puppets:
+            for move in puppet_.moves:
+                if move&0xffff00==binary_pos and move&0b00000001:
+                    position=puppet_.position
+                    moves.append(((position&0b00000111)<<16)|((position&0b00111000)<<5)|0b00000001)
+        for puppet_ in player2.puppets:
+            for move in puppet_.moves:
+                if move&0xffff00==binary_pos and move&0b00001000:
+                    killers.append(puppet_)
+
+        return moves,killers
             
     def update_puppets(self):
         field=self.field
@@ -702,8 +714,8 @@ class chesuto_backend(object):
             for puppet in player.puppets:
                 puppet.update(field)
                 
-        check_king_moves(player.king,players[0],players[1],field)
-        check_king_moves(player.king,players[1],players[0],field)
+        check_king_moves(players[0],players[1],field)
+        check_king_moves(players[1],players[0],field)
 
     def __repr__(self):
         result=[]
@@ -759,7 +771,7 @@ class chesuto_backend(object):
         return ''.join(result)
             
 class chesuto_player(object):
-    __slots__=['backend', 'channel', 'puppets', 'side', 'user','king','in_check']
+    __slots__=['backend', 'channel', 'puppets', 'side', 'user', 'king', 'in_check']
     def __init__(self,user,channel):
         self.user=user
         self.channel=channel
@@ -824,6 +836,10 @@ async def chesuto_fight(client,message,user):
     else:
         if game_waiter.channel is message.channel:
             game_waiter.waiter.cancel()
-            Chesuto_backend(message.channel,message.author,user)
+            channel = await client.channel_privtae_create(user)
+            player1=chesuto_player(user,channel)
+            channel = await client.channel_private_create(message.author)
+            player2=chesuto_player(message.author,channel)
+            chesuto_backend(client,player1,player2)
             return
     await client.message_create(message.channel,f'{user:f} is not waiiting, or nto at this channel.')
