@@ -57,8 +57,6 @@ del GC_games
 @content_parser('str, default="\'\'"')
 async def ds_manager(self,message,command):
     permissions=message.channel.cached_permissions_for(self)
-    if not permissions.can_send_messages:
-        return
     
     while True:
 

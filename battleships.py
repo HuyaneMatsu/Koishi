@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re, random, time
 
-from hata.events import waitfor_wrapper,wait_and_continue
+from hata.events import wait_and_continue
 from hata.others import filter_content,is_user_mention
 from hata.futures import Future_WO,CancelledError,Future_WM,future_or_timeout,sleep,Task
 from hata.emoji import BUILTIN_EMOJIS
@@ -199,8 +199,8 @@ class battle_manager:
             case=wait_on_reply(guild,source,target)
             event=client.events.message_create
             
-            wrapper1=waitfor_wrapper(client,wait_and_continue(future,case,channel,event),300.)
-            wrapper2=waitfor_wrapper(client,wait_and_continue(future,case,private,event),300.)
+            waiter1=wait_and_continue(client,future,case,channel,event,300.)
+            waiter2=wait_and_continue(client,future,case,private,event,300.)
             
             try:
                 result=await future
@@ -216,9 +216,12 @@ class battle_manager:
                     del self.requests[request]
                 except KeyError:
                     pass
-                
-            wrapper1.cancel()
-            wrapper2.cancel()
+
+                for waiter in (waiter1,waiter2):
+                    cancel=waiter.cancel
+                    if cancel is None:
+                        continue
+                    Task(cancel(waiter,None,None),client.loop)
 
             try:
                 self.requesters.remove(source)
@@ -331,7 +334,7 @@ class user_profile:
         
         message = await client.message_create(self.channel,embed=self.render_state_1())
         self.message=message
-        Task(client.reaction_add(self.target,SWITCH),client.loop)
+        Task(client.reaction_add(self.message,SWITCH),client.loop)
         
         client.events.reaction_add.append(self,message)
         client.events.reaction_delete.append(self,message)

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-import sys, os
+import sys, os, re
 sys.path.append(os.path.abspath('..'))
 
-from hata.emoji import Emoji
-from hata.futures import Task
+from hata.emoji import Emoji,BUILTIN_EMOJIS
+from hata.futures import Task,Future,CancelledError
 from hata.events import cooldown
 from hata.events_compiler import content_parser
 from hata.exceptions import DiscordException
+from hata.embed import Embed
+from hata.dereaddons_local import asyncinit
 
 from tools import cooldown_handler
 
@@ -653,8 +655,9 @@ class Puppet(object):
 
 class chesuto_backend(object):
     __slots__=['client', 'field','players']
-    def __init__(self,client,player_0,player_1):
-        self.client=client()
+    def __init__(self,client,channel,player_0,player_1):
+        self.client=client
+        self.channel=channel
 
         self.field=[
             Puppet(Puppet_meta.rook,    0,  1),
@@ -680,11 +683,64 @@ class chesuto_backend(object):
 
         self.players=(player_0(self,0),player_1(self,1))
         self.update_puppets()
-        Task(self.run(),client.loop)
+        
+        Task(self.initial_messages(),client.loop)
 
-    def run(self):
-        pass
+    async def initial_messages(self):
+        client=self.client
+        dms_disabed=[]
+        player1,player2=self.players
+        
+        embed=self.render()
+        embed.add_footer('It is your turn now!')
+        
+        try:
+            await client.message_create(player1.channel,embed=embed)
+        except DiscordException:
+            dms_disabed.append(player1)
 
+        embed.add_footer('It is your opponents turn!')
+        
+        try:
+            await client.message_create(player2.channel,embed=embed)
+        except DiscordException:
+            dms_disabed.append(player2)
+
+        if dms_disabed:
+            if len(dms_disabed)==2:
+                disabled_text=f'{dms_disabed[1]:f} and YOU have dms disabled'
+            elif dms_disabed[0] is player1:
+                disabled_text='YOU have dms disabled'
+            else:
+                disabled_text=f'{dms_disabed[0]:f} has dms disabled'
+
+            try:
+                await client.message_create(player1.initial_channel,
+                    embed=Embed('Could not start the game.',disabled_text))
+            except DiscordException:
+                pass
+                
+            if len(dms_disabed)==2:
+                disabled_text=f'{dms_disabed[0]:f} and YOU have dms disabled'
+            elif dms_disabed[0] is player2:
+                disabled_text='YOU have dms disabled'
+            else:
+                disabled_text=f'{dms_disabed[0]:f} has dms disabled'
+            
+            try:
+                await client.message_create(player2.initial_channel,
+                    embed=Embed('Could not start the game.',disabled_text))
+            except DiscordException:
+                pass
+
+            return
+
+        event=client.events.message_create
+        for player in self.players:
+            event.append(self,player.channel)
+
+        #finish this
+        
     def check(self,player,x,y):
         puppet=self.field[x+(y<<3)]
         if puppet is not None:
@@ -771,10 +827,11 @@ class chesuto_backend(object):
         return ''.join(result)
             
 class chesuto_player(object):
-    __slots__=['backend', 'channel', 'puppets', 'side', 'user', 'king', 'in_check']
-    def __init__(self,user,channel):
+    __slots__=['backend', 'channel', 'initial_channel', 'puppets', 'side', 'user', 'king', 'in_check']
+    def __init__(self,user,channel,initial_channel):
         self.user=user
         self.channel=channel
+        self.initial_channel=initial_channel
         self.in_check=False
         
     def __call__(self,backend,side):
@@ -789,57 +846,241 @@ class chesuto_player(object):
             self.puppets=backend.field[48:]
         return self
 
-WAITERS={}
+##WAITERS={}
+##
+##class chesuto_waiter():
+##    __slots__=['channel', 'client', 'user', 'timeout_handle', 'waiter']
+##    def __init__(self,client,channel,user):
+##        self.client=client
+##        self.channel=channel
+##        self.user=user
+##        self.waiter=client.loop.call_later(300.,self.at_timeout)
+##
+##    def at_timeout(self):
+##        channel=self.channel
+##        del WAITERS[self.user.id]
+##        client=self.client
+##        Task(client.message_create(channel,f'{self.user:m} timeout'),client.loop)
+##
+##    def reset_waiter(self,channel):
+##        self.channel=channel
+##        self.waiter.cancel()
+##        self.waiter=self.client.loop.call_later(300.,self.at_timeout)
+##
+##@cooldown(60.,'user',handler=cooldown_handler())
+##async def chesuto_wait(client,message,content):
+##    channel=message.channel
+##    user=message.author
+##    try:
+##        game_waiter=WAITERS[user.id]
+##    except KeyError:
+##        WAITERS[user.id]=chesuto_waiter(client,channel,user)
+##        return
+##
+##    game_waiter.reset_waiter(channel)
+##    await client.message_create(channel,'Your waiter is reseted')
+##    return
+##
+##@cooldown(15.,'user',handler=cooldown_handler())
+##@content_parser('user')
+##async def chesuto_fight(client,message,user):
+##    if message.author is user:
+##        return
+##    try:
+##        game_waiter=WAITERS[user.id]
+##    except KeyError:
+##        pass
+##    else:
+##        if game_waiter.channel is message.channel:
+##            game_waiter.waiter.cancel()
+##            channel = await client.channel_privtae_create(user)
+##            player1=chesuto_player(user,channel)
+##            channel = await client.channel_private_create(message.author)
+##            player2=chesuto_player(message.author,channel)
+##            chesuto_backend(client,message.channel,player1,player2)
+##            return
+##    await client.message_create(message.channel,f'{user:f} is not waiiting, or nto at this channel.')
 
-class chesuto_waiter():
-    __slots__=['channel', 'client', 'user', 'timeout_handle', 'waiter']
-    def __init__(self,client,channel,user):
+
+ACTIVE_LOOBIES={}
+
+async def lobby(client,message,content):
+    channel=message.channel
+    if channel.guild is None: #guild only command
+        return
+    permissions=message.channel.cached_permissions_for(client)
+    if not (permissions.can_add_reactions and permissions.can_use_external_emojis and permissions.can_manage_messages):
+        await client.message_create(channel,embed=Embed(
+            'Permissions denied',
+            'I have not all permissions to start a lobby at this channel.'))
+        return
+
+    user=message.author
+
+    try:
+        lobby=ACTIVE_LOOBIES[user.id]
+    except KeyError:
+        await chesuto_lobby(client,channel,user)
+    else:
+        await lobby.switch_channel_to(channel)
+
+class chesuto_lobby(metaclass=asyncinit):
+    __slots__=['client','channel','message','user','future','embed','emojis']
+    async def __init__(self,client,channel,user):
+        embed=self.MAIN_MENU_EMBED
+        try:
+            message = await client.message_create(channel,embed=embed)
+        except DiscordException:
+            return
+
+        emojis=self.MAIN_MENU_EMOJIS
+        try:
+            for emoji in emojis:
+                await client.reaction_add(message,emoji)
+        except DiscordException:
+            return
+        
+        self.embed=embed
+        self.emojis=emojis
+        
         self.client=client
         self.channel=channel
+        self.message=message
         self.user=user
-        self.waiter=client.loop.call_later(300.,self.at_timeout)
+        
+        self.future=Future(client.loop)
+        Task(self.main_menu(),client.loop)
+        ACTIVE_LOOBIES[user.id]=self
 
-    def at_timeout(self):
-        channel=self.channel
-        del WAITERS[self.user.id]
+    async def switch_channel_to(self,channel):
         client=self.client
-        Task(client.message_create(channel,f'{self.user:m} timeout'),client.loop)
-
-    def reset_waiter(self,channel):
-        self.channel=channel
-        self.waiter.cancel()
-        self.waiter=self.client.loop.call_later(300.,self.at_timeout)
-
-@cooldown(60.,'user',handler=cooldown_handler())
-async def chesuto_wait(client,message,content):
-    channel=message.channel
-    user=message.author
-    try:
-        game_waiter=WAITERS[user.id]
-    except KeyError:
-        WAITERS[user.id]=chesuto_waiter(client,channel,user)
-        return
-
-    game_waiter.reset_waiter(channel)
-    await client.message_create(channel,'Your waiter is reseted')
-    return
-
-@cooldown(15.,'user',handler=cooldown_handler())
-@content_parser('user')
-async def chesuto_fight(client,message,user):
-    if message.author is user:
-        return
-    try:
-        game_waiter=WAITERS[user.id]
-    except KeyError:
-        pass
-    else:
-        if game_waiter.channel is message.channel:
-            game_waiter.waiter.cancel()
-            channel = await client.channel_privtae_create(user)
-            player1=chesuto_player(user,channel)
-            channel = await client.channel_private_create(message.author)
-            player2=chesuto_player(message.author,channel)
-            chesuto_backend(client,player1,player2)
+        embed=self.embed
+        try:
+            message = await client.message_create(channel,embed=embed)
+        except DiscordException:
             return
-    await client.message_create(message.channel,f'{user:f} is not waiiting, or nto at this channel.')
+
+        emojis=self.emojis
+        if emojis is not None:
+            try:
+                for emoji in emojis:
+                    await client.reaction_add(message,emoji)
+            except DiscordException:
+                return
+
+        self.message=message
+        self.channel=channel
+        self.future.cancel()
+
+    async def render(self,embed,emojis):
+        client=self.client
+        message=self.message
+        try:
+            await client.message_edit(message,embed=embed)
+        except DiscordException:
+            del ACTIVE_LOOBIES[self.user.id]
+            return True
+
+        if emojis is not None:
+            try:
+                for emoji in emojis:
+                    await client.reaction_add(message,emoji)
+            except DiscordException:
+                del ACTIVE_LOOBIES[self.user.id]
+                return True
+
+        self.embed=embed
+        self.emojis=emojis
+        return False
+
+
+    MAIN_MENU_EMBED=Embed(
+        'You\'re in the lobby now, select one of the listed choices',
+        '1. Wait in a room for battles\n'
+        '2. Edit your current deck\n'
+        '3. Open packs\n'
+        '4. Cancel\n',)
+
+    MAIN_MENU_EMOJI_1=BUILTIN_EMOJIS['one']
+    MAIN_MENU_EMOJI_2=BUILTIN_EMOJIS['two']
+    MAIN_MENU_EMOJI_3=BUILTIN_EMOJIS['three']
+    MAIN_MENU_EMOJI_4=BUILTIN_EMOJIS['four']
+
+    MAIN_MENU_EMOJIS=[
+        MAIN_MENU_EMOJI_1,
+        MAIN_MENU_EMOJI_2,
+        MAIN_MENU_EMOJI_3,
+        MAIN_MENU_EMOJI_4
+            ]
+
+    async def main_menu(self):
+        client=self.client
+        waiter=self.main_menu_reaction_waiter
+        while True:
+            message=self.message
+            client.events.reaction_add.append(waiter,message)
+            try:
+                emoji = await self.future
+            except CancelledError:
+                self.future.clear()
+                client.events.reaction_add.remove(waiter,message)
+                continue
+            
+            self.future.clear()
+            client.events.reaction_add.remove(waiter,message)
+            break
+        
+        if emoji is self.MAIN_MENU_EMOJI_1:
+            await self.client.reaction_clear(message)
+            Task(self.room_menu_wait_id(),client.loop)
+
+    async def main_menu_reaction_waiter(self,emoji,user):
+        if (user!=self.user) or (emoji not in self.MAIN_MENU_EMOJIS):
+            return
+        self.future.set_result(emoji)
+        
+    ROOM_MENU_WAIT_ID_EMBED=Embed(
+        'Please type a 5 literal long number',
+            )
+
+    ROOM_MENU_WAIT_ID_PATTERN=re.compile('(\d+)')
+    
+    async def room_menu_wait_id(self):
+        if await self.render(self.ROOM_MENU_WAIT_ID_EMBED,None):
+            return
+        
+        client=self.client
+        waiter=self.room_menu_wait_id_waiter
+        while True:
+            channel=self.channel
+            client.events.message_create.append(waiter,channel)
+            try:
+                room_id = await self.future
+            except CancelledError:
+                self.future.clear()
+                client.events.message_create.remove(waiter,channel)
+                continue
+
+            self.future.clear()
+            client.events.message_create.remove(waiter,channel)
+            break
+        
+        await client.message_create(channel,str(room_id))
+        del ACTIVE_LOOBIES[self.user.id]
+    
+    async def room_menu_wait_id_waiter(self,message):
+        user=message.author
+        if user!=self.user:
+            return
+        
+        parsed=self.ROOM_MENU_WAIT_ID_PATTERN.match(message.content)
+        if parsed is None:
+            return
+        
+        result=parsed.group(1)
+        if len(result)!=5:
+            return
+        
+        self.future.set_result(int(result))
+        
+        
