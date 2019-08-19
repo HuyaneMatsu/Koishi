@@ -19,6 +19,8 @@ import elphelt
 
 from tools import commit_extractor,message_delete_waitfor
 from booru import booru_commands
+from interpreter import Interpreter
+
 ############################## SETUP KOISHI ##############################
 
 Koishi=Client(pers_data.KOISHI_TOKEN,
@@ -73,8 +75,11 @@ elphelt_commands.extend(elphelt.commands)
 elphelt_commands(Koishi.events.message_create.commands['random'])
 
 ############################## TEST COMMANDS ##############################
+
+
     
 ############################## START ##############################
 
+koishi_commands(Interpreter(locals().copy()),case='execute')
 start_clients()
 

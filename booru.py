@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-from time import perf_counter
 import re
 
-from hata.http import HTTP_client
 from hata.embed import Embed
 from hata.parsers import eventlist
 from hata.color import Color
