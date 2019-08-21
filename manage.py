@@ -20,6 +20,7 @@ import elphelt
 from tools import commit_extractor,message_delete_waitfor
 from booru import booru_commands
 from interpreter import Interpreter
+import chesuto
 
 ############################## SETUP KOISHI ##############################
 
@@ -37,6 +38,7 @@ Koishi.events(koishi.once_on_ready)
 koishi_commands=Koishi.events(command_processer(koishi.PREFIXES)).shortcut
 koishi_commands.extend(koishi.commands)
 koishi_commands.extend(booru_commands)
+koishi_commands(chesuto.chesuto_lobby,'lobby')
 
 webhook_sender=commit_extractor(
     Koishi,
@@ -73,6 +75,7 @@ Elphelt.events(reaction_delete_waitfor)
 elphelt_commands=Elphelt.events(command_processer('/')).shortcut
 elphelt_commands.extend(elphelt.commands)
 elphelt_commands(Koishi.events.message_create.commands['random'])
+elphelt_commands(chesuto.chesuto_lobby,'lobby')
 
 ############################## TEST COMMANDS ##############################
 

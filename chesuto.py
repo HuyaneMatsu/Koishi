@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys, os, re
-sys.path.append(os.path.abspath('..'))
+if __name__=='__main__':
+    sys.path.append(os.path.abspath('..'))
 
 from hata.emoji import Emoji,BUILTIN_EMOJIS
 from hata.futures import Task,Future,CancelledError
@@ -653,8 +654,8 @@ class Puppet(object):
     def __repr__(self):
         return f'<{("light","dark")[self.side]} {self.meta.name} effetcts=[{", ".join([repr(effect) for effect in self.effects])}]>'
 
-class chesuto_backend(object):
-    __slots__=['client', 'field','players']
+class ChesutoBackend(object):
+    __slots__=['client', 'field','players', 'channel',]
     def __init__(self,client,channel,player_0,player_1):
         self.client=client
         self.channel=channel
@@ -688,53 +689,38 @@ class chesuto_backend(object):
 
     async def initial_messages(self):
         client=self.client
-        dms_disabed=[]
+        dms_disabled=[]
         player1,player2=self.players
         
-        embed=self.render()
+        embed=Embed('',self.render())
         embed.add_footer('It is your turn now!')
         
         try:
             await client.message_create(player1.channel,embed=embed)
         except DiscordException:
-            dms_disabed.append(player1)
+            dms_disabled.append(player1.user)
 
         embed.add_footer('It is your opponents turn!')
         
         try:
             await client.message_create(player2.channel,embed=embed)
         except DiscordException:
-            dms_disabed.append(player2)
+            dms_disabled.append(player2.user)
 
-        if dms_disabed:
-            if len(dms_disabed)==2:
-                disabled_text=f'{dms_disabed[1]:f} and YOU have dms disabled'
-            elif dms_disabed[0] is player1:
-                disabled_text='YOU have dms disabled'
+        if dms_disabled:
+            if len(dms_disabled)==2:
+                disabled_text=f'{dms_disabled[0]:f} and {dms_disabled[1]:f} has dms disabled'
             else:
-                disabled_text=f'{dms_disabed[0]:f} has dms disabled'
+                disabled_text='{dms_disabled[0]:f} has dms disabled'
 
             try:
-                await client.message_create(player1.initial_channel,
+                await client.message_create(self.channel,
                     embed=Embed('Could not start the game.',disabled_text))
             except DiscordException:
                 pass
-                
-            if len(dms_disabed)==2:
-                disabled_text=f'{dms_disabed[0]:f} and YOU have dms disabled'
-            elif dms_disabed[0] is player2:
-                disabled_text='YOU have dms disabled'
-            else:
-                disabled_text=f'{dms_disabed[0]:f} has dms disabled'
-            
-            try:
-                await client.message_create(player2.initial_channel,
-                    embed=Embed('Could not start the game.',disabled_text))
-            except DiscordException:
-                pass
-
             return
 
+        return #finish this
         event=client.events.message_create
         for player in self.players:
             event.append(self,player.channel)
@@ -826,12 +812,11 @@ class chesuto_backend(object):
         result.append(EDGE)
         return ''.join(result)
             
-class chesuto_player(object):
-    __slots__=['backend', 'channel', 'initial_channel', 'puppets', 'side', 'user', 'king', 'in_check']
-    def __init__(self,user,channel,initial_channel):
+class ChesutoPlayer(object):
+    __slots__=['backend', 'channel', 'puppets', 'side', 'user', 'king', 'in_check']
+    def __init__(self,user,channel):
         self.user=user
         self.channel=channel
-        self.initial_channel=initial_channel
         self.in_check=False
         
     def __call__(self,backend,side):
@@ -846,65 +831,180 @@ class chesuto_player(object):
             self.puppets=backend.field[48:]
         return self
 
-##WAITERS={}
-##
-##class chesuto_waiter():
-##    __slots__=['channel', 'client', 'user', 'timeout_handle', 'waiter']
-##    def __init__(self,client,channel,user):
-##        self.client=client
-##        self.channel=channel
-##        self.user=user
-##        self.waiter=client.loop.call_later(300.,self.at_timeout)
-##
-##    def at_timeout(self):
-##        channel=self.channel
-##        del WAITERS[self.user.id]
-##        client=self.client
-##        Task(client.message_create(channel,f'{self.user:m} timeout'),client.loop)
-##
-##    def reset_waiter(self,channel):
-##        self.channel=channel
-##        self.waiter.cancel()
-##        self.waiter=self.client.loop.call_later(300.,self.at_timeout)
-##
-##@cooldown(60.,'user',handler=cooldown_handler())
-##async def chesuto_wait(client,message,content):
-##    channel=message.channel
-##    user=message.author
-##    try:
-##        game_waiter=WAITERS[user.id]
-##    except KeyError:
-##        WAITERS[user.id]=chesuto_waiter(client,channel,user)
-##        return
-##
-##    game_waiter.reset_waiter(channel)
-##    await client.message_create(channel,'Your waiter is reseted')
-##    return
-##
-##@cooldown(15.,'user',handler=cooldown_handler())
-##@content_parser('user')
-##async def chesuto_fight(client,message,user):
-##    if message.author is user:
-##        return
-##    try:
-##        game_waiter=WAITERS[user.id]
-##    except KeyError:
-##        pass
-##    else:
-##        if game_waiter.channel is message.channel:
-##            game_waiter.waiter.cancel()
-##            channel = await client.channel_privtae_create(user)
-##            player1=chesuto_player(user,channel)
-##            channel = await client.channel_private_create(message.author)
-##            player2=chesuto_player(message.author,channel)
-##            chesuto_backend(client,message.channel,player1,player2)
-##            return
-##    await client.message_create(message.channel,f'{user:f} is not waiiting, or nto at this channel.')
+class ChesutoSystemShard():
+    __slots__=['embed','emojis','waiter_message','waiter_reaction','_waiter_flag']
+    def __init__(self,embed,emojis,waiter_message,waiter_reaction):
+        self.embed=embed
+        self.emojis=emojis
+        self.waiter_message=waiter_message
+        self.waiter_reaction=waiter_reaction
+        self._waiter_flag=((waiter_message is not None)<<1)+(waiter_reaction is not None)
 
+    async def just_init(self,parent):
+        client=parent.client
+        embed=self.embed
+        try:
+            message = await client.message_create(parent.channel,embed=embed)
+        except DiscordException:
+            return None
 
-ACTIVE_LOOBIES={}
+        emojis=self.emojis
+        if emojis is not None:
+            try:
+                if type(emojis) is Emoji:
+                    await client.reaction_add(message,emojis)
+                else:
+                    for emoji in emojis:
+                        await client.reaction_add(message,emoji)
+            except DiscordException:
+                del ACTIVE_LOBBIES[parent.user.id]
+                return None
+        
+        parent.embed=embed
+        parent.emojis=emojis
+        return message
 
-async def lobby(client,message,content):
+    def just_wait(self,parent):
+        return self._waiter_tasks[self._waiter_flag](self,parent)
+        
+    async def __call__(self,parent,embed=None):
+        if embed is None:
+            embed=self.embed
+
+        client=parent.client
+        message=parent.message
+        
+        if parent.emojis is not None:
+            try:
+                await client.reaction_clear(message)
+            except DiscordException:
+                del ACTIVE_LOBBIES[parent.user.id]
+                return None
+        
+        try:
+            await client.message_edit(message,embed=embed)
+        except DiscordException:
+            del ACTIVE_LOBBIES[parent.user.id]
+            return None
+        
+        emojis=self.emojis
+        if emojis is not None:
+            try:
+                if type(emojis) is Emoji:
+                    await client.reaction_add(message,emojis)
+                else:
+                    for emoji in emojis:
+                        await client.reaction_add(message,emoji)
+            except DiscordException:
+                del ACTIVE_LOBBIES[parent.user.id]
+                return None
+
+        parent.embed=embed
+        parent.emojis=emojis
+       
+        return await self._waiter_tasks[self._waiter_flag](self,parent)
+    
+    async def _0b00(self,parent):
+        while True:
+            try:
+                result = await parent.future
+            except CancelledError:
+                continue
+            else:
+                return result
+            finally:
+                parent.future.clear()
+
+    async def _0b01(self,parent):
+        waiter_reaction=MethodLike(self.waiter_reaction,parent)
+
+        while True:
+            client=parent.client
+            message=parent.message
+            client.events.reaction_add.append(waiter_reaction,message)
+            try:
+                result = await parent.future
+            except CancelledError:
+                continue
+            else:
+                return result
+            finally:
+                parent.future.clear()
+                client.events.reaction_add.remove(waiter_reaction,message)
+        
+    async def _0b10(self,parent):
+        waiter_message=MethodLike(self.waiter_message,parent)
+
+        while True:
+            client=parent.client
+            channel=parent.channel
+            client.events.message_create.append(waiter_message,channel)
+            try:
+                result = await parent.future
+            except CancelledError:
+                continue
+            else:
+                return result
+            finally:
+                parent.future.clear()
+                client.events.message_create.remove(waiter_message,channel)
+
+    
+    async def _0b11(self,parent):
+        waiter_message=MethodLike(self.waiter_message,parent)
+        waiter_reaction=MethodLike(self.waiter_reaction,parent)
+
+        while True:
+            client=parent.client
+            channel=parent.channel
+            message=parent.message
+            client.events.message_create.append(waiter_message,channel)
+            client.events.reaction_add.append(waiter_reaction,message)
+            try:
+                result = await parent.future
+            except CancelledError:
+                continue
+            else:
+                return result
+            finally:
+                parent.future.clear()
+                client.events.message_create.remove(waiter_message,channel)
+                client.events.reaction_add.remove(waiter_reaction,message)
+    
+    _waiter_tasks=(_0b00,_0b01,_0b10,_0b11)
+    del _0b00, _0b01, _0b10, _0b11
+
+class MethodLike():
+    __slots__=['func','parent']
+    def __init__(self,func,parent):
+        self.func=func
+        self.parent=parent
+    
+    def __call__(self,*args):
+        return self.func(self.parent,*args)
+
+    def __eq__(self,other):
+        return (self is other)
+
+    def __ne__(self,other):
+        return (self is not other)
+
+        
+ACTIVE_LOBBIES={}
+
+EMOJI_1=BUILTIN_EMOJIS['one']
+EMOJI_2=BUILTIN_EMOJIS['two']
+EMOJI_3=BUILTIN_EMOJIS['three']
+EMOJI_4=BUILTIN_EMOJIS['four']
+EMOJIS_1_4=[EMOJI_1,EMOJI_2,EMOJI_3,EMOJI_4]
+EMOJI_CHECK=BUILTIN_EMOJIS['white_check_mark']
+EMOJI_X=BUILTIN_EMOJIS['x']
+EMOJIS_CHECK_X=[EMOJI_CHECK,EMOJI_X]
+EMOJI_TU=BUILTIN_EMOJIS['thumbup_skin_tone_2']
+EMOJI_TD=BUILTIN_EMOJIS['thumbdown_skin_tone_2']
+EMOJIS_T_X=[EMOJI_TU,EMOJI_TD,EMOJI_X]
+    
+async def chesuto_lobby(client,message,content):
     channel=message.channel
     if channel.guild is None: #guild only command
         return
@@ -918,42 +1018,30 @@ async def lobby(client,message,content):
     user=message.author
 
     try:
-        lobby=ACTIVE_LOOBIES[user.id]
+        lobby=ACTIVE_LOBBIES[user.id]
     except KeyError:
-        await chesuto_lobby(client,channel,user)
+        await ChesutoWinSystem(client,channel,user)
     else:
-        await lobby.switch_channel_to(channel)
-
-class chesuto_lobby(metaclass=asyncinit):
+        await lobby.switch_context(client,channel)
+        
+    
+class ChesutoWinSystem(metaclass=asyncinit):
     __slots__=['client','channel','message','user','future','embed','emojis']
     async def __init__(self,client,channel,user):
-        embed=self.MAIN_MENU_EMBED
-        try:
-            message = await client.message_create(channel,embed=embed)
-        except DiscordException:
-            return
-
-        emojis=self.MAIN_MENU_EMOJIS
-        try:
-            for emoji in emojis:
-                await client.reaction_add(message,emoji)
-        except DiscordException:
-            return
-        
-        self.embed=embed
-        self.emojis=emojis
-        
         self.client=client
         self.channel=channel
-        self.message=message
         self.user=user
         
+        message = await self.shard_menu.just_init(self)
+        if message is None:
+            return
+        
+        self.message=message
         self.future=Future(client.loop)
-        Task(self.main_menu(),client.loop)
-        ACTIVE_LOOBIES[user.id]=self
+        Task(self.win_menu_initial(),client.loop)
+        ACTIVE_LOBBIES[user.id]=self
 
-    async def switch_channel_to(self,channel):
-        client=self.client
+    async def switch_context(self,client,channel):
         embed=self.embed
         try:
             message = await client.message_create(channel,embed=embed)
@@ -963,124 +1051,135 @@ class chesuto_lobby(metaclass=asyncinit):
         emojis=self.emojis
         if emojis is not None:
             try:
-                for emoji in emojis:
-                    await client.reaction_add(message,emoji)
+                if type(emojis) is Emoji:
+                    await client.reaction_add(message,emojis)
+                else:
+                    for emoji in emojis:
+                        await client.reaction_add(message,emoji)
             except DiscordException:
                 return
 
+        self.client=client
         self.message=message
         self.channel=channel
         self.future.cancel()
 
-    async def render(self,embed,emojis):
-        client=self.client
-        message=self.message
-        try:
-            await client.message_edit(message,embed=embed)
-        except DiscordException:
-            del ACTIVE_LOOBIES[self.user.id]
-            return True
-
-        if emojis is not None:
-            try:
-                for emoji in emojis:
-                    await client.reaction_add(message,emoji)
-            except DiscordException:
-                del ACTIVE_LOOBIES[self.user.id]
-                return True
-
-        self.embed=embed
-        self.emojis=emojis
-        return False
-
-
-    MAIN_MENU_EMBED=Embed(
-        'You\'re in the lobby now, select one of the listed choices',
-        '1. Wait in a room for battles\n'
-        '2. Edit your current deck\n'
-        '3. Open packs\n'
-        '4. Cancel\n',)
-
-    MAIN_MENU_EMOJI_1=BUILTIN_EMOJIS['one']
-    MAIN_MENU_EMOJI_2=BUILTIN_EMOJIS['two']
-    MAIN_MENU_EMOJI_3=BUILTIN_EMOJIS['three']
-    MAIN_MENU_EMOJI_4=BUILTIN_EMOJIS['four']
-
-    MAIN_MENU_EMOJIS=[
-        MAIN_MENU_EMOJI_1,
-        MAIN_MENU_EMOJI_2,
-        MAIN_MENU_EMOJI_3,
-        MAIN_MENU_EMOJI_4
-            ]
-
-    async def main_menu(self):
-        client=self.client
-        waiter=self.main_menu_reaction_waiter
-        while True:
-            message=self.message
-            client.events.reaction_add.append(waiter,message)
-            try:
-                emoji = await self.future
-            except CancelledError:
-                self.future.clear()
-                client.events.reaction_add.remove(waiter,message)
-                continue
-            
-            self.future.clear()
-            client.events.reaction_add.remove(waiter,message)
-            break
-        
-        if emoji is self.MAIN_MENU_EMOJI_1:
-            await self.client.reaction_clear(message)
-            Task(self.room_menu_wait_id(),client.loop)
-
-    async def main_menu_reaction_waiter(self,emoji,user):
-        if (user!=self.user) or (emoji not in self.MAIN_MENU_EMOJIS):
+    async def shard_menu_rw(self,emoji,user):
+        if (user!=self.user) or (emoji not in EMOJIS_1_4):
             return
         self.future.set_result(emoji)
         
-    ROOM_MENU_WAIT_ID_EMBED=Embed(
-        'Please type a 5 literal long number',
+    shard_menu=ChesutoSystemShard(
+        Embed(
+            'You\'re in the lobby now, select one of the listed choices',
+            '1. Wait in a room for battles\n'
+            '2. Edit your current deck\n'
+            '3. Open packs\n'
+            '4. Cancel\n',
+                ),
+        EMOJIS_1_4,
+        None,
+        shard_menu_rw,
             )
 
-    ROOM_MENU_WAIT_ID_PATTERN=re.compile('(\d+)')
+    del shard_menu_rw
     
-    async def room_menu_wait_id(self):
-        if await self.render(self.ROOM_MENU_WAIT_ID_EMBED,None):
+    async def win_menu_initial(self):
+        result = await self.shard_menu.just_wait(self)
+        if result is None:
             return
         
-        client=self.client
-        waiter=self.room_menu_wait_id_waiter
-        while True:
-            channel=self.channel
-            client.events.message_create.append(waiter,channel)
-            try:
-                room_id = await self.future
-            except CancelledError:
-                self.future.clear()
-                client.events.message_create.remove(waiter,channel)
-                continue
+        if result is EMOJI_1:
+            Task(self.win_room_1(),self.client.loop)
+            return
 
-            self.future.clear()
-            client.events.message_create.remove(waiter,channel)
-            break
+        await self.client.message_create(self.channel,'nothing set to go to')
+        del ACTIVE_LOBBIES[self.user.id]
         
-        await client.message_create(channel,str(room_id))
-        del ACTIVE_LOOBIES[self.user.id]
+    async def win_menu(self):
+        result = await self.shard_menu(self)
+        if result is None:
+            return
+        
+        if result is EMOJI_1:
+            Task(self.win_room_1(),self.client.loop)
+            return
+
+        await self.client.message_create(self.channel,'nothing set to go to')
+        del ACTIVE_LOBBIES[self.user.id]
+
+    async def shard_room_1_rw(self,emoji,user):
+        if user.is_bot:
+            return
+        if (user!=self.user):
+            if (emoji is EMOJI_CHECK):
+                self.future.set_result(user)
+            return
+        if (emoji is EMOJI_X):
+            self.future.set_result(emoji)
+
+    shard_room_1=ChesutoSystemShard(
+        None,
+        EMOJIS_CHECK_X,
+        None,
+        shard_room_1_rw,
+            )
+
+    del shard_room_1_rw
     
-    async def room_menu_wait_id_waiter(self,message):
-        user=message.author
-        if user!=self.user:
+    async def win_room_1(self):
+        embed=Embed(f'{self.user:f}\'s room',
+            f'Join with reacting with {EMOJI_CHECK:e}')
+        result = await self.shard_room_1(self,embed)
+        if result is None:
+            return
+
+        if result is EMOJI_X:
+            Task(self.win_menu(),self.client.loop)
+            return
+
+        Task(self.win_room_2(result),self.client.loop)
+
+    async def shard_room_2_rw(self,emoji,user):
+        if (user!=self.user) or (emoji not in EMOJIS_T_X):
+            return
+        self.future.set_result(emoji)
+    
+    shard_room_2=ChesutoSystemShard(
+        None,
+        EMOJIS_T_X,
+        None,
+        shard_room_2_rw,
+            )
+
+    del shard_room_2_rw
+
+    async def win_room_2(self,user):
+        embed=Embed(f'{self.user:f}\'s room',
+            f'{user:f} joined your room, do you want to fight against this player?')
+        result = await self.shard_room_2(self,embed)
+        if result is None:
+            return
+
+        client=self.client
+        
+        if result is EMOJI_X:
+            Task(self.win_menu(),client.loop)
+            return
+
+        if result is EMOJI_TD:
+            Task(self.win_room_1(),client.loop)
             return
         
-        parsed=self.ROOM_MENU_WAIT_ID_PATTERN.match(message.content)
-        if parsed is None:
-            return
+        channel = await client.channel_private_create(self.user)
+        player1=ChesutoPlayer(self.user,channel)
+        channel = await client.channel_private_create(user)
+        player2=ChesutoPlayer(user,channel)
+        ChesutoBackend(client,self.channel,player1,player2)
+        del ACTIVE_LOBBIES[self.user.id]
+
         
-        result=parsed.group(1)
-        if len(result)!=5:
-            return
-        
-        self.future.set_result(int(result))
-        
+
+
+
         
