@@ -10,7 +10,7 @@ from hata.color import Color
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS,Emoji
 from hata.futures import Future,CancelledError
-from hata.client_core import GC_process
+from hata.client_core import GC_cycler
 from hata.futures import Task
 
 from help_handler import HELP
@@ -27,7 +27,7 @@ async def _keep_await(function,games):
     for game in games:
         await function(game)
 
-def GC_games():
+def GC_games(cycler):
     limit=monotonic()-3600. #we delete after 1 hour
     to_delete=[]
     to_save=[]
@@ -47,9 +47,9 @@ def GC_games():
         loop.call_soon_threadsafe(Task,_keep_await(ds_game.save_position,to_save),loop)
 
 
-GC_process.functions.append(GC_games)
+GC_cycler.append(GC_games)
 
-del GC_process
+del GC_cycler
 del GC_games
 
 #:-> @ <-:#}{#:-> @ <-:#{ command }#:-> @ <-:#}{#:-> @ <-:#
@@ -148,7 +148,8 @@ class ds_game(metaclass=asyncinit):
             self.data=bytearray(800)
 
         loop=client.loop
-        
+
+        message=None
         try:
             message = await client.message_create(self.channel,embed=self.render_menu())
             self.message=message
