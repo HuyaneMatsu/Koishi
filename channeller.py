@@ -1,5 +1,5 @@
 from hata.futures import Task
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 from hata.client import Client
 from hata.user import User
 
@@ -122,7 +122,7 @@ class Channeller():
 
 CHANNELINGS={}
 
-@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'int, flags="g"',)
 async def channeling_start(client,message,channel_id):
     channel_1=message.channel
@@ -201,4 +201,4 @@ async def channeling_stop(client,message,content):
 
     await client.message_create(channel,text)
 
-del content_parser
+del ContentParser

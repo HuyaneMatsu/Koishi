@@ -1,18 +1,19 @@
-from hata.parsers import eventlist
-from hata.events import cooldown
-from tools import cooldown_handler
 from random import random
 import re
+
+from hata.parsers import eventlist
+from hata.events import Cooldown
 from hata.others import filter_content
-from tools import smart_join
 from hata.emoji import BUILTIN_EMOJIS
+
+from tools import CooldownHandler, smart_join
 
 commands=eventlist()
 
 @commands
-@cooldown(30.,'user',handler=cooldown_handler())
+@Cooldown('user',30.,handler=CooldownHandler())
 async def ping(client,message,content):
-    await client.message_create(message.channel,f'{int(client.gateway.kokoro.latency*1000.)} ms')
+    await client.message_create(message.channel,f'{client.gateway.kokoro.latency*1000.:.0f} ms')
 
 DECK_LINE_RP=re.compile('(\d+) *(.*?) *\n?')
 
@@ -173,3 +174,6 @@ async def usecard(client,message,content):
     await client.message_create(message.channel,text)
     
 del re
+del eventlist
+del Cooldown
+del CooldownHandler

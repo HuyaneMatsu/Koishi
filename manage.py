@@ -6,8 +6,8 @@ sys.path.append(os.path.abspath('..'))
 from hata import Client,start_clients
 from hata.activity import Activity_game
 from hata.channel import Channel_text
-from hata.events import (reaction_add_waitfor,command_processer,
-    reaction_delete_waitfor,)
+from hata.events import (ReactionAddWaitfor,CommandProcesser,
+    ReactionDeleteWaitfor,)
 from hata.webhook import Webhook
 from hata.role import Role
 
@@ -17,7 +17,7 @@ import koishi
 import mokou
 import elphelt
 
-from tools import commit_extractor,message_delete_waitfor
+from tools import commit_extractor,MessageDeleteWaitfor
 from booru import booru_commands
 from interpreter import Interpreter
 import chesuto
@@ -30,12 +30,12 @@ Koishi=Client(pers_data.KOISHI_TOKEN,
     activity=Activity_game.create(name='with Satori'),
         )
 
-Koishi.events(reaction_add_waitfor)
-Koishi.events(reaction_delete_waitfor)
-Koishi.events(message_delete_waitfor)
+Koishi.events(ReactionAddWaitfor)
+Koishi.events(ReactionDeleteWaitfor)
+Koishi.events(MessageDeleteWaitfor)
 Koishi.events(koishi.once_on_ready)
 
-koishi_commands=Koishi.events(command_processer(koishi.PREFIXES)).shortcut
+koishi_commands=Koishi.events(CommandProcesser(koishi.PREFIXES)).shortcut
 koishi_commands.extend(koishi.commands)
 koishi_commands.extend(booru_commands)
 koishi_commands(chesuto.chesuto_lobby,'lobby')
@@ -69,16 +69,24 @@ Elphelt=Client(pers_data.ELPHELT_TOKEN,
     status='idle'
         )
 
-Elphelt.events(reaction_add_waitfor)
-Elphelt.events(reaction_delete_waitfor)
+Elphelt.events(ReactionAddWaitfor)
+Elphelt.events(ReactionDeleteWaitfor)
 
-elphelt_commands=Elphelt.events(command_processer('/')).shortcut
+elphelt_commands=Elphelt.events(CommandProcesser('/')).shortcut
 elphelt_commands.extend(elphelt.commands)
 elphelt_commands(Koishi.events.message_create.commands['random'])
 elphelt_commands(chesuto.chesuto_lobby,'lobby')
 
 ############################## TEST COMMANDS ##############################
 
+from hata.events_compiler import ContentParser
+
+@koishi_commands
+@ContentParser(
+    'condition, flags=r, default="not client.is_owner(message.author)"',
+    'str, mode="1+"')
+async def test(client,message,strings):
+    await client.message_create(message.channel,'\n'.join(strings))
 
     
 ############################## START ##############################

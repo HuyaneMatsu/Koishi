@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 from hata.futures import Future,CancelledError,InvalidStateError,Task
 from random import randint
 from hata.dereaddons_local import any_to_any,asyncinit
@@ -521,7 +521,7 @@ class game_statistics(metaclass=asyncinit):
         self.cache[index]=embed
         return embed
 
-@content_parser('str, flags=g, default="\'\'"',
+@ContentParser('str, flags=g, default="\'\'"',
                 'condition, default="index==limit"',
                 'str, default="\'hiragana\'"',
                 'int, default=20',
@@ -713,6 +713,8 @@ class embedination(metaclass=asyncinit):
     
     async def _cancel(self,wrapper,exception):
         client=wrapper.client
+        if exception is None:
+            return
         if isinstance(exception,TimeoutError):
             self.pages=None
             if self.channel.cached_permissions_for(client).can_manage_messages:
@@ -724,4 +726,4 @@ class embedination(metaclass=asyncinit):
         
 del BUILTIN_EMOJIS
 del Color
-del content_parser
+del ContentParser

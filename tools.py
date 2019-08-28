@@ -1,6 +1,6 @@
 import re
 from weakref import WeakKeyDictionary
-from hata.events import command_processer
+from hata.events import CommandProcesser
 from hata.embed import Embed
 from hata.futures import CancelledError,sleep,Task
 from hata.dereaddons_local import inherit
@@ -35,8 +35,8 @@ def smart_join(list_,limit=2000,sep='\n'):
         result.append(value)
     return sep.join(result)
 
-@inherit(command_processer)
-class message_delete_waitfor():
+@inherit(CommandProcesser)
+class MessageDeleteWaitfor():
     __slots__=['waitfors']
     __event_name__='message_delete'
     def __init__(self):
@@ -49,29 +49,41 @@ class message_delete_waitfor():
             return
         await event(message)
 
-class cooldown_handler:
+class CooldownHandler:
     __slots__=['cache']
     def __init__(self):
         self.cache={}
+
     async def __call__(self,client,message,command,time_left):
-        id_=message.author.id
+        user_id=message.author.id
         try:
-            notification,waiter=self.cache[id_]
-            if notification.channel is message.channel:
-                await client.message_edit(notification,f'**{message.author:f}** please cool down, {int(time_left)} seconds left!')
-                return
-            waiter.cancel()
+            notification,waiter=self.cache[user_id]
         except KeyError:
             pass
-        notification = await client.message_create(message.channel,f'**{message.author:f}** please cool down, {int(time_left)} seconds left!')
-        waiter=Task(self.waiter(client,id_,notification),client.loop)
-        self.cache[id_]=(notification,waiter)
-    async def waiter(self,client,id_,notification):
+        else:
+            if notification.channel is message.channel:
+                try:
+                    await client.message_edit(notification,f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
+                except DiscordException:
+                    pass
+                return
+
+            waiter.cancel()
+
+        try:
+            notification = await client.message_create(message.channel,f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
+        except DiscordException:
+            return
+
+        waiter=Task(self.waiter(client,user_id,notification),client.loop)
+        self.cache[user_id]=(notification,waiter)
+
+    async def waiter(self,client,user_id,notification):
         try:
             await sleep(30.,client.loop)
         except CancelledError:
             pass
-        del self.cache[id_]
+        del self.cache[user_id]
         try:
             await client.message_delete(notification)
         except DiscordException:
@@ -171,6 +183,6 @@ class commit_extractor:
                 name=webhook_name,
                 avatar_url=webhook_avatar_url
                     )
-del command_processer
+del CommandProcesser
 del inherit
 del re

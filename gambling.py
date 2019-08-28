@@ -2,9 +2,9 @@
 from datetime import datetime,timedelta
 
 from hata.parsers import eventlist
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 from hata.others import elapsed_time
-from hata.events import cooldown, wait_for_reaction
+from hata.events import Cooldown, wait_for_reaction
 from hata.embed import Embed
 from hata.color import Color
 from hata.emoji import Emoji, BUILTIN_EMOJIS
@@ -13,7 +13,7 @@ from hata.futures import sleep,Task,Future
 from hata.dereaddons_local import asyncinit
 
 from models import DB_ENGINE,currency_model,CURRENCY_TABLE
-from tools import cooldown_handler
+from tools import CooldownHandler
 
 GAMBLING_COLOR=Color.from_rgb(254,254,164)
 CURRENCY_EMOJI=Emoji.precreate(603533301516599296)
@@ -34,8 +34,8 @@ EVENT_ABORT_EMOJI=BUILTIN_EMOJIS['x']
 gambling=eventlist()
 
 @gambling
-@cooldown(30.,'user',handler=cooldown_handler())
-@content_parser('user, flags=mni, default="message.author"')
+@Cooldown('user',40.,limit=4,weight=2,handler=CooldownHandler())
+@ContentParser('user, flags=mni, default="message.author"')
 async def daily(client,message,target_user):
     source_user=message.author
     if target_user.is_bot:
@@ -175,8 +175,8 @@ async def daily(client,message,target_user):
 
         
 @gambling
-@cooldown(20.,'user',handler=cooldown_handler())
-@content_parser('user, flags=mni, default="message.author"')
+@daily.shared(weight=1)
+@ContentParser('user, flags=mni, default="message.author"')
 async def hearts(client,message,target_user):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==target_user.id))
@@ -227,7 +227,7 @@ class heartevent_start_checker:
         return self.client.is_owner(user) and ((emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI))
 
 @gambling
-@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
     'tdelta','int','int, default=0')
 class heartevent(metaclass=asyncinit):
     _update_time=60.
@@ -398,4 +398,4 @@ class heartevent(metaclass=asyncinit):
         Task(connector.close(),self.client.loop)
         self.connector=None
 
-del Emoji, Color, cooldown, content_parser, eventlist
+del Emoji, Color, Cooldown, ContentParser, eventlist, CooldownHandler

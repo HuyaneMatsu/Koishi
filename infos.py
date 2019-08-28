@@ -11,7 +11,7 @@ from hata.prettyprint import pchunkify
 from hata.others import elapsed_time,Status,Audit_log_event,cchunkify,Status
 from hata.exceptions import DiscordException
 from hata.events import Pagination,waitfor_wrapper
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 from hata.embed import Embed
 from hata.emoji import BUILTIN_EMOJIS
 from hata.color import Color
@@ -103,8 +103,8 @@ def add_activity(text,activity):
             text.append(f'**>>** application id : {activity.application_id}\n')
 
     
-@infos.add('user')
-@content_parser('user, flags="mnap", default="message.author"')
+@infos(case='user')
+@ContentParser('user, flags="mnap", default="message.author"')
 async def user_info(client,message,user):
     guild=message.guild
 
@@ -166,7 +166,7 @@ async def user_info(client,message,user):
         embed.add_field('Status and Activity',''.join(text))
     await client.message_create(message.channel,embed=embed)
 
-@infos.add('guild')
+@infos(case='guild')
 async def guild_info(client,message,content):
     guild=message.guild
     if guild is None:
@@ -254,7 +254,7 @@ async def guild_info(client,message,content):
     await client.message_create(message.channel,embed=embed)
 
 @infos
-@content_parser('guild',
+@ContentParser('guild',
                 'condition, flags=r, default="not guild.permissions_for(message.author).can_manage_channel"',
                 'channel, flags=mni, default=None',
                 on_failure=no_permission)
@@ -416,7 +416,7 @@ LOVE_VALUES=tuple(generate_love_level())
 del generate_love_level
 
 @infos
-@content_parser('user, flags="mna"',
+@ContentParser('user, flags="mna"',
                 'condition, flags=r, default="message.author is user_0"',
                 on_failure=show_help('love'))
 async def love(client,message,target):
@@ -474,7 +474,7 @@ def update_about(client):
 
 
 @infos
-@content_parser('guild',
+@ContentParser('guild',
                 'condition, flags=r, default="not guild.permissions_for(message.author).can_view_audit_log"',
                 'ensure',
                 'condition, default="not part"',
@@ -517,7 +517,7 @@ async def logs(client,message,guild,*args):
 
 
 @infos
-@content_parser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
+@ContentParser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',
                 on_failure=no_permission)
@@ -530,7 +530,7 @@ async def message(client,message,message_id,channel):
     await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
 
 @infos
-@content_parser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
+@ContentParser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',
                 on_failure=no_permission)
@@ -699,7 +699,6 @@ class embedination_rr(metaclass=asyncinit):
     async def _cancel(self,wrapper,exception):
         self.task_flag=3
         if exception is None:
-            #we delete the message, so no need to remove reactions
             return
         if isinstance(exception,TimeoutError):
             if self.channel.guild is not None:

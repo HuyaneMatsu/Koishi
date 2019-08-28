@@ -5,13 +5,13 @@ if __name__=='__main__':
 
 from hata.emoji import Emoji,BUILTIN_EMOJIS
 from hata.futures import Task,Future,CancelledError
-from hata.events import cooldown
-from hata.events_compiler import content_parser
+from hata.events import Cooldown
+from hata.events_compiler import ContentParser
 from hata.exceptions import DiscordException
 from hata.embed import Embed
 from hata.dereaddons_local import asyncinit
 
-from tools import cooldown_handler
+from tools import CooldownHandler
 
 #each added move is from 3 elements for a total of 24 bits:
 # x coordinate 1st 8 bit

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#note : most of theese commands are outdated, even the most recent ones!
+#note : most of these commands are outdated, even the most recent ones!
 
 # - : - # infos.py # - : - #
 
@@ -3192,7 +3192,7 @@ async def parse_details_command(client,message,content):
         else:
             await self.message_create(message.channel,'Guild only')
     @on_command
-    @content_parser('guild',
+    @ContentParser('guild',
                     'condition, flags=r, default="message.author is client.owner"',
                     on_failure=failure_test_on_failure)
     async def failure_test(self,message,guild):
@@ -3225,7 +3225,7 @@ async def parse_details_command(client,message,content):
         #does not drops error
 
     @on_command
-    @content_parser('condition, flags=r, default="message.author is not client.owner"',
+    @ContentParser('condition, flags=r, default="message.author is not client.owner"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
     async def emojis_get_0(client,message,message_id,channel):
@@ -3250,7 +3250,7 @@ async def parse_details_command(client,message,content):
         pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(result)])
     
     @on_command
-    @content_parser('condition, default="message.author is not client.owner"',
+    @ContentParser('condition, default="message.author is not client.owner"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
     async def emojis_get_1(client,message,message_id,channel):
@@ -3275,7 +3275,7 @@ async def parse_details_command(client,message,content):
         pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(result)])
 
     @on_command
-    @content_parser('condition, flags=r, default="message.author is not client.owner"',
+    @ContentParser('condition, flags=r, default="message.author is not client.owner"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
     async def emojis_get_2(client,message,message_id,channel):
@@ -3799,9 +3799,9 @@ async def suppress_test(client,message,content):
 
     await client.message_suppress_embeds(embed_message,False)
 
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 @koishi_commands
-@content_parser('condition, flags=r, default="message.author is not client.owner"',
+@ContentParser('condition, flags=r, default="message.author is not client.owner"',
                 'int')
 async def desuppress(client,message,id_):
     for message in message.channel.messages:
@@ -3978,10 +3978,10 @@ async def getapp(client,message,content):
 
     await client.message_create(message.channel,result)
 
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 
 @koishi_commands
-@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
     'user, mode="0+"')
 async def i_love(client,message,users):
     for user in users:

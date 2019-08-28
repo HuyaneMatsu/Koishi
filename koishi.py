@@ -4,12 +4,12 @@ from random import randint
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
 from hata.oauth2 import SCOPES
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
 from hata.futures import CancelledError,sleep,Future_WM,Task
-from hata.events import Pagination,wait_for_message,wait_for_reaction,cooldown,prefix_by_guild
+from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild
 from hata.channel import cr_pg_channel_object,Channel_text
 from hata import others
 from hata.exceptions import DiscordException
@@ -28,7 +28,7 @@ from voice import voice
 from dispatch_tests import dispatch_tester
 from battleships import battle_manager
 from infos import infos,update_about
-from tools import cooldown_handler, BeautifulSoup
+from tools import CooldownHandler, BeautifulSoup
 from gambling import gambling
 import channeller
 import pers_data
@@ -91,7 +91,7 @@ async def default_event(client,message):
         await client.message_create(message.channel,result)
     else:
         content=message.content
-        if _KOISHI_NOU_RP.match(content) is not None:
+        if message.channel.cached_permissions_for(client).can_add_reactions and _KOISHI_NOU_RP.match(content) is not None:
             parts=[]
             for value in 'nou':
                 emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
@@ -114,7 +114,7 @@ async def default_event(client,message):
             await client.message_create(message.channel,text)
 
 @commands
-@content_parser('user, flags=mna, default="message.author"')
+@ContentParser('user, flags=mna, default="message.author"')
 async def rate(client,message,target):
     if target in CLIENTS or client.is_owner(target):
         result=10
@@ -125,7 +125,7 @@ async def rate(client,message,target):
 
 
 @commands
-@content_parser('int, default="1"')
+@ContentParser('int, default="1"')
 async def dice(client,message,times):
     if times==0:
         text='0 KEK'
@@ -147,9 +147,9 @@ async def dice(client,message,times):
     await client.message_create(message.channel,text)
 
 @commands
-@cooldown(30.,'user',handler=cooldown_handler())
+@Cooldown('user',30.,handler=CooldownHandler())
 async def ping(client,message,content):
-    await client.message_create(message.channel,f'{int(client.gateway.kokoro.latency*1000.)} ms')
+    await client.message_create(message.channel,f'{client.gateway.kokoro.latency*1000.:.0f} ms')
 
 
 @commands
@@ -161,12 +161,18 @@ async def message_me(client,message,content):
         await client.message_create(message.channel,'Pls turn on private messages from this server!')
 
 @commands
-@content_parser('condition, flags=gr, default="not message.channel.permissions_for(message.author).can_manage_messages"',
+@ContentParser('condition, flags=gr, default="not message.channel.permissions_for(message.author).can_manage_messages"',
                 'int, default=1',
                 'rest, default="f\'{message.author:f} asked for it\'"')
 async def clear(client,message,limit,reason):
     if limit>0:
         await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
+
+def check_message_for_emoji(message):
+    parsed=parse_emoji(message.content)
+    if parsed is None:
+        return False
+    return parsed
 
 @commands
 async def waitemoji(client,message,content):
@@ -175,19 +181,13 @@ async def waitemoji(client,message,content):
     message_to_delete = await client.message_create(channel,'Waiting!')
     
     try:
-        _,emoji = await wait_for_message(client,channel,lambda message:parse_emoji(message.content),30.)
+        _,emoji = await wait_for_message(client,channel,check_message_for_emoji,30.)
     except TimeoutError:
-        emoji=None
-    except Exception as err:
         return
-    
-    try:
+    finally:
         await client.message_delete(message_to_delete)
-    except DiscordException:
-        pass
     
-    if emoji is not None:
-        await client.message_create(channel,emoji.as_emoji*5)
+    await client.message_create(channel,emoji.as_emoji*5)
 
 @commands
 async def subscribe(client,message,content):
@@ -240,6 +240,14 @@ mine_mine_clear = (
         )
 
 mine_mine=tuple(f'||{e}||' for e in mine_mine_clear)
+
+class check_emoji_and_user:
+    __slots__=['emoji', 'user']
+    def __init__(self,emoji,user):
+        self.emoji=emoji
+        self.user=user
+    def __call__(self,emoji,user):
+        return (self.emoji is emoji, self.user==user)
 
 @commands
 async def mine(client,message,content):
@@ -326,23 +334,18 @@ async def mine(client,message,content):
     
     message = await client.message_create(message.channel,text)
 
-    if text_mode:
+    if text_mode or (not message.channel.cached_permissions_for(client).can_add_reactions):
         return
     
     message.weakrefer()
     await client.reaction_add(message,emoji)
     
     try:
-        await wait_for_reaction(client,message,
-            lambda emoji,user,v0=emoji,v1=user:emoji is v0 and user is v1,
-            1200.)
+        await wait_for_reaction(client,message,check_emoji_and_user(emoji,user),1200.)
     except TimeoutError:
         return
     finally:
-        try:
-            await client.reaction_delete_own(message,emoji)
-        except DiscordException:
-            pass
+        await client.reaction_delete_own(message,emoji)
     
     y=0
     while True:
@@ -366,7 +369,7 @@ async def bans(client,message,content):
     guild=message.guild
     if guild is None:
         return
-    if not guild.permissions_for(client).can_ban_user:
+    if not message.channel.cached_permissions_for(client).can_ban_user:
         return await client.message_create(message.channel,embed=Embed(description='I have no permissions to check it.'))
                                  
     ban_data = await client.guild_bans(guild)
@@ -374,15 +377,13 @@ async def bans(client,message,content):
     if not ban_data:
         await client.message_create(message.channel,'None')
         return
-        
-    ban_index=0
+
     embeds=[]
     maintext=f'Guild bans for {guild.name} {guild.id}:'
     limit=len(ban_data)
     index=0
 
     while True:
-        field_index=0       
         field_count=0
         embed_length=len(maintext)
         embed=Embed(title=maintext)
@@ -653,7 +654,7 @@ async def download(self,message,content):
     await Pagination(self,message.channel,result)
 
 @commands
-@content_parser('emoji')
+@ContentParser('emoji')
 async def se(client,message,emoji):
     if emoji.is_custom_emoji:
         await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
@@ -696,7 +697,7 @@ async def nitro(client,message,content):
     await client.message_create(message.channel,emoji.as_emoji)
 
 @commands
-@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
 async def resend_webhook(client,message,message_id,channel):
@@ -715,7 +716,7 @@ async def resend_webhook(client,message,message_id,channel):
         avatar_url=target_message.author.avatar_url)
 
 @commands
-@content_parser('int', 'int, default="0"',)
+@ContentParser('int', 'int, default="0"',)
 async def random(client,message,v1,v2):
     result=randint(v2,v1) if v1>v2 else randint(v1,v2)
     await client.message_create(message.channel,str(result))
@@ -824,7 +825,7 @@ async def count_reactions(client,message,content):
     await Pagination(client,source_channel,chunks)        
 
 @commands
-@content_parser('condition, flags=r, default="not client.is_owner(message.author)"',
+@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'user, flags=mna, default="client"',)
 async def update_application_info(client,message,user):
     if type(user) is Client:
@@ -833,3 +834,6 @@ async def update_application_info(client,message,user):
     else:
         text='I can update application info only of a client'
     await client.message_create(message.channel,text)
+
+del Cooldown
+del CooldownHandler

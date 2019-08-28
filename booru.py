@@ -6,11 +6,11 @@ from hata.parsers import eventlist
 from hata.color import Color
 from hata.emoji import BUILTIN_EMOJIS
 from hata.dereaddons_local import asyncinit
-from hata.events import waitfor_wrapper, cooldown, multievent
+from hata.events import waitfor_wrapper, Cooldown, multievent
 from hata.futures import Task
 from hata.exceptions import DiscordException
 
-from tools import BeautifulSoup, choose, pop_one, cooldown_handler, mark_as_async
+from tools import BeautifulSoup, choose, pop_one, CooldownHandler, mark_as_async
 
 BOORU_COLOR=Color.from_html('#138a50')
 
@@ -121,7 +121,6 @@ class Shuffled_shelter(metaclass=asyncinit):
     async def _cancel(self,wrapper,exception):
         self.task_flag=3
         if exception is None:
-            #we deleted the message, so no need to remove reactions
             return
         if isinstance(exception,TimeoutError):
             client=wrapper.client
@@ -155,11 +154,11 @@ async def answer_booru(client,channel,content,url_base):
         return
     
     await client.message_create(channel,embed=Embed(
-        f'Sowwy, but {client.name} could not find anything what matches theese tags..',
+        f'Sowwy, but {client.name} could not find anything what matches these tags..',
         color=BOORU_COLOR))
 
 @booru_commands
-@cooldown(10.,'channel',handler=cooldown_handler())
+@Cooldown('channel',20.,limit=2,handler=CooldownHandler())
 @mark_as_async
 def safebooru(client,message,content):
     return answer_booru(client,message.channel,content,SAFE_BOORU)
@@ -189,7 +188,7 @@ class nsfw_checker():
 
 @booru_commands
 @nsfw_checker
-@cooldown(10.,'channel',handler=cooldown_handler())
+@safebooru.shared()
 @mark_as_async
 def nsfwbooru(client,message,content):
     return answer_booru(client,message.channel,content,NSFW_BOORU)
@@ -309,4 +308,4 @@ for title,tag_name,command_names in (
         booru_commands(command,case=command_name)
 
 del title, tag_name, command_names, command, command_name
-del Color, asyncinit, BUILTIN_EMOJIS, cooldown, cooldown_handler, mark_as_async, eventlist
+del Color, asyncinit, BUILTIN_EMOJIS, Cooldown, CooldownHandler, mark_as_async, eventlist

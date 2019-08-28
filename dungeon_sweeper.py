@@ -4,7 +4,7 @@ import re
 from time import monotonic
 
 from hata.dereaddons_local import asyncinit
-from hata.events_compiler import content_parser
+from hata.events_compiler import ContentParser
 from hata.embed import Embed
 from hata.color import Color
 from hata.exceptions import DiscordException
@@ -54,7 +54,7 @@ del GC_games
 
 #:-> @ <-:#}{#:-> @ <-:#{ command }#:-> @ <-:#}{#:-> @ <-:#
 
-@content_parser('str, default="\'\'"')
+@ContentParser('str, default="\'\'"')
 async def ds_manager(self,message,command):
     permissions=message.channel.cached_permissions_for(self)
     
