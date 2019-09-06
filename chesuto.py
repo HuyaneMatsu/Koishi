@@ -941,7 +941,7 @@ class Rarity():
         self.index=index
         type(self).count=index+1
         self.values.append(self)
-        self.by_names[name]=self
+        self.by_name[name]=self
         
     def __str__(self):
         return self.name
