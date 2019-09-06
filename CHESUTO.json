@@ -1,0 +1,11 @@
+[
+    {
+        "acquirable": true,
+        "description": "If this is your 5th turn or later, after this card is used, starting from this turn, whenever a banish effect activates from your opponent's cards, put a Twofold Defence into your hand.",
+        "effectname": "silent_preparations",
+        "id": 619220530628919296,
+        "name": "Silent Preparations",
+        "rarity": 3,
+        "token": false
+    }
+]

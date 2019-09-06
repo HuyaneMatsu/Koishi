@@ -34,6 +34,9 @@ import channeller
 import pers_data
 import models
 
+from PIL import Image as PIL
+from hata.ios import ReuBytesIO
+
 PREFIXES=prefix_by_guild(pers_data.PREFIX,models.DB_ENGINE,models.PREFIX_TABLE,models.pefix_model)
 
 del pers_data
@@ -835,5 +838,49 @@ async def update_application_info(client,message,user):
         text='I can update application info only of a client'
     await client.message_create(message.channel,text)
 
+HTML_RP=re.compile('#?([0-9a-f]{6})',re.I)
+REGULAR_RP=re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
+
+@commands(case='color')
+async def command_color(client,message,content):
+    while True:
+        parsed=HTML_RP.fullmatch(content)
+        if parsed is not None:
+            full_color=int(parsed.group(1),base=16)
+            color_r=(full_color&0xff0000)>>16
+            color_g=(full_color&0x00ff00)>>8
+            color_b(full_color&0x00ff)
+            break
+        
+        parsed=REGULAR_RP.fullmatch(content)
+        if parsed is not None:
+            color_r,color_g,color_b=parsed.groups()
+            color_r=int(color_r)
+            if color_r>255:
+                return
+            color_g=int(color_g)
+            if color_g>255:
+                return
+            color_b=int(color_b)
+            if color_b>255:
+                return
+            full_color=(color_r<<16)|(color_g<<8)|color_b
+            break
+            
+        return
+    
+    color=(color_r,color_g,color_b)
+    
+    embed=Embed(content,color=full_color)
+    embed.add_image('attachment://color.png')
+    
+    buffer=ReuBytesIO()
+    image=PIL.new('RGB',(120,30),color)
+    image.save(buffer,'png')
+    buffer.seek(0)
+    
+    await client.message_create(message.channel,embed=embed,file=('color.png',buffer))
+    buffer.real_close()
+    
 del Cooldown
 del CooldownHandler

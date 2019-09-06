@@ -713,3 +713,17 @@ async def roles(client,message,content):
     if message.guild is None:
         return
     await role_details(client,message.channel)
+
+@infos
+@ContentParser('user, flags=mna, default="message.author"')
+async def avatar(client, message, user):
+    color=user.avatar&0xffffff
+    if color==0:
+        color=user.default_avatar.color
+
+    url=user.avatar_url_as(size=4096)
+    embed=Embed(f'{user:f}\'s avatar', color=color, url=url)
+    embed.add_image(url)
+    
+    await client.message_create(message.channel, embed=embed)
+    

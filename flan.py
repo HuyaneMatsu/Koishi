@@ -5,6 +5,7 @@ from hata.parsers import eventlist
 from hata.events import Cooldown
 from hata.others import filter_content
 from hata.emoji import BUILTIN_EMOJIS
+from hata.user import ZEROUSER
 
 from tools import CooldownHandler, smart_join
 
@@ -15,6 +16,26 @@ commands=eventlist()
 async def ping(client,message,content):
     await client.message_create(message.channel,f'{client.gateway.kokoro.latency*1000.:.0f} ms')
 
+@commands
+async def sync_avatar(client,message,content):
+    if client.owner is ZEROUSER:
+        await client.update_application_info()
+    
+    if not client.is_owner(message.author):
+        await client.message_create(message.channel,'You do not have permission to use this command.')
+        return
+
+    avatar_url=client.application.icon_url_as(ext='png',size=4096)
+    if not avatar_url:
+        await client.message_create(message.channel,'The application has no avatar set.')
+        return
+
+    avatar = await client.download_url(avatar_url)
+    await client.client_edit(avatar=avatar)
+
+    await client.message_create(message.channel,'Avatar synced.')
+
+    
 DECK_LINE_RP=re.compile('(\d+) *(.*?) *\n?')
 
 USER_CARDS={}
@@ -172,7 +193,22 @@ async def usecard(client,message,content):
     else:
         text=f'You have no `{content}` at your hand'
     await client.message_create(message.channel,text)
+
+@commands
+async def discardcard(client,message,content):
+    user_cards=USER_CARDS.get(message.author.id)
+    if user_cards is None:
+        await client.message_create(message.channel,'You do not have a deck added.')
+        return
     
+    content=content.strip()
+    drawed=user_cards.deck.pop_1(content)
+    if drawed:
+        text=f'You successfully discarded a `{content}` from your deck.'
+    else:
+        text=f'You have no `{content}` at your deck'
+    await client.message_create(message.channel,text)
+
 del re
 del eventlist
 del Cooldown

@@ -4057,6 +4057,62 @@ async def get_users_like_ordered(client,message,content):
         text='No result'
     await client.message_create(message.channel,text)
 
+from hata.events_compiler import ContentParser
+
+@koishi_commands
+@ContentParser(
+    'condition, flags=r, default="not client.is_owner(message.author)"',
+    'str, mode="1+"')
+async def test(client,message,strings):
+    await client.message_create(message.channel,'\n'.join(strings))
+
+from hata.futures import sleep
+from hata.others import Status
+from hata.client_core import CLIENTS, USERS, GUILDS, ROLES, CHANNELS
+import gc
+
+@koishi_commands
+async def test_reference_remove(client,message,token):
+    if not client.is_owner(message.author):
+        return
+    
+    if message.channel.type!=1:
+        return
+    
+    old_amounts=len(CLIENTS),len(GUILDS),len(USERS),len(ROLES),len(CHANNELS)
+    
+    tester=Client(token)
+    start_clients()
+    await client.message_create(message.channel,'connecting')
+    
+    duration=0.
+    while tester.status is Status.offline:
+        await sleep(.1,client.loop)
+        duration+=.1
+
+    await client.message_create(message.channel,f'connected in {duration:.2f}')
+
+    middle_amounts=len(CLIENTS),len(GUILDS),len(USERS),len(ROLES),len(CHANNELS)
+     
+    await tester.disconnect()
+    tester._delete()
+
+    await client.message_create(message.channel,f'disconnected')
+    
+    tester=None
+    await sleep(0.,client.loop)
+    gc.collect()
+    await sleep(0.,client.loop)
+    
+    new_amounts=len(CLIENTS),len(GUILDS),len(USERS),len(ROLES),len(CHANNELS)
+    
+    result=['changes:']
+    for name,old,middle,new in zip(
+            ('clients','guilds','users','roles','channels'),
+            old_amounts,middle_amounts,new_amounts,):
+        result.append(f'\n{name} {old} -> {middle} -> {new}')
+
+    await client.message_create(message.channel,''.join(result))
 
 # - : - # dungeon_sweeper.py # - : - #
 

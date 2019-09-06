@@ -2,7 +2,7 @@
 from hata.events_compiler import ContentParser
 from hata.futures import Future,CancelledError,InvalidStateError,Task
 from random import randint
-from hata.dereaddons_local import any_to_any,asyncinit
+from hata.dereaddons_local import any_to_any,asyncinit, methodize
 from time import monotonic
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS
@@ -16,49 +16,9 @@ import os
 from hata.ios import ReuBytesIO
 from help_handler import HELP
 
-class ms_cache(object):
-    __slots__=['parent', 'obj']
-
-    def get_doc(self):
-        return self.parent.klass.__doc__
-    def set_doc(self,value):
-        self.parent.klass.__doc__=value
-    __doc__=property(get_doc,set_doc)
-    del get_doc,set_doc
-
-    def __init__(self,parent,obj):
-        self.parent=parent
-        self.obj=obj
-        
-    def __call__(self,*args,**kwargs):
-        return self.parent.klass(self.obj,*args,**kwargs)
-    
-class methodsimulator(object):
-    __slots__=['klass']
-    
-    def get_doc(self):
-        return self.klass.__doc__
-    def set_doc(self,value):
-        self.klass.__doc__==value
-    __doc__=property(get_doc,set_doc)
-    del get_doc,set_doc
-   
-    def __init__(self,klass):
-        self.klass=klass
-        
-    def __get__(self,obj,objtype=None):
-        if obj is None:
-            return self.klass
-        return ms_cache(self,obj)
-
-    def __set__(self,obj,value):
-        raise AttributeError('can\'t set attribute')
-    def __delete__(self,obj):
-        raise AttributeError('can\'t delete attribute')
-
-PIL.Image.draw=methodsimulator(ImageDraw)
+PIL.Image.draw=methodize(ImageDraw)
 PIL.font=truetype
-del ImageDraw,truetype
+del ImageDraw, truetype, methodize
 
 FONT=PIL.font(os.path.join('library','Kozuka.otf'),90)
 FONT_COLOR=(162,61,229)
