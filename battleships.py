@@ -3,7 +3,7 @@ import re, random, time
 
 from hata.events import wait_and_continue
 from hata.others import filter_content,is_user_mention
-from hata.futures import Future_WO,CancelledError,Future_WM,future_or_timeout,sleep,Task
+from hata.futures import Future_WO,CancelledError,FutureWM,future_or_timeout,sleep,Task
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed
 from hata.exceptions import DiscordException
@@ -514,7 +514,7 @@ class battleships_game:
             client.events.message_create.append(self,player2.channel)
             
             #game starts            
-            self.future=Future_WM(loop,2)
+            self.future=FutureWM(loop,2)
             future_or_timeout(self.future,300.)
 
             #startup

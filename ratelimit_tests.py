@@ -16,14 +16,14 @@ from hata.exceptions import DiscordException
 from hata.others import to_json,from_json,quote
 from hata.emoji import BUILTIN_EMOJIS
 from hata.message import Message
-from hata.others import (ext_from_base64,bytes_to_base64,Voice_region,
-    Verification_level,Message_notification_level,Content_filter_level,
+from hata.others import (ext_from_base64,bytes_to_base64,VoiceRegion,
+    VerificationLevel,MessageNotificationLevel,ContentFilterLevel,
     parse_oauth2_redirect_url)
 from hata.user import Partial_user,User
 from hata.role import Role
 from hata.client import Client
-from hata.oauth2 import completed_user
-from hata.channel import cr_pg_channel_object,Channel_category,Channel_text
+from hata.oauth2 import UserOA2
+from hata.channel import cr_pg_channel_object,ChannelCategory,ChannelText
 from hata.guild import Partial_guild
 from hata.http import VALID_ICON_FORMATS
 from hata.integration import Integration
@@ -563,7 +563,7 @@ def client_logout(client):
 def permission_ow_create(client,channel,target,allow,deny):
     if type(target) is Role:
         type_='role'
-    elif type(target) in (User,Client,completed_user):
+    elif type(target) in (User,Client,UserOA2):
         type_='member'
     else:
         raise TypeError(f'Target expected to be Role or User type, got {type(target)!r}')
@@ -677,10 +677,10 @@ def webhook_get_channel(client,channel):
         f'https://discordapp.com/api/v7/channels/{channel_id}/webhooks')
 
 async def guild_create(client,name,icon=None,avatar=b'',
-        region=Voice_region.eu_central,
-        verification_level=Verification_level.medium,
-        message_notification_level=Message_notification_level.only_mentions,
-        content_filter_level=Content_filter_level.disabled,
+        region=VoiceRegion.eu_central,
+        verification_level=VerificationLevel.medium,
+        message_notification_level=MessageNotificationLevel.only_mentions,
+        content_filter_level=ContentFilterLevel.disabled,
         roles=[],channels=[]):
         
     if client.is_bot and len(client.guilds)>9:
@@ -766,7 +766,7 @@ async def channel_move(client,*args,**kwargs):
 
 def channel_create(client,guild,category=None):
     data=cr_pg_channel_object(type_=0,name='tesuto-channel9')
-    data['parent_id']=category.id if type(category) is Channel_category else None
+    data['parent_id']=category.id if type(category) is ChannelCategory else None
     guild_id=guild.id
     return bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',data)
@@ -2571,7 +2571,7 @@ async def ratelimit_test0115(client,message,content):
     access = await client.owners_access(['guilds.join'])
     user = await client.user_info(access)
     guild = await client.guild_create(name='Luv ya',
-                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
     await sleep(.5,loop)
     await guild_user_add(client,guild,user)
     await sleep(.5,loop)
@@ -2586,7 +2586,7 @@ async def ratelimit_test0116(client,message,content):
     access = await client.owners_access(['guilds.join'])
     user = await client.user_info(access)
     guild = await client.guild_create(name='Luv ya',
-                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
     await sleep(.5,loop)
     await guild_user_add(client,guild,user)
     await sleep(.5,loop)
@@ -2602,7 +2602,7 @@ async def ratelimit_test0117(client,message,content):
     access = await client.owners_access(['guilds.join'])
     user = await client.user_info(access)
     guild = await client.guild_create(name='Luv ya',
-                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
     await sleep(.5,loop)
     await guild_user_add(client,guild,user)
 
@@ -2622,7 +2622,7 @@ async def ratelimit_test0117(client,message,content):
     access = await client.owners_access(['guilds.join'])
     user = await client.user_info(access)
     guild = await client.guild_create(name='Luv ya',
-                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
     await sleep(.5,loop)
     await guild_user_add(client,guild,user)
 
@@ -2976,7 +2976,7 @@ async def ratelimit_test0148(client,message,content):
     access = await client.owners_access(['guilds.join'])
     user = await client.user_info(access)
     guild = await client.guild_create(name='Luv ya',
-                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
     await sleep(.5,loop)
     await guild_user_add(client,guild,user)
     await guild_users(client,guild)
@@ -3107,7 +3107,7 @@ async def ratelimit_test0161(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    channel2=Channel_text.precreate(572079522065678336) #different guild
+    channel2=ChannelText.precreate(572079522065678336) #different guild
     
     message1 = await client.message_create(channel1,embed=Embed('owo'))
     message2 = await client.message_create(channel2,embed=Embed('uwu'))

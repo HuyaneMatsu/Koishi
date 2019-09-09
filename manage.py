@@ -4,8 +4,8 @@ import sys, os
 sys.path.append(os.path.abspath('..'))
 
 from hata import Client,start_clients
-from hata.activity import Activity_game
-from hata.channel import Channel_text
+from hata.activity import ActivityGame
+from hata.channel import ChannelText
 from hata.events import (ReactionAddWaitfor,CommandProcesser,
     ReactionDeleteWaitfor,)
 from hata.webhook import Webhook
@@ -27,7 +27,7 @@ import chesuto
 Koishi=Client(pers_data.KOISHI_TOKEN,
     secret=pers_data.KOISHI_SECRET,
     client_id=pers_data.KOISHI_ID,
-    activity=Activity_game.create(name='with Satori'),
+    activity=ActivityGame.create(name='with Satori'),
         )
 
 Koishi.events(ReactionAddWaitfor)
@@ -44,7 +44,7 @@ koishi_commands(chesuto.showcard)
 
 webhook_sender=commit_extractor(
     Koishi,
-    Channel_text.precreate(555476090382974999),
+    ChannelText.precreate(555476090382974999),
     Webhook.precreate(555476334210580508),
     role=Role.precreate(538397994421190657),
     color=0x2ad300,

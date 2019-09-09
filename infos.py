@@ -6,9 +6,9 @@ import json
 from hata.dereaddons_local import asyncinit
 from hata.futures import Task
 from hata.parsers import eventlist
-from hata.channel import message_at_index,Channel_text,Channel_category,CHANNELS
+from hata.channel import message_at_index,ChannelText,ChannelCategory,CHANNELS
 from hata.prettyprint import pchunkify
-from hata.others import elapsed_time,Status,Audit_log_event,cchunkify,Status
+from hata.others import elapsed_time,Status,AuditLogEvent,cchunkify,Status
 from hata.exceptions import DiscordException
 from hata.events import Pagination,waitfor_wrapper
 from hata.events_compiler import ContentParser
@@ -18,7 +18,7 @@ from hata.color import Color
 from hata.user import USERS
 from hata.guild import GUILDS
 from hata.client_core import CLIENTS
-from hata.activity import Activity_unknown
+from hata.activity import ActivityUnknown
 from help_handler import HELP
 
 async def no_permission(client,message,*args):
@@ -140,7 +140,7 @@ async def user_info(client,message,user):
     
     embed.add_thumbnail(user.avatar_url_as(size=128))
 
-    if user.activity is not Activity_unknown or user.status is not Status.offline:
+    if user.activity is not ActivityUnknown or user.status is not Status.offline:
         text=[]
         
         if user.status is Status.offline:
@@ -153,7 +153,7 @@ async def user_info(client,message,user):
             for platform,status in user.statuses.items():
                 text.append(f'**>>** {status} ({platform})\n')
         
-        if user.activity is Activity_unknown:
+        if user.activity is ActivityUnknown:
             text.append('Activity : *unknown*\n')
         elif len(user.activities)==1:
             text.append('Activity : ')
@@ -206,9 +206,9 @@ async def guild_info(client,message,content):
     channel_voice   = 0
 
     for channel in guild.all_channel.values():
-        if type(channel) is Channel_text:
+        if type(channel) is ChannelText:
             channel_text+=1
-        elif type(channel) is Channel_category:
+        elif type(channel) is ChannelCategory:
             channel_category+=1
         else:
             channel_voice+=1
@@ -496,12 +496,12 @@ async def logs(client,message,guild,*args):
             break
         for event_name in args:
             try:
-                event=Audit_log_event.values[int(event_name)]
+                event=AuditLogEvent.values[int(event_name)]
                 break
             except (KeyError,ValueError):
                 pass
             try:
-                event=getattr(Audit_log_event,event_name.upper())
+                event=getattr(AuditLogEvent,event_name.upper())
                 break
             except AttributeError:
                 continue

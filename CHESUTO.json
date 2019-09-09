@@ -7,5 +7,14 @@
         "name": "Silent Preparations",
         "rarity": 3,
         "token": false
+    },
+    {
+        "acquirable": true,
+        "description": "Put an Aegis Reinforcement and a Sacrificial Guardianship into your hand. This will not end your turn.",
+        "effectname": "twofold_defence",
+        "id": 619867908360896512,
+        "name": "Twofold Defence",
+        "rarity": 3,
+        "token": true
     }
 ]

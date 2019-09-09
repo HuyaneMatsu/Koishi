@@ -2,7 +2,7 @@ from collections import deque
 import re
 from random import randint
 from datetime import timedelta
-from hata.channel import Channel_private
+from hata.channel import ChannelPrivate
 
 TYPINGS={}
 class typing_counter:
@@ -18,7 +18,7 @@ _MOKOU_MOKOU_RP=re.compile('mokou?')
 async def message_create(client,message):
     while True:
         channel=message.channel
-        if type(channel) is Channel_private:
+        if type(channel) is ChannelPrivate:
             break
         
         user=message.author
@@ -88,7 +88,7 @@ async def message_create(client,message):
         await client.message_create(message.channel,text)
 
 async def typing(self,channel,user,timestamp):
-    if type(channel) is Channel_private:
+    if type(channel) is ChannelPrivate:
         return
     
     try:

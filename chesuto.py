@@ -1243,11 +1243,8 @@ async def create_card(client,message,content):
     channel=message.channel
     user=message.author
     
-    card=object.__new__(Card)
-    card.id=message.id
-    
     while True:
-        await client.message_create(channel,'Please enter the `name` of your card.\nLenght: 3-100')
+        await client.message_create(channel,'Please enter the `name` of your card.\nlength: 3-100')
         
         try:
             message = await wait_for_message(client,channel,check_user_and_ln(user,(2,101),),300.)
@@ -1270,10 +1267,15 @@ async def create_card(client,message,content):
             break
         return
 
-    card.name=value
-
+    try:
+        card=CARDS_by_name[value.lower()]
+    except KeyError:
+        card=object.__new__(Card)
+        card.id=message.id
+        card.name=value
+    
     while True:
-        await client.message_create(channel,'Please enter the `description` of your card.\nLenght: 3-1000')
+        await client.message_create(channel,'Please enter the `description` of your card.\nlength: 3-1000')
         
         try:
             message = await wait_for_message(client,channel,check_user_and_ln(user,(2,1001),),300.)
@@ -1353,7 +1355,7 @@ async def create_card(client,message,content):
     card.token=value
 
     while True:
-        await client.message_create(channel,'Please enter the `effectname` of your card.\nLenght: 3-32')
+        await client.message_create(channel,'Please enter the `effectname` of your card.\nlength: 3-32')
         
         try:
             message,value = await wait_for_message(client,channel,check_user_and_en(user),300.)
@@ -1429,6 +1431,36 @@ async def create_card(client,message,content):
     await Card.dump_cards(client.loop)
     await client.message_create(message.channel,'Card successfully created and saved')
 
+CARD_HDR_RP=re.compile('([a-z0-9 ]+?) *(\[token\])? *\(([a-z]+)\)',re.I)
+
+async def massadd(client,message,content):
+    while True:
+        try:
+            profile=message.author.guild_profiles[CARDS_ROLE.guild]
+        except KeyError:
+            pass
+        else:
+            if CARDS_ROLE in profile.roles:
+                break
+        await client.message_create(message.channel,'You do not have permission to use this command')
+        return
+
+    await client.message_at_index(message.channel,1000)
+    await client.message_delete(message)
+    for messsage in message.channel.messages:
+        try:
+            profile=message.author.guild_profiles[CARDS_ROLE.guild]
+        except KeyError:
+            continue
+
+        if CARDS_ROLE not in profile.roles:
+            continue
+        
+        
+
+    
+
+    
 async def showcard(client,message,content):
     if not 2<len(content)<101:
         return

@@ -8,9 +8,9 @@ from hata.events_compiler import ContentParser
 from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
-from hata.futures import CancelledError,sleep,Future_WM,Task
+from hata.futures import CancelledError,sleep,FutureWM,Task
 from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild
-from hata.channel import cr_pg_channel_object,Channel_text
+from hata.channel import cr_pg_channel_object,ChannelText
 from hata import others
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
@@ -581,7 +581,7 @@ async def oa2_my_guild(client,message,content):
     
     try:
         guild = await client.guild_create(name='Luv ya',
-            channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=Channel_text),])
+            channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
 
         await sleep(1.,client.loop)
         await client.guild_user_add(guild,user)
@@ -639,7 +639,7 @@ async def OG(client,message,content):
     user = await client.user_info(access)
 
     guild = await client.guild_create(name=content,
-        channels=[cr_pg_channel_object(name='general',type_=Channel_text),])
+        channels=[cr_pg_channel_object(name='general',type_=ChannelText),])
 
     await sleep(1.,client.loop)
     role = await client.role_create(guild,'my dear',8)
@@ -745,7 +745,7 @@ async def count_messages(client,message,content):
     
     loop=client.loop
     channels=guild.messageable_channels
-    future=Future_WM(loop,len(channels))
+    future=FutureWM(loop,len(channels))
     users={}
     
     with client.keep_typing(source_channel):
@@ -800,7 +800,7 @@ async def count_reactions(client,message,content):
     
     loop=client.loop
     channels=guild.messageable_channels
-    future=Future_WM(loop,len(channels))
+    future=FutureWM(loop,len(channels))
     reactions={}
     
     with client.keep_typing(source_channel):
