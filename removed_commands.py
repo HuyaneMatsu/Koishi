@@ -4114,6 +4114,20 @@ async def test_reference_remove(client,message,token):
 
     await client.message_create(message.channel,''.join(result))
 
+
+from hata.ios import ReuAsyncIO
+from hata.embed import Embed
+
+@koishi_commands
+async def embedimage(client,message,content):
+    path=os.path.join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    embed=Embed('Here is an image from attachment')
+    embed.add_image('attachment://image.png')
+    
+    with await ReuAsyncIO(path,'rb') as file:
+        await client.message_create(message.channel,embed=embed,file=('image.png',file))
+
+
 # - : - # dungeon_sweeper.py # - : - #
 
 ##STAGE_NAME_PATTERN_RE=re.compile(

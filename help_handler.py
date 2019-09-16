@@ -144,7 +144,7 @@ HELP['change_prefix']=Embed(title='change_prefix',color=HELP_COLOR,
     description='Changes my prefix at the guild (guild owner only)!'
         )
 
-HELP['kanako']=Embed(title='kanako',color=HELP_COLOR,
+HELP['kanakogame']=Embed(title='kanakogame',color=HELP_COLOR,
     description=(
         'Start a hiragana or katakana quiz!\n'
         'There can be only one game each channel.\n\n'

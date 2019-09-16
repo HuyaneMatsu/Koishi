@@ -8,8 +8,8 @@ if __name__=='__main__':
     sys.path.append(os.path.abspath('..'))
 
 from hata.emoji import Emoji,BUILTIN_EMOJIS
-from hata.futures import Task,Future,CancelledError,sync_Lock,current_thread
-from hata.events import Cooldown, wait_for_message
+from hata.futures import Task,Future,CancelledError,sync_Lock,current_thread,sleep
+from hata.events import Cooldown, wait_for_message, Pagination
 from hata.events_compiler import ContentParser
 from hata.exceptions import DiscordException
 from hata.embed import Embed
@@ -53,23 +53,19 @@ else:
 #   0b00010000 <- can special
 #   0b00100000 <- could special
 
-class Puppet_meta(object):
+class PuppetMeta(object):
     __slots__=['generate_moves', 'name', 'outlooks']
     def __init__(self,name,generate_moves,outlooks):
         self.name=name
         self.generate_moves=generate_moves
         self.outlooks=outlooks
-        if getattr(type(self),name,_spaceholder) is None:
-            setattr(type(self),name,self)
-            return
-        raise ValueError('Invalid name')
     
-    rook    = None
-    knight  = None
-    bishop  = None
-    queen   = None
-    king    = None
-    pawn    = None
+    rook    = NotImplemented
+    knight  = NotImplemented
+    bishop  = NotImplemented
+    queen   = NotImplemented
+    king    = NotImplemented
+    pawn    = NotImplemented
     
 
 def rook_moves(self,field):
@@ -156,7 +152,7 @@ def rook_pierce(self,target,field):
                 found=True
                 continue
 
-            if other.meta is Puppet_meta.king:
+            if other.meta is PuppetMeta.king:
                 return moves
             return
         
@@ -493,12 +489,12 @@ def check_king_moves(player,others,field):
                 if king.side==other.side:
                    break
                 #enemy!
-                if other.meta is not Puppet_meta.queen:
+                if other.meta is not PuppetMeta.queen:
                     if x_diff==0 or y_diff==0: #front
-                        if other.meta is not Puppet_meta.rook:
+                        if other.meta is not PuppetMeta.rook:
                             break
                     else: #size
-                        if other.meta is not Puppet_meta.bishop:
+                        if other.meta is not PuppetMeta.bishop:
                             break
 
                 other_moves=found.moves
@@ -513,7 +509,7 @@ def check_king_moves(player,others,field):
     if len(king.killers)==1:
         killer=king.killers[0]
             
-        if killer.meta in (Puppet_meta.rook,Puppet_meta.bishop,Puppet_meta.queen):
+        if killer.meta in (PuppetMeta.rook,PuppetMeta.bishop,PuppetMeta.queen):
             local_y,  local_x=divmod(position,8)
             killer_y,killer_x=divmod(killer.position,8)
             pos_diff=0
@@ -593,42 +589,42 @@ def check_king_moves(player,others,field):
             continue
         puppet.moves.clear()
 
-Puppet_meta('rook',     rook_moves,     (
+PuppetMeta.rook     = PuppetMeta('rook',     rook_moves,     (
     Emoji.precreate(604652042635706416,name='a0').as_emoji,
     Emoji.precreate(604657343950487562,name='a1').as_emoji,
     Emoji.precreate(604652042669129788,name='a2').as_emoji,
     Emoji.precreate(604652042652483591,name='a3').as_emoji,
         ))
             
-Puppet_meta('knight',   knight_moves,   (
+PuppetMeta.knight   = PuppetMeta('knight',   knight_moves,   (
     Emoji.precreate(604652042350362625,name='a4').as_emoji,
     Emoji.precreate(604652042413146113,name='a5').as_emoji,
     Emoji.precreate(604652042853548042,name='a6').as_emoji,
     Emoji.precreate(604652042740301835,name='a7').as_emoji,
         ))
     
-Puppet_meta('bishop',   bishop_moves,   (
+PuppetMeta.bishop   = PuppetMeta('bishop',   bishop_moves,   (
     Emoji.precreate(604652042694426634,name='a8').as_emoji,
     Emoji.precreate(604652042715398144,name='a9').as_emoji,
     Emoji.precreate(604652042253762571,name='aa').as_emoji,
     Emoji.precreate(604652042581180425,name='ab').as_emoji,
         ))
 
-Puppet_meta('queen',    queen_moves,    (
+PuppetMeta.queen    = PuppetMeta('queen',    queen_moves,    (
     Emoji.precreate(604657915038793728,name='ac').as_emoji,
     Emoji.precreate(604657914820558849,name='ad').as_emoji,
     Emoji.precreate(604652042732175390,name='ae').as_emoji,
     Emoji.precreate(604652042639638550,name='af').as_emoji,
         ))
     
-Puppet_meta('king',     king_moves,     (
+PuppetMeta.king     = PuppetMeta('king',    king_moves,     (
     Emoji.precreate(604658587117027328,name='ag').as_emoji,
     Emoji.precreate(604658587121221642,name='ah').as_emoji,
     Emoji.precreate(604652042790895616,name='ai').as_emoji,
     Emoji.precreate(604658586978746378,name='aj').as_emoji,
         ))
     
-Puppet_meta('pawn',     pawn_moves,     (
+PuppetMeta.pawn     = PuppetMeta('pawn',    pawn_moves,     (
     Emoji.precreate(604652042656677918,name='ak').as_emoji,
     Emoji.precreate(604652042731913216,name='al').as_emoji,
     Emoji.precreate(604652042702815313,name='am').as_emoji,
@@ -704,25 +700,25 @@ class ChesutoBackend(object):
         self.channel=channel
 
         self.field=[
-            Puppet(Puppet_meta.rook,    0,  1),
-            Puppet(Puppet_meta.knight,  1,  1),
-            Puppet(Puppet_meta.bishop,  2,  1),
-            Puppet(Puppet_meta.queen,   3,  1),
-            Puppet(Puppet_meta.king,    4,  1),
-            Puppet(Puppet_meta.bishop,  5,  1),
-            Puppet(Puppet_meta.knight,  6,  1),
-            Puppet(Puppet_meta.rook,    7,  1),
-            *(Puppet(Puppet_meta.pawn,  pos,1) for pos in range(8,16)),
+            Puppet(PuppetMeta.rook,    0,  1),
+            Puppet(PuppetMeta.knight,  1,  1),
+            Puppet(PuppetMeta.bishop,  2,  1),
+            Puppet(PuppetMeta.queen,   3,  1),
+            Puppet(PuppetMeta.king,    4,  1),
+            Puppet(PuppetMeta.bishop,  5,  1),
+            Puppet(PuppetMeta.knight,  6,  1),
+            Puppet(PuppetMeta.rook,    7,  1),
+            *(Puppet(PuppetMeta.pawn,  pos,1) for pos in range(8,16)),
             *(None for _ in range(16,48)),
-            *(Puppet(Puppet_meta.pawn,  pos,0) for pos in range(48,56)),
-            Puppet(Puppet_meta.rook,    56, 0),
-            Puppet(Puppet_meta.knight,  57, 0),
-            Puppet(Puppet_meta.bishop,  58, 0),
-            Puppet(Puppet_meta.queen,   59, 0),
-            Puppet(Puppet_meta.king,    60, 0),
-            Puppet(Puppet_meta.bishop,  61, 0),
-            Puppet(Puppet_meta.knight,  62, 0),
-            Puppet(Puppet_meta.rook,    63, 0),
+            *(Puppet(PuppetMeta.pawn,  pos,0) for pos in range(48,56)),
+            Puppet(PuppetMeta.rook,    56, 0),
+            Puppet(PuppetMeta.knight,  57, 0),
+            Puppet(PuppetMeta.bishop,  58, 0),
+            Puppet(PuppetMeta.queen,   59, 0),
+            Puppet(PuppetMeta.king,    60, 0),
+            Puppet(PuppetMeta.bishop,  61, 0),
+            Puppet(PuppetMeta.knight,  62, 0),
+            Puppet(PuppetMeta.rook,    63, 0),
                 ]
 
         self.players=(player_0(self,0),player_1(self,1))
@@ -738,16 +734,20 @@ class ChesutoBackend(object):
         embed.add_footer('It is your turn now!')
         
         try:
-            await client.message_create(player1.channel,embed=embed)
+            message = await client.message_create(player1.channel,embed=embed)
         except DiscordException:
             dms_disabled.append(player1.user)
+        else:
+            player1.message=message
 
         embed.add_footer('It is your opponents turn!')
         
         try:
-            await client.message_create(player2.channel,embed=embed)
+            message = await client.message_create(player2.channel,embed=embed)
         except DiscordException:
             dms_disabled.append(player2.user)
+        else:
+            player2.message=message
 
         if dms_disabled:
             if len(dms_disabled)==2:
@@ -771,7 +771,7 @@ class ChesutoBackend(object):
         self.next=0
         self.update_puppets()
 
-    def __call__(self,message):
+    async def __call__(self,message):
         next_=self.next
         player=self.players[next_]
         if message.author!=player.user:
@@ -801,7 +801,7 @@ class ChesutoBackend(object):
             if source_puppet is None:
                 return #nothing to move
             if source_puppet.side!=next_:
-                return #not your
+                return #not yours
             target_rel_pos=(target_x<<16)|(target_y<<8)
             for move in source_puppet.moves:
                 if move&0xffff00==target_rel_pos:
@@ -815,13 +815,54 @@ class ChesutoBackend(object):
             source_puppet.moves.append((source_pos,target_pos,),)
             self.field[source_pos]=None
             self.field[target_pos]=target_puppet
+
+            next_=next_^1
+            self.next=next_
             if target_puppet is not None:
-                self.players[next_^1].puppets.remove(target_puppet)
+                self.players[next_].puppets.remove(target_puppet)
 
             self.update_puppets()
 
+            client=self.client
 
+            embed=Embed('',self.render(),color=CHESUTO_COLOR)
+            embed.add_footer('It is your opponents turn!')
 
+            try:
+                await client.message_edit(player.message,embed=embed)
+            except DiscordException:
+                #DM is disabled, lets notify
+                player=self.players[next_]
+                try:
+                    await client.message.create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
+                except DiscordException: #BOTH lost, fill up TODO
+                    pass
+                else: #ONE lost, fill up TODO
+                    pass
+                event=self.client.events.message_create
+                for player in self.players:
+                    event.remove(self,player.channel)
+                return
+
+            embed.add_footer('It is your turn now!')
+            player=self.players[next_]
+
+            try:
+                message = await client.message_create(player.channel,embed=embed)
+            except DiscordException:
+                player=self.players[next_^1]
+                try:
+                    await client.message.create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
+                except DiscordException: #BOTH lost, fill up TODO
+                    pass
+                else: #ONE lost, fill up TODO
+                    pass
+                event=self.client.events.message_create
+                for player in self.players:
+                    event.remove(self,player.channel)
+                return
+
+            return
         return
 
 
@@ -855,8 +896,8 @@ class ChesutoBackend(object):
             for puppet in player.puppets:
                 puppet.update(field)
                 
-        check_king_moves(players[0],players[1],field)
-        check_king_moves(players[1],players[0],field)
+        check_king_moves(players[0],players[1].puppets,field)
+        check_king_moves(players[1],players[0].puppets,field)
 
     def __repr__(self):
         result=[]
@@ -912,12 +953,18 @@ class ChesutoBackend(object):
         return ''.join(result)
             
 class ChesutoPlayer(object):
-    __slots__=['backend', 'channel', 'puppets', 'side', 'user', 'king', 'in_check']
+    __slots__=['backend', 'channel', 'puppets', 'side', 'user', 'king', 'in_check', 'message']
     def __init__(self,user,channel):
-        self.user=user
-        self.channel=channel
-        self.in_check=False
-        
+        self.user       = user
+        self.channel    = channel
+        self.in_check   = False
+        self.message    = NotImplemented
+
+##        self.backend    = NotImplemented
+##        self.side       = NotImplemented
+##        self.king       = NotImplemented
+##        self.puppets    = NotImplemented
+
     def __call__(self,backend,side):
         self.backend=backend
         self.side=side
@@ -930,11 +977,11 @@ class ChesutoPlayer(object):
             self.puppets=backend.field[48:]
         return self
 
-class Rarity():
+class Rarity(object):
     count=0
     values=[]
     by_name={}
-    __slots__=['index', 'name',]
+    __slots__=('index', 'name',)
     def __init__(self,name):
         self.name=name
         index=self.count
@@ -950,17 +997,35 @@ class Rarity():
         return f'{self.__class__.__name__}(name={self.name}, index={self.index})'
 
     def __gt__(self,other):
-        return self.index>other.index
+        if type(self) is type(other):
+            return self.index>other.index
+        return NotImplemented
+    
     def __ge__(self,other):
-        return self.index>=other.index
+        if type(self) is type(other):
+            return self.index>=other.index
+        return NotImplemented
+    
     def __eq__(self,other):
-        return self.index==other.index
+        if type(self) is type(other):
+            return self.index==other.index
+        return NotImplemented
+    
     def __ne__(self,other):
-        return self.index!=other.index
+        if type(self) is type(other):
+            return self.index!=other.index
+        return NotImplemented
+    
     def __le__(self,other):
-        return self.index<=other.index
+        if type(self) is type(other):
+            return self.index<=other.index
+        return NotImplemented
+    
     def __lt__(self,other):
-        return self.index<other.index
+        if type(self) is type(other):
+            return self.index<other.index
+        return NotImplemented
+    
 
     def __hash__(self):
         return self.index
@@ -975,8 +1040,8 @@ CARDS_by_id={}
 CARDS_by_name={}
 EFFECTS={}
 
-class Card():
-    __slots__=['acquirable', 'description', 'effect', 'effectname', 'id', 'name', 'rarity', 'token']
+class Card(object):
+    __slots__=('acquirable', 'description', 'effect', 'effectname', 'id', 'name', 'rarity', 'token',)
     def __init__(self,acquirable,description,effectname,id_,name,rarity,token):
         self.id         = id_
         self.name       = name
@@ -1020,7 +1085,7 @@ class Card():
     @classmethod
     async def load_cards(cls,loop):
         if CARDS_by_id:
-            future=Future()
+            future=Future(loop)
             future.set_result(None)
             return future
         
@@ -1032,7 +1097,7 @@ class Card():
                 break
 
             if type(cards_data) is not list:
-                exception=f'Expected type \'list\' for \'cards_data\', got \'{carsd_data.__class__.__name__}\''
+                exception=f'Expected type \'list\' for \'cards_data\', got \'{cards_data.__class__.__name__}\''
                 break
 
             break
@@ -1445,9 +1510,15 @@ async def massadd(client,message,content):
         await client.message_create(message.channel,'You do not have permission to use this command')
         return
 
-    await client.message_at_index(message.channel,1000)
+    try:
+        await client.message_at_index(message.channel,1000)
+    except IndexError:
+        pass
+    
     await client.message_delete(message)
-    for messsage in message.channel.messages:
+
+    messages=[]
+    for message in message.channel.messages:
         try:
             profile=message.author.guild_profiles[CARDS_ROLE.guild]
         except KeyError:
@@ -1456,10 +1527,66 @@ async def massadd(client,message,content):
         if CARDS_ROLE not in profile.roles:
             continue
         
-        
+        messages.append(message)
 
+    new_=0
+    modified_=0
     
+    for message in messages:
+        lines=message.content.split('\n')
+        
+        next_id=message.id
+        state=0 #parse header
+        for line in lines:
+            if not line:
+                state=0
+                continue
+            
+            if state==0:
+                parsed=CARD_HDR_RP.fullmatch(line)
+                if parsed is None:
+                    continue
+                name,token,rarity=parsed.groups()
+                
+                if token is None:
+                    token=False
+                else:
+                    token=True
+                
+                try:
+                    rarity=Rarity.by_name[rarity.title()]
+                except KeyError:
+                    continue
+                
+                state=1 #parse description
+                continue
 
+            if state==1:
+                lower_name=name.lower()
+                try:
+                    card=CARDS_by_name[lower_name]
+                except KeyError:
+                    card=Card(True,line,lower_name,next_id,name,rarity,token)
+                    new_+=1
+                else:
+                    card.description=line
+                    card.effectname=lower_name
+                    card.effect=EFFECTS.get(lower_name)
+                    card.name=name
+                    card.rarity=rarity
+                    card.token=token
+                    modified_+=1
+
+                next_id=next_id+1
+                state=0
+                continue
+
+    await Card.dump_cards(client.loop)
+    message = await client.message_create(message.channel,
+        f'modified: {modified_}\nnew: {new_}')
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
+    
     
 async def showcard(client,message,content):
     if not 2<len(content)<101:
@@ -1473,9 +1600,95 @@ async def showcard(client,message,content):
     embed.add_field('Rarity',card.rarity.name,inline=True)
     embed.add_field('Description',card.description)
     await client.message_create(message.channel,embed=embed)
-    
-class CardRandomizer():
-    __slots__=['array', 'elements', 'references']
+
+async def showcards(client,message,content):
+    while True:
+        if len(content)>32:
+            result=None
+            break
+
+        if content:
+            filtered=[]
+            search_for=content.lower()
+            for name,card in CARDS_by_name.items():
+                if search_for in name:
+                    filtered.append(card)
+            title=f'Search results for : `{content}`'
+        else:
+            filtered=list(CARDS_by_name.values())
+            title='All cards'
+
+        if not filtered:
+            result=None
+            break
+
+        filtered.sort(key=lambda card:card.name)
+
+        
+        embeds=[]
+        embed=Embed(title,color=CHESUTO_COLOR)
+        field_count=0
+        total_ln=0 # we do not get the len of the title, we say it is 100 and we check 5900 later.
+
+        index=0
+        limit=len(filtered)
+        while index<limit:
+            card=filtered[index]
+            index=index+1
+
+            header=[card.name]
+            if card.token:
+                header.append(' [TOKEN]')
+            header.append(' (')
+            header.append(card.rarity.name)
+            header.append(')')
+
+            header=''.join(header)
+            local_ln=len(header)
+
+            description=card.description
+            local_ln+=len(description)
+            total_ln+=local_ln
+
+            if total_ln>5900 or field_count==24:
+                total_ln=local_ln
+                embeds.append(embed)
+                embed=Embed(title,color=CHESUTO_COLOR)
+                embed.add_field(header,description)
+                field_count=1
+                continue
+
+            embed.add_field(header,description)
+            field_count=field_count+1
+            continue
+
+        embeds.append(embed)
+
+        index=0
+        field_count=0
+        embed_ln=len(embeds)
+        result=[]
+        while True:
+            embed=embeds[index]
+            index+=1
+            embed.add_footer(f'Page: {index}/{embed_ln}. Results {field_count+1}-{field_count+len(embed.fields)}/{limit}')
+            field_count+=len(embed.fields)
+
+            result.append({'embed':embed})
+
+            if index==embed_ln:
+                break
+
+        break
+
+    if result is None:
+        result=[{'embed':Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)}]
+
+    await Pagination(client,message.channel,result)
+
+
+class CardRandomizer(object):
+    __slots__=('array', 'elements', 'references')
     def __init__(self,cards,rarity_weights):
         sorted_by_rarity={}
         for card in cards:

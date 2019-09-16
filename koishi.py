@@ -37,7 +37,7 @@ import models
 from PIL import Image as PIL
 from hata.ios import ReuBytesIO
 
-PREFIXES=prefix_by_guild(pers_data.PREFIX,models.DB_ENGINE,models.PREFIX_TABLE,models.pefix_model)
+PREFIXES=prefix_by_guild(pers_data.KOISHI_PREFIX,models.DB_ENGINE,models.PREFIX_TABLE,models.pefix_model)
 
 del pers_data
 del prefix_by_guild
@@ -50,6 +50,7 @@ class once_on_ready:
         self.called=False
     async def __call__(self,client):
         if self.called:
+            print('reconneted')
             update_about(client)
             return
         self.called=True
@@ -66,7 +67,7 @@ commands(image_handler.on_command_image,'image')
 commands(on_command_help,'help')
 commands(invalid_command)
 commands.extend(ratelimit_commands)
-commands(kanako_manager,'kanako')
+commands(kanako_manager,'kanakogame')
 commands(voice)
 commands(dispatch_tester.here)
 commands(dispatch_tester.switch)

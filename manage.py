@@ -41,6 +41,8 @@ koishi_commands.extend(booru_commands)
 koishi_commands(chesuto.chesuto_lobby,'lobby')
 koishi_commands(chesuto.create_card,)
 koishi_commands(chesuto.showcard)
+koishi_commands(chesuto.massadd)
+koishi_commands(chesuto.showcards)
 
 webhook_sender=commit_extractor(
     Koishi,
@@ -66,35 +68,116 @@ Mokou.events(mokou.channel_delete)
 
 ############################## SETUP ELPHELT ##############################
 
-Flan=Client(pers_data.ELPHELT_TOKEN,
-    client_id=pers_data.ELPHELT_ID,
+Flan=Client(pers_data.FLAN_TOKEN,
+    client_id=pers_data.FLAN_ID,
     status='idle'
         )
 
 Flan.events(ReactionAddWaitfor)
 Flan.events(ReactionDeleteWaitfor)
 
-flan_commands=Flan.events(CommandProcesser('/')).shortcut
+flan_commands=Flan.events(CommandProcesser(pers_data.FLAN_PREFIX)).shortcut
 flan_commands.extend(flan.commands)
 flan_commands(Koishi.events.message_create.commands['random'])
 flan_commands(chesuto.chesuto_lobby,'lobby')
 flan_commands(chesuto.create_card,)
 flan_commands(chesuto.showcard)
+flan_commands(chesuto.massadd)
+flan_commands(chesuto.showcards)
 
 ############################## TEST COMMANDS ##############################
 
+from hata.others import filter_content
+from hata.prettyprint import pchunkify
 from hata.ios import ReuAsyncIO
-from hata.embed import Embed
+join=os.path.join
+import traceback
 
 @koishi_commands
-async def embedimage(client,message,content):
-    path=os.path.join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
-    embed=Embed('Here is an image from attachment')
-    embed.add_image('attachment://image.png')
+async def achievement_create(client,message,content):
+    while True:
+        if not client.is_owner(message.author):
+            text='Owner only'
+            break
+        
+        content=filter_content(content)
+        if len(content)<2:
+            text='expected at least 2 content parts'
+            break
+
+        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        try:
+            with (await ReuAsyncIO(image_path)) as file:
+                image = await file.read()
+                result = await client.achievement_create(
+                    content[0],content[1],False,False,image)
+        except BaseException as err:
+            text=''.join([
+                'at create exception occured\n',
+                '\nTraceback (most recent call last):\n',
+                *traceback.format_tb(err.__traceback__),
+                repr(err),'\n',])
+        else:
+            text=repr(result)
+        break
+            
+    await client.message_create(message.channel,text)
     
-    with await ReuAsyncIO(path,'rb') as file:
-        await client.message_create(message.channel,embed=embed,file=('image.png',file))
-    
+@koishi_commands
+async def achievement_get_all(client,message,content):
+    while True:
+        if not client.is_owner(message.author):
+            text='Owner only'
+            break
+        
+        try:
+            achievements = await client.achievement_get_all()
+        except BaseException as err:
+            text=''.join([
+                'at get all: exception occured\n',
+                '\nTraceback (most recent call last):\n',
+                *traceback.format_tb(err.__traceback__),
+                repr(err),'\n',])
+            break
+
+        chunks=pchunkify(achievements)
+        pages=[{'content':chunk} for chunk in chunks]
+        await Pagination(client,message.channel,pages)
+        return
+
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def achievement_get(client,message,content):
+    while True:
+        if not client.is_owner(message.author):
+            text='Owner only'
+            break
+
+        try:
+            id_=int(content)
+        except ValueError:
+            text='pass id pls'
+            break
+        
+        try:
+            achievements = await client.achievement_get(id_)
+        except BaseException as err:
+            text=''.join([
+                'at get: exception occured\n',
+                '\nTraceback (most recent call last):\n',
+                *traceback.format_tb(err.__traceback__),
+                repr(err),'\n',])
+            break
+
+        chunks=pchunkify(achievements)
+        pages=[{'content':chunk} for chunk in chunks]
+        await Pagination(client,message.channel,pages)
+        return
+
+    await client.message_create(message.channel,text)
+
+
 ############################## START ##############################
 
 koishi_commands(Interpreter(locals().copy()),case='execute')

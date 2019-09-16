@@ -25,8 +25,8 @@ async def no_permission(client,message,*args):
     if args:
         await client.message_create(message.channel,'You do not have permission to use this command!')
 
-class show_help:
-    __slots__=['embed']
+class show_help(object):
+    __slots__=('embed',)
     __async_call__=True
     def __init__(self,name):
         self.embed=HELP[name]
@@ -148,7 +148,7 @@ async def user_info(client,message,user):
         elif len(user.statuses)==1:
             for platform,status in user.statuses.items():
                 text.append(f'Status : {status} ({platform})\n')
-        elif len(user.statuses)==1:
+        else:
             text.append('Statuses :\n')
             for platform,status in user.statuses.items():
                 text.append(f'**>>** {status} ({platform})\n')

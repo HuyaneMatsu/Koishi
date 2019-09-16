@@ -552,7 +552,7 @@ async def kanako_manager(client,message,command,*args):
             await embedination(client,channel,pages)
             return
         except KeyError:
-            embed=HELP['kanako']
+            embed=HELP['kanakogame']
     
     await client.message_create(channel,embed=embed)
 
