@@ -10,6 +10,7 @@ from hata.events import (ReactionAddWaitfor,CommandProcesser,
     ReactionDeleteWaitfor,)
 from hata.webhook import Webhook
 from hata.role import Role
+from hata.futures import sleep
 
 import pers_data
 
@@ -21,6 +22,8 @@ from tools import commit_extractor,MessageDeleteWaitfor
 from booru import booru_commands
 from interpreter import Interpreter
 import chesuto
+
+
 
 ############################## SETUP KOISHI ##############################
 
@@ -177,7 +180,7 @@ async def achievement_get(client,message,content):
 
     await client.message_create(message.channel,text)
 
-
+    
 ############################## START ##############################
 
 koishi_commands(Interpreter(locals().copy()),case='execute')
