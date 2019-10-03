@@ -3,7 +3,7 @@ import re, random, time
 
 from hata.events import wait_and_continue
 from hata.others import filter_content,is_user_mention
-from hata.futures import Future_WO,CancelledError,FutureWM,future_or_timeout,sleep,Task
+from hata.futures import FutureWO,CancelledError,FutureWM,future_or_timeout,sleep,Task
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed
 from hata.exceptions import DiscordException
@@ -195,7 +195,7 @@ class battle_manager:
             await client.message_create(channel,f'Waiting on {target:f}\'s reply here and at dm.\nType:"accept name/mention" to accept')
             
             
-            future=request.future=Future_WO(client.loop)
+            future=request.future=FutureWO(client.loop)
             case=wait_on_reply(guild,source,target)
             event=client.events.message_create
             
@@ -551,7 +551,7 @@ class battleships_game:
             
 
             while self.process is not None:
-                self.future=Future_WO(loop)
+                self.future=FutureWO(loop)
                 future_or_timeout(self.future,300.)
                 try:
                     result = await self.future

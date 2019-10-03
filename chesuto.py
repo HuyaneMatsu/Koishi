@@ -834,11 +834,24 @@ class ChesutoBackend(object):
                 #DM is disabled, lets notify
                 player=self.players[next_]
                 try:
-                    await client.message.create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
-                except DiscordException: #BOTH lost, fill up TODO
-                    pass
-                else: #ONE lost, fill up TODO
-                    pass
+                    await client.message_create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
+                except DiscordException: #BOTH lost
+                    try:
+                        await client.message_create(self.channel,embed=Embed('You two there!',
+                            f'{self.players[0]:m} and {self.players[1]:m} direct messages disabled from all of my servers, the game is cancelled'))
+                    except DiscordException:
+                        pass
+                else: #ONE lost
+                    next_=next_^1
+                    player=self.players[next_]
+                    try:
+                        await client.message_create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
+                    except DiscordException: #BOTH lost
+                        try:
+                            await client.message_create(self.channel,embed=Embed('You two there!',
+                                f'{self.players[0]:m} and {self.players[1]:m} direct messages disabled from all of my servers, the game is cancelled'))
+                        except DiscordException:
+                            pass
                 event=self.client.events.message_create
                 for player in self.players:
                     event.remove(self,player.channel)
@@ -848,15 +861,28 @@ class ChesutoBackend(object):
             player=self.players[next_]
 
             try:
-                message = await client.message_create(player.channel,embed=embed)
+                await client.message_create(player.channel,embed=embed)
             except DiscordException:
                 player=self.players[next_^1]
                 try:
-                    await client.message.create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
-                except DiscordException: #BOTH lost, fill up TODO
-                    pass
-                else: #ONE lost, fill up TODO
-                    pass
+                    await client.message_create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
+                except DiscordException: #BOTH lost
+                    try:
+                        await client.message_create(self.channel,embed=Embed('You two there!',
+                            f'{self.players[0]:m} and {self.players[1]:m} direct messages disabled from all of my servers, the game is cancelled'))
+                    except DiscordException:
+                        pass
+                else: #ONE lost
+                    next_=next_^1
+                    player=self.players[next_]
+                    try:
+                        await client.message_create(player.channel,embed=Embed('You won',color=CHESUTO_COLOR))
+                    except DiscordException: #BOTH lost
+                        try:
+                            await client.message_create(self.channel,embed=Embed('You two there!',
+                                f'{self.players[0]:m} and {self.players[1]:m} direct messages disabled from all of my servers, the game is cancelled'))
+                        except DiscordException:
+                            pass
                 event=self.client.events.message_create
                 for player in self.players:
                     event.remove(self,player.channel)
@@ -1248,8 +1274,8 @@ class check_user_and_ync():
         
         return False
 
-class check_user_and_rarity():
-    __slots__=['user']
+class check_user_and_rarity(object):
+    __slots__=('user',)
     def __init__(self,user):
         self.user=user
     def __call__(self,message):
@@ -1261,8 +1287,8 @@ class check_user_and_rarity():
             return False
         return rarity
 
-class check_user_and_tf():
-    __slots__=['user']
+class check_user_and_tf(object):
+    __slots__=('user',)
     def __init__(self,user):
         self.user=user
     def __call__(self,message):
@@ -1277,8 +1303,8 @@ class check_user_and_tf():
 
 EN_RP=re.compile('([a-z][a-z_0-9]{2,})',re.I)
 
-class check_user_and_en():
-    __slots__=['user']
+class check_user_and_en(object):
+    __slots__=('user',)
     def __init__(self,user):
         self.user=user
     def __call__(self,message):
@@ -1723,16 +1749,16 @@ class CardRandomizer(object):
             total_weight_sum+=weight_sum
             total_weight[rarity]=weight_sum
         
-        self.array=array=Array('f')
-        self.elements=elements=[]
-        self.references=references={}
+        self.array=Array('f')
+        self.elements=[]
+        self.references={}
         last=0.
         index=0
         for rarity in rarity_weights:
             self.array.append(last)
             last=last+(total_weight/total_weight[rarity])
             self.elements.append(sorted_by_rarity[rarity])
-            references[rarity]=index
+            self.references[rarity]=index
             index=index+1
 
     def poll(self):
@@ -1747,8 +1773,8 @@ class CardRandomizer(object):
         index=(random()*elements.__len__()).__int__()
         return elements[index]
 
-class ChesutoSystemShard():
-    __slots__=['embed','emojis','waiter_message','waiter_reaction','_waiter_flag']
+class ChesutoSystemShard(object):
+    __slots__=('embed','emojis','waiter_message','waiter_reaction','_waiter_flag',)
     def __init__(self,embed,emojis,waiter_message,waiter_reaction):
         self.embed=embed
         self.emojis=emojis
@@ -1890,8 +1916,8 @@ class ChesutoSystemShard():
     _waiter_tasks=(_0b00,_0b01,_0b10,_0b11)
     del _0b00, _0b01, _0b10, _0b11
 
-class MethodLike():
-    __slots__=['func','parent']
+class MethodLike(object):
+    __slots__=('func','parent',)
     def __init__(self,func,parent):
         self.func=func
         self.parent=parent
@@ -1943,7 +1969,7 @@ async def chesuto_lobby(client,message,content):
         
     
 class ChesutoWinSystem(metaclass=asyncinit):
-    __slots__=['client','channel','message','user','future','embed','emojis']
+    __slots__=('client','channel','message','user','future','embed','emojis',)
     async def __init__(self,client,channel,user):
         self.client=client
         self.channel=channel

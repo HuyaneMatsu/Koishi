@@ -31,6 +31,7 @@ Koishi=Client(pers_data.KOISHI_TOKEN,
     secret=pers_data.KOISHI_SECRET,
     client_id=pers_data.KOISHI_ID,
     activity=ActivityGame.create(name='with Satori'),
+    shard_count=1,
         )
 
 Koishi.events(ReactionAddWaitfor)
@@ -95,6 +96,7 @@ from hata.prettyprint import pchunkify
 from hata.ios import ReuAsyncIO
 join=os.path.join
 import traceback
+from hata.events import Pagination
 
 @koishi_commands
 async def achievement_create(client,message,content):
@@ -178,8 +180,53 @@ async def achievement_get(client,message,content):
         await Pagination(client,message.channel,pages)
         return
 
-    await client.message_create(message.channel,text)
+from hata.exceptions import DiscordException
 
+@koishi_commands
+async def target_user_type_invite_test(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : True,
+        'unique'            : True,
+        'target_user_type'  : 0,
+            }
+
+    try:
+        data = await client.http.invite_create(message.channel.id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(data)
+        await client.http.invite_delete(data['code'],'just testin')
+
+    await client.message_create(message.channel,result)
+
+
+@koishi_commands
+async def voice_reconnect_test(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    voice_clients=client.voice_clients.copy()
+    for voice_client in voice_clients.values():
+        voice_client._freeze()
+
+    loop=client.loop
+    
+    await client.disconnect()
+    
+    await sleep(5.0,loop)
+
+    client.loop=loop
+    await client.connect()
+    await sleep(5.0,loop)
+    client.voice_clients=voice_clients
+    for voice_client in voice_clients.values():
+        voice_client._unfreeze()
     
 ############################## START ##############################
 

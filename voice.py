@@ -215,14 +215,17 @@ async def voice_local(client,message,content):
                 index=index+1
                 continue
 
-            most_accurate=(parsed.end()-parsed.start(),len(name),name)
+            start=parsed.start()
+            length=parsed.end()-start
+            most_accurate=(start,length,len(name),name)
             break
         
         if most_accurate is None:
-            text='Not found anything, what matches'
+            text='Not found anything, what matches.'
             break
-
+        
         while True:
+            index=index+1
             if index==limit:
                 break
 
@@ -230,24 +233,44 @@ async def voice_local(client,message,content):
             parsed=pattern.search(name)
             
             if parsed is None:
-                index=index+1
                 continue
 
-            parsed_length=parsed.end()-parsed.start()
-            if parsed_length>most_accurate[0]:
-                index=index+1
+            start=parsed.start()
+            target=most_accurate[0]
+            if start>target:
                 continue
 
+            if start<target:
+                most_accurate=(start,parsed.end()-start,len(name),name)
+                continue
+
+            length=parsed.end()-start
+            target=most_accurate[1]
+            
+            if length>target:
+                continue
+
+            if length<target:
+                most_accurate=(start,length,len(name),name)
+                continue
+            
             name_length=len(name)
-            if name_length>most_accurate[1]:
-                index=index+1
+            target=most_accurate[2]
+            if name_length>target:
                 continue
 
-            most_accurate=(parsed_length,name_length,name)
-            index=index+1
+            if name_length<target:
+                most_accurate=(start,length,name_length,name)
+                continue
+            
+            target=most_accurate[3]
+            if name>target:
+                continue
+            
+            most_accurate=(start,length,name_length,name)
             continue
         
-        name=most_accurate[2]
+        name=most_accurate[3]
         path=os.path.join(AUDIO_PATH,name)
         
         try:

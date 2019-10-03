@@ -14,7 +14,7 @@ commands=eventlist()
 @commands
 @Cooldown('user',30.,handler=CooldownHandler())
 async def ping(client,message,content):
-    await client.message_create(message.channel,f'{client.gateway.kokoro.latency*1000.:.0f} ms')
+    await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
 
 @commands
 async def sync_avatar(client,message,content):

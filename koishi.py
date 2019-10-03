@@ -44,20 +44,36 @@ del prefix_by_guild
 del models
 
 class once_on_ready:
-    __slots__ = ['called',]
+    __slots__ = ('called',)
     __event_name__='ready'
     def __init__(self):
-        self.called=False
+        self.called=0
     async def __call__(self,client):
-        if self.called:
-            print('reconneted')
+        called=self.called
+        called=called+1
+        self.called=called
+        
+        if called==1:
+            print(f'{client:f} ({client.id}) logged in')
+            await client.update_application_info()
+            print(f'owner: {client.owner:f} ({client.owner.id})')
             update_about(client)
             return
-        self.called=True
+        
+        shard_count=client.shard_count
+        if called<shard_count:
+            return
+        
+        if shard_count<2:
+            update_about(client)
+            return
 
-        print(f'{client:f} ({client.id}) logged in')
-        await client.update_application_info()
-        print(f'owner: {client.owner:f} ({client.owner.id})')
+        if (called>>1)<shard_count:
+            return
+        
+        if called%shard_count:
+            return
+        
         update_about(client)
 
 commands=eventlist()
@@ -153,7 +169,7 @@ async def dice(client,message,times):
 @commands
 @Cooldown('user',30.,handler=CooldownHandler())
 async def ping(client,message,content):
-    await client.message_create(message.channel,f'{client.gateway.kokoro.latency*1000.:.0f} ms')
+    await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
 
 
 @commands
