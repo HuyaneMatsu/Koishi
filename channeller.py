@@ -2,6 +2,7 @@ from hata.futures import Task
 from hata.events_compiler import ContentParser
 from hata.client import Client
 from hata.user import User
+from hata.channel import CHANNELS
 
 class Channeller_v_del:
     __slots__=['parent']
@@ -133,7 +134,7 @@ async def channeling_start(client,message,channel_id):
             break
 
         try:
-            channel_2=client.channels[channel_id]
+            channel_2=CHANNELS[channel_id]
         except KeyError:
             text=f'Unknown channel : {channel_id}'
             break
