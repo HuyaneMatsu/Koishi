@@ -10,7 +10,6 @@ from hata.color import Color
 from hata.emoji import Emoji, BUILTIN_EMOJIS
 from hata.exceptions import DiscordException
 from hata.futures import sleep,Task,Future
-from hata.dereaddons_local import asyncinit
 
 from models import DB_ENGINE,currency_model,CURRENCY_TABLE
 from tools import CooldownHandler
@@ -229,12 +228,13 @@ class heartevent_start_checker:
 @gambling
 @ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
     'tdelta','int','int, default=0')
-class heartevent(metaclass=asyncinit):
+class heartevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
     
     __slots__=['amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter']
-    async def __init__(self,client,message,duration,amount,user_limit):
+    async def __new__(cls,client,message,duration,amount,user_limit):
+        self=object.__new__(cls)
         self.connector=None
         channel=message.channel
         while True:
@@ -318,7 +318,8 @@ class heartevent(metaclass=asyncinit):
         client.events.reaction_add.append(self,message)
         Task(self.countdown(client,message),client.loop)
         await client.reaction_add(message,CURRENCY_EMOJI)
-
+        return self
+    
     def generate_embed(self):
         title=f'React with {CURRENCY_EMOJI:e} to receive {self.amount}'
         if self.user_limit:

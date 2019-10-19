@@ -5,7 +5,6 @@ from hata.embed import Embed
 from hata.parsers import eventlist
 from hata.color import Color
 from hata.emoji import BUILTIN_EMOJIS
-from hata.dereaddons_local import asyncinit
 from hata.events import waitfor_wrapper, Cooldown, multievent
 from hata.futures import Task
 from hata.exceptions import DiscordException
@@ -17,9 +16,9 @@ BOORU_COLOR=Color.from_html('#138a50')
 SAFE_BOORU='http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 NSFW_BOORU='http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags='
 
-class cached_booru_command:
+class cached_booru_command(object):
     _FILTER='solo+-underwear+-sideboob+-pov_feet+-underboob+-upskirt+-sexually_suggestive+-ass+-bikini+-6%2Bgirls+-comic+-greyscale+'
-    __slots__=['_tag_name', 'title', 'urls']
+    __slots__=('_tag_name', 'title', 'urls',)
     def __init__(self,title,tag_name):
         self._tag_name=tag_name
         self.title=title
@@ -34,7 +33,7 @@ class cached_booru_command:
                 await client.message_create(message.channel,embed=Embed('Booru is unavailable',color=BOORU_COLOR))
                 return
 
-        await Shuffled_shelter(client,message.channel,urls,False,self.title)
+        await ShuffledShelter(client,message.channel,urls,False,self.title)
 
     async def _request_urls(self,client):
         url=''.join([SAFE_BOORU,self._FILTER,self._tag_name])
@@ -48,11 +47,12 @@ class cached_booru_command:
 booru_commands=eventlist()
 
 
-class Shuffled_shelter(metaclass=asyncinit):
+class ShuffledShelter(object):
     RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
     
-    __slots__=['cancel', 'channel','task_flag', 'urls', 'pop', 'title']
-    async def __init__(self,client,channel,urls,pop,title='Link'):
+    __slots__=('cancel', 'channel','task_flag', 'urls', 'pop', 'title',)
+    async def __new__(cls,client,channel,urls,pop,title='Link'):
+        self=object.__new__(cls)
         self.channel=channel
         self.cancel=self._cancel
         self.task_flag=0
@@ -73,7 +73,9 @@ class Shuffled_shelter(metaclass=asyncinit):
         await client.reaction_add(message,self.RESET)
 
         waitfor_wrapper(client,self,300.,multievent(client.events.reaction_add,client.events.reaction_delete),message,)
-
+        
+        return self
+    
     async def __call__(self,wrapper,emoji,user):
         if user.is_bot or emoji is not self.RESET:
             return
@@ -150,7 +152,7 @@ async def answer_booru(client,channel,content,url_base):
     soup=BeautifulSoup(result,'lxml')
     urls=[post['file_url'] for post in soup.find_all('post')]
     if urls:
-        await Shuffled_shelter(client,channel,urls,True)
+        await ShuffledShelter(client,channel,urls,True)
         return
     
     await client.message_create(channel,embed=Embed(
@@ -164,7 +166,7 @@ def safebooru(client,message,content):
     return answer_booru(client,message.channel,content,SAFE_BOORU)
 
 class nsfw_checker():
-    __slots__=['command']
+    __slots__=('command',)
     __async_call__=True
     
     def __init__(self,command):
@@ -308,4 +310,4 @@ for title,tag_name,command_names in (
         booru_commands(command,case=command_name)
 
 del title, tag_name, command_names, command, command_name
-del Color, asyncinit, BUILTIN_EMOJIS, Cooldown, CooldownHandler, mark_as_async, eventlist
+del Color, BUILTIN_EMOJIS, Cooldown, CooldownHandler, mark_as_async, eventlist

@@ -3,7 +3,6 @@ from random import choice
 import sys
 import json
 
-from hata.dereaddons_local import asyncinit
 from hata.futures import Task
 from hata.parsers import eventlist
 from hata.channel import message_at_index,ChannelText,ChannelCategory,CHANNELS
@@ -544,9 +543,10 @@ async def message_pure(client,message,message_id,channel):
     await Pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
 
 
-class role_details(metaclass=asyncinit):
-    __slots__=['cache','guild','roles']
-    def __init__(self,client,channel):
+class role_details(object):
+    __slots__=('cache','guild','roles',)
+    def __new__(cls,client,channel):
+        self=object.__new__(cls)
         self.roles=list(reversed(channel.guild.roles))
         self.cache=[None for _ in range(self.roles.__len__()+1)]
         self.createpage0(channel.guild)
@@ -589,7 +589,7 @@ class role_details(metaclass=asyncinit):
         self.cache[index]=embed
         return embed
 
-class embedination_rr(metaclass=asyncinit):
+class embedination_rr(object):
     LEFT2   = BUILTIN_EMOJIS['rewind']
     LEFT    = BUILTIN_EMOJIS['arrow_backward']
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
@@ -598,12 +598,13 @@ class embedination_rr(metaclass=asyncinit):
     CROSS   = BUILTIN_EMOJIS['x']
     emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET,CROSS]
     
-    __slots__=['cancel', 'channel', 'page', 'pages', 'task_flag']
-    async def __init__(self,client,channel,pages):
+    __slots__=('cancel', 'channel', 'page', 'pages', 'task_flag',)
+    async def __new__(cls,client,channel,pages):
+        self=object.__new__(cls)
         self.pages=pages
         self.page=0
         self.channel=channel
-        self.cancel=type(self)._cancel
+        self.cancel=cls._cancel
         self.task_flag=0
         
         message = await client.message_create(self.channel,embed=self.pages[0])
@@ -616,7 +617,8 @@ class embedination_rr(metaclass=asyncinit):
             await client.reaction_add(message,self.CROSS)
 
         waitfor_wrapper(client,self,150.,client.events.reaction_add,message)
-        
+        return self
+    
     async def __call__(self,wrapper,emoji,user):
         if user.is_bot:
             return

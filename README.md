@@ -24,7 +24,7 @@ AUDIO_PATH      = #path for local audio files
 - `youtube_dl` (from youtube)
 
 #### Koishi requirements
-- BeautifulSoup
-- sqlalchemy
-- PIL
+- [BeautifulSoup](https://pypi.org/project/beautifulsoup4/)
+- [SQLAlchemy](https://pypi.org/project/SQLAlchemy/)
+- [PIL](https://pypi.org/project/PIL/)
 

@@ -1,15 +1,15 @@
 from collections import deque
 from code import InteractiveConsole
 from hata.embed import Embed
-import traceback
+from hata.futures import render_exc_to_list
 from hata.events import Pagination
 from hata.dereaddons_local import alchemy_incendiary
 from threading import Lock
 import re
 
 #emulates a file
-class InterpreterPrinter():
-    __slots__=['lock','buffer']
+class InterpreterPrinter(object):
+    __slots__=('lock','buffer',)
     def __init__(self):
         self.lock=Lock()
         self.buffer=deque()
@@ -209,8 +209,8 @@ def parse_content(content1,content2):
 
     return ''.join(parts),False
 
-class Interpreter():
-    __slots__=['console','printer']
+class Interpreter(object):
+    __slots__=('console','printer',)
     def __init__(self,locals_):
         printer=InterpreterPrinter()
         locals_['print']=printer
@@ -232,8 +232,14 @@ class Interpreter():
         try:
             code_object=compile(code_block,'online_interpreter','exec')
             await client.loop.run_in_executor(alchemy_incendiary(self.console.runcode,(code_object,),),)
-        except BaseException:
-            traceback.print_exc(file=printer)
+        except BaseException as err:
+            extracted=[
+                'Exception occured at ',
+                self.__class__.__name__,
+                '.__call__\nTraceback (most recent call last):\n',
+                    ]
+            render_exc_to_list(err,extend=extracted)
+            printer.write(''.join(extracted))
 
         if printer:
             embeds=[]

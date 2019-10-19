@@ -1,4 +1,4 @@
-import re, traceback
+import re, sys
 from random import randint
 
 from hata.parsers import eventlist
@@ -8,7 +8,7 @@ from hata.events_compiler import ContentParser
 from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
-from hata.futures import CancelledError,sleep,FutureWM,Task
+from hata.futures import CancelledError,sleep,FutureWM,Task,render_exc_to_list
 from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild
 from hata.channel import cr_pg_channel_object,ChannelText
 from hata import others
@@ -43,7 +43,7 @@ del pers_data
 del prefix_by_guild
 del models
 
-class once_on_ready:
+class once_on_ready(object):
     __slots__ = ('called',)
     __event_name__='ready'
     def __init__(self):
@@ -261,8 +261,8 @@ mine_mine_clear = (
 
 mine_mine=tuple(f'||{e}||' for e in mine_mine_clear)
 
-class check_emoji_and_user:
-    __slots__=['emoji', 'user']
+class check_emoji_and_user(object):
+    __slots__=('emoji', 'user',)
     def __init__(self,emoji,user):
         self.emoji=emoji
         self.user=user
@@ -605,8 +605,7 @@ async def oa2_my_guild(client,message,content):
         await sleep(1.,client.loop)
         await client.guild_edit(guild,owner=user)
     except Exception as err:
-        print(err)
-        traceback.print_exc()
+        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at oa2_my_guild\nTraceback (most recent call last):\n'])))
     finally:
         try:
             guild
@@ -747,7 +746,7 @@ async def pararell_load(client,channel,future):
     except (IndexError,PermissionError) as err:
         pass
     except BaseException as err:
-        traceback.print_exc()
+        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at pararell_load\nTraceback (most recent call last):\n'])))
     finally:
         future.set_result(None)
     
@@ -788,7 +787,7 @@ async def pararell_load_reactions(client,channel,future,reactions):
     except (IndexError,PermissionError) as err:
         pass
     except BaseException as err:
-        traceback.print_exc()
+        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at pararell_load_reactions\nTraceback (most recent call last):\n'])))
     finally:
         messages=[message for message in channel.messages if message.reactions]
         for message in messages:
@@ -866,7 +865,7 @@ async def command_color(client,message,content):
             full_color=int(parsed.group(1),base=16)
             color_r=(full_color&0xff0000)>>16
             color_g=(full_color&0x00ff00)>>8
-            color_b(full_color&0x00ff)
+            color_b=(full_color&0x00ff)
             break
         
         parsed=REGULAR_RP.fullmatch(content)

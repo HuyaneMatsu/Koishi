@@ -91,7 +91,7 @@
     },
     {
         "acquirable": true,
-        "description": "If you have no duplicates of any cards in your deck, your opponent can only move Pawns for the next 5 turns. This card can't be duplicated by card effects.",
+        "description": "If you have no duplicates of any cards in your deck, your opponent can only move Pawns for the next 4 turns. This card can't be duplicated by card effects.",
         "effectname": "one hope",
         "id": 611753886881153025,
         "name": "One Hope",
@@ -550,7 +550,7 @@
     },
     {
         "acquirable": true,
-        "description": "If this is your 12th turn or later, starting from this turn, you can draw a card whenever your turn end, whenever you have 15 cards in your deck, you lose the game",
+        "description": "If this is your 12th turn or later, starting from this turn, you can draw a card whenever your turn ends, whenever you have 15 cards in your deck, you lose the game",
         "effectname": "overflowing greed",
         "id": 601721604875223044,
         "name": "Overflowing Greed",

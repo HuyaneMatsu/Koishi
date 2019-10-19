@@ -3,7 +3,6 @@ from itertools import chain
 import re
 from time import monotonic
 
-from hata.dereaddons_local import asyncinit
 from hata.events_compiler import ContentParser
 from hata.embed import Embed
 from hata.color import Color
@@ -92,7 +91,7 @@ async def ds_manager(self,message,command):
 
 #:-> @ <-:#}{#:-> @ <-:#{ backend }#:-> @ <-:#}{#:-> @ <-:#
 
-class ds_game(metaclass=asyncinit):
+class ds_game(object):
 
     WEST    = BUILTIN_EMOJIS['arrow_left']
     NORTH   = BUILTIN_EMOJIS['arrow_up']
@@ -122,8 +121,8 @@ class ds_game(metaclass=asyncinit):
 
     __async_call__ = True
     
-    async def __init__(self,client,channel,user):
-        
+    async def __new__(cls,client,channel,user):
+        self=object.__new__(cls)
         DS_GAMES[user.id]   = self
         self.client         = client
         self.user           = user
@@ -166,7 +165,9 @@ class ds_game(metaclass=asyncinit):
             message.weakrefer()
             self.task.set_result(None)
             client.events.reaction_add.append(self,message)
-            
+
+        return self
+    
     async def start_menu(self):
         self.stage=None
         

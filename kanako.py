@@ -2,7 +2,7 @@
 from hata.events_compiler import ContentParser
 from hata.futures import Future,CancelledError,InvalidStateError,Task
 from random import randint
-from hata.dereaddons_local import any_to_any,asyncinit, methodize
+from hata.dereaddons_local import any_to_any, methodize
 from time import monotonic
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS
@@ -366,11 +366,12 @@ class kanako_game():
             self.running=False
         Task(client.message_create(self.channel,embed=Embed('','Game cancelled',COLOR)),client.loop)
 
-class game_statistics(metaclass=asyncinit):
+class game_statistics(object):
     __slots__=['cache', 'source']
     def __len__(self):
         return self.cache.__len__()
-    def __init__(self,source):
+    def __new__(cls,source):
+        self=object.__new__(cls)
         self.source=source
         self.cache=[None for _ in range((self.source.history.__len__()+9)//10+1)]
         self.createpage0()
@@ -600,7 +601,7 @@ def kanako_create(client,game,message,args):
         return Embed('',text,COLOR)
 
 
-class embedination(metaclass=asyncinit):
+class embedination(object):
     LEFT2   = BUILTIN_EMOJIS['rewind']
     LEFT    = BUILTIN_EMOJIS['arrow_backward']
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
@@ -609,7 +610,8 @@ class embedination(metaclass=asyncinit):
     emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET]
     
     __slots__=['cancel', 'channel', 'page', 'pages', 'task']
-    async def __init__(self,client,channel,pages):
+    async def __new__(cls,client,channel,pages):
+        self=object.__new__(cls)
         self.pages=pages
         self.page=0
         self.channel=channel
@@ -628,6 +630,8 @@ class embedination(metaclass=asyncinit):
         
         waitfor_wrapper(client,self,150.,events,message)
 
+        return self
+    
     async def __call__(self,wrapper,emoji,user):
         if self.task is not None or user.is_bot:
             return

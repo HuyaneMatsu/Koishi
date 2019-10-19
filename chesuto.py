@@ -13,7 +13,6 @@ from hata.events import Cooldown, wait_for_message, Pagination
 from hata.events_compiler import ContentParser
 from hata.exceptions import DiscordException
 from hata.embed import Embed
-from hata.dereaddons_local import asyncinit
 from hata.role import Role
 from hata.dereaddons_local import alchemy_incendiary,_spaceholder
 from hata.color import Color
@@ -1968,9 +1967,10 @@ async def chesuto_lobby(client,message,content):
         await lobby.switch_context(client,channel)
         
     
-class ChesutoWinSystem(metaclass=asyncinit):
+class ChesutoWinSystem(object):
     __slots__=('client','channel','message','user','future','embed','emojis',)
-    async def __init__(self,client,channel,user):
+    async def __new__(cls,client,channel,user):
+        self=object.__new__(cls)
         self.client=client
         self.channel=channel
         self.user=user
@@ -1983,7 +1983,8 @@ class ChesutoWinSystem(metaclass=asyncinit):
         self.future=Future(client.loop)
         Task(self.win_menu_initial(),client.loop)
         ACTIVE_LOBBIES[user.id]=self
-
+        return self
+    
     async def switch_context(self,client,channel):
         embed=self.embed
         try:
