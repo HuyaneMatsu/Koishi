@@ -414,7 +414,7 @@ async def bans(client,message,content):
                 reason='Not defined.'
             name=f'{user:f} {user.id}'
             embed_length+=len(reason)+len(name)
-            if embed_length>7900:
+            if embed_length>5900:
                 break
             embed.add_field(name,reason)
             field_count+=1
@@ -518,7 +518,13 @@ OA2_accesses={}
 
 @commands
 async def oa2_link(client,message,content): #just a test link
-    await client.message_create(message.channel,'https://discordapp.com/oauth2/authorize?client_id=486565096164687885&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu&response_type=code&scope=identify%20connections%20guilds%20guilds.join%20email')
+    await client.message_create(message.channel,(
+        'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
+        '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
+        '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
+        '%20email%20applications.builds.read'
+        '%20applications.builds.upload%20applications.entitlements'
+        '%20applications.store.update'))
 
 @commands
 async def oa2_feed(client,message,content):
@@ -698,19 +704,15 @@ async def nitro(client,message,content):
             emoji=guild.get_emoji(text_form)
             if emoji is not None:
                 break
-        
-        if emoji is None:
+        else:
             return
         
     else:
         if emoji.is_custom_emoji:
-            found=False
             for guild in client.guilds.values():
                 if emoji.id in guild.emojis:
-                    found=True
                     break
-            
-            if found==False:
+            else:
                 return
     
     await client.message_create(message.channel,emoji.as_emoji)

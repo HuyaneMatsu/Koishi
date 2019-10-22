@@ -9,8 +9,9 @@ KOISHI_ID       = #bot id (int), can be 0
 KOISHI_SECRET   = #client_secret (str) for oauth2, can be None.
 KOISHI_PREFIX   = 'k!' #default prefix (str)
 
-MOKOU_TOKEN     = #bot token (str) for second bot
-MOKOU_ID        = #bot id (int) for second bot, can be 0
+SATORI_TOKEN    = #bot token (str) for second bot
+SATORI_ID       = #bot id (int) for second bot, can be 0
+SATORI_PREFIX   = '&' #default prefix (str)
 
 FLAN_TOKEN      = #bot token (str) for third bot
 FLAN_ID         = #bot id (int) for third bot, can be 0

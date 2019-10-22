@@ -9,7 +9,7 @@ from hata.events import waitfor_wrapper, Cooldown, multievent
 from hata.futures import Task
 from hata.exceptions import DiscordException
 
-from tools import BeautifulSoup, choose, pop_one, CooldownHandler, mark_as_async
+from tools import BeautifulSoup, choose, pop_one, CooldownHandler, mark_as_async, choose_notsame
 
 BOORU_COLOR=Color.from_html('#138a50')
 
@@ -66,7 +66,7 @@ class ShuffledShelter(object):
         
         message = await client.message_create(channel,embed=embed)
 
-        if not urls or not channel.cached_permissions_for(client).can_add_reactions:
+        if (len(urls)==pop) or (not channel.cached_permissions_for(client).can_add_reactions):
             return
         
         message.weakrefer()
@@ -92,7 +92,7 @@ class ShuffledShelter(object):
         if self.task_flag:
             return
 
-        url=pop_one(self.urls) if self.pop else choose(self.urls)
+        url=pop_one(self.urls) if self.pop else choose_notsame(self.urls,message.embeds[0].image.url)
         embed=Embed(self.title,color=BOORU_COLOR,url=url)
         embed.add_image(url)
         

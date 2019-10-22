@@ -23,13 +23,14 @@ from hata.user import Partial_user,User
 from hata.role import Role
 from hata.client import Client
 from hata.oauth2 import UserOA2
-from hata.channel import cr_pg_channel_object,ChannelCategory,ChannelText
+from hata.channel import cr_pg_channel_object,ChannelCategory,ChannelText,ChannelGuildBase
 from hata.guild import Partial_guild
 from hata.http import VALID_ICON_FORMATS
 from hata.integration import Integration
 from email._parseaddr import _parsedate_tz
 from datetime import datetime,timedelta,timezone
 from hata.embed import Embed
+from hata.webhook import Webhook
 
 user1_id=189702078958927872
 user2_id=184405311681986560
@@ -91,6 +92,7 @@ UNLIMITED  :
     guild_channels
     guild_roles
     guild_widget_get
+    channel_follow
     
 group       : reaction
 limit       : 1
@@ -1083,6 +1085,24 @@ def message_suppress_embeds(client,message,suppress=True):
     return bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/suppress-embeds',
         data={'suppress':suppress})
+
+async def channel_follow(client,source_channel,target_channel):
+    if source_channel.type!=5:
+        raise ValueError(f'\'source_channel\' must be type 5, so news (announcements) channel, got {source_channel}')
+    if target_channel.type not in ChannelText.INTERCHANGE:
+        raise ValueError(f'\'target_channel\' must be type 0 or 5, so any guild text channel, got  {target_channel}')
+
+    data = {
+        'webhook_channel_id': target_channel.id,
+            }
+
+    channel_id=source_channel.id
+
+    data = await bypass_request(client,METH_POST,
+        f'https://discordapp.com/api/v7/channels/{channel_id}/followers',data)
+    webhook=Webhook._from_follow_data(data,target_channel,client)
+    return webhook
+
 
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
@@ -3168,6 +3188,9 @@ async def ratelimit_test0163(client,message,content):
 
 @ratelimit_commands
 async def ratelimit_test164(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
     amount=10
     reactions=[BUILTIN_EMOJIS['regional_indicator_'+chr(x)] for x in range(98,108)]
     await client.reaction_add(message,BUILTIN_EMOJIS['regional_indicator_a'])
@@ -3189,4 +3212,99 @@ async def ratelimit_test164(client,message,content):
 
     await client.message_create(message.channel,'\n'.join(result))
 
-    
+@ratelimit_commands
+async def ratelimit_test165(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    source_channel=message.channel
+    if not isinstance(source_channel,ChannelGuildBase):
+        await client.message_create(source_channel,'Guild channel only')
+        return
+
+    category=source_channel.category
+
+    channel1=None
+    channel2=None
+
+    for channel in category.channels:
+        if channel.type==0:
+            if channel1 is None:
+                channel1=channel
+            continue
+
+        if channel.type==5:
+            if channel2 is None:
+                channel2=channel
+
+    del channel
+    if channel1 is None:
+        if channel2 is None:
+            await client.message_create(source_channel,'Could not find either normal text and news channel at the categeory.')
+            return
+        else:
+            await client.message_create(source_channel,'Could not find normal text channel at the categeory.')
+            return
+    else:
+        if channel2 is None:
+            await client.message_create(source_channel,'Could not find news channel at the categeory.')
+            return
+
+    webhook = await channel_follow(client,channel2,channel1)
+    await client.webhook_delete(webhook)
+
+@ratelimit_commands
+async def ratelimit_test166(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    source_channel=message.channel
+    if not isinstance(source_channel,ChannelGuildBase):
+        await client.message_create(source_channel,'Guild channel only')
+        return
+
+    channel1=None
+    channel2=None
+    channel3=None
+
+    for channel in source_channel.category.channels:
+        if channel.type==0:
+            if channel1 is None:
+                channel1=channel
+                continue
+            if channel3 is None:
+                channel3=channel
+                continue
+            continue
+
+        if channel.type==5:
+            if channel2 is None:
+                channel2=channel
+
+    del channel
+    if channel1 is None:
+        if channel2 is None:
+            await client.message_create(source_channel,'Could not find 2 normal text and news channel at the categeory.')
+            return
+        else:
+            await client.message_create(source_channel,'Could not find 2 normal text channel at the category.')
+            return
+    else:
+        if channel2 is None:
+            if channel3 is None:
+                await client.message_create(source_channel,'Could not find either 1 normal text and news channel at the categeory.')
+                return
+            else:
+                await client.message_create(source_channel,'Could not find news channel at the categeory.')
+                return
+        else:
+            if channel3 is None:
+                await client.message_create(source_channel,'Could not find 1 normal text channel at the category.')
+                return
+
+    task1=Task(channel_follow(client,channel2,channel1),client.loop)
+    task2=Task(channel_follow(client,channel2,channel3),client.loop)
+    webhook1 = await task1
+    webhook2 = await task2
+    await client.webhook_delete(webhook1)
+    await client.webhook_delete(webhook2)

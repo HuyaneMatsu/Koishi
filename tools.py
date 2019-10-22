@@ -16,6 +16,17 @@ except ImportError:
 def choose(list_):
     return list_[(random()*list_.__len__()).__int__()]
 
+def choose_notsame(list_,last):
+    index=(random()*list_.__len__()).__int__()
+    value=list_[index]
+    if value==last:
+        index=index+1
+        if index==list_.__len__():
+            index=0
+        value=list_[index]
+
+    return value
+
 def pop_one(list_):
     return list_.pop((random()*list_.__len__()).__int__())
 

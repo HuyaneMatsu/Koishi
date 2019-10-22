@@ -2187,11 +2187,11 @@ async def parse_details_command(client,message,content):
         await client.message_create_files(message.channel,files,'Did it work OwO?')
         
     @on_command
-    async def bypass_connection_check(client,message,content):
+    async def bypass_pconnection_check(client,message,content):
         if message.author is not client.owner:
             return
         try:
-            data = await client.http.client_connections(client)
+            data = await client.http.client_pconnections(client)
         except Exception as err:
             content=repr(err)
         else:
@@ -2200,15 +2200,15 @@ async def parse_details_command(client,message,content):
         await client.message_create(message.channel,content)
 
     @on_command
-    async def test_connection(client,message,content):
+    async def test_pconnection(client,message,content):
         if message.author is not client.owner:
             return
         try:
-            connections = await client.client_connections()
+            pconnections = await client.client_pconnections()
         except Exception as err:
             content=repr(err)
         else:
-            content=connect(list(connections.values()))
+            content=pconnect(list(pconnections.values()))
 
         await client.message_create(message.channel,content)
 
@@ -2544,8 +2544,8 @@ async def parse_details_command(client,message,content):
 ##            return
 ##        try:
 ##            for times in range(2):
-##                gateway = await client.http.ws_connect(new_gateway_test_class1(client))
-##                print('connected')
+##                gateway = await client.http.ws_pconnect(new_gateway_test_class1(client))
+##                print('pconnected')
 ##                async for result in gateway.websocket:
 ##                    try:
 ##                        json=from_json(result)
@@ -2640,7 +2640,7 @@ async def parse_details_command(client,message,content):
 ##            'client_id': client.id,
 ##            'client_secret': CLIENT_SECRET,
 ##            'grant_type': 'client_credentials',
-##            'scope': 'identify connections',
+##            'scope': 'identify pconnections',
 ##                }
 ##
 ##        async with Request_CM(client.http.client_tokens(data)) as response:
@@ -2665,7 +2665,7 @@ async def parse_details_command(client,message,content):
 ##            response_data = await response.text(encoding='utf-8')
 ##            data=from_json(response_data)
 ##            
-##        url='https://discordapp.com/api/v7/users/@me/connections'
+##        url='https://discordapp.com/api/v7/users/@me/pconnections'
 ##
 ##        headers=type(client.header)() #for keeping the type
 ##        headers['Authorization']=f'Bearer {data["access_token"]}'
@@ -2723,7 +2723,7 @@ async def parse_details_command(client,message,content):
         if message.author is not client.owner or guild is None:
             return
         await client.guild_embed_edit(guild,True,message.channel)
-        result=connect(guild.embed)
+        result=pconnect(guild.embed)
         
         await client.message_create(message.channel,result)
 
@@ -2734,7 +2734,7 @@ async def parse_details_command(client,message,content):
             return
         guild_embed = await client.guild_embed_get(guild)
 
-        result=connect(guild_embed)
+        result=pconnect(guild_embed)
 
         await client.message_create(message.channel,result)
 
@@ -2745,7 +2745,7 @@ async def parse_details_command(client,message,content):
             return
         
         guild_embed = await client.guild_embed_edit(guild,False,None)
-        result=connect(guild.embed)
+        result=pconnect(guild.embed)
 
         await client.message_create(message.channel,result)
 
@@ -2782,7 +2782,7 @@ async def parse_details_command(client,message,content):
         if message.author is not client.owner or guild is None:
             return
         ingegrations = await client.integration_get_all(guild)
-        result=connect(ingegrations)
+        result=pconnect(ingegrations)
         await client.message_create(message.channel,result)
 
     @on_command
@@ -4083,21 +4083,21 @@ async def test_reference_remove(client,message,token):
     
     tester=Client(token)
     start_clients()
-    await client.message_create(message.channel,'connecting')
+    await client.message_create(message.channel,'pconnecting')
     
     duration=0.
     while tester.status is Status.offline:
         await sleep(.1,client.loop)
         duration+=.1
 
-    await client.message_create(message.channel,f'connected in {duration:.2f}')
+    await client.message_create(message.channel,f'pconnected in {duration:.2f}')
 
     middle_amounts=len(CLIENTS),len(GUILDS),len(USERS),len(ROLES),len(CHANNELS)
      
-    await tester.disconnect()
+    await tester.dispconnect()
     tester._delete()
 
-    await client.message_create(message.channel,f'disconnected')
+    await client.message_create(message.channel,f'dispconnected')
     
     tester=None
     await sleep(0.,client.loop)
@@ -4127,6 +4127,27 @@ async def embedimage(client,message,content):
     with await ReuAsyncIO(path,'rb') as file:
         await client.message_create(message.channel,embed=embed,file=('image.png',file))
 
+@koishi_commands
+async def voice_reconnect_test(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    voice_clients=client.voice_clients.copy()
+    for voice_client in voice_clients.values():
+        voice_client._freeze()
+
+    loop=client.loop
+
+    await client.disconnect()
+
+    await sleep(5.0,loop)
+
+    client.loop=loop
+    await client.connect()
+    await sleep(5.0,loop)
+    client.voice_clients=voice_clients
+    for voice_client in voice_clients.values():
+        voice_client._unfreeze()
 
 # - : - # dungeon_sweeper.py # - : - #
 

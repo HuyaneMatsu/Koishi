@@ -5,17 +5,20 @@ sys.path.append(os.path.abspath('..'))
 
 from hata import Client,start_clients
 from hata.activity import ActivityGame
-from hata.channel import ChannelText
+from hata.channel import ChannelText, CHANNELS
 from hata.events import (ReactionAddWaitfor,CommandProcesser,
     ReactionDeleteWaitfor,)
 from hata.webhook import Webhook
 from hata.role import Role
-from hata.futures import sleep
-
+from hata.futures import sleep,render_exc_to_list
+from hata.dereaddons_local import alchemy_incendiary
+from hata.prettyprint import pconnect
+from hata.invite import Invite
+from hata.exceptions import DiscordException
 import pers_data
 
 import koishi
-import mokou
+import satori
 import flan
 
 from tools import commit_extractor,MessageDeleteWaitfor
@@ -61,13 +64,13 @@ Koishi.events.message_create.append(webhook_sender,webhook_sender.channel)
 ############################## SETUP MOKOU ##############################
 
 
-Mokou=Client(pers_data.MOKOU_TOKEN,
-    client_id=pers_data.MOKOU_ID,
+Satori=Client(pers_data.SATORI_TOKEN,
+    client_id=pers_data.SATORI_ID,
         )
 
-Mokou.events(mokou.message_create)
-Mokou.events(mokou.typing)
-Mokou.events(mokou.channel_delete)
+satori.Koishi=Koishi #sisters, u know
+satori_commands=Satori.events(CommandProcesser(pers_data.SATORI_PREFIX)).shortcut
+satori_commands.extend(satori.commands)
 
 
 ############################## SETUP ELPHELT ##############################
@@ -180,11 +183,136 @@ async def achievement_get(client,message,content):
         await Pagination(client,message.channel,pages)
         return
 
-from hata.exceptions import DiscordException
+    await client.message_create(message.channel,text)
 
 @koishi_commands
-async def target_user_type_invite_test(client,message,content):
+async def achievement_edit(client,message,content):
+    while True:
+        if not client.is_owner(message.author):
+            text='Owner only'
+            break
+
+        try:
+            id_=int(content)
+        except ValueError:
+            text='pass id pls'
+            break
+        
+        try:
+            achievement = await client.achievement_edit(id_,name='woaaa')
+        except BaseException as err:
+            text=''.join([
+                'at edit: exception occured\n',
+                '\nTraceback (most recent call last):\n',
+                *traceback.format_tb(err.__traceback__),
+                repr(err),'\n',])
+            break
+
+        chunks=pchunkify(achievement)
+        pages=[{'content':chunk} for chunk in chunks]
+        await Pagination(client,message.channel,pages)
+        return
+
+    await client.message_create(message.channel,text)
+    
+@koishi_commands
+async def achievement_delete(client,message,content):
+    while True:
+        if not client.is_owner(message.author):
+            text='Owner only'
+            break
+
+        try:
+            id_=int(content)
+        except ValueError:
+            text='pass id pls'
+            break
+        
+        try:
+            achievement = await client.achievement_delete(id_)
+        except BaseException as err:
+            text=''.join([
+                'at delete: exception occured\n',
+                '\nTraceback (most recent call last):\n',
+                *traceback.format_tb(err.__traceback__),
+                repr(err),'\n',])
+            break
+
+        chunks=pchunkify(achievement)
+        pages=[{'content':chunk} for chunk in chunks]
+        await Pagination(client,message.channel,pages)
+        return
+
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def user_achievements(client,message,content):
+    while True:
+        user=message.author
+        if not client.is_owner(user):
+            text='Owner only'
+            break
+
+        try:
+            access=koishi.OA2_accesses[user.id]
+        except KeyError:
+            text='pls give OA link first'
+            break
+        
+        try:
+            achievements = await client.user_achievements(access)
+        except BaseException as err:
+            text=''.join([
+                'at user\'s achievements: exception occured\n',
+                '\nTraceback (most recent call last):\n',
+                *traceback.format_tb(err.__traceback__),
+                repr(err),'\n',])
+            break
+
+        chunks=pchunkify(achievements)
+        pages=[{'content':chunk} for chunk in chunks]
+        await Pagination(client,message.channel,pages)
+        return
+
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def user_achievement_update(client,message,content):
+    while True:
+        if not client.is_owner(message.author):
+            text='Owner only'
+            break
+
+        try:
+            id_=int(content)
+        except ValueError:
+            text='pass id pls'
+            break
+        
+        try:
+            await client.user_achievement_update(message.author,id_,100)
+        except BaseException as err:
+            text=''.join([
+                'at user\'s achievement update: exception occured\n',
+                '\nTraceback (most recent call last):\n',
+                *traceback.format_tb(err.__traceback__),
+                repr(err),'\n',])
+            break
+
+        text='success'
+        break
+
+    await client.message_create(message.channel,text)
+    
+
+@koishi_commands
+async def target_user_type_invite_test_0(client,message,content):
     if not client.is_owner(message.author):
+        return
+
+    channel=message.channel
+    if channel.guild is None:
+        await client.message_create(channel,'Guild only!')
         return
 
     data = {
@@ -196,38 +324,338 @@ async def target_user_type_invite_test(client,message,content):
             }
 
     try:
-        data = await client.http.invite_create(message.channel.id,data)
+        data = await client.http.invite_create(channel.id,data)
     except DiscordException as err:
         result=repr(err)
     else:
         result=repr(data)
         await client.http.invite_delete(data['code'],'just testin')
 
-    await client.message_create(message.channel,result)
-
+    await client.message_create(channel,result)
 
 @koishi_commands
-async def voice_reconnect_test(client,message,content):
+async def target_user_type_invite_test_0(client,message,content):
     if not client.is_owner(message.author):
         return
 
-    voice_clients=client.voice_clients.copy()
-    for voice_client in voice_clients.values():
-        voice_client._freeze()
+    channel=message.channel
+    if message.channel.guild is None:
+        client.message_create(channel,'Guild only!')
+        return
 
-    loop=client.loop
-    
-    await client.disconnect()
-    
-    await sleep(5.0,loop)
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+            }
 
-    client.loop=loop
-    await client.connect()
-    await sleep(5.0,loop)
-    client.voice_clients=voice_clients
-    for voice_client in voice_clients.values():
-        voice_client._unfreeze()
+    try:
+        data = await client.http.invite_create(channel.id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(data)
+        await client.http.invite_delete(data['code'],'just testin')
+
+    await client.message_create(channel,result)
+
+@koishi_commands
+async def target_user_id_invite_test(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    channel=message.channel
+    if channel.guild is None:
+        await client.message_create(channel,'Guild only!')
+        return
+
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_id'    : 319854926740062208,
+            }
+
+    try:
+        data = await client.http.invite_create(channel.id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(data)
+        await client.http.invite_delete(data['code'],'just testin')
+
+    await client.message_create(channel,result)
+
+@koishi_commands
+async def target_user_id_with_type_test(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    channel=message.channel
+    if channel.guild is None:
+        await client.message_create(channel,'Guild only!')
+        return
+
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : 319854926740062208,
+            }
+
+    try:
+        data = await client.http.invite_create(channel.id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(data)
+        await client.http.invite_delete(data['code'],'just testin')
+
+    await client.message_create(channel,result)
+
+@koishi_commands
+async def target_user_stream_test_0(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    channel=message.channel
+    guild=channel.guild
+    if guild is None:
+        await client.message_create(channel,'Guild only!')
+        return
+
+    voice_states=guild.voice_states
+    if not voice_states:
+        await client.message_create(channel,'No voice state at the guild.')
+        return
+
+    for voice_state in voice_states.values():
+        if voice_state.self_video:
+            break
+    else:
+        await client.message_create(channel,'No 1 is streaming at that specific guild.')
+        return
+
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : voice_state.user.id,
+            }
+
+    try:
+        data = await client.http.invite_create(channel.id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(data)
+        await client.http.invite_delete(data['code'],'just testin')
+
+    await client.message_create(channel,result)
+
+@koishi_commands
+async def target_user_stream_test_1(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    channel=message.channel
+    guild=channel.guild
+    if guild is None:
+        await client.message_create(channel,'Guild only!')
+        return
+
+    voice_states=guild.voice_states
+    if not voice_states:
+        await client.message_create(channel,'No voice state at the guild.')
+        return
+
+    for voice_state in voice_states.values():
+        if voice_state.self_video:
+            break
+    else:
+        await client.message_create(channel,'No 1 is streaming at that specific guild.')
+        return
+
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : voice_state.user.id,
+            }
+
+    try:
+        data = await client.http.invite_create(voice_state.channel.id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(data)
+        await client.http.invite_delete(data['code'],'just testin')
+
+    await client.message_create(channel,result)
+
+@koishi_commands
+async def target_user_stream_test_2(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    channel=message.channel
+    guild=channel.guild
+    if guild is None:
+        await client.message_create(channel,'Guild only!')
+        return
+
+    for channel_ in guild.all_channel.values():
+        if channel_.type==5:
+            target_channel_id=channel.id
+            break
+    else:
+        await client.message_create(channel,'No NEWS channel found at the guild!')
+        return
+
+    voice_states=guild.voice_states
+    if not voice_states:
+        await client.message_create(channel,'No voice state at the guild.')
+        return
+
+    for voice_state in voice_states.values():
+        if voice_state.self_video:
+            break
+    else:
+        await client.message_create(channel,'No 1 is streaming at that specific guild.')
+        return
+
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : voice_state.user.id,
+            }
+
+    try:
+        data = await client.http.invite_create(target_channel_id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        result=repr(data)
+        await client.http.invite_delete(data['code'],'just testin')
+
+    await client.message_create(channel,result)
+
+@koishi_commands
+async def target_user_stream_test_url(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    channel=message.channel
+    guild=channel.guild
+    if guild is None:
+        await client.message_create(channel,'Guild only!')
+        return
+
+    voice_states=guild.voice_states
+    if not voice_states:
+        await client.message_create(channel,'No voice state at the guild.')
+        return
+
+    for voice_state in voice_states.values():
+        if voice_state.self_video:
+            break
+    else:
+        await client.message_create(channel,'No 1 is streaming at that specific guild.')
+        return
+
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : voice_state.user.id,
+            }
+
+    try:
+        data = await client.http.invite_create(voice_state.channel.id,data)
+    except DiscordException as err:
+        result=repr(err)
+    else:
+        invite=Invite(data)
+        result=invite.url
+
+    await client.message_create(channel,result)
     
+@koishi_commands
+async def follow_test(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    content=filter_content(content)
+    if len(content)<2:
+        await client.message_create(message.channel,'Please include 2 channel ids.')
+        return
+
+    try:
+        source_channel_id=int(content[0])
+    except ValueError:
+        await client.message_create(message.channel,'Source channel id is not integer.')
+        return
+
+    try:
+        target_channel_id=int(content[1])
+    except ValueError:
+        await client.message_create(message.channel,'Target channel id is not integer.')
+        return
+
+    try:
+        source_channel=CHANNELS[source_channel_id]
+    except KeyError:
+        await client.message_create(message.channel,'I dont share a guild with that source channel.')
+        return
+
+    try:
+        target_channel=CHANNELS[target_channel_id]
+    except KeyError:
+        await client.message_create(message.channel,'I dont share a guild with the target channel.')
+        return
+
+    try:
+        webhook = await client.channel_follow(source_channel,target_channel)
+    except ValueError as err:
+        text=err.args[0]
+    except BaseException as err:
+        text=''.join(Koishi.loop.run_in_exceutor(alchemy_incendiary,render_exc_to_list,(err,),),)
+    else:
+        text=pconnect(webhook)
+
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def show_invite_data(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    data = await client.http.invite_get(content,{'with_counts':True})
+    text=repr(data)
+    await client.message_create(message.channel,text)
+
+@koishi_commands
+async def show_invite(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    invite = await client.invite_get(content)
+    text=pconnect(invite)
+    await client.message_create(message.channel,text)
+
 ############################## START ##############################
 
 koishi_commands(Interpreter(locals().copy()),case='execute')
