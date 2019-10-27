@@ -13,7 +13,7 @@ class dispatch_tester:
 
     @classmethod
     async def here(self,client,message,content):
-        if message.author is not client.owner:
+        if not client.is_owner(message.author):
             return
         if message.channel is self.channel:
             try:
@@ -30,7 +30,7 @@ class dispatch_tester:
             
     @classmethod
     async def switch(self,client,message,content):
-        if message.author is not client.owner or not (5<len(content)<50):
+        if (not client.is_owner(message.author)) or (not (5<len(content)<50)):
             return
         if content not in EVENTS.defaults:
             await client.message_create(message.channel,f'Invalid dispatcher: {content}')
@@ -269,9 +269,9 @@ class dispatch_tester:
                     
             for activity in ignore:
                 result.append('Activity updated:')
-                activity=activity.pop('activity')
+                real_activity=activity.pop('activity')
                 for key,value in activity.items():
-                    result.append(f'- {key} : {value} -> {getattr(activity,key)}')
+                    result.append(f'- {key} : {value} -> {getattr(real_activity,key)}')
             
             if len(ignore)!=len(activities):
                 for activity in activities:

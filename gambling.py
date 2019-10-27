@@ -14,21 +14,23 @@ from hata.futures import sleep,Task,Future
 from models import DB_ENGINE,currency_model,CURRENCY_TABLE
 from tools import CooldownHandler
 
-GAMBLING_COLOR=Color.from_rgb(254,254,164)
-CURRENCY_EMOJI=Emoji.precreate(603533301516599296)
-DAILY_INTERVAL=timedelta(hours=22)
-DAILY_STREAK_BREAK=timedelta(hours=26)
-DAILY_STREAK_LOSE=timedelta(hours=12)
-DAILY_REWARD=100
-DAILY_STREAK_BONUS=5
-DAILY_REWARD_LIMIT=300
+GAMBLING_COLOR          = Color.from_rgb(254,254,164)
+CURRENCY_EMOJI          = Emoji.precreate(603533301516599296)
+DAILY_INTERVAL          = timedelta(hours=22)
+DAILY_STREAK_BREAK      = timedelta(hours=26)
+DAILY_STREAK_LOSE       = timedelta(hours=12)
+DAILY_REWARD            = 100
+DAILY_STREAK_BONUS      = 5
+DAILY_REWARD_LIMIT      = 300
 
-EVENT_MAX_DURATION=timedelta(hours=24)
-EVENT_MIN_DURATION=timedelta(minutes=30)
-EVENT_MIN_AMOUNT=DAILY_REWARD//2 #half day of min
-EVENT_MAX_AMOUNT=7*DAILY_REWARD_LIMIT #1 week of max
-EVENT_OK_EMOJI=BUILTIN_EMOJIS['ok_hand']
-EVENT_ABORT_EMOJI=BUILTIN_EMOJIS['x']
+EVENT_MAX_DURATION      = timedelta(hours=24)
+EVENT_MIN_DURATION      = timedelta(minutes=30)
+EVENT_HEART_MIN_AMOUNT  = DAILY_REWARD//2           #half day of min
+EVENT_HEART_MAX_AMOUNT  = 7*DAILY_REWARD_LIMIT      #1 week of max
+EVENT_OK_EMOJI          = BUILTIN_EMOJIS['ok_hand']
+EVENT_ABORT_EMOJI       = BUILTIN_EMOJIS['x']
+EVENT_DAILY_MIN_AMOUNT  = 1
+EVENT_DAILY_MAX_AMOUNT  = 7
 
 gambling=eventlist()
 
@@ -218,7 +220,7 @@ def convert_tdelta(delta):
     return ', '.join(result)
 
 class heartevent_start_checker:
-    __slots__=['client']
+    __slots__=('client',)
     def __init__(self,client):
         self.client=client
 
@@ -232,7 +234,7 @@ class heartevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
     
-    __slots__=['amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter']
+    __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     async def __new__(cls,client,message,duration,amount,user_limit):
         self=object.__new__(cls)
         self.connector=None
@@ -248,14 +250,14 @@ class heartevent(object):
                      f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
                      f'**>**  passed : {convert_tdelta(duration)}',
                       color=GAMBLING_COLOR)
-            elif amount>EVENT_MAX_AMOUNT:
+            elif amount>EVENT_HEART_MAX_AMOUNT:
                 embed=Embed('Amount passed the upper limit\n',
-                     f'**>**  upper limit : {EVENT_MAX_AMOUNT}\n'
+                     f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n'
                      f'**>**  passed : {amount}',
                       color=GAMBLING_COLOR)
-            elif amount<EVENT_MIN_AMOUNT:
+            elif amount<EVENT_HEART_MIN_AMOUNT:
                 embed=Embed('Amount passed the lower limit\n',
-                     f'**>**  lower limit : {EVENT_MIN_AMOUNT}\n'
+                     f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n'
                      f'**>**  passed : {amount}',
                       color=GAMBLING_COLOR)
             elif user_limit<0:
@@ -351,8 +353,9 @@ class heartevent(object):
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
         results = await response.fetchall()
         if results:
+            result=results[0]
             to_execute=CURRENCY_TABLE.update().values(
-                total_love  = results[0].total_love+self.amount,
+                total_love  = result.total_love+self.amount,
                     ).where(currency_model.user_id==user_id)
         else:
             to_execute=CURRENCY_TABLE.insert().values(
@@ -360,6 +363,196 @@ class heartevent(object):
                 total_love  = self.amount,
                 daily_next  = datetime.utcnow(),
                 daily_streak= 0,)
+        await connector.execute(to_execute)
+
+    async def countdown(self,client,message):
+        update_delta=self._update_delta
+        self.waiter=waiter=Future(self.client.loop)
+
+        sleep_time=(self.duration%update_delta).seconds
+        if sleep_time:
+            self.duration-=timedelta(seconds=sleep_time)
+            await waiter.sleep(sleep_time)
+            waiter.clear()
+
+        sleep_time=self._update_time
+        while True:
+            await waiter.sleep(sleep_time)
+            waiter.clear()
+            self.duration-=update_delta
+            if self.duration<update_delta:
+                break
+            try:
+                await client.message_edit(message,embed=self.generate_embed())
+            except DiscordException:
+                break
+
+        client.events.reaction_add.remove(self,message)
+        try:
+            await client.message_delete(message)
+        except DiscordException:
+            pass
+        await self.connector.close()
+        self.connector=None
+
+    def __del__(self):
+        connector=self.connector
+        if connector is None:
+            return
+        Task(connector.close(),self.client.loop)
+        self.connector=None
+
+@gambling
+@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
+    'tdelta','int','int, default=0')
+class dailyevent(object):
+    _update_time=60.
+    _update_delta=timedelta(seconds=_update_time)
+
+    __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
+    async def __new__(cls,client,message,duration,amount,user_limit):
+        self=object.__new__(cls)
+        self.connector=None
+        channel=message.channel
+        while True:
+            if duration>EVENT_MAX_DURATION:
+                embed=Embed('Duration passed the upper limit\n',
+                     f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
+                     f'**>**  passed : {convert_tdelta(duration)}',
+                      color=GAMBLING_COLOR)
+            elif duration<EVENT_MIN_DURATION:
+                embed=Embed('Duration passed the lower limit\n',
+                     f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
+                     f'**>**  passed : {convert_tdelta(duration)}',
+                      color=GAMBLING_COLOR)
+            elif amount>EVENT_DAILY_MAX_AMOUNT:
+                embed=Embed('Amount passed the upper limit\n',
+                     f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n'
+                     f'**>**  passed : {amount}',
+                      color=GAMBLING_COLOR)
+            elif amount<EVENT_DAILY_MIN_AMOUNT:
+                embed=Embed('Amount passed the lower limit\n',
+                     f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n'
+                     f'**>**  passed : {amount}',
+                      color=GAMBLING_COLOR)
+            elif user_limit<0:
+                embed=Embed('User limit passed the lower limit\n',
+                      '**>** lower limit : 0\n'
+                     f'**>**  - passed : {user_limit}',
+                      color=GAMBLING_COLOR)
+            else:
+                break
+
+            to_delete = await client.message_create(channel,embed=embed)
+            await sleep(30.,client.loop)
+            try:
+                await client.message_delete(to_delete)
+                await client.message_delete(message)
+            except DiscordException:
+                pass
+            return
+
+        result=[]
+        result.append('Duration: ')
+        result.append(convert_tdelta(duration))
+        result.append('\n Amount : ')
+        result.append(amount.__str__())
+        if user_limit:
+            result.append('\n user limit : ')
+            result.append(user_limit.__str__())
+
+        embed=Embed('Is everything correct?',''.join(result),color=GAMBLING_COLOR)
+        del result
+
+        to_check = await client.message_create(channel,embed=embed)
+        await client.reaction_add(to_check,EVENT_OK_EMOJI)
+        await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
+        try:
+            emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+        except TimeoutError:
+            return
+        finally:
+            try:
+                await client.message_delete(to_check)
+                await client.message_delete(message)
+            except DiscordException:
+                pass
+
+        if emoji is EVENT_ABORT_EMOJI:
+            return
+
+        self.user_ids=set()
+        self.user_limit=user_limit
+        self.client=client
+        self.duration=duration
+        self.amount=amount
+
+        self.connector = await DB_ENGINE.connect()
+
+        message = await client.message_create(channel,embed=self.generate_embed())
+        message.weakrefer()
+        self.message=message
+        client.events.reaction_add.append(self,message)
+        Task(self.countdown(client,message),client.loop)
+        await client.reaction_add(message,CURRENCY_EMOJI)
+        return self
+
+    def generate_embed(self):
+        title=f'React with {CURRENCY_EMOJI:e} to increase your daily streak by {self.amount}'
+        if self.user_limit:
+            description=f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
+        else:
+            description=f'{convert_tdelta(self.duration)} left'
+        return Embed(title,description,color=GAMBLING_COLOR)
+
+    async def __call__(self,emoji,user):
+        if user.is_bot or (emoji is not CURRENCY_EMOJI):
+            return
+
+        user_id=user.id
+        user_ids=self.user_ids
+
+        old_ln=len(user_ids)
+        user_ids.add(user_id)
+        new_ln=len(user_ids)
+
+        if new_ln==old_ln:
+            return
+
+        if new_ln==self.user_limit:
+            self.duration=timedelta()
+            self.waiter.set_result(None)
+
+        connector=self.connector
+
+        response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
+        results = await response.fetchall()
+        if results:
+            result=results[0]
+            now=datetime.utcnow()
+            daily_next=result.daily_next+DAILY_STREAK_BREAK
+            if daily_next>now:
+                to_execute=CURRENCY_TABLE.update().values(
+                    daily_streak  = result.daily_streak+self.amount,
+                        ).where(currency_model.user_id==user_id)
+            else:
+                daily_streak=result.daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
+                if daily_streak<0:
+                    daily_streak=self.amount
+                else:
+                    daily_streak=daily_streak+self.amount
+
+                to_execute=CURRENCY_TABLE.update().values(
+                    daily_streak= daily_streak,
+                    daily_next  = now,
+                        ).where(currency_model.user_id==user_id)
+
+        else:
+            to_execute=CURRENCY_TABLE.insert().values(
+                user_id     = user_id,
+                total_love  = 0,
+                daily_next  = datetime.utcnow(),
+                daily_streak= self.amount,)
         await connector.execute(to_execute)
 
     async def countdown(self,client,message):

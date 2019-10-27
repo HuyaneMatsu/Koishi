@@ -37,9 +37,10 @@ infos=eventlist()
 
 def add_activity(text,activity):
     ACTIVITY_FLAG=activity.ACTIVITY_FLAG
+    
     text.append(activity.name)
     text.append('\n')
-    text.append(f'**>>** type : {("game","stream","spotify","watching")[activity.type]} ({activity.type})\n')
+    text.append(f'**>>** type : {("game","stream","spotify","watching","custom")[activity.type]} ({activity.type})\n')
 
     if ACTIVITY_FLAG&0b0000000000000001:
         if activity.timestamp_start:
@@ -52,7 +53,7 @@ def add_activity(text,activity):
             text.append(f'**>>** details : {activity.details}\n')
 
     if ACTIVITY_FLAG&0b0000000000000100:
-        if activity.state:
+        if activity.state is not None:
             text.append(f'**>>** state : {activity.state}\n')
             
     if ACTIVITY_FLAG&0b0000000000001000:
@@ -101,7 +102,14 @@ def add_activity(text,activity):
         if activity.application_id:
             text.append(f'**>>** application id : {activity.application_id}\n')
 
-    
+    if ACTIVITY_FLAG&0b0000100000000000:
+        if activity.emoji is not None:
+            text.append(f'**>>** emoji : {activity.emoji.as_emoji}\n')
+
+    if ACTIVITY_FLAG&0b0000100000000000:
+        if activity.created_at:
+            text.append(f'**>>** created_at : {elapsed_time(activity.created)} ago\n')
+            
 @infos(case='user')
 @ContentParser('user, flags="mnap", default="message.author"')
 async def user_info(client,message,user):

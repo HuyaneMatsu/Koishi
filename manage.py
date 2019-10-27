@@ -69,6 +69,9 @@ Satori=Client(pers_data.SATORI_TOKEN,
         )
 
 satori.Koishi=Koishi #sisters, u know
+
+Satori.events(ReactionAddWaitfor)
+Satori.events(ReactionDeleteWaitfor)
 satori_commands=Satori.events(CommandProcesser(pers_data.SATORI_PREFIX)).shortcut
 satori_commands.extend(satori.commands)
 

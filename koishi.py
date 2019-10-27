@@ -681,7 +681,7 @@ async def download(self,message,content):
 @commands
 @ContentParser('emoji')
 async def se(client,message,emoji):
-    if emoji.is_custom_emoji:
+    if emoji.is_custom_emoji():
         await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
 
 
@@ -708,7 +708,7 @@ async def nitro(client,message,content):
             return
         
     else:
-        if emoji.is_custom_emoji:
+        if emoji.is_custom_emoji():
             for guild in client.guilds.values():
                 if emoji.id in guild.emojis:
                     break
