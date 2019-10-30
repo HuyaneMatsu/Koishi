@@ -2,7 +2,7 @@ import os, re, time
 from collections import deque
 from time import perf_counter
 from hata.dereaddons_local import multidict_titled, titledstr
-from hata.futures import Future,sleep,elsewhere_await_coro,Task
+from hata.futures import Future,sleep,Task
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
 from hata import py_hdrs as hdrs
@@ -1200,9 +1200,9 @@ async def ratelimit_test0005(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     message3 = await client.message_create(channel3,'test')
-    await elsewhere_await_coro(client2.reaction_add(message1,emoji1),loop,client2.loop)
-    await elsewhere_await_coro(client2.reaction_add(message2,emoji1),loop,client2.loop)
-    await elsewhere_await_coro(client2.reaction_add(message3,emoji1),loop,client2.loop)
+    await client2.reaction_add(message1,emoji1)
+    await client2.reaction_add(message2,emoji1)
+    await client2.reaction_add(message3,emoji1)
     Task(reaction_delete(client,message1,emoji1,client2),loop)
     Task(reaction_delete(client,message2,emoji1,client2),loop)
     Task(reaction_delete(client,message3,emoji1,client2),loop)
@@ -1219,9 +1219,9 @@ async def ratelimit_test0006(client,message,content):
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel1,'test')
     message3 = await client.message_create(channel1,'test')
-    await elsewhere_await_coro(client2.reaction_add(message1,emoji1),loop,client2.loop)
-    await elsewhere_await_coro(client2.reaction_add(message2,emoji1),loop,client2.loop)
-    await elsewhere_await_coro(client2.reaction_add(message3,emoji1),loop,client2.loop)
+    await client2.reaction_add(message1,emoji1)
+    await client2.reaction_add(message2,emoji1)
+    await client2.reaction_add(message3,emoji1)
     Task(reaction_delete(client,message1,emoji1,client2),loop)
     Task(reaction_delete(client,message2,emoji1,client2),loop)
     Task(reaction_delete(client,message3,emoji1,client2),loop)
@@ -1238,8 +1238,8 @@ async def ratelimit_test0007(client,message,content):
     channel1=message.channel
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel1,'test')
-    await elsewhere_await_coro(client2.reaction_add(message1,emoji1),loop,client2.loop)
-    await elsewhere_await_coro(client2.reaction_add(message2,emoji1),loop,client2.loop)
+    await client2.reaction_add(message1,emoji1)
+    await client2.reaction_add(message2,emoji1)
     Task(reaction_delete(client,message1,emoji1,client2),loop)
     Task(reaction_delete(client,message2,emoji1,client2),loop)
     Task(reaction_add(client,message1,emoji2),loop)

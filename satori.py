@@ -41,7 +41,6 @@ WIKI_COLOR      = Color.from_rgb(48,217,255)
 
 @commands
 async def wiki(client,message,content):
-    
     if not content:
         await client.message_create(message.channel,embed=Embed(
             'No result',
@@ -92,7 +91,7 @@ class TouhouWikiChooseMenu(object):
     DOWN    = BUILTIN_EMOJIS['arrow_down_small']
     SELECT  = BUILTIN_EMOJIS['ok']
     CANCEL  = BUILTIN_EMOJIS['x']
-    emojis  = [UP,DOWN,SELECT,CANCEL]
+    EMOJIS  = [UP,DOWN,SELECT,CANCEL]
     async def __new__(cls,client,channel,search_for,results):
         self=object.__new__(cls)
         self.page=0
@@ -107,7 +106,7 @@ class TouhouWikiChooseMenu(object):
             return self
 
         message.weakrefer()
-        for emoji in self.emojis:
+        for emoji in self.EMOJIS:
             await client.reaction_add(message,emoji)
 
         waitfor_wrapper(client,self,300.,multievent(client.events.reaction_add,client.events.reaction_delete),message,)
@@ -135,7 +134,7 @@ class TouhouWikiChooseMenu(object):
         return embed
 
     async def __call__(self,wrapper,emoji,user):
-        if user.is_bot or (emoji not in self.emojis):
+        if user.is_bot or (emoji not in self.EMOJIS):
             return
 
         client=wrapper.client
@@ -168,6 +167,12 @@ class TouhouWikiChooseMenu(object):
                 return wrapper.cancel()
             if emoji is self.SELECT:
                 self.task_flag=4
+                if self.channel.cached_permissions_for(client).can_manage_messages:
+                    await client.reaction_clear(message)
+                else:
+                    for emoji in self.EMOJIS:
+                        await client.reaction_delete_own(message,emoji)
+
                 await TouhouWikiPage(client,self.channel,self.results[self.page],message)
                 return wrapper.cancel()
             return
@@ -230,7 +235,16 @@ class TouhouWikiChooseMenu(object):
         #we do nothing
 
 class TouhouWikiPage(object):
-    async def __new__(cls,client,channel,result,to_edit):
+    LEFT2   = BUILTIN_EMOJIS['track_previous']
+    LEFT    = BUILTIN_EMOJIS['arrow_backward']
+    RIGHT   = BUILTIN_EMOJIS['arrow_forward']
+    RIGHT2  = BUILTIN_EMOJIS['track_next']
+    CROSS   = BUILTIN_EMOJIS['x']
+    EMOJIS  = [LEFT2,LEFT,RIGHT,RIGHT2,CROSS]
+
+    __slots__=('cancel', 'channel', 'page', 'pages', 'task_flag',)
+
+    async def __new__(cls,client,channel,result,message):
         async with client.http.request_(METH_GET,result[1]) as response:
             response_data = await response.text()
         soup=BeautifulSoup(response_data,features='lxml')
@@ -372,5 +386,118 @@ class TouhouWikiPage(object):
             if index==limit:
                 break
 
-        for page in pages:
-            print(page.title,page.description)
+        self=object.__new__(cls)
+        self.pages=pages
+        self.page=0
+        self.channel=channel
+        self.cancel=cls._cancel
+        self.task_flag=0
+
+        if message is None:
+            message = await client.message_create(channel,pages[0])
+            if not channel.cached_permissions_for(client).can_add_reactions:
+                return self
+
+            message.weakrefer()
+
+        if len(self.pages)>1:
+            for emoji in self.EMOJIS:
+                await client.reaction_add(message,emoji)
+        else:
+            await client.reaction_add(message,self.CROSS)
+
+        waitfor_wrapper(client,self,600.,multievent(client.events.reaction_add,client.events.reaction_delete),message,)
+        return self
+
+
+    async def __call__(self,wrapper,emoji,user):
+        if user.is_bot or (emoji not in self.EMOJIS):
+            return
+
+        client=wrapper.client
+        message=wrapper.target
+        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
+
+        if can_manage_messages:
+            if not message.did_react(emoji,user):
+                return
+            Task(self.reaction_remove(client,message,emoji,user),client.loop)
+
+        if self.task_flag:
+            if self.task_flag!=1 and (emoji is self.CROSS):
+                self.task_flag=2
+            return
+
+        while True:
+            if emoji is self.LEFT:
+                page=self.page-1
+                break
+            if emoji is self.RIGHT:
+                page=self.page+1
+                break
+            if emoji is self.CROSS:
+                self.task_flag=3
+                try:
+                    await client.message_delete(message)
+                except DiscordException:
+                    pass
+                return wrapper.cancel()
+            if emoji is self.LEFT2:
+                page=0
+                break
+            if emoji is self.RIGHT2:
+                page=len(self.pages)-1
+                break
+            return
+
+        if page<0:
+            page=0
+        elif page>=len(self.pages):
+            page=len(self.pages)-1
+
+        if self.page==page:
+            return
+
+        self.page=page
+        self.task_flag=1
+        try:
+            await client.message_edit(message,embed=self.pages[page])
+        except DiscordException:
+            self.task_flag=3
+            return wrapper.cancel()
+        else:
+            if self.task_flag==2:
+                self.task_flag=3
+                if can_manage_messages:
+                    try:
+                        await client.message_delete(message)
+                    except DiscordException:
+                        pass
+                return wrapper.cancel()
+            else:
+                self.task_flag=0
+
+        if wrapper.timeout<240.:
+            wrapper.timeout+=30.
+
+    @staticmethod
+    async def reaction_remove(client,message,emoji,user):
+        try:
+            await client.reaction_delete(message,emoji,user)
+        except DiscordException:
+            pass
+
+    @staticmethod
+    async def _cancel(self,wrapper,exception):
+        self.task_flag=3
+        if exception is None:
+            return
+        if isinstance(exception,TimeoutError):
+            client=wrapper.client
+            if self.channel.cached_permissions_for(client).can_manage_messages:
+                try:
+                    await client.reaction_clear(wrapper.target)
+                except DiscordException:
+                    pass
+            return
+        #we do nothing

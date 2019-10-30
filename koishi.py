@@ -183,7 +183,7 @@ async def message_me(client,message,content):
 @commands
 @ContentParser('condition, flags=gr, default="not message.channel.permissions_for(message.author).can_manage_messages"',
                 'int, default=1',
-                'rest, default="f\'{message.author:f} asked for it\'"')
+                'rest, default="f\'{message.author.full_name} asked for it\'"')
 async def clear(client,message,limit,reason):
     if limit>0:
         await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
@@ -227,26 +227,45 @@ async def subscribe(client,message,content):
 
 @commands
 async def invite(client,message,content):
-    guild=message.guild
-    if guild is None or not guild.permissions_for(message.author).can_create_instant_invite:
+    guild=message.channel.guild
+    if (guild is None):
         return
 
-    if message.author is guild.owner and content=='perma':
-        max_age=0
-        max_use=0
+    if not guild.cached_permissions_for(client).can_create_instant_invite:
+        await client.message_create(message.channel,
+            'I do not have permission to create Invite from this guild.')
+        return
+
+    user=message.author
+    owner=client.is_owner(user)
+    if (not owner) or (not guild.permissions_for(user).can_create_instant_invite):
+        await client.message_create(message.channel,
+            'You do not have permission to invoke this command.')
+        return
+
+    if content=='perma':
+        user=message.author
+        if owner or user==guild.owner:
+            max_age=0
+            max_use=0
+        else:
+            await client.message_create(message.channel,
+                'You must be the owner of the guild, to create a permanent invite.')
+            return
     else:
         max_age=21600
         max_use=1
     
     try:
-        invite = await client.invite_create_pref(guild,max_age,max_use)
+        invite_ = await client.invite_create_pref(guild,max_age,max_use)
     except DiscordException:
         return
                                             
     channel = await client.channel_private_create(message.author)
-    await client.message_create(channel,f'Here is your invite, dear:\n\n{invite.url}')
+    await client.message_create(channel,f'Here is your invite, dear:\n\n{invite_.url}')
 
-mine_mine_clear = (
+
+MINE_MINE_CLEAR = (
     BUILTIN_EMOJIS['white_large_square'].as_emoji,
     BUILTIN_EMOJIS['one'].as_emoji,
     BUILTIN_EMOJIS['two'].as_emoji,
@@ -259,7 +278,8 @@ mine_mine_clear = (
     BUILTIN_EMOJIS['bomb'].as_emoji,
         )
 
-mine_mine=tuple(f'||{e}||' for e in mine_mine_clear)
+MINE_MINE=tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
+MINE_CANCEL=BUILTIN_EMOJIS['anger']
 
 class check_emoji_and_user(object):
     __slots__=('emoji', 'user',)
@@ -332,7 +352,7 @@ async def mine(client,message,content):
     while True:
         x=0
         while True:
-            result_sub.append(mine_mine[data[x+y]])
+            result_sub.append(MINE_MINE[data[x+y]])
             x+=1
             if x==10:
                 break
@@ -346,7 +366,7 @@ async def mine(client,message,content):
         result.insert(0,'```')
         result.append('```')
     else:
-        emoji=BUILTIN_EMOJIS['anger']
+        emoji=MINE_CANCEL
         user=message.author
     
     text='\n'.join(result)
@@ -371,7 +391,7 @@ async def mine(client,message,content):
     while True:
         x=0
         while True:
-            result_sub.append(mine_mine_clear[data[x+y]])
+            result_sub.append(MINE_MINE_CLEAR[data[x+y]])
             x+=1
             if x==10:
                 break
@@ -386,12 +406,21 @@ async def mine(client,message,content):
 
 @commands
 async def bans(client,message,content):
-    guild=message.guild
-    if guild is None:
+    guild=message.channel.guild
+    if (guild is None):
         return
-    if not message.channel.cached_permissions_for(client).can_ban_user:
-        return await client.message_create(message.channel,embed=Embed(description='I have no permissions to check it.'))
-                                 
+
+    if not guild.cached_permissions_for(client).can_ban_user:
+        await client.message_create(message.channel,embed=Embed(
+            description='I have no permissions to check it.'))
+        return
+
+    user=message.author
+    if (not client.is_owner(user)) or (not guild.permissions_for(user).can_ban_user):
+        await client.message_create(message.channel,embed=Embed('Permission denied.',
+                'You must have `ban user` permission to invoke this command'))
+        return
+
     ban_data = await client.guild_bans(guild)
 
     if not ban_data:
@@ -445,15 +474,18 @@ async def bans(client,message,content):
 
 @commands
 async def leave_guild(client,message,content):
-    guild=message.guild
-    if guild is None or guild.owner is not message.author:
+    guild=message.channel.guild
+    if (guild is None):
+        return
+    user=message.author
+    if (guild.owner!=message.author) or (not client.is_owner(user)):
         return
     await client.guild_leave(guild)
     
 @commands
 async def change_prefix(client,message,content):
     guild=message.guild
-    if (guild is None) or (message.author is not guild.owner) or (not content):
+    if (guild is None) or (message.author!=guild.owner) or (not client.is_owner(message.author)) or (not content):
         return
     content=filter_content(content)[0]
     if not (0<len(content)<33):
@@ -464,31 +496,9 @@ async def change_prefix(client,message,content):
         text='Thats the frefix already.'
     await client.message_create(message.channel,text)
 
-@commands
-async def _change_prefix(client,message,content):
-    if not client.is_owner(message.author):
-        return
-    content=filter_content(content)
-    if len(content)<2:
-        return
-    if not (0<len(content[1])<33):
-        return
-    
-    try:
-        guild=GUILDS[int(content[0])]
-    except (ValueError,KeyError):
-        guild=client.get_guild(content[0])
-        if guild is None:
-            return
-    if PREFIXES.add(guild,content[1]):
-        text='Done.'
-    else:
-        text='No modifications took place.'
-
-    await client.message_create(message.channel,text)
 
 @commands
-async def nikki(client,message,content):
+async def yuno(client,message,content):
     await client.message_create(message.channel,embed=Embed('YUKI YUKI YUKI!','''
         ░░░░░░░░░░░▄▄▀▀▀▀▀▀▀▀▄▄░░░░░░░░░░░░░
         ░░░░░░░░▄▀▀░░░░░░░░░░░░▀▄▄░░░░░░░░░░
@@ -518,6 +528,9 @@ OA2_accesses={}
 
 @commands
 async def oa2_link(client,message,content): #just a test link
+    if not client.is_owner(message.author):
+        return
+
     await client.message_create(message.channel,(
         'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
         '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
@@ -528,6 +541,9 @@ async def oa2_link(client,message,content): #just a test link
 
 @commands
 async def oa2_feed(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
     Task(client.message_delete(message),client.loop)
     try:
         result=others.parse_oauth2_redirect_url(content)
@@ -544,7 +560,7 @@ async def oa2_feed(client,message,content):
     OA2_accesses[user.id]=user
     await client.message_create(message.channel,'Thanks')
     
-def oa2_query(message,content):
+def _oa2_query(message,content):
     author_id=message.author.id
     if not (16<len(content)<33):
         return OA2_accesses.get(author_id,None)
@@ -560,7 +576,10 @@ def oa2_query(message,content):
 
 @commands
 async def oa2_user(client,message,content):
-    user=oa2_query(message,content)
+    if not client.is_owner(message.author):
+        return
+
+    user=_oa2_query(message,content)
     if user is None:
         await client.message_create(message.channel,'Could not find that user')
         return
@@ -570,7 +589,10 @@ async def oa2_user(client,message,content):
 
 @commands
 async def oa2_connections(client,message,content):
-    user=oa2_query(message,content)
+    if not client.is_owner(message.author):
+        return
+
+    user=_oa2_query(message,content)
     if user is None:
         await client.message_create(message.channel,'Could not find that user')
         return
@@ -582,7 +604,10 @@ async def oa2_connections(client,message,content):
     
 @commands
 async def oa2_guilds(client,message,content):
-    user=oa2_query(message,content)
+    if not client.is_owner(message.author):
+        return
+
+    user=_oa2_query(message,content)
     if user is None:
         await client.message_create(message.channel,'Could not find that user')
         return
@@ -593,7 +618,10 @@ async def oa2_guilds(client,message,content):
     
 @commands
 async def oa2_my_guild(client,message,content):
-    user=oa2_query(message,content)
+    if not client.is_owner(message.author):
+        return
+
+    user=_oa2_query(message,content)
     if user is None:
         await client.message_create(message.channel,'Could not find that user')
         return
@@ -622,26 +650,30 @@ async def oa2_my_guild(client,message,content):
             await client.guild_delete(guild)
         else:
             await client.guild_leave(guild)
-        
-@commands
-async def oa2_owners(client,message,content):
-    if not client.is_owner(message.author):
-        return
 
-    access = await client.owners_access(valuable_scopes)
-    user = await client.user_info(access)
-    OA2_accesses[user.id]=user
-    result=[f'queried {user:f}']
-    for scope in access.scopes:
-        result.append(f'- {scope}')
-
-    text='\n'.join(result)
-                 
-    await client.message_create(message.channel,text)
+# Deprecated because it does not works with teams.
+#@commands
+#async def oa2_owners(client,message,content):
+#    if not client.is_owner(message.author):
+#        return
+#
+#    access = await client.owners_access(valuable_scopes)
+#    user = await client.user_info(access)
+#    OA2_accesses[user.id]=user
+#    result=[f'queried {user:f}']
+#    for scope in access.scopes:
+#        result.append(f'- {scope}')
+#
+#    text='\n'.join(result)
+#
+#    await client.message_create(message.channel,text)
     
 @commands
 async def oa2_renew(client,message,content):
-    user=oa2_query(message,content)
+    if not client.is_owner(message.author):
+        return
+
+    user=_oa2_query(message,content)
     if user is None:
         await client.message_create(message.channel,'Could not find that user')
         return
