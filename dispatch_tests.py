@@ -304,7 +304,7 @@ class dispatch_tester:
         result=[f'{user:f} {user.id} profile got edited at guild {guild.name!r} {guild.id}:']
         profile=user.guild_profiles[guild]
         for key,value in old.items():
-            if key in ('nick',):
+            if key in ('nick','boosts_since'):
                 result.append(f'{key} changed: {value!r} -> {getattr(profile,key)!r}')
                 continue
             
@@ -319,16 +319,6 @@ class dispatch_tester:
                     result.append(f'Roles added: ({len(added)})')
                     for role in added:
                         result.append(f'- {role.name} {role.id}')
-                continue
-            
-            if key=='boosts_since':
-                result.append(f'{key} changed: {value!r} -> {user.boosts_since!r}')
-                continue
-
-            if key=='boosts':
-                added='None' if value is None else f'\'{value.name}\''
-                removed='None' if user.boosts is None else f'\'{user.boosts.name}\''
-                result.append(f'{key} changed: {added} ->  {removed}')
                 continue
             
             raise RuntimeError(key)
@@ -405,11 +395,11 @@ class dispatch_tester:
         await client.message_create(self.channel,f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!')
 
     @classmethod
-    async def guild_user_delete(self,client,guild,user,profile,boosted_since):
+    async def guild_user_delete(self,client,guild,user,profile):
         if self.channel is None:
             return
         text=[f'Bai bai {user:f}! with your {len(profile.roles)} roles.']
-        if boosted_since is not None:
+        if profile.boosted_since is not None:
             text.append('Also rip your boost :c')
         text.append(f'The guild is down to {guild.user_count} members!')
         
@@ -487,13 +477,13 @@ class dispatch_tester:
         await Pagination(client,self.channel,pages,120.)
         
     @classmethod
-    async def guild_delete(self,client,guild,profile,boosted_since):
+    async def guild_delete(self,client,guild,profile):
         if self.channel is None:
             return
         result=pretty_print(guild)
         result.insert(0,f'Guild deleted {guild.id}')
         result.insert(1,f'I had {len(profile.roles)} roles there')
-        result.insert(2,'At least i did not boost' if boosted_since is None else 'Rip by boost ahhhh...')
+        result.insert(2,'At least i did not boost' if (profile.boosted_since is None) else 'Rip by boost ahhhh...')
 
         pages=[{'content':chunk} for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)

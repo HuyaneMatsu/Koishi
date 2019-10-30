@@ -108,7 +108,11 @@ def add_activity(text,activity):
 
     if ACTIVITY_FLAG&0b0000100000000000:
         if activity.created_at:
-            text.append(f'**>>** created_at : {elapsed_time(activity.created)} ago\n')
+            text.append(f'**>>** created at : {elapsed_time(activity.created)} ago\n')
+
+    if ACTIVITY_FLAG&0b0001000000000000:
+        if activity.created_at:
+            text.append(f'**>>** id : {activity.id}\n')
             
 @infos(case='user')
 @ContentParser('user, flags="mnap", default="message.author"')
@@ -140,8 +144,9 @@ async def user_info(client,message,user):
         if profile.joined_at is None:
             await client.guild_user_get(user.id)
         text.append(f'Joined: {elapsed_time(profile.joined_at)} ago')
-        if user.boosts is guild:
-            text.append(f'Booster since: {elapsed_time(user.boosts_since)}')
+        boosts_since=profile.boosts_since
+        if boosts_since is not None:
+            text.append(f'Booster since: {elapsed_time(boosts_since)}')
         text.append(f'Roles: {roles}')
         embed.add_field('In guild profile','\n'.join(text))
     
@@ -253,7 +258,7 @@ async def guild_info(client,message,content):
 
         for user in boosters[:21]:
             embed.add_field(user.full_name,
-                f'since: {elapsed_time(user.boosts_since)}',
+                f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}',
                 inline=True)
     
     embed.add_thumbnail(guild.icon_url_as(size=128))
