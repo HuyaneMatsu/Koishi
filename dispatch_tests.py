@@ -5,11 +5,15 @@ from hata.prettyprint import pchunkify,pretty_print
 from hata.events import Pagination
 from hata.others import cchunkify,Status
 from hata.permission import PERM_KEYS
-from hata.embed import EXTRA_EMBED_TYPES
-from hata.dereaddons_local import listdifference
+from hata.embed import EXTRA_EMBED_TYPES,Embed
+from hata.dereaddons_local import listdifference,method
+from hata.futures import Task
+
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
 class dispatch_tester:
     channel=None
+    old_events={}
 
     @classmethod
     async def here(self,client,message,content):
@@ -41,24 +45,20 @@ class dispatch_tester:
             return
         
         actual=getattr(client.events,content)
-
-        if actual is client.events.default_event:
-            try:
-                await client.message_create(message.channel,'Event set')
-            except DiscordException:
-                return
-            setattr(client.events,content,event)
-        else:
-            try:
-                await client.message_create(message.channel,'Event removed')
-            except DiscordException:
-                return
+        if type(actual) is method and actual.__self__ is self:
             setattr(client.events,content,client.events.default_event)
+            await client.message_create(message.channel,'Event removed')
+        else:
+            self.old_events[content]=actual
+            setattr(client.events,content,event)
+            await client.message_create(message.channel,'Event set')
 
     @classmethod
     async def client_edit(self,client,old):
+        Task(self.old_events['client_edit'](client,old),client.loop)
         if self.channel is None:
             return
+        
         result=[]
         result.append(f'Me, {client:f} got edited')
         for key,value in old.items():
@@ -71,6 +71,10 @@ class dispatch_tester:
 
     @classmethod
     async def message_delete(self,client,message):
+        Task(self.old_events['message_delete'](client,message),client.loop)
+        if self.channel is None:
+            return
+        
         text=pretty_print(message)
         text.insert(0,f'Message {message.id} got deleted')
         pages=[{'content':chunk} for chunk in cchunkify(text)]
@@ -78,8 +82,10 @@ class dispatch_tester:
 
     @classmethod
     async def message_edit(self,client,message,old):
+        Task(self.old_events['message_edit'](client,message,old),client.loop)
         if self.channel is None:
             return
+        
         result=[f'Message {message.id} got edited']
 
         channel=message.channel
@@ -172,8 +178,10 @@ class dispatch_tester:
 
     @classmethod
     async def embed_update(self,client,message,flag):
+        Task(self.old_events['embed_update'](client,message,flag),client.loop)
         if self.channel is None:
             return
+        
         result=[f'Message {message.id} got embed update:']
 
         channel=message.channel
@@ -232,8 +240,10 @@ class dispatch_tester:
         
     @classmethod
     async def reaction_clear(self,client,message,old):
+        Task(self.old_events['reaction_clear'](client,message,old),client.loop)
         if self.channel is None:
             return
+        
         text=pretty_print(old)
         text.insert(0,f'Reactions got cleared from message {message.id}:')
         pages=[{'content':chunk} for chunk in cchunkify(text)]
@@ -241,6 +251,10 @@ class dispatch_tester:
 
     @classmethod
     async def user_presence_update(self,client,user,old):
+        Task(self.old_events['user_presence_update'](client,user,old),client.loop)
+        if self.channel is None:
+            return
+        
         result=[f'Presence update on user: {user:f} {user.id}']
         try:
             statuses=old['statuses']
@@ -292,6 +306,10 @@ class dispatch_tester:
 
     @classmethod
     async def user_edit(self,client,user,old):
+        Task(self.old_events['user_edit'](client,user,old),client.loop)
+        if self.channel is None:
+            return
+        
         result=[f'A user got updated: {user:f} {user.id}']
         for key,value in old. items():
             result.append(f'- {key} : {value} -> {getattr(user,key)}')
@@ -301,6 +319,10 @@ class dispatch_tester:
     
     @classmethod
     async def user_profile_edit(self,client,user,old,guild):
+        Task(self.old_events['user_profile_edit'](client,user,old,guild),client.loop)
+        if self.channel is None:
+            return
+        
         result=[f'{user:f} {user.id} profile got edited at guild {guild.name!r} {guild.id}:']
         profile=user.guild_profiles[guild]
         for key,value in old.items():
@@ -328,12 +350,20 @@ class dispatch_tester:
 
     @classmethod
     async def channel_delete(self,client,channel):
+        Task(self.old_events['channel_delete'](client,channel),client.loop)
+        if self.channel is None:
+            return
+        
         text=f'```\nA channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def channel_edit(self,client,channel,old):
+        Task(self.old_events['channel_delete'](client,channel,old),client.loop)
+        if self.channel is None:
+            return
+        
         result=[f'A channel got edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
         for key,value in old.items():
             if key in ('overwrites',):
@@ -353,6 +383,10 @@ class dispatch_tester:
 
     @classmethod
     async def channel_create(self,client,channel):
+        Task(self.old_events['channel_create'](client,channel),client.loop)
+        if self.channel is None:
+            return
+        
         result=pretty_print(channel)
         result.insert(0,f'A channel got created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
@@ -360,6 +394,10 @@ class dispatch_tester:
 
     @classmethod
     async def channel_pin_update(self,client,channel):
+        Task(self.old_events['channel_pin_update'](client,channel),client.loop)
+        if self.channel is None:
+            return
+        
         text=f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[{'content':text}]
         await Pagination(client,self.channel,pages,120.)
@@ -367,6 +405,7 @@ class dispatch_tester:
         
     @classmethod
     async def emoji_edit(self,client,guild,changes):
+        Task(self.old_events['emoji_edit'](client,guild,changes),client.loop)
         if self.channel is None:
             return
     
@@ -390,14 +429,18 @@ class dispatch_tester:
 
     @classmethod
     async def guild_user_add(self,client,guild,user):
+        Task(self.old_events['guild_user_add'](client,guild,user),client.loop)
         if self.channel is None:
             return
+        
         await client.message_create(self.channel,f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!')
 
     @classmethod
     async def guild_user_delete(self,client,guild,user,profile):
+        Task(self.old_events['guild_user_delete'](client,guild,user,profile),client.loop)
         if self.channel is None:
             return
+        
         text=[f'Bai bai {user:f}! with your {len(profile.roles)} roles.']
         if profile.boosted_since is not None:
             text.append('Also rip your boost :c')
@@ -407,8 +450,10 @@ class dispatch_tester:
         
     @classmethod
     async def guild_create(self,client,guild):
+        Task(self.old_events['guild_create'](client,guild,),client.loop)
         if self.channel is None:
             return
+        
         result=pretty_print(guild)
         result.insert(0,f'Guild created: {guild.id}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
@@ -419,8 +464,10 @@ class dispatch_tester:
         
     @classmethod
     async def guild_edit(self,client,guild,old):
+        Task(self.old_events['guild_edit'](client,guild,old),client.loop)
         if self.channel is None:
             return
+        
         result=[f'A guild got edited {guild.name} {guild.id}']
         for key,value in old.items():
             if key in ('name','icon','splash','user_count','afk_timeout',
@@ -478,8 +525,10 @@ class dispatch_tester:
         
     @classmethod
     async def guild_delete(self,client,guild,profile):
+        Task(self.old_events['guild_delete'](client,guild,profile),client.loop)
         if self.channel is None:
             return
+        
         result=pretty_print(guild)
         result.insert(0,f'Guild deleted {guild.id}')
         result.insert(1,f'I had {len(profile.roles)} roles there')
@@ -491,16 +540,20 @@ class dispatch_tester:
 
     @classmethod
     async def guild_ban_add(self,client,guild,user):
+        Task(self.old_events['guild_ban_add'](client,guild,user),client.loop)
         if self.channel is None:
             return
+        
         text=f'```\nUser {user:f} {user.id} got banned at {guild.name} {guild.id}.```'
         pages=[{'content':text}]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def guild_ban_delete(self,client,guild,user):
+        Task(self.old_events['guild_ban_delete'](client,guild,user),client.loop)
         if self.channel is None:
             return
+        
         text=f'```\nUser {user:f} {user.id} got UNbanned at {guild.name} {guild.id}.```'
         pages=[{'content':text}]
         await Pagination(client,self.channel,pages,120.)
@@ -512,8 +565,10 @@ class dispatch_tester:
 
     @classmethod
     async def role_create(self,client,role):
+        Task(self.old_events['role_create'](client,role,),client.loop)
         if self.channel is None:
             return
+        
         result=pretty_print(role)
         result.insert(0,f'A role got created at {role.guild.name} {role.guild.id}')
         pages=[{'content':chunk} for chunk in cchunkify(result)]
@@ -521,16 +576,20 @@ class dispatch_tester:
 
     @classmethod
     async def role_delete(self,client,role):
+        Task(self.old_events['role_delete'](client,role,),client.loop)
         if self.channel is None:
             return
+        
         text=f'```\nA role got deleted at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}```'
         pages=[{'content':text}]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
     async def role_edit(self,client,role,old):
+        Task(self.old_events['role_edit'](client,role,old),client.loop)
         if self.channel is None:
             return
+        
         result=[f'A role got edited at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}']
         for key,value in old.items():
             if key in ('name','separated','managed','mentionable','position',):
@@ -554,16 +613,20 @@ class dispatch_tester:
 
     @classmethod
     async def webhook_update(self,client,channel):
+        Task(self.old_events['webhook_update'](client,channel),client.loop)
         if self.channel is None:
             return
+        
         text=f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
         pages=[{'content':text}]
         await Pagination(client,self.channel,pages,120.)
         
     @classmethod
     async def voice_state_update(self,client,state,action,old):
+        Task(self.old_events['voice_state_update'](client,state,action,old),client.loop)
         if self.channel is None:
             return
+        
         result=[]
         user=state.user
         if action=='l':
@@ -596,8 +659,10 @@ class dispatch_tester:
             
     @classmethod
     async def typing(self,client,channel,user,timestamp):
+        Task(self.old_events['typing'](client,channel,user,timestamp),client.loop)
         if self.channel is None:
             return
+        
         result=['Typing:']
         if user.partial:
             result.append(f'- user : Parital user {user.id}')
@@ -611,13 +676,71 @@ class dispatch_tester:
 
     @classmethod
     async def client_edit_settings(self,client,old):
+        Task(self.old_events['client_edit_settings'](client,client,old),client.loop)
         if self.channel is None:
             return
+        
         result=['The client\'s settings got updated:','```']
         for key,value in old.items():
             result.append(f' {key} : {value!r} -> {getattr(client.settings,key)!r}')
         result.append('```')
         await client.message_create(self.channel,'\n'.join(result))
-
-
     
+async def _help_here(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('here',(
+        'I set the dispatch tester commands\' output to this channel.\n'
+        f'Usage: `{prefix}here`\n'
+        'By calling the command again, I ll remove the current channel.\n'
+        'You can switch the dispatch testers, like:\n'
+        f'`{prefix}switch *event_name*`\n'
+        'For the event names, use:\n'
+        f'`{prefix}help switch`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('here',_help_here,KOISHI_HELPER.check_is_owner)
+
+
+async def _help_switch(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('here',(
+        'I can turn on a dispatch tester for you.\n'
+        f'`{prefix}switch *event_name*`\n'
+        'The list of defined testers:\n'
+        '- `channel_create`\n'
+        '- `channel_delete`\n'
+        '- `channel_edit`\n'
+        '- `channel_pin_update`\n'
+        '- `client_edit_settings`\n'
+        '- `client_edit`\n'
+        '- `embed_update`\n'
+        '- `emoji_edit`\n'
+        '- `guild_ban_add`\n'
+        '- `guild_ban_delete`\n'
+        '- `guild_create`\n'
+        '- `guild_delete`\n'
+        '- `guild_edit`\n'
+        '- `guild_user_add`\n'
+        '- `guild_user_delete`\n'
+        '- `message_delete`\n'
+        '- `message_edit`\n'
+        '- `reaction_clear`\n'
+        '- `role_create`\n'
+        '- `role_delete`\n'
+        '- `role_edit`\n'
+        '- `typing`\n'
+        '- `user_edit`\n'
+        '- `user_presence_update`\n'
+        '- `user_profile_edit`\n'
+        '- `voice_state_update`\n'
+        '- `webhook_update`\n'
+        'The full list of events can be found [here]'
+        '(https://github.com/HuyaneMatsu/hata/blob/master/docs/ref/EventDescriptor.md).\n'
+        f'For setting channel, use: `{prefix}here`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('switch',_help_switch,KOISHI_HELPER.check_is_owner)

@@ -12,8 +12,26 @@ from hata.futures import Future,CancelledError
 from hata.client_core import GC_cycler
 from hata.futures import Task
 
-from help_handler import HELP
 from models import DB_ENGINE,DS_TABLE,ds_model
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+
+async def _help_ds(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('ds',(
+        'Play **Dungeon sweeper** game! A simple box pushing game with '
+        'cute touhou characters!\n'
+        f'Usage : `{prefix}ds *subcommand*`'
+        'A user can have only one activate game at a time.\n\n'
+        'Subcommand cases:'
+        f'- `{prefix}ds` : Starts a game at this channel or moves your actual '
+        'game.\n'
+        f'- `{prefix}ds rules` : The rules of the game desu!\n'
+        f'- `{prefix}ds help` : Shows you this message.'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('ds',_help_ds)
+
 
 DS_GAMES={}
 STAGES=[]
@@ -54,14 +72,14 @@ del GC_games
 #:-> @ <-:#}{#:-> @ <-:#{ command }#:-> @ <-:#}{#:-> @ <-:#
 
 @ContentParser('str, default="\'\'"')
-async def ds_manager(self,message,command):
-    permissions=message.channel.cached_permissions_for(self)
+async def ds_manager(client,message,command):
+    permissions=message.channel.cached_permissions_for(client)
     
     while True:
 
         if not (0<=len(command)<10):
-            embed=HELP['ds']
-            break
+            await _help_ds(client,message)
+            return
 
         command=command.lower()
 
@@ -73,7 +91,7 @@ async def ds_manager(self,message,command):
                 break
             
             if game is None:
-                return (await ds_game(self,message.channel,message.author))
+                return (await ds_game(client,message.channel,message.author))
             else:
                 return (await game.renew(message.channel))
             
@@ -84,10 +102,10 @@ async def ds_manager(self,message,command):
                 embed=('Permissions denied','I have no permissions at this channel to render this message.')
             break
         
-        embed=HELP['ds']
-        break
+        await _help_ds(client,message)
+        return
         
-    await self.message_create(message.channel,embed=embed)
+    await client.message_create(message.channel,embed=embed)
 
 #:-> @ <-:#}{#:-> @ <-:#{ backend }#:-> @ <-:#}{#:-> @ <-:#
 
@@ -1500,3 +1518,16 @@ async def _DS_modify_best(client,message,content):
 
     await client.message_create(message.channel,f'modified : {count}')
     
+async def _help__DS_modify_best(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('_DS_modify_best',(
+        f'A helper command for {prefix}ds, to modify the best results '
+        'of a stage.\n Before calling this command, make sure you edited the '
+        'source code and restarted me.'
+        f'Usage : `{prefix}_DS_modify_best *position*`'
+        'The `position` is the position of the stage in `int`.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('_DS_modify_best',_help__DS_modify_best,KOISHI_HELPER.check_is_owner)

@@ -1,20 +1,52 @@
 # -*- coding: utf-8 -*-
+import os
+from random import randint
+from time import monotonic
+
+from PIL import Image as PIL
+from PIL.ImageDraw import ImageDraw
+from PIL.ImageFont import truetype
+
 from hata.events_compiler import ContentParser
 from hata.futures import Future,CancelledError,InvalidStateError,Task
-from random import randint
 from hata.dereaddons_local import any_to_any, methodize
-from time import monotonic
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS
 from hata.events import waitfor_wrapper,multievent
 from hata.color import Color
 from hata.embed import Embed
-from PIL import Image as PIL
-from PIL.ImageDraw import ImageDraw
-from PIL.ImageFont import truetype
-import os
 from hata.ios import ReuBytesIO
-from help_handler import HELP
+
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+
+async def _help_kanakogame(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('kanakogame',(
+        'Start a hiragana or katakana quiz!\n'
+        f'Usage: `{prefix}kanakogame (subcommand) ...`\n'
+        'There can be only one game each channel.\n\n'
+        'Subcommands:'
+        f'- `{prefix}kanakogame create <map> <amount> <possibilities>` : '
+        'Creates a kanakogame at the channel, to what users can join, or you '
+        'as the creator can start or cancel it anytime. `map` can be '
+        '`hiragana` (default) or `katakana`. `amount` need to be at least '
+        '`10` and maximum same long as the `map` is. `20` is the default. '
+        '`possibilities` can be one of : `0`, `3`, `4` or `5` (default)\n'
+        f'- `{prefix}kanakogame start` : Starts the game. *Game owner only.*\n'
+        f'- `{prefix}kanakogame join` : Joins you to the game. Cannot join to '
+        'already started games.\n'
+        f'- `{prefix}kanakogame leave` : Leaves from the current game.'
+        'The ownership passes on the user who joined second. If noone is left '
+        'at the game, I cancel the game.\n'
+        f'- `{prefix}kanakogame cancel` : Cancels the current game. '
+        '*Game owner only.*\n'
+        f'- `{prefix}kanakogame hiragana` : Shows up the hiragana map.\n'
+        f'- `{prefix}kanakogame katakana` : Shows up the hiragana map.'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('kanakogame',_help_kanakogame)
+
 
 PIL.Image.draw=methodize(ImageDraw)
 PIL.font=truetype
@@ -80,13 +112,13 @@ def render_showcase(name,map_):
 
 MAP_showcases={name:render_showcase(name,map_) for name,map_ in MAPS.items()}
 
-class history_element():
-    __slots__=['answer', 'answers', 'options', 'question']
+class history_element(object):
+    __slots__=('answer', 'answers', 'options', 'question',)
 
-class kanako_game():
-    __slots__=['amount', 'answers', 'client', 'history', 'map', 'map_name',
+class kanako_game(object):
+    __slots__=('amount', 'answers', 'client', 'history', 'map', 'map_name',
         'options', 'possibilities', 'romajis', 'running', 'channel', 'users',
-        'waiter']
+        'waiter',)
     def __init__(self,client,channel,user,map_name,amount,possibilities):
         self.client=client
         self.channel=channel
@@ -367,7 +399,7 @@ class kanako_game():
         Task(client.message_create(self.channel,embed=Embed('','Game cancelled',COLOR)),client.loop)
 
 class game_statistics(object):
-    __slots__=['cache', 'source']
+    __slots__=('cache', 'source',)
     def __len__(self):
         return self.cache.__len__()
     def __new__(cls,source):
@@ -553,7 +585,8 @@ async def kanako_manager(client,message,command,*args):
             await embedination(client,channel,pages)
             return
         except KeyError:
-            embed=HELP['kanakogame']
+            await _help_kanakogame(client,message)
+            return
     
     await client.message_create(channel,embed=embed)
 
@@ -607,9 +640,9 @@ class embedination(object):
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
     RIGHT2  = BUILTIN_EMOJIS['fast_forward']
     RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
-    emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET]
+    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET)
     
-    __slots__=['cancel', 'channel', 'page', 'pages', 'task']
+    __slots__=('cancel', 'channel', 'page', 'pages', 'task',)
     async def __new__(cls,client,channel,pages):
         self=object.__new__(cls)
         self.pages=pages
@@ -622,7 +655,7 @@ class embedination(object):
         message.weakrefer()
         
         if len(self.pages)>1:
-            for emoji in self.emojis:
+            for emoji in self.EMOJIS:
                 await client.reaction_add(message,emoji)
 
         events=multievent(client.events.reaction_add,

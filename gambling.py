@@ -13,6 +13,7 @@ from hata.futures import sleep,Task,Future
 
 from models import DB_ENGINE,currency_model,CURRENCY_TABLE
 from tools import CooldownHandler
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
 GAMBLING_COLOR          = Color.from_rgb(254,254,164)
 CURRENCY_EMOJI          = Emoji.precreate(603533301516599296)
@@ -174,7 +175,17 @@ async def daily(client,message,target_user):
     
     await client.message_create(message.channel,embed=embed)
 
-        
+async def _help_daily(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('daily',(
+        'Claim everyday your share of my love!\n'
+        f'Usage: `{prefix}daily <user>`\n'
+        'You can also gift your daily reward to your lovely imouto.'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('daily',_help_daily)
+
 @gambling
 @daily.shared(weight=1)
 @ContentParser('user, flags=mni, default="message.author"')
@@ -201,6 +212,17 @@ async def hearts(client,message,target_user):
         
     await client.message_create(message.channel,embed=embed)
 
+async def _help_hearts(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('hearts',(
+        'How many hearts do you have?\n'
+        f'Usage: `{prefix}hearts <user>`\n'
+        'You can also check other user\'s hearts too.'
+            ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('hearts',_help_hearts)
+
 def convert_tdelta(delta):
     result=[]
     rest=delta.days
@@ -219,7 +241,7 @@ def convert_tdelta(delta):
         result.append(f'{rest} seconds')
     return ', '.join(result)
 
-class heartevent_start_checker:
+class heartevent_start_checker(object):
     __slots__=('client',)
     def __init__(self,client):
         self.client=client
@@ -401,6 +423,22 @@ class heartevent(object):
             return
         Task(connector.close(),self.client.loop)
         self.connector=None
+
+async def _help_heartevent(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('heartevent',(
+        'Starts a heart event at the channel.\n'
+        f'Usage: `{prefix}heartevent *duration* *amount* <users_limit>`\n'
+        f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
+        f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
+        f'Min `amount`: {EVENT_HEART_MIN_AMOUNT}\n'
+        f'Max `amount`: {EVENT_HEART_MAX_AMOUNT}\n'
+        'If `user_imit` is not included, the event will have no user limit.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('heartevent',_help_heartevent,KOISHI_HELPER.check_is_owner)
 
 @gambling
 @ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
@@ -591,5 +629,21 @@ class dailyevent(object):
             return
         Task(connector.close(),self.client.loop)
         self.connector=None
+
+async def _help_dailyevent(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('dailyevent',(
+        'Starts a daily event at the channel.\n'
+        f'Usage: `{prefix}dailyevetn *duration* *amount* <users_limit>`\n'
+        f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
+        f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
+        f'Min `amount`: {EVENT_DAILY_MIN_AMOUNT}\n'
+        f'Max `amount`: {EVENT_DAILY_MAX_AMOUNT}\n'
+        'If `user_imit` is not included, the event will have no user limit.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('dailyevent',_help_dailyevent,KOISHI_HELPER.check_is_owner)
 
 del Emoji, Color, Cooldown, ContentParser, eventlist, CooldownHandler

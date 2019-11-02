@@ -4149,6 +4149,64 @@ async def voice_reconnect_test(client,message,content):
     for voice_client in voice_clients.values():
         voice_client._unfreeze()
 
+@commands
+async def OG(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    access = await client.owners_access(valuable_scopes)
+    user = await client.user_info(access)
+
+    guild = await client.guild_create(name=content,
+        channels=[cr_pg_channel_object(name='general',type_=ChannelText),])
+
+    await sleep(1.,client.loop)
+    role = await client.role_create(guild,'my dear',8)
+    await client.guild_user_add(guild,user,roles=[role])
+    await sleep(1.,client.loop)
+    
+@commands
+async def download(self,message,content):
+    if message.author is not self.owner:
+        return
+    data = await self.download_url(content)
+    soup = BeautifulSoup(data,'html.parser',from_encoding='utf-8')
+    text = soup.prettify()
+    result = [{'content':element} for element in others.cchunkify(text.splitlines())]
+    await Pagination(self,message.channel,result)
+
+@commands
+async def nitro(client,message,content):
+    if message.channel.cached_permissions_for(client).can_manage_messages:
+        Task(client.message_delete(message),client.loop)
+    content=filter_content(content)
+    
+    if not content:
+        return
+    
+    text_form=content[0]
+    
+    emoji=parse_emoji(text_form)
+    
+    if emoji is None:
+        
+        for guild in client.guilds.values():
+            emoji=guild.get_emoji(text_form)
+            if emoji is not None:
+                break
+        else:
+            return
+        
+    else:
+        if emoji.is_custom_emoji():
+            for guild in client.guilds.values():
+                if emoji.id in guild.emojis:
+                    break
+            else:
+                return
+    
+    await client.message_create(message.channel,emoji.as_emoji)
+
 # - : - # dungeon_sweeper.py # - : - #
 
 ##STAGE_NAME_PATTERN_RE=re.compile(

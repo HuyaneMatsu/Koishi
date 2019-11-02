@@ -10,6 +10,7 @@ from hata.futures import Task
 from hata.exceptions import DiscordException
 
 from tools import BeautifulSoup, choose, pop_one, CooldownHandler, mark_as_async, choose_notsame
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
 BOORU_COLOR=Color.from_html('#138a50')
 
@@ -165,6 +166,17 @@ async def answer_booru(client,channel,content,url_base):
 def safebooru(client,message,content):
     return answer_booru(client,message.channel,content,SAFE_BOORU)
 
+async def _help_safebooru(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('safebooru',(
+        'Do you want me, to request some images from safebooru?\n'
+        f'Usage: `{prefix}safebooru *tags*`\n'
+        'You should pass at least 1 tag.'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('safebooru',_help_safebooru)
+
 class nsfw_checker():
     __slots__=('command',)
     __async_call__=True
@@ -194,6 +206,19 @@ class nsfw_checker():
 @mark_as_async
 def nsfwbooru(client,message,content):
     return answer_booru(client,message.channel,content,NSFW_BOORU)
+
+async def _help_nsfwbooru(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('safebooru',(
+        'Do you want me, to request some images from gelbooru?... You perv!\n'
+        f'Usage: `{prefix}nsfwbooru *tags*`\n'
+        'You should pass at least 1 tag. '
+        'Passing nsfw tags is recommended as well.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'NSFW channel only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('nsfwbooru',_help_nsfwbooru)
 
 for title,tag_name,command_names in (
         ('Aki Minoriko',            'aki_minoriko',         ('minoriko',),),

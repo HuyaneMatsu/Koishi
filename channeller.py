@@ -3,9 +3,12 @@ from hata.events_compiler import ContentParser
 from hata.client import Client
 from hata.user import User
 from hata.channel import CHANNELS
+from hata.embed import Embed
 
-class Channeller_v_del:
-    __slots__=['parent']
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+
+class Channeller_v_del(object):
+    __slots__=('parent')
     def __init__(self,parent):
         self.parent=parent
 
@@ -31,20 +34,20 @@ class Channeller_v_del:
             for message in channel.messages:
                 if type(message.author) in nonwebhook:
                     continue
-                if (user.name_at(webhook.guild) != message.author.name or \
+                if (user.name_at(webhook.guild) != message.author.name or
                     #avatar_url  != message.author.avatar_url or \
-                    content     != message.clean_content or \
+                    content     != message.clean_content or
                     file        != (None if message.attachments is None else [attachment.name for attachment in message.attachments]) or \
-                    embed       != message.clean_embeds or \
-                    tts         != message.tts \
+                    embed       != message.clean_embeds or
+                    tts         != message.tts
                         ):
                     
                     continue
                 Task(client.message_delete(message),client.loop)
                 break
                     
-class Channeller():
-    __slots__=['client', 'deleter', 'pairs']
+class Channeller(object):
+    __slots__=('client', 'deleter', 'pairs')
     def __init__(self,client,pairs):
         self.client=client
         self.pairs=pairs
@@ -184,7 +187,25 @@ async def channeling_start(client,message,channel_id):
         break
     
     await client.message_create(channel_1,text)
-    
+
+async def _help_channeling_start(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('channeling_start',(
+        'I can connect more channels with my youkai powers.\n'
+        f'Usage: `{prefix}channeling_start *channe_id*`\n'
+        '`channel_id` must be an id of a channel, what I have access too.\n'
+        'By connecting two channels, I manipulate them to cross send each '
+        'message. I always connect the source channel, with the target '
+        'channel to be clean. *More channels can be connected too.*\n'
+        'To cancel channelling;\n'
+        f'Use: `{prefix}channeling_stop`'
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('channeling_start',_help_channeling_start,KOISHI_HELPER.check_is_owner)
+
+
 async def channeling_stop(client,message,content):
     if client.is_owner(message.author):
         return
@@ -201,5 +222,20 @@ async def channeling_stop(client,message,content):
         break
 
     await client.message_create(channel,text)
+
+async def _help_channeling_stop(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('channeling_start',(
+        'Cancels the channelling between this an an another channel.\n'
+        f'Usage: `{prefix}channeling_stop`\n'
+        'If more channels, are connected, you need to call this command, '
+        'from every of them, to cancel all.\n'
+        'If only one channel is left alone, it will be cancelled automatically.'
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('channeling_stop',_help_channeling_stop,KOISHI_HELPER.check_is_owner)
+
 
 del ContentParser

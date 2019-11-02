@@ -3,7 +3,7 @@ from random import randint
 
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
-from hata.oauth2 import SCOPES
+from hata.permission import Permission
 from hata.events_compiler import ContentParser
 from hata.user import User
 from hata.client import Client
@@ -20,7 +20,7 @@ from hata.role import Role
 from hata.embed import Embed
 
 import image_handler
-from help_handler import on_command_help,HELP,invalid_command
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER, invalid_command
 from ratelimit_tests import ratelimit_commands
 from kanako import kanako_manager
 from dungeon_sweeper import ds_manager,_DS_modify_best
@@ -80,7 +80,7 @@ commands=eventlist()
 
 commands(image_handler.on_command_upload,'upload')
 commands(image_handler.on_command_image,'image')
-commands(on_command_help,'help')
+commands(KOISHI_HELPER,'help')
 commands(invalid_command)
 commands.extend(ratelimit_commands)
 commands(kanako_manager,'kanakogame')
@@ -143,6 +143,17 @@ async def rate(client,message,target):
     #nickname check
     await client.message_create(message.channel,f'I rate {target.name_at(message.guild)} {result}/10')
 
+async def _help_rate(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('rate',(
+        'Do you want me, to rate someone?\n'
+        f'Usage: `{prefix}rate <user>`\n'
+        'If no user is passed, I will rate you :3'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('rate',_help_rate)
+
 
 @commands
 @ContentParser('int, default="1"')
@@ -166,10 +177,33 @@ async def dice(client,message,times):
         
     await client.message_create(message.channel,text)
 
+async def _help_dice(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('dice',(
+        'I will throw some dice and tell you the sum.\n'
+        f'Usage: `{prefix}dice <dice_count>`\n'
+        '`dice_count` if optional, but i have only 6 dices...'
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'I see, you Yukari peeking there! You dice stealer!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('dice',_help_dice)
+
+
 @commands
 @Cooldown('user',30.,handler=CooldownHandler())
 async def ping(client,message,content):
     await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
+
+async def _help_ping(client,message):
+    prefix=client.events.message_create.prefix(message)
+    return Embed('ping',(
+        'Do you wanna know how bad my connection is to Discord?\n'
+        f'Usage: `{prefix}ping\n'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('ping',_help_ping)
 
 
 @commands
@@ -180,6 +214,18 @@ async def message_me(client,message,content):
     except DiscordException:
         await client.message_create(message.channel,'Pls turn on private messages from this server!')
 
+async def _help_message_me(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('message_me',(
+        'I ll send you something, from really deep of my heart.\n'
+        f'Usage : `{prefix}message_me`'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('message_me',_help_message_me)
+
+
+
 @commands
 @ContentParser('condition, flags=gr, default="not message.channel.permissions_for(message.author).can_manage_messages"',
                 'int, default=1',
@@ -187,6 +233,22 @@ async def message_me(client,message,content):
 async def clear(client,message,limit,reason):
     if limit>0:
         await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
+
+async def _help_clear(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('clear',(
+        'I ll clear up the leftover after your lewd messages O-NEE-CHA-N.'
+        f'Usage : `{prefix}clear <amount> <reason>`\n'
+        '`amount` is optional, by default it is just 1.\n'
+        'If you pass `reason`, You will see that at the audit logs of the guild.'
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'This command can be executed only at a guild, and you must have '
+            '`manage messages` permission as well.')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('clear',_help_clear,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(manage_messages=True)))
+
+
 
 def check_message_for_emoji(message):
     parsed=parse_emoji(message.content)
@@ -209,6 +271,19 @@ async def waitemoji(client,message,content):
     
     await client.message_create(channel,emoji.as_emoji*5)
 
+async def _help_waitemoji(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('waitemoji',(
+        'After using this command, I ll wait some time for you to send '
+        'an emoji at this channel. If you sent one, I ll send it back five '
+        'times instead.\n'
+        f'Usage : `{prefix}waitemoji`'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('waitemji',_help_waitemoji)
+
+
 @commands
 async def subscribe(client,message,content):
     guild=message.guild
@@ -224,6 +299,18 @@ async def subscribe(client,message,content):
         await client.user_role_add(message.author,role)
         text='You succesfully subscribed'
     await client.message_create(message.channel,text)
+
+async def _help_subscribe(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('subscribe',(
+        'I subscribe you for the guild\' `Announcememnts` role, if aplicable.\n'
+        'By calling the command again, I ll unsubscribe you, if that is oki.\n'
+        f'Usage : `{prefix}subscribe`'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('subscribe',_help_subscribe)
+
 
 @commands
 async def invite(client,message,content):
@@ -263,6 +350,42 @@ async def invite(client,message,content):
                                             
     channel = await client.channel_private_create(message.author)
     await client.message_create(channel,f'Here is your invite, dear:\n\n{invite_.url}')
+
+async def _help_invite(client,message):
+    guild=message.channel.guild
+    user=message.author
+    if guild is None:
+        full=False
+    else:
+        if user==guild.owner:
+            full=True
+        else:
+            full=False
+
+    if not full:
+        full=client.is_owner(user)
+
+    prefix=client.events.message_create.prefix(message)
+    if full:
+        content=(
+            'I create an invite for you, to this guild.\n'
+            f'Usage: `{prefix}invite (perma)`\n'
+            'By passing `perma` after the command, I ll create for you, my dear '
+            'A permanent invite to the guild.'
+                )
+    else:
+        content=(
+            'I create an invite for you, to this guild.\n'
+            f'Usage: `{prefix}invite \n'
+                )
+
+    embed=Embed('invite',content,color=KOISHI_HELP_COLOR).add_footer(
+        'Guild only. You must have `create instant invite` permission to '
+        'invoke this command.')
+
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('invite',_help_invite,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(create_instant_invite=True)))
 
 
 MINE_MINE_CLEAR = (
@@ -404,6 +527,23 @@ async def mine(client,message,content):
 
     await client.message_edit(message,text)
 
+async def _help_mine(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('mine',(
+        'I creates a minesweeper game.\n'
+        'If you are mad already from failing, just click on the '
+        f'{MINE_CANCEL.as_emoji} under the mine.\n'
+        f'Usage : `{prefix}mine (text) <bomb_count>`\n'
+        'By passing a `text` keyword, i will send the whole mine in a '
+        'codeblock, allowing you, to simply copy-paste it.\n'
+        'The default bomb count in 12, but you can change it between '
+        '8 and 24.'
+            ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('mine',_help_mine)
+
+
 @commands
 async def bans(client,message,content):
     guild=message.channel.guild
@@ -472,6 +612,19 @@ async def bans(client,message,content):
     
     await Pagination(client,message.channel,result)
 
+async def _help_bans(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('bans',(
+        'I ll show you the banned users at the guild.\n'
+        f'Usage: `{prefix}bans`'
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only. You must have `ban user` permission to '
+            'invoke this command.')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('bans',_help_bans,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(ban_user=True)))
+
+
 @commands
 async def leave_guild(client,message,content):
     guild=message.channel.guild
@@ -481,7 +634,18 @@ async def leave_guild(client,message,content):
     if (guild.owner!=message.author) or (not client.is_owner(user)):
         return
     await client.guild_leave(guild)
-    
+
+async def _help_leave_guild(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('leave_guild',(
+        'You really ant me to leave? :c\n'
+        f'Usage: `{prefix}leave_guild`'
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only. You must be the owner of the guild to use this command.')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('leave_guild',_help_leave_guild,checker=KOISHI_HELPER.check_is_guild_owner)
+
 @commands
 async def change_prefix(client,message,content):
     guild=message.guild
@@ -490,39 +654,74 @@ async def change_prefix(client,message,content):
     content=filter_content(content)[0]
     if not (0<len(content)<33):
         text=f'Prefix lenght should be between 1 and 32, got {len(content)}.'
+    elif '`' in content:
+        text=f'The prefix should not include `\`` in it.'
     elif PREFIXES.add(guild,content):
         text='Prefix modified.'
     else:
         text='Thats the frefix already.'
     await client.message_create(message.channel,text)
 
+async def _help_change_prefix(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('change_prefix',(
+        'Do you have any preferred prefix for my commands?\n'
+        f'Usage: `{prefix}chnage_prefix *prefix*`'
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only. You must be the owner of the guild to use this command.')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('change_prefix',_help_change_prefix,checker=KOISHI_HELPER.check_is_guild_owner)
+
+
 
 @commands
 async def yuno(client,message,content):
-    await client.message_create(message.channel,embed=Embed('YUKI YUKI YUKI!','''
-        ░░░░░░░░░░░▄▄▀▀▀▀▀▀▀▀▄▄░░░░░░░░░░░░░
-        ░░░░░░░░▄▀▀░░░░░░░░░░░░▀▄▄░░░░░░░░░░
-        ░░░░░░▄▀░░░░░░░░░░░░░░░░░░▀▄░░░░░░░░
-        ░░░░░▌░░░░░░░░░░░░░▀▄░░░░░░░▀▀▄░░░░░
-        ░░░░▌░░░░░░░░░░░░░░░░▀▌░░░░░░░░▌░░░░
-        ░░░▐░░░░░░░░░░░░▒░░░░░▌░░░░░░░░▐░░░░
-        ░░░▌▐░░░░▐░░░░▐▒▒░░░░░▌░░░░░░░░░▌░░░
-        ░░▐░▌░░░░▌░░▐░▌▒▒▒░░░▐░░░░░▒░▌▐░▐░░░
-        ░░▐░▌▒░░░▌▄▄▀▀▌▌▒▒░▒░▐▀▌▀▌▄▒░▐▒▌░▌░░
-        ░░░▌▌░▒░░▐▀▄▌▌▐▐▒▒▒▒▐▐▐▒▐▒▌▌░▐▒▌▄▐░░
-        ░▄▀▄▐▒▒▒░▌▌▄▀▄▐░▌▌▒▐░▌▄▀▄░▐▒░▐▒▌░▀▄░
-        ▀▄▀▒▒▌▒▒▄▀░▌█▐░░▐▐▀░░░▌█▐░▀▄▐▒▌▌░░░▀
-        ░▀▀▄▄▐▒▀▄▀░▀▄▀░░░░░░░░▀▄▀▄▀▒▌░▐░░░░░
-        ░░░░▀▐▀▄▒▀▄░░░░░░░░▐░░░░░░▀▌▐░░░░░░░
-        ░░░░░░▌▒▌▐▒▀░░░░░░░░░░░░░░▐▒▐░░░░░░░
-        ░░░░░░▐░▐▒▌░░░░▄▄▀▀▀▀▄░░░░▌▒▐░░░░░░░
-        ░░░░░░░▌▐▒▐▄░░░▐▒▒▒▒▒▌░░▄▀▒░▐░░░░░░░
-        ░░░░░░▐░░▌▐▐▀▄░░▀▄▄▄▀░▄▀▐▒░░▐░░░░░░░
-        ░░░░░░▌▌░▌▐░▌▒▀▄▄░░░░▄▌▐░▌▒░▐░░░░░░░
-        ░░░░░▐▒▐░▐▐░▌▒▒▒▒▀▀▄▀▌▐░░▌▒░▌░░░░░░░
-        ░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░
-        ''',0xffafde,'https://www.youtube.com/watch?v=NI_fgwbmJg0&t=0s'))
-valuable_scopes=[scope for scope in SCOPES if scope[0] not in 'mrw']
+    await client.message_create(message.channel,embed=Embed('YUKI YUKI YUKI!',
+        '░░░░░░░░░░░▄▄▀▀▀▀▀▀▀▀▄▄░░░░░░░░░░░░░\n'
+        '░░░░░░░░▄▀▀░░░░░░░░░░░░▀▄▄░░░░░░░░░░\n'
+        '░░░░░░▄▀░░░░░░░░░░░░░░░░░░▀▄░░░░░░░░\n'
+        '░░░░░▌░░░░░░░░░░░░░▀▄░░░░░░░▀▀▄░░░░░\n'
+        '░░░░▌░░░░░░░░░░░░░░░░▀▌░░░░░░░░▌░░░░\n'
+        '░░░▐░░░░░░░░░░░░▒░░░░░▌░░░░░░░░▐░░░░\n'
+        '░░░▌▐░░░░▐░░░░▐▒▒░░░░░▌░░░░░░░░░▌░░░\n'
+        '░░▐░▌░░░░▌░░▐░▌▒▒▒░░░▐░░░░░▒░▌▐░▐░░░\n'
+        '░░▐░▌▒░░░▌▄▄▀▀▌▌▒▒░▒░▐▀▌▀▌▄▒░▐▒▌░▌░░\n'
+        '░░░▌▌░▒░░▐▀▄▌▌▐▐▒▒▒▒▐▐▐▒▐▒▌▌░▐▒▌▄▐░░\n'
+        '░▄▀▄▐▒▒▒░▌▌▄▀▄▐░▌▌▒▐░▌▄▀▄░▐▒░▐▒▌░▀▄░\n'
+        '▀▄▀▒▒▌▒▒▄▀░▌█▐░░▐▐▀░░░▌█▐░▀▄▐▒▌▌░░░▀\n'
+        '░▀▀▄▄▐▒▀▄▀░▀▄▀░░░░░░░░▀▄▀▄▀▒▌░▐░░░░░\n'
+        '░░░░▀▐▀▄▒▀▄░░░░░░░░▐░░░░░░▀▌▐░░░░░░░\n'
+        '░░░░░░▌▒▌▐▒▀░░░░░░░░░░░░░░▐▒▐░░░░░░░\n'
+        '░░░░░░▐░▐▒▌░░░░▄▄▀▀▀▀▄░░░░▌▒▐░░░░░░░\n'
+        '░░░░░░░▌▐▒▐▄░░░▐▒▒▒▒▒▌░░▄▀▒░▐░░░░░░░\n'
+        '░░░░░░▐░░▌▐▐▀▄░░▀▄▄▄▀░▄▀▐▒░░▐░░░░░░░\n'
+        '░░░░░░▌▌░▌▐░▌▒▀▄▄░░░░▄▌▐░▌▒░▐░░░░░░░\n'
+        '░░░░░▐▒▐░▐▐░▌▒▒▒▒▀▀▄▀▌▐░░▌▒░▌░░░░░░░\n'
+        '░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░\n'
+        ,0xffafde,'https://www.youtube.com/watch?v=NI_fgwbmJg0&t=0s'))
+    
+async def _help_yuno(client,message):
+    embed=Embed('yuno',(
+        'Your personal yandere.\n'
+        'Good luck, I better leave now!'
+            ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('yuno',_help_yuno,)
+
+
+valuable_scopes = [
+    'identify',
+    'connections',
+    'guilds',
+    'guilds.join',
+    'email',
+    'applications.builds.read',
+    'applications.builds.upload',
+    'applications.entitlements',
+    'applications.store.update',
+        ]
 
 OA2_accesses={}
 
@@ -538,6 +737,27 @@ async def oa2_link(client,message,content): #just a test link
         '%20email%20applications.builds.read'
         '%20applications.builds.upload%20applications.entitlements'
         '%20applications.store.update'))
+
+async def _help_oa2_link(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('oa2_link',(
+        'I ll give you a nice authorization link for some oauth 2 scopes.\n'
+        f'Usage: `{prefix}oa2_link`\n'
+        'After you authorized yourself, you should call the `oa2_feed` '
+        'command, to feed the authorized link to me.\n'
+        f'Example: `{prefix}oa2_feed *link*`\n'
+        'By doing this you will unlock other oauth 2 commands, like:\n'
+        f'- `{prefix}oa2_user <user_id>`\n'
+        f'- `{prefix}oa2_connections <user_id>`\n'
+        f'- `{prefix}oa2_guilds <user_id>`\n'
+        f'- `{prefix}oa2_my_guild <user_id>`\n'
+        f'- `{prefix}oa2_renew <user_id>`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('oa2_link',_help_oa2_link,KOISHI_HELPER.check_is_owner)
+
 
 @commands
 async def oa2_feed(client,message,content):
@@ -559,7 +779,27 @@ async def oa2_feed(client,message,content):
     user = await client.user_info(access)
     OA2_accesses[user.id]=user
     await client.message_create(message.channel,'Thanks')
-    
+
+async def _help_oa2_feed(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('oa2_feed',(
+        'Feeds your oauth 2 authorized redirect url.\n'
+        f'Usage: `{prefix}oa2_feed *link*`\n'
+        'How to get an oauth 2 authorization url?\n'
+        f'Use: `{prefix}oa2_link`\n'
+        'By doing this you will unlock other oauth 2 commands, like:\n'
+        f'- `{prefix}oa2_user <user_id>`\n'
+        f'- `{prefix}oa2_connections <user_id>`\n'
+        f'- `{prefix}oa2_guilds <user_id>`\n'
+        f'- `{prefix}oa2_my_guild <user_id>`\n'
+        f'- `{prefix}oa2_renew <user_id>`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('oa2_feed',_help_oa2_feed,KOISHI_HELPER.check_is_owner)
+
+
 def _oa2_query(message,content):
     author_id=message.author.id
     if not (16<len(content)<33):
@@ -586,6 +826,23 @@ async def oa2_user(client,message,content):
     
     await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
 
+async def _help_oa2_user(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('oa2_user',(
+        'After you authorized yourself, I will know your deepest secrets :3\n'
+        'Using this command, I ll show the extra information, I received.\n'
+        f'Usage: `{prefix}oa2_user <user_id>`\n'
+        'Well, every other owner will know it too, by passing your id, '
+        'so take care, you can not trust them! *Only me!*\n'
+        'If you dont know how to authorize yourself;\n'
+        f'Use : `{prefix}help oa2_link`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('oa2_user',_help_oa2_user,KOISHI_HELPER.check_is_owner)
+
+
 
 @commands
 async def oa2_connections(client,message,content):
@@ -600,7 +857,24 @@ async def oa2_connections(client,message,content):
     connections = await client.user_connections(user.access)
     
     await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
+
+async def _help_oa2_connections(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('oa2_connections',(
+        'After you authorized yourself, I will know your deepest secrets :3\n'
+        'You might ask what are your connections. '
+        'Those are your connected apps and sites.\n'
+        f'Usage: `{prefix}oa2_connections <user_id>`\n'
+        'Well, every other owner will know it too, by passing your id, '
+        'so take care, you can not trust them! *Only me!*\n'
+        'If you dont know how to authorize yourself;\n'
+        f'Use : `{prefix}help oa2_link`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
     
+KOISHI_HELPER.add('oa2_connections',_help_oa2_connections,KOISHI_HELPER.check_is_owner)
+
     
 @commands
 async def oa2_guilds(client,message,content):
@@ -615,7 +889,25 @@ async def oa2_guilds(client,message,content):
     guilds = await client.user_guilds(user.access)
     
     await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
-    
+
+async def _help_oa2_guilds(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('oa2_guilds',(
+        'After you authorized yourself, I will know your deepest secrets :3\n'
+        'By using this command, I ll show your guilds. '
+        '*And everything, what I know about them.*\n'
+        f'Usage: `{prefix}oa2_guilds <user_id>`\n'
+        'Well, every other owner will know it too, by passing your id, '
+        'so take care, you can not trust them! *Only me!*\n'
+        'If you dont know how to authorize yourself;\n'
+        f'Use : `{prefix}help oa2_link`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('oa2_guilds',_help_oa2_guilds,KOISHI_HELPER.check_is_owner)
+
+
 @commands
 async def oa2_my_guild(client,message,content):
     if not client.is_owner(message.author):
@@ -624,10 +916,6 @@ async def oa2_my_guild(client,message,content):
     user=_oa2_query(message,content)
     if user is None:
         await client.message_create(message.channel,'Could not find that user')
-        return
-    
-    if (not client.is_owner(message.author)) and user!=message.author:
-        await client.message_create(message.channel,'NOPE, do it on yourself!')
         return
     
     try:
@@ -639,7 +927,7 @@ async def oa2_my_guild(client,message,content):
         await sleep(1.,client.loop)
         await client.guild_edit(guild,owner=user)
     except Exception as err:
-        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at oa2_my_guild\nTraceback (most recent call last):\n'])))
+        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at oa2_my_guild\n'])))
     finally:
         try:
             guild
@@ -650,6 +938,23 @@ async def oa2_my_guild(client,message,content):
             await client.guild_delete(guild)
         else:
             await client.guild_leave(guild)
+
+async def _help_oa2_my_guild(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('my_guild',(
+        'After you authorized yourself, I can create a guild for you, '
+        'so just sit back!\n'
+        f'Usage: `{prefix}oa2_my_guild <user_id>`\n'
+        'Other owners can create a guild for you, after you authorized, '
+        'take care!\n'
+        'If you dont know how to authorize yourself;\n'
+        f'Use : `{prefix}help oa2_link`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('my_guild',_help_oa2_my_guild,KOISHI_HELPER.check_is_owner)
+
 
 # Deprecated because it does not works with teams.
 #@commands
@@ -682,33 +987,28 @@ async def oa2_renew(client,message,content):
     last=access.created_at
     await client.renew_access_token(access)
     new=access.created_at
-    await client.message_create(message.channel,f'{user:f}\' access token got renewed.\nFrom creation time at: {last:%Y.%m.%d-%H:%M:%S}\nTo creation time at: {new:%Y.%m.%d-%H:%M:%S}')
+    await client.message_create(message.channel,
+        f'{user:f}\' access token got renewed.\n'
+        f'From creation time at: {last:%Y.%m.%d-%H:%M:%S}\n'
+        f'To creation time at: {new:%Y.%m.%d-%H:%M:%S}'
+            )
 
-@commands
-async def OG(client,message,content):
-    if not client.is_owner(message.author):
-        return
-    
-    access = await client.owners_access(valuable_scopes)
-    user = await client.user_info(access)
+async def _help_oa2_renew(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('oa2_renew',(
+        'Your oauth2 authorization might expire; with this command you can '
+        'renew it.\n'
+        f'Usage: `{prefix}oa2_renew <user_id>`\n'
+        'Other owners can renew it for you as well!\n'
+        'If you dont know how to authorize yourself;\n'
+        f'Use : `{prefix}help oa2_link`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
 
-    guild = await client.guild_create(name=content,
-        channels=[cr_pg_channel_object(name='general',type_=ChannelText),])
+KOISHI_HELPER.add('oa2_renew',_help_oa2_renew,KOISHI_HELPER.check_is_owner)
 
-    await sleep(1.,client.loop)
-    role = await client.role_create(guild,'my dear',8)
-    await client.guild_user_add(guild,user,roles=[role])
-    await sleep(1.,client.loop)
-    
-@commands
-async def download(self,message,content):
-    if message.author is not self.owner:
-        return
-    data = await self.download_url(content)
-    soup = BeautifulSoup(data,'html.parser',from_encoding='utf-8')
-    text = soup.prettify()
-    result = [{'content':element} for element in others.cchunkify(text.splitlines())]
-    await Pagination(self,message.channel,result)
+
 
 @commands
 @ContentParser('emoji')
@@ -716,57 +1016,70 @@ async def se(client,message,emoji):
     if emoji.is_custom_emoji():
         await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
 
+async def _help_se(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('se',(
+        '`se` stands for `show emoji`\n'
+        f'Usage: `{prefix}se *emoji*`\n'
+        'I can show only custom emojis.'
+            ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
 
-@commands
-async def nitro(client,message,content):
-    if message.channel.cached_permissions_for(client).can_manage_messages:
-        Task(client.message_delete(message),client.loop)
-    content=filter_content(content)
-    
-    if not content:
-        return
-    
-    text_form=content[0]
-    
-    emoji=parse_emoji(text_form)
-    
-    if emoji is None:
-        
-        for guild in client.guilds.values():
-            emoji=guild.get_emoji(text_form)
-            if emoji is not None:
-                break
-        else:
-            return
-        
-    else:
-        if emoji.is_custom_emoji():
-            for guild in client.guilds.values():
-                if emoji.id in guild.emojis:
-                    break
-            else:
-                return
-    
-    await client.message_create(message.channel,emoji.as_emoji)
+KOISHI_HELPER.add('se',_help_se)
+
 
 @commands
 @ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'int',
                 'channel, flags=mnig, default="message.channel"',)
 async def resend_webhook(client,message,message_id,channel):
+    permissions=message.channel.cached_permissions_for(client)
+    can_delete=permissions.can_manage_messages
+    
+    if not permissions.can_manage_webhooks:
+        message = await client.message_create(message.channel,
+            'I have no permissions to get webhooks from this channel.')
+        if can_delete:
+            await sleep(30.0,client.loop)
+            await client.message_delete(message)
+        return
+    
     try:
         target_message = await client.message_get(channel,message_id)
-    except Exception as err:
-        await client.message_create(message.channel,err.__class__.__name__)
+    except DiscordException as err:
+        message = await client.message_create(message.channel,err.__repr__())
+        if can_delete:
+            await sleep(30.0,client.loop)
+            await client.message_delete(message)
         return
 
     webhooks = await client.webhook_get_channel(channel)
-    webhook=webhooks[0]
+    if webhooks:
+        webhook=webhooks[0]
+    else:
+        webhook = await client.webhook_create(channel,'Love You')
 
     await client.webhook_send(webhook,
         embed=target_message.embeds,
         name=target_message.author.name,
         avatar_url=target_message.author.avatar_url)
+
+async def _help_resend_webhook(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('resend_webhook',(
+        'I can resend a webhook, if chu really want.\n'
+        f'Usage: `{prefix}resend_webhook *message_id* <channel>`\n'
+        'The `message_id` must be the `id` of the message sent by the '
+        'webhook.\n'
+        'The `channel` by default is the channel from here you call the '
+        'command. But if the message is at a different channel, you should '
+        'tell me > <.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only. Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('resend_webhook',_help_resend_webhook,KOISHI_HELPER.check_is_owner)
+
 
 @commands
 @ContentParser('int', 'int, default="0"',)
@@ -774,7 +1087,19 @@ async def random(client,message,v1,v2):
     result=randint(v2,v1) if v1>v2 else randint(v1,v2)
     await client.message_create(message.channel,str(result))
 
-async def pararell_load(client,channel,future):
+async def _help_random(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('random',(
+        'Do you need some random numbers?\n'
+        f'Usage: `{prefix}random *number_1* <number_2>`\n'
+        'You should pass at least 1 number. The second is optinal and by '
+        'default is `0`.'),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('random',_help_random)
+
+
+async def _pararell_load(client,channel,future):
     try:
         await client.message_at_index(channel,256256256) #gl
     except (IndexError,PermissionError) as err:
@@ -800,7 +1125,7 @@ async def count_messages(client,message,content):
     
     with client.keep_typing(source_channel):
         for channel in channels:
-            Task(pararell_load(client,channel,future),client.loop)
+            Task(_pararell_load(client,channel,future),client.loop)
 
         await future
         
@@ -815,7 +1140,22 @@ async def count_messages(client,message,content):
     chunks=[{'content':chunk} for chunk in others.chunkify(text)]
     await Pagination(client,source_channel,chunks)
 
-async def pararell_load_reactions(client,channel,future,reactions):
+async def _help_count_messages(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('count_messages',(
+        'I mastered math for a long time, I can count who and how messages '
+        'sent at the guild!\n'
+        f'Usage: `{prefix}count_messages`\n'
+        'This command takes a while and it is not guaranteed, that it '
+        'will finish without an error.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only. Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('count_messages',_help_count_messages,KOISHI_HELPER.check_is_owner)
+
+
+async def _pararell_load_reactions(client,channel,future,reactions):
     try:
         await client.message_at_index(channel,256256256) #gl
     except (IndexError,PermissionError) as err:
@@ -855,7 +1195,7 @@ async def count_reactions(client,message,content):
     
     with client.keep_typing(source_channel):
         for channel in channels:
-            Task(pararell_load_reactions(client,channel,future,reactions),client.loop)
+            Task(_pararell_load_reactions(client,channel,future,reactions),client.loop)
 
         await future
 
@@ -877,6 +1217,20 @@ async def count_reactions(client,message,content):
     chunks=[{'content':chunk} for chunk in others.chunkify(text)]
     await Pagination(client,source_channel,chunks)        
 
+async def _help_count_reactions(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('count_reactions',(
+        'Do you want me to count every reaction at your guild ever sent?\n'
+        f'Usage: `{prefix}count_reactions`\n'
+        'This command takes a while and it is not guaranteed, that it '
+        'will finish without an error.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only. Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('count_reactions',_help_count_reactions,KOISHI_HELPER.check_is_owner)
+
+
 @commands
 @ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'user, flags=mna, default="client"',)
@@ -890,6 +1244,20 @@ async def update_application_info(client,message,user):
 
 HTML_RP=re.compile('#?([0-9a-f]{6})',re.I)
 REGULAR_RP=re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
+
+async def _help_update_application_info(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('update_application_info',(
+        'I can update applicaction info of any of the active clients '
+        'with my mansion.\n'
+        f'Usage: `{prefix}update_application_info <user>`\n'
+        '`user` is otional and can be only an another client.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('update_application_info',_help_update_application_info,KOISHI_HELPER.check_is_owner)
+
 
 @commands(case='color')
 async def command_color(client,message,content):
@@ -924,13 +1292,23 @@ async def command_color(client,message,content):
     embed=Embed(content,color=full_color)
     embed.add_image('attachment://color.png')
     
-    buffer=ReuBytesIO()
-    image=PIL.new('RGB',(120,30),color)
-    image.save(buffer,'png')
-    buffer.seek(0)
-    
-    await client.message_create(message.channel,embed=embed,file=('color.png',buffer))
-    buffer.real_close()
-    
+    with ReuBytesIO() as buffer:
+        image=PIL.new('RGB',(120,30),color)
+        image.save(buffer,'png')
+        buffer.seek(0)
+        
+        await client.message_create(message.channel,embed=embed,file=('color.png',buffer))
+
+async def _help_color(client,message):
+    prefix=client.events.message_crate.prefix(message)
+    embed=Embed('color',(
+        'Do you wanna see a color?\n'
+        f'Usage: `{prefix}color *color*`\n'
+        'I accept regular RGB or HTML color format.'
+            ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('color',_help_color)
+
 del Cooldown
 del CooldownHandler

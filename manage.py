@@ -29,6 +29,7 @@ import chesuto
 
 
 ############################## SETUP KOISHI ##############################
+koishi.KOISHI_HELPER.sort()
 
 Koishi=Client(pers_data.KOISHI_TOKEN,
     secret=pers_data.KOISHI_SECRET,
