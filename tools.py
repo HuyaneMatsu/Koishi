@@ -47,7 +47,7 @@ def smart_join(list_,limit=2000,sep='\n'):
     return sep.join(result)
 
 @inherit(CommandProcesser)
-class MessageDeleteWaitfor():
+class MessageDeleteWaitfor(object):
     __slots__=['waitfors']
     __event_name__='message_delete'
     def __init__(self):
@@ -61,7 +61,7 @@ class MessageDeleteWaitfor():
         await event(message)
 
 class CooldownHandler:
-    __slots__=['cache']
+    __slots__=('cache',)
     def __init__(self):
         self.cache={}
 
@@ -100,9 +100,9 @@ class CooldownHandler:
         except DiscordException:
             pass
 
-class commit_extractor:
+class commit_extractor(object):
     _GIT_RP=re.compile('^\[`[\da-f]*`\]\((https://github.com/[^/]*/[^/]*/)commit')
-    __slots__=['channel', 'client', 'color', 'role', 'webhook']
+    __slots__=('channel', 'client', 'color', 'role', 'webhook',)
     def __init__(self,client,channel,webhook,role=None,color=0):
         self.client=client
         self.channel=channel

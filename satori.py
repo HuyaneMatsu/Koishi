@@ -247,7 +247,7 @@ class TouhouWikiPage(object):
     async def __new__(cls,client,channel,result,message):
         async with client.http.request_(METH_GET,result[1]) as response:
             response_data = await response.text()
-        soup=BeautifulSoup(response_data,features='lxml')
+        soup=BeautifulSoup(response_data,'html.parser',from_encoding='utf-8')
         block=soup.find_all('div',class_='mw-parser-output')[2]
 
         last=[]

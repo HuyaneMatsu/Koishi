@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
+import sys, json
 from random import choice
-import sys
-import json
 
 from hata.futures import Task
 from hata.parsers import eventlist
-from hata.channel import message_at_index,ChannelText,ChannelCategory,CHANNELS
+from hata.channel import message_at_index, ChannelText, ChannelCategory, CHANNELS
 from hata.prettyprint import pchunkify
 from hata.others import elapsed_time,Status,AuditLogEvent,cchunkify,Status
 from hata.exceptions import DiscordException
@@ -18,19 +17,21 @@ from hata.user import USERS
 from hata.guild import GUILDS
 from hata.client_core import CLIENTS
 from hata.activity import ActivityUnknown
-from help_handler import HELP
+from hata.permission import Permission
+
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
 async def no_permission(client,message,*args):
     if args:
-        await client.message_create(message.channel,'You do not have permission to use this command!')
+        await client.message_create(message.channel,'You do not have permission to invoke this command!')
 
 class show_help(object):
-    __slots__=('embed',)
+    __slots__=('func',)
     __async_call__=True
-    def __init__(self,name):
-        self.embed=HELP[name]
+    def __init__(self,func):
+        self.func=func
     def __call__(self,client,message,*args):
-        return client.message_create(message.channel,embed=self.embed)
+        return self.func(client,message)
 
 infos=eventlist()
 
@@ -178,6 +179,19 @@ async def user_info(client,message,user):
         embed.add_field('Status and Activity',''.join(text))
     await client.message_create(message.channel,embed=embed)
 
+async def _help_user(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('user',(
+        'I show you some information about the given user.\n'
+        'If you use it inside of a guild and the user is inside as well, '
+        'will show information, about their guild profile too.\n'
+        f'Usage: `{prefix}user <user>`\n'
+        'If no user is passed, I will tell your secrets :3'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('user',_help_user)
+
 @infos(case='guild')
 async def guild_info(client,message,content):
     guild=message.guild
@@ -265,22 +279,50 @@ async def guild_info(client,message,content):
 
     await client.message_create(message.channel,embed=embed)
 
+async def _help_guild(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('user',(
+        'Do you want me to list, some information about this guild?\n'
+        f'Usage: `{prefix}guild`\n'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('guild',_help_guild)
+
+
 @infos
 @ContentParser('guild',
                 'condition, flags=r, default="not guild.permissions_for(message.author).can_manage_channel"',
-                'channel, flags=mni, default=None',
-                on_failure=no_permission)
+                'channel, flags=mni, default=None',)
 async def invites(client,message,guild,channel):
-    try:
-        if channel is None:
-            invites = await client.invite_get_guild(guild)
-        else:
-            invites = await client.invite_get_channel(channel)
-    except DiscordException:
+    if channel is None:
+        if guild.cached_permissions_for(client).can_manage_guild:
+            await client.message_create(message.channel,
+                'I dont have enough permission, to request the invites.')
+            return
+        invites = await client.invite_get_guild(guild)
+    else:
+        if channel.cached_permissions_for(client).can_manage_channel:
+            await client.message_create(message.channel,
+                'I dont have enough permission, to request the invites.')
         return
+        invites = await client.invite_get_channel(channel)
     
     pages=[{'content':chunk} for chunk in pchunkify(invites,write_parents=False,show_code=False)]
     await Pagination(client,message.channel,pages,120.)
+
+async def _help_invites(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('invites',(
+        'I can list you the invites of the guild.\n'
+        f'Usage: `{prefix}invites <channel>`\n'
+        'If `channel` is passed, I ll check the invites only at that channel.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('invites',_help_invites,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(manage_channel=True)))
 
 def generate_love_level():
     value = {
@@ -427,10 +469,20 @@ def generate_love_level():
 LOVE_VALUES=tuple(generate_love_level())
 del generate_love_level
 
+async def _help_love(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('love',(
+        'How much you two fit together?'
+        f'Usage: `{prefix}user *user*`\n'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('love',_help_love)
+
 @infos
 @ContentParser('user, flags="mna"',
                 'condition, flags=r, default="message.author is user_0"',
-                on_failure=show_help('love'))
+                on_failure=show_help(_help_love))
 async def love(client,message,target):
     source=message.author
 
@@ -446,8 +498,8 @@ async def love(client,message,target):
 
     await client.message_create(message.channel,embed=embed)
 
-class once:
-    __slots__=['content','embed','ready']
+class once(object):
+    __slots__=('content','embed','ready')
     def __init__(self,content='',embed=None):
         self.ready=False
         self.content=content
@@ -460,15 +512,15 @@ ABOUT=once()
 infos(ABOUT,'about')
 def update_about(client):
     implement=sys.implementation
-    text=''.join([ \
-        f'Me, {client:f}, I am general purpose/test client.',
+    text=''.join([
+        f'Me, {client.full_name}, I am general purpose/test client.',
         '\n',
         'My code base is',
         ' [open source](https://github.com/HuyaneMatsu/Koishi). ',
         'One of the main goal of my existence is to test the best *cough*',
         ' [discord API wrapper](https://github.com/HuyaneMatsu/hata). ',
         '\n\n',
-        f'My Masutaa is {client.owner:f} (send neko pictures pls).\n\n',
+        f'My Masutaa is {client.owner.full_name} (send neko pictures pls).\n\n',
         '**Client info**\n',
         f'Python version: {implement.version[0]}.{implement.version[1]}',
         f'{"" if implement.version[3]=="final" else " "+implement.version[3]}\n',
@@ -484,6 +536,16 @@ def update_about(client):
     ABOUT.embed=embed
     ABOUT.ready=True
 
+async def _help_about(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('about',(
+        'Just some information about me.'
+        f'Usage: `{prefix}about`'
+            ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('about',_help_about)
+
 
 @infos
 @ContentParser('guild',
@@ -496,6 +558,11 @@ def update_about(client):
                 'str',
                 on_failure=no_permission)
 async def logs(client,message,guild,*args):
+    if not guild.cached_permissions_for(client).can_view_audit_log:
+        await client.message_create(message.channel,
+            'I have no permissions at the guild, to request audit logs.')
+        return
+    
     user=None
     event=None
 
@@ -527,6 +594,21 @@ async def logs(client,message,guild,*args):
     
     await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])
 
+async def _help_logs(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('logs',(
+        'I can list you the audit logs of the guild.\n'
+        f'Usage: `{prefix}logs <user> <event>`\n'
+        'Both `user` and `event` is optional.\n'
+        '`user` is the user, who executed the logged oprations.\n'
+        'The `event` is the internal value or name of the type of the '
+        'operation.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('logs',_help_logs,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(view_audit_log=True)))
+
 
 @infos
 @ContentParser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
@@ -534,12 +616,29 @@ async def logs(client,message,guild,*args):
                 'channel, flags=mnig, default="message.channel"',
                 on_failure=no_permission)
 async def message(client,message,message_id,channel):
+    if not channel.cached_permissions_for(client).can_read_message_history:
+        await client.message_create(message.channel,
+            'I am unable to read the messages at the specified channel.')
+        return
+    
     try:
         target_message = await client.message_get(channel,message_id)
-    except DiscordException:
-        await client.message_create(message.channel,'Acces denied or not existing message')
+    except DiscordException as err:
+        await client.message_create(message.channel,err.__repr__())
         return
     await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
+
+async def _help_message(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('message',(
+        'If you want, I show the representation of a message.\n'
+        f'Usage: `{prefix}message *message_id* <channel>`\n'
+        'By default `channel` is the channel, where you used the command.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only! Adminsitartor only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('message',_help_message,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
 @infos
 @ContentParser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
@@ -547,14 +646,30 @@ async def message(client,message,message_id,channel):
                 'channel, flags=mnig, default="message.channel"',
                 on_failure=no_permission)
 async def message_pure(client,message,message_id,channel):
+    if not channel.cached_permissions_for(client).can_read_message_history:
+        await client.message_create(message.channel,
+            'I am unable to read the messages at the specified channel.')
+        return
+    
     try:
         data = await client.http.message_get(channel.id,message_id)
-    except DiscordException:
-        await client.message_create(message.channel,'Access denied or not existing message')
+    except DiscordException as err:
+        await client.message_create(message.channel,err.__repr__())
         return
     
     await Pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
 
+async def _help_message_pure(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('message_pure',(
+        'If you want, I show the pure json representing a message.\n'
+        f'Usage: `{prefix}message_pure *message_id* <channel>`\n'
+        'By default `channel` is the channel, where you used the command.'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only! Adminsitartor only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('message_pure',_help_message_pure,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
 class role_details(object):
     __slots__=('cache','guild','roles',)
@@ -609,7 +724,7 @@ class embedination_rr(object):
     RIGHT2  = BUILTIN_EMOJIS['fast_forward']
     RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
     CROSS   = BUILTIN_EMOJIS['x']
-    emojis  = [LEFT2,LEFT,RIGHT,RIGHT2,RESET,CROSS]
+    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET,CROSS)
     
     __slots__=('cancel', 'channel', 'page', 'pages', 'task_flag',)
     async def __new__(cls,client,channel,pages):
@@ -624,7 +739,7 @@ class embedination_rr(object):
         message.weakrefer()
         
         if len(self.pages)>1:
-            for emoji in self.emojis:
+            for emoji in self.EMOJIS:
                 await client.reaction_add(message,emoji)
         else:
             await client.reaction_add(message,self.CROSS)
@@ -643,7 +758,7 @@ class embedination_rr(object):
             if self.task_flag==1:
                 if emoji is self.CROSS:
                     self.task_flag=2
-                elif emoji in self.emojis:
+                elif emoji in self.EMOJIS:
                     Task(self.reaction_remove(client,message,emoji,user),client.loop)
             return
         
@@ -729,6 +844,19 @@ async def roles(client,message,content):
         return
     await role_details(client,message.channel)
 
+async def _help_roles(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('roles',(
+        'Cutie, do you want me, to list the roles of the guild and their '
+        'permissions?\n'
+        f'Usage: `{prefix}roles`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('roles',_help_roles)
+
+
 @infos
 @ContentParser('user, flags=mna, default="message.author"')
 async def avatar(client, message, user):
@@ -742,3 +870,14 @@ async def avatar(client, message, user):
     
     await client.message_create(message.channel, embed=embed)
     
+async def _help_avatar(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('avatar',(
+        'Pure 4K user avatar showcase!\n'
+        f'Usage: `{prefix}avatar <user>`\n'
+        'If no `user` is passed, I will showcase your avatar.'
+            ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('avatar',_help_avatar)
+

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-import re
+import re, os, wave
+
 from hata import player
-from hata.parsers import eventlist
 from hata.others import filter_content
 from hata.futures import sleep,Task
-from help_handler import HELP
-import pers_data
-import os
-from hata.reader import AudioReader
 from hata.dereaddons_local import alchemy_incendiary
-import wave
+from hata.embed import Embed
+from hata.events_compiler import ContentParser
+
+import pers_data
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
 #await it
 def save_voice(client,frames):
@@ -364,32 +364,26 @@ async def voice_stop(client,message,content):
     await client.message_delete(message,reason='Voice messages expire after 30s.')
 
 VOICE_SUBCOMMANDS['stop']=voice_stop
-
-async def voice_move(client,message,content):
-    guild=message.channel.guild
+@ContentParser('channel, flags=mnig, default=None',)
+async def voice_move(client,message,channel):
+    guild=channel.guild
     while True:
-        if content:
-            name=content[0]
-            channel=guild.get_channel(name)
-            if channel is None:
-                text=f'Not existing channel: "{name}"!'
-                break
-            
-            if channel.type!=2:
-                text='Not voice channel.'
-                break
-            
-        else:
+        if channel is None:
             state=guild.voice_states.get(message.author.id,None)
             if state is None:
-                text='You must be in vocie channel, or you must add a voice channel name to join to'
+                text='You must be in vocie channel, or you should pass a voice channel.'
                 break
             
             channel=state.channel
             if not message.channel.cached_permissions_for(client).can_connect:
                 test='I have no permissions to connect to that channel'
                 break
-        
+            
+        else:
+            if channel.type!=2:
+                text='Not voice channel.'
+                break
+
         voice_client=client.voice_client_for(message)
         if voice_client is None:
             await client.join_voice_channel(channel)
@@ -409,22 +403,40 @@ VOICE_SUBCOMMANDS['move']=voice_move
 async def voice_partyisover(client,message,content):
     channel=message.channel
     guild=channel.guild
+    
+    if not client.is_owner(message.author):
+        if not guild.permissions_for(message.author).can_administrator:
+            return
+    
+    
     while True:
         voice_client=client.voice_client_for(message)
         if voice_client is None:
             text='I dont see any parties arround me.'
             break
         
-        if guild.permissions_for(message.author).can_move_users and guild.cached_permissions_for(client).can_move_users:
-            channel=voice_client.channel
-            for state in guild.voice_states.values():
-                if state.channel is channel and state.user is not client:
-                    Task(client.user_voice_kick(state.user,guild),client.loop)
-
+        channel=voice_client.channel
+        users=[]
+        for state in guild.voice_states.values():
+            if (state.channel is not channel):
+                continue
+                
+            user=state.user
+            if (user==client):
+                continue
+            
+            users.append(user)
+        
+        if not users:
             Task(voice_client.disconnect(),client.loop)
             return
         
-        text='Missing permissions.'
+        if guild.cached_permissions_for(client).can_move_users:
+            for user in users:
+                Task(client.user_voice_kick(state.user,guild),client.loop)
+            return
+        
+        text='I have no permission to disconnect other users.'
         break
 
     message = await client.message_create(message.channel,text)
@@ -436,7 +448,6 @@ VOICE_SUBCOMMANDS['partyisover']=voice_partyisover
 
 async def voice_save(client,message,content):
     if not client.is_owner(message.author):
-        await client.message_create(message.channel,'Owner only desu')
         return
 
     voice_client=client.voice_client_for(message)
@@ -469,7 +480,7 @@ async def voice(client,message,content):
     content=filter_content(content)
     
     if not content:
-        await client.message_create(message.channel,embed=HELP['voice'])
+        await _help_voice(client,message)
         return
     
     key=content.pop(0).lower()
@@ -477,8 +488,58 @@ async def voice(client,message,content):
     try:
         command=VOICE_SUBCOMMANDS[key]
     except KeyError:
-        await client.message_create(message.channel,embed=HELP['voice'])
+        await _help_voice(client,message)
         return
 
     await command(client,message,content)
+
+async def _help_voice(client,message):
+    is_owner=client.is_owner(message.author)
     
+    if is_owner:
+        is_admin=True
+    else:
+        is_admin=message.channel.permissions_for(message.author).can_administrator
+        
+    prefix=client.events.message_create.prefix(message)
+    text=(
+        'Voice related command colection!\n'
+        f'Usage: `{prefix}voice (subcommand) ...`\n'
+        'Subcommands:'
+        f'- `{prefix}voice join <n%>` : Joins me to the voice channel, where '
+        'you are. You can join me with a set % volume as well.\n'
+        f'- `{prefix}voice move <channel>` : You can move me between voice '
+        'channels. If you dont pass channel, I ll check your.\n'
+        f'- `{prefix}voice leave` : Disconnects me from the channel :c\n'
+        f'- `{prefix}voice pause` : Pauses my player.\n'
+        f'- `{prefix}voice resume` : Resumes my player.\n'
+        f'- `{prefix}voice skips` : Skips the actual source.\n'
+        f'- `{prefix}voice stop` : Stops my player and clears the queue.\n'
+        f'- `{prefix}voice play <link_or_title>` : I will search it up and '
+        'play it for you. If nohing is passed, I ll tell you, what I am '
+        'currently playing.\n'
+        f'- `{prefix}voice local <name>` : I ll try to search it at my '
+        'local collection. If nothing is passed, I ll tell you, what I am '
+        'currently playing.\n'
+        f'- `{prefix}voice volume <n%>`: You can change my player\'s volume. '
+        'If you not say any volume, I ll tell you the actual one.'
+            )
+    
+    if is_owner or is_admin:
+        connected=[text]
+        if is_admin:
+            connected.append(
+                f'\n- `{prefix}voice partyisover`: I disconnect everyone, '
+                'who is at the same channel as me. *Admin only.*',
+                    )
+        if is_owner:
+            connected.append(
+                f'\n- `{prefix}voice save`: I save 10s of your audio. '
+                '*Owner only, experimental.*',
+                    )
+        text=''.join(connected)
+    
+    embed=Embed('voice',text,color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('voice',_help_voice)

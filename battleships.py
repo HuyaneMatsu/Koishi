@@ -7,6 +7,20 @@ from hata.futures import FutureWO,CancelledError,FutureWM,future_or_timeout,slee
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed
 from hata.exceptions import DiscordException
+from hata.events_compiler import ContentParser
+
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+
+async def _help_bs(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('bs',(
+        'Requests a battleship game with the given user.\n'
+        f'Usage: `{prefix}bs *user*`',
+        ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('bs',_help_bs)
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
 
@@ -86,8 +100,8 @@ POS_PATTERN_0=re.compile('^([\d]{1,2}|[a-jA-J]{1}) *[/]{0,1} *([\d]{1,2}|[a-jA-J
 POS_PATTERN_1=re.compile('^([\d]{1,2}|[a-jA-J]{1}) *[/]{0,1} *([\d]{1,2}|[a-jA-J]{1})$')
 
 
-class wait_on_reply:
-    __slots__=['cancel', 'guild', 'source', 'target']
+class wait_on_reply(object):
+    __slots__=('cancel', 'guild', 'source', 'target',)
     def __init__(self,guild,source,target):
         self.guild=guild
         self.source=source
@@ -114,8 +128,8 @@ class wait_on_reply:
     def _default_cancel(self,wrapper,exception):
         wrapper.cancel()
         
-class active_request:
-    __slots__=['future', 'hash', 'source', 'target']
+class active_request(object):
+    __slots__=('future', 'hash', 'source', 'target',)
     def __init__(self,source,target):
         self.source=source
         self.target=target
@@ -127,126 +141,108 @@ class active_request:
     def __ne__(self,other):
         return self.hash!=other.hash
     
-class battle_manager:
-    __slots__=['games', 'requesters', 'requests']
-    def __init__(self):
-        self.games={}
-        self.requesters=set()
-        self.requests={}
-    async def __call__(self,client,message,content):
-        text=''
-        while True:
-            guild=message.guild
-            if guild is None:
-                text='You can start game only from a guild'
-                break
-
-            source=message.author
-            
-            if source in self.games:
-                text='You cant start a game, if you are in 1 already'
-                break
-            
-            if source in self.requesters:
-                text='You can have only one active request'
-                break
-            
-            if not content:
-                text='Missing argument WHO'
-                break
-            
-            target=None   
-            if message.user_mentions:
-                target=message.user_mentions[0]
-            else:
-                target=guild.get_user(content)
-                if target is None:
-                    text='Could not find that user'
-                    break
-
-            if target is source:
-                text='Say 2 and easier.'
-                break
-
-            if target is client:
-                text='NO AI opponent yet!'
-                break
-            
-            if target in self.games:
-                text='The user is already in game'
-                break
-
-            
-            request=active_request(source,target)
-            
-            is_reversed=self.requests.get(request,None)
-
-            if is_reversed is not None:
-                is_reversed.future.set_result(message)
-                return
-
-            self.requests[request]=request
-            
-            self.requesters.add(source)
-            
-            channel=message.channel
-            private = await client.channel_private_create(target)
-            
-            await client.message_create(channel,f'Waiting on {target:f}\'s reply here and at dm.\nType:"accept name/mention" to accept')
-            
-            
-            future=request.future=FutureWO(client.loop)
-            case=wait_on_reply(guild,source,target)
-            event=client.events.message_create
-            
-            waiter1=wait_and_continue(client,future,case,channel,event,300.)
-            waiter2=wait_and_continue(client,future,case,private,event,300.)
-            
-            try:
-                result=await future
-            except TimeoutError:
-                try:
-                    self.requesters.remove(source)
-                    text=f'The request from {source:f} timed out'
-                except KeyError:
-                    pass
-                break
-            finally:
-                try:
-                    del self.requests[request]
-                except KeyError:
-                    pass
-
-                for waiter in (waiter1,waiter2):
-                    cancel=waiter.cancel
-                    if cancel is None:
-                        continue
-                    Task(cancel(waiter,None,None),client.loop)
-
-            try:
-                self.requesters.remove(source)
-            except KeyError:
-                text='The requester is already in a game'
-                break
-            
-            if target in self.games:
-                text='You already accepted a game'
-                break
-
-            try:
-                self.requesters.remove(target)
-                await client.message_create(channel,f'Request from {target:f} got cancelled')
-            except KeyError:
-                pass
-                
-            game=battleships_game(self,client,source,target,private)
+BS_GAMES={}
+BS_REQUESTERS=set()
+BS_REQUESTS={}
+    
+@ContentParser('user, flags=mnag')
+async def battle_manager(client,message,target):
+    text=''
+    while True:
+        guild=message.guild
+        source=message.author
+        
+        if source in BS_GAMES:
+            text='You cant start a game, if you are in 1 already'
+            break
+        
+        if source in BS_REQUESTERS:
+            text='You can have only one active request'
             break
 
-        if text:
-            await client.message_create(message.channel,text)
+        if target is source:
+            text='Say 2 and easier.'
+            break
+
+        if target is client:
+            text='NO AI opponent yet!'
+            break
+        
+        if target in BS_GAMES:
+            text='The user is already in game'
+            break
+
+        
+        request=active_request(source,target)
+        
+        is_reversed=BS_REQUESTS.get(request,None)
+
+        if is_reversed is not None:
+            is_reversed.future.set_result(message)
+            return
+
+        BS_REQUESTS[request]=request
+        
+        BS_REQUESTERS.add(source)
+        
+        channel=message.channel
+        private = await client.channel_private_create(target)
+        
+        await client.message_create(channel,f'Waiting on {target:f}\'s reply here and at dm.\nType:"accept name/mention" to accept')
+        
+        
+        future=request.future=FutureWO(client.loop)
+        case=wait_on_reply(guild,source,target)
+        event=client.events.message_create
+        
+        waiter1=wait_and_continue(client,future,case,channel,event,300.)
+        waiter2=wait_and_continue(client,future,case,private,event,300.)
+        
+        try:
+            result=await future
+        except TimeoutError:
+            try:
+                BS_REQUESTERS.remove(source)
+                text=f'The request from {source:f} timed out'
+            except KeyError:
+                pass
+            break
+        finally:
+            try:
+                del BS_REQUESTS[request]
+            except KeyError:
+                pass
+
+            for waiter in (waiter1,waiter2):
+                cancel=waiter.cancel
+                if cancel is None:
+                    continue
+                Task(cancel(waiter,None,None),client.loop)
+
+        try:
+            BS_REQUESTERS.remove(source)
+        except KeyError:
+            text='The requester is already in a game'
+            break
+        
+        if target in BS_GAMES:
+            text='You already accepted a game'
+            break
+
+        try:
+            BS_REQUESTERS.remove(target)
+            await client.message_create(channel,f'Request from {target:f} got cancelled')
+        except KeyError:
+            pass
             
-class ship_type:
-    __slots__=['parts_left', 'size1', 'size2', 'type', 'x', 'y']
+        game=battleships_game(client,source,target,private)
+        break
+
+    if text:
+        await client.message_create(message.channel,text)
+            
+class ship_type(object):
+    __slots__=('parts_left', 'size1', 'size2', 'type', 'x', 'y',)
     def __init__(self,x,y,size1,size2,type_):
         self.x=x
         self.y=y
@@ -264,10 +260,10 @@ class ship_type:
             for n_y in range(y_start,y_end,10):
                 yield n_x+n_y
 
-class user_profile:
-    __slots__=['channel', 'client', 'data', 'last_switch', 'message', 'other',
+class user_profile(object):
+    __slots__=('channel', 'client', 'data', 'last_switch', 'message', 'other',
         'page', 'process', 'ship_positions', 'ships_left', 'state', 'text',
-        'user', 'won']
+        'user', 'won',)
     ships=[0,2,1,1]
     def __init__(self,user,client):
         self.user=user
@@ -402,12 +398,12 @@ class user_profile:
 
     def render_state_0(self):
         other=self.other
-        text=['''
-            Type "new" to show this message up again.
-            Type "A-J" "1-10" for coordinate.
-            And "1-3" "1-3" for ship placement
-            It always places the ship right-down from the source coordinate'
-            ''']
+        text = [
+            'Type "new" to show this message up again.'
+            'Type "A-J" "1-10" for coordinate.'
+            'And "1-3" "1-3" for ship placement'
+            'It always places the ship right-down from the source coordinate'
+                ]
         text.extend(render_map(self.data,SHIP_VALUES))
         embed=Embed('','\n'.join(text),0x010101)
         embed.add_author(other.user.avatar_url_as(size=64),f'vs.: {other.user:f}')
@@ -478,14 +474,13 @@ class user_profile:
         return embed
 
 class battleships_game:
-    __slots__=['actual', 'client', 'future', 'manager', 'player1', 'player2',
-        'process']
-    def __init__(self,manager,client,user1,user2,channel2):
+    __slots__=('actual', 'client', 'future', 'player1', 'player2',
+        'process',)
+    def __init__(self,client,user1,user2,channel2):
 
-        manager.games[user1]=self
-        manager.games[user2]=self
+        BS_GAMES[user1]=self
+        BS_GAMES[user2]=self
 
-        self.manager=manager
         self.client=client
 
         self.player1=user_profile(user1,client)
@@ -801,9 +796,9 @@ class battleships_game:
                 text2=f'Your opponent shot {chr(65+y)}/{1+x} and your ship sinked :c\n'
             else:
                 self.process=None
-                await player.set_state_2(True, \
+                await player.set_state_2(True,
                     f'You shot {chr(65+y)}/{1+x} and you sinked your opponents last ship!')
-                await other.set_state_2(False, \
+                await other.set_state_2(False,
                     f'Your opponent shot {chr(65+y)}/{1+x} and your last ship sinked :c')
                 self.future.set_result(False)
                 return
@@ -830,8 +825,8 @@ class battleships_game:
         event.remove(self,self.player1.channel)
         event.remove(self,self.player2.channel)
         
-        del self.manager.games[self.player1.user]
-        del self.manager.games[self.player2.user]
+        del BS_GAMES[self.player1.user]
+        del BS_GAMES[self.player2.user]
 
         self.player1.cancel()
         self.player2.cancel()

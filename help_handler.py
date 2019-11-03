@@ -4,255 +4,153 @@ from hata.events import Pagination
 from hata.color import Color
 from hata.exceptions import DiscordException
 from hata.futures import sleep
+from hata.permission import Permission
 
-HELP={}
+class _HelperE(object):
+    __slots__=('name', 'coro', 'checker')
 
-HELP_COLOR=Color.from_html('#ffd21e')
+class Helper(object):
+    __slots__=('default','invalid','no_perm','helps','helps_by_name')
+    def __init__(self,default,invalid,no_perm):
+        self.default        = default
+        self.invalid        = invalid
+        self.no_perm        = no_perm
+        self.helps          = []
+        self.helps_by_name = {}
 
-def create_help_help(prefix):
-    result=[]
+    def add(self,name,coro,checker=None):
+        if len(name)>64:
+            raise ValueError('name ower 64 character')
+        
+        if (checker is not None):
+            if not callable(checker):
+                raise TypeError(f'Checker should be callable, got {checker!r}.\nname = \'{name}\'\ncoro = {coro!r}')
+            
+        element=object.__new__(_HelperE)
+        element.name    = name
+        element.coro    = coro
+        element.checker = checker
 
+        self.helps.append(element)
+        self.helps_by_name[name]=element
+
+    def sort(self):
+        self.helps.sort(key=lambda e:e.name)
+
+    @staticmethod
+    def check_is_owner(client,message):
+        return client.is_owner(message.author)
+
+    @staticmethod
+    def check_is_guild_owner(client,message):
+        if client.is_owner(message.author):
+            return True
+
+        guild=message.channel.guild
+        if guild is None:
+            return False
+
+        return guild.owner==message.author
+
+    class check_permission(object):
+        def __init__(self,perms):
+            self.perms=perms
+        def __call__(self,client,message):
+            if client.is_owner(message.author):
+                return True
+
+            return message.channel.permissions_for(message.author).is_superset(self.perms)
+
+    async def __call__(self,client,message,content):
+        if not (0<len(content)<64):
+            await self.default(client,message,self)
+            return
+        
+        content=content.lower()
+        try:
+            result=self.helps_by_name[content]
+        except KeyError:
+            await self.invalid(client,message,content)
+            return
+
+        checker=result.checker
+        if (checker is not None) and (not checker(client,message)):
+            await self.no_perm(client,message)
+            return
+
+        await result.coro(client,message)
+
+KOISHI_HELP_COLOR=Color.from_html('#ffd21e')
+
+async def _koishi_help_default(client,message,helper):
     pages=[]
     part=[]
     index=0
-    for name in sorted(HELP):
+    for element in helper.helps:
+        checker=element.checker
+        if (checker is not None) and (not checker(client,message)):
+            continue
+
         if index==16:
             pages.append('\n'.join(part))
             part.clear()
             index=0
-        part.append(f'**>>** {name}')
+        part.append(f'**>>** {element.name}')
         index+=1
 
     pages.append('\n'.join(part))
 
     del part
 
+    prefix=client.events.message_create.prefix(message)
+    result=[]
+
     limit=len(pages)
     index=0
     while index<limit:
-        page=Embed(title='Commands:',color=HELP_COLOR,description=pages[index])
+        page=Embed('Commands:',color=KOISHI_HELP_COLOR,description=pages[index])
         index+=1
-        page.add_field(f'Use {prefix}help *command* for more information.',f'page {index}/{limit}')
+        page.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
         result.append({'embed':page})
 
-    return result
+    del pages
 
-HELP['help']=Embed(title='help',color=HELP_COLOR,
-    description='Shows the list of the commands.'
-        )
+    await Pagination(client,message.channel,result)
 
-HELP['image']=Embed(title='image',color=HELP_COLOR,description='')
+async def _koishi_help_invalid(client,message,content):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed(f'Invalid command: {content}',(
+        f'Please try using `{prefix}help` to list the available commands '
+        'for you\n'
+        'Take care!'
+        ),color=KOISHI_HELP_COLOR)
+    message = await client.message_create(message.channel,embed=embed)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
 
-HELP['upload']=Embed(title='upload',color=HELP_COLOR,                           
-    description=(
-        'You can can upload images with tags, which you can access with the "image" command.\n'
-        'On mention it will upload the mentioned\'s image.\n'
-        '(Owner only!)'
-            ))
+async def _koishi_help_no_perm(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('Permission denied',(
+        f'Please try using `{prefix}help` to list the available commands '
+        'for you\n'
+        'Love you!'
+        ),color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
 
-HELP['rate']=Embed(title='rate',color=HELP_COLOR,
-    description='Use this command to rate someone by @mentionning them.'
-        )
+KOISHI_HELPER=Helper(_koishi_help_default,_koishi_help_invalid,_koishi_help_no_perm)
+KOISHI_HELPER.add('help',_koishi_help_default)
 
-HELP['mine']=Embed(title='mine',color=HELP_COLOR,
-    description=(
-        'Creates a minesweeper game.\n'
-        'U can ask the result as "text" too\n'
-        'Default bomb amount is 12, but you can set it between 8 and 24!'
-            ))
-
-HELP['dice']=Embed(title='dice',color=HELP_COLOR,
-    description='Throws a/more dices.'
-        )
-
-HELP['ping']=Embed(title='pong',color=HELP_COLOR,
-    description='Returns the client\s ping in ms'
-        )
-
-
-HELP['nitro']=Embed(title='emoji',color=HELP_COLOR,  
-    description=(
-        'Type an emoji what I can use with my nitro. If I find it, I will '
-        'send it.'
-            ))
-
-HELP['voice']=Embed(title='voice',color=HELP_COLOR,
-    description=(
-        'Use "join (n%)" to make the bot to join your voice channel\n'
-        'Use "pause" to pause the player\n'
-        'Use "resume" to resume the player\n'
-        'Use "play <link or title>" to play music\n'
-        'Use "volume (n%)" to get/set volume\n'
-        'Use "skip" to skip the actual source\n'
-        'Use "move <channel name>" to move the player to an another channel\n'
-        'Use "leave" to make me leave the channel\n'
-        'Use "stop" to cancel the current player and clear the queue'
-            ))
-
-HELP['message_me']=Embed(title='message_me',color=HELP_COLOR,
-    description='Sends you something nice'
-        )
-
-
-HELP['clear']=Embed(title='clear',color=HELP_COLOR,
-    description='Clears the set amount of messages (default=1)'
-        )
-
-HELP['waitemoji']=Embed(title='waitemoji',color=HELP_COLOR,
-    description='Waits for an emoji at the channel'
-        )
-
-HELP['subscribe']=Embed(title='subscribe',color=HELP_COLOR,
-    description='Subscribes u to Announcements role, if possible'
-        )
-
-HELP['user']=Embed(title='user',color=HELP_COLOR,
-    description='Shows your profile'
-        )
-
-HELP['invite']=Embed(title='ivnite',color=HELP_COLOR,
-    description=(
-        'Sends you an invite (only if u can create invite anyways too)\n'
-        'Guild owner can create permament invite too with an additinal "perma"'
-        ))
-
-HELP['invites']=Embed(title='invites',color=HELP_COLOR,
-    description='Shows the invites of the guild <channel>.'
-        )
-
-HELP['bans']=Embed(title='bans',color=HELP_COLOR,
-    description='Shows the banned users at the guild'
-        )
-
-HELP['leave_guild']=Embed(title='unban',color=HELP_COLOR,
-    description='Leaves the guild. Guild owner only.'
-        )
-
-HELP['guild']=Embed(title='unban',color=HELP_COLOR,
-    description='Shows the guild\'s profile.'
-        )
-
-HELP['bs']=Embed(title='bs',color=HELP_COLOR,
-    description='Requests a batlleship game to the mentioned user.'
-        )
-
-HELP['love']=Embed(title='love',color=HELP_COLOR,
-    description='How much you two fit together?'
-        )
-
-HELP['change_prefix']=Embed(title='change_prefix',color=HELP_COLOR,
-    description='Changes my prefix at the guild (guild owner only)!'
-        )
-
-HELP['kanakogame']=Embed(title='kanakogame',color=HELP_COLOR,
-    description=(
-        'Start a hiragana or katakana quiz!\n'
-        'There can be only one game each channel.\n\n'
-        '- **create <map> <amount of question> <possibilities (0, 3, 4, 5)>**\n'
-        'Creates a game.\n'
-        '\n'
-        '- **start**\n'
-        'Stats the game, Oldest user at the game only.\n'
-        '\n'
-        '- **join**\n'
-        'Joins to the current game. Cant join if it is already started.\n'
-        '\n'
-        '- **leave**\n'
-        'Leaves from the actual game.\n'
-        '\n'
-        '- **cancel**\n'
-        'Cancels the current game, oldest user at the game only.\n'
-        '\n'
-        '- **<name>**\n'
-        'Shows you every character at the map.'
-            ))
-
-HELP['se']=Embed(title='se',color=HELP_COLOR,
-    description='`se` stands for `show emoji`!'
-        )
-
-HELP['nikki']=Embed(title='nikki',color=HELP_COLOR,
-    description='Your personal yandere <3'
-        )
-
-HELP['ds']=Embed(title='ds',color=HELP_COLOR,
-    description=(
-        'Play **Dungeon sweeper** game!\n'
-        'A user can have only one activate game at a time.\n'
-        '\n'
-        '- *nothing*\n'
-        'Starts a game at this channel or moves your actual game.\n'
-        '\n'
-        '- **rules**\n'
-        'The rules of the game desu!\n'
-        '\n'
-        '- **help**\n'
-        'Shows you this message\n'
-            ))
-
-HELP['roles']=Embed(title='roles',color=HELP_COLOR,
-    description='Show the roles of the guild.'
-        )
-
-HELP['random']=Embed(title='random',color=HELP_COLOR,
-    description=(
-        'Tell me 2 numbers and I tell you a totally not rigged random '
-        'number between them.'
-            ))
-
-HELP['daily']=Embed(title='daily',color=HELP_COLOR,
-    description=(
-        'Claim everyday your share of Koishi\'s love, or gift it to your lovely imouto\~'
-            ))
-
-HELP['hearts']=Embed(title='hearts',color=HELP_COLOR,
-    description=(
-        'How many hearts do you have?'
-            ))
-
-HELP['safebooru']=Embed(title='safebooru',color=HELP_COLOR,
-    description=(
-        'Let\'s you search SFW ( Safe For Work ) images of any tag you want.'
-            ))
-
-HELP['nsfwbooru']=Embed(title='nsfwbooru',color=HELP_COLOR,
-    description=(
-        'Let\'s you search NSFW ( Not Safe For Work ) images of any tag '
-        'you want... you perv~\n'
-        '~~NSFW channel only~~'
-            ))
-
-HELP['heartevent']=Embed(title='heartevent',color=HELP_COLOR,
-    description=(
-        'Starts a heart event at the channel. Usage:\n'
-        '- **heartevent duration amount <users limit>**\n'
-        '*Owner only.*'
-            ))
-
-
-async def on_command_help(client,message,content):
-    if 0<len(content)<50:
-        content=content.lower()
-        try:
-            result=HELP[content]
-        except KeyError:
-            try:
-                message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command: {content}',color=HELP_COLOR))
-                await sleep(30.,client.loop)
-                await client.message_delete(message)
-            except DiscordException:
-                pass
-            return
-        
-        await client.message_create(message.channel,embed=result)
-    else:
-        await Pagination(client,message.channel,create_help_help(client.events.message_create.prefix(message)))
-    
 async def invalid_command(client,message,command,content):
     prefix=client.events.message_create.prefix(message)
-    try:
-        message = await client.message_create(message.channel,embed=Embed(title=f'Invalid command `{command}`, try using: `{prefix}help`',color=HELP_COLOR))
-        await sleep(30.,client.loop)
-        await client.message_delete(message)
-    except DiscordException:
-        pass
+    embed=Embed(
+        f'Invalid command `{command}`',
+        f'try using: `{prefix}help`',
+        color=KOISHI_HELP_COLOR,
+            )
+    
+    message = await client.message_create(message.channel,embed=embed)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
+
