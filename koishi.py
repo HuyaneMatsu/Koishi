@@ -182,9 +182,9 @@ async def _help_dice(client,message):
     embed=Embed('dice',(
         'I will throw some dice and tell you the sum.\n'
         f'Usage: `{prefix}dice <dice_count>`\n'
-        '`dice_count` if optional, but i have only 6 dices...'
+        '`dice_count` if optional, but I have only 6 dices...'
         ),color=KOISHI_HELP_COLOR).add_footer(
-            'I see, you Yukari peeking there! You dice stealer!')
+            'I see you Yukari peeking there! You dice stealer!')
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('dice',_help_dice)
@@ -240,7 +240,7 @@ async def _help_clear(client,message):
         'I ll clear up the leftover after your lewd messages O-NEE-CHA-N.'
         f'Usage : `{prefix}clear <amount> <reason>`\n'
         '`amount` is optional, by default it is just 1.\n'
-        'If you pass `reason`, You will see that at the audit logs of the guild.'
+        'The `reason`will show up at the audit logs of the guild.'
         ),color=KOISHI_HELP_COLOR).add_footer(
             'This command can be executed only at a guild, and you must have '
             '`manage messages` permission as well.')
@@ -534,7 +534,7 @@ async def _help_mine(client,message):
         'If you are mad already from failing, just click on the '
         f'{MINE_CANCEL.as_emoji} under the mine.\n'
         f'Usage : `{prefix}mine (text) <bomb_count>`\n'
-        'By passing a `text` keyword, i will send the whole mine in a '
+        'By passing a `text` keyword, I will send the whole mine in a '
         'codeblock, allowing you, to simply copy-paste it.\n'
         'The default bomb count in 12, but you can change it between '
         '8 and 24.'
@@ -785,8 +785,7 @@ async def _help_oa2_feed(client,message):
     embed=Embed('oa2_feed',(
         'Feeds your oauth 2 authorized redirect url.\n'
         f'Usage: `{prefix}oa2_feed *link*`\n'
-        'How to get an oauth 2 authorization url?\n'
-        f'Use: `{prefix}oa2_link`\n'
+        'How to get an oauth 2 authorization url?, use: `{prefix}oa2_link`\n'
         'By doing this you will unlock other oauth 2 commands, like:\n'
         f'- `{prefix}oa2_user <user_id>`\n'
         f'- `{prefix}oa2_connections <user_id>`\n'
@@ -830,12 +829,13 @@ async def _help_oa2_user(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('oa2_user',(
         'After you authorized yourself, I will know your deepest secrets :3\n'
-        'Using this command, I ll show the extra information, I received.\n'
+        'Using this command, I ll show the extra user information , I '
+        'received.\n'
         f'Usage: `{prefix}oa2_user <user_id>`\n'
         'Well, every other owner will know it too, by passing your id, '
         'so take care, you can not trust them! *Only me!*\n'
-        'If you dont know how to authorize yourself;\n'
-        f'Use : `{prefix}help oa2_link`'
+        'If you dont know how to authorize yourself; use : '
+        '`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -867,8 +867,8 @@ async def _help_oa2_connections(client,message):
         f'Usage: `{prefix}oa2_connections <user_id>`\n'
         'Well, every other owner will know it too, by passing your id, '
         'so take care, you can not trust them! *Only me!*\n'
-        'If you dont know how to authorize yourself;\n'
-        f'Use : `{prefix}help oa2_link`'
+        'If you dont know how to authorize yourself; use : '
+        '`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -899,8 +899,8 @@ async def _help_oa2_guilds(client,message):
         f'Usage: `{prefix}oa2_guilds <user_id>`\n'
         'Well, every other owner will know it too, by passing your id, '
         'so take care, you can not trust them! *Only me!*\n'
-        'If you dont know how to authorize yourself;\n'
-        f'Use : `{prefix}help oa2_link`'
+        'If you dont know how to authorize yourself; use : '
+        '`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -947,8 +947,8 @@ async def _help_oa2_my_guild(client,message):
         f'Usage: `{prefix}oa2_my_guild <user_id>`\n'
         'Other owners can create a guild for you, after you authorized, '
         'take care!\n'
-        'If you dont know how to authorize yourself;\n'
-        f'Use : `{prefix}help oa2_link`'
+        'If you dont know how to authorize yourself, use : '
+        '`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -1019,7 +1019,7 @@ async def se(client,message,emoji):
 async def _help_se(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('se',(
-        '`se` stands for `show emoji`\n'
+        '`se` stands for `show emoji`.\n'
         f'Usage: `{prefix}se *emoji*`\n'
         'I can show only custom emojis.'
             ),color=KOISHI_HELP_COLOR)
@@ -1071,9 +1071,8 @@ async def _help_resend_webhook(client,message):
         f'Usage: `{prefix}resend_webhook *message_id* <channel>`\n'
         'The `message_id` must be the `id` of the message sent by the '
         'webhook.\n'
-        'The `channel` by default is the channel from here you call the '
-        'command. But if the message is at a different channel, you should '
-        'tell me > <.'
+        'The `channel` by default is zhis channel, but if the message '
+        'is at a different channel, you should tell me > <.'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Guild only. Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -1143,7 +1142,7 @@ async def count_messages(client,message,content):
 async def _help_count_messages(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('count_messages',(
-        'I mastered math for a long time, I can count who and how messages '
+        'I mastered math for a long time, I can count who and how much messages '
         'sent at the guild!\n'
         f'Usage: `{prefix}count_messages`\n'
         'This command takes a while and it is not guaranteed, that it '
@@ -1249,7 +1248,7 @@ async def _help_update_application_info(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('update_application_info',(
         'I can update applicaction info of any of the active clients '
-        'with my mansion.\n'
+        'at my mansion.\n'
         f'Usage: `{prefix}update_application_info <user>`\n'
         '`user` is otional and can be only an another client.'
             ),color=KOISHI_HELP_COLOR).add_footer(

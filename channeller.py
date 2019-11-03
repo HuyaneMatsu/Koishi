@@ -197,8 +197,7 @@ async def _help_channeling_start(client,message):
         'By connecting two channels, I manipulate them to cross send each '
         'message. I always connect the source channel, with the target '
         'channel to be clean. *More channels can be connected too.*\n'
-        'To cancel channelling;\n'
-        f'Use: `{prefix}channeling_stop`'
+        'To cancel channelling use: `{prefix}channeling_stop`'
         ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -226,9 +225,9 @@ async def channeling_stop(client,message,content):
 async def _help_channeling_stop(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('channeling_start',(
-        'Cancels the channelling between this an an another channel.\n'
+        'Cancels the channelling of this channel.\n'
         f'Usage: `{prefix}channeling_stop`\n'
-        'If more channels, are connected, you need to call this command, '
+        'If more channels are connected, you need to call this command, '
         'from every of them, to cancel all.\n'
         'If only one channel is left alone, it will be cancelled automatically.'
         ),color=KOISHI_HELP_COLOR).add_footer(

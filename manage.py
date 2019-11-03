@@ -8,6 +8,7 @@ from hata.activity import ActivityGame
 from hata.channel import ChannelText, CHANNELS
 from hata.events import (ReactionAddWaitfor,CommandProcesser,
     ReactionDeleteWaitfor,)
+from hata.events_compiler import ContentParser
 from hata.webhook import Webhook
 from hata.role import Role
 from hata.futures import sleep,render_exc_to_list
@@ -660,6 +661,237 @@ async def show_invite(client,message,content):
     text=pconnect(invite)
     await client.message_create(message.channel,text)
 
+@koishi_commands
+class userlist1(object):
+    def __init__(self):
+        self.users=[None for _ in range(10)]
+        self.position=0
+
+    @ContentParser('user, flags=mni',is_method=True)
+    async def __call__(self,client,message,user):
+        position=self.position
+        
+        users=self.users
+        users[position]=user
+        
+        if position==9:
+            position=0
+        else:
+            position=position+1
+        self.position=position
+
+        names=[]
+        for user in users:
+            if user is None:
+                break
+            names.append(user.full_name)
+
+        text=', '.join(names)
+        
+        await client.message_create(message.channel,text)
+
+@koishi_commands
+@ContentParser('user, flags=mni')
+class userlist2(object):
+    def __init__(self):
+        self.users=[None for _ in range(10)]
+        self.position=0
+    
+    async def __call__(self,client,message,user):
+        position=self.position
+        
+        users=self.users
+        users[position]=user
+        
+        if position==9:
+            position=0
+        else:
+            position=position+1
+        self.position=position
+
+        names=[]
+        for user in users:
+            if user is None:
+                break
+            names.append(user.full_name)
+
+        text=', '.join(names)
+        
+        await client.message_create(message.channel,text)
+        
+class UserList1(object):
+    users=[None for _ in range(10)]
+    position=0
+
+    @ContentParser('user, flags=mni',is_method=True)
+    async def userlist3(cls,client,message,user):
+        position=cls.position
+        
+        users=cls.users
+        users[position]=user
+        
+        if position==9:
+            position=0
+        else:
+            position=position+1
+        cls.position=position
+
+        names=[]
+        for user in users:
+            if user is None:
+                break
+            names.append(user.full_name)
+
+        text=', '.join(names)
+        
+        await client.message_create(message.channel,text)
+
+koishi_commands(UserList1.userlist3)
+
+
+class UserList2(object):
+    users=[None for _ in range(10)]
+    position=0
+
+    @ContentParser('user, flags=mni',is_method=True)
+    async def userlist4(cls,client,message,user):
+        position=cls.position
+        
+        users=cls.users
+        users[position]=user
+        
+        if position==9:
+            position=0
+        else:
+            position=position+1
+        cls.position=position
+
+        names=[]
+        for user in users:
+            if user is None:
+                break
+            names.append(user.full_name)
+
+        text=', '.join(names)
+        
+        await client.message_create(message.channel,text)
+
+    @ContentParser('user, flags=mni',is_method=True)
+    async def userclear1(cls,client,message,user):
+        users=cls.users
+        count=0
+        for index in reversed(range(len(users))):
+            user_=users[index]
+            if user_ is user:
+                del users[index]
+                users.append(None)
+                count+=1
+        
+        await client.message_create(message.channel,f'{user:f} removed {count} times.')
+
+    @classmethod
+    async def usershow1(cls,client,message,content):
+        users=cls.users
+        names=[]
+        for user in users:
+            if user is None:
+                break
+            names.append(user.full_name)
+
+        if names:
+            text=', '.join(names)
+        else:
+            text='No users are added yet.'
+        
+        await client.message_create(message.channel,text)
+    
+koishi_commands(UserList2.userlist4)
+koishi_commands(UserList2.userclear1)
+koishi_commands(UserList2.usershow1)
+
+@koishi_commands
+class userlist5(object):
+    def __init__(self):
+        self.users=[None for _ in range(10)]
+        self.position=0
+
+    @ContentParser('str, default="\'\'"', 'rest', is_method=True)
+    async def __call__(self,client,message,subcommand,rest):
+        subcommand=subcommand.lower()
+        if subcommand=='add':
+            await self.add(client,message,rest)
+            return
+        
+        if subcommand=='clear':
+            await self.clear(client,message,rest)
+            return
+
+        if subcommand=='show':
+            await self.show(client,message)
+            return
+
+        await self.help(client,message)
+
+    @ContentParser('user, flags=mni',is_method=True)
+    async def add(self,client,message,user):
+        position=self.position
+        
+        users=self.users
+        users[position]=user
+        
+        if position==9:
+            position=0
+        else:
+            position=position+1
+        self.position=position
+
+        names=[]
+        for user in users:
+            if user is None:
+                break
+            names.append(user.full_name)
+
+        text=', '.join(names)
+        
+        await client.message_create(message.channel,text)
+
+    @ContentParser('user, flags=mni',is_method=True)
+    async def clear(self,client,message,user):
+        users=self.users
+        count=0
+        for index in reversed(range(len(users))):
+            user_=users[index]
+            if user_ is user:
+                del users[index]
+                users.append(None)
+                count+=1
+        
+        await client.message_create(message.channel,f'{user:f} removed {count} times.')
+
+    async def show(self,client,message):
+        users=self.users
+        names=[]
+        for user in users:
+            if user is None:
+                break
+            names.append(user.full_name)
+
+        if names:
+            text=', '.join(names)
+        else:
+            text='No users are added yet.'
+        
+        await client.message_create(message.channel,text)
+
+    async def help(self,client,message):
+        prefix=client.events.message_create.prefix(message)
+        text = (
+            f'Use `{prefix}userlist add *user*` to add a user to the list.\n'
+            f'Use `{prefix}userlist clear *user*` to clear a user from the list.\n'
+            f'Use `{prefix}userlist show` to show up the list of the user.'
+                )
+        await client.message_create(message.channel,text)
+        
 ############################## START ##############################
 
 koishi_commands(Interpreter(locals().copy()),case='execute')

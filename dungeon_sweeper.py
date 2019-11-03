@@ -1521,11 +1521,11 @@ async def _DS_modify_best(client,message,content):
 async def _help__DS_modify_best(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('_DS_modify_best',(
-        f'A helper command for {prefix}ds, to modify the best results '
+        f'A helper command for `{prefix}ds`, to modify the best results '
         'of a stage.\n Before calling this command, make sure you edited the '
-        'source code and restarted me.'
-        f'Usage : `{prefix}_DS_modify_best *position*`'
-        'The `position` is the position of the stage in `int`.'
+        'source code and restarted me.\n'
+        f'Usage : `{prefix}_DS_modify_best *position*`\n'
+        'The `position` is the position of the stage.'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)

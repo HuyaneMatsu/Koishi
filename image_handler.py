@@ -87,13 +87,13 @@ async def _help_image(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('image',(
         'I ll search images by tags from my collection, '
-        'then sends 1 of the results.\n',
+        'then send 1 of the results.\n',
         f'Usage : `{prefix}image (count) (any / pic / vid) (index (hex) *n*) <tag_1> <tag_2> ...`\n'
         'If `count` is passed, I ll count how much image there is with that '
         'combination. *Count does not goes with `index`*\n'
         'With Passing `any`, `pic` or `vid` keywords you can define, '
         'if you wanna search anything (default), between normal images or '
-        'between animated images.\n'
+        'between animated ones.\n'
         'By passing `index`, then a number, you can define which one result '
         'You want from the found ones. If you do `index hex`, I ll expect '
         'a hexadecimal number.\n'

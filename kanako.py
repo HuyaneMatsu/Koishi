@@ -22,26 +22,26 @@ from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 async def _help_kanakogame(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('kanakogame',(
-        'Start a hiragana or katakana quiz!\n'
+        'Start a hiragana or a katakana quiz!\n'
         f'Usage: `{prefix}kanakogame (subcommand) ...`\n'
         'There can be only one game each channel.\n\n'
         'Subcommands:'
         f'- `{prefix}kanakogame create <map> <amount> <possibilities>` : '
-        'Creates a kanakogame at the channel, to what users can join, or you '
+        'Creates a kanakogame at the channel, to what users can join. You '
         'as the creator can start or cancel it anytime. `map` can be '
         '`hiragana` (default) or `katakana`. `amount` need to be at least '
-        '`10` and maximum same long as the `map` is. `20` is the default. '
+        '`10` and maximum as long as the `map` is. `20` is the default. '
         '`possibilities` can be one of : `0`, `3`, `4` or `5` (default)\n'
         f'- `{prefix}kanakogame start` : Starts the game. *Game owner only.*\n'
         f'- `{prefix}kanakogame join` : Joins you to the game. Cannot join to '
         'already started games.\n'
         f'- `{prefix}kanakogame leave` : Leaves from the current game.'
         'The ownership passes on the user who joined second. If noone is left '
-        'at the game, I cancel the game.\n'
+        'at the game, I cancel it.\n'
         f'- `{prefix}kanakogame cancel` : Cancels the current game. '
         '*Game owner only.*\n'
         f'- `{prefix}kanakogame hiragana` : Shows up the hiragana map.\n'
-        f'- `{prefix}kanakogame katakana` : Shows up the hiragana map.'
+        f'- `{prefix}kanakogame katakana` : Shows up the katakana map.'
         ),color=KOISHI_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 

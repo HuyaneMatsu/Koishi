@@ -600,7 +600,7 @@ async def _help_logs(client,message):
         'I can list you the audit logs of the guild.\n'
         f'Usage: `{prefix}logs <user> <event>`\n'
         'Both `user` and `event` is optional.\n'
-        '`user` is the user, ho execute the logged oprations.\n'
+        '`user` is the user, who executed the logged oprations.\n'
         'The `event` is the internal value or name of the type of the '
         'operation.'
             ),color=KOISHI_HELP_COLOR).add_footer(
@@ -847,7 +847,7 @@ async def roles(client,message,content):
 async def _help_roles(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('roles',(
-        'Do you want me cutie, to list the roles of the guild and their '
+        'Cutie, do you want me, to list the roles of the guild and their '
         'permissions?\n'
         f'Usage: `{prefix}roles`'
             ),color=KOISHI_HELP_COLOR).add_footer(
@@ -873,7 +873,7 @@ async def avatar(client, message, user):
 async def _help_avatar(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('avatar',(
-        'Pure 4K user avatar showcase!'
+        'Pure 4K user avatar showcase!\n'
         f'Usage: `{prefix}avatar <user>`\n'
         'If no `user` is passed, I will showcase your avatar.'
             ),color=KOISHI_HELP_COLOR)
