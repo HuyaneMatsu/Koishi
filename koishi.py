@@ -785,7 +785,7 @@ async def _help_oa2_feed(client,message):
     embed=Embed('oa2_feed',(
         'Feeds your oauth 2 authorized redirect url.\n'
         f'Usage: `{prefix}oa2_feed *link*`\n'
-        'How to get an oauth 2 authorization url?, use: `{prefix}oa2_link`\n'
+        f'How to get an oauth 2 authorization url?, use: `{prefix}oa2_link`\n'
         'By doing this you will unlock other oauth 2 commands, like:\n'
         f'- `{prefix}oa2_user <user_id>`\n'
         f'- `{prefix}oa2_connections <user_id>`\n'
@@ -835,7 +835,7 @@ async def _help_oa2_user(client,message):
         'Well, every other owner will know it too, by passing your id, '
         'so take care, you can not trust them! *Only me!*\n'
         'If you dont know how to authorize yourself; use : '
-        '`{prefix}help oa2_link`'
+        f'`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -868,7 +868,7 @@ async def _help_oa2_connections(client,message):
         'Well, every other owner will know it too, by passing your id, '
         'so take care, you can not trust them! *Only me!*\n'
         'If you dont know how to authorize yourself; use : '
-        '`{prefix}help oa2_link`'
+        f'`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -900,7 +900,7 @@ async def _help_oa2_guilds(client,message):
         'Well, every other owner will know it too, by passing your id, '
         'so take care, you can not trust them! *Only me!*\n'
         'If you dont know how to authorize yourself; use : '
-        '`{prefix}help oa2_link`'
+        f'`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -948,7 +948,7 @@ async def _help_oa2_my_guild(client,message):
         'Other owners can create a guild for you, after you authorized, '
         'take care!\n'
         'If you dont know how to authorize yourself, use : '
-        '`{prefix}help oa2_link`'
+        f'`{prefix}help oa2_link`'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
