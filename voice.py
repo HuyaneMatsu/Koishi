@@ -327,11 +327,11 @@ async def voice_skip(client,message,content):
     while True:
         voice_client=client.voice_client_for(message)
         if voice_client is None:
-            text='There is no voice client at your guild'
+            text='There is no voice client at your guild.'
             break
         
         if voice_client.player is None:
-            text='There is nothing to skip now'
+            text='There is nothing to skip now.'
             break
         
         text=f'Skipping: {voice_client.player.source.title}'
@@ -352,7 +352,7 @@ async def voice_stop(client,message,content):
             break
         
         if voice_client.player is None:
-            text='I dont play anything, so i cant stop it.'
+            text='I don\'t play anything, so I can not stop it.'
             break
         
         text='Stopped playing'
@@ -376,7 +376,7 @@ async def voice_move(client,message,channel):
             
             channel=state.channel
             if not message.channel.cached_permissions_for(client).can_connect:
-                test='I have no permissions to connect to that channel'
+                test='I have no permissions to connect to that channel.'
                 break
             
         else:
@@ -412,8 +412,10 @@ async def voice_partyisover(client,message,content):
     while True:
         voice_client=client.voice_client_for(message)
         if voice_client is None:
-            text='I dont see any parties arround me.'
+            text='I don\'t see any parties arround me.'
             break
+
+        Task(voice_client.disconnect(),client.loop)
         
         channel=voice_client.channel
         users=[]
@@ -426,14 +428,13 @@ async def voice_partyisover(client,message,content):
                 continue
             
             users.append(user)
-        
+
         if not users:
-            Task(voice_client.disconnect(),client.loop)
             return
         
         if guild.cached_permissions_for(client).can_move_users:
             for user in users:
-                Task(client.user_voice_kick(state.user,guild),client.loop)
+                Task(client.user_voice_kick(user,guild),client.loop)
             return
         
         text='I have no permission to disconnect other users.'
@@ -509,20 +510,20 @@ async def _help_voice(client,message):
         f'- `{prefix}voice join <n%>` : Joins me to the voice channel, where '
         'you are. You can join me with a set % volume as well.\n'
         f'- `{prefix}voice move <channel>` : You can move me between voice '
-        'channels. If you dont pass channel, I ll check your.\n'
+        'channels. If you don\'t pass a channel, I\'ll check yours.\n'
         f'- `{prefix}voice leave` : Disconnects me from the channel :c\n'
         f'- `{prefix}voice pause` : Pauses my player.\n'
         f'- `{prefix}voice resume` : Resumes my player.\n'
         f'- `{prefix}voice skips` : Skips the actual source.\n'
         f'- `{prefix}voice stop` : Stops my player and clears the queue.\n'
         f'- `{prefix}voice play <link_or_title>` : I will search it up and '
-        'play it for you. If nohing is passed, I ll tell you, what I am '
+        'play it for you. If nohing is passed, I\'ll tell you, what I am '
         'currently playing.\n'
-        f'- `{prefix}voice local <name>` : I ll try to search it at my '
-        'local collection. If nothing is passed, I ll tell you, what I am '
+        f'- `{prefix}voice local <name>` : I\'ll try to search it at my '
+        'local collection. If nothing is passed, I\'ll tell you, what I am '
         'currently playing.\n'
         f'- `{prefix}voice volume <n%>`: You can change my player\'s volume. '
-        'If you not say any volume, I ll tell you the actual one.'
+        'If you not say any volume, I\'ll tell you the actual one.'
             )
     
     if is_owner or is_admin:
