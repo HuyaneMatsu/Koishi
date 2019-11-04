@@ -410,7 +410,7 @@ class check_emoji_and_user(object):
         self.emoji=emoji
         self.user=user
     def __call__(self,emoji,user):
-        return (self.emoji is emoji, self.user==user)
+        return (self.emoji is emoji) and (self.user==user)
 
 @commands
 async def mine(client,message,content):
@@ -502,14 +502,14 @@ async def mine(client,message,content):
     
     message.weakrefer()
     await client.reaction_add(message,emoji)
-    
+
     try:
         await wait_for_reaction(client,message,check_emoji_and_user(emoji,user),1200.)
     except TimeoutError:
         return
     finally:
         await client.reaction_delete_own(message,emoji)
-    
+
     y=0
     while True:
         x=0
