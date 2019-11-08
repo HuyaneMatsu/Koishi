@@ -244,17 +244,16 @@ class Interpreter(object):
             printer.write(''.join(extracted))
 
         if printer:
-            embeds=[]
+            pages=[]
             while printer:
-                embeds.append(Embed('Output:',printer.get_value()))
+                pages.append(Embed('Output:',printer.get_value()))
 
-            amount=len(embeds)
-            for index,embed in enumerate(embeds,1):
+            amount=len(pages)
+            for index,embed in enumerate(pages,1):
                 embed.add_footer(f'page {index}/{amount}')
 
-            pages=[{'embed':embed} for embed in embeds]
         else:
-            pages=[{'embed':Embed('No output')}]
+            pages=[Embed('No output')]
         await Pagination(client,message.channel,pages,240.)
 
 

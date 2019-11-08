@@ -3,7 +3,7 @@ import re, random, time
 
 from hata.events import wait_and_continue
 from hata.others import filter_content,is_user_mention
-from hata.futures import FutureWO,CancelledError,FutureWM,future_or_timeout,sleep,Task
+from hata.futures import Future,CancelledError,FutureWM,future_or_timeout,sleep,Task
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed
 from hata.exceptions import DiscordException
@@ -107,6 +107,7 @@ class wait_on_reply(object):
         self.source=source
         self.target=target
         self.cancel=type(self)._default_cancel
+    
     def __call__(self,message):
         if message.author is not self.target:
             return False
@@ -123,7 +124,7 @@ class wait_on_reply(object):
         else:
             user=self.guild.get_user(content)
 
-        return self.source is user
+        return (self.source is user)
 
     def _default_cancel(self,wrapper,exception):
         wrapper.cancel()
@@ -191,7 +192,7 @@ async def battle_manager(client,message,target):
         await client.message_create(channel,f'Waiting on {target:f}\'s reply here and at dm.\nType:"accept name/mention" to accept')
         
         
-        future=request.future=FutureWO(client.loop)
+        future=request.future=Future(client.loop)
         case=wait_on_reply(guild,source,target)
         event=client.events.message_create
         
@@ -546,7 +547,7 @@ class battleships_game:
             
 
             while self.process is not None:
-                self.future=FutureWO(loop)
+                self.future=Future(loop)
                 future_or_timeout(self.future,300.)
                 try:
                     result = await self.future

@@ -77,7 +77,7 @@ class dispatch_tester:
         
         text=pretty_print(message)
         text.insert(0,f'Message {message.id} got deleted')
-        pages=[{'content':chunk} for chunk in cchunkify(text)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client,self.channel,pages,120.) #does not raises exceptions
 
     @classmethod
@@ -173,7 +173,7 @@ class dispatch_tester:
                 continue
 
         text=cchunkify(result)
-        pages=[{'content':chunk} for chunk in text]
+        pages=[Embed(description=chunk) for chunk in text]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -234,7 +234,7 @@ class dispatch_tester:
 
 
         text=cchunkify(result)
-        pages=[{'content':chunk} for chunk in text]
+        pages=[Embed(description=chunk) for chunk in text]
         await Pagination(client,self.channel,pages,120.)
 
         
@@ -246,7 +246,7 @@ class dispatch_tester:
         
         text=pretty_print(old)
         text.insert(0,f'Reactions got cleared from message {message.id}:')
-        pages=[{'content':chunk} for chunk in cchunkify(text)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -301,7 +301,7 @@ class dispatch_tester:
                     result.append('Added activity:')
                     result.extend(pretty_print(activity))
 
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -314,7 +314,7 @@ class dispatch_tester:
         for key,value in old. items():
             result.append(f'- {key} : {value} -> {getattr(user,key)}')
 
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
     
     @classmethod
@@ -345,7 +345,7 @@ class dispatch_tester:
             
             raise RuntimeError(key)
 
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -355,7 +355,7 @@ class dispatch_tester:
             return
         
         text=f'```\nA channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
-        pages=[{'content':text}]
+        pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -378,7 +378,7 @@ class dispatch_tester:
                         result.append(f'- {value.target!r} : {value.allow} {value.deny}')
                 continue
             result.append(f'{key} changed: {value!r} -> {getattr(channel,key)!r}')
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -389,7 +389,7 @@ class dispatch_tester:
         
         result=pretty_print(channel)
         result.insert(0,f'A channel got created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -399,7 +399,7 @@ class dispatch_tester:
             return
         
         text=f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
-        pages=[{'content':text}]
+        pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
 
         
@@ -424,7 +424,7 @@ class dispatch_tester:
                 continue
             raise RuntimeError(modtype) #bugged?
         
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -456,7 +456,7 @@ class dispatch_tester:
         
         result=pretty_print(guild)
         result.insert(0,f'Guild created: {guild.id}')
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     #Unknown:
@@ -520,7 +520,7 @@ class dispatch_tester:
             
             raise RuntimeError(key)
 
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
         
     @classmethod
@@ -534,7 +534,7 @@ class dispatch_tester:
         result.insert(1,f'I had {len(profile.roles)} roles there')
         result.insert(2,'At least i did not boost' if (profile.boosted_since is None) else 'Rip by boost ahhhh...')
 
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
 
@@ -545,7 +545,7 @@ class dispatch_tester:
             return
         
         text=f'```\nUser {user:f} {user.id} got banned at {guild.name} {guild.id}.```'
-        pages=[{'content':text}]
+        pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -555,7 +555,7 @@ class dispatch_tester:
             return
         
         text=f'```\nUser {user:f} {user.id} got UNbanned at {guild.name} {guild.id}.```'
-        pages=[{'content':text}]
+        pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
 
     #Auto dispatched:
@@ -571,7 +571,7 @@ class dispatch_tester:
         
         result=pretty_print(role)
         result.insert(0,f'A role got created at {role.guild.name} {role.guild.id}')
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -581,7 +581,7 @@ class dispatch_tester:
             return
         
         text=f'```\nA role got deleted at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}```'
-        pages=[{'content':text}]
+        pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -608,7 +608,7 @@ class dispatch_tester:
                         result.append(f'   {name} : {bool(old_value)} -> {bool(new_value)}')
                 continue
 
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -618,7 +618,7 @@ class dispatch_tester:
             return
         
         text=f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
-        pages=[{'content':text}]
+        pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
         
     @classmethod
@@ -654,7 +654,7 @@ class dispatch_tester:
                     continue
                 result.append(f'- {key} : {value} -> {getattr(state,key)}')
 
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
             
     @classmethod
@@ -671,7 +671,7 @@ class dispatch_tester:
         result.append(f'- channel : {channel.name} {channel.id}')
         result.append(f'- timestamp : {timestamp:%Y.%m.%d-%H:%M:%S}')
         
-        pages=[{'content':chunk} for chunk in cchunkify(result)]
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod

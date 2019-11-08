@@ -108,10 +108,10 @@ async def _koishi_help_default(client,message,helper):
     limit=len(pages)
     index=0
     while index<limit:
-        page=Embed('Commands:',color=KOISHI_HELP_COLOR,description=pages[index])
+        embed=Embed('Commands:',color=KOISHI_HELP_COLOR,description=pages[index])
         index+=1
-        page.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
-        result.append({'embed':page})
+        embed.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
+        result.append(embed)
 
     del pages
 

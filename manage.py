@@ -16,6 +16,7 @@ from hata.dereaddons_local import alchemy_incendiary
 from hata.prettyprint import pconnect
 from hata.invite import Invite
 from hata.exceptions import DiscordException
+from hata.embed import Embed
 import pers_data
 
 import koishi
@@ -154,7 +155,7 @@ async def achievement_get_all(client,message,content):
             break
 
         chunks=pchunkify(achievements)
-        pages=[{'content':chunk} for chunk in chunks]
+        pages=[Embed(description=chunk) for chunk in chunks]
         await Pagination(client,message.channel,pages)
         return
 
@@ -184,7 +185,7 @@ async def achievement_get(client,message,content):
             break
 
         chunks=pchunkify(achievements)
-        pages=[{'content':chunk} for chunk in chunks]
+        pages=[Embed(description=chunk) for chunk in chunks]
         await Pagination(client,message.channel,pages)
         return
 
@@ -214,7 +215,7 @@ async def achievement_edit(client,message,content):
             break
 
         chunks=pchunkify(achievement)
-        pages=[{'content':chunk} for chunk in chunks]
+        pages=[Embed(description=chunk) for chunk in chunks]
         await Pagination(client,message.channel,pages)
         return
 
@@ -244,7 +245,7 @@ async def achievement_delete(client,message,content):
             break
 
         chunks=pchunkify(achievement)
-        pages=[{'content':chunk} for chunk in chunks]
+        pages=[Embed(description=chunk) for chunk in chunks]
         await Pagination(client,message.channel,pages)
         return
 
@@ -275,7 +276,7 @@ async def user_achievements(client,message,content):
             break
 
         chunks=pchunkify(achievements)
-        pages=[{'content':chunk} for chunk in chunks]
+        pages=[Embed(description=chunk) for chunk in chunks]
         await Pagination(client,message.channel,pages)
         return
 

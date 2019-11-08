@@ -306,10 +306,10 @@ async def invites(client,message,guild,channel):
         if channel.cached_permissions_for(client).can_manage_channel:
             await client.message_create(message.channel,
                 'I dont have enough permission, to request the invites.')
-        return
+            return
         invites = await client.invite_get_channel(channel)
     
-    pages=[{'content':chunk} for chunk in pchunkify(invites,write_parents=False,show_code=False)]
+    pages=[Embed(description=chunk) for chunk in pchunkify(invites,write_parents=False,show_code=False)]
     await Pagination(client,message.channel,pages,120.)
 
 async def _help_invites(client,message):
@@ -592,7 +592,7 @@ async def logs(client,message,guild,*args):
         await iterator.load_all()
         logs = iterator.transform()
     
-    await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(logs)])
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(logs)])
 
 async def _help_logs(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -626,7 +626,7 @@ async def message(client,message,message_id,channel):
     except DiscordException as err:
         await client.message_create(message.channel,err.__repr__())
         return
-    await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(target_message)])
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(target_message)])
 
 async def _help_message(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -657,7 +657,7 @@ async def message_pure(client,message,message_id,channel):
         await client.message_create(message.channel,err.__repr__())
         return
     
-    await Pagination(client,message.channel,[{'content':chunk} for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
 
 async def _help_message_pure(client,message):
     prefix=client.events.message_create.prefix(message)

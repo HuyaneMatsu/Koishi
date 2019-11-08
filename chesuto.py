@@ -1699,7 +1699,7 @@ async def showcards(client,message,content):
             embed.add_footer(f'Page: {index}/{embed_ln}. Results {field_count+1}-{field_count+len(embed.fields)}/{limit}')
             field_count+=len(embed.fields)
 
-            result.append({'embed':embed})
+            result.append(embed)
 
             if index==embed_ln:
                 break
@@ -1707,7 +1707,7 @@ async def showcards(client,message,content):
         break
 
     if result is None:
-        result=[{'embed':Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)}]
+        result=[Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)]
 
     await Pagination(client,message.channel,result)
 
