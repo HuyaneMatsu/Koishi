@@ -22,7 +22,7 @@ async def _help_ds(client,message):
         'cute touhou characters!\n'
         f'Usage : `{prefix}ds *subcommand*`'
         'A user can have only one activate game at a time.\n\n'
-        'Subcommand cases:'
+        'Subcommand cases:\n'
         f'- `{prefix}ds` : Starts a game at this channel or moves your actual '
         'game.\n'
         f'- `{prefix}ds rules` : The rules of the game desu!\n'

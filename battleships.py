@@ -15,7 +15,7 @@ async def _help_bs(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('bs',(
         'Requests a battleship game with the given user.\n'
-        f'Usage: `{prefix}bs *user*`',
+        f'Usage: `{prefix}bs *user*`'
         ),color=KOISHI_HELP_COLOR).add_footer(
             'Guild only!')
     await client.message_create(message.channel,embed=embed)
@@ -241,7 +241,9 @@ async def battle_manager(client,message,target):
 
     if text:
         await client.message_create(message.channel,text)
-            
+    else:
+        await _help_bs(client,message)
+
 class ship_type(object):
     __slots__=('parts_left', 'size1', 'size2', 'type', 'x', 'y',)
     def __init__(self,x,y,size1,size2,type_):
@@ -685,7 +687,7 @@ class battleships_game:
 
             if sum(player.ships_left)==0:
                 self.future.set_result(player)
-                text=f'You placed all of your ships at: {", ".join(cords)}; waiting on the other player.'
+                text=f'You placed all of your ships. Last ship placed at: {", ".join(cords)}; waiting on the other player.'
             else:
                 text=f'You placed the ship succesfully at: {", ".join(cords)}.'
 
