@@ -281,7 +281,7 @@ async def _help_waitemoji(client,message):
         ),color=KOISHI_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('waitemji',_help_waitemoji)
+KOISHI_HELPER.add('waitemoji',_help_waitemoji)
 
 
 @commands

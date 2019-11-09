@@ -297,13 +297,13 @@ KOISHI_HELPER.add('guild',_help_guild)
                 'channel, flags=mni, default=None',)
 async def invites(client,message,guild,channel):
     if channel is None:
-        if guild.cached_permissions_for(client).can_manage_guild:
+        if not guild.cached_permissions_for(client).can_manage_guild:
             await client.message_create(message.channel,
                 'I dont have enough permission, to request the invites.')
             return
         invites = await client.invite_get_guild(guild)
     else:
-        if channel.cached_permissions_for(client).can_manage_channel:
+        if not channel.cached_permissions_for(client).can_manage_channel:
             await client.message_create(message.channel,
                 'I dont have enough permission, to request the invites.')
             return
