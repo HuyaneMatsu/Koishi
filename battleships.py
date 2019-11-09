@@ -146,10 +146,13 @@ BS_GAMES={}
 BS_REQUESTERS=set()
 BS_REQUESTS={}
     
-@ContentParser('user, flags=mnag')
+@ContentParser('user, flags=mnag, default=None')
 async def battle_manager(client,message,target):
     text=''
     while True:
+        if target is None:
+            break
+        
         guild=message.guild
         source=message.author
         

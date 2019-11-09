@@ -16,7 +16,7 @@ from hata.color import Color
 from hata.user import USERS
 from hata.guild import GUILDS
 from hata.client_core import CLIENTS
-from hata.activity import ActivityUnknown
+from hata.activity import ActivityUnknown, DISCORD_EPOCH
 from hata.permission import Permission
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
@@ -107,13 +107,11 @@ def add_activity(text,activity):
         if activity.emoji is not None:
             text.append(f'**>>** emoji : {activity.emoji.as_emoji}\n')
 
-    if ACTIVITY_FLAG&0b0000100000000000:
-        if activity.created_at:
-            text.append(f'**>>** created at : {elapsed_time(activity.created)} ago\n')
+    if activity.created!=DISCORD_EPOCH:
+        text.append(f'**>>** created at : {elapsed_time(activity.created_at)} ago\n')
 
     if ACTIVITY_FLAG&0b0001000000000000:
-        if activity.created_at:
-            text.append(f'**>>** id : {activity.id}\n')
+        text.append(f'**>>** id : {activity.id}\n')
             
 @infos(case='user')
 @ContentParser('user, flags="mnap", default="message.author"')
