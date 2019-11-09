@@ -67,7 +67,7 @@ class ShuffledShelter(object):
         
         message = await client.message_create(channel,embed=embed)
 
-        if (len(urls)==pop) or (not channel.cached_permissions_for(client).can_add_reactions):
+        if (len(urls)==(0 if pop else 1)) or (not channel.cached_permissions_for(client).can_add_reactions):
             return
         
         message.weakrefer()

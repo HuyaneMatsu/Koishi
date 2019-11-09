@@ -319,7 +319,7 @@ async def _help_invites(client,message):
         f'Usage: `{prefix}invites <channel>`\n'
         'If `channel` is passed, I ll check the invites only at that channel.'
             ),color=KOISHI_HELP_COLOR).add_footer(
-            'Guild only!')
+            'Guild only! You must have manage_channel permission to use this command.')
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('invites',_help_invites,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(manage_channel=True)))
