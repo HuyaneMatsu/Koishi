@@ -209,7 +209,7 @@ def nsfwbooru(client,message,content):
 
 async def _help_nsfwbooru(client,message):
     prefix=client.events.message_create.prefix(message)
-    embed=Embed('safebooru',(
+    embed=Embed('nsfwbooru',(
         'Do you want me, to request some images from gelbooru?... You perv!\n'
         f'Usage: `{prefix}nsfwbooru *tags*`\n'
         'You should pass at least 1 tag. '
