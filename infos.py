@@ -172,8 +172,9 @@ async def user_info(client,message,user):
         else:
             text.append('Activities : \n')
             for index,activity in enumerate(user.activities,1):
-                text.append('{index}.: ')
-
+                text.append(f'{index}.: ')
+                add_activity(text,activity)
+                
         embed.add_field('Status and Activity',''.join(text))
     await client.message_create(message.channel,embed=embed)
 
