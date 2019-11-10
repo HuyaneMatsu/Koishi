@@ -20,7 +20,7 @@ async def invalid_command(client,message,command,content):
     guild=message.guild
     if guild is None:
         try:
-            await client.message_cretae('Eeh, what should I do, what should I do?!?!')
+            await client.message_create('Eeh, what should I do, what should I do?!?!')
         except DiscordException:
             pass
         return
