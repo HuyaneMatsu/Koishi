@@ -19,12 +19,12 @@ from hata.message import Message
 from hata.others import (ext_from_base64,bytes_to_base64,VoiceRegion,
     VerificationLevel,MessageNotificationLevel,ContentFilterLevel,
     parse_oauth2_redirect_url)
-from hata.user import Partial_user,User
+from hata.user import PartialUser,User
 from hata.role import Role
 from hata.client import Client
 from hata.oauth2 import UserOA2
 from hata.channel import cr_pg_channel_object,ChannelCategory,ChannelText,ChannelGuildBase
-from hata.guild import Partial_guild
+from hata.guild import PartialGuild
 from hata.http import VALID_ICON_FORMATS
 from hata.integration import Integration
 from email._parseaddr import _parsedate_tz
@@ -705,7 +705,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
     data = await bypass_request(client,METH_POST,
         'https://discordapp.com/api/v7/guilds',data)
     #we can create only partial, because the guild data is not completed usually
-    return Partial_guild(data)
+    return PartialGuild(data)
 
 def guild_get(client,guild_id):
     return bypass_request(client,METH_GET,
@@ -1394,7 +1394,7 @@ async def ratelimit_test0017(client,message,content):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
-    channel2 = await client.channel_private_create(Partial_user(user1_id))
+    channel2 = await client.channel_private_create(PartialUser(user1_id))
     await sleep(5.,loop)
     Task(message_create(client,channel1,'test'),loop)
     Task(message_create(client,channel2,'test'),loop)
@@ -1447,7 +1447,7 @@ async def ratelimit_test0021(client,message,content):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
-    channel2 = await client.channel_private_create(Partial_user(user1_id))
+    channel2 = await client.channel_private_create(PartialUser(user1_id))
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
@@ -1560,7 +1560,7 @@ async def ratelimit_test0029(client,message,content):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
-    channel2 = await client.channel_private_create(Partial_user(user1_id))
+    channel2 = await client.channel_private_create(PartialUser(user1_id))
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
@@ -1640,7 +1640,7 @@ async def ratelimit_test0035(client,message,content):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
-    channel2 = await client.channel_private_create(Partial_user(user1_id))
+    channel2 = await client.channel_private_create(PartialUser(user1_id))
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await sleep(5.,loop)
@@ -1725,7 +1725,7 @@ async def ratelimit_test0041(client,message,content):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
-    channel2 = await client.channel_private_create(Partial_user(user1_id))
+    channel2 = await client.channel_private_create(PartialUser(user1_id))
     message1 = await client.message_create(channel1,'test')
     message2 = await client.message_create(channel2,'test')
     await client.message_pin(message1)
@@ -1800,7 +1800,7 @@ async def ratelimit_test0047(client,message,content):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
-    channel2 = await client.channel_private_create(Partial_user(user1_id))
+    channel2 = await client.channel_private_create(PartialUser(user1_id))
     Task(message_pinneds(client,channel1),loop)
     Task(message_pinneds(client,channel2),loop)
     # - is message_pinneds global PM limited
@@ -1947,7 +1947,7 @@ async def ratelimit_test0060(client,message,content):
         return
     loop=client.loop
     channel1 = await client.channel_private_create(message.author)
-    channel2 = await client.channel_private_create(Partial_user(user1_id))
+    channel2 = await client.channel_private_create(PartialUser(user1_id))
     await sleep(5.,loop)
     Task(typing(client,channel1),loop)
     Task(typing(client,channel2),loop)
@@ -2141,8 +2141,8 @@ async def ratelimit_test0077(client,message,content):
         return
     loop=client.loop
     channel1,channel2=message.channel.category.channels[0:2]
-    await permission_ow_create(client,channel1,Partial_user(user2_id),156,148)
-    await permission_ow_create(client,channel2,Partial_user(user2_id),156,148)
+    await permission_ow_create(client,channel1,PartialUser(user2_id),156,148)
+    await permission_ow_create(client,channel2,PartialUser(user2_id),156,148)
     #permission_ow_create is not guild limited
     #permission_ow_create is UNLIMITED
 
@@ -2152,8 +2152,8 @@ async def ratelimit_test0078(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    await permission_ow_create(client,channel1,Partial_user(user2_id),256,149)
-    await permission_ow_create(client,channel1,Partial_user(user2_id),356,138)
+    await permission_ow_create(client,channel1,PartialUser(user2_id),256,149)
+    await permission_ow_create(client,channel1,PartialUser(user2_id),356,138)
     #permission_ow_create is not channel limited
 
 @ratelimit_commands
@@ -2162,8 +2162,8 @@ async def ratelimit_test0079(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    await permission_ow_create(client,channel1,Partial_user(user2_id),256,149)
-    await permission_ow_delete(client,channel1,Partial_user(user2_id))
+    await permission_ow_create(client,channel1,PartialUser(user2_id),256,149)
+    await permission_ow_delete(client,channel1,PartialUser(user2_id))
     #permission_ow_create is not limited with permission_ow_delete
     #permission_ow_delete is UNLIMITED
     

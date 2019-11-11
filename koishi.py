@@ -46,34 +46,19 @@ del models
 class once_on_ready(object):
     __slots__ = ('called',)
     __event_name__='ready'
+    
     def __init__(self):
-        self.called=0
+        self.called=False
+        
     async def __call__(self,client):
-        called=self.called
-        called=called+1
-        self.called=called
-        
-        if called==1:
-            print(f'{client:f} ({client.id}) logged in')
-            await client.update_application_info()
-            print(f'owner: {client.owner:f} ({client.owner.id})')
-            update_about(client)
+        if self.called:
             return
         
-        shard_count=client.shard_count
-        if called<shard_count:
-            return
+        self.called=True
         
-        if shard_count<2:
-            update_about(client)
-            return
-
-        if (called>>1)<shard_count:
-            return
-        
-        if called%shard_count:
-            return
-        
+        print(f'{client:f} ({client.id}) logged in')
+        await client.update_application_info()
+        print(f'owner: {client.owner:f} ({client.owner.id})')
         update_about(client)
 
 commands=eventlist()
@@ -325,7 +310,7 @@ async def invite(client,message,content):
 
     user=message.author
     owner=client.is_owner(user)
-    if (not owner) or (not guild.permissions_for(user).can_create_instant_invite):
+    if (not owner) and (not guild.permissions_for(user).can_create_instant_invite):
         await client.message_create(message.channel,
             'You do not have permission to invoke this command.')
         return

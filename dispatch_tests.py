@@ -442,7 +442,7 @@ class dispatch_tester:
             return
         
         text=[f'Bai bai {user:f}! with your {len(profile.roles)} roles.']
-        if profile.boosted_since is not None:
+        if profile.boosts_since is not None:
             text.append('Also rip your boost :c')
         text.append(f'The guild is down to {guild.user_count} members!')
         
@@ -532,7 +532,7 @@ class dispatch_tester:
         result=pretty_print(guild)
         result.insert(0,f'Guild deleted {guild.id}')
         result.insert(1,f'I had {len(profile.roles)} roles there')
-        result.insert(2,'At least i did not boost' if (profile.boosted_since is None) else 'Rip by boost ahhhh...')
+        result.insert(2,'At least i did not boost' if (profile.boosts_since is None) else 'Rip by boost ahhhh...')
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
