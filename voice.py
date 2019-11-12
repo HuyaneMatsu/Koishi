@@ -147,7 +147,7 @@ async def voice_play(client,message,content):
         
         try:
             with client.keep_typing(message.channel,7200.):
-                source = await player.YTaudio(client.loop,' '.join(content),message.channel.guild.id)
+                source = await player.YTaudio(client.loop,content,message.channel.guild.id)
         except player.DownloadError as err: #raised by YTdl
             text='Error meanwhile downloading'
             break
@@ -191,7 +191,8 @@ async def voice_local(client,message,content):
             
             text=f'Now playing: {voice_client.player.source.title}'
             break
-
+        
+        content=content.split(' ')
         for index in range(len(content)):
             word=content[index]
             word=re.escape(word)
@@ -302,7 +303,7 @@ async def voice_volume(client,message,content):
             text=f'{round(voice_client.volume*100.)}% desu'
             break
         
-        amount=PERCENT_RP.fullmatch(content[0])
+        amount=PERCENT_RP.fullmatch(content)
         if not amount:
             text='*Number*% pls'
             break
@@ -474,30 +475,23 @@ async def voice_save(client,message,content):
     
 VOICE_SUBCOMMANDS['save']=voice_save
 
-async def voice(client,message,content):
+@ContentParser('str, default=\"\'\'\"','rest')
+async def voice(client,message,sub_command,rest):
     guild=message.guild
     if guild is None:
         return
-    content=filter_content(content)
     
-    if not content:
+    if not sub_command:
         await _help_voice(client,message)
         return
-    
-    key=content.pop(0).lower()
 
     try:
-        command=VOICE_SUBCOMMANDS[key]
+        command=VOICE_SUBCOMMANDS[sub_command]
     except KeyError:
         await _help_voice(client,message)
         return
     
-    if content:
-        content=content[0]
-    else:
-        connect=''
-    
-    await command(client,message,content)
+    await command(client,message,rest)
 
 async def _help_voice(client,message):
     is_owner=client.is_owner(message.author)
