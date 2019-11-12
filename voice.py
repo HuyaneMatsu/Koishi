@@ -491,7 +491,12 @@ async def voice(client,message,content):
     except KeyError:
         await _help_voice(client,message)
         return
-
+    
+    if content:
+        content=content[0]
+    else:
+        connect=''
+    
     await command(client,message,content)
 
 async def _help_voice(client,message):
@@ -516,9 +521,9 @@ async def _help_voice(client,message):
         f'- `{prefix}voice resume` : Resumes my player.\n'
         f'- `{prefix}voice skips` : Skips the actual source.\n'
         f'- `{prefix}voice stop` : Stops my player and clears the queue.\n'
-        f'- `{prefix}voice play <link_or_title>` : I will search it up and '
-        'play it for you. If nohing is passed, I\'ll tell you, what I am '
-        'currently playing.\n'
+        f'- `{prefix}voice play <link_or_title>` : I will search the link or '
+        'title up and play it.  If you did not pass anymeow, I\'ll tell you, '
+        'what I am currently playing.\n'
         f'- `{prefix}voice local <name>` : I\'ll try to search it at my '
         'local collection. If nothing is passed, I\'ll tell you, what I am '
         'currently playing.\n'
