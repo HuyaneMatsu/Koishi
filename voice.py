@@ -61,7 +61,7 @@ async def voice_join(client,message,content):
         
         text=f'Joined to {state.channel.name}'
         if content:
-            amount=PERCENT_RP.fullmatch(content[0])
+            amount=PERCENT_RP.fullmatch(content)
             if amount:
                 amount=int(amount.groups()[0])
                 if amount<0:
