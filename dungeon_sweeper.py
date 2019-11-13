@@ -564,12 +564,12 @@ class ds_game(object):
         
     def render_done(self):
         stage=self.stage
-        steps=stage.best
+        steps=len(stage.history)
 
         rating=stage.source.rate(steps)
             
         embed=Embed(f'{stage.source.name} finished with {steps} steps with {rating} rating!',stage.render(),COLORS[stage.source.difficulty])
-        embed.add_footer(f'steps : {len(stage.history)}, best : {stage.best}')
+        embed.add_footer(f'steps : {steps}, best : {stage.best}')
         embed.add_author(self.user.avatar_url_as('png',32),self.user.full_name)
         return embed
     
