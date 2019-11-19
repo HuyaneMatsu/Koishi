@@ -272,8 +272,7 @@ async def guild_info(client,message,content):
 
         for user in boosters[:21]:
             embed.add_field(user.full_name,
-                f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}',
-                inline=True)
+                f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
     
     embed.add_thumbnail(guild.icon_url_as(size=128))
 
@@ -860,9 +859,9 @@ KOISHI_HELPER.add('roles',_help_roles)
 @infos
 @ContentParser('user, flags=mna, default="message.author"')
 async def avatar(client, message, user):
-    color=user.avatar&0xffffff
+    color = user.avatar&0xffffff
     if color==0:
-        color=user.default_avatar.color
+        color = user.default_avatar.color
 
     url=user.avatar_url_as(size=4096)
     embed=Embed(f'{user:f}\'s avatar', color=color, url=url)

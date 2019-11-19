@@ -892,7 +892,81 @@ class userlist5(object):
             f'Use `{prefix}userlist show` to show up the list of the user.'
                 )
         await client.message_create(message.channel,text)
+
+from hata import parse_emoji
+
+@koishi_commands
+async def is_emoji(client,message,content):
+    emoji=parse_emoji(content)
+    
+    if emoji is None:
+        result = content.encode().__repr__()
+    else:
+        result = 'yes'
         
+    await client.message_create(message.channel,result)
+
+@koishi_commands
+class keep_checking_emoji(object):
+    def __init__(self):
+        self.channel=None
+        
+    async def __call__(self,client,message,content):
+        if not client.is_owner(message.author):
+            return
+
+        content=content.lower()
+
+        if content=='start':
+            channel=self.channel
+            if channel is not None:
+                client.events.message_create.remove(self.worker,channel)
+            channel=message.channel
+            client.events.message_create.append(self.worker,channel)
+            self.channel=channel
+            return
+
+        if content=='stop':
+            channel=self.channel
+            if channel is not None:
+                client.events.message_create.remove(self.worker,channel)
+            self.channel=None
+            return
+        
+    @staticmethod
+    async def worker(message):
+        if not Koishi.is_owner(message.author):
+            return
+
+        content=message.content
+        emoji=parse_emoji(content)
+        
+        if emoji is None:
+            result = f'new : {content.encode()!r}'
+        else:
+            result = 'old'
+
+        await Koishi.message_create(message.channel,result)
+
+from hata.emoji import BUILTIN_EMOJIS
+
+@koishi_commands
+async def multy_emoji_test(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    message = await client.message_create(message.channel,
+        'Will add 2 same emojis, lets se, what happens')
+
+    emoji=BUILTIN_EMOJIS['heart']
+    await client.reaction_add(message,emoji)
+
+    emoji=BUILTIN_EMOJIS['heart_old']
+    try:
+        await client.reaction_add(message,emoji)
+    except Discordexception as err:
+        await client.message_create(message.channel,err.__repr__())
+
 ############################## START ##############################
 
 koishi_commands(Interpreter(locals().copy()),case='execute')

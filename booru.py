@@ -283,7 +283,7 @@ for title,tag_name,command_names in (
         ('Mononobe no Futo',        'mononobe_no_futo',     ('futo',),),
         ('Morichika Rinnosuke',     'morichika_rinnosuke',  ('rinnosuke',),),
         ('Moriya Suwako',           'moriya_suwako',        ('suwako',),),
-        ('Motoori Kosuzu',          'motoori_kosuzu',       ('kosuzu'),),
+        ('Motoori Kosuzu',          'motoori_kosuzu',       ('kosuzu',),),
         ('Murasa Minamitsu',        'murasa_minamitsu',     ('minamitsu',),),
         ('Nagae Iku',               'nagae_iku',            ('iku',),),
         ('Nazuurin',                'nazrin',               ('nazuurin','nazrin',),),
