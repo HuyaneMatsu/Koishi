@@ -17,6 +17,8 @@ from hata.prettyprint import pconnect
 from hata.invite import Invite
 from hata.exceptions import DiscordException
 from hata.embed import Embed
+from hata.extension_loader import ExtensionLoader
+
 import pers_data
 
 import koishi
@@ -77,7 +79,38 @@ Satori.events(ReactionAddWaitfor)
 Satori.events(ReactionDeleteWaitfor)
 satori_commands=Satori.events(CommandProcesser(pers_data.SATORI_PREFIX)).shortcut
 satori_commands.extend(satori.commands)
+ExtensionLoader(Satori)
 
+def add_extensions():
+    def entry(client, lib):
+        commands=getattr(lib,'commands',None)
+        if commands is not None:
+            client.events.message_create.shortcut.extend(commands)
+        
+        entry=getattr(lib,'entry',None)
+        if entry is not None:
+            entry(client)
+        
+    def exit(client, lib):
+        commands=getattr(lib,'commands',None)
+        if commands is not None:
+            client.events.message_create.shortcut.unextend(commands)
+        
+        exit=getattr(lib,'exit',None)
+        if exit is not None:
+            exit(client)
+
+    extension_loader=Satori.extension_loader
+    
+    for filename in os.listdir('./ext'):
+        if filename.endswith('.py'):
+            module_name='ext.'+filename[:-3]
+            extension_loader.add(module_name, entry_point=entry, exit_point=exit)
+    
+    #load them  
+    extension_loader.load_all().syncwrap().wait()
+
+add_extensions()
 
 ############################## SETUP ELPHELT ##############################
 

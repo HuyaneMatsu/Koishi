@@ -192,12 +192,12 @@ async def _help_channeling_start(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('channeling_start',(
         'I can connect more channels with my youkai powers.\n'
-        f'Usage: `{prefix}channeling_start *channe_id*`\n'
+        f'Usage: `{prefix}channeling_start *channel_id*`\n'
         '`channel_id` must be an id of a channel, what I have access too.\n'
         'By connecting two channels, I manipulate them to cross send each '
         'message. I always connect the source channel, with the target '
         'channel to be clean. *More channels can be connected too.*\n'
-        'To cancel channelling use: `{prefix}channeling_stop`'
+        f'To cancel channelling use: `{prefix}channeling_stop`'
         ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -206,7 +206,7 @@ KOISHI_HELPER.add('channeling_start',_help_channeling_start,KOISHI_HELPER.check_
 
 
 async def channeling_stop(client,message,content):
-    if client.is_owner(message.author):
+    if not client.is_owner(message.author):
         return
     channel=message.channel
     while True:
@@ -224,7 +224,7 @@ async def channeling_stop(client,message,content):
 
 async def _help_channeling_stop(client,message):
     prefix=client.events.message_create.prefix(message)
-    embed=Embed('channeling_start',(
+    embed=Embed('channeling_stop',(
         'Cancels the channelling of this channel.\n'
         f'Usage: `{prefix}channeling_stop`\n'
         'If more channels are connected, you need to call this command, '

@@ -535,13 +535,13 @@ async def bans(client,message,content):
     if (guild is None):
         return
 
-    if not guild.cached_permissions_for(client).can_ban_user:
+    if not guild.cached_permissions_for(client).can_ban_users:
         await client.message_create(message.channel,embed=Embed(
             description='I have no permissions to check it.'))
         return
 
     user=message.author
-    if (not client.is_owner(user)) or (not guild.permissions_for(user).can_ban_user):
+    if (not client.is_owner(user)) or (not guild.permissions_for(user).can_ban_users):
         await client.message_create(message.channel,embed=Embed('Permission denied.',
                 'You must have `ban user` permission to invoke this command'))
         return
@@ -607,7 +607,7 @@ async def _help_bans(client,message):
             'invoke this command.')
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('bans',_help_bans,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(ban_user=True)))
+KOISHI_HELPER.add('bans',_help_bans,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(ban_users=True)))
 
 
 @commands
