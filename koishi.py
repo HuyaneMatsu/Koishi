@@ -590,7 +590,7 @@ async def bans(client,message,content):
         embed.add_footer(f'Page: {index}/{embed_ln}. Bans {field_count+1}-{field_count+len(embed.fields)}/{limit}')
         field_count+=len(embed.fields)
         
-        result.append({'embed':embed})
+        result.append(embed)
         
         if index==embed_ln:
             break
@@ -719,9 +719,7 @@ async def oa2_link(client,message,content): #just a test link
         'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
         '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
         '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
-        '%20email%20applications.builds.read'
-        '%20applications.builds.upload%20applications.entitlements'
-        '%20applications.store.update'))
+        '%20email'))
 
 async def _help_oa2_link(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -808,7 +806,7 @@ async def oa2_user(client,message,content):
         await client.message_create(message.channel,'Could not find that user')
         return
     
-    await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(user)])
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(user)])
 
 async def _help_oa2_user(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -841,7 +839,7 @@ async def oa2_connections(client,message,content):
     
     connections = await client.user_connections(user.access)
     
-    await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(connections)])
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(connections)])
 
 async def _help_oa2_connections(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -873,7 +871,7 @@ async def oa2_guilds(client,message,content):
     
     guilds = await client.user_guilds(user.access)
     
-    await Pagination(client,message.channel,[{'content':chunk} for chunk in pchunkify(guilds)])
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(guilds)])
 
 async def _help_oa2_guilds(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -1121,7 +1119,7 @@ async def count_messages(client,message,content):
     users=list(users.items())
     users.sort(reverse=True,key=lambda item:item[1])
     text=[f'{index}.: {user:f} : {count}' for index,(user,count) in enumerate(users,1)]
-    chunks=[{'content':chunk} for chunk in others.chunkify(text)]
+    chunks=[Embed(description=chunk) for chunk in others.chunkify(text)]
     await Pagination(client,source_channel,chunks)
 
 async def _help_count_messages(client,message):
@@ -1198,7 +1196,7 @@ async def count_reactions(client,message,content):
         for index,(emoji,emoji_count) in enumerate(emojis,1):
             text.append(f' - {index} {emoji:e} {emoji_count}')
     
-    chunks=[{'content':chunk} for chunk in others.chunkify(text)]
+    chunks=[Embed(description=chunk) for chunk in others.chunkify(text)]
     await Pagination(client,source_channel,chunks)        
 
 async def _help_count_reactions(client,message):
@@ -1284,7 +1282,7 @@ async def command_color(client,message,content):
         await client.message_create(message.channel,embed=embed,file=('color.png',buffer))
 
 async def _help_color(client,message):
-    prefix=client.events.message_crate.prefix(message)
+    prefix=client.events.message_create.prefix(message)
     embed=Embed('color',(
         'Do you wanna see a color?\n'
         f'Usage: `{prefix}color *color*`\n'
