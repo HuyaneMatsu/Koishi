@@ -18,6 +18,7 @@ from hata.guild import GUILDS
 from hata.client_core import CLIENTS
 from hata.activity import ActivityUnknown
 from hata.permission import Permission
+from hata import ActivitySpotify
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
@@ -66,15 +67,21 @@ def add_activity(text,activity):
             text.append(f'**>>** party limit : {activity.party_max}\n')
 
     if ACTIVITY_FLAG&0b0000000000010000:
-        if activity.asset_image_large:
-            text.append(f'**>>** asset image large url : {activity.image_large_url}\n')
-        if activity.asset_text_large:
-            text.append(f'**>>** asset text large : {activity.asset_text_large}\n')
-        if activity.asset_image_small:
-            text.append(f'**>>** asset image small url : {activity.image_small_url}\n')
-        if activity.asset_text_small:
-            text.append(f'**>>** asset text small : {activity.asset_text_small}\n')
-
+        if ACTIVITY_FLAG&0b0000010000000000:
+            if activity.asset_image_large:
+                text.append(f'**>>** asset image large url : {activity.image_large_url}\n')
+            if activity.asset_text_large:
+                text.append(f'**>>** asset text large : {activity.asset_text_large}\n')
+            if activity.asset_image_small:
+                text.append(f'**>>** asset image small url : {activity.image_small_url}\n')
+            if activity.asset_text_small:
+                text.append(f'**>>** asset text small : {activity.asset_text_small}\n')
+            
+        elif activity.type==ActivitySpotify.type:
+            album_cover_url=activity.album_cover_url
+            if album_cover_url is not None:
+                text.append(f'**>>** album cover : {album_cover_url}\n')
+        
     if ACTIVITY_FLAG&0b0000000000100000:
         if activity.secret_join:
             text.append(f'**>>** secret join : {activity.secret_join}\n')
