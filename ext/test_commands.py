@@ -34,7 +34,7 @@ def exit(client):
     CustomLinkCommand.unload(client)
     
     #unload keep_checking_emoji
-    keep_checking_emoji.unload()
+    keep_checking_emoji.unload(client)
 
 # works
 @commands
@@ -1009,7 +1009,7 @@ class keep_checking_emoji(object):
         
         return (self.client is other.client)
     
-    def on_exit(self,client):
+    def unload(self,client):
         channel=self.channel
         if channel is None:
             return
@@ -1095,3 +1095,55 @@ async def CustomLinkCommand_off(client, message, content):
     channel=message.channel
     client.events.message_create.remove(CustomLinkCommand(client,channel),channel)
     
+@commands
+async def nom(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    guild=message.guild
+    if guild is None:
+        await client.message_create(message.channel,'Guild only')
+        return
+    
+    if not guild.cached_permissions_for(client).can_view_audit_log:
+        await client.message_create(message.channel,
+            'I have no permissions at the guild, to request audit logs.')
+        return
+    
+    with client.keep_typing(message.channel):
+        iterator = client.audit_log_iterator(guild,)
+        await iterator.load_all()
+        logs = iterator.transform()
+    
+    if logs:
+        pages=[]
+        page=Embed()
+        pages.append(page)
+        
+        index=0
+        limit=len(logs)
+        field_count=0
+        
+        while True:
+            if index==limit:
+                break
+                
+            page.add_field(f'entry {index}',logs[index])
+            
+            field_count=field_count+1
+            index=index+1
+            
+            if field_count!=20:
+                continue
+            
+            field_count=0
+            
+            # dont create a new page if we are at the end
+            if index==limit:
+                break
+                
+            page=Embed()
+            pages.append(page)
+        
+        await Pagination(client,message.channel,pages)
+
