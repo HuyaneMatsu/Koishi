@@ -59,10 +59,10 @@ webhook_sender=commit_extractor(
 
 Koishi.events.message_create.append(webhook_sender,webhook_sender.channel)
 
-satori_extension_loader=ExtensionLoader(Koishi)
-satori_extension_loader.add('ext.test_commands',entry_point='entry',exit_point='exit')
-satori_extension_loader.add('ext.ratelimit_tests',entry_point='entry',exit_point='exit')
-satori_extension_loader.load_all().syncwrap().wait()
+koishi_extension_loader=ExtensionLoader(Koishi)
+koishi_extension_loader.add('ext.test_commands',entry_point='entry',exit_point='exit')
+koishi_extension_loader.add('ext.ratelimit_tests',entry_point='entry',exit_point='exit')
+koishi_extension_loader.load_all().syncwrap().wait()
 
 ############################## SETUP SATORI ##############################
 
