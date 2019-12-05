@@ -20,8 +20,8 @@ class Helper(object):
 
     def add(self,name,coro,checker=None):
         if len(name)>64:
-            raise ValueError('name ower 64 character')
-        
+            raise ValueError('name over 64 character')
+
         if (checker is not None):
             if not callable(checker):
                 raise TypeError(f'Checker should be callable, got {checker!r}.\nname = \'{name}\'\ncoro = {coro!r}')
