@@ -1,8 +1,10 @@
-import os, re, time
+import os, re
+join=os.path.join
 from collections import deque
 from time import perf_counter
-from hata.dereaddons_local import multidict_titled, titledstr
-from hata.futures import Future,sleep,Task
+from io import StringIO
+from hata.dereaddons_local import multidict_titled, titledstr, _spaceholder
+from hata.futures import Future,sleep,Task, WaitTillAll
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
 from hata import py_hdrs as hdrs
@@ -11,6 +13,7 @@ METH_GET    = hdrs.METH_GET
 METH_DELETE = hdrs.METH_DELETE
 METH_POST   = hdrs.METH_POST
 METH_PUT    = hdrs.METH_PUT
+AUTHORIZATION=hdrs.AUTHORIZATION
 from hata.py_reqrep import Request_CM
 from hata.exceptions import DiscordException
 from hata.others import to_json,from_json,quote
@@ -21,278 +24,323 @@ from hata.others import (ext_from_base64,bytes_to_base64,VoiceRegion,
     parse_oauth2_redirect_url)
 from hata.user import PartialUser,User
 from hata.role import Role
-from hata.client import Client
+from hata.client import Client, Achievement
 from hata.oauth2 import UserOA2
 from hata.channel import cr_pg_channel_object,ChannelCategory,ChannelText,ChannelGuildBase
 from hata.guild import PartialGuild
-from hata.http import VALID_ICON_FORMATS
+from hata.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED
 from hata.integration import Integration
 from email._parseaddr import _parsedate_tz
 from datetime import datetime,timedelta,timezone
 from hata.embed import Embed
 from hata.webhook import Webhook
+from hata.ios import ReuAsyncIO
+from hata.events import wait_for_message
 
 user1_id=189702078958927872
 user2_id=184405311681986560
 guild1_id=558318432253378560
 guild2_id=388267636661682178
 
-'''
-UNLIMITED  :
-    reaction_users
-    message_logs
-    message_get
-    download_attachment
-    invite_get_channel
-    permission_ow_create
-    permission_ow_delete
-    channel_edit
-    channel_delete
-    oauth2_token
-    webhook_create
-    webhook_get_channel
-    guild_create
-    guild_get
-    guild_delete
-    guild_edit
-    audit_logs
-    guild_bans
-    guild_ban_add
-    guild_ban_delete
-    guild_ban_get
-    channel_move
-    channel_create
-    guild_embed_get
-    guild_embed_edit
-    guild_emojis
-    emoji_get
-    integration_get_all
-    invite_get_guild
-    guild_prune
-    guild_prune_estimate
-    role_create
-    role_move
-    role_edit
-    role_delete
-    webhook_get_guild
-    invite_delete
-    client_application_info
-    user_info
-    client_user
-    channel_private_get_all
-    channel_private_create
-    guild_delete
-    webhook_get
-    webhook_edit
-    webhook_delete
-    webhook_get_token
-    webhook_edit_token
-    webhook_delete_token
-    guild_regions
-    guild_channels
-    guild_roles
-    guild_widget_get
-    channel_follow
+ratelimit_commands=eventlist()
+
+def entry(client):
+    client.events.message_create.shortcut.extend(ratelimit_commands)
     
-group       : reaction
-limit       : 1
-reset       : 0.25s
-limited by  : channel
-members     :
-    reaction_add
-    reaction_delete
-    reaction_delete_own
-    reaction_clear
-
-group       : message_create
-limit       : 5
-reset       : 4s
-limited by  : channel
-members     :
-    message_create
-    
-    
-group       : message_delete_multiple
-limit       : 1
-reset       : 3s
-limited by  : channel
-members     :
-    message_delete_multiple
-
-group       : message_edit
-limit       : 5
-reset       : 4s
-limited by  : channel
-members     :
-    message_edit
-
-group       : pinning
-limit       : 5
-reset       : 4s
-limited by  : channel
-members     :
-    message_pin
-    message_unpin
-
-group       : pinneds
-limit       : 1
-reset       : 5s
-limited by  : global
-members     :
-    message_pinneds
+def exit(client):
+    client.events.message_create.shortcut.unextend(ratelimit_commands)
 
 
-group       : typing
-limit       : 5
-reset:      : 5s
-limited by  : channel
-members     :
-    typing
+##UNLIMITED  :
+##    reaction_users
+##    message_logs
+##    message_get
+##    download_attachment
+##    invite_get_channel
+##    permission_ow_create
+##    permission_ow_delete
+##    channel_edit
+##    channel_delete
+##    oauth2_token
+##    webhook_create
+##    webhook_get_channel
+##    guild_create
+##    guild_get
+##    guild_delete
+##    guild_edit
+##    audit_logs
+##    guild_bans
+##    guild_ban_add
+##    guild_ban_delete
+##    guild_ban_get
+##    channel_move
+##    channel_create
+##    guild_embed_get
+##    guild_embed_edit
+##    guild_emojis
+##    emoji_get
+##    integration_get_all
+##    invite_get_guild
+##    guild_prune
+##    guild_prune_estimate
+##    role_create
+##    role_move
+##    role_edit
+##    role_delete
+##    webhook_get_guild
+##    invite_delete
+##    client_application_info
+##    user_info
+##    client_user
+##    channel_private_get_all
+##    channel_private_create
+##    guild_delete
+##    webhook_get
+##    webhook_edit
+##    webhook_delete
+##    webhook_get_token
+##    webhook_edit_token
+##    webhook_delete_token
+##    guild_regions
+##    guild_channels
+##    guild_roles
+##    guild_widget_get
+##    channel_follow
+##    
+##group       : reaction
+##limit       : 1
+##reset       : 0.25s
+##limited by  : channel
+##members     :
+##    reaction_add
+##    reaction_delete
+##    reaction_delete_own
+##    reaction_clear
+##
+##group       : message_create
+##limit       : 5
+##reset       : 4s
+##limited by  : channel
+##members     :
+##    message_create
+##    
+##    
+##group       : message_delete_multiple
+##limit       : 1
+##reset       : 3s
+##limited by  : channel
+##members     :
+##    message_delete_multiple
+##
+##group       : message_edit
+##limit       : 5
+##reset       : 4s
+##limited by  : channel
+##members     :
+##    message_edit
+##
+##group       : pinning
+##limit       : 5
+##reset       : 4s
+##limited by  : channel
+##members     :
+##    message_pin
+##    message_unpin
+##
+##group       : pinneds
+##limit       : 1
+##reset       : 5s
+##limited by  : global
+##members     :
+##    message_pinneds
+##
+##
+##group       : typing
+##limit       : 5
+##reset:      : 5s
+##limited by  : channel
+##members     :
+##    typing
+##
+##group       : invite_create
+##limit       : 5
+##reset       : 15s
+##limited by  : global
+##members     :
+##    invite_create
+##
+##group       : client_gateway_bot
+##limit       : 2
+##reset       : 5s
+##limited by  : global
+##members     :
+##    client_gateway_bot
+##
+##group       : emoji_create
+##limit       : 50
+##reset       : 3600s
+##limited by  : guild
+##members     :
+##    emoji_create
+##
+##group       : emoji_delete
+##limit       : 1
+##reset       : 3s
+##limited by  : global
+##members     :
+##    emoji_delete
+##
+##group       : emoji_edit
+##limit       : 1
+##reset       : 3s
+##limited by  : global
+##members     :
+##    emoji_edit
+##
+##group       : client_edit_nick
+##limit       : 1
+##reset       : 2s
+##limited by  : global
+##members     :
+##    client_edit_nick
+##
+##group       : guild_user_delete
+##limit       : 5
+##reset       : 2s
+##limited by  : guild
+##members     :
+##    guild_user_delete
+##
+##group       : user_edit
+##limit       : 10
+##reset       : 10s
+##limited by  : guild
+##members     :
+##    user_edit
+##
+##group       : guild_user_add
+##limit       : 10
+##reset       : 10s
+##limited by  : guild
+##members     :
+##    guild_user_add
+##
+##group       : user_role
+##limit       : 10
+##reset       : 10s
+##limited by  : guild
+##members     :
+##    user_role_add
+##    user_role_delete
+##
+##group       : invite_get
+##limit       : 250
+##reset       : 6s
+##limited by  : global
+##members     :
+##    invite_get
+##
+##group       : client_edit
+##limit       : 2
+##reset       : 3600s
+##limited by  : global
+##members     :
+##    client_edit
+##
+##group       : user_guilds
+##limit       : 1
+##reset       : 1s
+##limited by  : global
+##members     :
+##    user_guilds
+##
+##group       : guild_get_all
+##limit       : 1
+##reset       : 1s
+##limited by  : global
+##members     :
+##    guild_get_all
+##    
+##group       : user_get
+##limit       : 30
+##reset       : 30s
+##limited by  : global
+##members     :
+##    user_get
+##
+##group       : webhook_execute
+##limit       : 5
+##reset       : 2s
+##limited by  : webhook
+##members     :
+##    webhook_execute
+##
+##group       : guild_users
+##limit       : 10
+##reset       : 10s
+##limited by  : webhook
+##members     :
+##    guild_users
+##    
+##group       : guild_user_get
+##limit       : 5
+##reset       : 2s
+##limited by  : global
+##members:
+##    guild_user_get
+##
+##group       : message_delete 
+##case 1      : newer than 2 week or own
+##    limit   : 3
+##    reset   : 2s
+##case 2      : older than 2 week and not own
+##    limit   : 30
+##    reset   : 120s
+##members     :
+##    message_delete
+##
+##group       : message_suppress_embeds
+##limit       : 3
+##reset       : 1
+##limited by  : global
+##members:
+##    message_suppress_embeds
+##
+##group       : achievement_get
+##limit       : 5
+##reset       : 5
+##limited by  : global
+##members:
+##    achievement_get
+##
+##group       : achievement_create
+##limit       : 5
+##reset       : 5
+##limited by  : global
+##members:
+##    achievement_create
+##
+##group       : achievement_delete
+##limit       : 5
+##reset       : 5
+##limited by  : global
+##members:
+##    achievement_delete
+##
+##group       : achievement_get_all
+##limit       : 5
+##reset       : 5
+##limited by  : global
+##members:
+##    achievement_get_all
+##
+##group       : user_achievement_update
+##limit       : 5
+##reset       : 5
+##limited by  : global
+##members:
+##    user_achievement_update
 
-group       : invite_create
-limit       : 5
-reset       : 15s
-limited by  : global
-members     :
-    invite_create
-
-group       : client_gateway_bot
-limit       : 2
-reset       : 5s
-limited by  : global
-members     :
-    client_gateway_bot
-
-group       : emoji_create
-limit       : 50
-reset       : 3600s
-limited by  : guild
-members     :
-    emoji_create
-
-group       : emoji_delete
-limit       : 1
-reset       : 3s
-limited by  : global
-members     :
-    emoji_delete
-
-group       : emoji_edit
-limit       : 1
-reset       : 3s
-limited by  : global
-members     :
-    emoji_edit
-
-group       : client_edit_nick
-limit       : 1
-reset       : 2s
-limited by  : global
-members     :
-    client_edit_nick
-
-group       : guild_user_delete
-limit       : 5
-reset       : 2s
-limited by  : guild
-members     :
-    guild_user_delete
-
-group       : user_edit
-limit       : 10
-reset       : 10s
-limited by  : guild
-members     :
-    user_edit
-
-group       : guild_user_add
-limit       : 10
-reset       : 10s
-limited by  : guild
-members     :
-    guild_user_add
-
-group       : user_role
-limit       : 10
-reset       : 10s
-limited by  : guild
-members     :
-    user_role_add
-    user_role_delete
-
-group       : invite_get
-limit       : 250
-reset       : 6s
-limited by  : global
-members     :
-    invite_get
-
-group       : client_edit
-limit       : 2
-reset       : 3600s
-limited by  : global
-members     :
-    client_edit
-
-group       : user_guilds
-limit       : 1
-reset       : 1s
-limited by  : global
-members     :
-    user_guilds
-
-group       : guild_get_all
-limit       : 1
-reset       : 1s
-limited by  : global
-members     :
-    guild_get_all
-    
-group       : user_get
-limit       : 30
-reset       : 30s
-limited by  : global
-members     :
-    user_get
-
-group       : webhook_execute
-limit       : 5
-reset       : 2s
-limited by  : webhook
-members     :
-    webhook_execute
-
-group       : guild_users
-limit       : 10
-reset       : 10s
-limited by  : webhook
-members     :
-    guild_users
-    
-group       : guild_user_get
-limit       : 5
-reset       : 2s
-limited by  : global
-members:
-    guild_user_get
-
-group       : message_delete 
-case 1      : newer than 2 week or own
-    limit   : 3
-    reset   : 2s
-case 2      : older than 2 week and not own
-    limit   : 30
-    reset   : 120s
-members     :
-    message_delete
-
-group       : message_suppress_embeds
-limit       : 3
-reset       : 1
-limited by  : global
-members:
-    message_suppress_embeds
-'''
 
 def parsedate_to_datetime(data):
     *dtuple, tz = _parsedate_tz(data)
@@ -314,8 +362,6 @@ def other_client(client):
 
 async def notsocoro():
     pass
-
-ratelimit_commands=eventlist()
 
 async def bypass_request(client,method,url,data=None,params=None,reason=None,header=None,decode=True):
     self=client.http
@@ -361,6 +407,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
         value=headers.get('X-Ratelimit-Remaining',None)
         if value is not None:
             result.append(f'remaining : {value}')
+            
         value=headers.get('X-Ratelimit-Reset',None)
         if value is not None:
             delay=parse_header_ratelimit(headers)
@@ -397,7 +444,7 @@ def reaction_add(client,message,emoji):
     channel_id=message.channel.id
     message_id=message.id
     reaction=emoji.as_reaction
-    return bypass_request(client,METH_PUT, \
+    return bypass_request(client,METH_PUT,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me')
         
 def reaction_delete(client,message,emoji,user):
@@ -405,20 +452,20 @@ def reaction_delete(client,message,emoji,user):
     message_id=message.id
     reaction=emoji.as_reaction
     user_id=user.id
-    return bypass_request(client,METH_DELETE, \
+    return bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/{user_id}')
 
 def reaction_delete_own(client,message,emoji):
     channel_id=message.channel.id
     message_id=message.id
     reaction=emoji.as_reaction
-    return bypass_request(client,METH_DELETE, \
+    return bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me')
 
 def reaction_clear(client,message):
     channel_id=message.channel.id
     message_id=message.id
-    return bypass_request(client,METH_DELETE, \
+    return bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions')
 
 def reaction_users(client,message,emoji):
@@ -427,7 +474,7 @@ def reaction_users(client,message,emoji):
     channel_id=message.channel.id
     message_id=message.id
     reaction=emoji.as_reaction
-    return bypass_request(client,METH_GET, \
+    return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}',
         params={'limit':100})
 
@@ -444,7 +491,7 @@ async def message_create(client,channel,content=None,embed=None,tts=False,nonce=
     if nonce:
         data['nonce']=nonce
     channel_id=channel.id
-    data = await bypass_request(client,METH_POST, \
+    data = await bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages',
         data)
     return Message.new(data,channel)
@@ -452,7 +499,7 @@ async def message_create(client,channel,content=None,embed=None,tts=False,nonce=
 def message_delete(client,message):
     channel_id=message.channel.id
     message_id=message.id
-    return bypass_request(client,METH_DELETE, \
+    return bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}')
 
 def message_delete_multiple(client,messages):
@@ -462,7 +509,7 @@ def message_delete_multiple(client,messages):
         return message_delete(client,messages[0])
     data={'messages':[message.id for message in messages]}
     channel_id=messages[0].channel.id
-    return bypass_request(client,METH_POST, \
+    return bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/bulk_delete',
         data)
 
@@ -474,36 +521,36 @@ def message_edit(client,message,content=None,embed=None):
         data['embed']=embed.to_data()
     channel_id=message.channel.id
     message_id=message.id
-    return bypass_request(client,METH_PATCH, \
+    return bypass_request(client,METH_PATCH,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}',
         data)
 
 def message_pin(client,message):
     channel_id=message.channel.id
     message_id=message.id
-    return bypass_request(client,METH_PUT, \
+    return bypass_request(client,METH_PUT,
         f'https://discordapp.com/api/v7/channels/{channel_id}/pins/{message_id}')
 
 def message_unpin(client,message):
     channel_id=message.channel.id
     message_id=message.id
-    return bypass_request(client,METH_DELETE, \
+    return bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/channels/{channel_id}/pins/{message_id}')
 
 def message_pinneds(client,channel):
     channel_id=channel.id
-    return bypass_request(client,METH_GET, \
+    return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/channels/{channel_id}/pins')
 
 def message_logs(client,channel):
     channel_id=channel.id
-    return bypass_request(client,METH_GET, \
+    return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages',
         params={'limit':1})
 
 def message_get(client,channel,message_id):
     channel_id=channel.id
-    return bypass_request(client,METH_GET, \
+    return bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}')
 
 def download_attachment(client,attachment):
@@ -516,7 +563,7 @@ def download_attachment(client,attachment):
 
 def typing(client,channel):
     channel_id=channel.id
-    return bypass_request(client,METH_POST, \
+    return bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/channels/{channel_id}/typing')
 
 def client_edit(client,name='',avatar=b''):
@@ -531,7 +578,7 @@ def client_edit(client,name='',avatar=b''):
     elif avatar:
         avatar_data=bytes_to_base64(avatar)
         ext=ext_from_base64(avatar_data)
-    return bypass_request(client,METH_PATCH, \
+    return bypass_request(client,METH_PATCH,
         'https://discordapp.com/api/v7/users/@me',
         data)
 
@@ -541,24 +588,24 @@ def client_connections(client):
 
 def client_edit_nick(client,guild,nick):
     guild_id=guild.id
-    return bypass_request(client,METH_PATCH, \
+    return bypass_request(client,METH_PATCH,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/members/@me/nick',
         {'nick':nick})
 
 def client_gateway_bot(client):
-    return bypass_request(client,METH_GET, \
+    return bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/gateway/bot')
 
 def client_application_info(client):
-    return bypass_request(client,METH_GET, \
+    return bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/oauth2/applications/@me')
 
 def client_login_static(client):
-    return bypass_request(client,METH_GET, \
+    return bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me')
 
 def client_logout(client):
-    return bypass_request(client,METH_POST, \
+    return bypass_request(client,METH_POST,
         'https://discordapp.com/api/v7/auth/logout')
 
 
@@ -635,7 +682,7 @@ def channel_delete(client,channel):
         f'https://discordapp.com/api/v7/channels/{channel_id}')
 
 def oauth2_token(client):
-    data={ \
+    data = {
         'client_id'     : client.id,
         'client_secret' : client.secret,
         'grant_type'    : 'client_credentials',
@@ -649,7 +696,7 @@ def oauth2_token(client):
         'https://discordapp.com/api/oauth2/token',data,header=headers)
 
 def invite_create(client,channel):
-    data={ \
+    data = {
         'max_age'   : 60,
         'max_uses'  : 1,
         'temporary' : False,
@@ -691,7 +738,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
     if not (1<len(name)<101):
         raise ValueError(f'Guild\'s name\'s lenght can be between 2-100, got {len(name)}')
     
-    data = { \
+    data = {
         'name'                          : name,
         'icon'                          : None if icon is None else bytes_to_base64(avatar),
         'region'                        : region.id,
@@ -801,7 +848,7 @@ def emoji_create(client,guild,name,image):
     if not (1<len(name)<33):
         raise ValueError(f'The lenght of the name can be between 2-32, got {len(name)}')
     
-    data={ \
+    data = {
         'name'      : name,
         'image'     : image,
         'role_ids'  : []
@@ -923,9 +970,9 @@ def role_edit(client,role,color=None,separated=None,mentionable=None,
     if name is None:
         name=role.name
     if permissions is None:
-        permission=role.permissions
+        permissions=role.permissions
 
-    data={ \
+    data = {
         'name'        : name,
         'permissions' : permissions,
         'color'       : color,
@@ -968,7 +1015,7 @@ def invite_delete(client,invite):
 
 def user_info(client,access):
     header=multidict_titled()
-    header[hdrs.AUTHORIZATION]=f'Bearer {access.access_token}'
+    header[AUTHORIZATION]=f'Bearer {access.access_token}'
     return bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me',
         header=header)
@@ -988,14 +1035,14 @@ def channel_private_create(client,user):
 
 def user_connections(client,access):
     header=multidict_titled()
-    header[hdrs.AUTHORIZATION]=f'Bearer {access.access_token}'
+    header[AUTHORIZATION]=f'Bearer {access.access_token}'
     return bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me/connections',
         header=header)
 
 def user_guilds(client,access):
     header=multidict_titled()
-    header[hdrs.AUTHORIZATION]=f'Bearer {access.access_token}'
+    header[AUTHORIZATION]=f'Bearer {access.access_token}'
     return bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me/guilds',
         header=header)
@@ -1004,11 +1051,6 @@ def guild_get_all(client):
     return bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me/guilds',
         params={'after':0})
-
-def guild_delete(client,guild):
-    guild_id=guild.id
-    return bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}')
 
 def user_get(client,user):
     user_id=user.id
@@ -1100,9 +1142,113 @@ async def channel_follow(client,source_channel,target_channel):
 
     data = await bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/channels/{channel_id}/followers',data)
-    webhook=Webhook._from_follow_data(data,target_channel,client)
+    webhook=Webhook._from_follow_data(data,source_channel,target_channel,client)
     return webhook
 
+async def achievement_get(client,achievement_id):
+    application_id=client.application.id
+        
+    data = await bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/applications/{application_id}/achievements/{achievement_id}')
+    
+    return Achievement(data)
+    
+
+async def achievement_create(client,name,description,icon,secret=False,secure=False):
+    icon_data=bytes_to_base64(icon)
+    ext=ext_from_base64(icon_data)
+    if ext not in VALID_ICON_FORMATS_EXTENDED:
+        raise ValueError(f'Invalid icon type: {ext}')
+
+    data = {
+        'name'          : {
+            'default'   : name,
+                },
+        'description'   : {
+            'default'   : description,
+                },
+        'secret'        : secret,
+        'secure'        : secure,
+        'icon'          : icon_data,
+            }
+
+    application_id=client.application.id
+        
+    data =  await bypass_request(client,METH_POST,
+        f'https://discordapp.com/api/v7/applications/{application_id}/achievements',
+        data=data)
+    
+    return Achievement(data)
+
+async def achievement_delete(client,achievement):
+    application_id=client.application.id
+    achievement_id=achievement.id
+    await bypass_request(client,METH_DELETE,
+        f'https://discordapp.com/api/v7/applications/{application_id}/achievements/{achievement_id}')
+
+async def achievement_edit(client,achievement,name=None,description=None,secret=None,secure=None,icon=_spaceholder):
+    data={}
+    if (name is not None):
+        data['name'] = {
+            'default'   : name,
+                }
+    if (description is not None):
+        data['description'] = {
+            'default'   : description,
+                }
+    if (secret is not None):
+        data['secret']=secret
+        
+    if (secure is not None):
+        data['secure']=secure
+        
+    if (icon is not _spaceholder):
+        icon_data=bytes_to_base64(icon)
+        ext=ext_from_base64(icon_data)
+        if ext not in VALID_ICON_FORMATS_EXTENDED:
+            raise ValueError(f'Invalid icon type: {ext}')
+        data['icon']=icon_data
+
+    application_id=client.application.id
+    achievement_id=achievement.id
+    
+    data = await bypass_request(client,METH_PATCH,
+        f'https://discordapp.com/api/v7/applications/{application_id}/achievements/{achievement_id}',
+        data=data,)
+
+    achievement._update_no_return(data)
+    return achievement
+
+async def achievement_get_all(client):
+    application_id=client.application.id
+    
+    data = await bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/applications/{application_id}/achievements')
+    
+    return [Achievement(achievement_data) for achievement_data in data]
+
+async def user_achievement_update(client,user,achievement,percent_complete):
+    data={'percent_complete':percent_complete}
+    
+    user_id=user.id
+    application_id=client.application.id
+    achievement_id=achievement.id
+    
+    await bypass_request(client,METH_PUT,
+        f'https://discordapp.com/api/v7/users/{user_id}/applications/{application_id}/achievements/{achievement_id}',
+        data=data,)
+
+async def user_achievements(client,access):
+    header=multidict_titled()
+    header[AUTHORIZATION]=f'Bearer {access.access_token}'
+    
+    application_id=client.application.id
+    
+    data = await bypass_request(client,METH_GET,
+        f'https://discordapp.com/api/v7/users/@me/applications/{application_id}/achievements',
+        header=header)
+    
+    return [Achievement(achievement_data) for achievement_data in data]
 
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
@@ -1889,7 +2035,7 @@ async def ratelimit_test0055(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    message1 = await client.message_create_file(channel1, \
+    message1 = await client.message_create_file(channel1,
         open(os.path.join(os.path.abspath('.'),'images',
             '0000000A_touhou_koishi_kokoro_reversed.png'),'rb'))
     Task(download_attachment(client,message1.attachments[0]),loop)
@@ -1901,7 +2047,7 @@ async def ratelimit_test0056(client,message,content):
         return
     loop=client.loop
     channel1=message.channel
-    message1 = await message.message_create_file(channel1, \
+    message1 = await message.message_create_file(channel1,
         open(os.path.join(os.path.abspath('.'),'images',
             '0000000A_touhou_koishi_kokoro_reversed.png'),'rb'))
     await sleep(5.,loop)
@@ -3038,8 +3184,8 @@ async def ratelimit_test0152(client,message,content):
     loop=client.loop
     guild1=message.guild
     user1_id=message.author.id
-    await user_get_profile(client,guild1,user1_id)
-    #user_get_profile is limited
+    await guild_user_get(client,guild1,user1_id)
+    #guild_user_get is limited
 
 @ratelimit_commands
 async def ratelimit_test0153(client,message,content):
@@ -3066,7 +3212,7 @@ async def ratelimit_test0154(client,message,content):
     #limited globally
 
 @ratelimit_commands
-async def ratelimit_test155(client,message,content):
+async def ratelimit_test0155(client,message,content):
     if not client.is_owner(message.author):
         return
     messages = await client.messages_till_index(message.channel)
@@ -3187,7 +3333,7 @@ async def ratelimit_test0163(client,message,content):
 
 
 @ratelimit_commands
-async def ratelimit_test164(client,message,content):
+async def ratelimit_test0164(client,message,content):
     if not client.is_owner(message.author):
         return
 
@@ -3213,7 +3359,7 @@ async def ratelimit_test164(client,message,content):
     await client.message_create(message.channel,'\n'.join(result))
 
 @ratelimit_commands
-async def ratelimit_test165(client,message,content):
+async def ratelimit_test0165(client,message,content):
     if not client.is_owner(message.author):
         return
 
@@ -3226,7 +3372,7 @@ async def ratelimit_test165(client,message,content):
 
     channel1=None
     channel2=None
-
+    
     for channel in category.channels:
         if channel.type==0:
             if channel1 is None:
@@ -3238,6 +3384,7 @@ async def ratelimit_test165(client,message,content):
                 channel2=channel
 
     del channel
+    
     if channel1 is None:
         if channel2 is None:
             await client.message_create(source_channel,'Could not find either normal text and news channel at the categeory.')
@@ -3254,7 +3401,7 @@ async def ratelimit_test165(client,message,content):
     await client.webhook_delete(webhook)
 
 @ratelimit_commands
-async def ratelimit_test166(client,message,content):
+async def ratelimit_test0166(client,message,content):
     if not client.is_owner(message.author):
         return
 
@@ -3308,3 +3455,397 @@ async def ratelimit_test166(client,message,content):
     webhook2 = await task2
     await client.webhook_delete(webhook1)
     await client.webhook_delete(webhook2)
+
+@ratelimit_commands
+async def ratelimit_test0167(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    try:
+        achievements = await client.achievement_get_all()
+    except BaseException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,'At ratelimit_test0167 -> .achievement_get_all;\n',file=buffer)
+            text=buffer.getvalue()
+        await client.message_create(message.channel,text)
+        return
+    
+    if not achievements:
+        await client.message_create(message.channel,'The application has no achievement')
+    
+    achievement=achievements[0]
+    achievement_id=achievement.id
+    
+    loop=client.loop
+    
+    for _ in range(6):
+        Task(achievement_get(client,achievement_id),loop)
+    #achievement_get limited. limit:5, reset:5
+    
+@ratelimit_commands
+async def ratelimit_test0168(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    try:
+        achievements = await client.achievement_get_all()
+    except BaseException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,'At ratelimit_test0168 -> .achievement_get_all;\n',file=buffer)
+            text=buffer.getvalue()
+        await client.message_create(message.channel,text)
+        return
+    
+    if len(achievements)<3:
+        await client.message_create(message.channel,'The application has less than 2 achievements')
+        return
+    
+    achievement_1=achievements[0]
+    achievement_2=achievements[1]
+    
+    achievement_id_1=achievement_1.id
+    achievement_id_2=achievement_2.id
+    
+    loop=client.loop
+    
+    for _ in range(4):
+        Task(achievement_get(client,achievement_id_1),loop)
+        Task(achievement_get(client,achievement_id_2),loop)
+    #achievement_get limited globally
+    
+@ratelimit_commands
+async def ratelimit_test0169(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    loop=client.loop
+    
+    tasks=[]
+    names=('Yura','Hana','Neko','Kaze','Scarlet','Yukari')
+    for name in names:
+        description=name+'boroshi'
+        task=Task(achievement_create(client,name,description,image),loop)
+        tasks.append(task)
+        
+    await WaitTillAll(tasks,loop)
+    
+    for task, name in zip(tasks,names):
+        try:
+            achievement=task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0169 -> .achievement_create ({name});\n',file=buffer)
+                text=buffer.getvalue()
+    
+            await client.message_create(message.channel,text)
+        else:
+            await client.achievement_delete(achievement.id)
+    #achievement_create limited. limit:5, reset:5, globally
+    
+@ratelimit_commands
+async def ratelimit_test0170(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievements=[]
+    for name in ('Cake','Neko'):
+        description=name+' are love'
+        achievement = await client.achievement_create(name,description,image)
+        achievements.append(achievement)
+    
+    loop=client.loop
+    
+    tasks = []
+    for achievement in achievements:
+        task = Task(achievement_delete(client,achievement),loop)
+        
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0170 -> .achievement_delete;\n',file=buffer)
+                text=buffer.getvalue()
+    
+            await client.message_create(message.channel,text)
+    #achievement_delete limited. limit:5, reset:5, globally
+
+@ratelimit_commands
+async def ratelimit_test0171(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievement = await client.achievement_create('Cake','Nekos are love',image)
+    
+    loop=client.loop
+    tasks = []
+    
+    task = Task(achievement_edit(client,achievement,name='Hana'),loop)
+    tasks.append(task)
+    
+    task = Task(achievement_edit(client,achievement,name='Phantom'),loop)
+    tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0171 -> .achievement_edit;\n',file=buffer)
+                text=buffer.getvalue()
+    
+            await client.message_create(message.channel,text)
+    
+    await client.achievement_delete(achievement)
+            
+    #achievement_edit limited. limit:5, reset:5
+    
+@ratelimit_commands
+async def ratelimit_test0172(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievements=[]
+    for name in ('Kokoro','Koishi'):
+        description='UwUwUwU'
+        achievement = await client.achievement_create(name,description,image)
+        achievements.append(achievement)
+
+    loop=client.loop
+    tasks = []
+    for achievement in achievements:
+        task = Task(achievement_edit(client,achievement,name='Yura'),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0172 -> .achievement_edit;\n',file=buffer)
+                text=buffer.getvalue()
+    
+            await client.message_create(message.channel,text)
+    
+    for achievement in achievements:
+        await client.achievement_delete(achievement)
+    
+    #achievement_edit limited globally
+
+@ratelimit_commands
+async def ratelimit_test0173(client,message,content):
+    if not client.is_owner(message.author):
+        return
+
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievement = await achievement_create(client,'Kokoro','is love',image)
+    await achievement_get(client,achievement.id)
+    await achievement_edit(client,achievement,name='Yurika')
+    await achievement_delete(client,achievement)
+    # achievement_create, achievement_get, achievement_edit, achievement_delete are NOT grouped
+    
+@ratelimit_commands
+async def ratelimit_test0174(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    loop=client.loop
+    tasks = []
+    for _ in range(2):
+        task = Task(achievement_get_all(client),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0174 -> .achievement_get_all;\n',file=buffer)
+                text=buffer.getvalue()
+    
+            await client.message_create(message.channel,text)
+    #achievement_get_all limited. limit:5, reset:5, globally
+
+@ratelimit_commands
+async def ratelimit_test0175(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
+    
+    try:
+        await user_achievement_update(client,client.owner,achievement,100)
+    except BaseException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,f'At ratelimit_test0175 -> .user_achievement_update;\n',file=buffer)
+            text=buffer.getvalue()
+
+        await client.message_create(message.channel,text)
+        
+    await client.achievement_delete(achievement)
+    # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
+    # user_achievement_update limited. Limit : 5, reset : 5.
+    
+@ratelimit_commands
+async def ratelimit_test0176(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
+    await sleep(2.0,client.loop) # wait some time this time
+    
+    try:
+        await user_achievement_update(client,client.owner,achievement,100)
+    except BaseException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,f'At ratelimit_test0176 -> .user_achievement_update;\n',file=buffer)
+            text=buffer.getvalue()
+
+        await client.message_create(message.channel,text)
+    
+    await client.achievement_delete(achievement)
+    # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
+    
+@ratelimit_commands
+async def ratelimit_test0177(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievement = await client.achievement_create('Koishi','Kokoro',image) #no just a normal one
+    
+    try:
+        await user_achievement_update(client,client.owner,achievement,100)
+    except BaseException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,f'At ratelimit_test0177 -> .user_achievement_update;\n',file=buffer)
+            text=buffer.getvalue()
+
+        await client.message_create(message.channel,text)
+    
+    await client.achievement_delete(achievement)
+    # DiscordException FORBIDDEN (403), code=40001: Unauthorized
+
+@ratelimit_commands
+async def ratelimit_test0178(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+    with (await ReuAsyncIO(image_path)) as file:
+        image = await file.read()
+    
+    achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
+    
+    loop=client.loop
+    
+    tasks=[]
+    for member in client.application.owner.members:
+        user = member.user
+        task=Task(user_achievement_update(client,user,achievement,100),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0178 -> .user_achievement_update;\n',file=buffer)
+                text=buffer.getvalue()
+    
+            await client.message_create(message.channel,text)
+    
+    await client.achievement_delete(achievement)
+    # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
+    #limited globally
+
+class check_is_owner(object):
+    __slots__=('client', )
+    def __init__(self,client):
+        self.client=client
+    
+    def __call__(self,message):
+        return self.client.is_owner(message.author)
+    
+@ratelimit_commands
+async def ratelimit_test0179(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    await client.message_create(message.channel, (
+        'Please authorize yourself and resend the redirected url after it\n'
+        'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
+        '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
+        '&response_type=code&scope=identify%20applications.store.update'))
+    
+    try:
+        message = await wait_for_message(client,message.channel,check_is_owner(client),60.)
+    except TimeoutError:
+        await client.message_create('Timeout meanwhile waiting for redirect url.')
+        return
+    
+    Task(client.message_delete(message),client.loop)
+    try:
+        result=parse_oauth2_redirect_url(message.content)
+    except ValueError:
+        await client.message_create(message.channel,'Bad redirect url.')
+        return
+    
+    access = await client.activate_authorization_code(*result,['identify', 'applications.store.update'])
+    
+    if access is None:
+        await client.message_create(message.channel,'Too old redirect url.')
+        return
+    
+    try:
+        await user_achievements(client,access)
+    except BaseException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,f'At ratelimit_test0179 -> .user_achievements;\n',file=buffer)
+            text=buffer.getvalue()
+
+        await client.message_create(message.channel,text)
+    #DiscordException UNAUTHORIZED (401): 401: Unauthorized
+    # no limit data provided
+
+    
