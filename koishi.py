@@ -21,7 +21,6 @@ from hata.embed import Embed
 
 import image_handler
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER, invalid_command
-from ratelimit_tests import ratelimit_commands
 from kanako import kanako_manager
 from dungeon_sweeper import ds_manager,_DS_modify_best
 from voice import voice
@@ -67,7 +66,6 @@ commands(image_handler.on_command_upload,'upload')
 commands(image_handler.on_command_image,'image')
 commands(KOISHI_HELPER,'help')
 commands(invalid_command)
-commands.extend(ratelimit_commands)
 commands(kanako_manager,'kanakogame')
 commands(voice)
 commands(dispatch_tester.here)
@@ -184,7 +182,7 @@ async def _help_ping(client,message):
     prefix=client.events.message_create.prefix(message)
     return Embed('ping',(
         'Do you wanna know how bad my connection is to Discord?\n'
-        f'Usage: `{prefix}ping\n'
+        f'Usage: `{prefix}ping'
         ),color=KOISHI_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
@@ -225,7 +223,7 @@ async def _help_clear(client,message):
         'I ll clear up the leftover after your lewd messages O-NEE-CHA-N.'
         f'Usage : `{prefix}clear <amount> <reason>`\n'
         '`amount` is optional, by default it is just 1.\n'
-        'The `reason`will show up at the audit logs of the guild.'
+        'The `reason` will show up at the audit logs of the guild.'
         ),color=KOISHI_HELP_COLOR).add_footer(
             'This command can be executed only at a guild, and you must have '
             '`manage messages` permission as well.')
