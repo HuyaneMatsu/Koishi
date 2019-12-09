@@ -2,25 +2,26 @@ import os
 from io import StringIO
 from os.path import join
 import re
+from weakref import WeakSet, WeakKeyDictionary
 
 from hata.others import filter_content
-from hata.prettyprint import pchunkify
+from hata.prettyprint import pchunkify, pconnect
 from hata.ios import ReuAsyncIO
-from hata.events import Pagination
 from hata.client import Achievement
-from hata.others import bytes_to_base64, parse_oauth2_redirect_url
+from hata.others import bytes_to_base64, parse_oauth2_redirect_url, Unknown
 from hata.emoji import BUILTIN_EMOJIS, parse_emoji
-from hata.futures import sleep, render_exc_to_list, Task
+from hata.futures import sleep, render_exc_to_list, Task, Future
 from hata.dereaddons_local import alchemy_incendiary
-from hata.prettyprint import pconnect
 from hata.invite import Invite
 from hata.exceptions import DiscordException
 from hata.embed import Embed
 from hata.channel import CHANNELS
 from hata.events_compiler import ContentParser
-from hata.parsers import eventlist
-from hata.events import wait_for_message
-from weakref import WeakSet
+from hata.parsers import eventlist, EventHandlerBase
+from hata.events import Pagination, wait_for_message, GUI_STATE_READY,      \
+    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
+    GUI_STATE_SWITCHING_CTX, multievent, asynclist, CommandProcesser,       \
+    EventDescriptor
 
 commands = eventlist()
 
@@ -65,7 +66,7 @@ async def achievement_create(client,message,content):
     pages=[Embed(description=chunk) for chunk in chunks]
     await Pagination(client,message.channel,pages)
 
-# icon cannto be None
+# icon cannot be None
 @commands
 async def achievement_create_no_avatar_1(client,message,content):
     if not client.is_owner(message.author):
@@ -157,10 +158,6 @@ async def achievement_create_pure_data(client,message,content):
         'secure'        : False,
         'icon'          : icon_data,
             }
-        
-    image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
-    with (await ReuAsyncIO(image_path)) as file:
-        image = await file.read()
 
     application_id=client.application.id
     
@@ -213,7 +210,7 @@ async def achievement_get(client,message,content):
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_get;\n',file=buffer)
             content=buffer.getvalue()
-        await client.message_create(message.channel,'pass id pls')
+        await client.message_create(message.channel,content)
         return
 
     chunks=pchunkify(achievement)
@@ -1095,8 +1092,9 @@ async def CustomLinkCommand_off(client, message, content):
     channel=message.channel
     client.events.message_create.remove(CustomLinkCommand(client,channel),channel)
     
+# shows the representation of AuditLogEntry-s
 @commands
-async def nom(client, message, content):
+async def test_logs_entry_repr(client, message, content):
     if not client.is_owner(message.author):
         return
     
@@ -1115,35 +1113,1215 @@ async def nom(client, message, content):
         await iterator.load_all()
         logs = iterator.transform()
     
-    if logs:
-        pages=[]
+    if not logs:
+        await client.message_create(message.channel,'The guild has no logs.')
+        return
+        
+    pages=[]
+    page=Embed()
+    pages.append(page)
+    field_count=0
+    
+    index=0
+    limit=len(logs)
+    
+    while True:
+        if index==limit:
+            break
+            
+        page.add_field(f'entry {index}',logs[index].__repr__())
+        
+        field_count=field_count+1
+        index=index+1
+        
+        if field_count!=20:
+            continue
+        
+        field_count=0
+        
+        # dont create a new page if we are at the end
+        if index==limit:
+            break
+            
+        page=Embed()
+        pages.append(page)
+    
+    await Pagination(client,message.channel,pages)
+
+# list AuditLogChange's data science
+
+class log_change_type_collecter(object):
+    def __init__(self,name):
+        self.name=name
+        self.before_types=set()
+        self.after_types=set()
+        
+@commands
+async def test_logs_changes(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    guild=message.guild
+    if guild is None:
+        await client.message_create(message.channel,'Guild only')
+        return
+    
+    if not guild.cached_permissions_for(client).can_view_audit_log:
+        await client.message_create(message.channel,
+            'I have no permissions at the guild, to request audit logs.')
+        return
+    
+    with client.keep_typing(message.channel):
+        iterator = client.audit_log_iterator(guild,)
+        await iterator.load_all()
+        logs = iterator.transform()
+    
+    if not logs:
+        await client.message_create(message.channel,'The guild has no logs.')
+        return
+    
+    changes = []
+    for entry in logs:
+        changes_=entry.changes
+        if changes_ is None:
+            continue
+        
+        changes.extend(changes_)
+    
+    if not changes:
+        await client.message_create(message.channel,'The guild has no changes.')
+        return
+    
+    # short
+    index=0
+    limit=len(changes)
+    collectors={}
+    
+    while True:
+        if index==limit:
+            break
+        
+        change=changes[index]
+        index=index+1
+        
+        name=change.attr
+        try:
+            collector=collectors[name]
+        except KeyError:
+            collector=log_change_type_collecter(name)
+            collectors[name]=collector
+        
+        before=change.before
+        if before is None:
+            type_=None
+        else:
+            type_=type(before)
+            if type_ is Unknown:
+                type_=before.type
+        
+        collector.before_types.add(type_)
+        
+        after=change.after
+        if after is None:
+            type_=None
+        else:
+            type_=type(after)
+            if type_ is Unknown:
+                type_=after.type
+        
+        collector.after_types.add(type_)
+    
+    pages=[]
+    page=Embed()
+    pages.append(page)
+    content_parts=[]
+    field_count=0
+    
+    limit=len(collectors)
+    index=0
+    
+    for collector in collectors.values():
+        
+        content_parts.append('**befores:**')
+        for before in collector.before_types:
+            content_parts.append(repr(before))
+            content_parts.append(', ')
+        
+        del content_parts[-1]
+        
+        content_parts.append('\n**afters:**')
+        for after in collector.after_types:
+            content_parts.append(repr(after))
+            content_parts.append(', ')
+        
+        del content_parts[-1]
+        
+        content=''.join(content_parts)
+        content_parts.clear()
+        
+        page.add_field(collector.name,content)
+        
+        field_count=field_count+1
+        index=index+1
+        
+        if field_count!=20:
+            continue
+        
+        field_count=0
+        
+        # dont create a new page if we are at the end
+        if index==limit:
+            break
+            
         page=Embed()
         pages.append(page)
         
-        index=0
-        limit=len(logs)
-        field_count=0
+    await Pagination(client,message.channel,pages)
+
+# do not connects the messages somewhy
+@commands
+async def test_multyimage(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    avatar_url=client.avatar_url_as(size=4096)
+    embed=Embed(client.full_name)
+    embed.add_image(avatar_url)
+    embeds=[embed]
+    for _ in range(3):
+        embed=Embed()
+        embed.add_image(avatar_url)
+        embeds.append(embed)
+
+    webhooks = await client.webhook_get_channel(message.channel)
+    if webhooks:
+        webhook = webhooks[0]
+    else:
+        webhook = await client.webhook_create(message.channel,'UwU')
+    
+    await client.webhook_send(webhook,embed=embeds,name=message.author.name,avatar_url=message.author.avatar_url)
+    
+
+@commands
+async def test_suppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    try:
+        await client.message_suppress_embeds(message)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+@commands
+async def test_unsuppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    try:
+        await client.message_suppress_embeds(message,suppress=False)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+
+@commands
+async def test_get_suppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    content = ('False','True')[message.flags.embeds_suppressed]
+    await client.message_create(message.channel,content)
+
+@commands
+async def test_get_could_suppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    content = ('False','True')[message.could_suppress_embeds]
+    await client.message_create(message.channel,content)
+
+@commands
+async def test_edit_suppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    if message.author!=client:
+        await client.message_create(message.channel,'The message must be sent by me')
+        return
+
+    if message.embeds is None:
+        await client.message_create(message.channel,'The message must have embeds')
+        return
+    
+    if message.flags.embeds_suppressed:
+        await client.message_create(message.channel,'The message\'s embeds must be not unsupressed')
+        return
+    
+    data={'flags':message.flags|4}
+    try:
+        await client.http.message_edit(message.channel.id,message.id,data)
+    except DiscordException as err:
+        content=repr(err)
+    else:
+        content='OwO?'
+    
+    await client.message_create(message.channel,content)
+
+@commands
+async def test_edit_unsuppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    if message.author!=client:
+        await client.message_create(message.channel,'The message must be sent by me')
+        return
+    
+    if not message.flags.embeds_suppressed:
+        await client.message_create(message.channel,'The message\'s embeds must be supressed')
+        return
+    
+    data={'flags':message.flags^4}
+    try:
+        await client.http.message_edit(message.channel.id,message.id,data)
+    except DiscordException as err:
+        content=repr(err)
+    else:
+        content='UwU?'
+    
+    await client.message_create(message.channel,content)
+
+@commands
+async def test_message_edit_suppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    if message.author!=client:
+        await client.message_create(message.channel,'The message must be sent by me')
+        return
+    
+    if message.flags.embeds_suppressed:
+        await client.message_create(message.channel,'The message\'s embeds must be not supressed')
+        return
+    
+    await client.message_edit(message,suppress=True)
+    
+@commands
+async def test_message_edit_unsuppress(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_id=int(content)
+    except ValueError:
+        await client.message_create(message.channel,'Id please')
+        return
+        
+    try:
+        message = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    if message.author!=client:
+        await client.message_create(message.channel,'The message must be sent by me')
+        return
+    
+    if not message.flags.embeds_suppressed:
+        await client.message_create(message.channel,'The message\'s embeds must be supressed')
+        return
+    
+    await client.message_edit(message,suppress=False)
+
+class Timeouter(object):
+    __slots__=('loop', 'handler', 'owner', 'timeout')
+    def __init__(self,loop,owner,timeout):
+        self.loop=loop
+        self.owner=owner
+        self.timeout=timeout
+        self.handler=loop.call_later(timeout,self.__step,self)
+        
+    @staticmethod
+    def __step(self):
+        timeout=self.timeout
+        if timeout>0.0:
+            self.handler=self.loop.call_later(timeout,self.__step,self)
+            self.timeout=0.0
+            return
+        
+        self.handler=None
+        owner=self.owner
+        if owner is None:
+            return
+        
+        self.owner=None
+        
+        canceller=owner.canceller
+        if canceller is None:
+            return
+        owner.canceller=None
+        Task(canceller(owner,TimeoutError()),self.loop)
+        
+        
+    def cancel(self):
+        handler=self.handler
+        if handler is None:
+            return
+        
+        self.handler=None
+        handler.cancel()
+        self.owner=None
+
+class NewGenerationPagination(object):
+    LEFT2   = BUILTIN_EMOJIS['track_previous']
+    LEFT    = BUILTIN_EMOJIS['arrow_backward']
+    RIGHT   = BUILTIN_EMOJIS['arrow_forward']
+    RIGHT2  = BUILTIN_EMOJIS['track_next']
+    CANCEL  = BUILTIN_EMOJIS['x']
+    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,CANCEL,)
+    
+    __slots__=('canceller', 'channel', 'client', 'message', 'page', 'pages',
+        'task_flag', 'timeouter')
+    
+    async def __new__(cls,client,channel,pages,timeout=240.,message=None):
+        self=object.__new__(cls)
+        self.client=client
+        self.channel=channel
+        self.pages=pages
+        self.page=0
+        self.canceller=cls._canceller
+        self.task_flag=GUI_STATE_READY
+        self.message=message
+        self.timeouter=None
+        
+        if message is None:
+            message = await client.message_create(channel,embed=pages[0])
+            self.message=message
+        
+        if not channel.cached_permissions_for(client).can_add_reactions:
+            return self
+
+        message.weakrefer()
+        
+        if len(self.pages)>1:
+            for emoji in self.EMOJIS:
+                await client.reaction_add(message,emoji)
+        else:
+            await client.reaction_add(message,self.CANCEL)
+        
+        self.timeouter=Timeouter(client.loop,self,timeout=timeout)
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
+        return self
+    
+    async def __call__(self,emoji,user):
+        if user.is_bot or (emoji not in self.EMOJIS):
+            return
+        
+        client=self.client
+        message=self.message
+        
+        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
+        if can_manage_messages:
+            if not message.did_react(emoji,user):
+                return
+            Task(self.reaction_remove(client,message,emoji,user),client.loop)
+        
+        task_flag=self.task_flag
+        if task_flag!=GUI_STATE_READY:
+            if task_flag==GUI_STATE_SWITCHING_PAGE:
+                if emoji is self.CANCEL:
+                    self.task_flag=GUI_STATE_CANCELLING
+                return
+
+            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
+            return
         
         while True:
-            if index==limit:
+            if emoji is self.LEFT:
+                page=self.page-1
                 break
                 
-            page.add_field(f'entry {index}',logs[index])
-            
-            field_count=field_count+1
-            index=index+1
-            
-            if field_count!=20:
-                continue
-            
-            field_count=0
-            
-            # dont create a new page if we are at the end
-            if index==limit:
+            if emoji is self.RIGHT:
+                page=self.page+1
                 break
                 
-            page=Embed()
-            pages.append(page)
+            if emoji is self.CANCEL:
+                self.task_flag=GUI_STATE_CANCELLED
+                try:
+                    await client.message_delete(message)
+                except DiscordException:
+                    pass
+                self.cancel()
+                return
+            
+            if emoji is self.LEFT2:
+                page=0
+                break
+                
+            if emoji is self.RIGHT2:
+                page=len(self.pages)-1
+                break
+            
+            return
         
-        await Pagination(client,message.channel,pages)
+        if page<0:
+            page=0
+        elif page>=len(self.pages):
+            page=len(self.pages)-1
+        
+        if self.page==page:
+            return
+
+        self.page=page
+        self.task_flag=GUI_STATE_SWITCHING_PAGE
+        
+        try:
+            await client.message_edit(message,embed=self.pages[page])
+        except DiscordException:
+            self.task_flag=GUI_STATE_CANCELLED
+            self.cancel()
+            return
+        
+        if self.task_flag==GUI_STATE_CANCELLING:
+            self.task_flag=GUI_STATE_CANCELLED
+            if can_manage_messages:
+                try:
+                    await client.message_delete(message)
+                except DiscordException:
+                    pass
+
+            self.cancel()
+            return
+            
+        self.task_flag=GUI_STATE_READY
+        
+        timeouter=self.timeouter
+        if timeouter.timeout<240.:
+            timeouter.timeout+=30.
+            
+    @staticmethod
+    async def reaction_remove(client,message,emoji,user):
+        try:
+            await client.reaction_delete(message,emoji,user)
+        except DiscordException:
+            pass
+    
+    async def _canceller(self,exception,):
+        client=self.client
+        message=self.message
+        
+        client.events.reaction_add.remove(self,message)
+        client.events.reaction_delete.remove(self,message)
+        
+        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+            # the message is not our, we should not do anything with it.
+            return
+
+        self.task_flag=GUI_STATE_CANCELLED
+        
+        if exception is None:
+            return
+        
+        if isinstance(exception,TimeoutError):
+            if self.channel.cached_permissions_for(client).can_manage_messages:
+                try:
+                    await client.reaction_clear(message)
+                except DiscordException:
+                    pass
+            return
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        #we do nothing
+    
+    def cancel(self):
+        canceller=self.canceller
+        if canceller is None:
+            return
+        
+        self.canceller=None
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+        return Task(canceller(self,None),self.client.loop)
+    
+    def __repr__(self):
+        result = [
+            '<', self.__class__.__name__,
+            ' pages=', repr(len(self.pages)),
+            ', page=', repr(self.page),
+            ', channel=', repr(self.channel),
+            ', task_flag='
+                ]
+        
+        task_flag=self.task_flag
+        result.append(repr(task_flag))
+        result.append(' (')
+        
+        task_flag_name = (
+            'GUI_STATE_READY',
+            'GUI_STATE_SWITCHING_PAGE',
+            'GUI_STATE_CANCELLING',
+            'GUI_STATE_CANCELLED',
+            'GUI_STATE_SWITCHING_CTX',
+                )[task_flag]
+        
+        result.append(task_flag_name)
+        result.append(')>')
+        
+        return ''.join(result)
+
+
+class NewGenerationWaitAndContinue(object):
+    __slots__=('canceller', 'case', 'event', 'future', 'target', 'timeouter')
+    def __init__(self, future, case, target, event, timeout):
+        self.canceller=self.__class__._canceller
+        self.future=future
+        self.case=case
+        self.event=event
+        self.target=target
+        self.timeouter=Timeouter(future._loop,self,timeout)
+        event.append(self,target)
+        
+    async def __call__(self, *args):
+        result = self.case(*args)
+        if type(result) is bool:
+            if not result:
+                return
+                
+            if len(args)==1:
+                self.future.set_result_if_pending(args[0],)
+            else:
+                self.future.set_result_if_pending(args,)
+        
+        else:
+            args=(*args,result,)
+            self.future.set_result_if_pending(args,)
+        
+        self.cancel()
+        
+    async def _canceller(self,exception):
+        self.event.remove(self,self.target)
+        if exception is None:
+            self.future.set_result_if_pending(None)
+            return
+        
+        self.future.set_exception_if_pending(exception)
+        
+        if not isinstance(exception,TimeoutError):
+            return
+
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+    def cancel(self):
+        canceller=self.canceller
+        if canceller is None:
+            return
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+        return Task(canceller(self,None),self.future._loop)
+    
+    
+def new_generation_wait_for_reaction(client,message,case,timeout):
+    future=Future(client.loop)
+    NewGenerationWaitAndContinue(future,case,message,client.events.reaction_add,timeout)
+    return future
+
+def new_generation_wait_for_message(client,channel,case,timeout):
+    future=Future(client.loop)
+    NewGenerationWaitAndContinue(future,case,channel,client.events.message_create,timeout)
+    return future
+
+def test_new_generation_match(*args):
+    for arg in args:
+        if arg is not None:
+            return False
+    
+    return True
+
+class test_new_generation_case_message_delete(object):
+    __slots__=('message')
+    def __new__(cls,message):
+        self=object.__new__(cls)
+        self.message=message
+        return self
+        
+    def __call__(self,message):
+        return (self.message is message)
+    
+def test_new_generation_wait_for_message_delete(client,message,timeout):
+    future=Future(client.loop)
+    case=test_new_generation_case_message_delete(message)
+    NewGenerationWaitAndContinue(future,case,message.channel,client.events.message_delete,timeout)
+    return future
+
+class MessageDeleteAltPatcher(EventHandlerBase):
+    __slots__=('original', 'waitfors',)
+    __event_name__='message_delete'
+    
+    @classmethod
+    def apply(cls,client):
+        actual=client.events.message_delete
+        if actual is EventDescriptor.default_event:
+            self=object.__new__(cls)
+            self.original=None
+            self.waitfors=WeakKeyDictionary()
+            client.events.message_create=self
+            return
+        
+        if hasattr(actual,'append') and hasattr(actual,'remove'):
+            return
+        
+        self=object.__new__(cls)
+        self.original=actual
+        self.waitfors=WeakKeyDictionary()
+        client.events.message_create=self
+        return
+        
+    @classmethod
+    def detach(cls,client):
+        actual=client.events.message_delete
+        if type(actual) is not cls:
+            return
+            
+        original=actual.original
+        if original is None:
+            del client.events.message_delete
+            return
+        
+        client.events.message_delete=original
+            
+    
+    append=CommandProcesser.append
+    remove=CommandProcesser.remove
+    
+    async def __call__(self,client,message):
+        try:
+            event=self.waitfors[message.channel]
+        except KeyError:
+            return
+        
+        if type(event) is asynclist:
+            for event in event:
+                Task(event(message),client.loop)
+        else:
+            Task(event(message),client.loop)
+        
+        original=self.original
+        if original is None:
+            return
+        
+        await original(client,message)
+        
+@commands
+async def test_new_generation(client, message, content):
+    if not client.is_owner(message.author):
+        return
+    
+    channel=message.channel
+    user=message.author
+    
+    # Test 1
+    while True:
+        pagination=None
+        pages=[Embed(f'Page 1')]
+        
+        try:
+            pagination = await NewGenerationPagination(client,channel,pages)
+        except DiscordException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,'Test 1 failed:\n\n',file=buffer)
+                content=buffer.getvalue()
+            break
+        
+        await sleep(0.1,client.loop)
+        
+        reaction_amount=len(pagination.message.reactions)
+        if reaction_amount!=1:
+            content = f'Test 1 failed:\nExpected 1 reaction on the pagination, found {reaction_amount}.'
+            break
+        
+        content = 'Test 1 passed.'
+        break
+        
+    await client.message_create(channel,content)
+    
+    if pagination is not None:
+        try:
+            await client.message_delete(pagination.message)
+        except DiscordException:
+            pass
+    
+    # Test 2
+    while True:
+        pagination=None
+        pages=[]
+        for index in range(1,6):
+            pages.append(Embed(f'Page {index}'))
+        
+        try:
+            pagination = await NewGenerationPagination(client,message.channel,pages)
+        except DiscordException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,'Test 2 failed:\n\n',file=buffer)
+                content=buffer.getvalue()
+            break
+        
+        await sleep(0.1,client.loop)
+        
+        reaction_amount=len(pagination.message.reactions)
+        if reaction_amount!=5:
+            content = f'Test 2 failed:\nExpected 5 reaction on the pagination, found {reaction_amount}.'
+            break
+            
+        content = 'Test 2 passed.'
+        break
+        
+    await client.message_create(message.channel,content)
+    
+    if pagination is not None:
+        try:
+            await client.message_delete(pagination.message)
+        except DiscordException:
+            pass
+    
+    # Test 3
+    while True:
+        pagination=None
+        
+        pages=[]
+        for index in range(1,6):
+            pages.append(Embed(f'Page {index}'))
+        
+        try:
+            pagination = await NewGenerationPagination(client,message.channel,pages)
+        except DiscordException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,'Test 3 failed:\n\n',file=buffer)
+                content=buffer.getvalue()
+            break
+            
+        await sleep(0.1,client.loop)
+        
+        pagination.message.reactions[NewGenerationPagination.RIGHT].add(user)
+        try:
+            await pagination(NewGenerationPagination.RIGHT,user)
+        except DiscordException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,'Test 3 failed:\n\n',file=buffer)
+                content=buffer.getvalue()
+            break
+        
+        await sleep(0.1,client.loop)
+        
+        page=pagination.page
+        if page!=1:
+            content=f'Test 3 failed:\nExpected to be on page 1, but we are on page {page}'
+            break
+        
+        embeds=pagination.message.embeds
+        if embeds is None:
+            content=f'Test 3 failed:\nExpected the page to have embed `Page 2`, but it does not even has any.'
+            break
+            
+        if pages[1]!=embeds[0]:
+            content=f'Test 3 failed:\nExpected the pagination to have `Page 2`, but has something else.'
+            break
+        
+        content='Test 3 passed.'
+        break
+    
+    await client.message_create(message.channel,content)
+    
+    if pagination is not None:
+        try:
+            await client.message_delete(pagination.message)
+        except DiscordException:
+            pass
+    
+    # Test 4
+    MessageDeleteAltPatcher.apply(client)
+    while True:
+        pagination=None
+        
+        pages=[]
+        for index in range(1,3):
+            pages.append(Embed(f'Page {index}'))
+        
+        try:
+            pagination = await NewGenerationPagination(client,channel,pages)
+        except DiscordException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,'Test 4 failed:\n\n',file=buffer)
+                content=buffer.getvalue()
+            break
+        
+        await sleep(0.4,client.loop)
+        
+        future=test_new_generation_wait_for_message_delete(client,pagination.message,2.0)
+        
+        pagination.message.reactions[NewGenerationPagination.CANCEL].add(user)
+        try:
+            await pagination(NewGenerationPagination.CANCEL,user)
+        except DiscordException as err:
+            future.cancel()
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,'Test 3 failed:\n\n',file=buffer)
+                content=buffer.getvalue()
+            break
+        
+        try:
+            await future
+        except TimeoutError:
+            content = f'Test 4 failed:\nExpected message deletetion but timeouted after 2s.'
+            break
+            
+        content = 'Test 4 passed.'
+        break
+    MessageDeleteAltPatcher.detach(client)
+    
+    await client.message_create(channel,content)
+    
+    if pagination is not None:
+        try:
+            await client.message_delete(pagination.message)
+        except DiscordException:
+            pass
+    
+    # Test 5
+    while True:
+        pagination=None
+        
+        pages=[]
+        for index in range(1,3):
+            pages.append(Embed(f'Page {index}'))
+        
+        try:
+            pagination = await NewGenerationPagination(client,channel,pages,timeout=0.5)
+        except DiscordException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,'Test 5 failed:\n\n',file=buffer)
+                content=buffer.getvalue()
+            break
+        
+        await sleep(3.0,client.loop)
+        
+        reaction_amount=len(pagination.message.reactions)
+        if reaction_amount!=0:
+            content = f'Test 5 failed:\nExpected 0 reaction on the pagination, found {reaction_amount}.'
+            break
+            
+        content = 'Test 5 passed.'
+        break
+    
+    await client.message_create(channel,content)
+    
+    if pagination is not None:
+        try:
+            await client.message_delete(pagination.message)
+        except DiscordException:
+            pass
+    
+    # Test 6
+    while True:
+        future=new_generation_wait_for_message(client,channel,test_new_generation_match,0.3)
+        if __debug__:
+            future.__silence__()
+        
+        waitfors=client.events.message_create.waitfors
+        try:
+            event=waitfors[channel]
+        except KeyError:
+            content='Test 6 failed:\nWaitfor event is added, but not found.\n(None at channel)'
+            break
+            
+        if type(event) is asynclist:
+            found=False
+            for event in event:
+                if type(event) is NewGenerationWaitAndContinue:
+                    found=True
+                    break
+            
+            if not found:
+                content='Test 6 failed:\nWaitfor event is added, but not found.\n(Expects more, but no correct)'
+                break
+        else:
+            if type(event) is not NewGenerationWaitAndContinue:
+                content='Test 6 failed:\nWaitfor event is added, but not found.\n(1:1 no correct)'
+                break
+        
+        await event(None)
+        await sleep(0.1,client.loop)
+        
+        try:
+            await future
+        except TimeoutError:
+            content = f'Test 6 failed:\nExpected `None` result, received `TimeoutError`.'
+            break
+    
+        await sleep(0.1,client.loop)
+
+        try:
+            event=waitfors[channel]
+        except KeyError:
+            pass
+        else:
+            if type(event) is asynclist:
+                found=False
+                for event in event:
+                    if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                        found=True
+                        break
+                
+                if found:
+                    content='Test 6 failed:\nWaitfor event should be removed, but still found.\n(Expects more and matched)'
+                    break
+            else:
+                if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                    content='Test 6 failed:\nWaitfor event should be removed, but still found.\n(1:1 match).'
+                    break
+        
+        content = 'Test 6 passed'
+        break
+    
+    await client.message_create(channel,content)
+    
+    # Test 7
+    while True:
+        future=new_generation_wait_for_message(client,channel,test_new_generation_match,0.1)
+        if __debug__:
+            future.__silence__()
+            
+        waitfors=client.events.message_create.waitfors
+        try:
+            event=waitfors[channel]
+        except KeyError:
+            content='Test 7 failed:\nWaitfor event is added, but not found.\n(None at channel)'
+            break
+            
+        if type(event) is asynclist:
+            found=False
+            for event in event:
+                if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                    found=True
+                    break
+            
+            if not found:
+                content='Test 7 failed:\nWaitfor event is added, but not found.\n(Excepts more, but not correct)'
+                break
+        else:
+            if not (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                content='Test 7 failed:\nWaitfor event is added, but not found.\n(1:1 no match)'
+                break
+        
+        await sleep(0.3,client.loop)
+        
+        try:
+            await future
+        except TimeoutError:
+            pass
+        else:
+            content = f'Test 7 failed:\nExpected `TimeoutError` result, received `None`.'
+            break
+    
+        await sleep(0.1,client.loop)
+
+        try:
+            event=waitfors[channel]
+        except KeyError:
+            pass
+        else:
+            if type(event) is asynclist:
+                found=False
+                for event in event:
+                    if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                        found=True
+                        break
+                
+                if found:
+                    content='Test 7 failed:\nWaitfor sould be removed, but still found.\n(Expects more and matched)'
+                    break
+            else:
+                if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                    content='Test 7 failed:\nWaitfor event is removed, but still found.\n(1:1 match)'
+                    break
+        
+        content = 'Test 7 passed.'
+        break
+    
+    await client.message_create(channel,content)
+    
+    # Test 8
+    while True:
+        future=new_generation_wait_for_reaction(client,message,test_new_generation_match,0.3)
+        if __debug__:
+            future.__silence__()
+            
+        waitfors=client.events.reaction_add.waitfors
+        try:
+            event=waitfors[message]
+        except KeyError:
+            content='Test 8 failed:\nWaitfor event is added, but not found.\n(None at channel)'
+            break
+            
+        if type(event) is asynclist:
+            found=False
+            for event in event:
+                if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                    found=True
+                    break
+            
+            if not found:
+                content='Test 8 failed:\nWaitfor event is added, but not found.\n(Expects more, but not correct)'
+                break
+        else:
+            if not (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                content='Test 8 failed:\nWaitfor event is added, but not found.\n(1:1 no match)'
+                break
+    
+        await event(None,None)
+        await sleep(0.1,client.loop)
+        
+        try:
+            await future
+        except TimeoutError:
+            content = f'Test 8 failed:\nExpected `None` result, received `TimeoutError`.'
+            break
+    
+        await sleep(0.1,client.loop)
+
+        try:
+            event=waitfors[message]
+        except KeyError:
+            pass
+        else:
+            if type(event) is asynclist:
+                found=False
+                for event in event:
+                    if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                        found=True
+                        break
+                
+                if found:
+                    content='Test 8 failed:\nWaitfor event is removed, but still found.\n(Expects more and matched)'
+                    break
+            else:
+                if (type(event) is NewGenerationWaitAndContinue) and (event.future is future):
+                    content='Test 8 failed:\nWaitfor event is removed, but still found.\n(1:1 match)'
+                    break
+        
+        content = 'Test 8 passed.'
+        break
+    
+    await client.message_create(channel,content)
+    
+    await client.message_create(channel,'No more tests left.')
+    
+
+@commands
+async def test_remove_embed(client, message, content):
+    message = await client.message_create(message.channel,'content',Embed('Embed'))
+    data={'embed':None}
+    
+    try:
+        await client.http.message_edit(message.channel.id,message.id,data)
+    except DiscordException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,'Test 5 failed:\n\n',file=buffer)
+            content=buffer.getvalue()
+        await client.message_create(message.channel,content)
+
+
 
