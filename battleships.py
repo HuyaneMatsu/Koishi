@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re, random, time
 
-from hata.events import wait_and_continue
+from hata.events import WaitAndContinue
 from hata.others import filter_content,is_user_mention
 from hata.futures import Future,CancelledError,FutureWM,future_or_timeout,sleep,Task
 from hata.emoji import BUILTIN_EMOJIS
@@ -101,15 +101,14 @@ POS_PATTERN_1=re.compile('^([\d]{1,2}|[a-jA-J]{1}) *[/]{0,1} *([\d]{1,2}|[a-jA-J
 
 
 class wait_on_reply(object):
-    __slots__=('cancel', 'guild', 'source', 'target',)
+    __slots__=('guild', 'source', 'target',)
     def __init__(self,guild,source,target):
         self.guild=guild
         self.source=source
         self.target=target
-        self.cancel=type(self)._default_cancel
     
     def __call__(self,message):
-        if message.author is not self.target:
+        if message.author!=self.target:
             return False
         
         content=filter_content(message.content)
@@ -119,16 +118,14 @@ class wait_on_reply(object):
 
         content=content[1]
 
-        if is_user_mention(content) and message.user_mentions:
+        if is_user_mention(content) and (message.user_mentions is not None):
             user=message.user_mentions[0]
         else:
             user=self.guild.get_user(content)
 
-        return (self.source is user)
+        return (self.source==user)
 
-    def _default_cancel(self,wrapper,exception):
-        wrapper.cancel()
-        
+ 
 class active_request(object):
     __slots__=('future', 'hash', 'source', 'target',)
     def __init__(self,source,target):
@@ -199,8 +196,8 @@ async def battle_manager(client,message,target):
         case=wait_on_reply(guild,source,target)
         event=client.events.message_create
         
-        waiter1=wait_and_continue(client,future,case,channel,event,300.)
-        waiter2=wait_and_continue(client,future,case,private,event,300.)
+        waiter1=WaitAndContinue(future,case,channel,event,300.)
+        waiter2=WaitAndContinue(future,case,private,event,300.)
         
         try:
             result=await future
@@ -221,7 +218,9 @@ async def battle_manager(client,message,target):
                 cancel=waiter.cancel
                 if cancel is None:
                     continue
-                Task(cancel(waiter,None,None),client.loop)
+                
+                waiter.cancel=None
+                Task(cancel(waiter,None),client.loop)
 
         try:
             BS_REQUESTERS.remove(source)

@@ -5,7 +5,10 @@ from hata.embed import Embed
 from hata.parsers import eventlist
 from hata.color import Color
 from hata.emoji import BUILTIN_EMOJIS
-from hata.events import waitfor_wrapper, Cooldown, multievent
+from hata.events import Timeouter, Cooldown, GUI_STATE_READY,               \
+    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
+    GUI_STATE_SWITCHING_CTX
+
 from hata.futures import Task
 from hata.exceptions import DiscordException
 
@@ -51,38 +54,46 @@ booru_commands=eventlist()
 class ShuffledShelter(object):
     RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
     
-    __slots__=('cancel', 'channel','task_flag', 'urls', 'pop', 'title',)
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'pop',
+        'task_flag', 'timeouter', 'title', 'urls')
+    
     async def __new__(cls,client,channel,urls,pop,title='Link'):
         self=object.__new__(cls)
+        self.client=client
         self.channel=channel
-        self.cancel=self._cancel
-        self.task_flag=0
+        self.canceller=self.__class__._canceller
+        self.task_flag=GUI_STATE_READY
         self.urls=urls
         self.pop=pop
         self.title=title
+        self.timeouter=None
         
         url=pop_one(urls) if pop else choose(urls)
         embed=Embed(title,color=BOORU_COLOR,url=url)
         embed.add_image(url)
         
         message = await client.message_create(channel,embed=embed)
-
+        self.message=message
+        
         if (len(urls)==(0 if pop else 1)) or (not channel.cached_permissions_for(client).can_add_reactions):
             return
         
         message.weakrefer()
+        
         await client.reaction_add(message,self.RESET)
 
-        waitfor_wrapper(client,self,300.,multievent(client.events.reaction_add,client.events.reaction_delete),message,)
+        self.timeouter=Timeouter(client.loop,self,timeout=300.)
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
         
         return self
     
-    async def __call__(self,wrapper,emoji,user):
-        if user.is_bot or emoji is not self.RESET:
+    async def __call__(self,emoji,user):
+        if user.is_bot or (emoji is not self.RESET):
             return
         
-        client=wrapper.client
-        message=wrapper.target
+        client=self.client
+        message=self.message
         can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
 
         if can_manage_messages:
@@ -97,21 +108,22 @@ class ShuffledShelter(object):
         embed=Embed(self.title,color=BOORU_COLOR,url=url)
         embed.add_image(url)
         
-        self.task_flag=1
+        self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(message,embed=embed)
         except DiscordException:
-            self.task_flag=3
-            return wrapper.cancel()
-
+            self.task_flag=GUI_STATE_CANCELLED
+            self.cancel()
+            return
+            
         if not self.urls:
-            self.task_flag=3
-            return wrapper.cancel()
+            self.task_flag=GUI_STATE_CANCELLED
+            self.cancel()
+            return
         
-        self.task_flag=0
+        self.task_flag=GUI_STATE_READY
 
-        if wrapper.timeout<300.:
-            wrapper.timeout+=20.
+        self.timeouter.timeout+=20.0
             
     @staticmethod
     async def reaction_remove(client,message,emoji,user):
@@ -120,21 +132,49 @@ class ShuffledShelter(object):
         except DiscordException:
             pass
 
-    @staticmethod
-    async def _cancel(self,wrapper,exception):
-        self.task_flag=3
+    async def _canceller(self,exception):
+        client=self.client
+        message=self.message
+        
+        client.events.reaction_add.remove(self,message)
+        client.events.reaction_delete.remove(self,message)
+
+        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+            # the message is not our, we should not do anything with it.
+            return
+        
+        self.task_flag=GUI_STATE_CANCELLED
+        
         if exception is None:
             return
+        
         if isinstance(exception,TimeoutError):
-            client=wrapper.client
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
-                    await client.reaction_clear(wrapper.target)
+                    await client.reaction_clear(message)
                 except DiscordException:
                     pass
+            
             return
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
         #we do nothing
-
+    
+    def cancel(self):
+        canceller=self.canceller
+        if canceller is None:
+            return
+        
+        self.canceller=None
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+        return Task(canceller(self,None),self.client.loop)
+        
 async def answer_booru(client,channel,content,url_base):
     if content:
         content=content.split()

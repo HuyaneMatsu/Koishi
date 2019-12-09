@@ -8,7 +8,9 @@ from hata.channel import message_at_index, ChannelText, ChannelCategory, CHANNEL
 from hata.prettyprint import pchunkify
 from hata.others import elapsed_time,Status,AuditLogEvent,cchunkify,Status
 from hata.exceptions import DiscordException
-from hata.events import Pagination,waitfor_wrapper
+from hata.events import Pagination, Timeouter, GUI_STATE_READY,             \
+    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
+    GUI_STATE_SWITCHING_CTX
 from hata.events_compiler import ContentParser
 from hata.embed import Embed
 from hata.emoji import BUILTIN_EMOJIS
@@ -729,65 +731,97 @@ class embedination_rr(object):
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
     RIGHT2  = BUILTIN_EMOJIS['fast_forward']
     RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
-    CROSS   = BUILTIN_EMOJIS['x']
-    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET,CROSS)
+    CANCEL  = BUILTIN_EMOJIS['x']
+    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET,CANCEL)
     
-    __slots__=('cancel', 'channel', 'page', 'pages', 'task_flag',)
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages',
+        'task_flag', 'timeouter')
+
     async def __new__(cls,client,channel,pages):
         self=object.__new__(cls)
+        self.client=client
+        self.channel=channel
         self.pages=pages
         self.page=0
-        self.channel=channel
-        self.cancel=cls._cancel
-        self.task_flag=0
+        self.canceller=cls._canceller
+        self.task_flag=GUI_STATE_READY
+        self.timeouter=None
         
-        message = await client.message_create(self.channel,embed=self.pages[0])
+        try:
+            message = await client.message_create(self.channel,embed=self.pages[0])
+        except DiscordException:
+            self.message=None
+            raise
+        
+        self.message=message
+
+        if not channel.cached_permissions_for(client).can_add_reactions:
+            return self
+        
         message.weakrefer()
         
         if len(self.pages)>1:
             for emoji in self.EMOJIS:
                 await client.reaction_add(message,emoji)
         else:
-            await client.reaction_add(message,self.CROSS)
-
-        waitfor_wrapper(client,self,150.,client.events.reaction_add,message)
+            await client.reaction_add(message,self.CANCEL)
+        
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
+        self.timeouter=Timeouter(client.loop,self,timeout=300.)
         return self
     
-    async def __call__(self,wrapper,emoji,user):
-        if user.is_bot:
+    async def __call__(self,emoji,user):
+        if user.is_bot or (emoji not in self.EMOJIS):
             return
         
-        client=wrapper.client
-        message=wrapper.target
+        client=self.client
+        message=self.message
+        
+        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
+        
+        if can_manage_messages:
+            if not message.did_react(emoji,user):
+                return
+            Task(self.reaction_remove(client,message,emoji,user),client.loop)
+        
+        task_flag=self.task_flag
+        if task_flag!=GUI_STATE_READY:
+            if task_flag==GUI_STATE_SWITCHING_PAGE:
+                if emoji is self.CANCEL:
+                    self.task_flag=GUI_STATE_CANCELLING
+                return
 
-        if self.task_flag:
-            if self.task_flag==1:
-                if emoji is self.CROSS:
-                    self.task_flag=2
-                elif emoji in self.EMOJIS:
-                    Task(self.reaction_remove(client,message,emoji,user),client.loop)
+            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
             return
         
         while True:
             if emoji is self.LEFT:
                 page=self.page-1
                 break
+                
             if emoji is self.RIGHT:
                 page=self.page+1
                 break
+                
             if emoji is self.RESET:
                 page=0
                 break
-            if emoji is self.CROSS:
-                self.task_flag=3
+                
+            if emoji is self.CANCEL:
+                self.task_flag=GUI_STATE_CANCELLED
                 try:
                     await client.message_delete(message)
                 except DiscordException:
                     pass
-                return wrapper.cancel()
+                
+                self.cancel()
+                return
+            
             if emoji is self.LEFT2:
                 page=self.page-10
                 break
+                
             if emoji is self.RIGHT2:
                 page=self.page+10
                 break
@@ -805,25 +839,28 @@ class embedination_rr(object):
             return
 
         self.page=page
-        self.task_flag=1
+        self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(message,embed=self.pages[page])
         except DiscordException:
-            self.task_flag=3
-            return wrapper.cancel()
-        else:
-            if self.task_flag==2:
-                self.task_flag=3
-                try:
-                    await client.message_delete(message)
-                except DiscordException:
-                    pass
-                return wrapper.cancel()
-            else:
-                self.task_flag=0
+            self.task_flag=GUI_STATE_CANCELLED
+            self.cancel()
+            return
 
-        if wrapper.timeout<150.:
-            wrapper.timeout+=10.
+        if self.task_flag==GUI_STATE_CANCELLING:
+            self.task_flag=GUI_STATE_CANCELLED
+            try:
+                await client.message_delete(message)
+            except DiscordException:
+                pass
+            self.cancel()
+            return
+        
+        self.task_flag=GUI_STATE_READY
+        
+        timeouter=self.timeouter
+        if timeouter.timeout<150.:
+            timeouter.timeout+=10.
 
     @staticmethod
     async def reaction_remove(client,message,emoji,user):
@@ -832,18 +869,49 @@ class embedination_rr(object):
         except DiscordException:
             pass
         
-    async def _cancel(self,wrapper,exception):
-        self.task_flag=3
+    @staticmethod
+    async def _canceller(self,exception,):
+        client=self.client
+        message=self.message
+        
+        client.events.reaction_add.remove(self,message)
+        client.events.reaction_delete.remove(self,message)
+
+        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+            # the message is not our, we should not do anything with it.
+            return
+        
+        self.task_flag=GUI_STATE_CANCELLED
+        
         if exception is None:
             return
+        
         if isinstance(exception,TimeoutError):
-            if self.channel.guild is not None:
+            if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
-                    await wrapper.client.reaction_clear(wrapper.target)
+                    await client.reaction_clear(message)
                 except DiscordException:
                     pass
             return
-
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        #we do nothing
+    
+    def cancel(self):
+        canceller=self.canceller
+        if canceller is None:
+            return
+        
+        self.canceller=None
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+        return Task(canceller(self,None),self.client.loop)
+    
 @infos
 async def roles(client,message,content):
     if message.guild is None:

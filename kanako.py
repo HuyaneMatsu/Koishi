@@ -8,11 +8,14 @@ from PIL.ImageDraw import ImageDraw
 from PIL.ImageFont import truetype
 
 from hata.events_compiler import ContentParser
-from hata.futures import Future,CancelledError,InvalidStateError,Task
+from hata.futures import CancelledError, InvalidStateError, Task, sleep
 from hata.dereaddons_local import any_to_any, methodize
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS
-from hata.events import waitfor_wrapper,multievent
+from hata.events import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE,          \
+    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX,     \
+    Timeouter
+
 from hata.color import Color
 from hata.embed import Embed
 from hata.ios import ReuBytesIO
@@ -129,14 +132,14 @@ class kanako_game(object):
         self.possibilities=possibilities
         
         self.running=False
-        self.waiter=Future(client.loop)
+        self.waiter=sleep(300.,client.loop)
 
         Task(self.start_waiting(),client.loop)
         
     async def start_waiting(self):
     
         try:
-            await self.waiter.sleep(300.)
+            await self.waiter
         except CancelledError:
             pass
         except InterruptedError:
@@ -266,15 +269,17 @@ class kanako_game(object):
                 return self.cancel()
             
             circle_start=monotonic()
-            self.waiter.clear()
+            waiter=sleep(time_till_notify,client.loop)
+            self.waiter=waiter
             try:
-                await self.waiter.sleep(time_till_notify)
+                await waiter
                 Task(self.send_or_except(
                     Embed('Hurry! Only 10 seconds left!',
                         '\n'.join([user.full_name for user in self.users if user.id not in answers]),
                         COLOR)),client.loop)
-                self.waiter.clear()
-                await self.waiter.sleep(10.)
+                waiter=sleep(time_till_notify,client.loop)
+                self.waiter=waiter
+                await waiter
                 self.calculate_leavers()
             except CancelledError:
                 pass
@@ -642,50 +647,81 @@ class embedination(object):
     RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
     EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET)
     
-    __slots__=('cancel', 'channel', 'page', 'pages', 'task',)
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages',
+        'task_flag', 'timeouter')
+    
     async def __new__(cls,client,channel,pages):
         self=object.__new__(cls)
+        self.client=client
+        self.channel=channel
         self.pages=pages
         self.page=0
-        self.channel=channel
-        self.cancel=type(self)._cancel
-        self.task=None
-
-        message = await client.message_create(self.channel,embed=self.pages[0])
+        self.canceller=cls._canceller
+        self.task_flag=GUI_STATE_READY
+        self.timeouter=None
+        
+        try:
+            message = await client.message_create(self.channel,embed=self.pages[0])
+        except DiscordException:
+            self.message=None
+            raise
+        
+        self.message=message
+        
+        if not channel.cached_permissions_for(client).can_add_reactions:
+            return self
+        
         message.weakrefer()
         
         if len(self.pages)>1:
             for emoji in self.EMOJIS:
                 await client.reaction_add(message,emoji)
 
-        events=multievent(client.events.reaction_add,
-                          client.events.reaction_delete)
         
-        waitfor_wrapper(client,self,150.,events,message)
-
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
+        self.timeouter=Timeouter(client.loop,self,timeout=150)
         return self
     
-    async def __call__(self,wrapper,emoji,user):
-        if self.task is not None or user.is_bot:
+    async def __call__(self,emoji,user):
+        if user.is_bot or (emoji not in self.EMOJIS):
             return
-        client=wrapper.client
-        message=wrapper.target
+        
+        client=self.client
+        message=self.message
+        
+        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
+        if can_manage_messages:
+            if not message.did_react(emoji,user):
+                return
+            Task(self.reaction_remove(client,message,emoji,user),client.loop)
+        
+        task_flag=self.task_flag
+        if task_flag!=GUI_STATE_READY:
+            # ignore GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
+            return
+        
         while True:
             if emoji is self.LEFT:
                 page=self.page-1
                 break
+                
             if emoji is self.RIGHT:
                 page=self.page+1
                 break
+                
             if emoji is self.RESET:
                 page=0
                 break
+                
             if emoji is self.LEFT2:
                 page=self.page-10
                 break
+                
             if emoji is self.RIGHT2:
                 page=self.page+10
                 break
+                
             return
         
         if page<0:
@@ -697,29 +733,66 @@ class embedination(object):
             return
 
         self.page=page
-
-        wrapper.timeout+=10.
-
+        self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
-            self.task = Task(client.message_edit(message,embed=self.pages[page]),client.loop)
-            await self.task
+            await client.message_edit(message,embed=self.pages[page])
+        except DiscordException:
+            self.task_flag=GUI_STATE_CANCELLED
+            self.cancel()
+            return
+        
+        self.task_flag=GUI_STATE_READY
+        
+        self.timeouter.timeout+=10.
+    
+    @staticmethod
+    async def reaction_remove(client,message,emoji,user):
+        try:
+            await client.reaction_delete(message,emoji,user)
         except DiscordException:
             pass
-        finally:
-            self.task=None
     
-    async def _cancel(self,wrapper,exception):
-        client=wrapper.client
+    async def _canceller(self,exception,):
+        client=self.client
+        message=self.message
+        
+        client.events.reaction_add.remove(self,message)
+        client.events.reaction_delete.remove(self,message)
+        
+        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+            # the message is not our, we should not do anything with it.
+            return
+
+        self.task_flag=GUI_STATE_CANCELLED
+        
         if exception is None:
             return
+        
         if isinstance(exception,TimeoutError):
-            self.pages=None
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
-                    self.task=Task(client.reaction_clear(wrapper.target),client.loop)
-                    await self.task
+                    await client.reaction_clear(message)
                 except DiscordException:
                     pass
+            return
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        #we do nothing
+    
+    def cancel(self):
+        canceller=self.canceller
+        if canceller is None:
+            return
+        
+        self.canceller=None
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+        return Task(canceller(self,None),self.client.loop)
         
 del BUILTIN_EMOJIS
 del Color

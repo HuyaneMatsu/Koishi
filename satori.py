@@ -3,12 +3,13 @@ from random import random
 
 from bs4 import BeautifulSoup
 
-from hata import eventlist,DiscordException,sleep,Embed,Color,BUILTIN_EMOJIS,Task
+from hata import eventlist, DiscordException, sleep, Embed, Color, Task,    \
+    BUILTIN_EMOJIS
 from hata.py_hdrs import METH_GET
 from hata.others import from_json
-from hata.events import (waitfor_wrapper, multievent, Pagination,
-    GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING,
-    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX)
+from hata.events import multievent, Pagination, Timeouter, GUI_STATE_READY, \
+    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
+    GUI_STATE_SWITCHING_CTX
 
 
 Koishi=NotImplemented
@@ -101,16 +102,31 @@ class TouhouWikiChooseMenu(object):
     SELECT  = BUILTIN_EMOJIS['ok']
     CANCEL  = BUILTIN_EMOJIS['x']
     EMOJIS  = (UP,DOWN,SELECT,CANCEL)
+    
+    __slots__ = ('canceller', 'channel', 'client', 'embed', 'message', 'page',
+        'results', 'task_flag', 'timeouter')
+    
     async def __new__(cls,client,channel,search_for,results):
         self=object.__new__(cls)
-        self.page=0
+        self.client=client
         self.channel=channel
-        self.cancel=cls._cancel
-        self.task_flag=GUI_STATE_READY
         self.results=results
+        
+        self.page=0
+        self.canceller=cls._canceller
+        self.task_flag=GUI_STATE_READY
+        self.timeouter=None
+        
         self.embed=Embed(title=f'Search results for `{search_for}`',color=WIKI_COLOR)
         
-        message = await client.message_create(channel,embed=self.render_embed())
+        try:
+            message = await client.message_create(channel,embed=self.render_embed())
+        except DiscordException:
+            self.message=None
+            raise
+        
+        self.message=message
+        
         if not channel.cached_permissions_for(client).can_add_reactions:
             return self
         
@@ -118,7 +134,9 @@ class TouhouWikiChooseMenu(object):
         for emoji in self.EMOJIS:
             await client.reaction_add(message,emoji)
         
-        waitfor_wrapper(client,self,300.,multievent(client.events.reaction_add,client.events.reaction_delete),message,)
+        self.timeouter=Timeouter(client.loop,self,timeout=300.0)
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
         return self
     
     def render_embed(self):
@@ -142,12 +160,12 @@ class TouhouWikiChooseMenu(object):
         embed.description=''.join(lines)
         return embed
     
-    async def __call__(self,wrapper,emoji,user):
+    async def __call__(self,emoji,user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         
-        client=wrapper.client
-        message=wrapper.target
+        client=self.client
+        message=self.message
         can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
         
         if can_manage_messages:
@@ -180,7 +198,8 @@ class TouhouWikiChooseMenu(object):
                     await client.message_delete(message)
                 except DiscordException:
                     pass
-                return wrapper.cancel()
+                self.cancel()
+                return
             
             if emoji is self.SELECT:
                 self.task_flag=GUI_STATE_SWITCHING_CTX
@@ -190,7 +209,7 @@ class TouhouWikiChooseMenu(object):
                     for emoji in self.EMOJIS:
                         await client.reaction_delete_own(message,emoji)
                 
-                wrapper.cancel()
+                self.cancel()
                 pages = await download_wiki_page(client,self.results[self.page])
                 await client.message_edit(message,embed=pages[0])
                 await Pagination(client,message.channel,pages,timeout=600.0,message=message)
@@ -212,21 +231,24 @@ class TouhouWikiChooseMenu(object):
             await client.message_edit(message,embed=self.render_embed())
         except DiscordException:
             self.task_flag=GUI_STATE_CANCELLED
-            return wrapper.cancel()
-        else:
-            if self.task_flag==GUI_STATE_CANCELLING:
-                self.task_flag=GUI_STATE_CANCELLED
-                if can_manage_messages:
-                    try:
-                        await client.message_delete(message)
-                    except DiscordException:
-                        pass
-                return wrapper.cancel()
-            else:
-                self.task_flag=GUI_STATE_READY
+            self.cancel()
+            return
+
+        if self.task_flag==GUI_STATE_CANCELLING:
+            self.task_flag=GUI_STATE_CANCELLED
+            if can_manage_messages:
+                try:
+                    await client.message_delete(message)
+                except DiscordException:
+                    pass
+            self.cancel()
+            return
         
-        if wrapper.timeout<240.:
-            wrapper.timeout+=30.
+        self.task_flag=GUI_STATE_READY
+        
+        timeouter=self.timeouter
+        if timeouter.timeout<240.:
+            timeouter.timeout+=30.
     
     @staticmethod
     async def reaction_remove(client,message,emoji,user):
@@ -235,25 +257,47 @@ class TouhouWikiChooseMenu(object):
         except DiscordException:
             pass
     
-    @staticmethod
-    async def _cancel(self,wrapper,exception):
-        if self.task_flag==GUI_STATE_SWITCHING_CTX:
-            #we gave the message to a different object
-            #we do nothing
-            return
+    async def _canceller(self,exception,):
+        client=self.client
+        message=self.message
         
+        client.events.reaction_add.remove(self,message)
+        client.events.reaction_delete.remove(self,message)
+        
+        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+            # the message is not our, we should not do anything with it.
+            return
+
         self.task_flag=GUI_STATE_CANCELLED
+        
         if exception is None:
             return
+        
         if isinstance(exception,TimeoutError):
-            client=wrapper.client
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
-                    await client.reaction_clear(wrapper.target)
+                    await client.reaction_clear(message)
                 except DiscordException:
                     pass
             return
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
         #we do nothing
+    
+    def cancel(self):
+        canceller=self.canceller
+        if canceller is None:
+            return
+        
+        self.canceller=None
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+        return Task(canceller(self,None),self.client.loop)
 
 async def download_wiki_page(client,result):
     async with client.http.request_(METH_GET,result[1]) as response:
