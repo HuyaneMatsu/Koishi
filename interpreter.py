@@ -1,19 +1,22 @@
-from collections import deque
-from code import InteractiveConsole
-from hata.embed import Embed
-from hata.futures import render_exc_to_list
-from hata.events import Pagination
-from hata.dereaddons_local import alchemy_incendiary
-from threading import Lock
+from threading import Lock as sync_Lock
 import re
 
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+from collections import deque
+from hata.embed import Embed
+from hata.futures import Lock, Task, _ignore_frame
+from hata.events import Pagination, wait_for_message
+from hata.dereaddons_local import alchemy_incendiary
+from hata.client_core import KOKORO
+
+_ignore_frame(__spec__.origin, '__call__',
+    'await client.loop.run_in_executor(alchemy_incendiary(exec,(code_object,self.locals),),)')
+
 
 #emulates a file
 class InterpreterPrinter(object):
     __slots__=('lock','buffer',)
     def __init__(self):
-        self.lock=Lock()
+        self.lock=sync_Lock()
         self.buffer=deque()
 
     def write(self,value):
@@ -118,6 +121,55 @@ class InterpreterPrinter(object):
 
         return ''.join(result)
 
+class InterpreterInputter(object):
+    def __init__(self,owner):
+        self.owner=owner
+        self.client=None
+        self.channel=None
+        
+    def __call__(self,promt=None):
+        client=self.client
+        channel=self.channel
+        if (client is None) or (channel is None):
+            raise RuntimeError(f'{self.__class__.__name__} has no linked `.client` or `.channel`')
+        
+        printer=self.owner.printer
+        if promt is not None:
+            if not isinstance(promt,str):
+                promt=str(promt)
+            printer.write(promt)
+        
+        if printer:
+            pages=[]
+            while printer:
+                pages.append(Embed('Waiting for input (timeout 5 min):',printer.get_value()))
+
+            amount=len(pages)
+            for index,embed in enumerate(pages,1):
+                embed.add_footer(f'page {index}/{amount}')
+
+        else:
+            pages=[Embed('Waiting for input (timeout 5 min):')]
+        
+        with client.loop.enter():
+            task=Task(Pagination(client,channel,pages,300.),client.loop)
+            future=wait_for_message(client,channel,self.check_is_owner,300.)
+        
+        task.syncwrap().wait()
+        try:
+            message=future.syncwrap().wait()
+        except TimeoutError:
+            raise SystemExit from None
+        
+        return message.content
+    
+    def set(self,client,channel):
+        self.client=client
+        self.channel=channel
+    
+    def check_is_owner(self,message):
+        return self.client.is_owner(message.author)
+    
 LINE_START=re.compile('[ \t]*')
 BLOCK_START=re.compile('(```|`|)(.*?)?(```|`|)')
 PYTHON_RP=re.compile('(?:python|py|)[ \t]*',re.I)
@@ -197,65 +249,72 @@ def parse_content(content1,content2):
 
     if not lines:
         return 'No code to execute.',True
-
-    parts=['try:']
-
-    ln=len(lines)
-    while index<ln:
-        line=lines[index]
-        parts.append('\n  ')
-        parts.append(line)
-        index+=1
-
-    parts.append('\nexcept BaseException:\n  import traceback\n  traceback.print_exc(file=print)\n')
-
-    return ''.join(parts),False
+    
+    return lines,False
 
 class Interpreter(object):
-    __slots__=('console','printer',)
+    __slots__=('inputter', 'locals', 'lock', 'printer',)
     def __init__(self,locals_):
+        self.lock=Lock(KOKORO)
+        
         printer=InterpreterPrinter()
         locals_['print']=printer
         self.printer=printer
-        self.console=InteractiveConsole(locals_)
-
+        
+        inputter=InterpreterInputter(self)
+        locals_['input']=inputter
+        self.inputter=inputter
+        
+        self.locals=locals_
+        
     async def __call__(self,client,message,content):
         if not client.is_owner(message.author):
             await client.message_create(message.channel,'You are not my boss!')
             return
-
-        code_block,except_=parse_content(content,message.content)
-        if except_:
-            await client.message_create(message.channel,embed=Embed('Parsing error',code_block))
+        
+        if self.lock.locked():
+            await client.message_create(message.channel,'An execution is already running.')
             return
+        
+        self.inputter.set(client,message.channel)
+        
+        async with self.lock:
+            result,except_=parse_content(content,message.content)
+            if except_:
+                await client.message_create(message.channel,embed=Embed('Parsing error',result))
+                return
+    
+            printer=self.printer
+    
+            try:
+                code_object=compile('\n'.join(result),'online_interpreter','exec')
+            except SyntaxError as err:
+                printer.write(f'{err.__class__.__name__} at line {err.lineno}: {err.msg}\n{result[err.lineno-1]}\n{" "*(err.offset-1)}^')
+            else:
+                try:
+                    await client.loop.run_in_executor(alchemy_incendiary(exec,(code_object,self.locals),),)
+                except BaseException as err:
+                    await client.loop.render_exc_async(err,file=printer)
+            
+            if printer:
+                pages=[]
+                while printer:
+                    pages.append(Embed('Output:',printer.get_value()))
+    
+                amount=len(pages)
+                for index,embed in enumerate(pages,1):
+                    embed.add_footer(f'page {index}/{amount}')
+    
+            else:
+                pages=[Embed('No output')]
+            await Pagination(client,message.channel,pages,240.)
 
-        printer=self.printer
 
-        try:
-            code_object=compile(code_block,'online_interpreter','exec')
-            await client.loop.run_in_executor(alchemy_incendiary(self.console.runcode,(code_object,),),)
-        except BaseException as err:
-            extracted=[
-                'Exception occured at ',
-                self.__class__.__name__,
-                '.__call__\nTraceback (most recent call last):\n',
-                    ]
-            render_exc_to_list(err,extend=extracted)
-            printer.write(''.join(extracted))
+del re
+del _ignore_frame
 
-        if printer:
-            pages=[]
-            while printer:
-                pages.append(Embed('Output:',printer.get_value()))
 
-            amount=len(pages)
-            for index,embed in enumerate(pages,1):
-                embed.add_footer(f'page {index}/{amount}')
-
-        else:
-            pages=[Embed('No output')]
-        await Pagination(client,message.channel,pages,240.)
-
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
 async def _help_execute(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -280,6 +339,3 @@ async def _help_execute(client,message):
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('execute',_help_execute,KOISHI_HELPER.check_is_owner)
-
-
-del re
