@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+from collections import deque
 
 from hata.embed import Embed
 from hata.parsers import eventlist
@@ -52,10 +53,12 @@ booru_commands=eventlist()
 
 
 class ShuffledShelter(object):
-    RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
+    CYCLE   = BUILTIN_EMOJIS['arrows_counterclockwise']
+    BACK    = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
+    EMOJIS  = (CYCLE, BACK)
     
-    __slots__ = ('canceller', 'channel', 'client', 'message', 'pop',
-        'task_flag', 'timeouter', 'title', 'urls')
+    __slots__ = ('canceller', 'channel', 'client', 'history', 'history_step',
+        'message', 'pop', 'task_flag', 'timeouter', 'title', 'urls')
     
     async def __new__(cls,client,channel,urls,pop,title='Link'):
         self=object.__new__(cls)
@@ -67,8 +70,14 @@ class ShuffledShelter(object):
         self.pop=pop
         self.title=title
         self.timeouter=None
+        history=deque(maxlen=100)
+        self.history=history
+        self.history_step=1
+        
         
         url=pop_one(urls) if pop else choose(urls)
+        history.append(url)
+        
         embed=Embed(title,color=BOORU_COLOR,url=url)
         embed.add_image(url)
         
@@ -80,7 +89,8 @@ class ShuffledShelter(object):
         
         message.weakrefer()
         
-        await client.reaction_add(message,self.RESET)
+        for emoji in self.EMOJIS:
+            await client.reaction_add(message,emoji)
 
         self.timeouter=Timeouter(client.loop,self,timeout=300.)
         client.events.reaction_add.append(self,message)
@@ -89,7 +99,7 @@ class ShuffledShelter(object):
         return self
     
     async def __call__(self,emoji,user):
-        if user.is_bot or (emoji is not self.RESET):
+        if user.is_bot or (emoji not in self.EMOJIS):
             return
         
         client=self.client
@@ -103,8 +113,31 @@ class ShuffledShelter(object):
 
         if self.task_flag:
             return
-
-        url=pop_one(self.urls) if self.pop else choose_notsame(self.urls,message.embeds[0].image.url)
+        
+        while True:
+            if emoji is self.CYCLE:
+                url=pop_one(self.urls) if self.pop else choose_notsame(self.urls,message.embeds[0].image.url)
+                self.history.append(url)
+                self.history_step=1
+                break
+            
+            if emoji is self.BACK:
+                history=self.history
+                history_ln=len(history)
+                if history_ln<2:
+                    return
+                
+                history_step=self.history_step
+                if history_step==history_ln:
+                    history_step=0
+                
+                history_step=history_step+1
+                self.history_step=history_step
+                url=history[history_ln-history_step]
+                break
+                
+            return
+        
         embed=Embed(self.title,color=BOORU_COLOR,url=url)
         embed.add_image(url)
         
