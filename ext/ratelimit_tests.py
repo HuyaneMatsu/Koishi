@@ -1254,104 +1254,453 @@ async def user_achievements(client,access):
 async def ratelimit_test0000(client,message,content):
     if not client.is_owner(message.author):
         return
+    
+    channel=message.channel
+    guild=channel.guild
+    
+    if guild is None:
+        await client.message_create(channel,'Please use this command at a guild.')
+        return
+    
+    category=channel.category
+    if type(category) is not ChannelCategory:
+        await client.message_create(channel,'Please use a channel at a category channel.')
+        return
+    
+    found_channels=[]
+    for channel_ in category.channels:
+        if (type(channel_) is not ChannelText):
+            continue
+        
+        permissions=channel_.cached_permissions_for(client)
+        if not permissions.send_messages:
+            continue
+        
+        if not permissions.add_reactions:
+            continue
+        
+        if channel_.slowmode==0:
+            found_channels.append(channel_)
+            if len(found_channels)==3:
+                break
+            continue
+        
+        if not permissions.can_manage_messages:
+            continue
+        
+        found_channels.append(channel_)
+        if len(found_channels)==3:
+            break
+        
+        continue
+    
+    if len(found_channels)<3:
+        await client.message_create(channel,
+            'I want at least 3 channels at the category, where there are 3 '
+            'channels, where I can send messages without slowmode and also '
+            'add reactions.')
+        return
+    
+    messages=[]
+    for channel_ in found_channels:
+        message_ = await client.message_create(channel_,'test')
+        messages.append(message_)
+    
     loop=client.loop
-    emoji1=BUILTIN_EMOJIS['x']
-    channel1,channel2,channel3=message.channel.category.channels[0:3]
-    message1 = await client.message_create(channel1,'test')
-    message2 = await client.message_create(channel2,'test')
-    message3 = await client.message_create(channel3,'test')
-    Task(reaction_add(client,message1,emoji1),loop)
-    Task(reaction_add(client,message2,emoji1),loop)
-    Task(reaction_add(client,message3,emoji1),loop)
+    emoji=BUILTIN_EMOJIS['x']
+    
+    print('ratelimit_test0000 begins')
+    
+    tasks=[]
+    for message_ in messages:
+        task=Task(reaction_add(client,message_,emoji),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0000 -> .reaction_add;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    for message_ in messages:
+        await client.message_delete(message_)
+    
+    print('ratelimit_test0000 ended')
+    
     #reaction_add is not per guild
 
 @ratelimit_commands
 async def ratelimit_test0001(client,message,content):
     if not client.is_owner(message.author):
         return
+    
+    channel=message.channel
+    guild=channel.guild
+    if guild is None:
+        await client.message_create(channel,
+            'Please use this command at a guild.')
+        return
+    
+    permissions=channel.cached_permissions_for(client)
+    if not permissions.can_add_reactions:
+        await client.message_create(channel,
+            'I should be able to add reactions at the specific channel.')
+        return
+    
+    if channel.slowmode!=0 and (not permissions.can_manage_messages):
+        await client.message_create(channel,
+            'Slowmode is enabled, please turn it off for me.')
+        return
+        
+    messages=[]
+    for _ in range(3):
+        message_ = await client.message_create(channel,'test')
+        messages.append(message_)
+    
     loop=client.loop
-    emoji1=BUILTIN_EMOJIS['x']
-    channel1=message.channel
-    message1 = await client.message_create(channel1,'test')
-    message2 = await client.message_create(channel1,'test')
-    message3 = await client.message_create(channel1,'test')
-    loop=client.loop
-    Task(reaction_add(client,message1,emoji1),loop)
-    Task(reaction_add(client,message2,emoji1),loop)
-    Task(reaction_add(client,message3,emoji1),loop)
+    emoji=BUILTIN_EMOJIS['x']
+    
+    print('ratelimit_test0001 begins')
+    
+    tasks=[]
+    for message_ in messages:
+        task=Task(reaction_add(client,message_,emoji),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0001 -> .reaction_add;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    for message_ in messages:
+        await client.message_delete(message_)
+    
+    print('ratelimit_test0001 ended')
     #reaction_add is per channel -> no pm tests needed
 
 @ratelimit_commands
 async def ratelimit_test0002(client,message,content):
     if not client.is_owner(message.author):
         return
+    
+    channel=message.channel
+    guild=channel.guild
+    if guild is None:
+        await client.message_create(channel,
+            'Please use this command at a guild.')
+        return
+    
+    category=channel.category
+    if (type(category) is not ChannelCategory):
+        await client.message_create(channel,
+            'Please use a channel at a category channel.')
+        return
+    
+    found_channels=[]
+    for channel_ in category.channels:
+        if (type(channel_) is not ChannelText):
+            continue
+        
+        permissions=channel_.cached_permissions_for(client)
+        if not permissions.send_messages:
+            continue
+        
+        if not permissions.add_reactions:
+            continue
+        
+        if channel_.slowmode==0:
+            found_channels.append(channel_)
+            if len(found_channels)==3:
+                break
+            continue
+        
+        if not permissions.can_manage_messages:
+            continue
+        
+        found_channels.append(channel_)
+        if len(found_channels)==3:
+            break
+        continue
+    
+    if len(found_channels)<3:
+        await client.message_create(channel,
+            'I want at least 3 channels at the category, where there are 3 '
+            'channels, where I can send messages without slowmode and also '
+            'add reactions.')
+        return
+    
+    emoji=BUILTIN_EMOJIS['x']
+    
+    messages=[]
+    for channel_ in found_channels:
+        message_ = await client.message_create(channel_,'test')
+        client.reaction_add(message_,emoji)
+        messages.append(message_)
+    
     loop=client.loop
-    emoji1=BUILTIN_EMOJIS['x']
-    channel1,channel2,channel3=message.channel.category.channels[0:3]
-    message1 = await client.message_create(channel1,'test')
-    message2 = await client.message_create(channel2,'test')
-    message3 = await client.message_create(channel3,'test')
-    await client.reaction_add(message1,emoji1)
-    await client.reaction_add(message2,emoji1)
-    await client.reaction_add(message3,emoji1)
-    Task(reaction_delete_own(client,message1,emoji1),loop)
-    Task(reaction_delete_own(client,message2,emoji1),loop)
-    Task(reaction_delete_own(client,message3,emoji1),loop)
+    
+    print('ratelimit_test0002 begins')
+    
+    tasks=[]
+    for message_ in messages:
+        task=Task(reaction_delete_own(client,message_,emoji),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0002 -> .reaction_delete_own;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    for message_ in messages:
+        await client.message_delete(message_)
+    
+    print('ratelimit_test0002 ended')
     #reaction_delete_own not limited per guild
     
 @ratelimit_commands
 async def ratelimit_test0003(client,message,content):
     if not client.is_owner(message.author):
         return
+    
+    channel=message.channel
+
+    permissions=channel.cached_permissions_for(client)
+    if not permissions.can_add_reactions:
+        await client.message_create(channel,
+            'I should be able to add reactions at the specific channel.')
+        return
+    
+    if (channel.slowmode!=0) and (not permissions.can_manage_messages):
+        await client.message_create(channel,
+            'Slowmode is enabled, please turn it off for me.')
+        return
+    
+    emoji=BUILTIN_EMOJIS['x']
+    
+    messages=[]
+    for _ in range(3):
+        message_ = await client.message_create(channel,'test')
+        await client.reaction_add(message_,emoji)
+        messages.append(message_)
+    
     loop=client.loop
-    emoji1=BUILTIN_EMOJIS['x']
-    channel1=message.channel
-    message1 = await client.message_create(channel1,'test')
-    message2 = await client.message_create(channel1,'test')
-    message3 = await client.message_create(channel1,'test')
-    await client.reaction_add(message1,emoji1)
-    await client.reaction_add(message2,emoji1)
-    await client.reaction_add(message3,emoji1)
-    Task(reaction_delete_own(client,message1,emoji1),loop)
-    Task(reaction_delete_own(client,message2,emoji1),loop)
-    Task(reaction_delete_own(client,message3,emoji1),loop)
+    
+    print('ratelimit_test0003 begins')
+    
+    tasks=[]
+    for message_ in messages:
+        task=Task(reaction_delete_own(client,message_,emoji),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0003 -> .reaction_delete_own;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    for message_ in messages:
+        await client.message_delete(message_)
+    
+    print('ratelimit_test0003 ended')
     #reaction_delete_own limited per chanel
 
 @ratelimit_commands
 async def ratelimit_test0004(client,message,content):
     if not client.is_owner(message.author):
         return
-    loop=client.loop
+    
+    channel=message.channel
+
+    permissions=channel.cached_permissions_for(client)
+    if not permissions.can_add_reactions:
+        await client.message_create(channel,
+            'I should be able to add reactions at the specific channel.')
+        return
+    
+    if (channel.slowmode!=0) and (not permissions.can_manage_messages):
+        await client.message_create(channel,
+            'Slowmode is enabled, please turn it off for me.')
+        return
+    
     emoji1=BUILTIN_EMOJIS['x']
     emoji2=BUILTIN_EMOJIS['o']
-    channel1=message.channel
-    message1 = await client.message_create(channel1,'test')
-    message2 = await client.message_create(channel1,'test')
-    await client.reaction_add(message1,emoji1)
-    await client.reaction_add(message2,emoji1)
-    Task(reaction_delete_own(client,message1,emoji1),loop)
-    Task(reaction_delete_own(client,message2,emoji1),loop)
-    Task(reaction_add(client,message1,emoji2),loop)
-    Task(reaction_add(client,message2,emoji2),loop)
+    
+    messages=[]
+    for _ in range(3):
+        message_ = await client.message_create(channel,'test')
+        await client.reaction_add(message_,emoji1)
+        messages.append(message_)
+    
+    loop=client.loop
+    
+    print('ratelimit_test0004 begins')
+    
+    tasks=[]
+    for message_ in messages:
+        task=Task(reaction_delete_own(client,message_,emoji1),loop)
+        tasks.append(task)
+        
+        task = Task(reaction_add(client,message_,emoji2),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0004 -> .{task._coro.__name__};\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    for message_ in messages:
+        await client.message_delete(message_)
+    
+    print('ratelimit_test0004 ended')
     #reaction_delete_own and reaction_add share the same category
 
 @ratelimit_commands
 async def ratelimit_test0005(client,message,content):
     if not client.is_owner(message.author):
         return
+    
+    channel=message.channel
+    guild=channel.guild
+    if guild is None:
+        await client.message_create(message.channel,
+            'Please use this command at a guild.')
+        return
+    
+    category=channel.category
+    if (type(category) is not ChannelCategory):
+        await client.message_create(channel,
+            'Please use this command at a category channel.')
+        return
+    
+    found_channels=[]
+    for channel_ in category.channels:
+        if (type(channel_) is not ChannelText):
+            continue
+        
+        permissions=channel_.cached_permissions_for(client)
+        if not permissions.send_messages:
+            continue
+        
+        if not permissions.add_reactions:
+            continue
+        
+        if channel_.slowmode==0:
+            found_channels.append(channel_)
+            continue
+        
+        if not permissions.can_manage_messages:
+            continue
+        
+        found_channels.append(channel_)
+        continue
+    
+    if len(found_channels)<3:
+        await client.message_create(channel,
+            'I want at least 3 channels at the category, where there are 3 '
+            'channels, where I can send messages without slowmode and also '
+            'add reactions.')
+        return
+        
+    # check for channels
+    other_client=None
+    channels_approved=[]
+    
+    for client_ in guild.clients:
+        if client_ is client:
+            continue
+        
+        channels_approved.clear()
+        for channel_ in found_channels:
+            permissions=channel_.cached_permissions_for(client_)
+            
+            if not permissions.add_reactions:
+                continue
+                
+            if not permissions.can_read_message_history:
+                continue
+            
+            channels_approved.append(channel_)
+            if len(channels_approved)==3:
+                break
+        
+        if len(channels_approved)<3:
+            continue
+        
+        other_client=client_
+        break
+    
+    if other_client is None:
+        await client.message_create(channel,
+            'Did not found an another client at the local channels, who'
+            'could add reactons on my messages.')
+        return
+    
+    emoji=BUILTIN_EMOJIS['x']
+    
+    messages=[]
+    for channel_ in channels_approved:
+        message_ = await client.message_create(channel_,'test')
+        await other_client.reaction_add(message_,emoji)
+        messages.append(message_)
+    
+    print('ratelimit_test0005 begins')
+    
     loop=client.loop
-    client2=other_client(client)
-    emoji1=BUILTIN_EMOJIS['x']
-    channel1,channel2,channel3=message.channel.category.channels[0:3]
-    message1 = await client.message_create(channel1,'test')
-    message2 = await client.message_create(channel2,'test')
-    message3 = await client.message_create(channel3,'test')
-    await client2.reaction_add(message1,emoji1)
-    await client2.reaction_add(message2,emoji1)
-    await client2.reaction_add(message3,emoji1)
-    Task(reaction_delete(client,message1,emoji1,client2),loop)
-    Task(reaction_delete(client,message2,emoji1,client2),loop)
-    Task(reaction_delete(client,message3,emoji1,client2),loop)
+    
+    tasks=[]
+    for message_ in messages:
+        task=Task(reaction_delete(client,message_,emoji,other_client),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0005 -> .reaction_delete;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    for message_ in messages:
+        await client.message_delete(message_)
+    
+    print('ratelimit_test0005 ended')
     #reaction_delete is not guild limited
 
 @ratelimit_commands
@@ -3466,20 +3815,40 @@ async def ratelimit_test0167(client,message,content):
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At ratelimit_test0167 -> .achievement_get_all;\n',file=buffer)
-            text=buffer.getvalue()
-        await client.message_create(message.channel,text)
+            content=buffer.getvalue()
+        await client.message_create(message.channel,content)
         return
     
     if not achievements:
         await client.message_create(message.channel,'The application has no achievement')
+        return
+    
     
     achievement=achievements[0]
     achievement_id=achievement.id
     
     loop=client.loop
     
+    print('ratelimit_test0167 begins')
+    
+    tasks=[]
     for _ in range(6):
-        Task(achievement_get(client,achievement_id),loop)
+        task=Task(achievement_get(client,achievement_id),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0167 -> .achievement_get;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(message.channel,content)
+    
+    print('ratelimit_test0167 ended')
     #achievement_get limited. limit:5, reset:5
     
 @ratelimit_commands
@@ -3492,8 +3861,8 @@ async def ratelimit_test0168(client,message,content):
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At ratelimit_test0168 -> .achievement_get_all;\n',file=buffer)
-            text=buffer.getvalue()
-        await client.message_create(message.channel,text)
+            content=buffer.getvalue()
+        await client.message_create(message.channel,content)
         return
     
     if len(achievements)<3:
@@ -3508,9 +3877,29 @@ async def ratelimit_test0168(client,message,content):
     
     loop=client.loop
     
+    print('ratelimit_test0168 begins')
+    
+    tasks=[]
     for _ in range(4):
-        Task(achievement_get(client,achievement_id_1),loop)
-        Task(achievement_get(client,achievement_id_2),loop)
+        task=Task(achievement_get(client,achievement_id_1),loop)
+        tasks.append(task)
+        
+        task=Task(achievement_get(client,achievement_id_2),loop)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0168 -> .achievement_get;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(message.channel,content)
+    
+    print('ratelimit_test0168 ended')
     #achievement_get limited globally
     
 @ratelimit_commands
@@ -3523,6 +3912,8 @@ async def ratelimit_test0169(client,message,content):
         image = await file.read()
     
     loop=client.loop
+    
+    print('ratelimit_test0169 begins')
     
     tasks=[]
     names=('Yura','Hana','Neko','Kaze','Scarlet','Yukari')
@@ -3539,11 +3930,13 @@ async def ratelimit_test0169(client,message,content):
         except BaseException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,f'At ratelimit_test0169 -> .achievement_create ({name});\n',file=buffer)
-                text=buffer.getvalue()
+                content=buffer.getvalue()
     
-            await client.message_create(message.channel,text)
+            await client.message_create(message.channel,content)
         else:
             await client.achievement_delete(achievement.id)
+        
+    print('ratelimit_test0169 ended')
     #achievement_create limited. limit:5, reset:5, globally
     
 @ratelimit_commands
@@ -3563,10 +3956,13 @@ async def ratelimit_test0170(client,message,content):
     
     loop=client.loop
     
+    print('ratelimit_test0170 begins')
+    
     tasks = []
     for achievement in achievements:
         task = Task(achievement_delete(client,achievement),loop)
-        
+        tasks.append(task)
+    
     await WaitTillAll(tasks,loop)
     
     for task in tasks:
@@ -3575,9 +3971,11 @@ async def ratelimit_test0170(client,message,content):
         except BaseException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,f'At ratelimit_test0170 -> .achievement_delete;\n',file=buffer)
-                text=buffer.getvalue()
+                content=buffer.getvalue()
     
-            await client.message_create(message.channel,text)
+            await client.message_create(message.channel,content)
+    
+    print('ratelimit_test0170 ended')
     #achievement_delete limited. limit:5, reset:5, globally
 
 @ratelimit_commands
@@ -3592,6 +3990,9 @@ async def ratelimit_test0171(client,message,content):
     achievement = await client.achievement_create('Cake','Nekos are love',image)
     
     loop=client.loop
+    
+    print('ratelimit_test0171 begins')
+    
     tasks = []
     
     task = Task(achievement_edit(client,achievement,name='Hana'),loop)
@@ -3608,12 +4009,14 @@ async def ratelimit_test0171(client,message,content):
         except BaseException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,f'At ratelimit_test0171 -> .achievement_edit;\n',file=buffer)
-                text=buffer.getvalue()
+                content=buffer.getvalue()
     
-            await client.message_create(message.channel,text)
+            await client.message_create(message.channel,content)
     
     await client.achievement_delete(achievement)
-            
+    
+    print('ratelimit_test0171 ended')
+    
     #achievement_edit limited. limit:5, reset:5
     
 @ratelimit_commands
@@ -3632,6 +4035,9 @@ async def ratelimit_test0172(client,message,content):
         achievements.append(achievement)
 
     loop=client.loop
+    
+    print('ratelimit_test0172 begins')
+    
     tasks = []
     for achievement in achievements:
         task = Task(achievement_edit(client,achievement,name='Yura'),loop)
@@ -3645,12 +4051,14 @@ async def ratelimit_test0172(client,message,content):
         except BaseException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,f'At ratelimit_test0172 -> .achievement_edit;\n',file=buffer)
-                text=buffer.getvalue()
+                content=buffer.getvalue()
     
-            await client.message_create(message.channel,text)
+            await client.message_create(message.channel,content)
     
     for achievement in achievements:
         await client.achievement_delete(achievement)
+    
+    print('ratelimit_test0172 ended')
     
     #achievement_edit limited globally
 
@@ -3663,10 +4071,15 @@ async def ratelimit_test0173(client,message,content):
     with (await ReuAsyncIO(image_path)) as file:
         image = await file.read()
     
+    print('ratelimit_test0173 begins')
+    
     achievement = await achievement_create(client,'Kokoro','is love',image)
     await achievement_get(client,achievement.id)
     await achievement_edit(client,achievement,name='Yurika')
     await achievement_delete(client,achievement)
+    
+    print('ratelimit_test0173 ended')
+    
     # achievement_create, achievement_get, achievement_edit, achievement_delete are NOT grouped
     
 @ratelimit_commands
@@ -3675,6 +4088,9 @@ async def ratelimit_test0174(client,message,content):
         return
     
     loop=client.loop
+    
+    print('ratelimit_test0174 begins')
+    
     tasks = []
     for _ in range(2):
         task = Task(achievement_get_all(client),loop)
@@ -3688,9 +4104,12 @@ async def ratelimit_test0174(client,message,content):
         except BaseException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,f'At ratelimit_test0174 -> .achievement_get_all;\n',file=buffer)
-                text=buffer.getvalue()
+                content=buffer.getvalue()
     
-            await client.message_create(message.channel,text)
+            await client.message_create(message.channel,content)
+    
+    print('ratelimit_test0174 ended')
+    
     #achievement_get_all limited. limit:5, reset:5, globally
 
 @ratelimit_commands
@@ -3704,16 +4123,20 @@ async def ratelimit_test0175(client,message,content):
     
     achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
     
+    print('ratelimit_test0175 begins')
+    
     try:
         await user_achievement_update(client,client.owner,achievement,100)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,f'At ratelimit_test0175 -> .user_achievement_update;\n',file=buffer)
-            text=buffer.getvalue()
+            content=buffer.getvalue()
 
-        await client.message_create(message.channel,text)
+        await client.message_create(message.channel,content)
         
     await client.achievement_delete(achievement)
+    print('ratelimit_test0175 ended')
+    
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     # user_achievement_update limited. Limit : 5, reset : 5.
     
@@ -3729,16 +4152,19 @@ async def ratelimit_test0176(client,message,content):
     achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
     await sleep(2.0,client.loop) # wait some time this time
     
+    print('ratelimit_test0176 begins')
+    
     try:
         await user_achievement_update(client,client.owner,achievement,100)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,f'At ratelimit_test0176 -> .user_achievement_update;\n',file=buffer)
-            text=buffer.getvalue()
+            content=buffer.getvalue()
 
-        await client.message_create(message.channel,text)
+        await client.message_create(message.channel,content)
     
     await client.achievement_delete(achievement)
+    print('ratelimit_test0176 ended')
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     
 @ratelimit_commands
@@ -3752,16 +4178,21 @@ async def ratelimit_test0177(client,message,content):
     
     achievement = await client.achievement_create('Koishi','Kokoro',image) #no just a normal one
     
+    print('ratelimit_test0177 begins')
+    
     try:
         await user_achievement_update(client,client.owner,achievement,100)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,f'At ratelimit_test0177 -> .user_achievement_update;\n',file=buffer)
-            text=buffer.getvalue()
+            content=buffer.getvalue()
 
-        await client.message_create(message.channel,text)
+        await client.message_create(message.channel,content)
     
     await client.achievement_delete(achievement)
+    
+    print('ratelimit_test0177 ended')
+    
     # DiscordException FORBIDDEN (403), code=40001: Unauthorized
 
 @ratelimit_commands
@@ -3777,6 +4208,8 @@ async def ratelimit_test0178(client,message,content):
     
     loop=client.loop
     
+    print('ratelimit_test0178 begins')
+    
     tasks=[]
     for member in client.application.owner.members:
         user = member.user
@@ -3791,11 +4224,14 @@ async def ratelimit_test0178(client,message,content):
         except BaseException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,f'At ratelimit_test0178 -> .user_achievement_update;\n',file=buffer)
-                text=buffer.getvalue()
+                content=buffer.getvalue()
     
-            await client.message_create(message.channel,text)
+            await client.message_create(message.channel,content)
     
     await client.achievement_delete(achievement)
+    
+    print('ratelimit_test0178 ended')
+    
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     #limited globally
 
@@ -3837,14 +4273,18 @@ async def ratelimit_test0179(client,message,content):
         await client.message_create(message.channel,'Too old redirect url.')
         return
     
+    print('ratelimit_test0179 begins')
+    
     try:
         await user_achievements(client,access)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,f'At ratelimit_test0179 -> .user_achievements;\n',file=buffer)
-            text=buffer.getvalue()
+            content=buffer.getvalue()
 
-        await client.message_create(message.channel,text)
+        await client.message_create(message.channel,content)
+    
+    print('ratelimit_test0179 ended')
     #DiscordException UNAUTHORIZED (401): 401: Unauthorized
     # no limit data provided
 
