@@ -4,9 +4,10 @@ from random import choice
 
 from hata.futures import Task
 from hata.parsers import eventlist
-from hata.channel import message_at_index, ChannelText, ChannelCategory, CHANNELS
+from hata.channel import message_at_index, ChannelText, ChannelCategory,    \
+     CHANNELS
 from hata.prettyprint import pchunkify
-from hata.others import elapsed_time,Status,AuditLogEvent,cchunkify,Status
+from hata.others import elapsed_time, Status, cchunkify, Status
 from hata.exceptions import DiscordException
 from hata.events import Pagination, Timeouter, GUI_STATE_READY,             \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
@@ -18,9 +19,9 @@ from hata.color import Color
 from hata.user import USERS
 from hata.guild import GUILDS
 from hata.client_core import CLIENTS
-from hata.activity import ActivityUnknown
+from hata.activity import ActivityUnknown, ActivitySpotify
 from hata.permission import Permission
-from hata import ActivitySpotify
+from hata.audit_logs import AuditLogEvent
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
@@ -943,7 +944,7 @@ async def avatar(client, message, user):
     embed.add_image(url)
     
     await client.message_create(message.channel, embed=embed)
-    
+
 async def _help_avatar(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('avatar',(
@@ -954,4 +955,31 @@ async def _help_avatar(client,message):
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('avatar',_help_avatar)
+
+@infos(case='guild-icon')
+async def guild_icon(client, message, content):
+    guild = message.guild
+    if guild is None:
+        return
+    
+    icon_url = guild.icon_url_as(size=4096)
+    if icon_url is None:
+        embed=Embed(description=f'`{guild.name}` has no icon.')
+    else:
+        color=guild.icon&0xffffff
+        embed=Embed(f'{guild.name}\' icon', color=color, url=icon_url)
+        embed.add_image(icon_url)
+    
+    await client.message_create(message.channel,embed=embed)
+
+async def _help_guild_icon(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('guild-icon',(
+        'Do you wanna see the guild\'s icon in 4K?!\n'
+        f'Usage: `{prefix}guild-icon`\n'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('guild-icon',_help_guild_icon)
 

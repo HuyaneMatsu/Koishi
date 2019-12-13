@@ -53,7 +53,7 @@ else:
 #   0b00100000 <- could special
 
 class PuppetMeta(object):
-    __slots__=['generate_moves', 'name', 'outlooks']
+    __slots__=('generate_moves', 'name', 'outlooks', )
     def __init__(self,name,generate_moves,outlooks):
         self.name=name
         self.generate_moves=generate_moves
@@ -693,7 +693,7 @@ COMMAND_RP=re.compile('[ \-]*([a-z]+)[ \-]+',re.I)
 MOVE_RP=re.compile('([a-h])([1-8])[ \-]*([a-h])([1-8])[ \-]*',re.I)
 
 class ChesutoBackend(object):
-    __slots__=['client', 'field','players', 'channel', 'next']
+    __slots__=('client', 'field','players', 'channel', 'next',)
     def __init__(self,client,channel,player_0,player_1):
         self.client=client
         self.channel=channel
@@ -978,7 +978,7 @@ class ChesutoBackend(object):
         return ''.join(result)
             
 class ChesutoPlayer(object):
-    __slots__=['backend', 'channel', 'puppets', 'side', 'user', 'king', 'in_check', 'message']
+    __slots__=('backend', 'channel', 'puppets', 'side', 'user', 'king', 'in_check', 'message',)
     def __init__(self,user,channel):
         self.user       = user
         self.channel    = channel
@@ -1713,7 +1713,7 @@ async def showcards(client,message,content):
 
 
 class CardRandomizer(object):
-    __slots__=('array', 'elements', 'references')
+    __slots__=('array', 'elements', 'references', )
     def __init__(self,cards,rarity_weights):
         sorted_by_rarity={}
         for card in cards:
@@ -1937,18 +1937,22 @@ EMOJI_1=BUILTIN_EMOJIS['one']
 EMOJI_2=BUILTIN_EMOJIS['two']
 EMOJI_3=BUILTIN_EMOJIS['three']
 EMOJI_4=BUILTIN_EMOJIS['four']
-EMOJIS_1_4=[EMOJI_1,EMOJI_2,EMOJI_3,EMOJI_4]
+EMOJIS_1_4=(EMOJI_1,EMOJI_2,EMOJI_3,EMOJI_4,)
 EMOJI_CHECK=BUILTIN_EMOJIS['white_check_mark']
 EMOJI_X=BUILTIN_EMOJIS['x']
 EMOJIS_CHECK_X=[EMOJI_CHECK,EMOJI_X]
 EMOJI_TU=BUILTIN_EMOJIS['thumbup_skin_tone_2']
 EMOJI_TD=BUILTIN_EMOJIS['thumbdown_skin_tone_2']
-EMOJIS_T_X=[EMOJI_TU,EMOJI_TD,EMOJI_X]
+EMOJIS_T_X=(EMOJI_TU,EMOJI_TD,EMOJI_X,)
     
 async def chesuto_lobby(client,message,content):
     channel=message.channel
     if channel.guild is None: #guild only command
         return
+    
+    if not client.is_owner(message.author):
+        return
+    
     permissions=message.channel.cached_permissions_for(client)
     if not (permissions.can_add_reactions and permissions.can_use_external_emojis and permissions.can_manage_messages):
         await client.message_create(channel,embed=Embed(
