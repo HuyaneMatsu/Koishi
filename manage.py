@@ -94,7 +94,7 @@ Flan.events(ReactionDeleteWaitfor)
 
 flan_commands=Flan.events(CommandProcesser(pers_data.FLAN_PREFIX)).shortcut
 flan_commands.extend(flan.commands)
-flan_commands(Koishi.events.message_create.commands['random'])
+flan_commands(Koishi.events.message_create.commands['random'][1])
 flan_commands(chesuto.chesuto_lobby,'lobby')
 flan_commands(chesuto.create_card,)
 flan_commands(chesuto.showcard)

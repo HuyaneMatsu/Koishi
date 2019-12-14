@@ -28,7 +28,7 @@ async def invalid_command(client,message,command,content):
     
     if (guild in Koishi.guild_profiles) and message.channel.cached_permissions_for(Koishi).can_send_messages:
         try:
-            command=Koishi.events.message_create.commands[command]
+            needs_content,command=Koishi.events.message_create.commands[command]
         except KeyError:
             pass
         else:
@@ -37,7 +37,10 @@ async def invalid_command(client,message,command,content):
             await client.message_create(message.channel,f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
             await Koishi.typing(message.channel)
             await sleep((random()*2.)+1.0,client.loop)
-            await command(Koishi,message,content)
+            if needs_content:
+                await command(Koishi,message,content)
+            else:
+                await command(Koishi,message)
             return
     
     await client.message_create(message.channel,'I have no idea, hmpff...')

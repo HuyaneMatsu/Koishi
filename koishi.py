@@ -682,7 +682,7 @@ async def yuno(client,message,content):
         '░░░░░░▌▌░▌▐░▌▒▀▄▄░░░░▄▌▐░▌▒░▐░░░░░░░\n'
         '░░░░░▐▒▐░▐▐░▌▒▒▒▒▀▀▄▀▌▐░░▌▒░▌░░░░░░░\n'
         '░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░\n'
-        ,0xffafde,'https://www.youtube.com/watch?v=NI_fgwbmJg0&t=0s'))
+        ,0xffafde,'https://www.youtube.com/watch?v=TaDAn_S_4Y8'))
     
 async def _help_yuno(client,message):
     embed=Embed('yuno',(
