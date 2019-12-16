@@ -1597,11 +1597,10 @@ class NewGenerationPagination(object):
         client.events.reaction_delete.append(self,message)
         return self
     
-    async def __call__(self,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         
-        client=self.client
         message=self.message
         
         can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
@@ -1760,18 +1759,18 @@ class NewGenerationPagination(object):
 
 
 class NewGenerationWaitAndContinue(object):
-    __slots__=('canceller', 'case', 'event', 'future', 'target', 'timeouter')
-    def __init__(self, future, case, target, event, timeout):
+    __slots__=('canceller', 'check', 'event', 'future', 'target', 'timeouter')
+    def __init__(self, future, check, target, event, timeout):
         self.canceller=self.__class__._canceller
         self.future=future
-        self.case=case
+        self.check=check
         self.event=event
         self.target=target
         self.timeouter=Timeouter(future._loop,self,timeout)
         event.append(self,target)
         
-    async def __call__(self, *args):
-        result = self.case(*args)
+    async def __call__(self, client, *args):
+        result = self.check(*args)
         if type(result) is bool:
             if not result:
                 return
@@ -1854,7 +1853,7 @@ class MessageDeleteAltPatcher(EventHandlerBase):
     @classmethod
     def apply(cls,client):
         actual=client.events.message_delete
-        if actual is EventDescriptor.default_event:
+        if actual is EventDescriptor.DEFAULT_EVENT:
             self=object.__new__(cls)
             self.original=None
             self.waitfors=WeakKeyDictionary()
@@ -1895,9 +1894,9 @@ class MessageDeleteAltPatcher(EventHandlerBase):
         
         if type(event) is asynclist:
             for event in event:
-                Task(event(message),client.loop)
+                Task(event(client,message),client.loop)
         else:
-            Task(event(message),client.loop)
+            Task(event(client,message),client.loop)
         
         original=self.original
         if original is None:
@@ -1997,7 +1996,7 @@ async def test_new_generation(client, message, content):
         
         pagination.message.reactions[NewGenerationPagination.RIGHT].add(user)
         try:
-            await pagination(NewGenerationPagination.RIGHT,user)
+            await pagination(client,NewGenerationPagination.RIGHT,user)
         except DiscordException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,'Test 3 failed:\n\n',file=buffer)
@@ -2054,7 +2053,7 @@ async def test_new_generation(client, message, content):
         
         pagination.message.reactions[NewGenerationPagination.CANCEL].add(user)
         try:
-            await pagination(NewGenerationPagination.CANCEL,user)
+            await pagination(client,NewGenerationPagination.CANCEL,user)
         except DiscordException as err:
             future.cancel()
             with StringIO() as buffer:
