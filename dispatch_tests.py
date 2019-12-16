@@ -46,7 +46,7 @@ class dispatch_tester:
         
         actual=getattr(client.events,content)
         if type(actual) is method and actual.__self__ is self:
-            setattr(client.events,content,client.events.default_event)
+            setattr(client.events,content,client.events.DEFAULT_EVENT)
             await client.message_create(message.channel,'Event removed')
         else:
             self.old_events[content]=actual

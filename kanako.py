@@ -305,7 +305,7 @@ class kanako_game(object):
 
         await game_statistics(self)
     
-    async def __call__(self,message):
+    async def __call__(self,client,message):
         if message.author not in self.users or self.waiter.done() or message.author.id in self.answers or len(message.content)>4:
             return
         
@@ -683,11 +683,10 @@ class embedination(object):
         self.timeouter=Timeouter(client.loop,self,timeout=150)
         return self
     
-    async def __call__(self,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         
-        client=self.client
         message=self.message
         
         can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages

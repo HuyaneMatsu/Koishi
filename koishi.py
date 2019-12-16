@@ -85,36 +85,43 @@ _KOISHI_OMAE_RP=re.compile('omae wa mou',re.I)
 
 @commands
 async def default_event(client,message):
-    if message.user_mentions is not None and client in message.user_mentions:
-        m1=message.author.mention_at(message.guild)
-        m2=client.mention_at(message.guild)
-        replace={re.escape(m1):m2,re.escape(m2):m1}
+    user_mentions=message.user_mentions
+    if (user_mentions is not None) and (client in user_mentions):
+        m1=message.author.mention
+        m2=client.mention
+        replace={
+            '@everyone':'@\u200beveryone',
+            '@here':'@\u200bhere',
+            re.escape(m1):m2,
+            re.escape(m2):m1,
+                }
         pattern=re.compile("|".join(replace.keys()))
         result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
         await client.message_create(message.channel,result)
+        return
+        
+    content=message.content
+    if message.channel.cached_permissions_for(client).can_add_reactions and _KOISHI_NOU_RP.match(content) is not None:
+        parts=[]
+        for value in 'nou':
+            emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
+            await client.reaction_add(message,emoji)
+        return
+    
+    if len(content)==3:
+        matched=_KOISHI_OWO_RP.match(content,)
+        if matched is None:
+            return
+        text=f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
+
+    elif _KOISHI_OMAE_RP.match(content) is not None:
+        text='NANI?'
+
     else:
-        content=message.content
-        if message.channel.cached_permissions_for(client).can_add_reactions and _KOISHI_NOU_RP.match(content) is not None:
-            parts=[]
-            for value in 'nou':
-                emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
-                await client.reaction_add(message,emoji)
-            return
-        
-        if len(content)==3:
-            matched=_KOISHI_OWO_RP.match(content,)
-            if matched is None:
-                return
-            text=f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
-
-        elif _KOISHI_OMAE_RP.match(content) is not None:
-            text='NANI?'
-
-        else:
-            return
-        
-        if text:
-            await client.message_create(message.channel,text)
+        return
+    
+    if text:
+        await client.message_create(message.channel,text)
 
 @commands
 @ContentParser('user, flags=mna, default="message.author"')

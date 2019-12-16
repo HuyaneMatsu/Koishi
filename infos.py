@@ -584,7 +584,7 @@ async def logs(client,message,guild,*args):
             break
         for event_name in args:
             try:
-                event=AuditLogEvent.values[int(event_name)]
+                event=AuditLogEvent.INSTANCES[int(event_name)]
                 break
             except (KeyError,ValueError):
                 pass
@@ -772,7 +772,7 @@ class embedination_rr(object):
         self.timeouter=Timeouter(client.loop,self,timeout=300.)
         return self
     
-    async def __call__(self,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         

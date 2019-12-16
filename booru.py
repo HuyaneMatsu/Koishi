@@ -98,11 +98,10 @@ class ShuffledShelter(object):
         
         return self
     
-    async def __call__(self,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         
-        client=self.client
         message=self.message
         can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
 

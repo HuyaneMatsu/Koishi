@@ -163,7 +163,7 @@ class TouhouWikiChooseMenu(object):
         embed.description=''.join(lines)
         return embed
     
-    async def __call__(self,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         

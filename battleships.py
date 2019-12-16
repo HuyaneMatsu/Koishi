@@ -107,7 +107,7 @@ class wait_on_reply(object):
         self.source=source
         self.target=target
     
-    def __call__(self,message):
+    def __call__(self,client,message):
         if message.author!=self.target:
             return False
         
@@ -364,8 +364,8 @@ class user_profile(object):
         
         self.last_switch=0.
         
-    async def __call__(self,user,emoji):
-        if user is self.client:
+    async def __call__(self,client,user,emoji):
+        if user is client:
             return
         
         now=time.time()
@@ -819,8 +819,8 @@ class battleships_game:
         await other.process(True,text2)
         self.future.set_result(False)
     
-    async def __call__(self,message):
-        if message.author is self.client:
+    async def __call__(self,client,message):
+        if message.author is client:
             return
         
         await self.process(message)

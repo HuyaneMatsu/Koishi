@@ -333,7 +333,8 @@ class heartevent(object):
         self.client=client
         self.duration=duration
         self.amount=amount
-
+        self.waiter=Future(client.loop)
+        
         self.connector = await DB_ENGINE.connect()
         
         message = await client.message_create(channel,embed=self.generate_embed())
@@ -352,7 +353,7 @@ class heartevent(object):
             description=f'{convert_tdelta(self.duration)} left'
         return Embed(title,description,color=GAMBLING_COLOR)
 
-    async def __call__(self,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user.is_bot or (emoji is not CURRENCY_EMOJI):
             return
         
@@ -389,17 +390,20 @@ class heartevent(object):
 
     async def countdown(self,client,message):
         update_delta=self._update_delta
-        self.waiter=waiter=Future(self.client.loop)
+        loop=client.loop
+        waiter=self.waiter
 
         sleep_time=(self.duration%update_delta).seconds
         if sleep_time:
             self.duration-=timedelta(seconds=sleep_time)
-            await waiter.sleep(sleep_time)
+            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            await waiter
             waiter.clear()
 
         sleep_time=self._update_time
         while True:
-            await waiter.sleep(sleep_time)
+            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            await waiter
             waiter.clear()
             self.duration-=update_delta
             if self.duration<update_delta:
@@ -524,6 +528,7 @@ class dailyevent(object):
         self.client=client
         self.duration=duration
         self.amount=amount
+        self.waiter=Future(client.loop)
 
         self.connector = await DB_ENGINE.connect()
 
@@ -543,7 +548,7 @@ class dailyevent(object):
             description=f'{convert_tdelta(self.duration)} left'
         return Embed(title,description,color=GAMBLING_COLOR)
 
-    async def __call__(self,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user.is_bot or (emoji is not CURRENCY_EMOJI):
             return
 
@@ -595,17 +600,20 @@ class dailyevent(object):
 
     async def countdown(self,client,message):
         update_delta=self._update_delta
-        self.waiter=waiter=Future(self.client.loop)
-
+        loop=client.loop
+        waiter=self.waiter
+        
         sleep_time=(self.duration%update_delta).seconds
         if sleep_time:
             self.duration-=timedelta(seconds=sleep_time)
-            await waiter.sleep(sleep_time)
+            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            await waiter
             waiter.clear()
 
         sleep_time=self._update_time
         while True:
-            await waiter.sleep(sleep_time)
+            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            await waiter
             waiter.clear()
             self.duration-=update_delta
             if self.duration<update_delta:

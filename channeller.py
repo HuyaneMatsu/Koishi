@@ -12,12 +12,10 @@ class Channeller_v_del(object):
     def __init__(self,parent):
         self.parent=parent
 
-    async def __call__(self,message):
-        nonwebhook=(Client,User)
-        if type(message.author) not in nonwebhook:
+    async def __call__(self,client,message):
+        if type(message.author) not in (Client,User):
             return
 
-        client=self.parent.client
         source_channel=message.channel
         user=message.author
         
@@ -32,7 +30,7 @@ class Channeller_v_del(object):
                 continue
         
             for message in channel.messages:
-                if type(message.author) in nonwebhook:
+                if type(message.author) in (Client,User):
                     continue
                 if (user.name_at(webhook.guild) != message.author.name or
                     #avatar_url  != message.author.avatar_url or \
@@ -95,11 +93,9 @@ class Channeller(object):
         self.deleter=None
 
     
-    async def __call__(self,message):
+    async def __call__(self,client,message):
         if type(message.author) not in (Client,User):
             return
-
-        client=self.client
         
         attachments=message.attachments
         if attachments is None:

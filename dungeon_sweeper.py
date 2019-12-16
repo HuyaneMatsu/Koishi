@@ -256,7 +256,7 @@ class ds_game(object):
     async def default_coro():
         pass
     
-    def __call__(self,emoji,user):
+    def __call__(self,client,emoji,user):
         if user is not self.user:
             return self.default_coro()
 

@@ -48,7 +48,7 @@ def smart_join(list_,limit=2000,sep='\n'):
 
 @inherit(CommandProcesser)
 class MessageDeleteWaitfor(object):
-    __slots__=['waitfors']
+    __slots__=('waitfors',)
     __event_name__='message_delete'
     def __init__(self):
         self.waitfors=WeakKeyDictionary()
@@ -58,7 +58,7 @@ class MessageDeleteWaitfor(object):
             event=self.waitfors[message.channel]
         except KeyError:
             return
-        await event(message)
+        await event(client,message)
 
 class CooldownHandler:
     __slots__=('cache',)
@@ -102,17 +102,15 @@ class CooldownHandler:
 
 class commit_extractor(object):
     _GIT_RP=re.compile('^\[`[\da-f]*`\]\((https://github.com/[^/]*/[^/]*/)commit')
-    __slots__=('channel', 'client', 'color', 'role', 'webhook',)
-    def __init__(self,client,channel,webhook,role=None,color=0):
-        self.client=client
+    __slots__=('channel', 'color', 'role', 'webhook',)
+    def __init__(self,channel,webhook,role=None,color=0):
         self.channel=channel
         self.webhook=webhook
         self.role=role
         self.color=color
 
-    async def __call__(self,message):
+    async def __call__(self,client,message):
         webhook=self.webhook
-        client=self.client
 
         if message.author!=webhook or message.author.name!='GitHub':
             return

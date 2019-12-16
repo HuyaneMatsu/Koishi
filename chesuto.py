@@ -770,7 +770,7 @@ class ChesutoBackend(object):
         self.next=0
         self.update_puppets()
 
-    async def __call__(self,message):
+    async def __call__(self,client,message):
         next_=self.next
         player=self.players[next_]
         if message.author!=player.user:
@@ -1004,7 +1004,7 @@ class ChesutoPlayer(object):
 
 class Rarity(object):
     count=0
-    values=[]
+    INSTANCES=[]
     by_name={}
     __slots__=('index', 'name',)
     def __init__(self,name):
@@ -1012,7 +1012,7 @@ class Rarity(object):
         index=self.count
         self.index=index
         type(self).count=index+1
-        self.values.append(self)
+        self.INSTANCES.append(self)
         self.by_name[name]=self
         
     def __str__(self):
@@ -1198,7 +1198,7 @@ class Card(object):
                     break
 
                 try:
-                    rarity=Rarity.values[rarity]
+                    rarity=Rarity.INSTANCES[rarity]
                 except IndexError:
                     exception=f'No such \'rarity\' index: {rarity}'
                     break
@@ -1241,7 +1241,7 @@ class Card(object):
 CARDS_ROLE=Role.precreate(598708907816517632)
 
 class check_user_and_ln():
-    __slots__=['user', 'ln_limits']
+    __slots__=('user', 'ln_limits',)
     def __init__(self,user,ln_limits):
         self.user=user
         self.ln_limits=ln_limits

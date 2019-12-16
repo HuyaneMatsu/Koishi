@@ -50,7 +50,6 @@ koishi_commands(chesuto.massadd)
 koishi_commands(chesuto.showcards)
 
 webhook_sender=commit_extractor(
-    Koishi,
     ChannelText.precreate(555476090382974999),
     Webhook.precreate(555476334210580508),
     role=Role.precreate(538397994421190657),
