@@ -107,7 +107,7 @@ class wait_on_reply(object):
         self.source=source
         self.target=target
     
-    def __call__(self,client,message):
+    def __call__(self,message):
         if message.author!=self.target:
             return False
         
@@ -215,12 +215,7 @@ async def battle_manager(client,message,target):
                 pass
 
             for waiter in (waiter1,waiter2):
-                cancel=waiter.cancel
-                if cancel is None:
-                    continue
-                
-                waiter.cancel=None
-                Task(cancel(waiter,None),client.loop)
+                waiter.cancel()
 
         try:
             BS_REQUESTERS.remove(source)
