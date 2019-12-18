@@ -1,7 +1,7 @@
 import os, re
 join=os.path.join
 from collections import deque
-from time import perf_counter
+from time import perf_counter, time as time_now
 from io import StringIO
 from hata.dereaddons_local import multidict_titled, titledstr, _spaceholder
 from hata.futures import Future,sleep,Task, WaitTillAll
@@ -19,9 +19,9 @@ from hata.exceptions import DiscordException
 from hata.others import to_json,from_json,quote
 from hata.emoji import BUILTIN_EMOJIS
 from hata.message import Message
-from hata.others import (ext_from_base64,bytes_to_base64,VoiceRegion,
-    VerificationLevel,MessageNotificationLevel,ContentFilterLevel,
-    parse_oauth2_redirect_url)
+from hata.others import ext_from_base64, bytes_to_base64, VoiceRegion,      \
+    VerificationLevel, MessageNotificationLevel, ContentFilterLevel,        \
+    parse_oauth2_redirect_url, DISCORD_EPOCH
 from hata.user import PartialUser,User
 from hata.role import Role
 from hata.client import Client, Achievement
@@ -3128,26 +3128,6 @@ async def ratelimit_test0117(client,message,content):
     await sleep(.5,loop)
     await client.guild_delete(guild)
     #guild_user_add is limited by guild
-
-@ratelimit_commands
-async def ratelimit_test0117(client,message,content):
-    if not client.is_owner(message.author):
-        return
-    loop=client.loop
-    access = await client.owners_access(['guilds.join'])
-    user = await client.user_info(access)
-    guild = await client.guild_create(name='Luv ya',
-                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
-    await sleep(.5,loop)
-    await guild_user_add(client,guild,user)
-
-    result=parse_oauth2_redirect_url(content)
-    access = await client.activate_authorization_code(*result,['guilds.join'])
-    user = await client.user_info(access)
-    await guild_user_add(client,guild,user)
-    await sleep(.5,loop)
-    await client.guild_delete(guild)
-    #guild_user_add is limited by guild
     
 @ratelimit_commands
 async def ratelimit_test0118(client,message,content):
@@ -4288,4 +4268,174 @@ async def ratelimit_test0179(client,message,content):
     #DiscordException UNAUTHORIZED (401): 401: Unauthorized
     # no limit data provided
 
+@ratelimit_commands
+async def ratelimit_test0180(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    if channel.guild is None:
+        await client.message_create(channel,'Please use this command at a guild.')
+        return
+    
+    old_message=None
+    
+    old_limit=int((time_now()-1209600.)*1000.-DISCORD_EPOCH)<<22
+    
+    with client.keep_typing(channel):
+        while True:
+            try:
+                messages_ = await client.message_logs(channel,after=old_limit)
+            except BaseException as err:
+                with StringIO() as buffer:
+                    await client.loop.render_exc_async(err,f'At ratelimit_test0180 -> .message_logs;\n',file=buffer)
+                    content=buffer.getvalue()
+                await client.message_create(channel,content)
+                return
+            
+            for message_ in messages_:
+                if message_.author==client:
+                    old_message=message_
+                    break
+            
+            if (old_message is not None):
+                break
+            
+            if len(messages_)<100:
+                break
+            
+            old_limit=messages_[99].id
+            continue
+    
+    if old_message is None:
+        await client.message_create(channel,'Getting old message failed')
+        return
+    
+    messages = []
+    for index in range(6):
+        message_ = await client.message_create(channel,f'testint ratelimit: message {index}')
+        messages.append(message_)
+    
+    print('ratelimit_test0180 begins')
+    
+    loop=client.loop
+    tasks = []
+    
+    for message_ in messages:
+        task=Task(message_delete(client,message_),loop)
+        tasks.append(task)
+    
+    task=Task(message_delete(client,old_message),loop)
+    tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0180 -> .message_delete;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    print('ratelimit_test0180 ended')
+    # message_delete (own new) unlimited
+    # message_delete (own new) not limtied with message_delete (own old)
+    
+@ratelimit_commands
+async def ratelimit_test0181(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    if channel.guild is None:
+        await client.message_create(channel,'Please use this command at a guild.')
+        return
+    
+    if not channel.cached_permissions_for(client).can_manage_messages:
+        await client.message_create(channel,
+            'I Dont have enough permissions at this channel to complete this command.')
+        return
+    
+    other_client=None
+    for client_ in channel.clients:
+        if client_ is client:
+            continue
+        
+        if channel.cached_permissions_for(client_).can_send_messages:
+            other_client=client_
+            break
+    
+    if other_client is None:
+        await client.message_create(channel,
+            'I Dont see any other clients at this channel, with `send_messages` permission.')
+        return
+    
+    old_message=None
+    
+    old_limit=int((time_now()-1209600.)*1000.-DISCORD_EPOCH)<<22
+    
+    with client.keep_typing(channel):
+        while True:
+            try:
+                messages_ = await client.message_logs(channel,after=old_limit)
+            except BaseException as err:
+                with StringIO() as buffer:
+                    await client.loop.render_exc_async(err,f'At ratelimit_test0180 -> .message_logs;\n',file=buffer)
+                    content=buffer.getvalue()
+                await client.message_create(channel,content)
+                return
+            
+            for message_ in messages_:
+                if message_.author==client:
+                    old_message=message_
+                    break
+            
+            if (old_message is not None):
+                break
+            
+            if len(messages_)<100:
+                break
+            
+            old_limit=messages_[99].id
+            continue
+    
+    if old_message is None:
+        await client.message_create(channel,'Getting old message failed')
+        return
+    
+    messages = []
+    for index in range(6):
+        message_ = await other_client.message_create(channel,f'testint ratelimit: message {index}')
+        messages.append(message_)
+    
+    print('ratelimit_test0181 begins')
+    
+    loop=client.loop
+    tasks = []
+    
+    for message_ in messages:
+        task=Task(message_delete(client,message_),loop)
+        tasks.append(task)
+    
+    task=Task(message_delete(client,old_message),loop)
+    tasks.append(task)
+    
+    await WaitTillAll(tasks,loop)
+    
+    for task in tasks:
+        try:
+            task.result()
+        except BaseException as err:
+            with StringIO() as buffer:
+                await client.loop.render_exc_async(err,f'At ratelimit_test0180 -> .message_delete;\n',file=buffer)
+                content=buffer.getvalue()
+    
+            await client.message_create(channel,content)
+    
+    print('ratelimit_test0181 ended')
+    # message_delete (other new) unlimited
+    # message_delete (other new) not limtied with message_delete (own old)
     
