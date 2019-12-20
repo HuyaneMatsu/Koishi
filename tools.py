@@ -7,6 +7,7 @@ from hata.dereaddons_local import inherit
 from hata import others
 from hata.exceptions import DiscordException
 from random import random
+from hata.parsers import EventHandlerBase
 
 try:
     from bs4 import BeautifulSoup
@@ -46,8 +47,7 @@ def smart_join(list_,limit=2000,sep='\n'):
         result.append(value)
     return sep.join(result)
 
-@inherit(CommandProcesser)
-class MessageDeleteWaitfor(object):
+class MessageDeleteWaitfor(EventHandlerBase):
     __slots__=('waitfors',)
     __event_name__='message_delete'
     def __init__(self):
@@ -60,6 +60,9 @@ class MessageDeleteWaitfor(object):
             return
         await event(client,message)
 
+    append=CommandProcesser.append
+    remove=CommandProcesser.remove
+    
 class CooldownHandler:
     __slots__=('cache',)
     def __init__(self):
