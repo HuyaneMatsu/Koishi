@@ -5,21 +5,23 @@ import re
 from weakref import WeakSet,WeakKeyDictionary
 
 from hata.others import filter_content
-from hata.prettyprint import pchunkify,pconnect
+from hata.prettyprint import pchunkify, pconnect
 from hata.ios import ReuAsyncIO
 from hata.client import Achievement
-from hata.others import bytes_to_base64,parse_oauth2_redirect_url,Unknown
-from hata.emoji import BUILTIN_EMOJIS,parse_emoji
-from hata.futures import sleep,render_exc_to_list,Task,Future
+from hata.others import bytes_to_base64, parse_oauth2_redirect_url, Unknown
+from hata.emoji import BUILTIN_EMOJIS, parse_emoji
+from hata.futures import sleep, render_exc_to_list, Task, Future
 from hata.dereaddons_local import alchemy_incendiary
 from hata.invite import Invite
 from hata.exceptions import DiscordException
 from hata.embed import Embed
 from hata.channel import CHANNELS
 from hata.events_compiler import ContentParser
-from hata.parsers import eventlist,EventHandlerBase
-from hata.events import Pagination,wait_for_message,GUI_STATE_READY,GUI_STATE_SWITCHING_PAGE,GUI_STATE_CANCELLING,\
-    GUI_STATE_CANCELLED,GUI_STATE_SWITCHING_CTX,multievent,asynclist,CommandProcesser,EventDescriptor
+from hata.parsers import eventlist, EventHandlerBase
+from hata.events import Pagination, wait_for_message, GUI_STATE_READY,      \
+    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
+    GUI_STATE_SWITCHING_CTX, multievent, asynclist, CommandProcesser,       \
+    EventDescriptor
 
 from hata.ratelimit import ratelimit_handler
 from hata.http import API_ENDPOINT
@@ -55,9 +57,9 @@ async def achievement_create(client,message,content):
     
     image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
     with (await ReuAsyncIO(image_path)) as file:
-        image=await file.read()
+        image = await file.read()
     try:
-        achievement=await client.achievement_create(content[0],content[1],image)
+        achievement = await client.achievement_create(content[0],content[1],image)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_create;\n',file=buffer)
@@ -76,13 +78,22 @@ async def achievement_create_no_avatar_1(client,message,content):
     if not client.is_owner(message.author):
         return
     
-    data={'name':{'default':'Nice',},'description':{'default':'You are qt!',},'secret':False,'secure':False,
-        'icon':None,}
+    data = {
+        'name'          : {
+            'default'   : 'Nice',
+                },
+        'description'   : {
+            'default'   :'You are qt!',
+                },
+        'secret'        : False,
+        'secure'        : False,
+        'icon'          : None,
+            }
     
     application_id=client.application.id
     
     try:
-        data=await client.http.achievement_create(application_id,data)
+        data = await client.http.achievement_create(application_id,data)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_create;\n',file=buffer)
@@ -103,12 +114,21 @@ async def achievement_create_no_avatar_2(client,message,content):
     if not client.is_owner(message.author):
         return
     
-    data={'name':{'default':'Nice',},'description':{'default':'Nekos are qt',},'secret':False,'secure':False,}
+    data = {
+        'name'          : {
+            'default':'Nice',
+                },
+        'description'   : {
+            'default'   : 'Nekos are qt',
+            },
+        'secret'        : False,
+        'secure'        : False,
+            }
     
     application_id=client.application.id
     
     try:
-        data=await client.http.achievement_create(application_id,data)
+        data = await client.http.achievement_create(application_id,data)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_create;\n',file=buffer)
@@ -131,17 +151,26 @@ async def achievement_create_pure_data(client,message,content):
     
     image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
     with (await ReuAsyncIO(image_path)) as file:
-        image=await file.read()
+        image = await file.read()
     
     icon_data=bytes_to_base64(image)
     
-    data={'name':{'default':'OwO',},'description':{'default':'Whats this?',},'secret':False,'secure':False,
-        'icon':icon_data,}
+    data = {
+        'name'          : {
+            'default'   : 'OwO',
+                },
+        'description'   : {
+            'default'   : 'Whats this?',
+                },
+        'secret'        : False,
+        'secure'        : False,
+        'icon'          : icon_data,
+            }
     
     application_id=client.application.id
     
     try:
-        data=await client.http.achievement_create(application_id,data)
+        data = await client.http.achievement_create(application_id,data)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_create;\n',file=buffer)
@@ -160,7 +189,7 @@ async def achievement_get_all(client,message,content):
         return
     
     try:
-        achievements=await client.achievement_get_all()
+        achievements = await client.achievement_get_all()
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_get_all;\n',file=buffer)
@@ -186,7 +215,7 @@ async def achievement_get(client,message,content):
         return
     
     try:
-        achievement=await client.achievement_get(id_)
+        achievement = await client.achievement_get(id_)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_get;\n',file=buffer)
@@ -213,7 +242,7 @@ async def achievement_edit(client,message,content):
         return
     
     try:
-        achievement=await client.achievement_get(id_)
+        achievement = await client.achievement_get(id_)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_get;\n',file=buffer)
@@ -249,7 +278,7 @@ async def achievement_delete(client,message,content):
         return
     
     try:
-        achievement=await client.achievement_get(id_)
+        achievement = await client.achievement_get(id_)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At achievement_get;\n',file=buffer)
@@ -291,13 +320,14 @@ async def user_achievements(client,message,content):
     if not client.is_owner(message.author):
         return
     
-    await client.message_create(message.channel,('Please authorize yourself and resend the redirected url after it\n'
-                                                 'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
-                                                 '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
-                                                 '&response_type=code&scope=identify%20applications.store.update'))
+    await client.message_create(message.channel,(
+        'Please authorize yourself and resend the redirected url after it\n'
+        'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
+        '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
+        '&response_type=code&scope=identify%20applications.store.update'))
     
     try:
-        message=await wait_for_message(client,message.channel,check_is_owner(client),60.)
+        message = await wait_for_message(client,message.channel,check_is_owner(client),60.)
     except TimeoutError:
         await client.message_create('Timeout meanwhile waiting for redirect url.')
         return
@@ -309,14 +339,14 @@ async def user_achievements(client,message,content):
         await client.message_create(message.channel,'Bad redirect url.')
         return
     
-    access=await client.activate_authorization_code(*result,['identify','applications.store.update'])
+    access = await client.activate_authorization_code(*result,['identify','applications.store.update'])
     
     if access is None:
         await client.message_create(message.channel,'Too old redirect url.')
         return
     
     try:
-        achievements=await client.user_achievements(access)
+        achievements = await client.user_achievements(access)
     except BaseException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'At user_achievements;\n',file=buffer)
@@ -373,10 +403,16 @@ async def target_user_type_invite_test_0(client,message,content):
         await client.message_create(channel,'Guild only!')
         return
     
-    data={'max_age':0,'max_uses':0,'temporary':True,'unique':True,'target_user_type':0,}
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : True,
+        'unique'            : True,
+        'target_user_type'  : 0,
+            }
     
     try:
-        data=await client.http.invite_create(channel.id,data)
+        data = await client.http.invite_create(channel.id,data)
     except DiscordException as err:
         result=repr(err)
     else:
@@ -399,10 +435,16 @@ async def target_user_type_invite_test_1(client,message,content):
         client.message_create(channel,'Guild only!')
         return
     
-    data={'max_age':0,'max_uses':0,'temporary':False,'unique':True,'target_user_type':1,}
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+            }
     
     try:
-        data=await client.http.invite_create(channel.id,data)
+        data = await client.http.invite_create(channel.id,data)
     except DiscordException as err:
         result=repr(err)
     else:
@@ -425,10 +467,16 @@ async def target_user_id_invite_test(client,message,content):
         await client.message_create(channel,'Guild only!')
         return
     
-    data={'max_age':0,'max_uses':0,'temporary':False,'unique':True,'target_user_id':319854926740062208,}
+    data = {
+        'max_age'       : 0,
+        'max_uses'      : 0,
+        'temporary'     : False,
+        'unique'        : True,
+        'target_user_id': 319854926740062208,
+            }
     
     try:
-        data=await client.http.invite_create(channel.id,data)
+        data = await client.http.invite_create(channel.id,data)
     except DiscordException as err:
         result=repr(err)
     else:
@@ -451,11 +499,17 @@ async def target_user_id_with_type_test(client,message,content):
         await client.message_create(channel,'Guild only!')
         return
     
-    data={'max_age':0,'max_uses':0,'temporary':False,'unique':True,'target_user_type':1,
-        'target_user_id':319854926740062208,}
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : 319854926740062208,
+            }
     
     try:
-        data=await client.http.invite_create(channel.id,data)
+        data = await client.http.invite_create(channel.id,data)
     except DiscordException as err:
         result=repr(err)
     else:
@@ -491,11 +545,17 @@ async def target_user_stream_test_0(client,message,content):
         await client.message_create(channel,'No 1 is streaming at that specific guild.')
         return
     
-    data={'max_age':0,'max_uses':0,'temporary':False,'unique':True,'target_user_type':1,
-        'target_user_id':voice_state.user.id,}
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : voice_state.user.id,
+            }
     
     try:
-        data=await client.http.invite_create(channel.id,data)
+        data = await client.http.invite_create(channel.id,data)
     except DiscordException as err:
         result=repr(err)
     else:
@@ -537,11 +597,17 @@ async def target_user_stream_test_1(client,message,content):
         await client.message_create(channel,'No 1 is streaming at that specific guild.')
         return
     
-    data={'max_age':0,'max_uses':0,'temporary':False,'unique':True,'target_user_type':1,
-        'target_user_id':voice_state.user.id,}
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : voice_state.user.id,
+            }
     
     try:
-        data=await client.http.invite_create(target_channel_id,data)
+        data = await client.http.invite_create(target_channel_id,data)
     except DiscordException as err:
         result=repr(err)
     else:
@@ -575,11 +641,17 @@ async def target_user_stream_test_url(client,message,content):
         await client.message_create(channel,'No 1 is streaming at that specific guild.')
         return
     
-    data={'max_age':0,'max_uses':0,'temporary':False,'unique':True,'target_user_type':1,
-        'target_user_id':voice_state.user.id,}
+    data = {
+        'max_age'           : 0,
+        'max_uses'          : 0,
+        'temporary'         : False,
+        'unique'            : True,
+        'target_user_type'  : 1,
+        'target_user_id'    : voice_state.user.id,
+            }
     
     try:
-        data=await client.http.invite_create(voice_state.channel.id,data)
+        data = await client.http.invite_create(voice_state.channel.id,data)
     except DiscordException as err:
         result=repr(err)
     else:
@@ -625,7 +697,7 @@ async def follow_test(client,message,content):
         return
     
     try:
-        webhook=await client.channel_follow(source_channel,target_channel)
+        webhook = await client.channel_follow(source_channel,target_channel)
     except ValueError as err:
         text=err.args[0]
     except BaseException as err:
@@ -642,7 +714,7 @@ async def show_invite_data(client,message,content):
     if not client.is_owner(message.author):
         return
     
-    data=await client.http.invite_get(content,{'with_counts':True})
+    data = await client.http.invite_get(content,{'with_counts':True})
     text=repr(data)
     await client.message_create(message.channel,text)
 
@@ -652,7 +724,7 @@ async def show_invite_data(client,message,content):
 async def show_invite(client,message,content):
     if not client.is_owner(message.author):
         return
-    invite=await client.invite_get(content)
+    invite = await client.invite_get(content)
     text=pconnect(invite)
     await client.message_create(message.channel,text)
 
@@ -982,7 +1054,7 @@ async def multy_emoji_test(client,message,content):
     if not client.is_owner(message.author):
         return
     
-    message=await client.message_create(message.channel,'Will add 2 same emojis, lets se, what happens')
+    message = await client.message_create(message.channel,'Will add 2 same emojis, lets se, what happens')
     
     emoji=BUILTIN_EMOJIS['heart']
     await client.reaction_add(message,emoji)
@@ -1262,11 +1334,11 @@ async def test_multyimage(client,message,content):
         embed.add_image(avatar_url)
         embeds.append(embed)
     
-    webhooks=await client.webhook_get_channel(message.channel)
+    webhooks = await client.webhook_get_channel(message.channel)
     if webhooks:
         webhook=webhooks[0]
     else:
-        webhook=await client.webhook_create(message.channel,'UwU')
+        webhook = await client.webhook_create(message.channel,'UwU')
     
     await client.webhook_send(webhook,embed=embeds,name=message.author.name,avatar_url=message.author.avatar_url)
 
@@ -1283,7 +1355,7 @@ async def test_suppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1307,7 +1379,7 @@ async def test_unsuppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1331,7 +1403,7 @@ async def test_get_suppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1352,7 +1424,7 @@ async def test_get_could_suppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1373,7 +1445,7 @@ async def test_edit_suppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1413,7 +1485,7 @@ async def test_edit_unsuppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1449,7 +1521,7 @@ async def test_message_edit_suppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1477,7 +1549,7 @@ async def test_message_edit_unsuppress(client,message,content):
         return
     
     try:
-        message=await client.message_get(message.channel,message_id)
+        message = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
         return
@@ -1555,7 +1627,7 @@ class NewGenerationPagination(object):
         self.timeouter=None
         
         if message is None:
-            message=await client.message_create(channel,embed=pages[0])
+            message = await client.message_create(channel,embed=pages[0])
             self.message=message
         
         if not channel.cached_permissions_for(client).can_add_reactions:
@@ -1891,7 +1963,7 @@ async def test_new_generation(client,message,content):
         pages=[Embed(f'Page 1')]
         
         try:
-            pagination=await NewGenerationPagination(client,channel,pages)
+            pagination = await NewGenerationPagination(client,channel,pages)
         except DiscordException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,'Test 1 failed:\n\n',file=buffer)
@@ -1924,7 +1996,7 @@ async def test_new_generation(client,message,content):
             pages.append(Embed(f'Page {index}'))
         
         try:
-            pagination=await NewGenerationPagination(client,message.channel,pages)
+            pagination = await NewGenerationPagination(client,message.channel,pages)
         except DiscordException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,'Test 2 failed:\n\n',file=buffer)
@@ -1958,7 +2030,7 @@ async def test_new_generation(client,message,content):
             pages.append(Embed(f'Page {index}'))
         
         try:
-            pagination=await NewGenerationPagination(client,message.channel,pages)
+            pagination = await NewGenerationPagination(client,message.channel,pages)
         except DiscordException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,'Test 3 failed:\n\n',file=buffer)
@@ -2013,7 +2085,7 @@ async def test_new_generation(client,message,content):
             pages.append(Embed(f'Page {index}'))
         
         try:
-            pagination=await NewGenerationPagination(client,channel,pages)
+            pagination = await NewGenerationPagination(client,channel,pages)
         except DiscordException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,'Test 4 failed:\n\n',file=buffer)
@@ -2061,7 +2133,7 @@ async def test_new_generation(client,message,content):
             pages.append(Embed(f'Page {index}'))
         
         try:
-            pagination=await NewGenerationPagination(client,channel,pages,timeout=0.5)
+            pagination = await NewGenerationPagination(client,channel,pages,timeout=0.5)
         except DiscordException as err:
             with StringIO() as buffer:
                 await client.loop.render_exc_async(err,'Test 5 failed:\n\n',file=buffer)
@@ -2287,7 +2359,7 @@ async def test_remove_embed(client,message,content):
     if not client.is_owner(message.author):
         return
     
-    message=await client.message_create(message.channel,'content',Embed('Embed'))
+    message = await client.message_create(message.channel,'content',Embed('Embed'))
     data={'embed':None}
     
     try:
@@ -2323,7 +2395,7 @@ async def test_message_delete(client,message,content):
         return
     
     try:
-        result=await client.http.request(ratelimit_handler(client.loop,channel_id,71680),METH_DELETE,
+        result = await client.http.request(ratelimit_handler(client.loop,channel_id,71680),METH_DELETE,
             f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',reason=None)
     except DiscordException as err:
         with StringIO() as buffer:
