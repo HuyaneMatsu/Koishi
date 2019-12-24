@@ -1309,7 +1309,10 @@ class _role_emoji_emoji_checker(object):
         if emoji not in ROLE_EMOJI_EMOJIS:
             return False
         
-        if not self.guild.permissions_for(user).can_administartor:
+        if user.is_bot:
+            return False
+        
+        if not self.guild.permissions_for(user).can_administrator:
             return False
         
         return True
@@ -1329,37 +1332,37 @@ async def role_emoji(client,message,emoji,roles):
     roles.sort()
     roles_=emoji.roles
     
-    embed=Embed(emoji.as_reaction)
+    embed=Embed().add_author(emoji.url,emoji.name)
     
-    if (roles_ is None) or (not roles):
+    if (roles_ is None) or (not roles_):
         role_text='*none*'
     else:
         role_text=', '.join([role.mention for role in roles_])
     
-    embed.add_field('Roles after:',role_text)
+    embed.add_field('Roles before:',role_text)
     
-    if (not roles):
+    if (not roles) or (not roles):
         role_text='*none*'
     else:
         role_text=', '.join([role.mention for role in roles])
     
     embed.add_field('Roles after:',role_text)
     
-    message = await client.message_create(message.channel,embed=Embed)
-    for emoji in ROLE_EMOJI_EMOJIS:
-        await client.reaction_add(message,emoji)
+    message = await client.message_create(message.channel,embed=embed)
+    for emoji_ in ROLE_EMOJI_EMOJIS:
+        await client.reaction_add(message,emoji_)
     
     try:
-        emoji, _ = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
+        emoji_, _ = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
     except TimeoutError:
-        emoji = ROLE_EMOJI_CANCEL
+        emoji_ = ROLE_EMOJI_CANCEL
     
     if message.channel.cached_permissions_for(client).can_manage_messages:
-        task = client.loop.create_task(client.reaction_remove(message))
+        task = client.loop.create_task(client.reaction_clear(message))
         if __debug__: # if exception occures, we silence it
             task.__silence__()
         
-    if emoji is ROLE_EMOJI_OK:
+    if emoji_ is ROLE_EMOJI_OK:
         try:
             await client.emoji_edit(emoji,roles=roles)
         except DiscordException as err:
@@ -1367,7 +1370,7 @@ async def role_emoji(client,message,emoji,roles):
         else:
             footer='Emoji edited succesfully.'
     
-    elif emoji is ROLE_EMOJI_CANCEL:
+    elif emoji_ is ROLE_EMOJI_CANCEL:
         footer = 'Emoji edit cancelled'
     
     else: #should not happen

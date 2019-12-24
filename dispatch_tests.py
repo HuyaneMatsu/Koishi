@@ -405,8 +405,8 @@ class dispatch_tester:
         if self.channel is None:
             return
 
-        result=pretty_print(guild)
-        result.insert(0,f'Emoji created: {emoji.id}')
+        result=pretty_print(emoji)
+        result.insert(0,f'Emoji created: {emoji.name} {emoji.id} at guild {guild!r}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
     
@@ -416,8 +416,8 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=pretty_print(guild)
-        result.insert(0,f'Emoji deleted: {emoji.id} of guild {guild!r}')
+        result=pretty_print(emoji)
+        result.insert(0,f'Emoji deleted: {emoji.name} {emoji.id} at guild {guild!r}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
         
@@ -428,7 +428,7 @@ class dispatch_tester:
             return
     
         result=[]
-        result.append(f'Emoji edited:{emoji.name!r} : {emoji:e}\n')
+        result.append(f'Emoji edited: {emoji.name} {emoji.id} at guild {guild!r}')
         for key, value in old.items():
             if key=='roles':
                 removed, added = listdifference(value,emoji.roles)
@@ -436,12 +436,12 @@ class dispatch_tester:
                 if removed:
                     result.append(f'Removed roles: ({len(removed)})')
                     for role in removed:
-                        result.append(f'- {role.mention}')
+                        result.append(f'- {role.name} {role.id}')
                 
                 if added:
                     result.append(f'Added roles: ({len(added)})')
                     for role in added:
-                        result.append(f'- {role.mention}')
+                        result.append(f'- {role.name} {role.id}')
                 
                 continue
             
