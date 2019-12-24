@@ -363,7 +363,7 @@ class dispatch_tester:
         result=[f'A channel was edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
         for key,value in old.items():
             if key=='overwrites':
-                removed,added=listdifference(value,channel.overwrites)
+                removed,added=listdifference(sorted(value),sorted(channel.overwrites))
                 if removed:
                     result.append(f'Overwrites removed : ({len(removed)})')
                     for value in removed:
