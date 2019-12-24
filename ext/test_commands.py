@@ -2419,6 +2419,13 @@ async def get_private_channel_id(client,message):
     await client.message_create(message.channel,channel.id)
 
 @commands
+async def show_attachments(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    await client.message_create(message.channel,repr(message.attachments))
+    
+@commands
 async def message_sequencer_test(client,message):
     if not client.is_owner(message.author):
         return
