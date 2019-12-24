@@ -61,6 +61,10 @@ class ShuffledShelter(object):
         'message', 'pop', 'task_flag', 'timeouter', 'title', 'urls')
     
     async def __new__(cls,client,channel,urls,pop,title='Link'):
+        if not urls:
+            await client.message_create(channel,embed=Embed('No result'))
+            return
+        
         self=object.__new__(cls)
         self.client=client
         self.channel=channel
@@ -305,13 +309,15 @@ for title,tag_name,command_names in (
         ('Fujiwara no Mokou',       'fujiwara_no_mokou',    ('mokou',),),
         ('Futatsuiwa Mamizou',      'futatsuiwa_mamizou',   ('mamizou',),),
         ('Haan Maeriberii',         'maribel_hearn',        ('maeriberii','maribel',),),
+        ('Haniyasushin Keiki',      'haniyasushin_keiki',   ('keiki',),),
         ('Hakurei Reimu',           'hakurei_reimu',        ('reimu',),),
         ('Hata no Kokoro',          'hata_no_kokoro',       ('kokoro',),),
+        ('Hei Meirin',              'hei_meiling',          ('hei',),),
         ('Hieda no Akyuu',          'hieda_no_akyuu',       ('akyuu',),),
         ('Hijiri Byakuren',         'hijiri_byakuren',      ('byakuren',),),
         ('Himekaidou Hatate',       'himekaidou_hatate',    ('hatate',),),
         ('Hinanawi Tenshi',         'hinanawi_tenshi',      ('tenshi',),),
-        ('Hon Meirin',              'hong_meiling',         ('meirin','meiling',),),
+        ('Hon Meirin',              'hong_meiling',         ('meirin','meiling','hong',),),
         ('Horikawa Raiko',          'horikawa_raiko',       ('raiko',),),
         ('Hoshiguma Yuugi',         'hoshiguma_yuugi',      ('yuugi',),),
         ('Houjuu Nue',              'houjuu_nue',           ('nue',),),
@@ -324,6 +330,7 @@ for title,tag_name,command_names in (
         ('Inaba Tewi',              'inaba_tewi',           ('tewi',),),
         ('Inubashiri Momiji',       'inubashiri_momiji',    ('momiji',),),
         ('Izayoi Sakuya',           'izayoi_sakuya',        ('sakuya',),),
+        ('Joutouguu Mayumi',        'joutougu_mayumi',      ('mayumi',),),
         ('Junko',                   'junko_(touhou)',       ('junko',),),
         ('Kaenbyou Rin',            'kaenbyou_rin',         ('rin',),),
         ('Kagiyama Hina',           'kagiyama_hina',        ('hina',),),
@@ -331,11 +338,13 @@ for title,tag_name,command_names in (
         ('Kamishirasawa Keine',     'kamishirasawa_keine',  ('keine',),),
         ('Kasodani Kyouko',         'kasodani_kyouko',      ('kyouko',),),
         ('Kawashiro Nitori',        'kawashiro_nitori',     ('nitori',),),
-        ('Kazami Yuuka',            'kazami_yuuka',         ('yuuka',),),
+        ('Kazami Yuuka',            'kazami_yuuka',         ('yuuka',),), # same as 'kazami_youka'
+        ('Kicchou Yachie',          'kitcho_yachie',        ('yachie',),),
         ('Kijin Seija',             'kijin_seija',          ('seija',),),
         ('Kirisame Marisa',         'kirisame_marisa',      ('marisa',),),
         ('Kishin Sagume',           'kishin_sagume',        ('sagume',),),
         ('Kisume',                  'kisume',               ('kisume',),),
+        ('Kitashirakawa Chiyuri',   'kitashirakawa_chiyuri',('chiyuri',),),
         ('Koakuma',                 'koakuma',              ('koakuma',),),
         ('Kochiya Sanae',           'kochiya_sanae',        ('sanae',),),
         ('Komano Aunn',             'komano_aun',           ('aunn','aun',),),
@@ -343,8 +352,10 @@ for title,tag_name,command_names in (
         ('Komeiji Satori',          'komeiji_satori',       ('satori',),),
         ('Konngara',                'konngara',             ('konngara',),),
         ('Konpaku Youmu',           'konpaku_youmu',        ('youmu',),),
+        ('Kokuu Haruto',            'kokuu_haruto',         ('kokuu',),), # no result now
         ('Kuraunpiisu',             'clownpiece',           ('kuraunpiisu','clownpiece',),),
         ('Kurodani Yamame',         'kurodani_yamame',      ('yamame',),),
+        ('Kurokoma Saki',           'kurokoma_saki',        ('saki',),),
         ('Maagatoroido Arisu',      'alice_margatroid',     ('arisu','alice',),),
         ('Matara Okina',            'matara_okina',         ('okina',),),
         ('Merankorii Medisun',      'medicine_melancholy',  ('medisun', 'medicine',),),
@@ -368,12 +379,13 @@ for title,tag_name,command_names in (
         ('Purizumuribaa Runasa',    'lunasa_prismriver',    ('runasa','lunasa',),),
         ('Rapisurazuri Hekaatia',   'hecatia_lapislazuli',  ('hekaatia','hecatia',),),
         ('Reisen Udongein Inaba',   'reisen_udongein_inaba',('reisen',),),
-        ('Reiuji Utsuho',           'reiuji_utsuho',        ('utsuho',),),
+        ('Reiuji Utsuho',           'reiuji_utsuho',        ('utsuho','okuu',),),
         ('Riguru Naitobagu',        'wriggle_nightbug',     ('riguru','wriggle',),),
         ('Ringo',                   'ringo_(touhou)',       ('ringo',),),
         ('Roorerai Misutia',        'mystia_lorelei',       ('misutia','mystia',),),
         ('Ruumia',                  'rumia',                ('ruumia','rumia',),),
         ('Safaia Sutaa',            'star_sapphire',        ('sutaa','star',),),
+        ('Saigyouji Yuyuko',        'saigyouji_yuyuko',     ('yuyuko',),),
         ('Saigyouji Yuyuko',        'saigyouji_yuyuko',     ('yuyuko',),),
         ('Sakata Nemuno',           'sakata_nemuno',        ('nemuno',),),
         ('Seiran',                  'seiran_(touhou)',      ('seiran',),),

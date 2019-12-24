@@ -342,6 +342,7 @@ async def process_on_command_upload(client,message,content):
             image.decoderconfig=()
             image.decodermaxblock=65536
             image.readonly=False
+            image._exif=None
             image._open()
             await client.loop.run_in_executor(functools.partial(image.save,filename))
         else:

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from hata.exceptions import DiscordException
-from hata.parsers import EVENTS
-from hata.prettyprint import pchunkify,pretty_print
+from hata.parsers import EVENTS, DEFAULT_EVENT
+from hata.prettyprint import pchunkify, pretty_print
 from hata.events import Pagination
-from hata.others import cchunkify,Status
+from hata.others import cchunkify, Status
 from hata.permission import PERM_KEYS
-from hata.embed import EXTRA_EMBED_TYPES,Embed
-from hata.dereaddons_local import listdifference,method
+from hata.embed import EXTRA_EMBED_TYPES, Embed
+from hata.dereaddons_local import listdifference, method
 from hata.futures import Task
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
@@ -46,7 +46,7 @@ class dispatch_tester:
         
         actual=getattr(client.events,content)
         if type(actual) is method and actual.__self__ is self:
-            setattr(client.events,content,client.events.DEFAULT_EVENT)
+            setattr(client.events,content,DEFAULT_EVENT)
             await client.message_create(message.channel,'Event removed')
         else:
             self.old_events[content]=actual
@@ -60,9 +60,9 @@ class dispatch_tester:
             return
         
         result=[]
-        result.append(f'Me, {client:f} got edited')
+        result.append(f'Me, {client.full_name} was edited')
         for key,value in old.items():
-            result.append(f'- {key} changed: {value} -> {getattr(client,key)}')
+            result.append(f'{key} changed: {value} -> {getattr(client,key)}')
 
         try:
             await client.message_create(self.channel,'\n'.join(result))
@@ -86,26 +86,26 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'Message {message.id} got edited']
+        result=[f'Message {message.id} was edited']
 
         channel=message.channel
-        result.append(f'- At channel : {channel:d} {channel.id}')
+        result.append(f'At channel : {channel:d} {channel.id}')
         guild=channel.guild
         if guild is not None:
-            result.append(f'- At guild : {guild.name} {guild.id}')
+            result.append(f'At guild : {guild.name} {guild.id}')
 
         for key,value in old.items():
             if key in ('pinned','activity_party_id','everyone_mention'): 
-                result.append(f'- {key} changed: {value!r} -> {getattr(message,key)!r}')
+                result.append(f'{key} changed: {value!r} -> {getattr(message,key)!r}')
                 continue
             if key in ('edited',):
                 if value is None:
-                    result.append(f'- {key} changed: None -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
+                    result.append(f'{key} changed: None -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
                 else:
-                    result.append(f'- {key} changed: {value:%Y.%m.%d-%H:%M:%S} -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
+                    result.append(f'{key} changed: {value:%Y.%m.%d-%H:%M:%S} -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
                 continue
             if key in ('application','activity','attachments','embeds'):
-                result.append(f'- {key} changed:')
+                result.append(f'{key} changed:')
                 if value is None:
                     result.append('From None')
                 else:
@@ -117,12 +117,12 @@ class dispatch_tester:
                     result.extend(pretty_print(value))
                 continue
             if key in ('content',):
-                result.append(f'- {key} changed from:')
+                result.append(f'{key} changed from:')
                 content=value
                 break_=False
                 while True:
                     content_ln=len(content)
-                    result.append(f'- content: (len={content_ln})')
+                    result.append(f'{key}: (len={content_ln})')
                     if content_ln>500:
                         content=content[:500].replace('`','\\`')
                         result.append(f'--------------------\n{content}\n... +{content_ln-500} more\n--------------------')
@@ -136,26 +136,17 @@ class dispatch_tester:
                     result.append('To:')
                 continue
             if key in ('user_mentions','role_mentions','cross_mentions'):
-                result.append(f'- {key} changed:')
-                if type(value) is tuple:
-                    old,new=value
-                    if old:
-                        result.append(f'    - removed : {", ".join([f"{obj.name} {obj.id}" for obj in old])}')
-                    if new:
-                        result.append(f'    - added : {", ".join([f"{obj.name} {obj.id}" for obj in new])}')
-                else:
-                    if value is None:
-                        str_form='None'
-                    else:
-                        str_form=', '.join([f'{obj.name} {obj.id}' for obj in value])
-                    result.append(f'    - from: {str_form}')
+                removed, added = listdifference(value,getattr(message,key))
+                if removed:
+                    result.append(f'{key}s removed : {len(removed)}')
+                    for obj in removed:
+                        result.append(f'- {obj.name} {obj.id}')
+                        
+                if added:
+                    result.append(f'{key}s added : {len(added)}')
+                    for obj in added:
+                        result.append(f'- {obj.name} {obj.id}')
                     
-                    new=getattr(message,key)
-                    if new is None:
-                        str_form='None'
-                    else:
-                        str_form=', '.join([f'{obj.name} {obj.id}' for obj in new])
-                    result.append(f'    - to: {str_form}')
                 continue
             
             if key in ('flags',):
@@ -164,12 +155,17 @@ class dispatch_tester:
                 value=getattr(message,key)
                 new=list(value)
                 new.sort()
-                old,new=listdifference(old,new)
-                result.append(f'- {key} changed:')
-                if old:
-                    result.append(f'    - removed : {", ".join(old)}')
-                if new:
-                    result.append(f'    - added : {", ".join(new)}')
+                removed,added=listdifference(old,new)
+                if removed:
+                    result.append(f'{key}s removed : {len(removed)}')
+                    for name in removed:
+                        result.append(f'- {name}')
+                        
+                if added:
+                    result.append(f'{key}s added : {len(added)}')
+                    for name in added:
+                        result.append(f'- {name}')
+                    
                 continue
 
         text=cchunkify(result)
@@ -185,13 +181,13 @@ class dispatch_tester:
         result=[f'Message {message.id} got embed update:']
 
         channel=message.channel
-        result.append(f'- At channel : {channel:d} {channel.id}')
+        result.append(f'At channel : {channel:d} {channel.id}')
         guild=channel.guild
         if guild is not None:
-            result.append(f'- At guild : {guild.name} {guild.id}')
+            result.append(f'At guild : {guild.name} {guild.id}')
 
         if flag==1:
-            result.append('Only sizes got update.')
+            result.append('Only sizes were update.')
         elif flag==2:
             result.append('Links! Links everywhere...')
         else: #flag==3
@@ -262,14 +258,14 @@ class dispatch_tester:
             pass
         else:
             for key in ('desktop','mobile','web'):
-                result.append(f'- {key} status: {statuses.get(key,Status.offline)} -> {user.statuses.get(key,Status.offline)}')
+                result.append(f'{key} status: {statuses.get(key,Status.offline)} -> {user.statuses.get(key,Status.offline)}')
 
             try:
                 status=old['status']
             except KeyError:
                 pass
             else:
-                result.append(f'- status changed: {status} -> {user.status}')
+                result.append(f'status changed: {status} -> {user.status}')
             
         try:
             activities=old['activities']
@@ -310,9 +306,9 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'A user got updated: {user:f} {user.id}']
+        result=[f'A user was updated: {user:f} {user.id}']
         for key,value in old. items():
-            result.append(f'- {key} : {value} -> {getattr(user,key)}')
+            result.append(f'{key} : {value} -> {getattr(user,key)}')
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
@@ -323,7 +319,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'{user:f} {user.id} profile got edited at guild {guild.name!r} {guild.id}:']
+        result=[f'{user.full_name} {user.id} profile was edited at guild {guild.name!r} {guild.id}:']
         profile=user.guild_profiles[guild]
         for key,value in old.items():
             if key in ('nick','boosts_since'):
@@ -331,12 +327,12 @@ class dispatch_tester:
                 continue
             
             if key=='roles':
-                removed=value[0]
+                removed, added = listdifference(value,profile.roles)
                 if removed:
                     result.append(f'Roles removed: ({len(removed)})')
                     for role in removed:
                         result.append(f'- {role.name} {role.id}')
-                added=value[1]
+                
                 if added:
                     result.append(f'Roles added: ({len(added)})')
                     for role in added:
@@ -354,7 +350,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text=f'```\nA channel got deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
+        text=f'```\nA channel was deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
 
@@ -364,19 +360,20 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'A channel got edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
+        result=[f'A channel was edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
         for key,value in old.items():
-            if key in ('overwrites',):
-                removed,added=value
+            if key=='overwrites':
+                removed,added=listdifference(value,channel.overwrites)
                 if removed:
-                    result.append(f'Removed {key}: ({len(removed)})')
+                    result.append(f'Overwrites removed : ({len(removed)})')
                     for value in removed:
                         result.append(f'- {value.target!r} : {value.allow} {value.deny}')
                 if added:
-                    result.append(f'added {key}: ({len(removed)})')
+                    result.append(f'Overwrites added: ({len(added)})')
                     for value in added:
                         result.append(f'- {value.target!r} : {value.allow} {value.deny}')
                 continue
+            
             result.append(f'{key} changed: {value!r} -> {getattr(channel,key)!r}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
@@ -388,7 +385,7 @@ class dispatch_tester:
             return
         
         result=pretty_print(channel)
-        result.insert(0,f'A channel got created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
+        result.insert(0,f'A channel was created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
@@ -402,27 +399,54 @@ class dispatch_tester:
         pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
 
+    @classmethod
+    async def emoji_create(self,client,guild,emoji):
+        Task(self.old_events['emoji_create'](client,guild,emoji),client.loop)
+        if self.channel is None:
+            return
+
+        result=pretty_print(guild)
+        result.insert(0,f'Emoji created: {emoji.id}')
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
+        await Pagination(client,self.channel,pages,120.)
+    
+    @classmethod
+    async def emoji_delete(self,client,guild,emoji):
+        Task(self.old_events['emoji_delete'](client,guild,emoji),client.loop)
+        if self.channel is None:
+            return
+        
+        result=pretty_print(guild)
+        result.insert(0,f'Emoji deleted: {emoji.id} of guild {guild!r}')
+        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
+        await Pagination(client,self.channel,pages,120.)
         
     @classmethod
-    async def emoji_edit(self,client,guild,changes):
-        Task(self.old_events['emoji_edit'](client,guild,changes),client.loop)
+    async def emoji_edit(self,client,guild,emoji,old):
+        Task(self.old_events['emoji_edit'](client,guild,emoji,old),client.loop)
         if self.channel is None:
             return
     
         result=[]
-        for modtype,emoji,diff in changes:
-            if modtype=='n':
-                result.append(f'New emoji: {emoji.name!r} : {emoji:e}')
+        result.append(f'Emoji edited:{emoji.name!r} : {emoji:e}\n')
+        for key, value in old.items():
+            if key=='roles':
+                removed, added = listdifference(value,emoji.roles)
+                
+                if removed:
+                    result.append(f'Removed roles: ({len(removed)})')
+                    for role in removed:
+                        result.append(f'- {role.mention}')
+                
+                if added:
+                    result.append(f'Added roles: ({len(added)})')
+                    for role in added:
+                        result.append(f'- {role.mention}')
+                
                 continue
-            if modtype=='d':
-                result.append(f'Deleted emoji: {emoji.name!r} : {emoji:e}')
-                continue
-            if modtype=='e':
-                result.append(f'Emoji edited:{emoji.name!r} : {emoji:e}\n')
-                for key,value in diff.items():
-                    result.append(f'- {key}: {value} -> {getattr(emoji,key)}')
-                continue
-            raise RuntimeError(modtype) #bugged?
+            
+            result.append(f'{key}: {value} -> {getattr(emoji,key)}')
+            continue
         
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
@@ -441,7 +465,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text=[f'Bai bai {user:f}! with your {len(profile.roles)} roles.']
+        text=[f'Bai bai {user.full_name}! with your {len(profile.roles)} roles.']
         if profile.boosts_since is not None:
             text.append('Also rip your boost :c')
         text.append(f'The guild is down to {guild.user_count} members!')
@@ -474,7 +498,7 @@ class dispatch_tester:
                     'available','has_animated_icon','description',
                     'vanity_code','banner','max_members','max_presences',
                     'premium_tier','booster_count','widget_enabled',
-                    'embed_enabled','preferred_language'):
+                    'embed_enabled','preferred_language', 'discovery_splash'):
                 result.append(f'- {key} : {value} - > {getattr(guild,key)}')
                 continue
             
@@ -483,39 +507,50 @@ class dispatch_tester:
                 result.append(f'- {key} : {value!s} {value.value} -> {other!s} {other.value}')
                 continue
             
-            if key in ('features',):
-                result.append(f'{key}:')
-                removed=value[0]
+            if key=='features':
+                removed, added = listdifference(value,guild.features)
                 if removed:
-                    result.append(f'- {key} removed: ({len(removed)}')
-                    for subvalue in removed:
-                        result.append(f'- {subvalue.value}')
-                added=value[1]
+                    result.append(f'Features removed: ({len(removed)}')
+                    for feature in removed:
+                        result.append(f'- {feature.value}')
+                
                 if added:
-                    result.append(f'- {key} added: ({len(added)})')
-                    for subvalue in added:
-                        result.append(f'- {subvalue.value}')
+                    result.append(f'Features added: ({len(added)})')
+                    for feature in added:
+                        result.append(f'- {feature.value}')
+                
                 continue
             
-            if key in ('system_channel','afk_channel','widget_channel','embed_channel'):
+            if key in ('system_channel','afk_channel','widget_channel','embed_channel','rules_channel'):
                 other=getattr(guild,key)
                 if value is None:
-                    result.append(f'- {key} : None -> {other.name} {other.id}')
+                    result.append(f'{key} : None -> {other.name} {other.id}')
                 elif other is None:
-                    result.append(f'- {key} : {value.name} {value.id} -> None')
+                    result.append(f'{key} : {value.name} {value.id} -> None')
                 else:
-                    result.append(f'- {key} : {value.name} {value.id} -> {other.name} {other.id}')
+                    result.append(f'{key} : {value.name} {value.id} -> {other.name} {other.id}')
                 continue
             
             if key in ('system_channel_flags',):
-                added=list(value)
-                removed=list(getattr(guild,key))
-                result.append(f'- {key} : {", ".join(added) if added else "NONE"} -> {", ".join(removed) if removed else "NONE"}')
-                continue
+                old=list(value)
+                old.sort()
+                new=list(getattr(guild,key))
+                new.sort()
+                removed, added = listdifference(old,new)
+                
+                if removed:
+                    result.append(f'{key} removed : ({len(removed)})')
+                    for name in removed:
+                        result.append(f' - {name}')
+                
+                if added:
+                    result.append(f'{key} added : ({len(added)})')
+                    for name in added:
+                        result.append(f' - {name}')
             
             if key in ('owner',):
                 other=getattr(guild,'owner')
-                result.append(f'- {key} : {value:f} {value.id} -> {other:f} {other.id}')
+                result.append(f'{key} : {value.full_name} {value.id} -> {other.full_name} {other.id}')
                 continue
             
             raise RuntimeError(key)
@@ -593,19 +628,19 @@ class dispatch_tester:
         result=[f'A role got edited at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}']
         for key,value in old.items():
             if key in ('name','separated','managed','mentionable','position',):
-                result.append(f'- {key} : {value} -> {getattr(role,key)}')
+                result.append(f'{key} : {value} -> {getattr(role,key)}')
                 continue
             if key=='color':
-                result.append(f'- {key} : {value.as_html} -> {role.color.as_html}')
+                result.append(f'{key} : {value.as_html} -> {role.color.as_html}')
                 continue
             if key=='permissions':
-                result.append('- permissions :')
+                result.append('permissions :')
                 other=role.permissions
                 for name,index in PERM_KEYS.items():
                     old_value=(value>>index)&1
                     new_value=(other>>index)&1
                     if old_value!=new_value:
-                        result.append(f'   {name} : {bool(old_value)} -> {bool(new_value)}')
+                        result.append(f'{name} : {bool(old_value)} -> {bool(new_value)}')
                 continue
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
@@ -639,20 +674,20 @@ class dispatch_tester:
             result.append('Voice state update, action: update')
             user=state.user
             if user.partial:
-                result.append(f'- user : Parital user {user.id}')
+                result.append(f'user : Parital user {user.id}')
             else:
-                result.append(f'- user : {user:f} ({user.id})')
+                result.append(f'user : {user.full_name} ({user.id})')
             guild=state.channel.guild
             if guild is not None:
-                result.append(f'- guild : {guild.name} ({guild.id})')
-            result.append(f'- session_id : {state.session_id!r}')
+                result.append(f'guild : {guild.name} ({guild.id})')
+            result.append(f'session_id : {state.session_id!r}')
             result.append('Changes:')
             for key,value in old.items():
                 if key=='channel':
                     other=state.channel
-                    result.append(f'- channel : {value.name} {value.id} -> {other.name} {other.id}')
+                    result.append(f'channel : {value.name} {value.id} -> {other.name} {other.id}')
                     continue
-                result.append(f'- {key} : {value} -> {getattr(state,key)}')
+                result.append(f'{key} : {value} -> {getattr(state,key)}')
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
@@ -665,11 +700,11 @@ class dispatch_tester:
         
         result=['Typing:']
         if user.partial:
-            result.append(f'- user : Parital user {user.id}')
+            result.append(f'user : Parital user {user.id}')
         else:
-            result.append(f'- user : {user:f} ({user.id})')
-        result.append(f'- channel : {channel.name} {channel.id}')
-        result.append(f'- timestamp : {timestamp:%Y.%m.%d-%H:%M:%S}')
+            result.append(f'user : {user.full_name} ({user.id})')
+        result.append(f'channel : {channel.name} {channel.id}')
+        result.append(f'timestamp : {timestamp:%Y.%m.%d-%H:%M:%S}')
         
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
@@ -680,7 +715,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=['The client\'s settings got updated:','```']
+        result=['The client\'s settings were updated:','```']
         for key,value in old.items():
             result.append(f' {key} : {value!r} -> {getattr(client.settings,key)!r}')
         result.append('```')
@@ -716,6 +751,8 @@ async def _help_switch(client,message):
         '- `client_edit_settings`\n'
         '- `client_edit`\n'
         '- `embed_update`\n'
+        '- `emoji_create`\n'
+        '- `emoji_delete`\n'
         '- `emoji_edit`\n'
         '- `guild_ban_add`\n'
         '- `guild_ban_delete`\n'

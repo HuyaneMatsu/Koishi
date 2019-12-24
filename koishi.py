@@ -11,13 +11,13 @@ from hata.prettyprint import pchunkify
 from hata.futures import CancelledError,sleep,FutureWM,Task,render_exc_to_list
 from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild
 from hata.channel import cr_pg_channel_object,ChannelText
-from hata import others
 from hata.exceptions import DiscordException
 from hata.emoji import BUILTIN_EMOJIS,parse_emoji
-from hata.others import filter_content
+from hata.others import filter_content, chunkify
 from hata.guild import Guild,GUILDS
 from hata.role import Role
 from hata.embed import Embed
+from hata.oauth2 import parse_oauth2_redirect_url
 
 import image_handler
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER, invalid_command
@@ -55,9 +55,7 @@ class once_on_ready(object):
         
         self.called=True
         
-        print(f'{client:f} ({client.id}) logged in')
-        await client.update_application_info()
-        print(f'owner: {client.owner:f} ({client.owner.id})')
+        print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
         update_about(client)
 
 commands=eventlist()
@@ -754,7 +752,7 @@ async def oa2_feed(client,message,content):
 
     Task(client.message_delete(message),client.loop)
     try:
-        result=others.parse_oauth2_redirect_url(content)
+        result=parse_oauth2_redirect_url(content)
     except ValueError:
         await client.message_create(message.channel,'Bad link')
         return
@@ -1124,7 +1122,7 @@ async def count_messages(client,message,content):
     users=list(users.items())
     users.sort(reverse=True,key=lambda item:item[1])
     text=[f'{index}.: {user:f} : {count}' for index,(user,count) in enumerate(users,1)]
-    chunks=[Embed(description=chunk) for chunk in others.chunkify(text)]
+    chunks=[Embed(description=chunk) for chunk in chunkify(text)]
     await Pagination(client,source_channel,chunks)
 
 async def _help_count_messages(client,message):
@@ -1201,7 +1199,7 @@ async def count_reactions(client,message,content):
         for index,(emoji,emoji_count) in enumerate(emojis,1):
             text.append(f' - {index} {emoji:e} {emoji_count}')
     
-    chunks=[Embed(description=chunk) for chunk in others.chunkify(text)]
+    chunks=[Embed(description=chunk) for chunk in chunkify(text)]
     await Pagination(client,source_channel,chunks)        
 
 async def _help_count_reactions(client,message):
@@ -1296,6 +1294,99 @@ async def _help_color(client,message):
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('color',_help_color)
+
+ROLE_EMOJI_OK       = BUILTIN_EMOJIS['ok_hand']
+ROLE_EMOJI_CANCEL   = BUILTIN_EMOJIS['x']
+ROLE_EMOJI_EMOJIS   = (ROLE_EMOJI_OK, ROLE_EMOJI_CANCEL)
+
+class _role_emoji_emoji_checker(object):
+    __slots__ = ('guild',)
+    
+    def __init__(self, guild):
+        self.guild=guild
+    
+    def __call__(self, emoji, user):
+        if emoji not in ROLE_EMOJI_EMOJIS:
+            return False
+        
+        if not self.guild.permissions_for(user).can_administartor:
+            return False
+        
+        return True
+
+@commands(case='role-emoji')
+@ContentParser(
+    'condition, flags=r, default=" not (message.channel.permissions_for(message.author).can_administrator or client.is_owner(message.author))"',
+    'emoji',
+    'role, flags="nmi", mode="0+"',)
+async def role_emoji(client,message,emoji,roles):
+    permissions =message.channel.cached_permissions_for(client)
+    if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
+        await client.message_create(message.channel,
+            embed=Embed(description='I have no permissions to edit emojis, or to add reactions.'))
+        return
+    
+    roles.sort()
+    roles_=emoji.roles
+    
+    embed=Embed(emoji.as_reaction)
+    
+    if (roles_ is None) or (not roles):
+        role_text='*none*'
+    else:
+        role_text=', '.join([role.mention for role in roles_])
+    
+    embed.add_field('Roles after:',role_text)
+    
+    if (not roles):
+        role_text='*none*'
+    else:
+        role_text=', '.join([role.mention for role in roles])
+    
+    embed.add_field('Roles after:',role_text)
+    
+    message = await client.message_create(message.channel,embed=Embed)
+    for emoji in ROLE_EMOJI_EMOJIS:
+        await client.reaction_add(message,emoji)
+    
+    try:
+        emoji, _ = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
+    except TimeoutError:
+        emoji = ROLE_EMOJI_CANCEL
+    
+    if message.channel.cached_permissions_for(client).can_manage_messages:
+        task = client.loop.create_task(client.reaction_remove(message))
+        if __debug__: # if exception occures, we silence it
+            task.__silence__()
+        
+    if emoji is ROLE_EMOJI_OK:
+        try:
+            await client.emoji_edit(emoji,roles=roles)
+        except DiscordException as err:
+            footer=repr(err)
+        else:
+            footer='Emoji edited succesfully.'
+    
+    elif emoji is ROLE_EMOJI_CANCEL:
+        footer = 'Emoji edit cancelled'
+    
+    else: #should not happen
+        return
+    
+    embed.add_footer(footer)
+    
+    await client.message_edit(message,embed=embed)
+
+async def _help_role_emoji(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('role-emoji',(
+        'Edits the roles, for which the emoji is available for.\n'
+        f'Usage: `{prefix}role-emoji *emoji* <role_1> <role_2> ...`\n'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only. You must have adminsitartor role to excute this command')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('role-emoji',_help_role_emoji,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
 del Cooldown
 del CooldownHandler
