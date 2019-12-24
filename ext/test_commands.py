@@ -3,25 +3,27 @@ from io import StringIO
 from os.path import join
 import re
 from weakref import WeakSet,WeakKeyDictionary
+from time import time as time_now
+from collections import deque
 
-from hata.others import filter_content
+from hata.others import filter_content, now_as_id
 from hata.prettyprint import pchunkify, pconnect
 from hata.ios import ReuAsyncIO
 from hata.client import Achievement
-from hata.others import bytes_to_base64, parse_oauth2_redirect_url, Unknown
+from hata.others import bytes_to_base64, Unknown, DISCORD_EPOCH
+from hata.oauth2 import parse_oauth2_redirect_url
 from hata.emoji import BUILTIN_EMOJIS, parse_emoji
-from hata.futures import sleep, render_exc_to_list, Task, Future
+from hata.futures import sleep, render_exc_to_list, Task, Future, WaitTillFirst
 from hata.dereaddons_local import alchemy_incendiary
 from hata.invite import Invite
 from hata.exceptions import DiscordException
 from hata.embed import Embed
 from hata.channel import CHANNELS
 from hata.events_compiler import ContentParser
-from hata.parsers import eventlist, EventHandlerBase
+from hata.parsers import eventlist, EventHandlerBase, EventDescriptor
 from hata.events import Pagination, wait_for_message, GUI_STATE_READY,      \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
-    GUI_STATE_SWITCHING_CTX, multievent, asynclist, CommandProcesser,       \
-    EventDescriptor
+    GUI_STATE_SWITCHING_CTX, multievent, asynclist, CommandProcesser
 
 from hata.ratelimit import ratelimit_handler
 from hata.http import API_ENDPOINT
@@ -2415,3 +2417,120 @@ async def get_private_channel_id(client,message):
     channel = await client.channel_private_create(message.author)
     
     await client.message_create(message.channel,channel.id)
+
+@commands
+async def message_sequencer_test(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    channel=message.channel
+    guild=channel.guild
+    
+    if guild is None:
+        await client.message_create(channel,'Pls use this command at a guild.')
+        return
+    
+    if not guild.cached_permissions_for(client).can_administrator:
+        await client.message_create(channel,'I need administrator permission to execute this command.')
+        return
+    
+    await client.message_create(channel,'TODO')
+    return
+    
+    message_group_new   = deque()
+    message_group_old   = deque()
+    
+    now=time_now()
+    limit= int((now-1209540.)*1000.-DISCORD_EPOCH)<<22 # 2 weeks -1min
+    
+    message_id=9223372036854775807
+    for message in channel.messages:
+        message_id=message.id
+        if message_id<limit:
+            message_group_new.append(message_id)
+            continue
+        
+        if message.author==client:
+            message_group_new.append(message_id)
+            continue
+        
+        message_group_old.append(message_id)
+        continue
+    
+    tasks               = []
+    
+    get_mass_new_task   = None
+    get_mass_old_task   = None
+    
+    delete_mass_task    = None
+    delete_new_task     = None
+    delete_old_task     = None
+    
+    channel_id=channel.id
+    
+    last_message_id_new = message_id
+    last_message_id_old = limit
+    
+    if message_id>limit:
+        should_request_new=True
+    else:
+        should_request_new=False
+    
+    while True:
+        if should_request_new and (get_mass_new_task is None):
+            request_data = {
+                'limit' : 100,
+                'before': last_message_id_new,
+                    }
+            
+            get_mass_new_task = client.loop.cretate_task(client.http.message_logs(channel_id,request_data))
+            tasks.append(get_mass_new_task)
+            
+        if (get_mass_old_task is None):
+            request_data = {
+                'limit' : 100,
+                'before': last_message_id_old,
+                    }
+                
+            get_mass_old_task = client.loop.cretate_task(client.http.message_logs(channel_id,request_data))
+            tasks.append(get_mass_old_task)
+        
+        if (delete_mass_task is None):
+            message_limit=len(message_group_new)
+            if message_limit>1:
+                message_ids=[]
+                message_count=0
+                message_limit=len(message_group_new)
+                while True:
+                    if message_count==100:
+                        break
+                    if message_count==message_limit:
+                        break
+                    
+                    message_id=message_group_new.popleft()
+                    message_ids.append(message_id)
+                    continue
+            
+                delete_mass_task = client.loop.cretate_task(client.http.message_delete_multiple(channel_id,{'messages':message_ids},None))
+                tasks.append(delete_mass_task)
+                
+        if (delete_new_task is None):
+            if message_group_new:
+                message_id=message_group_new.pop()
+                delete_new_task = client.loop.cretate_task(client.http.message_delete(channel_id,message_id,None))
+                tasks.append(delete_new_task)
+        
+        if (last_message_id_old is None):
+            if message_group_old:
+                message_id=message_group_old.popleft()
+                delete_old_task = client.loop.cretate_task(client.http.message_delete_a2wo(channel_id,message_id,None))
+                tasks.append(delete_old_task)
+    
+        done = await WaitTillFirst(tasks,client.loop)
+    
+        for task in done:
+            pass
+    
+    
+    
+

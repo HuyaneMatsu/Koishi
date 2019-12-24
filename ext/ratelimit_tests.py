@@ -22,11 +22,11 @@ from hata.emoji import BUILTIN_EMOJIS
 from hata.message import Message
 from hata.others import ext_from_base64, bytes_to_base64, VoiceRegion,      \
     VerificationLevel, MessageNotificationLevel, ContentFilterLevel,        \
-    parse_oauth2_redirect_url, DISCORD_EPOCH, Discord_hdrs
+    DISCORD_EPOCH, Discord_hdrs
 from hata.user import User
 from hata.role import Role
 from hata.client import Client, Achievement
-from hata.oauth2 import UserOA2
+from hata.oauth2 import UserOA2, parse_oauth2_redirect_url
 from hata.channel import cr_pg_channel_object, ChannelCategory, ChannelText,\
     ChannelGuildBase
 from hata.guild import PartialGuild
@@ -37,7 +37,7 @@ from datetime import datetime,timedelta,timezone
 from hata.embed import Embed
 from hata.webhook import Webhook
 from hata.ios import ReuAsyncIO, AsyncIO
-from hata.events import wait_for_message, Pagination
+from hata.events import wait_for_message, Pagination, wait_for_reaction
 
 RATELIMIT_RESET=Discord_hdrs.RATELIMIT_RESET
 RATELIMIT_RESET_AFTER=Discord_hdrs.RATELIMIT_RESET_AFTER
@@ -357,15 +357,12 @@ def parse_header_ratelimit(headers):
             ).total_seconds()
     delay2=float(headers[RATELIMIT_RESET_AFTER])
     return (delay1 if delay1<delay2 else delay2)
-    
-async def notsocoro():
-    pass
 
 async def bypass_request(client,method,url,data=None,params=None,reason=None,header=None,decode=True,):
     self=client.http
     if header is None:
         header=self.header.copy()
-    header[titledstr.by_pass_titling('X-RateLimit-Precision')]='millisecond'
+    header[titledstr.bypass_titling('X-RateLimit-Precision')]='millisecond'
     
     if CONTENT_TYPE not in header and data and isinstance(data,(dict,list)):
         header[CONTENT_TYPE]='application/json'
@@ -484,6 +481,11 @@ class RLTCTX(object): #rate limit tester context manager
         unit_result = []
         
         for unit in RLTPrinterBuffer.buffers:
+            if type(unit) is str:
+                unit_result.append(unit)
+                unit_result.append('\n')
+                continue
+            
             task=unit.task
             unit_result.append(f'Task `{task.name}`')
             unit_result.append('\n')
@@ -630,7 +632,10 @@ class RLTCTX(object): #rate limit tester context manager
             page.add_footer(f'Page {index}/{page_count}')
         
         await Pagination(self.client,self.channel,pages)
-        
+    
+    def write(self,content):
+        RLTPrinterBuffer.buffers.append(content)
+    
     async def send(self,description):
         await Pagination(self.client,self.channel,[Embed(self.title,description).add_footer('Page 1/1')])
         raise CancelledError()
@@ -665,6 +670,8 @@ class RLTPrinterBuffer(object):
             raise RuntimeError(f'{self.__name__}.__enter__ was used outside of a task')
         
         for buffer in self.buffers:
+            if type(buffer) is str:
+                continue
             if buffer.task is current_task:
                 buffer.start_new_block=True
                 break
@@ -743,7 +750,7 @@ async def message_delete(client,message,):
 
 async def message_delete_multiple(client,messages,):
     if len(messages)==0:
-        return notsocoro()
+        return
     if len(messages)==1:
         return message_delete(client,messages[0])
     data={'messages':[message.id for message in messages]}
@@ -1938,6 +1945,7 @@ async def ratelimit_test0013(client,message,content):
     
     # message_delete (own new) unlimited
     # message_delete (own new) not limtied with message_delete (own old)
+    # message_delete limited sometimes with new/own group
     
 @ratelimit_commands
 async def ratelimit_test0014(client,message,content):
@@ -2006,7 +2014,8 @@ async def ratelimit_test0014(client,message,content):
     
     # message_delete (other new) unlimited
     # message_delete (other new) not limtied with message_delete (own old)
-
+    # message_delete limited sometimes with new/own group
+    
 @ratelimit_commands
 async def ratelimit_test0015(client,message,content):
     if not client.is_owner(message.author):
@@ -2055,8 +2064,9 @@ async def ratelimit_test0015(client,message,content):
         
         await WaitTillAll(tasks,loop)
     
-    # deleting ithout admin before 2 week is unlimited
-
+    # deleting without admin before 2 week is unlimited
+    # sometimes limited too propably
+    
 @ratelimit_commands
 async def ratelimit_test0016(client,message,content):
     if not client.is_owner(message.author):
@@ -2075,7 +2085,7 @@ async def ratelimit_test0016(client,message,content):
         
         old_limit=int((time_now()-1209610.)*1000.-DISCORD_EPOCH)<<22
         while True:
-            messages_ = await client.message_logs(channel,after=old_limit)
+            messages_ = await client.message_logs(channel,before=old_limit)
             for message_ in messages_:
                 if message_.author==client:
                     if (old_message_own is not None):
@@ -2138,13 +2148,14 @@ async def ratelimit_test0017(client,message,content):
         
         old_limit=int((time_now()-1209610.)*1000.-DISCORD_EPOCH)<<22
         
-        messages = await client.message_logs(channel,after=old_limit)
+        messages = await client.message_logs(channel,before=old_limit)
         
         loop=client.loop
         for message_ in messages:
             await Task(message_delete(client,message_),loop)
     
     # even deleting 100 message does not changes limit
+    # well, we discovered already, that it is only sometimes limited
     
 @ratelimit_commands
 async def ratelimit_test0018(client,message,content):
@@ -2160,11 +2171,11 @@ async def ratelimit_test0018(client,message,content):
             await RLT.send('I need admin permission to complete this command.')
         
         old_message=None
-        # check 6 weeks
-        old_limit=int((time_now()-3628810.)*1000.-DISCORD_EPOCH)<<22
+        # check 2 weeks
+        old_limit=int((time_now()-1209610.)*1000.-DISCORD_EPOCH)<<22
         
         while True:
-            messages_ = await client.message_logs(channel,after=old_limit)
+            messages_ = await client.message_logs(channel,before=old_limit)
             for message_ in messages_:
                 if message_.author==client:
                     old_message=message_
@@ -2184,7 +2195,7 @@ async def ratelimit_test0018(client,message,content):
     
         await Task(message_delete(client,old_message),client.loop)
     
-    # limit: 1s / 3 request
+    # after 2 week + own : limit: 1s / 3 request
     
 @ratelimit_commands
 async def ratelimit_test0019(client,message,content):
@@ -2195,16 +2206,16 @@ async def ratelimit_test0019(client,message,content):
     with RLTCTX(client,channel,'ratelimit_test0019') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
-    
+        
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
         old_message=None
-        # check 6 weeks
-        old_limit=int((time_now()-3628810.)*1000.-DISCORD_EPOCH)<<22
+        # check 2 weeks
+        old_limit=int((time_now()-1209610.)*1000.-DISCORD_EPOCH)<<22
         
         while True:
-            messages_ = await client.message_logs(channel,after=old_limit)
+            messages_ = await client.message_logs(channel,before=old_limit)
             for message_ in messages_:
                 if message_.author!=client:
                     old_message=message_
@@ -2224,5 +2235,190 @@ async def ratelimit_test0019(client,message,content):
     
         await Task(message_delete(client,old_message),client.loop)
     
-    # limit: 120s / 30 request
+    # after 2 week, other limit: 120s / 30 request
+
+ratelimit_test0020_OK       = BUILTIN_EMOJIS['ok_hand']
+ratelimit_test0020_CANCEL   = BUILTIN_EMOJIS['x']
+ratelimit_test0020_EMOJIS   = (ratelimit_test0020_OK, ratelimit_test0020_CANCEL)
+
+class ratelimit_test0020_checker(object):
+    __slots__ = ('client',)
     
+    def __init__(self, client):
+        self.client=client
+    
+    def __call__(self, emoji, user):
+        if not self.client.is_owner(user):
+            return False
+        
+        if emoji not in ratelimit_test0020_EMOJIS:
+            return False
+        
+        return True
+
+@ratelimit_commands
+async def ratelimit_test0020(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0020') as RLT:
+        if channel.guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+##        channels=[]
+##
+##        category=channel.category
+##        if type(category) is ChannelCategory:
+##            for channel in category.channels:
+##                if type(channel) is ChannelText:
+##                    channels.append(channel)
+##        else:
+##            category.append(channel)
+##
+##        messages=[]
+##        for day in range(41):
+##            
+##            before_ori= int((time_now()-(day  )*86400.+100.)*1000.-DISCORD_EPOCH)<<22
+##            after_ori = int((time_now()-(day+1)*86400.-100.)*1000.-DISCORD_EPOCH)<<22
+##            
+##            message_own=None
+##            message_other=None
+##            
+##            for channel_ in channels:
+##                before=before_ori
+##                while True:
+##                    messages_ = await client.message_logs(channel_,after=after_ori,before=before)
+##                    print(after_ori,before,messages_)
+##                    for message_ in messages_:
+##                        if message_.author==client:
+##                            if message_own is None:
+##                                message_own=message_
+##                                if (message_other is not None):
+##                                    break
+##                        else:
+##                            if message_other is None:
+##                                message_other=message_
+##                                if (message_own is not None):
+##                                    break
+##                    
+##                    if (message_own is not None) and (message_other is not None):
+##                        break
+##                    
+##                    if len(messages_)!=100:
+##                        break
+##                    
+##                    before=messages_[99].id
+##                    continue
+##                    
+##                if message_own is None:
+##                    continue
+##                    
+##                if message_other is None:
+##                    continue
+##                
+##                break
+##            
+##            messages.append((message_own,message_other,),)
+        
+        target_time=int((time_now()-40*86400.)*1000.-DISCORD_EPOCH)<<22
+        async for message_ in client.message_iterator(channel):
+            if message_.id>target_time:
+                continue
+            break
+        
+        now=time_now()
+        time_bounds=[]
+        for day in range(41):
+            before= int((now-(day  )*86400.+100.)*1000.-DISCORD_EPOCH)<<22
+            after = int((now-(day+1)*86400.-100.)*1000.-DISCORD_EPOCH)<<22
+            time_bounds.append((before,after),)
+        
+        messages=[]
+        for day in range(41):
+            messages.append((None,None),)
+        
+        for message_ in channel.messages:
+            for day,(before,after) in enumerate(time_bounds):
+                if message_.id>before:
+                    continue
+                
+                if message_.id<after:
+                    continue
+                
+                message_own,message_other=messages[day]
+                if (message_own is not None) and (message_other is not None):
+                    break
+                
+                if message_.author==client:
+                    if message_own is None:
+                        messages[day]=(message_,message_other)
+                else:
+                    if message_other is None:
+                        messages[day]=(message_own,message_)
+                
+                break
+        
+        result=['```\nday | own | other\n']
+        for day,(message_own, message_other) in enumerate(messages):
+            result.append(f'{day:>3} | {("YES", " NO")[message_own is None]} | {("YES"," NO")[message_other is None]}\n')
+        result.append('```\nShould we start?')
+        embed=Embed('Found messages',''.join(result))
+        
+        message = await client.message_create(channel,embed=embed)
+        
+        for emoji in ratelimit_test0020_EMOJIS:
+            await client.reaction_add(message,emoji)
+        
+        try:
+            emoji, _ = await wait_for_reaction(client, message, ratelimit_test0020_checker(client), 40.)
+        except TimeoutError:
+            emoji = ratelimit_test0020_CANCEL
+            
+        await client.reaction_clear(message)
+        
+        if emoji is ratelimit_test0020_CANCEL:
+            embed.add_footer('ratelimit_test0020 cancelled')
+            await client.message_edit(message,embed=embed)
+            raise CancelledError()
+        
+        if emoji is ratelimit_test0020_OK:
+            loop=client.loop
+            for day,(message_own, message_other) in enumerate(messages):
+                if (message_own is not None):
+                    RLT.write(f'day {day}, own:')
+                    await Task(message_delete(client,message_own),loop)
+                
+                if (message_other is not None):
+                    RLT.write(f'day {day}, other:')
+                    await Task(message_delete(client,message_other),loop)
+            
+            return
+            
+        # no more case
+        
+@ratelimit_commands
+async def ratelimit_test0021(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0021') as RLT:
+        if channel.guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+            
+        messages=[]
+        for index in range(2):
+            message_ = await client.message_create(channel,f'testing ratelimit: message {index}')
+            messages.append(message_)
+        
+        await Task(message_delete_multiple(client,messages),client.loop)
+
+
+
