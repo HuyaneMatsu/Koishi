@@ -87,11 +87,15 @@ async def default_event(client,message):
     if (user_mentions is not None) and (client in user_mentions):
         m1=message.author.mention
         m2=client.mention
+        m3=message.author.mention_nick
+        m4=client.mention_nick
         replace={
             '@everyone':'@\u200beveryone',
             '@here':'@\u200bhere',
             re.escape(m1):m2,
             re.escape(m2):m1,
+            re.escape(m3):m4,
+            re.escape(m4):m3,
                 }
         pattern=re.compile("|".join(replace.keys()))
         result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
