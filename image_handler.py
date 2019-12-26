@@ -87,7 +87,7 @@ async def _help_image(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('image',(
         'I ll search images by tags from my collection, '
-        'then send 1 of the results.\n',
+        'then send 1 of the results.\n'
         f'Usage : `{prefix}image (count) (any / pic / vid) (index (hex) *n*) <tag_1> <tag_2> ...`\n'
         'If `count` is passed, I ll count how much image there is with that '
         'combination. *Count does not goes with `index`*\n'
