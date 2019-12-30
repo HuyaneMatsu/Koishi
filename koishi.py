@@ -310,23 +310,21 @@ async def invite(client,message,content):
     if (guild is None):
         return
 
-    if not guild.cached_permissions_for(client).can_create_instant_invite:
-        await client.message_create(message.channel,
-            'I do not have permission to create Invite from this guild.')
-        return
-
     user=message.author
     owner=client.is_owner(user)
     if (not owner) and (not guild.permissions_for(user).can_create_instant_invite):
         await client.message_create(message.channel,
             'You do not have permission to invoke this command.')
         return
-
+    
+    invite_=None
     if content=='perma':
         user=message.author
         if owner or user==guild.owner:
-            max_age=0
-            max_use=0
+            invite_ = client.vanity_invite(guild)
+            if invite_ is None:
+                max_age=0
+                max_use=0
         else:
             await client.message_create(message.channel,
                 'You must be the owner of the guild, to create a permanent invite.')
@@ -336,12 +334,21 @@ async def invite(client,message,content):
         max_use=1
     
     try:
-        invite_ = await client.invite_create_pref(guild,max_age,max_use)
-    except DiscordException:
-        return
-                                            
-    channel = await client.channel_private_create(message.author)
-    await client.message_create(channel,f'Here is your invite, dear:\n\n{invite_.url}')
+        if invite_ is None:
+            invite_ = await client.invite_create_pref(guild,max_age,max_use)
+    except DiscordException as err:
+        content=repr(err)
+    except ValueError as err:
+        content=err.args[0]
+    else:
+        if invite_ is None:
+            content = 'I do not have enought permission to create invite '  \
+                      'from the guild\'s prefered channel.'
+        else:
+            content=f'Here is your invite, dear:\n\n{invite_.url}'
+        
+    channel = await client.channel_private_create(user)
+    await client.message_create(channel,content)
 
 async def _help_invite(client,message):
     guild=message.channel.guild
@@ -377,7 +384,7 @@ async def _help_invite(client,message):
 
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('invite',_help_invite,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(create_instant_invite=True)))
+KOISHI_HELPER.add('invite',_help_invite,checker=KOISHI_HELPER.check_guild_permission(Permission().update_by_keys(create_instant_invite=True)))
 
 
 MINE_MINE_CLEAR = (

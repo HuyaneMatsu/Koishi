@@ -6,7 +6,6 @@
 #  hacked into a module and updated by Jez Higgins
 #----------------------------------------------------------------------
 
-import string
 import re
 import random
 
@@ -21,7 +20,7 @@ class Eliza:
     #----------------------------------------------------------------------
     def translate(self,str_,dict_):
         words = str_.lower().split()
-        keys = dict_.keys();
+        keys = dict_.keys()
         for i in range(0,len(words)):
             if words[i] in keys:
                 words[i] = dict_[words[i]]

@@ -59,8 +59,21 @@ class Helper(object):
             if client.is_owner(message.author):
                 return True
 
-            return message.channel.permissions_for(message.author).is_superset(self.perms)
-
+            return message.channel.permissions_for(message.author)>=self.perms
+        
+    class check_guild_permission(object):
+        def __init__(self,perms):
+            self.perms=perms
+        def __call__(self,client,message):
+            if client.is_owner(message.author):
+                return True
+            
+            guild=message.guild
+            if guild is None:
+                return False
+            
+            return guild.permissions_for(message.author)>=self.perms
+        
     async def __call__(self,client,message,content):
         if not (0<len(content)<64):
             await self.default(client,message,self)
