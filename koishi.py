@@ -18,6 +18,7 @@ from hata.guild import Guild,GUILDS
 from hata.role import Role
 from hata.embed import Embed
 from hata.oauth2 import parse_oauth2_redirect_url
+from hata.message import Message
 
 import image_handler
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER, invalid_command
@@ -1226,7 +1227,6 @@ async def _help_count_reactions(client,message):
 
 KOISHI_HELPER.add('count_reactions',_help_count_reactions,KOISHI_HELPER.check_is_owner)
 
-
 @commands
 @ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
                 'user, flags=mna, default="client"',)
@@ -1237,9 +1237,6 @@ async def update_application_info(client,message,user):
     else:
         text='I can update application info only of a client'
     await client.message_create(message.channel,text)
-
-HTML_RP=re.compile('#?([0-9a-f]{6})',re.I)
-REGULAR_RP=re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
 
 async def _help_update_application_info(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -1254,6 +1251,8 @@ async def _help_update_application_info(client,message):
 
 KOISHI_HELPER.add('update_application_info',_help_update_application_info,KOISHI_HELPER.check_is_owner)
 
+HTML_RP=re.compile('#?([0-9a-f]{6})',re.I)
+REGULAR_RP=re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
 
 @commands(case='color')
 async def command_color(client,message,content):
@@ -1401,6 +1400,37 @@ async def _help_role_emoji(client,message):
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('role-emoji',_help_role_emoji,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
+
+@commands
+@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
+               'user, flags=mna, default=None','rest')
+async def show_help_for(client,message,user,rest):
+    if user is None:
+        await client.message_create(message.channel,
+            'Please define a user as well.')
+        return
+    
+    message=Message.custom(base=message,author=user)
+    
+    needs_content,command = client.events.message_create.commands['help']
+    
+    if needs_content:
+        coro = command(client, message, rest)
+    else:
+        coro = command(client, message)
+    await coro
+
+async def _help_show_help_for(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('show_help_for',(
+        'Calls `help` command, as the given user would do it.\n'
+        f'Usage: `{prefix}show_help_for *user*`\n'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('show_help_for',_help_show_help_for,KOISHI_HELPER.check_is_owner)
+
 
 del Cooldown
 del CooldownHandler

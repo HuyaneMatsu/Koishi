@@ -166,4 +166,3 @@ async def invalid_command(client,message,command,content):
     message = await client.message_create(message.channel,embed=embed)
     await sleep(30.,client.loop)
     await client.message_delete(message)
-

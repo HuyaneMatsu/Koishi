@@ -81,7 +81,7 @@ satori_extension_loader=ExtensionLoader(Satori)
 satori_extension_loader.add('ext.eliza',entry_point='entry',exit_point='exit')
 satori_extension_loader.load_all().syncwrap().wait()
 
-############################## SETUP ELPHELT ##############################
+############################## SETUP FLAN ##############################
 
 Flan=Client(pers_data.FLAN_TOKEN,
     client_id=pers_data.FLAN_ID,
