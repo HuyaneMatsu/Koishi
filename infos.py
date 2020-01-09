@@ -644,7 +644,7 @@ async def _help_message(client,message):
         f'Usage: `{prefix}message *message_id* <channel>`\n'
         'By default `channel` is the channel, where you used the command.'
             ),color=KOISHI_HELP_COLOR).add_footer(
-            'Guild only! Adminsitartor only!')
+            'Guild only! Administrator only!')
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('message',_help_message,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
@@ -675,7 +675,7 @@ async def _help_message_pure(client,message):
         f'Usage: `{prefix}message_pure *message_id* <channel>`\n'
         'By default `channel` is the channel, where you used the command.'
             ),color=KOISHI_HELP_COLOR).add_footer(
-            'Guild only! Adminsitartor only!')
+            'Guild only! Administrator only!')
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('message_pure',_help_message_pure,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))

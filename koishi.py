@@ -1412,13 +1412,7 @@ async def show_help_for(client,message,user,rest):
     
     message=Message.custom(base=message,author=user)
     
-    needs_content,command = client.events.message_create.commands['help']
-    
-    if needs_content:
-        coro = command(client, message, rest)
-    else:
-        coro = command(client, message)
-    await coro
+    await client.events.message_create.call_command('help',client,message,rest)
 
 async def _help_show_help_for(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -1430,6 +1424,40 @@ async def _help_show_help_for(client,message):
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('show_help_for',_help_show_help_for,KOISHI_HELPER.check_is_owner)
+
+@commands
+@ContentParser('condition, flags=gr, default="not guild.permissions_for(message.author).can_administrator"',
+                'int',)
+async def reaction_clear(client,message,message_id):
+    while True:
+        if not message.channel.cached_permissions_for(client).can_manage_messages:
+            content='I have no permissions to execute this command at the channel.'
+            break
+            
+        try:
+            target_message = await client.message_get(message.channel,message_id)
+        except DiscordException as err:
+            content='Could not find that message.'
+            break
+        
+        await client.reaction_clear(target_message)
+        content='Done, pat me now!'
+        break
+    
+    message = await client.message_create(message.channel,content)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
+
+async def _help_reaction_clear(client,message):
+    prefix=client.events.message_create.prefix(message)
+    embed=Embed('reaction_clear',(
+        'Do you want me to remvoe all the reactions from a message?\n'
+        f'Usage: `{prefix}reaction_clear *message_id*`'
+            ),color=KOISHI_HELP_COLOR).add_footer(
+            'Guild only! Administrator only!')
+    await client.message_create(message.channel,embed=embed)
+
+KOISHI_HELPER.add('reaction_clear',_help_reaction_clear,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
 
 del Cooldown

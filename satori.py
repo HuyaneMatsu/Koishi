@@ -557,3 +557,53 @@ async def download_wiki_page(client,result):
     pages[0].url=result[1]
     
     return pages
+
+TRANSFORMATIONS = {
+    ' ':' ',
+    '#':BUILTIN_EMOJIS['hash'].as_emoji,
+    '*':BUILTIN_EMOJIS['asterisk'].as_emoji,
+    '0':BUILTIN_EMOJIS['zero'].as_emoji,
+    '1':BUILTIN_EMOJIS['one'].as_emoji,
+    '2':BUILTIN_EMOJIS['two'].as_emoji,
+    '3':BUILTIN_EMOJIS['three'].as_emoji,
+    '4':BUILTIN_EMOJIS['four'].as_emoji,
+    '5':BUILTIN_EMOJIS['five'].as_emoji,
+    '6':BUILTIN_EMOJIS['six'].as_emoji,
+    '7':BUILTIN_EMOJIS['seven'].as_emoji,
+    '8':BUILTIN_EMOJIS['eight'].as_emoji,
+    '9':BUILTIN_EMOJIS['nine'].as_emoji,
+        }
+    
+for char in range(ord('a'),ord('z')+1):
+    emoji=BUILTIN_EMOJIS['regional_indicator_'+chr(char)].as_emoji
+    TRANSFORMATIONS[chr(char)]=emoji
+    TRANSFORMATIONS[chr(char-32)]=emoji
+
+del char, emoji
+
+@commands
+async def emojify(client, message, content):
+    if not content:
+        return
+    
+    if len(content)>80:
+        await client.message_create(message.channel,'Message too long')
+        return
+    
+    result=[]
+    for char in content:
+        try:
+            emoji=TRANSFORMATIONS[char]
+        except KeyError:
+            pass
+        else:
+            result.append(emoji)
+
+        continue
+    
+    result='\u200b'.join(result)
+    # If the message is empty, we will check that anyways
+    await client.message_create(message.channel,result)
+    return
+
+
