@@ -138,12 +138,12 @@ class dispatch_tester:
             if key in ('user_mentions','role_mentions','cross_mentions'):
                 removed, added = listdifference(value,getattr(message,key))
                 if removed:
-                    result.append(f'{key}s removed : {len(removed)}')
+                    result.append(f'{key} removed : {len(removed)}')
                     for obj in removed:
                         result.append(f'- {obj.name} {obj.id}')
                         
                 if added:
-                    result.append(f'{key}s added : {len(added)}')
+                    result.append(f'{key} added : {len(added)}')
                     for obj in added:
                         result.append(f'- {obj.name} {obj.id}')
                     
@@ -157,12 +157,12 @@ class dispatch_tester:
                 new.sort()
                 removed,added=listdifference(old,new)
                 if removed:
-                    result.append(f'{key}s removed : {len(removed)}')
+                    result.append(f'{key} removed : {len(removed)}')
                     for name in removed:
                         result.append(f'- {name}')
                         
                 if added:
-                    result.append(f'{key}s added : {len(added)}')
+                    result.append(f'{key} added : {len(added)}')
                     for name in added:
                         result.append(f'- {name}')
                     
@@ -185,49 +185,44 @@ class dispatch_tester:
         guild=channel.guild
         if guild is not None:
             result.append(f'At guild : {guild.name} {guild.id}')
-
-        if flag==1:
-            result.append('Only sizes were update.')
-        elif flag==2:
-            result.append('Links! Links everywhere...')
-        else: #flag==3
-            result.append('Unsuppressed embed on suppressed message')
-
-        embeds=message.embeds
-        if embeds is None:
-            result.append('This should not happen, there are no embeds...')
+        
+        if flag==3:
+            result.append('Less embeds than before???')
         else:
             if flag==1:
-                for index,embed in enumerate(embeds,1):
-                    if flag==1:
-                        collected=[]
-                        image=embed.image
-                        if image is not None:
-                            collected.append(('image.height',image.height))
-                            collected.append(('image.width',image.width))
-                        thumbnail=embed.thumbnail
-                        if thumbnail is not None:
-                            collected.append(('thumbnail.height',thumbnail.height))
-                            collected.append(('thumbnail.width',thumbnail.width))
-                        video=embed.video
-                        if video is not None:
-                            collected.append(('video.height',video.height))
-                            collected.append(('video.width',video.width))
-                        if collected:
-                            result.append(f'Sizes got update at embed {index}:')
-                            for name,value in collected:
-                                result.append(f'- {name} : {value}')
+                result.append('Only sizes were update.')
             elif flag==2:
-                for index,embed in enumerate(embeds,1):
-                    if embed.type in EXTRA_EMBED_TYPES:
-                        result.append(f'New embed appeared at index {index}:')
-                        result.extend(pretty_print(embed))
-            else: #flag==3:
-                for index,embed in enumerate(embeds,1):
-                    if not embed.suppressed:
-                        result.append(f'Unsuppressed embed appeared at {index}:')
-                        result.extend(pretty_print(embed))
-
+                result.append('Links! Links everywhere...')
+            
+            embeds=message.embeds
+            if embeds is None:
+                result.append('This should not happen, there are no embeds...')
+            else:
+                if flag==1:
+                    for index,embed in enumerate(embeds,1):
+                        if flag==1:
+                            collected=[]
+                            image=embed.image
+                            if image is not None:
+                                collected.append(('image.height',image.height))
+                                collected.append(('image.width',image.width))
+                            thumbnail=embed.thumbnail
+                            if thumbnail is not None:
+                                collected.append(('thumbnail.height',thumbnail.height))
+                                collected.append(('thumbnail.width',thumbnail.width))
+                            video=embed.video
+                            if video is not None:
+                                collected.append(('video.height',video.height))
+                                collected.append(('video.width',video.width))
+                            if collected:
+                                result.append(f'Sizes got update at embed {index}:')
+                                for name,value in collected:
+                                    result.append(f'- {name} : {value}')
+                elif flag==2:
+                    for index,embed in enumerate(embeds,1):
+                        if embed.type in EXTRA_EMBED_TYPES:
+                            result.append(f'New embed appeared at index {index}:')
+                            result.extend(pretty_print(embed))
 
         text=cchunkify(result)
         pages=[Embed(description=chunk) for chunk in text]
