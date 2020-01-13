@@ -26,6 +26,7 @@ from hata.parsers import eventlist, EventHandlerBase, EventDescriptor
 from hata.events import Pagination, wait_for_message, GUI_STATE_READY,      \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
     GUI_STATE_SWITCHING_CTX, multievent, asynclist, CommandProcesser
+from hata.message import Message
 
 from hata.ratelimit import ratelimit_handler
 from hata.http import API_ENDPOINT
@@ -2580,13 +2581,13 @@ async def test_message_delete_multiple_3(client,message):
     await client.message_create(channel,content)
     
 @commands
-@ContentParser('rdelta')
-async def message_sequencer_test(client,message,rdelta):
+@ContentParser('int')
+async def message_sequencer_test(client,message,limit):
     if not client.is_owner(message.author):
         return
     
-    channel=message.channel
-    guild=channel.guild
+    channel = message.channel
+    guild   = channel.guild
     
     if guild is None:
         await client.message_create(channel,'Pls use this command at a guild.')
@@ -2596,11 +2597,9 @@ async def message_sequencer_test(client,message,rdelta):
         await client.message_create(channel,'I need administrator permission to execute this command.')
         return
     
-    await client.message_create(channel,'TODO')
-    return
-    
-    before  = 9223372036854775807
-    after   = time_to_id(datetime.now()-rdelta)
+    before  = 665669054446436373
+    after   = 665666827480989709
+    filter  = None # lambda message: message.author.id==524288464422830095
     
     if before<after:
         await client.message_create(channel,'Reversed interval')
@@ -2610,73 +2609,55 @@ async def message_sequencer_test(client,message,rdelta):
     message_group_old       = deque()
     message_group_old_own   = deque()
     
-    message_id_baselimit = int((time_now()-1209600.)*1000.-DISCORD_EPOCH)<<22 # 2 weeks
-    
-    # Check if the request for new messages is in 2 weeks
-    if before<message_id_baselimit:
-        should_request_new=False
-    # Check if the channel is older than before
-    elif before<channel.id:
-        should_request_new=False
-    # Check if we have all the messages laoded from the channel
-    elif channel.message_history_reached_end:
-        should_request_new=False
+    # Check if we should request morem messages
+    if channel.message_history_reached_end:
+        should_request=False
     else:
-        should_request_new=True
-    
-    # Check if the channel is younger than 2 weeks
-    if message_id_baselimit<channel.id:
-        should_request_old=False
-    # Check if we have all the messages loaded already
-    elif channel.message_history_reached_end:
-        should_request_old=False
-    else:
-        should_request_old=True
+        should_request=True
     
     messages_=channel.messages
     if messages_:
         before_index=message_relativeindex(messages_,before)
         after_index=message_relativeindex(messages_,after)
-        if after_index!=len(messages):
-            should_request_new=False
-            should_request_old=False
         
-        while True:
-            if before_index==after_index:
-                break
-            
-            message_ = messages_[before_index]
-            before_index=before_index+1
-            
-            message_id=message_.id
-            own = (message_.author==client)
-            if message_id<message_id_baselimit:
-                message_group_new.append((own,message_id,),)
-                continue
-            
-            if own:
-                group = message_group_old_own
-            else:
-                group = message_group_old
-            
-            group.append(message_id)
-            continue
-    
-        last_message_id_new = message_id
+        
+        if before_index!=after_index:
+            time_limit = int((time_now()-1209600.)*1000.-DISCORD_EPOCH)<<22
+            while True:
+                if before_index==after_index:
+                    break
+                
+                message_ = messages_[before_index]
+                before_index=before_index+1
+                
+                if (filter is not None):
+                    if not filter(message_):
+                        continue
+                
+                message_id=message_.id
+                own = (message_.author==client)
+                if message_id > time_limit:
+                    message_group_new.append((own,message_id,),)
+                else:
+                    if own:
+                        group=message_group_old_own
+                    else:
+                        group=message_group_old
+                    group.append(message_id)
+                    
+                limit=limit-1
+                if limit==0:
+                    should_request=False
+                    break
+            last_message_id = message_id
+        else:
+            last_message_id = before
     else:
-        last_message_id_new = before
-    
-    last_message_id_old = message_id_baselimit
-    
-    # If we should request new still, we check if the last message passed the limit
-    if should_request_new and (last_message_id_new<message_id_baselimit):
-        should_request_new=False
+        last_message_id = before
     
     tasks               = []
     
-    get_mass_new_task   = None
-    get_mass_old_task   = None
-    
+    get_mass_task       = None
     delete_mass_task    = None
     delete_new_task     = None
     delete_old_task     = None
@@ -2684,75 +2665,88 @@ async def message_sequencer_test(client,message,rdelta):
     channel_id=channel.id
     
     while True:
-        if should_request_new and (get_mass_new_task is None):
+        if should_request and (get_mass_task is None):
             request_data = {
                 'limit' : 100,
-                'before': last_message_id_new,
+                'before': last_message_id,
                     }
             
-            get_mass_new_task = client.loop.create_task(client.http.message_logs(channel_id,request_data))
-            tasks.append(get_mass_new_task)
-            
-        if should_request_old and (get_mass_old_task is None):
-            request_data = {
-                'limit' : 100,
-                'before': last_message_id_old,
-                    }
-                
-            get_mass_old_task = client.loop.create_task(client.http.message_logs(channel_id,request_data))
-            tasks.append(get_mass_old_task)
+            get_mass_task = client.loop.create_task(client.http.message_logs(channel_id,request_data))
+            tasks.append(get_mass_task)
+        
         
         if (delete_mass_task is None):
             message_limit=len(message_group_new)
-            
-            # 0 is all good, but if it is more, lets check them
+            # If there are more messages, we are waiting for other tasks
             if message_limit:
-                message_ids=[]
-                message_count=0
-                limit = int((time_now()-1209590.)*1000.-DISCORD_EPOCH)<<22 # 2 weeks -10s
+                time_limit = int((time_now()-1209590.)*1000.-DISCORD_EPOCH)<<22 # 2 weeks -10s
+                collected = 0
                 
-                while message_group_new:
-                    own,message_id=message_group_new.popleft()
-                    if message_id>limit:
-                        message_ids.append(message_id)
-                        message_count=message_count+1
-                        if message_count==100:
-                            break
-                        continue
+                while True:
+                    if collected==message_limit:
+                        break
                     
-                    if (message_id+20971520000) > limit:
-                        continue
-                        
-                    # If the message is really older than the limit,
-                    # with ingoring the 10 second, then we move it.
-                    if own:
-                        group = message_group_old_own
-                    else:
-                        group = message_group_old
+                    if collected==100:
+                        break
                     
-                    group.appendleft(message_id)
+                    own,message_id=message_group_new[collected]
+                    if message_id<time_limit:
+                        break
+                    
+                    collected=collected+1
                     continue
                 
-                if message_count:
-                    if message_count==1:
-                        if (delete_new_task is None):
-                            message_id=message_ids[0]
-                            delete_new_task = client.loop.create_task(client.http.message_delete(channel_id,message_id,None))
-                            tasks.append(delete_new_task)
-                    else:
-                        delete_mass_task = client.loop.create_task(client.http.message_delete_multiple(channel_id,{'messages':message_ids},None))
-                        tasks.append(delete_mass_task)
+                if collected==0:
+                    pass
+                elif collected==1:
+                    # Delete the message if we dont delete a new message already
+                    if (delete_new_task is None):
+                        # We collected 1 message -> We cannot use mass delete on this.
+                        own,message_id=message_group_new.popleft()
+                        delete_new_task = client.loop.create_task(client.http.message_delete(channel_id,message_id,None))
+                        tasks.append(delete_new_task)
+                else:
+                    message_ids=[]
+                    while collected:
+                        collected = collected-1
+                        own,message_id=message_group_new.popleft()
+                        message_ids.append(message_id)
+                    
+                    delete_mass_task = client.loop.create_task(client.http.message_delete_multiple(channel_id,{'messages':message_ids},None))
+                    tasks.append(delete_mass_task)
+                
+                # After we checked what is at this group, lets move the others from it's end, if needed ofc
+                message_limit=len(message_group_new)
+                if message_limit:
+                    # timelimit -> 2 week
+                    time_limit = time_limit-20971520000
+                    
+                    while True:
+                        # Cannot start at index = len(...), so we instantly do -1
+                        message_limit = message_limit-1
+                        
+                        own, message_id = message_group_new[message_limit]
+                        # Check if we should not move -> leave
+                        if message_id>time_limit:
+                            break
+                        
+                        del message_group_new[message_limit]
+                        if own:
+                            group = message_group_old_own
+                        else:
+                            group = message_group_old
+                            
+                        group.appendleft(message_id)
+                        
+                        if message_limit:
+                            continue
+                        
+                        break
         
         if (delete_new_task is None):
-            if message_group_new:
-                group = message_group_new
-            elif message_group_old_own:
-                group = message_group_old_own
-            else:
-                group = None
-            
-            if (group is not None):
-                message_id=group.popleft()
+            # Check old own messages only, mass delete speed is pretty good by itself.
+            if message_group_old_own:
+                message_id=message_group_old_own.popleft()
                 delete_new_task = client.loop.create_task(client.http.message_delete(channel_id,message_id,None))
                 tasks.append(delete_new_task)
         
@@ -2766,7 +2760,7 @@ async def message_sequencer_test(client,message,rdelta):
             # It can happen, that there are no more tasks left,  at that case
             # we check if there is more message left. Only at
             # `message_group_new` can be anymore message, because there is a
-            # time intervallum of 5 seconds, what we do not move between
+            # time intervallum of 10 seconds, what we do not move between
             # categories.
             if not message_group_new:
                 break
@@ -2777,11 +2771,13 @@ async def message_sequencer_test(client,message,rdelta):
             # Sure it will not block the other endpoint for 2 minutes with any chance.
             if own:
                 delete_new_task = client.loop.create_task(client.http.message_delete(channel_id,message_id,None))
+                task=delete_new_task
             else:
                 delete_old_task = client.loop.create_task(client.http.message_delete_b2wo(channel_id,message_id,None))
+                task=delete_old_task
             
-            tasks.append(delete_old_task)
-            
+            tasks.append(task)
+        
         done, pending = await WaitTillFirst(tasks,client.loop)
         
         for task in done:
@@ -2793,112 +2789,87 @@ async def message_sequencer_test(client,message,rdelta):
                     task.cancel()
                 raise
             
-            if task is get_mass_new_task:
-                get_mass_new_task=None
+            if task is get_mass_task:
+                get_mass_task=None
                 
                 received_count=len(result)
                 if received_count<100:
-                    should_request_new=False
-                    should_request_old=False
+                    should_request=False
                     
+                    # We got 0 messages, move on the next task
                     if received_count==0:
                         continue
                 
-                # We dont really case about the limit, because we check
+                # We dont really care about the limit, because we check
                 # message id when we delete too.
-                limit = int((time_now()-1209600.)*1000.-DISCORD_EPOCH)<<22 # 2 weeks
+                time_limit = int((time_now()-1209600.)*1000.-DISCORD_EPOCH)<<22 # 2 weeks
                 
                 for message_data in result:
-                    last_message_id_new=int(message_data['id'])
-                    # If we pass the base limit means, we already requested the rest
-                    # of the messages, so we stop requesting new ones
-                    if last_message_id_new>message_id_baselimit:
-                        should_request_new=False
-                        break
-                    
-                    # Try to get user id, first start it with trying to get
-                    # author data. The default author_id will be 0, because
-                    # thats sure not the id of the client.
-                    try:
-                        author_data=author_dat['author']
-                    except KeyError:
-                        author_id=0
-                    else:
-                        # If we have author data, lets select the user's data
-                        # from it
-                        try:
-                            user_data=author_data['user']
-                        except KeyError:
-                            user_data=author_data
+                    if (filter is None):
+                        last_message_id=int(message_data['id'])
+
+                        # Did we reach the after limit?
+                        if last_message_id<after:
+                            should_request=False
+                            break
                         
+                        # If filter is `None`, we just have to decide, if we
+                        # were the author or nope.
+                        
+                        # Try to get user id, first start it with trying to get
+                        # author data. The default author_id will be 0, because
+                        # thats sure not the id of the client.
                         try:
-                            author_id=user_data['id']
+                            author_data=message_data['author']
                         except KeyError:
                             author_id=0
                         else:
-                            author_id=int(author_id)
+                            # If we have author data, lets select the user's data
+                            # from it
+                            try:
+                                user_data=author_data['user']
+                            except KeyError:
+                                user_data=author_data
+                            
+                            try:
+                                author_id=user_data['id']
+                            except KeyError:
+                                author_id=0
+                            else:
+                                author_id=int(author_id)
+                    else:
+                        message_=Message.onetime(message_data,channel)
+                        last_message_id=message_.id
+                        
+                        # Did we reach the after limit?
+                        if last_message_id<after:
+                            should_request=False
+                            break
+                        
+                        if not filter(message_):
+                            continue
+                        
+                        author_id=message_.author.id
                     
                     own = (author_id == client.id)
                     
-                    if last_message_id_new<limit:
-                        message_group_new.append((own,last_message_id_new,),)
-                        continue
-                    
-                    if own:
-                        group = message_group_old_own
+                    if last_message_id>time_limit:
+                        message_group_new.append((own,last_message_id,),)
                     else:
-                        group = message_group_old
-                    
-                    group.appendleft(last_message_id_new)
-                    continue
-                    
-                continue
-                    
-                
-            if task is get_mass_old_task:
-                get_mass_old_task=None
-                received_count=len(result)
-                if received_count<100:
-                    should_request_new=False
-                    should_request_old=False
-                    
-                    if received_count==0:
-                        continue
-                
-                for message_data in result:
-                    last_message_id_old=int(message_data['id'])
-                    
-                    # Try to get user id, first start it with trying to get
-                    # author data. The default author_id will be 0, because
-                    # thats sure not the id of the client.
-                    try:
-                        author_data=author_dat['author']
-                    except KeyError:
-                        author_id=0
-                    else:
-                        # If we have author data, lets select the user's data
-                        # from it
-                        try:
-                            user_data=author_data['user']
-                        except KeyError:
-                            user_data=author_data
-                        
-                        try:
-                            author_id=user_data['id']
-                        except KeyError:
-                            author_id=0
+                        if own:
+                            group = message_group_old_own
                         else:
-                            author_id=int(author_id)
-                    
-                    if author_id==client.id:
-                        group = message_group_old_own
-                    else:
-                        group = message_group_old
+                            group = message_group_old
                         
-                    group.append(last_message_id_old)
-                    continue
+                        group.append(last_message_id)
                     
-                continue
+                    # Did we reach the amount limit?
+                    limit = limit-1
+                    if limit:
+                        continue
+                    
+                    should_request=False
+                    break
             
             if task is delete_mass_task:
                 delete_mass_task=None
