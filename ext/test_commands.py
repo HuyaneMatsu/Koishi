@@ -8,7 +8,7 @@ from collections import deque
 from datetime import datetime
 
 from hata.others import filter_content, now_as_id, bytes_to_base64, Unknown,\
-    DISCORD_EPOCH
+    DISCORD_EPOCH, is_id
 from hata.prettyprint import pchunkify, pconnect
 from hata.ios import ReuAsyncIO
 from hata.client import Achievement
@@ -27,6 +27,8 @@ from hata.events import Pagination, wait_for_message, GUI_STATE_READY,      \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
     GUI_STATE_SWITCHING_CTX, multievent, asynclist, CommandProcesser
 from hata.message import Message
+from hata.role import Role
+from hata.guild import Guild
 
 from hata.ratelimit import ratelimit_handler
 from hata.http import API_ENDPOINT
@@ -2885,3 +2887,699 @@ async def message_sequencer_test(client,message,limit):
              
             # Should not happen
             continue
+
+@commands
+async def test_role_reorder(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    http_type = type(client.http)
+    http_role_move_original=http_type.role_move
+    
+    # Create a guild with roles
+    guild = Guild.precreate(0)
+    for index in range(0,15):
+        role = Role.precreate(index)
+        guild.all_role[index]=role
+        list.append(guild.roles,role)
+        role.guild=guild
+        role.position=index
+    
+    # Create some partial role
+    role_partial_1=Role.precreate(15)
+    role_partial_2=Role.precreate(16)
+    
+    # Create role with a different guild
+    guild_bad_linked = Guild.precreate(17)
+    role_bad_linked=Role.precreate(17)
+    role_bad_linked.guild=guild_bad_linked
+    
+    # We will collect the results to an embed
+    embed=Embed()
+    
+    def http_role_move_no_call(self, guild_id, data, reason):
+        raise RuntimeError
+    
+    http_type.role_move=http_role_move_no_call
+    
+    # Test 1 -> no role
+    try:
+        await client.role_reorder([])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+    
+    embed.add_field('Calling with empty list',result)
+    
+    # Test 2 -> partial role
+    
+    try:
+        await client.role_reorder([(role_partial_1,1)])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        await client.loop.render_exc_async(err)
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Calling with a partial role',result)
+    
+    # Test 3 -> 2 partial role
+    
+    try:
+        await client.role_reorder([(role_partial_1,1),(role_partial_2,2)])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Calling with 2 partial role',result)
+    
+    # Test 4 -> default to default
+    
+    try:
+        await client.role_reorder([(guild.roles[0],0),])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+    
+    embed.add_field('Calling with default role to default position',result)
+    
+    # Test 5 -> default to non default position
+    
+    try:
+        await client.role_reorder([(guild.roles[0],1),])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except ValueError:
+        result='Success'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='`ValueError` should have been raised.'
+        
+    embed.add_field('Calling with default to non default position',result)
+    
+    # Test 6 -> non default to default position
+    
+    try:
+        await client.role_reorder([(guild.roles[1],0),])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except ValueError:
+        result='Success'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='`ValueError` should have been raised.'
+        
+    embed.add_field('Calling with non default to default position',result)
+    
+    # Test 7 -> 2 guilds
+    
+    try:
+        await client.role_reorder([(guild.roles[1],1),(role_bad_linked,2),])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except ValueError:
+        result='Success'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='`ValueError` should have been raised.'
+        
+    embed.add_field('Calling with role from 2 different guilds',result)
+    
+    # Test 8 -> 2 role to their own position
+    
+    try:
+        await client.role_reorder([(guild.roles[1],1),(guild.roles[2],2),])
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('2 role to their own position',result)
+    
+    # Test 9 -> All roles up one (except default)
+    
+    roles=[]
+    for index,position in zip(range(1,15),range(2,16)):
+        roles.append((guild.roles[index],position),)
+
+    try:
+        await client.role_reorder(roles)
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('All roles up one (except deffault)',result)
+    
+    # Test 10 -> All roles up one (except default)
+    
+    roles=[]
+    for index,position in zip(range(1,15),range(2,16)):
+        roles.append((guild.roles[index],position),)
+    
+    try:
+        await client.role_reorder(roles)
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+    
+    roles=None
+    
+    embed.add_field('All roles up one (except deffault)',result)
+    
+    # Test 11 -> All roles to position 2 (except default)
+    
+    roles=[]
+    for index in range(1,15):
+        roles.append((guild.roles[index],2),)
+    
+    try:
+        await client.role_reorder(roles)
+    except RuntimeError:
+        result='http method was called, meanwhile it should not have been'
+    except BaseException as err:
+        await client.loop.render_exc_async(err)
+        result=repr(err)
+    else:
+        result='Success'
+    
+    roles=None
+    
+    embed.add_field('All roles to position 2 (except default)',result)
+    
+    # Test 12 -> Move role 4 top pos 6
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=3:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':6},
+                {'id':5,'position':4},
+                {'id':6,'position':5},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],6),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to position 6',result)
+    
+    # Test 13 -> Move role 6 to pos 4, role 6 to pos 4
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=2:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':6},
+                {'id':6,'position':4},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],6),(guild.roles[6],4),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 6 to position 4, role 4 to position 6',result)
+    
+    # Test 14 -> Move role 6 to pos 4
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=3:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':5},
+                {'id':5,'position':6},
+                {'id':6,'position':4},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[6],4),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 6 to position 4',result)
+    
+    # Test 15 -> Move role 4 to pos 1, role 5 to pos 1
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=5:
+            raise RuntimeError
+        
+        for value in (
+                {'id':1,'position':3},
+                {'id':2,'position':4},
+                {'id':3,'position':5},
+                {'id':4,'position':1},
+                {'id':5,'position':2},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],1),(guild.roles[5],1),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 1, role 5 to position 1',result)
+    
+    # Test 16 -> Move role 4 to pos 8, role 5 to pos 8
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=6:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':8},
+                {'id':5,'position':9},
+                {'id':6,'position':4},
+                {'id':7,'position':5},
+                {'id':8,'position':6},
+                {'id':9,'position':7},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],8),(guild.roles[5],8),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 8, role 5 to position 8',result)
+    
+    # Test 17 -> Move role 4 to pos 1, role 5 to pos 2
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=5:
+            raise RuntimeError
+        
+        for value in (
+                {'id':1,'position':3},
+                {'id':2,'position':4},
+                {'id':3,'position':5},
+                {'id':4,'position':1},
+                {'id':5,'position':2},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],1),(guild.roles[5],2),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 1, role 5 to position 2',result)
+
+    # Test 18 -> Move role 4 to pos 2, role 5 to pos 1
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=5:
+            raise RuntimeError
+        
+        for value in (
+                {'id':1,'position':3},
+                {'id':2,'position':4},
+                {'id':3,'position':5},
+                {'id':4,'position':2},
+                {'id':5,'position':1},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],2),(guild.roles[5],1),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 1, role 5 to position 2',result)
+
+    # Test 19 -> Move role 4 to pos 8, role 5 to pos 9
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=6:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':8},
+                {'id':5,'position':9},
+                {'id':6,'position':4},
+                {'id':7,'position':5},
+                {'id':8,'position':6},
+                {'id':9,'position':7},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],8),(guild.roles[5],9),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 8, role 5 to position 9',result)
+
+    # Test 20 -> Move role 4 to pos 9, role 5 to pos 8
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=6:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':9},
+                {'id':5,'position':8},
+                {'id':6,'position':4},
+                {'id':7,'position':5},
+                {'id':8,'position':6},
+                {'id':9,'position':7},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],9),(guild.roles[5],8),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 9, role 5 to position 8',result)
+
+    # Test 21 -> Move role 4 to pos 8, role 8 to pos 4, partial to pos 9
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=2:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':8},
+                {'id':8,'position':4},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],8),(guild.roles[8],4),(role_partial_1,9),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 8, role 5 to position 10, partial to position 9',result)
+    
+    # Test 22 -> Move role 4 to pos 8, role 5 to pos 10, partial to pos 9
+    
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=6:
+            raise RuntimeError
+        
+        for value in (
+                {'id':4,'position':8},
+                {'id':5,'position':9},
+                {'id':6,'position':4},
+                {'id':7,'position':5},
+                {'id':8,'position':6},
+                {'id':9,'position':7},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[4],8),(guild.roles[5],10),(role_partial_1,9),])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 4 to posisiton 8, role 5 to position 10, partial to position 9',result)
+    
+    # Test 23 move role 2 to pos 5, role 4 to pos 7
+
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=6:
+            raise RuntimeError
+        
+        for value in (
+                {'id':2,'position':5},
+                {'id':3,'position':2},
+                {'id':4,'position':7},
+                {'id':5,'position':3},
+                {'id':6,'position':4},
+                {'id':7,'position':6},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[2],5),(guild.roles[4],7)])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move role 2 to posisiton 5, role 4 to position 7',result)
+    
+    # Test 24 move role 3 to pos 8, role 4 to pos 8, role, 10 to pos 2, role 11 to pos 2
+
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=6:
+            raise RuntimeError
+        
+        for value in (
+                {'id':2,'position':4},
+                {'id':3,'position':9},
+                {'id':4,'position':10},
+                {'id':9,'position':11},
+                {'id':10,'position':2},
+                {'id':11,'position':3},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[3],8),(guild.roles[4],8),(guild.roles[10],2),(guild.roles[11],2)])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move 3->8, 4->8, 10->2, 11->2',result)
+    
+    # Test 25 3->5, 4->2, 5->7, 6->4, 7->9, 8->6
+
+    async def http_role_move_call(self, guild_id, data, reason):
+        if len(data)!=8:
+            raise RuntimeError
+        
+        for value in (
+                {'id':2,'position':3},
+                {'id':3,'position':5},
+                {'id':4,'position':2},
+                {'id':5,'position':7},
+                {'id':6,'position':4},
+                {'id':7,'position':9},
+                {'id':8,'position':6},
+                {'id':9,'position':8},
+                    ):
+            if value in data:
+                continue
+            
+            raise RuntimeError
+    
+    http_type.role_move=http_role_move_call
+    
+    try:
+        await client.role_reorder([(guild.roles[3],5),(guild.roles[4],2),(guild.roles[5],7),(guild.roles[6],4),(guild.roles[7],9),(guild.roles[8],6)])
+    except RuntimeError:
+        result='Failed, bad data was generated, pls look it up.'
+    except BaseException as err:
+        result=repr(err)
+    else:
+        result='Success'
+        
+    embed.add_field('Move 3->5, 4->2, 5->7, 6->4, 7->9, 8->6',result)
+    
+    # Cleanup
+    for role in guild.roles:
+        role.guild=None
+    
+    role=None
+    
+    guild.roles.clear()
+    guild.all_role.clear()
+    guild=None
+    
+    role_bad_linked.guild=None
+    guild_bad_linked=None
+    
+    role_partial_1=None
+    role_partial_2=None
+    
+    http_type.role_move = http_role_move_original
+    
+    
+    await client.message_create(message.channel,embed=embed)
+
+@commands
+async def test_guild_widget(client,message,content):
+    if not client.is_owner(message.author):
+        return
+    
+    if not is_id(content):
+        await client.message_create('Content should be passed as guild id')
+        return
+    
+    try:
+        guild_widget = await client.guild_widget_get(int(content))
+    except BaseException as err:
+        with StringIO() as buffer:
+            await client.loop.render_exc_async(err,'At guild_widget_get;\n',file=buffer)
+            content=buffer.getvalue()
+        await client.message_create(message.channel,content)
+        return
+    
+    if guild_widget is None:
+        await client.message_create('The guild has widget disabled')
+        return
+    
+    chunks=pchunkify(guild_widget)
+    pages=[Embed(description=chunk) for chunk in chunks]
+    await Pagination(client,message.channel,pages)
+
+@commands
+@ContentParser('int','emoji')
+async def test_reaction_delete_emoji(client,message,message_id,emoji):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        message_ = await client.message_get(message.channel,message_id)
+    except DiscordException as err:
+        await client.message_create(message.channel,repr(err))
+        return
+    
+    await client.reaction_delete_emoji(message_,emoji)
+    
+    await client.message_create(message.channel,'Done')

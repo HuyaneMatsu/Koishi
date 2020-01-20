@@ -42,7 +42,7 @@ class cached_booru_command(object):
 
     async def _request_urls(self,client):
         url=''.join([SAFE_BOORU,self._FILTER,self._tag_name])
-        async with client.http.request_get(url) as response:
+        async with client.http.get(url) as response:
             result = await response.read()
         if response.status!=200:
             return
@@ -219,7 +219,7 @@ async def answer_booru(client,channel,content,url_base):
     else:
         url=url_base
     
-    async with client.http.request_get(url) as response:
+    async with client.http.get(url) as response:
         result = await response.read()
     if response.status!=200:
         await client.message_create(channel,

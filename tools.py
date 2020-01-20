@@ -1,12 +1,9 @@
 import re
 from weakref import WeakKeyDictionary
-from hata.events import CommandProcesser
-from hata.embed import Embed
-from hata.futures import CancelledError,sleep,Task
-from hata.dereaddons_local import inherit
-from hata import others
-from hata.exceptions import DiscordException
 from random import random
+
+from hata import CancelledError, sleep, Task, DiscordException
+from hata.events import CommandProcesser
 from hata.parsers import EventHandlerBase
 
 try:
@@ -15,21 +12,21 @@ except ImportError:
     BeautifulSoup=None
 
 def choose(list_):
-    return list_[(random()*list_.__len__()).__int__()]
+    return list_[int((random()*len(list_)))]
 
 def choose_notsame(list_,last):
-    index=(random()*list_.__len__()).__int__()
+    index=int(random()*len(list_))
     value=list_[index]
     if value==last:
         index=index+1
-        if index==list_.__len__():
+        if index==len(list_):
             index=0
         value=list_[index]
 
     return value
 
 def pop_one(list_):
-    return list_.pop((random()*list_.__len__()).__int__())
+    return list_.pop(int((random()*len(list_))))
 
 def mark_as_async(func):
     func.__async_call__=True
@@ -103,98 +100,5 @@ class CooldownHandler:
         except DiscordException:
             pass
 
-class commit_extractor(object):
-    _GIT_RP=re.compile('^\[`[\da-f]*`\]\((https://github.com/[^/]*/[^/]*/)commit')
-    __slots__=('channel', 'color', 'role', 'webhook',)
-    def __init__(self,channel,webhook,role=None,color=0):
-        self.channel=channel
-        self.webhook=webhook
-        self.role=role
-        self.color=color
-
-    async def __call__(self,client,message):
-        webhook=self.webhook
-
-        if message.author!=webhook or message.author.name!='GitHub':
-            return
-        
-        embed=message.embeds[0]
-
-        if ':master' not in embed.title:
-            return
-
-        url=self._GIT_RP.match(embed.description).group(1)+'commit/master'
-        result = await client.download_url(url)
-        soup=BeautifulSoup(result,'html.parser',from_encoding='utf-8')
-        
-        description_container=soup.find(class_='commit-desc')
-        if description_container is None:
-            return
-        
-        title_container=soup.find(class_='commit-title')
-
-        if webhook.partial:
-            await client.webhook_update(webhook)
-
-        guild=webhook.guild
-        
-        if self.role is None:
-            result_content=''
-            needs_unlock=False
-        else:
-            result_content=self.role.mention
-            needs_unlock = (not self.role.mentionable) and guild.permissions_for(client).can_manage_roles
-
-        embed_text=others.chunkify(description_container.getText('\n').splitlines())
-        result_embed=Embed(
-            title       = title_container.getText('\n').strip(),
-            description = embed_text[0],
-            color       = self.color,
-            url         = url,
-                )
-
-        extra_embeds=[]
-        for index in range(1,min(len(embed_text),9)):
-            extra_embeds.append(
-                Embed(
-                    title       = '',
-                    description = embed_text[index],
-                    color       = self.color,
-                    url         = '',
-                        )
-                )
-            
-        webhook_name = embed.author.name
-        webhook_avatar_url = embed.author.proxy_icon_url
-
-        if needs_unlock:
-            try:
-                await client.role_edit(self.role,mentionable=True)
-                await sleep(0.8,client.loop)
-                await client.webhook_send(webhook,
-                    result_content,
-                    result_embed,
-                    name=webhook_name,
-                    avatar_url=webhook_avatar_url
-                        )
-                for embed in extra_embeds:
-                    await client.webhook_send(webhook,
-                        '',
-                        embed,
-                        name=webhook_name,
-                        avatar_url=webhook_avatar_url
-                            )
-                await sleep(0.8,client.loop)
-            finally:
-                await client.role_edit(self.role,mentionable=False)
-
-        else:
-            await client.webhook_send(webhook,
-                result_content,
-                result_embed,
-                name=webhook_name,
-                avatar_url=webhook_avatar_url
-                    )
 del CommandProcesser
-del inherit
 del re

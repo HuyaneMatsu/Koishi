@@ -241,6 +241,17 @@ class dispatch_tester:
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
+    async def reaction_delete_emoji(self,client,message,emoji,users):
+        Task(self.old_events['reaction_delete_emoji'](client,message,emoji,users),client.loop)
+        if self.channel is None:
+            return
+        
+        text=pretty_print(users)
+        text.insert(0,f'{emoji:e} were removed from message {message.id}:')
+        pages=[Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client,self.channel,pages,120.)
+        
+    @classmethod
     async def user_presence_update(self,client,user,old):
         Task(self.old_events['user_presence_update'](client,user,old),client.loop)
         if self.channel is None:
@@ -706,7 +717,7 @@ class dispatch_tester:
 
     @classmethod
     async def client_edit_settings(self,client,old):
-        Task(self.old_events['client_edit_settings'](client,client,old),client.loop)
+        Task(self.old_events['client_edit_settings'](client,old),client.loop)
         if self.channel is None:
             return
         
@@ -716,6 +727,28 @@ class dispatch_tester:
         result.append('```')
         await client.message_create(self.channel,'\n'.join(result))
     
+    @classmethod
+    async def invite_create(self,client,invite):
+        Task(self.old_events['invite_create'](client,invite),client.loop)
+        if self.channel is None:
+            return
+    
+        text=pretty_print(invite)
+        text.insert(0,f'Invite created:')
+        pages=[Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client,self.channel,pages,120.)
+    
+    @classmethod
+    async def invite_delete(self,client,invite):
+        Task(self.old_events['invite_delete'](client,invite),client.loop)
+        if self.channel is None:
+            return
+    
+        text=pretty_print(invite)
+        text.insert(0,f'Invite deleted:')
+        pages=[Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client,self.channel,pages,120.)
+        
 async def _help_here(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('here',(
@@ -756,9 +789,12 @@ async def _help_switch(client,message):
         '- `guild_edit`\n'
         '- `guild_user_add`\n'
         '- `guild_user_delete`\n'
+        '- `invite_create`\n'
+        '- `invite_delete`\n'
         '- `message_delete`\n'
         '- `message_edit`\n'
         '- `reaction_clear`\n'
+        '- `reaction_delete_emoji`\n'
         '- `role_create`\n'
         '- `role_delete`\n'
         '- `role_edit`\n'

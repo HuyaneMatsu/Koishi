@@ -16,7 +16,7 @@ class Helper(object):
         self.invalid        = invalid
         self.no_perm        = no_perm
         self.helps          = []
-        self.helps_by_name = {}
+        self.helps_by_name  = {}
 
     def add(self,name,coro,checker=None):
         if len(name)>64:
@@ -43,37 +43,66 @@ class Helper(object):
 
     @staticmethod
     def check_is_guild_owner(client,message):
-        if client.is_owner(message.author):
+        user=message.author
+        if client.is_owner(user):
             return True
 
         guild=message.channel.guild
         if guild is None:
             return False
 
-        return guild.owner==message.author
+        return (guild.owner==user)
 
     class check_permission(object):
+        __slots__=('perms',)
         def __init__(self,perms):
             self.perms=perms
+            
         def __call__(self,client,message):
-            if client.is_owner(message.author):
+            user=message.author
+            if client.is_owner(user):
                 return True
 
-            return message.channel.permissions_for(message.author)>=self.perms
+            return (message.channel.permissions_for(user)>=self.perms)
         
     class check_guild_permission(object):
+        __slots__=('perms',)
         def __init__(self,perms):
             self.perms=perms
+            
         def __call__(self,client,message):
-            if client.is_owner(message.author):
+            user=message.author
+            
+            if client.is_owner(user):
                 return True
             
             guild=message.guild
             if guild is None:
                 return False
             
-            return guild.permissions_for(message.author)>=self.perms
+            return (guild.permissions_for(user)>=self.perms)
         
+    class check_role(object):
+        __slots__=('role',)
+        def __init__(self,role):
+            self.role=role
+            
+        def __call__(self,client,message):
+            user=message.author
+            if client.is_owner(user):
+                return True
+            
+            role=self.role
+            try:
+                profile=user.guild_profiles[role.guild]
+            except KeyError:
+                return False
+            
+            if role in profile.roles:
+                return True
+            
+            return False
+    
     async def __call__(self,client,message,content):
         if not (0<len(content)<64):
             await self.default(client,message,self)
@@ -155,12 +184,86 @@ async def _koishi_help_no_perm(client,message):
 KOISHI_HELPER=Helper(_koishi_help_default,_koishi_help_invalid,_koishi_help_no_perm)
 KOISHI_HELPER.add('help',_koishi_help_default)
 
-async def invalid_command(client,message,command,content):
+async def koishi_invalid_command(client,message,command,content):
     prefix=client.events.message_create.prefix(message)
     embed=Embed(
         f'Invalid command `{command}`',
         f'try using: `{prefix}help`',
         color=KOISHI_HELP_COLOR,
+            )
+    
+    message = await client.message_create(message.channel,embed=embed)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
+
+FLAN_HELP_COLOR=Color.from_rgb(230,69,0)
+
+async def _flan_help_default(client,message,helper):
+    pages=[]
+    part=[]
+    index=0
+    for element in helper.helps:
+        checker=element.checker
+        if (checker is not None) and (not checker(client,message)):
+            continue
+
+        if index==16:
+            pages.append('\n'.join(part))
+            part.clear()
+            index=0
+        part.append(f'**>>** {element.name}')
+        index+=1
+
+    pages.append('\n'.join(part))
+
+    del part
+
+    prefix=client.events.message_create.prefix
+    result=[]
+
+    limit=len(pages)
+    index=0
+    while index<limit:
+        embed=Embed('Commands:',color=FLAN_HELP_COLOR,description=pages[index])
+        index+=1
+        embed.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
+        result.append(embed)
+
+    del pages
+
+    await Pagination(client,message.channel,result)
+
+async def _flan_help_invalid(client,message,content):
+    prefix=client.events.message_create.prefix
+    embed=Embed(f'Invalid command: {content}',(
+        f'Please try using `{prefix}help` to list the available commands '
+        'for you\n'
+        'Take care!'
+        ),color=FLAN_HELP_COLOR)
+    message = await client.message_create(message.channel,embed=embed)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
+
+async def _flan_help_no_perm(client,message):
+    prefix=client.events.message_create.prefix
+    embed=Embed('Permission denied',(
+        f'Please try using `{prefix}help` to list the available commands '
+        'for you\n'
+        'Love you!'
+        ),color=FLAN_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
+
+FLAN_HELPER=Helper(_flan_help_default,_flan_help_invalid,_flan_help_no_perm)
+FLAN_HELPER.add('help',_flan_help_default)
+
+async def flan_invalid_command(client,message,command,content):
+    prefix=client.events.message_create.prefix
+    embed=Embed(
+        f'Invalid command `{command}`',
+        f'try using: `{prefix}help`',
+        color=FLAN_HELP_COLOR,
             )
     
     message = await client.message_create(message.channel,embed=embed)

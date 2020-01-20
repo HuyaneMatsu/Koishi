@@ -21,7 +21,7 @@ from hata.oauth2 import parse_oauth2_redirect_url
 from hata.message import Message
 
 import image_handler
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER, invalid_command
+from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER, koishi_invalid_command
 from kanako import kanako_manager
 from dungeon_sweeper import ds_manager,_DS_modify_best
 from voice import voice
@@ -64,7 +64,7 @@ commands=eventlist()
 commands(image_handler.on_command_upload,'upload')
 commands(image_handler.on_command_image,'image')
 commands(KOISHI_HELPER,'help')
-commands(invalid_command)
+commands(koishi_invalid_command,'invalid_command')
 commands(kanako_manager,'kanakogame')
 commands(voice)
 commands(dispatch_tester.here)
@@ -105,7 +105,6 @@ async def default_event(client,message):
         
     content=message.content
     if message.channel.cached_permissions_for(client).can_add_reactions and _KOISHI_NOU_RP.match(content) is not None:
-        parts=[]
         for value in 'nou':
             emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
             await client.reaction_add(message,emoji)
@@ -190,7 +189,7 @@ async def ping(client,message,content):
 
 async def _help_ping(client,message):
     prefix=client.events.message_create.prefix(message)
-    return Embed('ping',(
+    embed=Embed('ping',(
         'Do you wanna know how bad my connection is to Discord?\n'
         f'Usage: `{prefix}ping'
         ),color=KOISHI_HELP_COLOR)
@@ -763,9 +762,8 @@ async def oa2_feed(client,message,content):
         return
 
     Task(client.message_delete(message),client.loop)
-    try:
-        result=parse_oauth2_redirect_url(content)
-    except ValueError:
+    result=parse_oauth2_redirect_url(content)
+    if result is None:
         await client.message_create(message.channel,'Bad link')
         return
 

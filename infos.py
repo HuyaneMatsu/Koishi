@@ -663,7 +663,7 @@ async def message_pure(client,message,message_id,channel):
     try:
         data = await client.http.message_get(channel.id,message_id)
     except DiscordException as err:
-        await client.message_create(message.channel,err.__repr__())
+        await client.message_create(message.channel,repr(err))
         return
     
     await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])

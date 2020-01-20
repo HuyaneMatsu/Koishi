@@ -63,7 +63,7 @@ async def wiki(client,message,content):
     # this takes a while, lets type a little.
     Task(client.typing(message.channel),client.loop)
     
-    async with client.http.request_(METH_GET,
+    async with client.http.request(METH_GET,
             'https://en.touhouwiki.net/api.php?action=opensearch&search='
             f'{search_for}&limit=25&redirects=resolve&format=json&utf8',) as response:
         response_data = await response.text()
@@ -303,7 +303,7 @@ class TouhouWikiChooseMenu(object):
         return Task(canceller(self,None),self.client.loop)
 
 async def download_wiki_page(client,result):
-    async with client.http.request_(METH_GET,result[1]) as response:
+    async with client.http.request(METH_GET,result[1]) as response:
         response_data = await response.text()
     soup=BeautifulSoup(response_data,'html.parser')
     block=soup.find_all('div',class_='mw-parser-output')[2]
