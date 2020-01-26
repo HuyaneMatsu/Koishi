@@ -72,7 +72,7 @@ from hata.dereaddons_local import alchemy_incendiary
 #Emoji.precreate(604698116658167808,name='aG').as_emoji
 
 class Rarity(object):
-    INSTANCES = [NotImplemented] *5
+    INSTANCES = [NotImplemented] * 6
     BY_NAME   = {}
     __slots__=('index', 'name',)
     
@@ -128,31 +128,30 @@ class Rarity(object):
     def __hash__(self):
         return self.index
     
+    token       = NotImplemented
     common      = NotImplemented
     uncommon    = NotImplemented
     rare        = NotImplemented
     legendary   = NotImplemented
     mythic      = NotImplemented
 
-
-Rarity(0,'Common'),
-Rarity(1,'Uncommon'),
-Rarity(2,'Rare'),
-Rarity(3,'Legendary'),
-Rarity(4,'Mythic'),
+Rarity.token    = Rarity(0,'Token',)
+Rarity.common   = Rarity(1,'Common')
+Rarity.uncommon = Rarity(2,'Uncommon')
+Rarity.rare     = Rarity(3,'Rare')
+Rarity.legendary= Rarity(4,'Legendary')
+Rarity.mythic   = Rarity(5,'Mythic')
 
 CARDS_BY_ID={}
 CARDS_BY_NAME={}
 
 class Card(object):
-    __slots__=('acquirable', 'description', 'id', 'name', 'rarity', 'token',)
-    def __init__(self,acquirable,description,id_,name,rarity,token):
+    __slots__=('description', 'id', 'name', 'rarity')
+    def __init__(self,description,id_,name,rarity):
         self.id         = id_
         self.name       = name
         self.description= description
         self.rarity     = rarity
-        self.acquirable = acquirable
-        self.token      = token
         CARDS_BY_ID[id_]= self
         CARDS_BY_NAME[name.lower()]=self
 
@@ -163,18 +162,17 @@ class Card(object):
     FILELOCK=SyncLock()
     
     @classmethod
-    def update(cls,description,id_,name,rarity,token):
+    def update(cls,description,id_,name,rarity):
         lower_name=name.lower()
         try:
             card=CARDS_BY_NAME[lower_name]
         except KeyError:
-            Card(True,description,id_,name,rarity,token)
+            Card(True,description,id_,name,rarity)
             return True
         
         card.description=description
         card.name=name
         card.rarity=rarity
-        card.token=token
         return False
     
     @classmethod
@@ -182,12 +180,10 @@ class Card(object):
         card_datas=[]
         for card in CARDS_BY_ID.values():
             card_data={}
-            card_data['acquirable'] = card.acquirable
             card_data['description']= card.description
             card_data['id']         = card.id
             card_data['name']       = card.name
             card_data['rarity']     = card.rarity.index
-            card_data['token']      = card.token
             card_datas.append(card_data)
         
         await loop.run_in_executor(alchemy_incendiary(cls._dump_cards,(card_datas,),),)
@@ -222,16 +218,6 @@ class Card(object):
             while True:
                 if type(card_data) is not dict:
                     exception=f'Expcted type \'dict\' for \'card_data\', got \'{card_data.__class__.__name__}\''
-                    break
-                
-                try:
-                    acquirable=card_data['acquirable']
-                except KeyError:
-                    exception='No \'acquirable\' key'
-                    break
-                
-                if type(acquirable) is not bool:
-                    exception=f'Expected type \'bool\' for \'acquirable\', got \'{acquirable.__class__.__name__}\''
                     break
                 
                 try:
@@ -279,21 +265,11 @@ class Card(object):
                 except IndexError:
                     exception=f'No such \'rarity\' index: {rarity}'
                     break
-
-                try:
-                    token=card_data['token']
-                except KeyError:
-                    exception='No \'token\' key'
-                    break
-                
-                if type(token) is not bool:
-                    exception=f'Expected type \'bool\' for \'token\', got \'{token.__class__.__name__}\''
-                    break
                 
                 break
 
             if exception is None:
-                Card(acquirable,description,id_,name,rarity,token)
+                Card(description,id_,name,rarity)
                 continue
             
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n At data part:\n{card_data}\n')

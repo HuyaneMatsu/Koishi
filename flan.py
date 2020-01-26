@@ -10,7 +10,7 @@ from chesuto import Rarity, CARDS_BY_NAME, Card
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
-CARD_HDR_RP     = re.compile('([a-z0-9 ]+?) *(\[token\])? *\(([a-z]+)\)',re.I)
+CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(\[token\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
 
 async def guild_user_add(client, guild, user):
     if guild is not CHESUTO_GUILD:
@@ -90,36 +90,51 @@ async def massadd(client,message):
             break
         
         return
-
+    
     try:
         await client.message_at_index(message.channel,1000)
     except IndexError:
         pass
     
     await client.message_delete(message)
-
+    
     messages=[]
-    for message in message.channel.messages:
+    for message_ in message.channel.messages:
         try:
-            profile=message.author.guild_profiles[CARDS_ROLE.guild]
+            profile=message_.author.guild_profiles[CARDS_ROLE.guild]
         except KeyError:
             continue
 
         if CARDS_ROLE not in profile.roles:
             continue
         
-        messages.append(message)
+        messages.append(message_)
 
     new_=0
     modified_=0
     
-    for message in messages:
-        lines=message.content.split('\n')
+    description_parts=[]
+    for message_ in messages:
+        lines=message_.content.split('\n')
         
-        next_id=message.id
+        next_id=message_.id
         state=0 #parse header
+        description_parts.clear()
+        
         for line in lines:
-            if not line:
+            if line=='<:nothing:562509134654865418>':
+                line=''
+            
+            if not line and description_parts:
+                description='\n'.join(description_parts)
+                description_parts.clear()
+                
+                if Card.update(description,next_id,name,rarity):
+                    new_+=1
+                    next_id+=1
+                else:
+                    modified_+=1
+                
                 state=0
                 continue
             
@@ -134,23 +149,32 @@ async def massadd(client,message):
                 else:
                     token=True
                 
-                try:
-                    rarity=Rarity.BY_NAME[rarity.title()]
-                except KeyError:
-                    continue
+                if token:
+                    rarity=Rarity.token
+                elif rarity is None:
+                    rarity=Rarity.INSTANCES[0]
+                else:
+                    try:
+                        rarity=Rarity.BY_NAME[rarity.title()]
+                    except KeyError:
+                        continue
                 
                 state=1 #parse description
                 continue
-
+            
             if state==1:
-                if Card.update(line,next_id,name,rarity,token):
-                    new_+=1
-                    next_id+=1
-                else:
-                    modified_+=1
-                
-                state=0
+                description_parts.append(line)
                 continue
+    
+        if description_parts:
+            description='\n'.join(description_parts)
+            description_parts.clear()
+            if Card.update(description,next_id,name,rarity,token):
+                new_+=1
+            else:
+                modified_+=1
+    
+    del description_parts
     
     if new_ or modified_:
         await Card.dump_cards(client.loop)
@@ -183,8 +207,15 @@ async def showcard(client,message,content):
         return
     embed=Embed(color=CHESUTO_COLOR)
     embed.add_field('Name',card.name,inline=True)
-    embed.add_field('Rarity',card.rarity.name,inline=True)
+    
+    rarity=card.rarity
+    if rarity is Rarity.token:
+        embed.add_footer('TOKEN')
+    else:
+        embed.add_field('Rarity',card.rarity.name,inline=True)
+    
     embed.add_field('Description',card.description)
+    
     await client.message_create(message.channel,embed=embed)
 
 async def _help_showcard(client,message):
@@ -233,11 +264,14 @@ async def showcards(client,message,content):
             index=index+1
 
             header=[card.name]
-            if card.token:
+            
+            rarity=card.rarity
+            if rarity is Rarity.token:
                 header.append(' [TOKEN]')
-            header.append(' (')
-            header.append(card.rarity.name)
-            header.append(')')
+            else:
+                header.append(' (')
+                header.append(card.rarity.name)
+                header.append(')')
 
             header=''.join(header)
             local_ln=len(header)
