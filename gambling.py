@@ -720,7 +720,7 @@ async def _help_dailyevent(client,message):
 KOISHI_HELPER.add('dailyevent',_help_dailyevent,KOISHI_HELPER.check_is_owner)
 
 @gambling(case='21')
-@ContentParser('int')
+@ContentParser('int, default=0')
 async def _21(client, message, amount):
     user=message.author
     while True:
@@ -862,6 +862,16 @@ async def _21(client, message, amount):
             return
             
         if emoji is GAME_21_NEW:
+            # It is enough to delete the reaction at this ase if needed,
+            # because after the other cases we will delete them anyways.
+            if can_manage_messages:
+                if not gui_message.did_react(emoji,user):
+                    continue
+                
+                should_delete_reaction=True
+            else:
+                should_delete_reaction=False
+                
             card = pull_card(all_pulled)
             all_pulled.append(card)
             all_pulled.sort()
@@ -881,15 +891,12 @@ async def _21(client, message, amount):
             if user_total>21:
                 break
 
-            # It is enough to delete the reaction at this ase if needed,
-            # because after the other cases we will delete them anyways.
-            if can_manage_messages:
-                if not gui_message.did_react(emoji,user):
-                    continue
+            if not should_delete_reaction:
+                continue
                 
-                task = Task(client.reaction_delete(gui_message,emoji,user),client.loop)
-                if __debug__:
-                    task.__silence__()
+            task = Task(client.reaction_delete(gui_message,emoji,user),client.loop)
+            if __debug__:
+                task.__silence__()
             
         elif emoji is GAME_21_STOP:
             break
