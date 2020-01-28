@@ -1457,6 +1457,34 @@ async def _help_reaction_clear(client,message):
 
 KOISHI_HELPER.add('reaction_clear',_help_reaction_clear,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
-
+@commands(case='die')
+@commands(case='kill')
+async def how_to_get_banned(client, message):
+    guild = message.guild
+    if guild is None:
+        return
+    
+    user = message.author
+    if client.is_owner(user):
+        return
+    
+    if not guild.cached_permissions_for(client).can_ban_users:
+        return
+    
+    try:
+        client_profile  = client.guild_profiles[guild]
+        user_profile    = user.guild_profiles[guild]
+    except KeyError:
+        return
+    
+    client_top_role_pos = max(client_profile.roles,default=guild.default_role).position
+    user_top_role_pos   = max(user_profile.roles,default=guild.default_role).position
+    
+    if client_top_role_pos<user_top_role_pos:
+        return
+    
+    await client.guild_ban_add(guild, user)
+    await client.message_create(message.channel,f'{user.full_name} banned succesfully')
+    
 del Cooldown
 del CooldownHandler

@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime,timedelta
+from random import random
 
 from hata.parsers import eventlist
 from hata.events_compiler import ContentParser
 from hata.others import elapsed_time
-from hata.events import Cooldown, wait_for_reaction
+from hata.events import Cooldown, wait_for_reaction, multievent, WaitAndContinue
 from hata.embed import Embed
 from hata.color import Color
 from hata.emoji import Emoji, BUILTIN_EMOJIS
 from hata.exceptions import DiscordException
-from hata.futures import sleep,Task,Future
+from hata.futures import sleep, Task, Future
 
 from models import DB_ENGINE,currency_model,CURRENCY_TABLE
 from tools import CooldownHandler
@@ -32,6 +33,70 @@ EVENT_OK_EMOJI          = BUILTIN_EMOJIS['ok_hand']
 EVENT_ABORT_EMOJI       = BUILTIN_EMOJIS['x']
 EVENT_DAILY_MIN_AMOUNT  = 1
 EVENT_DAILY_MAX_AMOUNT  = 7
+
+CARD_TYPES = (
+    BUILTIN_EMOJIS['spades'].as_emoji,
+    BUILTIN_EMOJIS['clubs'].as_emoji,
+    BUILTIN_EMOJIS['hearts'].as_emoji,
+    BUILTIN_EMOJIS['diamonds'].as_emoji,
+        )
+
+CARD_NUMBERS = (
+    BUILTIN_EMOJIS['two'].as_emoji,
+    BUILTIN_EMOJIS['three'].as_emoji,
+    BUILTIN_EMOJIS['four'].as_emoji,
+    BUILTIN_EMOJIS['five'].as_emoji,
+    BUILTIN_EMOJIS['six'].as_emoji,
+    BUILTIN_EMOJIS['seven'].as_emoji,
+    BUILTIN_EMOJIS['eight'].as_emoji,
+    BUILTIN_EMOJIS['nine'].as_emoji,
+    BUILTIN_EMOJIS['keycap_ten'].as_emoji,
+    BUILTIN_EMOJIS['regional_indicator_j'].as_emoji,
+    BUILTIN_EMOJIS['regional_indicator_q'].as_emoji,
+    BUILTIN_EMOJIS['regional_indicator_k'].as_emoji,
+    BUILTIN_EMOJIS['a'].as_emoji,
+        )
+
+DECK_SIZE   = len(CARD_TYPES) * len(CARD_NUMBERS)
+ACE_INDEX   = len(CARD_NUMBERS)-1
+BET_MIN     = 10
+
+GAME_21_NEW  = BUILTIN_EMOJIS['new']
+GAME_21_STOP = BUILTIN_EMOJIS['octagonal_sign']
+
+GAME_21_EMOJIS = (
+    GAME_21_NEW,
+    GAME_21_STOP,
+        )
+
+GAME_21_IDS = set()
+
+def pull_card(all_pulled):
+    index = int((DECK_SIZE-len(all_pulled))*random())
+    for pulled in all_pulled:
+        if pulled>index:
+            break
+        
+        index=index+1
+        continue
+    
+    return index
+
+class game_21_checker(object):
+    __slots__=('user')
+    def __init__(self,user):
+        self.user=user
+    def __call__(self,emoji,user):
+        return (user==self.user) and (emoji in GAME_21_EMOJIS)
+    
+def wait_for_reaction_any(client,message,case,timeout):
+    future=Future(client.loop)
+    
+    WaitAndContinue(future, case, message, multievent(
+        client.events.reaction_add, client.events.reaction_delete
+            ), timeout)
+    
+    return future
 
 gambling=eventlist()
 
@@ -303,10 +368,10 @@ class heartevent(object):
         result.append('Duration: ')
         result.append(convert_tdelta(duration))
         result.append('\n Amount : ')
-        result.append(amount.__str__())
+        result.append(str(amount))
         if user_limit:
             result.append('\n user limit : ')
-            result.append(user_limit.__str__())
+            result.append(str(user_limit))
 
         embed=Embed('Is everything correct?',''.join(result),color=GAMBLING_COLOR)
         del result
@@ -498,10 +563,10 @@ class dailyevent(object):
         result.append('Duration: ')
         result.append(convert_tdelta(duration))
         result.append('\n Amount : ')
-        result.append(amount.__str__())
+        result.append(str(amount))
         if user_limit:
             result.append('\n user limit : ')
-            result.append(user_limit.__str__())
+            result.append(str(user_limit))
 
         embed=Embed('Is everything correct?',''.join(result),color=GAMBLING_COLOR)
         del result
@@ -653,5 +718,302 @@ async def _help_dailyevent(client,message):
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('dailyevent',_help_dailyevent,KOISHI_HELPER.check_is_owner)
+
+@gambling(case='21')
+@ContentParser('int')
+async def _21(client, message, amount):
+    user=message.author
+    while True:
+        if user.id in GAME_21_IDS:
+            error_msg=f'You are already at a game.'
+            break
+        
+        if amount < BET_MIN:
+            error_msg=f'You must bet at least {BET_MIN} {CURRENCY_EMOJI.as_emoji}'
+            break
+    
+        permissions = message.channel.cached_permissions_for(client)
+        if not permissions.can_add_reactions:
+            error_msg='I cannot start this command here, not enough permissions provided.'
+            break
+        
+        can_manage_messages=permissions.can_manage_messages
+        
+        async with DB_ENGINE.connect() as connector:
+            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user.id))
+            results = await response.fetchall()
+            if results:
+                total_love = results[0].total_love
+            else:
+                total_love = 0
+        
+        if total_love < amount:
+            error_msg=f'You have just {total_love} {CURRENCY_EMOJI.as_emoji}'
+            break
+        
+        error_msg=None
+        break
+    
+    if (error_msg is not None):
+        await client.message_create(message.channel,
+            embed=Embed(error_msg,color=GAMBLING_COLOR))
+        return
+    
+    GAME_21_IDS.add(user.id)
+    
+    all_pulled  = []
+    
+    user_hand   = []
+    user_total  = 0
+    user_ace    = 0
+    
+    client_hand = []
+    client_total= 0
+    client_ace  = 0
+    
+    while True:
+        card = pull_card(all_pulled)
+        all_pulled.append(card)
+        all_pulled.sort()
+        
+        client_hand.append(card)
+        
+        number_index=card%len(CARD_NUMBERS)
+        if number_index==ACE_INDEX:
+            client_ace+=1
+            card_weight=1
+        elif number_index>7:
+            card_weight=10
+        else:
+            card_weight=number_index+2
+        client_total+=card_weight
+        
+        applied = client_total
+        free_ace = client_ace
+        while free_ace:
+            if applied>13:
+                break
+            
+            applied=applied+9
+            free_ace=free_ace-1
+            continue
+        
+        if free_ace:
+            if applied>17:
+                break
+            continue
+        
+        if applied>15:
+            break
+        
+        continue
+        
+    for _ in range(2):
+        card = pull_card(all_pulled)
+        all_pulled.append(card)
+        all_pulled.sort()
+        
+        user_hand.append(card)
+        
+        number_index=card%len(CARD_NUMBERS)
+        if number_index==ACE_INDEX:
+            user_ace+=1
+            card_weight=1
+        elif number_index>7:
+            card_weight=10
+        else:
+            card_weight=number_index+2
+        user_total+=card_weight
+    
+    applied=user_total+user_ace*9
+    embed=Embed(f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}',
+        f'You have cards equal to {applied} weight at your hand',
+        color=GAMBLING_COLOR)
+    
+    for round,card in enumerate(user_hand,1):
+        type_index, number_index = divmod(card,len(CARD_NUMBERS))
+        embed.add_field(f'Round {round}',
+            f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
+    
+    try:
+        gui_message = await client.message_create(message.channel,embed=embed)
+        for emoji in GAME_21_EMOJIS:
+            await client.reaction_add(gui_message, emoji)
+        
+        checker=game_21_checker(user)
+    except:
+        GAME_21_IDS.remove(user.id)
+        raise
+    
+    while True:
+        try:
+            emoji, _ = await wait_for_reaction_any(client,gui_message,checker,300.0)
+        except TimeoutError:
+            GAME_21_IDS.remove(user.id)
+            
+            embed.add_footer('Timeout occured, you lost.')
+            await client.message_edit(gui_message,embed=embed)
+            
+            async with DB_ENGINE.connect() as connector:
+                await connector.execute(CURRENCY_TABLE.update().values(
+                    total_love  = total_love-amount,
+                        ).where(currency_model.user_id==user.id))
+            
+            return
+            
+        if emoji is GAME_21_NEW:
+            card = pull_card(all_pulled)
+            all_pulled.append(card)
+            all_pulled.sort()
+            
+            user_hand.append(card)
+            
+            number_index=card%len(CARD_NUMBERS)
+            if number_index==ACE_INDEX:
+                user_ace+=1
+                card_weight=1
+            elif number_index>7:
+                card_weight=10
+            else:
+                card_weight=number_index+2
+            user_total+=card_weight
+            
+            if user_total>21:
+                break
+
+            # It is enough to delete the reaction at this ase if needed,
+            # because after the other cases we will delete them anyways.
+            if can_manage_messages:
+                if not gui_message.did_react(emoji,user):
+                    continue
+                
+                task = Task(client.reaction_delete(gui_message,emoji,user),client.loop)
+                if __debug__:
+                    task.__silence__()
+            
+        elif emoji is GAME_21_STOP:
+            break
+        else:
+            # should not happen
+            continue
+
+        applied = user_total
+        free_ace = user_ace
+        while free_ace:
+            if applied>13:
+                break
+            
+            applied=applied+9
+            free_ace=free_ace-1
+            continue
+        
+        embed.description=f'You have cards equal to {applied} weight at your hand'
+        
+        round=len(user_hand)
+        card=user_hand[round-1]
+        
+        type_index, number_index = divmod(card,len(CARD_NUMBERS))
+        embed.add_field(f'Round {round}',
+            f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
+        
+        try:
+            await client.message_edit(gui_message,embed=embed)
+        except:
+            GAME_21_IDS.remove(user.id)
+            raise
+    
+    GAME_21_IDS.remove(user.id)
+    
+    if can_manage_messages:
+        task = Task(client.reaction_clear(gui_message),client.loop)
+        if __debug__:
+            task.__silence__()
+    
+    client_applied = client_total
+    free_ace = client_ace
+    while free_ace:
+        if client_applied>13:
+            break
+        
+        client_applied=client_applied+9
+        free_ace=free_ace-1
+        continue
+    
+    user_applied = user_total
+    free_ace = user_ace
+    while free_ace:
+        if user_applied>13:
+            break
+        
+        user_applied=user_applied+9
+        free_ace=free_ace-1
+        continue
+    
+    if client_applied>21:
+        if user_applied>21:
+            winner=None
+        else:
+            winner=user
+    else:
+        if user_applied>21:
+            winner=client
+        else:
+            if client_applied>user_applied:
+                winner=client
+            elif client_applied<user_applied:
+                winner=user
+            else:
+                winner=None
+    
+    if winner is None:
+        title=f'How to draw.'
+    else:
+        if winner is user:
+            title=f'How to win {amount} {CURRENCY_EMOJI.as_emoji}'
+            total_love=total_love+amount
+        else:
+            title=f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}'
+            total_love=total_love-amount
+        
+        async with DB_ENGINE.connect() as connector:
+            await connector.execute(CURRENCY_TABLE.update().values(
+                total_love  = total_love,
+                    ).where(currency_model.user_id==user.id))
+    
+    embed=Embed(title,color=GAMBLING_COLOR)
+    
+    field_content=[]
+    
+    for round,card in enumerate(user_hand,1):
+        type_index, number_index = divmod(card,len(CARD_NUMBERS))
+        field_content.append('Round ')
+        field_content.append(str(round))
+        field_content.append(': ')
+        field_content.append(CARD_TYPES[type_index])
+        field_content.append(' ')
+        field_content.append(CARD_NUMBERS[number_index])
+        field_content.append('\n')
+        
+    embed.add_field(f'{user.name_at(message.guild)}\'s cards\' weight: {user_applied}',
+        ''.join(field_content))
+    field_content.clear()
+    
+    for round,card in enumerate(client_hand,1):
+        type_index, number_index = divmod(card,len(CARD_NUMBERS))
+        field_content.append('Round ')
+        field_content.append(str(round))
+        field_content.append(': ')
+        field_content.append(CARD_TYPES[type_index])
+        field_content.append(' ')
+        field_content.append(CARD_NUMBERS[number_index])
+        field_content.append('\n')
+    
+    embed.add_field(f'{client.name_at(message.guild)}\'s cards\' weight: {client_applied}',
+        ''.join(field_content))
+    field_content.clear()
+    
+    await client.message_edit(gui_message,embed=embed)
+
+
 
 del Emoji, Color, Cooldown, ContentParser, eventlist, CooldownHandler

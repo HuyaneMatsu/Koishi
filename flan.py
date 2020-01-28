@@ -169,7 +169,7 @@ async def massadd(client,message):
         if description_parts:
             description='\n'.join(description_parts)
             description_parts.clear()
-            if Card.update(description,next_id,name,rarity,token):
+            if Card.update(description,next_id,name,rarity):
                 new_+=1
             else:
                 modified_+=1

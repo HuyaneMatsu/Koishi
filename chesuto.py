@@ -167,7 +167,7 @@ class Card(object):
         try:
             card=CARDS_BY_NAME[lower_name]
         except KeyError:
-            Card(True,description,id_,name,rarity)
+            Card(description,id_,name,rarity)
             return True
         
         card.description=description
