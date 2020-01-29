@@ -776,16 +776,16 @@ class embedination_rr(object):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         
-        client=self.client
         message=self.message
         
-        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
-        
-        if can_manage_messages:
+        if self.channel.cached_permissions_for(client).can_manage_messages:
             if not message.did_react(emoji,user):
                 return
-            Task(self.reaction_remove(client,message,emoji,user),client.loop)
-        
+
+            task=Task(client.reaction_delete(message,emoji,user),client.loop)
+            if __debug__:
+                task.__silence__()
+            
         task_flag=self.task_flag
         if task_flag!=GUI_STATE_READY:
             if task_flag==GUI_STATE_SWITCHING_PAGE:
@@ -813,11 +813,11 @@ class embedination_rr(object):
                 self.task_flag=GUI_STATE_CANCELLED
                 try:
                     await client.message_delete(message)
-                except DiscordException:
+                except (DiscordException,ConnectionError):
                     pass
-                
-                self.cancel()
-                return
+                finally:
+                    self.cancel()
+                    return
             
             if emoji is self.LEFT2:
                 page=self.page-10
@@ -828,8 +828,10 @@ class embedination_rr(object):
                 break
 
             return
-
-        Task(self.reaction_remove(client,message,emoji,user),client.loop)
+        
+        task=Task(client.reaction_delete(message,emoji,user),client.loop)
+        if __debug__:
+            task.__silence__()
 
         if page<0:
             page=0
@@ -843,32 +845,26 @@ class embedination_rr(object):
         self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(message,embed=self.pages[page])
-        except DiscordException:
+        except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
-            return
+            if isinstance(err,(DiscordException,ConnectionError)):
+                return
+            raise
 
         if self.task_flag==GUI_STATE_CANCELLING:
             self.task_flag=GUI_STATE_CANCELLED
             try:
                 await client.message_delete(message)
-            except DiscordException:
+            except (DiscordException,ConnectionError):
                 pass
-            self.cancel()
-            return
+            finally:
+                self.cancel()
+                return
         
         self.task_flag=GUI_STATE_READY
         
-        timeouter=self.timeouter
-        if timeouter.timeout<150.:
-            timeouter.timeout+=10.
-
-    @staticmethod
-    async def reaction_remove(client,message,emoji,user):
-        try:
-            await client.reaction_delete(message,emoji,user)
-        except DiscordException:
-            pass
+        self.timeouter.set_timeout(150.0)
         
     @staticmethod
     async def _canceller(self,exception,):
@@ -900,7 +896,7 @@ class embedination_rr(object):
             timeouter.cancel()
         #we do nothing
     
-    def cancel(self):
+    def cancel(self,exception=None):
         canceller=self.canceller
         if canceller is None:
             return
@@ -911,7 +907,7 @@ class embedination_rr(object):
         if timeouter is not None:
             timeouter.cancel()
         
-        return Task(canceller(self,None),self.client.loop)
+        return Task(canceller(self,exception),self.client.loop)
     
 @infos
 async def roles(client,message,content):

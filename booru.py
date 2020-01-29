@@ -112,7 +112,10 @@ class ShuffledShelter(object):
         if can_manage_messages:
             if not message.did_react(emoji,user):
                 return
-            Task(self.reaction_remove(client,message,emoji,user),client.loop)
+            
+            task=Task(client.reaction_delete(message,emoji,user),client.loop)
+            if __debug__:
+                task.__silence__()
 
         if self.task_flag:
             return
@@ -147,10 +150,13 @@ class ShuffledShelter(object):
         self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(message,embed=embed)
-        except DiscordException:
+        except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
-            return
+            if isinstance(err,(DiscordException,ConnectionError)):
+                return
+            
+            raise
             
         if not self.urls:
             self.task_flag=GUI_STATE_CANCELLED
@@ -159,14 +165,7 @@ class ShuffledShelter(object):
         
         self.task_flag=GUI_STATE_READY
 
-        self.timeouter.timeout+=20.0
-            
-    @staticmethod
-    async def reaction_remove(client,message,emoji,user):
-        try:
-            await client.reaction_delete(message,emoji,user)
-        except DiscordException:
-            pass
+        self.timeouter.set_timeout(300.0)
 
     async def _canceller(self,exception):
         client=self.client
@@ -188,7 +187,7 @@ class ShuffledShelter(object):
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(message)
-                except DiscordException:
+                except (DiscordException,ConnectionError):
                     pass
             
             return
@@ -198,7 +197,7 @@ class ShuffledShelter(object):
             timeouter.cancel()
         #we do nothing
     
-    def cancel(self):
+    def cancel(self,exception=None):
         canceller=self.canceller
         if canceller is None:
             return
@@ -209,7 +208,7 @@ class ShuffledShelter(object):
         if timeouter is not None:
             timeouter.cancel()
         
-        return Task(canceller(self,None),self.client.loop)
+        return Task(canceller(self,exception),self.client.loop)
         
 async def answer_booru(client,channel,content,url_base):
     if content:
