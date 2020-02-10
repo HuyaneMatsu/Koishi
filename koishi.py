@@ -1,5 +1,7 @@
 import re, sys
 from random import randint
+from io import StringIO
+from math import ceil
 
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
@@ -8,7 +10,7 @@ from hata.events_compiler import ContentParser
 from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
-from hata.futures import CancelledError,sleep,FutureWM,Task,render_exc_to_list
+from hata.futures import CancelledError,sleep,FutureWM,Task
 from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild
 from hata.channel import cr_pg_channel_object,ChannelText
 from hata.exceptions import DiscordException
@@ -125,6 +127,92 @@ async def default_event(client,message):
     if text:
         await client.message_create(message.channel,text)
 
+DUNGEON=Guild.precreate(388267636661682178)
+
+@commands
+async def command_error(client, message, command, content, exception):
+    if message.guild is not DUNGEON:
+        return True
+    
+    with StringIO() as buffer:
+        await client.loop.render_exc_async(exception,[
+            client.full_name,
+            ' ignores an occured exception at command ',
+            repr(command),
+            '\n\nMessage details:\nGuild: ',
+            repr(message.guild),
+            '\nChannel: ',
+            repr(message.channel),
+            '\nAuthor: ',
+            message.author.full_name,
+            ' (',
+            repr(message.author.id),
+            ')\nContent: ',
+            repr(content),
+            '\n```py\n'], '```', file=buffer)
+        
+        buffer.seek(0)
+        lines = buffer.readlines()
+    
+    pages = []
+    
+    page_length = 0
+    page_contents = []
+    
+    index = 0
+    limit = len(lines)
+    
+    while True:
+        if index == limit:
+            embed = Embed(description=''.join(page_contents))
+            pages.append(embed)
+            page_contents = None
+            break
+        
+        line = lines[index]
+        index = index+1
+        
+        line_lenth = len(line)
+        # long line check, should not happen
+        if line_lenth > 500:
+            line = line[:500]+'...\n'
+            line_lenth = 504
+        
+        if page_length+line_lenth > 1997:
+            if index == limit:
+                # If we are at the last element, we dont need to shard up,
+                # because the last element is always '```'
+                page_contents.append(line)
+                embed = Embed(description=''.join(page_contents))
+                pages.append(embed)
+                page_contents = None
+                break
+            
+            page_contents.append('```')
+            embed = Embed(description=''.join(page_contents))
+            pages.append(embed)
+            
+            page_contents.clear()
+            page_contents.append('```py\n')
+            page_contents.append(line)
+            
+            page_length = 6+line_lenth
+            continue
+        
+        page_contents.append(line)
+        page_length += line_lenth
+        continue
+    
+    limit = len(pages)
+    index = 0
+    while index<limit:
+        embed = pages[index]
+        index += 1
+        embed.add_footer(f'page {index}/{limit}')
+    
+    await Pagination(client,message.channel,pages)
+    return False
+
 @commands
 @ContentParser('user, flags=mna, default="message.author"')
 async def rate(client,message,target):
@@ -150,8 +238,8 @@ KOISHI_HELPER.add('rate',_help_rate)
 @commands
 @ContentParser('int, default="1"')
 async def dice(client,message,times):
-    if times==0:
-        text='0 KEK'
+    if times<=0:
+        text=f'{times} KEK'
     elif times>6:
         text='I have only 6 dices, sorry, no money for more. Sadpanda'
     else:
@@ -923,7 +1011,7 @@ async def oa2_my_guild(client,message,content):
         await sleep(1.,client.loop)
         await client.guild_edit(guild,owner=user)
     except Exception as err:
-        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at oa2_my_guild\n'])))
+        await client.loop.render_exc_async(err,'Exception occured at oa2_my_guild\n')
     finally:
         try:
             guild
@@ -1100,7 +1188,7 @@ async def _pararell_load(client,channel,future):
     except (IndexError,PermissionError) as err:
         pass
     except BaseException as err:
-        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at pararell_load\nTraceback (most recent call last):\n'])))
+        await client.loop.render_exc_async(err,'Exception occured at pararell_load\n')
     finally:
         future.set_result(None)
     
@@ -1156,7 +1244,7 @@ async def _pararell_load_reactions(client,channel,future,reactions):
     except (IndexError,PermissionError) as err:
         pass
     except BaseException as err:
-        sys.stderr.write(''.join(render_exc_to_list(err,['Exception occured at pararell_load_reactions\nTraceback (most recent call last):\n'])))
+        await client.loop.render_exc_async(err,'Exception occured at pararell_load_reactions\n')
     finally:
         messages=[message for message in channel.messages if message.reactions]
         for message in messages:
@@ -1226,15 +1314,20 @@ async def _help_count_reactions(client,message):
 KOISHI_HELPER.add('count_reactions',_help_count_reactions,KOISHI_HELPER.check_is_owner)
 
 @commands
-@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
-                'user, flags=mna, default="client"',)
-async def update_application_info(client,message,user):
+@ContentParser('user, flags=mna, default="client"',)
+async def update_application_info(client, message, user):
+    if not client.is_owner(message.author):
+        return True
+    
     if type(user) is Client:
         await user.update_application_info()
-        text=f'Application info of `{user:f}` is updated succesfully!'
+        content = f'Application info of `{user:f}` is updated succesfully!'
     else:
-        text='I can update application info only of a client'
-    await client.message_create(message.channel,text)
+         content = 'I can update application info only of a client.'
+    
+    await client.message_create(message.channel, content)
+    
+    return False
 
 async def _help_update_application_info(client,message):
     prefix=client.events.message_create.prefix(message)

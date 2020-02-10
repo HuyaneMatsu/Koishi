@@ -527,7 +527,7 @@ class dispatch_tester:
                 
                 continue
             
-            if key in ('system_channel','afk_channel','widget_channel','embed_channel','rules_channel'):
+            if key in ('system_channel','afk_channel','widget_channel','embed_channel','rules_channel','public_updates_channel'):
                 other=getattr(guild,key)
                 if value is None:
                     result.append(f'{key} : None -> {other.name} {other.id}')

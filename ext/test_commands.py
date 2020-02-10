@@ -14,7 +14,7 @@ from hata.ios import ReuAsyncIO
 from hata.client import Achievement
 from hata.oauth2 import parse_oauth2_redirect_url
 from hata.emoji import BUILTIN_EMOJIS, parse_emoji
-from hata.futures import sleep, render_exc_to_list, Task, Future, WaitTillFirst
+from hata.futures import sleep, Task, Future, WaitTillFirst
 from hata.dereaddons_local import alchemy_incendiary
 from hata.invite import Invite
 from hata.exceptions import DiscordException
@@ -708,7 +708,9 @@ async def follow_test(client,message,content):
     except ValueError as err:
         text=err.args[0]
     except BaseException as err:
-        text=''.join(client.loop.run_in_exceutor(alchemy_incendiary,render_exc_to_list,(err,),),)
+        with StringIO as buffer:
+            await client.loop.render_exc_async(err,file=buffer)
+            text=buffer.getvalue()
     else:
         text=pconnect(webhook)
     
@@ -3572,14 +3574,42 @@ async def test_guild_widget(client,message,content):
 @ContentParser('int','emoji')
 async def test_reaction_delete_emoji(client,message,message_id,emoji):
     if not client.is_owner(message.author):
-        return
+        return True
     
     try:
         message_ = await client.message_get(message.channel,message_id)
     except DiscordException as err:
         await client.message_create(message.channel,repr(err))
-        return
+        return False
     
     await client.reaction_delete_emoji(message_,emoji)
     
     await client.message_create(message.channel,'Done')
+    
+    return False
+
+@commands
+async def test_raise(client, message):
+    if not client.is_owner(message.author):
+        return True
+    
+    raise ValueError('meow')
+
+def raise_long_line_step4():
+    raise ValueError('meow')
+
+def raise_long_line_step3():
+    raise_long_line_step4() # long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line
+
+def raise_long_line_step2():
+    raise_long_line_step3() # long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line
+
+def raise_long_line_step1():
+    raise_long_line_step2() # long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line, long line
+
+@commands
+async def test_raiselong(client, message):
+    if not client.is_owner(message.author):
+        return True
+    
+    raise_long_line_step1() # this line is long, because it has a long comment next to, hope it will 500 chars, because i rally ant it to do so, pls do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it

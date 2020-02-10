@@ -144,7 +144,7 @@
         "rarity": 2
     },
     {
-        "description": "This card can it be used if you have at least 9 other cards in your hand.\nI. Discard your hand.\nII. +50 hand size, you can't increase your hand size for the whole match. The effect can't be removed regardless of method. (This effect can't be stacked)\nIII. This card will not end your turn if used. ",
+        "description": "This card can it be used if you have at least 9 other cards in your hand.\nI. Discard your hand.\nII. +50 hand size, you can't increase your hand size for the whole match. The effect can't be removed regardless of method. (This effect can't be stacked)\nIII. This card will not end your turn.",
         "id": 611222905803636761,
         "name": "Ultimate Sacrifice",
         "rarity": 1
@@ -252,7 +252,7 @@
         "rarity": 0
     },
     {
-        "description": "If this card is used, select one of the effects to activate.\nEffect 1: This effect can only be selected on your 12th turn or later. Put an \"Echoing Resentments\" into your hand. \nEffect 2: Draw a card.",
+        "description": "I. If this card is used, select one of the effects to activate.\nEffect 1: This effect can only be selected on your 12th turn or later. Put an \"Echoing Resentments\" into your hand. \nEffect 2: Draw a card.",
         "id": 609410182501629965,
         "name": "Spellbook of Voices",
         "rarity": 4
@@ -624,10 +624,10 @@
         "rarity": 4
     },
     {
-        "description": "I. Discard 1 random \"A Gallon of Water\" from your opponent's hand.\nII. Increase your turn count by 1.",
+        "description": "You can only use this card if you played a card in your previous turn.\nI. Remove a Pawn of choice in your fourth or fifth lane\nII. Select an empty tile in your second lane, summon a Pawn.",
         "id": 645641586977538065,
-        "name": "Weird Vial",
-        "rarity": 0
+        "name": "An Accurate Arrow, a Swift Sway",
+        "rarity": 3
     },
     {
         "description": " I. Select an empty tile in your second lane, summon a Pawn in the selected tile.\nII. Draw a card.",
@@ -636,7 +636,7 @@
         "rarity": 2
     },
     {
-        "description": "I. Remove one of your Knights.\nII. Draw 2 cards.\nIII. This card will not end your turn if used.",
+        "description": "I. Remove one of your Knights.\nII. Draw 2 cards.\nIII. This card will not end your turn.",
         "id": 645641247897157667,
         "name": "Cannibal's Request",
         "rarity": 1
