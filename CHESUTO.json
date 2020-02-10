@@ -1,786 +1,768 @@
 [
     {
-        "description": "This card can only be used on your 5th turn or later.\nI. Starting from this turn, whenever a discard effect activates from your opponent's cards, put a Twofold Defence into your hand.\nThis effect lasts for the whole match and can't be stacked.",
-        "id": 619220530628919296,
-        "name": "Silent Preparations",
-        "rarity": 4
-    },
-    {
-        "description": "I. Put an Aegis Reinforcement and a Sacrificial Guardianship into your hand. \nII. This card will not end your turn.",
-        "id": 619867908360896512,
-        "name": "Twofold Defence",
-        "rarity": 0
-    },
-    {
         "description": "I. Select a one of your chess pieces, that piece ignores all captures and removal from Spells for 1 turn.\nII. You can choose to play an extra card after this card is played.",
-        "id": 617054220780306492,
+        "id": 645642084635639819,
         "name": "Aegis Reinforcement",
-        "rarity": 0
+        "rarity": 2
     },
     {
         "description": "I. Select one of your Pawns, it loses the ability to capture pieces and gains the following effect:\n- The next time another enemy chess piece captures another piece, this piece will be captured instead.\nII. You can choose to play an extra card after this card is played. ",
-        "id": 617054220780306493,
+        "id": 645642084635639820,
         "name": "Sacrificial Guardianship",
+        "rarity": 3
+    },
+    {
+        "description": "I. Select a card in your hand that has its requirements fulfilled, if any. Play that card.\nII. This card will not end your turn.\nThis card is a token only obtained at start of match if you start as Black.",
+        "id": 645642084635639821,
+        "name": "Black's Heirloom",
         "rarity": 0
-    },
-    {
-        "description": "I. Return a piece to where it was 1 turn ago.",
-        "id": 613729401674399745,
-        "name": "Chrono Slipstream",
-        "rarity": 2
-    },
-    {
-        "description": "I. Select an enemy Bishop, Rook, Knight or Queen, the selected type for both players receive the following effects:\n- Can't move for the next 2 turns.\n- Ignores all captures and removals from Spells targeted towards this piece.\nThis card can't be used if you don't have the same type of piece as the selected piece. ",
-        "id": 613729401674399746,
-        "name": "Crippling Indestructibility",
-        "rarity": 3
-    },
-    {
-        "description": "I. Remove a chess piece that neglect captures and removal from card effects. This card ignores spells that disallows the piece from being removed through card effects.",
-        "id": 613729401674399747,
-        "name": "Become Mortal",
-        "rarity": 3
     },
     {
         "description": "This card can only be used on your 15th turn or later.\nI. Your King ignores all captures and removals from Spells effects for 1 turn.\nII. Select an enemy chess piece except for the King and Queen. That piece will be removed immediately if:\n- It moves.\n- It gains an effect from a Spell.",
-        "id": 613729401674399748,
+        "id": 645642025881829376,
         "name": "Duality",
-        "rarity": 3
+        "rarity": 4
     },
     {
         "description": "I. Select one of your Rooks. That Rook ignores all captures and removal from Spells. The effect lasts for 1 turn.\nII. Switch your King with that Rook.\nThis card can be played even when your King is under check.\nThe effect can't be played on Kings outside of the one you started from the start of the match.",
-        "id": 613729401674399749,
+        "id": 645642025881829377,
         "name": "Immortal Defender",
-        "rarity": 3
+        "rarity": 4
     },
     {
         "description": "I. Select your third or fourth lane. All the Pawns in that lane gain the following effects:\n- Ignore all captures.\n- Ignore all removals from Spells.\n- After your opponent's turn ends, remove this chess piece.",
-        "id": 613729401674399750,
+        "id": 645642025881829378,
         "name": "Legion",
-        "rarity": 4
+        "rarity": 5
     },
     {
-        "description": "This card can only be used if you have no duplicates of any cards in your deck.\nI. Give the opponent the following effect: \"You can only move Pawns, this effect lasts for 4 turns\".\nII. This card can't be duplicated by card effects.",
-        "id": 611753886881153025,
-        "name": "One Hope",
-        "rarity": 4
+        "description": "This card can only be used on your 5th turn or later.\nI. Starting from this turn, whenever a discard effect activates from your opponent's cards, put a Twofold Defence into your hand.\nThis effect lasts for the whole match and can't be stacked.",
+        "id": 645642025881829379,
+        "name": "Silent Preparations",
+        "rarity": 5
     },
     {
-        "description": "I. Discard 2 cards in your hand.\nII. Select one of your chess pieces, it can move twice per turn for the next 3 turns.",
-        "id": 611753886881153026,
-        "name": "Conservative Breakthrough",
-        "rarity": 3
-    },
-    {
-        "description": "I. Select a chess piece, return it to its starting position. (If a piece is present in their original position, that piece can't be selected)",
-        "id": 611753886881153027,
-        "name": "Spring Trap",
-        "rarity": 2
+        "description": "I. Put an Aegis Reinforcement and a Sacrificial Guardianship into your hand. \nII. This card will not end your turn.",
+        "id": 645642025881829380,
+        "name": "Twofold Defence",
+        "rarity": 5
     },
     {
         "description": "This card can only be used if this is your 20th turn or later.\nI. Give the opponent the followijg effect: \"All of your Pawns can't choose to promote into a Queen, this effect lasts for the whole match\". (This effect can't be stacked)",
-        "id": 611753886881153028,
+        "id": 645641962245849108,
         "name": "Empty Journey",
-        "rarity": 3
-    },
-    {
-        "description": "I. Remove one of your Queens\nII. Draw cards until you have 9 cards in your hand.\nIII. This card will not end your turn.",
-        "id": 611392935271071755,
-        "name": "Offering to the Darkness",
-        "rarity": 2
-    },
-    {
-        "description": "I. Select a card in your hand (excluding \"Pledge to the Light\"). Shuffle 3 copies of the selected card into your deck and discard the selected card.\nII. Draw a card.",
-        "id": 611392935271071756,
-        "name": "Pledge to the Light",
-        "rarity": 3
-    },
-    {
-        "description": "I. You have the following effect: \"At the end of your turn, draw a card, the effect lasts for 4 turns\".\nII. Discard a card in your hand.",
-        "id": 611392935271071757,
-        "name": "Steady Harvest",
-        "rarity": 1
-    },
-    {
-        "description": "I. You have the following effects for 7 turns:\n- You hand size is set to 3. \n- Once per turn, you can use a card without ending your turn. \n- Draw a card after your turn ends.\"\nII. If you have more than 3 cards when this card is used, discard all other cards except for the first 3 cards in your hand.",
-        "id": 611392935271071758,
-        "name": "Cruel Crusade",
         "rarity": 4
     },
     {
-        "description": "I. Draw X cards. X equals to the number of times you drawn cards through card effects during this match.",
-        "id": 611392935271071759,
-        "name": "Snowball of Purpose",
-        "rarity": 1
+        "description": "I. Return a piece to where it was 1 turn ago.",
+        "id": 645641962245849109,
+        "name": "Chrono Slipstream",
+        "rarity": 3
     },
     {
-        "description": "I. You have the following effect: \"The next time your opponent discards cards, draw a card\". (This effect can stack)\nII. This card will not end your turn.",
-        "id": 611222905803636756,
-        "name": "Pillaging Efforts",
-        "rarity": 1
-    },
-    {
-        "description": "I. Draw a card. Activate the corresponding effect to the card drawn.\n- Card without the ability to discard: Discard this card, perform 1 more action this turn.\n- Card with the ability to discard: Give that card the following effect: \"This card will not end your turn\".",
-        "id": 611222905803636757,
-        "name": "Blind Bet",
-        "rarity": 2
-    },
-    {
-        "description": "This card can only be used if you have 1 other card in your hand.\nI. Discard a card in your hand.\nII. The opponent chooses a card to be discarded, the corresponding effect will activate depending on the discarded card.\n- A card with turn restriction: Nothing happens.\n- A card without turn restriction: Select and discard 2 more cards in your hand.",
-        "id": 611222905803636758,
-        "name": "Futile Struggle",
+        "description": "I. Select an enemy Bishop, Rook, Knight or Queen, the selected type for both players receive the following effects:\n- Can't move for the next 2 turns.\n- Ignores all captures and removals from Spells targeted towards this piece.\nThis card can't be used if you don't have the same type of piece as the selected piece. ",
+        "id": 645641962245849110,
+        "name": "Crippling Indestructibility",
         "rarity": 4
     },
     {
-        "description": "I. You have the followung effect: \"The next time your opponent discards cards, add the discarded cards into your hand instead\". (This effect can't be stacked)",
-        "id": 611222905803636759,
-        "name": "Planned Raid",
-        "rarity": 2
-    },
-    {
-        "description": "I. Discard a card in your hand and select a card in your hand, that card can't be discarded.\nThis effect lasts for 9 turns.",
-        "id": 611222905803636760,
-        "name": "Answered Prayer",
-        "rarity": 2
-    },
-    {
-        "description": "This card can it be used if you have at least 9 other cards in your hand.\nI. Discard your hand.\nII. +50 hand size, you can't increase your hand size for the whole match. The effect can't be removed regardless of method. (This effect can't be stacked)\nIII. This card will not end your turn.",
-        "id": 611222905803636761,
-        "name": "Ultimate Sacrifice",
-        "rarity": 1
-    },
-    {
-        "description": "I. -1 turn count for both players.\nII. Restore all captured and removed chess pieces from the previous turn.\nIII. Perform 2 more actions.",
-        "id": 611136725342748682,
-        "name": "Fatal Alter",
-        "rarity": 0
-    },
-    {
-        "description": "I. If this card is drawn, end your turn.",
-        "id": 611136725342748683,
-        "name": "Distraught Nightmare",
-        "rarity": 0
-    },
-    {
-        "description": "This card will automatically be used after 6 turns has passed.\nI. All other cards you have in your deck that has the same abilities will be discarded until only 1 copy of it remain.",
-        "id": 611136725342748684,
-        "name": "Cursed Promise",
-        "rarity": 0
-    },
-    {
-        "description": "After 7 turns this card will discard itself. I. This card can only be discarded by enemy spells or by itself. \nII. While this card is in your hand, you have the following effect: \"All spells you use will skip your next turn, if that spell already has the ability to skip your turns, add 1 more to the amount it will skip. ",
-        "id": 611136725342748685,
-        "name": "Frozen Soul",
-        "rarity": 0
-    },
-    {
-        "description": "I. While this card is in your hand, you have the following effect: \"All cards in your deck and hand except this card will have a 25 turn restriction\".",
-        "id": 611136725342748686,
-        "name": "Suffering Beyond Agony",
-        "rarity": 0
-    },
-    {
-        "description": "I. Remove all Lucy's Forbidden Power cards from your hand and deck. \nII. All remaining effects given by cards from Lucy's Forbidden Power will be removed.",
-        "id": 611136725342748687,
-        "name": "Resolution of Salvation",
-        "rarity": 0
-    },
-    {
-        "description": "I. While this card is in your hand, you have the following effect: \"If there are no cards from Lucy's Forbidden Power in your deck, at the end of your turn, activate the following effects.\n- Shuffle a \"Flamenugget\" into your opponent's deck, that \"Flamenugget\" will not discard their hand nor skip their turn.\n- Shuffle 2 \"Pondering\" into your deck.",
-        "id": 611136725342748688,
-        "name": "Lullaby of Armageddon",
-        "rarity": 0
-    },
-    {
-        "description": "I. Discard 3 cards in your hand.\nII. Increase your turn count by 5",
-        "id": 611136725342748689,
-        "name": "Travelling Marvelously",
-        "rarity": 3
-    },
-    {
-        "description": "I. Reveal the top 5 cards in your deck. Discard them. Shuffle the cards back to your deck instead if the following requirement is fulfilled:\n- Have at least 1 card from Lucy's Forbidden Power drawn.\nII. During your next turn, draw 5 cards.",
-        "id": 611136689812799496,
-        "name": "Spellbound Energy Check",
-        "rarity": 0
-    },
-    {
-        "description": "I. Gain the following effect: \"For the next 4 turns, draw a card at the start of your turn. After drawing, select one of the following actions to be performed:\n- Keep the drawn card.\n- Give the drawn card to the opponent.\nIf the second action is performed, the next time cards are drawn by your opponent, the drawn cards are given to you instead\". (This effect can be stacked) (The effect resolves before the default draw.)",
-        "id": 611136689812799497,
-        "name": "Luck Manipulation",
-        "rarity": 0
-    },
-    {
-        "description": "I. Gain the following effect: \"The next time your turn is skipped by your own card effects, perform the following effects instead.\n- Nullify the skip turn effect.\n- Draw a card.\" (These effects can stack)",
-        "id": 611136689812799498,
-        "name": "Energy Salvage",
-        "rarity": 0
-    },
-    {
-        "description": "I. Skip your next turn without drawing card.\nII. You may skip your opponent's current turn or their next turn anytime desired. This choice will stay in play until used. The effect will not end your turn if used on your turn. (If your opponent is using a card while this effect activates, discard that card before the effects activate) (This effect can't be stacked)",
-        "id": 611136689812799499,
-        "name": "Energy Pact",
-        "rarity": 0
-    },
-    {
-        "description": "I. Gain the following effect: \"The next time you end your turn,  select a card still in your deck, draw it\".",
-        "id": 611136689812799500,
-        "name": "Rigged Guidance",
-        "rarity": 0
-    },
-    {
-        "description": "I. Discard a token in your hand that doesn't come from Lucy's Forbidden Power.\nII. Select a token in your deck, draw it and a put a copy of it into your deck.",
-        "id": 611136689812799501,
-        "name": "Boundaries of Alchemy",
-        "rarity": 0
-    },
-    {
-        "description": "You can only play this card if you fulfilled the following requirement below:\n- Play at least 3 other cards in a row for 3 turns while this card is in your hand. \nI. Draw 3 cards.\nII. Increase your turn timer by 3.\nIII. Remove 3 chess pieces of choice except for the Queen and King. \nIV. This card will reset the number of cards played in a row.",
-        "id": 609410182501629962,
-        "name": "The Lucky Triples",
-        "rarity": 3
-    },
-    {
-        "description": "I. Transform all other cards in both player' hands to \"A Gallon of Water\".",
-        "id": 609410182501629963,
-        "name": "Some Refreshing Water",
-        "rarity": 2
-    },
-    {
-        "description": "I. Discard 1 random \"A Gallon of Water\" from your opponent's hand.\nII. Increase your turn count by 1.",
-        "id": 609410182501629964,
-        "name": "A Gallon of Water",
-        "rarity": 0
-    },
-    {
-        "description": "I. If this card is used, select one of the effects to activate.\nEffect 1: This effect can only be selected on your 12th turn or later. Put an \"Echoing Resentments\" into your hand. \nEffect 2: Draw a card.",
-        "id": 609410182501629965,
-        "name": "Spellbook of Voices",
+        "description": "I. Remove a chess piece that neglect captures and removal from card effects. This card ignores spells that disallows the piece from being removed through card effects.",
+        "id": 645641962245849111,
+        "name": "Become Mortal",
         "rarity": 4
-    },
-    {
-        "description": "I. Select a card in your hand that does not has the one card per deck restriction, put copies of it until your hand is full.\nII. Discard all other cards in your hand except the selected card and its copies.",
-        "id": 609410182501629966,
-        "name": "Echoing Resentments",
-        "rarity": 0
-    },
-    {
-        "description": "This card can only be used on your 20th turn or later.\nI. Transform all cards in both players' decks into \"Pondering\" cards.",
-        "id": 609410182501629967,
-        "name": "Awkward Tactician",
-        "rarity": 3
-    },
-    {
-        "description": "This card can only be used on your 7th turn or later.\nI. Gain the following effect: \"All of your Pawns including summoned ones can't be targeted by opponent Spells if they are in your second, seventh or eighth lane, this effect lasts for the whole match\".",
-        "id": 609410182501629968,
-        "name": "Lucky Kingdom",
-        "rarity": 3
-    },
-    {
-        "description": "I. Reduce your turn count by 3.\nII. Draw 3 cards.",
-        "id": 609410156513722369,
-        "name": "Bargain of Time",
-        "rarity": 2
-    },
-    {
-        "description": "This card can only be used on your 13th turn or later.\nI. Give both players the following effect: \"Turn count increases by 2 instead of 1 at the start of your turns, this effect lasts for the whole match.\" (This effect can stack)",
-        "id": 609410156513722370,
-        "name": "Hastened Timelines",
-        "rarity": 2
-    },
-    {
-        "description": "I. Increase your hand size by 2. ",
-        "id": 609410156513722371,
-        "name": "Extended Strategies",
-        "rarity": 1
-    },
-    {
-        "description": "I. Gain the following effect: \"All of your Knights that will come into play from card effects can choose to move forward one space after moving normally, this effect lasts for the rest of the match.\" (This effect can't be stacked)",
-        "id": 609410156513722372,
-        "name": "Centaur Transformation",
-        "rarity": 3
-    },
-    {
-        "description": "I. Discard a card in your hand.\nII. Draw a card.\nIII. Put a copy of the drawn card into your hand.",
-        "id": 609410156513722373,
-        "name": "Altered Discovery",
-        "rarity": 1
-    },
-    {
-        "description": "I. Transform all \"Pondering\" cards in both players' hand into random cards that are still in their deck.",
-        "id": 609410156513722374,
-        "name": "Brilliant Ideas",
-        "rarity": 1
-    },
-    {
-        "description": "I. Select a card in your hand, put any amount of copies of it into your deck. To the max, 5.\nII. Shuffle X Pondering into your deck. X equals to the chosen amount shuffled.",
-        "id": 609410156513722375,
-        "name": "Disturbed Plans",
-        "rarity": 3
-    },
-    {
-        "description": "I. Gain the following effect: \"Lose the ability to move chess pieces for 4 turns; after 5 turns, all of your chess pieces (excluding those which will come into play from card effects and transformed pieces) can move twice, this effect will last for the rest of the match\". (This effect can't be stacked)\nII. Draw 5 cards.",
-        "id": 609410156513722376,
-        "name": "Raging Anger",
-        "rarity": 2
-    },
-    {
-        "description": "This card can only be used if you have at least 5 other cards in your hand.\nI. Discard your hand. \nII. Remove all other effects from both players.",
-        "id": 609410156513722377,
-        "name": "Trickery of the Jesters",
-        "rarity": 1
-    },
-    {
-        "description": "I. Reduce your turn count by 2\nII. Discard a card in your hand.\nIII. Select any turn based effect from any player, increase its duration by 4.\nIV. You can't use cards for the next 2 turns.",
-        "id": 609410156513722378,
-        "name": "Favoured Downfall",
-        "rarity": 4
-    },
-    {
-        "description": "I. Draw a card.\nII. Increase your turn count by 1.",
-        "id": 609410156513722379,
-        "name": "Joy of Celebration",
-        "rarity": 1
-    },
-    {
-        "description": "I. Gain the following effect: \"The corresponding effect will activate depending on the next piece you capture:\n- Pawn: The next 2 cards you draw regardless of method will be discarded.\n- Non-Pawns: Draw 4 cards.\" (This effect can stack)",
-        "id": 601721604875223040,
-        "name": "Bounty",
-        "rarity": 2
-    },
-    {
-        "description": "This card can only be used on your 17th turn or later.\nI. Put a \"Final Stance\" into your hand.\nII. Draw 2 cards.",
-        "id": 601721604875223041,
-        "name": "Hardened Will",
-        "rarity": 4
-    },
-    {
-        "description": "I. Your Queen will be immune to captures if its being captured while this effect is in play. This effect last for 4 turns. (This effect can stack)\nII. Gain the following effect: \"Any chess piece that lands on your last lane can be promoted except for your King, this effect lasts for the rest of the match.\" (This effect can't be stacked)\nThis card can be used without any Queen in play.",
-        "id": 601721604875223042,
-        "name": "Final Stance",
-        "rarity": 0
-    },
-    {
-        "description": "This card can only be used on your 5th turn or later.\nI. Reduce your turn count by 3.\nII. Reduce your opponent's turn count by 5.",
-        "id": 601721604875223043,
-        "name": "Miraculous Rewind",
-        "rarity": 3
-    },
-    {
-        "description": "This card can only be used on your 12th turn or later.\nI. Gain the following effect: \"At end of each of your turns, draw a card; during the start of your turn, remove all of your chess pieces except for your King and Pawns if your deck only has 15 cards or less. These effects last for the rest of the match.\" (These effects can be stacked)",
-        "id": 601721604875223044,
-        "name": "Overflowing Greed",
-        "rarity": 3
-    },
-    {
-        "description": "I. Gain the following effect: \"The next time your cards are discarded by an effect, draw the same amount as the discarded amount\".",
-        "id": 601721604875223045,
-        "name": "Counterfeit",
-        "rarity": 2
-    },
-    {
-        "description": "I. Discard a card in your hand.\nII. Remove one of your Pawns or one of your opponent's Pawns.",
-        "id": 601721604875223046,
-        "name": "Weakened Morale",
-        "rarity": 1
-    },
-    {
-        "description": "I. If your deck has at least one card that has no duplicates at the start of the match, put a copy of a random card that meets all the following conditions into your hand:\n- Still in deck.\n- Has no duplicates inside deck from start of match.",
-        "id": 601721604875223047,
-        "name": "Sudden Discovery",
-        "rarity": 2
-    },
-    {
-        "description": "I. Select one of your chess pieces, whenever that chess piece moves you draw a card, this effect lasts for the rest of the match. (This effect can be stacked)",
-        "id": 599247444701610016,
-        "name": "Footsteps of the Steady",
-        "rarity": 1
-    },
-    {
-        "description": "I. Select a Pawn you control, it will ignore a capture while this effect is in play, after this effect activates, remove this effect. This effect lasts for the rest of the match. (This effect can be stacked)",
-        "id": 599247444701610017,
-        "name": "Spare Shield",
-        "rarity": 1
-    },
-    {
-        "description": "This card can only be used if at least one of your Bishops isn't in your first lane and if there is a targetable Bishop in both sides.\nI. Transform one of your Bishop into a Pawn, select and remove one of your opponent's Bishops.",
-        "id": 599247444701610018,
-        "name": "Demolishing Faith",
-        "rarity": 2
-    },
-    {
-        "description": "You can only use this card if your King has performed a castling in this match\nI. Remove one of your Rooks \nII. Your King will ignore a capture if its being captured for the first time, this effect lasts the rest of the game. (This effect can't be stacked)\nIII. Discard a card in your hand.",
-        "id": 599247444701610019,
-        "name": "Reign of the Wicked",
-        "rarity": 3
-    },
-    {
-        "description": "I. Select one of your chess pieces, for the next 2 turns, it is not visible for your opponent. \nThe card discards itself if you have 6 chess pieces or less in your control.",
-        "id": 599247444701610020,
-        "name": "Under the Shadows",
-        "rarity": 3
-    },
-    {
-        "description": "I. Allow your King to perform castling with any piece on the first row of your board. Cannot be played if:\n- A Check or Checkmate is occurring.\n- If the piece that is swapped with can be captured.\n- If you already performed castling this match.",
-        "id": 599247444701610021,
-        "name": "Benevolent Exchange",
-        "rarity": 2
-    },
-    {
-        "description": "I. Give the opponent the following effect: \"The next time you use a card:\n- Discard it before the effect activates. \n- Draw a card\". (This effect can stack)\nEach deck can only have one copy of this card.",
-        "id": 599247444701610022,
-        "name": "Banishing Scroll",
-        "rarity": 3
-    },
-    {
-        "description": "I. Both players discard their hand. \nII. Both players draw a card.",
-        "id": 599247444701610023,
-        "name": "Enraged Strike",
-        "rarity": 4
-    },
-    {
-        "description": "I. Draw 5 cards.\nII. Reveal one of the five cards. drawn through this effect.\nIII. Discard the first and last card drawn through this effect.",
-        "id": 599247444701610024,
-        "name": "Nut of the Fallen",
-        "rarity": 2
-    },
-    {
-        "description": "I. Select a card with a turn restriction of 16 or less in your hand, it gains the following effects:\n- At the end of this turn, reveal that card to your opponent.\n- Remove its turn restriction.\nII. Skip your next turn.\nThis effect will last for 4 turns.",
-        "id": 599247444701610025,
-        "name": "Forgotten Prayer",
-        "rarity": 2
-    },
-    {
-        "description": "I. Discard a card in your hand.\nII. Put a random card (excluding Offering of Alchemy) with the nearer-higher rarity than the discarded card.",
-        "id": 599247426339209227,
-        "name": "Offering of Alchemy",
-        "rarity": 2
-    },
-    {
-        "description": "I. Remove one of your Pawns.\nII. Select one of your Knights, it can move two times per turn for the next 3 turns. (This effect can't be stacked)",
-        "id": 599247426339209228,
-        "name": "Steadfast Boots",
-        "rarity": 1
-    },
-    {
-        "description": "I. Give the opponent the following effect: \"You can't use cards for the next 2 turns\".",
-        "id": 599247426339209229,
-        "name": "Silence",
-        "rarity": 1
-    },
-    {
-        "description": "This card can only be used if you have at least 1 King and 1 Queen.\nI. For the next 4 turns:\n- Your King can only move identically as your Queen.\n- Your Queen can only move identically as your King.",
-        "id": 599247426339209230,
-        "name": "Betrayal of Affairs",
-        "rarity": 4
-    },
-    {
-        "description": "I. All chess pieces in your fourth lane will be pushed towards to your fourth leftmost tile, all chess pieces before the rightmost piece are removed, immune pieces pushes the rightmost piece towards the right by one tile for each immune piece.",
-        "id": 599247426339209231,
-        "name": "Windfall",
-        "rarity": 3
-    },
-    {
-        "description": "I. Draw 2 cards.\nII. You can't move chess pieces in your next turn.\nIII. Shuffle a copy of \"Stingy Upkeep\" into your deck.",
-        "id": 599247426339209232,
-        "name": "Stingy Upkeep",
-        "rarity": 2
-    },
-    {
-        "description": "You can only play this card if you have at least 4 other cards in your hand.\nI. Choose and remove an effect for you. You may repeat this up to 3 times.\nII. Skip your next turn.\nIII. Discard 4 cards in your hand.",
-        "id": 599247426339209233,
-        "name": "Chains of the Insane",
-        "rarity": 2
-    },
-    {
-        "description": "I. Gain the following effect: \"The next time a Pawn comes into play from your card effects, transform it into a Rook\".",
-        "id": 599247426339209234,
-        "name": "Strengthened Rise",
-        "rarity": 2
-    },
-    {
-        "description": "This card can only be used if at least one Pawn has been captured during this match.\nI. Summon a Pawn in your second or third lane, if a chess piece is in the selected tile, remove it before summoning.\nEach deck can only have 1 copy of this card.",
-        "id": 599247311133999105,
-        "name": "Beyond the Grave",
-        "rarity": 4
-    },
-    {
-        "description": "This card can only be used on your 20th turn or later.\nI. All chess pieces in the fourth and fifth lane will be removed.\nEach deck can only have 1 copy of this card.",
-        "id": 599247311133999106,
-        "name": "Earthquake",
-        "rarity": 4
-    },
-    {
-        "description": "Remove all effects on a chess piece except for transformation and immunity effects.",
-        "id": 599247311133999107,
-        "name": "Goblet of Blood",
-        "rarity": 0
-    },
-    {
-        "description": "I. Does nothing.",
-        "id": 599247311133999108,
-        "name": "Pondering",
-        "rarity": 1
-    },
-    {
-        "description": "I. Draw 2 cards.",
-        "id": 599247311133999109,
-        "name": "Assembly March",
-        "rarity": 1
-    },
-    {
-        "description": "I. Remove one of your chess pieces except the King or Queen.\nII. Choose a same type of chess piece as the removed piece for your opponent, remove that piece.",
-        "id": 599247311133999110,
-        "name": "Voodoo Doll",
-        "rarity": 3
-    },
-    {
-        "description": "This card can only be used in your 10th turn or later.\nI. Randomly put one of the following cards into your hand.\n- Flamenugget\n- Hrog'qua \n- Peacegrant \nII. Skip your next turn.",
-        "id": 599247311133999111,
-        "name": "Forgotten Artifacts",
-        "rarity": 4
-    },
-    {
-        "description": "I. Select a chess piece and move it 3 times.\nII. Discard your hand.\nIII. Skip your next turn.",
-        "id": 599247311133999112,
-        "name": "Flamenugget",
-        "rarity": 0
-    },
-    {
-        "description": "I. For the next 3 turns:\n- The player can only move chess pieces.\n- The opponent can only use cards.",
-        "id": 599247311133999113,
-        "name": "Peacegrant",
-        "rarity": 0
-    },
-    {
-        "description": "I. Select one of your chess pieces except the King or Queen, if that chess piece is captured, the capturing piece will be removed. This effect lasts for the whole match. (This effect can't be stacked)",
-        "id": 599247311133999114,
-        "name": "Undying Loyalty",
-        "rarity": 3
-    },
-    {
-        "description": "Your opponent can perform two actions next turn\u00a0 you can move any enemy chess piece at the start of your next turn but can't move your own chess pieces.",
-        "id": 599247267144400906,
-        "name": "Grasp of Time",
-        "rarity": 1
-    },
-    {
-        "description": "I. Summon a Pawn in your half of the board.",
-        "id": 599247267144400907,
-        "name": "Recruitment",
-        "rarity": 2
-    },
-    {
-        "description": "This card can only be used if your King is in Check while this card is in your hand.\nI. This card will automatically be used if no cards were used this match.\nII. All empty tiles surrounding your King will be randomly replaced with chess pieces that has been captured or removed through card effects during the match.\nIII. Give all chess pieces summoned this turn the following effect: \"Remove this chess piece after 3 turns\".",
-        "id": 599247267144400908,
-        "name": "Revival Aegis",
-        "rarity": 3
-    },
-    {
-        "description": "I. You can't move chess pieces in your next turn.\nII. Draw 3 cards.",
-        "id": 599247267144400909,
-        "name": "Unlocking Knowledge",
-        "rarity": 1
-    },
-    {
-        "description": "If no Pawns you control have been defeated during this match, select a Pawn you control, remove all other Pawns you control, that Pawn is immune to all damage including card effects, it can only move once per two turns.",
-        "id": 599247267144400910,
-        "name": "Blitzkrieg",
-        "rarity": 0
-    },
-    {
-        "description": "This card can only be used on your 15th turn or later.\nI. Each unique black tile when landed on for the first time after this card is used will remove the corresponding piece that landed on it. (This effect can't be stacked)\nII. Each unique white tile when landed on for the first time after this card is used will draw a card for you if your pieces land on it. (This effect can't be stacked)",
-        "id": 599247208164098058,
-        "name": "Forbidden Lands",
-        "rarity": 4
-    },
-    {
-        "description": "I. Remove up to 3 Pawns of choice in your half of the board.\nII. For each Pawn removed, draw a card.",
-        "id": 599247208164098059,
-        "name": "Retirement",
-        "rarity": 3
-    },
-    {
-        "description": "You can only use this card if you have at least 1 Queen and 1 Knight.\nI. Remove one of your Queens and one of your Knights.\nII. Gain the following effects: \"All of your Pawns will ignore a capture if its being captured for while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect affects Pawns that will come into play\". (This effect can't be stacked)\nIII. Gain the following effects: \"All of your Pawns will ignore removals from Spells once if its being targeted while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect will affect Pawns that will come into play\". (This effect can't be stacked)",
-        "id": 599247208164098060,
-        "name": "Cursed Codex of Protection",
-        "rarity": 3
-    },
-    {
-        "description": "I. Remove an enemy Pawn\nII. During your next turn, a Pawn can move twice.",
-        "id": 599247208164098061,
-        "name": "Claymore of Rush",
-        "rarity": 3
     },
     {
         "description": "This card can only be used on your 13th turn or later.\nI. Give all cards currently in both players' hands the following effect:\n- Return this card into your deck instead of activating its effect.",
-        "id": 645641962245849108,
+        "id": 645641962245849112,
         "name": "Chronos: Genesis",
+        "rarity": 5
+    },
+    {
+        "description": "I. You have the following effects for 7 turns:\n- You hand size is set to 3. \n- Once per turn, you can use a card without ending your turn. \n- Draw a card after your turn ends.\"\nII. If you have more than 3 cards when this card is used, discard all other cards except for the first 3 cards in your hand.",
+        "id": 645641910513434636,
+        "name": "Cruel Crusade",
+        "rarity": 5
+    },
+    {
+        "description": "I. Draw X cards. X equals to the number of times you drawn cards through card effects during this match.",
+        "id": 645641910513434637,
+        "name": "Snowball of Purpose",
+        "rarity": 2
+    },
+    {
+        "description": "This card can only be used if you have no duplicates of any cards in your deck.\nI. Give the opponent the following effect: \"You can only move Pawns, this effect lasts for 4 turns\".\nII. This card can't be duplicated by card effects.",
+        "id": 645641910513434638,
+        "name": "One Hope",
+        "rarity": 5
+    },
+    {
+        "description": "I. Discard 2 cards in your hand.\nII. Select one of your chess pieces, it can move twice per turn for the next 3 turns.",
+        "id": 645641910513434639,
+        "name": "Conservative Breakthrough",
+        "rarity": 4
+    },
+    {
+        "description": "I. Select a chess piece, return it to its starting position. (If a piece is present in their original position, that piece can't be selected)",
+        "id": 645641910513434640,
+        "name": "Spring Trap",
+        "rarity": 3
+    },
+    {
+        "description": "I. Discard a card in your hand and select a card in your hand, that card can't be discarded.\nThis effect lasts for 9 turns.",
+        "id": 645641861939331084,
+        "name": "Answered Prayer",
+        "rarity": 3
+    },
+    {
+        "description": "This card can it be used if you have at least 9 other cards in your hand.\nI. Discard your hand.\nII. +50 hand size, you can't increase your hand size for the whole match. The effect can't be removed regardless of method. (This effect can't be stacked)\nIII. This card will not end your turn.",
+        "id": 645641861939331085,
+        "name": "Ultimate Sacrifice",
+        "rarity": 2
+    },
+    {
+        "description": "I. Remove one of your Queens\nII. Draw cards until you have 9 cards in your hand.\nIII. This card will not end your turn.",
+        "id": 645641861939331086,
+        "name": "Offering to the Darkness",
+        "rarity": 3
+    },
+    {
+        "description": "I. Select a card in your hand (excluding \"Pledge to the Light\"). Shuffle 3 copies of the selected card into your deck and discard the selected card.\nII. Draw a card.",
+        "id": 645641861939331087,
+        "name": "Pledge to the Light",
+        "rarity": 4
+    },
+    {
+        "description": "I. You have the following effect: \"At the end of your turn, draw a card, the effect lasts for 4 turns\".\nII. Discard a card in your hand.",
+        "id": 645641861939331088,
+        "name": "Steady Harvest",
+        "rarity": 2
+    },
+    {
+        "description": "I. Discard 3 cards in your hand.\nII. Increase your turn count by 5",
+        "id": 645641813515829250,
+        "name": "Travelling Marvelously",
+        "rarity": 4
+    },
+    {
+        "description": "I. You have the following effect: \"The next time your opponent discards cards, draw a card\". (This effect can stack)\nII. This card will not end your turn.",
+        "id": 645641813515829251,
+        "name": "Pillaging Efforts",
+        "rarity": 2
+    },
+    {
+        "description": "I. Draw a card. Activate the corresponding effect to the card drawn.\n- Card without the ability to discard: Discard this card, perform 1 more action this turn.\n- Card with the ability to discard: Give that card the following effect: \"This card will not end your turn\".",
+        "id": 645641813515829252,
+        "name": "Blind Bet",
+        "rarity": 3
+    },
+    {
+        "description": "This card can only be used if you have 1 other card in your hand.\nI. Discard a card in your hand.\nII. The opponent chooses a card to be discarded, the corresponding effect will activate depending on the discarded card.\n- A card with turn restriction: Nothing happens.\n- A card without turn restriction: Select and discard 2 more cards in your hand.",
+        "id": 645641813515829253,
+        "name": "Futile Struggle",
+        "rarity": 5
+    },
+    {
+        "description": "I. You have the followung effect: \"The next time your opponent discards cards, add the discarded cards into your hand instead\". (This effect can't be stacked)",
+        "id": 645641813515829254,
+        "name": "Planned Raid",
+        "rarity": 3
+    },
+    {
+        "description": "This card will automatically be used after 6 turns has passed.\nI. All other cards you have in your deck that has the same abilities will be discarded until only 1 copy of it remain.",
+        "id": 645641763893149716,
+        "name": "Cursed Promise",
+        "rarity": 5
+    },
+    {
+        "description": "After 7 turns this card will discard itself. I. This card can only be discarded by enemy spells or by itself. \nII. While this card is in your hand, you have the following effect: \"All spells you use will skip your next turn, if that spell already has the ability to skip your turns, add 1 more to the amount it will skip. ",
+        "id": 645641763893149717,
+        "name": "Frozen Soul",
+        "rarity": 5
+    },
+    {
+        "description": "I. While this card is in your hand, you have the following effect: \"All cards in your deck and hand except this card will have a 25 turn restriction\".",
+        "id": 645641763893149718,
+        "name": "Suffering Beyond Agony",
+        "rarity": 5
+    },
+    {
+        "description": "I. Remove all Lucy's Forbidden Power cards from your hand and deck. \nII. All remaining effects given by cards from Lucy's Forbidden Power will be removed.",
+        "id": 645641763893149719,
+        "name": "Resolution of Salvation",
+        "rarity": 5
+    },
+    {
+        "description": "I. While this card is in your hand, you have the following effect: \"If there are no cards from Lucy's Forbidden Power in your deck, at the end of your turn, activate the following effects.\n- Shuffle a \"Flamenugget\" into your opponent's deck, that \"Flamenugget\" will not discard their hand nor skip their turn.\n- Shuffle 2 \"Pondering\" into your deck.",
+        "id": 645641763893149720,
+        "name": "Lullaby of Armageddon",
+        "rarity": 5
+    },
+    {
+        "description": "I. Skip your next turn without drawing card.\nII. You may skip your opponent's current turn or their next turn anytime desired. This choice will stay in play until used. The effect will not end your turn if used on your turn. (If your opponent is using a card while this effect activates, discard that card before the effects activate) (This effect can't be stacked)",
+        "id": 645641708565954561,
+        "name": "Energy Pact",
+        "rarity": 5
+    },
+    {
+        "description": "I. Gain the following effect: \"The next time you end your turn,  select a card still in your deck, draw it\".",
+        "id": 645641708565954562,
+        "name": "Rigged Guidance",
+        "rarity": 5
+    },
+    {
+        "description": "I. Discard a token in your hand that doesn't come from Lucy's Forbidden Power.\nII. Select a token in your deck, draw it and a put a copy of it into your deck.",
+        "id": 645641708565954563,
+        "name": "Boundaries of Alchemy",
+        "rarity": 5
+    },
+    {
+        "description": "I. -1 turn count for both players.\nII. Restore all captured and removed chess pieces from the previous turn.\nIII. Perform 2 more actions.",
+        "id": 645641708565954564,
+        "name": "Fatal Alter",
+        "rarity": 5
+    },
+    {
+        "description": "I. If this card is drawn, end your turn.",
+        "id": 645641708565954565,
+        "name": "Distraught Nightmare",
+        "rarity": 5
+    },
+    {
+        "description": "This card can only be used on your 7th turn or later.\nI. Gain the following effect: \"All of your Pawns including summoned ones can't be targeted by opponent Spells if they are in your second, seventh or eighth lane, this effect lasts for the whole match\".",
+        "id": 645641658439827466,
+        "name": "Lucky Kingdom",
         "rarity": 4
     },
     {
         "description": "This card can only be used on your 8th turn or later.\nI. Shuffle one of each Lucy's Forbidden Power cards into your deck.",
-        "id": 645641658439827466,
+        "id": 645641658439827467,
         "name": "Lucy's Forbidden Power",
-        "rarity": 4
+        "rarity": 5
+    },
+    {
+        "description": "I. Reveal the top 5 cards in your deck. Discard them. Shuffle the cards back to your deck instead if the following requirement is fulfilled:\n- Have at least 1 card from Lucy's Forbidden Power drawn.\nII. During your next turn, draw 5 cards.",
+        "id": 645641658439827468,
+        "name": "Spellbound Energy Check",
+        "rarity": 5
+    },
+    {
+        "description": "I. Gain the following effect: \"For the next 4 turns, draw a card at the start of your turn. After drawing, select one of the following actions to be performed:\n- Keep the drawn card.\n- Give the drawn card to the opponent.\nIf the second action is performed, the next time cards are drawn by your opponent, the drawn cards are given to you instead\". (This effect can be stacked) (The effect resolves before the default draw.)",
+        "id": 645641658439827469,
+        "name": "Luck Manipulation",
+        "rarity": 5
+    },
+    {
+        "description": "I. Gain the following effect: \"The next time your turn is skipped by your own card effects, perform the following effects instead.\n- Nullify the skip turn effect.\n- Draw a card.\" (These effects can stack)",
+        "id": 645641658439827470,
+        "name": "Energy Salvage",
+        "rarity": 5
+    },
+    {
+        "description": "I. Discard 1 random \"A Gallon of Water\" from your opponent's hand.\nII. Increase your turn count by 1.",
+        "id": 645641586977538065,
+        "name": "Weird Vial",
+        "rarity": 3
     },
     {
         "description": "You can only use this card if you played a card in your previous turn.\nI. Remove a Pawn of choice in your fourth or fifth lane\nII. Select an empty tile in your second lane, summon a Pawn.",
-        "id": 645641586977538065,
+        "id": 645641586977538066,
         "name": "An Accurate Arrow, a Swift Sway",
+        "rarity": 4
+    },
+    {
+        "description": "I. If this card is used, select one of the effects to activate.\nEffect 1: This effect can only be selected on your 12th turn or later. Put an \"Echoing Resentments\" into your hand. \nEffect 2: Draw a card.",
+        "id": 645641586977538067,
+        "name": "Spellbook of Voices",
+        "rarity": 5
+    },
+    {
+        "description": "I. Select a card in your hand that does not has the one card per deck restriction, put copies of it until your hand is full.\nII. Discard all other cards in your hand except the selected card and its copies.",
+        "id": 645641586977538068,
+        "name": "Echoing Resentments",
+        "rarity": 5
+    },
+    {
+        "description": "This card can only be used on your 20th turn or later.\nI. Transform all cards in both players' decks into \"Pondering\" cards.",
+        "id": 645641586977538069,
+        "name": "Awkward Tactician",
+        "rarity": 4
+    },
+    {
+        "description": "This card can only be used if you have at least 5 other cards in your hand.\nI. Discard your hand. \nII. Remove all other effects from both players.",
+        "id": 645641536670924830,
+        "name": "Trickery of the Jesters",
+        "rarity": 2
+    },
+    {
+        "description": "I. Reduce your turn count by 2\nII. Discard a card in your hand.\nIII. Select any turn based effect from any player, increase its duration by 4.\nIV. You can't use cards for the next 2 turns.",
+        "id": 645641536670924831,
+        "name": "Favoured Downfall",
+        "rarity": 5
+    },
+    {
+        "description": "I. Draw a card.\nII. Increase your turn count by 1.",
+        "id": 645641536670924832,
+        "name": "Joy of Celebration",
+        "rarity": 2
+    },
+    {
+        "description": "You can only play this card if you fulfilled the following requirement below:\n- Play at least 3 other cards in a row for 3 turns while this card is in your hand. \nI. Draw 3 cards.\nII. Increase your turn timer by 3.\nIII. Remove 3 chess pieces of choice except for the Queen and King. \nIV. This card will reset the number of cards played in a row.",
+        "id": 645641536670924833,
+        "name": "The Lucky Triples",
+        "rarity": 4
+    },
+    {
+        "description": "I. Transform all other cards in both player' hands to \"Weird Vial\".",
+        "id": 645641536670924834,
+        "name": "Flask of Transformation",
+        "rarity": 3
+    },
+    {
+        "description": "I. Select a card in your hand, put any amount of copies of it into your deck. To the max, 5.\nII. Shuffle X Pondering into your deck. X equals to the chosen amount shuffled.",
+        "id": 645641473995309067,
+        "name": "Disturbed Plans",
+        "rarity": 4
+    },
+    {
+        "description": "I. Gain the following effect: \"Lose the ability to move chess pieces for 4 turns; after 5 turns, all of your chess pieces (excluding those which will come into play from card effects and transformed pieces) can move twice, this effect will last for the rest of the match\". (This effect can't be stacked)\nII. Draw 5 cards.",
+        "id": 645641473995309068,
+        "name": "Raging Anger",
+        "rarity": 3
+    },
+    {
+        "description": "This card can only be used on your 13th turn or later.\nI. Give both players the following effect: \"Turn count increases by 2 instead of 1 at the start of your turns, this effect lasts for the whole match.\" (This effect can stack)",
+        "id": 645641412259610637,
+        "name": "Hastened Timelines",
+        "rarity": 3
+    },
+    {
+        "description": "I. Increase your hand size by 2. ",
+        "id": 645641412259610638,
+        "name": "Extended Strategies",
+        "rarity": 2
+    },
+    {
+        "description": "I. Gain the following effect: \"All of your Knights that will come into play from card effects can choose to move forward one space after moving normally, this effect lasts for the rest of the match.\" (This effect can't be stacked)",
+        "id": 645641412259610639,
+        "name": "Centaur Transformation",
+        "rarity": 4
+    },
+    {
+        "description": "I. Discard a card in your hand.\nII. Draw a card.\nIII. Put a copy of the drawn card into your hand.",
+        "id": 645641412259610640,
+        "name": "Altered Discovery",
+        "rarity": 2
+    },
+    {
+        "description": "I. Transform all \"Pondering\" cards in both players' hand into random cards that are still in their deck.",
+        "id": 645641412259610641,
+        "name": "Brilliant Ideas",
+        "rarity": 2
+    },
+    {
+        "description": "This card can only be used on your 12th turn or later.\nI. Gain the following effect: \"At end of each of your turns, draw a card; during the start of your turn, remove all of your chess pieces except for your King and Pawns if your deck only has 15 cards or less. These effects last for the rest of the match.\" (These effects can be stacked)",
+        "id": 645641364440088586,
+        "name": "Overflowing Greed",
+        "rarity": 4
+    },
+    {
+        "description": "I. Gain the following effect: \"The next time your cards are discarded by an effect, draw the same amount as the discarded amount\".",
+        "id": 645641364440088587,
+        "name": "Counterfeit",
+        "rarity": 3
+    },
+    {
+        "description": "I. Discard a card in your hand.\nII. Remove one of your Pawns or one of your opponent's Pawns.",
+        "id": 645641364440088588,
+        "name": "Weakened Morale",
+        "rarity": 2
+    },
+    {
+        "description": "I. If your deck has at least one card that has no duplicates at the start of the match, put a copy of a random card that meets all the following conditions into your hand:\n- Still in deck.\n- Has no duplicates inside deck from start of match.",
+        "id": 645641364440088589,
+        "name": "Sudden Discovery",
+        "rarity": 3
+    },
+    {
+        "description": "I. Reduce your turn count by 3.\nII. Draw 3 cards.",
+        "id": 645641364440088590,
+        "name": "Bargain of Time",
         "rarity": 3
     },
     {
         "description": " I. Select an empty tile in your second lane, summon a Pawn in the selected tile.\nII. Draw a card.",
         "id": 645641308433809438,
         "name": "Slave's Escape",
-        "rarity": 2
+        "rarity": 3
+    },
+    {
+        "description": "I. Gain the following effect: \"The corresponding effect will activate depending on the next piece you capture:\n- Pawn: The next 2 cards you draw regardless of method will be discarded.\n- Non-Pawns: Draw 4 cards.\" (This effect can stack)",
+        "id": 645641308433809439,
+        "name": "Bounty",
+        "rarity": 3
+    },
+    {
+        "description": "This card can only be used on your 17th turn or later.\nI. Put a \"Final Stance\" into your hand.\nII. Draw 2 cards.",
+        "id": 645641308433809440,
+        "name": "Hardened Will",
+        "rarity": 5
+    },
+    {
+        "description": "I. Your Queen will be immune to captures if its being captured while this effect is in play. This effect last for 4 turns. (This effect can stack)\nII. Gain the following effect: \"Any chess piece that lands on your last lane can be promoted except for your King, this effect lasts for the rest of the match.\" (This effect can't be stacked)\nThis card can be used without any Queen in play.",
+        "id": 645641308433809441,
+        "name": "Final Stance",
+        "rarity": 5
+    },
+    {
+        "description": "This card can only be used on your 5th turn or later.\nI. Reduce your turn count by 3.\nII. Reduce your opponent's turn count by 5.",
+        "id": 645641308433809442,
+        "name": "Miraculous Rewind",
+        "rarity": 4
+    },
+    {
+        "description": "I. Give the opponent the following effect: \"The next time you use a card:\n- Discard it before the effect activates. \n- Draw a card\". (This effect can stack)\nEach deck can only have one copy of this card.",
+        "id": 645641247897157667,
+        "name": "Banishing Scroll",
+        "rarity": 4
+    },
+    {
+        "description": "I. Both players discard their hand. \nII. Both players draw a card.",
+        "id": 645641247897157668,
+        "name": "Enraged Strike",
+        "rarity": 5
     },
     {
         "description": "I. Remove one of your Knights.\nII. Draw 2 cards.\nIII. This card will not end your turn.",
-        "id": 645641247897157667,
+        "id": 645641247897157669,
         "name": "Cannibal's Request",
-        "rarity": 1
+        "rarity": 2
+    },
+    {
+        "description": "I. Draw 5 cards.\nII. Reveal one of the five cards. drawn through this effect.\nIII. Discard the first and last card drawn through this effect.",
+        "id": 645641247897157670,
+        "name": "Nut of the Fallen",
+        "rarity": 3
+    },
+    {
+        "description": "I. Select a card with a turn restriction of 16 or less in your hand, it gains the following effects:\n- At the end of this turn, reveal that card to your opponent.\n- Remove its turn restriction.\nII. Skip your next turn.\nThis effect will last for 4 turns.",
+        "id": 645641247897157671,
+        "name": "Forgotten Prayer",
+        "rarity": 3
+    },
+    {
+        "description": "I. Select a Pawn you control, it will ignore a capture while this effect is in play, after this effect activates, remove this effect. This effect lasts for the rest of the match. (This effect can be stacked)",
+        "id": 645641189072306200,
+        "name": "Spare Shield",
+        "rarity": 2
+    },
+    {
+        "description": "This card can only be used if at least one of your Bishops isn't in your first lane and if there is a targetable Bishop in both sides.\nI. Transform one of your Bishop into a Pawn, select and remove one of your opponent's Bishops.",
+        "id": 645641189072306201,
+        "name": "Demolishing Faith",
+        "rarity": 3
+    },
+    {
+        "description": "You can only use this card if your King has performed a castling in this match\nI. Remove one of your Rooks \nII. Your King will ignore a capture if its being captured for the first time, this effect lasts the rest of the game. (This effect can't be stacked)\nIII. Discard a card in your hand.",
+        "id": 645641189072306202,
+        "name": "Reign of the Wicked",
+        "rarity": 4
+    },
+    {
+        "description": "I. Select one of your chess pieces, for the next 2 turns, it is not visible for your opponent. \nThe card discards itself if you have 6 chess pieces or less in your control.",
+        "id": 645641189072306203,
+        "name": "Under the Shadows",
+        "rarity": 4
+    },
+    {
+        "description": "I. Allow your King to perform castling with any piece on the first row of your board. Cannot be played if:\n- A Check or Checkmate is occurring.\n- If the piece that is swapped with can be captured.\n- If you already performed castling this match.",
+        "id": 645641189072306204,
+        "name": "Benevolent Exchange",
+        "rarity": 3
     },
     {
         "description": "I. Select a card in your hand that has its requirements fulfilled, if any. Play that card.\nII. Skip your next 2 turns.\nIII. This card will not end your turn.",
         "id": 645641129093496832,
         "name": "Swift Assault\u00a0",
-        "rarity": 1
+        "rarity": 2
+    },
+    {
+        "description": "You can only play this card if you have at least 4 other cards in your hand.\nI. Choose and remove an effect for you. You may repeat this up to 3 times.\nII. Skip your next turn.\nIII. Discard 4 cards in your hand.",
+        "id": 645641129093496833,
+        "name": "Chains of the Insane",
+        "rarity": 3
+    },
+    {
+        "description": "I. Gain the following effect: \"The next time a Pawn comes into play from your card effects, transform it into a Rook\".",
+        "id": 645641129093496834,
+        "name": "Strengthened Rise",
+        "rarity": 3
     },
     {
         "description": "I. Put 2 \"Recruitment\" into your hand. ",
-        "id": 645641129093496833,
+        "id": 645641129093496835,
         "name": "Dawn's Arrival",
-        "rarity": 1
+        "rarity": 2
+    },
+    {
+        "description": "I. Select one of your chess pieces, whenever that chess piece moves you draw a card, this effect lasts for the rest of the match. (This effect can be stacked)",
+        "id": 645641129093496836,
+        "name": "Footsteps of the Steady",
+        "rarity": 2
+    },
+    {
+        "description": "This card can only be used if you have at least 1 King and 1 Queen.\nI. For the next 4 turns:\n- Your King can only move identically as your Queen.\n- Your Queen can only move identically as your King.",
+        "id": 645641076409106432,
+        "name": "Betrayal of Affairs",
+        "rarity": 5
+    },
+    {
+        "description": "I. All chess pieces in your fourth lane will be pushed towards to your fourth leftmost tile, all chess pieces before the rightmost piece are removed, immune pieces pushes the rightmost piece towards the right by one tile for each immune piece.",
+        "id": 645641076409106433,
+        "name": "Windfall",
+        "rarity": 4
+    },
+    {
+        "description": "I. Draw 2 cards.\nII. You can't move chess pieces in your next turn.\nIII. Shuffle a copy of \"Stingy Upkeep\" into your deck.",
+        "id": 645641076409106434,
+        "name": "Stingy Upkeep",
+        "rarity": 3
     },
     {
         "description": "I. For the next 3 turns:\n- All chess piece captures that will occur will remove the capturing piece too.",
-        "id": 645641076409106432,
+        "id": 645641076409106435,
         "name": "Safe Approach\u00a0",
-        "rarity": 1
+        "rarity": 2
     },
     {
         "description": "This card can only be used if you have at least 3 Pawns.\nI. Remove 3 of your Pawns.\nII. Remove an enemy Knight, Bishop or Rook.",
-        "id": 645641076409106433,
+        "id": 645641076409106436,
         "name": "Blood Oath\u00a0",
-        "rarity": 1
+        "rarity": 2
+    },
+    {
+        "description": "I. For the next 3 turns:\n- The player can only move chess pieces.\n- The opponent can only use cards.",
+        "id": 645641019823489074,
+        "name": "Peacegrant",
+        "rarity": 5
+    },
+    {
+        "description": "I. Select one of your chess pieces except the King or Queen, if that chess piece is captured, the capturing piece will be removed. This effect lasts for the whole match. (This effect can't be stacked)",
+        "id": 645641019823489075,
+        "name": "Undying Loyalty",
+        "rarity": 4
+    },
+    {
+        "description": "I. Discard a card in your hand.\nII. Put a random card (excluding Offering of Alchemy) with the nearer-higher rarity than the discarded card.",
+        "id": 645641019823489076,
+        "name": "Offering of Alchemy",
+        "rarity": 3
+    },
+    {
+        "description": "I. Remove one of your Pawns.\nII. Select one of your Knights, it can move two times per turn for the next 3 turns. (This effect can't be stacked)",
+        "id": 645641019823489077,
+        "name": "Steadfast Boots",
+        "rarity": 2
+    },
+    {
+        "description": "I. Give the opponent the following effect: \"You can't use cards for the next 2 turns\".",
+        "id": 645641019823489078,
+        "name": "Silence",
+        "rarity": 2
+    },
+    {
+        "description": "I. Draw 2 cards.",
+        "id": 645640944003317775,
+        "name": "Assembly March",
+        "rarity": 2
+    },
+    {
+        "description": "I. Remove one of your chess pieces except the King or Queen.\nII. Choose a same type of chess piece as the removed piece for your opponent, remove that piece.",
+        "id": 645640944003317776,
+        "name": "Voodoo Doll",
+        "rarity": 4
+    },
+    {
+        "description": "This card can only be used in your 10th turn or later.\nI. Randomly put one of the following cards into your hand.\n- Flamenugget\n- Hrog'qua \n- Peacegrant \nII. Skip your next turn.",
+        "id": 645640944003317777,
+        "name": "Forgotten Artifacts",
+        "rarity": 5
+    },
+    {
+        "description": "I. Select a chess piece and move it 3 times.\nII. Discard your hand.\nIII. Skip your next turn.",
+        "id": 645640944003317778,
+        "name": "Flamenugget",
+        "rarity": 5
     },
     {
         "description": "I. You can perform two actions in the next 6 turns including this turn.\nII. You can't use cards for the next 15 turns.",
-        "id": 645640944003317775,
+        "id": 645640944003317779,
         "name": "Hrog'qua",
-        "rarity": 0
+        "rarity": 5
+    },
+    {
+        "description": "This card can only be used if at least one Pawn has been captured during this match.\nI. Summon a Pawn in your second or third lane, if a chess piece is in the selected tile, remove it before summoning.\nEach deck can only have 1 copy of this card.",
+        "id": 645640874427940910,
+        "name": "Beyond the Grave",
+        "rarity": 5
+    },
+    {
+        "description": "This card can only be used on your 20th turn or later.\nI. All chess pieces in the fourth and fifth lane will be removed.\nEach deck can only have 1 copy of this card.",
+        "id": 645640874427940911,
+        "name": "Earthquake",
+        "rarity": 5
     },
     {
         "description": "I. Remove all effects on a chess piece except for transformation and immunity effects.",
-        "id": 645640874427940910,
+        "id": 645640874427940912,
         "name": "Purifying Blast",
-        "rarity": 1
+        "rarity": 2
     },
     {
         "description": "I. Select a tile without a chess piece. For the next 8 turns, that tile will remove all chess pieces that land on that tile.",
-        "id": 645640874427940911,
+        "id": 645640874427940913,
         "name": "Devil's Pit\u00a0",
+        "rarity": 4
+    },
+    {
+        "description": "I. Does nothing.",
+        "id": 645640874427940914,
+        "name": "Pondering",
+        "rarity": 2
+    },
+    {
+        "description": "I. Summon a Pawn in your half of the board.",
+        "id": 645640814675886080,
+        "name": "Recruitment",
         "rarity": 3
     },
     {
         "description": "This card can only be used if you only have one Pawn in play.\nI. Transform one of your Pawns into a King.",
-        "id": 645640814675886080,
+        "id": 645640814675886081,
         "name": "Forgotten Sibling\u00a0",
+        "rarity": 3
+    },
+    {
+        "description": "This card can only be used if your King is in Check while this card is in your hand.\nI. This card will automatically be used if no cards were used this match.\nII. All empty tiles surrounding your King will be randomly replaced with chess pieces that has been captured or removed through card effects during the match.\nIII. Give all chess pieces summoned this turn the following effect: \"Remove this chess piece after 3 turns\".",
+        "id": 645640814675886082,
+        "name": "Revival Aegis",
+        "rarity": 4
+    },
+    {
+        "description": "I. You can't move chess pieces in your next turn.\nII. Draw 3 cards.",
+        "id": 645640814675886083,
+        "name": "Unlocking Knowledge",
         "rarity": 2
     },
     {
         "description": "This card can only be used if you have at least 5 Pawns in play.\nI. Select one of your Pawns. The selected Pawn will gain the following effects. (These effects can't stacked)\n- Can't be captured\n- Can't be removed through card effects.\n- Can't be transformed through card effects.\nII. Remove all Pawns except for the selected Pawn.",
-        "id": 645640814675886081,
+        "id": 645640814675886084,
         "name": "Ritual of Strength",
-        "rarity": 2
+        "rarity": 3
     },
     {
         "description": "I. All of your Bishops become Rooks.",
         "id": 645640756777975879,
         "name": "Fort's Barrage",
-        "rarity": 3
+        "rarity": 4
     },
     {
         "description": "I. Transform all Pawns adjacent to your Queen into Knights.\nThis effect will not activate for Queens that are promoted from Pawns or summoned through card effects.",
         "id": 645640756777975880,
         "name": "Knighthood\u00a0",
-        "rarity": 3
+        "rarity": 4
     },
     {
         "description": "I. During your next turn, all your Knights can move 2 times.  ",
         "id": 645640756777975881,
         "name": "Knight's Courage\u00a0",
-        "rarity": 2
+        "rarity": 3
     },
     {
         "description": "I. During your opponent's next turn, they can only move your chess pieces.\nII. During your next turn, you can only move your opponent's chess pieces.",
         "id": 645640756777975882,
         "name": "Reversal of Roles",
-        "rarity": 2
+        "rarity": 3
     },
     {
         "description": "I. Transform all of your Pawns into Knights.\nII. Gain the following effect: - After 8 turns, remove all of your Knights. (This effect can't be stacked)\nIII. Gain the following effect: - For 8 turns, all Pawns that come into play from your card effects will transform into a Knight. (This effect can't be stacked)",
         "id": 645640756777975883,
         "name": "Cursed Blade\u00a0",
-        "rarity": 3
+        "rarity": 4
     },
     {
         "description": "I. Remove either one of your Knights, Bishops or Rooks.\nII. Place two Pawns of choice in your second or third lane.\nIII. Draw a card.",
         "id": 645640679313244200,
         "name": "Gauntlet of Inheritance\u00a0",
-        "rarity": 1
+        "rarity": 2
     },
     {
         "description": "This card can only be used if at least 2 Knight, 2 Bishops and 2 Rooks has been captured or removed through card effects.\nI. Summon a Knight, Bishop and Rook in your first lane, placed by choice.",
         "id": 645640679313244201,
         "name": "Desperate Defence\u00a0",
-        "rarity": 1
+        "rarity": 2
+    },
+    {
+        "description": "You can only use this card if you have at least 1 Queen and 1 Knight.\nI. Remove one of your Queens and one of your Knights.\nII. Gain the following effects: \"All of your Pawns will ignore a capture if its being captured for while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect affects Pawns that will come into play\". (This effect can't be stacked)\nIII. Gain the following effects: \"All of your Pawns will ignore removals from Spells once if its being targeted while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect will affect Pawns that will come into play\". (This effect can't be stacked)",
+        "id": 645640679313244202,
+        "name": "Cursed Codex of Protection",
+        "rarity": 4
     },
     {
         "description": "This card can only be used if your opponent has 15 cards or less in their deck.\nI. Draw 5 cards.\nII. This card will not end your turn.",
-        "id": 645640679313244202,
+        "id": 645640679313244203,
         "name": "Fortification of Prosperity\u00a0",
-        "rarity": 2
+        "rarity": 3
+    },
+    {
+        "description": "I. Remove an enemy Pawn\nII. During your next turn, a Pawn can move twice.",
+        "id": 645640679313244204,
+        "name": "Claymore of Rush",
+        "rarity": 4
+    },
+    {
+        "description": "This card can only be used on your 15th turn or later.\nI. Each unique black tile when landed on for the first time after this card is used will remove the corresponding piece that landed on it. (This effect can't be stacked)\nII. Each unique white tile when landed on for the first time after this card is used will draw a card for you if your pieces land on it. (This effect can't be stacked)",
+        "id": 645640600569249803,
+        "name": "Forbidden Lands",
+        "rarity": 5
     },
     {
         "description": "I. Gain the following effects: \"All your Pawns can capture forward; all your Pawns loses the ability to capture diagonally\". (These effects can't be stacked)",
-        "id": 645640600569249803,
+        "id": 645640600569249804,
         "name": "Golden Spear\u00a0",
-        "rarity": 2
+        "rarity": 3
+    },
+    {
+        "description": "I. Remove up to 3 Pawns of choice in your half of the board.\nII. For each Pawn removed, draw a card.",
+        "id": 645640600569249805,
+        "name": "Retirement",
+        "rarity": 4
     },
     {
         "description": "This card can only be used if you only have one of each chess piece type, if at least one type is less or more than one, this card can't be used.\nI. All of your chess pieces are immune from being captured for the whole match. (These effects can't be stacked)",
-        "id": 645640600569249804,
+        "id": 645640600569249806,
         "name": "Kingdom of Solitude\u00a0",
-        "rarity": 1
-    },
-    {
-        "description": "This card can only be used on your 7th turn or later.\nI. Select one of your Pawns, it can move two times per turn for the whole match. (These effects can't be stacked)",
-        "id": 645640600569249805,
-        "name": "Nature's Blessing",
         "rarity": 2
     },
     {
-        "description": "I. Select a card in your hand that has its requirements fulfilled, if any. Play that card.\nII. This card will not end your turn.\nThis card is a token only obtained at start of match if you start as Black.",
-        "id": 645642084635639819,
-        "name": "Black's Heirloom",
-        "rarity": 0
+        "description": "This card can only be used on your 7th turn or later.\nI. Select one of your Pawns, it can move two times per turn for the whole match. (These effects can't be stacked)",
+        "id": 645640600569249807,
+        "name": "Nature's Blessing",
+        "rarity": 3
     },
     {
         "description": "At the start of every 5 turns: \nI. Choose one of the following effects to activate:\nEffect 1: Put a \"Spell of True Silence\" into your hand.\nEffect 2: Put a \"Spell of Rewind\" into your hand.",
         "id": 669187722258415623,
         "name": "Tome of Silver",
-        "rarity": 0
+        "rarity": 1
     },
     {
-        "description": "I. Whenever this card is put into your hand, discard all \"Spell of True Silence\" and \"Spell of Rewind\" in your hand.\nII. Give the opponent the following effect: \"You can't use cards for the next 4 turns\". (This effect can stack)\nIII. Remove all effects on 2 of the opponent's rightmost, non-token cards. ",
+        "description": "I. Whenever this card is put into your hand, discard all other \"Spell of True Silence\" and \"Spell of Rewind\" in your hand.\nII. Give the opponent the following effect: \"You can't use cards for the next 4 turns\". (This effect can stack)\nIII. Remove all effects on 2 of the opponent's rightmost, non-token cards. ",
         "id": 669187722258415624,
         "name": "Spell of True Silence",
         "rarity": 0
     },
     {
-        "description": "I. Whenever this card is put into your hand, discard all \"Spell of True Silence\" and \"Spell of Rewind\" in your hand.\nII. Shuffle the the last 4 non-token cards from the opponent's hand into their deck as the next 4 cards drawn.\nIII. Give the opponent the following effect: \"You draw 2 cards instead of 1 by default. This effect lasts for until you accumulate 4 card draws through this effect\". \nIV. This card will not end your turn if used for the second time, then reset the times you used \"Spell of Rewind\" for you.",
+        "description": "I. Whenever this card is put into your hand, discard all other \"Spell of True Silence\" and \"Spell of Rewind\" in your hand.\nII. Shuffle the the last 4 non-token cards from the opponent's hand into their deck as the next 4 cards drawn.\nIII. Give the opponent the following effect: \"You draw 2 cards instead of 1 by default. This effect lasts for until you accumulate 4 card draws through this effect\". \nIV. This card will not end your turn if used for the second time, then reset the times you used \"Spell of Rewind\" for you.",
         "id": 669187722258415625,
         "name": "Spell of Rewind",
         "rarity": 0
@@ -789,7 +771,7 @@
         "description": "At the start of every 3 turns:\nI. Put a \"Corrosion's Mark\" into your hand",
         "id": 669187668218871820,
         "name": "Impending Catastrophe",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Select an enemy Pawn, it has the following effect: \"Remove this piece after 3 turns\". If no enemy Pawns are in play, activate the second effect instead.\nII. This effect can't be activated through playing this card. Select an enemy Knight, it has the following effect: \"Remove this piece after 3 turns\". If no enemy Knights are in play, activate the third effect instead.\nIII. This effect can't be activated through playing this card. Select an enemy Bishop, it has the following effect: \"Remove this piece after 3 turns\". If no enemy Bishops are in play, activate the fourth effect instead.\nIV. This effect can't be activated through playing this card. Select an enemy Rook, it has the following effect: \"Remove this piece after 3 turns\". If no enemy Rooks are in play, activate the fifth effect instead.\nV. This effect can't be activated through playing this card. Select an enemy Queen, it has the following effect: \"Remove this piece after 3 turns\". If no enemy Queens are in play, activate the last effect instead.\nVI. This effect can't be activated through playing this card. Select an enemy King, it has the following effect: \"Remove this piece after 3 turns\". This effect bypasses immunity from being targeted.\nVII. This card can't be duplicated.\nVIII. This card will not end your turn.",
@@ -801,13 +783,13 @@
         "description": "At the start of the game:\nI. Nothing happens.",
         "id": 669025145179996181,
         "name": "The Unprepared",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "At the start of the game:\nI. Transform all \"Spare Shield\" in your deck into a \"Lyfengel, Sacred Shield\".\nII. Shuffle 3 \"Lyfengel, Sacred Shield\" into your deck.",
         "id": 669025145179996182,
         "name": "The Sacred Heir",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. All of your pieces you started with are immune to captures for 1 turn.\nFor each card you used this match, add 1 extra turn to all effects on this card.",
@@ -819,7 +801,7 @@
         "description": "At the start of the match:\nI. Start the game with \"Change the Odds\".\nII. Whenever a card is used or discarded (including from drawing over your hand size) shuffle a \"Pondering\" into your deck unless its \"Trumped Preparations\".\nIII. Shuffle 3 \"Trumped Preparations\" into your deck\nIV. Your hand size can't be increased nor decreased.\nV. Your hand size is set to 9\nVI. At the start of your turn, if you have 9 cards in your hand, shuffle your hand into your deck and draw 5 cards.\nVII. Cards can't be added into your deck, whenever this happens, discard that card instead unless its \"Trumped Preparations\" or cards though this passive.\nVIII. This passive's effects can't be removed.",
         "id": 669025121268269066,
         "name": "Passion to Gamble",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Shuffle both players' hands into their deck, both players draw cards equal to the amount of cards they reshuffled.\nII. Once per turn, this card will not end your turn if used for the first time.\nIII. Shuffle a \"Change the Odds\" into your deck.\nIV. This card can't be duplicated.",
@@ -837,7 +819,7 @@
         "description": "At the start of the game:\nI. Start with a \"The Forgotten Ritual\".\nII. You are immune to all turn reduction effects.",
         "id": 669025059674783768,
         "name": "The Last Cult Master",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Discard as many cards as you wish in your hand, the corresponding effects will activate: \n- At least 1: Remove an enemy Pawn.\n- At least 3: Then, draw 2 cards, reduce your opponent's hand size by 2 (lasts for the rest of the match)\n- At least 7: Then, remove an enemy Knight, Bishop and Rook.\n- At least 9: Then, remove all enemy Queens.\n- At least 11: Then, draw cards until your hand is full, discard a card after this.\n- At least 14: Then put a \"Y'shar, Sword of Armageddon\" into your hand.\nII. This card can't be discarded, transformed, given or put into your deck. ",
@@ -855,7 +837,7 @@
         "description": "At the start of the game:\nI. Put a \"Grashawl, Thunderbolt Wand\" into your hand.\nII. Choose to whether start the match as White or Black.",
         "id": 669025059674783771,
         "name": "Tip the Scales",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "While this card is in your hand: \nI. This card can't be played regardless of method.\nII. You have the following effect: - \"Whenever you capture a piece, if there are any chess pieces adjacent to it in the shape of X, select one, remove it.\"\nIII. Everytime this effect activates, draw a card and +1 hand size if the piece chosen is removed.\nIV. This card can't be discarded, transformed, given or put into your deck. ",
@@ -867,7 +849,7 @@
         "description": "At the start of the game:\nI. Start the game with \"Homecoming\".\nII. Exchange the places of 2 of your own pieces.",
         "id": 669025006017183784,
         "name": "Safe Returns",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Select one of your pieces, whenever that piece captures another piece, return that piece into its original position. (If a piece is in that tile, remove that piece)\nII. Put a \"Homecoming\" into your hand.\nIII. If this is your first or second Homecoming used in this game, this card will not end your turn.\nIV. If this card is discarded, draw cards until your hand is full.",
@@ -879,7 +861,7 @@
         "description": "At the start of the game:\nI. Start the game with \"Wyvendel, Fabled Bow\".",
         "id": 669025006017183786,
         "name": "The Legendary Marksman",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "While this card is in your hand:\nI. This card can't be played regardless of method.\nII. All of your Pawns and Kings (including summoned ones) will have their capture range increased by 3.\nIII. If the first effect is used: \n- That piece can't move for the next 3 turns.\n- All effects on this card are nullified for the next 3 turns.\nIV. This card can't be discarded, transformed, given or put into your deck. ",
@@ -891,7 +873,7 @@
         "description": "At the start of every turn:\nI. If this is your 21th turn, put a \"Final Charge\" into your hand, then remove this passive.\nII. Select an enemy Pawn, remove it and this passive.",
         "id": 669024962849407008,
         "name": "Steady Triumph",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Remove the enemy's passive.\nII. +8 hand size\nIII. Draw cards until your hand is full, then discard a card in your hand.\nIV. +5 turn count.\nV. This card can't be discarded, transformed or given.\nVI. Summon a Queen in your half of the board.\nVII. This card will not end your turn.\nVIII. This card will not count towards your hand size and will not be discarded if it exceeds your current hand size.",
@@ -903,13 +885,13 @@
         "description": "On your each of your turns:\nI. Discard a card in your hand.\nII. Your Queen is immune to all captures and removals until the start of your next turn if the effect resolves.\nIII. If no Queen is in play, summon a Queen in your half of the board instead of activating the second effect.\nIV. Draw 4 cards, then remove this passive effect.",
         "id": 669024962849407010,
         "name": "The Succubus Queen",
-        "rarity": 0
+        "rarity": 1
     },
     {
-        "description": "At the start of the game:\nI. Start with a \"Speedy Interception\"\nII. Give the opponent the following effect: - At the start of your turn, if this is your 21th turn or later, change your turn count to 15.",
+        "description": "At the start of the game:\nI. Start with a \"Speedy Interception\"\nII. Give your opponent the following effect: - At the start of your turn, if this is your 21th turn or later, change your turn count to 15.",
         "id": 669024962849407011,
         "name": "Instant Disruption",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. For the next 3 turns:\n- Your opponent's turn count will not increase, they can't use cards and the default timer will not grant them a draw during this period.\n- You can use 2 cards in one turn, including this turn.\nII. The next card your opponent uses will be discarded before its effect resolves.",
@@ -921,7 +903,7 @@
         "description": "I. Start the game with a \"Self-purify\", \"Purification\" and a \"Mirrored Purification\".",
         "id": 669024909246070817,
         "name": "Lifendel, Staff of Purification",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Remove all effects on you.\nII. This card can't be duplicated or discarded by enemy spells.",
@@ -936,7 +918,7 @@
         "rarity": 0
     },
     {
-        "description": "I. Whenever this card is used, select one of the effects to activate:\nEffect 1: Reverse the effects of the previous card your opponent used.\nEffect 2: This card is treated as the last card the opponent played. \nII. This card can't be duplicated or discarded by enemy spells.",
+        "description": "I. Whenever this card is used, select one of the effects to activate:\nEffect 1: Reverse the effects of the previous card your opponent played though their hand.\nEffect 2: This card is treated as the last card the opponent played. \nEffect 3: This effect can only be selected if you do not have \"Self-purify\" and \"Purification\" in hand; activate Effect 1 and 2.\nII. This card can't be duplicated or discarded by enemy spells.",
         "id": 669024909246070820,
         "name": "Mirrored Purification",
         "rarity": 0
@@ -945,7 +927,7 @@
         "description": "At the start of the game:\nI. Start the game with \"Temporal Rewind\" and \"Changes in Time\".\nII. Draw a card.",
         "id": 669024907962875904,
         "name": "Erased Mistakes",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "This card can only be used if you have at least 4 other cards in your hand.\nI. Discard your hand.\nII. Draw 2 cards.\nIII. Return to your previous turn with all captured or removed pieces returned.\nIV. -1 turn count for both players.\nV. Put a \"Temporal Rewind\" into your hand. \nVI. This card can't be discarded, transformed, given or put into your deck. \nVII. Once per turn, this card will not end your turn if used for the first time.",
@@ -963,13 +945,13 @@
         "description": "At the start of the game:\nI. Select 5 tiles up until your 6th lane, summon Pawns on all of them. Remove them after 13 turns.\nII. Select a tile up until your 6th lane, summon a Knight in that tile. Remove it after 8 turns.",
         "id": 669024907962875907,
         "name": "Ghost Soldiers",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Start the game with 3 \"Rogue Tactics\".\nII. After reshuffling, randomly put a non-token card from your opponent's hand into yours. They draw a card after this.",
         "id": 669024898185822208,
         "name": "Cunning Secrets",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Your next capture will not occur.\nII. The next 4 captures you perform will ignore all immunities on the corresponding piece.\nIII. Put a random card from your opponent's hand into yours.",
@@ -981,13 +963,13 @@
         "description": "At the start of the game:\nI. Draw an extra card.\nII. +1 hand size \nIII. -1 opponent's hand size\nIV. Your first card played during this match will not end your turn.\nV. +1 turn count",
         "id": 669024898185822210,
         "name": "Mana Remains",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Draw 2 cards instead of 1 whenever you skip your turn.\nII. Start the game with \"More Options\"\nIII. Every 4 cards you use will also draw you a card.",
         "id": 669024898185822211,
         "name": "Delayed Thoughts",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. For each card in your hand, add 1 to your hand size. This effect will not resolve if your hand size is 40 or above.\nII. If this is your 12th turn, this card will not end your turn.",
@@ -999,7 +981,7 @@
         "description": "At the start of the game:\nI. Have 6 cards instead of 2 cards before reshuffling.\nII. Start with \"Foresight\" ",
         "id": 669024764043722752,
         "name": "Insights",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Until the start of your next turn, the opponent's hand is revealed.\nII. Put a \"Foresight\" into your deck.\nIII. This card will not end your turn.\nIV. This card can't be duplicated or given.",
@@ -1011,25 +993,25 @@
         "description": "I. At the start of every turn: - If this is your 20th turn or later, if your first and second tiles in your far left and far right tiles are empty, summon Rooks on all of them.",
         "id": 669024764043722754,
         "name": "Inherited Castles",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. You can choose to reshuffle twice on each card at the start of the game.\nII. Start with 4 cards instead of 2.\nIII. Once per turn, the first card used will not end your turn. If this effect is used for the third time, remove this passive.",
         "id": 669024764043722755,
         "name": "Starry Glimpse",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "At the start of the game:\nI. Select a tile in your half of the board, summon a Pawn on it \nII. Players can't use cards until their 6th turn starts.\nIII. You can use cards without restrictions for the next 6 turns.",
         "id": 669024716115279872,
         "name": "Godspeed Advantage",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Once every 5 turns, put a \"Battlefield Fanfare\" into your hand.",
         "id": 669024716115279873,
         "name": "Steadfast Knights",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Select a tile in your half of the board, summon a Knight on it.\nII. This card will not end your turn.",
@@ -1041,16 +1023,16 @@
         "description": "At the start of the game:\nI. You have the following effect: - At the start of each turn, summon a random piece that has been captured or removed during this game into its original position.\nII. All cards that are given to you, transformed or shuffled into your deck will transform into \"Pondering\".\nIII. All cards in your deck will transform into \"Pondering\".\nIV. All effects on this passive can't be removed.",
         "id": 669024716115279875,
         "name": "Resentful Cemetery",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "At the start of the game:\nI. Transform all \"Cursed Blade\" in your deck into a \"Rifengrad, Cursed Heirloom\".\nII. Shuffle 3 \"Rifengrad, Cursed Heirlooms\" into your deck.",
         "id": 669024669222830082,
         "name": "The Cursed Heir",
-        "rarity": 0
+        "rarity": 1
     },
     {
-        "description": "I. Transform all of your Pawns into Knights.\nII. Gain the following effect: - After 4 turns, remove all of your Knights. (This effect can be stacked)\nIII. Gain the following effect: - For 4 turns, all Pawns that come into play from your card effects will transform into a Knight. (This effect can be stacked)\nFor each card you used this match, add 1 extra turn to all effects on this card.",
+        "description": "I. Transform all of your Pawns into Knights.\nII. Gain the following effect: - After 4 turns, remove all of your Knights. (This effect can have its duration increased by another copy)\nIII. Gain the following effect: - For 4 turns, all Pawns that come into play from your card effects will transform into a Knight. (This effect can have its duration increased by another copy)\nFor each card you used this match, add 1 extra turn to all effects on this card.",
         "id": 669024669222830083,
         "name": "Rifengrad, Cursed Heirloom",
         "rarity": 0
@@ -1059,24 +1041,18 @@
         "description": "At the start of the game:\nI. Randomly shuffle all tiles in the board.\nII. Remove all \"Forbidden Lands\" in your deck.\nIII. Put a \"Forbidden Lands\" into your hand, it can't be discarded by enemy spells.",
         "id": 669024669222830084,
         "name": "Forbidden Maze",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "At the start of every turn:\nI. Put a \"Divine Decree of Fate\" into your hand.\nII. Your opponent's hand is revealed.",
         "id": 669024669222830085,
         "name": "The Mystic Seer",
-        "rarity": 0
+        "rarity": 1
     },
     {
         "description": "I. Select a card in your hand, shuffle it into your deck.\nII. Draw a card.\nIII. This card will not end your turn.\nAt the end of your turn, discard this card.",
         "id": 669024669222830086,
         "name": "Divine Decree of Fate",
         "rarity": 0
-    },
-    {
-        "description": "I. Transform all other cards in both player' hands to \"Weird Vial\".",
-        "id": 645641536670924830,
-        "name": "Flask of Transformation",
-        "rarity": 2
     }
 ]

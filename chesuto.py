@@ -72,7 +72,7 @@ from hata.dereaddons_local import alchemy_incendiary
 #Emoji.precreate(604698116658167808,name='aG').as_emoji
 
 class Rarity(object):
-    INSTANCES = [NotImplemented] * 6
+    INSTANCES = [NotImplemented] * 7
     BY_NAME   = {}
     __slots__=('index', 'name',)
     
@@ -81,8 +81,8 @@ class Rarity(object):
         self.name=name
         
         self.INSTANCES[index]=self
-        self.BY_NAME[name]=self
-
+        self.BY_NAME[name.lower()]=self
+    
     def __str__(self):
         return self.name
 
@@ -129,6 +129,7 @@ class Rarity(object):
         return self.index
     
     token       = NotImplemented
+    passive     = NotImplemented
     common      = NotImplemented
     uncommon    = NotImplemented
     rare        = NotImplemented
@@ -136,11 +137,12 @@ class Rarity(object):
     mythic      = NotImplemented
 
 Rarity.token    = Rarity(0,'Token',)
-Rarity.common   = Rarity(1,'Common')
-Rarity.uncommon = Rarity(2,'Uncommon')
-Rarity.rare     = Rarity(3,'Rare')
-Rarity.legendary= Rarity(4,'Legendary')
-Rarity.mythic   = Rarity(5,'Mythic')
+Rarity.passive  = Rarity(1,'Passive',)
+Rarity.common   = Rarity(2,'Common')
+Rarity.uncommon = Rarity(3,'Uncommon')
+Rarity.rare     = Rarity(4,'Rare')
+Rarity.legendary= Rarity(5,'Legendary')
+Rarity.mythic   = Rarity(6,'Mythic')
 
 CARDS_BY_ID={}
 CARDS_BY_NAME={}

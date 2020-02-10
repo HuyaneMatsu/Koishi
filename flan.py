@@ -10,7 +10,7 @@ from chesuto import Rarity, CARDS_BY_NAME, Card
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
-CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(\[token\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
+CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
 
 async def guild_user_add(client, guild, user):
     if guild is not CHESUTO_GUILD:
@@ -47,17 +47,18 @@ FLAN_HELPER.add('ping',_help_ping)
 @commands
 async def sync_avatar(client,message):
     if not client.is_owner(message.author):
-        return
+        return True
     
     avatar_url=client.application.icon_url_as(ext='png',size=4096)
     if avatar_url is None:
         await client.message_create(message.channel,'The application has no avatar set.')
-        return
+        return True
     
     avatar = await client.download_url(avatar_url)
     await client.client_edit(avatar=avatar)
     
     await client.message_create(message.channel,'Avatar synced.')
+    return False
 
 async def _help_sync_avatar(client,message):
     prefix=client.events.message_create.prefix
@@ -84,12 +85,12 @@ async def massadd(client,message):
         try:
             profile=user.guild_profiles[CARDS_ROLE.guild]
         except KeyError:
-            return
+            return True
         
         if CARDS_ROLE in profile.roles:
             break
         
-        return
+        return True
     
     try:
         await client.message_at_index(message.channel,1000)
@@ -109,7 +110,7 @@ async def massadd(client,message):
             continue
         
         messages.append(message_)
-
+    
     new_=0
     modified_=0
     
@@ -142,20 +143,33 @@ async def massadd(client,message):
                 parsed=CARD_HDR_RP.fullmatch(line)
                 if parsed is None:
                     continue
-                name,token,rarity=parsed.groups()
+                name,special_rarity,rarity=parsed.groups()
                 
-                if token is None:
-                    token=False
+                if special_rarity is None:
+                    special_rarity=-1
                 else:
-                    token=True
+                    special_rarity=special_rarity.lower()
+                    if special_rarity=='token':
+                        special_rarity=0
+                    elif special_rarity=='passive':
+                        special_rarity=1
+                    else:
+                        special_rarity=-1
                 
-                if token:
-                    rarity=Rarity.token
-                elif rarity is None:
-                    rarity=Rarity.INSTANCES[0]
+                if special_rarity==-1:
+                    if rarity is None:
+                        special_rarity=0
+                    else:
+                        rarity=rarity.lower()
+                
+                if special_rarity!=-1:
+                    try:
+                        rarity=Rarity.INSTANCES[special_rarity]
+                    except IndexError:
+                        continue
                 else:
                     try:
-                        rarity=Rarity.BY_NAME[rarity.title()]
+                        rarity=Rarity.BY_NAME[rarity]
                     except KeyError:
                         continue
                 
@@ -183,6 +197,7 @@ async def massadd(client,message):
         embed=Embed(None,f'modified: {modified_}\nnew: {new_}',color=CHESUTO_COLOR))
     await sleep(30.,client.loop)
     await client.message_delete(message)
+    return False
 
 async def _help_massadd(client,message):
     prefix=client.events.message_create.prefix
@@ -205,16 +220,35 @@ async def showcard(client,message,content):
         card=CARDS_BY_NAME[content.lower()]
     except KeyError:
         return
-    embed=Embed(color=CHESUTO_COLOR)
-    embed.add_field('Name',card.name,inline=True)
+    
+    title_parts=['**']
+    name=card.name
+    if len(name)>200:
+        title=name[:200]
+        title_parts.append(title)
+        title_parts.append('...')
+    else:
+        title_parts.append(name)
+   
+    title_parts.append('** ')
     
     rarity=card.rarity
     if rarity is Rarity.token:
-        embed.add_footer('TOKEN')
+        title_parts.append(' [TOKEN]')
+    elif rarity is Rarity.passive:
+        title_parts.append(' [PASSIVE]')
     else:
-        embed.add_field('Rarity',card.rarity.name,inline=True)
+        title_parts.append(' (')
+        title_parts.append(card.rarity.name)
+        title_parts.append(')')
     
-    embed.add_field('Description',card.description)
+    title=''.join(title_parts)
+    
+    description=card.description
+    if len(description)>1700:
+        description = description[:1700]+'...'
+    
+    embed=Embed(title,description,CHESUTO_COLOR)
     
     await client.message_create(message.channel,embed=embed)
 
@@ -238,9 +272,16 @@ async def showcards(client,message,content):
         if content:
             filtered=[]
             search_for=content.lower()
-            for name,card in CARDS_BY_NAME.items():
-                if search_for in name:
-                    filtered.append(card)
+            rarity=Rarity.BY_NAME.get(search_for)
+            if rarity is None:
+                for name,card in CARDS_BY_NAME.items():
+                    if search_for in name:
+                        filtered.append(card)
+            else:
+                for card in CARDS_BY_NAME.values():
+                    if card.rarity is rarity:
+                        filtered.append(card)
+            
             title=f'Search results for : `{content}`'
         else:
             filtered=list(CARDS_BY_NAME.values())
@@ -251,71 +292,161 @@ async def showcards(client,message,content):
             break
         
         filtered.sort(key=lambda card:card.name)
-        
-        embeds=[]
-        embed=Embed(title,color=CHESUTO_COLOR)
-        field_count=0
-        total_ln=0 # we do not get the len of the title, we say it is 100 and we check 5900 later.
-        
-        index=0
-        limit=len(filtered)
-        while index<limit:
-            card=filtered[index]
-            index=index+1
-
-            header=[card.name]
-            
-            rarity=card.rarity
-            if rarity is Rarity.token:
-                header.append(' [TOKEN]')
-            else:
-                header.append(' (')
-                header.append(card.rarity.name)
-                header.append(')')
-
-            header=''.join(header)
-            local_ln=len(header)
-
-            description=card.description
-            local_ln+=len(description)
-            total_ln+=local_ln
-
-            if total_ln>5900 or field_count==24:
-                total_ln=local_ln
-                embeds.append(embed)
-                embed=Embed(title,color=CHESUTO_COLOR)
-                embed.add_field(header,description)
-                field_count=1
-                continue
-
-            embed.add_field(header,description)
-            field_count=field_count+1
-            continue
-        
-        embeds.append(embed)
-        
-        index=0
-        field_count=0
-        embed_ln=len(embeds)
-        result=[]
-        while True:
-            embed=embeds[index]
-            index+=1
-            embed.add_footer(f'Page: {index}/{embed_ln}. Results {field_count+1}-{field_count+len(embed.fields)}/{limit}')
-            field_count+=len(embed.fields)
-            
-            result.append(embed)
-            
-            if index==embed_ln:
-                break
-        
+        result=filtered
         break
     
     if result is None:
-        result=[Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)]
+        pages=[Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)]
+    else:
+        pages=CardPaginator(title,result)
     
-    await Pagination(client,message.channel,result)
-
+    await Pagination(client,message.channel,pages)
+    
+class CardPaginator(object):
+    __slots__ = ('title', 'rendered', 'collected', 'page_information')
+    def __init__(self, title, collected):
+        self.title=title
+        self.collected=collected
+        
+        page_information=[]
+        self.page_information=page_information
+        
+        total_length=0
+        
+        page_information_start=0
+        
+        index=0
+        limit=len(collected)
+        
+        while True:
+            if index==limit:
+                page_information.append((page_information_start,index),)
+                break
+            
+            card=collected[index]
+            
+            local_length=50+len(card.name)+len(card.description)
+            
+            if total_length+local_length>2000:
+                page_information.append((page_information_start,index),)
+                page_information_start=index
+                index=index+1
+                total_length=local_length
+                continue
+            
+            index=index+1
+            total_length+=local_length
+            continue
+        
+        self.rendered=list(None for _ in range(len(page_information)))
+        
+    def __len__(self):
+        return len(self.page_information)
+    
+    def __getitem__(self,index):
+        page=self.rendered[index]
+        if page is None:
+            page=self.render(index)
+            self.rendered[index]=page
+        
+        return page
+    
+    def render(self,page_index):
+        start, end = self.page_information[page_index]
+        
+        page_parts=[]
+        # The card's description or title might be too long, lets check them.
+        if start+1 == end:
+            card=self.collected[start]
+            
+            name=card.name
+            description=card.description
+            
+            local_length=50+len(name)+len(description)
+            # No good, our fear happens
+            if local_length>2000:
+                page_parts.append('**')
+                
+                if len(name)>200:
+                    title=name[:200]
+                    page_parts.append(title)
+                    page_parts.append('...')
+                else:
+                    page_parts.append(name)
+               
+                page_parts.append('** ')
+                
+                rarity=card.rarity
+                if rarity is Rarity.token:
+                    page_parts.append(' [TOKEN]')
+                elif rarity is Rarity.passive:
+                    page_parts.append(' [PASSIVE]')
+                else:
+                    page_parts.append(' (')
+                    page_parts.append(card.rarity.name)
+                    page_parts.append(')')
+                
+                page_parts.append('\n\n')
+                
+                if len(description)>1700:
+                    description = description[:1700]
+                    page_parts.append(description)
+                    page_parts.append('...')
+                else:
+                    page_parts.append(description)
+                
+            else:
+                page_parts.append('**')
+                page_parts.append(name)
+                page_parts.append('** ')
+                
+                rarity=card.rarity
+                if rarity is Rarity.token:
+                    page_parts.append(' [TOKEN]')
+                elif rarity is Rarity.passive:
+                    page_parts.append(' [PASSIVE]')
+                else:
+                    page_parts.append(' (')
+                    page_parts.append(card.rarity.name)
+                    page_parts.append(')')
+                
+                page_parts.append('\n\n')
+                page_parts.append(description)
+        
+        else:
+            index=start
+            
+            while True:
+                
+                card=self.collected[index]
+                index=index+1
+                
+                page_parts.append('**')
+                page_parts.append(card.name)
+                page_parts.append('** ')
+                
+                rarity=card.rarity
+                if rarity is Rarity.token:
+                    page_parts.append(' [TOKEN]')
+                elif rarity is Rarity.passive:
+                    page_parts.append(' [PASSIVE]')
+                else:
+                    page_parts.append(' (')
+                    page_parts.append(card.rarity.name)
+                    page_parts.append(')')
+                
+                page_parts.append('\n\n')
+                page_parts.append(card.description)
+            
+                if index==end:
+                    break
+                
+                page_parts.append('\n\n')
+                continue
+        
+        return Embed(self.title,''.join(page_parts),color=CHESUTO_COLOR).add_footer(
+            f'Page: {page_index+1}/{len(self.page_information)}. Results {start+1}-{end}/{len(self.collected)}')
+        
 async def _help_showcards(client,message):
     prefix=client.events.message_create.prefix
     embed=Embed('showcards',(
