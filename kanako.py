@@ -7,18 +7,13 @@ from PIL import Image as PIL
 from PIL.ImageDraw import ImageDraw
 from PIL.ImageFont import truetype
 
-from hata.events_compiler import ContentParser
-from hata.futures import CancelledError, InvalidStateError, Task, sleep
-from hata.dereaddons_local import any_to_any, methodize
-from hata.exceptions import DiscordException
-from hata.emoji import BUILTIN_EMOJIS
+from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep,  \
+    InvalidStateError, any_to_any, methodize, DiscordException, ReuBytesIO, \
+    Color, Embed
+
 from hata.events import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE,          \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX,     \
-    Timeouter
-
-from hata.color import Color
-from hata.embed import Embed
-from hata.ios import ReuBytesIO
+    Timeouter, ContentParser
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
@@ -337,7 +332,7 @@ class kanako_game(object):
         try:
             await self.client.message_create(self.channel,embed=embed)
         except DiscordException:
-            self.cacncel()
+            self.cancel()
         
     def calculate_leavers(self):
         if self.answers:
@@ -388,11 +383,10 @@ class kanako_game(object):
                 for element in self.history:
                     del element.answers[index]
                 if not self.answers.pop(user.id,'') and len(self.answers)==len(self.users)-1:
-                    try:
-                        self.future.set_result(None)
-                    except InvalidStateError:
-                        pass
+                    self.waiter.set_result_if_pending(None)
+            
             break
+        
         Task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)),self.client.loop)
 
     def cancel(self):
@@ -554,10 +548,9 @@ async def kanako_manager(client,message,command,*args):
         if game is None:
             embed=Embed('','There is no active message at the channel',COLOR)
         else:
-            try:
-                game.waiter.set_exception(InterruptedError)
-            except InvalidStateError:
-                  game.waiter.add_done_callback(lambda future:setattr(future,'_exception',InterruptedError))
+            waiter=game.waiter
+            if not waiter.set_exception(InterruptedError):
+                waiter.add_done_callback(lambda future: setattr(future,'_exception',InterruptedError()))
             return
         
     elif command=='start':
@@ -662,7 +655,7 @@ class embedination(object):
         
         try:
             message = await client.message_create(self.channel,embed=self.pages[0])
-        except DiscordException:
+        except:
             self.message=None
             raise
         
@@ -693,7 +686,8 @@ class embedination(object):
         if can_manage_messages:
             if not message.did_react(emoji,user):
                 return
-            Task(self.reaction_remove(client,message,emoji,user),client.loop)
+            
+            Task(self._reaction_delete(emoji,user),client.loop)
         
         task_flag=self.task_flag
         if task_flag!=GUI_STATE_READY:
@@ -735,21 +729,28 @@ class embedination(object):
         self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(message,embed=self.pages[page])
-        except DiscordException:
+        except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message already deleted
+                            ):
+                    return
+            
+            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            await client.events.error(client,f'{self!r}.__call__',err)
             return
         
         self.task_flag=GUI_STATE_READY
         
         self.timeouter.timeout+=10.
-    
-    @staticmethod
-    async def reaction_remove(client,message,emoji,user):
-        try:
-            await client.reaction_delete(message,emoji,user)
-        except DiscordException:
-            pass
     
     async def _canceller(self,exception,):
         client=self.client
@@ -771,8 +772,22 @@ class embedination(object):
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(message)
-                except DiscordException:
-                    pass
+                except BaseException as err:
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code in (
+                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.unknown_message, # message deleted
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                    ):
+                            return
+                    
+                    await client.events.error(client,f'{self!r}._canceller',err)
+                    return
             return
         
         timeouter=self.timeouter
@@ -792,7 +807,28 @@ class embedination(object):
             timeouter.cancel()
         
         return Task(canceller(self,None),self.client.loop)
-        
+
+    async def _reaction_delete(self,emoji,user):
+        client=self.client
+        try:
+            await client.reaction_delete(self.message,emoji,user)
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}._reaction_delete',err)
+            return
+
 del BUILTIN_EMOJIS
 del Color
 del ContentParser

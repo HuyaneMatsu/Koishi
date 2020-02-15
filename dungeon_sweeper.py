@@ -3,14 +3,14 @@ from itertools import chain
 import re
 from time import monotonic
 
-from hata.events_compiler import ContentParser
-from hata.embed import Embed
-from hata.color import Color
-from hata.exceptions import DiscordException
-from hata.emoji import BUILTIN_EMOJIS,Emoji
-from hata.futures import Future,CancelledError
+from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS,     \
+    Future, CancelledError, Task, WaitTillAll, ERROR_CODES
+
+from hata.events import ContentParser, GUI_STATE_READY,                     \
+    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING,  GUI_STATE_CANCELLED,   \
+    GUI_STATE_SWITCHING_CTX
+
 from hata.client_core import GC_cycler
-from hata.futures import Task
 
 from models import DB_ENGINE,DS_TABLE,ds_model
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
@@ -76,13 +76,13 @@ async def ds_manager(client,message,command):
     permissions=message.channel.cached_permissions_for(client)
     
     while True:
-
+        
         if not (0<=len(command)<10):
             await _help_ds(client,message)
             return
-
+        
         command=command.lower()
-
+        
         game=DS_GAMES.get(message.author.id)
         
         if command=='':
@@ -91,10 +91,11 @@ async def ds_manager(client,message,command):
                 break
             
             if game is None:
-                return (await ds_game(client,message.channel,message.author))
+                await ds_game(client,message.channel,message.author)
             else:
-                return (await game.renew(message.channel))
-            
+                await game.renew(message.channel)
+            return
+        
         if command=='rules':
             if permissions.can_use_external_emojis:
                 embed=RULES_HELP
@@ -134,23 +135,22 @@ class ds_game(object):
     
     emojis_menu=(UP,DOWN,UP2,DOWN2,LEFT,RIGHT,SELECT)
     
-    __slots__ = ['cache', 'call', 'channel', 'client', 'data', 'last', 'message',
-        'position', 'position_ori', 'stage', 'task', 'user']
-
-    __async_call__ = True
+    __slots__ = ('cache', 'call', 'channel', 'client', 'data', 'last', 'message',
+        'position', 'position_ori', 'stage', 'task_flag', 'user', )
     
     async def __new__(cls,client,channel,user):
         self=object.__new__(cls)
-        DS_GAMES[user.id]   = self
         self.client         = client
         self.user           = user
         self.channel        = channel
         self.message        = None
         self.stage          = None
-        self.task           = Future(client.loop)
+        self.task_flag      = GUI_STATE_READY
         self.call           = type(self).call_menu
         self.cache          = [None for _ in range(len(CHARS))]
         self.last           = monotonic()
+        
+        DS_GAMES[user.id]   = self
         
         async with DB_ENGINE.connect() as connector:
             result = await connector.execute(DS_TABLE.select(ds_model.user_id==self.user.id))
@@ -165,47 +165,150 @@ class ds_game(object):
             self.data=bytearray(800)
 
         loop=client.loop
-
-        message=None
+        
         try:
             message = await client.message_create(self.channel,embed=self.render_menu())
-            self.message=message
-            for emoji in self.emojis_menu:
-               Task(client.reaction_add(message,emoji),loop)
-        except DiscordException:
-            try:
-                if message is not None:
-                    await client.message_create(self.channel,'',Embed('','Error meanwhile initializing'))
-            except DiscordException:
-                pass
+        except BaseException as err:
+            self.task_flag = GUI_STATE_CANCELLED
             del DS_GAMES[self.user.id]
-        else:
-            message.weakrefer()
-            self.task.set_result(None)
-            client.events.reaction_add.append(self,message)
-
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return self
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return self
+            
+            await client.events.error(client,f'{self!r}.__new__',err)
+            return self
+            
+        self.message=message
+        
+        tasks=[]
+        
+        for emoji in self.emojis_menu:
+            task=Task(client.reaction_add(message,emoji),loop)
+            tasks.append(task)
+        
+        try:
+            await WaitTillAll(tasks,loop)
+        except BaseException as err:
+            for task in tasks:
+                task.cancel()
+            
+            self.task_flag = GUI_STATE_CANCELLED
+            del DS_GAMES[self.user.id]
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return self
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.unknown_emoji, # no permission to use external emoji
+                        ERROR_CODES.max_reactions, # maximal amount of reactions reached
+                            ):
+                    return self
+            
+            await client.events.error(client,f'{self!r}.__new__',err)
+            return self
+        
+        message.weakrefer()
+        client.events.reaction_add.append(self,message)
+        
         return self
     
+    def __repr___(self):
+        result = [
+            '<',
+            self.__class__.__name__,
+            'client=',
+            repr(self.client),
+            ', user=',
+            repr(self.user),
+            ', channel=',
+            repr(self.channel),
+            ', task_flag=',
+                ]
+        
+        task_flag=self.task_flag
+        result.append(repr(task_flag))
+        result.append(' (')
+        
+        task_flag_name = (
+            'GUI_STATE_READY',
+            'GUI_STATE_SWITCHING_PAGE',
+            'GUI_STATE_CANCELLING',
+            'GUI_STATE_CANCELLED',
+            'GUI_STATE_SWITCHING_CTX',
+                )[task_flag]
+        
+        result.append(task_flag_name)
+        result.append(')')
+        
+        result.append(',call =')
+        result.append(repr(self.call.__name__))
+        result.append('>')
+        
+        return ''.join(result)
+        
     async def start_menu(self):
         self.stage=None
+        self.task_flag = GUI_STATE_SWITCHING_PAGE
         
         client=self.client
         loop=client.loop
         message=self.message
+        
+        tasks=[]
+        task=Task(client.reaction_clear(message),loop)
+        tasks.append(task)
+        for emoji in self.emojis_menu:
+            task=Task(client.reaction_add(message,emoji),loop)
+            tasks.append(task)
+        
+        task=Task(client.message_edit(message,embed=self.render_menu()),loop)
+        tasks.append(task)
+        
         try:
-            Task(client.reaction_clear(message),loop)
-            for emoji in self.emojis_menu:
-                Task(client.reaction_add(message,emoji),loop)
+            await WaitTillAll(tasks,loop)
+        except BaseException as err:
+            for task in tasks:
+                task.cancel()
             
-            await client.message_edit(message,embed=self.render_menu())
-        except DiscordException:
-            return Task(self.cancel(),loop)
-        finally:
-            self.last=monotonic()
-            self.call=type(self).call_menu
-            self.task.set_result(None)
+            self.task_flag = GUI_STATE_CANCELLING
+            Task(self.cancel(),loop)
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.unknown_emoji, # no permission to use external emoji
+                        ERROR_CODES.max_reactions, # maximal amount of reactions reached
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}.start_menu',err)
+            return
+        
+        self.last=monotonic()
+        self.call=type(self).call_menu
+        self.task_flag = GUI_STATE_READY
 
     async def start_game(self):
+        self.task_flag=GUI_STATE_SWITCHING_PAGE
         
         i1,rest=divmod(self.position,33)
         if rest<3:
@@ -219,52 +322,128 @@ class ds_game(object):
         client=self.client
         loop=client.loop
         message=self.message
+        
+        tasks=[]
+        task=Task(client.reaction_clear(message),loop)
+        tasks.append(task)
+        
+        for emoji in self.emojis_game_p1:
+            task=Task(client.reaction_add(message,emoji),loop)
+            tasks.append(task)
+        
+        task=Task(client.reaction_add(message,self.stage.source.emoji),loop)
+        tasks.append(task)
+        
+        for emoji in self.emojis_game_p2:
+            task=Task(client.reaction_add(message,emoji),loop)
+            tasks.append(task)
+        
+        task=Task(client.message_edit(message,embed=self.render_game()),loop)
+        tasks.append(task)
+        
         try:
-            Task(client.reaction_clear(message),loop)
-            for emoji in chain(self.emojis_game_p1,(self.stage.source.emoji,),self.emojis_game_p2):
-                Task(client.reaction_add(message,emoji),loop)
+            await WaitTillAll(tasks,loop)
+        except BaseException as err:
+            for task in tasks:
+                task.cancel()
             
-            await client.message_edit(message,embed=self.render_game())
-        except DiscordException:
-            return Task(self.cancel(),loop)
-        finally:
-            self.last=monotonic()
-            self.call=type(self).call_game
-            self.task.set_result(None)
+            self.task_flag = GUI_STATE_CANCELLING
+            Task(self.cancel(),loop)
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.unknown_emoji, # no permission to use external emoji
+                        ERROR_CODES.max_reactions, # maximal amount of reactions reached
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}.start_game',err)
+            return
+        
+        self.last=monotonic()
+        self.call=type(self).call_game
+        
+        if self.task_flag!=GUI_STATE_SWITCHING_CTX:
+            self.task_flag = GUI_STATE_READY
 
     async def start_done(self):
+        self.task_flag=GUI_STATE_SWITCHING_PAGE
+        
         client=self.client
         loop=client.loop
         
-        task=Task(self.save_done(),loop)
+        save_task=Task(self.save_done(),loop)
         message=self.message
+        
+        tasks=[]
+        task=Task(client.reaction_clear(message),loop)
+        tasks.append(task)
+        task=Task(client.reaction_add(message,self.RESET),loop)
+        tasks.append(task)
+        task=Task(client.reaction_add(message,self.CANCEL),loop)
+        tasks.append(task)
+        task=Task(client.message_edit(message,embed=self.render_done()),client.loop)
+        tasks.append(task)
+        
         try:
-            Task(client.reaction_clear(message),loop)
-            Task(client.reaction_add(message,self.RESET),loop)
-            Task(client.reaction_add(message,self.CANCEL),loop)
+            await WaitTillAll(tasks,loop)
+        except BaseException as err:
+            for task in tasks:
+                task.cancel()
             
-            await client.message_edit(message,embed=self.render_done())
-        except DiscordException:
-            return Task(self.cancel(),loop)
+            self.task_flag = GUI_STATE_CANCELLING
+            Task(self.cancel(),loop)
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.unknown_emoji, # no permission to use external emoji
+                        ERROR_CODES.max_reactions, # maximal amount of reactions reached
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}.start_done',err)
+            return
+        
         finally:
-            await task
-            self.last=monotonic()
-            self.call=type(self).call_done
-            self.task.set_result(None)
-
+            await save_task
+            
+        self.last=monotonic()
+        self.call=type(self).call_done
+        
+        if self.task_flag!=GUI_STATE_SWITCHING_CTX:
+            self.task_flag = GUI_STATE_READY
+    
     @staticmethod
     async def default_coro():
         pass
     
-    def __call__(self,client,emoji,user):
+    async def __call__(self,client,emoji,user):
         if user is not self.user:
-            return self.default_coro()
-
-        return self.call(self,emoji)
+            return
+    
+        await self.call(self,emoji)
 
     async def call_menu(self,emoji):
-        if self.task.pending() and (emoji in self.emojis_menu):
-            return Task(self.reaction_delete(emoji),self.client.loop)
+        if (emoji not in self.emojis_menu):
+            return
+        
+        if self.task_flag!=GUI_STATE_READY:
+            Task(self.reaction_delete(emoji),self.client.loop)
+            return
         
         while True:
             if emoji is self.UP:
@@ -294,14 +473,13 @@ class ds_game(object):
 
             if emoji is self.SELECT:
                 if self.message.embeds[0].fields:
-                    self.task.clear()
                     await self.start_game()
                 else:
                     Task(self.reaction_delete(emoji),self.client.loop)
                 return
             
             return       
-
+        
         Task(self.reaction_delete(emoji),self.client.loop)
         
         position=self.position
@@ -356,20 +534,43 @@ class ds_game(object):
             new_position=cache[relative_position][0].position
 
         self.position=new_position
-
-        self.task.clear()
-
+        
+        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        
+        client=self.client
         try:
-            await self.client.message_edit(self.message,embed=self.render_menu())
-        except DiscordException:
-            return Task(self.cancel(),self.client.loop)
-        finally:
-            self.task.set_result(None)
+            await client.message_edit(self.message,embed=self.render_menu())
+        except BaseException as err:
+            
+            self.task_flag = GUI_STATE_CANCELLING
+            Task(self.cancel(),client.loop)
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message already deleted
+                            ):
+                    return
+            
+            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            await client.events.error(client,f'{self!r}.call_menu',err)
+            return
+        
+        if self.task_flag!=GUI_STATE_SWITCHING_CTX:
+            self.task_flag = GUI_STATE_READY
     
     async def call_game(self,emoji):
-        if self.task.pending() and (emoji in self.emojis_game_p1 or emoji in self.emojis_game_p2 or emoji is self.stage.source.emoji):
-            return Task(self.reaction_delete(emoji),self.client.loop)
-
+        if (emoji not in self.emojis_game_p1) and (emoji is not self.stage.source.emoji) and (emoji not in self.emojis_game_p2):
+            return
+        
+        if self.task_flag!=GUI_STATE_READY:
+            Task(self.reaction_delete(emoji),self.client.loop)
+            return
+        
         while True:
             if emoji is self.WEST:
                 result=self.stage.move_west()
@@ -400,40 +601,60 @@ class ds_game(object):
                 break
 
             if emoji is self.CANCEL:
-                self.task.clear()
-                return await self.start_menu()
+                await self.start_menu()
+                return
 
             return
-
+        
         client=self.client
         if not result:
-            return Task(self.reaction_delete(emoji),client.loop)
+            Task(self.reaction_delete(emoji),client.loop)
+            return
         
-        self.task.clear()
-
         if self.stage.done():
-            return await self.start_done()
-
+            await self.start_done()
+            return
+        
         Task(self.reaction_delete(emoji),client.loop)
+        
+        self.task_flag = GUI_STATE_SWITCHING_PAGE
         
         try:
             await self.client.message_edit(self.message,embed=self.render_game())
-        except DiscordException:
-            return Task(self.cancel(),client.loop)
-        finally:
-            self.last=monotonic()
-            self.task.set_result(None)
+        except BaseException as err:
+            
+            self.task_flag = GUI_STATE_CANCELLING
+            Task(self.cancel(),client.loop)
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message already deleted
+                            ):
+                    return
+            
+            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            await client.events.error(client,f'{self!r}.call_game',err)
+            return
+        
+        self.last=monotonic()
+        
+        if self.task_flag!=GUI_STATE_SWITCHING_CTX:
+            self.task_flag = GUI_STATE_READY
 
     async def call_done(self,emoji):
-        if not (emoji is self.RESET or emoji is self.CANCEL):
+        if (emoji is not self.RESET) and (emoji is not self.CANCEL):
             return
-
+        
         Task(self.reaction_delete(emoji),self.client.loop)
         
-        if self.task.pending():
+        if self.task_flag != GUI_STATE_READY:
             return 
-
-        self.task.clear()
+        
         if emoji is self.RESET:
             self.position=self.stage.source.position
             await self.start_game()
@@ -441,24 +662,26 @@ class ds_game(object):
             await self.start_menu()
         
     async def cancel(self):
-        if self.task.pending():
+        if self.task_flag==GUI_STATE_CANCELLING:
             await self.save_position()
             return
-
+        
+        self.task_flag = GUI_STATE_CANCELLED
+        
         try:
             del DS_GAMES[self.user.id]
         except KeyError:
             return #already cancelled
         
         self.client.events.reaction_add.remove(self,self.message)
-
+        
         await self.save_position()
-
+    
     async def save_position(self):
         position=self.position
         if position==self.position_ori:
             return
-
+        
         async with DB_ENGINE.connect() as connector:
             if self.position_ori<0:
                 coro=DS_TABLE.insert(). \
@@ -476,7 +699,7 @@ class ds_game(object):
         best_steps=self.stage.best
         position=self.position
         old_steps=self.value_from_position(position)
-
+        
         if position%33!=32:
             relative_position=position+1
             i1,rest=divmod(relative_position,33)
@@ -516,58 +739,130 @@ class ds_game(object):
         self.position_ori=self.position
       
     async def renew(self,channel):
-        if self.task.pending():
-            await self.task
-
-        self.task.clear()
+        if self.task_flag in (GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX):
+            return
+        
+        self.task_flag=GUI_STATE_SWITCHING_CTX
 
         client=self.client
         loop=client.loop
-        try:
-            if self.call is type(self).call_game:
-                message = await client.message_create(channel,embed=self.render_game())
-                for emoji in chain(self.emojis_game_p1,(self.stage.source.emoji,),self.emojis_game_p2):
-                    Task(client.reaction_add(message,emoji),loop)
-            elif self.call is type(self).call_menu:
-                message = await client.message_create(channel,embed=self.render_menu())
-                for emoji in self.emojis_menu:
-                    Task(client.reaction_add(message,emoji),loop)
-            else:
-                message = await client.message_create(channel,embed=self.render_done())
-                Task(client.reaction_add(message,self.RESET),loop)
-                Task(client.reaction_add(message,self.CANCEL),loop)
-                
-        except DiscordException:
-            try:
-                if message is not None:
-                    await client.message_create(channel,'',Embed('','Error meanwhile initializing'))
-            except DiscordException:
-                pass
-            return
+        
+        if self.call is type(self).call_game:
+            coro = client.message_create(channel,embed=self.render_game())
+        elif self.call is type(self).call_menu:
+            coro = client.message_create(channel,embed=self.render_menu())
         else:
-            try:
-                await client.reaction_clear(self.message)
-            except DiscordException:
-                pass
-                
-            client.events.reaction_add.remove(self,self.message)
-
-            message.weakrefer()
-            self.message=message
-            self.channel=channel
+            coro = client.message_create(channel,embed=self.render_done())
+        
+        try:
+            message = await coro
+        except BaseException as err:
             
-            client.events.reaction_add.append(self,message)
-
-        finally:
-            self.last=monotonic()
-            self.task.set_result(None)
+            if self.task_flag==GUI_STATE_SWITCHING_CTX:
+                self.task_flag = GUI_STATE_READY
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}.renew',err)
+            return
+        
+        tasks=[]
+        if self.call is type(self).call_game:
+            for emoji in self.emojis_game_p1:
+                task=Task(client.reaction_add(message,emoji),loop)
+                tasks.append(task)
+            
+            task=Task(client.reaction_add(message,self.stage.source.emoji),loop)
+            tasks.append(task)
+            
+            for emoji in self.emojis_game_p2:
+                task=Task(client.reaction_add(message,emoji),loop)
+                tasks.append(task)
+        
+        elif self.call is type(self).call_menu:
+            for emoji in self.emojis_menu:
+                task=Task(client.reaction_add(message,emoji),loop)
+                tasks.append(task)
+        
+        else:
+            task=Task(client.reaction_add(message,self.RESET),loop)
+            tasks.append(task)
+            task=Task(client.reaction_add(message,self.CANCEL),loop)
+            tasks.append(task)
+        
+        try:
+            await WaitTillAll(tasks,loop)
+        except BaseException as err:
+            for task in tasks:
+                task.cancel()
+            
+            if self.task_flag==GUI_STATE_SWITCHING_CTX:
+                self.task_flag = GUI_STATE_READY
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.unknown_emoji, # no permission to use external emoji
+                        ERROR_CODES.max_reactions, # maximal amount of reactions reached
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}.renew',err)
+            return
+        
+        try:
+            await client.reaction_clear(self.message)
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}.renew',err)
+            return
+        
+        client.events.reaction_add.remove(self,self.message)
+        
+        message.weakrefer()
+        self.message=message
+        self.channel=channel
+        
+        client.events.reaction_add.append(self,message)
+        
+        self.last=monotonic()
+        
+        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+            self.task_flag = GUI_STATE_READY
         
     def render_done(self):
         stage=self.stage
         steps=len(stage.history)
-
+        
         rating=stage.source.rate(steps)
-            
+        
         embed=Embed(f'{stage.source.name} finished with {steps} steps with {rating} rating!',stage.render(),COLORS[stage.source.difficulty])
         embed.add_footer(f'steps : {steps}, best : {stage.best}')
         embed.add_author(self.user.avatar_url_as('png',32),self.user.full_name)
@@ -595,16 +890,16 @@ class ds_game(object):
         if cache is None:
             cache=self.cache[chapter]=[]
             force=True
-
+        
         if not force:
             return cache
-
+        
         cache.clear()
         
         difficulties=STAGES[chapter]
-
+        
         additional=chapter*33
-
+        
         levels=difficulties[0]
         for index in range(len(levels)):
             value=self.value_from_position(additional+index)
@@ -612,7 +907,7 @@ class ds_game(object):
             if value:
                 continue
             break
-
+        
         
         if len(cache)==len(levels) and cache[-1][1]:
             additional-=7
@@ -625,7 +920,7 @@ class ds_game(object):
                     if value:
                         continue
                     break
-
+        
         return cache
     
     def render_menu(self):
@@ -636,23 +931,21 @@ class ds_game(object):
             i3=rest
         else:
             i2,i3=divmod(rest+7,10)
-
-        value_middle=self.value_from_position(position)
-
+        
         cache=self.get_cache(i1)
 
         embed=Embed(f'Chapter {chr(i1+49)}')
         embed.add_thumbnail(CHARS[i1][3].url)
-
+        
         if len(cache)>1 or (i1==0) or self.value_from_position(i1*33-21):
-
+            
             for target_index,element in enumerate(cache):
                 stage=element[0]
                 
                 if stage.difficulty==i2 and stage.level==i3:
                     embed.color=COLORS[stage.difficulty]
                     break
-
+            
             if target_index<3:
                 to_render=cache[4::-1]
             elif target_index>len(cache)-3:
@@ -666,34 +959,50 @@ class ds_game(object):
                     field_value='No results recorded yet!'
                 else:
                     field_value=f'rating {stage.rate(steps)}; steps : {steps}'
-
-
+                
+                
                 if stage.difficulty==i2 and stage.level==i3:
                     field_name=f'**{field_name}**'
                     field_value=f'**{field_value}**'
 
                 embed.add_field(field_name,field_value)
-            
+        
         else:
             embed.color=COLORS[0]
             embed.description=f'**You must finish chapter {chr(i1+48)} Easy 10 first.**'
         
         embed.add_author(self.user.avatar_url_as('png',32),self.user.full_name)
         return embed                     
-
+    
     def value_from_position(self,position):
         position=position<<1
         return int.from_bytes(self.data[position:position+2],byteorder='big')
-
+    
     def write_value(self,position,value):
         position=position<<1
         self.data[position:position+2]=value.to_bytes(2,byteorder='big')
-                                       
+    
     async def reaction_delete(self,emoji):
+        client=self.client
+        
         try:
-            await self.client.reaction_delete(self.message,emoji,self.user)
-        except DiscordException:
-            pass
+            await client.reaction_delete(self.message,emoji,self.user)
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}.reaction_delete',err)
+            return
 
 #:-> @ <-:#}{#:-> @ <-:#{ game }#:-> @ <-:#}{#:-> @ <-:#
 

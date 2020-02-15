@@ -2,26 +2,17 @@
 import sys, json
 from random import choice
 
-from hata.futures import Task
-from hata.parsers import eventlist
-from hata.channel import message_at_index, ChannelText, ChannelCategory,    \
-     CHANNELS
+from hata import Task, ERROR_CODES, eventlist, ChannelText, ChannelCategory,\
+    CHANNELS, elapsed_time, Status, Permission, Status, DiscordException,   \
+    Color, GUILDS, USERS, BUILTIN_EMOJIS, Embed, CLIENTS, ActivityUnknown,  \
+    ActivitySpotify, AuditLogEvent
+
 from hata.prettyprint import pchunkify
-from hata.others import elapsed_time, Status, cchunkify, Status
-from hata.exceptions import DiscordException
+from hata.others import cchunkify
+
 from hata.events import Pagination, Timeouter, GUI_STATE_READY,             \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
-    GUI_STATE_SWITCHING_CTX
-from hata.events_compiler import ContentParser
-from hata.embed import Embed
-from hata.emoji import BUILTIN_EMOJIS
-from hata.color import Color
-from hata.user import USERS
-from hata.guild import GUILDS
-from hata.client_core import CLIENTS
-from hata.activity import ActivityUnknown, ActivitySpotify
-from hata.permission import Permission
-from hata.audit_logs import AuditLogEvent
+    GUI_STATE_SWITCHING_CTX, ContentParser
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
@@ -750,7 +741,7 @@ class embedination_rr(object):
         
         try:
             message = await client.message_create(self.channel,embed=self.pages[0])
-        except DiscordException:
+        except:
             self.message=None
             raise
         
@@ -813,9 +804,21 @@ class embedination_rr(object):
                 self.task_flag=GUI_STATE_CANCELLED
                 try:
                     await client.message_delete(message)
-                except (DiscordException,ConnectionError):
-                    pass
-                finally:
+                except BaseException as err:
+                    self.cancel()
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code == ERROR_CODES.missing_access: # client removed
+                            return
+                    
+                    await client.events.error(client,f'{self!r}.__call__',err)
+                    return
+                
+                else:
                     self.cancel()
                     return
             
@@ -829,9 +832,7 @@ class embedination_rr(object):
 
             return
         
-        task=Task(client.reaction_delete(message,emoji,user),client.loop)
-        if __debug__:
-            task.__silence__()
+        Task(self._reaction_delete(emoji,user),client.loop)
 
         if page<0:
             page=0
@@ -848,19 +849,40 @@ class embedination_rr(object):
         except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
-            if isinstance(err,(DiscordException,ConnectionError)):
+            
+            if isinstance(err,ConnectionError):
+                # no internet
                 return
-            raise
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message already deleted
+                            ):
+                    return
+            
+            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            await client.events.error(client,f'{self!r}.__call__',err)
+            return
 
         if self.task_flag==GUI_STATE_CANCELLING:
             self.task_flag=GUI_STATE_CANCELLED
             try:
                 await client.message_delete(message)
-            except (DiscordException,ConnectionError):
-                pass
-            finally:
-                self.cancel()
+            except BaseException as err:
+                
+                if isinstance(err,ConnectionError):
+                    # no internet
+                    return
+                
+                if isinstance(err,DiscordException):
+                    if err.code==ERROR_CODES.missing_access: # client removed
+                        return
+                
+                await client.events.error(client,f'{self!r}.__call__',err)
                 return
+            
+            return
         
         self.task_flag=GUI_STATE_READY
         
@@ -887,8 +909,22 @@ class embedination_rr(object):
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(message)
-                except DiscordException:
-                    pass
+                except BaseException as err:
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code in (
+                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.unknown_message, # message deleted
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                    ):
+                            return
+                    
+                    await client.events.error(client,f'{self!r}._canceller',err)
+                    return
             return
         
         timeouter=self.timeouter
@@ -908,7 +944,28 @@ class embedination_rr(object):
             timeouter.cancel()
         
         return Task(canceller(self,exception),self.client.loop)
-    
+
+    async def _reaction_delete(self,emoji,user):
+        client=self.client
+        try:
+            await client.reaction_delete(self.message,emoji,user)
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}._reaction_delete',err)
+            return
+
 @infos
 async def roles(client,message,content):
     if message.guild is None:

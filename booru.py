@@ -2,16 +2,11 @@
 import re
 from collections import deque
 
-from hata.embed import Embed
-from hata.parsers import eventlist
-from hata.color import Color
-from hata.emoji import BUILTIN_EMOJIS
+from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task,\
+    DiscordException
 from hata.events import Timeouter, Cooldown, GUI_STATE_READY,               \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
     GUI_STATE_SWITCHING_CTX
-
-from hata.futures import Task
-from hata.exceptions import DiscordException
 
 from tools import BeautifulSoup, choose, pop_one, CooldownHandler, mark_as_async, choose_notsame
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
@@ -113,9 +108,7 @@ class ShuffledShelter(object):
             if not message.did_react(emoji,user):
                 return
             
-            task=Task(client.reaction_delete(message,emoji,user),client.loop)
-            if __debug__:
-                task.__silence__()
+            Task(self._reaction_delete(emoji,user),client.loop)
 
         if self.task_flag:
             return
@@ -153,10 +146,21 @@ class ShuffledShelter(object):
         except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
-            if isinstance(err,(DiscordException,ConnectionError)):
+            
+            if isinstance(err,ConnectionError):
+                # no internet
                 return
             
-            raise
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message already deleted
+                            ):
+                    return
+            
+            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            await client.events.error(client,f'{self!r}.__call__',err)
+            return
             
         if not self.urls:
             self.task_flag=GUI_STATE_CANCELLED
@@ -173,7 +177,7 @@ class ShuffledShelter(object):
         
         client.events.reaction_add.remove(self,message)
         client.events.reaction_delete.remove(self,message)
-
+        
         if self.task_flag==GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
@@ -187,9 +191,22 @@ class ShuffledShelter(object):
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(message)
-                except (DiscordException,ConnectionError):
-                    pass
-            
+                except BaseException as err:
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code in (
+                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.unknown_message, # message deleted
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                    ):
+                            return
+                    
+                    await client.events.error(client,f'{self!r}._canceller',err)
+                    return
             return
         
         timeouter=self.timeouter
@@ -209,7 +226,28 @@ class ShuffledShelter(object):
             timeouter.cancel()
         
         return Task(canceller(self,exception),self.client.loop)
-        
+
+    async def _reaction_delete(self,emoji,user):
+        client=self.client
+        try:
+            await client.reaction_delete(self.message,emoji,user)
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}._reaction_delete',err)
+            return
+
 async def answer_booru(client,channel,content,url_base):
     if content:
         content=content.split()
