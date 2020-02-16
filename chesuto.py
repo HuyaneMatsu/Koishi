@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys
-import json
+import sys, os, json
+
 from hata.emoji import Emoji
 from hata.futures import SyncLock
 from hata.dereaddons_local import alchemy_incendiary
@@ -144,24 +144,28 @@ Rarity.rare     = Rarity(4,'Rare')
 Rarity.legendary= Rarity(5,'Legendary')
 Rarity.mythic   = Rarity(6,'Mythic')
 
-CARDS_BY_ID={}
-CARDS_BY_NAME={}
+CARDS_BY_ID = {}
+CARDS_BY_NAME = {}
+
+CHESUTO_FOLDER = os.path.join(os.path.abspath('.'),'chesuto_data')
+CARDS_FILE = os.path.join(CHESUTO_FOLDER,'cards.json')
+CARDS_FILE_LOCK = SyncLock()
+
+PROTECTED_FILE_NAMES = {'cards.json'}
 
 class Card(object):
-    __slots__=('description', 'id', 'name', 'rarity')
-    def __init__(self,description,id_,name,rarity):
+    __slots__=('description', 'id', 'image_name', 'name', 'rarity')
+    def __init__(self,description,id_,name,rarity, image_name = None):
         self.id         = id_
         self.name       = name
         self.description= description
         self.rarity     = rarity
         CARDS_BY_ID[id_]= self
         CARDS_BY_NAME[name.lower()]=self
-
+        self.image_name = image_name
+        
     def __hash__(self):
         return self.id
-
-    FILENAME='CHESUTO.json'
-    FILELOCK=SyncLock()
     
     @classmethod
     def update(cls,description,id_,name,rarity):
@@ -184,6 +188,7 @@ class Card(object):
             card_data={}
             card_data['description']= card.description
             card_data['id']         = card.id
+            card_data['image_name'] = card.image_name
             card_data['name']       = card.name
             card_data['rarity']     = card.rarity.index
             card_datas.append(card_data)
@@ -192,15 +197,15 @@ class Card(object):
             
     @classmethod
     def _dump_cards(cls,card_datas):
-        with cls.FILELOCK:
-            with open(cls.FILENAME,'w') as file:
+        with CARDS_FILE_LOCK:
+            with open(CARDS_FILE,'w') as file:
                 json.dump(card_datas,file,indent=4)
-
+    
     @classmethod
     def load_cards(cls):
-
+        
         try:
-            with open(cls.FILENAME,'r') as file:
+            with open(CARDS_FILE,'r') as file:
                 cards_data=json.load(file)
         except FileNotFoundError:
             exception='file not found'
@@ -211,11 +216,11 @@ class Card(object):
                 exception=None
             else:
                 exception=f'Expected type \'list\' for \'cards_data\', got \'{cards_data.__class__.__name__}\''
-
+        
         if exception is not None:
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n')
             return
-            
+        
         for card_data in cards_data:
             while True:
                 if type(card_data) is not dict:
@@ -241,6 +246,15 @@ class Card(object):
                 if type(id_) is not int:
                     exception=f'Expected type \'int\' for \'id\', got \'{id_.__class__.__name__}\''
                     break
+                
+                image_name=card_data.get('image_name')
+                if (image_name is not None):
+                    if type(image_name) is not str:
+                        exception=f'Expected type \'str\' or None for \'image_name\', got \'{image_name.__class__.__name__}\''
+                        break
+                    
+                    if not os.path.isfile(os.path.join(CHESUTO_FOLDER,image_name)):
+                        image_name=None
                 
                 try:
                     name=card_data['name']
@@ -271,7 +285,7 @@ class Card(object):
                 break
 
             if exception is None:
-                Card(description,id_,name,rarity)
+                Card(description, id_, name, rarity, image_name)
                 continue
             
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n At data part:\n{card_data}\n')

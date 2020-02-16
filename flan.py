@@ -1,11 +1,14 @@
-import re
+import re, os
 
-from hata import Guild, eventlist, Embed, Color, Role, sleep
-from hata.events import Cooldown, Pagination
+from hata import Guild, eventlist, Embed, Color, Role, sleep, ReuAsyncIO,   \
+    BUILTIN_EMOJIS, AsyncIO
+
+from hata.events import Cooldown, Pagination, wait_for_reaction
 
 from help_handler import FLAN_HELPER, FLAN_HELP_COLOR, flan_invalid_command
 from tools import CooldownHandler
-from chesuto import Rarity, CARDS_BY_NAME, Card
+from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES,      \
+    CHESUTO_FOLDER
 
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
@@ -82,12 +85,7 @@ async def massadd(client,message):
         if client.is_owner(user):
             break
         
-        try:
-            profile=user.guild_profiles[CARDS_ROLE.guild]
-        except KeyError:
-            return True
-        
-        if CARDS_ROLE in profile.roles:
+        if user.has_role(CARDS_ROLE):
             break
         
         return True
@@ -216,9 +214,31 @@ FLAN_HELPER.add('massadd',_help_massadd,FLAN_HELPER.check_role(CARDS_ROLE))
 async def showcard(client,message,content):
     if not 2<len(content)<101:
         return
-    try:
-        card=CARDS_BY_NAME[content.lower()]
-    except KeyError:
+    
+    search_value = content.lower()
+    
+    card = None
+    start_index = 1000
+    length = 1000
+    
+    for card_name, card_ in CARDS_BY_NAME.items():
+        index = card_name.find(search_value)
+        if index==-1:
+            continue
+        
+        if index > start_index:
+            continue
+        
+        if index == start_index:
+            if length >= len(card_name):
+                continue
+        
+        card = card_
+        start_index=index
+        length=len(card_name)
+        continue
+    
+    if card is None:
         return
     
     title_parts=['**']
@@ -234,11 +254,11 @@ async def showcard(client,message,content):
     
     rarity=card.rarity
     if rarity is Rarity.token:
-        title_parts.append(' [TOKEN]')
+        title_parts.append('[TOKEN]')
     elif rarity is Rarity.passive:
-        title_parts.append(' [PASSIVE]')
+        title_parts.append('[PASSIVE]')
     else:
-        title_parts.append(' (')
+        title_parts.append('(')
         title_parts.append(card.rarity.name)
         title_parts.append(')')
     
@@ -250,7 +270,14 @@ async def showcard(client,message,content):
     
     embed=Embed(title,description,CHESUTO_COLOR)
     
-    await client.message_create(message.channel,embed=embed)
+    image_name = card.image_name
+    if image_name is None:
+        await client.message_create(message.channel,embed=embed)
+        return
+    
+    embed.add_image(f'attachment://{image_name}')
+    with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
+        await client.message_create(message.channel,embed=embed,file=file)
 
 async def _help_showcard(client,message):
     prefix=client.events.message_create.prefix
@@ -378,11 +405,11 @@ class CardPaginator(object):
                 
                 rarity=card.rarity
                 if rarity is Rarity.token:
-                    page_parts.append(' [TOKEN]')
+                    page_parts.append('[TOKEN]')
                 elif rarity is Rarity.passive:
-                    page_parts.append(' [PASSIVE]')
+                    page_parts.append('[PASSIVE]')
                 else:
-                    page_parts.append(' (')
+                    page_parts.append('(')
                     page_parts.append(card.rarity.name)
                     page_parts.append(')')
                 
@@ -402,11 +429,11 @@ class CardPaginator(object):
                 
                 rarity=card.rarity
                 if rarity is Rarity.token:
-                    page_parts.append(' [TOKEN]')
+                    page_parts.append('[TOKEN]')
                 elif rarity is Rarity.passive:
-                    page_parts.append(' [PASSIVE]')
+                    page_parts.append('[PASSIVE]')
                 else:
-                    page_parts.append(' (')
+                    page_parts.append('(')
                     page_parts.append(card.rarity.name)
                     page_parts.append(')')
                 
@@ -427,11 +454,11 @@ class CardPaginator(object):
                 
                 rarity=card.rarity
                 if rarity is Rarity.token:
-                    page_parts.append(' [TOKEN]')
+                    page_parts.append('[TOKEN]')
                 elif rarity is Rarity.passive:
-                    page_parts.append(' [PASSIVE]')
+                    page_parts.append('[PASSIVE]')
                 else:
-                    page_parts.append(' (')
+                    page_parts.append('(')
                     page_parts.append(card.rarity.name)
                     page_parts.append(')')
                 
@@ -456,6 +483,124 @@ async def _help_showcards(client,message):
     await client.message_create(message.channel,embed=embed)
 
 FLAN_HELPER.add('showcards',_help_showcards)
+
+ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
+ADD_IMAGE_CANCEL = BUILTIN_EMOJIS['x']
+ADD_IMAGE_EMOJIS = (ADD_IMAGE_OK, ADD_IMAGE_CANCEL)
+
+def ADD_IMAGE_CHECKER(emoji, user):
+    if user.is_bot:
+        return False
+    
+    if not user.has_role(CARDS_ROLE):
+        return False
+    
+    if emoji not in ADD_IMAGE_EMOJIS:
+        return False
+    
+    return True
+    
+@commands
+async def add_image(client, message, cards_name):
+    if not message.author.has_role(CARDS_ROLE):
+        return True
+    
+    while True:
+        attachments = message.attachments
+        if attachments is None:
+            content = 'The message has no attachment provided.'
+            break
+        
+        if len(attachments)>1:
+            content = 'The message has more attachmemnts.'
+        
+        attachment = attachments[0]
+        name=attachment.name
+        extension=os.path.splitext(name)[1].lower()
+        
+        if extension not in ('.png','.jpg','.jpeg','.bmp','.mp4','.gif'): # are there more?
+            content = 'You sure the message format is an image format?\n If you are please request adding it.'
+            break
+        
+        if name in PROTECTED_FILE_NAMES:
+            content = 'The file\'s name is same as a protected file\'s name.'
+            break
+        
+        card = CARDS_BY_NAME.get(cards_name.lower())
+        if card is None:
+            content = 'Could not find a card with that name.'
+            break
+        
+        actual_image_name = card.image_name
+        
+        file_path = os.path.join(CHESUTO_FOLDER,name)
+        exists = os.path.exists(file_path)
+        
+        should_dump = True
+        if actual_image_name is None:
+            if exists:
+                content = 'A file already exists with that name, if you overwrite it, more cards will have the same ' \
+                          'image.\nAre you sure?'
+            else:
+                content = None
+        else:
+            if exists:
+                if actual_image_name == name:
+                    content = 'Are you sure at overwriting the card\'s image?'
+                    should_dump = False
+                else:
+                    content = 'A file with that name already exists.\nIf you overwrite this card\'s image like that, ' \
+                              'you will endup with more cards with the same image. Are you sure?'
+            else:
+                content = 'The card has an image named differently. Are you sure like this?'
+        
+        if (content is not None):
+            message = await client.message_create(message.channel,
+                embed=Embed(description=content,color=CHESUTO_COLOR))
+            
+            for emoji in ADD_IMAGE_EMOJIS:
+                await client.reaction_add(message,emoji)
+            
+            try:
+                emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
+            except TimeoutError:
+                emoji = ADD_IMAGE_CANCEL
+            
+            await client.message_delete(message)
+            
+            if emoji is ADD_IMAGE_CANCEL:
+                content = 'Cancelled.'
+                break
+        
+        image_data = await client.download_attachment(attachment)
+        with (await AsyncIO(file_path,'wb')) as file:
+            await file.write(image_data)
+        
+        if should_dump:
+            card.image_name=name
+            await Card.dump_cards(client.loop)
+        
+        content = f'Image successfully added for {card.name}.'
+        break
+    
+    message = await client.message_create(message.channel,
+        embed=Embed(description=content,color=CHESUTO_COLOR))
+    
+    await sleep(30.)
+    await client.message_delete(message)
+    return False
+
+async def _help_add_image(client,message):
+    prefix=client.events.message_create.prefix
+    embed=Embed('add_image',(
+        'Adds or updates an image of a card.\n'
+        f'Usage: `{prefix}add_image <card name>`\n'
+        'Also include an image as attachment.'
+        ),color=FLAN_HELP_COLOR).add_footer(
+            f'You must have the `{CARDS_ROLE}` role to use this command.')
+    await client.message_create(message.channel,embed=embed)
+
+FLAN_HELPER.add('add_image',_help_add_image,FLAN_HELPER.check_role(CARDS_ROLE))
 
 del re
 del eventlist
