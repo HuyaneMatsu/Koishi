@@ -3,9 +3,8 @@ import re, os
 from hata import Guild, eventlist, Embed, Color, Role, sleep, ReuAsyncIO,   \
     BUILTIN_EMOJIS, AsyncIO
 
-from hata.events import Cooldown, Pagination, wait_for_reaction
+from hata.events import Cooldown, Pagination, wait_for_reaction, checks
 
-from help_handler import FLAN_HELPER, FLAN_HELP_COLOR, flan_invalid_command
 from tools import CooldownHandler
 from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES,      \
     CHESUTO_FOLDER
@@ -29,15 +28,89 @@ async def guild_user_add(client, guild, user):
     await client.message_create(channel,f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
 commands=eventlist()
-commands(FLAN_HELPER,'help')
-commands(flan_invalid_command,'invalid_command')
+
+FLAN_HELP_COLOR=Color.from_rgb(230,69,0)
 
 @commands
-@Cooldown('user',30.,handler=CooldownHandler())
-async def ping(client,message,content):
-    await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
+async def help(client, message, content):
+    if (0<len(content)<64):
+        content=content.lower()
+        if content!='help':
+            try:
+                command=client.events.message_create.commands[content]
+            except KeyError:
+                pass
+            else:
+                if not command.run_checks(client, message):
+                    run_invalid=False
+                    description=command.description
+                    if description is None:
+                        await client.message_create(message.channel,
+                            embed=Embed(f'No help is provided for this command',color=FLAN_HELP_COLOR))
+                        return
+                    
+                    await description(client, message)
+                    return
+            
+            prefix=client.events.message_create.prefix
+            embed=Embed(f'Invalid command: {content}',(
+                f'Please try using `{prefix}help` to list the available commands '
+                'for you\n'
+                'Take care!'
+                ),color=FLAN_HELP_COLOR)
+            message = await client.message_create(message.channel,embed=embed)
+            await sleep(30.,client.loop)
+            await client.message_delete(message)
+            return
+    
+    pages=[]
+    part=[]
+    index=0
+    for command in client.events.message_create.get_default_category().commands:
+        if command.run_checks(client, message):
+            continue
+        
+        if index==16:
+            pages.append('\n'.join(part))
+            part.clear()
+            index=0
+        part.append(f'**>>** {command.name}')
+        index+=1
+    
+    pages.append('\n'.join(part))
+    
+    del part
+    
+    prefix=client.events.message_create.prefix
+    result=[]
+    
+    limit=len(pages)
+    index=0
+    while index<limit:
+        embed=Embed('Commands:',color=FLAN_HELP_COLOR,description=pages[index])
+        index+=1
+        embed.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
+        result.append(embed)
+    
+    del pages
+    
+    await Pagination(client,message.channel,result)
 
-async def _help_ping(client,message):
+async def flan_invalid_command(client,message,command,content):
+    prefix=client.events.message_create.prefix
+    embed=Embed(
+        f'Invalid command `{command}`',
+        f'try using: `{prefix}help`',
+        color=FLAN_HELP_COLOR,
+            )
+    
+    message = await client.message_create(message.channel,embed=embed)
+    await sleep(30.,client.loop)
+    await client.message_delete(message)
+
+commands(flan_invalid_command,'invalid_command')
+
+async def ping_description(client,message):
     prefix=client.events.message_create.prefix
     embed=Embed('ping',(
         'Ping - Pong?\n'
@@ -45,25 +118,12 @@ async def _help_ping(client,message):
         ),color=FLAN_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-FLAN_HELPER.add('ping',_help_ping)
+@commands(aliases=['pong'],description=ping_description,)
+@Cooldown('user',30.,handler=CooldownHandler())
+async def ping(client, message):
+    await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
 
-@commands
-async def sync_avatar(client,message):
-    if not client.is_owner(message.author):
-        return True
-    
-    avatar_url=client.application.icon_url_as(ext='png',size=4096)
-    if avatar_url is None:
-        await client.message_create(message.channel,'The application has no avatar set.')
-        return True
-    
-    avatar = await client.download_url(avatar_url)
-    await client.client_edit(avatar=avatar)
-    
-    await client.message_create(message.channel,'Avatar synced.')
-    return False
-
-async def _help_sync_avatar(client,message):
+async def sync_avatar_description(client,message):
     prefix=client.events.message_create.prefix
     embed=Embed('sync_avatar',(
         'Hello there Esuto!\n'
@@ -75,9 +135,31 @@ async def _help_sync_avatar(client,message):
         ),color=FLAN_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-FLAN_HELPER.add('sync_avatar',_help_sync_avatar,FLAN_HELPER.check_is_owner)
+@commands(checks=[checks.owner_only()],description=sync_avatar_description)
+async def sync_avatar(client,message):
+    avatar_url=client.application.icon_url_as(ext='png',size=4096)
+    if avatar_url is None:
+        await client.message_create(message.channel,'The application has no avatar set.')
+        return True
+    
+    avatar = await client.download_url(avatar_url)
+    await client.client_edit(avatar=avatar)
+    
+    await client.message_create(message.channel,'Avatar synced.')
+    return False
 
-@commands
+async def massadd_description(client,message):
+    prefix=client.events.message_create.prefix
+    embed=Embed('massadd',(
+        'Loads the last 100 message at the channel, and check each of them '
+        'searching for card definitions. If it finds one, then updates it, if '
+        'already added, or creates a new one.\n'
+        f'Usage: `{prefix}massadd`'
+        ),color=FLAN_HELP_COLOR).add_footer(
+            f'You must have `{CARDS_ROLE}` role to use this command.')
+    await client.message_create(message.channel,embed=embed)
+
+@commands(checks=[checks.has_role(CARDS_ROLE)],description=massadd_description)
 async def massadd(client,message):
     while True:
         user=message.author
@@ -197,20 +279,15 @@ async def massadd(client,message):
     await client.message_delete(message)
     return False
 
-async def _help_massadd(client,message):
+async def showcard_description(client,message):
     prefix=client.events.message_create.prefix
-    embed=Embed('massadd',(
-        'Loads the last 100 message at the channel, and check each of them '
-        'searching for card definitions. If it finds one, then updates it, if '
-        'already added, or creates a new one.\n'
-        f'Usage: `{prefix}massadd`'
-        ),color=FLAN_HELP_COLOR).add_footer(
-            f'You must have the `{CARDS_ROLE}` role to use this command.')
+    embed=Embed('showcard',(
+        'Shows the specified card by it\'s name.\n'
+        f'Usage: `{prefix}showcard *name*`'
+        ),color=FLAN_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-FLAN_HELPER.add('massadd',_help_massadd,FLAN_HELPER.check_role(CARDS_ROLE))
-
-@commands
+@commands(description=showcard_description)
 async def showcard(client,message,content):
     if not 2<len(content)<101:
         return
@@ -279,18 +356,16 @@ async def showcard(client,message,content):
     with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
         await client.message_create(message.channel,embed=embed,file=file)
 
-async def _help_showcard(client,message):
+async def showcards_description(client,message):
     prefix=client.events.message_create.prefix
-    embed=Embed('showcard',(
-        'Shows the specified card by it\'s name.\n'
-        f'Usage: `{prefix}showcard *name*`'
+    embed=Embed('showcards',(
+        'Searcher all the cards, which contain the specified string.\n'
+        f'Usage: `{prefix}showcards *name*`'
         ),color=FLAN_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-FLAN_HELPER.add('showcard',_help_showcard)
-
-@commands
-async def showcards(client,message,content):
+@commands(description=showcards_description)
+async def showcards(client, message, content):
     while True:
         if len(content)>32:
             result=None
@@ -328,7 +403,7 @@ async def showcards(client,message,content):
         pages=CardPaginator(title,result)
     
     await Pagination(client,message.channel,pages)
-    
+
 class CardPaginator(object):
     __slots__ = ('title', 'rendered', 'collected', 'page_information')
     def __init__(self, title, collected):
@@ -473,16 +548,17 @@ class CardPaginator(object):
         
         return Embed(self.title,''.join(page_parts),color=CHESUTO_COLOR).add_footer(
             f'Page: {page_index+1}/{len(self.page_information)}. Results {start+1}-{end}/{len(self.collected)}')
-        
-async def _help_showcards(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('showcards',(
-        'Searcher all the cards, which contain the specified string.\n'
-        f'Usage: `{prefix}showcards *name*`'
-        ),color=FLAN_HELP_COLOR)
-    await client.message_create(message.channel,embed=embed)
 
-FLAN_HELPER.add('showcards',_help_showcards)
+
+async def add_image_description(client,message):
+    prefix=client.events.message_create.prefix
+    embed=Embed('add_image',(
+        'Adds or updates an image of a card.\n'
+        f'Usage: `{prefix}add_image <card name>`\n'
+        'Also include an image as attachment.'
+        ),color=FLAN_HELP_COLOR).add_footer(
+            f'You must have `{CARDS_ROLE}` role to use this command.')
+    await client.message_create(message.channel,embed=embed)
 
 ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_IMAGE_CANCEL = BUILTIN_EMOJIS['x']
@@ -499,12 +575,9 @@ def ADD_IMAGE_CHECKER(emoji, user):
         return False
     
     return True
-    
-@commands
+
+@commands(checks=[checks.has_role(CARDS_ROLE)],description=add_image_description)
 async def add_image(client, message, cards_name):
-    if not message.author.has_role(CARDS_ROLE):
-        return True
-    
     while True:
         attachments = message.attachments
         if attachments is None:
@@ -590,17 +663,172 @@ async def add_image(client, message, cards_name):
     await client.message_delete(message)
     return False
 
-async def _help_add_image(client,message):
+async def checklist_description(client,message):
     prefix=client.events.message_create.prefix
-    embed=Embed('add_image',(
-        'Adds or updates an image of a card.\n'
-        f'Usage: `{prefix}add_image <card name>`\n'
-        'Also include an image as attachment.'
+    embed=Embed('checklist',(
+        'Lists the cards of the given rarity, which have images added to them.\n'
+        'If no rarity is provided, I will list all the cards with images.\n'
+        f'Usage: `{prefix}checklist *rarity*`\n'
         ),color=FLAN_HELP_COLOR).add_footer(
-            f'You must have the `{CARDS_ROLE}` role to use this command.')
+            f'You must have `{CARDS_ROLE}` role to use this command.')
     await client.message_create(message.channel,embed=embed)
 
-FLAN_HELPER.add('add_image',_help_add_image,FLAN_HELPER.check_role(CARDS_ROLE))
+@commands(checks=[checks.has_role(CARDS_ROLE)],description=checklist_description)
+async def checklist(client, message, content):
+    result=[]
+    if content:
+        rarity=Rarity.BY_NAME.get(content.lower())
+        if rarity is None:
+            if len(content)>50:
+                content = content[:50]+'...'
+            result.append(Embed(f'{content!r} is not a rarity',color=CHESUTO_COLOR))
+            
+        else:
+            filtered=[]
+            
+            for card in CARDS_BY_NAME.values():
+                if card.rarity is rarity:
+                    if card.image_name is None:
+                        continue
+                    
+                    filtered.append(card)
+                    continue
+            
+            title = f'Checklist for {rarity.name}'
+            
+            limit=len(filtered)
+            if limit:
+                parts=[]
+                index=1
+                
+                card=filtered[0]
+                name=card.name
+                length=len(name)
+                if length>200:
+                    name = name[:200]+'...'
+                    length = 203
+                
+                parts.append(name)
+                
+                while True:
+                    if index==limit:
+                        break
+                    
+                    card=filtered[index]
+                    index=index+1
+                    name=card.name
+                    
+                    name_ln=len(name)
+                    if name_ln>200:
+                        name = name[:200]+'...'
+                        name_ln = 203
+                    
+                    length=length+name_ln+1
+                    if length>2000:
+                        result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                        length=name_ln
+                        parts.clear()
+                        parts.append(name)
+                        continue
+                    
+                    parts.append('\n')
+                    parts.append(name)
+                    continue
+                
+                if parts:
+                    result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                
+                parts=None
+            else:
+                result.append(Embed(title,color=CHESUTO_COLOR))
+            
+    else:
+        filtered=tuple([] for x in range(len(Rarity.INSTANCES)))
+        
+        for card in CARDS_BY_NAME.values():
+            if card.image_name is None:
+                continue
+            
+            filtered[card.rarity.index].append(card)
+            continue
+        
+        title='Checklist'
+        
+        parts=[]
+        length=0
+        
+        for rarity_index in range(len(filtered)):
+            container=filtered[rarity_index]
+            
+            limit=len(container)
+            if limit==0:
+                continue
+            
+            if length>1500:
+                result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                length=0
+                parts.clear()
+            else:
+                parts.append('\n\n')
+                length = length+2
+            
+            rarity_name=f'**{Rarity.INSTANCES[rarity_index].name}**\n\n'
+            length = length+len(rarity_name)
+            parts.append(rarity_name)
+            
+            card=container[0]
+            name=card.name
+            name_ln=len(name)
+            if name_ln>200:
+                name = name[:200]+'...'
+                name_ln = 203
+            
+            length = length+name_ln
+            parts.append(name)
+            index=1
+            
+            while True:
+                if index==limit:
+                    break
+                
+                card=container[index]
+                index=index+1
+                name=card.name
+                name_ln=len(name)
+                if name_ln>200:
+                    name = name[:200]+'...'
+                    name_ln=203
+                
+                length = length+1+name_ln
+                if length>2000:
+                    result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                    length=len(rarity_name)+name_ln
+                    parts.clear()
+                    parts.append(rarity_name)
+                    parts.append(name)
+                    continue
+                
+                parts.append('\n')
+                parts.append(name)
+                continue
+            
+        if parts:
+            result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+        
+        parts=None
+    
+    index=0
+    limit=len(result)
+    while True:
+        if index==limit:
+            break
+        
+        embed=result[index]
+        index=index+1
+        embed.add_footer(f'Page: {index}/{limit}')
+    
+    await Pagination(client,message.channel,result)
+    return False
 
 del re
 del eventlist

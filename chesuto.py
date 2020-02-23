@@ -74,6 +74,7 @@ from hata.dereaddons_local import alchemy_incendiary
 class Rarity(object):
     INSTANCES = [NotImplemented] * 7
     BY_NAME   = {}
+    
     __slots__=('index', 'name',)
     
     def __init__(self,index,name):

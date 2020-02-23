@@ -367,7 +367,7 @@ for title,tag_name,command_names in (
         ('Inaba Tewi',              'inaba_tewi',           ('tewi',),),
         ('Inubashiri Momiji',       'inubashiri_momiji',    ('momiji',),),
         ('Izayoi Sakuya',           'izayoi_sakuya',        ('sakuya',),),
-        ('Joutouguu Mayumi',        'joutougu_mayumi',      ('mayumi',),),
+        ('Joutouguu Mayumi',        'joutougu_mayumi',      ('mayumi',),), # same as 'joutouguu_mayumi'
         ('Junko',                   'junko_(touhou)',       ('junko',),),
         ('Kaenbyou Rin',            'kaenbyou_rin',         ('rin',),),
         ('Kagiyama Hina',           'kagiyama_hina',        ('hina',),),
@@ -376,7 +376,7 @@ for title,tag_name,command_names in (
         ('Kasodani Kyouko',         'kasodani_kyouko',      ('kyouko',),),
         ('Kawashiro Nitori',        'kawashiro_nitori',     ('nitori',),),
         ('Kazami Yuuka',            'kazami_yuuka',         ('yuuka',),), # same as 'kazami_youka'
-        ('Kicchou Yachie',          'kitcho_yachie',        ('yachie',),),
+        ('Kicchou Yachie',          'kitcho_yachie',        ('yachie',),), # same as 'kicchou_yachie'
         ('Kijin Seija',             'kijin_seija',          ('seija',),),
         ('Kirisame Marisa',         'kirisame_marisa',      ('marisa',),),
         ('Kishin Sagume',           'kishin_sagume',        ('sagume',),),
@@ -390,6 +390,7 @@ for title,tag_name,command_names in (
         ('Konngara',                'konngara',             ('konngara',),),
         ('Konpaku Youmu',           'konpaku_youmu',        ('youmu',),),
         ('Kokuu Haruto',            'kokuu_haruto',         ('kokuu',),), # no result now
+        ('Kumoi Ichirin',           'kumoi_ichirin',        ('ichirin',),),
         ('Kuraunpiisu',             'clownpiece',           ('kuraunpiisu','clownpiece',),),
         ('Kurodani Yamame',         'kurodani_yamame',      ('yamame',),),
         ('Kurokoma Saki',           'kurokoma_saki',        ('saki',),),
@@ -409,6 +410,7 @@ for title,tag_name,command_names in (
         ('Nazuurin',                'nazrin',               ('nazuurin','nazrin',),),
         ('Nishida Satono',          'nishida_satono',       ('satono',),),
         ('Niwatari Kutaka',         'niwatari_kutaka',      ('kutaka',),),
+        ('Okunoda Miyoi',           'okunoda_miyoi',        ('miyoi',),),
         ('Onozuka Komachi',         'onozuka_komachi',      ('komachi',),),
         ('Pachurii Noorejji',       'patchouli_knowledge',  ('patchouli',),),
         ('Purizumuribaa Meruran',   'merlin_prismriver',    ('meruran','merlin',),),

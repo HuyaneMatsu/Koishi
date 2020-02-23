@@ -16,7 +16,7 @@
     {
         "description": "I. Select a card in your hand that has its requirements fulfilled, if any. Play that card.\nII. This card will not end your turn.\nThis card is a token only obtained at start of match if you start as Black.",
         "id": 645642084635639821,
-        "image_name": "BlacksHeir.gif",
+        "image_name": "BlackH.gif",
         "name": "Black's Heirloom",
         "rarity": 0
     },
@@ -331,14 +331,14 @@
     {
         "description": "This card can only be used on your 20th turn or later.\nI. Transform all cards in both players' decks into \"Pondering\" cards.",
         "id": 645641586977538069,
-        "image_name": null,
+        "image_name": "AwkwardTac.gif",
         "name": "Awkward Tactician",
         "rarity": 4
     },
     {
         "description": "This card can only be used if you have at least 5 other cards in your hand.\nI. Discard your hand. \nII. Remove all other effects from both players.",
         "id": 645641536670924830,
-        "image_name": null,
+        "image_name": "TrickeryJ.gif",
         "name": "Trickery of the Jesters",
         "rarity": 2
     },
@@ -527,7 +527,7 @@
     {
         "description": "I. Select a Pawn you control, it will ignore a capture while this effect is in play, after this effect activates, remove this effect. This effect lasts for the rest of the match. (This effect can be stacked)",
         "id": 645641189072306200,
-        "image_name": null,
+        "image_name": "SpareShield.gif",
         "name": "Spare Shield",
         "rarity": 2
     },

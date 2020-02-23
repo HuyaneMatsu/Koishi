@@ -17,26 +17,26 @@ class Helper(object):
         self.no_perm        = no_perm
         self.helps          = []
         self.helps_by_name  = {}
-
+    
     def add(self,name,coro,checker=None):
         if len(name)>64:
             raise ValueError('name over 64 character')
-
+        
         if (checker is not None):
             if not callable(checker):
                 raise TypeError(f'Checker should be callable, got {checker!r}.\nname = \'{name}\'\ncoro = {coro!r}')
-            
+        
         element=object.__new__(_HelperE)
         element.name    = name
         element.coro    = coro
         element.checker = checker
-
+        
         self.helps.append(element)
         self.helps_by_name[name]=element
-
+    
     def sort(self):
         self.helps.sort(key=lambda e:e.name)
-
+    
     @staticmethod
     def check_is_owner(client,message):
         return client.is_owner(message.author)
@@ -196,76 +196,3 @@ async def koishi_invalid_command(client,message,command,content):
     await sleep(30.,client.loop)
     await client.message_delete(message)
 
-FLAN_HELP_COLOR=Color.from_rgb(230,69,0)
-
-async def _flan_help_default(client,message,helper):
-    pages=[]
-    part=[]
-    index=0
-    for element in helper.helps:
-        checker=element.checker
-        if (checker is not None) and (not checker(client,message)):
-            continue
-
-        if index==16:
-            pages.append('\n'.join(part))
-            part.clear()
-            index=0
-        part.append(f'**>>** {element.name}')
-        index+=1
-
-    pages.append('\n'.join(part))
-
-    del part
-
-    prefix=client.events.message_create.prefix
-    result=[]
-
-    limit=len(pages)
-    index=0
-    while index<limit:
-        embed=Embed('Commands:',color=FLAN_HELP_COLOR,description=pages[index])
-        index+=1
-        embed.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
-        result.append(embed)
-
-    del pages
-
-    await Pagination(client,message.channel,result)
-
-async def _flan_help_invalid(client,message,content):
-    prefix=client.events.message_create.prefix
-    embed=Embed(f'Invalid command: {content}',(
-        f'Please try using `{prefix}help` to list the available commands '
-        'for you\n'
-        'Take care!'
-        ),color=FLAN_HELP_COLOR)
-    message = await client.message_create(message.channel,embed=embed)
-    await sleep(30.,client.loop)
-    await client.message_delete(message)
-
-async def _flan_help_no_perm(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('Permission denied',(
-        f'Please try using `{prefix}help` to list the available commands '
-        'for you\n'
-        'Love you!'
-        ),color=FLAN_HELP_COLOR)
-    await client.message_create(message.channel,embed=embed)
-    await sleep(30.,client.loop)
-    await client.message_delete(message)
-
-FLAN_HELPER=Helper(_flan_help_default,_flan_help_invalid,_flan_help_no_perm)
-FLAN_HELPER.add('help',_flan_help_default)
-
-async def flan_invalid_command(client,message,command,content):
-    prefix=client.events.message_create.prefix
-    embed=Embed(
-        f'Invalid command `{command}`',
-        f'try using: `{prefix}help`',
-        color=FLAN_HELP_COLOR,
-            )
-    
-    message = await client.message_create(message.channel,embed=embed)
-    await sleep(30.,client.loop)
-    await client.message_delete(message)

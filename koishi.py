@@ -10,7 +10,7 @@ from hata.events_compiler import ContentParser
 from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
-from hata.futures import CancelledError,sleep,FutureWM,Task
+from hata.futures import CancelledError,sleep,FutureWM,Task, WaitTillExc
 from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild
 from hata.channel import cr_pg_channel_object,ChannelText
 from hata.exceptions import DiscordException
@@ -1503,7 +1503,8 @@ async def show_help_for(client,message,user,rest):
     
     message=Message.custom(base=message,author=user)
     
-    await client.events.message_create.call_command('help',client,message,rest)
+    
+    await client.events.message_create['help'](client,message,rest)
 
 async def _help_show_help_for(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -1578,6 +1579,26 @@ async def how_to_get_banned(client, message):
     
     await client.guild_ban_add(guild, user)
     await client.message_create(message.channel,f'{user.full_name} banned succesfully')
+
+@commands
+async def rawr(client, message):
+    channel=message.channel
+    loop=client.loop
+    tasks=[]
     
+    for client_ in channel.clients:
+        if client_ is not client:
+            if not channel.cached_permissions_for(client_).can_send_messages:
+                continue
+        task=loop.create_task(client_.message_create(channel,'Rawrr !'))
+        tasks.append(task)
+    
+    try:
+        await WaitTillExc(tasks,loop)
+    except:
+        for task in tasks:
+            task.cancel()
+        raise
+
 del Cooldown
 del CooldownHandler
