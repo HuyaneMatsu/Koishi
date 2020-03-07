@@ -7,8 +7,7 @@ from hata.futures import Future,CancelledError,FutureWM,future_or_timeout,sleep,
 from hata.emoji import BUILTIN_EMOJIS
 from hata.embed import Embed
 from hata.exceptions import DiscordException
-from hata.events_compiler import ContentParser
-
+from hata.events import Converter, ConverterFlag
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
 async def _help_bs(client,message):
@@ -142,9 +141,8 @@ class active_request(object):
 BS_GAMES={}
 BS_REQUESTERS=set()
 BS_REQUESTS={}
-    
-@ContentParser('user, flags=mnag, default=None')
-async def battle_manager(client,message,target):
+
+async def battle_manager(client,message,target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='None')):
     text=''
     while True:
         if target is None:
@@ -193,11 +191,11 @@ async def battle_manager(client,message,target):
         
         
         future=request.future=Future(client.loop)
-        case=wait_on_reply(guild,source,target)
+        check=wait_on_reply(guild,source,target)
         event=client.events.message_create
         
-        waiter1=WaitAndContinue(future,case,channel,event,300.)
-        waiter2=WaitAndContinue(future,case,private,event,300.)
+        waiter1=WaitAndContinue(future,check,channel,event,300.)
+        waiter2=WaitAndContinue(future,check,private,event,300.)
         
         try:
             result=await future

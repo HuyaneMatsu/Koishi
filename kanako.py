@@ -3,19 +3,15 @@ import os
 from random import randint
 from time import monotonic
 
-from PIL import Image as PIL
-from PIL.ImageDraw import ImageDraw
-from PIL.ImageFont import truetype
-
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep,  \
-    InvalidStateError, any_to_any, methodize, DiscordException, ReuBytesIO, \
-    Color, Embed
+    InvalidStateError, any_to_any, Color, Embed, DiscordException, ReuBytesIO
 
 from hata.events import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE,          \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX,     \
-    Timeouter, ContentParser
+    Timeouter
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+from tools import PIL
 
 async def _help_kanakogame(client,message):
     prefix=client.events.message_create.prefix(message)
@@ -44,11 +40,6 @@ async def _help_kanakogame(client,message):
     await client.message_create(message.channel,embed=embed)
 
 KOISHI_HELPER.add('kanakogame',_help_kanakogame)
-
-
-PIL.Image.draw=methodize(ImageDraw)
-PIL.font=truetype
-del ImageDraw, truetype, methodize
 
 FONT=PIL.font(os.path.join('library','Kozuka.otf'),90)
 FONT_COLOR=(162,61,229)
@@ -513,21 +504,16 @@ class game_statistics(object):
         self.cache[index]=embed
         return embed
 
-@ContentParser('str, flags=g, default="\'\'"',
-                'condition, default="index==limit"',
-                'str, default="\'hiragana\'"',
-                'int, default=20',
-                'int, default=5',)
-async def kanako_manager(client,message,command,*args):
+async def kanako_manager(client,message,command:str='',map_:str='hiragana',length:int=20,amount:int=5):
     channel=message.channel
-
+    
     try:
         game=ACTIVE_GAMES[channel.id]
     except KeyError:
         game=None
-        
+    
     command=command.lower()
-
+    
     if command=='info':
         if game is None:
             embed=Embed('','There is no active game at the channel',COLOR)
@@ -535,7 +521,7 @@ async def kanako_manager(client,message,command,*args):
             embed=game.info
             
     elif command=='create':
-        embed=kanako_create(client,game,message,args)
+        embed=kanako_create(client,game,message,(map_,length,amount))
         
     elif command=='join':
         if game is None:
@@ -831,4 +817,3 @@ class embedination(object):
 
 del BUILTIN_EMOJIS
 del Color
-del ContentParser

@@ -6,9 +6,8 @@ from time import monotonic
 from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS,     \
     Future, CancelledError, Task, WaitTillAll, ERROR_CODES
 
-from hata.events import ContentParser, GUI_STATE_READY,                     \
-    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING,  GUI_STATE_CANCELLED,   \
-    GUI_STATE_SWITCHING_CTX
+from hata.events import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE,          \
+    GUI_STATE_CANCELLING,  GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
 from hata.client_core import GC_cycler
 
@@ -71,8 +70,7 @@ del GC_games
 
 #:-> @ <-:#}{#:-> @ <-:#{ command }#:-> @ <-:#}{#:-> @ <-:#
 
-@ContentParser('str, default="\'\'"')
-async def ds_manager(client,message,command):
+async def ds_manager(client,message,command:str=''):
     permissions=message.channel.cached_permissions_for(client)
     
     while True:

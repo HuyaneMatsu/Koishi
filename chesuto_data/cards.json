@@ -4,14 +4,14 @@
         "id": 645642084635639819,
         "image_name": null,
         "name": "Aegis Reinforcement",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "I. Select one of your Pawns, it loses the ability to capture pieces and gains the following effect:\n- The next time another enemy chess piece captures another piece, this piece will be captured instead.\nII. You can choose to play an extra card after this card is played. ",
         "id": 645642084635639820,
         "image_name": null,
         "name": "Sacrificial Guardianship",
-        "rarity": 3
+        "rarity": 0
     },
     {
         "description": "I. Select a card in your hand that has its requirements fulfilled, if any. Play that card.\nII. This card will not end your turn.\nThis card is a token only obtained at start of match if you start as Black.",
@@ -53,10 +53,10 @@
         "id": 645642025881829380,
         "image_name": null,
         "name": "Twofold Defence",
-        "rarity": 5
+        "rarity": 0
     },
     {
-        "description": "This card can only be used if this is your 20th turn or later.\nI. Give the opponent the followijg effect: \"All of your Pawns can't choose to promote into a Queen, this effect lasts for the whole match\". (This effect can't be stacked)",
+        "description": "This card can only be used if this is your 20th turn or later.\nI. Give the opponent the following effect: \"All of your Pawns can't choose to promote into a Queen, this effect lasts for the whole match\". (This effect can't be stacked)",
         "id": 645641962245849108,
         "image_name": null,
         "name": "Empty Journey",
@@ -91,7 +91,7 @@
         "rarity": 5
     },
     {
-        "description": "I. You have the following effects for 7 turns:\n- You hand size is set to 3. \n- Once per turn, you can use a card without ending your turn. \n- Draw a card after your turn ends.\"\nII. If you have more than 3 cards when this card is used, discard all other cards except for the first 3 cards in your hand.",
+        "description": "I. If you have more than 3 cards when this card is used, discard all other cards except for the first 3 cards in your hand.\nII. You have the following effects for 7 turns:\n- Your hand size is set to 3. \n- Once per turn, you can use a card without ending your turn. \n- Draw a card after your turn ends.\"",
         "id": 645641910513434636,
         "image_name": null,
         "name": "Cruel Crusade",
@@ -200,70 +200,70 @@
         "id": 645641763893149716,
         "image_name": null,
         "name": "Cursed Promise",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "After 7 turns this card will discard itself. I. This card can only be discarded by enemy spells or by itself. \nII. While this card is in your hand, you have the following effect: \"All spells you use will skip your next turn, if that spell already has the ability to skip your turns, add 1 more to the amount it will skip. ",
         "id": 645641763893149717,
         "image_name": null,
         "name": "Frozen Soul",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. While this card is in your hand, you have the following effect: \"All cards in your deck and hand except this card will have a 25 turn restriction\".",
         "id": 645641763893149718,
         "image_name": null,
         "name": "Suffering Beyond Agony",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. Remove all Lucy's Forbidden Power cards from your hand and deck. \nII. All remaining effects given by cards from Lucy's Forbidden Power will be removed.",
         "id": 645641763893149719,
         "image_name": null,
         "name": "Resolution of Salvation",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. While this card is in your hand, you have the following effect: \"If there are no cards from Lucy's Forbidden Power in your deck, at the end of your turn, activate the following effects.\n- Shuffle a \"Flamenugget\" into your opponent's deck, that \"Flamenugget\" will not discard their hand nor skip their turn.\n- Shuffle 2 \"Pondering\" into your deck.",
         "id": 645641763893149720,
         "image_name": null,
         "name": "Lullaby of Armageddon",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. Skip your next turn without drawing card.\nII. You may skip your opponent's current turn or their next turn anytime desired. This choice will stay in play until used. The effect will not end your turn if used on your turn. (If your opponent is using a card while this effect activates, discard that card before the effects activate) (This effect can't be stacked)",
         "id": 645641708565954561,
         "image_name": null,
         "name": "Energy Pact",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. Gain the following effect: \"The next time you end your turn,  select a card still in your deck, draw it\".",
         "id": 645641708565954562,
         "image_name": null,
         "name": "Rigged Guidance",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. Discard a token in your hand that doesn't come from Lucy's Forbidden Power.\nII. Select a token in your deck, draw it and a put a copy of it into your deck.",
         "id": 645641708565954563,
         "image_name": null,
         "name": "Boundaries of Alchemy",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. -1 turn count for both players.\nII. Restore all captured and removed chess pieces from the previous turn.\nIII. Perform 2 more actions.",
         "id": 645641708565954564,
         "image_name": null,
         "name": "Fatal Alter",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. If this card is drawn, end your turn.",
         "id": 645641708565954565,
         "image_name": null,
         "name": "Distraught Nightmare",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "This card can only be used on your 7th turn or later.\nI. Gain the following effect: \"All of your Pawns including summoned ones can't be targeted by opponent Spells if they are in your second, seventh or eighth lane, this effect lasts for the whole match\".",
@@ -284,28 +284,28 @@
         "id": 645641658439827468,
         "image_name": null,
         "name": "Spellbound Energy Check",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. Gain the following effect: \"For the next 4 turns, draw a card at the start of your turn. After drawing, select one of the following actions to be performed:\n- Keep the drawn card.\n- Give the drawn card to the opponent.\nIf the second action is performed, the next time cards are drawn by your opponent, the drawn cards are given to you instead\". (This effect can be stacked) (The effect resolves before the default draw.)",
         "id": 645641658439827469,
         "image_name": null,
         "name": "Luck Manipulation",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. Gain the following effect: \"The next time your turn is skipped by your own card effects, perform the following effects instead.\n- Nullify the skip turn effect.\n- Draw a card.\" (These effects can stack)",
         "id": 645641658439827470,
         "image_name": null,
         "name": "Energy Salvage",
-        "rarity": 5
+        "rarity": 0
     },
     {
-        "description": "I. Discard 1 random \"A Gallon of Water\" from your opponent's hand.\nII. Increase your turn count by 1.",
+        "description": "I. Discard 1 random \"Weird Vial\" from your opponent's hand.\nII. Increase your turn count by 1.",
         "id": 645641586977538065,
         "image_name": null,
         "name": "Weird Vial",
-        "rarity": 3
+        "rarity": 0
     },
     {
         "description": "You can only use this card if you played a card in your previous turn.\nI. Remove a Pawn of choice in your fourth or fifth lane\nII. Select an empty tile in your second lane, summon a Pawn.",
@@ -326,7 +326,7 @@
         "id": 645641586977538068,
         "image_name": null,
         "name": "Echoing Resentments",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "This card can only be used on your 20th turn or later.\nI. Transform all cards in both players' decks into \"Pondering\" cards.",
@@ -480,7 +480,7 @@
         "id": 645641308433809441,
         "image_name": null,
         "name": "Final Stance",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "This card can only be used on your 5th turn or later.\nI. Reduce your turn count by 3.\nII. Reduce your opponent's turn count by 5.",
@@ -634,7 +634,7 @@
         "id": 645641019823489074,
         "image_name": null,
         "name": "Peacegrant",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. Select one of your chess pieces except the King or Queen, if that chess piece is captured, the capturing piece will be removed. This effect lasts for the whole match. (This effect can't be stacked)",
@@ -690,14 +690,14 @@
         "id": 645640944003317778,
         "image_name": null,
         "name": "Flamenugget",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "I. You can perform two actions in the next 6 turns including this turn.\nII. You can't use cards for the next 15 turns.",
         "id": 645640944003317779,
         "image_name": null,
         "name": "Hrog'qua",
-        "rarity": 5
+        "rarity": 0
     },
     {
         "description": "This card can only be used if at least one Pawn has been captured during this match.\nI. Summon a Pawn in your second or third lane, if a chess piece is in the selected tile, remove it before summoning.\nEach deck can only have 1 copy of this card.",
@@ -777,15 +777,8 @@
         "rarity": 4
     },
     {
-        "description": "I. Transform all Pawns adjacent to your Queen into Knights.\nThis effect will not activate for Queens that are promoted from Pawns or summoned through card effects.",
-        "id": 645640756777975880,
-        "image_name": null,
-        "name": "Knighthood",
-        "rarity": 4
-    },
-    {
         "description": "I. During your next turn, all your Knights can move 2 times.  ",
-        "id": 645640756777975881,
+        "id": 645640756777975880,
         "image_name": null,
         "name": "Knight's Courage",
         "rarity": 3
@@ -805,11 +798,11 @@
         "rarity": 4
     },
     {
-        "description": "I. Remove either one of your Knights, Bishops or Rooks.\nII. Place two Pawns of choice in your second or third lane.\nIII. Draw a card.",
+        "description": "You can only use this card if you have at least 1 Queen and 1 Knight.\nI. Remove one of your Queens and one of your Knights.\nII. Gain the following effects: \"All of your Pawns will ignore a capture if its being captured for while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect affects Pawns that will come into play\". (This effect can't be stacked)\nIII. Gain the following effects: \"All of your Pawns will ignore removals from Spells once if its being targeted while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect will affect Pawns that will come into play\". (This effect can't be stacked)",
         "id": 645640679313244200,
         "image_name": null,
-        "name": "Gauntlet of Inheritance",
-        "rarity": 2
+        "name": "Cursed Codex of Protection",
+        "rarity": 4
     },
     {
         "description": "This card can only be used if at least 2 Knight, 2 Bishops and 2 Rooks has been captured or removed through card effects.\nI. Summon a Knight, Bishop and Rook in your first lane, placed by choice.",
@@ -817,13 +810,6 @@
         "image_name": null,
         "name": "Desperate Defence",
         "rarity": 2
-    },
-    {
-        "description": "You can only use this card if you have at least 1 Queen and 1 Knight.\nI. Remove one of your Queens and one of your Knights.\nII. Gain the following effects: \"All of your Pawns will ignore a capture if its being captured for while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect affects Pawns that will come into play\". (This effect can't be stacked)\nIII. Gain the following effects: \"All of your Pawns will ignore removals from Spells once if its being targeted while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect will affect Pawns that will come into play\". (This effect can't be stacked)",
-        "id": 645640679313244202,
-        "image_name": null,
-        "name": "Cursed Codex of Protection",
-        "rarity": 4
     },
     {
         "description": "This card can only be used if your opponent has 15 cards or less in their deck.\nI. Draw 5 cards.\nII. This card will not end your turn.",
@@ -845,13 +831,6 @@
         "image_name": null,
         "name": "Forbidden Lands",
         "rarity": 5
-    },
-    {
-        "description": "I. Gain the following effects: \"All your Pawns can capture forward; all your Pawns loses the ability to capture diagonally\". (These effects can't be stacked)",
-        "id": 645640600569249804,
-        "image_name": "GoldSpr.png",
-        "name": "Golden Spear",
-        "rarity": 3
     },
     {
         "description": "I. Remove up to 3 Pawns of choice in your half of the board.\nII. For each Pawn removed, draw a card.",
@@ -1230,5 +1209,96 @@
         "image_name": null,
         "name": "Divine Decree of Fate",
         "rarity": 0
+    },
+    {
+        "description": "I. Both players gain the following effect: \"The next card you use will not end your turn\"",
+        "id": 682556963422470181,
+        "image_name": null,
+        "name": "Skillful Delay",
+        "rarity": 2
+    },
+    {
+        "description": "I. Remove 3 of your Pawns.\nII. Summon a Knight, Bishop or Rook in your half of the board.",
+        "id": 682556963422470182,
+        "image_name": null,
+        "name": "Shameful Promotion",
+        "rarity": 2
+    },
+    {
+        "description": "This card can only be used on your 15th turn or later.\nI. Select a piece in your fourth to fifth lane, then select 2 adjacent pieces next to the select piece, remove them.",
+        "id": 682556963422470183,
+        "image_name": null,
+        "name": "Rupture",
+        "rarity": 2
+    },
+    {
+        "description": "I. Select one of your Pawns, it can only move identically to a Bishop once. It can't move more than 4 tiles at once",
+        "id": 682556963422470184,
+        "image_name": null,
+        "name": "Pray",
+        "rarity": 2
+    },
+    {
+        "description": "I. Select a card in your hand, put a copy of it into your hand.",
+        "id": 682556925120217090,
+        "image_name": "SavConserve.gif",
+        "name": "Savory Conservation",
+        "rarity": 2
+    },
+    {
+        "description": "I. Remove an enemy Pawn, if none are in play, select an enemy Knight, Bishop or Rook instead.",
+        "id": 682556925120217091,
+        "image_name": "B_WoundStab.png",
+        "name": "Wounding Stab",
+        "rarity": 2
+    },
+    {
+        "description": "I. Select a card with turn restriction in your hand. Reduce the turns needed to use that card by 2.",
+        "id": 682556925120217092,
+        "image_name": null,
+        "name": "Meditation",
+        "rarity": 2
+    },
+    {
+        "description": "I. Draw a card.\nII. If this is your 15th turn or later, this will not end your turn.",
+        "id": 682556925120217093,
+        "image_name": null,
+        "name": "Focus",
+        "rarity": 2
+    },
+    {
+        "description": "I. Discard 2 cards in your hand. \nII. Draw 3 cards.\nIII. Summon a Pawn in your second rank.",
+        "id": 682556925120217094,
+        "image_name": null,
+        "name": "Fresher Choices",
+        "rarity": 2
+    },
+    {
+        "description": "I. If you performed castling this match, you may perform it again, once.",
+        "id": 682556925120217095,
+        "image_name": null,
+        "name": "Ignorance",
+        "rarity": 2
+    },
+    {
+        "description": "This card can only be used in your 20th turn or later.\nI. Gain the following effect: \"You can use 2 cards per turn, this effect lasts for the rest of the match\". (This effect can't be stacked)",
+        "id": 682556925120217096,
+        "image_name": null,
+        "name": "Unleashed Potential",
+        "rarity": 2
+    },
+    {
+        "description": "I. Gain the following effect: \"Your Pawns can move twice for the next 2 turns\"",
+        "id": 682556925120217097,
+        "image_name": null,
+        "name": "Doubling Steps",
+        "rarity": 2
+    },
+    {
+        "description": "I. Transform one of your non-Pawns (except your Kings) into a Pawn.\nII. Draw 3 cards.\nIII. If this is used for the first time, this will not end your turn",
+        "id": 682556925120217098,
+        "image_name": null,
+        "name": "Shamed Wealth",
+        "rarity": 2
     }
 ]

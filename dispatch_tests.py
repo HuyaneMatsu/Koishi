@@ -17,8 +17,6 @@ class dispatch_tester:
 
     @classmethod
     async def here(self,client,message,content):
-        if not client.is_owner(message.author):
-            return
         if message.channel is self.channel:
             try:
                 await client.message_create(message.channel,'Current channel removed')
@@ -34,7 +32,7 @@ class dispatch_tester:
             
     @classmethod
     async def switch(self,client,message,content):
-        if (not client.is_owner(message.author)) or (not (5<len(content)<50)):
+        if (not (5<len(content)<50)):
             return
         if content not in EVENTS.defaults:
             await client.message_create(message.channel,f'Invalid dispatcher: {content}')

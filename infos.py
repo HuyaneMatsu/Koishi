@@ -5,20 +5,16 @@ from random import choice
 from hata import Task, ERROR_CODES, eventlist, ChannelText, ChannelCategory,\
     CHANNELS, elapsed_time, Status, Permission, Status, DiscordException,   \
     Color, GUILDS, USERS, BUILTIN_EMOJIS, Embed, CLIENTS, ActivityUnknown,  \
-    ActivitySpotify, AuditLogEvent
+    ActivitySpotify, AuditLogEvent, ChannelBase, User
 
 from hata.prettyprint import pchunkify
 from hata.others import cchunkify
 
 from hata.events import Pagination, Timeouter, GUI_STATE_READY,             \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
-    GUI_STATE_SWITCHING_CTX, ContentParser
+    GUI_STATE_SWITCHING_CTX, Converter, ConverterFlag, checks
 
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
-
-async def no_permission(client,message,*args):
-    if args:
-        await client.message_create(message.channel,'You do not have permission to invoke this command!')
 
 class show_help(object):
     __slots__=('func',)
@@ -115,17 +111,16 @@ def add_activity(text,activity):
     if ACTIVITY_FLAG&0b0001000000000000:
         text.append(f'**>>** id : {activity.id}\n')
             
-@infos(case='user')
-@ContentParser('user, flags="mnap", default="message.author"')
-async def user_info(client,message,user):
+@infos(name='user', aliases=['profile'])
+async def user_info(client, message, user : Converter('user', ConverterFlag.user_default.update_by_keys(everywhere = True, profile = True), default_code='message.author')):
     guild=message.guild
-
+    
     embed=Embed(user.full_name)
     embed.add_field('User Information',
         f'Created: {elapsed_time(user.created_at)} ago\n'
         f'Profile: {user:m}\n'
         f'ID: {user.id}')
-
+    
     try:
         profile=user.guild_profiles[guild]
     except KeyError:
@@ -193,7 +188,7 @@ async def _help_user(client,message):
 
 KOISHI_HELPER.add('user',_help_user)
 
-@infos(case='guild')
+@infos(name='guild')
 async def guild_info(client,message,content):
     guild=message.guild
     if guild is None:
@@ -291,11 +286,9 @@ async def _help_guild(client,message):
 KOISHI_HELPER.add('guild',_help_guild)
 
 
-@infos
-@ContentParser('guild',
-                'condition, flags=r, default="not guild.permissions_for(message.author).can_manage_channel"',
-                'channel, flags=mni, default=None',)
-async def invites(client,message,guild,channel):
+@infos(checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_channel=True))])
+async def invites(client,message,channel:ChannelBase=None):
+    guild = message.channel.guild
     if channel is None:
         if not guild.cached_permissions_for(client).can_manage_guild:
             await client.message_create(message.channel,
@@ -479,13 +472,13 @@ async def _help_love(client,message):
 
 KOISHI_HELPER.add('love',_help_love)
 
-@infos
-@ContentParser('user, flags="mna"',
-                'condition, flags=r, default="message.author is user_0"',
-                on_failure=show_help(_help_love))
-async def love(client,message,target):
+@infos(parser_failure_handler=show_help(_help_love))
+async def love(client,message,target:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True))):
     source=message.author
-
+    if source is target:
+        await _help_love(client, message)
+        return
+    
     percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
     element=LOVE_VALUES[percent]
     
@@ -547,44 +540,33 @@ async def _help_about(client,message):
 KOISHI_HELPER.add('about',_help_about)
 
 
-@infos
-@ContentParser('guild',
-                'condition, flags=r, default="not guild.permissions_for(message.author).can_view_audit_log"',
-                'ensure',
-                'condition, default="not part"',
-                'user, flags=nmi, default=part',
-                'ensure',
-                'condition, default="not part"',
-                'str',
-                on_failure=no_permission)
-async def logs(client,message,guild,*args):
-    if not guild.cached_permissions_for(client).can_view_audit_log:
+@infos(checks=[checks.has_guild_permissions(Permission().update_by_keys(view_audit_log=True))])
+async def logs(client,message,guild:Converter('guild'),user:User=None,event_name:str=''):
+    if not guild.cached_permissions_for(client).view_audit_log:
         await client.message_create(message.channel,
             'I have no permissions at the guild, to request audit logs.')
         return
     
-    user=None
     event=None
-
+    
     while True:
-        if not args:
+        if not event_name:
+            event=None
             break
-        if type(args[0]) is not str:
-            user,*args=args
-        if not args:
+        
+        try:
+            event=AuditLogEvent.INSTANCES[int(event_name)]
             break
-        for event_name in args:
-            try:
-                event=AuditLogEvent.INSTANCES[int(event_name)]
-                break
-            except (KeyError,ValueError):
-                pass
-            try:
-                event=getattr(AuditLogEvent,event_name.upper())
-                break
-            except AttributeError:
-                continue
+        except (KeyError,ValueError):
+            pass
+        
+        try:
+            event=getattr(AuditLogEvent,event_name.upper())
             break
+        except AttributeError:
+            pass
+        
+        event=None
         break
 
     with client.keep_typing(message.channel):
@@ -610,12 +592,8 @@ async def _help_logs(client,message):
 KOISHI_HELPER.add('logs',_help_logs,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(view_audit_log=True)))
 
 
-@infos
-@ContentParser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
-                'int',
-                'channel, flags=mnig, default="message.channel"',
-                on_failure=no_permission)
-async def message(client,message,message_id,channel):
+@infos(checks=[checks.has_guild_permissions(Permission(8)),],)
+async def message(client,message,message_id:int,channel:Converter('channel', default_code='message.channel')):
     if not channel.cached_permissions_for(client).can_read_message_history:
         await client.message_create(message.channel,
             'I am unable to read the messages at the specified channel.')
@@ -640,12 +618,8 @@ async def _help_message(client,message):
 
 KOISHI_HELPER.add('message',_help_message,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
-@infos
-@ContentParser('condition, flags=r, default="not guild.permissions_for(message.author).can_administrator"',
-                'int',
-                'channel, flags=mnig, default="message.channel"',
-                on_failure=no_permission)
-async def message_pure(client,message,message_id,channel):
+@infos(checks=[checks.has_guild_permissions(Permission(8))])
+async def message_pure(client,message,message_id:int,channel:Converter('channel',default_code='message.channel')):
     if not channel.cached_permissions_for(client).can_read_message_history:
         await client.message_create(message.channel,
             'I am unable to read the messages at the specified channel.')
@@ -986,12 +960,11 @@ KOISHI_HELPER.add('roles',_help_roles)
 
 
 @infos
-@ContentParser('user, flags=mna, default="message.author"')
-async def avatar(client, message, user):
+async def avatar(client, message, user : Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default_code='message.author')):
     color = user.avatar&0xffffff
     if color==0:
         color = user.default_avatar.color
-
+    
     url=user.avatar_url_as(size=4096)
     embed=Embed(f'{user:f}\'s avatar', color=color, url=url)
     embed.add_image(url)
@@ -1009,7 +982,7 @@ async def _help_avatar(client,message):
 
 KOISHI_HELPER.add('avatar',_help_avatar)
 
-@infos(case='guild-icon')
+@infos(name='guild-icon')
 async def guild_icon(client, message, content):
     guild = message.guild
     if guild is None:

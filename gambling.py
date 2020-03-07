@@ -3,11 +3,11 @@ from datetime import datetime,timedelta
 from random import random
 
 from hata.parsers import eventlist
-from hata.events_compiler import ContentParser
 from hata.others import elapsed_time
 from hata.events import wait_for_reaction, WaitAndContinue, Timeouter,      \
     Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, GUI_STATE_CANCELLED,\
-    GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
+    GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, multievent, Converter,  \
+    checks
 
 from hata.embed import Embed
 from hata.color import Color
@@ -71,12 +71,12 @@ class game_21_checker(object):
     def __init__(self,user):
         self.user=user
     def __call__(self,emoji,user):
-        return (user==self.user) and (emoji in GAME_21_EMOJIS)
-    
-def wait_for_reaction_any(client,message,case,timeout):
+        return (user==self.user) and (emoji in Game21.EMOJIS)
+
+def wait_for_reaction_any(client,message,check,timeout):
     future=Future(client.loop)
     
-    WaitAndContinue(future, case, message, multievent(
+    WaitAndContinue(future, check, message, multievent(
         client.events.reaction_add, client.events.reaction_delete
             ), timeout)
     
@@ -86,8 +86,7 @@ gambling=eventlist()
 
 @gambling
 @Cooldown('user',40.,limit=4,weight=2,handler=CooldownHandler())
-@ContentParser('user, flags=mni, default="message.author"')
-async def daily(client,message,target_user):
+async def daily(client,message,target_user: Converter('user', default_code='message.author')):
     source_user=message.author
     if target_user.is_bot:
         target_user=source_user
@@ -237,8 +236,7 @@ KOISHI_HELPER.add('daily',_help_daily)
 
 @gambling
 @daily.shared(weight=1)
-@ContentParser('user, flags=mni, default="message.author"')
-async def hearts(client,message,target_user):
+async def hearts(client,message,target_user: Converter('user', default_code='message.author')):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==target_user.id))
         results = await response.fetchall()
@@ -298,15 +296,13 @@ class heartevent_start_checker(object):
     def __call__(self,emoji,user):
         return self.client.is_owner(user) and ((emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI))
 
-@gambling
-@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
-    'tdelta','int','int, default=0')
+@gambling(checks=[checks.owner_only()])
 class heartevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls,client,message,duration,amount,user_limit):
+    async def __new__(cls,client,message,duration:timedelta,amount:int,user_limit:int=0):
         self=object.__new__(cls)
         self.connector=None
         channel=message.channel
@@ -493,15 +489,13 @@ async def _help_heartevent(client,message):
 
 KOISHI_HELPER.add('heartevent',_help_heartevent,KOISHI_HELPER.check_is_owner)
 
-@gambling
-@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
-    'tdelta','int','int, default=0')
+@gambling(checks=[checks.owner_only()])
 class dailyevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
 
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls,client,message,duration,amount,user_limit):
+    async def __new__(cls,client,message,duration:timedelta,amount:int,user_limit:int=0):
         self=object.__new__(cls)
         self.connector=None
         channel=message.channel
@@ -703,9 +697,8 @@ async def _help_dailyevent(client,message):
 
 KOISHI_HELPER.add('dailyevent',_help_dailyevent,KOISHI_HELPER.check_is_owner)
 
-@gambling(case='21')
-@ContentParser('int, default=0')
-class _21(object):
+@gambling(name='21')
+class Game21(object):
     NEW     = BUILTIN_EMOJIS['new']
     STOP    = BUILTIN_EMOJIS['octagonal_sign']
     EMOJIS  = (NEW,STOP)
@@ -728,7 +721,7 @@ class _21(object):
         
         return card
     
-    async def __new__(cls,client,source_message,amount):
+    async def __new__(cls,client,source_message,amount:int=0):
         user=source_message.author
         channel=source_message.channel
         
@@ -1157,4 +1150,4 @@ async def _help_21(client,message):
 
 KOISHI_HELPER.add('21',_help_21)
 
-del Emoji, Color, Cooldown, ContentParser, eventlist, CooldownHandler
+del Emoji, Color, Cooldown, eventlist, CooldownHandler

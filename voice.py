@@ -6,7 +6,6 @@ from hata.others import filter_content
 from hata.futures import sleep,Task
 from hata.dereaddons_local import alchemy_incendiary
 from hata.embed import Embed
-from hata.events_compiler import ContentParser
 
 import pers_data
 from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
@@ -365,9 +364,12 @@ async def voice_stop(client,message,content):
     await client.message_delete(message,reason='Voice messages expire after 30s.')
 
 VOICE_SUBCOMMANDS['stop']=voice_stop
-@ContentParser('channel, flags=mnig, default=None',)
 async def voice_move(client,message,channel):
-    guild=channel.guild
+    guild=message.guild
+    try:
+        channel = guild.channels[int(channel)]
+    except (KeyError,ValueError):
+        channel=None
     while True:
         if channel is None:
             state=guild.voice_states.get(message.author.id,None)
@@ -475,8 +477,7 @@ async def voice_save(client,message,content):
     
 VOICE_SUBCOMMANDS['save']=voice_save
 
-@ContentParser('str, default=\"\'\'\"','rest')
-async def voice(client,message,sub_command,rest):
+async def voice(client,message,sub_command:str,rest):
     guild=message.guild
     if guild is None:
         return

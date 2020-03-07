@@ -18,7 +18,8 @@ from tools import MessageDeleteWaitfor
 from booru import booru_commands
 from interpreter import Interpreter
 
-
+from hata import IntentFlag
+intents=IntentFlag().update_by_keys(guild_users=False)
 
 ############################## SETUP KOISHI ##############################
 koishi.KOISHI_HELPER.sort()
@@ -28,6 +29,7 @@ Koishi=Client(pers_data.KOISHI_TOKEN,
     client_id=pers_data.KOISHI_ID,
     activity=ActivityGame.create(name='with Satori'),
     shard_count=1,
+    intents=intents,
         )
 
 Koishi.events(ReactionAddWaitfor)
@@ -81,6 +83,6 @@ flan_commands.extend(flan.commands)
 
 ############################## START ##############################
 
-koishi_commands(Interpreter(locals().copy()),case='execute')
+koishi_commands(Interpreter(locals().copy()),name='execute')
 start_clients()
 

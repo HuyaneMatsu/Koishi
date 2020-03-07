@@ -2,7 +2,7 @@ import re
 from weakref import WeakKeyDictionary
 from random import random
 
-from hata import CancelledError, sleep, Task, DiscordException
+from hata import CancelledError, sleep, Task, DiscordException, methodize
 from hata.events import CommandProcesser
 from hata.parsers import EventHandlerBase
 
@@ -10,6 +10,14 @@ try:
     from bs4 import BeautifulSoup
 except ImportError:
     BeautifulSoup=None
+
+from PIL import Image as PIL
+from PIL.ImageDraw import ImageDraw
+from PIL.ImageFont import truetype
+
+PIL.Image.draw=methodize(ImageDraw)
+PIL.font=truetype
+del ImageDraw, truetype, methodize
 
 def choose(list_):
     return list_[int((random()*len(list_)))]

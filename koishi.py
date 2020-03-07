@@ -6,15 +6,14 @@ from math import ceil
 from hata.parsers import eventlist
 from hata.client_core import CLIENTS
 from hata.permission import Permission
-from hata.events_compiler import ContentParser
 from hata.user import User
 from hata.client import Client
 from hata.prettyprint import pchunkify
 from hata.futures import CancelledError,sleep,FutureWM,Task, WaitTillExc
-from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild
+from hata.events import Pagination,wait_for_message,wait_for_reaction,Cooldown,prefix_by_guild,Converter, checks, ConverterFlag
 from hata.channel import cr_pg_channel_object,ChannelText
 from hata.exceptions import DiscordException
-from hata.emoji import BUILTIN_EMOJIS,parse_emoji
+from hata.emoji import BUILTIN_EMOJIS, parse_emoji, Emoji
 from hata.others import filter_content, chunkify
 from hata.guild import Guild,GUILDS
 from hata.role import Role
@@ -63,20 +62,20 @@ class once_on_ready(object):
 
 commands=eventlist()
 
-commands(image_handler.on_command_upload,'upload')
-commands(image_handler.on_command_image,'image')
-commands(KOISHI_HELPER,'help')
-commands(koishi_invalid_command,'invalid_command')
-commands(kanako_manager,'kanakogame')
+commands(image_handler.on_command_upload,name='upload', checks=[checks.owner_only()])
+commands(image_handler.on_command_image,name='image')
+commands(KOISHI_HELPER,name='help')
+commands(koishi_invalid_command,name='invalid_command')
+commands(kanako_manager,name='kanakogame', checks=[checks.guild_only()])
 commands(voice)
-commands(dispatch_tester.here)
-commands(dispatch_tester.switch)
+commands(dispatch_tester.here, checks=[checks.owner_only()])
+commands(dispatch_tester.switch, checks=[checks.owner_only()])
 commands.extend(infos)
-commands(battle_manager,case='bs')
-commands(ds_manager,'ds')
-commands(_DS_modify_best)
-commands(channeller.channeling_start)
-commands(channeller.channeling_stop)
+commands(battle_manager,name='bs', checks=[checks.guild_only()])
+commands(ds_manager,name='ds')
+commands(_DS_modify_best, checks=[checks.owner_only()])
+commands(channeller.channeling_start, checks=[checks.guild_only(),checks.owner_only()])
+commands(channeller.channeling_stop, checks=[checks.owner_only()])
 commands.extend(gambling)
 
 _KOISHI_NOU_RP=re.compile(r'n+\s*o+\s*u+',re.I)
@@ -112,15 +111,13 @@ async def default_event(client,message):
             await client.reaction_add(message,emoji)
         return
     
-    if len(content)==3:
-        matched=_KOISHI_OWO_RP.match(content,)
-        if matched is None:
-            return
+    matched=_KOISHI_OWO_RP.fullmatch(content,)
+    if (matched is not None):
         text=f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
-
+    
     elif _KOISHI_OMAE_RP.match(content) is not None:
         text='NANI?'
-
+    
     else:
         return
     
@@ -214,8 +211,7 @@ async def command_error(client, message, command, content, exception):
     return False
 
 @commands
-@ContentParser('user, flags=mna, default="message.author"')
-async def rate(client,message,target):
+async def rate(client, message, target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='message.author')):
     if target in CLIENTS or client.is_owner(target):
         result=10
     else:
@@ -236,8 +232,7 @@ KOISHI_HELPER.add('rate',_help_rate)
 
 
 @commands
-@ContentParser('int, default="1"')
-async def dice(client,message,times):
+async def dice(client,message,times:int = 1):
     if times<=0:
         text=f'{times} KEK'
     elif times>6:
@@ -306,11 +301,8 @@ KOISHI_HELPER.add('message_me',_help_message_me)
 
 
 
-@commands
-@ContentParser('condition, flags=gr, default="not message.channel.permissions_for(message.author).can_manage_messages"',
-                'int, default=1',
-                'rest, default="f\'{message.author.full_name} asked for it\'"')
-async def clear(client,message,limit,reason):
+@commands(checks = [checks.has_permissions(Permission().update_by_keys(manage_messages=True))])
+async def clear(client, message, limit : Converter('int', default_code='1',), reason : Converter('rest', default_code='f"{message.author.full_name} asked for it"')):
     if limit>0:
         await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
 
@@ -1095,8 +1087,7 @@ KOISHI_HELPER.add('oa2_renew',_help_oa2_renew,KOISHI_HELPER.check_is_owner)
 
 
 @commands
-@ContentParser('emoji')
-async def se(client,message,emoji):
+async def se(client,message,emoji : Emoji):
     if emoji.is_custom_emoji():
         await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
 
@@ -1112,11 +1103,8 @@ async def _help_se(client,message):
 KOISHI_HELPER.add('se',_help_se)
 
 
-@commands
-@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
-                'int',
-                'channel, flags=mnig, default="message.channel"',)
-async def resend_webhook(client,message,message_id,channel):
+@commands(checks = [checks.guild_only(), checks.owner_only()])
+async def resend_webhook(client,message,message_id:int,channel : Converter('channel', default_code='message.channel')):
     permissions=message.channel.cached_permissions_for(client)
     can_delete=permissions.can_manage_messages
     
@@ -1165,8 +1153,7 @@ KOISHI_HELPER.add('resend_webhook',_help_resend_webhook,KOISHI_HELPER.check_is_o
 
 
 @commands
-@ContentParser('int', 'int, default="0"',)
-async def random(client,message,v1,v2):
+async def random(client,message,v1 :int,v2:int=0):
     result=randint(v2,v1) if v1>v2 else randint(v1,v2)
     await client.message_create(message.channel,str(result))
 
@@ -1314,8 +1301,7 @@ async def _help_count_reactions(client,message):
 KOISHI_HELPER.add('count_reactions',_help_count_reactions,KOISHI_HELPER.check_is_owner)
 
 @commands
-@ContentParser('user, flags=mna, default="client"',)
-async def update_application_info(client, message, user):
+async def update_application_info(client, message, user:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='client')):
     if not client.is_owner(message.author):
         return True
     
@@ -1345,7 +1331,7 @@ KOISHI_HELPER.add('update_application_info',_help_update_application_info,KOISHI
 HTML_RP=re.compile('#?([0-9a-f]{6})',re.I)
 REGULAR_RP=re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
 
-@commands(case='color')
+@commands(name='color')
 async def command_color(client,message,content):
     while True:
         parsed=HTML_RP.fullmatch(content)
@@ -1418,12 +1404,8 @@ class _role_emoji_emoji_checker(object):
         
         return True
 
-@commands(case='role-emoji')
-@ContentParser(
-    'condition, flags=r, default=" not (message.channel.permissions_for(message.author).can_administrator or client.is_owner(message.author))"',
-    'emoji',
-    'role, flags="nmi", mode="0+"',)
-async def role_emoji(client,message,emoji,roles):
+@commands(name='role-emoji', checks=[checks.owner_or_has_guild_permissions(Permission(8))])
+async def role_emoji(client,message,emoji:Emoji,roles:Converter('role', amount=(0,0))):
     permissions =message.channel.cached_permissions_for(client)
     if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
         await client.message_create(message.channel,
@@ -1492,10 +1474,8 @@ async def _help_role_emoji(client,message):
 
 KOISHI_HELPER.add('role-emoji',_help_role_emoji,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
-@commands
-@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
-               'user, flags=mna, default=None','rest')
-async def show_help_for(client,message,user,rest):
+@commands(checks=[checks.owner_only()])
+async def show_help_for(client,message,user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='None'),rest):
     if user is None:
         await client.message_create(message.channel,
             'Please define a user as well.')
@@ -1517,10 +1497,8 @@ async def _help_show_help_for(client,message):
 
 KOISHI_HELPER.add('show_help_for',_help_show_help_for,KOISHI_HELPER.check_is_owner)
 
-@commands
-@ContentParser('condition, flags=gr, default="not guild.permissions_for(message.author).can_administrator"',
-                'int',)
-async def reaction_clear(client,message,message_id):
+@commands(checks=[checks.owner_or_has_guild_permissions(Permission(8))])
+async def reaction_clear(client,message,message_id:int):
     while True:
         if not message.channel.cached_permissions_for(client).can_manage_messages:
             content='I have no permissions to execute this command at the channel.'
@@ -1551,8 +1529,7 @@ async def _help_reaction_clear(client,message):
 
 KOISHI_HELPER.add('reaction_clear',_help_reaction_clear,checker=KOISHI_HELPER.check_permission(Permission().update_by_keys(administrator=True)))
 
-@commands(case='die')
-@commands(case='kill')
+@commands(name='die', aliases=['kill'])
 async def how_to_get_banned(client, message):
     guild = message.guild
     if guild is None:
@@ -1599,6 +1576,28 @@ async def rawr(client, message):
         for task in tasks:
             task.cancel()
         raise
+
+@commands
+async def test(client, message):
+    if not client.is_owner(message.author):
+        return True
+    
+    data = {'content' : 'meow'}
+    
+    channel_id=message.channel.id
+    tasks = []
+    for x in range(10):
+        task = Task(client.http.message_create(channel_id,data),client.loop)
+        tasks.append(task)
+    
+    try:
+        WaitTillExc(tasks,client.loop)
+    except:
+        for task in tasks:
+            task.cancel()
+        raise
+    
+    return False
 
 del Cooldown
 del CooldownHandler

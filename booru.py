@@ -369,7 +369,7 @@ for title,tag_name,command_names in (
         ('Izayoi Sakuya',           'izayoi_sakuya',        ('sakuya',),),
         ('Joutouguu Mayumi',        'joutougu_mayumi',      ('mayumi',),), # same as 'joutouguu_mayumi'
         ('Junko',                   'junko_(touhou)',       ('junko',),),
-        ('Kaenbyou Rin',            'kaenbyou_rin',         ('rin',),),
+        ('Kaenbyou Rin',            'kaenbyou_rin',         ('orin','rin',),),
         ('Kagiyama Hina',           'kagiyama_hina',        ('hina',),),
         ('Kaku Seiga',              'kaku_seiga',           ('seiga',),),
         ('Kamishirasawa Keine',     'kamishirasawa_keine',  ('keine',),),
@@ -432,8 +432,8 @@ for title,tag_name,command_names in (
         ('Shameimaru Aya',          'shameimaru_aya',       ('aya',),),
         ('Shiki Eiki Yamazanadu',   'shiki_eiki',           ('eiki',),),
         ('Suiito Doremii',          'doremy_sweet',         ('doremy',),),
-        ('Sukaaretto Furandooru',   'flandre_scarlet',      ('furandooru','flandre',),),
-        ('Sukaaretto Remiria',      'remilia_scarlet',      ('remiria','remilia',),),
+        ('Sukaaretto Furandooru',   'flandre_scarlet',      ('flandre','furandooru','flan'),),
+        ('Sukaaretto Remiria',      'remilia_scarlet',      ('remilia','remiria',),),
         ('Sukuna Shinmyoumaru',     'sukuna_shinmyoumaru',  ('sukuna',),),
         ('Tatara Kogasa',           'tatara_kogasa',        ('kogasa',),),
         ('Teireida Mai',            'teireida_mai',         ('mai',),),
@@ -453,9 +453,13 @@ for title,tag_name,command_names in (
         ('Yorigami Joon',           'yorigami_jo\'on',      ('joon',),),
         ('Yorigami Shion',          'yorigami_shion',       ('shion',),),
             ):
-    command=cached_booru_command(title,tag_name)
-    for command_name in command_names:
-        booru_commands(command,case=command_name)
+    command_name=command_names[0]
+    if len(command_names)>1:
+        aliases=command_names[1:]
+    else:
+        aliases=None
+    
+    booru_commands(cached_booru_command(title,tag_name), name=command_name, aliases=aliases)
 
-del title, tag_name, command_names, command, command_name
+del title, tag_name, command_names, command_name, aliases
 del Color, BUILTIN_EMOJIS, Cooldown, CooldownHandler, mark_as_async, eventlist

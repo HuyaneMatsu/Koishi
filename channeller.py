@@ -1,5 +1,4 @@
 from hata.futures import Task
-from hata.events_compiler import ContentParser
 from hata.client import Client
 from hata.user import User
 from hata.channel import CHANNELS
@@ -122,9 +121,7 @@ class Channeller(object):
 
 CHANNELINGS={}
 
-@ContentParser('condition, flags=r, default="not client.is_owner(message.author)"',
-                'int, flags="g"',)
-async def channeling_start(client,message,channel_id):
+async def channeling_start(client,message,channel_id:int):
     channel_1=message.channel
     while True:
         permission=channel_1.cached_permissions_for(client)
@@ -202,8 +199,6 @@ KOISHI_HELPER.add('channeling_start',_help_channeling_start,KOISHI_HELPER.check_
 
 
 async def channeling_stop(client,message,content):
-    if not client.is_owner(message.author):
-        return
     channel=message.channel
     while True:
         try:
@@ -232,5 +227,3 @@ async def _help_channeling_stop(client,message):
 
 KOISHI_HELPER.add('channeling_stop',_help_channeling_stop,KOISHI_HELPER.check_is_owner)
 
-
-del ContentParser
