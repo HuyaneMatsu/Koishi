@@ -492,6 +492,7 @@ class dispatch_tester:
         
     @classmethod
     async def guild_edit(self,client,guild,old):
+        
         Task(self.old_events['guild_edit'](client,guild,old),client.loop)
         if self.channel is None:
             return
@@ -551,6 +552,7 @@ class dispatch_tester:
                     result.append(f'{key} added : ({len(added)})')
                     for name in added:
                         result.append(f' - {name}')
+                continue
             
             if key in ('owner',):
                 other=getattr(guild,'owner')

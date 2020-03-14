@@ -3,10 +3,9 @@ import sys, os
 #moving to the outer folder, so hata ll count as a package and stuffs
 sys.path.append(os.path.abspath('..'))
 
-from hata import Client,start_clients, ActivityGame, ActivityWatching
-from hata.events import ReactionAddWaitfor, CommandProcesser,               \
-    ReactionDeleteWaitfor
-from hata.extension_loader import ExtensionLoader
+from hata import Client, start_clients, ActivityGame, ActivityWatching
+from hata.events import setup_extension
+from hata.extension_loader import EXTENSION_LOADER
 
 import pers_data
 
@@ -18,10 +17,6 @@ from tools import MessageDeleteWaitfor
 from booru import booru_commands
 from interpreter import Interpreter
 
-from hata import IntentFlag
-intents=IntentFlag().update_by_keys(guild_users=False)
-
-############################## SETUP KOISHI ##############################
 koishi.KOISHI_HELPER.sort()
 
 Koishi=Client(pers_data.KOISHI_TOKEN,
@@ -29,25 +24,7 @@ Koishi=Client(pers_data.KOISHI_TOKEN,
     client_id=pers_data.KOISHI_ID,
     activity=ActivityGame.create(name='with Satori'),
     shard_count=1,
-    intents=intents,
         )
-
-Koishi.events(ReactionAddWaitfor)
-Koishi.events(ReactionDeleteWaitfor)
-Koishi.events(MessageDeleteWaitfor)
-Koishi.events(koishi.once_on_ready)
-
-koishi_commands=Koishi.events(CommandProcesser(koishi.PREFIXES)).shortcut
-koishi_commands.extend(koishi.commands)
-koishi_commands.extend(booru_commands)
-
-koishi_extension_loader=ExtensionLoader(Koishi)
-koishi_extension_loader.add('ext.test_commands',entry_point='entry',exit_point='exit')
-koishi_extension_loader.add('ext.ratelimit_tests',entry_point='entry',exit_point='exit')
-koishi_extension_loader.load_all().syncwrap().wait()
-
-############################## SETUP SATORI ##############################
-
 
 Satori=Client(pers_data.SATORI_TOKEN,
     client_id=pers_data.SATORI_ID,
@@ -55,34 +32,44 @@ Satori=Client(pers_data.SATORI_TOKEN,
     status='dnd',
         )
 
-satori.Koishi=Koishi #sisters, u know
-
-Satori.events(ReactionAddWaitfor)
-Satori.events(ReactionDeleteWaitfor)
-satori_commands=Satori.events(CommandProcesser(pers_data.SATORI_PREFIX)).shortcut
-satori_commands.extend(satori.commands)
-
-satori_extension_loader=ExtensionLoader(Satori)
-satori_extension_loader.add('ext.eliza',entry_point='entry',exit_point='exit')
-satori_extension_loader.load_all().syncwrap().wait()
-
-############################## SETUP FLAN ##############################
-
 Flan=Client(pers_data.FLAN_TOKEN,
     client_id=pers_data.FLAN_ID,
     activity=ActivityWatching.create(name='Chesuto development'),
     status='idle',
         )
 
-Flan.events(ReactionAddWaitfor)
-Flan.events(ReactionDeleteWaitfor)
+############################## SETUP KOISHI ##############################
+
+setup_extension(Koishi,koishi.PREFIXES)
+Koishi.events(koishi.once_on_ready)
+Koishi.events(MessageDeleteWaitfor)
+
+Koishi.commands.extend(koishi.commands)
+Koishi.commands.extend(booru_commands)
+
+############################## SETUP SATORI ##############################
+
+satori.Koishi=Koishi #sisters, u know
+
+setup_extension(Satori,pers_data.SATORI_PREFIX)
+Satori.commands.extend(satori.commands)
+
+############################## SETUP FLAN ##############################
+
+setup_extension(Flan,pers_data.FLAN_PREFIX)
 Flan.events(flan.guild_user_add)
 
-flan_commands=Flan.events(CommandProcesser(pers_data.FLAN_PREFIX)).shortcut
-flan_commands.extend(flan.commands)
+Flan.commands.extend(flan.commands)
 
 ############################## START ##############################
 
-koishi_commands(Interpreter(locals().copy()),name='execute')
+EXTENSION_LOADER.add_default_variables(Koishi=Koishi, Satori=Satori, Flan=Flan)
+EXTENSION_LOADER.add('ext.eliza')
+EXTENSION_LOADER.add('ext.test_commands')
+EXTENSION_LOADER.add('ext.ratelimit_tests')
+EXTENSION_LOADER.load_all()
+
+Koishi.commands(Interpreter(locals().copy()),name='execute')
+
 start_clients()
 

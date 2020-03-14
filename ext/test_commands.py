@@ -1,19 +1,18 @@
-import os
+import os, json, re
 from io import StringIO
 from os.path import join
-import re
 from weakref import WeakSet,WeakKeyDictionary
 from time import time as time_now, perf_counter
 from collections import deque
 from datetime import datetime
 
 from hata.others import filter_content, now_as_id, bytes_to_base64, Unknown,\
-    DISCORD_EPOCH, is_id
+    DISCORD_EPOCH, is_id, cchunkify
 from hata.prettyprint import pchunkify, pconnect
 from hata.ios import ReuAsyncIO
 from hata.client import Achievement
 from hata.oauth2 import parse_oauth2_redirect_url
-from hata.emoji import BUILTIN_EMOJIS, parse_emoji
+from hata.emoji import BUILTIN_EMOJIS, parse_emoji, Emoji
 from hata.futures import sleep, Task, Future, WaitTillFirst
 from hata.dereaddons_local import alchemy_incendiary
 from hata.invite import Invite
@@ -21,7 +20,6 @@ from hata.exceptions import DiscordException
 from hata.embed import Embed
 from hata.channel import CHANNELS, message_relativeindex, ChannelCategory,  \
     ChannelText
-from hata.events_compiler import ContentParser
 from hata.parsers import eventlist, EventHandlerBase, EventDescriptor
 from hata.events import Pagination, wait_for_message, GUI_STATE_READY,      \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
@@ -30,25 +28,25 @@ from hata.message import Message
 from hata.role import Role
 from hata.guild import Guild
 
-from hata.ratelimit import ratelimit_handler
 from hata.http import API_ENDPOINT
 from hata.py_hdrs import METH_DELETE
+from hata.ratelimit import RATELIMIT_GROUPS, RatelimitHandler
 
 commands=eventlist()
 
 
-def entry(client):
-    event=client.events.message_create.shortcut.extend(commands)
+def setup(lib):
+    Koishi.commands.extend(commands)
 
 
-def exit(client):
-    event=client.events.message_create.shortcut.unextend(commands)
+def teardown(lib):
+    Koishi.commands.unextend(commands)
     
     #unload CustomLinkCommand
-    CustomLinkCommand.unload(client)
+    CustomLinkCommand.unload(Koishi)
     
     #unload keep_checking_emoji
-    keep_checking_emoji.unload(client)
+    keep_checking_emoji.unload(Koishi)
 
 
 # works
@@ -738,246 +736,6 @@ async def show_invite(client,message,content):
     await client.message_create(message.channel,text)
 
 
-# ContentParser functionality test
-@commands
-class userlist1(object):
-    def __init__(self):
-        self.users=[None for _ in range(10)]
-        self.position=0
-    
-    @ContentParser('user, flags=mni',is_method=True)
-    async def __call__(self,client,message,user):
-        position=self.position
-        
-        users=self.users
-        users[position]=user
-        
-        if position==9:
-            position=0
-        else:
-            position=position+1
-        self.position=position
-        
-        names=[]
-        for user in users:
-            if user is None:
-                break
-            names.append(user.full_name)
-        
-        text=', '.join(names)
-        
-        await client.message_create(message.channel,text)
-
-
-# ContentParser functionality test
-@commands
-@ContentParser('user, flags=mni')
-class userlist2(object):
-    def __init__(self):
-        self.users=[None for _ in range(10)]
-        self.position=0
-    
-    async def __call__(self,client,message,user):
-        position=self.position
-        
-        users=self.users
-        users[position]=user
-        
-        if position==9:
-            position=0
-        else:
-            position=position+1
-        self.position=position
-        
-        names=[]
-        for user in users:
-            if user is None:
-                break
-            names.append(user.full_name)
-        
-        text=', '.join(names)
-        
-        await client.message_create(message.channel,text)
-
-
-# ContentParser functionality test
-class UserList1(object):
-    users=[None for _ in range(10)]
-    position=0
-    
-    @ContentParser('user, flags=mni',is_method=True)
-    async def userlist3(cls,client,message,user):
-        position=cls.position
-        
-        users=cls.users
-        users[position]=user
-        
-        if position==9:
-            position=0
-        else:
-            position=position+1
-        cls.position=position
-        
-        names=[]
-        for user in users:
-            if user is None:
-                break
-            names.append(user.full_name)
-        
-        text=', '.join(names)
-        
-        await client.message_create(message.channel,text)
-
-
-commands(UserList1.userlist3)
-
-
-# ContentParser functionality test
-class UserList2(object):
-    users=[None for _ in range(10)]
-    position=0
-    
-    @ContentParser('user, flags=mni',is_method=True)
-    async def userlist4(cls,client,message,user):
-        position=cls.position
-        
-        users=cls.users
-        users[position]=user
-        
-        if position==9:
-            position=0
-        else:
-            position=position+1
-        cls.position=position
-        
-        names=[]
-        for user in users:
-            if user is None:
-                break
-            names.append(user.full_name)
-        
-        text=', '.join(names)
-        
-        await client.message_create(message.channel,text)
-    
-    @ContentParser('user, flags=mni',is_method=True)
-    async def userclear1(cls,client,message,user):
-        users=cls.users
-        count=0
-        for index in reversed(range(len(users))):
-            user_=users[index]
-            if user_ is user:
-                del users[index]
-                users.append(None)
-                count+=1
-        
-        await client.message_create(message.channel,f'{user:f} removed {count} times.')
-    
-    @classmethod
-    async def usershow1(cls,client,message,content):
-        users=cls.users
-        names=[]
-        for user in users:
-            if user is None:
-                break
-            names.append(user.full_name)
-        
-        if names:
-            text=', '.join(names)
-        else:
-            text='No users are added yet.'
-        
-        await client.message_create(message.channel,text)
-
-
-commands(UserList2.userlist4)
-commands(UserList2.userclear1)
-commands(UserList2.usershow1)
-
-
-# ContentParser functionality test
-@commands
-class userlist5(object):
-    def __init__(self):
-        self.users=[None for _ in range(10)]
-        self.position=0
-    
-    @ContentParser('str, default="\'\'"','rest',is_method=True)
-    async def __call__(self,client,message,subcommand,rest):
-        subcommand=subcommand.lower()
-        if subcommand=='add':
-            await self.add(client,message,rest)
-            return
-        
-        if subcommand=='clear':
-            await self.clear(client,message,rest)
-            return
-        
-        if subcommand=='show':
-            await self.show(client,message)
-            return
-        
-        await self.help(client,message)
-    
-    @ContentParser('user, flags=mni',is_method=True)
-    async def add(self,client,message,user):
-        position=self.position
-        
-        users=self.users
-        users[position]=user
-        
-        if position==9:
-            position=0
-        else:
-            position=position+1
-        self.position=position
-        
-        names=[]
-        for user in users:
-            if user is None:
-                break
-            names.append(user.full_name)
-        
-        text=', '.join(names)
-        
-        await client.message_create(message.channel,text)
-    
-    @ContentParser('user, flags=mni',is_method=True)
-    async def clear(self,client,message,user):
-        users=self.users
-        count=0
-        for index in reversed(range(len(users))):
-            user_=users[index]
-            if user_ is user:
-                del users[index]
-                users.append(None)
-                count+=1
-        
-        await client.message_create(message.channel,f'{user:f} removed {count} times.')
-    
-    async def show(self,client,message):
-        users=self.users
-        names=[]
-        for user in users:
-            if user is None:
-                break
-            names.append(user.full_name)
-        
-        if names:
-            text=', '.join(names)
-        else:
-            text='No users are added yet.'
-        
-        await client.message_create(message.channel,text)
-    
-    async def help(self,client,message):
-        prefix=client.events.message_create.prefix(message)
-        text=(f'Use `{prefix}userlist add *user*` to add a user to the list.\n'
-              f'Use `{prefix}userlist clear *user*` to clear a user from the list.\n'
-              f'Use `{prefix}userlist show` to show up the list of the user.')
-        await client.message_create(message.channel,text)
-
-
 #checking new emoji by one
 @commands
 async def is_emoji(client,message,content):
@@ -994,10 +752,7 @@ async def is_emoji(client,message,content):
 # keep checking new emojis class
 @commands
 class keep_checking_emoji(object):
-    __slots__=('channel',)
-    
-    def __init__(self):
-        self.channel=None
+    channel = None
     
     async def __call__(self,client,message,content):
         if not client.is_owner(message.author):
@@ -1012,14 +767,14 @@ class keep_checking_emoji(object):
             
             channel=message.channel
             client.events.message_create.append(self.worker(self),channel)
-            self.channel=channel
+            type(self).channel=channel
             return
         
         if content=='stop':
             channel=self.channel
             if channel is not None:
                 client.events.message_create.remove(self.worker(self),channel)
-            self.channel=None
+            type(self).channel=None
             return
     
     @staticmethod
@@ -1049,12 +804,13 @@ class keep_checking_emoji(object):
         
         return (self.client is other.client)
     
-    def unload(self,client):
-        channel=self.channel
+    @classmethod
+    def unload(cls,client):
+        channel=cls.channel
         if channel is None:
             return
         
-        client.events.message_create.remove(self.worker(self),channel)
+        client.events.message_create.remove(cls.worker(client),channel)
 
 
 #keep checking more emojis command
@@ -2404,8 +2160,8 @@ async def test_message_delete(client,message,content):
         return
     
     try:
-        result = await client.http.request(ratelimit_handler(client.loop,channel_id,71680),METH_DELETE,
-            f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',reason=None)
+        result = await client.http.request(RatelimitHandler(RATELIMIT_GROUPS.message_delete, channel_id),
+            METH_DELETE, f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',reason=None)
     except DiscordException as err:
         with StringIO() as buffer:
             await client.loop.render_exc_async(err,'test_message_delete:\n\n',file=buffer)
@@ -2585,8 +2341,7 @@ async def test_message_delete_multiple_3(client,message):
     await client.message_create(channel,content)
     
 @commands
-@ContentParser('int')
-async def message_sequencer_test(client,message,limit):
+async def message_sequencer_test(client,message,limit:int):
     if not client.is_owner(message.author):
         return
     
@@ -3541,7 +3296,6 @@ async def test_role_reorder(client,message):
     
     http_type.role_move = http_role_move_original
     
-    
     await client.message_create(message.channel,embed=embed)
 
 @commands
@@ -3571,8 +3325,7 @@ async def test_guild_widget(client,message,content):
     await Pagination(client,message.channel,pages)
 
 @commands
-@ContentParser('int','emoji')
-async def test_reaction_delete_emoji(client,message,message_id,emoji):
+async def test_reaction_delete_emoji(client,message,message_id:int,emoji:Emoji):
     if not client.is_owner(message.author):
         return True
     
@@ -3612,4 +3365,126 @@ async def test_raiselong(client, message):
     if not client.is_owner(message.author):
         return True
     
-    raise_long_line_step1() # this line is long, because it has a long comment next to, hope it will 500 chars, because i rally ant it to do so, pls do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it
+    raise_long_line_step1() # this line is long, because it has a long comment next to, hope it will be 500 chars, because I really want it to do so, pls do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it, do it
+
+@commands
+async def test_ping_1(client, message):
+    user = message.author
+    if not client.is_owner(user):
+        return True
+    
+    channel = message.channel
+    if not channel.cached_permissions_for(user).can_administrator:
+        await client.message_create(channel, 'I need administrator permission to execute this command, if possible.')
+        return False
+    
+    test_message = await client.message_create(channel,user.mention,allowed_mentions=None)
+    if (test_message.user_mentions is not None):
+        await client.message_create(channel, 'You were mentioned in theory.')
+        return False
+    
+    test_message = await client.message_create(channel,user.mention,allowed_mentions=['roles'])
+    if (test_message.user_mentions is not None):
+        await client.message_create(channel, 'You were mentioned in theory.')
+        return False
+    
+    test_message = await client.message_create(channel,user.mention,allowed_mentions=['everyone'])
+    if (test_message.user_mentions is not None):
+        await client.message_create(channel, 'You were mentioned in theory.')
+        return False
+
+    test_message = await client.message_create(channel,user.mention,allowed_mentions=[client])
+    if (test_message.user_mentions is not None):
+        await client.message_create(channel, 'You were mentioned in theory.')
+        return False
+    
+    await client.message_create(channel, 'Nice')
+    return False
+
+@commands
+async def test_ping_2(client, message):
+    user = message.author
+    if not client.is_owner(user):
+        return True
+
+    channel = message.channel
+    if not channel.cached_permissions_for(user).can_administrator:
+        await client.message_create(channel, 'I need administrator permission to execute this command, if possible.')
+        return False
+    
+    test_message = await client.message_create(channel,user.mention,allowed_mentions=[user])
+    if test_message.user_mentions is None:
+        await client.message_create(channel, 'You were mentioned in theory.')
+        return False
+    
+    await client.message_edit(test_message,client.mention) #,allowed_mentions=[user]
+    await sleep(0.4)
+    user_mentions = test_message.user_mentions
+    
+    if (user_mentions is not None) and user_mentions[0] is client:
+        await client.message_create(channel, 'Me was not mentioned at the message in theory.')
+        return False
+    
+    await client.message_edit(test_message,user.mention)
+    await sleep(0.4)
+    if test_message.user_mentions is None:
+        await client.message_create(channel, 'You were mentioned in theory.')
+        return False
+    
+    await client.message_create(channel, 'Nice')
+    return False
+
+@commands
+async def test_ping_3(client, message):
+    user = message.author
+    if not client.is_owner(user):
+        return
+    
+    channel = message.channel
+    if not channel.cached_permissions_for(user).can_administrator:
+        await client.message_create(channel, 'I need administrator permission to execute this command, if possible.')
+        return False
+    
+    test_message = await client.message_create(channel,user.mention,allowed_mentions=None)
+    if test_message.user_mentions is not None:
+        await client.message_create(channel, 'You were not mentioned in theory.')
+        return False
+    
+    await client.message_edit(test_message,user.mention)
+    await sleep(0.4)
+    if test_message.user_mentions is None:
+        await client.message_create(channel, 'You were mentioned in theory.')
+        return False
+    
+    await client.message_create(channel, 'Nice')
+    return False
+
+@commands
+async def test_guild_preview(client, message, guild_id:int):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        guild_preview = await client.guild_preview(guild_id)
+    except DiscordException:
+        await Pagination(client, message.channel, [Embed(description=f'No preview for {guild_id}')])
+        return
+    
+    chunks=pchunkify(guild_preview)
+    pages=[Embed(description=chunk) for chunk in chunks]
+    await Pagination(client,message.channel,pages)
+
+@commands
+async def test_guild_preview_pure(client, message, guild_id:int):
+    if not client.is_owner(message.author):
+        return
+    
+    try:
+        guild_preview_data = await client.http.guild_preview(guild_id)
+    except DiscordException:
+        await Pagination(client, message.channel, [Embed(description=f'No preview for {guild_id}')])
+        return
+    
+    chunks=cchunkify(json.dumps(guild_preview_data,indent=4,sort_keys=True).splitlines())
+    pages=[Embed(description=chunk) for chunk in chunks]
+    await Pagination(client,message.channel,pages)

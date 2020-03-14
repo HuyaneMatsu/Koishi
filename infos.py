@@ -670,7 +670,7 @@ class role_details(object):
         if page is None:
             return self.create_page(index)
         return page
-
+    
     def create_page(self,index):
         role=self.roles[index-1]
         embed=Embed(role.name,
@@ -687,7 +687,7 @@ class role_details(object):
                     ]),
             color=role.color)
         embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
-
+        
         self.cache[index]=embed
         return embed
 

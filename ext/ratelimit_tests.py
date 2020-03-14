@@ -44,11 +44,11 @@ RATELIMIT_RESET_AFTER=Discord_hdrs.RATELIMIT_RESET_AFTER
 
 ratelimit_commands=eventlist()
 
-def entry(client):
-    client.events.message_create.shortcut.extend(ratelimit_commands)
+def setup(lib):
+    Koishi.commands.extend(ratelimit_commands)
     
-def exit(client):
-    client.events.message_create.shortcut.unextend(ratelimit_commands)
+def teardown(lib):
+    Koishi.commands.unextend(ratelimit_commands)
 
 
 ##UNLIMITED  :
@@ -342,6 +342,13 @@ def exit(client):
 ##limited by  : global
 ##members:
 ##    user_achievement_update
+##
+##group       : guild_preview
+##limit       : 5
+##reset       : 5
+##limited by  : global
+##members:
+##    guild_preview
 
 
 def parsedate_to_datetime(data):
@@ -1563,6 +1570,13 @@ async def user_achievements(client,access,):
     
     return [Achievement(achievement_data) for achievement_data in data]
 
+async def reaction_delete_emoji(client, message, emoji):
+    await bypass_request(client, METH_DELETE,
+        f'https://discordapp.com/api/v7/channels/{message.channel.id}/messages/{message.id}/reactions/{emoji.as_reaction}')
+
+async def guild_preview(client, guild_id):
+    await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/preview')
 
 @ratelimit_commands
 async def ratelimit_test0000(client,message,content):
@@ -2420,5 +2434,55 @@ async def ratelimit_test0021(client,message):
         
         await Task(message_delete_multiple(client,messages),client.loop)
 
+@ratelimit_commands
+async def ratelimit_test0022(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0022') as RLT:
+        if channel.guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        emoji = BUILTIN_EMOJIS['x']
+        await reaction_delete_emoji(client, message, emoji)
 
+@ratelimit_commands
+async def ratelimit_test0023(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0023') as RLT:
+        if channel.guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        emoji = BUILTIN_EMOJIS['x']
+        await reaction_add(client, message, emoji)
+        await reaction_delete_emoji(client, message, emoji)
+
+@ratelimit_commands
+async def ratelimit_test0024(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0024') as RLT:
+        await guild_preview(client, 197038439483310086)
+
+@ratelimit_commands
+async def ratelimit_test0025(client,message):
+    if not client.is_owner(message.author):
+        return
+    
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0025') as RLT:
+        await guild_preview(client, 302094807046684672)
+        await guild_preview(client, 197038439483310086)
 

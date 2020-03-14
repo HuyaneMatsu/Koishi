@@ -297,11 +297,9 @@ async def chat(client, message, content):
     await client.message_create(message.channel,response)
 
 
-def entry(client):
-    client.events.message_create.shortcut.extend(commands)
+def setup(lib):
+    Satori.commands.extend(commands)
 
-def exit(client):
-    client.events.message_create.shortcut.unextend(commands)
-
-
+def teardown(lib):
+    Satori.commands.unextend(commands)
 
