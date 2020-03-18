@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
-from itertools import chain
-import re
+import re, os
 from time import monotonic
 
 from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS,     \
-    Future, CancelledError, Task, WaitTillAll, ERROR_CODES
+    Task, WaitTillAll, ERROR_CODES, eventlist
 
-from hata.events import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE,          \
-    GUI_STATE_CANCELLING,  GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
+from hata.events import Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
+    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
 
 from hata.client_core import GC_cycler
 
 from models import DB_ENGINE,DS_TABLE,ds_model
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 
-async def _help_ds(client,message):
-    prefix=client.events.message_create.prefix(message)
+DS_COLOR = Color(0xa000c4)
+DS_COMMANDS = eventlist(type_=Command)
+
+def setup(lib):
+    Koishi.commands.extend(DS_COMMANDS)
+
+def teardown(lib):
+    Koishi.commands.unextend(DS_COMMANDS)
+
+async def ds_description(client,message):
+    prefix=client.command_processer.prefix(message)
     embed=Embed('ds',(
         'Play **Dungeon sweeper** game! A simple box pushing game with '
         'cute touhou characters!\n'
@@ -26,11 +33,8 @@ async def _help_ds(client,message):
         'game.\n'
         f'- `{prefix}ds rules` : The rules of the game desu!\n'
         f'- `{prefix}ds help` : Shows you this message.'
-        ),color=KOISHI_HELP_COLOR)
+        ),color=DS_COLOR)
     await client.message_create(message.channel,embed=embed)
-
-KOISHI_HELPER.add('ds',_help_ds)
-
 
 DS_GAMES={}
 STAGES=[]
@@ -76,7 +80,7 @@ async def ds_manager(client,message,command:str=''):
     while True:
         
         if not (0<=len(command)<10):
-            await _help_ds(client,message)
+            await ds_description(client,message)
             return
         
         command=command.lower()
@@ -101,7 +105,7 @@ async def ds_manager(client,message,command:str=''):
                 embed=('Permissions denied','I have no permissions at this channel to render this message.')
             break
         
-        await _help_ds(client,message)
+        await ds_description(client,message)
         return
         
     await client.message_create(message.channel,embed=embed)
@@ -218,7 +222,6 @@ class ds_game(object):
             await client.events.error(client,f'{self!r}.__new__',err)
             return self
         
-        message.weakrefer()
         client.events.reaction_add.append(self,message)
         
         return self
@@ -844,7 +847,6 @@ class ds_game(object):
         
         client.events.reaction_add.remove(self,self.message)
         
-        message.weakrefer()
         self.message=message
         self.channel=channel
         
@@ -1762,7 +1764,7 @@ def loader(filename):
         if map_:
             stage_source(header,map_)
                 
-loader('ds.txt')
+loader(os.path.join('library','ds.txt'))
 
 del DEFAULT_STYLE_PARTS
 
@@ -1781,7 +1783,9 @@ del YUKARI_SKILL_ACTIVATE
 del YUKARI_SKILL_USE
 del YUKARI_EMOJI
 
-async def _DS_modify_best(client,message,content):
+DS_COMMANDS(ds_manager,name='ds',category='GAMES',description=ds_description)
+
+async def ds_modify_best(client,message,content):
     if not client.is_owner(message.author):
         return
     try:
@@ -1825,16 +1829,17 @@ async def _DS_modify_best(client,message,content):
 
     await client.message_create(message.channel,f'modified : {count}')
     
-async def _help__DS_modify_best(client,message):
+async def ds_modify_best_description(client,message):
     prefix=client.events.message_create.prefix(message)
-    embed=Embed('_DS_modify_best',(
+    embed=Embed('ds_modify_best',(
         f'A helper command for `{prefix}ds`, to modify the best results '
         'of a stage.\n Before calling this command, make sure you edited the '
         'source code and restarted me.\n'
-        f'Usage : `{prefix}_DS_modify_best *position*`\n'
+        f'Usage : `{prefix}ds_modify_best *position*`\n'
         'The `position` is the position of the stage.'
-            ),color=KOISHI_HELP_COLOR).add_footer(
+            ),color=DS_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('_DS_modify_best',_help__DS_modify_best,KOISHI_HELPER.check_is_owner)
+DS_COMMANDS(ds_modify_best, checks=[checks.owner_only()], category='GAMES', description=ds_modify_best_description)
+
