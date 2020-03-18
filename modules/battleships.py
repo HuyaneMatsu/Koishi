@@ -1,25 +1,27 @@
 # -*- coding: utf-8 -*-
-import re, random, time
+import re, time
+from random import randint
 
-from hata.events import WaitAndContinue
-from hata.others import filter_content,is_user_mention
-from hata.futures import Future,CancelledError,FutureWM,future_or_timeout,sleep,Task
-from hata.emoji import BUILTIN_EMOJIS
-from hata.embed import Embed
-from hata.exceptions import DiscordException
-from hata.events import Converter, ConverterFlag
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+from hata import Color,filter_content, is_user_mention, Future, FutureWM,   \
+    future_or_timeout, sleep, Task, DiscordException, BUILTIN_EMOJIS, Embed
+from hata.events import WaitAndContinue, Converter, ConverterFlag, checks
 
-async def _help_bs(client,message):
-    prefix=client.events.message_create.prefix(message)
+BS_COLOR = Color.from_rgb(71, 130, 255)
+
+def setup(lib):
+    Koishi.commands(battle_manager,name='bs', checks=[checks.guild_only()],category='GAMES')
+
+def teardown(lib):
+    Koishi.commands.remove(battle_manager, name='bs')
+
+async def bs_description(client,message):
+    prefix=client.command_processer.prefix(message)
     embed=Embed('bs',(
         'Requests a battleship game with the given user.\n'
         f'Usage: `{prefix}bs *user*`'
-        ),color=KOISHI_HELP_COLOR).add_footer(
+        ),color=BS_COLOR).add_footer(
             'Guild only!')
     await client.message_create(message.channel,embed=embed)
-
-KOISHI_HELPER.add('bs',_help_bs)
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
 
@@ -237,7 +239,7 @@ async def battle_manager(client,message,target:Converter('user', flags=Converter
     if text:
         await client.message_create(message.channel,text)
     else:
-        await _help_bs(client,message)
+        await bs_description(client,message)
 
 class ship_type(object):
     __slots__=('parts_left', 'size1', 'size2', 'type', 'x', 'y',)
@@ -534,7 +536,7 @@ class battleships_game:
             player1.ships_left[:]=user_profile.ships
             player2.ships_left[:]=user_profile.ships
 
-            if random.randint(0,1):
+            if randint(0,1):
                 self.actual=player1
             else:
                 self.actual=player2
