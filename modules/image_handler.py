@@ -2,10 +2,8 @@
 import re, os, functools
 from io import BytesIO
 
-from hata.others import is_mention
-from hata.channel import messages_till_index
-from hata.ios import ReuAsyncIO,AsyncIO
-from hata.embed import Embed
+from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, eventlist, Color
+from hata.events import Command, checks
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -14,12 +12,20 @@ try:
 except ImportError:
     UPLOAD=False
 
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
 from tools import choose
 
 splitext=os.path.splitext
 join=os.path.join
 
+IMAGE_COLOR = Color(0x5dc66f)
+IMAGE_COMMANDS = eventlist(type_=Command)
+
+def setup(lib):
+    Koishi.commands.extend(IMAGE_COMMANDS)
+
+def teardown(lib):
+    Koishi.commands.unextend(IMAGE_COMMANDS)
+    
 IMAGES=[]
 VIDS=[]
 ALL_img=[]
@@ -83,7 +89,7 @@ def load_images():
 
 load_images()
 
-async def _help_image(client,message):
+async def image_description(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('image',(
         'I ll search images by tags from my collection, '
@@ -98,12 +104,11 @@ async def _help_image(client,message):
         'You want from the found ones. If you do `index hex`, I ll expect '
         'a hexadecimal number.\n'
         'You can pass any amount of tags, mentions are ignored.'
-            ),color=KOISHI_HELP_COLOR)
+            ),color=IMAGE_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('image',_help_image)
 
-async def _help_upload(client,message):
+async def upload_description(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('upload',(
         'You can can upload images with tags, which you can access with the '
@@ -113,15 +118,13 @@ async def _help_upload(client,message):
         'my dear.\n I look up the last 26 messages searching for an '
         'attachment.\n'
         'You can pass any amount of tags, mentions are ignored.'
-            ),color=KOISHI_HELP_COLOR).add_footer(
+            ),color=IMAGE_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('upload',_help_upload,KOISHI_HELPER.check_is_owner)
-
-
 RESERVED_TAGS={'any','vid','pic','count','index','hex',}
 
+@IMAGE_COMMANDS(category='UTILITY',description=image_description)
 async def on_command_image(client,message,content):
     result=process_on_command_image(content)
     if type(result) is str:
@@ -129,8 +132,8 @@ async def on_command_image(client,message,content):
     else:
         with (await ReuAsyncIO(join(IMAGE_PATH,result.path))) as image:
             await client.message_create(message.channel,file=image)
-    
-    
+
+
 def process_on_command_image(content):
     content=[x.lower() for x in re.findall(r'\S+',content) if not is_mention(x)]
     limit=len(content)
@@ -275,10 +278,14 @@ def process_on_command_image(content):
             else:
                 return 'Sowwy, no result.'
 
-async def on_command_upload(client,message,content):
-    if (not UPLOAD) or (not client.is_owner(message.author)):
-        return
 
+@IMAGE_COMMANDS(category='UTILITY',checks=[checks.owner_only()],description=upload_description)
+async def on_command_upload(client,message,content):
+    if (not UPLOAD):
+        await client.message_create(message.channel,
+            'Upload is not supported, PIL library not found.')
+        return
+    
     result = await process_on_command_upload(client,message,content)
     await client.message_create(message.channel,result)
     
@@ -296,7 +303,7 @@ async def process_on_command_upload(client,message,content):
             return f'Reserved tag: {tag}'
 
     result=None
-    for msg in (await messages_till_index(client,message.channel,end=26)):
+    for msg in (await client.messages_till_index(message.channel,end=26)):
         if msg.author==source and msg.attachments:
             result=msg.attachments[0]
             break
