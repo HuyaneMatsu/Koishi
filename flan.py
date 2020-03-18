@@ -1,10 +1,12 @@
 import re, os
 
-from hata import Guild, eventlist, Embed, Color, Role, sleep, ReuAsyncIO,   \
-    BUILTIN_EMOJIS, AsyncIO
+from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS,\
+    AsyncIO
 
-from hata.events import Cooldown, Pagination, wait_for_reaction, checks
+from hata.events import setup_extension, Cooldown, Pagination, checks,      \
+    wait_for_reaction
 
+from shared import FLAN_PREFIX
 from tools import CooldownHandler
 from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES,      \
     CHESUTO_FOLDER
@@ -14,6 +16,9 @@ CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
 CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
 
+setup_extension(Flan,FLAN_PREFIX)
+
+@Flan.events
 async def guild_user_add(client, guild, user):
     if guild is not CHESUTO_GUILD:
         return
@@ -27,11 +32,9 @@ async def guild_user_add(client, guild, user):
     
     await client.message_create(channel,f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
-commands=eventlist()
-
 FLAN_HELP_COLOR=Color.from_rgb(230,69,0)
 
-@commands
+@Flan.commands
 async def help(client, message, content):
     if (0<len(content)<64):
         content=content.lower()
@@ -41,7 +44,7 @@ async def help(client, message, content):
             except KeyError:
                 pass
             else:
-                if not command.run_checks(client, message):
+                if command.run_checks(client, message):
                     run_invalid=False
                     description=command.description
                     if description is None:
@@ -52,9 +55,8 @@ async def help(client, message, content):
                     await description(client, message)
                     return
             
-            prefix=client.events.message_create.prefix
             embed=Embed(f'Invalid command: {content}',(
-                f'Please try using `{prefix}help` to list the available commands '
+                f'Please try using `{FLAN_PREFIX}help` to list the available commands '
                 'for you\n'
                 'Take care!'
                 ),color=FLAN_HELP_COLOR)
@@ -67,7 +69,7 @@ async def help(client, message, content):
     part=[]
     index=0
     for command in client.events.message_create.get_default_category().commands:
-        if command.run_checks(client, message):
+        if not command.run_checks(client, message):
             continue
         
         if index==16:
@@ -81,7 +83,6 @@ async def help(client, message, content):
     
     del part
     
-    prefix=client.events.message_create.prefix
     result=[]
     
     limit=len(pages)
@@ -89,18 +90,18 @@ async def help(client, message, content):
     while index<limit:
         embed=Embed('Commands:',color=FLAN_HELP_COLOR,description=pages[index])
         index+=1
-        embed.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
+        embed.add_field(f'Use `{FLAN_PREFIX}help <command>` for more information.',f'page {index}/{limit}')
         result.append(embed)
     
     del pages
     
     await Pagination(client,message.channel,result)
 
-async def flan_invalid_command(client,message,command,content):
-    prefix=client.events.message_create.prefix
+@Flan.commands
+async def invalid_command(client,message,command,content):
     embed=Embed(
         f'Invalid command `{command}`',
-        f'try using: `{prefix}help`',
+        f'try using: `{FLAN_PREFIX}help`',
         color=FLAN_HELP_COLOR,
             )
     
@@ -108,301 +109,294 @@ async def flan_invalid_command(client,message,command,content):
     await sleep(30.,client.loop)
     await client.message_delete(message)
 
-commands(flan_invalid_command,'invalid_command')
-
-async def ping_description(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('ping',(
-        'Ping - Pong?\n'
-        f'Usage: `{prefix}ping`'
-        ),color=FLAN_HELP_COLOR)
-    await client.message_create(message.channel,embed=embed)
-
-@commands(aliases=['pong'],description=ping_description,)
-@Cooldown('user',30.,handler=CooldownHandler())
-async def ping(client, message):
-    await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
-
-async def sync_avatar_description(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('sync_avatar',(
-        'Hello there Esuto!\n'
-        'This is a specific command for You, to sync the bot\'s avatar with '
-        'the application\'s. I know, You might struggle with updating the '
-        'bot\'s avatar the other way, so I made a command for it.\n'
-        'Have a nice day!\n'
-        f'Usage: `{prefix}sync_avatar`'
-        ),color=FLAN_HELP_COLOR)
-    await client.message_create(message.channel,embed=embed)
-
-@commands(checks=[checks.owner_only()],description=sync_avatar_description)
-async def sync_avatar(client,message):
-    avatar_url=client.application.icon_url_as(ext='png',size=4096)
-    if avatar_url is None:
-        await client.message_create(message.channel,'The application has no avatar set.')
-        return True
+@Flan.commands.from_class
+class ping:
+    @Cooldown('user',30.,handler=CooldownHandler())
+    async def ping(client, message):
+        await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
     
-    avatar = await client.download_url(avatar_url)
-    await client.client_edit(avatar=avatar)
+    aliases=['pong']
     
-    await client.message_create(message.channel,'Avatar synced.')
-    return False
+    async def description(client,message):
+        embed=Embed('ping',(
+            'Ping - Pong?\n'
+            f'Usage: `{FLAN_PREFIX}ping`'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel,embed=embed)
 
-async def massadd_description(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('massadd',(
-        'Loads the last 100 message at the channel, and check each of them '
-        'searching for card definitions. If it finds one, then updates it, if '
-        'already added, or creates a new one.\n'
-        f'Usage: `{prefix}massadd`'
-        ),color=FLAN_HELP_COLOR).add_footer(
-            f'You must have `{CARDS_ROLE}` role to use this command.')
-    await client.message_create(message.channel,embed=embed)
-
-@commands(checks=[checks.has_role(CARDS_ROLE)],description=massadd_description)
-async def massadd(client,message):
-    while True:
-        user=message.author
+@Flan.commands.from_class
+class sync_avatar:
+    async def command(client,message):
+        avatar_url=client.application.icon_url_as(ext='png',size=4096)
+        if avatar_url is None:
+            await client.message_create(message.channel,'The application has no avatar set.')
+            return
         
-        if client.is_owner(user):
-            break
+        avatar = await client.download_url(avatar_url)
+        await client.client_edit(avatar=avatar)
         
-        if user.has_role(CARDS_ROLE):
-            break
-        
-        return True
+        await client.message_create(message.channel,'Avatar synced.')
     
-    try:
-        await client.message_at_index(message.channel,1000)
-    except IndexError:
-        pass
+    checks=[checks.owner_only()]
     
-    await client.message_delete(message)
-    
-    messages=[]
-    for message_ in message.channel.messages:
+    async def description(client,message):
+        embed=Embed('sync_avatar',(
+            'Hello there Esuto!\n'
+            'This is a specific command for You, to sync the bot\'s avatar with '
+            'the application\'s. I know, You might struggle with updating the '
+            'bot\'s avatar the other way, so I made a command for it.\n'
+            'Have a nice day!\n'
+            f'Usage: `{FLAN_PREFIX}sync_avatar`'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel,embed=embed)
+
+@Flan.commands.from_class
+class massadd:
+    async def command(client,message):
         try:
-            profile=message_.author.guild_profiles[CARDS_ROLE.guild]
-        except KeyError:
-            continue
-
-        if CARDS_ROLE not in profile.roles:
-            continue
+            await client.message_at_index(message.channel,1000)
+        except IndexError:
+            pass
         
-        messages.append(message_)
+        await client.message_delete(message)
+        
+        messages=[]
+        for message_ in message.channel.messages:
+            try:
+                profile=message_.author.guild_profiles[CARDS_ROLE.guild]
+            except KeyError:
+                continue
     
-    new_=0
-    modified_=0
-    
-    description_parts=[]
-    for message_ in messages:
-        lines=message_.content.split('\n')
-        
-        next_id=message_.id
-        state=0 #parse header
-        description_parts.clear()
-        
-        for line in lines:
-            if line=='<:nothing:562509134654865418>':
-                line=''
+            if CARDS_ROLE not in profile.roles:
+                continue
             
-            if not line and description_parts:
+            messages.append(message_)
+        
+        new_=0
+        modified_=0
+        
+        description_parts=[]
+        for message_ in messages:
+            lines=message_.content.split('\n')
+            
+            next_id=message_.id
+            state=0 #parse header
+            description_parts.clear()
+            
+            for line in lines:
+                if line=='<:nothing:562509134654865418>':
+                    line=''
+                
+                if not line and description_parts:
+                    description='\n'.join(description_parts)
+                    description_parts.clear()
+                    
+                    if Card.update(description,next_id,name,rarity):
+                        new_+=1
+                        next_id+=1
+                    else:
+                        modified_+=1
+                    
+                    state=0
+                    continue
+                
+                if state==0:
+                    parsed=CARD_HDR_RP.fullmatch(line)
+                    if parsed is None:
+                        continue
+                    name,special_rarity,rarity=parsed.groups()
+                    
+                    if special_rarity is None:
+                        special_rarity=-1
+                    else:
+                        special_rarity=special_rarity.lower()
+                        if special_rarity=='token':
+                            special_rarity=0
+                        elif special_rarity=='passive':
+                            special_rarity=1
+                        else:
+                            special_rarity=-1
+                    
+                    if special_rarity==-1:
+                        if rarity is None:
+                            special_rarity=0
+                        else:
+                            rarity=rarity.lower()
+                    
+                    if special_rarity!=-1:
+                        try:
+                            rarity=Rarity.INSTANCES[special_rarity]
+                        except IndexError:
+                            continue
+                    else:
+                        try:
+                            rarity=Rarity.BY_NAME[rarity]
+                        except KeyError:
+                            continue
+                    
+                    state=1 #parse description
+                    continue
+                
+                if state==1:
+                    description_parts.append(line)
+                    continue
+        
+            if description_parts:
                 description='\n'.join(description_parts)
                 description_parts.clear()
-                
                 if Card.update(description,next_id,name,rarity):
                     new_+=1
-                    next_id+=1
                 else:
                     modified_+=1
-                
-                state=0
-                continue
-            
-            if state==0:
-                parsed=CARD_HDR_RP.fullmatch(line)
-                if parsed is None:
-                    continue
-                name,special_rarity,rarity=parsed.groups()
-                
-                if special_rarity is None:
-                    special_rarity=-1
-                else:
-                    special_rarity=special_rarity.lower()
-                    if special_rarity=='token':
-                        special_rarity=0
-                    elif special_rarity=='passive':
-                        special_rarity=1
-                    else:
-                        special_rarity=-1
-                
-                if special_rarity==-1:
-                    if rarity is None:
-                        special_rarity=0
-                    else:
-                        rarity=rarity.lower()
-                
-                if special_rarity!=-1:
-                    try:
-                        rarity=Rarity.INSTANCES[special_rarity]
-                    except IndexError:
-                        continue
-                else:
-                    try:
-                        rarity=Rarity.BY_NAME[rarity]
-                    except KeyError:
-                        continue
-                
-                state=1 #parse description
-                continue
-            
-            if state==1:
-                description_parts.append(line)
-                continue
-    
-        if description_parts:
-            description='\n'.join(description_parts)
-            description_parts.clear()
-            if Card.update(description,next_id,name,rarity):
-                new_+=1
-            else:
-                modified_+=1
-    
-    del description_parts
-    
-    if new_ or modified_:
-        await Card.dump_cards(client.loop)
-    
-    message = await client.message_create(message.channel,
-        embed=Embed(None,f'modified: {modified_}\nnew: {new_}',color=CHESUTO_COLOR))
-    await sleep(30.,client.loop)
-    await client.message_delete(message)
-    return False
-
-async def showcard_description(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('showcard',(
-        'Shows the specified card by it\'s name.\n'
-        f'Usage: `{prefix}showcard *name*`'
-        ),color=FLAN_HELP_COLOR)
-    await client.message_create(message.channel,embed=embed)
-
-@commands(description=showcard_description)
-async def showcard(client,message,content):
-    if not 2<len(content)<101:
+        
+        del description_parts
+        
+        if new_ or modified_:
+            await Card.dump_cards(client.loop)
+        
+        message = await client.message_create(message.channel,
+            embed=Embed(None,f'modified: {modified_}\nnew: {new_}',color=CHESUTO_COLOR))
+        await sleep(30.,client.loop)
+        await client.message_delete(message)
         return
     
-    search_value = content.lower()
+    checks = [checks.owner_or_has_role(CARDS_ROLE)]
     
-    card = None
-    start_index = 1000
-    length = 1000
-    
-    for card_name, card_ in CARDS_BY_NAME.items():
-        index = card_name.find(search_value)
-        if index==-1:
-            continue
-        
-        if index > start_index:
-            continue
-        
-        if index == start_index:
-            if length >= len(card_name):
-                continue
-        
-        card = card_
-        start_index=index
-        length=len(card_name)
-        continue
-    
-    if card is None:
-        return
-    
-    title_parts=['**']
-    name=card.name
-    if len(name)>200:
-        title=name[:200]
-        title_parts.append(title)
-        title_parts.append('...')
-    else:
-        title_parts.append(name)
-   
-    title_parts.append('** ')
-    
-    rarity=card.rarity
-    if rarity is Rarity.token:
-        title_parts.append('[TOKEN]')
-    elif rarity is Rarity.passive:
-        title_parts.append('[PASSIVE]')
-    else:
-        title_parts.append('(')
-        title_parts.append(card.rarity.name)
-        title_parts.append(')')
-    
-    title=''.join(title_parts)
-    
-    description=card.description
-    if len(description)>1700:
-        description = description[:1700]+'...'
-    
-    embed=Embed(title,description,CHESUTO_COLOR)
-    
-    image_name = card.image_name
-    if image_name is None:
+    async def description(client,message):
+        embed=Embed('massadd',(
+            'Loads the last 100 message at the channel, and check each of them '
+            'searching for card definitions. If it finds one, then updates it, if '
+            'already added, or creates a new one.\n'
+            f'Usage: `{FLAN_PREFIX}massadd`'
+            ),color=FLAN_HELP_COLOR).add_footer(
+                f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
-        return
-    
-    embed.add_image(f'attachment://{image_name}')
-    with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
-        await client.message_create(message.channel,embed=embed,file=file)
 
-async def showcards_description(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('showcards',(
-        'Searcher all the cards, which contain the specified string.\n'
-        f'Usage: `{prefix}showcards *name*`'
-        ),color=FLAN_HELP_COLOR)
-    await client.message_create(message.channel,embed=embed)
-
-@commands(description=showcards_description)
-async def showcards(client, message, content):
-    while True:
-        if len(content)>32:
-            result=None
-            break
+@Flan.commands.from_class
+class showcard:
+    async def command(client,message,content):
+        if not 2<len(content)<101:
+            return
         
-        if content:
-            filtered=[]
-            search_for=content.lower()
-            rarity=Rarity.BY_NAME.get(search_for)
-            if rarity is None:
-                for name,card in CARDS_BY_NAME.items():
-                    if search_for in name:
-                        filtered.append(card)
-            else:
-                for card in CARDS_BY_NAME.values():
-                    if card.rarity is rarity:
-                        filtered.append(card)
+        search_value = content.lower()
+        
+        card = None
+        start_index = 1000
+        length = 1000
+        
+        for card_name, card_ in CARDS_BY_NAME.items():
+            index = card_name.find(search_value)
+            if index==-1:
+                continue
             
-            title=f'Search results for : `{content}`'
-        else:
-            filtered=list(CARDS_BY_NAME.values())
-            title='All cards'
+            if index > start_index:
+                continue
+            
+            if index == start_index:
+                if length >= len(card_name):
+                    continue
+            
+            card = card_
+            start_index=index
+            length=len(card_name)
+            continue
         
-        if not filtered:
-            result=None
+        if card is None:
+            return
+        
+        title_parts=['**']
+        name=card.name
+        if len(name)>200:
+            title=name[:200]
+            title_parts.append(title)
+            title_parts.append('...')
+        else:
+            title_parts.append(name)
+       
+        title_parts.append('** ')
+        
+        rarity=card.rarity
+        if rarity is Rarity.token:
+            title_parts.append('[TOKEN]')
+        elif rarity is Rarity.passive:
+            title_parts.append('[PASSIVE]')
+        else:
+            title_parts.append('(')
+            title_parts.append(card.rarity.name)
+            title_parts.append(')')
+        
+        title=''.join(title_parts)
+        
+        description=card.description
+        if len(description)>1700:
+            description = description[:1700]+'...'
+        
+        embed=Embed(title,description,CHESUTO_COLOR)
+        
+        image_name = card.image_name
+        if image_name is None:
+            await client.message_create(message.channel,embed=embed)
+            return
+        
+        embed.add_image(f'attachment://{image_name}')
+        with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
+            await client.message_create(message.channel,embed=embed,file=file)
+    
+    async def description(client,message):
+        embed=Embed('showcard',(
+            'Shows the specified card by it\'s name.\n'
+            f'Usage: `{FLAN_PREFIX}showcard *name*`'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel,embed=embed)
+
+
+@Flan.commands.from_class
+class showcards:
+    async def command(client, message, content):
+        while True:
+            if len(content)>32:
+                result=None
+                break
+            
+            if content:
+                filtered=[]
+                search_for=content.lower()
+                rarity=Rarity.BY_NAME.get(search_for)
+                if rarity is None:
+                    for name,card in CARDS_BY_NAME.items():
+                        if search_for in name:
+                            filtered.append(card)
+                else:
+                    for card in CARDS_BY_NAME.values():
+                        if card.rarity is rarity:
+                            filtered.append(card)
+                
+                title=f'Search results for : `{content}`'
+            else:
+                filtered=list(CARDS_BY_NAME.values())
+                title='All cards'
+            
+            if not filtered:
+                result=None
+                break
+            
+            filtered.sort(key=lambda card:card.name)
+            result=filtered
             break
         
-        filtered.sort(key=lambda card:card.name)
-        result=filtered
-        break
+        if result is None:
+            pages=[Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)]
+        else:
+            pages=CardPaginator(title,result)
+        
+        await Pagination(client,message.channel,pages)
     
-    if result is None:
-        pages=[Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)]
-    else:
-        pages=CardPaginator(title,result)
-    
-    await Pagination(client,message.channel,pages)
+    async def description(client,message):
+        embed=Embed('showcards',(
+            'Searcher all the cards, which contain the specified string.\n'
+            f'Usage: `{FLAN_PREFIX}showcards *name*`'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel,embed=embed)
 
 class CardPaginator(object):
     __slots__ = ('title', 'rendered', 'collected', 'page_information')
@@ -549,17 +543,6 @@ class CardPaginator(object):
         return Embed(self.title,''.join(page_parts),color=CHESUTO_COLOR).add_footer(
             f'Page: {page_index+1}/{len(self.page_information)}. Results {start+1}-{end}/{len(self.collected)}')
 
-
-async def add_image_description(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('add_image',(
-        'Adds or updates an image of a card.\n'
-        f'Usage: `{prefix}add_image <card name>`\n'
-        'Also include an image as attachment.'
-        ),color=FLAN_HELP_COLOR).add_footer(
-            f'You must have `{CARDS_ROLE}` role to use this command.')
-    await client.message_create(message.channel,embed=embed)
-
 ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_IMAGE_CANCEL = BUILTIN_EMOJIS['x']
 ADD_IMAGE_EMOJIS = (ADD_IMAGE_OK, ADD_IMAGE_CANCEL)
@@ -576,158 +559,239 @@ def ADD_IMAGE_CHECKER(emoji, user):
     
     return True
 
-@commands(checks=[checks.has_role(CARDS_ROLE)],description=add_image_description)
-async def add_image(client, message, cards_name):
-    while True:
-        attachments = message.attachments
-        if attachments is None:
-            content = 'The message has no attachment provided.'
-            break
-        
-        if len(attachments)>1:
-            content = 'The message has more attachmemnts.'
-        
-        attachment = attachments[0]
-        name=attachment.name
-        extension=os.path.splitext(name)[1].lower()
-        
-        if extension not in ('.png','.jpg','.jpeg','.bmp','.mp4','.gif'): # are there more?
-            content = 'You sure the message format is an image format?\n If you are please request adding it.'
-            break
-        
-        if name in PROTECTED_FILE_NAMES:
-            content = 'The file\'s name is same as a protected file\'s name.'
-            break
-        
-        card = CARDS_BY_NAME.get(cards_name.lower())
-        if card is None:
-            content = 'Could not find a card with that name.'
-            break
-        
-        actual_image_name = card.image_name
-        
-        file_path = os.path.join(CHESUTO_FOLDER,name)
-        exists = os.path.exists(file_path)
-        
-        should_dump = True
-        if actual_image_name is None:
-            if exists:
-                content = 'A file already exists with that name, if you overwrite it, more cards will have the same ' \
-                          'image.\nAre you sure?'
-            else:
-                content = None
-        else:
-            if exists:
-                if actual_image_name == name:
-                    content = 'Are you sure at overwriting the card\'s image?'
-                    should_dump = False
-                else:
-                    content = 'A file with that name already exists.\nIf you overwrite this card\'s image like that, ' \
-                              'you will endup with more cards with the same image. Are you sure?'
-            else:
-                content = 'The card has an image named differently. Are you sure like this?'
-        
-        if (content is not None):
-            message = await client.message_create(message.channel,
-                embed=Embed(description=content,color=CHESUTO_COLOR))
-            
-            for emoji in ADD_IMAGE_EMOJIS:
-                await client.reaction_add(message,emoji)
-            
-            try:
-                emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
-            except TimeoutError:
-                emoji = ADD_IMAGE_CANCEL
-            
-            await client.message_delete(message)
-            
-            if emoji is ADD_IMAGE_CANCEL:
-                content = 'Cancelled.'
+@Flan.commands.from_class
+class add_image:
+    async def command(client, message, cards_name):
+        while True:
+            attachments = message.attachments
+            if attachments is None:
+                content = 'The message has no attachment provided.'
                 break
-        
-        image_data = await client.download_attachment(attachment)
-        with (await AsyncIO(file_path,'wb')) as file:
-            await file.write(image_data)
-        
-        if should_dump:
-            card.image_name=name
-            await Card.dump_cards(client.loop)
-        
-        content = f'Image successfully added for {card.name}.'
-        break
-    
-    message = await client.message_create(message.channel,
-        embed=Embed(description=content,color=CHESUTO_COLOR))
-    
-    await sleep(30.)
-    await client.message_delete(message)
-    return False
-
-async def checklist_description(client,message):
-    prefix=client.events.message_create.prefix
-    embed=Embed('checklist',(
-        'Lists the cards of the given rarity, which have images added to them.\n'
-        'If no rarity is provided, I will list all the cards with images.\n'
-        f'Usage: `{prefix}checklist *rarity*`\n'
-        ),color=FLAN_HELP_COLOR).add_footer(
-            f'You must have `{CARDS_ROLE}` role to use this command.')
-    await client.message_create(message.channel,embed=embed)
-
-@commands(checks=[checks.has_role(CARDS_ROLE)],description=checklist_description)
-async def checklist(client, message, content):
-    result=[]
-    if content:
-        rarity=Rarity.BY_NAME.get(content.lower())
-        if rarity is None:
-            if len(content)>50:
-                content = content[:50]+'...'
-            result.append(Embed(f'{content!r} is not a rarity',color=CHESUTO_COLOR))
             
-        else:
-            filtered=[]
+            if len(attachments)>1:
+                content = 'The message has more attachmemnts.'
             
-            for card in CARDS_BY_NAME.values():
-                if card.rarity is rarity:
-                    if card.image_name is None:
+            attachment = attachments[0]
+            name=attachment.name
+            extension=os.path.splitext(name)[1].lower()
+            
+            if extension not in ('.png','.jpg','.jpeg','.bmp','.mp4','.gif'): # are there more?
+                content = 'You sure the message format is an image format?\n If you are please request adding it.'
+                break
+            
+            if name in PROTECTED_FILE_NAMES:
+                content = 'The file\'s name is same as a protected file\'s name.'
+                break
+            
+            card = CARDS_BY_NAME.get(cards_name.lower())
+            if card is None:
+                content = 'Could not find a card with that name.'
+                break
+            
+            actual_image_name = card.image_name
+            
+            file_path = os.path.join(CHESUTO_FOLDER,name)
+            exists = os.path.exists(file_path)
+            
+            should_dump = True
+            if actual_image_name is None:
+                if exists:
+                    content = 'A file already exists with that name, if you overwrite it, more cards will have the same ' \
+                              'image.\nAre you sure?'
+                else:
+                    content = None
+            else:
+                if exists:
+                    if actual_image_name == name:
+                        content = 'Are you sure at overwriting the card\'s image?'
+                        should_dump = False
+                    else:
+                        content = 'A file with that name already exists.\nIf you overwrite this card\'s image like that, ' \
+                                  'you will endup with more cards with the same image. Are you sure?'
+                else:
+                    content = 'The card has an image named differently. Are you sure like this?'
+            
+            if (content is not None):
+                message = await client.message_create(message.channel,
+                    embed=Embed(description=content,color=CHESUTO_COLOR))
+                
+                for emoji in ADD_IMAGE_EMOJIS:
+                    await client.reaction_add(message,emoji)
+                
+                try:
+                    emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
+                except TimeoutError:
+                    emoji = ADD_IMAGE_CANCEL
+                
+                await client.message_delete(message)
+                
+                if emoji is ADD_IMAGE_CANCEL:
+                    content = 'Cancelled.'
+                    break
+            
+            image_data = await client.download_attachment(attachment)
+            with (await AsyncIO(file_path,'wb')) as file:
+                await file.write(image_data)
+            
+            if should_dump:
+                card.image_name=name
+                await Card.dump_cards(client.loop)
+            
+            content = f'Image successfully added for {card.name}.'
+            break
+        
+        message = await client.message_create(message.channel,
+            embed=Embed(description=content,color=CHESUTO_COLOR))
+        
+        await sleep(30.)
+        await client.message_delete(message)
+        return
+    
+    checks=[checks.has_role(CARDS_ROLE)]
+    
+    async def description(client,message):
+        embed=Embed('add_image',(
+            'Adds or updates an image of a card.\n'
+            f'Usage: `{FLAN_PREFIX}add_image <card name>`\n'
+            'Also include an image as attachment.'
+            ),color=FLAN_HELP_COLOR).add_footer(
+                f'You must have `{CARDS_ROLE}` role to use this command.')
+        await client.message_create(message.channel,embed=embed)
+
+@Flan.commands.from_class
+class checklist:
+
+    async def command(client, message, content):
+        result=[]
+        if content:
+            rarity=Rarity.BY_NAME.get(content.lower())
+            if rarity is None:
+                if len(content)>50:
+                    content = content[:50]+'...'
+                result.append(Embed(f'{content!r} is not a rarity',color=CHESUTO_COLOR))
+                
+            else:
+                filtered=[]
+                
+                for card in CARDS_BY_NAME.values():
+                    if card.rarity is rarity:
+                        if card.image_name is None:
+                            continue
+                        
+                        filtered.append(card)
+                        continue
+                
+                title = f'Checklist for {rarity.name}'
+                
+                limit=len(filtered)
+                if limit:
+                    parts=[]
+                    index=1
+                    
+                    card=filtered[0]
+                    name=card.name
+                    length=len(name)
+                    if length>200:
+                        name = name[:200]+'...'
+                        length = 203
+                    
+                    parts.append(name)
+                    
+                    while True:
+                        if index==limit:
+                            break
+                        
+                        card=filtered[index]
+                        index=index+1
+                        name=card.name
+                        
+                        name_ln=len(name)
+                        if name_ln>200:
+                            name = name[:200]+'...'
+                            name_ln = 203
+                        
+                        length=length+name_ln+1
+                        if length>2000:
+                            result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                            length=name_ln
+                            parts.clear()
+                            parts.append(name)
+                            continue
+                        
+                        parts.append('\n')
+                        parts.append(name)
                         continue
                     
-                    filtered.append(card)
+                    if parts:
+                        result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                    
+                    parts=None
+                else:
+                    result.append(Embed(title,color=CHESUTO_COLOR))
+                
+        else:
+            filtered=tuple([] for x in range(len(Rarity.INSTANCES)))
+            
+            for card in CARDS_BY_NAME.values():
+                if card.image_name is None:
                     continue
-            
-            title = f'Checklist for {rarity.name}'
-            
-            limit=len(filtered)
-            if limit:
-                parts=[]
-                index=1
                 
-                card=filtered[0]
+                filtered[card.rarity.index].append(card)
+                continue
+            
+            title='Checklist'
+            
+            parts=[]
+            length=0
+            
+            for rarity_index in range(len(filtered)):
+                container=filtered[rarity_index]
+                
+                limit=len(container)
+                if limit==0:
+                    continue
+                
+                if length>1500:
+                    result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                    length=0
+                    parts.clear()
+                else:
+                    parts.append('\n\n')
+                    length = length+2
+                
+                rarity_name=f'**{Rarity.INSTANCES[rarity_index].name}**\n\n'
+                length = length+len(rarity_name)
+                parts.append(rarity_name)
+                
+                card=container[0]
                 name=card.name
-                length=len(name)
-                if length>200:
+                name_ln=len(name)
+                if name_ln>200:
                     name = name[:200]+'...'
-                    length = 203
+                    name_ln = 203
                 
+                length = length+name_ln
                 parts.append(name)
+                index=1
                 
                 while True:
                     if index==limit:
                         break
                     
-                    card=filtered[index]
+                    card=container[index]
                     index=index+1
                     name=card.name
-                    
                     name_ln=len(name)
                     if name_ln>200:
                         name = name[:200]+'...'
-                        name_ln = 203
+                        name_ln=203
                     
-                    length=length+name_ln+1
+                    length = length+1+name_ln
                     if length>2000:
                         result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
-                        length=name_ln
+                        length=len(rarity_name)+name_ln
                         parts.clear()
+                        parts.append(rarity_name)
                         parts.append(name)
                         continue
                     
@@ -735,102 +799,36 @@ async def checklist(client, message, content):
                     parts.append(name)
                     continue
                 
-                if parts:
-                    result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
-                
-                parts=None
-            else:
-                result.append(Embed(title,color=CHESUTO_COLOR))
-            
-    else:
-        filtered=tuple([] for x in range(len(Rarity.INSTANCES)))
-        
-        for card in CARDS_BY_NAME.values():
-            if card.image_name is None:
-                continue
-            
-            filtered[card.rarity.index].append(card)
-            continue
-        
-        title='Checklist'
-        
-        parts=[]
-        length=0
-        
-        for rarity_index in range(len(filtered)):
-            container=filtered[rarity_index]
-            
-            limit=len(container)
-            if limit==0:
-                continue
-            
-            if length>1500:
+            if parts:
                 result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
-                length=0
-                parts.clear()
-            else:
-                parts.append('\n\n')
-                length = length+2
             
-            rarity_name=f'**{Rarity.INSTANCES[rarity_index].name}**\n\n'
-            length = length+len(rarity_name)
-            parts.append(rarity_name)
-            
-            card=container[0]
-            name=card.name
-            name_ln=len(name)
-            if name_ln>200:
-                name = name[:200]+'...'
-                name_ln = 203
-            
-            length = length+name_ln
-            parts.append(name)
-            index=1
-            
-            while True:
-                if index==limit:
-                    break
-                
-                card=container[index]
-                index=index+1
-                name=card.name
-                name_ln=len(name)
-                if name_ln>200:
-                    name = name[:200]+'...'
-                    name_ln=203
-                
-                length = length+1+name_ln
-                if length>2000:
-                    result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
-                    length=len(rarity_name)+name_ln
-                    parts.clear()
-                    parts.append(rarity_name)
-                    parts.append(name)
-                    continue
-                
-                parts.append('\n')
-                parts.append(name)
-                continue
-            
-        if parts:
-            result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+            parts=None
         
-        parts=None
-    
-    index=0
-    limit=len(result)
-    while True:
-        if index==limit:
-            break
+        index=0
+        limit=len(result)
+        while True:
+            if index==limit:
+                break
+            
+            embed=result[index]
+            index=index+1
+            embed.add_footer(f'Page: {index}/{limit}')
         
-        embed=result[index]
-        index=index+1
-        embed.add_footer(f'Page: {index}/{limit}')
+        await Pagination(client,message.channel,result)
+        return
     
-    await Pagination(client,message.channel,result)
-    return False
+    checks=[checks.has_role(CARDS_ROLE)]
+    
+    async def description(client,message):
+        embed=Embed('checklist',(
+            'Lists the cards of the given rarity, which have images added to them.\n'
+            'If no rarity is provided, I will list all the cards with images.\n'
+            f'Usage: `{FLAN_PREFIX}checklist *rarity*`\n'
+            ),color=FLAN_HELP_COLOR).add_footer(
+                f'You must have `{CARDS_ROLE}` role to use this command.')
+        await client.message_create(message.channel,embed=embed)
+    
 
 del re
-del eventlist
 del Cooldown
 del CooldownHandler
