@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from random import random
 
-from hata.parsers import eventlist
-from hata.others import elapsed_time
+from hata import eventlist, elapsed_time, Embed, Color, Emoji, BUILTIN_EMOJIS,\
+    DiscordException, sleep, Task, Future
 from hata.events import wait_for_reaction, WaitAndContinue, Timeouter,      \
     Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, GUI_STATE_CANCELLED,\
     GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, multievent, Converter,  \
-    checks
+    checks, Command
 
-from hata.embed import Embed
-from hata.color import Color
-from hata.emoji import Emoji, BUILTIN_EMOJIS
-from hata.exceptions import DiscordException
-from hata.futures import sleep, Task, Future
-
-from models import DB_ENGINE,currency_model,CURRENCY_TABLE
+from models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from tools import CooldownHandler
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+
+
+GAMBLING_COMMANDS=eventlist(type_=Command)
+
+def setup(lib):
+    Koishi.commands.extend(GAMBLING_COMMANDS)
+    
+def teardown(lib):
+    Koishi.commands.unextend(GAMBLING_COMMANDS)
 
 GAMBLING_COLOR          = Color.from_rgb(254,254,164)
 CURRENCY_EMOJI          = Emoji.precreate(603533301516599296)
@@ -82,9 +84,17 @@ def wait_for_reaction_any(client,message,check,timeout):
     
     return future
 
-gambling=eventlist()
+async def daily_description(client,message):
+    prefix=client.command_processer.prefix(message)
+    embed=Embed('daily',(
+        'Claim everyday your share of my love!\n'
+        f'Usage: `{prefix}daily <user>`\n'
+        'You can also gift your daily reward to your lovely imouto.'
+        ),color=GAMBLING_COLOR)
+    await client.message_create(message.channel,embed=embed)
 
-@gambling
+
+@GAMBLING_COMMANDS(description=daily_description,category='GAMBLING')
 @Cooldown('user',40.,limit=4,weight=2,handler=CooldownHandler())
 async def daily(client,message,target_user: Converter('user', default_code='message.author')):
     source_user=message.author
@@ -223,18 +233,17 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
     
     await client.message_create(message.channel,embed=embed)
 
-async def _help_daily(client,message):
-    prefix=client.events.message_create.prefix(message)
-    embed=Embed('daily',(
-        'Claim everyday your share of my love!\n'
-        f'Usage: `{prefix}daily <user>`\n'
-        'You can also gift your daily reward to your lovely imouto.'
-        ),color=KOISHI_HELP_COLOR)
+
+async def hearts_description(client,message):
+    prefix=client.command_processer.prefix(message)
+    embed=Embed('hearts',(
+        'How many hearts do you have?\n'
+        f'Usage: `{prefix}hearts <user>`\n'
+        'You can also check other user\'s hearts too.'
+            ),color=GAMBLING_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('daily',_help_daily)
-
-@gambling
+@GAMBLING_COMMANDS(description=hearts_description,category='GAMBLING')
 @daily.shared(weight=1)
 async def hearts(client,message,target_user: Converter('user', default_code='message.author')):
     async with DB_ENGINE.connect() as connector:
@@ -259,16 +268,6 @@ async def hearts(client,message,target_user: Converter('user', default_code='mes
         
     await client.message_create(message.channel,embed=embed)
 
-async def _help_hearts(client,message):
-    prefix=client.events.message_create.prefix(message)
-    embed=Embed('hearts',(
-        'How many hearts do you have?\n'
-        f'Usage: `{prefix}hearts <user>`\n'
-        'You can also check other user\'s hearts too.'
-            ),color=KOISHI_HELP_COLOR)
-    await client.message_create(message.channel,embed=embed)
-
-KOISHI_HELPER.add('hearts',_help_hearts)
 
 def convert_tdelta(delta):
     result=[]
@@ -296,7 +295,22 @@ class heartevent_start_checker(object):
     def __call__(self,emoji,user):
         return self.client.is_owner(user) and ((emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI))
 
-@gambling(checks=[checks.owner_only()])
+
+async def heartevent_description(client,message):
+    prefix=client.command_processer.prefix(message)
+    embed=Embed('heartevent',(
+        'Starts a heart event at the channel.\n'
+        f'Usage: `{prefix}heartevent *duration* *amount* <users_limit>`\n'
+        f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
+        f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
+        f'Min `amount`: {EVENT_HEART_MIN_AMOUNT}\n'
+        f'Max `amount`: {EVENT_HEART_MAX_AMOUNT}\n'
+        'If `user_imit` is not included, the event will have no user limit.'
+            ),color=GAMBLING_COLOR).add_footer(
+            'Owner only!')
+    await client.message_create(message.channel,embed=embed)
+
+@GAMBLING_COMMANDS(checks=[checks.owner_only()],description=heartevent_description,category='GAMBLING')
 class heartevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
@@ -383,7 +397,6 @@ class heartevent(object):
         self.connector = await DB_ENGINE.connect()
         
         message = await client.message_create(channel,embed=self.generate_embed())
-        message.weakrefer()
         self.message=message
         client.events.reaction_add.append(self,message)
         Task(self.countdown(client,message),client.loop)
@@ -473,23 +486,21 @@ class heartevent(object):
         Task(connector.close(),self.client.loop)
         self.connector=None
 
-async def _help_heartevent(client,message):
-    prefix=client.events.message_create.prefix(message)
-    embed=Embed('heartevent',(
-        'Starts a heart event at the channel.\n'
-        f'Usage: `{prefix}heartevent *duration* *amount* <users_limit>`\n'
+async def dailyevent_description(client,message):
+    prefix=client.command_processer.prefix(message)
+    embed=Embed('dailyevent',(
+        'Starts a daily event at the channel.\n'
+        f'Usage: `{prefix}dailyevent *duration* *amount* <users_limit>`\n'
         f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
         f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
-        f'Min `amount`: {EVENT_HEART_MIN_AMOUNT}\n'
-        f'Max `amount`: {EVENT_HEART_MAX_AMOUNT}\n'
+        f'Min `amount`: {EVENT_DAILY_MIN_AMOUNT}\n'
+        f'Max `amount`: {EVENT_DAILY_MAX_AMOUNT}\n'
         'If `user_imit` is not included, the event will have no user limit.'
-            ),color=KOISHI_HELP_COLOR).add_footer(
+            ),color=GAMBLING_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
-
-KOISHI_HELPER.add('heartevent',_help_heartevent,KOISHI_HELPER.check_is_owner)
-
-@gambling(checks=[checks.owner_only()])
+    
+@GAMBLING_COMMANDS(checks=[checks.owner_only()],description=dailyevent_description,category='GAMBLING')
 class dailyevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
@@ -576,7 +587,6 @@ class dailyevent(object):
         self.connector = await DB_ENGINE.connect()
 
         message = await client.message_create(channel,embed=self.generate_embed())
-        message.weakrefer()
         self.message=message
         client.events.reaction_add.append(self,message)
         Task(self.countdown(client,message),client.loop)
@@ -681,23 +691,24 @@ class dailyevent(object):
         Task(connector.close(),self.client.loop)
         self.connector=None
 
-async def _help_dailyevent(client,message):
-    prefix=client.events.message_create.prefix(message)
-    embed=Embed('dailyevent',(
-        'Starts a daily event at the channel.\n'
-        f'Usage: `{prefix}dailyevent *duration* *amount* <users_limit>`\n'
-        f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
-        f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
-        f'Min `amount`: {EVENT_DAILY_MIN_AMOUNT}\n'
-        f'Max `amount`: {EVENT_DAILY_MAX_AMOUNT}\n'
-        'If `user_imit` is not included, the event will have no user limit.'
-            ),color=KOISHI_HELP_COLOR).add_footer(
-            'Owner only!')
+
+async def game21_description(client,message):
+    prefix=client.command_processer.prefix(message)
+    embed=Embed('21',(
+        'Starts a 21 game at the channel.\n'
+        f'Usage: `{prefix}21 *amount*`\n'
+        'Your chalange is to collect cards with weight up to 21. Each card '
+        'with number 2-10 has the same weight as their number says, meanwhile '
+        'J, Q and K has fix weight of 10. Ace has weight of 10, but if You '
+        'whould pass 21, it loses 9 of it.\n'
+        'At this game you are fighting me, so if we boss lose, it is a draw.\n'
+        'You start with 2 cards initially drawed and at every round, you have '
+        'option to draw a new card, or to stop.'),
+            color=GAMBLING_COLOR)
+    
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('dailyevent',_help_dailyevent,KOISHI_HELPER.check_is_owner)
-
-@gambling(name='21')
+@GAMBLING_COMMANDS(name='21',description=game21_description,category='GAMBLING')
 class Game21(object):
     NEW     = BUILTIN_EMOJIS['new']
     STOP    = BUILTIN_EMOJIS['octagonal_sign']
@@ -867,8 +878,6 @@ class Game21(object):
             if isinstance(err,(DiscordException, ConnectionError)):
                 return
             raise
-        
-        message.weakrefer()
         
         self=object.__new__(cls)
         self.client=client
@@ -1131,23 +1140,6 @@ class Game21(object):
             timeouter.cancel()
         
         return Task(canceller(self,exception),self.client.loop)
-    
-async def _help_21(client,message):
-    prefix=client.events.message_create.prefix(message)
-    embed=Embed('21',(
-        'Starts a 21 game at the channel.\n'
-        f'Usage: `{prefix}21 *amount*`\n'
-        'Your chalange is to collect cards with weight up to 21. Each card '
-        'with number 2-10 has the same weight as their number says, meanwhile '
-        'J, Q and K has fix weight of 10. Ace has weight of 10, but if You '
-        'whould pass 21, it loses 9 of it.\n'
-        'At this game you are fighting me, so if we boss lose, it is a draw.\n'
-        'You start with 2 cards initially drawed and at every round, you have '
-        'option to draw a new card, or to stop.'),
-            color=KOISHI_HELP_COLOR)
-    
-    await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('21',_help_21)
 
 del Emoji, Color, Cooldown, eventlist, CooldownHandler
