@@ -1,11 +1,16 @@
-from hata.futures import Task
-from hata.client import Client
-from hata.user import User
-from hata.channel import CHANNELS
-from hata.embed import Embed
+from hata import Task, Client, User, CHANNELS, Embed, eventlist, Color
 
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+from hata.events import checks, Command
 
+CHANNELLER_COMMANDS=eventlist(type_=Command)
+CHANNELLER_COLOR = Color.from_rgb(129, 158, 0)
+
+def setup(lib):
+    Koishi.commands.extend(CHANNELLER_COMMANDS)
+
+def teardown(lib):
+    Koishi.commands.unextend(CHANNELLER_COMMANDS)
+    
 class Channeller_v_del(object):
     __slots__=('parent')
     def __init__(self,parent):
@@ -181,8 +186,8 @@ async def channeling_start(client,message,channel_id:int):
     
     await client.message_create(channel_1,text)
 
-async def _help_channeling_start(client,message):
-    prefix=client.events.message_create.prefix(message)
+async def channeling_start_description(client,message):
+    prefix=client.command_processer.prefix(message)
     embed=Embed('channeling_start',(
         'I can connect more channels with my youkai powers.\n'
         f'Usage: `{prefix}channeling_start *channel_id*`\n'
@@ -191,11 +196,9 @@ async def _help_channeling_start(client,message):
         'message. I always connect the source channel, with the target '
         'channel to be clean. *More channels can be connected too.*\n'
         f'To cancel channelling use: `{prefix}channeling_stop`'
-        ),color=KOISHI_HELP_COLOR).add_footer(
+        ),color=CHANNELLER_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
-
-KOISHI_HELPER.add('channeling_start',_help_channeling_start,KOISHI_HELPER.check_is_owner)
 
 
 async def channeling_stop(client,message,content):
@@ -213,17 +216,17 @@ async def channeling_stop(client,message,content):
 
     await client.message_create(channel,text)
 
-async def _help_channeling_stop(client,message):
-    prefix=client.events.message_create.prefix(message)
+async def channeling_stop_description(client,message):
+    prefix=client.command_processer.prefix(message)
     embed=Embed('channeling_stop',(
         'Cancels the channelling of this channel.\n'
         f'Usage: `{prefix}channeling_stop`\n'
         'If more channels are connected, you need to call this command, '
         'from every of them, to cancel all.\n'
         'If only one channel is left alone, it will be cancelled automatically.'
-        ),color=KOISHI_HELP_COLOR).add_footer(
+        ),color=CHANNELLER_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('channeling_stop',_help_channeling_stop,KOISHI_HELPER.check_is_owner)
-
+CHANNELLER_COMMANDS(channeling_start, description=channeling_start_description, checks=[checks.guild_only(),checks.owner_only()],category='UTILITY')
+CHANNELLER_COMMANDS(channeling_stop, description=channeling_stop_description,checks=[checks.owner_only()],category='UTILITY')
