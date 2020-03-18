@@ -1,19 +1,43 @@
 # -*- coding: utf-8 -*-
 import os
-from random import randint
 from time import monotonic
+from random import randint
 
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep,  \
-    InvalidStateError, any_to_any, Color, Embed, DiscordException, ReuBytesIO
+    InvalidStateError, any_to_any, Color, Embed, DiscordException, ReuBytesIO,\
+    eventlist
 
 from hata.events import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE,          \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX,     \
-    Timeouter
+    Timeouter, Command, checks
 
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
-from tools import PIL
+from PIL import Image as PIL
 
-async def _help_kanakogame(client,message):
+KANAKO_COMMANDS = eventlist(type_=Command)
+
+def setup(lib):
+    Koishi.commands.extend(KANAKO_COMMANDS)
+
+def teardown(lib):
+    Koishi.commands.unextend(KANAKO_COMMANDS)
+
+FONT=PIL.font(os.path.join('library','Kozuka.otf'),90)
+FONT_COLOR=(162,61,229)
+
+del os
+
+def draw(buffer,text):
+    image=PIL.new('RGBA',FONT.getsize(text),(0,0,0,0))
+    image.draw().text((0,0),text,fill=FONT_COLOR,font=FONT)
+    image.save(buffer,'png')
+    buffer.seek(0)
+    return buffer
+
+ACTIVE_GAMES={}
+CIRCLE_TIME=60.
+KANAKO_COLOR=Color.from_tuple(FONT_COLOR)
+
+async def kanako_description(client,message):
     prefix=client.events.message_create.prefix(message)
     embed=Embed('kanakogame',(
         'Start a hiragana or a katakana quiz!\n'
@@ -36,26 +60,8 @@ async def _help_kanakogame(client,message):
         '*Game owner only.*\n'
         f'- `{prefix}kanakogame hiragana` : Shows up the hiragana map.\n'
         f'- `{prefix}kanakogame katakana` : Shows up the katakana map.'
-        ),color=KOISHI_HELP_COLOR)
+        ),color=KANAKO_COLOR)
     await client.message_create(message.channel,embed=embed)
-
-KOISHI_HELPER.add('kanakogame',_help_kanakogame)
-
-FONT=PIL.font(os.path.join('library','Kozuka.otf'),90)
-FONT_COLOR=(162,61,229)
-
-del os
-
-def draw(buffer,text):
-    image=PIL.new('RGBA',FONT.getsize(text),(0,0,0,0))
-    image.draw().text((0,0),text,fill=FONT_COLOR,font=FONT)
-    image.save(buffer,'png')
-    buffer.seek(0)
-    return buffer
-
-ACTIVE_GAMES={}
-CIRCLE_TIME=60.
-COLOR=Color.from_tuple(FONT_COLOR)
 
 _pairsK=('k','g','s','z','c','t','d','f','h','b','p','n','m','y','r','w','j')
 _pairsKx={'k':('k','g'),'g':('k','g'),'s':('s','z','c'),'z':('s','z','c'),'c':('s','z','c'),'t':('t','d'),'d':('t','d'),'f':('f','h','b','p'),'h':('f','h','b','p'),'b':('f','h','b','p'),'p':('f','h','b','p')}
@@ -78,7 +84,7 @@ def render_showcase(name,map_):
     while True:
         if page_index>page_limit:
             break
-        embed=Embed(name.capitalize(),'',COLOR)
+        embed=Embed(name.capitalize(),'',KANAKO_COLOR)
         embed.add_footer(f'page {page_index} / {page_limit}')
         
         for _ in range(((element_limit%30)+9)//10 if page_index==page_limit else 3):
@@ -157,7 +163,7 @@ class kanako_game(object):
             f'Question amount : {self.amount}\n'
             f'possibilities : {self.possibilities}\n'
             f'state : {("ready to start","running")[self.running]}',
-            COLOR)
+            KANAKO_COLOR)
     
     def generate_options(self,answer):
         result=[answer]
@@ -238,7 +244,7 @@ class kanako_game(object):
         channel=self.channel
         answers=self.answers
         buffer=ReuBytesIO()
-        embed=Embed(color=COLOR)
+        embed=Embed(color=KANAKO_COLOR)
         embed.add_image('attachment://guessme.png')
         embed.add_footer('')
         time_till_notify=CIRCLE_TIME-10
@@ -262,7 +268,7 @@ class kanako_game(object):
                 Task(self.send_or_except(
                     Embed('Hurry! Only 10 seconds left!',
                         '\n'.join([user.full_name for user in self.users if user.id not in answers]),
-                        COLOR)),client.loop)
+                        KANAKO_COLOR)),client.loop)
                 waiter=sleep(time_till_notify,client.loop)
                 self.waiter=waiter
                 await waiter
@@ -283,7 +289,7 @@ class kanako_game(object):
 
             embed.title=f'Last answer: {answer}'
 
-        await self.send_or_except(Embed(embed.title,'',COLOR))
+        await self.send_or_except(Embed(embed.title,'',KANAKO_COLOR))
             
         del ACTIVE_GAMES[channel.id]
         client.events.message_create.remove(self,self.channel)
@@ -350,7 +356,7 @@ class kanako_game(object):
                 self.waiter.cancel()
                 
             break
-        Task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)),self.client.loop)
+        Task(self.client.message_create(self.channel,embed=Embed('',message,KANAKO_COLOR)),self.client.loop)
         
     def remove(self,user):
         while True:
@@ -378,7 +384,7 @@ class kanako_game(object):
             
             break
         
-        Task(self.client.message_create(self.channel,embed=Embed('',message,COLOR)),self.client.loop)
+        Task(self.client.message_create(self.channel,embed=Embed('',message,KANAKO_COLOR)),self.client.loop)
 
     def cancel(self):
         client=self.client
@@ -386,7 +392,7 @@ class kanako_game(object):
         if self.running:
             client.events.message_create.remove(self,self.channel)
             self.running=False
-        Task(client.message_create(self.channel,embed=Embed('','Game cancelled',COLOR)),client.loop)
+        Task(client.message_create(self.channel,embed=Embed('','Game cancelled',KANAKO_COLOR)),client.loop)
 
 class game_statistics(object):
     __slots__=('cache', 'source',)
@@ -441,7 +447,7 @@ class game_statistics(object):
         win_medians=[value[len(value)//2] if value else CIRCLE_TIME for value in win_times]
         lose_medians=[value[len(value)//2] if value else CIRCLE_TIME for value in lose_times]
         
-        embed=Embed('Statistics','',COLOR)
+        embed=Embed('Statistics','',KANAKO_COLOR)
         
         for index,user in enumerate(self.source.users):
             win_count=win_counts[index]
@@ -483,7 +489,7 @@ class game_statistics(object):
             end=len(self.source.history)
 
         shard=[]
-        embed=Embed('Statistics',f'{start} - {end}',COLOR)
+        embed=Embed('Statistics',f'{start} - {end}',KANAKO_COLOR)
         
         add_options=self.source.possibilities
         
@@ -516,7 +522,7 @@ async def kanako_manager(client,message,command:str='',map_:str='hiragana',lengt
     
     if command=='info':
         if game is None:
-            embed=Embed('','There is no active game at the channel',COLOR)
+            embed=Embed('','There is no active game at the channel',KANAKO_COLOR)
         else:
             embed=game.info
             
@@ -525,14 +531,14 @@ async def kanako_manager(client,message,command:str='',map_:str='hiragana',lengt
         
     elif command=='join':
         if game is None:
-            embed=Embed('','There is nothing to join into at the channel',COLOR)
+            embed=Embed('','There is nothing to join into at the channel',KANAKO_COLOR)
         else:
             game.append(message.author)
             return
         
     elif command=='cancel':
         if game is None:
-            embed=Embed('','There is no active message at the channel',COLOR)
+            embed=Embed('','There is no active message at the channel',KANAKO_COLOR)
         else:
             waiter=game.waiter
             if not waiter.set_exception(InterruptedError):
@@ -555,11 +561,11 @@ async def kanako_manager(client,message,command:str='',map_:str='hiragana',lengt
 
             game.waiter.cancel()
             return
-        embed=Embed('',message,COLOR)
+        embed=Embed('',message,KANAKO_COLOR)
         
     elif command=='leave':
         if game is None:
-            embed=Embed('','There is nothing to leave from at the channel',COLOR)
+            embed=Embed('','There is nothing to leave from at the channel',KANAKO_COLOR)
         else:
             game.remove(message.author)
             return
@@ -569,7 +575,7 @@ async def kanako_manager(client,message,command:str='',map_:str='hiragana',lengt
             await embedination(client,channel,pages)
             return
         except KeyError:
-            await _help_kanakogame(client,message)
+            await kanako_description(client,message)
             return
     
     await client.message_create(channel,embed=embed)
@@ -598,7 +604,7 @@ def kanako_create(client,game,message,args):
                 break
             
             if text:
-                return Embed('',text,COLOR)
+                return Embed('',text,KANAKO_COLOR)
 
         else:
             map_name='hiragana'
@@ -615,7 +621,7 @@ def kanako_create(client,game,message,args):
         text='There is already an active game at the channel.'
         if not game.running:
             text+=f'\n use **{client.events.message_create.prefix(message)}kanako join** to join into it'
-        return Embed('',text,COLOR)
+        return Embed('',text,KANAKO_COLOR)
 
 
 class embedination(object):
@@ -649,8 +655,6 @@ class embedination(object):
         
         if not channel.cached_permissions_for(client).can_add_reactions:
             return self
-        
-        message.weakrefer()
         
         if len(self.pages)>1:
             for emoji in self.EMOJIS:
@@ -814,6 +818,8 @@ class embedination(object):
             
             await client.events.error(client,f'{self!r}._reaction_delete',err)
             return
+
+KANAKO_COMMANDS(kanako_manager,description=kanako_description,category='GAMES', checks=[checks.guild_only()])
 
 del BUILTIN_EMOJIS
 del Color
