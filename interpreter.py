@@ -47,11 +47,11 @@ class InterpreterPrinter(object):
     def get_value(self,wrap_start='```',wrap_end='```',limit=2000,ignore=50):
         limit=limit-len(wrap_start)-len(wrap_end)-2 #allocate 2 more for linebreaks
         if limit<=ignore:
-            raise ValueError('wrap start and wrap end are longer than the limir-ignore itself')
-
+            raise ValueError('wrap start and wrap end are longer than the limit-ignore itself')
+        
         result=[wrap_start,'\n']
         buffer=self.buffer
-
+        
         with self.lock:
             while buffer:
                 value=buffer[0]
@@ -312,30 +312,3 @@ class Interpreter(object):
 
 del re
 del _ignore_frame
-
-
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
-
-async def _help_execute(client,message):
-    prefix=client.events.message_create.prefix(message)
-    embed=Embed('execute',(
-        'Use an interpreter trough me :3\n'
-        'Usages:\n'
-        f'{prefix}execute #code here\n'
-        '*not code*\n'
-        '\n'
-        f'{prefix}execute\n'
-        '#code goes here\n'
-        '#code goes here\n'
-        '\n'
-        f'{prefix}execute\n'
-        '```\n'
-        '#code goes here\n'
-        '#code goes here\n'
-        '```\n'
-        '*not code*'
-            ),color=KOISHI_HELP_COLOR).add_footer(
-            'Owner only!')
-    await client.message_create(message.channel,embed=embed)
-
-KOISHI_HELPER.add('execute',_help_execute,KOISHI_HELPER.check_is_owner)
