@@ -2,8 +2,11 @@ import re
 from weakref import WeakKeyDictionary
 from random import random
 
-from hata import CancelledError, sleep, Task, DiscordException, methodize
-from hata.events import CommandProcesser
+from hata import CancelledError, sleep, Task, DiscordException, methodize,  \
+    ERROR_CODES, BUILTIN_EMOJIS
+from hata.events import CommandProcesser, Timeouter, GUI_STATE_READY,       \
+    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
+    GUI_STATE_SWITCHING_CTX
 from hata.parsers import EventHandlerBase
 
 try:
@@ -107,6 +110,255 @@ class CooldownHandler:
             await client.message_delete(notification)
         except DiscordException:
             pass
+
+class PAGINATION_5PN(object):
+    LEFT2   = BUILTIN_EMOJIS['rewind']
+    LEFT    = BUILTIN_EMOJIS['arrow_backward']
+    RIGHT   = BUILTIN_EMOJIS['arrow_forward']
+    RIGHT2  = BUILTIN_EMOJIS['fast_forward']
+    RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
+    CANCEL  = BUILTIN_EMOJIS['x']
+    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET,CANCEL)
+    
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages',
+        'task_flag', 'timeouter')
+
+    async def __new__(cls,client,channel,pages):
+        self=object.__new__(cls)
+        self.client=client
+        self.channel=channel
+        self.pages=pages
+        self.page=0
+        self.canceller=cls._canceller
+        self.task_flag=GUI_STATE_READY
+        self.timeouter=None
+        
+        try:
+            message = await client.message_create(self.channel,embed=self.pages[0])
+        except:
+            self.message=None
+            raise
+        
+        self.message=message
+
+        if not channel.cached_permissions_for(client).can_add_reactions:
+            return self
+        
+        message.weakrefer()
+        
+        if len(self.pages)>1:
+            for emoji in self.EMOJIS:
+                await client.reaction_add(message,emoji)
+        else:
+            await client.reaction_add(message,self.CANCEL)
+        
+        client.events.reaction_add.append(self,message)
+        client.events.reaction_delete.append(self,message)
+        self.timeouter=Timeouter(client.loop,self,timeout=300.)
+        return self
+    
+    async def __call__(self,client,emoji,user):
+        if user.is_bot or (emoji not in self.EMOJIS):
+            return
+        
+        message=self.message
+        
+        if self.channel.cached_permissions_for(client).can_manage_messages:
+            if not message.did_react(emoji,user):
+                return
+
+            task=Task(client.reaction_delete(message,emoji,user),client.loop)
+            if __debug__:
+                task.__silence__()
+            
+        task_flag=self.task_flag
+        if task_flag!=GUI_STATE_READY:
+            if task_flag==GUI_STATE_SWITCHING_PAGE:
+                if emoji is self.CANCEL:
+                    self.task_flag=GUI_STATE_CANCELLING
+                return
+
+            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
+            return
+        
+        while True:
+            if emoji is self.LEFT:
+                page=self.page-1
+                break
+                
+            if emoji is self.RIGHT:
+                page=self.page+1
+                break
+                
+            if emoji is self.RESET:
+                page=0
+                break
+                
+            if emoji is self.CANCEL:
+                self.task_flag=GUI_STATE_CANCELLED
+                try:
+                    await client.message_delete(message)
+                except BaseException as err:
+                    self.cancel()
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code == ERROR_CODES.missing_access: # client removed
+                            return
+                    
+                    await client.events.error(client,f'{self!r}.__call__',err)
+                    return
+                
+                else:
+                    self.cancel()
+                    return
+            
+            if emoji is self.LEFT2:
+                page=self.page-10
+                break
+                
+            if emoji is self.RIGHT2:
+                page=self.page+10
+                break
+
+            return
+        
+        Task(self._reaction_delete(emoji,user),client.loop)
+
+        if page<0:
+            page=0
+        elif page>=len(self.pages):
+            page=len(self.pages)-1
+        
+        if self.page==page:
+            return
+
+        self.page=page
+        self.task_flag=GUI_STATE_SWITCHING_PAGE
+        try:
+            await client.message_edit(message,embed=self.pages[page])
+        except BaseException as err:
+            self.task_flag=GUI_STATE_CANCELLED
+            self.cancel()
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message already deleted
+                            ):
+                    return
+            
+            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            await client.events.error(client,f'{self!r}.__call__',err)
+            return
+
+        if self.task_flag==GUI_STATE_CANCELLING:
+            self.task_flag=GUI_STATE_CANCELLED
+            try:
+                await client.message_delete(message)
+            except BaseException as err:
+                
+                if isinstance(err,ConnectionError):
+                    # no internet
+                    return
+                
+                if isinstance(err,DiscordException):
+                    if err.code==ERROR_CODES.missing_access: # client removed
+                        return
+                
+                await client.events.error(client,f'{self!r}.__call__',err)
+                return
+            
+            return
+        
+        self.task_flag=GUI_STATE_READY
+        
+        self.timeouter.set_timeout(150.0)
+        
+    @staticmethod
+    async def _canceller(self,exception,):
+        client=self.client
+        message=self.message
+        
+        client.events.reaction_add.remove(self,message)
+        client.events.reaction_delete.remove(self,message)
+
+        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+            # the message is not our, we should not do anything with it.
+            return
+        
+        self.task_flag=GUI_STATE_CANCELLED
+        
+        if exception is None:
+            return
+        
+        if isinstance(exception,TimeoutError):
+            if self.channel.cached_permissions_for(client).can_manage_messages:
+                try:
+                    await client.reaction_clear(message)
+                except BaseException as err:
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code in (
+                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.unknown_message, # message deleted
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                    ):
+                            return
+                    
+                    await client.events.error(client,f'{self!r}._canceller',err)
+                    return
+            return
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        #we do nothing
+    
+    def cancel(self,exception=None):
+        canceller=self.canceller
+        if canceller is None:
+            return
+        
+        self.canceller=None
+        
+        timeouter=self.timeouter
+        if timeouter is not None:
+            timeouter.cancel()
+        
+        return Task(canceller(self,exception),self.client.loop)
+
+    async def _reaction_delete(self,emoji,user):
+        client=self.client
+        try:
+            await client.reaction_delete(self.message,emoji,user)
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}._reaction_delete',err)
+            return
 
 del CommandProcesser
 del re
