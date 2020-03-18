@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
-from hata.exceptions import DiscordException
+from hata import DiscordException,  cchunkify, Status, PERM_KEYS, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist
 from hata.parsers import EVENTS, DEFAULT_EVENT
-from hata.prettyprint import pchunkify, pretty_print
-from hata.events import Pagination
-from hata.others import cchunkify, Status
-from hata.permission import PERM_KEYS
-from hata.embed import EXTRA_EMBED_TYPES, Embed
+from hata.prettyprint import pretty_print
+from hata.events import Pagination, Command
 from hata.dereaddons_local import listdifference, method
-from hata.futures import Task
 
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+DISPATCH_TESTS = eventlist(type_=Command)
+DISPTACH_COLOR = Color.from_rgb(120, 108, 128)
+
+def setup(lib):
+    Koishi.commands.extend(DISPATCH_TESTS)
+    
+def teardown(lib):
+    Koishi.commands.unextend(DISPATCH_TESTS)
 
 class dispatch_tester:
     channel=None
     old_events={}
 
     @classmethod
-    async def here(self,client,message,content):
+    async def here(self,client,message):
         if message.channel is self.channel:
             try:
                 await client.message_create(message.channel,'Current channel removed')
@@ -748,9 +751,9 @@ class dispatch_tester:
         text.insert(0,f'Invite deleted:')
         pages=[Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client,self.channel,pages,120.)
-        
-async def _help_here(client,message):
-    prefix=client.events.message_create.prefix(message)
+
+async def here_description(client,message):
+    prefix=client.command_processer.prefix(message)
     embed=Embed('here',(
         'I set the dispatch tester commands\' output to this channel.\n'
         f'Usage: `{prefix}here`\n'
@@ -759,15 +762,12 @@ async def _help_here(client,message):
         f'`{prefix}switch *event_name*`\n'
         'For the event names, use:\n'
         f'`{prefix}help switch`'
-            ),color=KOISHI_HELP_COLOR).add_footer(
+            ),color=DISPTACH_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('here',_help_here,KOISHI_HELPER.check_is_owner)
-
-
-async def _help_switch(client,message):
-    prefix=client.events.message_create.prefix(message)
+async def switch_description(client,message):
+    prefix=client.command_processer.prefix(message)
     embed=Embed('here',(
         'I can turn on a dispatch tester for you.\n'
         f'`{prefix}switch *event_name*`\n'
@@ -807,8 +807,9 @@ async def _help_switch(client,message):
         'The full list of events can be found [here]'
         '(https://github.com/HuyaneMatsu/hata/blob/master/docs/ref/EventDescriptor.md).\n'
         f'For setting channel, use: `{prefix}here`'
-            ),color=KOISHI_HELP_COLOR).add_footer(
+            ),color=DISPTACH_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('switch',_help_switch,KOISHI_HELPER.check_is_owner)
+DISPATCH_TESTS(dispatch_tester.here,description=here_description,category='TEST COMMANDS')
+DISPATCH_TESTS(dispatch_tester.switch,description=switch_description,category='TEST COMMANDS')
