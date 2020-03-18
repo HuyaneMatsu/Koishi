@@ -4,20 +4,9 @@ import sys, os
 sys.path.append(os.path.abspath('..'))
 
 from hata import Client, start_clients, ActivityGame, ActivityWatching
-from hata.events import setup_extension
 from hata.extension_loader import EXTENSION_LOADER
 
 import pers_data
-
-import koishi
-import satori
-import flan
-
-from tools import MessageDeleteWaitfor
-from booru import booru_commands
-from interpreter import Interpreter
-
-koishi.KOISHI_HELPER.sort()
 
 Koishi=Client(pers_data.KOISHI_TOKEN,
     secret=pers_data.KOISHI_SECRET,
@@ -38,38 +27,25 @@ Flan=Client(pers_data.FLAN_TOKEN,
     status='idle',
         )
 
-############################## SETUP KOISHI ##############################
-
-setup_extension(Koishi,koishi.PREFIXES)
-Koishi.events(koishi.once_on_ready)
-Koishi.events(MessageDeleteWaitfor)
-
-Koishi.commands.extend(koishi.commands)
-Koishi.commands.extend(booru_commands)
-
-############################## SETUP SATORI ##############################
-
-satori.Koishi=Koishi #sisters, u know
-
-setup_extension(Satori,pers_data.SATORI_PREFIX)
-Satori.commands.extend(satori.commands)
-
-############################## SETUP FLAN ##############################
-
-setup_extension(Flan,pers_data.FLAN_PREFIX)
-Flan.events(flan.guild_user_add)
-
-Flan.commands.extend(flan.commands)
-
-############################## START ##############################
-
 EXTENSION_LOADER.add_default_variables(Koishi=Koishi, Satori=Satori, Flan=Flan)
-EXTENSION_LOADER.add('ext.eliza')
-EXTENSION_LOADER.add('ext.test_commands')
-EXTENSION_LOADER.add('ext.ratelimit_tests')
-EXTENSION_LOADER.load_all()
+EXTENSION_LOADER.load_extension('koishi')
+EXTENSION_LOADER.load_extension('satori')
+EXTENSION_LOADER.load_extension('flan')
 
-Koishi.commands(Interpreter(locals().copy()),name='execute')
+EXTENSION_LOADER.add('testers.test_commands')
+EXTENSION_LOADER.add('testers.ratelimit')
+EXTENSION_LOADER.add('testers.dispatch_tests')
+
+path=None
+for path in os.listdir('modules'):
+    if not path.endswith('.py'):
+        continue
+    
+    EXTENSION_LOADER.add('modules.'+path[:-3])
+    
+del path
+
+EXTENSION_LOADER.load_all()
 
 start_clients()
 
