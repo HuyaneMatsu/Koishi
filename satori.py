@@ -3,49 +3,63 @@ from random import random
 
 from bs4 import BeautifulSoup
 
-from hata import eventlist, DiscordException, sleep, Embed, Color, Task,    \
+from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES,  \
     BUILTIN_EMOJIS
-from hata.py_hdrs import METH_GET
+
 from hata.others import from_json
-from hata.events import multievent, Pagination, Timeouter, GUI_STATE_READY, \
-    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
-    GUI_STATE_SWITCHING_CTX
+from hata.events import setup_extension, Pagination, Timeouter,             \
+    GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING,        \
+    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
+from shared import SATORI_PREFIX
 
-Koishi=NotImplemented
+setup_extension(Satori,SATORI_PREFIX)
 
-commands=eventlist()
-
-@commands
+@Satori.commands
 async def invalid_command(client,message,command,content):
     guild=message.guild
     if guild is None:
         try:
-            await client.message_create('Eeh, what should I do, what should I do?!?!')
-        except DiscordException:
-            pass
+            await client.message_create(message.channel,
+                'Eeh, what should I do, what should I do?!?!')
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.cannot_send_message_to_user, # dm disabled
+                            ):
+                    return
+            
+            await client.events.error(client,'invalid_command',err)
+            return
         return
     
-    if (guild in Koishi.guild_profiles) and message.channel.cached_permissions_for(Koishi).can_send_messages:
+    if (Koishi in guild.clients) and message.channel.cached_permissions_for(Koishi).can_send_messages:
         try:
-            command=Koishi.events.message_create.commands[command]
+            command=Koishi.command_processer.commands[command]
         except KeyError:
             pass
         else:
-            await client.typing(message.channel)
-            await sleep(2.0,client.loop)
-            await client.message_create(message.channel,f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
-            await Koishi.typing(message.channel)
-            await sleep((random()*2.)+1.0,client.loop)
-            await command(Koishi,message,content)
-            return
+            if command.category.name=='TOUHOU':
+                await client.typing(message.channel)
+                await sleep(2.0,client.loop)
+                await client.message_create(message.channel,f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
+                await Koishi.typing(message.channel)
+                await sleep((random()*2.)+1.0,client.loop)
+                await command(Koishi,message,content)
+                return
     
     await client.message_create(message.channel,'I have no idea, hmpff...')
 
 WORDMATCH_RP    = re.compile('[^a-zA-z0-9]+')
 WIKI_COLOR      = Color.from_rgb(48,217,255)
 
-@commands
+@Satori.commands
 async def wiki(client,message,content):
     if not content:
         await client.message_create(message.channel,embed=Embed(
@@ -60,7 +74,7 @@ async def wiki(client,message,content):
     # this takes a while, lets type a little.
     Task(client.typing(message.channel),client.loop)
     
-    async with client.http.request(METH_GET,
+    async with client.http.get(
             'https://en.touhouwiki.net/api.php?action=opensearch&search='
             f'{search_for}&limit=25&redirects=resolve&format=json&utf8',) as response:
         response_data = await response.text()
@@ -69,14 +83,14 @@ async def wiki(client,message,content):
     while True:
         if len(response_data)<30:
             break
-
+        
         json_data=from_json(response_data)
         if len(json_data)!=4:
             break
-
+        
         for element in zip(json_data[1],json_data[3]):
             results.append(element)
-
+        
         results.sort(key=lambda item:len(item[0]))
         break
     
@@ -121,8 +135,19 @@ class TouhouWikiChooseMenu(object):
         
         try:
             message = await client.message_create(channel,embed=self.render_embed())
-        except DiscordException:
+        except BaseException as err:
             self.message=None
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                            ):
+                    return
+            
             raise
         
         self.message=message
@@ -130,7 +155,6 @@ class TouhouWikiChooseMenu(object):
         if not channel.cached_permissions_for(client).can_add_reactions:
             return self
         
-        message.weakrefer()
         for emoji in self.EMOJIS:
             await client.reaction_add(message,emoji)
         
@@ -166,12 +190,12 @@ class TouhouWikiChooseMenu(object):
         
         client=self.client
         message=self.message
-        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
         
-        if can_manage_messages:
+        if self.channel.cached_permissions_for(client).can_manage_messages:
             if not message.did_react(emoji,user):
                 return
-            Task(self.reaction_remove(client,message,emoji,user),client.loop)
+            
+            Task(self._reaction_delete(emoji,user),client.loop)
         
         task_flag=self.task_flag
         if task_flag!=GUI_STATE_READY:
@@ -196,10 +220,23 @@ class TouhouWikiChooseMenu(object):
                 self.task_flag=GUI_STATE_CANCELLED
                 try:
                     await client.message_delete(message)
-                except DiscordException:
-                    pass
-                self.cancel()
-                return
+                except BaseException as err:
+                    self.cancel()
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code == ERROR_CODES.missing_access: # client removed
+                            return
+                    
+                    await client.events.error(client,f'{self!r}.__call__',err)
+                    return
+                
+                else:
+                    self.cancel()
+                    return
             
             if emoji is self.SELECT:
                 self.task_flag=GUI_STATE_SWITCHING_CTX
@@ -229,33 +266,68 @@ class TouhouWikiChooseMenu(object):
         self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(message,embed=self.render_embed())
-        except DiscordException:
+        except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message already deleted
+                            ):
+                    return
+            
+            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            await client.events.error(client,f'{self!r}.__call__',err)
             return
 
         if self.task_flag==GUI_STATE_CANCELLING:
             self.task_flag=GUI_STATE_CANCELLED
-            if can_manage_messages:
-                try:
-                    await client.message_delete(message)
-                except DiscordException:
-                    pass
+            try:
+                await client.message_delete(message)
+            except BaseException as err:
+                
+                if isinstance(err,ConnectionError):
+                    # no internet
+                    return
+                
+                if isinstance(err,DiscordException):
+                    if err.code==ERROR_CODES.missing_access: # client removed
+                        return
+                
+                await client.events.error(client,f'{self!r}.__call__',err)
+                return
             self.cancel()
             return
         
         self.task_flag=GUI_STATE_READY
-        
-        timeouter=self.timeouter
-        if timeouter.timeout<240.:
-            timeouter.timeout+=30.
+        self.timeouter.set_timeout(240.)
     
     @staticmethod
-    async def reaction_remove(client,message,emoji,user):
+    async def _reaction_delete(self,emoji,user):
+        client=self.client
         try:
-            await client.reaction_delete(message,emoji,user)
-        except DiscordException:
-            pass
+            await client.reaction_delete(self.message,emoji,user)
+        except BaseException as err:
+            
+            if isinstance(err,ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err,DiscordException):
+                if err.code in (
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            await client.events.error(client,f'{self!r}._reaction_delete',err)
+            return
     
     async def _canceller(self,exception,):
         client=self.client
@@ -277,8 +349,22 @@ class TouhouWikiChooseMenu(object):
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(message)
-                except DiscordException:
-                    pass
+                except BaseException as err:
+                    
+                    if isinstance(err,ConnectionError):
+                        # no internet
+                        return
+                    
+                    if isinstance(err,DiscordException):
+                        if err.code in (
+                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.unknown_message, # message deleted
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                    ):
+                            return
+                    
+                    await client.events.error(client,f'{self!r}._canceller',err)
+                    return
             return
         
         timeouter=self.timeouter
@@ -300,7 +386,7 @@ class TouhouWikiChooseMenu(object):
         return Task(canceller(self,None),self.client.loop)
 
 async def download_wiki_page(client,result):
-    async with client.http.request(METH_GET,result[1]) as response:
+    async with client.http.get(result[1]) as response:
         response_data = await response.text()
     soup=BeautifulSoup(response_data,'html.parser')
     block=soup.find_all('div',class_='mw-parser-output')[2]
@@ -578,7 +664,7 @@ for char in range(ord('a'),ord('z')+1):
 
 del char, emoji
 
-@commands
+@Satori.commands
 async def emojify(client, message, content):
     if not content:
         return
