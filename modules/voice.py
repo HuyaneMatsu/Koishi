@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 import re, os, wave
 
-from hata import player
-from hata.others import filter_content
-from hata.futures import sleep,Task
-from hata.dereaddons_local import alchemy_incendiary
-from hata.embed import Embed
+from hata import player, alchemy_incendiary, sleep, Task, Embed, eventlist, \
+    Color
+from hata.events import Command
 
 import pers_data
-from help_handler import KOISHI_HELP_COLOR, KOISHI_HELPER
+
+VOICE_COLOR = Color.from_rgb(235, 52, 207)
+VOICE_COMMANDS = eventlist(type_=Command)
+
+def setup(lib):
+    Koishi.commands.extend(VOICE_COMMANDS)
+
+def teardown(lib):
+    Koishi.commands.unextend(VOICE_COMMANDS)
 
 #await it
 def save_voice(client,frames):
@@ -367,7 +373,7 @@ VOICE_SUBCOMMANDS['stop']=voice_stop
 async def voice_move(client,message,channel):
     guild=message.guild
     try:
-        channel = guild.channels[int(channel)]
+        channel = guild.all_channel[int(channel)]
     except (KeyError,ValueError):
         channel=None
     while True:
@@ -379,7 +385,7 @@ async def voice_move(client,message,channel):
             
             channel=state.channel
             if not message.channel.cached_permissions_for(client).can_connect:
-                test='I have no permissions to connect to that channel.'
+                text='I have no permissions to connect to that channel.'
                 break
             
         else:
@@ -477,24 +483,7 @@ async def voice_save(client,message,content):
     
 VOICE_SUBCOMMANDS['save']=voice_save
 
-async def voice(client,message,sub_command:str,rest):
-    guild=message.guild
-    if guild is None:
-        return
-    
-    if not sub_command:
-        await _help_voice(client,message)
-        return
-
-    try:
-        command=VOICE_SUBCOMMANDS[sub_command]
-    except KeyError:
-        await _help_voice(client,message)
-        return
-    
-    await command(client,message,rest)
-
-async def _help_voice(client,message):
+async def voice_description(client,message):
     is_owner=client.is_owner(message.author)
     
     if is_owner:
@@ -540,7 +529,23 @@ async def _help_voice(client,message):
                     )
         text=''.join(connected)
     
-    embed=Embed('voice',text,color=KOISHI_HELP_COLOR)
+    embed=Embed('voice',text,color=VOICE_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-KOISHI_HELPER.add('voice',_help_voice)
+@VOICE_COMMANDS(category='VOICE', description=voice_description)
+async def voice(client,message,sub_command:str,rest):
+    guild=message.guild
+    if guild is None:
+        return
+    
+    if not sub_command:
+        await voice_description(client,message)
+        return
+
+    try:
+        command=VOICE_SUBCOMMANDS[sub_command]
+    except KeyError:
+        await voice_description(client,message)
+        return
+    
+    await command(client,message,rest)
