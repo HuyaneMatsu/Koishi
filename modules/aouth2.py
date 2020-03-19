@@ -7,11 +7,11 @@ OAUTH2_COLOR = Color.from_rgb(148,0,211)
 OAUTH2_COMMANDS = eventlist(type_=Command)
 
 def setup(lib):
-    Koishi.command_processer.create_category('oauth2',checks=[checks.owner_only()])
+    Koishi.command_processer.create_category('OAUTH2',checks=[checks.owner_only()])
     Koishi.commands.extend(OAUTH2_COMMANDS)
     
 def teardown(lib):
-    Koishi.command_processer.delete_category('oauth2')
+    Koishi.command_processer.delete_category('OAUTH2')
 
 VALUABLE_SCOPES = [
     'identify',

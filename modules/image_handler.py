@@ -125,7 +125,7 @@ async def upload_description(client,message):
 RESERVED_TAGS={'any','vid','pic','count','index','hex',}
 
 @IMAGE_COMMANDS(category='UTILITY',description=image_description)
-async def on_command_image(client,message,content):
+async def image(client,message,content):
     result=process_on_command_image(content)
     if type(result) is str:
         await client.message_create(message.channel,result)
@@ -280,7 +280,7 @@ def process_on_command_image(content):
 
 
 @IMAGE_COMMANDS(category='UTILITY',checks=[checks.owner_only()],description=upload_description)
-async def on_command_upload(client,message,content):
+async def upload(client,message,content):
     if (not UPLOAD):
         await client.message_create(message.channel,
             'Upload is not supported, PIL library not found.')
