@@ -307,7 +307,6 @@ class TouhouWikiChooseMenu(object):
         self.task_flag=GUI_STATE_READY
         self.timeouter.set_timeout(240.)
     
-    @staticmethod
     async def _reaction_delete(self,emoji,user):
         client=self.client
         try:
