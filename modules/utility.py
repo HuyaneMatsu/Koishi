@@ -325,8 +325,10 @@ class user_info:
                 embed.color=user.default_avatar.color
         else:
             embed.color=user.color(guild)
-            if profile.roles:
-                roles=', '.join(role.mention for role in reversed(profile.roles))
+            roles = profile.roles
+            if roles:
+                roles.sort()
+                roles=', '.join(role.mention for role in reversed(roles))
             else:
                 roles='none'
             text=[]

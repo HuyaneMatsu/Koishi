@@ -72,17 +72,8 @@ class game_21_checker(object):
     __slots__=('user')
     def __init__(self,user):
         self.user=user
-    def __call__(self,emoji,user):
+    def __call__(self, message, emoji, user):
         return (user==self.user) and (emoji in Game21.EMOJIS)
-
-def wait_for_reaction_any(client,message,check,timeout):
-    future=Future(client.loop)
-    
-    WaitAndContinue(future, check, message, multievent(
-        client.events.reaction_add, client.events.reaction_delete
-            ), timeout)
-    
-    return future
 
 async def daily_description(client,message):
     prefix=client.command_processer.prefix(message)
@@ -292,7 +283,7 @@ class heartevent_start_checker(object):
     def __init__(self,client):
         self.client=client
 
-    def __call__(self,emoji,user):
+    def __call__(self, message, emoji, user):
         return self.client.is_owner(user) and ((emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI))
 
 
@@ -374,7 +365,7 @@ class heartevent(object):
         await client.reaction_add(to_check,EVENT_OK_EMOJI)
         await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
         try:
-            emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+            _,emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
         except TimeoutError:
             return
         finally:
@@ -398,7 +389,7 @@ class heartevent(object):
         
         message = await client.message_create(channel,embed=self.generate_embed())
         self.message=message
-        client.events.reaction_add.append(self,message)
+        client.events.reaction_add.append(message, self)
         Task(self.countdown(client,message),client.loop)
         await client.reaction_add(message,CURRENCY_EMOJI)
         return self
@@ -411,7 +402,7 @@ class heartevent(object):
             description=f'{convert_tdelta(self.duration)} left'
         return Embed(title,description,color=GAMBLING_COLOR)
 
-    async def __call__(self,client,emoji,user):
+    async def __call__(self, client, message, emoji, user):
         if user.is_bot or (emoji is not CURRENCY_EMOJI):
             return
         
@@ -471,7 +462,7 @@ class heartevent(object):
             except DiscordException:
                 break
 
-        client.events.reaction_add.remove(self,message)
+        client.events.reaction_add.remove(message, self)
         try:
             await client.message_delete(message)
         except DiscordException:
@@ -564,7 +555,7 @@ class dailyevent(object):
         await client.reaction_add(to_check,EVENT_OK_EMOJI)
         await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
         try:
-            emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+            _,emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
         except TimeoutError:
             return
         finally:
@@ -588,7 +579,7 @@ class dailyevent(object):
 
         message = await client.message_create(channel,embed=self.generate_embed())
         self.message=message
-        client.events.reaction_add.append(self,message)
+        client.events.reaction_add.append(message, self)
         Task(self.countdown(client,message),client.loop)
         await client.reaction_add(message,CURRENCY_EMOJI)
         return self
@@ -601,7 +592,7 @@ class dailyevent(object):
             description=f'{convert_tdelta(self.duration)} left'
         return Embed(title,description,color=GAMBLING_COLOR)
 
-    async def __call__(self,client,emoji,user):
+    async def __call__(self, client, message, emoji, user):
         if user.is_bot or (emoji is not CURRENCY_EMOJI):
             return
 
@@ -676,7 +667,7 @@ class dailyevent(object):
             except DiscordException:
                 break
 
-        client.events.reaction_add.remove(self,message)
+        client.events.reaction_add.remove(message, self)
         try:
             await client.message_delete(message)
         except DiscordException:
@@ -894,15 +885,13 @@ class Game21(object):
         self.client_hand=client_hand
         self.client_applied=client_applied
         self.timeouter=Timeouter(client.loop,self,timeout=300.)
-        client.events.reaction_add.append(self,message)
-        client.events.reaction_delete.append(self,message)
+        client.events.reaction_add.append(message, self)
+        client.events.reaction_delete.append(message, self)
         return self
     
-    async def __call__(self,client,emoji,user):
+    async def __call__(self, client, message, emoji, user):
         if user!=self.user or emoji not in self.EMOJIS:
             return
-        
-        message=self.message
         
         if self.channel.cached_permissions_for(client).can_manage_messages:
             if not message.did_react(emoji,user):
@@ -1094,8 +1083,8 @@ class Game21(object):
         client=self.client
         message=self.message
         
-        client.events.reaction_add.remove(self,message)
-        client.events.reaction_delete.remove(self,message)
+        client.events.reaction_add.remove(message, self)
+        client.events.reaction_delete.remove(message, self)
         
         if self.task_flag==GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.

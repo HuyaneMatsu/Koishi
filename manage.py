@@ -28,9 +28,9 @@ Flan=Client(pers_data.FLAN_TOKEN,
         )
 
 EXTENSION_LOADER.add_default_variables(Koishi=Koishi, Satori=Satori, Flan=Flan)
-EXTENSION_LOADER.load_extension('koishi')
-EXTENSION_LOADER.load_extension('satori')
-EXTENSION_LOADER.load_extension('flan')
+EXTENSION_LOADER.load_extension('koishi', locked=True)
+EXTENSION_LOADER.load_extension('satori', locked=True)
+EXTENSION_LOADER.load_extension('flan'  , locked=True)
 
 EXTENSION_LOADER.add('testers.test_commands')
 EXTENSION_LOADER.add('testers.ratelimit')

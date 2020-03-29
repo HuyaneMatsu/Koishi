@@ -2003,7 +2003,7 @@ async def ratelimit_test0013(client,message):
             await client.reaction_add(message,emoji)
         
         try:
-            emoji, _ = await wait_for_reaction(client, message, ratelimit_test0020_checker(client), 40.)
+            _, emoji, _ = await wait_for_reaction(client, message, ratelimit_test0020_checker(client), 40.)
         except TimeoutError:
             emoji = ratelimit_test0020_CANCEL
             

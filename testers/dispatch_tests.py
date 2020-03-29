@@ -352,8 +352,8 @@ class dispatch_tester:
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
-    async def channel_delete(self,client,channel):
-        Task(self.old_events['channel_delete'](client,channel),client.loop)
+    async def channel_delete(self,client,channel,guild):
+        Task(self.old_events['channel_delete'](client,channel,guild),client.loop)
         if self.channel is None:
             return
         
@@ -363,7 +363,7 @@ class dispatch_tester:
 
     @classmethod
     async def channel_edit(self,client,channel,old):
-        Task(self.old_events['channel_delete'](client,channel,old),client.loop)
+        Task(self.old_events['channel_edit'](client,channel,old),client.loop)
         if self.channel is None:
             return
         
@@ -405,21 +405,21 @@ class dispatch_tester:
         text=f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[Embed(description=text)]
         await Pagination(client,self.channel,pages,120.)
-
+    
     @classmethod
-    async def emoji_create(self,client,guild,emoji):
-        Task(self.old_events['emoji_create'](client,guild,emoji),client.loop)
+    async def emoji_create(self,client,emoji):
+        Task(self.old_events['emoji_create'](client,emoji),client.loop)
         if self.channel is None:
             return
-
+    
         result=pretty_print(emoji)
-        result.insert(0,f'Emoji created: {emoji.name} {emoji.id} at guild {guild!r}')
+        result.insert(0,f'Emoji created: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
     
     @classmethod
-    async def emoji_delete(self,client,guild,emoji):
-        Task(self.old_events['emoji_delete'](client,guild,emoji),client.loop)
+    async def emoji_delete(self,client,emoji,guild):
+        Task(self.old_events['emoji_delete'](client,emoji,guild),client.loop)
         if self.channel is None:
             return
         
@@ -429,13 +429,13 @@ class dispatch_tester:
         await Pagination(client,self.channel,pages,120.)
         
     @classmethod
-    async def emoji_edit(self,client,guild,emoji,old):
-        Task(self.old_events['emoji_edit'](client,guild,emoji,old),client.loop)
+    async def emoji_edit(self,client,emoji,old):
+        Task(self.old_events['emoji_edit'](client,emoji,old),client.loop)
         if self.channel is None:
             return
     
         result=[]
-        result.append(f'Emoji edited: {emoji.name} {emoji.id} at guild {guild!r}')
+        result.append(f'Emoji edited: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         for key, value in old.items():
             if key=='roles':
                 removed, added = listdifference(value,emoji.roles)
@@ -619,8 +619,8 @@ class dispatch_tester:
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
-    async def role_delete(self,client,role):
-        Task(self.old_events['role_delete'](client,role,),client.loop)
+    async def role_delete(self,client,role,guild):
+        Task(self.old_events['role_delete'](client,role,guild),client.loop)
         if self.channel is None:
             return
         

@@ -1,13 +1,11 @@
 import re
-from weakref import WeakKeyDictionary
 from random import random
 
 from hata import CancelledError, sleep, Task, DiscordException, methodize,  \
-    ERROR_CODES, BUILTIN_EMOJIS
+    ERROR_CODES, BUILTIN_EMOJIS, EventWaitforBase
 from hata.events import CommandProcesser, Timeouter, GUI_STATE_READY,       \
     GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
     GUI_STATE_SWITCHING_CTX
-from hata.parsers import EventHandlerBase
 
 try:
     from bs4 import BeautifulSoup
@@ -55,22 +53,24 @@ def smart_join(list_,limit=2000,sep='\n'):
         result.append(value)
     return sep.join(result)
 
-class MessageDeleteWaitfor(EventHandlerBase):
-    __slots__=('waitfors',)
+class MessageDeleteWaitfor(EventWaitforBase):
     __event_name__='message_delete'
-    def __init__(self):
-        self.waitfors=WeakKeyDictionary()
 
-    async def __call__(self,client,message):
-        try:
-            event=self.waitfors[message.channel]
-        except KeyError:
-            return
-        await event(client,message)
+class GuildDeleteWaitfor(EventWaitforBase):
+    __event_name__='guild_delete'
 
-    append=CommandProcesser.append
-    remove=CommandProcesser.remove
-    
+class RoleDeleteWaitfor(EventWaitforBase):
+    __event_name__='role_delete'
+
+class ChannelDeleteWaitfor(EventWaitforBase):
+    __event_name__='channel_delete'
+
+class EmojiDeleteWaitfor(EventWaitforBase):
+    __event_name__='emoji_delete'
+
+class RoleEditWaitfor(EventWaitforBase):
+    __event_name__='role_edit'
+
 class CooldownHandler:
     __slots__=('cache',)
     def __init__(self):
@@ -144,24 +144,20 @@ class PAGINATION_5PN(object):
         if not channel.cached_permissions_for(client).can_add_reactions:
             return self
         
-        message.weakrefer()
-        
         if len(self.pages)>1:
             for emoji in self.EMOJIS:
                 await client.reaction_add(message,emoji)
         else:
             await client.reaction_add(message,self.CANCEL)
         
-        client.events.reaction_add.append(self,message)
-        client.events.reaction_delete.append(self,message)
+        client.events.reaction_add.append(message, self)
+        client.events.reaction_delete.append(message, self)
         self.timeouter=Timeouter(client.loop,self,timeout=300.)
         return self
     
-    async def __call__(self,client,emoji,user):
+    async def __call__(self, client, message, emoji, user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
-        
-        message=self.message
         
         if self.channel.cached_permissions_for(client).can_manage_messages:
             if not message.did_react(emoji,user):
@@ -206,7 +202,10 @@ class PAGINATION_5PN(object):
                         return
                     
                     if isinstance(err,DiscordException):
-                        if err.code == ERROR_CODES.missing_access: # client removed
+                        if err.code in (
+                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.unknown_channel, # message's channel deleted
+                                    ):
                             return
                     
                     await client.events.error(client,f'{self!r}.__call__',err)
@@ -250,6 +249,7 @@ class PAGINATION_5PN(object):
             
             if isinstance(err,DiscordException):
                 if err.code in (
+                        ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
                             ):
@@ -258,7 +258,7 @@ class PAGINATION_5PN(object):
             # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
             await client.events.error(client,f'{self!r}.__call__',err)
             return
-
+        
         if self.task_flag==GUI_STATE_CANCELLING:
             self.task_flag=GUI_STATE_CANCELLED
             try:
@@ -287,8 +287,8 @@ class PAGINATION_5PN(object):
         client=self.client
         message=self.message
         
-        client.events.reaction_add.remove(self,message)
-        client.events.reaction_delete.remove(self,message)
+        client.events.reaction_add.remove(message, self)
+        client.events.reaction_delete.remove(message, self)
 
         if self.task_flag==GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
@@ -311,6 +311,7 @@ class PAGINATION_5PN(object):
                     
                     if isinstance(err,DiscordException):
                         if err.code in (
+                                ERROR_CODES.unknown_channel, # message's channel deleted
                                 ERROR_CODES.missing_access, # client removed
                                 ERROR_CODES.unknown_message, # message deleted
                                 ERROR_CODES.missing_permissions, # permissions changed meanwhile
@@ -351,6 +352,7 @@ class PAGINATION_5PN(object):
             
             if isinstance(err,DiscordException):
                 if err.code in (
+                        ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.missing_permissions, # permissions changed meanwhile

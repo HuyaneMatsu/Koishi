@@ -149,7 +149,7 @@ class check_emoji_and_user(object):
     def __init__(self,emoji,user):
         self.emoji=emoji
         self.user=user
-    def __call__(self,emoji,user):
+    def __call__(self, message, emoji, user):
         return (self.emoji is emoji) and (self.user==user)
 
 @GAMES_COMMANDS.from_class

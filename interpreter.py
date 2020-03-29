@@ -143,11 +143,11 @@ class InterpreterInputter(object):
             pages=[]
             while printer:
                 pages.append(Embed('Waiting for input (timeout 5 min):',printer.get_value()))
-
+            
             amount=len(pages)
             for index,embed in enumerate(pages,1):
                 embed.add_footer(f'page {index}/{amount}')
-
+        
         else:
             pages=[Embed('Waiting for input (timeout 5 min):')]
         

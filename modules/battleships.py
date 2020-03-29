@@ -108,7 +108,7 @@ class wait_on_reply(object):
         self.source=source
         self.target=target
     
-    def __call__(self,message):
+    def __call__(self, message):
         if message.author!=self.target:
             return False
         
@@ -296,15 +296,15 @@ class user_profile(object):
 
         message=self.message
         if new:
-            client.events.reaction_add.remove(self,message)
-            client.events.reaction_delete.remove(self,message)
+            client.events.reaction_add.remove(message, self)
+            client.events.reaction_delete.remove(message, self)
 
             message = await client.message_create(self.channel,embed=self.render_state_1())
             self.message=message
             Task(client.reaction_add(message,SWITCH),client.loop)
             
-            client.events.reaction_add.append(self,message)
-            client.events.reaction_delete.append(self,message)
+            client.events.reaction_add.append(message, self)
+            client.events.reaction_delete.append(message, self)
         else:
             await client.message_edit(message,embed=self.render_state_1())
 
@@ -332,8 +332,8 @@ class user_profile(object):
         self.message=message
         Task(client.reaction_add(self.message,SWITCH),client.loop)
         
-        client.events.reaction_add.append(self,message)
-        client.events.reaction_delete.append(self,message)
+        client.events.reaction_add.append(message, self)
+        client.events.reaction_delete.append(message, self)
 
         self.last_switch=0.
         
@@ -347,19 +347,19 @@ class user_profile(object):
         client=self.client
 
         message=self.message
-        client.events.reaction_add.remove(self,message)
-        client.events.reaction_delete.remove(self,message)
+        client.events.reaction_add.remove(message, self)
+        client.events.reaction_delete.remove(message, self)
         
         message = await client.message_create(self.channel,embed=self.render_state_2())
         self.message=message
         Task(client.reaction_add(message,SWITCH),client.loop)
 
-        client.events.reaction_add.append(self,message)
-        client.events.reaction_delete.append(self,message)
+        client.events.reaction_add.append(message, self)
+        client.events.reaction_delete.append(message, self)
         
         self.last_switch=0.
         
-    async def __call__(self,client,user,emoji):
+    async def __call__(self, client, message, user, emoji):
         if user is client:
             return
         
@@ -374,7 +374,7 @@ class user_profile(object):
         else:
             embed=self.render_state_1()
         
-        await self.client.message_edit(self.message,embed=embed)
+        await self.client.message_edit(message,embed=embed)
 
 
     def cancel(self):
@@ -385,14 +385,14 @@ class user_profile(object):
 
         del self.other
         if self.process.__func__ is type(self).process_state_1:
-            client.events.reaction_add.remove(self,self.message)
-            client.events.reaction_delete.remove(self,self.message)
+            client.events.reaction_add.remove(self.message, self)
+            client.events.reaction_delete.remove(self.message, self)
         
     async def cancel_later(self):
         client=self.client
         await sleep(300.,client.loop)
-        client.events.reaction_add.remove(self,self.message)
-        client.events.reaction_delete.remove(self,self.message)
+        client.events.reaction_add.remove(self.message, self)
+        client.events.reaction_delete.remove(self.message, self)
         del self.other
 
 
@@ -505,8 +505,8 @@ class battleships_game:
             player1.channel = await client.channel_private_create(player1.user)
 
             #adding channels to the event to notify us
-            client.events.message_create.append(self,player1.channel)
-            client.events.message_create.append(self,player2.channel)
+            client.events.message_create.append(player1.channel, self)
+            client.events.message_create.append(player2.channel, self)
             
             #game starts            
             self.future=FutureWM(loop,2)
@@ -814,7 +814,7 @@ class battleships_game:
         await other.process(True,text2)
         self.future.set_result(False)
     
-    async def __call__(self,client,message):
+    async def __call__(self, client, message):
         if message.author is client:
             return
         

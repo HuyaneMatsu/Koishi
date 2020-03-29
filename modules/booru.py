@@ -96,16 +96,15 @@ class ShuffledShelter(object):
             await client.reaction_add(message,emoji)
 
         self.timeouter=Timeouter(client.loop,self,timeout=300.)
-        client.events.reaction_add.append(self,message)
-        client.events.reaction_delete.append(self,message)
+        client.events.reaction_add.append(message, self)
+        client.events.reaction_delete.append(message, self)
         
         return self
     
-    async def __call__(self,client,emoji,user):
+    async def __call__(self, client, message, emoji, user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         
-        message=self.message
         can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
 
         if can_manage_messages:
@@ -179,8 +178,8 @@ class ShuffledShelter(object):
         client=self.client
         message=self.message
         
-        client.events.reaction_add.remove(self,message)
-        client.events.reaction_delete.remove(self,message)
+        client.events.reaction_add.remove(message, self)
+        client.events.reaction_delete.remove(message, self)
         
         if self.task_flag==GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.

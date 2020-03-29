@@ -60,8 +60,8 @@ class Channeller(object):
         for pair in pairs:
             channel=pair[0]
             channel.mc_gc_limit=30 #if caching is diabled we turn this on
-            event_1.append(self,channel)
-            event_2.append(deleter,channel)
+            event_1.append(channel, self)
+            event_2.append(channel, deleter)
             CHANNELINGS[channel.id]=self
 
     def cancel(self,channel):
@@ -82,16 +82,16 @@ class Channeller(object):
                     del pairs[index]
                     break
             channel.mc_gc_limit = channel.MC_GC_LIMIT
-            event_1.remove(self,channel)
-            event_2.remove(deleter,channel)
+            event_1.remove(channel, self)
+            event_2.remove(channel, deleter)
             del CHANNELINGS[channel.id]
             return
 
         for pair in pairs:
             channel=pair[0]
             channel.mc_gc_limit=channel.MC_GC_LIMIT
-            event_1.remove(self,channel)
-            event_2.remove(deleter,channel)
+            event_1.remove(channel, self)
+            event_2.remove(channel, deleter)
             
         deleter.parent=None
         self.deleter=None

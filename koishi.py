@@ -6,13 +6,19 @@ from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS,\
 from hata.events import Pagination, checks, setup_extension
 from hata.dereaddons_local import function
 
-from tools import MessageDeleteWaitfor
+from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor,\
+    ChannelDeleteWaitfor, EmojiDeleteWaitfor, RoleEditWaitfor
 from shared import KOISHI_PREFIX
 from interpreter import Interpreter
 
 setup_extension(Koishi,KOISHI_PREFIX)
 
 Koishi.events(MessageDeleteWaitfor)
+Koishi.events(GuildDeleteWaitfor)
+Koishi.events(RoleDeleteWaitfor)
+Koishi.events(ChannelDeleteWaitfor)
+Koishi.events(EmojiDeleteWaitfor)
+Koishi.events(RoleEditWaitfor)
 
 @Koishi.events
 class once_on_ready(object):
@@ -75,8 +81,7 @@ async def default_event(client,message):
     else:
         return
     
-    if text:
-        await client.message_create(message.channel,text)
+    await client.message_create(message.channel,text)
 
 DUNGEON=Guild.precreate(388267636661682178)
 

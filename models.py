@@ -34,6 +34,18 @@ class currency_model(BASE):
 
 CURRENCY_TABLE=currency_model.__table__
 
+class auto_react_role_model(BASE):
+    __tablename__ = 'AUTO_REACT_ROLE'
+    id          = Column(Integer,primary_key=True)
+    message_id  = Column(Integer,unique = True)
+    channel_id  = Column(Integer)
+    data        = Column(BINARY(320))
+    behaviour   = Column(Integer)
+    client_id   = Column(Integer)
+
+AUTO_REACT_ROLE_TABLE=auto_react_role_model.__table__
+
+
 #creating tables
 DB_ENGINE = create_engine(DATABASE_NAME)
 BASE.metadata.create_all(DB_ENGINE)

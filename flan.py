@@ -547,7 +547,7 @@ ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_IMAGE_CANCEL = BUILTIN_EMOJIS['x']
 ADD_IMAGE_EMOJIS = (ADD_IMAGE_OK, ADD_IMAGE_CANCEL)
 
-def ADD_IMAGE_CHECKER(emoji, user):
+def ADD_IMAGE_CHECKER(message, emoji, user):
     if user.is_bot:
         return False
     

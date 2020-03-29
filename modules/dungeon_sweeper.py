@@ -222,7 +222,7 @@ class ds_game(object):
             await client.events.error(client,f'{self!r}.__new__',err)
             return self
         
-        client.events.reaction_add.append(self,message)
+        client.events.reaction_add.append(message, self)
         
         return self
     
@@ -432,7 +432,7 @@ class ds_game(object):
     async def default_coro():
         pass
     
-    async def __call__(self,client,emoji,user):
+    async def __call__(self, client, message, emoji, user):
         if user is not self.user:
             return
     
@@ -674,7 +674,7 @@ class ds_game(object):
         except KeyError:
             return #already cancelled
         
-        self.client.events.reaction_add.remove(self,self.message)
+        self.client.events.reaction_add.remove(self.message, self)
         
         await self.save_position()
     
@@ -845,12 +845,12 @@ class ds_game(object):
             await client.events.error(client,f'{self!r}.renew',err)
             return
         
-        client.events.reaction_add.remove(self,self.message)
+        client.events.reaction_add.remove(self.message, self)
         
         self.message=message
         self.channel=channel
         
-        client.events.reaction_add.append(self,message)
+        client.events.reaction_add.append(message, self)
         
         self.last=monotonic()
         
@@ -1820,7 +1820,7 @@ async def ds_modify_best(client,message,content):
             
             data=bytearray(data)
             data[position:position+2]=best.to_bytes(2,byteorder='big')
-        
+            
             await connector.execute(DS_TABLE.update(). \
                 values(data=data). \
                 where(ds_model.user_id==obj.user_id))

@@ -151,7 +151,7 @@ class kanako_game(object):
         self.history=[]
         self.answers={}
         self.running=True
-        self.client.events.message_create.append(self,self.channel)
+        self.client.events.message_create.append(self.channel, self)
         
         Task(self.run(),self.client.loop)
 
@@ -292,7 +292,7 @@ class kanako_game(object):
         await self.send_or_except(Embed(embed.title,'',KANAKO_COLOR))
             
         del ACTIVE_GAMES[channel.id]
-        client.events.message_create.remove(self,self.channel)
+        client.events.message_create.remove(self.channel, self)
         self.running=False
 
         await game_statistics(self)
@@ -390,7 +390,7 @@ class kanako_game(object):
         client=self.client
         del ACTIVE_GAMES[self.channel.id]
         if self.running:
-            client.events.message_create.remove(self,self.channel)
+            client.events.message_create.remove(self.channel, self)
             self.running=False
         Task(client.message_create(self.channel,embed=Embed('','Game cancelled',KANAKO_COLOR)),client.loop)
 
@@ -661,12 +661,12 @@ class embedination(object):
                 await client.reaction_add(message,emoji)
 
         
-        client.events.reaction_add.append(self,message)
-        client.events.reaction_delete.append(self,message)
+        client.events.reaction_add.append(message, self)
+        client.events.reaction_delete.append(message, self)
         self.timeouter=Timeouter(client.loop,self,timeout=150)
         return self
     
-    async def __call__(self,client,emoji,user):
+    async def __call__(self, client, message, emoji, user):
         if user.is_bot or (emoji not in self.EMOJIS):
             return
         
@@ -746,8 +746,8 @@ class embedination(object):
         client=self.client
         message=self.message
         
-        client.events.reaction_add.remove(self,message)
-        client.events.reaction_delete.remove(self,message)
+        client.events.reaction_add.remove(message, self)
+        client.events.reaction_delete.remove(message, self)
         
         if self.task_flag==GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
@@ -819,7 +819,7 @@ class embedination(object):
             await client.events.error(client,f'{self!r}._reaction_delete',err)
             return
 
-KANAKO_COMMANDS(kanako_manager,description=kanako_description,category='GAMES', checks=[checks.guild_only()])
+KANAKO_COMMANDS(kanako_manager,name='kanako_game', description=kanako_description,category='GAMES', checks=[checks.guild_only()])
 
 del BUILTIN_EMOJIS
 del Color
