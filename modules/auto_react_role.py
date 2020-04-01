@@ -1,13 +1,10 @@
 import re
 from weakref import WeakKeyDictionary
 
-from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep,    \
-    ScarletExecutor, MESSAGES, Permission, Color, Embed, Emoji, CLIENTS, Role,\
-    eventlist
-
-from hata.events import ContentParser, checks, Converter
-
-from hata.others import IS_ID_RP
+from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
+    Color, Embed, Emoji, CLIENTS, Role, eventlist
+from hata.ext.commands import ContentParser, checks, Converter
+from hata.discord.others import IS_ID_RP
 
 from shared import FI_NO
 from models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE

@@ -1,5 +1,5 @@
 from hata import eventlist
-from hata.events import Command, checks
+from hata.ext.commands import Command
 
 TEST_COMMANDS=eventlist(type_=Command)
 
@@ -8,4 +8,3 @@ def setup(lib):
     
 def teardown(lib):
     Koishi.commands.unextend(TEST_COMMANDS)
-    

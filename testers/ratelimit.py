@@ -1,44 +1,24 @@
 import os, re
 join=os.path.join
-from collections import deque
 from threading import current_thread
-from time import perf_counter, time as time_now, monotonic
-from io import StringIO
-
-from hata.dereaddons_local import multidict_titled, titledstr, _spaceholder,\
-    alchemy_incendiary
-from hata.futures import Future,sleep,Task, WaitTillAll, render_exc_to_list,\
-    CancelledError, _EXCFrameType, render_frames_to_list
-from hata.parsers import eventlist
-from hata.client_core import CLIENTS
-from hata.eventloop import EventThread
-from hata.py_hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST,\
-    METH_PUT, AUTHORIZATION, CONTENT_TYPE
-
-from hata.py_reqrep import Request_CM
-from hata.exceptions import DiscordException
-from hata.others import to_json,from_json,quote
-from hata.emoji import BUILTIN_EMOJIS
-from hata.message import Message
-from hata.others import ext_from_base64, bytes_to_base64, VoiceRegion,      \
-    VerificationLevel, MessageNotificationLevel, ContentFilterLevel,        \
-    DISCORD_EPOCH, Discord_hdrs
-from hata.user import User
-from hata.role import Role
-from hata.client import Client, Achievement
-from hata.oauth2 import UserOA2, parse_oauth2_redirect_url
-from hata.channel import cr_pg_channel_object, ChannelCategory, ChannelText,\
-    ChannelGuildBase
-from hata.guild import PartialGuild
-from hata.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED
-from hata.integration import Integration
+from time import time as time_now
 from email._parseaddr import _parsedate_tz
-from datetime import datetime,timedelta,timezone
-from hata.embed import Embed
-from hata.webhook import Webhook
-from hata.ios import ReuAsyncIO, AsyncIO
-from hata.events import wait_for_message, Pagination, wait_for_reaction,    \
-    Command, checks
+from datetime import datetime, timedelta, timezone
+
+from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, multidict_titled, titledstr, Embed, \
+    alchemy_incendiary, Webhook, eventlist, EventThread, DiscordException, BUILTIN_EMOJIS, Message, ChannelText, \
+    VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
+    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role
+
+from hata.backend.dereaddons_local import _spaceholder
+from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
+from hata.backend.py_hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST, METH_PUT, AUTHORIZATION, \
+    CONTENT_TYPE
+from hata.backend.py_reqrep import Request_CM
+from hata.discord.others import to_json, from_json, quote, bytes_to_base64, ext_from_base64, Discord_hdrs
+from hata.discord.guild import PartialGuild
+from hata.discord.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED
+from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks
 
 RATELIMIT_RESET=Discord_hdrs.RATELIMIT_RESET
 RATELIMIT_RESET_AFTER=Discord_hdrs.RATELIMIT_RESET_AFTER

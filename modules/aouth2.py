@@ -1,7 +1,7 @@
-from hata import Color, Embed, eventlist, parse_oauth2_redirect_url, sleep, \
-    DiscordException, ERROR_CODES, cr_pg_channel_object, ChannelText
-from hata.events import Command, checks, Pagination
-from hata.prettyprint import pchunkify
+from hata import Color, Embed, eventlist, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
+    cr_pg_channel_object, ChannelText
+from hata.ext.commands import Command, checks, Pagination
+from hata.ext.prettyprint import pchunkify
 
 OAUTH2_COLOR = Color.from_rgb(148,0,211)
 OAUTH2_COMMANDS = eventlist(type_=Command)

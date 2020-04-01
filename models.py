@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, BINARY, create_engine, String, DateTime
-from hata.kokoro_sqlalchemy import KOKORO_STRATEGY
+from hata.ext.kokoro_sqlalchemy import KOKORO_STRATEGY
 
 BASE = declarative_base()
 DATABASE_NAME='sqlite:///_sqlite.db'

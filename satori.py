@@ -3,17 +3,14 @@ from random import random
 
 from bs4 import BeautifulSoup
 
-from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES,  \
-    BUILTIN_EMOJIS
-
-from hata.others import from_json
-from hata.events import setup_extension, Pagination, Timeouter,             \
-    GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING,        \
-    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
+from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS
+from hata.discord.others import from_json
+from hata.ext.commands import setup_ext_commands, Pagination, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
+    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
 from shared import SATORI_PREFIX
 
-setup_extension(Satori,SATORI_PREFIX)
+setup_ext_commands(Satori,SATORI_PREFIX)
 
 @Satori.commands
 async def invalid_command(client,message,command,content):
@@ -159,8 +156,8 @@ class TouhouWikiChooseMenu(object):
             await client.reaction_add(message,emoji)
         
         self.timeouter=Timeouter(client.loop,self,timeout=300.0)
-        client.events.reaction_add.append(self,message)
-        client.events.reaction_delete.append(self,message)
+        client.events.reaction_add.append(message, self)
+        client.events.reaction_delete.append(message, self)
         return self
     
     def render_embed(self):
@@ -332,8 +329,8 @@ class TouhouWikiChooseMenu(object):
         client=self.client
         message=self.message
         
-        client.events.reaction_add.remove(self,message)
-        client.events.reaction_delete.remove(self,message)
+        client.events.reaction_add.remove(message, self)
+        client.events.reaction_delete.remove(message, self)
         
         if self.task_flag==GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.

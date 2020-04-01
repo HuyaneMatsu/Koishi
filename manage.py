@@ -4,7 +4,7 @@ import sys, os
 sys.path.append(os.path.abspath('..'))
 
 from hata import Client, start_clients, ActivityGame, ActivityWatching
-from hata.extension_loader import EXTENSION_LOADER
+from hata.ext.extension_loader import EXTENSION_LOADER
 
 import pers_data
 

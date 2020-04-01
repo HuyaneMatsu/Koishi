@@ -1,22 +1,19 @@
 import re, os
 
-from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS,\
-    AsyncIO
+from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO
 
-from hata.events import setup_extension, Cooldown, Pagination, checks,      \
-    wait_for_reaction
+from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
 
 from shared import FLAN_PREFIX
 from tools import CooldownHandler
-from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES,      \
-    CHESUTO_FOLDER
+from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER
 
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
 CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
 
-setup_extension(Flan,FLAN_PREFIX)
+setup_ext_commands(Flan,FLAN_PREFIX)
 
 @Flan.events
 async def guild_user_add(client, guild, user):
@@ -150,7 +147,7 @@ class sync_avatar:
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
-@Flan.commands.from_class
+#@Flan.commands.from_class
 class massadd:
     async def command(client,message):
         try:
@@ -619,7 +616,7 @@ class add_image:
                     await client.reaction_add(message,emoji)
                 
                 try:
-                    emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
+                    _, emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
                 except TimeoutError:
                     emoji = ADD_IMAGE_CANCEL
                 

@@ -1,9 +1,7 @@
 from random import random, choice, randint
 
-from hata import Color, Embed, eventlist, DiscordException, parse_emoji,    \
-    CLIENTS, BUILTIN_EMOJIS, ERROR_CODES
-from hata.events import Command, wait_for_message, ConverterFlag, Converter,\
-    wait_for_reaction
+from hata import Color, Embed, eventlist, DiscordException, parse_emoji, CLIENTS, BUILTIN_EMOJIS, ERROR_CODES
+from hata.ext.commands import Command, wait_for_message, ConverterFlag, Converter, wait_for_reaction
 
 GAMES_COLOR = Color.from_rgb(148,0,211)
 GAMES_COMMANDS = eventlist(type_=Command)

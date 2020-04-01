@@ -2,11 +2,9 @@
 import re
 from collections import deque
 
-from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task,\
-    DiscordException
-from hata.events import Timeouter, Cooldown, Command, GUI_STATE_READY,      \
-    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
-    GUI_STATE_SWITCHING_CTX
+from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task, DiscordException
+from hata.ext.commands import Timeouter, Cooldown, Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
+    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
 from tools import BeautifulSoup, choose, pop_one, CooldownHandler, mark_as_async, choose_notsame
 

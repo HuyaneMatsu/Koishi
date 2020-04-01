@@ -2,9 +2,9 @@
 import re, time
 from random import randint
 
-from hata import Color,filter_content, is_user_mention, Future, FutureWM,   \
-    future_or_timeout, sleep, Task, DiscordException, BUILTIN_EMOJIS, Embed
-from hata.events import WaitAndContinue, Converter, ConverterFlag, checks
+from hata import Color,filter_content, is_user_mention, Future, FutureWM, future_or_timeout, sleep, Task, \
+    DiscordException, BUILTIN_EMOJIS, Embed
+from hata.ext.commands import WaitAndContinue, Converter, ConverterFlag, checks
 
 BS_COLOR = Color.from_rgb(71, 130, 255)
 

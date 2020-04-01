@@ -3,7 +3,7 @@ import re, os, functools
 from io import BytesIO
 
 from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, eventlist, Color
-from hata.events import Command, checks
+from hata.ext.commands import Command, checks
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP

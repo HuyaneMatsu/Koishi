@@ -1,17 +1,16 @@
 import re
 from io import StringIO
+from types import FunctionType as function
 
-from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS,\
-    CHANNELS, GUILDS
-from hata.events import Pagination, checks, setup_extension
-from hata.dereaddons_local import function
+from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS
+from hata.ext.commands import Pagination, checks, setup_ext_commands
 
-from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor,\
-    ChannelDeleteWaitfor, EmojiDeleteWaitfor, RoleEditWaitfor
+from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
+    EmojiDeleteWaitfor, RoleEditWaitfor
 from shared import KOISHI_PREFIX
 from interpreter import Interpreter
 
-setup_extension(Koishi,KOISHI_PREFIX)
+setup_ext_commands(Koishi,KOISHI_PREFIX)
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)

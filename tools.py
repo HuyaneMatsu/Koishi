@@ -1,11 +1,10 @@
 import re
 from random import random
 
-from hata import CancelledError, sleep, Task, DiscordException, methodize,  \
-    ERROR_CODES, BUILTIN_EMOJIS, EventWaitforBase
-from hata.events import CommandProcesser, Timeouter, GUI_STATE_READY,       \
-    GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED,    \
-    GUI_STATE_SWITCHING_CTX
+from hata import CancelledError, sleep, Task, DiscordException, methodize, ERROR_CODES, BUILTIN_EMOJIS, \
+    EventWaitforBase
+from hata.ext.commands import CommandProcesser, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
+    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
 try:
     from bs4 import BeautifulSoup

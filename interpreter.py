@@ -1,12 +1,12 @@
-from threading import Lock as sync_Lock
+
 import re
+from threading import Lock as SyncLock
 
 from collections import deque
-from hata.embed import Embed
-from hata.futures import Lock, Task, _ignore_frame
-from hata.events import Pagination, wait_for_message
-from hata.dereaddons_local import alchemy_incendiary
-from hata.client_core import KOKORO
+
+from hata import Embed, Lock, Task, alchemy_incendiary, KOKORO
+from hata.ext.commands import Pagination, wait_for_message
+from hata.backend.futures import _ignore_frame
 
 _ignore_frame(__spec__.origin, '__call__',
     'await client.loop.run_in_executor(alchemy_incendiary(exec,(code_object,self.locals),),)')
@@ -16,7 +16,7 @@ _ignore_frame(__spec__.origin, '__call__',
 class InterpreterPrinter(object):
     __slots__=('lock','buffer',)
     def __init__(self):
-        self.lock=sync_Lock()
+        self.lock=SyncLock()
         self.buffer=deque()
 
     def write(self,value):

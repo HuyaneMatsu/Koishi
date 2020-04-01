@@ -1,6 +1,6 @@
 [
     {
-        "description": "I. Select a one of your chess pieces, that piece ignores all captures and removal from Spells for 1 turn.\nII. You can choose to play an extra card after this card is played.",
+        "description": "I. Select a one of your chess pieces, that piece ignores all captures and removal from card effects for 1 turn.\nII. You can choose to play an extra card after this card is played.",
         "id": 645642084635639819,
         "image_name": null,
         "name": "Aegis Reinforcement",
@@ -21,21 +21,21 @@
         "rarity": 0
     },
     {
-        "description": "This card can only be used on your 15th turn or later.\nI. Your King ignores all captures and removals from Spells effects for 1 turn.\nII. Select an enemy chess piece except for the King and Queen. That piece will be removed immediately if:\n- It moves.\n- It gains an effect from a Spell.",
+        "description": "This card can only be used on your 15th turn or later.\nI. Your King ignores all captures and removals from card effects for 1 turn.\nII. Select an enemy piece except for the King and Queen. That piece will be removed immediately if:\n- It moves.\n- It gains an effect from a card.",
         "id": 645642025881829376,
         "image_name": null,
         "name": "Duality",
         "rarity": 4
     },
     {
-        "description": "I. Select one of your Rooks. That Rook ignores all captures and removal from Spells. The effect lasts for 1 turn.\nII. Switch your King with that Rook.\nThis card can be played even when your King is under check.\nThe effect can't be played on Kings outside of the one you started from the start of the match.",
+        "description": "I. Select one of your Rooks. That Rook ignores all captures and removal from card effects. The effect lasts for 1 turn.\nII. Switch your King with that Rook.\nThis card can be played even when your King is under check.\nThe effect can't be played on Kings outside of the one you started from the start of the match.",
         "id": 645642025881829377,
         "image_name": null,
         "name": "Immortal Defender",
         "rarity": 4
     },
     {
-        "description": "I. Select your third or fourth lane. All the Pawns in that lane gain the following effects:\n- Ignore all captures.\n- Ignore all removals from Spells.\n- After your opponent's turn ends, remove this chess piece.",
+        "description": "I. Select your third or fourth rank. All the Pawns in that rank gain the following effects:\n- Ignore all captures.\n- Ignore all removals from cards.\n- After your opponent's turn ends, remove this chess piece.",
         "id": 645642025881829378,
         "image_name": null,
         "name": "Legion",
@@ -70,14 +70,14 @@
         "rarity": 3
     },
     {
-        "description": "I. Select an enemy Bishop, Rook, Knight or Queen, the selected type for both players receive the following effects:\n- Can't move for the next 2 turns.\n- Ignores all captures and removals from Spells targeted towards this piece.\nThis card can't be used if you don't have the same type of piece as the selected piece. ",
+        "description": "I. Select an enemy Bishop, Rook, Knight or Queen, the selected type for both players receive the following effects:\n- Can't move for the next 2 turns.\n- Is immune to all captures and removals from cards targeted towards this piece.\nThis card can't be used if you don't have the same type of piece as the selected piece. ",
         "id": 645641962245849110,
         "image_name": null,
         "name": "Crippling Indestructibility",
         "rarity": 4
     },
     {
-        "description": "I. Remove a chess piece that neglect captures and removal from card effects. This card ignores spells that disallows the piece from being removed through card effects.",
+        "description": "I. Remove a chess piece that is immune. You can't select Kings or Queens. \nThis card ignores cards that disallows the piece from being removed through card effects.",
         "id": 645641962245849111,
         "image_name": null,
         "name": "Become Mortal",
@@ -196,14 +196,14 @@
         "rarity": 3
     },
     {
-        "description": "This card will automatically be used after 6 turns has passed.\nI. All other cards you have in your deck that has the same abilities will be discarded until only 1 copy of it remain.",
+        "description": "This card will automatically be used after 6 turns has passed.\nI. All other cards you have in your deck that has the same abilities will be removed until only 1 copy of it remain.",
         "id": 645641763893149716,
         "image_name": null,
         "name": "Cursed Promise",
         "rarity": 0
     },
     {
-        "description": "After 7 turns this card will discard itself. I. This card can only be discarded by enemy spells or by itself. \nII. While this card is in your hand, you have the following effect: \"All spells you use will skip your next turn, if that spell already has the ability to skip your turns, add 1 more to the amount it will skip. ",
+        "description": "After 7 turns this card will discard itself. I. This card can only be discarded by enemy cards or by itself. \nII. While this card is in your hand, you have the following effect: \"All cards you use will skip your next turn, if that card already has the ability to skip your turns, add 1 more to the amount it will skip. ",
         "id": 645641763893149717,
         "image_name": null,
         "name": "Frozen Soul",
@@ -266,7 +266,7 @@
         "rarity": 0
     },
     {
-        "description": "This card can only be used on your 7th turn or later.\nI. Gain the following effect: \"All of your Pawns including summoned ones can't be targeted by opponent Spells if they are in your second, seventh or eighth lane, this effect lasts for the whole match\".",
+        "description": "This card can only be used on your 7th turn or later.\nI. Gain the following effect: \"All of your Pawns including summoned ones can't be targeted by opponent cards if they are in your second, seventh or eighth rank, this effect lasts for the whole match\".",
         "id": 645641658439827466,
         "image_name": null,
         "name": "Lucky Kingdom",
@@ -308,7 +308,7 @@
         "rarity": 0
     },
     {
-        "description": "You can only use this card if you played a card in your previous turn.\nI. Remove a Pawn of choice in your fourth or fifth lane\nII. Select an empty tile in your second lane, summon a Pawn.",
+        "description": "You can only use this card if you played a card in your previous turn.\nI. Remove a Pawn of choice in your fourth or fifth rank.\nII. Select an empty tile in your second rank, summon a Pawn.",
         "id": 645641586977538066,
         "image_name": null,
         "name": "An Accurate Arrow, a Swift Sway",
@@ -338,8 +338,8 @@
     {
         "description": "This card can only be used if you have at least 5 other cards in your hand.\nI. Discard your hand. \nII. Remove all other effects from both players.",
         "id": 645641536670924830,
-        "image_name": "TrickeryJ.gif",
-        "name": "Trickery of the Jesters",
+        "image_name": "TrueMischief.gif",
+        "name": "True Mischief",
         "rarity": 2
     },
     {
@@ -455,7 +455,7 @@
         "rarity": 3
     },
     {
-        "description": " I. Select an empty tile in your second lane, summon a Pawn in the selected tile.\nII. Draw a card.",
+        "description": " I. Select an empty tile in your second rank, summon a Pawn in the selected tile.\nII. Draw a card.",
         "id": 645641308433809438,
         "image_name": null,
         "name": "Slave's Escape",
@@ -476,7 +476,7 @@
         "rarity": 5
     },
     {
-        "description": "I. Your Queen will be immune to captures if its being captured while this effect is in play. This effect last for 4 turns. (This effect can stack)\nII. Gain the following effect: \"Any chess piece that lands on your last lane can be promoted except for your King, this effect lasts for the rest of the match.\" (This effect can't be stacked)\nThis card can be used without any Queen in play.",
+        "description": "I. Your Queen will be immune to captures if its being captured while this effect is in play. This effect last for 4 turns. (This effect can stack)\nII. Gain the following effect: \"Any chess piece that lands on your last rank can be promoted except for your King, this effect lasts for the rest of the match.\" (This effect can't be stacked)\nThis card can be used without any Queen in play.",
         "id": 645641308433809441,
         "image_name": null,
         "name": "Final Stance",
@@ -525,35 +525,35 @@
         "rarity": 3
     },
     {
-        "description": "I. Select a Pawn you control, it will ignore a capture while this effect is in play, after this effect activates, remove this effect. This effect lasts for the rest of the match. (This effect can be stacked)",
+        "description": "I. Select one of your Pawns, it is immune to captures while this effect is in play, after this effect activates, remove this effect. This effect lasts for the rest of the match. (This effect can be stacked)",
         "id": 645641189072306200,
         "image_name": "SpareShield.gif",
         "name": "Spare Shield",
         "rarity": 2
     },
     {
-        "description": "This card can only be used if at least one of your Bishops isn't in your first lane and if there is a targetable Bishop in both sides.\nI. Transform one of your Bishop into a Pawn, select and remove one of your opponent's Bishops.",
+        "description": "This card can only be used if at least one of your Bishops isn't in your first rank and if there is a targetable Bishop in both sides.\nI. Transform one of your Bishop into a Pawn, select and remove one of your opponent's Bishops.",
         "id": 645641189072306201,
         "image_name": null,
         "name": "Demolishing Faith",
         "rarity": 3
     },
     {
-        "description": "You can only use this card if your King has performed a castling in this match\nI. Remove one of your Rooks \nII. Your King will ignore a capture if its being captured for the first time, this effect lasts the rest of the game. (This effect can't be stacked)\nIII. Discard a card in your hand.",
+        "description": "You can only use this card if your King has performed castling this match\nI. Remove one of your Rooks \nII. Your King is immune to captures while this effect is in play, after this effect activates, remove this effect. This effect lasts the rest of the game. (This effect can't be stacked)\nIII. Discard a card in your hand.",
         "id": 645641189072306202,
         "image_name": null,
         "name": "Reign of the Wicked",
         "rarity": 4
     },
     {
-        "description": "I. Select one of your chess pieces, for the next 2 turns, it is not visible for your opponent. \nThe card discards itself if you have 6 chess pieces or less in your control.",
+        "description": "I. Select one of your pieces, for the next 2 turns, it is not visible for your opponent. \nThe card discards itself if you have 6 pieces or less in your control.",
         "id": 645641189072306203,
         "image_name": null,
         "name": "Under the Shadows",
         "rarity": 4
     },
     {
-        "description": "I. Allow your King to perform castling with any piece on the first row of your board. Cannot be played if:\n- A Check or Checkmate is occurring.\n- If the piece that is swapped with can be captured.\n- If you already performed castling this match.",
+        "description": "I. Allow your King to perform castling with any piece on the first rank of your board. Cannot be played if:\n- A Check or Checkmate is occurring.\n- If the piece that is swapped with can be captured.\n- If you already performed castling this match.",
         "id": 645641189072306204,
         "image_name": null,
         "name": "Benevolent Exchange",
@@ -595,18 +595,18 @@
         "rarity": 2
     },
     {
-        "description": "This card can only be used if you have at least 1 King and 1 Queen.\nI. For the next 4 turns:\n- Your King can only move identically as your Queen.\n- Your Queen can only move identically as your King.",
+        "description": "I. For the next 3 turns:\n- All piece captures that will occur will remove the capturing piece too.",
         "id": 645641076409106432,
         "image_name": null,
-        "name": "Betrayal of Affairs",
-        "rarity": 5
+        "name": "Safe Approach",
+        "rarity": 2
     },
     {
-        "description": "I. All chess pieces in your fourth lane will be pushed towards to your fourth leftmost tile, all chess pieces before the rightmost piece are removed, immune pieces pushes the rightmost piece towards the right by one tile for each immune piece.",
+        "description": "This card can only be used if you have at least 3 Pawns.\nI. Remove 3 of your Pawns.\nII. Remove an enemy Knight, Bishop or Rook.",
         "id": 645641076409106433,
         "image_name": null,
-        "name": "Windfall",
-        "rarity": 4
+        "name": "Blood Oath",
+        "rarity": 2
     },
     {
         "description": "I. Draw 2 cards.\nII. You can't move chess pieces in your next turn.\nIII. Shuffle a copy of \"Stingy Upkeep\" into your deck.",
@@ -700,14 +700,14 @@
         "rarity": 0
     },
     {
-        "description": "This card can only be used if at least one Pawn has been captured during this match.\nI. Summon a Pawn in your second or third lane, if a chess piece is in the selected tile, remove it before summoning.\nEach deck can only have 1 copy of this card.",
+        "description": "I. Select a tile without a chess piece. For the next 8 turns, that tile will remove all chess pieces that land on that tile.",
         "id": 645640874427940910,
         "image_name": null,
-        "name": "Beyond the Grave",
-        "rarity": 5
+        "name": "Devil's Pit",
+        "rarity": 4
     },
     {
-        "description": "This card can only be used on your 20th turn or later.\nI. All chess pieces in the fourth and fifth lane will be removed.\nEach deck can only have 1 copy of this card.",
+        "description": "This card can only be used on your 20th turn or later.\nI. All chess pieces in the fourth and fifth rank will be removed.\nEach deck can only have 1 copy of this card.",
         "id": 645640874427940911,
         "image_name": null,
         "name": "Earthquake",
@@ -735,10 +735,10 @@
         "rarity": 2
     },
     {
-        "description": "I. Summon a Pawn in your half of the board.",
+        "description": "This card can only be used if you only have one Pawn in play.\nI. Transform one of your Pawns into a King.",
         "id": 645640814675886080,
         "image_name": null,
-        "name": "Recruitment",
+        "name": "Forgotten Sibling",
         "rarity": 3
     },
     {
@@ -770,10 +770,10 @@
         "rarity": 3
     },
     {
-        "description": "I. All of your Bishops become Rooks.",
+        "description": "I. Transform all Pawns adjacent to your Queen into Knights.\nThis effect will not activate for Queens that are promoted from Pawns or summoned through card effects.",
         "id": 645640756777975879,
         "image_name": null,
-        "name": "Fort's Barrage",
+        "name": "Knighthood",
         "rarity": 4
     },
     {
@@ -798,14 +798,14 @@
         "rarity": 4
     },
     {
-        "description": "You can only use this card if you have at least 1 Queen and 1 Knight.\nI. Remove one of your Queens and one of your Knights.\nII. Gain the following effects: \"All of your Pawns will ignore a capture if its being captured for while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect affects Pawns that will come into play\". (This effect can't be stacked)\nIII. Gain the following effects: \"All of your Pawns will ignore removals from Spells once if its being targeted while this effect is in play. After this effect activates, remove all effects on that Pawn, this effect will affect Pawns that will come into play\". (This effect can't be stacked)",
+        "description": "I. Remove either one of your Knights, Bishops or Rooks.\nII. Place two Pawns of choice in your second or third rank.\nIII. Draw a card.",
         "id": 645640679313244200,
         "image_name": null,
-        "name": "Cursed Codex of Protection",
-        "rarity": 4
+        "name": "Gauntlet of Inheritance",
+        "rarity": 2
     },
     {
-        "description": "This card can only be used if at least 2 Knight, 2 Bishops and 2 Rooks has been captured or removed through card effects.\nI. Summon a Knight, Bishop and Rook in your first lane, placed by choice.",
+        "description": "This card can only be used if at least 2 Knight, 2 Bishops and 2 Rooks has been captured or removed through card effects.\nI. Summon a Knight, Bishop and Rook in your first rank, placed by choice.",
         "id": 645640679313244201,
         "image_name": null,
         "name": "Desperate Defence",
@@ -826,11 +826,11 @@
         "rarity": 4
     },
     {
-        "description": "This card can only be used on your 15th turn or later.\nI. Each unique black tile when landed on for the first time after this card is used will remove the corresponding piece that landed on it. (This effect can't be stacked)\nII. Each unique white tile when landed on for the first time after this card is used will draw a card for you if your pieces land on it. (This effect can't be stacked)",
+        "description": "I. Gain the following effects: \"All your Pawns can capture forward; all your Pawns loses the ability to capture diagonally\". (These effects can't be stacked)",
         "id": 645640600569249803,
         "image_name": null,
-        "name": "Forbidden Lands",
-        "rarity": 5
+        "name": "Golden Spear",
+        "rarity": 3
     },
     {
         "description": "I. Remove up to 3 Pawns of choice in your half of the board.\nII. For each Pawn removed, draw a card.",
@@ -1215,90 +1215,111 @@
         "id": 682556963422470181,
         "image_name": null,
         "name": "Skillful Delay",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "I. Remove 3 of your Pawns.\nII. Summon a Knight, Bishop or Rook in your half of the board.",
         "id": 682556963422470182,
         "image_name": null,
         "name": "Shameful Promotion",
-        "rarity": 2
+        "rarity": 0
     },
     {
-        "description": "This card can only be used on your 15th turn or later.\nI. Select a piece in your fourth to fifth lane, then select 2 adjacent pieces next to the select piece, remove them.",
+        "description": "This card can only be used on your 15th turn or later.\nI. Select a piece in your fourth to fifth rank, then select 2 adjacent pieces next to the select piece, remove them. You must select 3 pieces to play this card.",
         "id": 682556963422470183,
         "image_name": null,
         "name": "Rupture",
-        "rarity": 2
+        "rarity": 0
     },
     {
-        "description": "I. Select one of your Pawns, it can only move identically to a Bishop once. It can't move more than 4 tiles at once",
+        "description": "I. Select one of your Pawns, it can only move identically to a Bishop once. It can't move more than 4 tiles at once.",
         "id": 682556963422470184,
         "image_name": null,
-        "name": "Pray",
-        "rarity": 2
+        "name": "Faith",
+        "rarity": 0
     },
     {
         "description": "I. Select a card in your hand, put a copy of it into your hand.",
         "id": 682556925120217090,
-        "image_name": "SavConserve.gif",
-        "name": "Savory Conservation",
-        "rarity": 2
+        "image_name": null,
+        "name": "Hidden Tricks",
+        "rarity": 0
     },
     {
         "description": "I. Remove an enemy Pawn, if none are in play, select an enemy Knight, Bishop or Rook instead.",
         "id": 682556925120217091,
-        "image_name": "B_WoundStab.png",
+        "image_name": "WoundingStab.gif",
         "name": "Wounding Stab",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "I. Select a card with turn restriction in your hand. Reduce the turns needed to use that card by 2.",
         "id": 682556925120217092,
         "image_name": null,
         "name": "Meditation",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "I. Draw a card.\nII. If this is your 15th turn or later, this will not end your turn.",
         "id": 682556925120217093,
         "image_name": null,
-        "name": "Focus",
-        "rarity": 2
+        "name": "Channeling Focus",
+        "rarity": 0
     },
     {
         "description": "I. Discard 2 cards in your hand. \nII. Draw 3 cards.\nIII. Summon a Pawn in your second rank.",
         "id": 682556925120217094,
         "image_name": null,
         "name": "Fresher Choices",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "I. If you performed castling this match, you may perform it again, once.",
         "id": 682556925120217095,
         "image_name": null,
         "name": "Ignorance",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "This card can only be used in your 20th turn or later.\nI. Gain the following effect: \"You can use 2 cards per turn, this effect lasts for the rest of the match\". (This effect can't be stacked)",
         "id": 682556925120217096,
-        "image_name": null,
+        "image_name": "UnleashedPot.gif",
         "name": "Unleashed Potential",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "I. Gain the following effect: \"Your Pawns can move twice for the next 2 turns\"",
         "id": 682556925120217097,
         "image_name": null,
         "name": "Doubling Steps",
-        "rarity": 2
+        "rarity": 0
     },
     {
         "description": "I. Transform one of your non-Pawns (except your Kings) into a Pawn.\nII. Draw 3 cards.\nIII. If this is used for the first time, this will not end your turn",
         "id": 682556925120217098,
         "image_name": null,
         "name": "Shamed Wealth",
+        "rarity": 0
+    },
+    {
+        "description": "I. Transform all of your Pawns into Knights.\nII. Gain the following effect: - After 8 turns, remove all of your Knights. (This effect can't be stacked)\nIII. Gain the following effect: - For 8 turns, all Pawns that come into play from your card effects will transform into a Knight. (This effect can't be stacked)",
+        "id": 645640756777975881,
+        "image_name": null,
+        "name": "Cursed Blade",
+        "rarity": 4
+    },
+    {
+        "description": "This card can only be used if your opponent has 15 cards or less in their deck.\nI. Draw 5 cards.\nII. This card will not end your turn.",
+        "id": 645640679313244202,
+        "image_name": null,
+        "name": "Fortification of Prosperity",
+        "rarity": 3
+    },
+    {
+        "description": "This card can only be used if you only have one of each piece type, if at least one type is less or more than one, this card can't be used.\nI. All of your pieces are immune from being captured for the whole match. (These effects can't be stacked)",
+        "id": 645640600569249804,
+        "image_name": null,
+        "name": "Kingdom of Solitude",
         "rarity": 2
     }
 ]

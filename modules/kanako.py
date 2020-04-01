@@ -3,13 +3,11 @@ import os
 from time import monotonic
 from random import randint
 
-from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep,  \
-    InvalidStateError, any_to_any, Color, Embed, DiscordException, ReuBytesIO,\
-    eventlist
+from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
+    Embed, DiscordException, ReuBytesIO, eventlist
 
-from hata.events import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE,          \
-    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX,     \
-    Timeouter, Command, checks
+from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
+    GUI_STATE_SWITCHING_CTX, Timeouter, Command, checks
 
 from PIL import Image as PIL
 

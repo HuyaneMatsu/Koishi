@@ -1,9 +1,7 @@
-from hata import Color, Embed, eventlist, Permission, DiscordException,     \
-    sleep, Message, Emoji, BUILTIN_EMOJIS, ERROR_CODES, ChannelBase, User,  \
-    AuditLogEvent
-from hata.events import Command, Converter, checks, Pagination, ConverterFlag,\
-    wait_for_reaction
-from hata.prettyprint import pchunkify
+from hata import Color, Embed, eventlist, Permission, DiscordException, sleep, Message, Emoji, BUILTIN_EMOJIS, \
+    ERROR_CODES, ChannelBase, User, AuditLogEvent
+from hata.ext.commands import Command, Converter, checks, Pagination, ConverterFlag, wait_for_reaction
+from hata.ext.prettyprint import pchunkify
 
 from shared import KOISHI_PREFIX, FI_NO
 

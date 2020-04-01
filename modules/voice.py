@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import re, os, wave
 
-from hata import player, alchemy_incendiary, sleep, Task, Embed, eventlist, \
-    Color
-from hata.events import Command
+from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color
+from hata.discord import player
+from hata.ext.commands import Command
 
 import pers_data
 

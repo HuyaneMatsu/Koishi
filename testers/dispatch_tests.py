@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from hata import DiscordException,  cchunkify, Status, PERM_KEYS, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist
-from hata.parsers import EVENTS, DEFAULT_EVENT
-from hata.prettyprint import pretty_print
-from hata.events import Pagination, Command
-from hata.dereaddons_local import listdifference, method
+from hata import DiscordException,  cchunkify, Status, PERM_KEYS, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, \
+    listdifference
+from hata.discord.parsers import EVENTS, DEFAULT_EVENT
+from hata.ext.prettyprint import pretty_print
+from hata.ext.commands import Pagination, Command
+from hata.backend.dereaddons_local import method
 
 DISPATCH_TESTS = eventlist(type_=Command)
 DISPTACH_COLOR = Color.from_rgb(120, 108, 128)

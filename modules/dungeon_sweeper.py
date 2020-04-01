@@ -2,15 +2,14 @@
 import re, os
 from time import monotonic
 
-from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS,     \
-    Task, WaitTillAll, ERROR_CODES, eventlist
+from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, eventlist
 
-from hata.events import Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
-    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
+from hata.ext.commands import Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
+    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
 
-from hata.client_core import GC_cycler
+from hata.discord.client_core import GC_cycler
 
-from models import DB_ENGINE,DS_TABLE,ds_model
+from models import DB_ENGINE, DS_TABLE, ds_model
 
 DS_COLOR = Color(0xa000c4)
 DS_COMMANDS = eventlist(type_=Command)

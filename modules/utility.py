@@ -1,12 +1,10 @@
 import re, sys, json
 
-from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client,  \
-    sleep, DiscordException, Emoji, elapsed_time, ActivityUnknown, Status,  \
-    ActivitySpotify, BUILTIN_EMOJIS, ChannelText, ChannelCategory,cchunkify,\
-    Permission
-from hata.events import Command, Cooldown, Converter, ConverterFlag, checks,\
-    Pagination
-from hata.prettyprint import pchunkify
+from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, \
+    elapsed_time, ActivityUnknown, Status, ActivitySpotify, BUILTIN_EMOJIS, ChannelText, ChannelCategory, \
+    cchunkify, Permission
+from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination
+from hata.ext.prettyprint import pchunkify
 
 from PIL import Image as PIL
 

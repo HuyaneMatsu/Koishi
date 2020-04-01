@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys, os, json
+from threading import Lock as SyncLock
 
-from hata.emoji import Emoji
-from hata.futures import SyncLock
-from hata.dereaddons_local import alchemy_incendiary
+from hata import Emoji, alchemy_incendiary
 
 # Emojis are not used, but we will keep them for a time now
 
