@@ -1,4 +1,5 @@
 import re, os
+from itertools import cycle
 
 from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO
 
@@ -11,7 +12,7 @@ from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_F
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
-CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
+CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
 
 setup_ext_commands(Flan,FLAN_PREFIX)
 
@@ -311,16 +312,7 @@ class showcard:
             title_parts.append(name)
        
         title_parts.append('** ')
-        
-        rarity=card.rarity
-        if rarity is Rarity.token:
-            title_parts.append('[TOKEN]')
-        elif rarity is Rarity.passive:
-            title_parts.append('[PASSIVE]')
-        else:
-            title_parts.append('(')
-            title_parts.append(card.rarity.name)
-            title_parts.append(')')
+        title_parts.append(card.rarity.outlook)
         
         title=''.join(title_parts)
         
@@ -468,17 +460,7 @@ class CardPaginator(object):
                     page_parts.append(name)
                
                 page_parts.append('** ')
-                
-                rarity=card.rarity
-                if rarity is Rarity.token:
-                    page_parts.append('[TOKEN]')
-                elif rarity is Rarity.passive:
-                    page_parts.append('[PASSIVE]')
-                else:
-                    page_parts.append('(')
-                    page_parts.append(card.rarity.name)
-                    page_parts.append(')')
-                
+                page_parts.append(card.rarity.outlook)
                 page_parts.append('\n\n')
                 
                 if len(description)>1700:
@@ -492,17 +474,7 @@ class CardPaginator(object):
                 page_parts.append('**')
                 page_parts.append(name)
                 page_parts.append('** ')
-                
-                rarity=card.rarity
-                if rarity is Rarity.token:
-                    page_parts.append('[TOKEN]')
-                elif rarity is Rarity.passive:
-                    page_parts.append('[PASSIVE]')
-                else:
-                    page_parts.append('(')
-                    page_parts.append(card.rarity.name)
-                    page_parts.append(')')
-                
+                page_parts.append(card.rarity.outlook)
                 page_parts.append('\n\n')
                 page_parts.append(description)
         
@@ -517,17 +489,7 @@ class CardPaginator(object):
                 page_parts.append('**')
                 page_parts.append(card.name)
                 page_parts.append('** ')
-                
-                rarity=card.rarity
-                if rarity is Rarity.token:
-                    page_parts.append('[TOKEN]')
-                elif rarity is Rarity.passive:
-                    page_parts.append('[PASSIVE]')
-                else:
-                    page_parts.append('(')
-                    page_parts.append(card.rarity.name)
-                    page_parts.append(')')
-                
+                page_parts.append(card.rarity.outlook)
                 page_parts.append('\n\n')
                 page_parts.append(card.description)
             
@@ -825,6 +787,67 @@ class checklist:
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
     
+@Flan.commands.from_class
+class dump_all_card:
+    async def command(client, message):
+        channel=message.channel
+        clients = channel.clients
+        if len(clients)<2:
+            await client.message_create(channel.channel,'I need at least 2 clients at the channel to execute this command.')
+            return
+        
+        for other_client in clients:
+            if client is other_client:
+                continue
+            
+            if channel.cached_permissions_for(other_client).can_send_messages:
+                break
+        else:
+            await client.message_create(channel.channel,'I need at least 2 clients at the channel, which can sen messages as well!')
+            return
+        
+        clients = (client,other_client)
+        for client in clients:
+            if channel.cached_permissions_for(client).can_manage_messages:
+                await client.message_delete(message)
+                break
+        
+        cards = list(CARDS_BY_NAME.values())
+        cards.sort(key=lambda card:card.name)
+        
+        for card, client in zip(cards,cycle(clients),):
+            title_parts=['**']
+            name=card.name
+            if len(name)>200:
+                title=name[:200]
+                title_parts.append(title)
+                title_parts.append('...')
+            else:
+                title_parts.append(name)
+           
+            title_parts.append('** ')
+            title_parts.append(card.rarity.outlook)
+            
+            title=''.join(title_parts)
+            
+            description=card.description
+            if len(description)>1700:
+                description = description[:1700]+'...'
+            
+            embed=Embed(title,description,CHESUTO_COLOR)
+            
+            await client.message_create(channel,embed=embed)
+    
+    name = 'dump-all-card'
+    checks=[checks.has_role(CARDS_ROLE)]
+    
+    async def description(client,message):
+        embed=Embed('dump-all-card',(
+            'Lists all the cards to this channel.\n'
+            f'Usage: `{FLAN_PREFIX}dump-all-card`\n'
+            ),color=FLAN_HELP_COLOR).add_footer(
+                f'You must have `{CARDS_ROLE}` role to use this command.')
+        await client.message_create(message.channel,embed=embed)
 
 del re
 del Cooldown

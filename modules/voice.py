@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import re, os, wave
 
-from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color
-from hata.discord import player
+from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color, YTaudio, DownloadError, LocalAudio
 from hata.ext.commands import Command
 
 import pers_data
@@ -127,7 +126,7 @@ VOICE_SUBCOMMANDS['leave']=voice_leave
 
 async def voice_play(client,message,content):
     while True:
-        if player.youtube_dl is None:
+        if YTaudio is None:
             text='This option in unavailable :c'
             break
         
@@ -152,8 +151,8 @@ async def voice_play(client,message,content):
         
         try:
             with client.keep_typing(message.channel,7200.):
-                source = await player.YTaudio(client.loop,content,message.channel.guild.id)
-        except player.DownloadError as err: #raised by YTdl
+                source = await YTaudio(content,message.channel.guild.id)
+        except DownloadError as err: #raised by YTdl
             text='Error meanwhile downloading'
             break
         except ReferenceError: #raised by executor
@@ -280,7 +279,7 @@ async def voice_local(client,message,content):
         path=os.path.join(AUDIO_PATH,name)
         
         try:
-            source = await player.LocalAudio(client.loop,path)   
+            source = await LocalAudio(path)
         except PermissionError:
             text='The file is already playing somewhere'
             break

@@ -1318,3 +1318,18 @@ AUTO_REACT_ROLE_COMMANDS(create_auto_react_role,
         checks.has_permissions(Permission().update_by_keys(administrator=True),fail_identificator=FI_NO.ADMIN),
             ]
         )
+
+async def show_auto_react_roles(client, message):
+    guild = message.guild
+    if guild is None:
+        return
+    
+    managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type = True, is_method=True)
+    
+    if not managers:
+        await client.message_create(message.channel,embed=Embed(
+            'No managers are etup at the guild',
+            color=AUTO_REACT_ROLE_COLOR))
+        return
+    
+    await AutoReactRoleManager(client,message.channel,managers)

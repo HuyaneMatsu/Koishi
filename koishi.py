@@ -1,9 +1,10 @@
-import re
+import re, sys
 from io import StringIO
 from types import FunctionType as function
 
-from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS
+from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify
 from hata.ext.commands import Pagination, checks, setup_ext_commands
+from hata.ext.extension_loader import EXTENSION_LOADER
 
 from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
@@ -314,8 +315,58 @@ class about:
                 ),color=KOISHI_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
+@Koishi.commands.from_class
+class reload:
+    async def command(client, message, name:str):
+        while True:
+            try:
+                extension = EXTENSION_LOADER.extensions[name]
+            except KeyError:
+                result = 'There is no extension with the specified name'
+                break
+            
+            if extension.locked:
+                result = 'The extension is locked, propably for reason.'
+                break
+            
+            try:
+                await EXTENSION_LOADER.reload(name)
+            except BaseException as err:
+                result = repr(err)
+                break
+                
+            result = 'success'
+            break
+        
+        await client.message_create(message.channel, result)
+        return
+    
+    category = 'UTILITY'
+    checks = [checks.owner_only()]
+    
+    async def description(client, message):
+        prefix=client.command_processer.prefix(message)
+        lines = [
+            'Reloads the specified extension by it\'s name.',
+            f'Usage : `{prefix}reload <name>`',
+            '\nAvailable extensions:',
+                ]
+        for extension in  EXTENSION_LOADER.extensions.values():
+            lines.append(f'- `{extension.name}`{" (locked)" if extension.locked else ""}')
+        
+        pages = [Embed('reload', chunk, color=KOISHI_HELP_COLOR) for chunk in chunkify(lines)]
+        
+        limit = len(pages)
+        index = 0
+        while index<limit:
+            embed = pages[index]
+            index += 1
+            embed.add_footer(f'page {index}/{limit}')
+        
+        await Pagination(client,message.channel,pages)
+
 async def execute_description(client,message):
-    prefix=client.commandprocesser.prefix(message)
+    prefix=client.command_processer.prefix(message)
     embed=Embed('execute',(
         'Use an interpreter trough me :3\n'
         'Usages:\n'

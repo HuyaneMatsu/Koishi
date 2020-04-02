@@ -71,15 +71,22 @@ from hata import Emoji, alchemy_incendiary
 #Emoji.precreate(604698116658167808,name='aG').as_emoji
 
 class Rarity(object):
-    INSTANCES = [NotImplemented] * 7
+    INSTANCES = [NotImplemented] * 8
     BY_NAME   = {}
     
-    __slots__=('index', 'name',)
+    __slots__=('index', 'name', 'special', 'outlook')
     
-    def __init__(self,index,name):
+    def __init__(self,index,name,special):
         self.index=index
         self.name=name
+        self.special=special
         
+        if special:
+            outlook=f'[{name.upper()}]'
+        else:
+            outlook=f'({name})'
+        
+        self.outlook=outlook
         self.INSTANCES[index]=self
         self.BY_NAME[name.lower()]=self
     
@@ -128,21 +135,23 @@ class Rarity(object):
     def __hash__(self):
         return self.index
     
-    token       = NotImplemented
-    passive     = NotImplemented
     common      = NotImplemented
     uncommon    = NotImplemented
     rare        = NotImplemented
     legendary   = NotImplemented
     mythic      = NotImplemented
+    token       = NotImplemented
+    passive     = NotImplemented
+    basic       = NotImplemented
 
-Rarity.token    = Rarity(0,'Token',)
-Rarity.passive  = Rarity(1,'Passive',)
-Rarity.common   = Rarity(2,'Common')
-Rarity.uncommon = Rarity(3,'Uncommon')
-Rarity.rare     = Rarity(4,'Rare')
-Rarity.legendary= Rarity(5,'Legendary')
-Rarity.mythic   = Rarity(6,'Mythic')
+Rarity.common   = Rarity(0  , 'Common'      , False , )
+Rarity.uncommon = Rarity(1  , 'Uncommon'    , False , )
+Rarity.rare     = Rarity(2  , 'Rare'        , False , )
+Rarity.legendary= Rarity(3  , 'Legendary'   , False , )
+Rarity.mythic   = Rarity(4  , 'Mythic'      , False , )
+Rarity.token    = Rarity(5  , 'Token'       , True  , )
+Rarity.passive  = Rarity(6  , 'Passive'     , True  , )
+Rarity.basic    = Rarity(7  , 'Basic'       , True  , )
 
 CARDS_BY_ID = {}
 CARDS_BY_NAME = {}
