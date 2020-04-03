@@ -3,7 +3,7 @@ from weakref import WeakKeyDictionary
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
     Color, Embed, Emoji, CLIENTS, Role, eventlist
-from hata.ext.commands import ContentParser, checks, Converter
+from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination
 from hata.discord.others import IS_ID_RP
 
 from shared import FI_NO
@@ -512,7 +512,7 @@ class AutoReactRoleGUI(object):
         embed.add_field(AUTO_REACT_ROLE_GUI_EMBED_FIELD_NAME, AUTO_REACT_ROLE_GUI_EMBED_FIELD_VALUE)
         return embed
     
-    async def __new__(cls, client, target_message, channel, guild):
+    async def __new__(cls, client, target_message, channel, guild, message = None):
         try:
             old_gui = AUTO_REACT_ROLE_GUIS.pop(target_message)
         except KeyError:
@@ -532,13 +532,18 @@ class AutoReactRoleGUI(object):
         self.client = client
         
         try:
-            message = await client.message_create(channel, embed=self.render())
+            embed=self.render()
+            if message is None:
+                message = await client.message_create(channel, embed=embed)
+            else:
+                await client.message_edit(message, embed=embed)
         except BaseException as err:
             if isinstance(err,ConnectionError):
                 return
             
             if isinstance(err,DiscordException):
                 if err.code in (
+                        ERROR_CODES.unknown_message, # message deletedd
                         ERROR_CODES.unknown_channel, # channel deleted
                         ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.missing_permissions, # permissions changed meanwhile
@@ -553,7 +558,7 @@ class AutoReactRoleGUI(object):
         client.command_processer.append(message.channel, self)
         AUTO_REACT_ROLE_GUIS[target_message] = self
         return self
-            
+    
     def __repr__(self):
         result = [
             '<',
@@ -1155,7 +1160,7 @@ class AutoReactRoleManager(object):
             
             if isinstance(err,DiscordException):
                 if err.code in (
-                        ERROR_CODES.missing_emoji, # emoji deleted
+                        ERROR_CODES.unknown_emoji, # emoji deleted
                         ERROR_CODES.unknown_guild, # guild deleted
                         ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.missing_access, # client removed
@@ -1285,11 +1290,12 @@ class AutoReactRoleManager(object):
         client.events.reaction_add.remove(message, self.action_on_reaction_add)
         client.events.reaction_delete.remove(message, self.action_on_reaction_delete)
         client.events.message_delete.remove(message, self.action_on_message_delete)
-        client.events.channel_delete.remove(message.channel, self.action_on_message_delete)
+        client.events.channel_delete.remove(message.channel, self.action_on_channel_delete)
         guild = self.guild
-        client.events.guild_delete.remove(guild, self.action_on_message_delete)
+        client.events.guild_delete.remove(guild, self.action_on_guild_delete)
         client.events.emoji_delete.remove(guild, self.action_on_emoji_delete)
         client.events.role_delete.remove(guild, self.action_on_role_delete)
+        client.events.role_edit.remove(guild, self.action_on_role_edit)
         
         async with DB_ENGINE.connect() as connector:
             await connector.execute(AUTO_REACT_ROLE_TABLE.delete().where(
@@ -1326,10 +1332,34 @@ async def show_auto_react_roles(client, message):
     
     managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type = True, is_method=True)
     
+    embed = Embed(f'Auto role managers for: {guild}',color=AUTO_REACT_ROLE_COLOR)
     if not managers:
-        await client.message_create(message.channel,embed=Embed(
-            'No managers are etup at the guild',
-            color=AUTO_REACT_ROLE_COLOR))
+        embed.description = '*none*'
+        await Pagination(client,message.channel,[embed])
         return
     
-    await AutoReactRoleManager(client,message.channel,managers)
+    results=[]
+    for manager in managers:
+        message_ = manager.message
+        title=f'{message_.channel:m} {message.id}'
+        results.append((title,manager),)
+    
+    await ChooseMenu(client,message.channel,results,select_auto_react_role_gui, embed=embed, prefix='¤')
+
+async def select_auto_react_role_gui(client, message, title, manager):
+    guild = manager.message.channel.guild
+    if manager.destroy_called or (guild is None):
+        await client.message_create(message.channel,embed=Embed(
+            'The selected embed was already destroyed',color=AUTO_REACT_ROLE_COLOR),)
+        return
+    
+    await AutoReactRoleGUI(client, manager.message, message.channel, guild, message=message)
+
+AUTO_REACT_ROLE_COMMANDS(show_auto_react_roles,
+    name    = 'show-auto-react-roles',
+    category= 'ADMINISTRATION',
+    checks  = [
+        checks.guild_only(),
+        checks.has_permissions(Permission().update_by_keys(administrator=True),fail_identificator=FI_NO.ADMIN),
+            ]
+        )

@@ -5,8 +5,7 @@ from bs4 import BeautifulSoup
 
 from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS
 from hata.discord.others import from_json
-from hata.ext.commands import setup_ext_commands, Pagination, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
-    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
+from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu
 
 from shared import SATORI_PREFIX
 
@@ -76,322 +75,45 @@ async def wiki(client,message,content):
             f'{search_for}&limit=25&redirects=resolve&format=json&utf8',) as response:
         response_data = await response.text()
     
-    results=[]
     while True:
         if len(response_data)<30:
+            results=None
             break
         
         json_data=from_json(response_data)
         if len(json_data)!=4:
+            results=None
             break
         
-        for element in zip(json_data[1],json_data[3]):
-            results.append(element)
-        
+        results=list(zip(json_data[1],json_data[3]))
         results.sort(key=lambda item:len(item[0]))
         break
     
-    found=len(results)
-    if found==0:
+    if (results is None) or (not results):
         await client.message_create(message.channel,embed=Embed(
             'No result',
             f'No search result for: `{search_for}`',
             color=WIKI_COLOR))
         return
     
-    if found==1:
-        pages = await download_wiki_page(client,results[0])
-        await Pagination(client,message.channel,pages,timeout=600.0)
-        return
-    
-    await TouhouWikiChooseMenu(client,message.channel,search_for,results)
+    embed = Embed(title=f'Search results for `{search_for}`',color=WIKI_COLOR)
+    await ChooseMenu(client, message.channel, results, wiki_page_selected, embed=embed, prefix='>>')
 
+async def wiki_page_selected(client, message, title, url):
+    pages = await download_wiki_page(client,title, url)
+    await Pagination(client,message.channel,pages,timeout=600.0,message=message)
 
-class TouhouWikiChooseMenu(object):
-    UP      = BUILTIN_EMOJIS['arrow_up_small']
-    DOWN    = BUILTIN_EMOJIS['arrow_down_small']
-    SELECT  = BUILTIN_EMOJIS['ok']
-    CANCEL  = BUILTIN_EMOJIS['x']
-    EMOJIS  = (UP,DOWN,SELECT,CANCEL)
-    
-    __slots__ = ('canceller', 'channel', 'client', 'embed', 'message', 'page',
-        'results', 'task_flag', 'timeouter')
-    
-    async def __new__(cls,client,channel,search_for,results):
-        self=object.__new__(cls)
-        self.client=client
-        self.channel=channel
-        self.results=results
-        
-        self.page=0
-        self.canceller=cls._canceller
-        self.task_flag=GUI_STATE_READY
-        self.timeouter=None
-        
-        self.embed=Embed(title=f'Search results for `{search_for}`',color=WIKI_COLOR)
-        
-        try:
-            message = await client.message_create(channel,embed=self.render_embed())
-        except BaseException as err:
-            self.message=None
-            
-            if isinstance(err,ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err,DiscordException):
-                if err.code in (
-                        ERROR_CODES.missing_access, # client removed
-                            ):
-                    return
-            
-            raise
-        
-        self.message=message
-        
-        if not channel.cached_permissions_for(client).can_add_reactions:
-            return self
-        
-        for emoji in self.EMOJIS:
-            await client.reaction_add(message,emoji)
-        
-        self.timeouter=Timeouter(client.loop,self,timeout=300.0)
-        client.events.reaction_add.append(message, self)
-        client.events.reaction_delete.append(message, self)
-        return self
-    
-    def render_embed(self):
-        lines=[]
-        results=self.results
-        page=self.page
-        index=0
-        limit=len(results)
-        while True:
-            element=results[index]
-            title=element[0]
-            if index==page:
-                lines.append(f'**>>** **{title}**\n')
-            else:
-                lines.append(f'>> {title}\n')
-            index=index+1
-            if index==limit:
-                break
-        
-        embed=self.embed
-        embed.description=''.join(lines)
-        return embed
-    
-    async def __call__(self,client,message,emoji,user):
-        if user.is_bot or (emoji not in self.EMOJIS):
-            return
-        
-        client=self.client
-        message=self.message
-        
-        if self.channel.cached_permissions_for(client).can_manage_messages:
-            if not message.did_react(emoji,user):
-                return
-            
-            Task(self._reaction_delete(emoji,user),client.loop)
-        
-        task_flag=self.task_flag
-        if task_flag!=GUI_STATE_READY:
-            if task_flag==GUI_STATE_SWITCHING_PAGE:
-                if emoji is self.CANCEL:
-                    task_flag=GUI_STATE_CANCELLING
-                return
-            
-            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
-            return
-        
-        while True:
-            if emoji is self.UP:
-                page=self.page-1
-                break
-            
-            if emoji is self.DOWN:
-                page=self.page+1
-                break
-            
-            if emoji is self.CANCEL:
-                self.task_flag=GUI_STATE_CANCELLED
-                try:
-                    await client.message_delete(message)
-                except BaseException as err:
-                    self.cancel()
-                    
-                    if isinstance(err,ConnectionError):
-                        # no internet
-                        return
-                    
-                    if isinstance(err,DiscordException):
-                        if err.code == ERROR_CODES.missing_access: # client removed
-                            return
-                    
-                    await client.events.error(client,f'{self!r}.__call__',err)
-                    return
-                
-                else:
-                    self.cancel()
-                    return
-            
-            if emoji is self.SELECT:
-                self.task_flag=GUI_STATE_SWITCHING_CTX
-                if self.channel.cached_permissions_for(client).can_manage_messages:
-                    await client.reaction_clear(message)
-                else:
-                    for emoji in self.EMOJIS:
-                        await client.reaction_delete_own(message,emoji)
-                
-                self.cancel()
-                pages = await download_wiki_page(client,self.results[self.page])
-                await client.message_edit(message,embed=pages[0])
-                await Pagination(client,message.channel,pages,timeout=600.0,message=message)
-                return
-            
-            return
-        
-        if page<0:
-            page=0
-        elif page>=len(self.results):
-            page=len(self.results)-1
-        
-        if self.page==page:
-            return
-        
-        self.page=page
-        self.task_flag=GUI_STATE_SWITCHING_PAGE
-        try:
-            await client.message_edit(message,embed=self.render_embed())
-        except BaseException as err:
-            self.task_flag=GUI_STATE_CANCELLED
-            self.cancel()
-            
-            if isinstance(err,ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err,DiscordException):
-                if err.code in (
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.unknown_message, # message already deleted
-                            ):
-                    return
-            
-            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
-            await client.events.error(client,f'{self!r}.__call__',err)
-            return
-
-        if self.task_flag==GUI_STATE_CANCELLING:
-            self.task_flag=GUI_STATE_CANCELLED
-            try:
-                await client.message_delete(message)
-            except BaseException as err:
-                
-                if isinstance(err,ConnectionError):
-                    # no internet
-                    return
-                
-                if isinstance(err,DiscordException):
-                    if err.code==ERROR_CODES.missing_access: # client removed
-                        return
-                
-                await client.events.error(client,f'{self!r}.__call__',err)
-                return
-            self.cancel()
-            return
-        
-        self.task_flag=GUI_STATE_READY
-        self.timeouter.set_timeout(240.)
-    
-    async def _reaction_delete(self,emoji,user):
-        client=self.client
-        try:
-            await client.reaction_delete(self.message,emoji,user)
-        except BaseException as err:
-            
-            if isinstance(err,ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err,DiscordException):
-                if err.code in (
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            await client.events.error(client,f'{self!r}._reaction_delete',err)
-            return
-    
-    async def _canceller(self,exception,):
-        client=self.client
-        message=self.message
-        
-        client.events.reaction_add.remove(message, self)
-        client.events.reaction_delete.remove(message, self)
-        
-        if self.task_flag==GUI_STATE_SWITCHING_CTX:
-            # the message is not our, we should not do anything with it.
-            return
-
-        self.task_flag=GUI_STATE_CANCELLED
-        
-        if exception is None:
-            return
-        
-        if isinstance(exception,TimeoutError):
-            if self.channel.cached_permissions_for(client).can_manage_messages:
-                try:
-                    await client.reaction_clear(message)
-                except BaseException as err:
-                    
-                    if isinstance(err,ConnectionError):
-                        # no internet
-                        return
-                    
-                    if isinstance(err,DiscordException):
-                        if err.code in (
-                                ERROR_CODES.missing_access, # client removed
-                                ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                    ):
-                            return
-                    
-                    await client.events.error(client,f'{self!r}._canceller',err)
-                    return
-            return
-        
-        timeouter=self.timeouter
-        if timeouter is not None:
-            timeouter.cancel()
-        #we do nothing
-    
-    def cancel(self):
-        canceller=self.canceller
-        if canceller is None:
-            return
-        
-        self.canceller=None
-        
-        timeouter=self.timeouter
-        if timeouter is not None:
-            timeouter.cancel()
-        
-        return Task(canceller(self,None),self.client.loop)
-
-async def download_wiki_page(client,result):
-    async with client.http.get(result[1]) as response:
+async def download_wiki_page(client, title_, url):
+    async with client.http.get(url) as response:
         response_data = await response.text()
     soup=BeautifulSoup(response_data,'html.parser')
     block=soup.find_all('div',class_='mw-parser-output')[2]
-
+    
     last=[]
-    title_parts=[result[0]]
-
+    title_parts=[title_]
+    
     contents=[(None,last),]
-
+    
     for element in block.contents:
         element_name=element.name
         if element_name is None:
@@ -524,7 +246,7 @@ async def download_wiki_page(client,result):
         
     del last
     
-    title=result[0]
+    title=title_
     pages=[]
     
     sections=[]
@@ -633,7 +355,7 @@ async def download_wiki_page(client,result):
         if index==limit:
             break
     
-    pages[0].url=result[1]
+    pages[0].url='https://en.touhouwiki.net'+url
     
     return pages
 

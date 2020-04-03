@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, multidict_titled, titledstr, Embed, \
     alchemy_incendiary, Webhook, eventlist, EventThread, DiscordException, BUILTIN_EMOJIS, Message, ChannelText, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
-    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role
+    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS
 
 from hata.backend.dereaddons_local import _spaceholder
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -31,307 +31,6 @@ def setup(lib):
     
 def teardown(lib):
     Koishi.command_processer.delete_category('RATELIMIT TESTS')
-
-##UNLIMITED  :
-##    reaction_users
-##    message_logs
-##    message_get
-##    download_attachment
-##    invite_get_channel
-##    permission_ow_create
-##    permission_ow_delete
-##    channel_edit
-##    channel_delete
-##    oauth2_token
-##    webhook_create
-##    webhook_get_channel
-##    guild_create
-##    guild_get
-##    guild_delete
-##    guild_edit
-##    audit_logs
-##    guild_bans
-##    guild_ban_add
-##    guild_ban_delete
-##    guild_ban_get
-##    channel_move
-##    channel_create
-##    guild_embed_get
-##    guild_embed_edit
-##    guild_emojis
-##    emoji_get
-##    integration_get_all
-##    invite_get_guild
-##    guild_prune
-##    guild_prune_estimate
-##    role_create
-##    role_move
-##    role_edit
-##    role_delete
-##    webhook_get_guild
-##    invite_delete
-##    client_application_info
-##    user_info
-##    client_user
-##    channel_private_get_all
-##    channel_private_create
-##    guild_delete
-##    webhook_get
-##    webhook_edit
-##    webhook_delete
-##    webhook_get_token
-##    webhook_edit_token
-##    webhook_delete_token
-##    guild_regions
-##    guild_channels
-##    guild_roles
-##    guild_widget_get
-##    channel_follow
-##    
-##group       : reaction
-##limit       : 1
-##reset       : 0.25s
-##limited by  : channel
-##members     :
-##    reaction_add
-##    reaction_delete
-##    reaction_delete_own
-##    reaction_clear
-##    reaction_delete_emoji
-##
-##group       : message_create
-##limit       : 5
-##reset       : 4s
-##limited by  : channel
-##members     :
-##    message_create
-##    
-##    
-##group       : message_delete_multiple
-##limit       : 1
-##reset       : 3s
-##limited by  : channel
-##members     :
-##    message_delete_multiple
-##
-##group       : message_edit
-##limit       : 5
-##reset       : 4s
-##limited by  : channel
-##members     :
-##    message_edit
-##
-##group       : pinning
-##limit       : 5
-##reset       : 4s
-##limited by  : channel
-##members     :
-##    message_pin
-##    message_unpin
-##
-##group       : pinneds
-##limit       : 1
-##reset       : 5s
-##limited by  : global
-##members     :
-##    message_pinneds
-##
-##
-##group       : typing
-##limit       : 5
-##reset:      : 5s
-##limited by  : channel
-##members     :
-##    typing
-##
-##group       : invite_create
-##limit       : 5
-##reset       : 15s
-##limited by  : global
-##members     :
-##    invite_create
-##
-##group       : client_gateway_bot
-##limit       : 2
-##reset       : 5s
-##limited by  : global
-##members     :
-##    client_gateway_bot
-##
-##group       : emoji_create
-##limit       : 50
-##reset       : 3600s
-##limited by  : guild
-##members     :
-##    emoji_create
-##
-##group       : emoji_delete
-##limit       : 1
-##reset       : 3s
-##limited by  : global
-##members     :
-##    emoji_delete
-##
-##group       : emoji_edit
-##limit       : 1
-##reset       : 3s
-##limited by  : global
-##members     :
-##    emoji_edit
-##
-##group       : client_edit_nick
-##limit       : 1
-##reset       : 2s
-##limited by  : global
-##members     :
-##    client_edit_nick
-##
-##group       : guild_user_delete
-##limit       : 5
-##reset       : 2s
-##limited by  : guild
-##members     :
-##    guild_user_delete
-##
-##group       : user_edit
-##limit       : 10
-##reset       : 10s
-##limited by  : guild
-##members     :
-##    user_edit
-##
-##group       : guild_user_add
-##limit       : 10
-##reset       : 10s
-##limited by  : guild
-##members     :
-##    guild_user_add
-##
-##group       : user_role
-##limit       : 10
-##reset       : 10s
-##limited by  : guild
-##members     :
-##    user_role_add
-##    user_role_delete
-##
-##group       : invite_get
-##limit       : 250
-##reset       : 6s
-##limited by  : global
-##members     :
-##    invite_get
-##
-##group       : client_edit
-##limit       : 2
-##reset       : 3600s
-##limited by  : global
-##members     :
-##    client_edit
-##
-##group       : user_guilds
-##limit       : 1
-##reset       : 1s
-##limited by  : global
-##members     :
-##    user_guilds
-##
-##group       : guild_get_all
-##limit       : 1
-##reset       : 1s
-##limited by  : global
-##members     :
-##    guild_get_all
-##    
-##group       : user_get
-##limit       : 30
-##reset       : 30s
-##limited by  : global
-##members     :
-##    user_get
-##
-##group       : webhook_execute
-##limit       : 5
-##reset       : 2s
-##limited by  : webhook
-##members     :
-##    webhook_execute
-##
-##group       : guild_users
-##limit       : 10
-##reset       : 10s
-##limited by  : webhook
-##members     :
-##    guild_users
-##    
-##group       : guild_user_get
-##limit       : 5
-##reset       : 2s
-##limited by  : global
-##members:
-##    guild_user_get
-##
-##group       : message_delete 
-##case 1      : newer than 2 week
-##    limit   : UNLIMITED
-##case 2      : older than 2 week, own
-##    limit   : 3
-##    reset   : 1s
-##case 3      : older than 2 week, other's
-##    limit   : 30
-##    reset   : 120s
-##members     :
-##    message_delete
-##
-##group       : message_suppress_embeds
-##limit       : 3
-##reset       : 1
-##limited by  : global
-##members:
-##    message_suppress_embeds
-##
-##group       : achievement_get
-##limit       : 5
-##reset       : 5
-##limited by  : global
-##members:
-##    achievement_get
-##
-##group       : achievement_create
-##limit       : 5
-##reset       : 5
-##limited by  : global
-##members:
-##    achievement_create
-##
-##group       : achievement_delete
-##limit       : 5
-##reset       : 5
-##limited by  : global
-##members:
-##    achievement_delete
-##
-##group       : achievement_get_all
-##limit       : 5
-##reset       : 5
-##limited by  : global
-##members:
-##    achievement_get_all
-##
-##group       : user_achievement_update
-##limit       : 5
-##reset       : 5
-##limited by  : global
-##members:
-##    user_achievement_update
-##
-##group       : guild_preview
-##limit       : 5
-##reset       : 5
-##limited by  : global
-##members:
-##    guild_preview
-
 
 def parsedate_to_datetime(data):
     *dtuple, tz = _parsedate_tz(data)
@@ -1236,7 +935,7 @@ async def role_create(client,guild,name=None,permissions=None,color=None,
         data=data,)
 
 async def role_move(client,role,new_position,):
-    data=role.guild.roles.change_on_swich(role,new_position,key=lambda role,pos:{'id':role.id,'position':pos})
+    data=role.guild.roles.change_on_switch(role,new_position,key=lambda role,pos:{'id':role.id,'position':pos})
     guild_id=role.guild.id
     return await bypass_request(client,METH_PATCH,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/roles',
@@ -2077,7 +1776,249 @@ async def ratelimit_test0018(client,message):
     Requests 2 guild preview.
     '''
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0025') as RLT:
+    with RLTCTX(client,channel,'ratelimit_test0018') as RLT:
         await guild_preview(client, 302094807046684672)
         await guild_preview(client, 197038439483310086)
 
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0019(client,message):
+    '''
+    Edits the channel twice.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0019') as RLT:
+        if channel.guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        nsfw=channel.nsfw
+        
+        await channel_edit(client, channel, nsfw = (not nsfw))
+        await channel_edit(client, channel, nsfw = nsfw)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0020(client,message):
+    '''
+    Creates a channel.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0020') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        data = await channel_create(client, guild)
+        channel_id=int(data['id'])
+        await client.http.channel_delete(channel_id,None)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0021(client,message):
+    '''
+    Deletes a channel.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0021') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        channel = await client.channel_create(guild, name='Kanako', type_=0)
+        await channel_delete(client, channel)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0022(client,message):
+    '''
+    Edits a role.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0022') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        role = await client.role_create(guild,name='Sanae')
+        await role_edit(client, role, name='Chiruno')
+        await client.role_delete(role)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0023(client,message):
+    '''
+    Creates a role.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0023') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        data = await role_create(client, guild, name='Yukari')
+        role_id=int(data['id'])
+        await client.http.role_delete(guild.id,role_id,None)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0024(client,message):
+    '''
+    Deletes a role.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0024') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        role = await client.role_create(guild,name='Sakuya')
+        await role_delete(client, role)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0025(client,message):
+    '''
+    Edits 2 channel.
+    '''
+    channel_1 = message.channel
+    with RLTCTX(client,channel_1,'ratelimit_test0025') as RLT:
+        if channel_1.guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel_1.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        category = channel_1.category
+        if category is None:
+            await RLT.send('The channel should be at a category')
+        
+        channel_2=None
+        for channel in category.channels:
+            if channel is channel_1:
+                continue
+            
+            if type(channel) is not ChannelText:
+                continue
+            
+            channel_2 = channel
+            break
+        
+        if channel_2 is None:
+            await RLT.send('I want 2 text channels at the category of this channel.')
+        
+        nsfw_1=channel_1.nsfw
+        nsfw_2=channel_2.nsfw
+        
+        await channel_edit(client, channel_1, nsfw = (not nsfw_1))
+        await channel_edit(client, channel_2, nsfw = (not nsfw_2))
+        
+        await client.channel_edit(channel_1, nsfw = nsfw_1)
+        await client.channel_edit(channel_2, nsfw = nsfw_2)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0026(client,message):
+    '''
+    Edits 2 roles at the same guild.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0026') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        role_1 = await client.role_create(guild,name='Sanae')
+        role_2 = await client.role_create(guild,name='Reimu')
+        await role_edit(client, role_1, name='Chiruno')
+        await role_edit(client, role_2, name='Ririi')
+        await client.role_delete(role_1)
+        await client.role_delete(role_2)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0027(client, message, guild_id:str=''):
+    '''
+    Edits 1-1 roles at separate guilds.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0027') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not guild_1.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        if not guild_2.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission at the other guild as well')
+            
+        role_1 = await client.role_create(guild_1,name='Sanae')
+        role_2 = await client.role_create(guild_2,name='Reimu')
+        await role_edit(client, role_1, name='Chiruno')
+        await role_edit(client, role_2, name='Ririi')
+        await client.role_delete(role_1)
+        await client.role_delete(role_2)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0028(client, message, guild_id:str=''):
+    '''
+    Creates 1-1 roles at separate guilds
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0027') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not guild_1.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        if not guild_2.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission at the other guild as well')
+            
+        role_1_data = await role_create(client,guild_1,name='Yuyuko')
+        role_2_data = await role_create(client,guild_2,name='Yoshika')
+        role_1_id=int(role_1_data['id'])
+        role_2_id=int(role_2_data['id'])
+        await client.http.role_delete(guild_1.id,role_1_id,None)
+        await client.http.role_delete(guild_2.id,role_2_id,None)
+
+@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+async def ratelimit_test0029(client,message):
+    '''
+    Moves a role.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0029') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        role = await client.role_create(guild,name='Sakuya')
+        await role_move(client,role,2)
+        await client.role_delete(role)
