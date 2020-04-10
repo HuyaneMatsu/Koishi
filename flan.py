@@ -13,6 +13,7 @@ CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
 CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
+VISITORS_ROLE   = Role.precreate(669875992159977492)
 
 setup_ext_commands(Flan,FLAN_PREFIX)
 
@@ -28,6 +29,7 @@ async def guild_user_add(client, guild, user):
     if user.is_bot:
         return
     
+    await client.user_role_add(user, VISITORS_ROLE)
     await client.message_create(channel,f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
 FLAN_HELP_COLOR=Color.from_rgb(230,69,0)
@@ -97,9 +99,10 @@ async def help(client, message, content):
 
 @Flan.commands
 async def invalid_command(client,message,command,content):
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed(
         f'Invalid command `{command}`',
-        f'try using: `{FLAN_PREFIX}help`',
+        f'try using: `{prefix}help`',
         color=FLAN_HELP_COLOR,
             )
     
@@ -116,9 +119,10 @@ class ping:
     aliases=['pong']
     
     async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('ping',(
             'Ping - Pong?\n'
-            f'Usage: `{FLAN_PREFIX}ping`'
+            f'Usage: `{prefix}ping`'
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
@@ -138,17 +142,18 @@ class sync_avatar:
     checks=[checks.owner_only()]
     
     async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('sync_avatar',(
             'Hello there Esuto!\n'
             'This is a specific command for You, to sync the bot\'s avatar with '
             'the application\'s. I know, You might struggle with updating the '
             'bot\'s avatar the other way, so I made a command for it.\n'
             'Have a nice day!\n'
-            f'Usage: `{FLAN_PREFIX}sync_avatar`'
+            f'Usage: `{prefix}sync_avatar`'
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
-#@Flan.commands.from_class
+@Flan.commands.from_class
 class massadd:
     async def command(client,message):
         try:
@@ -261,11 +266,12 @@ class massadd:
     checks = [checks.owner_or_has_role(CARDS_ROLE)]
     
     async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('massadd',(
             'Loads the last 100 message at the channel, and check each of them '
             'searching for card definitions. If it finds one, then updates it, if '
             'already added, or creates a new one.\n'
-            f'Usage: `{FLAN_PREFIX}massadd`'
+            f'Usage: `{prefix}massadd`'
             ),color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
@@ -381,9 +387,10 @@ class showcards:
         await Pagination(client,message.channel,pages)
     
     async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('showcards',(
             'Searcher all the cards, which contain the specified string.\n'
-            f'Usage: `{FLAN_PREFIX}showcards *name*`'
+            f'Usage: `{prefix}showcards *name*`'
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
@@ -607,11 +614,14 @@ class add_image:
         return
     
     checks=[checks.has_role(CARDS_ROLE)]
+    name = 'add-image'
+    aliases = ['add_image']
     
     async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('add_image',(
             'Adds or updates an image of a card.\n'
-            f'Usage: `{FLAN_PREFIX}add_image <card name>`\n'
+            f'Usage: `{prefix}add_image <card name>`\n'
             'Also include an image as attachment.'
             ),color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
@@ -779,10 +789,11 @@ class checklist:
     checks=[checks.has_role(CARDS_ROLE)]
     
     async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('checklist',(
             'Lists the cards of the given rarity, which have images added to them.\n'
             'If no rarity is provided, I will list all the cards with images.\n'
-            f'Usage: `{FLAN_PREFIX}checklist *rarity*`\n'
+            f'Usage: `{prefix}checklist *rarity*`\n'
             ),color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
@@ -842,9 +853,10 @@ class dump_all_card:
     checks=[checks.has_role(CARDS_ROLE)]
     
     async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('dump-all-card',(
             'Lists all the cards to this channel.\n'
-            f'Usage: `{FLAN_PREFIX}dump-all-card`\n'
+            f'Usage: `{prefix}dump-all-card`\n'
             ),color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)

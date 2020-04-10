@@ -139,9 +139,9 @@ async def download_wiki_page(client, title_, url):
                             # is it main article link?
                             if (classes is not None) and ('mainarticle' in classes):
                                 sub=sub.find('a')
-                                url=sub.attrs['href']
+                                url_=sub.attrs['href']
                                 title=sub.attrs['title']
-                                text=f'*Main article: [{title}](https://en.touhouwiki.net{url})*\n'
+                                text=f'*Main article: [{title}](https://en.touhouwiki.net{url_})*\n'
                                 last.append(text)
                                 continue
 
@@ -228,9 +228,9 @@ async def download_wiki_page(client, title_, url):
             classes=element.attrs.get('class')
             if (classes is not None) and ('mainarticle' in classes):
                 sub=element.find('a')
-                url=sub.attrs['href']
+                url_=sub.attrs['href']
                 title=sub.attrs['title']
-                text=f'*Main article: [{title}](https://en.touhouwiki.net{url})*\n'
+                text=f'*Main article: [{title}](https://en.touhouwiki.net{url_})*\n'
                 last.append(text)
                 
                 continue
@@ -241,7 +241,7 @@ async def download_wiki_page(client, title_, url):
             continue #spellcard table?
         
         sys.stderr.write('Unhandled element at `TouhouWikiPage.__new__` : ')
-        sys.stderr.write(element.__repr__())
+        sys.stderr.write(repr(element))
         sys.stderr.write('\n')
         
     del last
@@ -355,8 +355,7 @@ async def download_wiki_page(client, title_, url):
         if index==limit:
             break
     
-    pages[0].url='https://en.touhouwiki.net'+url
-    
+    pages[0].url=url
     return pages
 
 TRANSFORMATIONS = {

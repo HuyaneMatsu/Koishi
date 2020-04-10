@@ -23,7 +23,7 @@ from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, C
 RATELIMIT_RESET=Discord_hdrs.RATELIMIT_RESET
 RATELIMIT_RESET_AFTER=Discord_hdrs.RATELIMIT_RESET_AFTER
 
-RATELIMIT_COMMANDS=eventlist(type_=Command)
+RATELIMIT_COMMANDS=eventlist(type_=Command, category='RATELIMIT TESTS')
 
 def setup(lib):
     Koishi.command_processer.create_category('RATELIMIT TESTS',checks=[checks.owner_only()])
@@ -1259,7 +1259,7 @@ async def guild_preview(client, guild_id):
     await bypass_request(client, METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/preview')
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
     '''
     Does 6 achievement get request towards 1 achievemt.
@@ -1288,7 +1288,7 @@ async def ratelimit_test0000(client,message):
         await WaitTillAll(tasks,loop)
     #achievement_get limited. limit:5, reset:5
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0001(client,message):
     '''
     Does 3-3 achievement get request towards 2 achievemts.
@@ -1323,7 +1323,7 @@ async def ratelimit_test0001(client,message):
         await WaitTillAll(tasks,loop)
     #achievement_get limited globally
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0002(client,message):
     '''
     Creates 6 achievements.
@@ -1354,7 +1354,7 @@ async def ratelimit_test0002(client,message):
                 await client.achievement_delete(achievement.id)
     #achievement_create limited. limit:5, reset:5, globally
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0003(client,message):
     '''
     First creates 2 achievements with the client normally, then deletes them for testing.
@@ -1381,7 +1381,7 @@ async def ratelimit_test0003(client,message):
         await WaitTillAll(tasks,loop)
     #achievement_delete limited. limit:5, reset:5, globally
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0004(client,message):
     '''
     Creates an achievent, then edits it twice for testing. When done, deletes it.
@@ -1407,7 +1407,7 @@ async def ratelimit_test0004(client,message):
         await client.achievement_delete(achievement)
     #achievement_edit limited. limit:5, reset:5
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0005(client,message):
     '''
     Creates 2 achievements, then edits them once, once for testing. At the end deletes them.
@@ -1436,7 +1436,7 @@ async def ratelimit_test0005(client,message):
             await client.achievement_delete(achievement)
     #achievement_edit limited globally
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0006(client,message):
     '''
     Creates, edits and deletes an achievment.
@@ -1454,7 +1454,7 @@ async def ratelimit_test0006(client,message):
     
     # achievement_create, achievement_get, achievement_edit, achievement_delete are NOT grouped
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0007(client,message):
     '''
     Requests all the achievemenets.
@@ -1471,7 +1471,7 @@ async def ratelimit_test0007(client,message):
     
     #achievement_get_all limited. limit:5, reset:5, globally
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0008(client,message):
     '''
     Updates an achievement of the client's owner.
@@ -1492,7 +1492,7 @@ async def ratelimit_test0008(client,message):
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     # user_achievement_update limited. Limit : 5, reset : 5.
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0009(client,message):
     '''
     Updates an achievement of the client's owner.
@@ -1513,7 +1513,7 @@ async def ratelimit_test0009(client,message):
 
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0010(client,message):
     '''
     Updates an achievement of the client's owner. But now one, what has `secure=False`
@@ -1533,7 +1533,7 @@ async def ratelimit_test0010(client,message):
     
     # DiscordException FORBIDDEN (403), code=40001: Unauthorized
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0011(client,message):
     '''
     Updates the achievemenets of all the owners of the client.
@@ -1567,7 +1567,7 @@ class check_is_owner(object):
     def __call__(self,message):
         return self.client.is_owner(message.author)
     
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0012(client,message):
     '''
     Tries to get a user's achievemenets after oauth2 authorization.
@@ -1619,7 +1619,7 @@ class ratelimit_test0020_checker(object):
         
         return True
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0013(client,message):
     '''
     Requests messages for each day from the channel if can, then deletes them if you agree with it as well.
@@ -1708,7 +1708,7 @@ async def ratelimit_test0013(client,message):
             
         # no more case
         
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0014(client,message):
     '''
     Creates 2 message.
@@ -1728,7 +1728,7 @@ async def ratelimit_test0014(client,message):
         
         await Task(message_delete_multiple(client,messages),client.loop)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0015(client,message):
     '''
     Deletes all the reactions of a single emoji from a message.
@@ -1744,7 +1744,7 @@ async def ratelimit_test0015(client,message):
         emoji = BUILTIN_EMOJIS['x']
         await reaction_delete_emoji(client, message, emoji)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0016(client,message):
     '''
     Adds a reaction and deletes alll the same type from the message.
@@ -1761,7 +1761,7 @@ async def ratelimit_test0016(client,message):
         await reaction_add(client, message, emoji)
         await reaction_delete_emoji(client, message, emoji)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0017(client,message):
     '''
     Requests 1 guild preview.
@@ -1770,7 +1770,7 @@ async def ratelimit_test0017(client,message):
     with RLTCTX(client,channel,'ratelimit_test0017') as RLT:
         await guild_preview(client, 197038439483310086)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0018(client,message):
     '''
     Requests 2 guild preview.
@@ -1780,7 +1780,7 @@ async def ratelimit_test0018(client,message):
         await guild_preview(client, 302094807046684672)
         await guild_preview(client, 197038439483310086)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0019(client,message):
     '''
     Edits the channel twice.
@@ -1798,7 +1798,7 @@ async def ratelimit_test0019(client,message):
         await channel_edit(client, channel, nsfw = (not nsfw))
         await channel_edit(client, channel, nsfw = nsfw)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0020(client,message):
     '''
     Creates a channel.
@@ -1816,7 +1816,7 @@ async def ratelimit_test0020(client,message):
         channel_id=int(data['id'])
         await client.http.channel_delete(channel_id,None)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0021(client,message):
     '''
     Deletes a channel.
@@ -1833,7 +1833,7 @@ async def ratelimit_test0021(client,message):
         channel = await client.channel_create(guild, name='Kanako', type_=0)
         await channel_delete(client, channel)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0022(client,message):
     '''
     Edits a role.
@@ -1851,7 +1851,7 @@ async def ratelimit_test0022(client,message):
         await role_edit(client, role, name='Chiruno')
         await client.role_delete(role)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0023(client,message):
     '''
     Creates a role.
@@ -1869,7 +1869,7 @@ async def ratelimit_test0023(client,message):
         role_id=int(data['id'])
         await client.http.role_delete(guild.id,role_id,None)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0024(client,message):
     '''
     Deletes a role.
@@ -1886,7 +1886,7 @@ async def ratelimit_test0024(client,message):
         role = await client.role_create(guild,name='Sakuya')
         await role_delete(client, role)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0025(client,message):
     '''
     Edits 2 channel.
@@ -1926,7 +1926,7 @@ async def ratelimit_test0025(client,message):
         await client.channel_edit(channel_1, nsfw = nsfw_1)
         await client.channel_edit(channel_2, nsfw = nsfw_2)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0026(client,message):
     '''
     Edits 2 roles at the same guild.
@@ -1947,7 +1947,7 @@ async def ratelimit_test0026(client,message):
         await client.role_delete(role_1)
         await client.role_delete(role_2)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0027(client, message, guild_id:str=''):
     '''
     Edits 1-1 roles at separate guilds.
@@ -1976,7 +1976,7 @@ async def ratelimit_test0027(client, message, guild_id:str=''):
         await client.role_delete(role_1)
         await client.role_delete(role_2)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0028(client, message, guild_id:str=''):
     '''
     Creates 1-1 roles at separate guilds
@@ -2005,7 +2005,7 @@ async def ratelimit_test0028(client, message, guild_id:str=''):
         await client.http.role_delete(guild_1.id,role_1_id,None)
         await client.http.role_delete(guild_2.id,role_2_id,None)
 
-@RATELIMIT_COMMANDS(category='RATELIMIT TESTS')
+@RATELIMIT_COMMANDS
 async def ratelimit_test0029(client,message):
     '''
     Moves a role.

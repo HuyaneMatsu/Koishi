@@ -21,7 +21,7 @@ def teardown(lib):
     Koishi.commands.unextend(DS_COMMANDS)
 
 async def ds_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('ds',(
         'Play **Dungeon sweeper** game! A simple box pushing game with '
         'cute touhou characters!\n'
@@ -31,7 +31,10 @@ async def ds_description(client,message):
         f'- `{prefix}ds` : Starts a game at this channel or moves your actual '
         'game.\n'
         f'- `{prefix}ds rules` : The rules of the game desu!\n'
-        f'- `{prefix}ds help` : Shows you this message.'
+        f'- `{prefix}ds help` : Shows you this message.\n\n'
+        'The game is based on a mobile game '
+        '[Sweeper of Suika](https://play.google.com/store/apps/details?id=net.satoritan.suika&hl=en), '
+        'So please go and love to it as well!'
         ),color=DS_COLOR)
     await client.message_create(message.channel,embed=embed)
 
@@ -1829,7 +1832,7 @@ async def ds_modify_best(client,message,content):
     await client.message_create(message.channel,f'modified : {count}')
     
 async def ds_modify_best_description(client,message):
-    prefix=client.events.message_create.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('ds_modify_best',(
         f'A helper command for `{prefix}ds`, to modify the best results '
         'of a stage.\n Before calling this command, make sure you edited the '

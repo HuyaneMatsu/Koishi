@@ -15,7 +15,7 @@ def teardown(lib):
     Koishi.commands.remove(battle_manager, name='bs')
 
 async def bs_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('bs',(
         'Requests a battleship game with the given user.\n'
         f'Usage: `{prefix}bs *user*`'

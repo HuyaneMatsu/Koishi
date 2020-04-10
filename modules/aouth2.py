@@ -1,10 +1,12 @@
+import json
 from hata import Color, Embed, eventlist, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
-    cr_pg_channel_object, ChannelText
+    cr_pg_channel_object, ChannelText, cchunkify, multidict_titled
 from hata.ext.commands import Command, checks, Pagination
 from hata.ext.prettyprint import pchunkify
+from hata.backend.py_hdrs import AUTHORIZATION
 
 OAUTH2_COLOR = Color.from_rgb(148,0,211)
-OAUTH2_COMMANDS = eventlist(type_=Command)
+OAUTH2_COMMANDS = eventlist(type_=Command, category = 'OAUTH2')
 
 def setup(lib):
     Koishi.command_processer.create_category('OAUTH2',checks=[checks.owner_only()])
@@ -43,7 +45,7 @@ def _oauth2_query(message,content):
 
 
 @OAUTH2_COMMANDS.from_class
-class oaut2_link:
+class oauth2_link:
     async def command(client,message,): #just a test link
         await client.message_create(message.channel,(
             'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
@@ -51,11 +53,9 @@ class oaut2_link:
             '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
             '%20email'))
     
-    category = 'OAUTH2'
-    
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
-        embed=Embed('oaut2_link',(
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('oauth2_link',(
             'I ll give you a nice authorization link for some oauth 2 scopes.\n'
             f'Usage: `{prefix}oauth2_link`\n'
             'After you authorized yourself, you should call the `oauth2_feed` '
@@ -101,10 +101,8 @@ class oauth2_feed:
         OA2_accesses[user.id]=user
         await client.message_create(message.channel,'Thanks')
     
-    category = 'OAUTH2'
-    
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('oauth2_feed',(
             'Feeds your oauth 2 authorized redirect url.\n'
             f'Usage: `{prefix}oauth2_feed *link*`\n'
@@ -130,10 +128,8 @@ class oauth2_user:
         
         await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(user)])
     
-    category = 'OAUTH2'
-    
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('oauth2_user',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'Using this command, I ll show the extra user information , I '
@@ -160,10 +156,8 @@ class oauth2_connections:
         
         await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(connections)])
     
-    category = 'OAUTH2'
-    
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('oauth2_connections',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'You might ask what are your connections. '
@@ -190,10 +184,8 @@ class oauth2_guilds:
         
         await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(guilds)])
     
-    category = 'OAUTH2'
-    
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('oauth2_guilds',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'By using this command, I ll show your guilds. '
@@ -236,11 +228,9 @@ class oauth2_my_guild:
                 await client.guild_delete(guild)
             else:
                 await client.guild_leave(guild)
-
-    category = 'OAUTH2'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('oauth2_my_guild',(
             'After you authorized yourself, I can create a guild for you, '
             'so just sit back!\n'
@@ -272,10 +262,8 @@ class oauth2_renew:
             f'To creation time at: {new:%Y.%m.%d-%H:%M:%S}'
                 )
     
-    category = 'OAUTH2'
-    
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('oauth2_renew',(
             'Your oauth2 authorization might expire; with this command you can '
             'renew it.\n'
@@ -286,3 +274,17 @@ class oauth2_renew:
                 ),color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
         await client.message_create(message.channel,embed=embed)
+
+@OAUTH2_COMMANDS(category = 'TEST COMMANDS')
+async def test_oauth2_user_data(client, message, content):
+    user=_oauth2_query(message,content)
+    if user is None:
+        await client.message_create(message.channel,'Could not find that user')
+        return
+    
+    header=multidict_titled()
+    header[AUTHORIZATION]=f'Bearer {user.access_token}'
+    data = await client.http.user_info(header)
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
+
+

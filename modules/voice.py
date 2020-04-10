@@ -490,7 +490,7 @@ async def voice_description(client,message):
     else:
         is_admin=message.channel.permissions_for(message.author).can_administrator
         
-    prefix=client.events.message_create.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     text=(
         'Voice related command colection!\n'
         f'Usage: `{prefix}voice (subcommand) ...`\n'

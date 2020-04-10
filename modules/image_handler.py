@@ -90,7 +90,7 @@ def load_images():
 load_images()
 
 async def image_description(client,message):
-    prefix=client.events.message_create.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('image',(
         'I ll search images by tags from my collection, '
         'then send 1 of the results.\n'
@@ -109,7 +109,7 @@ async def image_description(client,message):
 
 
 async def upload_description(client,message):
-    prefix=client.events.message_create.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('upload',(
         'You can can upload images with tags, which you can access with the '
         f'{prefix}image` command after.\n'

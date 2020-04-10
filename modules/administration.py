@@ -51,7 +51,7 @@ class clear:
     checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True),fail_identificator=FI_NO.MANAGE_MESSAGES)]
 
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('clear',(
             'I ll clear up the leftover after your lewd messages O-NEE-CHA-N.'
             f'Usage : `{prefix}clear <amount> <reason>`\n'
@@ -121,7 +121,7 @@ class invite:
         if not full:
             full=client.is_owner(user)
     
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         if full:
             content=(
                 'I create an invite for you, to this guild.\n'
@@ -210,7 +210,7 @@ class bans:
     checks = [checks.has_guild_permissions(Permission().update_by_keys(ban_users=True),fail_identificator=FI_NO.BAN)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('bans',(
             'I ll show you the banned users at the guild.\n'
             f'Usage: `{prefix}bans`'
@@ -224,7 +224,7 @@ class bans:
 class prefix:
     async def command(client,message,prefix:str=None):
         if prefix is None:
-            response = client.command_processer.prefix(message)
+            response = prefix = client.command_processer.get_prefix_for(message)
         else:
             prefix_ln = len(prefix)
             if prefix_ln==0 or prefix_ln>32:
@@ -245,7 +245,7 @@ class prefix:
     checks = [checks.owner_or_guild_owner(fail_identificator=FI_NO.GUILD_OWNER)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('prefix',(
             'Do you have any preferred prefix for my commands?\n'
             f'Usage: `{prefix}prefix *prefix*`'
@@ -263,7 +263,7 @@ class leave_guild:
     checks = [checks.owner_or_guild_owner(fail_identificator=FI_NO.GUILD_OWNER)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('leave_guild',(
             'You really want me to leave? :c\n'
             f'Usage: `{prefix}leave_guild`'
@@ -297,7 +297,7 @@ class reaction_clear:
     checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True),fail_identificator=FI_NO.MANAGE_MESSAGES)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('reaction_clear',(
             'Do you want me to remvoe all the reactions from a message?\n'
             f'Usage: `{prefix}reaction_clear *message_id*`'
@@ -313,7 +313,7 @@ class show_help_for:
                 'Please define a user as well.')
             return
         
-        message=Message.custom(base=message,author=user)
+        message=message.custom(author=user)
         
         await client.command_processer.commands['help'](client,message,rest)
     
@@ -321,7 +321,7 @@ class show_help_for:
     checks = [checks.owner_only(fail_identificator=FI_NO.OWNER)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('show_help_for',(
             'Calls `help` command, as the given user would do it.\n'
             f'Usage: `{prefix}show_help_for *user*`\n'
@@ -430,7 +430,7 @@ class role_emoji:
     checks=[checks.has_permissions(Permission().update_by_keys(administrator=True),fail_identificator=FI_NO.ADMIN)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('role-emoji',(
             'Edits the roles, for which the emoji is available for.\n'
             f'Usage: `{prefix}role-emoji *emoji* <role_1> <role_2> ...`\n'
@@ -462,7 +462,7 @@ class invites:
     checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_channel=True),fail_identificator=FI_NO.MANAGE_CHANNEL)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('invites',(
             'I can list you the invites of the guild.\n'
             f'Usage: `{prefix}invites <channel>`\n'
@@ -511,7 +511,7 @@ class logs:
     checks=[checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True),fail_identificator=FI_NO.AUDIT_LOGS)]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('logs',(
             'I can list you the audit logs of the guild.\n'
             f'Usage: `{prefix}logs <user> <event>`\n'

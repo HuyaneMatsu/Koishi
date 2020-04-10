@@ -285,7 +285,7 @@ class safebooru:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.events.message_create.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('safebooru',(
             'Do you want me, to request some images from safebooru?\n'
             f'Usage: `{prefix}safebooru *tags*`\n'
@@ -328,7 +328,7 @@ class nsfwbooru:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.events.message_create.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('nsfwbooru',(
             'Do you want me, to request some images from gelbooru?... You perv!\n'
             f'Usage: `{prefix}nsfwbooru *tags*`\n'

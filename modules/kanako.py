@@ -36,7 +36,7 @@ CIRCLE_TIME=60.
 KANAKO_COLOR=Color.from_tuple(FONT_COLOR)
 
 async def kanako_description(client,message):
-    prefix=client.events.message_create.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('kanakogame',(
         'Start a hiragana or a katakana quiz!\n'
         f'Usage: `{prefix}kanakogame (subcommand) ...`\n'

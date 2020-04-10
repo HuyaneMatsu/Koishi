@@ -30,7 +30,7 @@ class ping:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('ping',(
             'Do you wanna know how bad my connection is to Discord?\n'
             f'Usage: `{prefix}ping`'
@@ -62,7 +62,7 @@ class rawr:
     category = 'UTILITY'
 
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('rawr',(
             'Sends a message with every client, who can send a message to the channel.\n'
             f'Usage: `{prefix}rawr`'
@@ -116,7 +116,7 @@ class color:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('color',(
             'Do you wanna see a color?\n'
             f'Usage: `{prefix}color *color*`\n'
@@ -139,7 +139,7 @@ class update_application_info:
     checks = [checks.owner_only()]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('update_application_info',(
             'I can update applicaction info of any of the active clients '
             'at my mansion.\n'
@@ -188,7 +188,7 @@ class resend_webhook:
     checks = [checks.guild_only(), checks.owner_only()]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('resend_webhook',(
             'I can resend a webhook, if chu really want.\n'
             f'Usage: `{prefix}resend_webhook *message_id* <channel>`\n'
@@ -210,7 +210,7 @@ class se:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('se',(
             '`se` stands for `show emoji`.\n'
             f'Usage: `{prefix}se *emoji*`\n'
@@ -322,7 +322,7 @@ class user_info:
             else:
                 embed.color=user.default_avatar.color
         else:
-            embed.color=user.color(guild)
+            embed.color=user.color_at(guild)
             roles = profile.roles
             if roles:
                 roles.sort()
@@ -375,7 +375,7 @@ class user_info:
     aliases = ['profile']
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('user',(
             'I show you some information about the given user.\n'
             'If you use it inside of a guild and the user is inside as well, '
@@ -482,7 +482,7 @@ class guild_info:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('user',(
             'Do you want me to list, some information about this guild?\n'
             f'Usage: `{prefix}guild`\n'
@@ -509,7 +509,7 @@ class message:
     checks=[checks.has_permissions(Permission().update_by_keys(administrator=True))]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('message',(
             'If you want, I show the representation of a message.\n'
             f'Usage: `{prefix}message *message_id* <channel>`\n'
@@ -539,7 +539,7 @@ class message_pure:
     checks=[checks.has_permissions(Permission().update_by_keys(administrator=True))]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('message_pure',(
             'If you want, I show the pure json representing a message.\n'
             f'Usage: `{prefix}message_pure *message_id* <channel>`\n'
@@ -601,7 +601,7 @@ class roles:
     checks = [checks.guild_only()]
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('roles',(
             'Cutie, do you want me, to list the roles of the guild and their '
             'permissions?\n'
@@ -626,7 +626,7 @@ class avatar:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.events.message_create.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('avatar',(
             'Pure 4K user avatar showcase!\n'
             f'Usage: `{prefix}avatar <user>`\n'
@@ -655,7 +655,7 @@ class guild_icon:
     category = 'UTILITY'
     
     async def description(client,message):
-        prefix=client.events.message_create.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('guild-icon',(
             'Do you wanna see the guild\'s icon in 4K?!\n'
             f'Usage: `{prefix}guild-icon`\n'

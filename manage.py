@@ -2,7 +2,6 @@
 import sys, os
 #moving to the outer folder, so hata ll count as a package and stuffs
 sys.path.append(os.path.abspath('..'))
-
 from hata import Client, start_clients, ActivityGame, ActivityWatching
 from hata.ext.extension_loader import EXTENSION_LOADER
 

@@ -26,7 +26,7 @@ class message_me:
     category = 'GAMES'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('message_me',(
             'I ll send you something, from really deep of my heart.\n'
             f'Usage : `{prefix}message_me`'
@@ -59,7 +59,7 @@ class dice:
     category = 'GAMES'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('dice',(
             'I will throw some dice and tell you the sum.\n'
             f'Usage: `{prefix}dice <dice_count>`\n'
@@ -94,7 +94,7 @@ class waitemoji:
     category = 'GAMES'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('waitemoji',(
             'After using this command, I ll wait some time for you to send '
             'an emoji at this channel. If you sent one, I ll send it back five '
@@ -117,7 +117,7 @@ class rate:
     category = 'GAMES'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('rate',(
             'Do you want me, to rate someone?\n'
             f'Usage: `{prefix}rate <user>`\n'
@@ -267,7 +267,7 @@ class mine:
     category = 'GAMES'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('mine',(
             'I creates a minesweeper game.\n'
             'If you are mad already from failing, just click on the '
@@ -328,7 +328,7 @@ class command_random:
     category = 'GAMES'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('random',(
             'Do you need some random numbers?\n'
             f'Usage: `{prefix}random *number_1* <number_2>`\n'
@@ -487,7 +487,7 @@ class love:
     async def command(client,message,target:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True))):
         source=message.author
         if source is target:
-            prefix=client.command_processer.prefix(message)
+            prefix = client.command_processer.get_prefix_for(message)
             embed=Embed('love',(
                 'How much you two fit together?'
                 f'Usage: `{prefix}user *user*`\n'
@@ -508,7 +508,7 @@ class love:
     category = 'GAMES'
     
     async def description(client,message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('love',(
             'How much you two fit together?'
             f'Usage: `{prefix}user *user*`\n'
@@ -516,7 +516,7 @@ class love:
         await client.message_create(message.channel,embed=embed)
     
     async def parser_failure_handler(client, message, command, content, args):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('love',(
             'How much you two fit together?'
             f'Usage: `{prefix}user *user*`\n'

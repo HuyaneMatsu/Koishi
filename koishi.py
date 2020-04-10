@@ -2,8 +2,8 @@ import re, sys
 from io import StringIO
 from types import FunctionType as function
 
-from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify
-from hata.ext.commands import Pagination, checks, setup_ext_commands
+from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client
+from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter, ConverterFlag
 from hata.ext.extension_loader import EXTENSION_LOADER
 
 from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
@@ -218,7 +218,7 @@ async def help_description(client,message):
     
     del page
     
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     result=[]
     
     limit=len(pages)
@@ -243,7 +243,7 @@ async def help(client, message, name:str=''):
     command = client.command_processer.commands.get(name)
     
     if (command is None) or (not command.run_all_checks(client, message)):
-        prefix=client.events.message_create.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed(f'Invalid command: {name!r}',(
             f'Please try using `{prefix}help` to list the available commands '
             'for you\n'
@@ -268,7 +268,7 @@ async def help(client, message, name:str=''):
 
 @Koishi.commands
 async def invalid_command(client,message,command,content):
-    prefix=client.events.message_create.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed(
         f'Invalid command `{command}`',
         f'try using: `{prefix}help`',
@@ -308,7 +308,7 @@ class about:
     category = 'HELP'
     
     async def description(client, message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('about',(
             'Just some information about me.'
             f'Usage: `{prefix}about`'
@@ -345,7 +345,7 @@ class reload:
     checks = [checks.owner_only()]
     
     async def description(client, message):
-        prefix=client.command_processer.prefix(message)
+        prefix = client.command_processer.get_prefix_for(message)
         lines = [
             'Reloads the specified extension by it\'s name.',
             f'Usage : `{prefix}reload <name>`',
@@ -365,8 +365,65 @@ class reload:
         
         await Pagination(client,message.channel,pages)
 
+async def aliases_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed = Embed('aliases',(
+        'Do you wanna know one of my command\'s aliases?\n'
+        f'Type `{prefix}aliases <name>` and check them out!\n\n'
+        'Or if you wanna know someone elses, who I might spy on, type her name after the command\'s :3.'
+            ), color=KOISHI_HELP_COLOR)
+    
+    await client.message_create(message.channel, embed=embed)
+
+async def aliases_parser_failure_handler(client, message, command, content, args):
+    return await aliases_description(client, message)
+
+@Koishi.commands(description=aliases_description, category='HELP', parser_failure_handler=aliases_parser_failure_handler)
+async def aliases(client, message, name:str, target_client:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default=None)):
+    if type(target_client) is not Client:
+        target_client = client
+    
+    while True:
+        if len(name)>64:
+            fail = True
+            break
+        
+        if not name.islower():
+            name = name.lower()
+        
+        try:
+            command = target_client.command_processer.commands[name]
+        except KeyError:
+            fail = True
+            break
+        
+        if command.run_all_checks(target_client, message):
+            fail = False
+            break
+            
+        fail = True
+        break
+    
+    if fail:
+        title = None
+        if client is target_client:
+            description = f'I have no command named as {name!r}.'
+        else:
+            description = f'{target_client.name_at(message.guild)} has no command named as {name!r}.'
+    else:
+        aliases = command.aliases
+        if aliases is None:
+            title = f'There are no alises provided for command: {name!r}.'
+            description = None
+        else:
+            title = f'Aliases for: {command.name!r}:'
+            description = '\n'.join(aliases)
+    
+    await client.message_create(message.channel,embed=Embed(title,description,color=KOISHI_HELP_COLOR))
+
+
 async def execute_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('execute',(
         'Use an interpreter trough me :3\n'
         'Usages:\n'

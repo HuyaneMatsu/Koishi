@@ -73,7 +73,7 @@ class game_21_checker(object):
         return (user==self.user) and (emoji in Game21.EMOJIS)
 
 async def daily_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('daily',(
         'Claim everyday your share of my love!\n'
         f'Usage: `{prefix}daily <user>`\n'
@@ -223,7 +223,7 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
 
 
 async def hearts_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('hearts',(
         'How many hearts do you have?\n'
         f'Usage: `{prefix}hearts <user>`\n'
@@ -285,7 +285,7 @@ class heartevent_start_checker(object):
 
 
 async def heartevent_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('heartevent',(
         'Starts a heart event at the channel.\n'
         f'Usage: `{prefix}heartevent *duration* *amount* <users_limit>`\n'
@@ -475,7 +475,7 @@ class heartevent(object):
         self.connector=None
 
 async def dailyevent_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('dailyevent',(
         'Starts a daily event at the channel.\n'
         f'Usage: `{prefix}dailyevent *duration* *amount* <users_limit>`\n'
@@ -681,7 +681,7 @@ class dailyevent(object):
 
 
 async def game21_description(client,message):
-    prefix=client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('21',(
         'Starts a 21 game at the channel.\n'
         f'Usage: `{prefix}21 *amount*`\n'
