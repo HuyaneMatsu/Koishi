@@ -2,7 +2,7 @@
 import sys, os, json
 from threading import Lock as SyncLock
 
-from hata import Emoji, alchemy_incendiary
+from hata import Emoji, alchemy_incendiary, Color, Embed
 
 # Emojis are not used, but we will keep them for a time now
 
@@ -69,6 +69,10 @@ from hata import Emoji, alchemy_incendiary
 
 # Edge
 #Emoji.precreate(604698116658167808,name='aG').as_emoji
+
+EMBED_COLOR = Color.from_rgb(73,245,73)
+EMBED_NAME_LENGTH        = 200
+EMBED_DESCRIPTION_LENGTH = 1600
 
 class Rarity(object):
     INSTANCES = [NotImplemented] * 8
@@ -153,6 +157,62 @@ Rarity.token    = Rarity(5  , 'Token'       , True  , )
 Rarity.passive  = Rarity(6  , 'Passive'     , True  , )
 Rarity.basic    = Rarity(7  , 'Basic'       , True  , )
 
+class CardFlag(int):
+    __slots__ = ()
+    
+    def render_description_to(self, parts):
+        collected = []
+        # 0 = Can't be
+        # 1 = Will not
+        if self&1:
+            collected.append((0, 'duplicated'))
+        
+        #if (self>>1)&1:
+        #    collected.append((1, 'end your turn'))
+        
+        if (self>>2)&1:
+            collected.append((0,'put into decks'))
+        
+        if (self>>3)&1:
+            collected.append((1, 'count towards your hand size and will not be discarded if it exceeds your current hand size'))
+        
+        if (self>>4)&1:
+            collected.append((0,'given'))
+        
+        if (self>>5)&1:
+            collected.append((0,'discarded by enemy spells'))
+        
+        if (self>>6)&1:
+            collected.append((0,'discarded, transformed, given or put into your deck'))
+        
+        if not collected:
+            return
+        
+        parts.append('This card ')
+        index = 0
+        limit = len(collected)
+        while True:
+            start_type, content = collected[index]
+            while True:
+                if index:
+                    parts.append(', ')
+                    if collected[index-1][0]==start_type:
+                        parts.append('neither')
+                        break
+                    else:
+                        parts.append('and ')
+                parts.append(('can\'t be','will not')[start_type])
+                break
+            
+            parts.append(' ')
+            parts.append(content)
+            
+            index = index+1
+            if index == limit:
+                break
+        
+        parts.append('.')
+
 CARDS_BY_ID = {}
 CARDS_BY_NAME = {}
 
@@ -163,18 +223,119 @@ CARDS_FILE_LOCK = SyncLock()
 PROTECTED_FILE_NAMES = {'cards.json'}
 
 class Card(object):
-    __slots__=('description', 'id', 'image_name', 'name', 'rarity')
-    def __init__(self,description,id_,name,rarity, image_name = None):
+    __slots__=('_length_hint', 'description', 'flags', 'id', 'image_name', 'name', 'rarity')
+    def __init__(self, description, id_, name, rarity, flags = 0, image_name = None):
         self.id         = id_
         self.name       = name
         self.description= description
         self.rarity     = rarity
+        self.flags      = CardFlag(flags)
+        self.image_name = image_name
+        self._length_hint=0
         CARDS_BY_ID[id_]= self
         CARDS_BY_NAME[name.lower()]=self
-        self.image_name = image_name
-        
+    
     def __hash__(self):
         return self.id
+    
+    def render_to_embed(self):
+        title_parts=['**']
+        name=self.name
+        if len(name)>EMBED_NAME_LENGTH:
+            title=name[:EMBED_NAME_LENGTH]
+            title_parts.append(title)
+            title_parts.append('...')
+        else:
+            title_parts.append(name)
+       
+        title_parts.append('** ')
+        title_parts.append(self.rarity.outlook)
+        
+        title=''.join(title_parts)
+        
+        description=self.description
+        description_parts = []
+        if len(description)<=EMBED_DESCRIPTION_LENGTH:
+            description_parts.append(description)
+        else:
+            description = description[:EMBED_DESCRIPTION_LENGTH]
+            description_parts.append(description)
+            description_parts.append('...')
+        
+        flags = self.flags
+        if flags:
+            description_parts.append('\n\n')
+            flags.render_description_to(description_parts)
+        
+        description = ''.join(description_parts)
+        
+        return Embed(title, description, EMBED_COLOR)
+    
+    def render_to(self, parts):
+        parts.append('**')
+        
+        name=self.name
+        if len(name)<=EMBED_NAME_LENGTH:
+            parts.append(name)
+        else:
+            title=name[:EMBED_NAME_LENGTH]
+            parts.append(title)
+            parts.append('...')
+        
+        parts.append('** ')
+        parts.append(self.rarity.outlook)
+        
+        parts.append('\n\n')
+        
+        description=self.description
+        if len(description)<=EMBED_DESCRIPTION_LENGTH:
+            parts.append(description)
+        else:
+            description = description[:EMBED_DESCRIPTION_LENGTH]
+            parts.append(description)
+            parts.append('...')
+        
+        flags = self.flags
+        if flags:
+            parts.append('\n\n')
+            flags.render_description_to(parts)
+    
+    def __len__(self):
+        result = self._length_hint
+        if result!=0:
+            return result
+        
+        # 2 name start with **
+        # 2 name ends with **
+        # 1 for space before rarity
+        # 2 for 2 linebreak after name
+        result += 7 + len(self.rarity.outlook)
+        
+        # name length
+        name_ln = len(self.name)
+        if name_ln>EMBED_NAME_LENGTH:
+            name_ln = EMBED_NAME_LENGTH+3
+        
+        result += name_ln
+        
+        # description length
+        description_ln = len(self.description)
+        if description_ln > EMBED_DESCRIPTION_LENGTH:
+            description_ln = EMBED_DESCRIPTION_LENGTH+3
+        
+        result += description_ln
+        
+        flags = self.flags
+        if flags:
+            # another two line
+            result +=2
+            parts = []
+            flags.render_description_to(parts)
+            for part in parts:
+                result +=len(part)
+        
+        self._length_hint = result
+        return result
     
     @classmethod
     def update(cls,description,id_,name,rarity):
@@ -188,10 +349,11 @@ class Card(object):
         card.description=description
         card.name=name
         card.rarity=rarity
+        card._length_hint=0
         return False
     
     @classmethod
-    async def dump_cards(cls,loop):
+    async def dump_cards(cls, loop):
         card_datas=[]
         for card in CARDS_BY_ID.values():
             card_data={}
@@ -200,10 +362,11 @@ class Card(object):
             card_data['image_name'] = card.image_name
             card_data['name']       = card.name
             card_data['rarity']     = card.rarity.index
+            card_data['flags']      = card.flags
             card_datas.append(card_data)
         
         await loop.run_in_executor(alchemy_incendiary(cls._dump_cards,(card_datas,),),)
-            
+    
     @classmethod
     def _dump_cards(cls,card_datas):
         with CARDS_FILE_LOCK:
@@ -270,11 +433,11 @@ class Card(object):
                 except KeyError:
                     exception='No \'name\' key'
                     break
-
+                
                 if type(name) is not str:
                     exception=f'Expected type \'str\' for \'name\', got \'{name.__class__.__name__}\''
                     break
-                    
+                
                 try:
                     rarity=card_data['rarity']
                 except KeyError:
@@ -291,10 +454,11 @@ class Card(object):
                     exception=f'No such \'rarity\' index: {rarity}'
                     break
                 
+                flags=card_data.get('flags',0)
                 break
-
+            
             if exception is None:
-                Card(description, id_, name, rarity, image_name)
+                Card(description, id_, name, rarity, flags, image_name)
                 continue
             
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n At data part:\n{card_data}\n')

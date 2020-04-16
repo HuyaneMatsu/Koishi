@@ -51,7 +51,7 @@ class oauth2_link:
             'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
             '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
             '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
-            '%20email'))
+            '%20email%20applications.entitlements'))
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)

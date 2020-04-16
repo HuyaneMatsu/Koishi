@@ -7,13 +7,15 @@ from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, 
 
 from shared import FLAN_PREFIX
 from tools import CooldownHandler
-from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER
+from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH
 
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
 CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
 VISITORS_ROLE   = Role.precreate(669875992159977492)
+
+
 
 setup_ext_commands(Flan,FLAN_PREFIX)
 
@@ -306,27 +308,10 @@ class showcard:
             continue
         
         if card is None:
+            await client.message_create(message.channel,embed = Embed(None,'*Nothing found.*',FLAN_HELP_COLOR))
             return
         
-        title_parts=['**']
-        name=card.name
-        if len(name)>200:
-            title=name[:200]
-            title_parts.append(title)
-            title_parts.append('...')
-        else:
-            title_parts.append(name)
-       
-        title_parts.append('** ')
-        title_parts.append(card.rarity.outlook)
-        
-        title=''.join(title_parts)
-        
-        description=card.description
-        if len(description)>1700:
-            description = description[:1700]+'...'
-        
-        embed=Embed(title,description,CHESUTO_COLOR)
+        embed = card.render_to_embed()
         
         image_name = card.image_name
         if image_name is None:
@@ -334,8 +319,10 @@ class showcard:
             return
         
         embed.add_image(f'attachment://{image_name}')
-        with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
-            await client.message_create(message.channel,embed=embed,file=file)
+        
+        with client.keep_typing(message.channel):
+            with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
+                await client.message_create(message.channel,embed=embed,file=file)
     
     async def description(client,message):
         embed=Embed('showcard',(
@@ -417,7 +404,8 @@ class CardPaginator(object):
             
             card=collected[index]
             
-            local_length=50+len(card.name)+len(card.description)
+            # 2 extra linebreak
+            local_length=2+len(card)
             
             if total_length+local_length>2000:
                 page_information.append((page_information_start,index),)
@@ -447,64 +435,17 @@ class CardPaginator(object):
         start, end = self.page_information[page_index]
         
         page_parts=[]
-        # The card's description or title might be too long, lets check them.
-        if start+1 == end:
-            card=self.collected[start]
+        index = start
+        while True:
+            card=self.collected[index]
+            card.render_to(page_parts)
             
-            name=card.name
-            description=card.description
+            index = index+1
+            if index==end:
+                break
             
-            local_length=50+len(name)+len(description)
-            # No good, our fear happens
-            if local_length>2000:
-                page_parts.append('**')
-                
-                if len(name)>200:
-                    title=name[:200]
-                    page_parts.append(title)
-                    page_parts.append('...')
-                else:
-                    page_parts.append(name)
-               
-                page_parts.append('** ')
-                page_parts.append(card.rarity.outlook)
-                page_parts.append('\n\n')
-                
-                if len(description)>1700:
-                    description = description[:1700]
-                    page_parts.append(description)
-                    page_parts.append('...')
-                else:
-                    page_parts.append(description)
-                
-            else:
-                page_parts.append('**')
-                page_parts.append(name)
-                page_parts.append('** ')
-                page_parts.append(card.rarity.outlook)
-                page_parts.append('\n\n')
-                page_parts.append(description)
-        
-        else:
-            index=start
-            
-            while True:
-                
-                card=self.collected[index]
-                index=index+1
-                
-                page_parts.append('**')
-                page_parts.append(card.name)
-                page_parts.append('** ')
-                page_parts.append(card.rarity.outlook)
-                page_parts.append('\n\n')
-                page_parts.append(card.description)
-            
-                if index==end:
-                    break
-                
-                page_parts.append('\n\n')
-                continue
+            page_parts.append('\n\n')
+            continue
         
         return Embed(self.title,''.join(page_parts),color=CHESUTO_COLOR).add_footer(
             f'Page: {page_index+1}/{len(self.page_information)}. Results {start+1}-{end}/{len(self.collected)}')
@@ -660,8 +601,8 @@ class checklist:
                     card=filtered[0]
                     name=card.name
                     length=len(name)
-                    if length>200:
-                        name = name[:200]+'...'
+                    if length>EMBED_NAME_LENGTH:
+                        name = name[:EMBED_NAME_LENGTH]+'...'
                         length = 203
                     
                     parts.append(name)
@@ -675,8 +616,8 @@ class checklist:
                         name=card.name
                         
                         name_ln=len(name)
-                        if name_ln>200:
-                            name = name[:200]+'...'
+                        if name_ln>EMBED_NAME_LENGTH:
+                            name = name[:EMBED_NAME_LENGTH]+'...'
                             name_ln = 203
                         
                         length=length+name_ln+1
@@ -735,8 +676,8 @@ class checklist:
                 card=container[0]
                 name=card.name
                 name_ln=len(name)
-                if name_ln>200:
-                    name = name[:200]+'...'
+                if name_ln>EMBED_NAME_LENGTH:
+                    name = name[:EMBED_NAME_LENGTH]+'...'
                     name_ln = 203
                 
                 length = length+name_ln
@@ -751,8 +692,8 @@ class checklist:
                     index=index+1
                     name=card.name
                     name_ln=len(name)
-                    if name_ln>200:
-                        name = name[:200]+'...'
+                    if name_ln>EMBED_NAME_LENGTH:
+                        name = name[:EMBED_NAME_LENGTH]+'...'
                         name_ln=203
                     
                     length = length+1+name_ln
@@ -827,25 +768,7 @@ class dump_all_card:
         cards.sort(key=lambda card:card.name)
         
         for card, client in zip(cards,cycle(clients),):
-            title_parts=['**']
-            name=card.name
-            if len(name)>200:
-                title=name[:200]
-                title_parts.append(title)
-                title_parts.append('...')
-            else:
-                title_parts.append(name)
-           
-            title_parts.append('** ')
-            title_parts.append(card.rarity.outlook)
-            
-            title=''.join(title_parts)
-            
-            description=card.description
-            if len(description)>1700:
-                description = description[:1700]+'...'
-            
-            embed=Embed(title,description,CHESUTO_COLOR)
+            embed = card.render_to_embed()
             
             await client.message_create(channel,embed=embed)
     
