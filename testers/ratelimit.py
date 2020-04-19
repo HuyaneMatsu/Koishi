@@ -1259,6 +1259,10 @@ async def guild_preview(client, guild_id):
     await bypass_request(client, METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/preview')
 
+async def message_crosspost(client, message):
+    await bypass_request(client, METH_POST,
+        f'https://discordapp.com/api/v7//channels/{message.channel.id}/messages/{message.id}/crosspost')
+
 @RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
     '''
@@ -2022,3 +2026,75 @@ async def ratelimit_test0029(client,message):
         role = await client.role_create(guild,name='Sakuya')
         await role_move(client,role,2)
         await client.role_delete(role)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0030(client, message):
+    '''
+    Crossposts 2 message at the current channel.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0030') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if channel.type != 5:
+            await RLT.send('Pls perform this action at a news channel.')
+        
+        message_1 = await client.message_create(channel, 'Hatate')
+        message_2 = await client.message_create(channel, 'Iku')
+        
+        await message_crosspost(client, message_1)
+        await message_crosspost(client, message_2)
+        
+        await client.message_delete(message_1)
+        await client.message_delete(message_2)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0031(client, message):
+    '''
+    Crossposts 1-1 messages at 2 different channels.
+    '''
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0031') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if channel.type != 5:
+            await RLT.send('Pls perform this action at a news channel.')
+        
+        category = channel.category
+        if category is None:
+            await RLT.send('Pls perform this action at a channel within a category.')
+        
+        for channel_ in category.channels:
+            if channel_ is channel:
+                continue
+            
+            if channel_.type!=5:
+                continue
+            
+            channel_2 = channel_
+            break
+        else:
+            channel_2 = None
+        
+        if channel_2 is None:
+            await RLT.send('The channel\'s category has only 1 news channel.')
+        
+        message_1 = await client.message_create(channel, 'Aya')
+        message_2 = await client.message_create(channel_2, 'Chen')
+        
+        await message_crosspost(client, message_1)
+        await message_crosspost(client, message_2)
+        
+        await client.message_delete(message_1)
+        await client.message_delete(message_2)
+

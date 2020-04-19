@@ -384,14 +384,6 @@
         "flags": 0
     },
     {
-        "description": "I. Draw a card.\nII. Increase your turn count by 1.",
-        "id": 645641536670924832,
-        "image_name": null,
-        "name": "Joy of Celebration",
-        "rarity": 0,
-        "flags": 0
-    },
-    {
         "description": "You can only play this card if you fulfilled the following requirement below:\n- Play at least 3 other cards in a row for 3 turns while this card is in your hand. \nI. Draw 3 cards.\nII. Increase your turn timer by 3.\nIII. Remove 3 chess pieces of choice except for the Queen and King. \nIV. This card will reset the number of cards played in a row.",
         "id": 645641536670924833,
         "image_name": null,
@@ -549,14 +541,6 @@
         "image_name": null,
         "name": "Banishing Scroll",
         "rarity": 2,
-        "flags": 0
-    },
-    {
-        "description": "I. Both players discard their hand. \nII. Both players draw a card.",
-        "id": 645641247897157668,
-        "image_name": null,
-        "name": "Enraged Strike",
-        "rarity": 3,
         "flags": 0
     },
     {

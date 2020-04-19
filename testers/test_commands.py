@@ -92,7 +92,9 @@ async def test_user_data(client, message, user:User):
 
 @TEST_COMMANDS
 async def test_100_messages(client, message):
-    
+    '''
+    Sends 100 messages, like a boss!
+    '''
     tasks = []
     for x in range(100):
         task = client.loop.create_task(client.message_create(message.channel,repr(x)))
@@ -103,3 +105,16 @@ async def test_100_messages(client, message):
     end = perf_counter()
     
     await client.message_create(message.channel,repr(end-start))
+
+@TEST_COMMANDS
+async def crosspost(client, message, message_id:int):
+    '''
+    Crossposts, pls pass a mssage id from the current channel!
+    '''
+    
+    to_message = await client.message_get(message.channel,message_id)
+    await client.message_crosspost(to_message)
+    
+    await client.message_create(message.channel, 'success')
+
+

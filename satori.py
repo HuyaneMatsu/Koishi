@@ -99,9 +99,9 @@ async def wiki(client,message,content):
     embed = Embed(title=f'Search results for `{search_for}`',color=WIKI_COLOR)
     await ChooseMenu(client, message.channel, results, wiki_page_selected, embed=embed, prefix='>>')
 
-async def wiki_page_selected(client, message, title, url):
-    pages = await download_wiki_page(client,title, url)
-    await Pagination(client,message.channel,pages,timeout=600.0,message=message)
+async def wiki_page_selected(client, channel, message, title, url):
+    pages = await download_wiki_page(client, title, url)
+    await Pagination(client, channel, pages, timeout=600.0, message=message)
 
 async def download_wiki_page(client, title_, url):
     async with client.http.get(url) as response:

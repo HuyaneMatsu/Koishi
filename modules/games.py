@@ -489,8 +489,8 @@ class love:
         if source is target:
             prefix = client.command_processer.get_prefix_for(message)
             embed=Embed('love',(
-                'How much you two fit together?'
-                f'Usage: `{prefix}user *user*`\n'
+                'How much you two fit together?\n'
+                f'Usage: `{prefix}user *user*`'
                 ),color=GAMES_COLOR)
         else:
             percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101

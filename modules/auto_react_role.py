@@ -1359,7 +1359,7 @@ async def show_auto_react_roles(client, message):
     
     await ChooseMenu(client,message.channel,results,select_auto_react_role_gui, embed=embed, prefix='¤')
 
-async def select_auto_react_role_gui(client, message, title, manager):
+async def select_auto_react_role_gui(client, channel, message, title, manager):
     guild = manager.message.channel.guild
     if manager.destroy_called or (guild is None):
         await client.message_create(message.channel,embed=Embed(

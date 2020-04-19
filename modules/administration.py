@@ -353,7 +353,7 @@ class _role_emoji_emoji_checker(object):
         return True
 
 @ADMINISTRATION_COMMANDS.from_class
-class role_emoji:
+class emoji_role:
     async def command(client, message, emoji:Emoji, roles:Converter('role', amount=(0,0))):
         permissions =message.channel.cached_permissions_for(client)
         if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
@@ -385,7 +385,7 @@ class role_emoji:
             await client.reaction_add(message,emoji_)
         
         try:
-            emoji_, _ = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
+            _, emoji_, _ = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
         except TimeoutError:
             emoji_ = ROLE_EMOJI_CANCEL
         
@@ -425,15 +425,15 @@ class role_emoji:
         
         await client.message_edit(message,embed=embed)
     
-    name = 'role-emoji'
+    name = 'emoji-role'
     category = 'ADMINISTRATION'
     checks=[checks.has_permissions(Permission().update_by_keys(administrator=True),fail_identificator=FI_NO.ADMIN)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('role-emoji',(
-            'Edits the roles, for which the emoji is available for.\n'
-            f'Usage: `{prefix}role-emoji *emoji* <role_1> <role_2> ...`\n'
+        embed=Embed('emoji-role',(
+            'Edits the emoji for which roles is available for.\n'
+            f'Usage: `{prefix}emoji-role *emoji* <role_1> <role_2> ...`\n'
                 ),color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must have adminsitartor role to excute this command')
         await client.message_create(message.channel,embed=embed)
