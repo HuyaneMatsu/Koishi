@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, re
 join=os.path.join
 from threading import current_thread
@@ -12,9 +13,9 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, mult
 
 from hata.backend.dereaddons_local import _spaceholder
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
-from hata.backend.py_hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST, METH_PUT, AUTHORIZATION, \
+from hata.backend.hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST, METH_PUT, AUTHORIZATION, \
     CONTENT_TYPE
-from hata.backend.py_reqrep import Request_CM
+from hata.backend.http import Request_CM
 from hata.discord.others import to_json, from_json, quote, bytes_to_base64, ext_from_base64, Discord_hdrs
 from hata.discord.guild import PartialGuild
 from hata.discord.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED

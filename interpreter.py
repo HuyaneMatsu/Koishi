@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import re
 from threading import Lock as SyncLock
 

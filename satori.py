@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re, sys
 from random import random
 

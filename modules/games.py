@@ -1,4 +1,5 @@
-from random import random, choice, randint
+# -*- coding: utf-8 -*-
+from random import choice, randint
 
 from hata import Color, Embed, eventlist, DiscordException, parse_emoji, CLIENTS, BUILTIN_EMOJIS, ERROR_CODES
 from hata.ext.commands import Command, wait_for_message, ConverterFlag, Converter, wait_for_reaction

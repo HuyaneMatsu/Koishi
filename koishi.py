@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re, sys
 from io import StringIO
 from types import FunctionType as function

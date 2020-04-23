@@ -503,11 +503,10 @@ class dispatch_tester:
         
         result=[f'A guild got edited {guild.name} {guild.id}']
         for key,value in old.items():
-            if key in ('name','icon','splash','user_count','afk_timeout',
-                    'available','has_animated_icon','description',
-                    'vanity_code','banner','max_members','max_presences',
-                    'premium_tier','booster_count','widget_enabled',
-                    'embed_enabled','preferred_language', 'discovery_splash'):
+            if key in ('name', 'icon', 'splash', 'user_count', 'afk_timeout', 'available', 'has_animated_icon',
+                    'description', 'vanity_code', 'banner', 'max_members', 'max_presences', 'premium_tier',
+                    'booster_count', 'widget_enabled', 'embed_enabled', 'preferred_language', 'discovery_splash',
+                    'max_video_channel_users', ):
                 result.append(f'- {key} : {value} - > {getattr(guild,key)}')
                 continue
             

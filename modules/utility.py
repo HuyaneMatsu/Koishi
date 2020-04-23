@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re, sys, json
 
 from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, \

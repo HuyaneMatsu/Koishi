@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from hata import Task, Client, User, CHANNELS, Embed, eventlist, Color
 
 from hata.ext.commands import checks, Command

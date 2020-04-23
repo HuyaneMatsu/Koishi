@@ -117,4 +117,15 @@ async def crosspost(client, message, message_id:int):
     
     await client.message_create(message.channel, 'success')
 
+@TEST_COMMANDS
+async def get_guild(client, message):
+    '''
+    Gets the current guild.
+    '''
+    guild = message.guild
+    if guild is None:
+        await client.message_create(message.channel,'Please use this command at a guild.')
+    
+    data = await client.http.guild_get(guild.id)
+    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
 
