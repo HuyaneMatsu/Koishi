@@ -9,11 +9,17 @@ ADMINISTRATION_COLOR = Color.from_rgb(148,0,211)
 ADMINISTRATION_COMMANDS = eventlist(type_=Command)
 
 def setup(lib):
-    Koishi.command_processer.create_category('administration',check_failure_handler=check_failure_handler)
+    category = Koishi.command_processer.get_category('administration')
+    if (category is None):
+        Koishi.command_processer.create_category('administration',check_failure_handler=check_failure_handler)
+    else:
+        if (category.check_failure_handler is None):
+            category.check_failure_handler = check_failure_handler
+    
     Koishi.commands.extend(ADMINISTRATION_COMMANDS)
 
 def teardown(lib):
-    Koishi.command_processer.unextend(ADMINISTRATION_COMMANDS)
+    Koishi.commands.unextend(ADMINISTRATION_COMMANDS)
 
 
 PERMISSION_NAMES = [
@@ -435,7 +441,7 @@ class emoji_role:
             'Edits the emoji for which roles is available for.\n'
             f'Usage: `{prefix}emoji-role *emoji* <role_1> <role_2> ...`\n'
                 ),color=ADMINISTRATION_COLOR).add_footer(
-                'Guild only. You must have adminsitartor role to excute this command')
+                'Guild only. You must have adminsitartor permission to execute this command')
         await client.message_create(message.channel,embed=embed)
 
 @ADMINISTRATION_COMMANDS.from_class
