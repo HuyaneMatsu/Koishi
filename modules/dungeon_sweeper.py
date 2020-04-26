@@ -34,7 +34,7 @@ async def ds_description(client,message):
         f'- `{prefix}ds help` : Shows you this message.\n\n'
         'The game is based on a mobile game '
         '[Sweeper of Suika](https://play.google.com/store/apps/details?id=net.satoritan.suika&hl=en), '
-        'So please go and love to it as well!'
+        'So please go and give love to it as well!'
         ),color=DS_COLOR)
     await client.message_create(message.channel,embed=embed)
 
@@ -1229,19 +1229,36 @@ class stage_backend:
         limit=len(map_)
         step=self.source.size
 
-        if limit<82:
+        if limit <= 75:
             start=0
-            while start<limit:
-                end=start+step
-                result.append(''.join([style[element] for element in map_[start:end]]))
-                start=end
+            shift = 0
         else:
-            start=1
-            step=step-2
-            while start<limit:
-                end=start+step
-                result.append(''.join([style[element] for element in map_[start:end]]))
-                start=end+2
+            step_count = limit//step
+            if step_count < step:
+                if (step_count * (step-2)) <= 75:
+                    start = 1
+                    step -= 2
+                    shift = 2
+                else:
+                    start = step+1
+                    limit -= step
+                    step -= 2
+                    shift = 2
+            else:
+                if ((step_count-2) * step) <= 75:
+                    start = step
+                    limit -= step
+                    shift = 0
+                else:
+                    start = step+1
+                    limit -= step
+                    step -= 2
+                    shift = 2
+        
+        while start<limit:
+            end=start+step
+            result.append(''.join([style[element] for element in map_[start:end]]))
+            start=end+shift
         
         return '\n'.join(result)
 
@@ -1700,7 +1717,9 @@ def loader(filename):
         'FLOOR'     : FLOOR,
         'TARGET'    : TARGET,
         'BOX'       : BOX,
+        'BOX_TARGET': BOX_TARGET,
         'HOLE_U'    : HOLE_U,
+        'HOLE_P'    : HOLE_P,
         'OBJECT_U'  : OBJECT_U,
         'CN_FLOOR'  : CHAR_N|FLOOR,
         'CE_FLOOR'  : CHAR_E|FLOOR,

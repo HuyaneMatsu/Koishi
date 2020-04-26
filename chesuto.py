@@ -2,7 +2,7 @@
 import sys, os, json
 from threading import Lock as SyncLock
 
-from hata import Emoji, alchemy_incendiary, Color, Embed
+from hata import Emoji, alchemy_incendiary, Color, Embed, KOKORO
 
 # Emojis are not used, but we will keep them for a time now
 
@@ -344,13 +344,26 @@ class Card(object):
             card=CARDS_BY_NAME[lower_name]
         except KeyError:
             Card(description,id_,name,rarity)
-            return True
+            result = True
+        else:
+            card.description=description
+            card.name=name
+            card.rarity=rarity
+            card._length_hint=0
+            result = False
         
-        card.description=description
-        card.name=name
-        card.rarity=rarity
-        card._length_hint=0
-        return False
+        return result
+    
+    def _delete(self):
+        try:
+            del CARDS_BY_NAME[self.name.lower()]
+        except KeyError:
+            pass
+        
+        try:
+            del CARDS_BY_ID[self.id]
+        except KeyError:
+            pass
     
     @classmethod
     async def dump_cards(cls, loop):
@@ -464,5 +477,35 @@ class Card(object):
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n At data part:\n{card_data}\n')
             exception=None
             continue
+
+
+def get_card(value):
+    if not 2<len(value)<2001:
+        return
+        
+    value = value.lower()
+    
+    card = None
+    start_index = 1000
+    length = 1000
+    
+    for card_name, card_ in CARDS_BY_NAME.items():
+        index = card_name.find(value)
+        if index==-1:
+            continue
+        
+        if index > start_index:
+            continue
+        
+        if index == start_index:
+            if length >= len(card_name):
+                continue
+        
+        card = card_
+        start_index=index
+        length=len(card_name)
+        continue
+    
+    return card
 
 Card.load_cards()

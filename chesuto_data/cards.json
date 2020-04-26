@@ -1224,30 +1224,6 @@
         "flags": 17
     },
     {
-        "description": "I. At the start of every turn: - If this is your 20th turn or later, if your first and second tiles in your far left and far right tiles are empty, summon Rooks on all of them.",
-        "id": 669024764043722754,
-        "image_name": null,
-        "name": "Inherited Castles",
-        "rarity": 6,
-        "flags": 0
-    },
-    {
-        "description": "I. You can choose to reshuffle twice on each card at the start of the game.\nII. Start with 4 cards instead of 2.\nIII. Once per turn, the first card used will not end your turn. If this effect is used for the third time, remove this passive.",
-        "id": 669024764043722755,
-        "image_name": null,
-        "name": "Starry Glimpse",
-        "rarity": 6,
-        "flags": 0
-    },
-    {
-        "description": "At the start of the game:\nI. Select a tile in your half of the board, summon a Pawn on it \nII. Players can't use cards until their 6th turn starts.\nIII. You can use cards without restrictions for the next 6 turns.",
-        "id": 669024716115279872,
-        "image_name": null,
-        "name": "Godspeed Advantage",
-        "rarity": 6,
-        "flags": 0
-    },
-    {
         "description": "I. Once every 5 turns, put a \"Battlefield Fanfare\" into your hand.",
         "id": 669024716115279873,
         "image_name": null,
@@ -1284,30 +1260,6 @@
         "id": 669024669222830083,
         "image_name": null,
         "name": "Rifengrad, Cursed Heirloom",
-        "rarity": 5,
-        "flags": 0
-    },
-    {
-        "description": "At the start of the game:\nI. Randomly shuffle all tiles in the board.\nII. Remove all \"Forbidden Lands\" in your deck.\nIII. Put a \"Forbidden Lands\" into your hand, it can't be discarded by enemy spells.",
-        "id": 669024669222830084,
-        "image_name": null,
-        "name": "Forbidden Maze",
-        "rarity": 6,
-        "flags": 0
-    },
-    {
-        "description": "At the start of every turn:\nI. Put a \"Divine Decree of Fate\" into your hand if you have non in it.\nII. Your opponent's hand is revealed.",
-        "id": 669024669222830085,
-        "image_name": null,
-        "name": "The Mystic Seer",
-        "rarity": 6,
-        "flags": 0
-    },
-    {
-        "description": "I. Select a card in your hand, shuffle it into your deck.\nII. Draw a card.\nIII. This card will not end your turn.",
-        "id": 669024669222830086,
-        "image_name": null,
-        "name": "Divine Decree of Fate",
         "rarity": 5,
         "flags": 0
     },

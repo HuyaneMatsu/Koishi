@@ -8,7 +8,7 @@ from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, 
 
 from shared import FLAN_PREFIX
 from tools import CooldownHandler
-from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH
+from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, get_card
 
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
 CHESUTO_COLOR   = Color.from_rgb(73,245,73)
@@ -281,35 +281,11 @@ class massadd:
 
 @Flan.commands.from_class
 class showcard:
-    async def command(client,message,content):
-        if not 2<len(content)<101:
-            return
-        
-        search_value = content.lower()
-        
-        card = None
-        start_index = 1000
-        length = 1000
-        
-        for card_name, card_ in CARDS_BY_NAME.items():
-            index = card_name.find(search_value)
-            if index==-1:
-                continue
-            
-            if index > start_index:
-                continue
-            
-            if index == start_index:
-                if length >= len(card_name):
-                    continue
-            
-            card = card_
-            start_index=index
-            length=len(card_name)
-            continue
+    async def command(client, message, content):
+        card = get_card(content)
         
         if card is None:
-            await client.message_create(message.channel,embed = Embed(None,'*Nothing found.*',FLAN_HELP_COLOR))
+            await client.message_create(message.channel,embed = Embed(None,'*Nothing found.*',CHESUTO_COLOR))
             return
         
         embed = card.render_to_embed()
@@ -743,7 +719,7 @@ class checklist:
 @Flan.commands.from_class
 class dump_all_card:
     async def command(client, message):
-        channel=message.channel
+        channel = message.channel
         clients = channel.clients
         if len(clients)<2:
             await client.message_create(channel.channel,'I need at least 2 clients at the channel to execute this command.')
@@ -781,6 +757,59 @@ class dump_all_card:
         embed=Embed('dump-all-card',(
             'Lists all the cards to this channel.\n'
             f'Usage: `{prefix}dump-all-card`\n'
+            ),color=FLAN_HELP_COLOR).add_footer(
+                f'You must have `{CARDS_ROLE}` role to use this command.')
+        await client.message_create(message.channel,embed=embed)
+
+REMOVE_CARD_OK = BUILTIN_EMOJIS['ok_hand']
+REMOVE_CARD_CANCEL = BUILTIN_EMOJIS['x']
+REMOVE_CARD_EMOJIS = (REMOVE_CARD_OK, REMOVE_CARD_CANCEL)
+
+@Flan.commands.from_class
+class remove_card:
+    async def command(client, message, content):
+        card = get_card(content)
+        
+        if card is None:
+            await client.message_create(message.channel,embed = Embed(None,'*Nothing found.*',CHESUTO_COLOR))
+            return
+        
+        message = await client.message_create(message.channel,embed=Embed(
+            None, f'Are you sure, to remove {card.name!r}?', CHESUTO_COLOR,))
+        
+        for emoji in REMOVE_CARD_EMOJIS:
+            await client.reaction_add(message,emoji)
+        
+        try:
+            _, emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
+        except TimeoutError:
+            emoji = REMOVE_CARD_CANCEL
+        
+        await client.message_delete(message)
+        
+        if emoji is REMOVE_CARD_CANCEL:
+            content = 'Cancelled.'
+        else:
+            card._delete()
+            await Card.dump_cards(client.loop)
+            content = f'{card.name!r} successfully removed.'
+        
+        message = await client.message_create(message.channel,
+            embed=Embed(description=content,color=CHESUTO_COLOR))
+        
+        await sleep(30.)
+        await client.message_delete(message)
+        return
+    
+    name = 'remove-card'
+    aliases = ['remove_card']
+    checks=[checks.has_role(CARDS_ROLE)]
+    
+    async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('remove-card',(
+            'Removes the specific card\n'
+            f'Usage: `{prefix}remove-card <name>`\n'
             ),color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
