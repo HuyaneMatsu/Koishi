@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from hata import DiscordException,  cchunkify, Status, PERM_KEYS, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, \
+from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
     listdifference
 from hata.discord.parsers import EVENTS, DEFAULT_EVENT
 from hata.ext.prettyprint import pretty_print
@@ -645,16 +645,16 @@ class dispatch_tester:
             if key=='permissions':
                 result.append('permissions :')
                 other=role.permissions
-                for name,index in PERM_KEYS.items():
+                for name,index in Permission.__keys__.items():
                     old_value=(value>>index)&1
                     new_value=(other>>index)&1
                     if old_value!=new_value:
                         result.append(f'{name} : {bool(old_value)} -> {bool(new_value)}')
                 continue
-
+        
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
-
+    
     @classmethod
     async def webhook_update(self,client,channel):
         Task(self.old_events['webhook_update'](client,channel),client.loop)
