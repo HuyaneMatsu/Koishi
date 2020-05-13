@@ -481,7 +481,7 @@ class invites:
 @ADMINISTRATION_COMMANDS.from_class
 class logs:
     async def command(client,message,guild:Converter('guild'),user:User=None,event_name:str=''):
-        if not guild.cached_permissions_for(client).view_audit_logs:
+        if not guild.cached_permissions_for(client).can_view_audit_logs:
             await client.message_create(message.channel,
                 'I have no permissions at the guild, to request audit logs.')
             return
