@@ -1114,6 +1114,22 @@ async def guild_user_get(client,guild,user_id,):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}',
         )
 
+async def guild_user_search(client, guild, query, limit=1):
+    data = {'query': query}
+    
+    if limit == 1:
+        # default limit is `1`, so not needed to send it.
+        pass
+    elif limit < 1000 and limit > 0:
+        data['limit'] = limit
+    else:
+        raise ValueError('`limit` can be betwwen 1 and 1000, got `{limit}`')
+    
+    guild_id=guild.id
+    return await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/search', params = data,
+            )
+
 async def guild_widget_get(client,guild_id,):
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/widget.json',
@@ -2098,4 +2114,51 @@ async def ratelimit_test0031(client, message):
         
         await client.message_delete(message_1)
         await client.message_delete(message_2)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0032(client, message):
+    """
+    Requests a user (myself) at 2 guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0032') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        for guild_2 in client.guild_profiles.keys():
+            if guild_2 is guild_1:
+                continue
+            
+            break
+        
+        else:
+            await RLT.send('I must have at least 2 guilds.')
+        
+        await guild_user_get(client, guild_1, client.id)
+        await guild_user_get(client, guild_2, client.id)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0033(client, message):
+    """
+    Requests users with name `nyan` at 2 guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0033') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        for guild_2 in client.guild_profiles.keys():
+            if guild_2 is guild_1:
+                continue
+            
+            break
+        
+        else:
+            await RLT.send('I must have at least 2 guilds.')
+        
+        await guild_user_search(client, guild_1, 'nyan')
+        await guild_user_search(client, guild_2, 'nyan')
+
 
