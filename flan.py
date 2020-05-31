@@ -353,7 +353,7 @@ class showcards:
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('showcards',(
-            'Searcher all the cards, which contain the specified string.\n'
+            'Searches all the cards, which contain the specified string.\n'
             f'Usage: `{prefix}showcards *name*`'
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)

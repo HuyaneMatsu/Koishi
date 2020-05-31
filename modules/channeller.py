@@ -60,7 +60,7 @@ class Channeller(object):
         event_2=client.events.message_delete
         for pair in pairs:
             channel=pair[0]
-            channel.mc_gc_limit=30 #if caching is diabled we turn this on
+            channel.message_keep_limit=30 #if caching is diabled we turn this on
             event_1.append(channel, self)
             event_2.append(channel, deleter)
             CHANNELINGS[channel.id]=self
@@ -75,14 +75,14 @@ class Channeller(object):
         elif len(pairs)<3:
             for pair in pairs:
                 channel = pair[0]
-                channel.mc_gc_limit = channel.MC_GC_LIMIT
+                channel.message_keep_limit = channel.MC_GC_LIMIT
                 del CHANNELINGS[channel.id]
         else:
             for index,pair in enumerate(pairs):
                 if pair[0] is channel:
                     del pairs[index]
                     break
-            channel.mc_gc_limit = channel.MC_GC_LIMIT
+            channel.message_keep_limit = channel.MC_GC_LIMIT
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
             del CHANNELINGS[channel.id]
@@ -90,7 +90,7 @@ class Channeller(object):
 
         for pair in pairs:
             channel=pair[0]
-            channel.mc_gc_limit=channel.MC_GC_LIMIT
+            channel.message_keep_limit=channel.MC_GC_LIMIT
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
             

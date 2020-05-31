@@ -154,7 +154,7 @@ class ShuffledShelter(object):
             
             if isinstance(err,DiscordException):
                 if err.code in (
-                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
                             ):
                     return
@@ -200,9 +200,9 @@ class ShuffledShelter(object):
                     
                     if isinstance(err,DiscordException):
                         if err.code in (
-                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.invalid_access, # client removed
                                 ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                                     ):
                             return
                     
@@ -240,9 +240,9 @@ class ShuffledShelter(object):
             
             if isinstance(err,DiscordException):
                 if err.code in (
-                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                             ):
                     return
             

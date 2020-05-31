@@ -83,7 +83,7 @@ class oauth2_feed:
                 return
             
             elif isinstance(err,DiscordException):
-                if err.code == ERROR_CODES.missing_access: # client removed
+                if err.code == ERROR_CODES.invalid_access: # client removed
                     return
             
             raise

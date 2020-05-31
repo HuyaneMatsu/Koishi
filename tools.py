@@ -203,7 +203,7 @@ class PAGINATION_5PN(object):
                     
                     if isinstance(err,DiscordException):
                         if err.code in (
-                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.invalid_access, # client removed
                                 ERROR_CODES.unknown_channel, # message's channel deleted
                                     ):
                             return
@@ -250,7 +250,7 @@ class PAGINATION_5PN(object):
             if isinstance(err,DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
                             ):
                     return
@@ -270,7 +270,7 @@ class PAGINATION_5PN(object):
                     return
                 
                 if isinstance(err,DiscordException):
-                    if err.code==ERROR_CODES.missing_access: # client removed
+                    if err.code==ERROR_CODES.invalid_access: # client removed
                         return
                 
                 await client.events.error(client,f'{self!r}.__call__',err)
@@ -312,9 +312,9 @@ class PAGINATION_5PN(object):
                     if isinstance(err,DiscordException):
                         if err.code in (
                                 ERROR_CODES.unknown_channel, # message's channel deleted
-                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.invalid_access, # client removed
                                 ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                                     ):
                             return
                     
@@ -353,9 +353,9 @@ class PAGINATION_5PN(object):
             if isinstance(err,DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                             ):
                     return
             

@@ -17,7 +17,8 @@ FLAN_TOKEN      = #bot token (str) for third bot
 FLAN_ID         = #bot id (int) for third bot, can be 0
 FLAN_PREFIX     = '\\' #default prefix (str)
 
-AUDIO_PATH      = #path for local audio files
+AUDIO_PATH      = # path for local audio files
+HATA_PATH       = # path to hata if Any (str or None)
 ```
 
 #### Hata requirements

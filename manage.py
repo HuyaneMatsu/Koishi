@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 import sys, os
-#moving to the outer folder, so hata ll count as a package and stuffs
+
 sys.path.append(os.path.abspath('..'))
+#moving to the outer folder, so pers_data will count as a package
+import pers_data
+
+hata_path = pers_data.HATA_PATH
+if (hata_path is not None):
+    sys.path.append(hata_path)
+
+del hata_path
+
 from hata import Client, start_clients, ActivityGame, ActivityWatching
 from hata.ext.extension_loader import EXTENSION_LOADER
-
-import pers_data
 
 Koishi=Client(pers_data.KOISHI_TOKEN,
     secret=pers_data.KOISHI_SECRET,
     client_id=pers_data.KOISHI_ID,
     activity=ActivityGame.create(name='with Satori'),
-    shard_count=1,
+    shard_count=2,
         )
 
 Satori=Client(pers_data.SATORI_TOKEN,

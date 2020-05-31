@@ -33,7 +33,7 @@ class dispatch_tester:
             except DiscordException:
                 return
             self.channel=message.channel
-            
+    
     @classmethod
     async def switch(self,client,message,content):
         if (not (5<len(content)<50)):
