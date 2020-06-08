@@ -3,7 +3,7 @@ import re, sys, json
 
 from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, \
     elapsed_time, ActivityUnknown, Status, ActivitySpotify, BUILTIN_EMOJIS, ChannelText, ChannelCategory, \
-    cchunkify, Permission
+    cchunkify, Permission, ICON_TYPE_NONE
 from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination
 from hata.ext.prettyprint import pchunkify
 
@@ -445,7 +445,7 @@ class guild_info:
         else:
             features='none'
         
-        embed=Embed(guild.name,color=guild.icon&0xFFFFFF if guild.icon else (guild.id>>22)&0xFFFFFF)
+        embed=Embed(guild.name,color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
         embed.add_field('Guild information',
             f'Created: {elapsed_time(guild.created_at)} ago\n'
             f'Voice region: {guild.region}\n'
@@ -476,7 +476,7 @@ class guild_info:
                     f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
         
         embed.add_thumbnail(guild.icon_url_as(size=128))
-    
+        
         await client.message_create(message.channel,embed=embed)
     
     name = 'guild'
@@ -568,7 +568,7 @@ class roles:
         def createpage0(self,guild):
             embed=Embed(f'Roles of **{guild.name}**:',
                 '\n'.join([role.mention for role in self.roles]),
-                color=guild.icon&0xFFFFFF if guild.icon else (guild.id>>22)&0xFFFFFF)
+                color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
             embed.add_footer(f'Page 1 /  {len(self.cache)}')
             self.cache[0]=embed
         
@@ -614,8 +614,10 @@ class roles:
 @UTILITY_COMMANDS.from_class
 class avatar:
     async def command(client, message, user : Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default_code='message.author')):
-        color = user.avatar&0xffffff
-        if color==0:
+        color = user.avatar_hash
+        if color:
+            color &=0xffffff
+        else:
             color = user.default_avatar.color
         
         url=user.avatar_url_as(size=4096)
@@ -646,7 +648,7 @@ class guild_icon:
         if icon_url is None:
             embed=Embed(description=f'`{guild.name}` has no icon.')
         else:
-            color=guild.icon&0xffffff
+            color=guild.icon_hash&0xffffff
             embed=Embed(f'{guild.name}\' icon', color=color, url=icon_url)
             embed.add_image(icon_url)
         

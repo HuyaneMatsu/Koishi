@@ -22,6 +22,7 @@ Koishi=Client(pers_data.KOISHI_TOKEN,
         )
 
 Satori=Client(pers_data.SATORI_TOKEN,
+    secret=pers_data.SATORI_SECRET,
     client_id=pers_data.SATORI_ID,
     activity=ActivityGame.create(name='with Koishi'),
     status='dnd',

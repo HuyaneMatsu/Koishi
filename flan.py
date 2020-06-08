@@ -813,7 +813,7 @@ class remove_card:
             ),color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
-
+        
 del re
 del Cooldown
 del CooldownHandler

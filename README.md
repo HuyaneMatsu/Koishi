@@ -11,6 +11,7 @@ KOISHI_PREFIX   = 'k!' #default prefix (str)
 
 SATORI_TOKEN    = #bot token (str) for second bot
 SATORI_ID       = #bot id (int) for second bot, can be 0
+SATORI_SECRET   = #client_secret (str) for oauth2, can be None.
 SATORI_PREFIX   = '&' #default prefix (str)
 
 FLAN_TOKEN      = #bot token (str) for third bot

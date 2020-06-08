@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 import re, sys
-from random import random
+from random import random, randint
+from itertools import cycle, chain
 
 from bs4 import BeautifulSoup
 
-from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS
+from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType
 from hata.discord.others import from_json
-from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu
+from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu, checks
 
 from shared import SATORI_PREFIX
 
 setup_ext_commands(Satori,SATORI_PREFIX)
+
+SATORI_HELP_COLOR = Color.from_rgb(118, 0, 161)
 
 @Satori.commands
 async def invalid_command(client,message,command,content):
@@ -407,4 +410,136 @@ async def emojify(client, message, content):
     await client.message_create(message.channel,result)
     return
 
-
+@Satori.commands.from_class
+class auto_pyramid:
+    async def command(client, message, emoji:Emoji, size:int):
+        while True:
+            if size < 2:
+                error_message = 'That is pretty small. OOF'
+            elif size > 10:
+                error_message = 'That is HUGE! Thats what she said...'
+            else:
+                break
+            
+            await client.message_create(message.channel, error_message)
+            return
+        
+        should_check_external = (emoji.is_custom_emoji() and (emoji.guild is not message.guild))
+        
+        available_clients = []
+        
+        channel = message.channel
+        for client_ in channel.clients:
+            permissions = channel.cached_permissions_for(client_)
+            if not permissions.can_send_messages:
+                continue
+            
+            if not client_.can_use_emoji(emoji):
+                continue
+            
+            if should_check_external and (not permissions.can_use_external_emojis):
+                continue
+            
+            available_clients.append(client_)
+        
+        if len(available_clients) < 2:
+            await client.message_create(message.channel,f'There need to be at least 2 client at the channel, who can '
+                f'build a pyramid, meanwhile there is only {len(available_clients)}')
+            return
+        
+        
+        for client_, count in zip(cycle(available_clients), chain(range(1,size),range(size,0,-1))):
+            await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
+        
+    name = 'auto-pyramid'
+    aliases = ['auto_pyramid']
+    checks = [checks.guild_only()]
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('execute',(
+            'Creates a pyramid!\n'
+            f'Usage: `{prefix}auto-pyramid <emoji> <size>`'
+                ),color=SATORI_HELP_COLOR).add_footer(
+                'Guild only!')
+        await client.message_create(message.channel,embed=embed)
+    
+    async def parser_failure_handler(client, message, command, conetnt, args):
+        await command.description(client, message)
+        
+@Satori.commands.from_class
+class auto_pyramid_u:
+    async def command(client, message, emoji:Emoji, size:int):
+        while True:
+            if size < 2:
+                error_message = 'That is pretty small. OOF'
+            elif size > 10:
+                error_message = 'That is HUGE! Thats what she said...'
+            else:
+                break
+            
+            await client.message_create(message.channel, error_message)
+            return
+        
+        if emoji.is_custom_emoji() and (emoji.managed or (emoji.roles is not None) or (emoji.guild is not message.guild)):
+            await client.message_create(message.channel, 'No managed, limited to role or outer custom emojis are allowed.')
+            return
+        
+        channel = message.channel
+        if not channel.cached_permissions_for(client).can_manage_webhooks:
+            await client.message_create(channel, 'I need manage webhooks permission to execute this command.')
+            return
+        
+        webhooks = await client.webhook_get_channel(channel)
+        for webhook in webhooks:
+            if webhook.type is WebhookType.bot:
+                executor_webhook = webhook
+                break
+        else:
+            executor_webhook = None
+        
+        if (executor_webhook is None):
+            executor_webhook = await client.webhook_create(channel, 'auto-pyramider')
+        
+        users = list(message.guild.users.values())
+        selected_users = []
+        needed_users = (size<<1) - 1
+        user_count = len(users)
+        while True:
+            if user_count == 0:
+                break
+            
+            if needed_users == 0:
+                break
+            
+            user = users.pop(randint(0,user_count-1))
+            user_count -=1
+            if user.is_bot:
+                continue
+            
+            selected_users.append(user)
+            needed_users -=1
+        
+        if needed_users:
+            await client.message_create(channel, 'The guild does not have enough users for this size of pyramid.')
+            return
+        
+        for user, count in zip(selected_users, chain(range(1,size),range(size,0,-1))):
+            await client.webhook_send(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)), name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
+    
+    name = 'auto-pyramid-u'
+    aliases = ['auto_pyramid_u']
+    checks = [checks.guild_only()]
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('execute',(
+            'Creates a pyramid!\n'
+            f'Usage: `{prefix}auto-pyramid-u <emoji> <size>`'
+                ),color=SATORI_HELP_COLOR).add_footer(
+                'Guild only!')
+        await client.message_create(message.channel,embed=embed)
+    
+    async def parser_failure_handler(client, message, command, content, args):
+        await command.description(client, message)
+        

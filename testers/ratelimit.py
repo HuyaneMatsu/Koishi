@@ -9,7 +9,8 @@ from datetime import datetime, timedelta, timezone
 from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, multidict_titled, titledstr, Embed, \
     alchemy_incendiary, Webhook, eventlist, EventThread, DiscordException, BUILTIN_EMOJIS, Message, ChannelText, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
-    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS
+    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
+    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc
 
 from hata.backend.dereaddons_local import _spaceholder
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -19,7 +20,10 @@ from hata.backend.http import Request_CM
 from hata.discord.others import to_json, from_json, quote, bytes_to_base64, ext_from_base64, Discord_hdrs
 from hata.discord.guild import PartialGuild
 from hata.discord.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED
-from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks
+from hata.backend.helpers import BasicAuth
+from hata.discord.channel import CHANNEL_TYPES
+
+from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks, Converter, ConverterFlag
 
 RATELIMIT_RESET=Discord_hdrs.RATELIMIT_RESET
 RATELIMIT_RESET_AFTER=Discord_hdrs.RATELIMIT_RESET_AFTER
@@ -47,19 +51,19 @@ def parse_header_ratelimit(headers):
     delay2=float(headers[RATELIMIT_RESET_AFTER])
     return (delay1 if delay1<delay2 else delay2)
 
-async def bypass_request(client,method,url,data=None,params=None,reason=None,header=None,decode=True,):
+async def bypass_request(client,method,url,data=None,params=None,reason=None,headers=None,decode=True,):
     self=client.http
-    if header is None:
-        header=self.header.copy()
-    header[titledstr.bypass_titling('X-RateLimit-Precision')]='millisecond'
+    if headers is None:
+        headers=self.headers.copy()
+    headers[titledstr.bypass_titling('X-RateLimit-Precision')]='millisecond'
     
-    if CONTENT_TYPE not in header and data and isinstance(data,(dict,list)):
-        header[CONTENT_TYPE]='application/json'
+    if CONTENT_TYPE not in headers and data and isinstance(data,(dict,list)):
+        headers[CONTENT_TYPE]='application/json'
         #converting data to json
         data=to_json(data)
 
     if reason:
-        header['X-Audit-Log-Reason']=quote(reason)
+        headers['X-Audit-Log-Reason']=quote(reason)
     
     try_again=5
     while try_again:
@@ -68,7 +72,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
             buffer.write(f'Request started : {url} {method}\n')
             
         try:
-            async with Request_CM(self._request(method,url,header,data,params)) as response:
+            async with Request_CM(self._request(method,url,headers,data,params)) as response:
                 if decode:
                     response_data = await response.text(encoding='utf-8')
                 else:
@@ -80,32 +84,32 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
             continue
         
         with RLTPrinterBuffer() as buffer:
-            headers=response.headers
+            reponse_headers=response.headers
             status=response.status
-            if headers['content-type']=='application/json':
+            if reponse_headers['content-type']=='application/json':
                 response_data=from_json(response_data)
             
-            value=headers.get('X-Ratelimit-Global',None)
+            value=reponse_headers.get('X-Ratelimit-Global',None)
             if value is not None:
                 buffer.write(f'global : {value}\n')
-            value=headers.get('X-Ratelimit-Limit',None)
+            value=reponse_headers.get('X-Ratelimit-Limit',None)
             if value is not None:
                 buffer.write(f'limit : {value}\n')
-            value=headers.get('X-Ratelimit-Remaining',None)
+            value=reponse_headers.get('X-Ratelimit-Remaining',None)
             if value is not None:
                 buffer.write(f'remaining : {value}\n')
                 
-            value=headers.get('X-Ratelimit-Reset',None)
+            value=reponse_headers.get('X-Ratelimit-Reset',None)
             if value is not None:
-                delay=parse_header_ratelimit(headers)
+                delay=parse_header_ratelimit(reponse_headers)
                 buffer.write(f'reset : {value}, after {delay} seconds\n')
-            value=headers.get('X-Ratelimit-Reset-After',None)
+            value=reponse_headers.get('X-Ratelimit-Reset-After',None)
             if value is not None:
                 buffer.write(f'reset after : {value}\n')
     
             
             if 199<status<305:
-                if headers.get('X-Ratelimit-Remaining','1')=='0':
+                if reponse_headers.get('X-Ratelimit-Remaining','1')=='0':
                     buffer.write(f'reached 0\n try again after {delay}\n',)
                 return response_data
             
@@ -497,7 +501,7 @@ async def download_attachment(client,attachment,):
         url=attachment.proxy_url
     else:
         url=attachment.url
-    return await bypass_request(client,METH_GET,url,header=multidict_titled(),decode=False,
+    return await bypass_request(client,METH_GET,url,headers=multidict_titled(),decode=False,
         )
 
 
@@ -570,13 +574,16 @@ async def permission_ow_create(client,channel,target,allow,deny,):
             }
     channel_id=channel.id
     overwrite_id=target.id
-    return await bypass_request(client,METH_PUT,
+    await bypass_request(client,METH_PUT,
         f'https://discordapp.com/api/v7/channels/{channel_id}/permissions/{overwrite_id}',
         data,)
+    
+    return PermOW.custom(target,allow,deny)
 
 async def permission_ow_delete(client,channel,overwrite,):
     channel_id=channel.id
-    overwrite_id=overwrite.id
+    overwrite_id=overwrite.target.id
+    print(overwrite, channel, overwrite.id, overwrite.target)
     return await bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/channels/{channel_id}/permissions/{overwrite_id}',
         )
@@ -633,18 +640,17 @@ async def channel_delete(client,channel,):
 
 async def oauth2_token(client,):
     data = {
-        'client_id'     : client.id,
-        'client_secret' : client.secret,
         'grant_type'    : 'client_credentials',
-        'scope'         : 'connections'
+        'scope'         : ' connections',
             }
     
-    headers=multidict_titled()
-    dict.__setitem__(headers,CONTENT_TYPE,['application/x-www-form-urlencoded'])
+    headers = multidict_titled()
+    headers[AUTHORIZATION] = BasicAuth(str(client.id), client.secret).encode()
+    headers[CONTENT_TYPE]='application/x-www-form-urlencoded'
                 
     return await bypass_request(client,METH_POST,
         'https://discordapp.com/api/oauth2/token',
-        data,header=headers,)
+        data,headers=headers,)
 
 async def invite_create(client,channel,):
     data = {
@@ -670,9 +676,10 @@ async def webhook_create(client,channel,name,avatar=b'',):
         data['avatar']=bytes_to_base64(avatar)
             
     channel_id=channel.id
-    return await bypass_request(client,METH_POST,
+    data = await bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/channels/{channel_id}/webhooks',
         data,)
+    return Webhook(data)
 
 async def webhook_get_channel(client,channel,):
     channel_id=channel.id
@@ -721,16 +728,12 @@ async def guild_delete(client,guild,):
         f'https://discordapp.com/api/v7/guilds/{guild_id}',
         )
 
-async def guild_edit(client,guild,name,icon=b'',): #keep it short
-    data={'name':name}
-    if icon is None:
-        data['icon']=None
-    elif icon:
-        icon_data=bytes_to_base64(icon)
-        ext=ext_from_base64(icon_data)
-        if ext not in VALID_ICON_FORMATS:
-            raise ValueError(f'Invalid icon type: {ext}')
-        data['icon']=icon_data
+async def guild_edit(client,guild, afk_channel=_spaceholder): #keep it short
+    data={}
+    
+    if (afk_channel is not _spaceholder):
+        data['afk_channel'] = None if afk_channel is None else afk_channel.id
+    
     guild_id=guild.id
     return await bypass_request(client,METH_PATCH,
         f'https://discordapp.com/api/v7/guilds/{guild_id}',
@@ -768,29 +771,390 @@ async def guild_ban_get(client,guild,user_id,):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/bans/{user_id}',
         )
 
-async def channel_move(client,*args,file=None,**kwargs):
-    def http_channel_move_redirect(self,guild_id,data,reason):
-        return bypass_request(client,METH_PATCH,
-            f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',data,
-            )
-    original=type(client.http).channel_move
-    type(client.http).channel_move=http_channel_move_redirect
-    coro=client.channel_move(*args,**kwargs)
-    future=Future(client.loop)
-    #skip 1 loop
-    client.loop.call_at(0.0,future.__class__.set_result_if_pending,future,None)
-    await future
+async def channel_move(client, channel, visual_position, category=_spaceholder, lock_permissions=False, reason=None):
+    guild = channel.guild
+    if guild is None:
+        return
     
-    type(client.http).channel_move=original
-    await coro
+    if category is _spaceholder:
+        category=channel.category
+    elif category is None:
+        category=guild
+    elif type(category) is Guild:
+        if guild is not category:
+            raise ValueError('Can not move channel between guilds!')
+    elif type(category) is ChannelCategory:
+        if category.guild is not guild:
+            raise ValueError('Can not move channel between guilds!')
+    else:
+        raise TypeError(f'Invalid type {channel.__class__.__name__}')
+    
+    if type(channel) is type(category):
+        raise ValueError('Cant move category under category!')
+    
+    if channel.category is category and category.channels.index(channel)==visual_position:
+        return #saved 1 request
+    
+    #making sure
+    visual_position=int(visual_position)
+    
+    #quality python code incoming :ok_hand:
+    ordered=[]
+    indexes=[0,0,0,0,0,0,0] #for the 7 channel type (type 1 and 3 wont be used)
 
-async def channel_create(client,guild,category=None,):
-    data=cr_pg_channel_object(type_=0,name='tesuto-channel9')
+    #loop preparations
+    outer_channels=guild.channels
+    index_0=0
+    limit_0=len(outer_channels)
+    #inner loop preparations
+    index_1=0
+    #loop start
+    while True:
+        if index_0==limit_0:
+            break
+        channel_=outer_channels[index_0]
+        #loop block start
+        
+        type_=channel_.type
+        type_index=indexes[type_]
+        indexes[type_]=type_index+1
+        
+        ordered.append((index_0,index_1,type_index,channel_),)
+        
+        if type_==4:
+            #reset type_indexes
+            indexes[0]=indexes[2]=indexes[5]=indexes[6]=0
+            #loop preparations
+            inner_channels=channel_.channels
+            limit_1=len(inner_channels)
+            #loop start
+            while True:
+                if index_1==limit_1:
+                    break
+                channel_=inner_channels[index_1]
+                #loop block start
+                
+                type_=channel_.type
+                type_index=indexes[type_]
+                indexes[type_]=type_index+1
+                
+                ordered.append((index_0,index_1,type_index,channel_),)
+                
+                #loop block end
+                index_1=index_1+1
+            #reseting inner
+            index_1=0
+            #loop ended
+        
+        #loop block end
+        index_0=index_0+1
+    #loop ended
+    
+    #prepare loop
+    index_0=0
+    limit_0=len(ordered)
+    #loop start
+    while True:
+        if index_0==limit_0:
+            break
+        info_line=ordered[index_0]
+        #loop block start
+        
+        if info_line[3] is channel:
+            original_position=index_0
+            break
+
+        #loop block end
+        index_0=index_0+1
+    #loop ended
+
+    restricted_positions=[]
+    
+    index_0=0
+    limit_0=len(ordered)
+    last_index=-1
+    if type(category) is Guild:
+        #loop start
+        while True:
+            if index_0==limit_0:
+                break
+            info_line=ordered[index_0]
+            #loop block start
+            
+            if info_line[0]>last_index:
+                last_index+=1
+                restricted_positions.append(index_0)
+            
+            #loop block end
+            index_0=index_0+1
+        #loop ended
+    else:
+        #loop start
+        while True:
+            if index_0==limit_0:
+                break
+            info_line=ordered[index_0]
+            category_index=index_0 #we might need it
+            #loop block start
+            if info_line[3] is category:
+                index_0=index_0+1
+                #loop preapre
+                #loop start
+                while True:
+                    if index_0==limit_0:
+                        break
+                    info_line=ordered[index_0]
+                    #loop block start
+
+                    if info_line[3].type==4:
+                        break
+                    restricted_positions.append(index_0)
+                    
+                    #loop block end
+                    index_0=index_0+1
+                #loop ended
+                break
+            
+            #loop block end
+            index_0=index_0+1
+        #loop ended
+        
+    index_0=(4,2,0).index(channel.ORDER_GROUP)
+    before=(4,2,0)[index_0:]
+    after =(4,2,0)[:index_0+1]
+
+    possible_indexes=[]
+    if restricted_positions:
+        #loop prepare
+        index_0=0
+        limit_0=len(restricted_positions)-1
+        info_line=ordered[restricted_positions[index_0]]
+        #loop at 0 block start
+        
+        if info_line[3].ORDER_GROUP in after:
+            possible_indexes.append((0,restricted_positions[index_0],),)
+            
+        #loop at 0 block ended
+        while True:
+            if index_0==limit_0:
+                break
+            info_line=ordered[restricted_positions[index_0]]
+            #next step mixin
+            index_0=index_0+1
+            info_line_2=ordered[restricted_positions[index_0]]
+            #loop block start
+
+            if info_line[3].ORDER_GROUP in before and info_line_2[3].ORDER_GROUP in after:
+                possible_indexes.append((index_0,restricted_positions[index_0],),)
+
+            #loop block end
+        if limit_0:
+            info_line=info_line_2
+        #loop at -1 block start
+        
+        if info_line[3].ORDER_GROUP in before:
+            possible_indexes.append((index_0+1,restricted_positions[index_0]+1,),)
+
+        #loop at -1 block ended
+        #loop ended
+    else:
+        #empty category
+        possible_indexes.append((0,category_index+1,),)
+        
+    #GOTO start
+    while True:
+        #GOTO block start
+        
+        #loop prepare
+        index_0=0
+        limit_0=len(possible_indexes)
+        info_line=possible_indexes[index_0]
+        
+        #loop at 0 block start
+        if info_line[0]>visual_position:
+            result_position=info_line[1]
+            
+            #GOTO end
+            break
+            #GOTO ended
+        
+        #loop at 0 block ended
+        
+        #setup GOTO from loop start
+        end_goto=False
+        #setup GOTO from loop ended
+        
+        index_0=index_0+1
+        while True:
+            if index_0==limit_0:
+                break
+            info_line=possible_indexes[index_0]
+            #loop block start
+
+            if info_line[0]==visual_position:
+                result_position=info_line[1]
+                
+                #GOTO end inner 1
+                end_goto=True
+                break
+                #GOTO ended inner 1
+
+            #loop block end
+            index_0=index_0+1
+        #loop ended
+
+        #GOTO end
+        if end_goto:
+            break
+        #GOTO ended
+
+        result_position=info_line[1]
+
+        #GOTO block ended
+        break
+    #GOTO ended
+    
+    ordered.insert(result_position,ordered[original_position])
+    higher_flag=(result_position<original_position)
+    if higher_flag:
+        original_position=original_position+1
+    else:
+        result_position=result_position-1
+    del ordered[original_position]
+    
+    if channel.type==4:
+        channels_to_move=[]
+
+        #loop prepare
+        index_0=original_position
+        limit_0=len(ordered)
+        #loop start
+        while True:
+            if index_0==limit_0:
+                break
+            info_line=ordered[index_0]
+            #loop block start
+
+            if info_line[3].type==4:
+                break
+            channels_to_move.append(info_line)
+            
+            #loop block end
+            index_0=index_0+1
+        #loop ended
+
+        insert_to=result_position+1
+        
+        #loop prepare
+        index_0=len(channels_to_move)
+        limit_0=0
+        #loop start
+        while True:
+            index_0=index_0-1
+            info_line=channels_to_move[index_0]
+            #loop block start
+            
+            ordered.insert(insert_to,info_line)
+            
+            #loop block end
+            if index_0==limit_0:
+                break
+        #loop ended
+
+        delete_from=original_position
+        if higher_flag:
+            delete_from=delete_from+len(channels_to_move) #len(channels_to_move)
+
+        #loop prepare
+        index_0=0
+        limit_0=len(channels_to_move)
+        #loop start
+        while True:
+            if index_0==limit_0:
+                break
+            info_line=ordered[index_0]
+            #loop block start
+
+            del ordered[delete_from]
+            
+            #loop block end
+            index_0=index_0+1
+        #loop ended
+        
+    indexes[0]=indexes[2]=indexes[4]=indexes[5]=indexes[6]=0 #reset
+
+    #loop preparations
+    index_0=0
+    limit_0=len(ordered)
+    #loop start
+    while True:
+        if index_0==limit_0:
+            break
+        channel_=ordered[index_0][3]
+        #loop block start
+        
+        type_=channel_.type
+        type_index=indexes[type_]
+        indexes[type_]=type_index+1
+        
+        ordered[index_0]=(type_index,channel_)
+
+        #loop block step
+        index_0=index_0+1
+        #loop block continue
+        
+        if type_==4:
+            #reset type_indexes
+            indexes[0]=indexes[2]=indexes[5]=indexes[6]=0
+            #loop preparations
+            #loop start
+            while True:
+                if index_0==limit_0:
+                    break
+                channel_=ordered[index_0][3]
+                #loop block start
+                
+                type_=channel_.type
+                if type_==4:
+                    break
+                type_index=indexes[type_]
+                indexes[type_]=type_index+1
+
+                ordered[index_0]=(type_index,channel_)
+                
+                #loop block end
+                index_0=index_0+1
+            
+        #loop block end
+    #loop ended
+
+    bonus_data={'lock_permissions':lock_permissions}
+    if category is guild:
+        bonus_data['parent_id']=None
+    else:
+        bonus_data['parent_id']=category.id
+    
+    data=[]
+    for position,channel_ in ordered:
+        if channel is channel_:
+            data.append({'id':channel_.id,'position':position,**bonus_data})
+            continue
+        if channel_.position!=position:
+            data.append({'id':channel_.id,'position':position})
+    
+    guild_id = guild.id
+    return await bypass_request(client,METH_PATCH,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',data,
+        )
+
+async def channel_create(client,guild, name, category=None, type_=0):
+    data=cr_pg_channel_object(type_=type_,name=name)
     data['parent_id']=category.id if type(category) is ChannelCategory else None
     guild_id=guild.id
-    return await bypass_request(client,METH_POST,
+    data = await bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',
         data,)
+    return CHANNEL_TYPES[data['type']](data,client,guild)
 
 async def guild_embed_get(client,guild,):
     guild_id=guild.id
@@ -809,7 +1173,7 @@ async def guild_embed_image(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/embed.png',
-        params={'style':'shield'},decode=False,header={},)
+        params={'style':'shield'},decode=False,headers={},)
 
 async def guild_emojis(client,guild,):
     guild_id=guild.id
@@ -834,8 +1198,12 @@ async def emoji_create(client,guild,name,image,):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis',
         data,)
 
-async def emoji_get(client,guild,emoji_id,):
+async def emoji_get(client, emoji):
+    guild = emoji.guild
+    if guild is None:
+        return
     guild_id=guild.id
+    emoji_id = emoji.id
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis/{emoji_id}',
         )
@@ -987,7 +1355,7 @@ async def guild_widget_image(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/widget.png',
-        params={'style':'shield'},decode=False,header={},)
+        params={'style':'shield'},decode=False,headers={},)
 
 async def invite_get(client,invite,):
     invite_code=invite.code
@@ -1002,11 +1370,11 @@ async def invite_delete(client,invite,):
         )
 
 async def user_info(client,access,):
-    header=multidict_titled()
-    header[AUTHORIZATION]=f'Bearer {access.access_token}'
+    headers=multidict_titled()
+    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me',
-        header=header,)
+        headers=headers,)
 
 async def client_user(client,):
     return await bypass_request(client,METH_GET,
@@ -1024,18 +1392,18 @@ async def channel_private_create(client,user,):
         data={'recipient_id':user.id},)
 
 async def user_connections(client,access,):
-    header=multidict_titled()
-    header[AUTHORIZATION]=f'Bearer {access.access_token}'
+    headers=multidict_titled()
+    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me/connections',
-        header=header,)
+        headers=headers,)
 
 async def user_guilds(client,access,):
-    header=multidict_titled()
-    header[AUTHORIZATION]=f'Bearer {access.access_token}'
+    headers=multidict_titled()
+    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me/guilds',
-        header=header,)
+        headers=headers,)
 
 async def guild_get_all(client,):
     return await bypass_request(client,METH_GET,
@@ -1068,21 +1436,21 @@ async def webhook_edit(client,webhook,name,): #keep it short
 
 async def webhook_get_token(client,webhook,):
     return await bypass_request(client,METH_GET,
-        webhook.url,header={},)
+        webhook.url,headers={},)
 
 async def webhook_delete_token(client,webhook,):
     return await bypass_request(client,METH_DELETE,
-        webhook.url,header={},)
+        webhook.url,headers={},)
 
 async def webhook_edit_token(client,webhook,name,): #keep it short
     return await bypass_request(client,METH_PATCH,
         webhook.url,
-        data={'name':name},header={},)
+        data={'name':name},headers={},)
 
 async def webhook_execute(client,webhook,content,wait=False,):
     return await bypass_request(client,METH_POST,
         f'{webhook.url}?wait={wait:d}',
-        data={'content':content},header={},)
+        data={'content':content},headers={},)
     
 async def guild_users(client,guild,):
     guild_id=guild.id
@@ -1133,7 +1501,7 @@ async def guild_user_search(client, guild, query, limit=1):
 async def guild_widget_get(client,guild_id,):
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/widget.json',
-        header={},)
+        headers={},)
 
 async def message_suppress_embeds(client,message,suppress=True,):
     message_id=message.id
@@ -1147,17 +1515,17 @@ async def channel_follow(client,source_channel,target_channel,):
         raise ValueError(f'\'source_channel\' must be type 5, so news (announcements) channel, got {source_channel}')
     if target_channel.type not in ChannelText.INTERCHANGE:
         raise ValueError(f'\'target_channel\' must be type 0 or 5, so any guild text channel, got  {target_channel}')
-
+    
     data = {
         'webhook_channel_id': target_channel.id,
             }
-
+    
     channel_id=source_channel.id
-
+    
     data = await bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/channels/{channel_id}/followers',
         data,)
-    webhook=Webhook._from_follow_data(data,source_channel,target_channel,client)
+    webhook = await Webhook._from_follow_data(data,source_channel,target_channel,client)
     return webhook
 
 async def achievement_get(client,achievement_id,):
@@ -1257,14 +1625,14 @@ async def user_achievement_update(client,user,achievement,percent_complete,):
         data=data,)
 
 async def user_achievements(client,access,):
-    header=multidict_titled()
-    header[AUTHORIZATION]=f'Bearer {access.access_token}'
+    headers=multidict_titled()
+    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     
     application_id=client.application.id
     
     data = await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/users/@me/applications/{application_id}/achievements',
-        header=header,)
+        headers=headers,)
     
     return [Achievement(achievement_data) for achievement_data in data]
 
@@ -1278,7 +1646,12 @@ async def guild_preview(client, guild_id):
 
 async def message_crosspost(client, message):
     await bypass_request(client, METH_POST,
-        f'https://discordapp.com/api/v7//channels/{message.channel.id}/messages/{message.id}/crosspost')
+        f'https://discordapp.com/api/v7/channels/{message.channel.id}/messages/{message.id}/crosspost')
+
+async def vanity_get(client, guild):
+    guild_id = guild.id
+    await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/vanity-url')
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
@@ -1286,7 +1659,6 @@ async def ratelimit_test0000(client,message):
     Does 6 achievement get request towards 1 achievemt.
     The bot's application must have at least 1 achievement created.
     '''
-    
     with RLTCTX(client,message.channel,'ratelimit_test0000') as RLT:
         try:
             achievements = await client.achievement_get_all()
@@ -1315,7 +1687,6 @@ async def ratelimit_test0001(client,message):
     Does 3-3 achievement get request towards 2 achievemts.
     The bot's application must have at least 2 achievement created.
     '''
-    
     with RLTCTX(client,message.channel,'ratelimit_test0001') as RLT:
         try:
             achievements = await client.achievement_get_all()
@@ -1349,7 +1720,6 @@ async def ratelimit_test0002(client,message):
     '''
     Creates 6 achievements.
     '''
-    
     with RLTCTX(client,message.channel,'ratelimit_test0002') as RLT:
         image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1380,7 +1750,6 @@ async def ratelimit_test0003(client,message):
     '''
     First creates 2 achievements with the client normally, then deletes them for testing.
     '''
-    
     with RLTCTX(client,message.channel,'ratelimit_test0003') as RLT:
         image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1539,7 +1908,6 @@ async def ratelimit_test0010(client,message):
     '''
     Updates an achievement of the client's owner. But now one, what has `secure=False`
     '''
-    
     with RLTCTX(client,message.channel,'ratelimit_test0010') as RLT:
         image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1903,6 +2271,10 @@ async def ratelimit_test0024(client,message):
         
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
+
+        top_role = client.top_role_at(guild)
+        if (top_role is not None) and (top_role.position < 2):
+            await RLT.send('My top role\'s position is not enough high.')
         
         role = await client.role_create(guild,name='Sakuya')
         await role_delete(client, role)
@@ -2040,7 +2412,11 @@ async def ratelimit_test0029(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        role = await client.role_create(guild,name='Sakuya')
+        top_role = client.top_role_at(guild)
+        if (top_role is not None) and (top_role.position < 3):
+            await RLT.send('My top role\'s position is not enough high.')
+        
+        role = await client.role_create(guild, name='Sakuya')
         await role_move(client,role,2)
         await client.role_delete(role)
 
@@ -2161,4 +2537,708 @@ async def ratelimit_test0033(client, message):
         await guild_user_search(client, guild_1, 'nyan')
         await guild_user_search(client, guild_2, 'nyan')
 
+@RATELIMIT_COMMANDS
+async def ratelimit_test0034(client, message):
+    """
+    Requests an application's owner's access.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0034') as RLT:
+        for client_ in CLIENTS:
+            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+                break
+        else:
+            client_ = None
+        
+        if client_ is None:
+            await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
+        
+        await oauth2_token(client_)
 
+@RATELIMIT_COMMANDS
+async def ratelimit_test0035(client, message):
+    """
+    Follows a channel like a boss.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0035') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+            
+        for channel_ in guild.all_channel.values():
+            if channel_.type ==5:
+                source_channel = channel_
+                break
+        else:
+            source_channel = None
+        
+        if source_channel is None:
+            await RLT.send('The guild should have at least 1 news channel')
+        
+        webhooks = await client.webhook_get_guild(guild)
+        used_channels = set()
+        for webhook in webhooks:
+            if webhook.type is WebhookType.server:
+                used_channels.add(webhook.channel)
+        
+        for channel_ in guild.all_channel.values():
+            if channel_.type not in (0,5):
+                continue
+            if channel_ is source_channel:
+                continue
+            if channel_ in used_channels:
+                continue
+            
+            target_channel = channel_
+            break
+        
+        else:
+            target_channel = None
+        
+        if target_channel is None:
+            await RLT.send('The guild should have at least 1 non server webhooked channel, what is not the same as the first found announcements channel.')
+        
+        webhook = await channel_follow(client, source_channel, target_channel)
+        await client.webhook_delete(webhook)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0036(client, message):
+    """
+    Gets the invites of the channel
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0036') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        # I dunno what perm u need, so lets check all ^^'
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await invite_get_channel(client, channel)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0037(client, message):
+    """
+    Requests the messages of the channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0037') as RLT:
+        if not channel.cached_permissions_for(client).can_read_message_history:
+            await RLT.send('I need permission to read message history to execute this command.')
+        
+        await message_logs(client, channel)
+        
+@RATELIMIT_COMMANDS
+async def ratelimit_test0038(client, message):
+    """
+    Gets the source message.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0038') as RLT:
+        await message_get(client, channel, message.id)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0039(client, message):
+    """
+    Requests the reacters of an emoji on the source message.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0039') as RLT:
+        if not channel.cached_permissions_for(client).can_add_reactions:
+            await RLT.send('I need permission to add reactions to execute this command.')
+        
+        emoji = BUILTIN_EMOJIS['x']
+        await client.reaction_add(message, emoji)
+        
+        await reaction_users(client, message, emoji)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0040(client, message):
+    """
+    Removes a permission overwrite from a channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0040') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        # I dunno what perm u need, so lets check all ^^'
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        roles = guild.roles
+        if len(roles) < 2:
+            await RLT.send('The guild needs at least 1 role.')
+        
+        role = roles[1]
+        
+        if not client.has_higher_role_than(role):
+            await RLT.send('There is no lower role than my own for the channel.')
+        
+        for channel_ in guild.all_channel.values():
+            for overwrite in channel_.overwrites:
+                if overwrite.target is role:
+                    break
+            else:
+                target_channel = channel_
+                break
+        else:
+            target_channel = channel_
+        
+        if target_channel is None:
+            await RLT.send('Every channel has an overwrite for the bottom role.')
+        
+        permission_overwrite = await client.permission_ow_create(channel, role, 0b1000, 0b0100, 'tesing ratelimits')
+        await permission_ow_delete(client, channel, permission_overwrite)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0041(client, message):
+    """
+    Creates a permission overwrite at a channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0041') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        # I dunno what perm u need, so lets check all ^^'
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        roles = guild.roles
+        if len(roles) < 2:
+            await RLT.send('The guild needs at least 1 role.')
+        
+        role = roles[1]
+        
+        if not client.has_higher_role_than(role):
+            await RLT.send('There is no lower role than my own for the channel.')
+        
+        for channel_ in guild.all_channel.values():
+            for overwrite in channel_.overwrites:
+                if overwrite.target is role:
+                    break
+            else:
+                target_channel = channel_
+                break
+        else:
+            target_channel = channel_
+        
+        if target_channel is None:
+            await RLT.send('Every channel has an overwrite for the bottom role.')
+        
+        permission_overwrite = await permission_ow_create(client, target_channel, role, 0b1000, 0b0100)
+        await client.permission_ow_delete(channel, permission_overwrite)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0042(client, message):
+    """
+    Gets the webhooks of the channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0042') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await webhook_get_channel(client, channel)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0043(client, message):
+    """
+    Creates a webhook at the channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0043') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        webhook = await webhook_create(client, channel, 'cake')
+        await client.webhook_delete(webhook)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0044(client, message):
+    """
+    Gets the current guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0044') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await guild_get(client, guild.id)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0045(client, message):
+    """
+    Edist the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0045') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+    
+        afk_channel = guild.afk_channel
+        
+        for channel_ in guild.all_channel.values():
+            if type(channel_) is not ChannelVoice:
+                continue
+            
+            if channel_ is afk_channel:
+                continue
+            
+            target_channel = channel_
+            break
+        else:
+            target_channel = None
+        
+        if afk_channel is target_channel: #both is None
+            await RLT.send('The guild should have at least 1 voice channel.')
+
+        await guild_edit(client, guild, afk_channel=target_channel)
+        await client.guild_edit(guild, afk_channel=afk_channel)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0046(client, message):
+    """
+    Requests audit logs from the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0046') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_view_audit_logs:
+            await RLT.send('I need view audit log permission to complete this command.')
+        
+        await audit_logs(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0047(client, message):
+    """
+    Gets the bans of the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0047') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await guild_bans(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0048(client, message, user:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default=None)):
+    """
+    Bans gets the ban and ubnans the given user.
+    
+    Derpy, right?
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0048') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if user is None:
+            await RLT.send('plase pass a user as well.')
+        
+        if user.id in guild.users:
+            await RLT.send('Please don\'t ban a member of your guild, hehe.')
+        
+        await guild_ban_add(client, guild, user.id)
+        await guild_ban_get(client, guild, user.id)
+        await guild_ban_delete(client, guild, user.id)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0049(client, message):
+    """
+    Gets the channels of teh guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0049') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await guild_channels(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0050(client, message):
+    """
+    Moves a channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0050') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        target_channel = await client.channel_create(guild, name='tesuto_next:gen', category=channel.category, type_=0)
+        if channel.position == 0:
+            positon = 1
+        else:
+            position = 0
+        
+        await channel_move(client, target_channel, position)
+        
+        await client.channel_delete(target_channel)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0051(client, message):
+    """
+    Creates a channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0051') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        created_channel = await channel_create(client, guild, name='tesuto_next:gen2', type_=0)
+        
+        await client.channel_delete(created_channel)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0052(client, message):
+    """
+    Gets the emojis of teh guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0052') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await guild_emojis(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0053(client, message):
+    """
+    Gets the emojis of teh guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0053') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        emojis = guild.emojis
+        if not emojis:
+            await RLT.send('The guild should have at least 1 emoji.')
+        
+        emoji = next(iter(emojis.values()))
+        
+        await emoji_get(client, emoji)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0054(client, message):
+    """
+    Estimates guild prune.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0054') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await guild_prune_estimate(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0055(client, message):
+    """
+    Guild prunes.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0055') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await guild_prune(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0056(client, message):
+    """
+    Gets he guild's regions.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0056') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await guild_regions(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0057(client, message):
+    """
+    Gets the guild's roles.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0057') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await guild_roles(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0058(client, message):
+    """
+    Gets the guild's vanity code. This endpoint is not used tho.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0058') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await vanity_get(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0059(client, message):
+    """
+    Gets the webhooks of the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0059') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await webhook_get_guild(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0060(client, message):
+    """
+    Creates and deletes an invite.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0060') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        invite = await client.invite_create_pref(guild)
+        await invite_delete(client, invite)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0061(client, message):
+    """
+    Gets the client's applciation info.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0061') as RLT:
+        await client_application_info(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0062(client, message):
+    """
+    Requests the application owner's user information.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0062') as RLT:
+        for client_ in CLIENTS:
+            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+                break
+        else:
+            client_ = None
+        
+        if client_ is None:
+            await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
+        
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
+        await user_info(client_, access)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0063(client, message):
+    """
+    Requests the client's profile.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0063') as RLT:
+        await client_user(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0064(client, message):
+    """
+    Gets the private channels of the client.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0064') as RLT:
+        await channel_private_get_all(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0065(client, message):
+    """
+    Gets the client's connections.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0065') as RLT:
+        await client_connections(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0066(client, message):
+    """
+    Requests the owner's connnections.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0066') as RLT:
+        for client_ in CLIENTS:
+            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+                break
+        else:
+            client_ = None
+        
+        if client_ is None:
+            await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
+        
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
+        await user_connections(client_, access)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0067(client, message):
+    """
+    Requests the owner's guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0067') as RLT:
+        for client_ in CLIENTS:
+            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+                break
+        else:
+            client_ = None
+        
+        if client_ is None:
+            await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
+        
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
+        await user_guilds(client_, access)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0068(client, message):
+    """
+    Requests the client's guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0068') as RLT:
+        await guild_get_all(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0069(client, message):
+    """
+    Requests the owner's and the client' guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'ratelimit_test0069') as RLT:
+        for client_ in CLIENTS:
+            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+                break
+        else:
+            client_ = None
+        
+        if client_ is None:
+            await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
+        
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
+        tasks = []
+        loop = client.loop
+        task = Task(user_guilds(client_, access), loop)
+        tasks.append(task)
+        task = Task(guild_get_all(client), loop)
+        tasks.append(task)
+        
+        done, pending = await WaitTillExc(tasks, loop)
+        
+        for task in pending:
+            task.cancel()
+        
+        for task in done:
+            task.result()
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0070(client, message):
+    """
+    Edits a webhook.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0070') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        webhook = await client.webhook_create(channel,name='Suzuya')
+        await webhook_edit(client, webhook, 'Saki')
+        await client.webhook_delete(webhook)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0071(client, message):
+    """
+    Edits a webhook with it's token.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0071') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        webhook = await client.webhook_create(channel,name='Suzuya')
+        await webhook_edit_token(client, webhook, 'Saki')
+        await client.webhook_delete(webhook)
