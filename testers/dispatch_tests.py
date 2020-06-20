@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
-    listdifference
+    listdifference, ActivityChange
 from hata.discord.parsers import EVENTS, DEFAULT_EVENT
 from hata.ext.prettyprint import pretty_print
 from hata.ext.commands import Pagination, Command
@@ -229,8 +229,8 @@ class dispatch_tester:
         text=cchunkify(result)
         pages=[Embed(description=chunk) for chunk in text]
         await Pagination(client,self.channel,pages,120.)
-
-        
+    
+    
     @classmethod
     async def reaction_clear(self,client,message,old):
         Task(self.old_events['reaction_clear'](client,message,old),client.loop)
@@ -282,28 +282,38 @@ class dispatch_tester:
         else:
             ignore=[]
             for activity in activities:
-                if type(activity) is dict:
+                if type(activity) is ActivityChange:
                     ignore.append(activity)
-                    
-            for activity in ignore:
-                result.append('Activity updated:')
-                real_activity=activity.pop('activity')
-                for key,value in activity.items():
-                    result.append(f'- {key} : {value} -> {getattr(real_activity,key)}')
             
-            if len(ignore)!=len(activities):
-                for activity in activities:
-                    if activity in ignore:
-                        continue
-                    result.append('Removed activity:')
-                    result.extend(pretty_print(activity))
-
-            if len(ignore)!=len(user.activities):
-                for activity in user.activities:
-                    if activity in ignore:
-                        continue
-                    result.append('Added activity:')
-                    result.extend(pretty_print(activity))
+            for index in range(len(ignore)):
+                result.append('Activity updated:')
+                activity_change = ignore[index]
+                activity=activity_change.activity
+                ignore[index] = activity
+                for key,value in activity_change.old_attributes.items():
+                    result.append(f'- {key} : {value} -> {getattr(activity,key)}')
+            
+            
+            user_activities = user.activities
+            for activity in activities:
+                if activity in ignore:
+                    continue
+                
+                if activity in user_activities:
+                    continue
+                
+                result.append('Removed activity:')
+                result.extend(pretty_print(activity))
+            
+            for activity in user_activities:
+                if activity in ignore:
+                    continue
+                
+                if activity in activities:
+                    continue
+                
+                result.append('Added activity:')
+                result.extend(pretty_print(activity))
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
@@ -322,7 +332,7 @@ class dispatch_tester:
         await Pagination(client,self.channel,pages,120.)
     
     @classmethod
-    async def user_profile_edit(self,client,user,old,guild):
+    async def user_profile_edit(self,client,user,guild,old):
         Task(self.old_events['user_profile_edit'](client,user,old,guild),client.loop)
         if self.channel is None:
             return
