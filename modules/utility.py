@@ -318,10 +318,12 @@ class user_info:
         try:
             profile=user.guild_profiles[guild]
         except KeyError:
-            if user.avatar:
-                embed.color=user.avatar&0xFFFFFF
+            if user.avatar_type is ICON_TYPE_NONE:
+                color = user.default_avatar.color
             else:
-                embed.color=user.default_avatar.color
+                color = user.avatar_hash&0xFFFFFF
+            embed.color = color
+            
         else:
             embed.color=user.color_at(guild)
             roles = profile.roles
