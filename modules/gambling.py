@@ -956,7 +956,7 @@ class Game21(object):
                 if user_applied>21:
                     winner=None
                 else:
-                    winner=user
+                    winner=self.user
             else:
                 if user_applied>21:
                     winner=client
@@ -964,7 +964,7 @@ class Game21(object):
                     if client_applied>user_applied:
                         winner=client
                     elif client_applied<user_applied:
-                        winner=user
+                        winner=self.user
                     else:
                         winner=None
             
@@ -975,7 +975,7 @@ class Game21(object):
                     bonus=self.amount*2
                     
                 async with DB_ENGINE.connect() as connector:
-                    response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user.id))
+                    response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==self.user.id))
                     results = await response.fetchall()
 
                     if results:
@@ -983,10 +983,10 @@ class Game21(object):
                         
                         to_execute=CURRENCY_TABLE.update().values(
                             total_love  = total_love+bonus,
-                                ).where(currency_model.user_id==user.id)
+                                ).where(currency_model.user_id==self.user.id)
                     else:
                         to_execute=CURRENCY_TABLE.insert().values(
-                            user_id     = user.id,
+                            user_id     = self.user.id,
                             total_love  = bonus,
                             daily_next  = datetime.utcnow(),
                             daily_streak= 0,)
@@ -1014,7 +1014,7 @@ class Game21(object):
                 field_content.append(CARD_NUMBERS[number_index])
                 field_content.append('\n')
                 
-            embed.add_field(f'{user.name_at(message.guild)}\'s cards\' weight: {user_applied}',
+            embed.add_field(f'{self.user.name_at(self.message.guild)}\'s cards\' weight: {user_applied}',
                 ''.join(field_content))
             field_content.clear()
             
@@ -1028,12 +1028,12 @@ class Game21(object):
                 field_content.append(CARD_NUMBERS[number_index])
                 field_content.append('\n')
             
-            embed.add_field(f'{client.name_at(message.guild)}\'s cards\' weight: {client_applied}',
+            embed.add_field(f'{client.name_at(self.message.guild)}\'s cards\' weight: {client_applied}',
                 ''.join(field_content))
             field_content=None
             
             try:
-                await client.message_edit(message,embed=embed)
+                await client.message_edit(self.message,embed=embed)
             except BaseException as err:
                 if isinstance(err,(DiscordException, ConnectionError)):
                     return
@@ -1062,7 +1062,7 @@ class Game21(object):
             self.task_flag=GUI_STATE_SWITCHING_PAGE
             
             try:
-                await client.message_edit(message,embed=embed)
+                await client.message_edit(self.message,embed=embed)
             except BaseException as err:
                 self.task_flag=GUI_STATE_CANCELLED
                 self.cancel()
