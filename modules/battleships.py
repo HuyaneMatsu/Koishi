@@ -359,8 +359,8 @@ class user_profile(object):
         
         self.last_switch=0.
         
-    async def __call__(self, client, message, user, emoji):
-        if user is client:
+    async def __call__(self, client, event):
+        if event.user is client:
             return
         
         now=time.time()
@@ -374,7 +374,7 @@ class user_profile(object):
         else:
             embed=self.render_state_1()
         
-        await self.client.message_edit(message,embed=embed)
+        await self.client.message_edit(self.message,embed=embed)
 
 
     def cancel(self):

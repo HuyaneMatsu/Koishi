@@ -51,6 +51,9 @@ async def test_ratelimit(client, message):
     A fast ratelimit test for next patch to validate anything.
     '''
     guild = message.guild
+    if guild is None:
+        return
+    
     proxy = client.get_ratelimits_of(RATELIMIT_GROUPS.role_edit,limiter = guild)
     if (not proxy.is_alive()) or (not proxy.has_size_set()):
         if not guild.cached_permissions_for(client).can_manage_roles:

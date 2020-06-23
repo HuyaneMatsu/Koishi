@@ -664,24 +664,21 @@ class embedination(object):
         self.timeouter=Timeouter(client.loop,self,timeout=150)
         return self
     
-    async def __call__(self, client, message, emoji, user):
-        if user.is_bot or (emoji not in self.EMOJIS):
+    async def __call__(self, client, event):
+        if event.user.is_bot or (event.emoji not in self.EMOJIS):
             return
         
         message=self.message
         
-        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
-        if can_manage_messages:
-            if not message.did_react(emoji,user):
-                return
-            
-            Task(self._reaction_delete(emoji,user),client.loop)
+        if (event.delete_reaction_with(client) == event.DELETE_NOT_ADDED):
+            return
         
         task_flag=self.task_flag
         if task_flag!=GUI_STATE_READY:
             # ignore GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
             return
         
+        emoji = event.emoji
         while True:
             if emoji is self.LEFT:
                 page=self.page-1
@@ -795,27 +792,6 @@ class embedination(object):
             timeouter.cancel()
         
         return Task(canceller(self,None),self.client.loop)
-
-    async def _reaction_delete(self,emoji,user):
-        client=self.client
-        try:
-            await client.reaction_delete(self.message,emoji,user)
-        except BaseException as err:
-            
-            if isinstance(err,ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err,DiscordException):
-                if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            await client.events.error(client,f'{self!r}._reaction_delete',err)
-            return
 
 KANAKO_COMMANDS(kanako_manager,name='kanako_game', description=kanako_description,category='GAMES', checks=[checks.guild_only()])
 

@@ -204,7 +204,7 @@ class resend_webhook:
 
 @UTILITY_COMMANDS.from_class
 class se:
-    async def command(client,message,emoji : Emoji):
+    async def command(client, message, emoji : Emoji):
         if emoji.is_custom_emoji():
             await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
     

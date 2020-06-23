@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re, os, wave
 
-from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color, YTaudio, DownloadError, LocalAudio
+from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio
 from hata.ext.commands import Command
 
 import pers_data
@@ -126,7 +126,7 @@ VOICE_SUBCOMMANDS['leave']=voice_leave
 
 async def voice_play(client,message,content):
     while True:
-        if YTaudio is None:
+        if YTAudio is None:
             text='This option in unavailable :c'
             break
         
@@ -151,7 +151,7 @@ async def voice_play(client,message,content):
         
         try:
             with client.keep_typing(message.channel,7200.):
-                source = await YTaudio(content,message.channel.guild.id)
+                source = await YTAudio(content,message.channel.guild.id)
         except DownloadError as err: #raised by YTdl
             text='Error meanwhile downloading'
             break

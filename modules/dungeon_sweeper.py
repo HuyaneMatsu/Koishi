@@ -434,11 +434,11 @@ class ds_game(object):
     async def default_coro():
         pass
     
-    async def __call__(self, client, message, emoji, user):
-        if user is not self.user:
+    async def __call__(self, client, event):
+        if event.user is not self.user:
             return
     
-        await self.call(self,emoji)
+        await self.call(self,event.emoji)
 
     async def call_menu(self,emoji):
         if (emoji not in self.emojis_menu):

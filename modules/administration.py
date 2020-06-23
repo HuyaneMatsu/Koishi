@@ -344,12 +344,13 @@ class _role_emoji_emoji_checker(object):
     __slots__ = ('guild',)
     
     def __init__(self, guild):
-        self.guild=guild
+        self.guild = guild
     
-    def __call__(self, message, emoji, user):
-        if emoji not in ROLE_EMOJI_EMOJIS:
+    def __call__(self, event):
+        if event.emoji not in ROLE_EMOJI_EMOJIS:
             return False
         
+        user = event.user
         if user.is_bot:
             return False
         
@@ -391,9 +392,9 @@ class emoji_role:
             await client.reaction_add(message,emoji_)
         
         try:
-            _, emoji_, _ = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
+            event = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
         except TimeoutError:
-            emoji_ = ROLE_EMOJI_CANCEL
+            event = ROLE_EMOJI_CANCEL
         
         if message.channel.cached_permissions_for(client).can_manage_messages:
             try:
@@ -413,6 +414,7 @@ class emoji_role:
                 
                 raise
         
+        emoji_ = event.emoji_
         if emoji_ is ROLE_EMOJI_OK:
             try:
                 await client.emoji_edit(emoji,roles=roles)

@@ -99,24 +99,24 @@ class ShuffledShelter(object):
         
         return self
     
-    async def __call__(self, client, message, emoji, user):
-        if user.is_bot or (emoji not in self.EMOJIS):
+    async def __call__(self, client, event):
+        if event.user.is_bot:
             return
         
-        can_manage_messages=self.channel.cached_permissions_for(client).can_manage_messages
-
-        if can_manage_messages:
-            if not message.did_react(emoji,user):
-                return
-            
-            Task(self._reaction_delete(emoji,user),client.loop)
-
+        
+        if (event.emoji not in self.EMOJIS):
+            return
+        
+        if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
+            return
+        
         if self.task_flag:
             return
         
         while True:
+            emoji = event.emoji
             if emoji is self.CYCLE:
-                url=pop_one(self.urls) if self.pop else choose_notsame(self.urls,message.embeds[0].image.url)
+                url=pop_one(self.urls) if self.pop else choose_notsame(self.urls,self.message.embeds[0].image.url)
                 self.history.append(url)
                 self.history_step=1
                 break
@@ -143,7 +143,7 @@ class ShuffledShelter(object):
         
         self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
-            await client.message_edit(message,embed=embed)
+            await client.message_edit(self.message,embed=embed)
         except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
@@ -227,27 +227,6 @@ class ShuffledShelter(object):
             timeouter.cancel()
         
         return Task(canceller(self,exception),self.client.loop)
-
-    async def _reaction_delete(self,emoji,user):
-        client=self.client
-        try:
-            await client.reaction_delete(self.message,emoji,user)
-        except BaseException as err:
-            
-            if isinstance(err,ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err,DiscordException):
-                if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            await client.events.error(client,f'{self!r}._reaction_delete',err)
-            return
 
 async def answer_booru(client,channel,content,url_base):
     if content:

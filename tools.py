@@ -155,25 +155,21 @@ class PAGINATION_5PN(object):
         self.timeouter=Timeouter(client.loop,self,timeout=300.)
         return self
     
-    async def __call__(self, client, message, emoji, user):
-        if user.is_bot or (emoji not in self.EMOJIS):
+    async def __call__(self, client, event):
+        if event.user.is_bot or (event.emoji not in self.EMOJIS):
             return
         
-        if self.channel.cached_permissions_for(client).can_manage_messages:
-            if not message.did_react(emoji,user):
-                return
-
-            task=Task(client.reaction_delete(message,emoji,user),client.loop)
-            if __debug__:
-                task.__silence__()
-            
+        if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
+            return
+        
+        emoji = event.emoji
         task_flag=self.task_flag
         if task_flag!=GUI_STATE_READY:
             if task_flag==GUI_STATE_SWITCHING_PAGE:
                 if emoji is self.CANCEL:
                     self.task_flag=GUI_STATE_CANCELLING
                 return
-
+            
             # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
             return
         
@@ -193,7 +189,7 @@ class PAGINATION_5PN(object):
             if emoji is self.CANCEL:
                 self.task_flag=GUI_STATE_CANCELLED
                 try:
-                    await client.message_delete(message)
+                    await client.message_delete(self.message)
                 except BaseException as err:
                     self.cancel()
                     
@@ -218,15 +214,13 @@ class PAGINATION_5PN(object):
             if emoji is self.LEFT2:
                 page=self.page-10
                 break
-                
+            
             if emoji is self.RIGHT2:
                 page=self.page+10
                 break
-
+            
             return
         
-        Task(self._reaction_delete(emoji,user),client.loop)
-
         if page<0:
             page=0
         elif page>=len(self.pages):
@@ -238,7 +232,7 @@ class PAGINATION_5PN(object):
         self.page=page
         self.task_flag=GUI_STATE_SWITCHING_PAGE
         try:
-            await client.message_edit(message,embed=self.pages[page])
+            await client.message_edit(self.message,embed=self.pages[page])
         except BaseException as err:
             self.task_flag=GUI_STATE_CANCELLED
             self.cancel()
@@ -262,7 +256,7 @@ class PAGINATION_5PN(object):
         if self.task_flag==GUI_STATE_CANCELLING:
             self.task_flag=GUI_STATE_CANCELLED
             try:
-                await client.message_delete(message)
+                await client.message_delete(self.message)
             except BaseException as err:
                 
                 if isinstance(err,ConnectionError):
@@ -339,28 +333,6 @@ class PAGINATION_5PN(object):
             timeouter.cancel()
         
         return Task(canceller(self,exception),self.client.loop)
-
-    async def _reaction_delete(self,emoji,user):
-        client=self.client
-        try:
-            await client.reaction_delete(self.message,emoji,user)
-        except BaseException as err:
-            
-            if isinstance(err,ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err,DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            await client.events.error(client,f'{self!r}._reaction_delete',err)
-            return
 
 del CommandProcesser
 del re

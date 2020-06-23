@@ -65,13 +65,6 @@ BET_MIN     = 10
 
 IN_GAME_IDS = set()
 
-class game_21_checker(object):
-    __slots__=('user')
-    def __init__(self,user):
-        self.user=user
-    def __call__(self, message, emoji, user):
-        return (user==self.user) and (emoji in Game21.EMOJIS)
-
 async def daily_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('daily',(
@@ -280,8 +273,16 @@ class heartevent_start_checker(object):
     def __init__(self,client):
         self.client=client
 
-    def __call__(self, message, emoji, user):
-        return self.client.is_owner(user) and ((emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI))
+    def __call__(self, event):
+        if not self.client.is_owner(event.user):
+            return False
+        
+        emoji = event.emoji
+        if (emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI):
+            return True
+        
+        return False
+        
 
 
 async def heartevent_description(client,message):
@@ -362,7 +363,7 @@ class heartevent(object):
         await client.reaction_add(to_check,EVENT_OK_EMOJI)
         await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
         try:
-            _,emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+            event = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
         except TimeoutError:
             return
         finally:
@@ -372,7 +373,7 @@ class heartevent(object):
             except DiscordException:
                 pass
 
-        if emoji is EVENT_ABORT_EMOJI:
+        if event.emoji is EVENT_ABORT_EMOJI:
             return
 
         self.user_ids=set()
@@ -399,8 +400,9 @@ class heartevent(object):
             description=f'{convert_tdelta(self.duration)} left'
         return Embed(title,description,color=GAMBLING_COLOR)
 
-    async def __call__(self, client, message, emoji, user):
-        if user.is_bot or (emoji is not CURRENCY_EMOJI):
+    async def __call__(self, client, event):
+        user = event.user
+        if user.is_bot or (event.emoji is not CURRENCY_EMOJI):
             return
         
         user_id=user.id
@@ -552,7 +554,7 @@ class dailyevent(object):
         await client.reaction_add(to_check,EVENT_OK_EMOJI)
         await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
         try:
-            _,emoji,_ = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+            event = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
         except TimeoutError:
             return
         finally:
@@ -562,7 +564,7 @@ class dailyevent(object):
             except DiscordException:
                 pass
 
-        if emoji is EVENT_ABORT_EMOJI:
+        if event.emoji is EVENT_ABORT_EMOJI:
             return
 
         self.user_ids=set()
@@ -589,8 +591,9 @@ class dailyevent(object):
             description=f'{convert_tdelta(self.duration)} left'
         return Embed(title,description,color=GAMBLING_COLOR)
 
-    async def __call__(self, client, message, emoji, user):
-        if user.is_bot or (emoji is not CURRENCY_EMOJI):
+    async def __call__(self, client, event):
+        user = event.user
+        if user.is_bot or (event.emoji is not CURRENCY_EMOJI):
             return
 
         user_id=user.id
@@ -886,18 +889,14 @@ class Game21(object):
         client.events.reaction_delete.append(message, self)
         return self
     
-    async def __call__(self, client, message, emoji, user):
-        if user!=self.user or emoji not in self.EMOJIS:
+    async def __call__(self, client, event):
+        if event.user!=self.user or event.emoji not in self.EMOJIS:
             return
         
-        if self.channel.cached_permissions_for(client).can_manage_messages:
-            if not message.did_react(emoji,user):
-                return
-            
-            task = Task(client.reaction_delete(message,emoji,user),client.loop)
-            if __debug__:
-                task.__silence__()
+        if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
+            return
         
+        emoji = event.emoji
         task_flag=self.task_flag
         if task_flag!=GUI_STATE_READY:
             if task_flag==GUI_STATE_SWITCHING_PAGE:
@@ -907,7 +906,7 @@ class Game21(object):
 
             # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
             return
-            
+        
         if emoji is self.NEW:
             # It is enough to delete the reaction at this ase if needed,
             # because after the other cases we will delete them anyways.

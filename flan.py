@@ -431,14 +431,14 @@ ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_IMAGE_CANCEL = BUILTIN_EMOJIS['x']
 ADD_IMAGE_EMOJIS = (ADD_IMAGE_OK, ADD_IMAGE_CANCEL)
 
-def ADD_IMAGE_CHECKER(message, emoji, user):
-    if user.is_bot:
+def ADD_IMAGE_CHECKER(event):
+    if event.user.is_bot:
         return False
     
-    if not user.has_role(CARDS_ROLE):
+    if not event.user.has_role(CARDS_ROLE):
         return False
     
-    if emoji not in ADD_IMAGE_EMOJIS:
+    if event.emoji not in ADD_IMAGE_EMOJIS:
         return False
     
     return True
@@ -503,9 +503,11 @@ class add_image:
                     await client.reaction_add(message,emoji)
                 
                 try:
-                    _, emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
+                    event = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
                 except TimeoutError:
                     emoji = ADD_IMAGE_CANCEL
+                else:
+                    emoji = event.emoji
                 
                 await client.message_delete(message)
                 
@@ -781,9 +783,11 @@ class remove_card:
             await client.reaction_add(message,emoji)
         
         try:
-            _, emoji, _ = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
+            event = await wait_for_reaction(client, message, ADD_IMAGE_CHECKER, 40.)
         except TimeoutError:
             emoji = REMOVE_CARD_CANCEL
+        else:
+            emoji = event.emoji
         
         await client.message_delete(message)
         

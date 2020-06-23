@@ -1003,15 +1003,15 @@ class AutoReactRoleManager(object):
         client.events.role_delete.append(guild, self.action_on_role_delete)
         client.events.role_edit.append(guild, self.action_on_role_edit)
     
-    async def action_on_reaction_add(self, client, message, emoji, user):
+    async def action_on_reaction_add(self, client, event):
         try:
-            role = self.relations[emoji]
+            role = self.relations[event.emoji]
         except KeyError:
             return
         
         guild = self.guild
         try:
-            user_profile = user.guild_profiles[guild]
+            user_profile = event.user.guild_profiles[guild]
         except KeyError:
             return
         
@@ -1019,7 +1019,7 @@ class AutoReactRoleManager(object):
             return
         
         try:
-            await client.user_role_add(user, role)
+            await client.user_role_add(event.user, role)
         except BaseException as err:
             if isinstance(err,ConnectionError):
                 return
@@ -1038,15 +1038,15 @@ class AutoReactRoleManager(object):
             await client.events.error(client,f'{self!r}.action_on_reaction_add',err)
             return
     
-    async def action_on_reaction_delete(self, client, message, emoji, user):
+    async def action_on_reaction_delete(self, client, event):
         try:
-            role = self.relations[emoji]
+            role = self.relations[event.emoji]
         except KeyError:
             return
         
         guild = self.guild
         try:
-            user_profile = user.guild_profiles[guild]
+            user_profile = event.user.guild_profiles[guild]
         except KeyError:
             return
         
@@ -1054,7 +1054,7 @@ class AutoReactRoleManager(object):
             return
         
         try:
-            await client.user_role_delete(user, role)
+            await client.user_role_delete(event.user, role)
         except BaseException as err:
             if isinstance(err,ConnectionError):
                 return
