@@ -380,7 +380,7 @@ class emoji_role:
         
         embed.add_field('Roles before:',role_text)
         
-        if (not roles) or (not roles):
+        if (not roles):
             role_text='*none*'
         else:
             role_text=', '.join([role.mention for role in roles])
@@ -414,7 +414,7 @@ class emoji_role:
                 
                 raise
         
-        emoji_ = event.emoji_
+        emoji_ = event.emoji
         if emoji_ is ROLE_EMOJI_OK:
             try:
                 await client.emoji_edit(emoji,roles=roles)

@@ -1323,7 +1323,7 @@ async def auto_react_roles_description(client,message):
         'Starts an auto react role GUI on the specified message.\n'
         'If the message has active auto react role on it, will display that, '
         'and if it has active GUI too, will cancel that.\n'
-        f'Usage: `{prefix}auto-react-roles` *channel* <message_id>'
+        f'Usage: `{prefix}auto-react-roles *channel* <message_id>`'
             ),color=AUTO_REACT_ROLE_COLOR).add_footer(
                 'Guild only! You must have administrator permission to use this command.')
     await client.message_create(message.channel,embed=embed)
@@ -1366,7 +1366,7 @@ async def select_auto_react_role_gui(client, channel, message, title, manager):
             'The selected embed was already destroyed',color=AUTO_REACT_ROLE_COLOR),)
         return
     
-    await AutoReactRoleGUI(client, manager.message, message.channel, guild, message=message)
+    await AutoReactRoleGUI(client, manager.message, channel, guild, message=message)
 
 async def show_auto_react_roles_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
