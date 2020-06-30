@@ -2,8 +2,10 @@
 import re, sys
 from io import StringIO
 from types import FunctionType as function
+from datetime import datetime, timedelta
 
-from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client
+from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
+    Role, ChannelText
 from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter, ConverterFlag
 from hata.ext.extension_loader import EXTENSION_LOADER
 
@@ -422,7 +424,6 @@ async def aliases(client, message, name:str, target_client:Converter('user',flag
     
     await client.message_create(message.channel,embed=Embed(title,description,color=KOISHI_HELP_COLOR))
 
-
 async def execute_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
     embed=Embed('execute',(
@@ -446,3 +447,105 @@ async def execute_description(client,message):
     await client.message_create(message.channel,embed=embed)
 
 Koishi.commands(Interpreter(locals().copy()),name='execute',description=execute_description,category='UTILITY',checks=[checks.owner_only()])
+
+EVERYNYAN_ROLE = Role.precreate(445189164703678464)
+WELCOME_CHANNEL = ChannelText.precreate(445191707491958784)
+
+@Koishi.commands.from_class
+class rules:
+    async def command(client, message):
+        embed = Embed(f'Rules of {DUNGEON}:', color = KOISHI_HELP_COLOR,
+            ).add_field(
+                'Guidelines',
+                'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
+            ).add_field(
+                'Behaviour',
+                'Listen to staff and follow their instructions.',
+            ).add_field(
+                'Language',
+                f'{DUNGEON} is an english speaking server, please try to stick yourself to it.',
+            ).add_field(
+                'Channels',
+                'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
+            ).add_field(
+                'Usernames',
+                'Invisible, offensive or noise unicode names are not allowed.'
+            ).add_field(
+                'Spamming',
+                'Forbidden in any form. Spamming server members in DM-s counts as well.',
+            ).add_field(
+                'NSFW',
+                'Keep explicit content in nsfw channels',
+            ).add_field(
+                'Roles',
+                f'Do not beg for roles. You can claim {EVERYNYAN_ROLE.mention} role, what gives you access to '
+                f'additional channels by typing `nya` at {WELCOME_CHANNEL.mention}.\n'
+                f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
+                f'as well.*'
+            ).add_field(
+                'Advertisements',
+                'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
+            ).add_field(
+                'No political or religious topics.',
+                'I do not say either that aliens exists, even tho they do.',
+            )
+        await client.message_create(message.channel, embed=embed, allowed_mentions=None)
+        
+        if message.channel.cached_permissions_for(client).can_manage_messages:
+            await client.message_delete(message)
+        
+    category = 'HELP'
+    checks = [checks.owner_only(), checks.is_guild(DUNGEON)]
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed = Embed('rules',(
+            f'Shows the rules of the {DUNGEON} guild.'
+            f'Usage : `{prefix}rules`'
+                ),color=KOISHI_HELP_COLOR).add_footer(
+                f'Owner only and can be used only at {DUNGEON}.')
+        
+        await client.message_create(message.channel, embed=embed)
+
+NYA_PATTERN = re.compile('nya+',re.I)
+MINIMAL_JOINED_BEFORE = timedelta(minutes=10)
+
+async def role_giver(client, message):
+    if (NYA_PATTERN.fullmatch(message.content) is None):
+        return
+    
+    user = message.author
+    if user.has_role(EVERYNYAN_ROLE):
+        return
+    
+    permissions = message.channel.cached_permissions_for(client)
+    if (not permissions.can_manage_roles) or (not client.has_higher_role_than(EVERYNYAN_ROLE)):
+        if permissions.can_send_messages:
+            content = 'My permissions are broken, cannot provide the specified role.'
+        else:
+            return
+    else:
+        guild_profile = user.guild_profiles.get(DUNGEON)
+        if guild_profile is None:
+            return
+        
+        joined_at = guild_profile.joined_at
+        if joined_at is None:
+            return
+        
+        if datetime.now() - joined_at < MINIMAL_JOINED_BEFORE:
+            return
+        
+        await client.user_role_add(user, EVERYNYAN_ROLE)
+        
+        if permissions.can_send_messages:
+            content = f'You now have {EVERYNYAN_ROLE.mention} role.'
+        else:
+            return
+    
+    message = await client.message_create(message.channel, content, allowed_mentions=None)
+    await sleep(30.0)
+    await client.message_delete(message)
+
+Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
+

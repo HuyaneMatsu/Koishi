@@ -1,5 +1,6 @@
 import json
 from time import perf_counter
+from random import random
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, \
     titledstr, multidict_titled, random_id, WebhookType, sleep, chunkify, ICON_TYPE_NONE, Webhook
@@ -359,3 +360,22 @@ async def test_webhook_response_avatar_url_nowait(client, message, avatar_url:'r
         PARSERS['MESSAGE_CREATE'] = source_MESSAGE_CREATE
     
     await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
+
+@TEST_COMMANDS
+async def discovery_validate_randoms(client, message):
+    """
+    Does 30 discovery validate request with random terms. 10 of them is duped tho.
+    """
+    words = [''.join(chr(97+int(random()*25.0)) for _ in range(10)) for _ in range(20)]
+    for index in range(10):
+        words.append(words[index])
+    
+    collected = []
+    for word in words:
+        start = perf_counter()
+        result = await client.discovery_validate_term(word)
+        end = perf_counter()
+        
+        collected.append(f'{word} : {result} ({end-start:.2f}s)')
+    
+    await client.message_create(message.channel, '\n'.join(collected))

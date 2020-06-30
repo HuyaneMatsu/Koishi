@@ -10,7 +10,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, mult
     alchemy_incendiary, Webhook, eventlist, EventThread, DiscordException, BUILTIN_EMOJIS, Message, ChannelText, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc
+    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory
 
 from hata.backend.dereaddons_local import _spaceholder
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -18,15 +18,16 @@ from hata.backend.hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST
     CONTENT_TYPE
 from hata.backend.http import Request_CM
 from hata.discord.others import to_json, from_json, bytes_to_base64, ext_from_base64, Discord_hdrs
-from hata.discord.guild import PartialGuild
+from hata.discord.guild import PartialGuild, GuildDiscovery
 from hata.discord.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED, quote
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
 
 from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks, Converter, ConverterFlag
 
-RATELIMIT_RESET=Discord_hdrs.RATELIMIT_RESET
-RATELIMIT_RESET_AFTER=Discord_hdrs.RATELIMIT_RESET_AFTER
+RATELIMIT_RESET = Discord_hdrs.RATELIMIT_RESET
+RATELIMIT_RESET_AFTER = Discord_hdrs.RATELIMIT_RESET_AFTER
+RATELIMIT_PRECISION = Discord_hdrs.RATELIMIT_PRECISION
 
 RATELIMIT_COMMANDS=eventlist(type_=Command, category='RATELIMIT TESTS')
 
@@ -55,7 +56,6 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
     self=client.http
     if headers is None:
         headers=self.headers.copy()
-    headers[titledstr.bypass_titling('X-RateLimit-Precision')]='millisecond'
     
     if CONTENT_TYPE not in headers and data and isinstance(data,(dict,list)):
         headers[CONTENT_TYPE]='application/json'
@@ -1653,6 +1653,52 @@ async def vanity_get(client, guild):
     await bypass_request(client, METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/vanity-url')
 
+async def guild_discovery_get(client, guild):
+    guild_id = guild.id
+    guild_discovery_data = await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-metadata')
+    return GuildDiscovery(guild_discovery_data, guild)
+
+async def guild_discovery_edit(client, guild, primary_category_id=_spaceholder, keywords=_spaceholder,
+            emoji_discovery=_spaceholder):
+    
+    guild_id = guild.id
+    data = {}
+    if (primary_category_id is not _spaceholder):
+        data['primary_category_id'] = primary_category_id
+    
+    if (keywords is not _spaceholder):
+        data['keywords'] = keywords
+    
+    if (emoji_discovery is not _spaceholder):
+        data['emoji_discoverability_enabled'] = emoji_discovery
+    
+    await bypass_request(client, METH_PATCH,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-metadata',
+        data=data)
+
+async def guild_discovery_add_subcategory(client, guild, category_id):
+    guild_id = guild.id
+    await bypass_request(client, METH_POST,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-categories/{category_id}')
+
+async def guild_discovery_delete_subcategory(client, guild, category_id):
+    guild_id = guild.id
+    await bypass_request(client, METH_DELETE,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-categories/{category_id}')
+
+async def discovery_categories(client):
+    discovery_category_datas = await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/discovery/categories')
+    return [DiscoveryCategory(discovery_category_data) for discovery_category_data in discovery_category_datas]
+
+async def discovery_validate_term(client, term):
+    data = await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/discovery/valid-term',
+        params={'term': term})
+    
+    return data['valid']
+    
 @RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
     '''
@@ -1802,7 +1848,6 @@ async def ratelimit_test0005(client,message):
     '''
     Creates 2 achievements, then edits them once, once for testing. At the end deletes them.
     '''
-    
     with RLTCTX(client,message.channel,'ratelimit_test0005') as RLT:
         image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1989,21 +2034,21 @@ async def ratelimit_test0012(client,message):
     #DiscordException UNAUTHORIZED (401): 401: Unauthorized
     # no limit data provided
 
-ratelimit_test0020_OK       = BUILTIN_EMOJIS['ok_hand']
-ratelimit_test0020_CANCEL   = BUILTIN_EMOJIS['x']
-ratelimit_test0020_EMOJIS   = (ratelimit_test0020_OK, ratelimit_test0020_CANCEL)
+ratelimit_test0013_OK       = BUILTIN_EMOJIS['ok_hand']
+ratelimit_test0013_CANCEL   = BUILTIN_EMOJIS['x']
+ratelimit_test0013_EMOJIS   = (ratelimit_test0013_OK, ratelimit_test0013_CANCEL)
 
-class ratelimit_test0020_checker(object):
+class ratelimit_test0013_checker(object):
     __slots__ = ('client',)
     
     def __init__(self, client):
         self.client=client
     
-    def __call__(self, emoji, user):
-        if not self.client.is_owner(user):
+    def __call__(self, event):
+        if not self.client.is_owner(event.user):
             return False
         
-        if emoji not in ratelimit_test0020_EMOJIS:
+        if event.emoji not in ratelimit_test0013_EMOJIS:
             return False
         
         return True
@@ -2067,22 +2112,24 @@ async def ratelimit_test0013(client,message):
         
         message = await client.message_create(channel,embed=embed)
         
-        for emoji in ratelimit_test0020_EMOJIS:
+        for emoji in ratelimit_test0013_EMOJIS:
             await client.reaction_add(message,emoji)
         
         try:
-            _, emoji, _ = await wait_for_reaction(client, message, ratelimit_test0020_checker(client), 40.)
+            event = await wait_for_reaction(client, message, ratelimit_test0013_checker(client), 40.)
         except TimeoutError:
-            emoji = ratelimit_test0020_CANCEL
-            
+            emoji = ratelimit_test0013_CANCEL
+        else:
+            emoji = event.emoji
+        
         await client.reaction_clear(message)
         
-        if emoji is ratelimit_test0020_CANCEL:
+        if emoji is ratelimit_test0013_CANCEL:
             embed.add_footer('ratelimit_test0020 cancelled')
             await client.message_edit(message,embed=embed)
             raise CancelledError()
         
-        if emoji is ratelimit_test0020_OK:
+        if emoji is ratelimit_test0013_OK:
             loop=client.loop
             for day,(message_own, message_other) in enumerate(messages):
                 if (message_own is not None):
@@ -3242,3 +3289,98 @@ async def ratelimit_test0071(client, message):
         webhook = await client.webhook_create(channel,name='Suzuya')
         await webhook_edit_token(client, webhook, 'Saki')
         await client.webhook_delete(webhook)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0072(client, message):
+    """
+    Requests the guild's discovery object.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0072') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_manage_guild:
+            await RLT.send('I need manage guild permission to complete this command.')
+        
+        await guild_discovery_get(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0073(client, message):
+    """
+    Edits the guild's discovery object.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0073') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_manage_guild:
+            await RLT.send('I need manage guild permission to complete this command.')
+        
+        guild_discovery = await client.guild_discovery_get(guild)
+        discovery = guild_discovery.emoji_discovery
+        
+        await guild_discovery_edit(client, guild, emoji_discovery = (not discovery))
+        await client.guild_discovery_edit(guild, emoji_discovery = discovery)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0074(client, message):
+    """
+    Adds and deletes or deletes and adds a subcategory to the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0074') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_manage_guild:
+            await RLT.send('I need manage guild permission to complete this command.')
+        
+        discovery_categories = await client.discovery_categories()
+        guild_discovery = await client.guild_discovery_get(guild)
+        
+        actual_category_ids = guild_discovery.category_ids
+        if actual_category_ids:
+            remove_first = True
+            id_ = next(iter(actual_category_ids))
+        else:
+            remove_first = False
+            for category in discovery_categories:
+                id_ = category.id
+                
+                if id_ == guild_discovery.primary_category_id:
+                    continue
+                
+                break
+            else:
+                await RLT.send('There are not enough category ids, lol.')
+        
+        if remove_first:
+            actions = (guild_discovery_delete_subcategory, guild_discovery_add_subcategory)
+        else:
+            actions = (guild_discovery_add_subcategory, guild_discovery_delete_subcategory)
+        
+        for action in actions:
+            await action(client, guild, id_)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0075(client, message):
+    """
+    Requests the discovery categories.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0075') as RLT:
+        await discovery_categories(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0076(client, message):
+    """
+    Validates a discovery search term.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0076') as RLT:
+        await discovery_validate_term(client, 'gaming')
