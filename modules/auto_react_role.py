@@ -2,7 +2,7 @@ import re
 from weakref import WeakKeyDictionary
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
-    Color, Embed, Emoji, CLIENTS, Role, eventlist
+    Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS
 from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination
 from hata.discord.others import IS_ID_RP
 
@@ -918,9 +918,16 @@ class AutoReactRoleManager(object):
                 try:
                     message = await client.message_get(channel, message_id)
                 except ConnectionError:
-                    await sleep(2.5, KOKORO)
-                    continue
-                break
+                    pass
+                except DiscordException as err:
+                    if err.status < 500:
+                        raise
+                else:
+                    break
+                
+                await sleep(2.5, KOKORO)
+                continue
+        
         except BaseException as err:
             if isinstance(err,DiscordException):
                 if err.code in (
@@ -945,7 +952,7 @@ class AutoReactRoleManager(object):
                 break
             
             try:
-                emoji = guild.emojis[emoji_id]
+                emoji = EMOJIS[emoji_id]
             except KeyError:
                 re_do = True
                 continue
@@ -953,7 +960,7 @@ class AutoReactRoleManager(object):
             role_id = int.from_bytes(data[position+8:position+16],byteorder='big')
             
             try:
-                role = guild.all_role[role_id]
+                role = ROLES[role_id]
             except KeyError:
                 re_do = True
                 continue
@@ -1115,10 +1122,13 @@ class AutoReactRoleManager(object):
         try:
             await client.role_delete(role)
         except BaseException as err:
-            if isinstance(err,ConnectionError):
+            if isinstance(err, ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
+                if err.status >= 500:
+                    return
+                
                 if err.code in (
                         ERROR_CODES.unknown_role, # role deleted
                         ERROR_CODES.unknown_guild, # guild deleted
@@ -1159,6 +1169,9 @@ class AutoReactRoleManager(object):
                 return
             
             if isinstance(err,DiscordException):
+                if err.status >= 500:
+                    return
+                
                 if err.code in (
                         ERROR_CODES.unknown_emoji, # emoji deleted
                         ERROR_CODES.unknown_guild, # guild deleted

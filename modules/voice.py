@@ -35,7 +35,7 @@ def collect_local_audio():
             FILENAMES.append(filename)
             
 collect_local_audio()
-    
+
 PERCENT_RP=re.compile('(\d*)[%]?')
 
 VOICE_SUBCOMMANDS={}
@@ -151,17 +151,14 @@ async def voice_play(client,message,content):
         
         try:
             with client.keep_typing(message.channel,7200.):
-                source = await YTAudio(content,message.channel.guild.id)
+                source = await YTAudio(content, stream=True)
         except DownloadError as err: #raised by YTdl
             text='Error meanwhile downloading'
-            break
-        except ReferenceError: #raised by executor
-            text='There is an active download from the guild already.'
             break
         except PermissionError: #raised by YTdl
             text='The file is already playing somewhere'
             break
-
+        
         if voice_client.append(source):
             text=f'Now playing {source.title}!'
         else:
@@ -495,7 +492,7 @@ async def voice_description(client,message):
         'Voice related command colection!\n'
         f'Usage: `{prefix}voice (subcommand) ...`\n'
         'Subcommands:'
-        f'- `{prefix}voice join <n%>` : Joins me to the voice channel, where '
+        f'- `{prefix}voice join *n%*` : Joins me to the voice channel, where '
         'you are. You can join me with a set % volume as well.\n'
         f'- `{prefix}voice move <channel>` : You can move me between voice '
         'channels. If you don\'t pass a channel, I\'ll check yours.\n'

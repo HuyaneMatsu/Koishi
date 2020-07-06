@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-import re, os
+import re, os, subprocess
 from itertools import cycle
+from io import BytesIO
 
-from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO
+from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, LocalAudio
 
 from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
 
 from shared import FLAN_PREFIX
-from tools import CooldownHandler
+from tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
 from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, get_card
 
 CHESUTO_GUILD   = Guild.precreate(598706074115244042)
@@ -15,10 +16,43 @@ CHESUTO_COLOR   = Color.from_rgb(73,245,73)
 CARDS_ROLE      = Role.precreate(598708907816517632)
 CARD_HDR_RP     = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
 VISITORS_ROLE   = Role.precreate(669875992159977492)
+FLAN_HELP_COLOR = Color.from_rgb(230,69,0)
+CHESUTO_BGM_MESSAGES = set()
+CHESUTO_BGM_CHANNEL = ChannelText.precreate(707892105749594202)
+CHESUTO_BGM_TRACKS = {}
+CHESUTO_BGM_TRACKS_SORTED = []
+BGM_SPLITPATTERN = re.compile('([^ _-]+)')
+BGM_NAME_PATTERN = re.compile('[a-z0-9]+',re.I)
+PERCENT_RP = re.compile('(\d*)[%]?')
 
-
+BMG_NAMES_W_S = {
+    'backstory',
+    'est',
+    'lucy',
+    'corrupted',
+    'fatale',
+    'overseer',
+    'erlmeier',
+    'chesuto',
+    'grashaw',
+    'springwind',
+    'lifendel',
+    'asterwart',
+    'sindarin',
+    'market',
+    'runesworth',
+    'rifengrad',
+    'luyavean',
+    'tavern',
+    'wyvendel',
+    'grashawl',
+    'lene',
+    'castles',
+        }
 
 setup_ext_commands(Flan,FLAN_PREFIX)
+Flan.events(MessageDeleteWaitfor)
+Flan.events(MessageEditWaitfor)
 
 @Flan.events
 async def guild_user_add(client, guild, user):
@@ -35,7 +69,6 @@ async def guild_user_add(client, guild, user):
     await client.user_role_add(user, VISITORS_ROLE)
     await client.message_create(channel,f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
-FLAN_HELP_COLOR=Color.from_rgb(230,69,0)
 
 @Flan.commands
 async def help(client, message, content):
@@ -534,8 +567,6 @@ class add_image:
         return
     
     checks=[checks.has_role(CARDS_ROLE)]
-    name = 'add-image'
-    aliases = ['add_image']
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -751,7 +782,6 @@ class dump_all_card:
             
             await client.message_create(channel,embed=embed)
     
-    name = 'dump-all-card'
     checks=[checks.has_role(CARDS_ROLE)]
     
     async def description(client,message):
@@ -805,8 +835,6 @@ class remove_card:
         await client.message_delete(message)
         return
     
-    name = 'remove-card'
-    aliases = ['remove_card']
     checks=[checks.has_role(CARDS_ROLE)]
     
     async def description(client,message):
@@ -817,7 +845,520 @@ class remove_card:
             ),color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
+
+@Flan.events
+async def ready(client):
+    async for message in client.message_iterator(CHESUTO_BGM_CHANNEL):
+        Track.create(message)
+
+async def bgm_message_create(client, message):
+    Track.create(message)
+
+async def bgm_message_delete(client, message):
+    Track.delete(message)
+
+async def bgm_message_edit(client, message, old):
+    Track.edit(message)
+
+Flan.command_processer.append(CHESUTO_BGM_CHANNEL, bgm_message_create)
+Flan.events.message_delete.append(CHESUTO_BGM_CHANNEL, bgm_message_delete)
+Flan.events.message_edit.append(CHESUTO_BGM_CHANNEL, bgm_message_edit)
+
+class Track(object):
+    __slots__ = ('display_name', 'source_name', 'url', 'description')
+    @classmethod
+    def create(cls, message):
+        attachments = message.attachments
+        if attachments is None:
+            return
         
-del re
+        for attachment in attachments:
+            if attachment.name.endswith('.mp3'):
+                break
+        else:
+            return
+        
+        self = cls()
+        name = attachment.name
+        self.source_name = name
+        self.display_name = cls._convert_name(name)
+        self.url = attachment.url
+        self.description = message.content
+        
+        index = self._relative_index()
+        if index != len(CHESUTO_BGM_TRACKS_SORTED) and CHESUTO_BGM_TRACKS_SORTED[index] == self:
+            return
+        
+        CHESUTO_BGM_TRACKS_SORTED.insert(index, self)
+        CHESUTO_BGM_MESSAGES.add(message)
+        CHESUTO_BGM_TRACKS[message.id] = self
+    
+    @staticmethod
+    def delete(message):
+        try:
+            CHESUTO_BGM_MESSAGES.remove(message)
+        except KeyError:
+            return
+        
+        try:
+            self = CHESUTO_BGM_TRACKS.pop(message.id)
+        except KeyError:
+            return
+        
+        path = os.path.join(os.path.abspath('.'), CHESUTO_FOLDER, self.source_name)
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+        
+        index = self._relative_index()
+        
+        if len(CHESUTO_BGM_TRACKS_SORTED) == index:
+            return
+        
+        if CHESUTO_BGM_TRACKS_SORTED[index] != self:
+            return
+        
+        del CHESUTO_BGM_TRACKS_SORTED[index]
+    
+    @staticmethod
+    def edit(message):
+        try:
+            self = CHESUTO_BGM_TRACKS[message.id]
+        except KeyError:
+            return
+        
+        self.description = message.description
+    
+    def _relative_index(self):
+        bot = 0
+        top = len(CHESUTO_BGM_TRACKS_SORTED)
+        
+        while True:
+            if bot < top:
+                half = (bot+top)>>1
+                if CHESUTO_BGM_TRACKS_SORTED[half] < self:
+                    bot = half+1
+                else:
+                    top = half
+                continue
+            return bot
+    
+    @staticmethod
+    def _convert_name(name):
+        parts = BGM_NAME_PATTERN.findall(name)
+        if not parts:
+            return ''
+        
+        last = parts[-1]
+        if len(last) == 3 and last.lower() == 'mp3':
+            del parts[-1]
+        
+        index = 0
+        limit = len(parts)
+        while True:
+            if index == limit:
+                break
+            
+            part = parts[index]
+            if part.endswith('s'):
+                word = part[:-1]
+                if word.lower() in BMG_NAMES_W_S:
+                    parts[index] = f'{word}\'s'
+            
+            index+=1
+            continue
+        
+        return ' '.join(parts)
+    
+    def __gt__(self, other):
+        return self.source_name > other.source_name
+    
+    def __ge__(self, other):
+        return self.source_name >= other.source_name
+    
+    def __eq__(self, other):
+        return self.source_name == other.source_name
+    
+    def __le__(self, other):
+        return self.source_name <= other.source_name
+    
+    def __lt__(self, other):
+        return self.source_name < other.source_name
+
+@Flan.commands.from_class
+class join:
+    async def command(client, message, content):
+        channel=message.channel
+        guild=channel.guild
+        while True:
+            state = guild.voice_states.get(message.author.id,None)
+            if state is None:
+                text='You are not at a voice channel!'
+                break
+            
+            channel=state.channel
+            if not channel.cached_permissions_for(client).can_connect:
+                text='I have no permissions to connect to that channel'
+                break
+            
+            voice_client = client.voice_client_for(message)
+            if voice_client is None:
+                try:
+                    voice_client = await client.join_voice_channel(channel)
+                except TimeoutError:
+                    text = 'Timed out meanwhile tried to connect.'
+                    break
+                except RuntimeError:
+                    text = 'The client cannot play voice, some libraries are not loaded'
+                    break
+                
+                text=f'{client.name_at(channel.guild)} in.'
+            else:
+                try:
+                    await voice_client.move_to(channel)
+                except TimeoutError:
+                    text = 'Timed out meanwhile tried to connect.'
+                    break
+                text = f'{client.name_at(channel.guild)} in {channel}.'
+            
+            if content:
+                amount=PERCENT_RP.fullmatch(content)
+                if amount:
+                    amount=int(amount.groups()[0])
+                    if amount<0:
+                        amount=0
+                    elif amount>200:
+                        amount=200
+                    voice_client.volume=amount/100.
+                    text=f'{text}; Volume set to {amount}%'
+                
+            break
+        
+        message = await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('join',(
+            'Joins me to your voice channel.\n'
+            f'Usage: `{prefix}join *n%*`\n'
+            'You can also define how loud my volume will be.'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel,embed=embed)
+
+@Flan.commands.from_class
+class leave:
+    async def command(client, message):
+        voice_client = client.voice_client_for(message)
+        if voice_client is None:
+            text = 'There is no voice client at your guild.'
+        else:
+            await voice_client.disconnect()
+            text = f'{client.name_at(message.channel.guild)} out.'
+        
+        message = await client.message_create(message.channel,text)
+        await sleep(30.,client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('leave',(
+            'Leaves me from the voice channel..\n'
+            f'Usage: `{prefix}leave`'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel,embed=embed)
+
+def get_bgm(content):
+    if not content:
+        return None
+    
+    if content.isnumeric():
+        index = int(content)-1
+        if index >= 0 and index<len(CHESUTO_BGM_TRACKS_SORTED):
+            return CHESUTO_BGM_TRACKS_SORTED[index]
+    
+    parts = BGM_SPLITPATTERN.findall(content)
+    if not parts:
+        return None
+    
+    final = []
+    
+    index = 0
+    limit = len(parts)
+    while True:
+        part = parts[index]
+        part = part.replace('\'','')
+        index +=1
+        final.append(re.escape(part))
+        
+        if index == limit:
+            break
+        
+        final.append('[ -_]+')
+        continue
+    
+    search_pattern = re.compile(''.join(final), re.I)
+    
+    best_found = None
+    best_start = 9999
+    for track in CHESUTO_BGM_TRACKS_SORTED:
+        parsed = search_pattern.search(track.source_name)
+        if parsed is None:
+            continue
+        
+        parsed_start = parsed.start()
+        
+        if parsed_start > best_start:
+            continue
+        
+        if parsed_start < best_start:
+            best_found = track
+            best_start = parsed_start
+            continue
+        
+        # last case both starts are equal
+        # lowest length name wins
+        if len(track.display_name) < len(track.display_name):
+            best_found = track
+            best_start = parsed_start
+            continue
+        
+        # No other optimal case to check.
+        continue
+    
+    return best_found
+    
+async def play_command(client, message, content):
+    if not content:
+        await play_description(client, message)
+        return
+    
+    # GOTO
+    while True:
+        voice_client = client.voice_client_for(message)
+        
+        if voice_client is None:
+            text = 'There is no voice client at your guild.'
+            break
+        
+        bgm = get_bgm(content)
+        
+        if bgm is None:
+            text = 'Nothing found.'
+            break
+        
+        path = os.path.join(os.path.abspath('.'), CHESUTO_FOLDER, bgm.source_name)
+        if not os.path.exists(path):
+            data = await client.download_url(bgm.url)
+            with await AsyncIO(path, 'wb') as file:
+                await file.write(data)
+        
+        source = await LocalAudio(path, title=bgm.display_name)
+        
+        if voice_client.append(source):
+            text = 'Now playing'
+        else:
+            text = 'Added to queue'
+        
+        text = f'{text} {bgm.display_name!r}!'
+        break
+    
+    message = await client.message_create(message.channel,text)
+    await sleep(30.,client.loop)
+    await client.message_delete(message, reason='Voice messages expire after 30s.')
+
+async def play_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed=Embed('play',(
+        'Plays the given chesuto bgm.\n'
+        f'Usage: `{prefix}play <name>`\n'
+        '\n'
+        'Note that the given name can be also given as the position of the track.'
+        ),color=FLAN_HELP_COLOR)
+    await client.message_create(message.channel,embed=embed)
+
+async def bgm_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed=Embed('bgm',(
+        'Shows up the given bgm\'s description..\n'
+        f'Usage: `{prefix}bgm <name>`\n'
+        '\n'
+        'Note that the given name can be also given as the position of the track.'
+            ),color=FLAN_HELP_COLOR)
+    await client.message_create(message.channel, embed=embed)
+
+Flan.commands(play_command, name='play', description=play_description)
+
+async def bgm_command(client, message, content):
+    if not content:
+        await bgm_description(client, message)
+        return
+    
+    bgm = get_bgm(content)
+    
+    if bgm is None:
+        title = 'Nothing found.'
+        description = None
+    else:
+        title = bgm.display_name
+        description = bgm.description
+    
+    embed = Embed(title, description, color=CHESUTO_COLOR)
+    await client.message_create(message.channel, embed=embed)
+
+Flan.commands(bgm_command, name='bgm', description=bgm_description)
+
+@Flan.commands.from_class
+class queue:
+    async def command(client, message):
+        guild = message.guild
+        if guild is None:
+            return
+        
+        voice_client = client.voice_client_for(message)
+        
+        title = f'Playing queue for {guild}'
+        page = Embed(title, color=CHESUTO_COLOR)
+        pages = [page]
+        while True:
+            if voice_client is None:
+                page.description = '*none*'
+                break
+            
+            source = voice_client.source
+            if (source is not None):
+                page.add_field('Actual:', source.title)
+            
+            queue = voice_client.queue
+            limit = len(queue)
+            if limit:
+                index = 0
+                while True:
+                    source = queue[index]
+                    index +=1
+                    page.add_field(f'Track {index}.:', source.title)
+                    
+                    if index == limit:
+                        break
+                    
+                    if index%10 == 0:
+                        page = Embed(title, color=CHESUTO_COLOR)
+                        pages.append(page)
+                
+            else:
+                if source is None:
+                    page.description = '*none*'
+            
+            break
+        
+        await Pagination(client, message.channel, pages)
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('queue',(
+            'Shows the audio player queue of the current guild.\n'
+            f'Usage: `{prefix}queue`'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+        
+        
+@Flan.commands.from_class
+class bgms:
+    async def command(client, message):
+        chunks = []
+        actual_chunk = []
+        index = 0
+        limit = len(CHESUTO_BGM_TRACKS_SORTED)
+        collected = 0
+        while True:
+            if index == limit:
+                break
+            
+            actual = CHESUTO_BGM_TRACKS_SORTED[index].display_name
+            index +=1
+            actual_chunk.append(repr(index))
+            actual_chunk.append('.: ')
+            actual_chunk.append(actual)
+            actual_chunk.append('\n')
+            
+            collected+=1
+            if collected == 20:
+                del actual_chunk[-1]
+                chunks.append(''.join(actual_chunk))
+                actual_chunk.clear()
+                collected = 0
+        
+        if collected:
+            chunks.append(''.join(actual_chunk))
+        
+        actual_chunk = None
+        
+        embeds = []
+    
+        limit=len(chunks)
+        index=0
+        while index<limit:
+            embed=Embed('Chesuto BGMs:',color=FLAN_HELP_COLOR, description=chunks[index])
+            index+=1
+            embed.add_footer(f'page {index}/{limit}')
+            embeds.append(embed)
+        
+        await Pagination(client, message.channel, embeds)
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('bgms',(
+            'Lists the chesuto bgms.\n'
+            f'Usage: `{prefix}bgms`'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
+@Flan.commands.from_class
+class volume:
+    async def command(client, message, content):
+        while True:
+            voice_client = client.voice_client_for(message)
+            if voice_client is None:
+                text = 'There is no voice client at your guild.'
+                break
+            
+            if not content:
+                text = f'{voice_client.volume*100.:.0f}%'
+                break
+            
+            amount=PERCENT_RP.fullmatch(content)
+            if not amount:
+                text = 'Number please'
+                break
+            
+            amount=int(amount.groups()[0])
+            if amount<0:
+                amount=0
+            elif amount>200:
+                amount=200
+            
+            voice_client.volume=amount/100.
+            text = f'Volume set to {amount}%.'
+            break
+        
+        await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('bgms',(
+            'Sets my volume to the given percentage.\n'
+            f'Usage: `{prefix}voice *n%*`\n'
+            'If no volume is passed, then I will tell my current volume.'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
 del Cooldown
 del CooldownHandler
+del ChannelText
+del MessageDeleteWaitfor
+del MessageEditWaitfor

@@ -56,6 +56,9 @@ def smart_join(list_,limit=2000,sep='\n'):
 class MessageDeleteWaitfor(EventWaitforBase):
     __event_name__='message_delete'
 
+class MessageEditWaitfor(EventWaitforBase):
+    __event_name__='message_edit'
+
 class GuildDeleteWaitfor(EventWaitforBase):
     __event_name__='guild_delete'
 
