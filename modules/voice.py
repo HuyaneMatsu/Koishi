@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import re, os, wave
+import re, os
 
 from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio
 from hata.ext.commands import Command
@@ -14,17 +14,6 @@ def setup(lib):
 
 def teardown(lib):
     Koishi.commands.unextend(VOICE_COMMANDS)
-
-#await it
-def save_voice(client,frames):
-    return client.loop.run_in_executor(alchemy_incendiary(_save,(frames,),),)
-
-def _save(frames):
-    with wave.open('test.wav','wb') as wav_writer:
-        wav_writer.setframerate(48000)
-        wav_writer.setsampwidth(2)
-        wav_writer.setnchannels(2)
-        wav_writer.writeframes(b''.join(frames))
     
 AUDIO_PATH=pers_data.AUDIO_PATH
 
@@ -33,7 +22,7 @@ def collect_local_audio():
     for filename in os.listdir(AUDIO_PATH):
         if filename.endswith('.mp3'):
             FILENAMES.append(filename)
-            
+
 collect_local_audio()
 
 PERCENT_RP=re.compile('(\d*)[%]?')
@@ -451,34 +440,6 @@ async def voice_partyisover(client,message,content):
 
 VOICE_SUBCOMMANDS['partyisover']=voice_partyisover
 
-
-async def voice_save(client,message,content):
-    if not client.is_owner(message.author):
-        return
-
-    voice_client=client.voice_client_for(message)
-    if voice_client is None:
-        await client.message_create(message.channel,'No clients found')
-        return
-
-    await client.message_create(message.channel,'Talk now')
-    
-    reader=voice_client.listen()
-    await sleep(10.,client.loop)
-    reader.stop()
-
-    frames=reader.get_audio_frames_for(message.author,flush=True,fill=False)
-    if not frames:
-        await client.message_create(message.channel,'U sure, u talked?')
-        return
-
-    await save_voice(client,frames)
-
-    await client.message_create(message.channel,'pat me!')
-    return
-    
-VOICE_SUBCOMMANDS['save']=voice_save
-
 async def voice_description(client,message):
     is_owner=client.is_owner(message.author)
     
@@ -517,11 +478,6 @@ async def voice_description(client,message):
             connected.append(
                 f'\n- `{prefix}voice partyisover`: I disconnect everyone, '
                 'who is at the same channel as me. *Admin only.*',
-                    )
-        if is_owner:
-            connected.append(
-                f'\n- `{prefix}voice save`: I save 10s of your audio. '
-                '*Owner only, experimental.*',
                     )
         text=''.join(connected)
     

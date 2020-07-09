@@ -3,7 +3,7 @@ from time import perf_counter
 from random import random
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, \
-    titledstr, multidict_titled, random_id, WebhookType, sleep, chunkify, ICON_TYPE_NONE, Webhook
+    titledstr, multidict_titled, random_id, WebhookType, sleep, chunkify, ICON_TYPE_NONE, Webhook, KOKORO
 from hata.backend.hdrs import AUTHORIZATION
 from hata.ext.commands import Command, ChooseMenu, checks, Pagination
 from hata.discord.others import Discord_hdrs
@@ -379,3 +379,149 @@ async def discovery_validate_randoms(client, message):
         collected.append(f'{word} : {result} ({end-start:.2f}s)')
     
     await client.message_create(message.channel, '\n'.join(collected))
+
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_receive_voice(client, message, target: User = None):
+    """
+    Receives 10 seconds of sound, then plays it. Also please define a user as well, who I will listen to.
+    """
+    channel = message.channel
+    guild = channel.guild
+    if guild is None:
+        return
+    
+    if target is None:
+        await client.message_create(channel, 'Please define a user as well')
+        return
+    
+    state = guild.voice_states.get(message.author.id, None)
+    if state is None:
+        await client.message_create(channel, 'You are not at a voice channel!')
+        return
+    
+    channel = state.channel
+    if not channel.cached_permissions_for(client).can_connect:
+        await client.message_create(message.channel, 'I have no permissions to connect to that channel')
+        return
+    
+    voice_client = client.voice_client_for(message)
+    if voice_client is None:
+        try:
+            voice_client = await client.join_voice_channel(channel)
+        except BaseException as err:
+            if isinstance(err, TimeoutError):
+                text = 'Timed out meanwhile tried to connect.'
+            elif isinstance(err, RuntimeError):
+                text = 'The client cannot play voice, some libraries are not loaded'
+            else:
+                text = repr(err)
+            
+            await client.message_create(message.channel, text)
+            return
+    
+    audio_stream = voice_client.listen_to(target)
+    
+    await client.message_create(message.channel, 'Started listening')
+    await sleep(10.0, KOKORO)
+    audio_stream.stop()
+    
+    voice_client.append(audio_stream)
+
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_receive_voice_decoded(client, message, target: User = None):
+    """
+    Receives 10 seconds of sound, then plays it. Also please define a user as well, who I will listen to.
+    """
+    channel = message.channel
+    guild = channel.guild
+    if guild is None:
+        return
+    
+    if target is None:
+        await client.message_create(channel, 'Please define a user as well')
+        return
+    
+    state = guild.voice_states.get(message.author.id, None)
+    if state is None:
+        await client.message_create(channel, 'You are not at a voice channel!')
+        return
+    
+    channel = state.channel
+    if not channel.cached_permissions_for(client).can_connect:
+        await client.message_create(message.channel, 'I have no permissions to connect to that channel')
+        return
+    
+    voice_client = client.voice_client_for(message)
+    if voice_client is None:
+        try:
+            voice_client = await client.join_voice_channel(channel)
+        except BaseException as err:
+            if isinstance(err, TimeoutError):
+                text = 'Timed out meanwhile tried to connect.'
+            elif isinstance(err, RuntimeError):
+                text = 'The client cannot play voice, some libraries are not loaded'
+            else:
+                text = repr(err)
+            
+            await client.message_create(message.channel, text)
+            return
+    
+    audio_stream = voice_client.listen_to(target, auto_decode=True, yield_decoded=True)
+    
+    await client.message_create(message.channel, 'Started listening')
+    await sleep(10.0, KOKORO)
+    audio_stream.stop()
+    
+    voice_client.append(audio_stream)
+
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_receive_voice_repeat(client, message, target: User = None):
+    """
+    Repeats your audio for 30 seconds. Please define who's audio to repeat as well.
+    """
+    channel = message.channel
+    guild = channel.guild
+    if guild is None:
+        return
+    
+    if target is None:
+        await client.message_create(channel, 'Please define a user as well')
+        return
+    
+    state = guild.voice_states.get(message.author.id, None)
+    if state is None:
+        await client.message_create(channel, 'You are not at a voice channel!')
+        return
+    
+    channel = state.channel
+    if not channel.cached_permissions_for(client).can_connect:
+        await client.message_create(message.channel, 'I have no permissions to connect to that channel')
+        return
+    
+    voice_client = client.voice_client_for(message)
+    if voice_client is None:
+        try:
+            voice_client = await client.join_voice_channel(channel)
+        except BaseException as err:
+            if isinstance(err, TimeoutError):
+                text = 'Timed out meanwhile tried to connect.'
+            elif isinstance(err, RuntimeError):
+                text = 'The client cannot play voice, some libraries are not loaded'
+            else:
+                text = repr(err)
+            
+            await client.message_create(message.channel, text)
+            return
+    
+    audio_stream = voice_client.listen_to(target)
+    
+    await client.message_create(message.channel, 'Started listening')
+    voice_client.append(audio_stream)
+    
+    await sleep(30.0, KOKORO)
+    audio_stream.stop()
+    
+
+
+
+

@@ -47,7 +47,7 @@ BMG_NAMES_W_S = {
     'wyvendel',
     'grashawl',
     'lene',
-    'castles',
+    'castle',
         }
 
 setup_ext_commands(Flan,FLAN_PREFIX)
@@ -1180,21 +1180,21 @@ async def play_description(client, message):
         ),color=FLAN_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-async def bgm_description(client, message):
+Flan.commands(play_command, name='play', description=play_description)
+
+async def bgminfo_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('bgm',(
+    embed=Embed('bgminfo',(
         'Shows up the given bgm\'s description..\n'
-        f'Usage: `{prefix}bgm <name>`\n'
+        f'Usage: `{prefix}bgminfo <name>`\n'
         '\n'
         'Note that the given name can be also given as the position of the track.'
             ),color=FLAN_HELP_COLOR)
     await client.message_create(message.channel, embed=embed)
 
-Flan.commands(play_command, name='play', description=play_description)
-
-async def bgm_command(client, message, content):
+async def bgminfo_command(client, message, content):
     if not content:
-        await bgm_description(client, message)
+        await bgminfo_description(client, message)
         return
     
     bgm = get_bgm(content)
@@ -1209,7 +1209,7 @@ async def bgm_command(client, message, content):
     embed = Embed(title, description, color=CHESUTO_COLOR)
     await client.message_create(message.channel, embed=embed)
 
-Flan.commands(bgm_command, name='bgm', description=bgm_description)
+Flan.commands(bgminfo_command, name='bgminfo', description=bgminfo_description)
 
 @Flan.commands.from_class
 class queue:
@@ -1263,8 +1263,8 @@ class queue:
             f'Usage: `{prefix}queue`'
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
-        
-        
+
+
 @Flan.commands.from_class
 class bgms:
     async def command(client, message):
@@ -1354,6 +1354,95 @@ class volume:
             'Sets my volume to the given percentage.\n'
             f'Usage: `{prefix}voice *n%*`\n'
             'If no volume is passed, then I will tell my current volume.'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
+@Flan.commands.from_class
+class skip:
+    async def command(client, message, index:int=0):
+        while True:
+            voice_client = client.voice_client_for(message)
+            if voice_client is None:
+                text = 'There is no voice client at your guild.'
+                break
+            
+            source = voice_client.skip(index)
+            if source is None:
+                text = 'Nothing was skipped.'
+            else:
+                text = f'Skipped {source.title!r}.'
+            break
+        
+        await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('skip',(
+            'Skips the audio at the given index.\n'
+            f'Usage: `{prefix}skip *index*`\n'
+            'If not giving any index or giving it as `0`, will skip the currently playing audio.'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
+@Flan.commands.from_class
+class pause:
+    async def command(client, message):
+        while True:
+            voice_client = client.voice_client_for(message)
+            if voice_client is None:
+                text = 'There is no voice client at your guild.'
+                break
+            
+            source = voice_client.source
+            if source is None:
+                text = 'Nothing to pause.'
+            else:
+                voice_client.pause()
+                text = f'{source.title!r} paused.'
+            
+            break
+        
+        await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('pause',(
+            'Pauses the currently playing audio.\n'
+            f'Usage: `{prefix}pause`\n'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
+@Flan.commands.from_class
+class resume:
+    async def command(client, message):
+        while True:
+            voice_client = client.voice_client_for(message)
+            if voice_client is None:
+                text = 'There is no voice client at your guild.'
+                break
+            
+            source = voice_client.source
+            if source is None:
+                text = 'Nothing to resume.'
+            else:
+                voice_client.resume()
+                text = f'{source.title!r} resumed.'
+            
+            break
+        
+        await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('resume',(
+            'Resumes the currently playing audio.\n'
+            f'Usage: `{prefix}resume`\n'
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 

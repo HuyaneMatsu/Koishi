@@ -670,7 +670,7 @@ class embedination(object):
         
         message=self.message
         
-        if (event.delete_reaction_with(client) == event.DELETE_NOT_ADDED):
+        if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
             return
         
         task_flag=self.task_flag
