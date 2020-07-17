@@ -48,6 +48,9 @@ BMG_NAMES_W_S = {
     'grashawl',
     'lene',
     'castle',
+    'firtrun',
+    'radialt',
+    'yshar',
         }
 
 setup_ext_commands(Flan,FLAN_PREFIX)
@@ -80,7 +83,7 @@ async def help(client, message, content):
             except KeyError:
                 pass
             else:
-                if command.run_checks(client, message):
+                if await command.run_checks(client, message):
                     run_invalid=False
                     description=command.description
                     if description is None:
@@ -105,7 +108,7 @@ async def help(client, message, content):
     part=[]
     index=0
     for command in client.events.message_create.get_default_category().commands:
-        if not command.run_checks(client, message):
+        if not await command.run_checks(client, message):
             continue
         
         if index==16:
@@ -1443,6 +1446,72 @@ class resume:
         embed=Embed('resume',(
             'Resumes the currently playing audio.\n'
             f'Usage: `{prefix}resume`\n'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
+@Flan.commands.from_class
+class loop:
+    async def command(client, message):
+        voice_client = client.voice_client_for(message)
+        if voice_client is None:
+            text = 'There is no voice client at your guild.'
+        else:
+            voice_client.call_after = voice_client._loop_actual
+            text = 'Started looping over the actual audio.'
+        
+        await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('loop',(
+            'Loops over the currently playing audio.\n'
+            f'Usage: `{prefix}loop`\n'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
+@Flan.commands.from_class
+class loop_stop:
+    async def command(client, message):
+        voice_client = client.voice_client_for(message)
+        if voice_client is None:
+            text = 'There is no voice client at your guild.'
+        else:
+            voice_client.call_after = voice_client._play_next
+            text = 'Started looping over the actual audio.'
+        
+        await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('loop-stop',(
+            'Stops looping over the actual audio or over the queue.\n'
+            f'Usage: `{prefix}loop-stop`\n'
+            ),color=FLAN_HELP_COLOR)
+        await client.message_create(message.channel, embed=embed)
+
+@Flan.commands.from_class
+class loop_all:
+    async def command(client, message):
+        voice_client = client.voice_client_for(message)
+        if voice_client is None:
+            text = 'There is no voice client at your guild.'
+        else:
+            voice_client.call_after = voice_client._loop_queue
+            text = 'Started looping over the audio queue.'
+        
+        await client.message_create(message.channel, text)
+        await sleep(30., client.loop)
+        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('loop-all',(
+            'Starts to loop over the queue.\n'
+            f'Usage: `{prefix}loop-all`\n'
             ),color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 

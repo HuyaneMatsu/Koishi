@@ -301,24 +301,22 @@ async def process_on_command_upload(client,message,content):
     for tag in tags:
         if tag in RESERVED_TAGS:
             return f'Reserved tag: {tag}'
-
+    
     result=None
-    for msg in (await client.messages_till_index(message.channel,end=26)):
+    for msg in (await client.messages_in_range(message.channel,end=26)):
         if msg.author==source and msg.attachments:
             result=msg.attachments[0]
             break
     
     if not result:
         return 'Huh?'
-
-
+    
     filename=result.name
     
     index=filename.rfind('.')
     if index<0:
         return
     ext=filename[index+1:].lower()
-
     
     if ext in image_formats:
         img=True
@@ -326,7 +324,7 @@ async def process_on_command_upload(client,message,content):
         img=False
     else:
         return 'Unknown image format'
-
+    
     data = await client.download_attachment(result)
     
     index=f'{(len(IMAGES)+len(VIDS)):08X}'
@@ -350,6 +348,7 @@ async def process_on_command_upload(client,message,content):
             image.decodermaxblock=65536
             image.readonly=False
             image._exif=None
+            image.pyaccess = None
             image._open()
             await client.loop.run_in_executor(functools.partial(image.save,filename))
         else:

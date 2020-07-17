@@ -29,7 +29,7 @@ class Channeller_v_del(object):
         file        = None if message.attachments is None else [attachment.name for attachment in message.attachments]
         tts         = message.tts
         #avatar_url  = message.author.avatar_url #cannot compare avatar urls.
-                
+        
         for channel,webhook in self.parent.pairs:
             if channel is source_channel:
                 continue
@@ -75,14 +75,14 @@ class Channeller(object):
         elif len(pairs)<3:
             for pair in pairs:
                 channel = pair[0]
-                channel.message_keep_limit = channel.MC_GC_LIMIT
+                channel.message_keep_limit = channel.MESSAGE_KEEP_LIMIT
                 del CHANNELINGS[channel.id]
         else:
             for index,pair in enumerate(pairs):
                 if pair[0] is channel:
                     del pairs[index]
                     break
-            channel.message_keep_limit = channel.MC_GC_LIMIT
+            channel.message_keep_limit = channel.MESSAGE_KEEP_LIMIT
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
             del CHANNELINGS[channel.id]
@@ -90,7 +90,7 @@ class Channeller(object):
 
         for pair in pairs:
             channel=pair[0]
-            channel.message_keep_limit=channel.MC_GC_LIMIT
+            channel.message_keep_limit=channel.MESSAGE_KEEP_LIMIT
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
             

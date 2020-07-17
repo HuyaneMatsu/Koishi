@@ -88,11 +88,8 @@ async def default_event(client,message):
 
 DUNGEON=Guild.precreate(388267636661682178)
 
-@Koishi.commands
+@Koishi.commands(checks=[checks.is_guild(DUNGEON)])
 async def command_error(client, message, command, content, exception):
-    if message.guild is not DUNGEON:
-        return True
-    
     with StringIO() as buffer:
         await client.loop.render_exc_async(exception,[
             client.full_name,
@@ -177,10 +174,10 @@ KOISHI_HELP_COLOR=Color.from_html('#ffd21e')
 async def help_description(client,message):
     by_categories=[]
     for category in client.command_processer.categories:
-        if category.run_checks(client,message):
+        if await category.run_checks(client,message):
             command_names = []
             for command in category.commands:
-                if command.run_checks(client,message):
+                if await command.run_checks(client,message):
                     command_names.append(command.name)
             
             # filter out empty categories

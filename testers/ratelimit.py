@@ -17,7 +17,7 @@ from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_ex
 from hata.backend.hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST, METH_PUT, AUTHORIZATION, \
     CONTENT_TYPE
 from hata.backend.http import Request_CM
-from hata.discord.others import to_json, from_json, bytes_to_base64, ext_from_base64, Discord_hdrs
+from hata.discord.others import to_json, from_json, image_to_base64, Discord_hdrs
 from hata.discord.guild import PartialGuild, GuildDiscovery
 from hata.discord.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED, quote
 from hata.backend.helpers import BasicAuth
@@ -521,8 +521,7 @@ async def client_edit(client,name='',avatar=b'',):
     if avatar is None:
         data['avatar']=None
     elif avatar:
-        avatar_data=bytes_to_base64(avatar)
-        ext=ext_from_base64(avatar_data)
+        avatar_data=image_to_base64(avatar)
     return await bypass_request(client,METH_PATCH,
         'https://discordapp.com/api/v7/users/@me',
         data,)
@@ -673,7 +672,7 @@ async def invite_get_channel(client,channel,):
 async def webhook_create(client,channel,name,avatar=b'',):
     data={'name':name}
     if avatar:            
-        data['avatar']=bytes_to_base64(avatar)
+        data['avatar']=image_to_base64(avatar)
             
     channel_id=channel.id
     data = await bypass_request(client,METH_POST,
@@ -702,7 +701,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
     
     data = {
         'name'                          : name,
-        'icon'                          : None if icon is None else bytes_to_base64(avatar),
+        'icon'                          : None if icon is None else image_to_base64(avatar),
         'region'                        : region.id,
         'verification_level'            : verification_level.value,
         'default_message_notifications' : message_notification_level.value,
@@ -1182,7 +1181,7 @@ async def guild_emojis(client,guild,):
         )
 
 async def emoji_create(client,guild,name,image,):
-    image=bytes_to_base64(image)
+    image=image_to_base64(image)
     name=''.join(re.findall('([0-9A-Za-z_]+)',name))
     if not (1<len(name)<33):
         raise ValueError(f'The length of the name can be between 2-32, got {len(name)}')
@@ -1539,11 +1538,8 @@ async def achievement_get(client,achievement_id,):
     
 
 async def achievement_create(client,name,description,icon,secret=False,secure=False,):
-    icon_data=bytes_to_base64(icon)
-    ext=ext_from_base64(icon_data)
-    if ext not in VALID_ICON_FORMATS_EXTENDED:
-        raise ValueError(f'Invalid icon type: {ext}')
-
+    icon_data=image_to_base64(icon)
+    
     data = {
         'name'          : {
             'default'   : name,
@@ -1588,12 +1584,8 @@ async def achievement_edit(client,achievement,name=None,description=None,secret=
         data['secure']=secure
         
     if (icon is not _spaceholder):
-        icon_data=bytes_to_base64(icon)
-        ext=ext_from_base64(icon_data)
-        if ext not in VALID_ICON_FORMATS_EXTENDED:
-            raise ValueError(f'Invalid icon type: {ext}')
-        data['icon']=icon_data
-
+        data['icon']=image_to_base64(icon)
+    
     application_id=client.application.id
     achievement_id=achievement.id
     

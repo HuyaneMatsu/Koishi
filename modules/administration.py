@@ -9,9 +9,9 @@ ADMINISTRATION_COLOR = Color.from_rgb(148,0,211)
 ADMINISTRATION_COMMANDS = eventlist(type_=Command)
 
 def setup(lib):
-    category = Koishi.command_processer.get_category('administration')
+    category = Koishi.command_processer.get_category('ADMINISTRATION')
     if (category is None):
-        Koishi.command_processer.create_category('administration',check_failure_handler=check_failure_handler)
+        Koishi.command_processer.create_category('ADMINISTRATION', check_failure_handler=check_failure_handler)
     else:
         if (category.check_failure_handler is None):
             category.check_failure_handler = check_failure_handler
