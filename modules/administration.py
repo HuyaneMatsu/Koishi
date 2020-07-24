@@ -3,7 +3,7 @@ from hata import Color, Embed, eventlist, Permission, DiscordException, sleep, M
 from hata.ext.commands import Command, Converter, checks, Pagination, ConverterFlag, wait_for_reaction
 from hata.ext.prettyprint import pchunkify
 
-from shared import KOISHI_PREFIX, FI_NO
+from shared import KOISHI_PREFIX, permission_check_handler, not_guild_owner_handler, not_bot_owner_handler
 
 ADMINISTRATION_COLOR = Color.from_rgb(148,0,211)
 ADMINISTRATION_COMMANDS = eventlist(type_=Command)
@@ -11,41 +11,12 @@ ADMINISTRATION_COMMANDS = eventlist(type_=Command)
 def setup(lib):
     category = Koishi.command_processer.get_category('ADMINISTRATION')
     if (category is None):
-        Koishi.command_processer.create_category('ADMINISTRATION', check_failure_handler=check_failure_handler)
-    else:
-        if (category.check_failure_handler is None):
-            category.check_failure_handler = check_failure_handler
+        Koishi.command_processer.create_category('ADMINISTRATION',)
     
     Koishi.commands.extend(ADMINISTRATION_COMMANDS)
 
 def teardown(lib):
     Koishi.commands.unextend(ADMINISTRATION_COMMANDS)
-
-
-PERMISSION_NAMES = [
-    '',
-    'administrator',
-    'create instant invite',
-    'ban users',
-    'manage messages',
-    'manage channel',
-    'view audit logs',
-        ]
-
-async def check_failure_handler(client, message, command, content, fail_identificator):
-    
-    if fail_identificator<len(PERMISSION_NAMES):
-        permission_name = PERMISSION_NAMES[fail_identificator]
-        response = f'You must have {permission_name} permission to invoke `{command.name}` command.'
-    elif fail_identificator==FI_NO.GUILD_OWNER:
-        response = f'You must be the owner of the guild to invoke `{command.name}` command.'
-    elif fail_identificator==FI_NO.OWNER:
-        response = f'You must be the owner of the bot to invoke `{command.name}` command.'
-    else:
-        return
-    
-    await client.message_create(message.channel, response)
-
 
 @ADMINISTRATION_COMMANDS.from_class
 class clear:
@@ -54,7 +25,7 @@ class clear:
             await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
     
     category = 'ADMINISTRATION'
-    checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True),fail_identificator=FI_NO.MANAGE_MESSAGES)]
+    checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
 
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -111,7 +82,7 @@ class invite:
                 await client.message_create(message.channel,'You have DM disabled, could not send the invite.')
         
     category = 'ADMINISTRATION'
-    checks=[checks.owner_or_has_guild_permissions(Permission().update_by_keys(create_instant_invite=True),fail_identificator=FI_NO.INVITE)]
+    checks=[checks.owner_or_has_guild_permissions(Permission().update_by_keys(create_instant_invite=True), handler=permission_check_handler)]
     
     async def description(client,message):
         guild=message.channel.guild
@@ -213,7 +184,7 @@ class bans:
         await Pagination(client,message.channel,result)
     
     category = 'ADMINISTRATION'
-    checks = [checks.has_guild_permissions(Permission().update_by_keys(ban_users=True),fail_identificator=FI_NO.BAN)]
+    checks = [checks.has_guild_permissions(Permission().update_by_keys(ban_users=True), handler=permission_check_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -248,7 +219,7 @@ class prefix:
         await client.message_create(message.channel,response)
     
     category = 'ADMINISTRATION'
-    checks = [checks.owner_or_guild_owner(fail_identificator=FI_NO.GUILD_OWNER)]
+    checks = [checks.owner_or_guild_owner(handler=not_guild_owner_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -266,7 +237,7 @@ class leave_guild:
         await client.guild_leave(message.guild)
     
     category = 'ADMINISTRATION'
-    checks = [checks.owner_or_guild_owner(fail_identificator=FI_NO.GUILD_OWNER)]
+    checks = [checks.owner_or_guild_owner(handler=not_guild_owner_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -300,7 +271,7 @@ class reaction_clear:
         await client.message_delete(message)
     
     category = 'ADMINISTRATION'
-    checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True),fail_identificator=FI_NO.MANAGE_MESSAGES)]
+    checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -324,7 +295,7 @@ class show_help_for:
         await client.command_processer.commands['help'](client,message,rest)
     
     category = 'ADMINISTRATION'
-    checks = [checks.owner_only(fail_identificator=FI_NO.OWNER)]
+    checks = [checks.owner_only(handler=not_bot_owner_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -334,7 +305,6 @@ class show_help_for:
                 ),color=ADMINISTRATION_COLOR).add_footer(
                 'Owner only!')
         await client.message_create(message.channel,embed=embed)
-
 
 ROLE_EMOJI_OK       = BUILTIN_EMOJIS['ok_hand']
 ROLE_EMOJI_CANCEL   = BUILTIN_EMOJIS['x']
@@ -435,7 +405,7 @@ class emoji_role:
     
     name = 'emoji-role'
     category = 'ADMINISTRATION'
-    checks=[checks.has_permissions(Permission().update_by_keys(administrator=True),fail_identificator=FI_NO.ADMIN)]
+    checks=[checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -467,7 +437,7 @@ class invites:
         await Pagination(client,message.channel,pages,120.)
     
     category = 'ADMINISTRATION'
-    checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_channel=True),fail_identificator=FI_NO.MANAGE_CHANNEL)]
+    checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_channel=True), handler=permission_check_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -516,7 +486,7 @@ class logs:
         await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(logs)])
     
     category = 'ADMINISTRATION'
-    checks=[checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True),fail_identificator=FI_NO.AUDIT_LOGS)]
+    checks=[checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True), handler=permission_check_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)

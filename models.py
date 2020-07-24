@@ -6,7 +6,6 @@ from hata.ext.kokoro_sqlalchemy import KOKORO_STRATEGY
 BASE = declarative_base()
 DATABASE_NAME='sqlite:///_sqlite.db'
 
-
 class ds_model(BASE):
     __tablename__ = 'DS_TABLE'
     id          = Column(Integer,primary_key=True)
@@ -45,22 +44,20 @@ class auto_react_role_model(BASE):
 
 AUTO_REACT_ROLE_TABLE=auto_react_role_model.__table__
 
-
-#creating tables
+# Creating tables
 DB_ENGINE = create_engine(DATABASE_NAME)
 BASE.metadata.create_all(DB_ENGINE)
 del DB_ENGINE
 
-
-#create future engine
+# Create future engine
 
 DB_ENGINE = create_engine(DATABASE_NAME,strategy=KOKORO_STRATEGY,single_worker=True)
 
-
 #clearing namespace
 del declarative_base
-del create_engine
 del Column
 del Integer
 del DateTime
 del BINARY
+del create_engine
+

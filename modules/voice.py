@@ -106,7 +106,7 @@ async def voice_leave(client,message,content):
     else:
         await voice_client.disconnect()
         text=f'{client.name} disconnects, bai bai nya!'
-
+    
     message = await client.message_create(message.channel,text)
     await sleep(30.,client.loop)
     await client.message_delete(message,reason='Voice messages expire after 30s.')

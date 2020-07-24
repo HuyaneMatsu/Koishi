@@ -17,9 +17,9 @@ from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_ex
 from hata.backend.hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST, METH_PUT, AUTHORIZATION, \
     CONTENT_TYPE
 from hata.backend.http import Request_CM
+from hata.backend.quote import quote
 from hata.discord.others import to_json, from_json, image_to_base64, Discord_hdrs
 from hata.discord.guild import PartialGuild, GuildDiscovery
-from hata.discord.http import VALID_ICON_FORMATS, VALID_ICON_FORMATS_EXTENDED, quote
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
 

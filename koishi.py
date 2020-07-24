@@ -242,7 +242,7 @@ async def help(client, message, name:str=''):
     name = name.lower()
     command = client.command_processer.commands.get(name)
     
-    if (command is None) or (not command.run_all_checks(client, message)):
+    if (command is None) or (not await command.run_all_checks(client, message)):
         prefix = client.command_processer.get_prefix_for(message)
         embed=Embed(f'Invalid command: {name!r}',(
             f'Please try using `{prefix}help` to list the available commands '
@@ -397,7 +397,7 @@ async def aliases(client, message, name:str, target_client:Converter('user',flag
             fail = True
             break
         
-        if command.run_all_checks(target_client, message):
+        if await command.run_all_checks(target_client, message):
             fail = False
             break
             

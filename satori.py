@@ -122,7 +122,7 @@ async def download_wiki_page(client, title_, url):
         element_name=element.name
         if element_name is None:
             continue #linebreak
-
+        
         if element_name=='dl':
             for element in element.contents:
                 element_name=element.name
@@ -148,7 +148,7 @@ async def download_wiki_page(client, title_, url):
                                 text=f'*Main article: [{title}](https://en.touhouwiki.net{url_})*\n'
                                 last.append(text)
                                 continue
-
+                    
                     text=element.text
                     if text.startswith('"') and text.endswith('"'):
                         text=f'*{text}*\n'
@@ -450,7 +450,7 @@ class auto_pyramid:
         
         for client_, count in zip(cycle(available_clients), chain(range(1,size),range(size,0,-1))):
             await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
-        
+    
     name = 'auto-pyramid'
     aliases = ['auto_pyramid']
     checks = [checks.guild_only()]
@@ -466,7 +466,7 @@ class auto_pyramid:
     
     async def parser_failure_handler(client, message, command, conetnt, args):
         await command.description(client, message)
-        
+
 @Satori.commands.from_class
 class auto_pyramid_u:
     async def command(client, message, emoji:Emoji, size:int):
