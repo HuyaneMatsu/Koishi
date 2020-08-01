@@ -7,7 +7,7 @@ from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, Wa
 from hata.ext.commands import Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
     GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
 
-from hata.discord.client_core import GC_cycler
+from hata.discord.client_core import GC_CYCLER
 
 from models import DB_ENGINE, DS_TABLE, ds_model
 
@@ -69,18 +69,17 @@ def GC_games(cycler):
         loop.call_soon_threadsafe(Task,_keep_await(ds_game.save_position,to_save),loop)
 
 
-GC_cycler.append(GC_games)
+GC_CYCLER.append(GC_games)
 
-del GC_cycler
+del GC_CYCLER
 del GC_games
 
 #:-> @ <-:#}{#:-> @ <-:#{ command }#:-> @ <-:#}{#:-> @ <-:#
 
 async def ds_manager(client,message,command:str=''):
-    permissions=message.channel.cached_permissions_for(client)
+    permissions = message.channel.cached_permissions_for(client)
     
     while True:
-        
         if not (0<=len(command)<10):
             await ds_description(client,message)
             return

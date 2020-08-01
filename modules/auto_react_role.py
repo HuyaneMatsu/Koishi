@@ -4,7 +4,7 @@ from weakref import WeakKeyDictionary
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
     Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS
 from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination
-from hata.discord.others import IS_ID_RP
+from hata.discord.others import ID_RP
 
 from shared import permission_check_handler
 from models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
@@ -86,7 +86,7 @@ async def create_auto_react_role(client, message, channel:Converter('channel', d
         await client.events.error(client,f'create_auto_react_role',err)
         return
     
-    if (target_id is None) or IS_ID_RP.fullmatch(target_id) is None:
+    if (target_id is None) or ID_RP.fullmatch(target_id) is None:
         await client.message_create(message.channel, 'Did not find any message with the specified ID.')
         return
     

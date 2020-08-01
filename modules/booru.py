@@ -93,7 +93,7 @@ class ShuffledShelter(object):
         for emoji in self.EMOJIS:
             await client.reaction_add(message,emoji)
 
-        self.timeouter=Timeouter(client.loop,self,timeout=300.)
+        self.timeouter=Timeouter(self,timeout=300.)
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
         

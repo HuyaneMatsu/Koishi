@@ -28,7 +28,7 @@ def teardown(lib):
     
 IMAGES=[]
 VIDS=[]
-ALL_img=[]
+ALL=[]
 
 ITGHL={}
 IMAGE_STATISTICS={}
@@ -46,7 +46,7 @@ class image_details(set):
         elif ext in video_formats:
             VIDS.append(self)
 
-        ALL_img.append(self)
+        ALL.append(self)
         
         tags=name.split('_')
         del tags[0]
@@ -60,6 +60,7 @@ class image_details(set):
             if tag not in self:
                 return False
         return True
+    
     def add(self,value):
         try:
             hashresult=ITGHL[value]
@@ -77,7 +78,10 @@ class image_details(set):
         return f'<{self.__class__.__name__} {self.path}>'
     
     __str__=__repr__
-    
+
+IMAGE_TAG_PAT = ITGHL['pat'] = 0
+IMAGE_TAG_HUG = ITGHL['hug'] = 1
+
 image_formats={'jpg','png','bmp','jpeg'}
 video_formats={'mp4','gif'}
 
@@ -91,7 +95,7 @@ load_images()
 
 async def image_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('image',(
+    embed = Embed('image',(
         'I ll search images by tags from my collection, '
         'then send 1 of the results.\n'
         f'Usage : `{prefix}image (count) (any / pic / vid) (index (hex) *n*) <tag_1> <tag_2> ...`\n'
@@ -104,13 +108,13 @@ async def image_description(client,message):
         'You want from the found ones. If you do `index hex`, I ll expect '
         'a hexadecimal number.\n'
         'You can pass any amount of tags, mentions are ignored.'
-            ),color=IMAGE_COLOR)
-    await client.message_create(message.channel,embed=embed)
+            ), color=IMAGE_COLOR)
+    await client.message_create(message.channel, embed=embed)
 
 
 async def upload_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('upload',(
+    embed = Embed('upload',(
         'You can can upload images with tags, which you can access with the '
         f'{prefix}image` command after.\n'
         f'Usage : `{prefix}upload <tag_1> <tag_2> ...`\n'
@@ -118,9 +122,9 @@ async def upload_description(client,message):
         'my dear.\n I look up the last 26 messages searching for an '
         'attachment.\n'
         'You can pass any amount of tags, mentions are ignored.'
-            ),color=IMAGE_COLOR).add_footer(
+            ), color=IMAGE_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel,embed=embed)
+    await client.message_create(message.channel, embed=embed)
 
 RESERVED_TAGS={'any','vid','pic','count','index','hex',}
 
@@ -130,8 +134,9 @@ async def image(client,message,content):
     if type(result) is str:
         await client.message_create(message.channel,result)
     else:
-        with (await ReuAsyncIO(join(IMAGE_PATH,result.path))) as image:
-            await client.message_create(message.channel,file=image)
+        with client.keep_typing(message.channel):
+            with (await ReuAsyncIO(join(IMAGE_PATH,result.path))) as image:
+                await client.message_create(message.channel,file=image)
 
 
 def process_on_command_image(content):
@@ -152,12 +157,12 @@ def process_on_command_image(content):
         try:
             search_from_index=('any','vid','pic').index(value)
         except ValueError:
-            search_from=ALL_img
+            search_from=ALL
         else:
-            search_from=(ALL_img,VIDS,IMAGES)[search_from_index]
+            search_from=(ALL,VIDS,IMAGES)[search_from_index]
             index+=1
     else:
-        search_from=ALL_img
+        search_from=ALL
 
     by_index=False
     if index<limit:
@@ -286,9 +291,10 @@ async def upload(client,message,content):
             'Upload is not supported, PIL library not found.')
         return
     
-    result = await process_on_command_upload(client,message,content)
-    await client.message_create(message.channel,result)
-    
+    with client.keep_typing(message.channel):
+        result = await process_on_command_upload(client,message,content)
+        await client.message_create(message.channel,result)
+
 async def process_on_command_upload(client,message,content):
     tags=[x.lower() for x in re.findall(r'\S+',content) if not is_mention(x)]
 
@@ -363,4 +369,64 @@ async def process_on_command_upload(client,message,content):
     image_details(path)
     
     return 'Done Masuta~!'
+
+def tandom_with_tag(tag):
+    results = []
+    for image in ALL:
+        if tag in image:
+            results.append(image)
+    
+    if results:
+        result = choose(results)
+    else:
+        result = None
+    
+    return result
+
+@IMAGE_COMMANDS.from_class        
+class pat:
+    async def command(client, message):
+        image = tandom_with_tag(IMAGE_TAG_PAT)
         
+        if image is None:
+            await client.message_create(message.channel, 'No patting image is added :\'C')
+        else:
+            with client.keep_typing(message.channel):
+                with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
+                    await client.message_create(message.channel, file=file)
+    
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        
+        embed = Embed('pat',(
+            'Pat pat pat pat!\n'
+            f'Usage : `{prefix}pat`'
+            ), color=IMAGE_COLOR)
+        
+        await client.message_create(message.channel, embed=embed)
+
+@IMAGE_COMMANDS.from_class
+class hug:
+    async def command(client, message):
+        image = tandom_with_tag(IMAGE_TAG_HUG)
+        
+        if image is None:
+            await client.message_create(message.channel, 'No hugging image is added :\'C')
+        else:
+            with client.keep_typing(message.channel):
+                with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
+                    await client.message_create(message.channel, file=file)
+    
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        
+        embed = Embed('hug',(
+            'Huh.. Huggu? HUGG YOUUU!!!\n'
+            f'Usage : `{prefix}hug`'
+            ), color=IMAGE_COLOR)
+        
+        await client.message_create(message.channel, embed=embed)

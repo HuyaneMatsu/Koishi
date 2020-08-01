@@ -5,7 +5,7 @@ from random import random
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, \
     titledstr, multidict_titled, random_id, WebhookType, sleep, chunkify, ICON_TYPE_NONE, Webhook, KOKORO
 from hata.backend.hdrs import AUTHORIZATION
-from hata.ext.commands import Command, ChooseMenu, checks, Pagination
+from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag
 from hata.discord.others import Discord_hdrs
 from hata.discord.http import API_ENDPOINT, CONTENT_TYPE
 from hata.discord.parsers import PARSERS
@@ -223,7 +223,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
 
 @TEST_COMMANDS
-async def test_webhook_response_with_url(client, message, url:'rest'):
+async def test_webhook_response_with_url(client, message, url):
     """
     Creates a message with a webhook for checking whether avatar is included.
     """
@@ -267,7 +267,7 @@ async def test_webhook_response_with_url(client, message, url:'rest'):
     await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
 
 @TEST_COMMANDS
-async def test_webhook_response_avatar_url(client, message, avatar_url:'rest'):
+async def test_webhook_response_avatar_url(client, message, avatar_url):
     """
     Creates a message with a webhook for checking whether avatar is included. Please include avatr url, hehe.
     """
@@ -321,7 +321,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url:'rest'):
     await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
 
 @TEST_COMMANDS
-async def test_webhook_response_avatar_url_nowait(client, message, avatar_url:'rest'):
+async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
     """
     Creates a message with a webhook for checking whether avatar is included. Please include avatr url, hehe.
     """
@@ -521,7 +521,32 @@ async def test_receive_voice_repeat(client, message, target: User = None):
     await sleep(30.0, KOKORO)
     audio_stream.stop()
     
+@TEST_COMMANDS
+async def test_raise(client, message):
+    """
+    Just raises an error.
+    """
+    raise ValueError('umm?')
 
+@TEST_COMMANDS
+async def test_multytype_annotation(client, message, value:('channel', 'role') = None):
+    """
+    Tries to parse role and channel at the same time, lets go boiz!
+    """
+    await client.message_create(message.channel, repr(value))
 
+@TEST_COMMANDS
+async def test_message_converter(client, message, value:Converter('message',
+        flags=ConverterFlag.message_default.update_by_keys(everywhere=True), default=None)):
+    """
+    Tries to parse the message from the content of the message.
+    """
+    await client.message_create(message.channel, repr(value))
 
+@TEST_COMMANDS
+async def test_invite_converter(client, message, value:Converter('invite', default=None)):
+    """
+    Tries to parse an invite from the content of the message.
+    """
+    await client.message_create(message.channel, repr(value))
 

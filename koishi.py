@@ -200,15 +200,27 @@ async def help_description(client,message):
             page.append(category_name)
             page_line_count+=1
         
-        for command_name in command_names:
+        command_name_index = 0
+        command_name_limit = len(command_names)
+        while True:
+            command_name = command_names[command_name_index]
+            command_name_index +=1
+            
             page.append(command_name)
             page_line_count+=1
             
             if page_line_count<20:
-                continue
-                
+                if command_name_index == command_name_limit:
+                    break
+                else:
+                    continue
+            
             pages.append('\n'.join(page))
             page.clear()
+            if command_name_index == command_name_limit:
+                page_line_count = 0
+                break
+            
             page.append(category_name)
             page_line_count=1
             continue
@@ -333,6 +345,9 @@ class reload:
                 await EXTENSION_LOADER.reload(name)
             except BaseException as err:
                 result = repr(err)
+                if len(result) > 2000:
+                    result = result[-2000:]
+                
                 break
                 
             result = 'success'
@@ -530,7 +545,7 @@ async def role_giver(client, message):
         if joined_at is None:
             return
         
-        if datetime.now() - joined_at < MINIMAL_JOINED_BEFORE:
+        if datetime.utcnow() - joined_at < MINIMAL_JOINED_BEFORE:
             return
         
         await client.user_role_add(user, EVERYNYAN_ROLE)

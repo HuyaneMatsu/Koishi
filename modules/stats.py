@@ -1,0 +1,440 @@
+# -*- coding: utf-8 -*-
+import os, sys
+IS_PYPY = (sys.implementation.name == 'pypy')
+
+if IS_PYPY:
+    from gc import get_stats as get_gc_stats
+
+try:
+    import psutil
+except ModuleNotFoundError:
+    psutil = None
+
+from datetime import datetime
+from threading import enumerate as list_threads, _MainThread as MainThreadType
+
+from hata import eventlist, EventThread, KOKORO, ExecutorThread, chunkify, Embed, Color, elapsed_time, Future, sleep
+from hata.discord.player import AudioPlayer
+from hata.discord.reader import AudioReader
+from hata.ext.commands import Command, checks, Pagination
+
+from models import DB_ENGINE
+
+STAT_COMMANDS = eventlist(type_=Command, category='STATS')
+STAT_COLOR = Color.from_rgb(61, 255, 249)
+
+def setup(lib):
+    category = Koishi.command_processer.get_category('STATS')
+    if (category is None):
+        Koishi.command_processer.create_category('STATS', checks=[checks.owner_only()])
+    
+    Koishi.commands.extend(STAT_COMMANDS)
+
+def teardown(lib):
+    Koishi.commands.unextend(STAT_COMMANDS)
+
+@STAT_COMMANDS.from_class
+class threads:
+    async def command(client, message):
+        thread_count_by_type = {}
+        thread_count = 0
+        
+        for thread in list_threads():
+            thread_count +=1
+            thread_type = thread.__class__
+            thread_count_by_type[thread_type] = thread_count_by_type.get(thread_type,0)+1
+        
+        description = []
+        
+        main_thread_count = thread_count_by_type.pop(MainThreadType, 0)
+        event_thread_count = thread_count_by_type.pop(EventThread, 0)
+        
+        event_loop_executor_count = 0
+        
+        add_space = False
+        
+        if main_thread_count or event_thread_count:
+            add_space = True
+            description.append('**Main threads**:\n')
+            
+            if main_thread_count:
+                description.append('Main threads: ')
+                description.append(repr(main_thread_count))
+                description.append('\n')
+            
+            if event_thread_count:
+                description.append('Event threads: ')
+                description.append(repr(event_thread_count))
+                description.append('\n')
+                
+                for thread in list_threads():
+                    if type(thread) is EventThread:
+                        event_loop_executor_count += thread.used_executor_count + thread.free_executor_count
+            
+            description.append(
+                f'--------------------\n'
+                f'Total: {main_thread_count+event_thread_count}'
+                    )
+        
+        
+        executor_thread_count = thread_count_by_type.pop(ExecutorThread, 0)
+        if executor_thread_count:
+            if add_space:
+                description.append('\n\n')
+            else:
+                add_space = True
+            
+            other_executors = executor_thread_count
+            
+            description.append('**Executors:**\n')
+            
+            if event_loop_executor_count:
+                other_executors -=event_loop_executor_count
+                description.append('Event thread executors: ')
+                description.append(repr(event_loop_executor_count))
+                description.append('\n')
+            
+            if DB_ENGINE.uses_single_worker:
+                other_executors -=1
+                description.append('Database engine worker: 1\n')
+            
+            if other_executors>0:
+                description.append('Other executors: ')
+                description.append(repr(other_executors))
+                description.append('\n')
+            
+            description.append(
+                f'--------------------\n'
+                f'Total: {executor_thread_count}'
+                    )
+        
+        
+        audio_player_thread_count = thread_count_by_type.pop(AudioPlayer, 0)
+        audio_reader_thread_count = thread_count_by_type.pop(AudioReader, 0)
+        
+        if audio_player_thread_count or audio_reader_thread_count:
+            if add_space:
+                description.append('\n\n')
+            else:
+                add_space = True
+            
+            description.append('**Voice threads**:\n')
+            if audio_player_thread_count:
+                description.append('Audio players: ')
+                description.append(repr(audio_player_thread_count))
+                description.append('\n')
+            
+            if audio_reader_thread_count:
+                description.append('Audio readers: ')
+                description.append(repr(audio_reader_thread_count))
+                description.append('\n')
+            
+            description.append('--------------------\nTotal: ')
+            description.append(repr(audio_player_thread_count+audio_reader_thread_count))
+        
+        if thread_count_by_type:
+            if add_space:
+                description.append('\n\n')
+            else:
+                add_space = True
+            
+            description.append('**Other thread types**:\n')
+            
+            thread_count_by_type = sorted(thread_count_by_type.items(), key=lambda item:item[1])
+            
+            total_leftover = 0
+            for item in thread_count_by_type:
+                total_leftover +=item[1]
+            
+            displayed_thread_types_count = 0
+            non_displayed_thread_count = total_leftover
+            
+            while True:
+                if non_displayed_thread_count == 0:
+                    break
+                
+                if displayed_thread_types_count == 10:
+                    description.append('Other: ')
+                    description.append(repr(non_displayed_thread_count))
+                    description.append('\n')
+                    break
+                
+                type_, count = thread_count_by_type.pop()
+                non_displayed_thread_count-=count
+                
+                thread_type_name = type_.__name__
+                if len(thread_type_name) > 32:
+                    thread_type_name = thread_type_name[:32]+'...'
+                
+                description.append(thread_type_name)
+                description.append(': ')
+                description.append(repr(count))
+                description.append('\n')
+            
+            description.append('--------------------\nTotal: ')
+            description.append(repr(total_leftover))
+        
+        if add_space:
+            description.append('\n\n**--------------------**\n')
+        
+        description.append('**Total**: ')
+        description.append(repr(thread_count))
+        
+        embed = Embed('Threads', ''.join(description), color=STAT_COLOR)
+        
+        await client.message_create(message.channel, embed=embed)
+    
+    async def descyrption(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        
+        embed = Embed('threads',(
+            'Just shows how my threads are doing.\n'
+            f'Usage: `{prefix}threads`'
+            ), color=STAT_COLOR).add_footer(
+                'Owner only!')
+        
+        await client.message_create(message.channel, embed=embed)
+
+if IS_PYPY:
+    @STAT_COMMANDS.from_class
+    class gc_stats:
+        async def command(client, message):
+            stats = get_gc_stats()
+            
+            embed = Embed(None,
+                '**Total memory consumed:**\n'
+                f'GC used: {stats.total_gc_memory} (peak: {stats.peak_memory})\n'
+                f'In arenas: {stats.total_arena_memory}\n'
+                f'Rawmalloced: {stats.total_rawmalloced_memory}\n'
+                f'Nursery: {stats.nursery_size}\n'
+                f'Jit backend used: {stats.jit_backend_used}\n'
+                '----------------------------\n'
+                f'Total: {stats.memory_used_sum}\n'
+                '\n'
+                f'**Total memory allocated:**\n'
+                f'GC allocated: {stats.total_allocated_memory} (peak: {stats.peak_allocated_memory})\n'
+                f'In arenas: {stats.peak_arena_memory}\n'
+                f'Rawmalloced: {stats.peak_rawmalloced_memory}\n'
+                f'Nursery: {stats.nursery_size}\n'
+                f'Jit backend allocated: {stats.jit_backend_allocated}\n'
+                '----------------------------\n'
+                f'Total: {stats.memory_allocated_sum}\n'
+                '\n'
+                f'Total time spent in GC: {stats.total_gc_time/1000.0:.3f}',
+                  color=STAT_COLOR)
+            
+            await client.message_create(message.channel, embed=embed)
+    
+    aliases = ['gc', 'gc-info',]
+    
+    async def descyrption(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        
+        embed = Embed('gc-stats',(
+            'Garbage collector info to check memory usage.\n'
+            f'Usage: `{prefix}gc-stats`'
+            ), color=STAT_COLOR).add_footer(
+                'Owner only!')
+        
+        await client.message_create(message.channel, embed=embed)
+
+if (psutil is not None) and (sys.platform == 'linux'):
+    def get_cpu_frquence_range():
+        
+        cpu_frequence = psutil.cpu_freq()
+        CPU_MIN_FREQUENCE = cpu_frequence.min
+        CPU_MAX_FREQUENCE = cpu_frequence.max
+        
+        import subprocess
+        
+        for line in subprocess.check_output('lscpu', shell=False).splitlines():
+            if line.startswith(b'CPU min MHz:'):
+                CPU_MIN_FREQUENCE = float(line[len(b'CPU min MHz:'):].strip())
+                continue
+            
+            if line.startswith(b'CPU max MHz:'):
+                CPU_MAX_FREQUENCE = float(line[len(b'CPU max MHz:'):].strip())
+                continue
+        
+        return CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE
+    
+    CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE = get_cpu_frquence_range()
+    del get_cpu_frquence_range
+    
+    PROCESS_PID = os.getpid()
+    PROCESS = psutil.Process(PROCESS_PID)
+    
+    class CpuUsage(object):
+        
+        __slots__ = ('average_cpu_frequence', 'cpu_percent',)
+        
+        waiter = None
+        
+        async def __new__(cls):
+            waiter = cls.waiter
+            if waiter is None:
+                average_cpu_frequence = psutil.cpu_freq().current
+                PROCESS.cpu_percent()
+                cls.waiter = waiter = Future(KOKORO)
+                await sleep(1.0, KOKORO)
+                cpu_percent = PROCESS.cpu_percent()
+                cpu_frequence = psutil.cpu_freq()
+                average_cpu_frequence = (average_cpu_frequence + cpu_frequence.current) / 2.0
+                
+                result = object.__new__(cls)
+                result.cpu_percent = cpu_percent
+                result.average_cpu_frequence = average_cpu_frequence
+                waiter.set_result(result)
+                cls.waiter = None
+            else:
+                result = await waiter
+            
+            return result
+        
+        @property
+        def cpu_percent_with_max_frequence(self):
+            return (self.average_cpu_frequence / CPU_MAX_FREQUENCE * self.cpu_percent)
+        
+        @property
+        def cpu_percent_total(self):
+            return self.cpu_percent_with_max_frequence / psutil.cpu_count(logical=False)
+    
+    @STAT_COMMANDS.from_class
+    class system_stats:
+        aliases = ['system', 'process', 'process-stats']
+        
+        async def command(client, message):
+            await client.typing(message.channel)
+            
+            process_cpu_usage = await CpuUsage()
+            
+            description = []
+            
+            description.append('**System info**:\n')
+            description.append('Platform: ')
+            description.append(sys.platform)
+            description.append('\n')
+            description.append('Cores: ')
+            description.append(repr(psutil.cpu_count(logical=False)))
+            description.append('\n')
+            description.append('Threads: ')
+            description.append(repr(psutil.cpu_count(logical=True)))
+            description.append('\n')
+            
+            description.append('Max CPU requence: ')
+            description.append(CPU_MAX_FREQUENCE.__format__('.2f'))
+            description.append('MHz\n\n')
+            
+            description.append('**Memory and swap**:\n')
+            memory = psutil.virtual_memory()
+            description.append('Memory total: ')
+            description.append((memory.total / (1 << 20)).__format__('.2f'))
+            description.append('MB\n')
+            description.append('Memory used: ')
+            description.append((memory.used / (1 << 20)).__format__('.2f'))
+            description.append('MB\n')
+            description.append('Memory percent: ')
+            description.append(memory.percent.__format__('.2f'))
+            description.append('%\n')
+            
+            swap = psutil.swap_memory()
+            description.append('Swap total: ')
+            description.append((swap.total / (1 << 20)).__format__('.2f'))
+            description.append('MB\n')
+            description.append('Swap used: ')
+            description.append((swap.used / (1 << 20)).__format__('.2f'))
+            description.append('MB\n')
+            description.append('Swap percent: ')
+            description.append(swap.percent.__format__('.2f'))
+            description.append('%\n')
+            
+            description.append('\n')
+            description.append('**Process info**:\n')
+            description.append('Name: ')
+            description.append(PROCESS.name())
+            description.append('\n')
+            description.append('PID: ')
+            description.append(repr(PROCESS_PID))
+            description.append('\n')
+            
+            description.append('File descriptor count: ')
+            description.append(repr(PROCESS.num_fds()))
+            description.append('\n')
+            description.append('Thread count: ')
+            description.append(repr(PROCESS.num_threads()))
+            description.append('\n')
+            description.append('Created: ')
+            description.append(elapsed_time(datetime.fromtimestamp(PROCESS.create_time())))
+            description.append(' ago\n\n')
+            
+            description.append('**CPU times:**\n')
+            cpu_times = PROCESS.cpu_times()
+            cpu_time_user = cpu_times.user
+            cpu_time_total = cpu_time_user
+            description.append('User: ')
+            description.append(cpu_time_user.__format__('.2f'))
+            description.append('\n')
+            cpu_time_system = cpu_times.system
+            cpu_time_total +=cpu_time_system
+            description.append('System: ')
+            description.append(cpu_time_system.__format__('.2f'))
+            description.append('\n')
+            cpu_times = PROCESS.cpu_times()
+            cpu_time_children_user = cpu_times.children_user
+            cpu_time_total += cpu_time_children_user
+            description.append('Children User: ')
+            description.append(cpu_time_children_user.__format__('.2f'))
+            description.append('\n')
+            cpu_time_children_system = cpu_times.children_system
+            cpu_time_total +=cpu_time_children_system
+            description.append('Children system: ')
+            description.append(cpu_time_children_system.__format__('.2f'))
+            description.append('\n')
+            cputime_io_wait = cpu_times.iowait
+            cpu_time_total +=cputime_io_wait
+            description.append('IO wait: ')
+            description.append(cputime_io_wait.__format__('.2f'))
+            description.append('\n')
+            description.append('--------------------\n')
+            description.append('Total: ')
+            description.append(cpu_time_total.__format__('.2f'))
+            description.append('\n\n')
+            
+            description.append('**CPU usage:**\n')
+            
+            description.append('CPU usage percent: ')
+            description.append(process_cpu_usage.cpu_percent.__format__('.2f'))
+            description.append('%\n')
+            
+            description.append('CPU usage with max frequence: ')
+            description.append(process_cpu_usage.cpu_percent_with_max_frequence.__format__('.2f'))
+            description.append('%\n')
+            
+            description.append(f'CPU usage over all cores: ')
+            description.append(process_cpu_usage.cpu_percent_total.__format__('.2f'))
+            description.append('%\n\n')
+            
+            description.append('**RAM usage**:\n')
+            description.append('Total: ')
+            description.append((PROCESS.memory_info().rss / (1 << 20)).__format__('.2f'))
+            description.append('MB\n')
+            description.append('Percent: ')
+            description.append(PROCESS.memory_percent().__format__('.2f'))
+            description.append('%\n')
+            
+            embed = Embed('System and Process stats:', ''.join(description), color=STAT_COLOR)
+            
+            await client.message_create(message.channel, embed=embed)
+    
+    async def descyrption(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        
+        embed = Embed('system-stats',(
+            'Shows my system\s and processe\'s stats.\n'
+            f'Usage: `{prefix}system-stats`'
+            ), color=STAT_COLOR).add_footer(
+                'Owner only!')
+        
+        await client.message_create(message.channel, embed=embed)
+
+

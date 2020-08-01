@@ -582,7 +582,6 @@ async def permission_ow_create(client,channel,target,allow,deny,):
 async def permission_ow_delete(client,channel,overwrite,):
     channel_id=channel.id
     overwrite_id=overwrite.target.id
-    print(overwrite, channel, overwrite.id, overwrite.target)
     return await bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/channels/{channel_id}/permissions/{overwrite_id}',
         )

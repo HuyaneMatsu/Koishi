@@ -84,21 +84,20 @@ async def help(client, message, content):
                 pass
             else:
                 if await command.run_checks(client, message):
-                    run_invalid=False
                     description=command.description
                     if description is None:
                         await client.message_create(message.channel,
-                            embed=Embed(f'No help is provided for this command',color=FLAN_HELP_COLOR))
+                            embed = Embed(f'No help is provided for this command', color=FLAN_HELP_COLOR))
                         return
                     
                     await description(client, message)
                     return
             
-            embed=Embed(f'Invalid command: {content}',(
+            embed = Embed(f'Invalid command: {content}',(
                 f'Please try using `{FLAN_PREFIX}help` to list the available commands '
                 'for you\n'
                 'Take care!'
-                ),color=FLAN_HELP_COLOR)
+                ), color=FLAN_HELP_COLOR)
             message = await client.message_create(message.channel,embed=embed)
             await sleep(30.,client.loop)
             await client.message_delete(message)
@@ -127,7 +126,7 @@ async def help(client, message, content):
     limit=len(pages)
     index=0
     while index<limit:
-        embed=Embed('Commands:',color=FLAN_HELP_COLOR,description=pages[index])
+        embed = Embed('Commands:', color=FLAN_HELP_COLOR,description=pages[index])
         index+=1
         embed.add_field(f'Use `{FLAN_PREFIX}help <command>` for more information.',f'page {index}/{limit}')
         result.append(embed)
@@ -139,7 +138,7 @@ async def help(client, message, content):
 @Flan.commands
 async def invalid_command(client,message,command,content):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed(
+    embed = Embed(
         f'Invalid command `{command}`',
         f'try using: `{prefix}help`',
         color=FLAN_HELP_COLOR,
@@ -159,10 +158,10 @@ class ping:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('ping',(
+        embed = Embed('ping',(
             'Ping - Pong?\n'
             f'Usage: `{prefix}ping`'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
 @Flan.commands.from_class
@@ -182,14 +181,14 @@ class sync_avatar:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('sync_avatar',(
+        embed = Embed('sync_avatar',(
             'Hello there Esuto!\n'
             'This is a specific command for You, to sync the bot\'s avatar with '
             'the application\'s. I know, You might struggle with updating the '
             'bot\'s avatar the other way, so I made a command for it.\n'
             'Have a nice day!\n'
             f'Usage: `{prefix}sync_avatar`'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
 @Flan.commands.from_class
@@ -297,7 +296,7 @@ class massadd:
             await Card.dump_cards(client.loop)
         
         message = await client.message_create(message.channel,
-            embed=Embed(None,f'modified: {modified_}\nnew: {new_}',color=CHESUTO_COLOR))
+            embed = Embed(None,f'modified: {modified_}\nnew: {new_}', color=CHESUTO_COLOR))
         await sleep(30.,client.loop)
         await client.message_delete(message)
         return
@@ -306,12 +305,12 @@ class massadd:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('massadd',(
+        embed = Embed('massadd',(
             'Loads the last 100 message at the channel, and check each of them '
             'searching for card definitions. If it finds one, then updates it, if '
             'already added, or creates a new one.\n'
             f'Usage: `{prefix}massadd`'
-            ),color=FLAN_HELP_COLOR).add_footer(
+            ), color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
 
@@ -338,10 +337,10 @@ class showcard:
                 await client.message_create(message.channel,embed=embed,file=file)
     
     async def description(client,message):
-        embed=Embed('showcard',(
+        embed = Embed('showcard',(
             'Shows the specified card by it\'s name.\n'
             f'Usage: `{FLAN_PREFIX}showcard *name*`'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
 
@@ -380,7 +379,7 @@ class showcards:
             break
         
         if result is None:
-            pages=[Embed(f'No search results for : `{content}`',color=CHESUTO_COLOR)]
+            pages=[Embed(f'No search results for : `{content}`', color=CHESUTO_COLOR)]
         else:
             pages=CardPaginator(title,result)
         
@@ -388,10 +387,10 @@ class showcards:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('showcards',(
+        embed = Embed('showcards',(
             'Searches all the cards, which contain the specified string.\n'
             f'Usage: `{prefix}showcards *name*`'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
 class CardPaginator(object):
@@ -460,7 +459,7 @@ class CardPaginator(object):
             page_parts.append('\n\n')
             continue
         
-        return Embed(self.title,''.join(page_parts),color=CHESUTO_COLOR).add_footer(
+        return Embed(self.title,''.join(page_parts), color=CHESUTO_COLOR).add_footer(
             f'Page: {page_index+1}/{len(self.page_information)}. Results {start+1}-{end}/{len(self.collected)}')
 
 ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
@@ -533,7 +532,7 @@ class add_image:
             
             if (content is not None):
                 message = await client.message_create(message.channel,
-                    embed=Embed(description=content,color=CHESUTO_COLOR))
+                    embed = Embed(description=content, color=CHESUTO_COLOR))
                 
                 for emoji in ADD_IMAGE_EMOJIS:
                     await client.reaction_add(message,emoji)
@@ -563,7 +562,7 @@ class add_image:
             break
         
         message = await client.message_create(message.channel,
-            embed=Embed(description=content,color=CHESUTO_COLOR))
+            embed = Embed(description=content, color=CHESUTO_COLOR))
         
         await sleep(30.)
         await client.message_delete(message)
@@ -573,11 +572,11 @@ class add_image:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('add_image',(
+        embed = Embed('add_image',(
             'Adds or updates an image of a card.\n'
             f'Usage: `{prefix}add_image <card name>`\n'
             'Also include an image as attachment.'
-            ),color=FLAN_HELP_COLOR).add_footer(
+            ), color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
 
@@ -591,7 +590,7 @@ class checklist:
             if rarity is None:
                 if len(content)>50:
                     content = content[:50]+'...'
-                result.append(Embed(f'{content!r} is not a rarity',color=CHESUTO_COLOR))
+                result.append(Embed(f'{content!r} is not a rarity', color=CHESUTO_COLOR))
                 
             else:
                 filtered=[]
@@ -635,7 +634,7 @@ class checklist:
                         
                         length=length+name_ln+1
                         if length>2000:
-                            result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                            result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
                             length=name_ln
                             parts.clear()
                             parts.append(name)
@@ -646,11 +645,11 @@ class checklist:
                         continue
                     
                     if parts:
-                        result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                        result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
                     
                     parts=None
                 else:
-                    result.append(Embed(title,color=CHESUTO_COLOR))
+                    result.append(Embed(title, color=CHESUTO_COLOR))
                 
         else:
             filtered=tuple([] for x in range(len(Rarity.INSTANCES)))
@@ -675,7 +674,7 @@ class checklist:
                     continue
                 
                 if length>1500:
-                    result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                    result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
                     length=0
                     parts.clear()
                 else:
@@ -711,7 +710,7 @@ class checklist:
                     
                     length = length+1+name_ln
                     if length>2000:
-                        result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                        result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
                         length=len(rarity_name)+name_ln
                         parts.clear()
                         parts.append(rarity_name)
@@ -723,7 +722,7 @@ class checklist:
                     continue
                 
             if parts:
-                result.append(Embed(title,''.join(parts),color=CHESUTO_COLOR))
+                result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
             
             parts=None
         
@@ -744,11 +743,11 @@ class checklist:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('checklist',(
+        embed = Embed('checklist',(
             'Lists the cards of the given rarity, which have images added to them.\n'
             'If no rarity is provided, I will list all the cards with images.\n'
             f'Usage: `{prefix}checklist *rarity*`\n'
-            ),color=FLAN_HELP_COLOR).add_footer(
+            ), color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
     
@@ -789,10 +788,10 @@ class dump_all_card:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('dump-all-card',(
+        embed = Embed('dump-all-card',(
             'Lists all the cards to this channel.\n'
             f'Usage: `{prefix}dump-all-card`\n'
-            ),color=FLAN_HELP_COLOR).add_footer(
+            ), color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
 
@@ -809,7 +808,7 @@ class remove_card:
             await client.message_create(message.channel,embed = Embed(None,'*Nothing found.*',CHESUTO_COLOR))
             return
         
-        message = await client.message_create(message.channel,embed=Embed(
+        message = await client.message_create(message.channel,embed = Embed(
             None, f'Are you sure, to remove {card.name!r}?', CHESUTO_COLOR,))
         
         for emoji in REMOVE_CARD_EMOJIS:
@@ -832,7 +831,7 @@ class remove_card:
             content = f'{card.name!r} successfully removed.'
         
         message = await client.message_create(message.channel,
-            embed=Embed(description=content,color=CHESUTO_COLOR))
+            embed = Embed(description=content, color=CHESUTO_COLOR))
         
         await sleep(30.)
         await client.message_delete(message)
@@ -842,10 +841,10 @@ class remove_card:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('remove-card',(
+        embed = Embed('remove-card',(
             'Removes the specific card\n'
             f'Usage: `{prefix}remove-card <name>`\n'
-            ),color=FLAN_HELP_COLOR).add_footer(
+            ), color=FLAN_HELP_COLOR).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
         await client.message_create(message.channel,embed=embed)
 
@@ -1039,17 +1038,17 @@ class join:
                 
             break
         
-        message = await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+        await client.message_create(message.channel, text)
+
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('join',(
+        embed = Embed('join',(
             'Joins me to your voice channel.\n'
             f'Usage: `{prefix}join *n%*`\n'
             'You can also define how loud my volume will be.'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
 @Flan.commands.from_class
@@ -1062,16 +1061,16 @@ class leave:
             await voice_client.disconnect()
             text = f'{client.name_at(message.channel.guild)} out.'
         
-        message = await client.message_create(message.channel,text)
-        await sleep(30.,client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+        await client.message_create(message.channel,text)
+
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('leave',(
+        embed = Embed('leave',(
             'Leaves me from the voice channel..\n'
             f'Usage: `{prefix}leave`'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel,embed=embed)
 
 def get_bgm(content):
@@ -1169,30 +1168,28 @@ async def play_command(client, message, content):
         text = f'{text} {bgm.display_name!r}!'
         break
     
-    message = await client.message_create(message.channel,text)
-    await sleep(30.,client.loop)
-    await client.message_delete(message, reason='Voice messages expire after 30s.')
+    await client.message_create(message.channel,text)
 
 async def play_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('play',(
+    embed = Embed('play',(
         'Plays the given chesuto bgm.\n'
         f'Usage: `{prefix}play <name>`\n'
         '\n'
         'Note that the given name can be also given as the position of the track.'
-        ),color=FLAN_HELP_COLOR)
+        ), color=FLAN_HELP_COLOR)
     await client.message_create(message.channel,embed=embed)
 
-Flan.commands(play_command, name='play', description=play_description)
+Flan.commands(play_command, name='play', checks=[checks.guild_only()], description=play_description)
 
 async def bgminfo_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('bgminfo',(
+    embed = Embed('bgminfo',(
         'Shows up the given bgm\'s description..\n'
         f'Usage: `{prefix}bgminfo <name>`\n'
         '\n'
         'Note that the given name can be also given as the position of the track.'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
     await client.message_create(message.channel, embed=embed)
 
 async def bgminfo_command(client, message, content):
@@ -1258,13 +1255,15 @@ class queue:
             break
         
         await Pagination(client, message.channel, pages)
+
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('queue',(
+        embed = Embed('queue',(
             'Shows the audio player queue of the current guild.\n'
             f'Usage: `{prefix}queue`'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 
@@ -1304,7 +1303,7 @@ class bgms:
         limit=len(chunks)
         index=0
         while index<limit:
-            embed=Embed('Chesuto BGMs:',color=FLAN_HELP_COLOR, description=chunks[index])
+            embed = Embed('Chesuto BGMs:', color=FLAN_HELP_COLOR, description=chunks[index])
             index+=1
             embed.add_footer(f'page {index}/{limit}')
             embeds.append(embed)
@@ -1313,10 +1312,10 @@ class bgms:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('bgms',(
+        embed = Embed('bgms',(
             'Lists the chesuto bgms.\n'
             f'Usage: `{prefix}bgms`'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 @Flan.commands.from_class
@@ -1348,16 +1347,16 @@ class volume:
             break
         
         await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('bgms',(
+        embed = Embed('volume',(
             'Sets my volume to the given percentage.\n'
-            f'Usage: `{prefix}voice *n%*`\n'
+            f'Usage: `{prefix}volume *n%*`\n'
             'If no volume is passed, then I will tell my current volume.'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 @Flan.commands.from_class
@@ -1377,16 +1376,16 @@ class skip:
             break
         
         await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('skip',(
+        embed = Embed('skip',(
             'Skips the audio at the given index.\n'
             f'Usage: `{prefix}skip *index*`\n'
             'If not giving any index or giving it as `0`, will skip the currently playing audio.'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 @Flan.commands.from_class
@@ -1408,15 +1407,15 @@ class pause:
             break
         
         await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('pause',(
+        embed = Embed('pause',(
             'Pauses the currently playing audio.\n'
             f'Usage: `{prefix}pause`\n'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 @Flan.commands.from_class
@@ -1438,15 +1437,15 @@ class resume:
             break
         
         await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('resume',(
+        embed = Embed('resume',(
             'Resumes the currently playing audio.\n'
             f'Usage: `{prefix}resume`\n'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 @Flan.commands.from_class
@@ -1460,15 +1459,15 @@ class loop:
             text = 'Started looping over the actual audio.'
         
         await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('loop',(
+        embed = Embed('loop',(
             'Loops over the currently playing audio.\n'
             f'Usage: `{prefix}loop`\n'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 @Flan.commands.from_class
@@ -1479,18 +1478,18 @@ class loop_stop:
             text = 'There is no voice client at your guild.'
         else:
             voice_client.call_after = voice_client._play_next
-            text = 'Started looping over the actual audio.'
+            text = 'Stopped looping over the actual audio(s).'
         
         await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('loop-stop',(
+        embed = Embed('loop-stop',(
             'Stops looping over the actual audio or over the queue.\n'
             f'Usage: `{prefix}loop-stop`\n'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 @Flan.commands.from_class
@@ -1504,15 +1503,15 @@ class loop_all:
             text = 'Started looping over the audio queue.'
         
         await client.message_create(message.channel, text)
-        await sleep(30., client.loop)
-        await client.message_delete(message, reason='Voice messages expire after 30s.')
+    
+    checks = [checks.guild_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('loop-all',(
+        embed = Embed('loop-all',(
             'Starts to loop over the queue.\n'
             f'Usage: `{prefix}loop-all`\n'
-            ),color=FLAN_HELP_COLOR)
+            ), color=FLAN_HELP_COLOR)
         await client.message_create(message.channel, embed=embed)
 
 del Cooldown

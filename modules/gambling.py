@@ -10,7 +10,7 @@ from models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from tools import CooldownHandler
 
 
-GAMBLING_COMMANDS=eventlist(type_=Command)
+GAMBLING_COMMANDS = eventlist(type_=Command)
 
 def setup(lib):
     Koishi.commands.extend(GAMBLING_COMMANDS)

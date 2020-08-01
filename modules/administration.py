@@ -20,13 +20,15 @@ def teardown(lib):
 
 @ADMINISTRATION_COMMANDS.from_class
 class clear:
-    async def command(client, message, limit : Converter('int', default_code='1',), reason : Converter('rest', default_code='f"{message.author.full_name} asked for it"')):
+    async def command(client, message, limit : Converter('int', default=1,), reason):
+        if not reason:
+            reason = f'{message.author.full_name} asked for it'
         if limit>0:
             await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
     
     category = 'ADMINISTRATION'
     checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
-
+    
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
         embed=Embed('clear',(
@@ -284,7 +286,7 @@ class reaction_clear:
 
 @ADMINISTRATION_COMMANDS.from_class
 class show_help_for:
-    async def command(client,message,user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='None'), rest):
+    async def command(client,message,user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), rest):
         if user is None:
             await client.message_create(message.channel,
                 'Please define a user as well.')
@@ -331,14 +333,14 @@ class _role_emoji_emoji_checker(object):
 
 @ADMINISTRATION_COMMANDS.from_class
 class emoji_role:
-    async def command(client, message, emoji:Emoji, roles:Converter('role', amount=(0,0))):
+    async def command(client, message, emoji:Emoji, *roles:'role'):
         permissions =message.channel.cached_permissions_for(client)
         if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
             await client.message_create(message.channel,
                 embed=Embed(description='I have no permissions to edit emojis, or to add reactions.'))
             return
         
-        roles.sort()
+        roles = sorted(roles)
         roles_=emoji.roles
         
         embed=Embed().add_author(emoji.url,emoji.name)
@@ -452,7 +454,14 @@ class invites:
 
 @ADMINISTRATION_COMMANDS.from_class
 class logs:
-    async def command(client,message,guild:Converter('guild'),user:User=None,event_name:str=''):
+    async def command(client, message, guild:'guild'=None, user:User=None, event_name:str=''):
+        if guild is None:
+            guild = message.guild
+            if guild is None:
+                await client.message_create(message.channel,
+                    'Cannot default to current guild. The command was not called from a guild.')
+                return
+        
         if not guild.cached_permissions_for(client).can_view_audit_logs:
             await client.message_create(message.channel,
                 'I have no permissions at the guild, to request audit logs.')

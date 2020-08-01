@@ -144,7 +144,7 @@ BS_GAMES={}
 BS_REQUESTERS=set()
 BS_REQUESTS={}
 
-async def battle_manager(client,message,target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='None')):
+async def battle_manager(client,message,target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
     text=''
     while True:
         if target is None:
