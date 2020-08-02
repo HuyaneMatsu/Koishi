@@ -550,3 +550,104 @@ async def test_invite_converter(client, message, value:Converter('invite', defau
     """
     await client.message_create(message.channel, repr(value))
 
+@TEST_COMMANDS(separator='|')
+async def test_command_argument_single(client, message, *words):
+    """
+    Separates words by `|' character.
+    """
+    result = ', '.join(words)
+    if len(result) > 2000:
+        result = result[:2000]
+    
+    await client.message_create(message.channel, result)
+
+@TEST_COMMANDS(separator=('[', ']'))
+async def test_command_argument_area(client, message, *words):
+    """
+    Separates words by space, but between `[]` count as one.
+    """
+    result = ', '.join(words)
+    if len(result) > 2000:
+        result = result[:2000]
+    
+    await client.message_create(message.channel, result)
+
+@TEST_COMMANDS(separator=('*', '*'))
+async def test_command_argument_inter(client, message, *words):
+    """
+    Separates words by space, but the ones between `*` character are one.
+    """
+    result = ', '.join(words)
+    if len(result) > 2000:
+        result = result[:2000]
+    
+    await client.message_create(message.channel, result)
+
+def rule_upper(name):
+    if name is None:
+        return 'UNCATEGORIZED'
+    
+    return name.upper()
+
+def rule_capu(name):
+    if name is None:
+        return 'Uncategorized'
+    
+    return name.capitalize()
+
+def rule_lower(name):
+    if name is None:
+        return 'uncategorized'
+    
+    return name.lower()
+
+@TEST_COMMANDS
+async def set_upper_category_names(client, message):
+    """
+    Sets the category names of the client to upper case.
+    """
+    client.command_processer.category_name_rule = rule_upper
+    await client.message_create(message.channel, 'nya!')
+
+@TEST_COMMANDS
+async def set_upper_command_names(client, message):
+    """
+    Sets the command names of the client to upper case.
+    """
+    client.command_processer.command_name_rule = rule_upper
+    await client.message_create(message.channel, 'nya!')
+
+@TEST_COMMANDS
+async def set_capu_category_names(client, message):
+    """
+    Sets the category names of the client to capitalized form.
+    """
+    client.command_processer.category_name_rule = rule_capu
+    await client.message_create(message.channel, 'nya!')
+
+@TEST_COMMANDS
+async def set_capu_command_names(client, message):
+    """
+    Sets the command names of the client to capitalized form.
+    """
+    client.command_processer.command_name_rule = rule_capu
+    await client.message_create(message.channel, 'nya!')
+
+@TEST_COMMANDS
+async def set_lower_category_names(client, message):
+    """
+    Sets the category names of the client to lower case.
+    """
+    client.command_processer.category_name_rule = rule_lower
+    await client.message_create(message.channel, 'nya!')
+
+@TEST_COMMANDS
+async def set_lower_command_names(client, message):
+    """
+    Sets the command names of the client to lower case.
+    """
+    client.command_processer.command_name_rule = rule_lower
+    await client.message_create(message.channel, 'nya!')
+
+
+

@@ -114,7 +114,7 @@ async def help(client, message, content):
             pages.append('\n'.join(part))
             part.clear()
             index=0
-        part.append(f'**>>** {command.name}')
+        part.append(f'**>>** {command.display_name}')
         index+=1
     
     pages.append('\n'.join(part))

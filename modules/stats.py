@@ -321,7 +321,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
             description.append(repr(psutil.cpu_count(logical=True)))
             description.append('\n')
             
-            description.append('Max CPU requence: ')
+            description.append('Max CPU frequence: ')
             description.append(CPU_MAX_FREQUENCE.__format__('.2f'))
             description.append('MHz\n\n')
             

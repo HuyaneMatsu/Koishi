@@ -36,3 +36,5 @@ HATA_PATH       = # path to hata if Any (str or None)
 - [PyNaCl](https://pypi.org/project/PyNaCl/) (for voice support)
 - `youtube_dl` (from youtube)
 
+#### More requirements
+ - [psutil](https://pypi.org/project/psutil/)

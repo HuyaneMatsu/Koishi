@@ -14,7 +14,8 @@ from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, C
 from shared import KOISHI_PREFIX
 from interpreter import Interpreter
 
-setup_ext_commands(Koishi,KOISHI_PREFIX)
+
+setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name = 'UNCATEGORIZED',)
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
@@ -39,8 +40,7 @@ class once_on_ready(object):
         
         print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
 
-Koishi.command_processer.default_category_name='UNCATEGORIZED'
-Koishi.command_processer.create_category('TEST COMMANDS',checks=[checks.owner_only()])
+Koishi.command_processer.create_category('TEST COMMANDS', checks=[checks.owner_only()])
 
 _KOISHI_NOU_RP=re.compile(r'n+\s*o+\s*u+',re.I)
 _KOISHI_OWO_RP=re.compile('(owo|uwu|0w0)',re.I)
@@ -178,11 +178,11 @@ async def help_description(client,message):
             command_names = []
             for command in category.commands:
                 if await command.run_checks(client,message):
-                    command_names.append(command.name)
+                    command_names.append(command.display_name)
             
             # filter out empty categories
             if command_names:
-                by_categories.append((f'**{category.name}**',command_names),)
+                by_categories.append((f'**{category.display_name}**',command_names),)
     
     pages = []
     page = []
@@ -431,7 +431,7 @@ async def aliases(client, message, name:str, target_client:Converter('user',flag
             title = f'There are no alises provided for command: {name!r}.'
             description = None
         else:
-            title = f'Aliases for: {command.name!r}:'
+            title = f'Aliases for: {command.display_name!r}:'
             description = '\n'.join(aliases)
     
     await client.message_create(message.channel,embed=Embed(title,description,color=KOISHI_HELP_COLOR))
