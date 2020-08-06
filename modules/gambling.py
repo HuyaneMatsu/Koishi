@@ -294,7 +294,7 @@ async def heartevent_description(client,message):
         f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
         f'Min `amount`: {EVENT_HEART_MIN_AMOUNT}\n'
         f'Max `amount`: {EVENT_HEART_MAX_AMOUNT}\n'
-        'If `user_imit` is not included, the event will have no user limit.'
+        'If `user_limit` is not included, the event will have no user limit.'
             ),color=GAMBLING_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
@@ -485,7 +485,7 @@ async def dailyevent_description(client,message):
         f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
         f'Min `amount`: {EVENT_DAILY_MIN_AMOUNT}\n'
         f'Max `amount`: {EVENT_DAILY_MAX_AMOUNT}\n'
-        'If `user_imit` is not included, the event will have no user limit.'
+        'If `user_limit` is not included, the event will have no user limit.'
             ),color=GAMBLING_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
