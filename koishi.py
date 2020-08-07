@@ -86,7 +86,7 @@ async def default_event(client,message):
     
     await client.message_create(message.channel,text)
 
-DUNGEON=Guild.precreate(388267636661682178)
+DUNGEON = Guild.precreate(388267636661682178)
 
 @Koishi.commands(checks=[checks.is_guild(DUNGEON)])
 async def command_error(client, message, command, content, exception):
@@ -445,18 +445,20 @@ async def execute_description(client,message):
         '*not code*\n'
         '\n'
         f'{prefix}execute\n'
-        '#code goes here\n'
-        '#code goes here\n'
+        '# code goes here\n'
+        '# code goes here\n'
         '\n'
         f'{prefix}execute\n'
         '```\n'
-        '#code goes here\n'
-        '#code goes here\n'
+        '# code goes here\n'
+        '# code goes here\n'
         '```\n'
-        '*not code*'
+        '*not code*\n'
+        '\n'
+        '... and many more ways.'
             ),color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel,embed=embed)
+    await client.message_create(message.channel, embed=embed)
 
 Koishi.commands(Interpreter(locals().copy()),name='execute',description=execute_description,category='UTILITY',checks=[checks.owner_only()])
 

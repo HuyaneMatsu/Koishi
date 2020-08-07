@@ -176,7 +176,7 @@ PYTHON_RP=re.compile('(?:python|py|)[ \t]*',re.I)
 ENDER_1_RP=re.compile('[^\\\]`')
 ENDER_3_RP=re.compile('[^\\\]```')
 
-def parse_content(content1,content2):
+def parse_code_content(content1, content2, no_code_output=None):
     #if second line is set we ignore the 1st
     line_break_index=content2.find('\n')
     if line_break_index==-1:
@@ -196,7 +196,7 @@ def parse_content(content1,content2):
                 else:
                     lines=[center]
         else:
-            return 'No code to execute.',True
+            return no_code_output,True
     else:
         lines=content2.splitlines()
         del lines[0]
@@ -246,11 +246,11 @@ def parse_content(content1,content2):
             continue
 
         del lines[index]
-
-    if not lines:
-        return 'No code to execute.',True
     
-    return lines,False
+    if not lines:
+        return no_code_output,True
+    
+    return '\n'.join(lines), False
 
 class Interpreter(object):
     __slots__=('inputter', 'locals', 'lock', 'printer',)
@@ -279,15 +279,15 @@ class Interpreter(object):
         self.inputter.set(client,message.channel)
         
         async with self.lock:
-            result,except_=parse_content(content,message.content)
-            if except_:
-                await client.message_create(message.channel,embed=Embed('Parsing error',result))
+            result, is_exception = parse_code_content(content, message.content, 'No code to execute.')
+            if is_exception:
+                await client.message_create(message.channel, embed=Embed('Parsing error',result))
                 return
-    
+            
             printer=self.printer
-    
+            
             try:
-                code_object=compile('\n'.join(result),'online_interpreter','exec')
+                code_object=compile(result,'online_interpreter','exec')
             except SyntaxError as err:
                 printer.write(f'{err.__class__.__name__} at line {err.lineno}: {err.msg}\n{result[err.lineno-1]}\n{" "*(err.offset-1)}^')
             else:
@@ -304,7 +304,7 @@ class Interpreter(object):
                 amount=len(pages)
                 for index,embed in enumerate(pages,1):
                     embed.add_footer(f'page {index}/{amount}')
-    
+            
             else:
                 pages=[Embed('No output')]
             await Pagination(client,message.channel,pages,240.)

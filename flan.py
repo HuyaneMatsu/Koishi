@@ -931,7 +931,7 @@ class Track(object):
         except KeyError:
             return
         
-        self.description = message.description
+        self.description = message.content
     
     def _relative_index(self):
         bot = 0
