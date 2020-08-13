@@ -1689,7 +1689,23 @@ async def discovery_validate_term(client, term):
         params={'term': term})
     
     return data['valid']
-    
+
+async def applications_detectable(client):
+    data = await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/applications/detectable',
+            )
+
+async def welcome_screen_get(client, guild_id):
+    data = await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/guilds/{guild_id}/welcome-screen',
+            )
+
+async def eula_get(client):
+    eula_id = 542074049984200704
+    data = await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/store/eulas/{eula_id}',
+            )
+
 @RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
     '''
@@ -3375,3 +3391,34 @@ async def ratelimit_test0076(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'ratelimit_test0076') as RLT:
         await discovery_validate_term(client, 'gaming')
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0077(client, message):
+    """
+    Requests the detectable applications.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0077') as RLT:
+        await applications_detectable(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0078(client, message):
+    """
+    Requests an eula.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0078') as RLT:
+        await eula_get(client)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test79(client, message):
+    """
+    Requests the guild's welcoem screen.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0079') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await welcome_screen_get(client, guild.id)

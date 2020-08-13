@@ -462,8 +462,8 @@ async def execute_description(client,message):
 
 Koishi.commands(Interpreter(locals().copy()),name='execute',description=execute_description,category='UTILITY',checks=[checks.owner_only()])
 
-EVERYNYAN_ROLE = Role.precreate(445189164703678464)
 WELCOME_CHANNEL = ChannelText.precreate(445191707491958784)
+EVERYNYAN_ROLE = Role.precreate(445189164703678464)
 
 @Koishi.commands.from_class
 class rules:
@@ -521,45 +521,56 @@ class rules:
         
         await client.message_create(message.channel, embed=embed)
 
-NYA_PATTERN = re.compile('nya+',re.I)
-MINIMAL_JOINED_BEFORE = timedelta(minutes=10)
+PATTERN_ROLE_RELATION = [
+    (re.compile('nya+', re.I), EVERYNYAN_ROLE, timedelta(minutes=10), True),
+    (re.compile('[il] *meow+', re.I), Role.precreate(538397994421190657), timedelta(hours=1), True),
+    (re.compile('[il] *not? *meow+', re.I), Role.precreate(538397994421190657), timedelta(), False),
+    (re.compile('nekogirl', re.I), Role.precreate(403586901803794432), timedelta(days=365), True),
+        ]
 
 async def role_giver(client, message):
-    if (NYA_PATTERN.fullmatch(message.content) is None):
-        return
-    
-    user = message.author
-    if user.has_role(EVERYNYAN_ROLE):
-        return
-    
-    permissions = message.channel.cached_permissions_for(client)
-    if (not permissions.can_manage_roles) or (not client.has_higher_role_than(EVERYNYAN_ROLE)):
-        if permissions.can_send_messages:
-            content = 'My permissions are broken, cannot provide the specified role.'
-        else:
-            return
-    else:
+    for pattern, role, delta, add in PATTERN_ROLE_RELATION:
+        
+        if (pattern.fullmatch(message.content) is None):
+            continue
+        
+        user = message.author
+        if add == user.has_role(role):
+            break
+        
         guild_profile = user.guild_profiles.get(DUNGEON)
         if guild_profile is None:
-            return
+            break
         
         joined_at = guild_profile.joined_at
         if joined_at is None:
-            return
+            break
         
-        if datetime.utcnow() - joined_at < MINIMAL_JOINED_BEFORE:
-            return
+        if datetime.utcnow() - joined_at < delta:
+            break
         
-        await client.user_role_add(user, EVERYNYAN_ROLE)
-        
-        if permissions.can_send_messages:
-            content = f'You now have {EVERYNYAN_ROLE.mention} role.'
+        permissions = message.channel.cached_permissions_for(client)
+        if (not permissions.can_manage_roles) or (not client.has_higher_role_than(role)):
+            if permissions.can_send_messages:
+                content = 'My permissions are broken, cannot provide the specified role.'
+            else:
+                break
         else:
-            return
-    
-    message = await client.message_create(message.channel, content, allowed_mentions=None)
-    await sleep(30.0)
-    await client.message_delete(message)
+            await (Client.user_role_add if add else Client.user_role_delete)(client, user, role)
+            
+            if permissions.can_send_messages:
+                if add:
+                    content = f'You now have {role.mention} role.'
+                else:
+                    content = f'You have {role.mention} removed.'
+            
+            else:
+                break
+        
+        message = await client.message_create(message.channel, content, allowed_mentions=None)
+        await sleep(30.0)
+        await client.message_delete(message)
+        break
 
 Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
 

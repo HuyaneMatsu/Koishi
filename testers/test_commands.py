@@ -2,13 +2,18 @@ import json
 from time import perf_counter
 from random import random
 
-from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, \
-    titledstr, multidict_titled, random_id, WebhookType, sleep, chunkify, ICON_TYPE_NONE, Webhook, KOKORO
+from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
+    titledstr, multidict_titled, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
+    IconSlot, CHANNELS, ChannelText
+
+from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
 from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag
 from hata.discord.others import Discord_hdrs
 from hata.discord.http import API_ENDPOINT, CONTENT_TYPE
 from hata.discord.parsers import PARSERS
+from hata.ext.prettyprint import pchunkify
+from hata.discord.emoji import PartialEmoji
 
 TEST_COMMANDS=eventlist(type_=Command, category='TEST COMMANDS',)
 
@@ -648,6 +653,144 @@ async def set_lower_command_names(client, message):
     """
     client.command_processer.command_name_rule = rule_lower
     await client.message_create(message.channel, 'nya!')
+
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_get_integrations(client, message):
+    """
+    Gets the integrations of the guild.
+    
+    Guild only!
+    """
+    # make sure
+    guild = message.guild
+    if guild is None:
+        return
+    
+    integrations = await client.integration_get_all(guild, include_applications=True)
+    pages = [Embed(description=chunk) for chunk in pchunkify(integrations)]
+    await Pagination(client, message.channel, pages,)
+
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_get_webhooks(client, message):
+    """
+    Gets the webhooks of the guild.
+    
+    Guild only!
+    """
+    # make sure
+    guild = message.guild
+    if guild is None:
+        return
+    
+    webhooks = await client.webhook_get_guild(guild,)
+    pages = [Embed(description=chunk) for chunk in pchunkify(webhooks)]
+    await Pagination(client, message.channel, pages,)
+
+@TEST_COMMANDS
+async def test_channel_pretty_render(client, message):
+    """
+    Renders the local channels.
+    """
+    channel = message.channel
+    guild = channel.guild
+    if guild is None:
+        to_render = channel
+    else:
+        to_render = guild.channels
+    
+    pages = [Embed(description=chunk) for chunk in pchunkify(to_render)]
+    await Pagination(client, message.channel, pages,)
+
+# DiscordException Forbidden (403), code=20001: Bots cannot use this endpoint
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_start_channel_thread(client, message):
+    """
+    Does a post request to the channel's threads.
+    """
+    data = await client.http.channel_thread_start(message.channel.id, None)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    await Pagination(client,message.channel, pages)
+
+# DiscordException Not Found (404): 404: Not Found
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_get_channel_thread_users(client, message):
+    """
+    Gets the channel's threads' users probably, no clue.
+    """
+    data = await client.http.thread_users(message.channel.id)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    await Pagination(client,message.channel, pages)
+
+# DiscordException Not Found (404): 404: Not Found
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_add_channel_thread_user(client, message):
+    """
+    Adds you to the channel's threads.
+    """
+    data = await client.http.thread_user_add(message.channel.id, message.author.id)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    await Pagination(client,message.channel, pages)
+
+# DiscordException Not Found (404): 404: Not Found
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_delete_channel_thread_user(client, message):
+    """
+    Deletes you to the channel's threads.
+    """
+    data = await client.http.thread_user_delete(message.channel.id, message.author.id)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    await Pagination(client,message.channel, pages)
+
+@TEST_COMMANDS
+async def test_get_applications_detectable(client, message):
+    """
+    Requests the detectable applications.
+    """
+    data = await client.http.applications_detectable()
+    
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    await Pagination(client,message.channel, pages)
+
+@TEST_COMMANDS
+async def test_get_eula(client, message):
+    """
+    Gets an eula.
+    """
+    data = await client.http.eula_get(542074049984200704)
+    
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    await Pagination(client, message.channel, pages)
+
+@TEST_COMMANDS
+async def test_render_application(client, message):
+    """
+    Renders the client's application.
+    """
+    pages = [Embed(description=chunk) for chunk in pchunkify(client.application)]
+    await Pagination(client,message.channel, pages)
+
+@TEST_COMMANDS
+async def test_render_applications(client, message):
+    """
+    Renders the detectable applications.
+    """
+    applications = await client.applications_detectable()
+    pages = [Embed(description=chunk) for chunk in pchunkify(applications)]
+    await Pagination(client, message.channel, pages)
+
+@TEST_COMMANDS(checks=[checks.guild_only()])
+async def test_get_welcome_screen(client, message):
+    """
+    Gets an eula.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    data = await client.http.welcome_screen_get(guild.id)
+    
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    await Pagination(client, message.channel, pages)
 
 
 

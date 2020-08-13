@@ -1,8 +1,7 @@
 import re
-from weakref import WeakKeyDictionary
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
-    Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS
+    Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS, WeakKeyDictionary
 from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination
 from hata.discord.others import ID_RP
 

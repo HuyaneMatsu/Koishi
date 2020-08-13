@@ -14,24 +14,24 @@ del hata_path
 from hata import Client, start_clients, ActivityGame, ActivityWatching
 from hata.ext.extension_loader import EXTENSION_LOADER
 
-Koishi=Client(pers_data.KOISHI_TOKEN,
-    secret=pers_data.KOISHI_SECRET,
-    client_id=pers_data.KOISHI_ID,
-    activity=ActivityGame.create(name='with Satori'),
-    shard_count=2,
+Koishi = Client(pers_data.KOISHI_TOKEN,
+    secret = pers_data.KOISHI_SECRET,
+    client_id = pers_data.KOISHI_ID,
+    activity = ActivityGame.create(name='with Satori'),
+    shard_count = 2,
         )
 
-Satori=Client(pers_data.SATORI_TOKEN,
-    secret=pers_data.SATORI_SECRET,
-    client_id=pers_data.SATORI_ID,
-    activity=ActivityGame.create(name='with Koishi'),
-    status='dnd',
+Satori = Client(pers_data.SATORI_TOKEN,
+    secret = pers_data.SATORI_SECRET,
+    client_id = pers_data.SATORI_ID,
+    activity = ActivityGame.create(name='with Koishi'),
+    status = 'dnd',
         )
 
-Flan=Client(pers_data.FLAN_TOKEN,
-    client_id=pers_data.FLAN_ID,
-    activity=ActivityWatching.create(name='Chesuto development'),
-    status='idle',
+Flan = Client(pers_data.FLAN_TOKEN,
+    client_id = pers_data.FLAN_ID,
+    activity = ActivityWatching.create(name='Chesuto development'),
+    status = 'idle',
         )
 
 EXTENSION_LOADER.add_default_variables(Koishi=Koishi, Satori=Satori, Flan=Flan)

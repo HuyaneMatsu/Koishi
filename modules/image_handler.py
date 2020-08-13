@@ -163,21 +163,21 @@ def process_on_command_image(content):
             index+=1
     else:
         search_from=ALL
-
+    
     by_index=False
     if index<limit:
         value=content[index]
         if value=='index':
             if count:
                 return '"count" and "index" cant be used at the same time BAKA!'
-
+            
             by_index=True
             
             index+=1
             
             if index==limit:
                 return '"index" needs after it a number!'
-
+            
             value=content[index]
             if value=='hex':
                 index+=1
@@ -204,7 +204,7 @@ def process_on_command_image(content):
         if count:
             return str(len(search_from))
         elif by_index:
-            if index<len(search_from):
+            if number<len(search_from):
                 return search_from[number]
             else:
                 return 'I could not find any image with that criteria.'

@@ -89,86 +89,99 @@ class dispatch_tester:
             return
         
         result=[f'Message {message.id} was edited']
-
+        
         channel=message.channel
         result.append(f'At channel : {channel:d} {channel.id}')
         guild=channel.guild
         if guild is not None:
             result.append(f'At guild : {guild.name} {guild.id}')
-
-        for key,value in old.items():
-            if key in ('pinned','activity_party_id','everyone_mention'): 
-                result.append(f'{key} changed: {value!r} -> {getattr(message,key)!r}')
-                continue
-            if key in ('edited',):
-                if value is None:
-                    result.append(f'{key} changed: None -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
-                else:
-                    result.append(f'{key} changed: {value:%Y.%m.%d-%H:%M:%S} -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
-                continue
-            if key in ('application','activity','attachments','embeds'):
-                result.append(f'{key} changed:')
-                if value is None:
-                    result.append('From None')
-                else:
-                    result.extend(pretty_print(value))
-                value=getattr(message,key)
-                if value is None:
-                    result.append('To None')
-                else:
-                    result.extend(pretty_print(value))
-                continue
-            if key in ('content',):
-                result.append(f'{key} changed from:')
-                content=value
-                break_=False
-                while True:
-                    content_ln=len(content)
-                    result.append(f'{key}: (len={content_ln})')
-                    if content_ln>500:
-                        content=content[:500].replace('`','\\`')
-                        result.append(f'--------------------\n{content}\n... +{content_ln-500} more\n--------------------')
-                    else:
-                        content=content.replace('`','\\`')
-                        result.append(f'--------------------\n{content}\n--------------------')
-                    if break_:
-                        break
-                    break_=True
-                    content=getattr(message,key)
-                    result.append('To:')
-                continue
-            if key in ('user_mentions','role_mentions','cross_mentions'):
-                removed, added = listdifference(value,getattr(message,key))
-                if removed:
-                    result.append(f'{key} removed : {len(removed)}')
-                    for obj in removed:
-                        result.append(f'- {obj.name} {obj.id}')
-                        
-                if added:
-                    result.append(f'{key} added : {len(added)}')
-                    for obj in added:
-                        result.append(f'- {obj.name} {obj.id}')
-                    
-                continue
+        
+        if old is None:
+            result.append('The message is uncached, cannot provide changes!')
+            content = message.content
+            content_ln=len(content)
+            result.append(f'content: (len={content_ln})')
+            if content_ln>500:
+                content=content[:500].replace('`','\\`')
+                result.append(f'--------------------\n{content}\n... +{content_ln-500} more\n--------------------')
+            else:
+                content=content.replace('`','\\`')
+                result.append(f'--------------------\n{content}\n--------------------')
             
-            if key in ('flags',):
-                old=list(value)
-                old.sort()
-                value=getattr(message,key)
-                new=list(value)
-                new.sort()
-                removed,added=listdifference(old,new)
-                if removed:
-                    result.append(f'{key} removed : {len(removed)}')
-                    for name in removed:
-                        result.append(f'- {name}')
+        else:
+            for key,value in old.items():
+                if key in ('pinned','activity_party_id','everyone_mention'):
+                    result.append(f'{key} changed: {value!r} -> {getattr(message,key)!r}')
+                    continue
+                if key in ('edited',):
+                    if value is None:
+                        result.append(f'{key} changed: None -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
+                    else:
+                        result.append(f'{key} changed: {value:%Y.%m.%d-%H:%M:%S} -> {getattr(message,key):%Y.%m.%d-%H:%M:%S}')
+                    continue
+                if key in ('application','activity','attachments','embeds'):
+                    result.append(f'{key} changed:')
+                    if value is None:
+                        result.append('From None')
+                    else:
+                        result.extend(pretty_print(value))
+                    value=getattr(message,key)
+                    if value is None:
+                        result.append('To None')
+                    else:
+                        result.extend(pretty_print(value))
+                    continue
+                if key in ('content',):
+                    result.append(f'{key} changed from:')
+                    content=value
+                    break_=False
+                    while True:
+                        content_ln=len(content)
+                        result.append(f'{key}: (len={content_ln})')
+                        if content_ln>500:
+                            content=content[:500].replace('`','\\`')
+                            result.append(f'--------------------\n{content}\n... +{content_ln-500} more\n--------------------')
+                        else:
+                            content=content.replace('`','\\`')
+                            result.append(f'--------------------\n{content}\n--------------------')
+                        if break_:
+                            break
+                        break_=True
+                        content=getattr(message,key)
+                        result.append('To:')
+                    continue
+                if key in ('user_mentions','role_mentions','cross_mentions'):
+                    removed, added = listdifference(value,getattr(message,key))
+                    if removed:
+                        result.append(f'{key} removed : {len(removed)}')
+                        for obj in removed:
+                            result.append(f'- {obj.name} {obj.id}')
+                            
+                    if added:
+                        result.append(f'{key} added : {len(added)}')
+                        for obj in added:
+                            result.append(f'- {obj.name} {obj.id}')
                         
-                if added:
-                    result.append(f'{key} added : {len(added)}')
-                    for name in added:
-                        result.append(f'- {name}')
-                    
-                continue
+                    continue
+                
+                if key in ('flags',):
+                    old=list(value)
+                    old.sort()
+                    value=getattr(message,key)
+                    new=list(value)
+                    new.sort()
+                    removed,added=listdifference(old,new)
+                    if removed:
+                        result.append(f'{key} removed : {len(removed)}')
+                        for name in removed:
+                            result.append(f'- {name}')
+                            
+                    if added:
+                        result.append(f'{key} added : {len(added)}')
+                        for name in added:
+                            result.append(f'- {name}')
+                        
+                    continue
 
         text=cchunkify(result)
         pages=[Embed(description=chunk) for chunk in text]

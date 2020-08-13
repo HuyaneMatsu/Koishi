@@ -656,8 +656,8 @@ class guild_icon:
         
         await client.message_create(message.channel,embed=embed)
     
-    name='guild-icon'
     category = 'UTILITY'
+    checks = [checks.guild_only()]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -668,4 +668,38 @@ class guild_icon:
                 'Guild only!')
         await client.message_create(message.channel,embed=embed)
 
-
+@UTILITY_COMMANDS.from_class
+class welcome_screen:
+    async def command(client, message):
+        guild = message.guild
+        if guild is None:
+            return
+        
+        welscome_screen = await client.welcome_screen_get(guild)
+        if welscome_screen is None:
+            embed = Embed(description=f'**{guild.name}** *has no welcome screen enabled*.')
+        else:
+            embed = Embed(f'Welcome to **{guild.name}**', f'{welscome_screen.description}\n\n*TOP THINGS TO DO HERE*')
+            
+            icon_url = guild.icon_url
+            if (icon_url is not None):
+                embed.add_thumbnail(icon_url)
+            
+            for welcome_channel in welscome_screen.welcome_channels:
+                embed.add_field(f'{welcome_channel.emoji:e} {welcome_channel.description}',
+                    f'#{welcome_channel.channel:d}')
+        
+        await client.message_create(message.channel, embed=embed)
+    
+    aliases = ['guild_welcome_screen']
+    category = 'UTILITY'
+    checks = [checks.guild_only()]
+    
+    async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed=Embed('welcome-screen',(
+            'Displays the guild\'s welcome screen'
+            f'Usage: `{prefix}welcome-screen`\n'
+                ),color=UTILITY_COLOR).add_footer(
+                'Guild only!')
+        await client.message_create(message.channel,embed=embed)
