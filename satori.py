@@ -451,8 +451,6 @@ class auto_pyramid:
         for client_, count in zip(cycle(available_clients), chain(range(1,size),range(size,0,-1))):
             await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
     
-    name = 'auto-pyramid'
-    aliases = ['auto_pyramid']
     checks = [checks.guild_only()]
     
     async def description(client, message):
@@ -473,7 +471,7 @@ class auto_pyramid_u:
         while True:
             if size < 2:
                 error_message = 'That is pretty small. OOF'
-            elif size > 10:
+            elif size > 23:
                 error_message = 'That is HUGE! Thats what she said...'
             else:
                 break
@@ -527,8 +525,6 @@ class auto_pyramid_u:
         for user, count in zip(selected_users, chain(range(1,size),range(size,0,-1))):
             await client.webhook_send(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)), name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
     
-    name = 'auto-pyramid-u'
-    aliases = ['auto_pyramid_u']
     checks = [checks.guild_only()]
     
     async def description(client, message):
@@ -542,4 +538,3 @@ class auto_pyramid_u:
     
     async def parser_failure_handler(client, message, command, content, args):
         await command.description(client, message)
-        
