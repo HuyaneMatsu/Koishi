@@ -2,11 +2,14 @@ import re
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
     Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS, WeakKeyDictionary
-from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination
+from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination, ConverterFlag
 from hata.discord.others import ID_RP
 
 from shared import permission_check_handler
 from models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
+
+ROLE_CONVERTER = Converter('role', flags=ConverterFlag.role_default.update_by_keys(everywhere=True))
+MESSAGE_CONVERTER = Converter('message', flags=ConverterFlag.message_default.update_by_keys(everywhere=True))
 
 def setup(lib):
     for client in CLIENTS:
@@ -62,65 +65,37 @@ class BehaviourFlag(int):
 
 AUTO_REACT_ROLE_REQUIRED_PERMISSIONS = Permission().update_by_keys(manage_messages = True, manage_roles = True)
 
-async def create_auto_react_role(client, message, channel:Converter('channel', default_code='message.channel'), target_id:str = None):
+async def create_auto_react_role(client, message, target_message: MESSAGE_CONVERTER):
+    channel = target_message.channel
     guild = channel.guild
+    if guild is None:
+        await client.message_create(message.channel, 'The given message do not belongs to a guild.')
+        return
+    
+    if (message.guild is not message.guild) and (not guild.permissions_for(message.author).can_administrator):
+        await client.mesage_create(message.channel, 'You do not have enough permission at the respective guild.')
+        return
+    
     if not guild.cached_permissions_for(client) >= AUTO_REACT_ROLE_REQUIRED_PERMISSIONS:
-        await client.mesage_create(message.channel, 'I do not have enough permission at this channel.')
+        await client.mesage_create(message.channel, 'I do not have enough permission at the respective guild.')
         return
     
     try:
         await client.message_delete(message)
     except BaseException as err:
-        if isinstance(err,ConnectionError):
+        if isinstance(err, ConnectionError):
             # no internet
             return
         
         if isinstance(err,DiscordException):
             if err.code in (
-                    ERROR_CODES.unknown_channel, #message's channel deleted
+                    ERROR_CODES.unknown_channel, # message's channel deleted
                     ERROR_CODES.invalid_access, # client removed
                         ):
                 return
         
-        await client.events.error(client,f'create_auto_react_role',err)
+        await client.events.error(client, f'create_auto_react_role', err)
         return
-    
-    if (target_id is None) or ID_RP.fullmatch(target_id) is None:
-        await client.message_create(message.channel, 'Did not find any message with the specified ID.')
-        return
-    
-    target_id=int(target_id)
-    try:
-        target_message = MESSAGES[target_id]
-    except KeyError:
-        if (not message.channel.cached_permissions_for(client).can_read_message_history):
-            await client.message_create(message.channel, 'Did not find any message with the specified, make sure, I have the permissions to request it.')
-            return
-        
-        try:
-            target_message = await client.message_get(channel, target_id)
-        except BaseException as err:
-            if isinstance(err,ConnectionError):
-                return
-            
-            if isinstance(err,DiscordException):
-                if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.unknown_channel,
-                        ERROR_CODES.invalid_permissions,
-                            ):
-                    return
-                
-                if err.code == ERROR_CODES.unknown_message:
-                    await client.message_create(message.channel, 'Did not find any message with the specified ID.')
-                    return
-            
-            await client.events.error(client,'create',err)
-            return
-    else:
-        if target_message.channel is not channel:
-            await client.message_create(message.channel, 'The message id beongs to a message of a different channel.')
-            return
     
     await AutoReactRoleGUI(client, target_message, message.channel, guild)
 
@@ -204,9 +179,11 @@ CHANGE_STATE_ACTUAL  = 2
 CHANGE_STATE_REMOVED = 3
 
 class AutoReactRoleChange(object):
-    __slots__ = ('added', 'removed', 'actual', 'old_behaviour', 'new_behaviour')
+    __slots__ = ('added', 'removed', 'actual', 'old_behaviour', 'new_behaviour', 'guild',)
     
-    def __init__(self, manager):
+    def __init__(self, manager, guild):
+        self.guild = guild
+        
         if manager is None:
             actual = None
         else:
@@ -365,7 +342,11 @@ class AutoReactRoleChange(object):
             for emoji, role in added:
                 result.append(emoji.as_emoji)
                 result.append(' -> ')
-                result.append(role.mention)
+                if role.guild is self.guild:
+                    result.append(role.mention)
+                else:
+                    result.append('@')
+                    result.append(role.name)
                 result.append('\n')
             add_line = True
         else:
@@ -381,7 +362,12 @@ class AutoReactRoleChange(object):
             for emoji, role in actual:
                 result.append(emoji.as_emoji)
                 result.append(' -> ')
-                result.append(role.mention)
+                if role.guild is self.guild:
+                    result.append(role.mention)
+                else:
+                    result.append('@')
+                    result.append(role.name)
+                
                 result.append('\n')
         
         removed = self.removed
@@ -394,7 +380,11 @@ class AutoReactRoleChange(object):
             for emoji, role in removed:
                 result.append(emoji.as_emoji)
                 result.append(' -> ')
-                result.append(role.mention)
+                if role.guild is self.guild:
+                    result.append(role.mention)
+                else:
+                    result.append('@')
+                    result.append(role.name)
                 result.append('\n')
         
         old_behaviour = self.old_behaviour
@@ -506,7 +496,7 @@ class AutoReactRoleGUI(object):
     __slots__ = ('target_message', 'changes', 'manager', 'message', 'client', 'guild', )
     def render(self):
         message = self.target_message
-        embed=Embed(render_message_content(message), self.changes.render(), color=AUTO_REACT_ROLE_COLOR)
+        embed = Embed(render_message_content(message), self.changes.render(), color=AUTO_REACT_ROLE_COLOR)
         embed.add_author(message.author.avatar_url,message.author.full_name,message.url)
         embed.add_field(AUTO_REACT_ROLE_GUI_EMBED_FIELD_NAME, AUTO_REACT_ROLE_GUI_EMBED_FIELD_VALUE)
         return embed
@@ -516,11 +506,12 @@ class AutoReactRoleGUI(object):
             old_gui = AUTO_REACT_ROLE_GUIS.pop(target_message)
         except KeyError:
             manager = client.events.reaction_add.get_waiter(target_message, AutoReactRoleManager, by_type = True, is_method=True)
-            changes = AutoReactRoleChange(manager)
+            changes = AutoReactRoleChange(manager, channel.guild)
         else:
             await old_gui.cancel()
             manager = old_gui.manager
             changes = old_gui.changes
+            changes.guild = channel.guild
         
         self = object.__new__(cls)
         self.target_message = target_message
@@ -531,7 +522,7 @@ class AutoReactRoleGUI(object):
         self.client = client
         
         try:
-            embed=self.render()
+            embed = self.render()
             if message is None:
                 message = await client.message_create(channel, embed=embed)
             else:
@@ -654,7 +645,7 @@ class AutoReactRoleGUI(object):
         if changes.changed():
             manager = self.manager
             if manager is None:
-                await AutoReactRoleManager(client,self.target_message,self.guild,changes)
+                await AutoReactRoleManager(client, self.target_message, self.guild, changes)
             else:
                 await manager.apply_changes(changes)
         
@@ -696,8 +687,16 @@ class AutoReactRoleGUI(object):
         await manager.destroy()
     
     @ContentParser(is_method=True)
-    async def sub_add(self, client, message, emoji: Emoji, role: Role):
+    async def sub_add(self, client, message, emoji: Emoji, role: ROLE_CONVERTER):
         if not client.can_use_emoji(emoji):
+            return
+        
+        guild = role.guild
+        if guild is None:
+            return
+        
+        if (guild is not self.guild) and ((not guild.permissions_for(message.author).can_administrator) or
+                                          (not guild.cached_permissions_for(client).can_manage_roles)):
             return
         
         try:
@@ -715,7 +714,7 @@ class AutoReactRoleGUI(object):
         await self.delete_message(message)
     
     @ContentParser(is_method=True)
-    async def sub_del(self, client, message, emoji: Emoji = None, role: Role = None):
+    async def sub_del(self, client, message, emoji: Emoji = None, role: ROLE_CONVERTER = None):
         if emoji is None:
             if role is None:
                 return
@@ -972,9 +971,9 @@ class AutoReactRoleManager(object):
                 position = 0
                 for emoji, role in relations.items():
                     data[position:position+8]=emoji.id.to_bytes(8,byteorder='big')
-                    position=position+8
+                    position +=8
                     data[position:position+8]=role.id.to_bytes(8,byteorder='big')
-                    position=position+8
+                    position +=8
                 
                 await connector.execute(AUTO_REACT_ROLE_TABLE.update().values(
                     data  = data,
@@ -1015,7 +1014,10 @@ class AutoReactRoleManager(object):
         except KeyError:
             return
         
-        guild = self.guild
+        guild = role.guild
+        if guild is None:
+            return
+        
         try:
             user_profile = event.user.guild_profiles[guild]
         except KeyError:
@@ -1027,7 +1029,7 @@ class AutoReactRoleManager(object):
         try:
             await client.user_role_add(event.user, role)
         except BaseException as err:
-            if isinstance(err,ConnectionError):
+            if isinstance(err, ConnectionError):
                 return
             
             if isinstance(err,DiscordException):
@@ -1050,7 +1052,10 @@ class AutoReactRoleManager(object):
         except KeyError:
             return
         
-        guild = self.guild
+        guild = role.guild
+        if guild is None:
+            return
+        
         try:
             user_profile = event.user.guild_profiles[guild]
         except KeyError:
@@ -1343,7 +1348,7 @@ async def auto_react_roles_description(client,message):
 AUTO_REACT_ROLE_COMMANDS(create_auto_react_role,
     name    = 'auto-react-role',
     category= 'ADMINISTRATION',
-    description =auto_react_roles_description,
+    description = auto_react_roles_description,
     checks  = [
         checks.guild_only(),
         checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler),
