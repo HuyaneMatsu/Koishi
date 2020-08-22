@@ -3,7 +3,7 @@ import re
 from random import random
 
 from hata import CancelledError, sleep, Task, DiscordException, methodize, ERROR_CODES, BUILTIN_EMOJIS, \
-    EventWaitforBase
+    EventWaitforBase, KOKORO
 from hata.ext.commands import CommandProcesser, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
@@ -88,7 +88,8 @@ class CooldownHandler:
         else:
             if notification.channel is message.channel:
                 try:
-                    await client.message_edit(notification,f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
+                    await client.message_edit(notification,
+                        f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
                 except DiscordException:
                     pass
                 return
@@ -96,16 +97,17 @@ class CooldownHandler:
             waiter.cancel()
 
         try:
-            notification = await client.message_create(message.channel,f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
+            notification = await client.message_create(message.channel,
+                f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
         except DiscordException:
             return
 
-        waiter=Task(self.waiter(client,user_id,notification),client.loop)
+        waiter=Task(self.waiter(client,user_id,notification), KOKORO)
         self.cache[user_id]=(notification,waiter)
 
     async def waiter(self,client,user_id,notification):
         try:
-            await sleep(30.,client.loop)
+            await sleep(30., KOKORO)
         except CancelledError:
             pass
         del self.cache[user_id]
@@ -115,47 +117,46 @@ class CooldownHandler:
             pass
 
 class PAGINATION_5PN(object):
-    LEFT2   = BUILTIN_EMOJIS['rewind']
-    LEFT    = BUILTIN_EMOJIS['arrow_backward']
-    RIGHT   = BUILTIN_EMOJIS['arrow_forward']
-    RIGHT2  = BUILTIN_EMOJIS['fast_forward']
-    RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
-    CANCEL  = BUILTIN_EMOJIS['x']
-    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET,CANCEL)
+    LEFT2 = BUILTIN_EMOJIS['rewind']
+    LEFT  = BUILTIN_EMOJIS['arrow_backward']
+    RIGHT = BUILTIN_EMOJIS['arrow_forward']
+    RIGHT2 = BUILTIN_EMOJIS['fast_forward']
+    RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
+    CANCEL = BUILTIN_EMOJIS['x']
+    EMOJIS = (LEFT2, LEFT, RIGHT, RIGHT2, RESET, CANCEL)
     
-    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages',
-        'task_flag', 'timeouter')
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', 'task_flag', 'timeouter')
 
-    async def __new__(cls,client,channel,pages):
-        self=object.__new__(cls)
-        self.client=client
-        self.channel=channel
-        self.pages=pages
-        self.page=0
-        self.canceller=cls._canceller
-        self.task_flag=GUI_STATE_READY
-        self.timeouter=None
+    async def __new__(cls, client, channel, pages):
+        self = object.__new__(cls)
+        self.client = client
+        self.channel = channel
+        self.pages = pages
+        self.page = 0
+        self.canceller = cls._canceller
+        self.task_flag = GUI_STATE_READY
+        self.timeouter = None
         
         try:
             message = await client.message_create(self.channel,embed=self.pages[0])
         except:
-            self.message=None
+            self.message = None
             raise
         
-        self.message=message
+        self.message = message
 
         if not channel.cached_permissions_for(client).can_add_reactions:
             return self
         
         if len(self.pages)>1:
             for emoji in self.EMOJIS:
-                await client.reaction_add(message,emoji)
+                await client.reaction_add(message, emoji)
         else:
-            await client.reaction_add(message,self.CANCEL)
+            await client.reaction_add(message, self.CANCEL)
         
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
-        self.timeouter=Timeouter(client.loop,self,timeout=300.)
+        self.timeouter = Timeouter(self, timeout=300.)
         return self
     
     async def __call__(self, client, event):
@@ -302,11 +303,11 @@ class PAGINATION_5PN(object):
                     await client.reaction_clear(message)
                 except BaseException as err:
                     
-                    if isinstance(err,ConnectionError):
+                    if isinstance(err, ConnectionError):
                         # no internet
                         return
                     
-                    if isinstance(err,DiscordException):
+                    if isinstance(err, DiscordException):
                         if err.code in (
                                 ERROR_CODES.unknown_channel, # message's channel deleted
                                 ERROR_CODES.invalid_access, # client removed
@@ -315,27 +316,27 @@ class PAGINATION_5PN(object):
                                     ):
                             return
                     
-                    await client.events.error(client,f'{self!r}._canceller',err)
+                    await client.events.error(client,f'{self!r}._canceller', err)
                     return
             return
         
-        timeouter=self.timeouter
-        if timeouter is not None:
+        timeouter = self.timeouter
+        if (timeouter is not None):
             timeouter.cancel()
         #we do nothing
     
     def cancel(self,exception=None):
-        canceller=self.canceller
+        canceller = self.canceller
         if canceller is None:
             return
         
-        self.canceller=None
+        self.canceller = None
         
-        timeouter=self.timeouter
-        if timeouter is not None:
+        timeouter = self.timeouter
+        if (timeouter is not None):
             timeouter.cancel()
         
-        return Task(canceller(self,exception),self.client.loop)
+        return Task(canceller(self,exception), KOKORO)
 
 del CommandProcesser
 del re

@@ -5,18 +5,22 @@ from itertools import cycle, chain
 
 from bs4 import BeautifulSoup
 
-from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType
+from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO
 from hata.discord.others import from_json
 from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu, checks
-
+from hata.ext.patchouli import map_module, MAPPED_OBJECTS, QualPath
 from shared import SATORI_PREFIX
 
-setup_ext_commands(Satori,SATORI_PREFIX)
+setup_ext_commands(Satori, SATORI_PREFIX)
+
+map_module('hata')
 
 SATORI_HELP_COLOR = Color.from_rgb(118, 0, 161)
+WORDMATCH_RP = re.compile('[^a-zA-z0-9]+')
+WIKI_COLOR = Color.from_rgb(48, 217, 255)
 
 @Satori.commands
-async def invalid_command(client,message,command,content):
+async def invalid_command(client, message, command, content):
     guild=message.guild
     if guild is None:
         try:
@@ -41,23 +45,20 @@ async def invalid_command(client,message,command,content):
     
     if (Koishi in guild.clients) and message.channel.cached_permissions_for(Koishi).can_send_messages:
         try:
-            command=Koishi.command_processer.commands[command]
+            command = Koishi.command_processer.commands[command]
         except KeyError:
             pass
         else:
-            if command.category.name=='TOUHOU':
+            if command.category.name=='touhou':
                 await client.typing(message.channel)
-                await sleep(2.0,client.loop)
+                await sleep(2.0, KOKORO)
                 await client.message_create(message.channel,f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
                 await Koishi.typing(message.channel)
-                await sleep((random()*2.)+1.0,client.loop)
+                await sleep((random()*2.)+1.0, KOKORO)
                 await command(Koishi,message,content)
                 return
     
     await client.message_create(message.channel,'I have no idea, hmpff...')
-
-WORDMATCH_RP    = re.compile('[^a-zA-z0-9]+')
-WIKI_COLOR      = Color.from_rgb(48,217,255)
 
 @Satori.commands
 async def wiki(client,message,content):
@@ -210,7 +211,7 @@ async def download_wiki_page(client, title_, url):
                             continue
                         
                         # `[n]`-s are missing, lets put them back
-                        parts=['[',index.__str__(),']']
+                        parts=['[',str(index),']']
                         for index_ in range(index_):
                             parts.append(' ')
                             parts.append(subs[index_].text)
@@ -416,7 +417,7 @@ class auto_pyramid:
         while True:
             if size < 2:
                 error_message = 'That is pretty small. OOF'
-            elif size > 10:
+            elif size > 23:
                 error_message = 'That is HUGE! Thats what she said...'
             else:
                 break
@@ -462,7 +463,7 @@ class auto_pyramid:
                 'Guild only!')
         await client.message_create(message.channel,embed=embed)
     
-    async def parser_failure_handler(client, message, command, conetnt, args):
+    async def parser_failure_handler(client, message, command, content, args):
         await command.description(client, message)
 
 @Satori.commands.from_class
@@ -529,12 +530,89 @@ class auto_pyramid_u:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('execute',(
+        embed = Embed('execute',(
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid-u <emoji> <size>`'
-                ),color=SATORI_HELP_COLOR).add_footer(
+                ), color=SATORI_HELP_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel,embed=embed)
+        
+        await client.message_create(message.channel, embed=embed)
     
     async def parser_failure_handler(client, message, command, content, args):
         await command.description(client, message)
+
+@Satori.commands.from_class
+class reverse:
+    async def command(client, message, content):
+        if content:
+            await client.message_create(message.channel, content[::-1])
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed = Embed('reverse',(
+            'Reverses your message\n'
+            f'Usage: `{prefix}reverses <content>`'
+                ), color=SATORI_HELP_COLOR)
+        
+        await client.message_create(message.channel, embed=embed)
+
+async def docs_selecter(client, channel, message, path):
+    unit = MAPPED_OBJECTS[path]
+    chunks = unit.embed_sized
+    
+    title_parts = []
+    path = unit.path.parent
+    if path:
+        title_parts.append('*')
+        title_parts.append(str(path))
+        title_parts.append('*.')
+    
+    title_parts.append('**')
+    title_parts.append(unit.name)
+    title_parts.append('**')
+    
+    title = ''.join(title_parts).replace('_', '\_')
+    
+    if chunks is None:
+        embeds = [Embed(title, *'The given object has no description included*', color=WIKI_COLOR)]
+    else:
+        embeds = [Embed(title, chunk, color=WIKI_COLOR) for chunk in chunks]
+    
+    await Pagination(client, channel, embeds, message=message)
+
+async def docs_help(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed = Embed('docs',(
+        'Searchers the given term in hata docs.\n'
+        f'Usage: `{prefix}docs <search_for>`'
+            ), color=SATORI_HELP_COLOR)
+    
+    await client.message_create(message.channel, embed=embed)
+
+async def docs(client, message, search_for:str=None):
+    if (search_for is None) or (len(search_for)<4):
+        await docs_help(client, message)
+        return
+    
+    search_for = search_for.split('.')
+    if len(search_for) == 1:
+        search_for = search_for[0]
+        searcher = QualPath.endswith
+    else:
+        searcher = QualPath.endswith_multy
+    
+    results = []
+    for path in MAPPED_OBJECTS:
+        if searcher(path, search_for):
+            results.append(str(path))
+    
+    if not results:
+        embeds = [Embed(f'No search result for: `{search_for}`', color=WIKI_COLOR)]
+        await Pagination(client, message.channel, embeds)
+        return
+    
+    embed = Embed(title=f'Search results for `{search_for}`', color=WIKI_COLOR)
+    await ChooseMenu(client, message.channel, results, docs_selecter, embed=embed, prefix='@')
+
+Satori.commands(docs, description=docs_help, aliases=['d'])
+

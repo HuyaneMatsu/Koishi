@@ -14,8 +14,21 @@ from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, C
 from shared import KOISHI_PREFIX
 from interpreter import Interpreter
 
+DUNGEON = Guild.precreate(388267636661682178)
 
-setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name = 'UNCATEGORIZED',)
+WELCOME_CHANNEL = ChannelText.precreate(445191707491958784)
+EVERYNYAN_ROLE = Role.precreate(445189164703678464)
+ANNOUNCEMNETS_ROLE = Role.precreate(538397994421190657)
+WORSHIPPER_ROLE = Role.precreate(403586901803794432)
+DUNGEON_PREMIUM_ROLE = Role.precreate(585556522558554113)
+
+KOISHI_HELP_COLOR=Color.from_html('#ffd21e')
+
+_KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
+_KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
+_KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
+
+setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name='UNCATEGORIZED',)
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
@@ -27,66 +40,62 @@ Koishi.events(RoleEditWaitfor)
 @Koishi.events
 class once_on_ready(object):
     __slots__ = ('called',)
-    __event_name__='ready'
+    __event_name__ = 'ready'
     
     def __init__(self):
-        self.called=False
+        self.called = False
         
-    async def __call__(self,client):
+    async def __call__(self, client):
         if self.called:
             return
         
-        self.called=True
+        self.called = True
         
         print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
 
 Koishi.command_processer.create_category('TEST COMMANDS', checks=[checks.owner_only()])
 
-_KOISHI_NOU_RP=re.compile(r'n+\s*o+\s*u+',re.I)
-_KOISHI_OWO_RP=re.compile('(owo|uwu|0w0)',re.I)
-_KOISHI_OMAE_RP=re.compile('omae wa mou',re.I)
+
 
 @Koishi.commands
-async def default_event(client,message):
-    user_mentions=message.user_mentions
+async def default_event(client, message):
+    user_mentions = message.user_mentions
     if (user_mentions is not None) and (client in user_mentions):
-        m1=message.author.mention
-        m2=client.mention
-        m3=message.author.mention_nick
-        m4=client.mention_nick
-        replace={
+        m1 = message.author.mention
+        m2 = client.mention
+        m3 = message.author.mention_nick
+        m4 = client.mention_nick
+        replace = {
             '@everyone':'@\u200beveryone',
             '@here':'@\u200bhere',
-            re.escape(m1):m2,
-            re.escape(m2):m1,
-            re.escape(m3):m4,
-            re.escape(m4):m3,
+            re.escape(m1) : m2,
+            re.escape(m2) : m1,
+            re.escape(m3) : m4,
+            re.escape(m4) : m3,
                 }
-        pattern=re.compile("|".join(replace.keys()))
-        result=pattern.sub(lambda x: replace[re.escape(x.group(0))],message.content)
-        await client.message_create(message.channel,result)
+        pattern = re.compile("|".join(replace.keys()))
+        result = pattern.sub(lambda x: replace[re.escape(x.group(0))], message.content)
+        await client.message_create(message.channel, result)
         return
         
-    content=message.content
-    if message.channel.cached_permissions_for(client).can_add_reactions and _KOISHI_NOU_RP.match(content) is not None:
+    content = message.content
+    if message.channel.cached_permissions_for(client).can_add_reactions and (_KOISHI_NOU_RP.match(content) is not None):
         for value in 'nou':
-            emoji=BUILTIN_EMOJIS[f'regional_indicator_{value}']
+            emoji = BUILTIN_EMOJIS[f'regional_indicator_{value}']
             await client.reaction_add(message,emoji)
         return
     
-    matched=_KOISHI_OWO_RP.fullmatch(content,)
+    matched = _KOISHI_OWO_RP.fullmatch(content,)
     if (matched is not None):
         text=f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
     
-    elif _KOISHI_OMAE_RP.match(content) is not None:
-        text='NANI?'
+    elif (_KOISHI_OMAE_RP.match(content) is not None):
+        text = 'NANI?'
     
     else:
         return
     
-    await client.message_create(message.channel,text)
-
-DUNGEON = Guild.precreate(388267636661682178)
+    await client.message_create(message.channel, text)
 
 @Koishi.commands(checks=[checks.is_guild(DUNGEON)])
 async def command_error(client, message, command, content, exception):
@@ -169,8 +178,6 @@ async def command_error(client, message, command, content, exception):
     await Pagination(client,message.channel,pages)
     return False
 
-KOISHI_HELP_COLOR=Color.from_html('#ffd21e')
-
 async def help_description(client,message):
     by_categories=[]
     for category in client.command_processer.categories:
@@ -236,9 +243,9 @@ async def help_description(client,message):
     limit=len(pages)
     index=0
     while index<limit:
-        embed=Embed('Commands:',color=KOISHI_HELP_COLOR,description=pages[index])
+        embed = Embed('Commands:',color=KOISHI_HELP_COLOR,description=pages[index])
         index+=1
-        embed.add_field(f'Use `{prefix}help <command>` for more information.',f'page {index}/{limit}')
+        embed.add_field(f'Use `{prefix}help <command>` for more information.', f'page {index}/{limit}')
         result.append(embed)
     
     del pages
@@ -272,10 +279,11 @@ async def help(client, message, name:str=''):
         return
     
     if type(description) is str:
-        await client.message_create(message.channel,embed=Embed(name,description,color=KOISHI_HELP_COLOR))
+        await client.message_create(message.channel, embed=Embed(name, description, color=KOISHI_HELP_COLOR))
         return
     
-    await client.message_create(message.channel,embed=Embed(description='The command has no description provided',color=KOISHI_HELP_COLOR))
+    await client.message_create(message.channel, embed=Embed(description='The command has no description provided',
+        color=KOISHI_HELP_COLOR))
     return
 
 @Koishi.commands
@@ -394,7 +402,7 @@ async def aliases_parser_failure_handler(client, message, command, content, args
     return await aliases_description(client, message)
 
 @Koishi.commands(description=aliases_description, category='HELP', parser_failure_handler=aliases_parser_failure_handler)
-async def aliases(client, message, name:str, target_client:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default=None)):
+async def aliases(client, message, name:str, target_client:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
     if type(target_client) is not Client:
         target_client = client
     
@@ -460,10 +468,8 @@ async def execute_description(client,message):
             'Owner only!')
     await client.message_create(message.channel, embed=embed)
 
-Koishi.commands(Interpreter(locals().copy()),name='execute',description=execute_description,category='UTILITY',checks=[checks.owner_only()])
-
-WELCOME_CHANNEL = ChannelText.precreate(445191707491958784)
-EVERYNYAN_ROLE = Role.precreate(445189164703678464)
+Koishi.commands(Interpreter(locals().copy()), name='execute',description=execute_description, category='UTILITY',
+    checks=[checks.owner_only()])
 
 @Koishi.commands.from_class
 class rules:
@@ -496,6 +502,10 @@ class rules:
                 f'additional channels by typing `nya` at {WELCOME_CHANNEL.mention}.\n'
                 f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
                 f'as well.*'
+                '\n\n'
+                f'Addtionally you can also claim (or unclaim) {ANNOUNCEMNETS_ROLE.mention} by typing `i meow` '
+                '(or `i not meow`), or if you are the member of the server for at least half year, you can claim the '
+                f'superior {WORSHIPPER_ROLE.mention} role by typing `nekogirl`!'
             ).add_field(
                 'Advertisements',
                 'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
@@ -523,9 +533,9 @@ class rules:
 
 PATTERN_ROLE_RELATION = [
     (re.compile('nya+', re.I), EVERYNYAN_ROLE, timedelta(minutes=10), True),
-    (re.compile('[il] *meow+', re.I), Role.precreate(538397994421190657), timedelta(hours=1), True),
-    (re.compile('[il] *not? *meow+', re.I), Role.precreate(538397994421190657), timedelta(), False),
-    (re.compile('nekogirl', re.I), Role.precreate(403586901803794432), timedelta(days=365), True),
+    (re.compile('[il] *meow+', re.I), ANNOUNCEMNETS_ROLE, timedelta(), True),
+    (re.compile('[il] *not? *meow+', re.I), ANNOUNCEMNETS_ROLE, timedelta(), False),
+    (re.compile('nekogirl', re.I), WORSHIPPER_ROLE, timedelta(days=183), True),
         ]
 
 async def role_giver(client, message):

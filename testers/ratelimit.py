@@ -1706,6 +1706,12 @@ async def eula_get(client):
         f'https://discordapp.com/api/v7/store/eulas/{eula_id}',
             )
 
+async def voice_regions(client):
+    data = await bypass_request(client, METH_GET,
+        f'https://discordapp.com/api/v7/voice/regions',
+            )
+    return data
+
 @RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
     '''
@@ -3422,3 +3428,14 @@ async def ratelimit_test79(client, message):
             await RLT.send('Please use this command at a guild.')
         
         await welcome_screen_get(client, guild.id)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test80(client, message):
+    """
+    Request all the voice regions.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0080') as RLT:
+        await voice_regions(client)
+
+

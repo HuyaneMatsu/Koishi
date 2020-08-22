@@ -8,7 +8,7 @@ from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_
 
 from models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from tools import CooldownHandler
-
+from koishi import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE
 
 GAMBLING_COMMANDS = eventlist(type_=Command)
 
@@ -25,7 +25,10 @@ DAILY_STREAK_BREAK      = timedelta(hours=26)
 DAILY_STREAK_LOSE       = timedelta(hours=12)
 DAILY_REWARD            = 100
 DAILY_STREAK_BONUS      = 5
+DAILY_REWARD_BONUS_W_W  = 10
 DAILY_REWARD_LIMIT      = 300
+DAILY_REWARD_LIMIT_W_P  = 600
+
 
 EVENT_MAX_DURATION      = timedelta(hours=24)
 EVENT_MIN_DURATION      = timedelta(minutes=30)
@@ -64,6 +67,37 @@ ACE_INDEX   = len(CARD_NUMBERS)-1
 BET_MIN     = 10
 
 IN_GAME_IDS = set()
+
+def calculate_daily_for(user, daily_streak):
+    """
+    Returns how much daily love the given user gets after the given streak.
+    
+    Parameters
+    ----------
+    user : ``User`` or ``Client``
+        The respective user.
+    daily_streak : `int`
+        The daily streak of the respective user.
+    
+    Returns
+    -------
+    received : `int`
+    """
+    if user.has_role(WORSHIPPER_ROLE):
+        daily_streak_bonus = DAILY_STREAK_BONUS
+    else:
+        daily_streak_bonus = DAILY_REWARD_BONUS_W_W
+    
+    if user.has_role(DUNGEON_PREMIUM_ROLE):
+        daily_bonus_limit = DAILY_REWARD_LIMIT_W_P
+    else:
+        daily_bonus_limit = DAILY_REWARD_LIMIT
+    
+    received = DAILY_REWARD+daily_streak*daily_streak_bonus
+    if received > daily_bonus_limit:
+        received = daily_bonus_limit
+    
+    return received
 
 async def daily_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -106,10 +140,8 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
                     else:
                         streak_text=f'You are in a {daily_streak} day streak! Keep up the good work!'
                     
-                    received=DAILY_REWARD+daily_streak*DAILY_STREAK_BONUS
-                    if received>DAILY_REWARD_LIMIT:
-                        received=DAILY_REWARD_LIMIT
-                    total_love=source_result.total_love+received
+                    received = calculate_daily_for(source_user, daily_streak)
+                    total_love = source_result.total_love+received
                     
                     await connector.execute(CURRENCY_TABLE.update().values(
                         total_love  = total_love,
@@ -187,21 +219,19 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
                     daily_next  = now+DAILY_INTERVAL,
                     daily_streak= daily_streak+1,
                         ).where(currency_model.user_id==source_user.id))
-                
-            received=DAILY_REWARD+daily_streak*DAILY_STREAK_BONUS
-            if received>DAILY_REWARD_LIMIT:
-                received=DAILY_REWARD_LIMIT
+            
+            received = calculate_daily_for(source_user, daily_streak)
             if target_result is None:
                 await connector.execute(CURRENCY_TABLE.insert().values(
                     user_id     = target_user.id,
                     total_love  = received,
                     daily_next  = now,
                     daily_streak= 0,))
-
+                
                 total_love=received
             else:
                 total_love=target_result.total_love+received
-
+                
                 await connector.execute(CURRENCY_TABLE.update().values(
                     total_love  = total_love,
                         ).where(currency_model.user_id==target_user.id))
@@ -685,29 +715,26 @@ class dailyevent(object):
 
 async def game21_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('21',(
+    embed = Embed('21',(
         'Starts a 21 game at the channel.\n'
         f'Usage: `{prefix}21 *amount*`\n'
-        'Your chalange is to collect cards with weight up to 21. Each card '
-        'with number 2-10 has the same weight as their number says, meanwhile '
-        'J, Q and K has fix weight of 10. Ace has weight of 10, but if You '
-        'whould pass 21, it loses 9 of it.\n'
+        'Your chalange is to collect cards with weight up to 21. Each card with number 2-10 has the same weight as '
+        'their number says, meanwhile J, Q and K has fix weight of 10. Ace has weight of 10, but if You whould pass '
+        '21, it loses 9 of it.\n'
         'At this game you are fighting me, so if we boss lose, it is a draw.\n'
-        'You start with 2 cards initially drawed and at every round, you have '
-        'option to draw a new card, or to stop.'),
-            color=GAMBLING_COLOR)
+        'You start with 2 cards initially drawed and at every round, you have option to draw a new card, or to stop.'
+            ), color=GAMBLING_COLOR)
     
-    await client.message_create(message.channel,embed=embed)
+    await client.message_create(message.channel, embed=embed)
 
 @GAMBLING_COMMANDS(name='21',description=game21_description,category='GAMBLING')
 class Game21(object):
-    NEW     = BUILTIN_EMOJIS['new']
-    STOP    = BUILTIN_EMOJIS['octagonal_sign']
-    EMOJIS  = (NEW,STOP)
+    NEW = BUILTIN_EMOJIS['new']
+    STOP = BUILTIN_EMOJIS['octagonal_sign']
+    EMOJIS = (NEW,STOP)
     
-    __slots__ = ('all_pulled', 'amount', 'canceller', 'channel', 'client',
-        'client_applied', 'client_hand', 'message', 'task_flag', 'timeouter',
-        'user', 'user_ace', 'user_hand', 'user_total')
+    __slots__ = ('all_pulled', 'amount', 'canceller', 'channel', 'client', 'client_applied', 'client_hand', 'message',
+        'task_flag', 'timeouter', 'user', 'user_ace', 'user_hand', 'user_total')
     
     def pull_card(all_pulled):
         card = int((DECK_SIZE-len(all_pulled))*random())
@@ -884,7 +911,7 @@ class Game21(object):
         self.user_ace=user_ace
         self.client_hand=client_hand
         self.client_applied=client_applied
-        self.timeouter=Timeouter(client.loop,self,timeout=300.)
+        self.timeouter = Timeouter(self, timeout=300.)
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
         return self

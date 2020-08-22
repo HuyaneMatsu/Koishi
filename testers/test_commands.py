@@ -4,7 +4,7 @@ from random import random
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     titledstr, multidict_titled, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
-    IconSlot, CHANNELS, ChannelText
+    IconSlot, CHANNELS, ChannelText, VoiceRegion
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
@@ -14,8 +14,11 @@ from hata.discord.http import API_ENDPOINT, CONTENT_TYPE
 from hata.discord.parsers import PARSERS
 from hata.ext.prettyprint import pchunkify
 from hata.discord.emoji import PartialEmoji
+from hata.ext.patchouli import map_module, MAPPED_OBJECTS
 
-TEST_COMMANDS=eventlist(type_=Command, category='TEST COMMANDS',)
+TEST_COMMANDS = eventlist(type_=Command, category='TEST COMMANDS',)
+
+map_module('hata')
 
 def setup(lib):
     Koishi.commands.extend(TEST_COMMANDS)
@@ -792,5 +795,22 @@ async def test_get_welcome_screen(client, message):
     pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
-
-
+@TEST_COMMANDS
+async def test_regions(client, message):
+    old_ones = set(VoiceRegion.INSTANCES.values())
+    await client.voice_regions()
+    new_ones = set(VoiceRegion.INSTANCES.values())
+    print(new_ones)
+    difference = new_ones - old_ones
+    if not difference:
+        embeds = [Embed(description='*There are no new voice regions added*')]
+    else:
+        embeds = [Embed(description=(
+            f'Voice region : {region.name!r}\n'
+            f'id : {region.id!r}\n'
+            f'vip : {region.vip!r}\n'
+            f'deprecated : {region.deprecated!r}\n'
+            f'custom : {region.custom!r}'
+                )) for region in difference]
+    
+    await Pagination(client, message.channel, embeds)

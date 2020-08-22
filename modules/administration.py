@@ -243,12 +243,12 @@ class leave_guild:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('leave_guild',(
+        embed = Embed('leave_-uild',(
             'You really want me to leave? :c\n'
             f'Usage: `{prefix}leave_guild`'
             ),color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must be the owner of the guild to use this command.')
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
 
 @ADMINISTRATION_COMMANDS.from_class
 class reaction_clear:
@@ -499,13 +499,56 @@ class logs:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('logs',(
+        embed = Embed('logs',(
             'I can list you the audit logs of the guild.\n'
-            f'Usage: `{prefix}logs <user> <event>`\n'
+            f'Usage: `{prefix}logs <guild> <user> <event>`\n'
             'Both `user` and `event` is optional.\n'
             '`user` is the user, who executed the logged oprations.\n'
             'The `event` is the internal value or name of the type of the '
             'operation.'
                 ),color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel,embed=embed)
+        
+        await client.message_create(message.channel, embed=embed)
+
+@ADMINISTRATION_COMMANDS.from_class
+class owner_ban:
+    async def command(client, message, guild:Converter('guild', default_code='message.guild'),
+            user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), reason):
+        
+        # Should not happen normally
+        if guild is None:
+            return
+        
+        if user is None:
+            await client.message_create(message.channel, 'Please define a user to ban.')
+            return
+        
+        if not reason:
+            author = message.author
+            reason = f'For the request of {author.full_name} ({author.id})'
+        
+        for maybe_banner in guild.clients:
+            if guild.cached_permissions_for(client).can_ban_users:
+                banner = maybe_banner
+                break
+        else:
+            await client.message_create(message.channel, 'No one of has can ban the user in the guild.')
+            return
+        
+        await banner.guild_ban_add(guild, user, reason=reason)
+        await client.message_create(message.channel,
+            f'{user.full_name} banned at guild {guild.name} by {banner.full_name}.')
+    
+    category = 'ADMINISTRATION'
+    checks=[checks.owner_only()]
+    
+    async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed = Embed('owner-ban',(
+            'Bans the given user at the specified guild\n.'
+            f'Usage: `{prefix}owner-ban <guild> *user* <reason>`\n'
+                ),color=ADMINISTRATION_COLOR).add_footer(
+                'Owner only!')
+        
+        await client.message_create(message.channel, embed=embed)

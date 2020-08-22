@@ -2,7 +2,8 @@
 import re, os
 from time import monotonic
 
-from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, eventlist
+from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, eventlist, \
+    KOKORO
 
 from hata.ext.commands import Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
     GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
@@ -566,7 +567,11 @@ class ds_game(object):
             self.task_flag = GUI_STATE_READY
     
     async def call_game(self,emoji):
-        if (emoji not in self.emojis_game_p1) and (emoji is not self.stage.source.emoji) and (emoji not in self.emojis_game_p2):
+        stage = self.stage
+        if stage is None:
+            return
+        
+        if (emoji not in self.emojis_game_p1) and (emoji is not stage.source.emoji) and (emoji not in self.emojis_game_p2):
             return
         
         if self.task_flag!=GUI_STATE_READY:
@@ -575,31 +580,31 @@ class ds_game(object):
         
         while True:
             if emoji is self.WEST:
-                result=self.stage.move_west()
+                result = stage.move_west()
                 break
             
             if emoji is self.NORTH:
-                result=self.stage.move_north()
+                result = stage.move_north()
                 break
 
             if emoji is self.SOUTH:
-                result=self.stage.move_south()
+                result = stage.move_south()
                 break
 
             if emoji is self.EAST:
-                result=self.stage.move_east()
+                result = stage.move_east()
                 break
             
             if emoji is self.stage.source.emoji:
-                result=self.stage.activate_skill()
+                result = stage.activate_skill()
                 break
 
             if emoji is self.BACK:
-                result=self.stage.back()
+                result = stage.back()
                 break
 
             if emoji is self.RESET:
-                result=self.stage.reset()
+                result = stage.reset()
                 break
 
             if emoji is self.CANCEL:
@@ -608,16 +613,16 @@ class ds_game(object):
 
             return
         
-        client=self.client
+        client = self.client
         if not result:
-            Task(self.reaction_delete(emoji),client.loop)
+            Task(self.reaction_delete(emoji), KOKORO)
             return
         
-        if self.stage.done():
+        if stage.done():
             await self.start_done()
             return
         
-        Task(self.reaction_delete(emoji),client.loop)
+        Task(self.reaction_delete(emoji), KOKORO)
         
         self.task_flag = GUI_STATE_SWITCHING_PAGE
         
@@ -626,7 +631,7 @@ class ds_game(object):
         except BaseException as err:
             
             self.task_flag = GUI_STATE_CANCELLING
-            Task(self.cancel(),client.loop)
+            Task(self.cancel(), KOKORO)
             
             if isinstance(err,ConnectionError):
                 # no internet
