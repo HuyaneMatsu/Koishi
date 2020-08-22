@@ -84,9 +84,9 @@ def calculate_daily_for(user, daily_streak):
     received : `int`
     """
     if user.has_role(WORSHIPPER_ROLE):
-        daily_streak_bonus = DAILY_STREAK_BONUS
-    else:
         daily_streak_bonus = DAILY_REWARD_BONUS_W_W
+    else:
+        daily_streak_bonus = DAILY_STREAK_BONUS
     
     if user.has_role(DUNGEON_PREMIUM_ROLE):
         daily_bonus_limit = DAILY_REWARD_LIMIT_W_P
