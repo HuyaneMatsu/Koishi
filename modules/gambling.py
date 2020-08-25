@@ -921,7 +921,7 @@ class Game21(object):
     STOP = BUILTIN_EMOJIS['octagonal_sign']
     EMOJIS = (NEW,STOP)
     
-    __slots__ = ('all_pulled', 'amount', 'canceller', 'channel', 'client', 'client_applied', 'client_hand', 'message',
+    __slots__ = ('all_pulled', 'amount', 'canceller', 'channel', 'client', 'client_hand', 'client_total', 'message',
         'task_flag', 'timeouter', 'user', 'user_ace', 'user_hand', 'user_total')
     
     def pull_card(all_pulled):
@@ -985,10 +985,6 @@ class Game21(object):
         
         all_pulled = []
         
-        user_hand = []
-        user_total = 0
-        user_ace = 0
-        
         client_hand = []
         client_total = 0
         client_ace = 0
@@ -998,38 +994,32 @@ class Game21(object):
             
             client_hand.append(card)
             
-            number_index=card%len(CARD_NUMBERS)
+            number_index = card%len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
                 client_ace +=1
-                card_weight = 1
+                card_weight = 10
             elif number_index > 7:
                 card_weight = 10
             else:
                 card_weight = number_index+2
+            
             client_total += card_weight
             
-            client_applied = client_total
-            free_ace = client_ace
-            while free_ace:
-                if client_applied > 13:
-                    break
-                
-                client_applied = client_applied+9
-                free_ace -=1
-                continue
+            while client_total>21 and client_ace:
+                client_total -= 9
+                client_ace -=1
             
-            if free_ace:
-                if client_applied > 17:
-                    break
-                continue
-            
-            if client_applied > 15:
+            if client_total > (17 if client_ace else 15):
                 break
             
             continue
         
         
-        for _ in range(2):
+        user_hand = []
+        user_total = 0
+        user_ace = 0
+        
+        while True:
             card = cls.pull_card(all_pulled)
             
             user_hand.append(card)
@@ -1037,16 +1027,19 @@ class Game21(object):
             number_index = card%len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
                 user_ace +=1
-                card_weight = 1
+                card_weight = 10
             elif number_index > 7:
                 card_weight = 10
             else:
                 card_weight = number_index+2
+            
             user_total += card_weight
+            
+            if user_total > 10:
+                break
         
-        applied = user_total+user_ace*9
         embed = Embed(f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}',
-            f'You have cards equal to {applied} weight at your hand',
+            f'You have cards equal to {user_total} weight at your hand',
             color=GAMBLING_COLOR)
         
         for round_,card in enumerate(user_hand,1):
@@ -1069,11 +1062,11 @@ class Game21(object):
                 results = await response.fetchall()
                 if results:
                     total_love = results[0].total_love
-                    to_execute=CURRENCY_TABLE.update().values(
+                    to_execute = CURRENCY_TABLE.update().values(
                         total_love  = total_love,
                             ).where(currency_model.user_id==user.id)
                 else:
-                    to_execute=CURRENCY_TABLE.insert().values(
+                    to_execute = CURRENCY_TABLE.insert().values(
                         user_id     = user.id,
                         total_love  = amount,
                         daily_next  = datetime.utcnow(),
@@ -1081,7 +1074,7 @@ class Game21(object):
                 
                 await connector.execute(to_execute)
             
-            if isinstance(err,ConnectionError):
+            if isinstance(err, ConnectionError):
                 return None
             
             if isinstance(err, DiscordException):
@@ -1109,7 +1102,7 @@ class Game21(object):
         self.user_total = user_total
         self.user_ace = user_ace
         self.client_hand = client_hand
-        self.client_applied = client_applied
+        self.client_total = client_total
         self.timeouter = Timeouter(self, timeout=300.)
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
@@ -1140,18 +1133,23 @@ class Game21(object):
             
             self.user_hand.append(card)
             
+            user_ace = self.user_ace
             number_index = card%len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
-                self.user_ace +=1
-                card_weight = 1
+                user_ace +=1
+                card_weight = 10
             elif number_index > 7:
                 card_weight = 10
             else:
                 card_weight = number_index+2
-                
-            user_total = self.user_total
-            user_total += card_weight
+            
+            user_total = self.user_total + card_weight
+            while user_total>21 and user_ace:
+                user_total -= 9
+                user_ace -=1
+            
             self.user_total = user_total
+            self.user_ace = user_ace
             
             game_ended = (user_total>21)
             
@@ -1166,30 +1164,21 @@ class Game21(object):
             self.task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
-            user_applied = self.user_total
-            free_ace = self.user_ace
-            while free_ace:
-                if user_applied>13:
-                    break
-                
-                user_applied=user_applied+9
-                free_ace=free_ace-1
-                continue
+            user_total = self.user_total
+            client_total = self.client_total
             
-            client_applied=self.client_applied
-            
-            if client_applied > 21:
-                if user_applied > 21:
+            if client_total > 21:
+                if user_total > 21:
                     winner = None
                 else:
                     winner = self.user
             else:
-                if user_applied > 21:
+                if user_total > 21:
                     winner = client
                 else:
-                    if client_applied > user_applied:
+                    if client_total > user_total:
                         winner = client
-                    elif client_applied<user_applied:
+                    elif client_total < user_total:
                         winner = self.user
                     else:
                         winner = None
@@ -1218,7 +1207,7 @@ class Game21(object):
                             daily_streak= 0,)
                     
                     await connector.execute(to_execute)
-                    
+                
             if winner is None:
                 title = f'How to draw.'
             elif winner is client:
@@ -1239,8 +1228,8 @@ class Game21(object):
                 field_content.append(' ')
                 field_content.append(CARD_NUMBERS[number_index])
                 field_content.append('\n')
-                
-            embed.add_field(f'{self.user.name_at(self.message.guild)}\'s cards\' weight: {user_applied}',
+            
+            embed.add_field(f'{self.user.name_at(self.message.guild)}\'s cards\' weight: {user_total}',
                 ''.join(field_content))
             field_content.clear()
             
@@ -1254,12 +1243,12 @@ class Game21(object):
                 field_content.append(CARD_NUMBERS[number_index])
                 field_content.append('\n')
             
-            embed.add_field(f'{client.name_at(self.message.guild)}\'s cards\' weight: {client_applied}',
+            embed.add_field(f'{client.name_at(self.message.guild)}\'s cards\' weight: {client_total}',
                 ''.join(field_content))
             field_content = None
             
             try:
-                await client.message_edit(self.message,embed=embed)
+                await client.message_edit(self.message, embed=embed)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     # no internet
@@ -1278,18 +1267,8 @@ class Game21(object):
                 return
                 
         else:
-            applied = user_total
-            free_ace = self.user_ace
-            while free_ace:
-                if applied > 13:
-                    break
-                
-                applied +=9
-                free_ace -=1
-                continue
-            
             embed = Embed(f'How to lose {self.amount} {CURRENCY_EMOJI.as_emoji}',
-                f'You have cards equal to {applied} weight at your hand',
+                f'You have cards equal to {user_total} weight at your hand',
                 color=GAMBLING_COLOR)
             
             for round_, card in enumerate(self.user_hand, 1):
