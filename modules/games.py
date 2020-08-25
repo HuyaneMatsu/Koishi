@@ -71,38 +71,39 @@ class dice:
 
 
 def check_message_for_emoji(message):
-    parsed=parse_emoji(message.content)
+    parsed = parse_emoji(message.content)
     if parsed is None:
         return False
+    
     return parsed
 
 @GAMES_COMMANDS.from_class
 class waitemoji:
     async def command(client,message):
-        channel=message.channel
+        channel = message.channel
         
-        message_to_delete = await client.message_create(channel,'Waiting!')
+        message_to_delete = await client.message_create(channel, 'Waiting!')
         
         try:
-            _,emoji = await wait_for_message(client,channel,check_message_for_emoji,30.)
+            _, emoji = await wait_for_message(client, channel, check_message_for_emoji, 30.)
         except TimeoutError:
             return
         finally:
             await client.message_delete(message_to_delete)
         
-        await client.message_create(channel,emoji.as_emoji*5)
+        await client.message_create(channel, emoji.as_emoji*5)
     
     category = 'GAMES'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('waitemoji',(
+        embed = Embed('waitemoji',(
             'After using this command, I ll wait some time for you to send '
             'an emoji at this channel. If you sent one, I ll send it back five '
             'times instead.\n'
             f'Usage : `{prefix}waitemoji`'
-            ),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
+            ), color=GAMES_COLOR)
+        await client.message_create(message.channel, embed=embed)
 
 
 @GAMES_COMMANDS.from_class
@@ -285,7 +286,7 @@ class mine:
 @GAMES_COMMANDS.from_class
 class yuno:
     async def command(client,message):
-        await client.message_create(message.channel,embed=Embed('YUKI YUKI YUKI!',
+        await client.message_create(message.channel, embed=Embed('YUKI YUKI YUKI!',
             '░░░░░░░░░░░▄▄▀▀▀▀▀▀▀▀▄▄░░░░░░░░░░░░░\n'
             '░░░░░░░░▄▀▀░░░░░░░░░░░░▀▄▄░░░░░░░░░░\n'
             '░░░░░░▄▀░░░░░░░░░░░░░░░░░░▀▄░░░░░░░░\n'
@@ -311,12 +312,31 @@ class yuno:
     
     category = 'GAMES'
     
-    async def description(client,message):
-        embed=Embed('yuno',(
+    async def description(client, message):
+        embed = Embed('yuno', (
             'Your personal yandere.\n'
             'Good luck, I better leave now!'
-                ),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
+                ), color=GAMES_COLOR)
+        
+        await client.message_create(message.channel, embed=embed)
+
+
+@GAMES_COMMANDS.from_class
+class paranoia:
+    async def command(client, message):
+        await client.message_create(message.channel,
+            embed=Embed('Pa-Pa-Pa-Pa-Paranoia', color=0x08963c, url='https://www.youtube.com/watch?v=wnli28pjsn4'
+                ).add_image('https://i.ytimg.com/vi/wnli28pjsn4/hqdefault.jpg?sqp=-oaymwEZCPYBEIoBSFXyq4qpAwsIARUAAIhCG'
+                            'AFwAQ==&rs=AOn4CLC27YDJ7qBQhLzq7y5iD85vlIYuHw'))
+    
+    category = 'GAMES'
+    
+    async def description(client, message):
+        embed = Embed('paranoia', (
+            'Pa-Pa-Pa-Pa-Paranoia!!\n'
+                ), color=GAMES_COLOR)
+        
+        await client.message_create(message.channel, embed=embed)
 
 
 @GAMES_COMMANDS.from_class

@@ -8,7 +8,7 @@ from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, 
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
-from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag
+from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer
 from hata.discord.others import Discord_hdrs
 from hata.discord.http import API_ENDPOINT, CONTENT_TYPE
 from hata.discord.parsers import PARSERS
@@ -797,6 +797,11 @@ async def test_get_welcome_screen(client, message):
 
 @TEST_COMMANDS
 async def test_regions(client, message):
+    """
+    Returns the difference between the predefined and the requestable voice regions.
+    
+    Note, this command should be called only once to yield the new regions.
+    """
     old_ones = set(VoiceRegion.INSTANCES.values())
     await client.voice_regions()
     new_ones = set(VoiceRegion.INSTANCES.values())
@@ -813,4 +818,24 @@ async def test_regions(client, message):
             f'custom : {region.custom!r}'
                 )) for region in difference]
     
+    await Pagination(client, message.channel, embeds)
+
+@TEST_COMMANDS
+async def test_closer(client, message):
+    """
+    Creates a new closer.
+    """
+    await Closer(client, message.channel, Embed('cake?'), timeout=5.0)
+
+@TEST_COMMANDS
+async def test_list_invites(client, message):
+    """
+    Lists the invites of the respective guild.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    invites = await client.invite_get_guild(guild)
+    embeds = [Embed('Invites', chunk) for chunk in pchunkify(invites)]
     await Pagination(client, message.channel, embeds)

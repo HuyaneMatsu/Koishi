@@ -5,7 +5,7 @@ from types import FunctionType as function
 from datetime import datetime, timedelta
 
 from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
-    Role, ChannelText
+    Role, ChannelText, Invite
 from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter, ConverterFlag
 from hata.ext.extension_loader import EXTENSION_LOADER
 
@@ -21,8 +21,9 @@ EVERYNYAN_ROLE = Role.precreate(445189164703678464)
 ANNOUNCEMNETS_ROLE = Role.precreate(538397994421190657)
 WORSHIPPER_ROLE = Role.precreate(403586901803794432)
 DUNGEON_PREMIUM_ROLE = Role.precreate(585556522558554113)
+DUNGEON_INVITE = Invite.precreate('3cH2r5d')
 
-KOISHI_HELP_COLOR=Color.from_html('#ffd21e')
+KOISHI_HELP_COLOR = Color.from_html('#ffd21e')
 
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
 _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
@@ -302,8 +303,8 @@ async def invalid_command(client,message,command,content):
 @Koishi.commands.from_class
 class about:
     async def command(client, message):
-        implement=sys.implementation
-        embed=Embed('About',(
+        implement = sys.implementation
+        embed = Embed('About',(
             f'Me, {client.full_name}, I am general purpose/test client.'
             '\n'
             'My code base is'
@@ -329,11 +330,11 @@ class about:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('about',(
+        embed = Embed('about',(
             'Just some information about me.'
             f'Usage: `{prefix}about`'
                 ),color=KOISHI_HELP_COLOR)
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
 
 @Koishi.commands.from_class
 class reload:
@@ -583,4 +584,20 @@ async def role_giver(client, message):
         break
 
 Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
+
+@Koishi.commands.from_class
+class invite:
+    async def command(client, message):
+        await client.message_create(message.channel, DUNGEON_INVITE.url)
+    
+    category = 'HELP'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed = Embed('invite',(
+            f'Sends an invite to our {DUNGEON} guild.'
+            f'Usage : `{prefix}invite`'
+                ),color=KOISHI_HELP_COLOR)
+        
+        await client.message_create(message.channel, embed=embed)
 

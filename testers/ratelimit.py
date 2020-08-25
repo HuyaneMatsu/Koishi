@@ -3417,7 +3417,7 @@ async def ratelimit_test0078(client, message):
         await eula_get(client)
 
 @RATELIMIT_COMMANDS
-async def ratelimit_test79(client, message):
+async def ratelimit_test0079(client, message):
     """
     Requests the guild's welcoem screen.
     """
@@ -3430,7 +3430,7 @@ async def ratelimit_test79(client, message):
         await welcome_screen_get(client, guild.id)
 
 @RATELIMIT_COMMANDS
-async def ratelimit_test80(client, message):
+async def ratelimit_test0080(client, message):
     """
     Request all the voice regions.
     """

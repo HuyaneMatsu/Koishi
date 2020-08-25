@@ -43,160 +43,157 @@ class clear:
 
 
 @ADMINISTRATION_COMMANDS.from_class
-class invite:
-    async def command(client,message,content):
-        user=message.author
+class invite_create:
+    async def command(client, message, content):
+        user = message.author
         
-        invite_=None
-        if content=='perma':
+        invite_ = None
+        if content == 'perma':
             if client.is_owner(user) or user==message.guild.owner:
-                invite_ = client.vanity_invite(message.guild)
+                invite_ = await client.vanity_invite(message.guild)
                 if invite_ is None:
-                    max_age=0
-                    max_use=0
+                    max_age = 0
+                    max_use = 0
             else:
                 await client.message_create(message.channel,
                     'You must be the owner of the guild, to create a permanent invite.')
                 return
         else:
-            max_age=21600
-            max_use=1
+            max_age = 21600
+            max_use = 1
         
         try:
             if invite_ is None:
-                invite_ = await client.invite_create_pref(message.guild,max_age,max_use)
+                invite_ = await client.invite_create_pref(message.guild, max_age, max_use)
         except DiscordException as err:
-            content=repr(err)
+            content = repr(err)
         except ValueError as err:
-            content=err.args[0]
+            content = err.args[0]
         else:
             if invite_ is None:
-                content = 'I do not have enought permission to create invite '  \
-                          'from the guild\'s prefered channel.'
+                content = 'I do not have enought permission to create invite from the guild\'s prefered channel.'
             else:
-                content=f'Here is your invite, dear:\n\n{invite_.url}'
+                content = f'Here is your invite, dear:\n\n{invite_.url}'
             
         channel = await client.channel_private_create(user)
         try:
-            await client.message_create(channel,content)
+            await client.message_create(channel, content)
         except DiscordException as err:
             if err.code == ERROR_CODES.cannot_send_message_to_user:
-                await client.message_create(message.channel,'You have DM disabled, could not send the invite.')
-        
+                await client.message_create(message.channel, 'You have DM disabled, could not send the invite.')
+    
     category = 'ADMINISTRATION'
-    checks=[checks.owner_or_has_guild_permissions(Permission().update_by_keys(create_instant_invite=True), handler=permission_check_handler)]
+    checks = [checks.owner_or_has_guild_permissions(Permission().update_by_keys(create_instant_invite=True), handler=permission_check_handler)]
     
     async def description(client,message):
-        guild=message.channel.guild
-        user=message.author
+        guild = message.channel.guild
+        user = message.author
         if guild is None:
-            full=False
+            full = False
         else:
-            if user==guild.owner:
-                full=True
+            if user == guild.owner:
+                full = True
             else:
-                full=False
+                full = False
     
         if not full:
-            full=client.is_owner(user)
+            full = client.is_owner(user)
     
         prefix = client.command_processer.get_prefix_for(message)
         if full:
-            content=(
+            content = (
                 'I create an invite for you, to this guild.\n'
-                f'Usage: `{prefix}invite (perma)`\n'
-                'By passing `perma` after the command, I ll create for you, my dear '
-                'A permanent invite to the guild.'
+                f'Usage: `{prefix}invite-create (perma)`\n'
+                'By passing `perma` after the command, I ll create for you, my dear A permanent invite to the guild.'
                     )
         else:
             content=(
                 'I create an invite for you, to this guild.\n'
-                f'Usage: `{prefix}invite \n'
+                f'Usage: `{prefix}invite-create`'
                     )
-    
-        embed=Embed('invite',content,color=ADMINISTRATION_COLOR).add_footer(
-            'Guild only. You must have `create instant invite` permission to '
-            'invoke this command.')
-    
+        
+        embed = Embed('create-invite', content, color=ADMINISTRATION_COLOR).add_footer(
+            'Guild only. You must have `create instant invite` permission to invoke this command.')
+        
         await client.message_create(message.channel,embed=embed)
 
 
 @ADMINISTRATION_COMMANDS.from_class
 class bans:
     async def command(client,message):
-        guild=message.channel.guild
+        guild = message.channel.guild
         if (guild is None):
             return
-    
+        
         if not guild.cached_permissions_for(client).can_ban_users:
-            await client.message_create(message.channel,embed=Embed(
-                description='I have no permissions at the guild.',
+            await client.message_create(message.channel, embed = Embed(
+                description = 'I have no permissions at the guild.',
                 color=ADMINISTRATION_COLOR))
             return
         
         ban_data = await client.guild_bans(guild)
         
         if not ban_data:
-            await client.message_create(message.channel,'None')
+            await client.message_create(message.channel, 'None')
             return
         
-        embeds=[]
-        maintext=f'Guild bans for {guild.name} {guild.id}:'
-        limit=len(ban_data)
-        index=0
+        embeds = []
+        maintext = f'Guild bans for {guild.name} {guild.id}:'
+        limit = len(ban_data)
+        index = 0
     
         while True:
-            field_count=0
-            embed_length=len(maintext)
-            embed=Embed(title=maintext)
+            field_count = 0
+            embed_length = len(maintext)
+            embed = Embed(title=maintext)
             embeds.append(embed)
             while True:
-                user,reason=ban_data[index]
+                user, reason = ban_data[index]
                 if reason is None:
-                    reason='Not defined.'
-                name=f'{user:f} {user.id}'
-                embed_length+=len(reason)+len(name)
-                if embed_length>5900:
+                    reason = 'Not defined.'
+                name = f'{user:f} {user.id}'
+                embed_length += len(reason)+len(name)
+                if embed_length > 5900:
                     break
                 embed.add_field(name,reason)
-                field_count+=1
-                if field_count==25:
+                field_count += 1
+                if field_count == 25:
                     break
-                index+=1
-                if index==limit:
+                index +=1
+                if index == limit:
                     break
-            if index==limit:
+            if index == limit:
                 break
         
-        index=0
-        field_count=0
-        embed_ln=len(embeds)
-        result=[]
+        index = 0
+        field_count = 0
+        embed_ln = len(embeds)
+        result = []
         while True:
-            embed=embeds[index]
-            index+=1
+            embed = embeds[index]
+            index +=1
             embed.add_footer(f'Page: {index}/{embed_ln}. Bans {field_count+1}-{field_count+len(embed.fields)}/{limit}')
-            field_count+=len(embed.fields)
+            field_count += len(embed.fields)
             
             result.append(embed)
             
-            if index==embed_ln:
+            if index == embed_ln:
                 break
         
-        await Pagination(client,message.channel,result)
+        await Pagination(client, message.channel, result)
     
     category = 'ADMINISTRATION'
     checks = [checks.has_guild_permissions(Permission().update_by_keys(ban_users=True), handler=permission_check_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('bans',(
+        embed = Embed('bans',(
             'I ll show you the banned users at the guild.\n'
             f'Usage: `{prefix}bans`'
-            ),color=ADMINISTRATION_COLOR).add_footer(
+            ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must have `ban user` permission to '
                 'invoke this command.')
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
 
 
 @ADMINISTRATION_COMMANDS.from_class
@@ -512,7 +509,7 @@ class logs:
         await client.message_create(message.channel, embed=embed)
 
 @ADMINISTRATION_COMMANDS.from_class
-class owner_ban:
+class telekinesisban:
     async def command(client, message, guild:Converter('guild', default_code='message.guild'),
             user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), reason):
         
@@ -545,10 +542,11 @@ class owner_ban:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('owner-ban',(
-            'Bans the given user at the specified guild\n.'
-            f'Usage: `{prefix}owner-ban <guild> *user* <reason>`\n'
+        embed = Embed('telekinesisban',(
+            'Bans the given user at the specified guild.\n'
+            f'Usage: `{prefix}telekinesisban <guild> *user* <reason>`\n'
                 ),color=ADMINISTRATION_COLOR).add_footer(
                 'Owner only!')
         
         await client.message_create(message.channel, embed=embed)
+

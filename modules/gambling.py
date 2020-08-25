@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 from random import random
+from math import log, ceil
 
-from hata import eventlist, elapsed_time, Embed, Color, Emoji, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future
+from hata import eventlist, elapsed_time, Embed, Color, Emoji, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future, \
+    KOKORO, ERROR_CODES, USERS, ZEROUSER
 from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
-    GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, Converter, checks, Command
+    GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, Converter, checks, Command, ConverterFlag
+
+from sqlalchemy.sql import select, desc
 
 from models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from tools import CooldownHandler
@@ -33,7 +37,7 @@ DAILY_REWARD_LIMIT_W_P  = 600
 EVENT_MAX_DURATION      = timedelta(hours=24)
 EVENT_MIN_DURATION      = timedelta(minutes=30)
 EVENT_HEART_MIN_AMOUNT  = DAILY_REWARD//2           #half day of min
-EVENT_HEART_MAX_AMOUNT  = 7*DAILY_REWARD_LIMIT      #1 week of max
+EVENT_HEART_MAX_AMOUNT  = 7*DAILY_REWARD_LIMIT_W_P      #1 week of max
 EVENT_OK_EMOJI          = BUILTIN_EMOJIS['ok_hand']
 EVENT_ABORT_EMOJI       = BUILTIN_EMOJIS['x']
 EVENT_DAILY_MIN_AMOUNT  = 1
@@ -101,31 +105,34 @@ def calculate_daily_for(user, daily_streak):
 
 async def daily_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('daily',(
+    embed = Embed('daily',(
         'Claim everyday your share of my love!\n'
         f'Usage: `{prefix}daily <user>`\n'
         'You can also gift your daily reward to your lovely imouto.'
-        ),color=GAMBLING_COLOR)
-    await client.message_create(message.channel,embed=embed)
+        ), color=GAMBLING_COLOR)
+    
+    await client.message_create(message.channel, embed=embed)
 
-
-@GAMBLING_COMMANDS(description=daily_description,category='GAMBLING')
-@Cooldown('user',40.,limit=4,weight=2,handler=CooldownHandler())
-async def daily(client,message,target_user: Converter('user', default_code='message.author')):
+@GAMBLING_COMMANDS(description=daily_description, category='GAMBLING')
+@Cooldown('user', 40., limit=4, weight=2, handler=CooldownHandler())
+async def daily(client, message, target_user: Converter(
+        'user', ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='message.author')
+            ):
+    
     source_user=message.author
     if target_user.is_bot:
         target_user=source_user
     now=datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
         while True:
-            if source_user is target_user:
+            if source_user == target_user:
                 response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==source_user.id))
                 results = await response.fetchall()
                 if results:
                     source_result=results[0]
                     daily_next=source_result.daily_next
                     if daily_next>now:
-                        embed=Embed(
+                        embed = Embed(
                             'You already claimed your daily love for today~',
                             f'Come back in {elapsed_time(daily_next)}.',
                             GAMBLING_COLOR)
@@ -161,7 +168,7 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
                     daily_next  = now+DAILY_INTERVAL,
                     daily_streak= 1,))
                 
-                embed=Embed(
+                embed = Embed(
                     'Here, some love for you~\nCome back tomorrow !',
                     f'You received {DAILY_REWARD} {CURRENCY_EMOJI:e} and now have {DAILY_REWARD} {CURRENCY_EMOJI:e}',
                     GAMBLING_COLOR)
@@ -169,27 +176,27 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
             
             response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id,target_user.id,])))
             results = await response.fetchall()
-            if len(results)==0:
-                source_result=None
-                target_result=None
-            elif len(results)==1:
-                if results[0].user_id==source_user.id:
-                    source_result=results[0]
-                    target_result=None
+            if len(results) == 0:
+                source_result = None
+                target_result = None
+            elif len(results) == 1:
+                if results[0].user_id == source_user.id:
+                    source_result = results[0]
+                    target_result = None
                 else:
-                    source_result=None
-                    target_result=results[0]
+                    source_result = None
+                    target_result = results[0]
             else:
-                if results[0].user_id==source_user.id:
-                    source_result=results[0]
-                    target_result=results[1]
+                if results[0].user_id == source_user.id:
+                    source_result = results[0]
+                    target_result = results[1]
                 else:
-                    source_result=results[1]
-                    target_result=results[0]
+                    source_result = results[1]
+                    target_result = results[0]
                     
             now=datetime.utcnow()
             if source_result is None:
-                daily_streak=0
+                daily_streak = 0
                 streak_text='I am happy you joined the sect too.'
 
                 await connector.execute(CURRENCY_TABLE.insert().values(
@@ -199,21 +206,21 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
                     daily_streak= 1,))
             else:
                 daily_next=source_result.daily_next
-                if daily_next>now:
-                    embed=Embed(
+                if daily_next > now:
+                    embed = Embed(
                         'You already claimed your daily love for today~',
                         f'Come back in {elapsed_time(daily_next)}.',
                         GAMBLING_COLOR)
                     break
-                daily_streak=source_result.daily_streak
-                daily_next=daily_next+DAILY_STREAK_BREAK
-                if daily_next<now:
-                    daily_streak=daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                    if daily_streak<0:
-                        daily_streak=0
-                    streak_text=f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
+                daily_streak = source_result.daily_streak
+                daily_next = daily_next+DAILY_STREAK_BREAK
+                if daily_next < now:
+                    daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
+                    if daily_streak < 0:
+                        daily_streak = 0
+                    streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
                 else:
-                    streak_text=f'You are in a {daily_streak} day streak! Keep up the good work!'
+                    streak_text = f'You are in a {daily_streak} day streak! Keep up the good work!'
                 
                 await connector.execute(CURRENCY_TABLE.update().values(
                     daily_next  = now+DAILY_INTERVAL,
@@ -228,9 +235,9 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
                     daily_next  = now,
                     daily_streak= 0,))
                 
-                total_love=received
+                total_love = received
             else:
-                total_love=target_result.total_love+received
+                total_love = target_result.total_love+received
                 
                 await connector.execute(CURRENCY_TABLE.update().values(
                     total_love  = total_love,
@@ -247,14 +254,14 @@ async def daily(client,message,target_user: Converter('user', default_code='mess
 
 async def hearts_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('hearts',(
+    embed = Embed('hearts', (
         'How many hearts do you have?\n'
         f'Usage: `{prefix}hearts <user>`\n'
         'You can also check other user\'s hearts too.'
-            ),color=GAMBLING_COLOR)
-    await client.message_create(message.channel,embed=embed)
+            ), color=GAMBLING_COLOR)
+    await client.message_create(message.channel, embed=embed)
 
-@GAMBLING_COMMANDS(description=hearts_description,category='GAMBLING')
+@GAMBLING_COMMANDS(description=hearts_description, category='GAMBLING')
 @daily.shared(weight=1)
 async def hearts(client,message,target_user: Converter('user', default_code='message.author')):
     async with DB_ENGINE.connect() as connector:
@@ -262,44 +269,45 @@ async def hearts(client,message,target_user: Converter('user', default_code='mes
         results = await response.fetchall()
     
     if results:
-        total_love=results[0].total_love
+        total_love = results[0].total_love
     else:
-        total_love=0
+        total_love = 0
 
     if message.author is target_user:
-        embed=Embed(
+        embed = Embed(
             f'You have {total_love} {CURRENCY_EMOJI:e}',
             '' if total_love else 'Awww, you seem so lonely..',
             GAMBLING_COLOR)
     else:
-        embed=Embed(
+        embed = Embed(
             f'{target_user:f} has {total_love} {CURRENCY_EMOJI:e}',
             '' if total_love else 'Awww, they seem so lonely..',
             GAMBLING_COLOR)
         
-    await client.message_create(message.channel,embed=embed)
+    await client.message_create(message.channel, embed=embed)
 
 
 def convert_tdelta(delta):
-    result=[]
-    rest=delta.days
+    result = []
+    rest = delta.days
     if rest:
         result.append(f'{rest} days')
-    rest=delta.seconds
-    amount=rest//3600
+    rest = delta.seconds
+    amount = rest//3600
     if amount:
         result.append(f'{amount} hours')
-        rest%=3600
-    amount=rest//60
+        rest %= 3600
+    amount = rest//60
     if amount:
         result.append(f'{amount} minutes')
-        rest%=60
+        rest %= 60
     if rest:
         result.append(f'{rest} seconds')
     return ', '.join(result)
 
+
 class heartevent_start_checker(object):
-    __slots__=('client',)
+    __slots__ = ('client',)
     def __init__(self,client):
         self.client=client
 
@@ -312,7 +320,6 @@ class heartevent_start_checker(object):
             return True
         
         return False
-        
 
 
 async def heartevent_description(client,message):
@@ -325,59 +332,70 @@ async def heartevent_description(client,message):
         f'Min `amount`: {EVENT_HEART_MIN_AMOUNT}\n'
         f'Max `amount`: {EVENT_HEART_MAX_AMOUNT}\n'
         'If `user_limit` is not included, the event will have no user limit.'
-            ),color=GAMBLING_COLOR).add_footer(
+            ), color=GAMBLING_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel,embed=embed)
+    await client.message_create(message.channel, embed=embed)
 
-@GAMBLING_COMMANDS(checks=[checks.owner_only()],description=heartevent_description,category='GAMBLING')
+@GAMBLING_COMMANDS(checks=[checks.owner_only()], description=heartevent_description, category='GAMBLING')
 class heartevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls,client,message,duration:timedelta,amount:int,user_limit:int=0):
-        self=object.__new__(cls)
-        self.connector=None
-        channel=message.channel
+    async def __new__(cls, client, message, duration:timedelta, amount:int, user_limit:int=0):
+        channel = message.channel
         while True:
-            if duration>EVENT_MAX_DURATION:
-                embed=Embed('Duration passed the upper limit\n',
+            if duration > EVENT_MAX_DURATION:
+                embed = Embed('Duration passed the upper limit\n',
                      f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
                      f'**>**  passed : {convert_tdelta(duration)}',
                       color=GAMBLING_COLOR)
-            elif duration<EVENT_MIN_DURATION:
-                embed=Embed('Duration passed the lower limit\n',
+            elif duration < EVENT_MIN_DURATION:
+                embed = Embed('Duration passed the lower limit\n',
                      f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
                      f'**>**  passed : {convert_tdelta(duration)}',
                       color=GAMBLING_COLOR)
-            elif amount>EVENT_HEART_MAX_AMOUNT:
-                embed=Embed('Amount passed the upper limit\n',
+            elif amount > EVENT_HEART_MAX_AMOUNT:
+                embed = Embed('Amount passed the upper limit\n',
                      f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n'
                      f'**>**  passed : {amount}',
                       color=GAMBLING_COLOR)
-            elif amount<EVENT_HEART_MIN_AMOUNT:
-                embed=Embed('Amount passed the lower limit\n',
+            elif amount < EVENT_HEART_MIN_AMOUNT:
+                embed = Embed('Amount passed the lower limit\n',
                      f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n'
                      f'**>**  passed : {amount}',
                       color=GAMBLING_COLOR)
-            elif user_limit<0:
-                embed=Embed('User limit passed the lower limit\n',
+            elif user_limit < 0:
+                embed = Embed('User limit passed the lower limit\n',
                       '**>** lower limit : 0\n'
                      f'**>**  - passed : {user_limit}',
                       color=GAMBLING_COLOR)
             else:
                 break
-
-            to_delete = await client.message_create(channel,embed=embed)
-            await sleep(30.,client.loop)
+            
+            to_delete = await client.message_create(channel, embed=embed)
+            await sleep(30., KOKORO)
             try:
                 await client.message_delete(to_delete)
                 await client.message_delete(message)
-            except DiscordException:
-                pass
-            return
-
-        result=[]
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    return None
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ):
+                        return None
+                
+                raise
+            
+            return None
+        
+        result = []
         result.append('Duration: ')
         result.append(convert_tdelta(duration))
         result.append('\n Amount : ')
@@ -385,13 +403,31 @@ class heartevent(object):
         if user_limit:
             result.append('\n user limit : ')
             result.append(str(user_limit))
-
-        embed=Embed('Is everything correct?',''.join(result),color=GAMBLING_COLOR)
+        
+        embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
         del result
         
-        to_check = await client.message_create(channel,embed=embed)
-        await client.reaction_add(to_check,EVENT_OK_EMOJI)
-        await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
+        to_check = await client.message_create(channel, embed=embed)
+        
+        try:
+            await client.reaction_add(to_check, EVENT_OK_EMOJI)
+            await client.reaction_add(to_check, EVENT_ABORT_EMOJI)
+        except BaseException as err:
+            if isinstance(err, ConnectionError):
+                return None
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ):
+                    return None
+            
+            raise
+        
         try:
             event = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
         except TimeoutError:
@@ -400,56 +436,87 @@ class heartevent(object):
             try:
                 await client.message_delete(to_check)
                 await client.message_delete(message)
-            except DiscordException:
-                pass
-
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    return None
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ):
+                        return None
+                
+                raise
+        
         if event.emoji is EVENT_ABORT_EMOJI:
             return
-
-        self.user_ids=set()
-        self.user_limit=user_limit
-        self.client=client
-        self.duration=duration
-        self.amount=amount
-        self.waiter=Future(client.loop)
+        
+        self = object.__new__(cls)
+        self.connector = None
+        self.user_ids = set()
+        self.user_limit = user_limit
+        self.client = client
+        self.duration = duration
+        self.amount = amount
+        self.waiter = Future(KOKORO)
+        
+        try:
+            message = await client.message_create(channel, embed=self.generate_embed())
+        except BaseException as err:
+            self.message = None
+            if isinstance(err, ConnectionError):
+                return None
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ):
+                    return None
+            
+            raise
+        
+        self.message = message
         
         self.connector = await DB_ENGINE.connect()
         
-        message = await client.message_create(channel,embed=self.generate_embed())
-        self.message=message
         client.events.reaction_add.append(message, self)
-        Task(self.countdown(client,message),client.loop)
-        await client.reaction_add(message,CURRENCY_EMOJI)
+        Task(self.countdown(client, message), KOKORO)
+        await client.reaction_add(message, CURRENCY_EMOJI)
         return self
     
     def generate_embed(self):
-        title=f'React with {CURRENCY_EMOJI:e} to receive {self.amount}'
+        title = f'React with {CURRENCY_EMOJI:e} to receive {self.amount}'
         if self.user_limit:
-            description=f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
+            description = f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
         else:
-            description=f'{convert_tdelta(self.duration)} left'
-        return Embed(title,description,color=GAMBLING_COLOR)
+            description = f'{convert_tdelta(self.duration)} left'
+        return Embed(title, description, color=GAMBLING_COLOR)
 
     async def __call__(self, client, event):
         user = event.user
         if user.is_bot or (event.emoji is not CURRENCY_EMOJI):
             return
         
-        user_id=user.id
-        user_ids=self.user_ids
+        user_id = user.id
+        user_ids = self.user_ids
         
-        old_ln=len(user_ids)
+        old_ln = len(user_ids)
         user_ids.add(user_id)
-        new_ln=len(user_ids)
+        new_ln = len(user_ids)
         
-        if new_ln==old_ln:
+        if new_ln == old_ln:
             return
 
-        if new_ln==self.user_limit:
+        if new_ln == self.user_limit:
             self.duration=timedelta()
             self.waiter.set_result(None)
         
-        connector=self.connector
+        connector = self.connector
         
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
         results = await response.fetchall()
@@ -466,49 +533,80 @@ class heartevent(object):
                 daily_streak= 0,)
         await connector.execute(to_execute)
 
-    async def countdown(self,client,message):
-        update_delta=self._update_delta
-        loop=client.loop
-        waiter=self.waiter
+    async def countdown(self, client, message):
+        update_delta = self._update_delta
+        waiter = self.waiter
 
-        sleep_time=(self.duration%update_delta).seconds
+        sleep_time = (self.duration%update_delta).seconds
         if sleep_time:
-            self.duration-=timedelta(seconds=sleep_time)
-            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            self.duration -= timedelta(seconds=sleep_time)
+            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             waiter.clear()
 
-        sleep_time=self._update_time
+        sleep_time = self._update_time
         while True:
-            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             waiter.clear()
-            self.duration-=update_delta
-            if self.duration<update_delta:
+            self.duration -= update_delta
+            if self.duration < update_delta:
                 break
             try:
-                await client.message_edit(message,embed=self.generate_embed())
-            except DiscordException:
+                await client.message_edit(message, embed=self.generate_embed())
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    break
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ):
+                        break
+                
+                await client.events.error(client, f'{self!r}.countdown', err)
                 break
-
+        
         client.events.reaction_add.remove(message, self)
         try:
             await client.message_delete(message)
-        except DiscordException:
-            pass
-        await self.connector.close()
-        self.connector=None
-
+        except BaseException as err:
+            if isinstance(err, ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.invalid_access, # client removed
+                            ):
+                    return
+            
+            await client.events.error(client, f'{self!r}.countdown', err)
+            return
+        
+        finally:
+            connector = self.connector
+            if (connector is not None):
+                self.connector = None
+                await connector.close()
+    
     def __del__(self):
-        connector=self.connector
+        connector = self.connector
         if connector is None:
             return
-        Task(connector.close(),self.client.loop)
-        self.connector=None
-
+        
+        self.connector = None
+        Task(connector.close(), KOKORO)
+        
 async def dailyevent_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('dailyevent',(
+    embed = Embed('dailyevent',(
         'Starts a daily event at the channel.\n'
         f'Usage: `{prefix}dailyevent *duration* *amount* <users_limit>`\n'
         f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
@@ -516,7 +614,7 @@ async def dailyevent_description(client,message):
         f'Min `amount`: {EVENT_DAILY_MIN_AMOUNT}\n'
         f'Max `amount`: {EVENT_DAILY_MAX_AMOUNT}\n'
         'If `user_limit` is not included, the event will have no user limit.'
-            ),color=GAMBLING_COLOR).add_footer(
+            ), color=GAMBLING_COLOR).add_footer(
             'Owner only!')
     await client.message_create(message.channel,embed=embed)
     
@@ -527,48 +625,59 @@ class dailyevent(object):
 
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     async def __new__(cls,client,message,duration:timedelta,amount:int,user_limit:int=0):
-        self=object.__new__(cls)
-        self.connector=None
-        channel=message.channel
+        channel = message.channel
         while True:
-            if duration>EVENT_MAX_DURATION:
-                embed=Embed('Duration passed the upper limit\n',
+            if duration > EVENT_MAX_DURATION:
+                embed = Embed('Duration passed the upper limit\n',
                      f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
                      f'**>**  passed : {convert_tdelta(duration)}',
                       color=GAMBLING_COLOR)
-            elif duration<EVENT_MIN_DURATION:
-                embed=Embed('Duration passed the lower limit\n',
+            elif duration < EVENT_MIN_DURATION:
+                embed = Embed('Duration passed the lower limit\n',
                      f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
                      f'**>**  passed : {convert_tdelta(duration)}',
                       color=GAMBLING_COLOR)
-            elif amount>EVENT_DAILY_MAX_AMOUNT:
-                embed=Embed('Amount passed the upper limit\n',
+            elif amount > EVENT_DAILY_MAX_AMOUNT:
+                embed = Embed('Amount passed the upper limit\n',
                      f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n'
                      f'**>**  passed : {amount}',
                       color=GAMBLING_COLOR)
-            elif amount<EVENT_DAILY_MIN_AMOUNT:
-                embed=Embed('Amount passed the lower limit\n',
+            elif amount < EVENT_DAILY_MIN_AMOUNT:
+                embed = Embed('Amount passed the lower limit\n',
                      f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n'
                      f'**>**  passed : {amount}',
                       color=GAMBLING_COLOR)
-            elif user_limit<0:
-                embed=Embed('User limit passed the lower limit\n',
+            elif user_limit < 0:
+                embed = Embed('User limit passed the lower limit\n',
                       '**>** lower limit : 0\n'
                      f'**>**  - passed : {user_limit}',
                       color=GAMBLING_COLOR)
             else:
                 break
-
-            to_delete = await client.message_create(channel,embed=embed)
-            await sleep(30.,client.loop)
+            
+            to_delete = await client.message_create(channel, embed=embed)
+            await sleep(30., KOKORO)
             try:
                 await client.message_delete(to_delete)
                 await client.message_delete(message)
-            except DiscordException:
-                pass
-            return
-
-        result=[]
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    return None
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ):
+                        return None
+                
+                raise
+            
+            return None
+        
+        result = []
         result.append('Duration: ')
         result.append(convert_tdelta(duration))
         result.append('\n Amount : ')
@@ -576,13 +685,31 @@ class dailyevent(object):
         if user_limit:
             result.append('\n user limit : ')
             result.append(str(user_limit))
-
-        embed=Embed('Is everything correct?',''.join(result),color=GAMBLING_COLOR)
+        
+        embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
         del result
-
-        to_check = await client.message_create(channel,embed=embed)
-        await client.reaction_add(to_check,EVENT_OK_EMOJI)
-        await client.reaction_add(to_check,EVENT_ABORT_EMOJI)
+        
+        to_check = await client.message_create(channel, embed=embed)
+        
+        try:
+            await client.reaction_add(to_check, EVENT_OK_EMOJI)
+            await client.reaction_add(to_check, EVENT_ABORT_EMOJI)
+        except BaseException as err:
+            if isinstance(err, ConnectionError):
+                return None
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ):
+                    return None
+            
+            raise
+        
         try:
             event = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
         except TimeoutError:
@@ -591,73 +718,103 @@ class dailyevent(object):
             try:
                 await client.message_delete(to_check)
                 await client.message_delete(message)
-            except DiscordException:
-                pass
-
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    return None
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ):
+                        return None
+                
+                raise
+        
         if event.emoji is EVENT_ABORT_EMOJI:
             return
-
-        self.user_ids=set()
-        self.user_limit=user_limit
-        self.client=client
-        self.duration=duration
-        self.amount=amount
-        self.waiter=Future(client.loop)
-
+        
+        self = object.__new__(cls)
+        self.connector = None
+        self.user_ids = set()
+        self.user_limit = user_limit
+        self.client = client
+        self.duration = duration
+        self.amount = amount
+        self.waiter = Future(KOKORO)
+        
+        try:
+            message = await client.message_create(channel, embed=self.generate_embed())
+        except BaseException as err:
+            self.message = None
+            if isinstance(err, ConnectionError):
+                return None
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ):
+                    return None
+            
+            raise
+        
+        self.message = message
         self.connector = await DB_ENGINE.connect()
-
-        message = await client.message_create(channel,embed=self.generate_embed())
-        self.message=message
+        
         client.events.reaction_add.append(message, self)
-        Task(self.countdown(client,message),client.loop)
-        await client.reaction_add(message,CURRENCY_EMOJI)
+        Task(self.countdown(client, message), KOKORO)
+        await client.reaction_add(message, CURRENCY_EMOJI)
         return self
-
+    
     def generate_embed(self):
-        title=f'React with {CURRENCY_EMOJI:e} to increase your daily streak by {self.amount}'
+        title = f'React with {CURRENCY_EMOJI:e} to increase your daily streak by {self.amount}'
         if self.user_limit:
-            description=f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
+            description = f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
         else:
-            description=f'{convert_tdelta(self.duration)} left'
-        return Embed(title,description,color=GAMBLING_COLOR)
-
+            description = f'{convert_tdelta(self.duration)} left'
+        return Embed(title, description, color=GAMBLING_COLOR)
+    
     async def __call__(self, client, event):
         user = event.user
         if user.is_bot or (event.emoji is not CURRENCY_EMOJI):
             return
-
-        user_id=user.id
-        user_ids=self.user_ids
-
-        old_ln=len(user_ids)
+        
+        user_id = user.id
+        user_ids = self.user_ids
+        
+        old_ln = len(user_ids)
         user_ids.add(user_id)
-        new_ln=len(user_ids)
-
-        if new_ln==old_ln:
+        new_ln = len(user_ids)
+        
+        if new_ln == old_ln:
             return
-
-        if new_ln==self.user_limit:
-            self.duration=timedelta()
+        
+        if new_ln == self.user_limit:
+            self.duration = timedelta()
             self.waiter.set_result(None)
-
-        connector=self.connector
-
+        
+        connector = self.connector
+        
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
         results = await response.fetchall()
         if results:
-            result=results[0]
-            now=datetime.utcnow()
-            daily_next=result.daily_next+DAILY_STREAK_BREAK
-            if daily_next>now:
+            result = results[0]
+            now = datetime.utcnow()
+            daily_next = result.daily_next+DAILY_STREAK_BREAK
+            if daily_next > now:
                 to_execute=CURRENCY_TABLE.update().values(
                     daily_streak  = result.daily_streak+self.amount,
                         ).where(currency_model.user_id==user_id)
             else:
                 daily_streak=result.daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                if daily_streak<0:
-                    daily_streak=self.amount
+                if daily_streak < 0:
+                    daily_streak = self.amount
                 else:
-                    daily_streak=daily_streak+self.amount
+                    daily_streak = daily_streak+self.amount
 
                 to_execute=CURRENCY_TABLE.update().values(
                     daily_streak= daily_streak,
@@ -671,49 +828,80 @@ class dailyevent(object):
                 daily_next  = datetime.utcnow(),
                 daily_streak= self.amount,)
         await connector.execute(to_execute)
-
-    async def countdown(self,client,message):
-        update_delta=self._update_delta
-        loop=client.loop
-        waiter=self.waiter
+    
+    async def countdown(self, client, message):
+        update_delta = self._update_delta
+        waiter = self.waiter
         
-        sleep_time=(self.duration%update_delta).seconds
+        sleep_time = (self.duration%update_delta).seconds
         if sleep_time:
-            self.duration-=timedelta(seconds=sleep_time)
-            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            self.duration -= timedelta(seconds=sleep_time)
+            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             waiter.clear()
-
-        sleep_time=self._update_time
+        
+        sleep_time = self._update_time
         while True:
-            loop.call_later(sleep_time,waiter.__class__.set_result_if_pending,waiter,None)
+            KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             waiter.clear()
-            self.duration-=update_delta
-            if self.duration<update_delta:
+            self.duration -= update_delta
+            if self.duration < update_delta:
                 break
             try:
                 await client.message_edit(message,embed=self.generate_embed())
-            except DiscordException:
+            except BaseException as err:
+                if isinstance(err,ConnectionError):
+                    break
+                
+                if isinstance(err,DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ):
+                        break
+                
+                await client.events.error(client, f'{self!r}.countdown', err)
                 break
-
+        
         client.events.reaction_add.remove(message, self)
         try:
             await client.message_delete(message)
-        except DiscordException:
-            pass
-        await self.connector.close()
-        self.connector=None
-
+        except BaseException as err:
+            if isinstance(err, ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.invalid_access, # client removed
+                            ):
+                    return
+            
+            await client.events.error(client, f'{self!r}.countdown', err)
+            return
+        
+        finally:
+            connector = self.connector
+            if (connector is not None):
+                self.connector = None
+                await connector.close()
+    
     def __del__(self):
-        connector=self.connector
+        connector = self.connector
         if connector is None:
             return
-        Task(connector.close(),self.client.loop)
-        self.connector=None
+        
+        self.connector = None
+        Task(connector.close(), KOKORO)
 
 
-async def game21_description(client,message):
+async def game21_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
     embed = Embed('21',(
         'Starts a 21 game at the channel.\n'
@@ -727,7 +915,7 @@ async def game21_description(client,message):
     
     await client.message_create(message.channel, embed=embed)
 
-@GAMBLING_COMMANDS(name='21',description=game21_description,category='GAMBLING')
+@GAMBLING_COMMANDS(name='21', description=game21_description, category='GAMBLING')
 class Game21(object):
     NEW = BUILTIN_EMOJIS['new']
     STOP = BUILTIN_EMOJIS['octagonal_sign']
@@ -742,7 +930,7 @@ class Game21(object):
             if pulled>card:
                 break
             
-            card=card+1
+            card +=1
             continue
         
         all_pulled.append(card)
@@ -750,21 +938,21 @@ class Game21(object):
         
         return card
     
-    async def __new__(cls,client,source_message,amount:int=0):
-        user=source_message.author
-        channel=source_message.channel
+    async def __new__(cls, client, source_message, amount:int=0):
+        user = source_message.author
+        channel = source_message.channel
         
         while True:
             if user.id in IN_GAME_IDS:
-                error_msg=f'You are already at a game.'
+                error_msg = f'You are already at a game.'
                 break
             
             if amount < BET_MIN:
-                error_msg=f'You must bet at least {BET_MIN} {CURRENCY_EMOJI.as_emoji}'
+                error_msg = f'You must bet at least {BET_MIN} {CURRENCY_EMOJI.as_emoji}'
                 break
         
             if not channel.cached_permissions_for(client).can_add_reactions:
-                error_msg='I cannot start this command here, not enough permissions provided.'
+                error_msg = 'I cannot start this command here, not enough permissions provided.'
                 break
             
             async with DB_ENGINE.connect() as connector:
@@ -785,25 +973,25 @@ class Game21(object):
                     error_msg=f'You have 0 {CURRENCY_EMOJI.as_emoji}'
                     break
             
-            error_msg=None
+            error_msg = None
             break
         
         if (error_msg is not None):
             await client.message_create(channel,
-                embed=Embed(error_msg,color=GAMBLING_COLOR))
+                embed=Embed(error_msg, color=GAMBLING_COLOR))
             return None
         
         IN_GAME_IDS.add(user.id)
         
-        all_pulled  = []
+        all_pulled = []
         
-        user_hand   = []
-        user_total  = 0
-        user_ace    = 0
+        user_hand = []
+        user_total = 0
+        user_ace = 0
         
         client_hand = []
-        client_total= 0
-        client_ace  = 0
+        client_total = 0
+        client_ace = 0
         
         while True:
             card = cls.pull_card(all_pulled)
@@ -811,31 +999,31 @@ class Game21(object):
             client_hand.append(card)
             
             number_index=card%len(CARD_NUMBERS)
-            if number_index==ACE_INDEX:
-                client_ace+=1
-                card_weight=1
-            elif number_index>7:
-                card_weight=10
+            if number_index == ACE_INDEX:
+                client_ace +=1
+                card_weight = 1
+            elif number_index > 7:
+                card_weight = 10
             else:
-                card_weight=number_index+2
-            client_total+=card_weight
+                card_weight = number_index+2
+            client_total += card_weight
             
             client_applied = client_total
             free_ace = client_ace
             while free_ace:
-                if client_applied>13:
+                if client_applied > 13:
                     break
                 
-                client_applied=client_applied+9
-                free_ace=free_ace-1
+                client_applied = client_applied+9
+                free_ace -=1
                 continue
             
             if free_ace:
-                if client_applied>17:
+                if client_applied > 17:
                     break
                 continue
             
-            if client_applied>15:
+            if client_applied > 15:
                 break
             
             continue
@@ -846,18 +1034,18 @@ class Game21(object):
             
             user_hand.append(card)
             
-            number_index=card%len(CARD_NUMBERS)
-            if number_index==ACE_INDEX:
-                user_ace+=1
-                card_weight=1
-            elif number_index>7:
-                card_weight=10
+            number_index = card%len(CARD_NUMBERS)
+            if number_index == ACE_INDEX:
+                user_ace +=1
+                card_weight = 1
+            elif number_index > 7:
+                card_weight = 10
             else:
-                card_weight=number_index+2
-            user_total+=card_weight
+                card_weight = number_index+2
+            user_total += card_weight
         
-        applied=user_total+user_ace*9
-        embed=Embed(f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}',
+        applied = user_total+user_ace*9
+        embed = Embed(f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}',
             f'You have cards equal to {applied} weight at your hand',
             color=GAMBLING_COLOR)
         
@@ -867,7 +1055,7 @@ class Game21(object):
                 f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
         
         try:
-            message = await client.message_create(channel,embed=embed)
+            message = await client.message_create(channel, embed=embed)
             for emoji in cls.EMOJIS:
                 await client.reaction_add(message, emoji)
         
@@ -893,42 +1081,53 @@ class Game21(object):
                 
                 await connector.execute(to_execute)
             
-            if isinstance(err,(DiscordException, ConnectionError)):
-                return
+            if isinstance(err,ConnectionError):
+                return None
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                    ):
+                 return None
+            
             raise
         
-        self=object.__new__(cls)
-        self.client=client
-        self.channel=channel
-        self.canceller=cls._canceller
-        self.task_flag=GUI_STATE_READY
-        self.message=message
-        self.user=user
-        self.amount=amount
-        self.all_pulled=all_pulled
-        self.user_hand=user_hand
-        self.user_total=user_total
-        self.user_ace=user_ace
-        self.client_hand=client_hand
-        self.client_applied=client_applied
+        self = object.__new__(cls)
+        self.client = client
+        self.channel = channel
+        self.canceller = cls._canceller
+        self.task_flag = GUI_STATE_READY
+        self.message = message
+        self.user = user
+        self.amount = amount
+        self.all_pulled = all_pulled
+        self.user_hand = user_hand
+        self.user_total = user_total
+        self.user_ace = user_ace
+        self.client_hand = client_hand
+        self.client_applied = client_applied
         self.timeouter = Timeouter(self, timeout=300.)
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
         return self
     
     async def __call__(self, client, event):
-        if event.user!=self.user or event.emoji not in self.EMOJIS:
+        if (event.user != self.user) or (event.emoji not in self.EMOJIS):
             return
         
         if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
             return
         
         emoji = event.emoji
-        task_flag=self.task_flag
-        if task_flag!=GUI_STATE_READY:
-            if task_flag==GUI_STATE_SWITCHING_PAGE:
+        task_flag = self.task_flag
+        if task_flag != GUI_STATE_READY:
+            if task_flag == GUI_STATE_SWITCHING_PAGE:
                 if emoji is self.CANCEL:
-                    self.task_flag=GUI_STATE_CANCELLING
+                    self.task_flag = GUI_STATE_CANCELLING
                 return
 
             # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
@@ -941,30 +1140,30 @@ class Game21(object):
             
             self.user_hand.append(card)
             
-            number_index=card%len(CARD_NUMBERS)
-            if number_index==ACE_INDEX:
-                self.user_ace+=1
-                card_weight=1
-            elif number_index>7:
-                card_weight=10
+            number_index = card%len(CARD_NUMBERS)
+            if number_index == ACE_INDEX:
+                self.user_ace +=1
+                card_weight = 1
+            elif number_index > 7:
+                card_weight = 10
             else:
-                card_weight=number_index+2
+                card_weight = number_index+2
                 
-            user_total=self.user_total
-            user_total+=card_weight
-            self.user_total=user_total
+            user_total = self.user_total
+            user_total += card_weight
+            self.user_total = user_total
             
             game_ended = (user_total>21)
             
         elif emoji is self.STOP:
-            game_ended=True
+            game_ended = True
         
         else:
             # should not happen
             return
         
         if game_ended:
-            self.task_flag=GUI_STATE_CANCELLED
+            self.task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
             user_applied = self.user_total
@@ -979,27 +1178,27 @@ class Game21(object):
             
             client_applied=self.client_applied
             
-            if client_applied>21:
-                if user_applied>21:
-                    winner=None
+            if client_applied > 21:
+                if user_applied > 21:
+                    winner = None
                 else:
-                    winner=self.user
+                    winner = self.user
             else:
-                if user_applied>21:
-                    winner=client
+                if user_applied > 21:
+                    winner = client
                 else:
-                    if client_applied>user_applied:
-                        winner=client
+                    if client_applied > user_applied:
+                        winner = client
                     elif client_applied<user_applied:
-                        winner=self.user
+                        winner = self.user
                     else:
-                        winner=None
+                        winner = None
             
             if (winner is not client):
                 if winner is None:
-                    bonus=self.amount
+                    bonus = self.amount
                 else:
-                    bonus=self.amount*2
+                    bonus = self.amount*2
                     
                 async with DB_ENGINE.connect() as connector:
                     response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==self.user.id))
@@ -1021,18 +1220,18 @@ class Game21(object):
                     await connector.execute(to_execute)
                     
             if winner is None:
-                title=f'How to draw.'
+                title = f'How to draw.'
             elif winner is client:
-                title=f'How to lose {self.amount} {CURRENCY_EMOJI.as_emoji}'
+                title = f'How to lose {self.amount} {CURRENCY_EMOJI.as_emoji}'
             else:
-                title=f'How to win {self.amount} {CURRENCY_EMOJI.as_emoji}'
+                title = f'How to win {self.amount} {CURRENCY_EMOJI.as_emoji}'
             
             embed=Embed(title,color=GAMBLING_COLOR)
             
             field_content=[]
             
-            for round_,card in enumerate(self.user_hand,1):
-                type_index, number_index = divmod(card,len(CARD_NUMBERS))
+            for round_, card in enumerate(self.user_hand, 1):
+                type_index, number_index = divmod(card, len(CARD_NUMBERS))
                 field_content.append('Round ')
                 field_content.append(str(round_))
                 field_content.append(': ')
@@ -1045,8 +1244,8 @@ class Game21(object):
                 ''.join(field_content))
             field_content.clear()
             
-            for round_,card in enumerate(self.client_hand,1):
-                type_index, number_index = divmod(card,len(CARD_NUMBERS))
+            for round_, card in enumerate(self.client_hand, 1):
+                type_index, number_index = divmod(card, len(CARD_NUMBERS))
                 field_content.append('Round ')
                 field_content.append(str(round_))
                 field_content.append(': ')
@@ -1057,101 +1256,397 @@ class Game21(object):
             
             embed.add_field(f'{client.name_at(self.message.guild)}\'s cards\' weight: {client_applied}',
                 ''.join(field_content))
-            field_content=None
+            field_content = None
             
             try:
                 await client.message_edit(self.message,embed=embed)
             except BaseException as err:
-                if isinstance(err,(DiscordException, ConnectionError)):
+                if isinstance(err, ConnectionError):
+                    # no internet
                     return
-                raise
-            
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_message, # message already deleted
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.invalid_access, # client removed
+                                ):
+                        return
+                
+                # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+                await client.events.error(client,f'{self!r}.__call__',err)
+                return
+                
         else:
             applied = user_total
             free_ace = self.user_ace
             while free_ace:
-                if applied>13:
+                if applied > 13:
                     break
                 
-                applied=applied+9
-                free_ace=free_ace-1
+                applied +=9
+                free_ace -=1
                 continue
             
-            embed=Embed(f'How to lose {self.amount} {CURRENCY_EMOJI.as_emoji}',
+            embed = Embed(f'How to lose {self.amount} {CURRENCY_EMOJI.as_emoji}',
                 f'You have cards equal to {applied} weight at your hand',
                 color=GAMBLING_COLOR)
             
-            for round_,card in enumerate(self.user_hand,1):
-                type_index, number_index = divmod(card,len(CARD_NUMBERS))
+            for round_, card in enumerate(self.user_hand, 1):
+                type_index, number_index = divmod(card, len(CARD_NUMBERS))
                 embed.add_field(f'Round {round_}',
                     f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
             
-            self.task_flag=GUI_STATE_SWITCHING_PAGE
+            self.task_flag = GUI_STATE_SWITCHING_PAGE
             
             try:
-                await client.message_edit(self.message,embed=embed)
+                await client.message_edit(self.message, embed=embed)
             except BaseException as err:
-                self.task_flag=GUI_STATE_CANCELLED
+                self.task_flag = GUI_STATE_CANCELLED
                 self.cancel()
-                if isinstance(err,(DiscordException, ConnectionError)):
+                if isinstance(err, ConnectionError):
+                    # no internet
                     return
-                raise
                 
-            self.task_flag=GUI_STATE_READY
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_message, # message already deleted
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.invalid_access, # client removed
+                                ):
+                        return
+                
+                # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+                await client.events.error(client,f'{self!r}.__call__',err)
+                return
+            
+            self.task_flag = GUI_STATE_READY
             self.timeouter.set_timeout(300.0)
         
-    async def _canceller(self,exception,):
+    async def _canceller(self, exception,):
         IN_GAME_IDS.remove(self.user.id)
         
-        client=self.client
-        message=self.message
+        client = self.client
+        message = self.message
         
         client.events.reaction_add.remove(message, self)
         client.events.reaction_delete.remove(message, self)
         
-        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+        if self.task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
 
-        self.task_flag=GUI_STATE_CANCELLED
+        self.task_flag = GUI_STATE_CANCELLED
 
         if self.channel.cached_permissions_for(client).can_manage_messages:
-            task = Task(client.reaction_clear(message),client.loop)
+            task = Task(client.reaction_clear(message), KOKORO)
             if __debug__:
                 task.__silence__()
-                
+        
         if exception is None:
             return
         
-        if isinstance(exception,TimeoutError):
+        if isinstance(exception, TimeoutError):
             IN_GAME_IDS.remove(self.user.id)
             
-            embed=Embed(f'Timeout occured, you lost your {self.amount} {CURRENCY_EMOJI.as_emoji} forever.')
+            embed = Embed(f'Timeout occured, you lost your {self.amount} {CURRENCY_EMOJI.as_emoji} forever.')
             
             try:
-                await client.message_edit(message,embed=embed)
-            except (DiscordException, ConnectionError):
+                await client.message_edit(message, embed=embed)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    # no internet
+                    return
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_message, # message already deleted
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.invalid_access, # client removed
+                                ):
+                        return
+                
+                # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+                await client.events.error(client, f'{self!r}._canceller', err)
                 return
             
             return
         
-        timeouter=self.timeouter
+        timeouter = self.timeouter
         if timeouter is not None:
             timeouter.cancel()
         #we do nothing
     
-    def cancel(self,exception=None):
-        canceller=self.canceller
+    def cancel(self, exception=None):
+        canceller = self.canceller
         if canceller is None:
             return
         
         self.canceller=None
         
-        timeouter=self.timeouter
-        if timeouter is not None:
+        timeouter = self.timeouter
+        if (timeouter is not None):
             timeouter.cancel()
         
-        return Task(canceller(self,exception),self.client.loop)
+        return Task(canceller(self,exception), KOKORO)
 
 
-del Emoji, Color, Cooldown, eventlist, CooldownHandler
+async def gift_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed = Embed('gift',(
+        'Gifts hearts to you heart\'s chosen one.\n'
+        f'Usage: `{prefix}gift *user* *amount*`\n'
+        ), color=GAMBLING_COLOR).add_footer(
+            f'You must have {WORSHIPPER_ROLE.name} or {DUNGEON_PREMIUM_ROLE.name} role!')
+    
+    await client.message_create(message.channel, embed=embed)
+
+
+@GAMBLING_COMMANDS(description=gift_description, category='GAMBLING', checks=[checks.has_any_role([WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE])])
+@daily.shared(weight=1)
+async def gift(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
+    source_user = message.author
+    while True:
+        if source_user == target_user:
+            embed = Embed('BAKA !!','You cannot give love to yourself..', GAMBLING_COLOR)
+            break
+    
+        if amount <= 0:
+            embed = Embed('BAKA !!','You cannot gift non-positive amount of hreats..', GAMBLING_COLOR)
+            break
+            
+        async with DB_ENGINE.connect() as connector:
+            response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==source_user.id))
+            results = await response.fetchall()
+            if results:
+                source_user_total_love = results[0][0]
+            else:
+                source_user_total_love = 0
+            
+            if source_user_total_love == 0:
+                embed = Embed('So lonely...', 'You do not have any hreats to gift.', GAMBLING_COLOR)
+                break
+            
+            response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==target_user.id))
+            results = await response.fetchall()
+            if results:
+                target_user_exists = True
+                target_user_total_love = results[0][0]
+            else:
+                target_user_exists = False
+                target_user_total_love = 0
+            
+            if amount > source_user_total_love:
+                amount = source_user_total_love
+                source_user_new_love = 0
+            else:
+                source_user_new_love = source_user_total_love-amount
+            
+            target_user_new_love = target_user_total_love + amount
+            
+            await connector.execute(CURRENCY_TABLE.update().values(
+                    total_love  = source_user_new_love,
+                    ).where(currency_model.user_id==source_user.id)
+                )
+            
+            if target_user_exists:
+                to_execute = CURRENCY_TABLE.update().values(
+                    total_love  = target_user_new_love,
+                    ).where(currency_model.user_id==target_user.id)
+            else:
+                to_execute = CURRENCY_TABLE.insert().values(
+                    user_id     = target_user.id,
+                    total_love  = target_user_new_love,
+                    daily_next  = datetime.utcnow(),
+                    daily_streak= 0,)
+            
+            await connector.execute(to_execute)
+            
+            embed = Embed('Aww, so lovely', f'You gifted {amount} {CURRENCY_EMOJI.as_emoji} to {target_user.full_name}',
+                GAMBLING_COLOR,
+                    ).add_field(
+                        f'Your {CURRENCY_EMOJI.as_emoji}',
+                        f'{source_user_total_love} -> {source_user_new_love}',
+                    ).add_field(
+                        f'Their {CURRENCY_EMOJI.as_emoji}',
+                        f'{target_user_total_love} -> {target_user_new_love}',
+                    )
+            break
+    
+    await client.message_create(message.channel, embed=embed)
+
+
+async def award_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed = Embed('award',(
+        'Awards someone with the given amount of hearts.\n'
+        f'Usage: `{prefix}award *user* *amount*`'
+        ), color=GAMBLING_COLOR).add_footer(
+            f'Owner only.')
+    
+    await client.message_create(message.channel, embed=embed)
+
+async def award_parser_failure_handler(client, message, command, content, args):
+    await award_description(client, message)
+
+@GAMBLING_COMMANDS(
+    description = gift_description,
+    category = 'GAMBLING',
+    checks = [checks.owner_only()],
+    parser_failure_handler = award_parser_failure_handler,
+        )
+async def award(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
+    
+    if amount <= 0:
+        await award_description(client, message)
+        return
+    
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==target_user.id))
+        results = await response.fetchall()
+        if results:
+            target_user_exists = True
+            target_user_total_love = results[0][0]
+        else:
+            target_user_exists = False
+            target_user_total_love = 0
+        
+        target_user_new_love = target_user_total_love+amount
+        
+        if target_user_exists:
+            to_execute = CURRENCY_TABLE.update().values(
+                total_love  = target_user_new_love,
+                ).where(currency_model.user_id==target_user.id)
+        else:
+            to_execute = CURRENCY_TABLE.insert().values(
+                user_id     = target_user.id,
+                total_love  = target_user_new_love,
+                daily_next  = datetime.utcnow(),
+                daily_streak= 0,)
+        
+        await connector.execute(to_execute)
+    
+    embed = Embed(f'You awarded {target_user.full_name} with {amount} {CURRENCY_EMOJI.as_emoji}',
+        f'Now they are up from {target_user_total_love} to {target_user_new_love} {CURRENCY_EMOJI.as_emoji}',
+        color=GAMBLING_COLOR)
+    
+    await client.message_create(message.channel, embed=embed)
+
+
+async def take_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed = Embed('take',(
+        'Takes the given amount of hearts from someone.\n'
+        f'Usage: `{prefix}take *user* *amount*`'
+        ), color=GAMBLING_COLOR).add_footer(
+            f'Owner only.')
+    
+    await client.message_create(message.channel, embed=embed)
+
+async def take_parser_failure_handler(client, message, command, content, args):
+    await take_description(client, message)
+
+@GAMBLING_COMMANDS(
+    description = take_description,
+    category = 'GAMBLING',
+    checks = [checks.owner_only()],
+    parser_failure_handler = take_parser_failure_handler,
+        )
+async def take(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
+    
+    if amount <= 0:
+        await take_description(client, message)
+        return
+    
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==target_user.id))
+        results = await response.fetchall()
+        if results:
+            target_user_total_love = results[0][0]
+            if target_user_total_love == 0:
+                target_user_new_love = 0
+            else:
+                target_user_new_love = target_user_total_love-amount
+                if target_user_new_love < 0:
+                    target_user_new_love = 0
+                
+                await connector.execute(CURRENCY_TABLE.update().values(
+                    total_love  = target_user_new_love,
+                    ).where(currency_model.user_id==target_user.id))
+        else:
+            target_user_total_love = 0
+            target_user_new_love = 0
+    
+    embed = Embed(f'You took {amount} {CURRENCY_EMOJI.as_emoji} away from {target_user.full_name}',
+        f'Theiy got down from {target_user_total_love} to {target_user_new_love} {CURRENCY_EMOJI.as_emoji}',
+        color=GAMBLING_COLOR)
+    
+    await client.message_create(message.channel, embed=embed)
+
+
+async def top_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    embed = Embed('top',(
+        'Shows the most favored persons by myself.\n'
+        f'Usage: `{prefix}top`'
+        ), color=GAMBLING_COLOR)
+    
+    await client.message_create(message.channel, embed=embed)
+
+@GAMBLING_COMMANDS(description=top_description, category='GAMBLING', aliases=['top-list'])
+@daily.shared(weight=1)
+async def top(client, message):
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select([currency_model.user_id, currency_model.total_love])
+                .where(currency_model.total_love != 0)
+                .order_by(desc(currency_model.total_love))
+                .limit(20)
+                    )
+        results = await response.fetchall()
+        
+        parts = []
+        total_hearts_longest = 1
+        
+        for index, (user_id, total_hearts) in enumerate(results, 1):
+            try:
+                user = USERS[user_id]
+            except KeyError:
+                try:
+                    user = await client.user_get(user_id)
+                except BaseException as err:
+                    if isinstance(err, ConnectionError):
+                        return
+                    
+                    if isinstance(err, DiscordException):
+                        if err.code == ERROR_CODES.unknown_user:
+                            # Should not happen, but can, so lets handle it
+                            await connector.execute(CURRENCY_TABLE.delete().where(currency_model.user_id==user_id))
+                            user = ZEROUSER
+                        else:
+                            raise
+                    
+                    else:
+                        raise
+            
+            total_hearts_length = ceil(log(total_hearts, 10))
+            if total_hearts_length > total_hearts_longest:
+                total_hearts_longest = total_hearts_length
+            parts.append((index, total_hearts, user.full_name))
+    
+    result_lines = [f'{CURRENCY_EMOJI.as_emoji} **Toplist** {CURRENCY_EMOJI.as_emoji}\n```cs\n']
+    for index, total_hearts, full_name in parts:
+        result_lines.append(f'{index:>2}.: {total_hearts:>{total_hearts_longest}} {full_name}\n')
+    
+    result_lines.append('```')
+    
+    await client.message_create(message.channel, ''.join(result_lines))
+
+
+del Emoji
+del Color
+del Cooldown
+del eventlist
+del CooldownHandler
+del ConverterFlag
+del Converter

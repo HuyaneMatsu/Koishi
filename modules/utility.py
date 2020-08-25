@@ -3,7 +3,7 @@ import re, sys, json
 
 from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, \
     elapsed_time, ActivityUnknown, Status, ActivitySpotify, BUILTIN_EMOJIS, ChannelText, ChannelCategory, \
-    cchunkify, Permission, ICON_TYPE_NONE
+    cchunkify, Permission, ICON_TYPE_NONE, KOKORO, Future, ERROR_CODES, ChannelVoice, ChannelStore, ChannelThread
 from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination
 from hata.ext.prettyprint import pchunkify
 
@@ -32,7 +32,7 @@ class ping:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('ping',(
+        embed = Embed('ping',(
             'Do you wanna know how bad my connection is to Discord?\n'
             f'Usage: `{prefix}ping`'
             ),color=UTILITY_COLOR)
@@ -216,7 +216,7 @@ class se:
             '`se` stands for `show emoji`.\n'
             f'Usage: `{prefix}se *emoji*`\n'
             'I can show only custom emojis.'
-                ),color=UTILITY_COLOR)
+                ), color=UTILITY_COLOR)
         await client.message_create(message.channel,embed=embed)
 
 
@@ -397,105 +397,193 @@ BLACK_HEART = BUILTIN_EMOJIS['black_heart']
 @UTILITY_COMMANDS.from_class
 class guild_info:
     async def command(client,message):
-        guild=message.guild
+        guild = message.guild
         if guild is None:
             return
-    
-        #most usual first
-        s_grey  = Status.offline
-        s_green = Status.online
-        s_yellow= Status.idle
-        s_red   = Status.dnd
         
-        v_grey  = 0
+        embed = Embed(guild.name, color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
+        
+        sections_parts = [
+            '**Created**: ', elapsed_time(guild.created_at), ' ago\n'
+            '**Voice region**: ', guild.region.name,
+                ]
+        
+        features = guild.features
+        if features:
+            sections_parts.append('\n**Features**: ')
+            for feature in features:
+                sections_parts.append(feature.name)
+                sections_parts.append(', ')
+            
+            del sections_parts[-1]
+        
+        embed.add_field('Guild information', ''.join(sections_parts))
+        
+        channel_text = 0
+        channel_announcements = 0
+        channel_category = 0
+        channel_voice = 0
+        channel_thread = 0
+        channel_store = 0
+        
+        for channel in guild.all_channel.values():
+            channel_type = channel.__class__
+            if channel_type is ChannelText:
+                channel_text +=1
+                if channel.type == 5:
+                    channel_announcements +=1
+                continue
+            
+            if channel_type is ChannelCategory:
+                channel_category +=1
+                continue
+            
+            if channel_type is ChannelVoice:
+                channel_voice +=1
+                continue
+            
+            if channel_type is ChannelThread:
+                channel_thread +=1
+                continue
+            
+            if channel_type is ChannelStore:
+                channel_store +=1
+                continue
+        
+        sections_parts = [
+            '**Users: ', str(guild.user_count), '**\n'
+            '**Roles: ', str(len(guild.roles)), '**'
+                ]
+        
+        if channel_text:
+            sections_parts.append('\n**Text channels: ')
+            sections_parts.append(str(channel_text))
+            sections_parts.append('**')
+            
+            if channel_announcements:
+                sections_parts.append(' [')
+                sections_parts.append(str(channel_announcements))
+                sections_parts.append(' Announcements]')
+        
+        if channel_voice:
+            sections_parts.append('\n**Voice channels: ')
+            sections_parts.append(str(channel_voice))
+            sections_parts.append('**')
+        
+        if channel_category:
+            sections_parts.append('\n**Category channels: ')
+            sections_parts.append(str(channel_category))
+            sections_parts.append('**')
+        
+        if channel_thread:
+            sections_parts.append('\n**Thread channels: ')
+            sections_parts.append(str(channel_thread))
+            sections_parts.append('**')
+        
+        if channel_store:
+            sections_parts.append('\n**Store channels: ')
+            sections_parts.append(str(channel_store))
+            sections_parts.append('**')
+        
+        embed.add_field('Counts', ''.join(sections_parts))
+        
+        emoji_count = len(guild.emojis)
+        if emoji_count:
+            sections_parts = [
+                '**Total: ', str(emoji_count), '**\n'
+                '**Static emojis: '
+                    ]
+            
+            normal_static, normal_animated, managed_static, managed_animated = guild.emoji_counts
+            emoji_limit = guild.emoji_limit
+            sections_parts.append(str(normal_static))
+            sections_parts.append('** [')
+            sections_parts.append(str(emoji_limit-normal_static))
+            sections_parts.append(' free]\n')
+            sections_parts.append('**Animated emojis: ')
+            sections_parts.append(str(normal_animated))
+            sections_parts.append('** [')
+            sections_parts.append(str(emoji_limit-normal_animated))
+            sections_parts.append(' free]')
+            
+            managed_total = managed_static+managed_animated
+            if managed_total:
+                sections_parts.append('\n**Managed: ')
+                sections_parts.append(str(managed_total))
+                sections_parts.append('** [')
+                sections_parts.append(str(managed_static))
+                sections_parts.append(' static, ')
+                sections_parts.append(str(managed_animated))
+                sections_parts.append(' anmiated]')
+            
+            embed.add_field('Emojis', ''.join(sections_parts))
+        
+        # most usual first
+        s_grey = Status.offline
+        s_green = Status.online
+        s_yellow = Status.idle
+        s_red = Status.dnd
+        
+        v_grey = 0
         v_green = 0
-        v_yellow= 0
-        v_red   = 0
+        v_yellow = 0
+        v_red = 0
     
         for user in guild.users.values():
-            status=user.status
+            status = user.status
             if   status is s_grey:
-                v_grey+=1
+                v_grey +=1
             elif status is s_green:
-                v_green+=1
+                v_green +=1
             elif status is s_yellow:
-                v_yellow+=1
+                v_yellow +=1
             elif status is s_red:
-                v_red+=1
-            else: #if we change our satus to invisible, it will be invisible till we get the dispatch event, then it turns offline.
-                v_grey+=1
+                v_red +=1
+            else:
+                v_grey +=1
         
         del s_grey
         del s_green
         del s_yellow
         del s_red
         
-        channel_text    = 0
-        channel_category= 0
-        channel_voice   = 0
-        
-        for channel in guild.all_channel.values():
-            if type(channel) is ChannelText:
-                channel_text+=1
-            elif type(channel) is ChannelCategory:
-                channel_category+=1
-            else:
-                channel_voice+=1
-        
-        if guild.features:
-            features=', '.join(feature.name for feature in guild.features)
-        else:
-            features='none'
-        
-        embed=Embed(guild.name,color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
-        embed.add_field('Guild information',
-            f'Created: {elapsed_time(guild.created_at)} ago\n'
-            f'Voice region: {guild.region}\n'
-            f'Features: {features}\n')
-        embed.add_field('Counts',
-            f'Users: {guild.user_count}\n'
-            f'Roles: {len(guild.roles)}\n'
-            f'Text channels: {channel_text}\n'
-            f'Voice channels: {channel_voice}\n'
-            f'Category channels: {channel_category}\n')
         embed.add_field('Users',
-            f'{GREEN_HEART:e} {v_green}\n'
-            f'{YELLOW_HEART:e} {v_yellow}\n'
-            f'{RED_HEART:e} {v_red}\n'
-            f'{BLACK_HEART:e} {v_grey}\n')
-    
-        boosters=guild.boosters
+            f'{GREEN_HEART:e} **{v_green}**\n'
+            f'{YELLOW_HEART:e} **{v_yellow}**\n'
+            f'{RED_HEART:e} **{v_red}**\n'
+            f'{BLACK_HEART:e} **{v_grey}**')
+        
+        boosters = guild.boosters
         if boosters:
-            emoji=BUILTIN_EMOJIS['gift_heart']
-            count=len(boosters)
-            to_render=count if count<21 else 21
+            emoji = BUILTIN_EMOJIS['gift_heart']
+            count = len(boosters)
+            to_render = count if count<21 else 21
             
-            embed.add_field('Most awesome people of the guild',
-                            f'{to_render} {emoji:e} out of {count} {emoji:e}')
-    
+            embed.add_field(f'Most awesome people of the guild', f'{to_render} {emoji:e} out of {count} {emoji:e}')
+            
             for user in boosters[:21]:
                 embed.add_field(user.full_name,
                     f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
         
         embed.add_thumbnail(guild.icon_url_as(size=128))
         
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
     
     name = 'guild'
     category = 'UTILITY'
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('user',(
+        embed = Embed('user',(
             'Do you want me to list, some information about this guild?\n'
             f'Usage: `{prefix}guild`\n'
-                ),color=UTILITY_COLOR).add_footer(
+                ), color=UTILITY_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
 
 @UTILITY_COMMANDS.from_class
 class message:
-    async def command(client,message,message_id:int,channel:Converter('channel', default_code='message.channel')):
+    async def command(client, message, message_id:int, channel:Converter('channel', default_code='message.channel')):
         if not channel.cached_permissions_for(client).can_read_message_history:
             await client.message_create(message.channel,
                 'I am unable to read the messages at the specified channel.')
@@ -697,9 +785,92 @@ class welcome_screen:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('welcome-screen',(
-            'Displays the guild\'s welcome screen'
-            f'Usage: `{prefix}welcome-screen`\n'
-                ),color=UTILITY_COLOR).add_footer(
+        embed = Embed('welcome-screen',(
+            'Displays the guild\'s welcome screen\n'
+            f'Usage: `{prefix}welcome-screen`'
+                ), color=UTILITY_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
+
+INVITE_GEN_WORDS = ['loli', 'dung', 'neko', 'koishi', 'hata', 'flan', '514', 'meow', 'nya', 'touhou', '2hu', 'kokoro',]
+INVITE_GEN_RP = re.compile('|'.join(re.escape(word) for word in INVITE_GEN_WORDS), re.I)
+
+@Koishi.commands.from_class
+class invite_gen:
+    async def command(client, message, target_channel:ChannelText, time:int):
+        guild = message.guild
+        if guild is None:
+            return
+        
+        if time < 1:
+            await client.message_create(message.channel, f'Time cannot be less than 1, got {time!r}')
+            return
+        
+        canceller = Future(KOKORO)
+        KOKORO.call_later(time*3600.0, Future.set_result_if_pending, canceller, None)
+        
+        await client.message_create(message.channel,
+            f'Starting loop over {target_channel.mention} for {time} hours.')
+        
+        invites = []
+        total = 0
+        
+        while True:
+            try:
+                invite = await client.invite_create(target_channel)
+                parsed = INVITE_GEN_RP.search(invite.code)
+                if parsed is None:
+                    await client.invite_delete(invite)
+                else:
+                    invites.append(invite)
+                
+                total +=1
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    canceller.cancel()
+                    sys.stderr.write('invite_gen failed, connection error occured meanwhile!\n')
+                    return
+                
+                if isinstance(err, DiscordException):
+                    err_code = err.code
+                    if err_code in (
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.invalid_access, # client removed
+                                ):
+                        
+                        canceller.set_result_if_pending(None)
+                        break
+                    
+                    if err_code == ERROR_CODES.unknown_channel: # message's channel deleted
+                        canceller.cancel()
+                        return
+                    
+                    if err_code == ERROR_CODES.max_invites:
+                        canceller.set_result_if_pending(None)
+                        break
+                
+                canceller.cancel()
+                await client.events.error(client, 'invite_gen', err)
+                return
+            
+            if canceller.done():
+                break
+        
+        title = f'{total} invites generated, from this {len(invites)} passed.'
+        pages = [Embed(title, chunk) for chunk in cchunkify([invite.url for invite in invites])]
+        
+        await Pagination(client, message.channel, pages, timeout=7200.0)
+    
+    category = 'UTILITY'
+    checks = [checks.guild_only(), checks.owner_only()]
+    
+    async def description(client,message):
+        prefix = client.command_processer.get_prefix_for(message)
+        embed = Embed('invite-gen',(
+            'Creates invite at the guild with any of the predefined words.\n'
+            f'Usage: `{prefix}invite-gen *text-channel* *time*`\n'
+            'Note that time is in hours, for how much time it should circle the invites!'
+                ), color=UTILITY_COLOR).add_footer(
+                'Guild and owner only!')
+        
+        await client.message_create(message.channel, embed=embed)

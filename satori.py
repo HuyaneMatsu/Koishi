@@ -21,18 +21,18 @@ WIKI_COLOR = Color.from_rgb(48, 217, 255)
 
 @Satori.commands
 async def invalid_command(client, message, command, content):
-    guild=message.guild
+    guild = message.guild
     if guild is None:
         try:
             await client.message_create(message.channel,
                 'Eeh, what should I do, what should I do?!?!')
         except BaseException as err:
             
-            if isinstance(err,ConnectionError):
+            if isinstance(err, ConnectionError):
                 # no internet
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.cannot_send_message_to_user, # dm disabled
@@ -49,13 +49,13 @@ async def invalid_command(client, message, command, content):
         except KeyError:
             pass
         else:
-            if command.category.name=='touhou':
+            if command.category.name == 'touhou':
                 await client.typing(message.channel)
                 await sleep(2.0, KOKORO)
-                await client.message_create(message.channel,f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
+                await client.message_create(message.channel, f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
                 await Koishi.typing(message.channel)
                 await sleep((random()*2.)+1.0, KOKORO)
-                await command(Koishi,message,content)
+                await command(Koishi, message, content)
                 return
     
     await client.message_create(message.channel,'I have no idea, hmpff...')
@@ -69,8 +69,8 @@ async def wiki(client,message,content):
             color=WIKI_COLOR))
         return
     
-    words=WORDMATCH_RP.split(content)
-    search_for=' '.join(words)
+    words = WORDMATCH_RP.split(content)
+    search_for = ' '.join(words)
     
     # this takes a while, lets type a little.
     Task(client.typing(message.channel),client.loop)
@@ -81,17 +81,17 @@ async def wiki(client,message,content):
         response_data = await response.text()
     
     while True:
-        if len(response_data)<30:
-            results=None
+        if len(response_data) < 30:
+            results = None
             break
         
-        json_data=from_json(response_data)
-        if len(json_data)!=4:
-            results=None
+        json_data = from_json(response_data)
+        if len(json_data) != 4:
+            results = None
             break
         
-        results=list(zip(json_data[1],json_data[3]))
-        results.sort(key=lambda item:len(item[0]))
+        results = list(zip(json_data[1], json_data[3]))
+        results.sort(key=lambda item: len(item[0]))
         break
     
     if (results is None) or (not results):
@@ -456,10 +456,10 @@ class auto_pyramid:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('execute',(
+        embed = Embed('execute',(
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid <emoji> <size>`'
-                ),color=SATORI_HELP_COLOR).add_footer(
+                ), color=SATORI_HELP_COLOR).add_footer(
                 'Guild only!')
         await client.message_create(message.channel,embed=embed)
     
@@ -561,7 +561,7 @@ async def docs_selecter(client, channel, message, path):
     chunks = unit.embed_sized
     
     title_parts = []
-    path = unit.path.parent
+    path = unit.path - unit.name
     if path:
         title_parts.append('*')
         title_parts.append(str(path))
