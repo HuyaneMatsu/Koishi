@@ -101,12 +101,13 @@ def build_output(output, returncode):
         index +=1
         line_length = len(line)
         
-        content_left_length -=line_length
-        if  content_left_length < 0:
-            lines[index-1] = line[:(-content_left_length)]
+        content_left_length -= line_length
+        if content_left_length < 0:
+            lines[index-1] = line[:line_length-content_left_length]
             del lines[index:]
             is_truncated = True
             break
+    
     
     if is_truncated:
         lines.append('[OUTPUT TRUNCATED]')

@@ -12,15 +12,17 @@ from sqlalchemy.sql import select, desc
 
 from models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from tools import CooldownHandler
-from koishi import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE
+from koishi import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON
 
 GAMBLING_COMMANDS = eventlist(type_=Command)
 
 def setup(lib):
     Koishi.commands.extend(GAMBLING_COMMANDS)
-    
+    Koishi.command_processer.append(DUNGEON, heart_generator)
+
 def teardown(lib):
     Koishi.commands.unextend(GAMBLING_COMMANDS)
+    Koishi.command_processer.remove(DUNGEON, heart_generator)
 
 GAMBLING_COLOR          = Color.from_rgb(254,254,164)
 CURRENCY_EMOJI          = Emoji.precreate(603533301516599296)
@@ -1621,6 +1623,51 @@ async def top(client, message):
     
     await client.message_create(message.channel, ''.join(result_lines))
 
+
+HEART_GENERATOR_COOLDOWNS = set()
+HEART_GENERATOR_COOLDOWN = 3600.0
+HEART_GENERATION_AMOUNT = 5
+
+async def heart_generator(client, message):
+    user = message.author
+    if user.is_bot:
+        return
+    
+    if random() >= 0.01:
+        return
+    
+    user_id = user.id
+    if user_id in HEART_GENERATOR_COOLDOWNS:
+        return
+    
+    HEART_GENERATOR_COOLDOWNS.add(user_id)
+    
+    KOKORO.call_later(HEART_GENERATOR_COOLDOWN, set.remove, HEART_GENERATOR_COOLDOWNS, user_id)
+    
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==user_id))
+        results = await response.fetchall()
+        if results:
+            target_user_exists = True
+            target_user_total_love = results[0][0]
+        else:
+            target_user_exists = False
+            target_user_total_love = 0
+        
+        target_user_new_love = target_user_total_love+HEART_GENERATION_AMOUNT
+        
+        if target_user_exists:
+            to_execute = CURRENCY_TABLE.update().values(
+                total_love  = target_user_new_love,
+                ).where(currency_model.user_id==user_id)
+        else:
+            to_execute = CURRENCY_TABLE.insert().values(
+                user_id     = user_id,
+                total_love  = target_user_new_love,
+                daily_next  = datetime.utcnow(),
+                daily_streak= 0,)
+        
+        await connector.execute(to_execute)
 
 del Emoji
 del Color
