@@ -112,7 +112,7 @@ class dispatch_tester:
                 result.append(f'--------------------\n{content}\n--------------------')
             
         else:
-            for key,value in old.items():
+            for key, value in old.items():
                 if key in ('pinned','activity_party_id','everyone_mention'):
                     result.append(f'{key} changed: {value!r} -> {getattr(message,key)!r}')
                     continue
@@ -275,63 +275,46 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'Presence update on user: {user:f} {user.id}']
+        result = [f'Presence update on user: {user:f} {user.id}']
         try:
-            statuses=old['statuses']
+            statuses = old['statuses']
         except KeyError:
             pass
         else:
-            for key in ('desktop','mobile','web'):
-                result.append(f'{key} status: {statuses.get(key,Status.offline)} -> {user.statuses.get(key,Status.offline)}')
-
+            for key in ('desktop', 'mobile', 'web'):
+                result.append(f'{key} status: {statuses.get(key, Status.offline)} -> {user.statuses.get(key, Status.offline)}')
+            
             try:
-                status=old['status']
+                status = old['status']
             except KeyError:
                 pass
             else:
                 result.append(f'status changed: {status} -> {user.status}')
-            
+        
         try:
-            activities=old['activities']
+            activities = old['activities']
         except KeyError:
             pass
         else:
-            ignore=[]
-            for activity in activities:
-                if type(activity) is ActivityChange:
-                    ignore.append(activity)
+            added, updated, removed = activities
+            if (added is not None):
+                for activity in added:
+                    result.append('Added activity:')
+                    result.extend(pretty_print(activity))
             
-            for index in range(len(ignore)):
-                result.append('Activity updated:')
-                activity_change = ignore[index]
-                activity=activity_change.activity
-                ignore[index] = activity
-                for key,value in activity_change.old_attributes.items():
-                    result.append(f'- {key} : {value} -> {getattr(activity,key)}')
-            
-            
-            user_activities = user.activities
-            for activity in activities:
-                if activity in ignore:
-                    continue
-                
-                if activity in user_activities:
-                    continue
-                
-                result.append('Removed activity:')
-                result.extend(pretty_print(activity))
-            
-            for activity in user_activities:
-                if activity in ignore:
-                    continue
-                
-                if activity in activities:
-                    continue
-                
-                result.append('Added activity:')
-                result.extend(pretty_print(activity))
-
-        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
+            if (updated is not None):
+                for activity_change in updated:
+                    result.append('Activity updated:')
+                    activity = activity_change.activity
+                    for key, value in activity_change.old_attributes.items():
+                        result.append(f'- {key} : {value} -> {getattr(activity, key)}')
+             
+            if (removed is not None):
+                for activity in removed:
+                    result.append('Removed activity:')
+                    result.extend(pretty_print(activity))
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
 
     @classmethod
@@ -512,14 +495,14 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=pretty_print(guild)
+        result = pretty_print(guild)
         result.insert(0,f'Guild created: {guild.id}')
-        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client,self.channel,pages,120.)
-
+    
     #Unknown:
     #guild_sync
-        
+    
     @classmethod
     async def guild_edit(self,client,guild,old):
         
@@ -780,7 +763,7 @@ class dispatch_tester:
 
 async def here_description(client, message):
     prefix = client.command_processer.prefix(message)
-    embed = Embed('here',(
+    return Embed('here',(
         'I set the dispatch tester commands\' output to this channel.\n'
         f'Usage: `{prefix}here`\n'
         'By calling the command again, I ll remove the current channel.\n'
@@ -790,11 +773,10 @@ async def here_description(client, message):
         f'`{prefix}help switch`'
             ), color=DISPTACH_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel, embed=embed)
 
 async def switch_description(client, message):
     prefix = client.command_processer.prefix(message)
-    embed = Embed('here',(
+    return Embed('here',(
         'I can turn on a dispatch tester for you.\n'
         f'`{prefix}switch *event_name*`\n'
         'The list of defined testers:\n'
@@ -833,7 +815,6 @@ async def switch_description(client, message):
         f'For setting channel, use: `{prefix}here`'
             ), color=DISPTACH_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel, embed=embed)
 
 DISPATCH_TESTS(dispatch_tester.here, description=here_description, category='TEST COMMANDS')
 DISPATCH_TESTS(dispatch_tester.switch, description=switch_description, category='TEST COMMANDS')

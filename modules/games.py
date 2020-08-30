@@ -2,7 +2,7 @@
 from random import choice, randint
 
 from hata import Color, Embed, eventlist, DiscordException, parse_emoji, CLIENTS, BUILTIN_EMOJIS, ERROR_CODES
-from hata.ext.commands import Command, wait_for_message, ConverterFlag, Converter, wait_for_reaction
+from hata.ext.commands import Command, wait_for_message, ConverterFlag, Converter, wait_for_reaction, Closer
 
 GAMES_COLOR = Color.from_rgb(148,0,211)
 GAMES_COMMANDS = eventlist(type_=Command)
@@ -28,11 +28,10 @@ class message_me:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('message_me',(
+        return Embed('message_me',(
             'I ll send you something, from really deep of my heart.\n'
             f'Usage : `{prefix}message_me`'
-            ),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
+            ), color=GAMES_COLOR)
 
 
 @GAMES_COMMANDS.from_class
@@ -61,13 +60,12 @@ class dice:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('dice',(
+        return Embed('dice',(
             'I will throw some dice and tell you the sum.\n'
             f'Usage: `{prefix}dice <dice_count>`\n'
             '`dice_count` if optional, but I have only 6 dices...'
             ),color=GAMES_COLOR).add_footer(
                 'I see you Yukari peeking there! You dice stealer!')
-        await client.message_create(message.channel,embed=embed)
 
 
 def check_message_for_emoji(message):
@@ -97,13 +95,12 @@ class waitemoji:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('waitemoji',(
+        return Embed('waitemoji',(
             'After using this command, I ll wait some time for you to send '
             'an emoji at this channel. If you sent one, I ll send it back five '
             'times instead.\n'
             f'Usage : `{prefix}waitemoji`'
             ), color=GAMES_COLOR)
-        await client.message_create(message.channel, embed=embed)
 
 
 @GAMES_COMMANDS.from_class
@@ -120,12 +117,11 @@ class rate:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('rate',(
+        return Embed('rate',(
             'Do you want me, to rate someone?\n'
             f'Usage: `{prefix}rate <user>`\n'
             'If no user is passed, I will rate you :3'
-            ),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
+            ), color=GAMES_COLOR)
 
 
 MINE_MINE_CLEAR = (
@@ -270,7 +266,7 @@ class mine:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('mine',(
+        return Embed('mine',(
             'I creates a minesweeper game.\n'
             'If you are mad already from failing, just click on the '
             f'{MINE_CANCEL.as_emoji} under the mine.\n'
@@ -280,7 +276,6 @@ class mine:
             'The default bomb count in 12, but you can change it between '
             '8 and 24.'
                 ),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
 
 
 @GAMES_COMMANDS.from_class
@@ -308,17 +303,15 @@ class yuno:
             '░░░░░░▌▌░▌▐░▌▒▀▄▄░░░░▄▌▐░▌▒░▐░░░░░░░\n'
             '░░░░░▐▒▐░▐▐░▌▒▒▒▒▀▀▄▀▌▐░░▌▒░▌░░░░░░░\n'
             '░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░\n'
-            ,0xffafde,'https://www.youtube.com/watch?v=TaDAn_S_4Y8'))
+            ,0xffafde, 'https://www.youtube.com/watch?v=TaDAn_S_4Y8'))
     
     category = 'GAMES'
     
     async def description(client, message):
-        embed = Embed('yuno', (
+        return Embed('yuno', (
             'Your personal yandere.\n'
             'Good luck, I better leave now!'
                 ), color=GAMES_COLOR)
-        
-        await client.message_create(message.channel, embed=embed)
 
 
 @GAMES_COMMANDS.from_class
@@ -332,11 +325,9 @@ class paranoia:
     category = 'GAMES'
     
     async def description(client, message):
-        embed = Embed('paranoia', (
+        return Embed('paranoia', (
             'Pa-Pa-Pa-Pa-Paranoia!!\n'
                 ), color=GAMES_COLOR)
-        
-        await client.message_create(message.channel, embed=embed)
 
 
 @GAMES_COMMANDS.from_class
@@ -350,12 +341,11 @@ class command_random:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('random',(
+        return Embed('random',(
             'Do you need some random numbers?\n'
             f'Usage: `{prefix}random *number_1* <number_2>`\n'
             'You should pass at least 1 number. The second is optinal and by '
-            'default is `0`.'),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
+            'default is `0`.'), color=GAMES_COLOR)
 
 
 def generate_love_level():
@@ -530,16 +520,11 @@ class love:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('love',(
+        return Embed('love',(
             'How much you two fit together?'
             f'Usage: `{prefix}user *user*`\n'
-            ),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
+            ), color=GAMES_COLOR)
     
     async def parser_failure_handler(client, message, command, content, args):
-        prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('love',(
-            'How much you two fit together?'
-            f'Usage: `{prefix}user *user*`\n'
-            ),color=GAMES_COLOR)
-        await client.message_create(message.channel,embed=embed)
+        embed = await command.description(client, message)
+        await Closer(client, message.channel, embed)

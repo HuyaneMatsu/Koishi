@@ -160,7 +160,7 @@ class EvalUserLock(object):
 if IS_UNIX:
     async def eval_description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('eval', (
+        return Embed('eval', (
             'Executes the given code in an isolated environment.\n'
             'Usages:\n'
             f'{prefix}eval # code here\n'
@@ -178,11 +178,9 @@ if IS_UNIX:
             '*not code*\n'
             '\n'
             '... and many more ways.'
-                ),color=SNEKBOX_COLOR).add_footer(
+                ), color=SNEKBOX_COLOR).add_footer(
                 f'{DUNGEON} only!')
-        
-        await client.message_create(message.channel, embed=embed)
-    
+     
     @SNEKBOX_COMMANDS(name='eval', aliases=['e'], description=eval_description)
     async def eval_(client, message, content):
         code, is_exception = parse_code_content(content, message.content)

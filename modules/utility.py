@@ -2,8 +2,10 @@
 import re, sys, json
 
 from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, \
-    elapsed_time, ActivityUnknown, Status, ActivitySpotify, BUILTIN_EMOJIS, ChannelText, ChannelCategory, \
+    elapsed_time, ActivityUnknown, Status, ActivityTypes, BUILTIN_EMOJIS, ChannelText, ChannelCategory, \
     cchunkify, Permission, ICON_TYPE_NONE, KOKORO, Future, ERROR_CODES, ChannelVoice, ChannelStore, ChannelThread
+
+from hata.discord.others import DISCORD_EPOCH_START
 from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination
 from hata.ext.prettyprint import pchunkify
 
@@ -23,20 +25,20 @@ def teardown(lib):
 
 @UTILITY_COMMANDS.from_class
 class ping:
-    async def command(client,message):
+    async def command(client, message):
         await client.message_create(message.channel,
             embed=Embed(f'{client.gateway.latency*1000.:.0f} ms',color=UTILITY_COLOR))
     
     aliases = ['pong']
     category = 'UTILITY'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('ping',(
+        return Embed('ping',(
             'Do you wanna know how bad my connection is to Discord?\n'
             f'Usage: `{prefix}ping`'
-            ),color=UTILITY_COLOR)
-        await client.message_create(message.channel,embed=embed)
+            ), color=UTILITY_COLOR)
+
 
 @UTILITY_COMMANDS.from_class
 class rawr:
@@ -62,16 +64,16 @@ class rawr:
 
     category = 'UTILITY'
 
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('rawr',(
+        return Embed('rawr',(
             'Sends a message with every client, who can send a message to the channel.\n'
             f'Usage: `{prefix}rawr`'
-            ),color=UTILITY_COLOR,).add_footer('With cooldown of 60 seconds.')
-        await client.message_create(message.channel,embed=embed)
+            ), color=UTILITY_COLOR,).add_footer(
+                'With cooldown of 60 seconds.')
 
-COLOR_HTML_RP=re.compile('#?([0-9a-f]{6})',re.I)
-COLOR_REGULAR_RP=re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
+COLOR_HTML_RP = re.compile('#?([0-9a-f]{6})',re.I)
+COLOR_REGULAR_RP = re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
 
 @UTILITY_COMMANDS.from_class
 class color:
@@ -118,12 +120,11 @@ class color:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('color',(
+        return Embed('color',(
             'Do you wanna see a color?\n'
             f'Usage: `{prefix}color *color*`\n'
             'I accept regular RGB or HTML color format.'
-                ),color=UTILITY_COLOR)
-        await client.message_create(message.channel,embed=embed)
+                ), color=UTILITY_COLOR)
 
 @UTILITY_COMMANDS.from_class
 class update_application_info:
@@ -139,17 +140,15 @@ class update_application_info:
     category = 'UTILITY'
     checks = [checks.owner_only()]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('update_application_info',(
+        return Embed('update_application_info',(
             'I can update applicaction info of any of the active clients '
             'at my mansion.\n'
             f'Usage: `{prefix}update_application_info <user>`\n'
             '`user` is otional and can be only an another client.'
-                ),color=UTILITY_COLOR).add_footer(
+                ), color=UTILITY_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
-
 
 @UTILITY_COMMANDS.from_class
 class resend_webhook:
@@ -188,18 +187,17 @@ class resend_webhook:
     category = 'UTILITY'
     checks = [checks.guild_only(), checks.owner_only()]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('resend_webhook',(
+        return Embed('resend_webhook',(
             'I can resend a webhook, if chu really want.\n'
             f'Usage: `{prefix}resend_webhook *message_id* <channel>`\n'
             'The `message_id` must be the `id` of the message sent by the '
             'webhook.\n'
             'The `channel` by default is zhis channel, but if the message '
             'is at a different channel, you should tell me > <.'
-                ),color=UTILITY_COLOR).add_footer(
+                ), color=UTILITY_COLOR).add_footer(
                 'Guild only. Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 
 @UTILITY_COMMANDS.from_class
@@ -210,113 +208,135 @@ class se:
     
     category = 'UTILITY'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('se',(
+        return Embed('se',(
             '`se` stands for `show emoji`.\n'
             f'Usage: `{prefix}se *emoji*`\n'
             'I can show only custom emojis.'
                 ), color=UTILITY_COLOR)
-        await client.message_create(message.channel,embed=embed)
 
 
-def add_activity(text,activity):
-    ACTIVITY_FLAG=activity.ACTIVITY_FLAG
+def add_activity(text, activity):
     
     text.append(activity.name)
     text.append('\n')
-    text.append(f'**>>** type : {("game","stream","spotify","watching","custom")[activity.type]} ({activity.type})\n')
-
-    if ACTIVITY_FLAG&0b0000000000000001:
-        if activity.timestamp_start:
-            text.append(f'**>>** started : {elapsed_time(activity.start)} ago\n')
-        if activity.timestamp_end:
-            text.append(f'**>>** ends after : {elapsed_time(activity.end)}\n')
-
-    if ACTIVITY_FLAG&0b0000000000000010:
-        if activity.details:
-            text.append(f'**>>** details : {activity.details}\n')
-
-    if ACTIVITY_FLAG&0b0000000000000100:
-        if activity.state is not None:
-            text.append(f'**>>** state : {activity.state}\n')
-            
-    if ACTIVITY_FLAG&0b0000000000001000:
-        if activity.party_id:
-            text.append(f'**>>** party id : {activity.party_id}\n')
-        if activity.party_size:
-            text.append(f'**>>** party size : {activity.party_size}\n')
-        if activity.party_max:
-            text.append(f'**>>** party limit : {activity.party_max}\n')
-
-    if ACTIVITY_FLAG&0b0000000000010000:
-        if ACTIVITY_FLAG&0b0000010000000000:
-            if activity.asset_image_large:
-                text.append(f'**>>** asset image large url : {activity.image_large_url}\n')
-            if activity.asset_text_large:
-                text.append(f'**>>** asset text large : {activity.asset_text_large}\n')
-            if activity.asset_image_small:
-                text.append(f'**>>** asset image small url : {activity.image_small_url}\n')
-            if activity.asset_text_small:
-                text.append(f'**>>** asset text small : {activity.asset_text_small}\n')
-            
-        elif activity.type==ActivitySpotify.type:
-            album_cover_url=activity.album_cover_url
-            if album_cover_url is not None:
-                text.append(f'**>>** album cover : {album_cover_url}\n')
+    
+    activity_type = activity.type
+    text.append(f'**>>** type : {("game", "stream", "spotify", "watching", "custom")[activity_type]} ({activity_type})\n')
+    if activity_type == ActivityTypes.custom:
+        return
+    
+    timestamps = activity.timestamps
+    if (timestamps is not None):
+        start = activity.start
+        if (start is not None):
+            text.append(f'**>>** started : {elapsed_time(start)} ago\n')
         
-    if ACTIVITY_FLAG&0b0000000000100000:
-        if activity.secret_join:
-            text.append(f'**>>** secret join : {activity.secret_join}\n')
-        if activity.secret_spectate:
-            text.append(f'**>>** secret spectate : {activity.secret_spectate}\n')
-        if activity.secret_match:
-            text.append(f'**>>** secret match : {activity.secret_match}\n')
+        end = activity.end
+        if (end is not None):
+            text.append(f'**>>** ends after : {elapsed_time(end)}\n')
+    
+    details = activity.details
+    if (details is not None):
+        text.append(f'**>>** details : {details}\n')
+    
+    state = activity
+    if (state is not None):
+        text.append(f'**>>** state : {state}\n')
             
-    if ACTIVITY_FLAG&0b0000000001000000:
-        if activity.url:
-            text.append(f'**>>** url : {activity.url}\n')
+    party = activity.party
+    if (party is not None):
+        id_ = activity.id
+        if (id_ is not None):
+            text.append(f'**>>** party id : {id_}\n')
+        
+        size = party.size
+        max_ = party.max
+        if size or max_:
+            if size:
+                text.append(f'**>>** party size : {size}\n')
+            
+            if max_:
+                text.append(f'**>>** party max : {max_}\n')
 
-    if ACTIVITY_FLAG&0b0000000010000000:
-        if activity.sync_id:
-            text.append(f'**>>** sync id : {activity.sync_id}\n')
-
-    if ACTIVITY_FLAG&0b0000000100000000:
-        if activity.session_id:
-            text.append(f'**>>** session id : {activity.session_id}\n')
-
-    if ACTIVITY_FLAG&0b0000001000000000:
-        if activity.flags:
-            text.append(f'**>>** flags : {activity.flags} ({", ".join(list(activity.flags))})\n')
-
-    if ACTIVITY_FLAG&0b0000010000000000:
-        if activity.application_id:
-            text.append(f'**>>** application id : {activity.application_id}\n')
-
-    if ACTIVITY_FLAG&0b0000100000000000:
-        if activity.emoji is not None:
-            text.append(f'**>>** emoji : {activity.emoji.as_emoji}\n')
-
-    created_at=activity.created_at
-    if created_at is not None:
+    assets = activity.assets
+    if (assets is not None):
+        image_large_url = activity.image_large_url
+        if (image_large_url is not None):
+            text.append(f'**>>** asset image large url : {image_large_url}\n')
+        
+        text_large = assets.text_large
+        if (text_large is not None):
+            text.append(f'**>>** asset text large : {text_large}\n')
+        
+        image_small_url = activity.image_small_url
+        if (image_small_url is not None):
+            text.append(f'**>>** asset image small url : {image_small_url}\n')
+        
+        text_small = assets.text_small
+        if text_small:
+            text.append(f'**>>** asset text small : {text_small}\n')
+    
+    album_cover_url = activity.album_cover_url
+    if album_cover_url is not None:
+        text.append(f'**>>** album cover : {album_cover_url}\n')
+    
+    secrets = activity.secrets
+    if (secrets is not None):
+        join = secrets.secret
+        if (join is not None):
+            text.append(f'**>>** secret join : {join}\n')
+        
+        spectate = secrets.spectate
+        if (spectate is not None):
+            text.append(f'**>>** secret spectate : {spectate}\n')
+        
+        match = secrets.match
+        if (match is not None):
+            text.append(f'**>>** secret match : {match}\n')
+    
+    url = activity.url
+    if (url is not None):
+        text.append(f'**>>** url : {url}\n')
+    
+    sync_id = activity.sync_id
+    if (sync_id is not None):
+        text.append(f'**>>** sync id : {sync_id}\n')
+    
+    session_id = activity.session_id
+    if (session_id is not None):
+        text.append(f'**>>** session id : {session_id}\n')
+    
+    flags = activity.flags
+    if flags:
+        text.append(f'**>>** flags : {activity.flags} ({", ".join(list(flags))})\n')
+    
+    application_id = activity.application_id
+    if activity.application_id:
+        text.append(f'**>>** application id : {application_id}\n')
+    
+    created_at = activity.created_at
+    if created_at > DISCORD_EPOCH_START:
         text.append(f'**>>** created at : {elapsed_time(created_at)} ago\n')
-
-    if ACTIVITY_FLAG&0b0001000000000000:
-        text.append(f'**>>** id : {activity.id}\n')
+    
+    id_ = activity.id
+    if id_:
+        text.append(f'**>>** id : {id_}\n')
 
 @UTILITY_COMMANDS.from_class
 class user_info:
     async def command(client, message, user : Converter('user', ConverterFlag.user_default.update_by_keys(everywhere = True, profile = True), default_code='message.author')):
-        guild=message.guild
+        guild = message.guild
         
-        embed=Embed(user.full_name)
+        embed = Embed(user.full_name)
         embed.add_field('User Information',
             f'Created: {elapsed_time(user.created_at)} ago\n'
             f'Profile: {user:m}\n'
             f'ID: {user.id}')
         
         try:
-            profile=user.guild_profiles[guild]
+            profile = user.guild_profiles[guild]
         except KeyError:
             if user.avatar_type is ICON_TYPE_NONE:
                 color = user.default_avatar.color
@@ -363,12 +383,12 @@ class user_info:
                 text.append('Activity : *unknown*\n')
             elif len(user.activities)==1:
                 text.append('Activity : ')
-                add_activity(text,user.activities[0])
+                add_activity(text, user.activities[0])
             else:
                 text.append('Activities : \n')
                 for index,activity in enumerate(user.activities,1):
                     text.append(f'{index}.: ')
-                    add_activity(text,activity)
+                    add_activity(text, activity)
                     
             embed.add_field('Status and Activity',''.join(text))
         await client.message_create(message.channel,embed=embed)
@@ -377,16 +397,15 @@ class user_info:
     category = 'UTILITY'
     aliases = ['profile']
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('user',(
+        return Embed('user',(
             'I show you some information about the given user.\n'
             'If you use it inside of a guild and the user is inside as well, '
             'will show information, about their guild profile too.\n'
             f'Usage: `{prefix}user <user>`\n'
             'If no user is passed, I will tell your secrets :3'
-            ),color=UTILITY_COLOR)
-        await client.message_create(message.channel,embed=embed)
+                ), color=UTILITY_COLOR)
 
 
 GREEN_HEART = BUILTIN_EMOJIS['green_heart']
@@ -396,7 +415,7 @@ BLACK_HEART = BUILTIN_EMOJIS['black_heart']
 
 @UTILITY_COMMANDS.from_class
 class guild_info:
-    async def command(client,message):
+    async def command(client, message):
         guild = message.guild
         if guild is None:
             return
@@ -572,14 +591,14 @@ class guild_info:
     name = 'guild'
     category = 'UTILITY'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('user',(
+        return Embed('user',(
             'Do you want me to list, some information about this guild?\n'
             f'Usage: `{prefix}guild`\n'
                 ), color=UTILITY_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel, embed=embed)
+
 
 @UTILITY_COMMANDS.from_class
 class message:
@@ -599,15 +618,14 @@ class message:
     category = 'UTILITY'
     checks=[checks.has_permissions(Permission().update_by_keys(administrator=True))]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('message',(
+        return Embed('message',(
             'If you want, I show the representation of a message.\n'
             f'Usage: `{prefix}message *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
-                ),color=UTILITY_COLOR).add_footer(
+                ), color=UTILITY_COLOR).add_footer(
                 'Guild only! Administrator only!')
-        await client.message_create(message.channel,embed=embed)
 
 
 @UTILITY_COMMANDS.from_class
@@ -631,13 +649,12 @@ class message_pure:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('message_pure',(
+        return Embed('message_pure',(
             'If you want, I show the pure json representing a message.\n'
             f'Usage: `{prefix}message_pure *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
                 ),color=UTILITY_COLOR).add_footer(
                 'Guild only! Administrator only!')
-        await client.message_create(message.channel,embed=embed)
 
 @UTILITY_COMMANDS.from_class
 class roles:
@@ -669,8 +686,8 @@ class roles:
             return page
         
         def create_page(self,index):
-            role=self.roles[index-1]
-            embed=Embed(role.name,
+            role = self.roles[index-1]
+            embed = Embed(role.name,
                 '\n'.join([
                     f'id : {role.id!r}',
                     f'color : {role.color.as_html}',
@@ -693,13 +710,12 @@ class roles:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('roles',(
+        return Embed('roles',(
             'Cutie, do you want me, to list the roles of the guild and their '
             'permissions?\n'
             f'Usage: `{prefix}roles`'
                 ),color=UTILITY_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel,embed=embed)
 
 @UTILITY_COMMANDS.from_class
 class avatar:
@@ -718,14 +734,13 @@ class avatar:
     
     category = 'UTILITY'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('avatar',(
+        return Embed('avatar',(
             'Pure 4K user avatar showcase!\n'
             f'Usage: `{prefix}avatar <user>`\n'
             'If no `user` is passed, I will showcase your avatar.'
-                ),color=UTILITY_COLOR)
-        await client.message_create(message.channel,embed=embed)
+                ), color=UTILITY_COLOR)
 
 @UTILITY_COMMANDS.from_class
 class guild_icon:
@@ -749,12 +764,12 @@ class guild_icon:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('guild-icon',(
+        return Embed('guild-icon',(
             'Do you wanna see the guild\'s icon in 4K?!\n'
             f'Usage: `{prefix}guild-icon`\n'
                 ),color=UTILITY_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel,embed=embed)
+
 
 @UTILITY_COMMANDS.from_class
 class welcome_screen:
@@ -785,12 +800,12 @@ class welcome_screen:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('welcome-screen',(
+        return Embed('welcome-screen',(
             'Displays the guild\'s welcome screen\n'
             f'Usage: `{prefix}welcome-screen`'
                 ), color=UTILITY_COLOR).add_footer(
                 'Guild only!')
-        await client.message_create(message.channel, embed=embed)
+
 
 INVITE_GEN_WORDS = ['loli', 'dung', 'neko', 'koishi', 'hata', 'flan', '514', 'meow', 'nya', 'touhou', '2hu', 'kokoro',]
 INVITE_GEN_RP = re.compile('|'.join(re.escape(word) for word in INVITE_GEN_WORDS), re.I)
@@ -864,13 +879,11 @@ class invite_gen:
     category = 'UTILITY'
     checks = [checks.guild_only(), checks.owner_only()]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('invite-gen',(
+        return Embed('invite-gen',(
             'Creates invite at the guild with any of the predefined words.\n'
             f'Usage: `{prefix}invite-gen *text-channel* *time*`\n'
             'Note that time is in hours, for how much time it should circle the invites!'
                 ), color=UTILITY_COLOR).add_footer(
                 'Guild and owner only!')
-        
-        await client.message_create(message.channel, embed=embed)

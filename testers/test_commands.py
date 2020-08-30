@@ -4,7 +4,7 @@ from random import random
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     titledstr, multidict_titled, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
-    IconSlot, CHANNELS, ChannelText, VoiceRegion
+    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
@@ -839,3 +839,35 @@ async def test_list_invites(client, message):
     invites = await client.invite_get_guild(guild)
     embeds = [Embed('Invites', chunk) for chunk in pchunkify(invites)]
     await Pagination(client, message.channel, embeds)
+
+@TEST_COMMANDS(separator=',')
+async def autohelp_singles(client, message, name:str, user:'user', *words):
+    pass
+
+@TEST_COMMANDS(aliases=['autohelp-defaulted-alt'])
+async def autohelp_defaulted(client, message, name:str=None, channel:ChannelText=None, rest=None):
+    pass
+
+@TEST_COMMANDS(separator=('[',']'))
+async def autohelp_multy(client, message, value:(int, str), user:(User, 'invite'), *cakes:(ChannelText, 'tdelta')):
+    pass
+
+@TEST_COMMANDS
+async def detect_custom_emojis(client, message):
+    emojis = parse_custom_emojis(message.content)
+    if emojis:
+        content_lines = []
+        for x, emoji in zip(range(1,21), emojis):
+            content_lines.append(f'{x}.: {emoji:e}')
+        
+        truncated = len(emojis)-20
+        if truncated > 0:
+            content_lines.append(f'*{truncated} truncated*')
+        
+        content = '\n'.join(content_lines)
+    else:
+        content = '*no custom emojis detected*'
+    
+    await client.message_create(message.channel, content)
+
+

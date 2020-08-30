@@ -5,9 +5,11 @@ from itertools import cycle, chain
 
 from bs4 import BeautifulSoup
 
-from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO
+from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, \
+    Permission
 from hata.discord.others import from_json
-from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu, checks
+from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu, checks, Closer
+from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, QualPath
 from shared import SATORI_PREFIX
 
@@ -18,6 +20,8 @@ map_module('hata')
 SATORI_HELP_COLOR = Color.from_rgb(118, 0, 161)
 WORDMATCH_RP = re.compile('[^a-zA-z0-9]+')
 WIKI_COLOR = Color.from_rgb(48, 217, 255)
+
+Satori.commands(SubterraneanHelpCommand(SATORI_HELP_COLOR), 'help')
 
 @Satori.commands
 async def invalid_command(client, message, command, content):
@@ -39,7 +43,7 @@ async def invalid_command(client, message, command, content):
                             ):
                     return
             
-            await client.events.error(client,'invalid_command',err)
+            await client.events.error(client, 'invalid_command', err)
             return
         return
     
@@ -60,10 +64,18 @@ async def invalid_command(client, message, command, content):
     
     await client.message_create(message.channel,'I have no idea, hmpff...')
 
-@Satori.commands
-async def wiki(client,message,content):
+async def wiki_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('wiki',
+        'Tries to find the given term on the touhou wiki and then shows up the results to choose, or if only one thing '
+        'was found, shows that instantly.\n'
+        f'Usage: `{prefix}wiki *search-term*`',
+        color=WIKI_COLOR)
+    
+@Satori.commands(description=wiki_description)
+async def wiki(client, message, content):
     if not content:
-        await client.message_create(message.channel,embed=Embed(
+        await client.message_create(message.channel, embed=Embed(
             'No result',
             'Nothing was passed to search for.',
             color=WIKI_COLOR))
@@ -73,7 +85,7 @@ async def wiki(client,message,content):
     search_for = ' '.join(words)
     
     # this takes a while, lets type a little.
-    Task(client.typing(message.channel),client.loop)
+    Task(client.typing(message.channel), KOKORO)
     
     async with client.http.get(
             'https://en.touhouwiki.net/api.php?action=opensearch&search='
@@ -452,19 +464,19 @@ class auto_pyramid:
         for client_, count in zip(cycle(available_clients), chain(range(1,size),range(size,0,-1))):
             await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
     
-    checks = [checks.guild_only()]
+    checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('execute',(
+        return Embed('execute',(
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid <emoji> <size>`'
                 ), color=SATORI_HELP_COLOR).add_footer(
-                'Guild only!')
-        await client.message_create(message.channel,embed=embed)
+                'Guild only! You must have manage messages permission to use it.')
     
     async def parser_failure_handler(client, message, command, content, args):
-        await command.description(client, message)
+        embed = await command.description(client, message)
+        await Closer(client, message.channel, embed)
 
 @Satori.commands.from_class
 class auto_pyramid_u:
@@ -526,20 +538,19 @@ class auto_pyramid_u:
         for user, count in zip(selected_users, chain(range(1,size),range(size,0,-1))):
             await client.webhook_send(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)), name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
     
-    checks = [checks.guild_only()]
+    checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('execute',(
+        return Embed('execute',(
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid-u <emoji> <size>`'
                 ), color=SATORI_HELP_COLOR).add_footer(
-                'Guild only!')
-        
-        await client.message_create(message.channel, embed=embed)
+                'Guild only! You must have manage messages permission to use it.')
     
     async def parser_failure_handler(client, message, command, content, args):
-        await command.description(client, message)
+        embed = await command.description(client, message)
+        await Closer(client, message.channel, embed)
 
 @Satori.commands.from_class
 class reverse:
@@ -549,12 +560,10 @@ class reverse:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('reverse',(
+        return Embed('reverse',(
             'Reverses your message\n'
-            f'Usage: `{prefix}reverses <content>`'
+            f'Usage: `{prefix}reverse <content>`'
                 ), color=SATORI_HELP_COLOR)
-        
-        await client.message_create(message.channel, embed=embed)
 
 async def docs_selecter(client, channel, message, path):
     unit = MAPPED_OBJECTS[path]
@@ -582,12 +591,10 @@ async def docs_selecter(client, channel, message, path):
 
 async def docs_help(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('docs',(
+    return Embed('docs',(
         'Searchers the given term in hata docs.\n'
         f'Usage: `{prefix}docs <search_for>`'
             ), color=SATORI_HELP_COLOR)
-    
-    await client.message_create(message.channel, embed=embed)
 
 async def docs(client, message, search_for:str=None):
     if (search_for is None) or (len(search_for)<4):

@@ -70,12 +70,12 @@ class join:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('join',(
+        return Embed('join',(
             'Joins me to your voice channel.\n'
             f'Usage: `{prefix}join *n%*`\n'
             'You can also tell me how loud I should sing for you.'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel,embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class pause:
@@ -91,11 +91,11 @@ class pause:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('pause',(
+        return Embed('pause',(
             'Pauses the currently playing audio.\n'
             f'Usage: `{prefix}pause`\n'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class resume:
@@ -119,11 +119,11 @@ class resume:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('resume',(
+        return Embed('resume',(
             'Resumes the currently playing audio.\n'
             f'Usage: `{prefix}resume`\n'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class leave:
@@ -139,11 +139,11 @@ class leave:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('leave',(
+        return Embed('leave',(
             'Leaves me from the voice channel..\n'
             f'Usage: `{prefix}leave`'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel,embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class play:
@@ -191,12 +191,12 @@ class play:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('play',(
+        return Embed('play',(
             'Do you want me to search me some audio to listen to?.\n'
             f'Usage: `{prefix}play <name>`\n'
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class local:
@@ -321,12 +321,11 @@ class local:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('local',(
+        return Embed('local',(
             'Plays a local audio from my collection.\n'
             f'Usage: `{prefix}local <name>`\n'
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
 
 @VOICE_COMMANDS.from_class
 class volume:
@@ -362,12 +361,11 @@ class volume:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('volume',(
+        return Embed('volume',(
             'Sets my volume to the given percentage.\n'
             f'Usage: `{prefix}volume *n%*`\n'
             'If no volume is passed, then I will tell my current volume.'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
 
 @VOICE_COMMANDS.from_class
 class skip:
@@ -391,12 +389,12 @@ class skip:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('skip',(
+        return Embed('skip',(
             'Skips the audio at the given index.\n'
             f'Usage: `{prefix}skip *index*`\n'
             'If not giving any index or giving it as `0`, will skip the currently playing audio.'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class stop:
@@ -421,11 +419,11 @@ class stop:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('stop',(
+        return Embed('stop',(
             'Well, if you really want I can stop playing audio.\n'
             f'Usage: `{prefix}stop`'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel,embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class move:
@@ -463,11 +461,11 @@ class move:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('move',(
+        return Embed('move',(
             'Should I move to an other channel, or next to You, my Love??\n'
             f'Usage: `{prefix}move <channel>`'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel,embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class party_is_over:
@@ -512,12 +510,11 @@ class party_is_over:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('party-is-over',(
+        return Embed('party-is-over',(
             'Should I mark the talking party as done?\n'
             f'Usage: `{prefix}party-is-over`'
             ), color=VOICE_COLOR).add_footer(
                 'Administartor only!')
-        await client.message_create(message.channel, embed=embed)
 
 @VOICE_COMMANDS.from_class
 class queue:
@@ -568,11 +565,11 @@ class queue:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('queue',(
+        return Embed('queue',(
             'Shows the audio player queue of the current guild.\n'
             f'Usage: `{prefix}queue`'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class loop:
@@ -590,11 +587,11 @@ class loop:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('loop',(
+        return Embed('loop', (
             'Loops over the currently playing audio.\n'
             f'Usage: `{prefix}loop`\n'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class loop_stop:
@@ -612,11 +609,11 @@ class loop_stop:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('loop-stop',(
+        return Embed('loop-stop',(
             'Stops looping over the actual audio or over the queue.\n'
             f'Usage: `{prefix}loop-stop`\n'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+
 
 @VOICE_COMMANDS.from_class
 class loop_all:
@@ -634,8 +631,8 @@ class loop_all:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('loop-all',(
+        return Embed('loop-all', (
             'Starts to loop over the queue.\n'
             f'Usage: `{prefix}loop-all`\n'
             ), color=VOICE_COLOR)
-        await client.message_create(message.channel, embed=embed)
+

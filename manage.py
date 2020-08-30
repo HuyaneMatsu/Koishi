@@ -11,26 +11,26 @@ if (hata_path is not None):
 
 del hata_path
 
-from hata import Client, start_clients, ActivityGame, ActivityWatching
+from hata import Client, start_clients, ActivityRich, ActivityTypes
 from hata.ext.extension_loader import EXTENSION_LOADER
 
 Koishi = Client(pers_data.KOISHI_TOKEN,
     secret = pers_data.KOISHI_SECRET,
     client_id = pers_data.KOISHI_ID,
-    activity = ActivityGame.create(name='with Satori'),
+    activity = ActivityRich('with Satori'),
     shard_count = 2,
         )
 
 Satori = Client(pers_data.SATORI_TOKEN,
     secret = pers_data.SATORI_SECRET,
     client_id = pers_data.SATORI_ID,
-    activity = ActivityGame.create(name='with Koishi'),
+    activity = ActivityRich('with Koishi'),
     status = 'dnd',
         )
 
 Flan = Client(pers_data.FLAN_TOKEN,
     client_id = pers_data.FLAN_ID,
-    activity = ActivityWatching.create(name='Chesuto development'),
+    activity = ActivityRich('Chesuto development', type_=ActivityTypes.watching),
     status = 'idle',
         )
 

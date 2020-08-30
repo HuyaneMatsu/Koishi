@@ -3,10 +3,12 @@ import re, sys
 from io import StringIO
 from types import FunctionType as function
 from datetime import datetime, timedelta
+from random import random
 
 from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
-    Role, ChannelText, Invite
-from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter, ConverterFlag
+    Role, ChannelText, Invite, KOKORO
+from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter, ConverterFlag, Closer
+from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.extension_loader import EXTENSION_LOADER
 
 from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
@@ -56,7 +58,7 @@ class once_on_ready(object):
 
 Koishi.command_processer.create_category('TEST COMMANDS', checks=[checks.owner_only()])
 
-
+Koishi.commands(SubterraneanHelpCommand(KOISHI_HELP_COLOR), 'help', category='HELP')
 
 @Koishi.commands
 async def default_event(client, message):
@@ -67,8 +69,8 @@ async def default_event(client, message):
         m3 = message.author.mention_nick
         m4 = client.mention_nick
         replace = {
-            '@everyone':'@\u200beveryone',
-            '@here':'@\u200bhere',
+            '@everyone'   : '@\u200beveryone',
+            '@here'       : '@\u200bhere',
             re.escape(m1) : m2,
             re.escape(m2) : m1,
             re.escape(m3) : m4,
@@ -88,7 +90,7 @@ async def default_event(client, message):
     
     matched = _KOISHI_OWO_RP.fullmatch(content,)
     if (matched is not None):
-        text=f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
+        text = f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
     
     elif (_KOISHI_OMAE_RP.match(content) is not None):
         text = 'NANI?'
@@ -101,7 +103,7 @@ async def default_event(client, message):
 @Koishi.commands(checks=[checks.is_guild(DUNGEON)])
 async def command_error(client, message, command, content, exception):
     with StringIO() as buffer:
-        await client.loop.render_exc_async(exception,[
+        await KOKORO.render_exc_async(exception,[
             client.full_name,
             ' ignores an occured exception at command ',
             repr(command),
@@ -179,114 +181,6 @@ async def command_error(client, message, command, content, exception):
     await Pagination(client,message.channel,pages)
     return False
 
-async def help_description(client,message):
-    by_categories=[]
-    for category in client.command_processer.categories:
-        if await category.run_checks(client,message):
-            command_names = []
-            for command in category.commands:
-                if await command.run_checks(client,message):
-                    command_names.append(command.display_name)
-            
-            # filter out empty categories
-            if command_names:
-                by_categories.append((f'**{category.display_name}**',command_names),)
-    
-    pages = []
-    page = []
-    page_line_count=0
-    for category_name, command_names in by_categories:
-        if page_line_count>14:
-            pages.append('\n'.join(page))
-            page.clear()
-            page.append(category_name)
-            page_line_count=1
-        else:
-            if page_line_count!=0:
-                page.append('')
-                page_line_count+=1
-            page.append(category_name)
-            page_line_count+=1
-        
-        command_name_index = 0
-        command_name_limit = len(command_names)
-        while True:
-            command_name = command_names[command_name_index]
-            command_name_index +=1
-            
-            page.append(command_name)
-            page_line_count+=1
-            
-            if page_line_count<20:
-                if command_name_index == command_name_limit:
-                    break
-                else:
-                    continue
-            
-            pages.append('\n'.join(page))
-            page.clear()
-            if command_name_index == command_name_limit:
-                page_line_count = 0
-                break
-            
-            page.append(category_name)
-            page_line_count=1
-            continue
-    
-    if page:
-        pages.append('\n'.join(page))
-    
-    del page
-    
-    prefix = client.command_processer.get_prefix_for(message)
-    result=[]
-    
-    limit=len(pages)
-    index=0
-    while index<limit:
-        embed = Embed('Commands:',color=KOISHI_HELP_COLOR,description=pages[index])
-        index+=1
-        embed.add_field(f'Use `{prefix}help <command>` for more information.', f'page {index}/{limit}')
-        result.append(embed)
-    
-    del pages
-    
-    await Pagination(client,message.channel,result)
-
-@Koishi.commands(description=help_description,category='HELP')
-async def help(client, message, name:str=''):
-    if not name:
-        await help_description(client, message)
-        return
-    
-    name = name.lower()
-    command = client.command_processer.commands.get(name)
-    
-    if (command is None) or (not await command.run_all_checks(client, message)):
-        prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed(f'Invalid command: {name!r}',(
-            f'Please try using `{prefix}help` to list the available commands '
-            'for you\n'
-            'Take care!'
-            ),color=KOISHI_HELP_COLOR)
-        message = await client.message_create(message.channel,embed=embed)
-        await sleep(30.,client.loop)
-        await client.message_delete(message)
-        return
-    
-    description=command.description
-    if type(description) is function:
-        await description(client, message)
-        return
-    
-    if type(description) is str:
-        await client.message_create(message.channel, embed=Embed(name, description, color=KOISHI_HELP_COLOR))
-        return
-    
-    await client.message_create(message.channel, embed=Embed(description='The command has no description provided',
-        color=KOISHI_HELP_COLOR))
-    return
-
 @Koishi.commands
 async def invalid_command(client,message,command,content):
     prefix = client.command_processer.get_prefix_for(message)
@@ -297,7 +191,7 @@ async def invalid_command(client,message,command,content):
             )
     
     message = await client.message_create(message.channel,embed=embed)
-    await sleep(30.,client.loop)
+    await sleep(30., KOKORO)
     await client.message_delete(message)
 
 @Koishi.commands.from_class
@@ -330,11 +224,10 @@ class about:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('about',(
+        return Embed('about',(
             'Just some information about me.'
             f'Usage: `{prefix}about`'
                 ),color=KOISHI_HELP_COLOR)
-        await client.message_create(message.channel, embed=embed)
 
 @Koishi.commands.from_class
 class reload:
@@ -387,20 +280,19 @@ class reload:
             index += 1
             embed.add_footer(f'page {index}/{limit}')
         
-        await Pagination(client,message.channel,pages)
+        return pages
 
 async def aliases_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('aliases',(
+    return Embed('aliases',(
         'Do you wanna know one of my command\'s aliases?\n'
         f'Type `{prefix}aliases <name>` and check them out!\n\n'
         'Or if you wanna know someone elses, who I might spy on, type her name after the command\'s :3.'
             ), color=KOISHI_HELP_COLOR)
-    
-    await client.message_create(message.channel, embed=embed)
+
 
 async def aliases_parser_failure_handler(client, message, command, content, args):
-    return await aliases_description(client, message)
+    await Closer(client, message.channel, aliases_description(client, message))
 
 @Koishi.commands(description=aliases_description, category='HELP', parser_failure_handler=aliases_parser_failure_handler)
 async def aliases(client, message, name:str, target_client:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
@@ -445,9 +337,9 @@ async def aliases(client, message, name:str, target_client:Converter('user', fla
     
     await client.message_create(message.channel,embed=Embed(title,description,color=KOISHI_HELP_COLOR))
 
-async def execute_description(client,message):
+async def execute_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('execute',(
+    return Embed('execute',(
         'Use an interpreter trough me :3\n'
         'Usages:\n'
         f'{prefix}execute #code here\n'
@@ -465,9 +357,8 @@ async def execute_description(client,message):
         '*not code*\n'
         '\n'
         '... and many more ways.'
-            ),color=KOISHI_HELP_COLOR).add_footer(
+            ), color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel, embed=embed)
 
 Koishi.commands(Interpreter(locals().copy()), name='execute',description=execute_description, category='UTILITY',
     checks=[checks.owner_only()])
@@ -524,13 +415,12 @@ class rules:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('rules',(
+        return Embed('rules',(
             f'Shows the rules of the {DUNGEON} guild.'
             f'Usage : `{prefix}rules`'
                 ),color=KOISHI_HELP_COLOR).add_footer(
                 f'Owner only and can be used only at {DUNGEON}.')
-        
-        await client.message_create(message.channel, embed=embed)
+
 
 PATTERN_ROLE_RELATION = [
     (re.compile('nya+', re.I), EVERYNYAN_ROLE, timedelta(minutes=10), True),
@@ -594,10 +484,8 @@ class invite:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('invite',(
+        return Embed('invite',(
             f'Sends an invite to our {DUNGEON} guild.'
             f'Usage : `{prefix}invite`'
                 ),color=KOISHI_HELP_COLOR)
-        
-        await client.message_create(message.channel, embed=embed)
 

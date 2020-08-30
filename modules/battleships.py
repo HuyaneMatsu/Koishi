@@ -4,24 +4,24 @@ from random import randint
 
 from hata import Color,filter_content, is_user_mention, Future, FutureWM, future_or_timeout, sleep, Task, \
     DiscordException, BUILTIN_EMOJIS, Embed
-from hata.ext.commands import WaitAndContinue, Converter, ConverterFlag, checks
+from hata.ext.commands import WaitAndContinue, Converter, ConverterFlag, checks, Closer
 
 BS_COLOR = Color.from_rgb(71, 130, 255)
 
 def setup(lib):
-    Koishi.commands(battle_manager,name='bs', checks=[checks.guild_only()],category='GAMES')
+    Koishi.commands(battle_manager, name='bs', checks=[checks.guild_only()], category='GAMES')
 
 def teardown(lib):
     Koishi.commands.remove(battle_manager, name='bs')
 
-async def bs_description(client,message):
+async def bs_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('bs',(
+    return Embed('bs',(
         'Requests a battleship game with the given user.\n'
         f'Usage: `{prefix}bs *user*`'
-        ),color=BS_COLOR).add_footer(
+        ), color=BS_COLOR).add_footer(
             'Guild only!')
-    await client.message_create(message.channel,embed=embed)
+
 
 OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
 
@@ -239,7 +239,8 @@ async def battle_manager(client,message,target:Converter('user', flags=Converter
     if text:
         await client.message_create(message.channel,text)
     else:
-        await bs_description(client,message)
+        embed = await bs_description(client, message)
+        await Closer(client, message.channel, embed)
 
 class ship_type(object):
     __slots__=('parts_left', 'size1', 'size2', 'type', 'x', 'y',)
@@ -488,7 +489,7 @@ class battleships_game:
         self.player2.channel=channel2
 
         Task(self.start(),self.client.loop)
-
+    
     #compability
     async def start(self):
         try:

@@ -31,15 +31,14 @@ class clear:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('clear',(
+        return Embed('clear',(
             'I ll clear up the leftover after your lewd messages O-NEE-CHA-N.'
             f'Usage : `{prefix}clear <amount> <reason>`\n'
             '`amount` is optional, by default it is just 1.\n'
             'The `reason` will show up at the audit logs of the guild.'
-            ),color=ADMINISTRATION_COLOR).add_footer(
+            ), color=ADMINISTRATION_COLOR).add_footer(
                 'This command can be executed only at a guild, and you must have '
                 '`manage messages` permission as well.')
-        await client.message_create(message.channel,embed=embed)
 
 
 @ADMINISTRATION_COMMANDS.from_class
@@ -95,10 +94,10 @@ class invite_create:
                 full = True
             else:
                 full = False
-    
+        
         if not full:
             full = client.is_owner(user)
-    
+        
         prefix = client.command_processer.get_prefix_for(message)
         if full:
             content = (
@@ -112,10 +111,8 @@ class invite_create:
                 f'Usage: `{prefix}invite-create`'
                     )
         
-        embed = Embed('create-invite', content, color=ADMINISTRATION_COLOR).add_footer(
+        return Embed('create-invite', content, color=ADMINISTRATION_COLOR).add_footer(
             'Guild only. You must have `create instant invite` permission to invoke this command.')
-        
-        await client.message_create(message.channel,embed=embed)
 
 
 @ADMINISTRATION_COMMANDS.from_class
@@ -187,13 +184,12 @@ class bans:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('bans',(
+        return Embed('bans',(
             'I ll show you the banned users at the guild.\n'
             f'Usage: `{prefix}bans`'
             ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must have `ban user` permission to '
                 'invoke this command.')
-        await client.message_create(message.channel, embed=embed)
 
 
 @ADMINISTRATION_COMMANDS.from_class
@@ -222,12 +218,11 @@ class prefix:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('prefix',(
+        return Embed('prefix',(
             'Do you have any preferred prefix for my commands?\n'
             f'Usage: `{prefix}prefix *prefix*`'
             ),color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must be the owner of the guild to use this command.')
-        await client.message_create(message.channel,embed=embed)
 
 
 @ADMINISTRATION_COMMANDS.from_class
@@ -240,12 +235,11 @@ class leave_guild:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('leave_-uild',(
+        return Embed('leave_-uild',(
             'You really want me to leave? :c\n'
             f'Usage: `{prefix}leave_guild`'
             ),color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must be the owner of the guild to use this command.')
-        await client.message_create(message.channel, embed=embed)
 
 @ADMINISTRATION_COMMANDS.from_class
 class reaction_clear:
@@ -274,12 +268,11 @@ class reaction_clear:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('reaction_clear',(
+        return Embed('reaction_clear',(
             'Do you want me to remvoe all the reactions from a message?\n'
             f'Usage: `{prefix}reaction_clear *message_id*`'
                 ),color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only! You must have manage messages permission to invoke this command.!')
-        await client.message_create(message.channel,embed=embed)
 
 @ADMINISTRATION_COMMANDS.from_class
 class show_help_for:
@@ -298,12 +291,11 @@ class show_help_for:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('show_help_for',(
+        return Embed('show_help_for',(
             'Calls `help` command, as the given user would do it.\n'
             f'Usage: `{prefix}show_help_for *user*`\n'
-                ),color=ADMINISTRATION_COLOR).add_footer(
+                ), color=ADMINISTRATION_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 ROLE_EMOJI_OK       = BUILTIN_EMOJIS['ok_hand']
 ROLE_EMOJI_CANCEL   = BUILTIN_EMOJIS['x']
@@ -408,12 +400,12 @@ class emoji_role:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('emoji-role',(
+        return Embed('emoji-role',(
             'Edits the emoji for which roles is available for.\n'
             f'Usage: `{prefix}emoji-role *emoji* <role_1> <role_2> ...`\n'
-                ),color=ADMINISTRATION_COLOR).add_footer(
+                ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must have adminsitartor permission to execute this command')
-        await client.message_create(message.channel,embed=embed)
+
 
 @ADMINISTRATION_COMMANDS.from_class
 class invites:
@@ -440,13 +432,12 @@ class invites:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('invites',(
+        return Embed('invites',(
             'I can list you the invites of the guild.\n'
             f'Usage: `{prefix}invites <channel>`\n'
             'If `channel` is passed, I ll check the invites only at that channel.'
-                ),color=ADMINISTRATION_COLOR).add_footer(
+                ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only! You must have manage_channel permission to use this command.')
-        await client.message_create(message.channel,embed=embed)
 
 
 @ADMINISTRATION_COMMANDS.from_class
@@ -489,14 +480,14 @@ class logs:
             await iterator.load_all()
             logs = iterator.transform()
         
-        await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(logs)])
+        await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(logs)])
     
     category = 'ADMINISTRATION'
     checks=[checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True), handler=permission_check_handler)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('logs',(
+        return Embed('logs',(
             'I can list you the audit logs of the guild.\n'
             f'Usage: `{prefix}logs <guild> <user> <event>`\n'
             'Both `user` and `event` is optional.\n'
@@ -505,8 +496,6 @@ class logs:
             'operation.'
                 ),color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only!')
-        
-        await client.message_create(message.channel, embed=embed)
 
 @ADMINISTRATION_COMMANDS.from_class
 class telekinesisban:
@@ -542,11 +531,10 @@ class telekinesisban:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed = Embed('telekinesisban',(
+        return Embed('telekinesisban',(
             'Bans the given user at the specified guild.\n'
             f'Usage: `{prefix}telekinesisban <guild> *user* <reason>`\n'
-                ),color=ADMINISTRATION_COLOR).add_footer(
+                ), color=ADMINISTRATION_COLOR).add_footer(
                 'Owner only!')
-        
-        await client.message_create(message.channel, embed=embed)
+
 

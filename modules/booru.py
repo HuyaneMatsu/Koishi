@@ -265,12 +265,11 @@ class safebooru:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('safebooru',(
+        return Embed('safebooru',(
             'Do you want me, to request some images from safebooru?\n'
             f'Usage: `{prefix}safebooru *tags*`\n'
             'You should pass at least 1 tag.'
-            ),color=BOORU_COLOR)
-        await client.message_create(message.channel,embed=embed)
+            ), color=BOORU_COLOR)
 
 
 class nsfw_checker():
@@ -308,15 +307,13 @@ class nsfwbooru:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('nsfwbooru',(
+        return Embed('nsfwbooru',(
             'Do you want me, to request some images from gelbooru?... You perv!\n'
             f'Usage: `{prefix}nsfwbooru *tags*`\n'
             'You should pass at least 1 tag. '
             'Passing nsfw tags is recommended as well.'
-                ),color=BOORU_COLOR).add_footer(
+                ), color=BOORU_COLOR).add_footer(
                 'NSFW channel only!')
-        await client.message_create(message.channel,embed=embed)
-
 
 for title,tag_name,command_names in (
         ('Aki Minoriko',            'aki_minoriko',         ('minoriko',),),

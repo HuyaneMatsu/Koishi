@@ -184,16 +184,14 @@ class threads:
         
         await client.message_create(message.channel, embed=embed)
     
-    async def descyrption(client, message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         
-        embed = Embed('threads',(
+        return Embed('threads',(
             'Just shows how my threads are doing.\n'
             f'Usage: `{prefix}threads`'
             ), color=STAT_COLOR).add_footer(
                 'Owner only!')
-        
-        await client.message_create(message.channel, embed=embed)
 
 if IS_PYPY:
     @STAT_COMMANDS.from_class
@@ -227,16 +225,15 @@ if IS_PYPY:
         
         aliases = ['gc', 'gc-info',]
         
-        async def descyrption(client, message):
+        async def description(client, message):
             prefix = client.command_processer.get_prefix_for(message)
             
-            embed = Embed('gc-stats',(
+            return Embed('gc-stats',(
                 'Garbage collector info to check memory usage.\n'
                 f'Usage: `{prefix}gc-stats`'
                 ), color=STAT_COLOR).add_footer(
                     'Owner only!')
-            
-            await client.message_create(message.channel, embed=embed)
+
 
 if (psutil is not None) and (sys.platform == 'linux'):
     def get_cpu_frquence_range():
@@ -418,15 +415,12 @@ if (psutil is not None) and (sys.platform == 'linux'):
             
             await client.message_create(message.channel, embed=embed)
     
-    async def descyrption(client, message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         
-        embed = Embed('system-stats',(
+        return Embed('system-stats',(
             'Shows my system\s and processe\'s stats.\n'
             f'Usage: `{prefix}system-stats`'
             ), color=STAT_COLOR).add_footer(
                 'Owner only!')
-        
-        await client.message_create(message.channel, embed=embed)
-
 

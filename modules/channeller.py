@@ -189,7 +189,7 @@ async def channeling_start(client,message,channel_id:int):
 
 async def channeling_start_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('channeling_start',(
+    return Embed('channeling_start',(
         'I can connect more channels with my youkai powers.\n'
         f'Usage: `{prefix}channeling_start *channel_id*`\n'
         '`channel_id` must be an id of a channel, what I have access too.\n'
@@ -197,9 +197,8 @@ async def channeling_start_description(client,message):
         'message. I always connect the source channel, with the target '
         'channel to be clean. *More channels can be connected too.*\n'
         f'To cancel channelling use: `{prefix}channeling_stop`'
-        ),color=CHANNELLER_COLOR).add_footer(
+        ), color=CHANNELLER_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel,embed=embed)
 
 
 async def channeling_stop(client,message,content):
@@ -219,15 +218,15 @@ async def channeling_stop(client,message,content):
 
 async def channeling_stop_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('channeling_stop',(
+    return Embed('channeling_stop',(
         'Cancels the channelling of this channel.\n'
         f'Usage: `{prefix}channeling_stop`\n'
         'If more channels are connected, you need to call this command, '
         'from every of them, to cancel all.\n'
         'If only one channel is left alone, it will be cancelled automatically.'
-        ),color=CHANNELLER_COLOR).add_footer(
+        ), color=CHANNELLER_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel,embed=embed)
+
 
 CHANNELLER_COMMANDS(channeling_start, description=channeling_start_description, checks=[checks.guild_only(),checks.owner_only()],category='UTILITY')
 CHANNELLER_COMMANDS(channeling_stop, description=channeling_stop_description,checks=[checks.owner_only()],category='UTILITY')

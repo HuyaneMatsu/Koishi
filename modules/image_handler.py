@@ -95,7 +95,7 @@ load_images()
 
 async def image_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('image',(
+    return Embed('image',(
         'I ll search images by tags from my collection, '
         'then send 1 of the results.\n'
         f'Usage : `{prefix}image (count) (any / pic / vid) (index (hex) *n*) <tag_1> <tag_2> ...`\n'
@@ -109,12 +109,11 @@ async def image_description(client,message):
         'a hexadecimal number.\n'
         'You can pass any amount of tags, mentions are ignored.'
             ), color=IMAGE_COLOR)
-    await client.message_create(message.channel, embed=embed)
 
 
 async def upload_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('upload',(
+    return Embed('upload',(
         'You can can upload images with tags, which you can access with the '
         f'{prefix}image` command after.\n'
         f'Usage : `{prefix}upload <tag_1> <tag_2> ...`\n'
@@ -124,7 +123,7 @@ async def upload_description(client,message):
         'You can pass any amount of tags, mentions are ignored.'
             ), color=IMAGE_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel, embed=embed)
+
 
 RESERVED_TAGS={'any','vid','pic','count','index','hex',}
 
@@ -400,12 +399,11 @@ class pat:
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         
-        embed = Embed('pat',(
+        return Embed('pat',(
             'Pat pat pat pat!\n'
             f'Usage : `{prefix}pat`'
             ), color=IMAGE_COLOR)
-        
-        await client.message_create(message.channel, embed=embed)
+
 
 @IMAGE_COMMANDS.from_class
 class hug:
@@ -424,9 +422,7 @@ class hug:
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         
-        embed = Embed('hug',(
+        return Embed('hug',(
             'Huh.. Huggu? HUGG YOUUU!!!\n'
             f'Usage : `{prefix}hug`'
             ), color=IMAGE_COLOR)
-        
-        await client.message_create(message.channel, embed=embed)

@@ -31,13 +31,13 @@ def draw(buffer,text):
     buffer.seek(0)
     return buffer
 
-ACTIVE_GAMES={}
-CIRCLE_TIME=60.
-KANAKO_COLOR=Color.from_tuple(FONT_COLOR)
+ACTIVE_GAMES = {}
+CIRCLE_TIME = 60.
+KANAKO_COLOR = Color.from_tuple(FONT_COLOR)
 
 async def kanako_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('kanakogame',(
+    return Embed('kanakogame',(
         'Start a hiragana or a katakana quiz!\n'
         f'Usage: `{prefix}kanakogame (subcommand) ...`\n'
         'There can be only one game each channel.\n\n'
@@ -58,8 +58,7 @@ async def kanako_description(client,message):
         '*Game owner only.*\n'
         f'- `{prefix}kanakogame hiragana` : Shows up the hiragana map.\n'
         f'- `{prefix}kanakogame katakana` : Shows up the katakana map.'
-        ),color=KANAKO_COLOR)
-    await client.message_create(message.channel,embed=embed)
+        ), color=KANAKO_COLOR)
 
 _pairsK=('k','g','s','z','c','t','d','f','h','b','p','n','m','y','r','w','j')
 _pairsKx={'k':('k','g'),'g':('k','g'),'s':('s','z','c'),'z':('s','z','c'),'c':('s','z','c'),'t':('t','d'),'d':('t','d'),'f':('f','h','b','p'),'h':('f','h','b','p'),'b':('f','h','b','p'),'p':('f','h','b','p')}

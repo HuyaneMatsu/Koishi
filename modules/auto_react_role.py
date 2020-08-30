@@ -1334,22 +1334,22 @@ class load_auto_react_roles(object):
                     await scarlet.add(AutoReactRoleManager.from_query(query,connector))
 
 
-async def auto_react_roles_description(client,message):
+async def auto_react_roles_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('show-auto-react-roles',(
+    return Embed('show-auto-react-roles',(
         'Starts an auto react role GUI on the specified message.\n'
         'If the message has active auto react role on it, will display that, '
         'and if it has active GUI too, will cancel that.\n'
         f'Usage: `{prefix}auto-react-roles *channel* <message_id>`'
-            ),color=AUTO_REACT_ROLE_COLOR).add_footer(
+            ), color=AUTO_REACT_ROLE_COLOR).add_footer(
                 'Guild only! You must have administrator permission to use this command.')
-    await client.message_create(message.channel,embed=embed)
+
 
 AUTO_REACT_ROLE_COMMANDS(create_auto_react_role,
-    name    = 'auto-react-role',
-    category= 'ADMINISTRATION',
+    name = 'auto-react-role',
+    category = 'ADMINISTRATION',
     description = auto_react_roles_description,
-    checks  = [
+    checks = [
         checks.guild_only(),
         checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler),
             ]
@@ -1360,7 +1360,7 @@ async def show_auto_react_roles(client, message):
     if guild is None:
         return
     
-    managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type = True, is_method=True)
+    managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type=True, is_method=True)
     
     embed = Embed(f'Auto role managers for: {guild}',color=AUTO_REACT_ROLE_COLOR)
     if not managers:
@@ -1385,20 +1385,20 @@ async def select_auto_react_role_gui(client, channel, message, title, manager):
     
     await AutoReactRoleGUI(client, manager.message, channel, guild, message=message)
 
-async def show_auto_react_roles_description(client,message):
+async def show_auto_react_roles_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('show-auto-react-roles',(
+    return Embed('show-auto-react-roles',(
         'Lists the currently active ˙`auto-react-roles` at the respective guild.\n'
         f'Usage: `{prefix}show-auto-react-roles`'
-            ),color=AUTO_REACT_ROLE_COLOR).add_footer(
+            ), color=AUTO_REACT_ROLE_COLOR).add_footer(
                 'Guild only! You must have administrator permission to use this command.')
-    await client.message_create(message.channel,embed=embed)
+
 
 AUTO_REACT_ROLE_COMMANDS(show_auto_react_roles,
-    name    = 'show-auto-react-roles',
+    name = 'show-auto-react-roles',
     description = show_auto_react_roles_description,
-    category= 'ADMINISTRATION',
-    checks  = [
+    category = 'ADMINISTRATION',
+    checks = [
         checks.guild_only(),
         checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler),
             ]

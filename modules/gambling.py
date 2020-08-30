@@ -5,7 +5,7 @@ from math import log, ceil
 
 from hata import eventlist, elapsed_time, Embed, Color, Emoji, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future, \
     KOKORO, ERROR_CODES, USERS, ZEROUSER
-from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
+from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, Closer,\
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, Converter, checks, Command, ConverterFlag
 
 from sqlalchemy.sql import select, desc
@@ -107,13 +107,12 @@ def calculate_daily_for(user, daily_streak):
 
 async def daily_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('daily',(
+    return Embed('daily',(
         'Claim everyday your share of my love!\n'
         f'Usage: `{prefix}daily <user>`\n'
         'You can also gift your daily reward to your lovely imouto.'
         ), color=GAMBLING_COLOR)
-    
-    await client.message_create(message.channel, embed=embed)
+
 
 @GAMBLING_COMMANDS(description=daily_description, category='GAMBLING')
 @Cooldown('user', 40., limit=4, weight=2, handler=CooldownHandler())
@@ -256,12 +255,12 @@ async def daily(client, message, target_user: Converter(
 
 async def hearts_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('hearts', (
+    return Embed('hearts', (
         'How many hearts do you have?\n'
         f'Usage: `{prefix}hearts <user>`\n'
         'You can also check other user\'s hearts too.'
             ), color=GAMBLING_COLOR)
-    await client.message_create(message.channel, embed=embed)
+
 
 @GAMBLING_COMMANDS(description=hearts_description, category='GAMBLING')
 @daily.shared(weight=1)
@@ -326,7 +325,7 @@ class heartevent_start_checker(object):
 
 async def heartevent_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('heartevent',(
+    return Embed('heartevent',(
         'Starts a heart event at the channel.\n'
         f'Usage: `{prefix}heartevent *duration* *amount* <users_limit>`\n'
         f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
@@ -336,7 +335,7 @@ async def heartevent_description(client,message):
         'If `user_limit` is not included, the event will have no user limit.'
             ), color=GAMBLING_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel, embed=embed)
+
 
 @GAMBLING_COMMANDS(checks=[checks.owner_only()], description=heartevent_description, category='GAMBLING')
 class heartevent(object):
@@ -608,7 +607,7 @@ class heartevent(object):
         
 async def dailyevent_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('dailyevent',(
+    return Embed('dailyevent',(
         'Starts a daily event at the channel.\n'
         f'Usage: `{prefix}dailyevent *duration* *amount* <users_limit>`\n'
         f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
@@ -618,7 +617,7 @@ async def dailyevent_description(client,message):
         'If `user_limit` is not included, the event will have no user limit.'
             ), color=GAMBLING_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel,embed=embed)
+
     
 @GAMBLING_COMMANDS(checks=[checks.owner_only()],description=dailyevent_description,category='GAMBLING')
 class dailyevent(object):
@@ -905,7 +904,7 @@ class dailyevent(object):
 
 async def game21_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('21',(
+    return Embed('21',(
         'Starts a 21 game at the channel.\n'
         f'Usage: `{prefix}21 *amount*`\n'
         'Your chalange is to collect cards with weight up to 21. Each card with number 2-10 has the same weight as '
@@ -914,8 +913,7 @@ async def game21_description(client, message):
         'At this game you are fighting me, so if we boss lose, it is a draw.\n'
         'You start with 2 cards initially drawed and at every round, you have option to draw a new card, or to stop.'
             ), color=GAMBLING_COLOR)
-    
-    await client.message_create(message.channel, embed=embed)
+
 
 @GAMBLING_COMMANDS(name='21', description=game21_description, category='GAMBLING')
 class Game21(object):
@@ -1374,13 +1372,11 @@ class Game21(object):
 
 async def gift_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('gift',(
+    return Embed('gift',(
         'Gifts hearts to you heart\'s chosen one.\n'
         f'Usage: `{prefix}gift *user* *amount*`\n'
         ), color=GAMBLING_COLOR).add_footer(
             f'You must have {WORSHIPPER_ROLE.name} or {DUNGEON_PREMIUM_ROLE.name} role!')
-    
-    await client.message_create(message.channel, embed=embed)
 
 
 @GAMBLING_COMMANDS(description=gift_description, category='GAMBLING', checks=[checks.has_any_role([WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE])])
@@ -1459,22 +1455,21 @@ async def gift(client, message, target_user: Converter('user', ConverterFlag.use
 
 async def award_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('award',(
+    return Embed('award',(
         'Awards someone with the given amount of hearts.\n'
         f'Usage: `{prefix}award *user* *amount*`'
         ), color=GAMBLING_COLOR).add_footer(
             f'Owner only.')
-    
-    await client.message_create(message.channel, embed=embed)
 
-async def award_parser_failure_handler(client, message, command, content, args):
-    await award_description(client, message)
+async def parser_failure_handler(client, message, command, content, args):
+    embed = await command.description(client, message)
+    await Closer(client, message.channel, embed)
 
 @GAMBLING_COMMANDS(
     description = gift_description,
     category = 'GAMBLING',
     checks = [checks.owner_only()],
-    parser_failure_handler = award_parser_failure_handler,
+    parser_failure_handler = parser_failure_handler,
         )
 async def award(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
     
@@ -1516,22 +1511,17 @@ async def award(client, message, target_user: Converter('user', ConverterFlag.us
 
 async def take_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('take',(
+    return Embed('take',(
         'Takes the given amount of hearts from someone.\n'
         f'Usage: `{prefix}take *user* *amount*`'
         ), color=GAMBLING_COLOR).add_footer(
             f'Owner only.')
-    
-    await client.message_create(message.channel, embed=embed)
-
-async def take_parser_failure_handler(client, message, command, content, args):
-    await take_description(client, message)
 
 @GAMBLING_COMMANDS(
     description = take_description,
     category = 'GAMBLING',
     checks = [checks.owner_only()],
-    parser_failure_handler = take_parser_failure_handler,
+    parser_failure_handler = parser_failure_handler,
         )
 async def take(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
     
@@ -1567,12 +1557,11 @@ async def take(client, message, target_user: Converter('user', ConverterFlag.use
 
 async def top_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed('top',(
+    return Embed('top',(
         'Shows the most favored persons by myself.\n'
         f'Usage: `{prefix}top`'
         ), color=GAMBLING_COLOR)
-    
-    await client.message_create(message.channel, embed=embed)
+
 
 @GAMBLING_COMMANDS(description=top_description, category='GAMBLING', aliases=['top-list'])
 @daily.shared(weight=1)

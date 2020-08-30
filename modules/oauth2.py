@@ -54,9 +54,9 @@ class oauth2_link:
             '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
             '%20email%20applications.entitlements'))
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('oauth2_link',(
+        return Embed('oauth2_link',(
             'I ll give you a nice authorization link for some oauth 2 scopes.\n'
             f'Usage: `{prefix}oauth2_link`\n'
             'After you authorized yourself, you should call the `oauth2_feed` '
@@ -68,9 +68,8 @@ class oauth2_link:
             f'- `{prefix}oauth2_guilds <user_id>`\n'
             f'- `{prefix}oauth2_my_guild <user_id>`\n'
             f'- `{prefix}oauth2_renew <user_id>`'
-                ),color=OAUTH2_COLOR).add_footer(
+                ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 @OAUTH2_COMMANDS.from_class
 class oauth2_feed:
@@ -102,9 +101,9 @@ class oauth2_feed:
         OA2_accesses[user.id]=user
         await client.message_create(message.channel,'Thanks')
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('oauth2_feed',(
+        return Embed('oauth2_feed',(
             'Feeds your oauth 2 authorized redirect url.\n'
             f'Usage: `{prefix}oauth2_feed *link*`\n'
             f'How to get an oauth 2 authorization url?, use: `{prefix}oauth2_link`\n'
@@ -114,9 +113,8 @@ class oauth2_feed:
             f'- `{prefix}oauth2_guilds <user_id>`\n'
             f'- `{prefix}oauth2_my_guild <user_id>`\n'
             f'- `{prefix}oauth2_renew <user_id>`'
-                ),color=OAUTH2_COLOR).add_footer(
+                ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 
 @OAUTH2_COMMANDS.from_class
@@ -127,11 +125,11 @@ class oauth2_user:
             await client.message_create(message.channel,'Could not find that user')
             return
         
-        await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(user)])
+        await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(user)])
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('oauth2_user',(
+        return Embed('oauth2_user',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'Using this command, I ll show the extra user information , I '
             'received.\n'
@@ -140,14 +138,13 @@ class oauth2_user:
             'so take care, you can not trust them! *Only me!*\n'
             'If you dont know how to authorize yourself; use : '
             f'`{prefix}help oauth2_link`'
-                ),color=OAUTH2_COLOR).add_footer(
+                ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 
 @OAUTH2_COMMANDS.from_class
 class oauth2_connections:
-    async def command(client,message,content):
+    async def command(client, message, content):
         user=_oauth2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
@@ -155,11 +152,11 @@ class oauth2_connections:
         
         connections = await client.user_connections(user.access)
         
-        await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(connections)])
+        await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(connections)])
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('oauth2_connections',(
+        return Embed('oauth2_connections',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'You might ask what are your connections. '
             'Those are your connected apps and sites.\n'
@@ -168,9 +165,8 @@ class oauth2_connections:
             'so take care, you can not trust them! *Only me!*\n'
             'If you dont know how to authorize yourself; use : '
             f'`{prefix}help oauth2_link`'
-                ),color=OAUTH2_COLOR).add_footer(
+                ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 
 @OAUTH2_COMMANDS.from_class
@@ -183,11 +179,11 @@ class oauth2_guilds:
         
         guilds = await client.user_guilds(user.access)
         
-        await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(guilds)])
+        await Pagination(client, message.channel,[Embed(description=chunk) for chunk in pchunkify(guilds)])
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('oauth2_guilds',(
+        return Embed('oauth2_guilds',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'By using this command, I ll show your guilds. '
             '*And everything, what I know about them.*\n'
@@ -196,9 +192,8 @@ class oauth2_guilds:
             'so take care, you can not trust them! *Only me!*\n'
             'If you dont know how to authorize yourself; use : '
             f'`{prefix}help oauth2_link`'
-                ),color=OAUTH2_COLOR).add_footer(
+                ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 
 @OAUTH2_COMMANDS.from_class
@@ -230,9 +225,9 @@ class oauth2_my_guild:
             else:
                 await client.guild_leave(guild)
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('oauth2_my_guild',(
+        return Embed('oauth2_my_guild',(
             'After you authorized yourself, I can create a guild for you, '
             'so just sit back!\n'
             f'Usage: `{prefix}oauth2_my_guild <user_id>`\n'
@@ -240,9 +235,8 @@ class oauth2_my_guild:
             'take care!\n'
             'If you dont know how to authorize yourself, use : '
             f'`{prefix}help oauth2_link`'
-                ),color=OAUTH2_COLOR).add_footer(
+                ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
 
 
 @OAUTH2_COMMANDS.from_class
@@ -263,29 +257,14 @@ class oauth2_renew:
             f'To creation time at: {new:%Y.%m.%d-%H:%M:%S}'
                 )
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        embed=Embed('oauth2_renew',(
+        return Embed('oauth2_renew',(
             'Your oauth2 authorization might expire; with this command you can '
             'renew it.\n'
             f'Usage: `{prefix}oauth2_renew <user_id>`\n'
             'Other owners can renew it for you as well!\n'
             'If you dont know how to authorize yourself;\n'
             f'Use : `{prefix}help oauth2_link`'
-                ),color=OAUTH2_COLOR).add_footer(
+                ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
-        await client.message_create(message.channel,embed=embed)
-
-@OAUTH2_COMMANDS(category = 'TEST COMMANDS')
-async def test_oauth2_user_data(client, message, content):
-    user=_oauth2_query(message,content)
-    if user is None:
-        await client.message_create(message.channel,'Could not find that user')
-        return
-    
-    header=multidict_titled()
-    header[AUTHORIZATION]=f'Bearer {user.access_token}'
-    data = await client.http.user_info(header)
-    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
-
-

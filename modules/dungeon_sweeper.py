@@ -23,7 +23,7 @@ def teardown(lib):
 
 async def ds_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('ds',(
+    return Embed('ds',(
         'Play **Dungeon sweeper** game! A simple box pushing game with '
         'cute touhou characters!\n'
         f'Usage : `{prefix}ds *subcommand*`'
@@ -36,8 +36,7 @@ async def ds_description(client,message):
         'The game is based on a mobile game '
         '[Sweeper of Suika](https://play.google.com/store/apps/details?id=net.satoritan.suika&hl=en), '
         'So please go and give love to it as well!'
-        ),color=DS_COLOR)
-    await client.message_create(message.channel,embed=embed)
+        ), color=DS_COLOR)
 
 DS_GAMES={}
 STAGES=[]
@@ -1856,15 +1855,15 @@ async def ds_modify_best(client,message,content):
     
 async def ds_modify_best_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed('ds_modify_best',(
+    return Embed('ds_modify_best',(
         f'A helper command for `{prefix}ds`, to modify the best results '
         'of a stage.\n Before calling this command, make sure you edited the '
         'source code and restarted me.\n'
         f'Usage : `{prefix}ds_modify_best *position*`\n'
         'The `position` is the position of the stage.'
-            ),color=DS_COLOR).add_footer(
+            ), color=DS_COLOR).add_footer(
             'Owner only!')
-    await client.message_create(message.channel,embed=embed)
+
 
 DS_COMMANDS(ds_modify_best, checks=[checks.owner_only()], category='GAMES', description=ds_modify_best_description)
 
