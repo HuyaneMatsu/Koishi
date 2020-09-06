@@ -12,11 +12,11 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, mult
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory
 
-from hata.backend.dereaddons_local import _spaceholder
+from hata.backend.dereaddons_local import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
 from hata.backend.hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST, METH_PUT, AUTHORIZATION, \
     CONTENT_TYPE
-from hata.backend.http import Request_CM
+from hata.backend.http import RequestCM
 from hata.backend.quote import quote
 from hata.discord.others import to_json, from_json, image_to_base64, Discord_hdrs
 from hata.discord.guild import PartialGuild, GuildDiscovery
@@ -72,7 +72,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
             buffer.write(f'Request started : {url} {method}\n')
             
         try:
-            async with Request_CM(self._request(method,url,headers,data,params)) as response:
+            async with RequestCM(self._request(method,url,headers,data,params)) as response:
                 if decode:
                     response_data = await response.text(encoding='utf-8')
                 else:
@@ -1302,7 +1302,8 @@ async def role_create(client,guild,name=None,permissions=None,color=None,
         data=data,)
 
 async def role_move(client,role,new_position,):
-    data=role.guild.roles.change_on_switch(role,new_position,key=lambda role,pos:{'id':role.id,'position':pos})
+    guild = role.guild
+    data= change_on_switch(guild.role_list, role,new_position,key=lambda role,pos:{'id':role.id,'position':pos})
     guild_id=role.guild.id
     return await bypass_request(client,METH_PATCH,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/roles',
@@ -2629,7 +2630,7 @@ async def ratelimit_test0035(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
             
-        for channel_ in guild.all_channel.values():
+        for channel_ in guild.channels.values():
             if channel_.type ==5:
                 source_channel = channel_
                 break
@@ -2645,7 +2646,7 @@ async def ratelimit_test0035(client, message):
             if webhook.type is WebhookType.server:
                 used_channels.add(webhook.channel)
         
-        for channel_ in guild.all_channel.values():
+        for channel_ in guild.channels.values():
             if channel_.type not in (0,5):
                 continue
             if channel_ is source_channel:
@@ -2733,7 +2734,7 @@ async def ratelimit_test0040(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        roles = guild.roles
+        roles = guild.role_list
         if len(roles) < 2:
             await RLT.send('The guild needs at least 1 role.')
         
@@ -2742,7 +2743,7 @@ async def ratelimit_test0040(client, message):
         if not client.has_higher_role_than(role):
             await RLT.send('There is no lower role than my own for the channel.')
         
-        for channel_ in guild.all_channel.values():
+        for channel_ in guild.channels.values():
             for overwrite in channel_.overwrites:
                 if overwrite.target is role:
                     break
@@ -2773,7 +2774,7 @@ async def ratelimit_test0041(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        roles = guild.roles
+        roles = guild.role_list
         if len(roles) < 2:
             await RLT.send('The guild needs at least 1 role.')
         
@@ -2782,7 +2783,7 @@ async def ratelimit_test0041(client, message):
         if not client.has_higher_role_than(role):
             await RLT.send('There is no lower role than my own for the channel.')
         
-        for channel_ in guild.all_channel.values():
+        for channel_ in guild.channels.values():
             for overwrite in channel_.overwrites:
                 if overwrite.target is role:
                     break
@@ -2860,7 +2861,7 @@ async def ratelimit_test0045(client, message):
     
         afk_channel = guild.afk_channel
         
-        for channel_ in guild.all_channel.values():
+        for channel_ in guild.channels.values():
             if type(channel_) is not ChannelVoice:
                 continue
             

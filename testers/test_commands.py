@@ -32,8 +32,8 @@ async def test_choose_menu_repr(client, message):
     Creates a ChooseMenu and returns it's repr.
     '''
     choices = ['nice', 'cat']
-    choose_menu = await ChooseMenu(client, message.channel, choices, lambda *args:Future(client.loop))
-    await client.message_create(message.channel,repr(choose_menu))
+    choose_menu = await ChooseMenu(client, message.channel, choices, lambda *args: Future(KOKORO))
+    await client.message_create(message.channel, repr(choose_menu))
 
 @TEST_COMMANDS(checks=[checks.guild_only()])
 async def test_role_create(client, message):
@@ -41,7 +41,7 @@ async def test_role_create(client, message):
     Creates and deletes a role.
     '''
     guild = message.guild
-    role = await client.role_create(guild,'Mokou')
+    role = await client.role_create(guild, 'Mokou')
     await client.role_delete(role)
     await client.message_create('done')
 
@@ -63,13 +63,13 @@ async def test_ratelimit(client, message):
     if guild is None:
         return
     
-    proxy = client.get_ratelimits_of(RATELIMIT_GROUPS.role_edit,limiter = guild)
+    proxy = client.get_ratelimits_of(RATELIMIT_GROUPS.role_edit, limiter = guild)
     if (not proxy.is_alive()) or (not proxy.has_size_set()):
         if not guild.cached_permissions_for(client).can_manage_roles:
             await client.message_create(message.channel, 'Current state unknown -> No permissions.')
             return
         
-        roles = message.guild.roles
+        roles = message.guild.role_list
         if len(roles)==1:
             await client.message_create(message.channel, 'Current state unknown -> Need more roles.')
             return
@@ -105,7 +105,7 @@ async def test_user_data(client, message, user:User):
     Prints out user data as received json
     '''
     data = await client.http.user_get(user.id)
-    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
+    await Pagination(client, message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
 
 @TEST_COMMANDS
 async def test_100_messages(client, message):
@@ -114,21 +114,21 @@ async def test_100_messages(client, message):
     '''
     tasks = []
     for x in range(100):
-        task = client.loop.create_task(client.message_create(message.channel,repr(x)))
+        task = KOKORO.create_task(client.message_create(message.channel, repr(x)))
         tasks.append(task)
     
     start = perf_counter()
     await WaitTillAll(tasks,client.loop)
     end = perf_counter()
     
-    await client.message_create(message.channel,repr(end-start))
+    await client.message_create(message.channel, repr(end-start))
 
 @TEST_COMMANDS
 async def crosspost(client, message, message_id:int):
     '''
     Crossposts, pls pass a mssage id from the current channel!
     '''
-    to_message = await client.message_get(message.channel,message_id)
+    to_message = await client.message_get(message.channel, message_id)
     await client.message_crosspost(to_message)
     
     await client.message_create(message.channel, 'success')
@@ -140,10 +140,10 @@ async def get_guild(client, message):
     '''
     guild = message.guild
     if guild is None:
-        await client.message_create(message.channel,'Please use this command at a guild.')
+        await client.message_create(message.channel, 'Please use this command at a guild.')
     
     data = await client.http.guild_get(guild.id)
-    await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
+    await Pagination(client, message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
 
 @TEST_COMMANDS
 async def test_new_discord_headers(client, message):
@@ -711,8 +711,8 @@ async def test_start_channel_thread(client, message):
     Does a post request to the channel's threads.
     """
     data = await client.http.channel_thread_start(message.channel.id, None)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
-    await Pagination(client,message.channel, pages)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    await Pagination(client, message.channel, pages)
 
 # DiscordException Not Found (404): 404: Not Found
 @TEST_COMMANDS(checks=[checks.guild_only()])
@@ -721,8 +721,8 @@ async def test_get_channel_thread_users(client, message):
     Gets the channel's threads' users probably, no clue.
     """
     data = await client.http.thread_users(message.channel.id)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
-    await Pagination(client,message.channel, pages)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    await Pagination(client, message.channel, pages)
 
 # DiscordException Not Found (404): 404: Not Found
 @TEST_COMMANDS(checks=[checks.guild_only()])
@@ -731,8 +731,8 @@ async def test_add_channel_thread_user(client, message):
     Adds you to the channel's threads.
     """
     data = await client.http.thread_user_add(message.channel.id, message.author.id)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
-    await Pagination(client,message.channel, pages)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    await Pagination(client, message.channel, pages)
 
 # DiscordException Not Found (404): 404: Not Found
 @TEST_COMMANDS(checks=[checks.guild_only()])
@@ -741,8 +741,8 @@ async def test_delete_channel_thread_user(client, message):
     Deletes you to the channel's threads.
     """
     data = await client.http.thread_user_delete(message.channel.id, message.author.id)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
-    await Pagination(client,message.channel, pages)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
 async def test_get_applications_detectable(client, message):
@@ -751,8 +751,8 @@ async def test_get_applications_detectable(client, message):
     """
     data = await client.http.applications_detectable()
     
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
-    await Pagination(client,message.channel, pages)
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
 async def test_get_eula(client, message):
@@ -761,7 +761,7 @@ async def test_get_eula(client, message):
     """
     data = await client.http.eula_get(542074049984200704)
     
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
@@ -770,7 +770,7 @@ async def test_render_application(client, message):
     Renders the client's application.
     """
     pages = [Embed(description=chunk) for chunk in pchunkify(client.application)]
-    await Pagination(client,message.channel, pages)
+    await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
 async def test_render_applications(client, message):
@@ -792,7 +792,7 @@ async def test_get_welcome_screen(client, message):
     
     data = await client.http.welcome_screen_get(guild.id)
     
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())]
+    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
@@ -848,16 +848,19 @@ async def autohelp_singles(client, message, name:str, user:'user', *words):
 async def autohelp_defaulted(client, message, name:str=None, channel:ChannelText=None, rest=None):
     pass
 
-@TEST_COMMANDS(separator=('[',']'))
+@TEST_COMMANDS(separator=('[', ']'))
 async def autohelp_multy(client, message, value:(int, str), user:(User, 'invite'), *cakes:(ChannelText, 'tdelta')):
     pass
 
 @TEST_COMMANDS
 async def detect_custom_emojis(client, message):
+    """
+    Detects the custom emojis at the given message's content.
+    """
     emojis = parse_custom_emojis(message.content)
     if emojis:
         content_lines = []
-        for x, emoji in zip(range(1,21), emojis):
+        for x, emoji in zip(range(1, 21), emojis):
             content_lines.append(f'{x}.: {emoji:e}')
         
         truncated = len(emojis)-20
@@ -870,4 +873,19 @@ async def detect_custom_emojis(client, message):
     
     await client.message_create(message.channel, content)
 
+@TEST_COMMANDS
+async def test_message_reaction_clear(client, message, channel_id: int, message_id:int):
+    """
+    Removes the reactions from the given channel-id - message-id conbination.
+    """
+    await client.http.reaction_clear(channel_id, message_id)
+    await client.message_create(message.channel, 'nya')
+
+@TEST_COMMANDS
+async def test_message_reaction_delete_emoji(client, message, channel_id: int, message_id: int, emoji:'emoji'):
+    """
+    Removes the reactions from the given channel-id - message-id - emoji conbination.
+    """
+    await client.http.reaction_delete_emoji(channel_id, message_id, emoji.as_reaction)
+    await client.message_create(message.channel, 'nya')
 

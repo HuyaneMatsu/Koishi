@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import re, sys, json
 
-from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, \
-    elapsed_time, ActivityUnknown, Status, ActivityTypes, BUILTIN_EMOJIS, ChannelText, ChannelCategory, \
-    cchunkify, Permission, ICON_TYPE_NONE, KOKORO, Future, ERROR_CODES, ChannelVoice, ChannelStore, ChannelThread
+from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, now_as_id, \
+    elapsed_time, ActivityUnknown, Status, ActivityTypes, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, \
+    cchunkify, Permission, ICON_TYPE_NONE, KOKORO, Future, ERROR_CODES, ChannelVoice, ChannelStore, ChannelThread, \
+    DATETIME_FORMAT_CODE
 
 from hata.discord.others import DISCORD_EPOCH_START
 from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination
@@ -201,19 +202,20 @@ class resend_webhook:
 
 
 @UTILITY_COMMANDS.from_class
-class se:
+class show_emoji:
     async def command(client, message, emoji : Emoji):
         if emoji.is_custom_emoji():
             await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
     
+    name = 'showemoji'
     category = 'UTILITY'
+    aliases = ['show-emoji', 'se']
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('se',(
-            '`se` stands for `show emoji`.\n'
-            f'Usage: `{prefix}se *emoji*`\n'
-            'I can show only custom emojis.'
+            'I show the given emoji, tho I can only the custom ones.\n'
+            f'Usage: `{prefix}showemoji *emoji*`\n'
                 ), color=UTILITY_COLOR)
 
 
@@ -343,24 +345,29 @@ class user_info:
             else:
                 color = user.avatar_hash&0xFFFFFF
             embed.color = color
-            
+        
         else:
             embed.color=user.color_at(guild)
             roles = profile.roles
-            if roles:
-                roles.sort()
-                roles=', '.join(role.mention for role in reversed(roles))
+            if roles is None:
+                roles = '*none*'
             else:
-                roles='none'
+                roles.sort()
+                roles = ', '.join(role.mention for role in reversed(roles))
+            
             text=[]
             if profile.nick is not None:
                 text.append(f'Nick: {profile.nick}')
+            
             if profile.joined_at is None:
                 await client.guild_user_get(user.id)
+            
             text.append(f'Joined: {elapsed_time(profile.joined_at)} ago')
-            boosts_since=profile.boosts_since
-            if boosts_since is not None:
+            
+            boosts_since = profile.boosts_since
+            if (boosts_since is not None):
                 text.append(f'Booster since: {elapsed_time(boosts_since)}')
+            
             text.append(f'Roles: {roles}')
             embed.add_field('In guild profile','\n'.join(text))
         
@@ -381,7 +388,7 @@ class user_info:
             
             if user.activity is ActivityUnknown:
                 text.append('Activity : *unknown*\n')
-            elif len(user.activities)==1:
+            elif len(user.activities) == 1:
                 text.append('Activity : ')
                 add_activity(text, user.activities[0])
             else:
@@ -445,7 +452,7 @@ class guild_info:
         channel_thread = 0
         channel_store = 0
         
-        for channel in guild.all_channel.values():
+        for channel in guild.channels.values():
             channel_type = channel.__class__
             if channel_type is ChannelText:
                 channel_text +=1
@@ -471,7 +478,7 @@ class guild_info:
         
         sections_parts = [
             '**Users: ', str(guild.user_count), '**\n'
-            '**Roles: ', str(len(guild.roles)), '**'
+            '**Roles: ', str(len(guild.role_list)), '**'
                 ]
         
         if channel_text:
@@ -663,7 +670,9 @@ class roles:
         async def __new__(cls,client,message):
             channel=message.channel
             self=object.__new__(cls)
-            self.roles=list(reversed(channel.guild.roles))
+            roles = channel.guild.role_list
+            roles.reverse()
+            self.roles = roles
             self.cache=[None for _ in range(len(self.roles)+1)]
             self.createpage0(channel.guild)
             #we return awaitable, so it is OK
@@ -881,9 +890,130 @@ class invite_gen:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('invite-gen',(
+        return Embed('invite-gen', (
             'Creates invite at the guild with any of the predefined words.\n'
             f'Usage: `{prefix}invite-gen *text-channel* *time*`\n'
             'Note that time is in hours, for how much time it should circle the invites!'
                 ), color=UTILITY_COLOR).add_footer(
                 'Guild and owner only!')
+
+
+@Koishi.commands.from_class
+class get_user_id:
+    async def command(client, message, user: Converter('user',
+            ConverterFlag().update_by_keys(mention=True, name=True), default_code='message.author')):
+        await client.message_create(message.channel, str(user.id))
+    
+    name = 'userid'
+    aliases = ['user-id', 'uid']
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('userid', (
+            'Sends your or the given user\'s id.\n'
+            f'Usage: `{prefix}userid <user name / mention>`'
+                ), color=UTILITY_COLOR)
+
+
+@Koishi.commands.from_class
+class get_channel_id:
+    async def command(client, message, channel: Converter('channel',
+            ConverterFlag().update_by_keys(mention=True, name=True), default_code='message.channel')):
+        await client.message_create(message.channel, str(channel.id))
+    
+    name = 'channelid'
+    aliases = ['channel-id', 'cid']
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('channelid', (
+            'Sends this or the given channel\'s id.\n'
+            f'Usage: `{prefix}channelid <channel name / mention>`'
+                ), color=UTILITY_COLOR)
+
+
+@Koishi.commands.from_class
+class get_guild_id:
+    async def command(client, message):
+        channel = message.channel
+        guild = channel.guild
+        if guild is None:
+            return
+        
+        await client.message_create(channel, str(guild.id))
+    
+    name = 'guildid'
+    aliases = ['guild-id', 'serverid', 'server-id', 'gid', 'sid']
+    category = 'UTILITY'
+    checks = [checks.guild_only()]
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('guildid', (
+            'Sends the guild\'s id.\n'
+            f'Usage: `{prefix}guildid`'
+                ), color=UTILITY_COLOR).add_footer('Guild only.')
+
+
+@Koishi.commands.from_class
+class get_role_id:
+    async def command(client, message, role: Converter('role',
+            ConverterFlag().update_by_keys(mention=True, name=True), default_code='message.guild.default_role')):
+        
+        if role is None:
+            role_id = 'N/A'
+        else:
+            role_id = str(role.id)
+        
+        await client.message_create(message.channel, role_id)
+    
+    name = 'roleid'
+    aliases = ['role-id', 'rid']
+    category = 'UTILITY'
+    checks = [checks.guild_only()]
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('roleid', (
+            'Sends the guild\'s default role\'s or the given role\'s id.\n'
+            f'Usage: `{prefix}roleid <role name / mention>`'
+                ), color=UTILITY_COLOR).add_footer('Guild only.')
+
+
+@Koishi.commands.from_class
+class get_now_as_id:
+    async def command(client, message):
+        await client.message_create(message.channel, str(now_as_id()))
+    
+    name = 'now-as-id'
+    aliases = ['nowasid']
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('now-as-id', (
+            'Sends the current time as Discord snowflake id.\n'
+            f'Usage: `{prefix}now-as-id`'
+                ), color=UTILITY_COLOR)
+
+
+@Koishi.commands.from_class
+class get_id_as_time:
+    async def command(client, message, snowflake:int):
+        if snowflake < 0 or snowflake > ((1<<63)-1):
+            return
+        
+        await client.message_create(message.channel, id_to_time(snowflake).__format__(DATETIME_FORMAT_CODE))
+    
+    name = 'id-as-id'
+    aliases = ['idastime', 'idtotime', 'id-to-time']
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('id-as-time', (
+            'converts the given Discord snowflake id to time.\n'
+            f'Usage: `{prefix}now-as-time *id*`'
+                ), color=UTILITY_COLOR)

@@ -16,19 +16,19 @@ def teardown(lib):
 
 @GAMES_COMMANDS.from_class
 class message_me:
-    async def command(client,message):
+    async def command(client, message):
         channel = await client.channel_private_create(message.author)
         try:
-            await client.message_create(channel,'Love you!')
+            await client.message_create(channel, 'Love you!')
         except DiscordException as err:
-            if err.code == ERROR_CODES.cannot_send_message_to_user:
-                await client.message_create(message.channel,'Pls turn on private messages from this server!')
+            if err.code == ERROR_CODES.invalid_message_send_user:
+                await client.message_create(message.channel, 'Pls turn on private messages from this server!')
     
     category = 'GAMES'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('message_me',(
+        return Embed('message_me', (
             'I ll send you something, from really deep of my heart.\n'
             f'Usage : `{prefix}message_me`'
             ), color=GAMES_COLOR)
@@ -36,23 +36,23 @@ class message_me:
 
 @GAMES_COMMANDS.from_class
 class dice:
-    async def command(client,message,times:int = 1):
-        if times<=0:
-            text=f'{times} KEK'
-        elif times>6:
-            text='I have only 6 dices, sorry, no money for more. Sadpanda'
+    async def command(client, message, times:int = 1):
+        if times <= 0:
+            text = f'{times} KEK'
+        elif times > 6:
+            text = 'I have only 6 dices, sorry, no money for more. Sadpanda'
         else:
-            result=0
+            result = 0
             for x in range(times):
-                result+=randint(1,6)
+                result += randint(1, 6)
                 
-            if result<=2.5*times:
+            if result <= 2.5*times:
                 luck_text=', better luck next time!'
-            elif result>=5.5*times:
-                luck_text=', so BIG,.. thats what she said... *cough*'
+            elif result >= 5.5*times:
+                luck_text = ', so BIG,.. thats what she said... *cough*'
             else:
-                luck_text=''
-            text=f'Rolled {result}{luck_text}'
+                luck_text = ''
+            text = f'Rolled {result}{luck_text}'
         
         await client.message_create(message.channel,text)
     
@@ -60,11 +60,11 @@ class dice:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('dice',(
+        return Embed('dice', (
             'I will throw some dice and tell you the sum.\n'
             f'Usage: `{prefix}dice <dice_count>`\n'
             '`dice_count` if optional, but I have only 6 dices...'
-            ),color=GAMES_COLOR).add_footer(
+            ), color=GAMES_COLOR).add_footer(
                 'I see you Yukari peeking there! You dice stealer!')
 
 

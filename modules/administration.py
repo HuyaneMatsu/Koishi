@@ -1,5 +1,5 @@
 from hata import Color, Embed, eventlist, Permission, DiscordException, sleep, Message, Emoji, BUILTIN_EMOJIS, \
-    ERROR_CODES, ChannelBase, User, AuditLogEvent
+    ERROR_CODES, ChannelBase, User, AuditLogEvent, KOKORO
 from hata.ext.commands import Command, Converter, checks, Pagination, ConverterFlag, wait_for_reaction
 from hata.ext.prettyprint import pchunkify
 
@@ -29,9 +29,9 @@ class clear:
     category = 'ADMINISTRATION'
     checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('clear',(
+        return Embed('clear', (
             'I ll clear up the leftover after your lewd messages O-NEE-CHA-N.'
             f'Usage : `{prefix}clear <amount> <reason>`\n'
             '`amount` is optional, by default it is just 1.\n'
@@ -84,7 +84,7 @@ class invite_create:
     category = 'ADMINISTRATION'
     checks = [checks.owner_or_has_guild_permissions(Permission().update_by_keys(create_instant_invite=True), handler=permission_check_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         guild = message.channel.guild
         user = message.author
         if guild is None:
@@ -117,7 +117,7 @@ class invite_create:
 
 @ADMINISTRATION_COMMANDS.from_class
 class bans:
-    async def command(client,message):
+    async def command(client, message):
         guild = message.channel.guild
         if (guild is None):
             return
@@ -184,7 +184,7 @@ class bans:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('bans',(
+        return Embed('bans', (
             'I ll show you the banned users at the guild.\n'
             f'Usage: `{prefix}bans`'
             ), color=ADMINISTRATION_COLOR).add_footer(
@@ -194,12 +194,12 @@ class bans:
 
 @ADMINISTRATION_COMMANDS.from_class
 class prefix:
-    async def command(client,message,prefix:str=None):
+    async def command(client, message, prefix:str=None):
         if prefix is None:
             response = prefix = client.command_processer.get_prefix_for(message)
         else:
             prefix_ln = len(prefix)
-            if prefix_ln==0 or prefix_ln>32:
+            if prefix_ln == 0 or prefix_ln > 32:
                 response=f'Prefix lenght should be between 1 and 32, got {prefix_ln}.'
             else:
                 if '`' in prefix:
@@ -216,90 +216,90 @@ class prefix:
     category = 'ADMINISTRATION'
     checks = [checks.owner_or_guild_owner(handler=not_guild_owner_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('prefix',(
+        return Embed('prefix', (
             'Do you have any preferred prefix for my commands?\n'
             f'Usage: `{prefix}prefix *prefix*`'
-            ),color=ADMINISTRATION_COLOR).add_footer(
+            ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must be the owner of the guild to use this command.')
 
 
 @ADMINISTRATION_COMMANDS.from_class
 class leave_guild:
-    async def command(client,message):
+    async def command(client, message):
         await client.guild_leave(message.guild)
     
     category = 'ADMINISTRATION'
     checks = [checks.owner_or_guild_owner(handler=not_guild_owner_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('leave_-uild',(
+        return Embed('leave_-uild', (
             'You really want me to leave? :c\n'
             f'Usage: `{prefix}leave_guild`'
-            ),color=ADMINISTRATION_COLOR).add_footer(
+            ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must be the owner of the guild to use this command.')
 
 @ADMINISTRATION_COMMANDS.from_class
 class reaction_clear:
-    async def command(client,message,message_id:int):
+    async def command(client, message, message_id:int):
         while True:
             if not message.channel.cached_permissions_for(client).can_manage_messages:
                 content='I have no permissions to execute this command at the channel.'
                 break
             
             try:
-                target_message = await client.message_get(message.channel,message_id)
+                target_message = await client.message_get(message.channel, message_id)
             except DiscordException:
-                content='Could not find that message.'
+                content = 'Could not find that message.'
                 break
             
             await client.reaction_clear(target_message)
-            content='Done, pat me now!'
+            content = 'Done, pat me now!'
             break
         
-        message = await client.message_create(message.channel,content)
-        await sleep(30.,client.loop)
+        message = await client.message_create(message.channel, content)
+        await sleep(30., KOKORO)
         await client.message_delete(message)
     
     category = 'ADMINISTRATION'
     checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('reaction_clear',(
+        return Embed('reaction_clear', (
             'Do you want me to remvoe all the reactions from a message?\n'
             f'Usage: `{prefix}reaction_clear *message_id*`'
-                ),color=ADMINISTRATION_COLOR).add_footer(
+                ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only! You must have manage messages permission to invoke this command.!')
 
 @ADMINISTRATION_COMMANDS.from_class
 class show_help_for:
-    async def command(client,message,user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), rest):
+    async def command(client, message,user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), rest):
         if user is None:
             await client.message_create(message.channel,
                 'Please define a user as well.')
             return
         
-        message=message.custom(author=user)
+        message = message.custom(author=user)
         
-        await client.command_processer.commands['help'](client,message,rest)
+        await client.command_processer.commands['help'](client, message,rest)
     
     category = 'ADMINISTRATION'
     checks = [checks.owner_only(handler=not_bot_owner_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('show_help_for',(
+        return Embed('show_help_for', (
             'Calls `help` command, as the given user would do it.\n'
             f'Usage: `{prefix}show_help_for *user*`\n'
                 ), color=ADMINISTRATION_COLOR).add_footer(
                 'Owner only!')
 
-ROLE_EMOJI_OK       = BUILTIN_EMOJIS['ok_hand']
-ROLE_EMOJI_CANCEL   = BUILTIN_EMOJIS['x']
-ROLE_EMOJI_EMOJIS   = (ROLE_EMOJI_OK, ROLE_EMOJI_CANCEL)
+ROLE_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
+ROLE_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
+ROLE_EMOJI_EMOJIS = (ROLE_EMOJI_OK, ROLE_EMOJI_CANCEL)
 
 class _role_emoji_emoji_checker(object):
     __slots__ = ('guild',)
@@ -323,49 +323,51 @@ class _role_emoji_emoji_checker(object):
 @ADMINISTRATION_COMMANDS.from_class
 class emoji_role:
     async def command(client, message, emoji:Emoji, *roles:'role'):
-        permissions =message.channel.cached_permissions_for(client)
+        permissions = message.channel.cached_permissions_for(client)
         if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
             await client.message_create(message.channel,
-                embed=Embed(description='I have no permissions to edit emojis, or to add reactions.'))
+                embed = Embed(description='I have no permissions to edit emojis, or to add reactions.'))
             return
         
         roles = sorted(roles)
-        roles_=emoji.roles
+        roles_ = emoji.roles
         
-        embed=Embed().add_author(emoji.url,emoji.name)
+        embed = Embed().add_author(emoji.url, emoji.name)
         
         if (roles_ is None) or (not roles_):
-            role_text='*none*'
+            role_text = '*none*'
         else:
-            role_text=', '.join([role.mention for role in roles_])
+            role_text = ', '.join([role.mention for role in roles_])
         
-        embed.add_field('Roles before:',role_text)
+        embed.add_field('Roles before:', role_text)
         
         if (not roles):
-            role_text='*none*'
+            role_text = '*none*'
         else:
-            role_text=', '.join([role.mention for role in roles])
+            role_text = ', '.join([role.mention for role in roles])
         
-        embed.add_field('Roles after:',role_text)
+        embed.add_field('Roles after:', role_text)
         
-        message = await client.message_create(message.channel,embed=embed)
+        message = await client.message_create(message.channel, embed=embed)
         for emoji_ in ROLE_EMOJI_EMOJIS:
-            await client.reaction_add(message,emoji_)
+            await client.reaction_add(message, emoji_)
         
         try:
             event = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
         except TimeoutError:
-            event = ROLE_EMOJI_CANCEL
+            emoji_ = ROLE_EMOJI_CANCEL
+        else:
+            emoji_ = event.emoji
         
         if message.channel.cached_permissions_for(client).can_manage_messages:
             try:
                 await client.reaction_clear(message)
             except BaseException as err:
-                if isinstance(err,ConnectionError):
+                if isinstance(err, ConnectionError):
                     # no internet
                     return
                 
-                if isinstance(err,DiscordException):
+                if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.invalid_access, # client removed
                             ERROR_CODES.unknown_message, # message deleted
@@ -375,14 +377,13 @@ class emoji_role:
                 
                 raise
         
-        emoji_ = event.emoji
         if emoji_ is ROLE_EMOJI_OK:
             try:
-                await client.emoji_edit(emoji,roles=roles)
+                await client.emoji_edit(emoji, roles=roles)
             except DiscordException as err:
-                footer=repr(err)
+                footer = repr(err)
             else:
-                footer='Emoji edited succesfully.'
+                footer = 'Emoji edited succesfully.'
         
         elif emoji_ is ROLE_EMOJI_CANCEL:
             footer = 'Emoji edit cancelled'
@@ -396,11 +397,11 @@ class emoji_role:
     
     name = 'emoji-role'
     category = 'ADMINISTRATION'
-    checks=[checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler)]
+    checks = [checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('emoji-role',(
+        return Embed('emoji-role', (
             'Edits the emoji for which roles is available for.\n'
             f'Usage: `{prefix}emoji-role *emoji* <role_1> <role_2> ...`\n'
                 ), color=ADMINISTRATION_COLOR).add_footer(
@@ -409,7 +410,7 @@ class emoji_role:
 
 @ADMINISTRATION_COMMANDS.from_class
 class invites:
-    async def command(client,message,channel:ChannelBase=None):
+    async def command(client, message, channel:ChannelBase=None):
         guild = message.channel.guild
         if channel is None:
             if not guild.cached_permissions_for(client).can_manage_guild:
@@ -425,14 +426,14 @@ class invites:
             invites = await client.invite_get_channel(channel)
         
         pages=[Embed(description=chunk) for chunk in pchunkify(invites,write_parents=False)]
-        await Pagination(client,message.channel,pages,120.)
+        await Pagination(client, message.channel,pages,120.)
     
     category = 'ADMINISTRATION'
     checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_channel=True), handler=permission_check_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('invites',(
+        return Embed('invites', (
             'I can list you the invites of the guild.\n'
             f'Usage: `{prefix}invites <channel>`\n'
             'If `channel` is passed, I ll check the invites only at that channel.'
@@ -442,7 +443,7 @@ class invites:
 
 @ADMINISTRATION_COMMANDS.from_class
 class logs:
-    async def command(client, message, guild:'guild'=None, user:User=None, event_name:str=''):
+    async def command(client, message, guild:'guild'=None, user:User=None, event_name: str=''):
         if guild is None:
             guild = message.guild
             if guild is None:
@@ -461,13 +462,13 @@ class logs:
                 break
             
             try:
-                event=AuditLogEvent.INSTANCES[int(event_name)]
+                event = AuditLogEvent.INSTANCES[int(event_name)]
                 break
-            except (KeyError,ValueError):
+            except (KeyError, ValueError):
                 pass
             
             try:
-                event=getattr(AuditLogEvent,event_name.upper())
+                event = getattr(AuditLogEvent, event_name.upper())
                 break
             except AttributeError:
                 pass
@@ -485,16 +486,16 @@ class logs:
     category = 'ADMINISTRATION'
     checks=[checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True), handler=permission_check_handler)]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('logs',(
+        return Embed('logs', (
             'I can list you the audit logs of the guild.\n'
             f'Usage: `{prefix}logs <guild> <user> <event>`\n'
             'Both `user` and `event` is optional.\n'
             '`user` is the user, who executed the logged oprations.\n'
             'The `event` is the internal value or name of the type of the '
             'operation.'
-                ),color=ADMINISTRATION_COLOR).add_footer(
+                ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only!')
 
 @ADMINISTRATION_COMMANDS.from_class
@@ -529,9 +530,9 @@ class telekinesisban:
     category = 'ADMINISTRATION'
     checks=[checks.owner_only()]
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('telekinesisban',(
+        return Embed('telekinesisban', (
             'Bans the given user at the specified guild.\n'
             f'Usage: `{prefix}telekinesisban <guild> *user* <reason>`\n'
                 ), color=ADMINISTRATION_COLOR).add_footer(

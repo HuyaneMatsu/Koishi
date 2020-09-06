@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import sys, os
-
 sys.path.append(os.path.abspath('..'))
 #moving to the outer folder, so pers_data will count as a package
 import pers_data
@@ -43,7 +42,7 @@ EXTENSION_LOADER.add('testers.test_commands')
 EXTENSION_LOADER.add('testers.ratelimit')
 EXTENSION_LOADER.add('testers.dispatch_tests')
 
-path=None
+path = None
 for path in os.listdir('modules'):
     if not path.endswith('.py'):
         continue

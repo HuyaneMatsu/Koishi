@@ -120,33 +120,33 @@ async def daily(client, message, target_user: Converter(
         'user', ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='message.author')
             ):
     
-    source_user=message.author
+    source_user = message.author
     if target_user.is_bot:
         target_user=source_user
-    now=datetime.utcnow()
+    now = datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
         while True:
             if source_user == target_user:
                 response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==source_user.id))
                 results = await response.fetchall()
                 if results:
-                    source_result=results[0]
+                    source_result = results[0]
                     daily_next=source_result.daily_next
-                    if daily_next>now:
+                    if daily_next > now:
                         embed = Embed(
                             'You already claimed your daily love for today~',
                             f'Come back in {elapsed_time(daily_next)}.',
                             GAMBLING_COLOR)
                         break
-                    daily_streak=source_result.daily_streak
-                    daily_next=daily_next+DAILY_STREAK_BREAK
-                    if daily_next<now:
+                    daily_streak = source_result.daily_streak
+                    daily_next = daily_next+DAILY_STREAK_BREAK
+                    if daily_next < now:
                         daily_streak=daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                        if daily_streak<0:
-                            daily_streak=0
-                        streak_text=f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
+                        if daily_streak < 0:
+                            daily_streak = 0
+                        streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
                     else:
-                        streak_text=f'You are in a {daily_streak} day streak! Keep up the good work!'
+                        streak_text = f'You are in a {daily_streak} day streak! Keep up the good work!'
                     
                     received = calculate_daily_for(source_user, daily_streak)
                     total_love = source_result.total_love+received
@@ -157,9 +157,10 @@ async def daily(client, message, target_user: Converter(
                         daily_streak= daily_streak+1,
                             ).where(currency_model.user_id==source_user.id))
                     
-                    embed=Embed(
+                    embed = Embed(
                         'Here, some love for you~\nCome back tomorrow !',
-                        f'You received {received} {CURRENCY_EMOJI:e} and now have {total_love} {CURRENCY_EMOJI:e}\n{streak_text}',
+                        f'You received {received} {CURRENCY_EMOJI:e} and now have {total_love} {CURRENCY_EMOJI:e}\n'
+                        f'{streak_text}',
                         GAMBLING_COLOR)
                     break
                 
@@ -175,7 +176,7 @@ async def daily(client, message, target_user: Converter(
                     GAMBLING_COLOR)
                 break
             
-            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id,target_user.id,])))
+            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,])))
             results = await response.fetchall()
             if len(results) == 0:
                 source_result = None
@@ -264,7 +265,7 @@ async def hearts_description(client,message):
 
 @GAMBLING_COMMANDS(description=hearts_description, category='GAMBLING')
 @daily.shared(weight=1)
-async def hearts(client,message,target_user: Converter('user', default_code='message.author')):
+async def hearts(client,message, target_user: Converter('user', default_code='message.author')):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==target_user.id))
         results = await response.fetchall()
@@ -325,7 +326,7 @@ class heartevent_start_checker(object):
 
 async def heartevent_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('heartevent',(
+    return Embed('heartevent', (
         'Starts a heart event at the channel.\n'
         f'Usage: `{prefix}heartevent *duration* *amount* <users_limit>`\n'
         f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
@@ -339,8 +340,8 @@ async def heartevent_description(client,message):
 
 @GAMBLING_COMMANDS(checks=[checks.owner_only()], description=heartevent_description, category='GAMBLING')
 class heartevent(object):
-    _update_time=60.
-    _update_delta=timedelta(seconds=_update_time)
+    _update_time = 60.
+    _update_delta = timedelta(seconds=_update_time)
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     async def __new__(cls, client, message, duration:timedelta, amount:int, user_limit:int=0):
@@ -430,7 +431,7 @@ class heartevent(object):
             raise
         
         try:
-            event = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+            event = await wait_for_reaction(client, to_check, heartevent_start_checker(client),1800.)
         except TimeoutError:
             return
         finally:
@@ -671,6 +672,7 @@ class dailyevent(object):
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.invalid_access, # client removed
                             ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.invalid_message_send_user, # user has dm-s disallowed
                                 ):
                         return None
                 
@@ -712,7 +714,7 @@ class dailyevent(object):
             raise
         
         try:
-            event = await wait_for_reaction(client,to_check,heartevent_start_checker(client),1800.)
+            event = await wait_for_reaction(client, to_check, heartevent_start_checker(client), 1800.)
         except TimeoutError:
             return
         finally:
@@ -1038,7 +1040,7 @@ class Game21(object):
             if user_total > 10:
                 break
         
-        embed = Embed(f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}',
+        embed = Embed(f'How to gamble {amount} {CURRENCY_EMOJI.as_emoji}',
             f'You have cards equal to {user_total} weight at your hand',
             color=GAMBLING_COLOR)
         
@@ -1267,7 +1269,7 @@ class Game21(object):
                 return
                 
         else:
-            embed = Embed(f'How to lose {self.amount} {CURRENCY_EMOJI.as_emoji}',
+            embed = Embed(f'How to gamble {self.amount} {CURRENCY_EMOJI.as_emoji}',
                 f'You have cards equal to {user_total} weight at your hand',
                 color=GAMBLING_COLOR)
             

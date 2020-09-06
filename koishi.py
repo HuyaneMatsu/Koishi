@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import re, sys
+import re
 from io import StringIO
-from types import FunctionType as function
 from datetime import datetime, timedelta
-from random import random
 
 from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
     Role, ChannelText, Invite, KOKORO
@@ -31,7 +29,18 @@ _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
 _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
 _KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
 
-setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name='UNCATEGORIZED',)
+KOISHI_DEFAULT_CATEGORY_NAME = 'Uncategorized'
+
+def category_name_rule(name):
+    if name is None:
+        name = KOISHI_DEFAULT_CATEGORY_NAME
+    else:
+        name = name.capitalize()
+    
+    return name
+
+setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name=KOISHI_DEFAULT_CATEGORY_NAME,
+    category_name_rule=category_name_rule)
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
@@ -182,9 +191,9 @@ async def command_error(client, message, command, content, exception):
     return False
 
 @Koishi.commands
-async def invalid_command(client,message,command,content):
+async def invalid_command(client, message, command, content):
     prefix = client.command_processer.get_prefix_for(message)
-    embed=Embed(
+    embed = Embed(
         f'Invalid command `{command}`',
         f'try using: `{prefix}help`',
         color=KOISHI_HELP_COLOR,
@@ -193,41 +202,6 @@ async def invalid_command(client,message,command,content):
     message = await client.message_create(message.channel,embed=embed)
     await sleep(30., KOKORO)
     await client.message_delete(message)
-
-@Koishi.commands.from_class
-class about:
-    async def command(client, message):
-        implement = sys.implementation
-        embed = Embed('About',(
-            f'Me, {client.full_name}, I am general purpose/test client.'
-            '\n'
-            'My code base is'
-            ' [open source](https://github.com/HuyaneMatsu/Koishi). '
-            'One of the main goal of my existence is to test the best *cough*'
-            ' [discord API wrapper](https://github.com/HuyaneMatsu/hata). '
-            '\n\n'
-            f'My Masutaa is {client.owner.full_name} (send neko pictures pls).\n\n'
-            '**Client info**\n'
-            f'Python version: {implement.version[0]}.{implement.version[1]}'
-            f'{"" if implement.version[3]=="final" else " "+implement.version[3]}\n'
-            f'Interpreter: {implement.name}\n'
-            f'Clients: {len(CLIENTS)}\n'
-            f'Users: {len(USERS)}\n'
-            f'Guilds: {len(GUILDS)}\n'
-            f'Channels: {len(CHANNELS)}\n'
-            'Power level: over 9000!\n'
-                )).add_thumbnail(client.application.icon_url_as(size=128))
-        
-        await client.message_create(message.channel,embed=embed)
-    
-    category = 'HELP'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('about',(
-            'Just some information about me.'
-            f'Usage: `{prefix}about`'
-                ),color=KOISHI_HELP_COLOR)
 
 @Koishi.commands.from_class
 class reload:
@@ -282,61 +256,6 @@ class reload:
         
         return pages
 
-async def aliases_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('aliases',(
-        'Do you wanna know one of my command\'s aliases?\n'
-        f'Type `{prefix}aliases <name>` and check them out!\n\n'
-        'Or if you wanna know someone elses, who I might spy on, type her name after the command\'s :3.'
-            ), color=KOISHI_HELP_COLOR)
-
-
-async def aliases_parser_failure_handler(client, message, command, content, args):
-    await Closer(client, message.channel, aliases_description(client, message))
-
-@Koishi.commands(description=aliases_description, category='HELP', parser_failure_handler=aliases_parser_failure_handler)
-async def aliases(client, message, name:str, target_client:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
-    if type(target_client) is not Client:
-        target_client = client
-    
-    while True:
-        if len(name)>64:
-            fail = True
-            break
-        
-        if not name.islower():
-            name = name.lower()
-        
-        try:
-            command = target_client.command_processer.commands[name]
-        except KeyError:
-            fail = True
-            break
-        
-        if await command.run_all_checks(target_client, message):
-            fail = False
-            break
-            
-        fail = True
-        break
-    
-    if fail:
-        title = None
-        if client is target_client:
-            description = f'I have no command named as {name!r}.'
-        else:
-            description = f'{target_client.name_at(message.guild)} has no command named as {name!r}.'
-    else:
-        aliases = command.aliases
-        if aliases is None:
-            title = f'There are no alises provided for command: {name!r}.'
-            description = None
-        else:
-            title = f'Aliases for: {command.display_name!r}:'
-            description = '\n'.join(aliases)
-    
-    await client.message_create(message.channel,embed=Embed(title,description,color=KOISHI_HELP_COLOR))
-
 async def execute_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
     return Embed('execute',(
@@ -362,64 +281,6 @@ async def execute_description(client, message):
 
 Koishi.commands(Interpreter(locals().copy()), name='execute',description=execute_description, category='UTILITY',
     checks=[checks.owner_only()])
-
-@Koishi.commands.from_class
-class rules:
-    async def command(client, message):
-        embed = Embed(f'Rules of {DUNGEON}:', color = KOISHI_HELP_COLOR,
-            ).add_field(
-                'Guidelines',
-                'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
-            ).add_field(
-                'Behaviour',
-                'Listen to staff and follow their instructions.',
-            ).add_field(
-                'Language',
-                f'{DUNGEON} is an english speaking server, please try to stick yourself to it.',
-            ).add_field(
-                'Channels',
-                'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
-            ).add_field(
-                'Usernames',
-                'Invisible, offensive or noise unicode names are not allowed.'
-            ).add_field(
-                'Spamming',
-                'Forbidden in any form. Spamming server members in DM-s counts as well.',
-            ).add_field(
-                'NSFW',
-                'Keep explicit content in nsfw channels',
-            ).add_field(
-                'Roles',
-                f'Do not beg for roles. You can claim {EVERYNYAN_ROLE.mention} role, what gives you access to '
-                f'additional channels by typing `nya` at {WELCOME_CHANNEL.mention}.\n'
-                f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
-                f'as well.*'
-                '\n\n'
-                f'Addtionally you can also claim (or unclaim) {ANNOUNCEMNETS_ROLE.mention} by typing `i meow` '
-                '(or `i not meow`), or if you are the member of the server for at least half year, you can claim the '
-                f'superior {WORSHIPPER_ROLE.mention} role by typing `nekogirl`!'
-            ).add_field(
-                'Advertisements',
-                'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
-            ).add_field(
-                'No political or religious topics.',
-                'I do not say either that aliens exists, even tho they do.',
-            )
-        await client.message_create(message.channel, embed=embed, allowed_mentions=None)
-        
-        if message.channel.cached_permissions_for(client).can_manage_messages:
-            await client.message_delete(message)
-        
-    category = 'HELP'
-    checks = [checks.owner_only(), checks.is_guild(DUNGEON)]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('rules',(
-            f'Shows the rules of the {DUNGEON} guild.'
-            f'Usage : `{prefix}rules`'
-                ),color=KOISHI_HELP_COLOR).add_footer(
-                f'Owner only and can be used only at {DUNGEON}.')
 
 
 PATTERN_ROLE_RELATION = [
@@ -474,18 +335,3 @@ async def role_giver(client, message):
         break
 
 Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
-
-@Koishi.commands.from_class
-class invite:
-    async def command(client, message):
-        await client.message_create(message.channel, DUNGEON_INVITE.url)
-    
-    category = 'HELP'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('invite',(
-            f'Sends an invite to our {DUNGEON} guild.'
-            f'Usage : `{prefix}invite`'
-                ),color=KOISHI_HELP_COLOR)
-

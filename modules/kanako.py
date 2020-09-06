@@ -660,7 +660,7 @@ class embedination(object):
         
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
-        self.timeouter=Timeouter(client.loop,self,timeout=150)
+        self.timeouter=Timeouter(self,timeout=150)
         return self
     
     async def __call__(self, client, event):
@@ -734,7 +734,7 @@ class embedination(object):
         
         self.task_flag=GUI_STATE_READY
         
-        self.timeouter.timeout+=10.
+        self.timeouter.set_timeout(10)
     
     async def _canceller(self,exception,):
         client=self.client

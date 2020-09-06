@@ -54,7 +54,7 @@ BMG_NAMES_W_S = {
     'yshar',
         }
 
-setup_ext_commands(Flan,FLAN_PREFIX)
+setup_ext_commands(Flan, FLAN_PREFIX)
 Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
 
@@ -76,7 +76,7 @@ async def guild_user_add(client, guild, user):
     await client.message_create(channel,f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
 @Flan.commands
-async def invalid_command(client,message,command,content):
+async def invalid_command(client, message, command, content):
     prefix = client.command_processer.get_prefix_for(message)
     embed = Embed(
         f'Invalid command `{command}`',
@@ -139,14 +139,15 @@ class massadd:
         
         await client.message_delete(message)
         
-        messages=[]
+        messages = []
         for message_ in message.channel.messages:
             try:
-                profile=message_.author.guild_profiles[CARDS_ROLE.guild]
+                profile = message_.author.guild_profiles[CARDS_ROLE.guild]
             except KeyError:
                 continue
-    
-            if CARDS_ROLE not in profile.roles:
+            
+            profile_roles = profile.roles
+            if (profile_roles is None) or (CARDS_ROLE not in profile_roles):
                 continue
             
             messages.append(message_)
@@ -919,88 +920,6 @@ class Track(object):
     def __lt__(self, other):
         return self.source_name < other.source_name
 
-@Flan.commands.from_class
-class join:
-    async def command(client, message, content):
-        channel=message.channel
-        guild=channel.guild
-        while True:
-            state = guild.voice_states.get(message.author.id,None)
-            if state is None:
-                text='You are not at a voice channel!'
-                break
-            
-            channel=state.channel
-            if not channel.cached_permissions_for(client).can_connect:
-                text='I have no permissions to connect to that channel'
-                break
-            
-            voice_client = client.voice_client_for(message)
-            if voice_client is None:
-                try:
-                    voice_client = await client.join_voice_channel(channel)
-                except TimeoutError:
-                    text = 'Timed out meanwhile tried to connect.'
-                    break
-                except RuntimeError:
-                    text = 'The client cannot play voice, some libraries are not loaded'
-                    break
-                
-                text=f'{client.name_at(channel.guild)} in.'
-            else:
-                try:
-                    await voice_client.move_to(channel)
-                except TimeoutError:
-                    text = 'Timed out meanwhile tried to connect.'
-                    break
-                text = f'{client.name_at(channel.guild)} in {channel}.'
-            
-            if content:
-                amount=PERCENT_RP.fullmatch(content)
-                if amount:
-                    amount=int(amount.groups()[0])
-                    if amount<0:
-                        amount=0
-                    elif amount>200:
-                        amount=200
-                    voice_client.volume=amount/100.
-                    text=f'{text}; Volume set to {amount}%'
-                
-            break
-        
-        await client.message_create(message.channel, text)
-
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('join',(
-            'Joins me to your voice channel.\n'
-            f'Usage: `{prefix}join *n%*`\n'
-            'You can also define how loud my volume will be.'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class leave:
-    async def command(client, message):
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-        else:
-            await voice_client.disconnect()
-            text = f'{client.name_at(message.channel.guild)} out.'
-        
-        await client.message_create(message.channel,text)
-
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('leave',(
-            'Leaves me from the voice channel..\n'
-            f'Usage: `{prefix}leave`'
-            ), color=FLAN_HELP_COLOR)
-
 def get_bgm(content):
     if not content:
         return None
@@ -1060,54 +979,6 @@ def get_bgm(content):
         continue
     
     return best_found
-    
-async def play_command(client, message, content):
-    if not content:
-        await play_description(client, message)
-        return
-    
-    # GOTO
-    while True:
-        voice_client = client.voice_client_for(message)
-        
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-            break
-        
-        bgm = get_bgm(content)
-        
-        if bgm is None:
-            text = 'Nothing found.'
-            break
-        
-        path = os.path.join(os.path.abspath('.'), CHESUTO_FOLDER, bgm.source_name)
-        if not os.path.exists(path):
-            data = await client.download_url(bgm.url)
-            with await AsyncIO(path, 'wb') as file:
-                await file.write(data)
-        
-        source = await LocalAudio(path, title=bgm.display_name)
-        
-        if voice_client.append(source):
-            text = 'Now playing'
-        else:
-            text = 'Added to queue'
-        
-        text = f'{text} {bgm.display_name!r}!'
-        break
-    
-    await client.message_create(message.channel,text)
-
-async def play_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('play',(
-        'Plays the given chesuto bgm.\n'
-        f'Usage: `{prefix}play <name>`\n'
-        '\n'
-        'Note that the given name can be also given as the position of the track.'
-        ), color=FLAN_HELP_COLOR)
-
-Flan.commands(play_command, name='play', checks=[checks.guild_only()], description=play_description)
 
 async def bgminfo_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -1136,60 +1007,6 @@ async def bgminfo_command(client, message, content):
     await client.message_create(message.channel, embed=embed)
 
 Flan.commands(bgminfo_command, name='bgminfo', description=bgminfo_description)
-
-@Flan.commands.from_class
-class queue:
-    async def command(client, message):
-        guild = message.guild
-        if guild is None:
-            return
-        
-        voice_client = client.voice_client_for(message)
-        
-        title = f'Playing queue for {guild}'
-        page = Embed(title, color=CHESUTO_COLOR)
-        pages = [page]
-        while True:
-            if voice_client is None:
-                page.description = '*none*'
-                break
-            
-            source = voice_client.source
-            if (source is not None):
-                page.add_field('Actual:', source.title)
-            
-            queue = voice_client.queue
-            limit = len(queue)
-            if limit:
-                index = 0
-                while True:
-                    source = queue[index]
-                    index +=1
-                    page.add_field(f'Track {index}.:', source.title)
-                    
-                    if index == limit:
-                        break
-                    
-                    if index%10 == 0:
-                        page = Embed(title, color=CHESUTO_COLOR)
-                        pages.append(page)
-                
-            else:
-                if source is None:
-                    page.description = '*none*'
-            
-            break
-        
-        await Pagination(client, message.channel, pages)
-
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('queue',(
-            'Shows the audio player queue of the current guild.\n'
-            f'Usage: `{prefix}queue`'
-            ), color=FLAN_HELP_COLOR)
 
 @Flan.commands.from_class
 class bgms:
@@ -1224,11 +1041,11 @@ class bgms:
         
         embeds = []
     
-        limit=len(chunks)
-        index=0
-        while index<limit:
+        limit = len(chunks)
+        index = 0
+        while index < limit:
             embed = Embed('Chesuto BGMs:', color=FLAN_HELP_COLOR, description=chunks[index])
-            index+=1
+            index +=1
             embed.add_footer(f'page {index}/{limit}')
             embeds.append(embed)
         
@@ -1239,195 +1056,6 @@ class bgms:
         return Embed('bgms',(
             'Lists the chesuto bgms.\n'
             f'Usage: `{prefix}bgms`'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class volume:
-    async def command(client, message, content):
-        while True:
-            voice_client = client.voice_client_for(message)
-            if voice_client is None:
-                text = 'There is no voice client at your guild.'
-                break
-            
-            if not content:
-                text = f'{voice_client.volume*100.:.0f}%'
-                break
-            
-            amount=PERCENT_RP.fullmatch(content)
-            if not amount:
-                text = 'Number please'
-                break
-            
-            amount=int(amount.groups()[0])
-            if amount<0:
-                amount=0
-            elif amount>200:
-                amount=200
-            
-            voice_client.volume=amount/100.
-            text = f'Volume set to {amount}%.'
-            break
-        
-        await client.message_create(message.channel, text)
-
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('volume',(
-            'Sets my volume to the given percentage.\n'
-            f'Usage: `{prefix}volume *n%*`\n'
-            'If no volume is passed, then I will tell my current volume.'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class skip:
-    async def command(client, message, index:int=0):
-        while True:
-            voice_client = client.voice_client_for(message)
-            if voice_client is None:
-                text = 'There is no voice client at your guild.'
-                break
-            
-            source = voice_client.skip(index)
-            if source is None:
-                text = 'Nothing was skipped.'
-            else:
-                text = f'Skipped {source.title!r}.'
-            break
-        
-        await client.message_create(message.channel, text)
-
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('skip',(
-            'Skips the audio at the given index.\n'
-            f'Usage: `{prefix}skip *index*`\n'
-            'If not giving any index or giving it as `0`, will skip the currently playing audio.'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class pause:
-    async def command(client, message):
-        while True:
-            voice_client = client.voice_client_for(message)
-            if voice_client is None:
-                text = 'There is no voice client at your guild.'
-                break
-            
-            source = voice_client.source
-            if source is None:
-                text = 'Nothing to pause.'
-            else:
-                voice_client.pause()
-                text = f'{source.title!r} paused.'
-            
-            break
-        
-        await client.message_create(message.channel, text)
-
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('pause',(
-            'Pauses the currently playing audio.\n'
-            f'Usage: `{prefix}pause`\n'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class resume:
-    async def command(client, message):
-        while True:
-            voice_client = client.voice_client_for(message)
-            if voice_client is None:
-                text = 'There is no voice client at your guild.'
-                break
-            
-            source = voice_client.source
-            if source is None:
-                text = 'Nothing to resume.'
-            else:
-                voice_client.resume()
-                text = f'{source.title!r} resumed.'
-            
-            break
-        
-        await client.message_create(message.channel, text)
-
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('resume',(
-            'Resumes the currently playing audio.\n'
-            f'Usage: `{prefix}resume`\n'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class loop:
-    async def command(client, message):
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-        else:
-            voice_client.call_after = voice_client._loop_actual
-            text = 'Started looping over the actual audio.'
-        
-        await client.message_create(message.channel, text)
-    
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('loop',(
-            'Loops over the currently playing audio.\n'
-            f'Usage: `{prefix}loop`\n'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class loop_stop:
-    async def command(client, message):
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-        else:
-            voice_client.call_after = voice_client._play_next
-            text = 'Stopped looping over the actual audio(s).'
-        
-        await client.message_create(message.channel, text)
-    
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('loop-stop',(
-            'Stops looping over the actual audio or over the queue.\n'
-            f'Usage: `{prefix}loop-stop`\n'
-            ), color=FLAN_HELP_COLOR)
-
-@Flan.commands.from_class
-class loop_all:
-    async def command(client, message):
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-        else:
-            voice_client.call_after = voice_client._loop_queue
-            text = 'Started looping over the audio queue.'
-        
-        await client.message_create(message.channel, text)
-    
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('loop-all',(
-            'Starts to loop over the queue.\n'
-            f'Usage: `{prefix}loop-all`\n'
             ), color=FLAN_HELP_COLOR)
 
 del Cooldown

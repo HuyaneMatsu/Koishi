@@ -87,7 +87,7 @@ async def create_auto_react_role(client, message, target_message: MESSAGE_CONVER
             # no internet
             return
         
-        if isinstance(err,DiscordException):
+        if isinstance(err, DiscordException):
             if err.code in (
                     ERROR_CODES.unknown_channel, # message's channel deleted
                     ERROR_CODES.invalid_access, # client removed
@@ -115,10 +115,10 @@ def iterate_embed_parts(embed):
 def render_message_content(message):
     content = message.content
     if content:
-        if len(content)>200:
-            space_position = content.rfind(' ',180,200)
-            if space_position==-1:
-                space_position=197
+        if len(content) > 200:
+            space_position = content.rfind(' ', 180, 200)
+            if space_position == -1:
+                space_position = 197
             
             content = content[:space_position]+'...'
     else:
@@ -130,18 +130,18 @@ def render_message_content(message):
             leftover_length = 200
             collected_parts = []
             for part in iterate_embed_parts(embed):
-                if len(part)<=leftover_length:
+                if len(part) <= leftover_length:
                     collected_parts.append(part)
                     collected_parts.append(' ')
                     leftover_length = leftover_length-len(part)-1
                     
-                    if leftover_length<20:
+                    if leftover_length < 20:
                         break
                 
                 else:
-                    space_position = content.rfind(' ',leftover_length-20,leftover_length)
-                    if space_position==-1:
-                        space_position=leftover_length-4
+                    space_position = content.rfind(' ', leftover_length-20, leftover_length)
+                    if space_position == -1:
+                        space_position = leftover_length-4
                     
                     part = part[:space_position]
                     collected_parts.append(part)
@@ -149,7 +149,7 @@ def render_message_content(message):
                     break
             
             if collected_parts:
-                if collected_parts[-1]==' ':
+                if collected_parts[-1] == ' ':
                     del collected_parts[-1]
                     
                 content = ''.join(collected_parts)
@@ -160,12 +160,10 @@ def render_message_content(message):
 
 AUTO_REACT_ROLE_GUI_EMBED_FIELD_NAME = 'HOW TO'
 AUTO_REACT_ROLE_GUI_EMBED_FIELD_VALUE = (
-    'Type `add <emoji> <role>` to add a new emoji-role pair to add a new '
-    'connection\n'
+    'Type `add <emoji> <role>` to add a new emoji-role pair to add a new connection\n'
     'Type `del <emoji>` or `del <role>` to remove a connection.\n'
-    'Type `behaviour enable/disable delete role/emoji` to enable or disable '
-    'deleting the emoji if the role is removed, or deleting the role if the '
-    'emoji is removed.\n'
+    'Type `behaviour enable/disable delete role/emoji` to enable or disable deleting the emoji if the role is removed, '
+    'or deleting the role if the emoji is removed.\n'
     'Type `apply` to save or `cancel` to not.\n'
     'Type `destroy` to destroy the auto react role instance, if exists.'
         )
@@ -271,7 +269,7 @@ class AutoReactRoleChange(object):
         
         actual_length = len(self.added)
         if (self.actual is not None):
-            actual_length+len(self.actual)
+            actual_length += len(self.actual)
         if emoji_state in (CHANGE_STATE_ADDED, CHANGE_STATE_ACTUAL):
             actual_length -=1
         if role_state in (CHANGE_STATE_ADDED, CHANGE_STATE_ACTUAL):
@@ -444,7 +442,7 @@ class AutoReactRoleChange(object):
                 result.append(': ')
                 result.append(repr(role))
                 result.append(', ')
-            result[-1]='}'
+            result[-1] = '}'
         else:
             result.append('{}')
         
@@ -457,7 +455,7 @@ class AutoReactRoleChange(object):
                 result.append(': ')
                 result.append(repr(role))
                 result.append(', ')
-            result[-1]='}'
+            result[-1] = '}'
         else:
             result.append('{}')
         
@@ -470,7 +468,7 @@ class AutoReactRoleChange(object):
                 result.append(': ')
                 result.append(repr(role))
                 result.append(', ')
-            result[-1]='}'
+            result[-1] = '}'
         else:
             result.append('{}')
         
@@ -531,7 +529,7 @@ class AutoReactRoleGUI(object):
             if isinstance(err,ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deletedd
                         ERROR_CODES.unknown_channel, # channel deleted
@@ -581,7 +579,7 @@ class AutoReactRoleGUI(object):
         if not name.islower():
             name = name.lower()
         
-        if name=='apply':
+        if name == 'apply':
             await self.delete_message(message)
             await self.apply(message)
             return
@@ -590,7 +588,7 @@ class AutoReactRoleGUI(object):
             await self.cancel()
             return
         
-        if name=='destroy':
+        if name == 'destroy':
             await self.destroy()
             return
         
@@ -601,11 +599,11 @@ class AutoReactRoleGUI(object):
             await self.sub_add(client, message, content)
             return
         
-        if name=='del':
+        if name == 'del':
             await self.sub_del(client, message, content)
             return
         
-        if name=='behaviour':
+        if name == 'behaviour':
             await self.sub_behaviour(message, content)
             return
     
@@ -625,7 +623,7 @@ class AutoReactRoleGUI(object):
                 if isinstance(err,ConnectionError):
                     break
                 
-                if isinstance(err,DiscordException):
+                if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
@@ -666,7 +664,7 @@ class AutoReactRoleGUI(object):
             if isinstance(err,ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
@@ -675,7 +673,7 @@ class AutoReactRoleGUI(object):
                             ):
                     return
             
-            await client.events.error(client,f'{self!r}.cancel',err)
+            await client.events.error(client, f'{self!r}.cancel', err)
             return
     
     async def destroy(self):
@@ -774,7 +772,7 @@ class AutoReactRoleGUI(object):
             if isinstance(err,ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
@@ -791,7 +789,7 @@ class AutoReactRoleGUI(object):
         try:
             await client.message_delete(message)
         except BaseException as err:
-            if isinstance(err,DiscordException) and err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+            if isinstance(err, DiscordException) and err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
                 return
             
             client.command_processer.remove(self.message.channel, self)
@@ -799,7 +797,7 @@ class AutoReactRoleGUI(object):
             if isinstance(err,ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
@@ -824,7 +822,7 @@ class AutoReactRoleManager(object):
                 if isinstance(err,ConnectionError):
                     return
                 
-                if isinstance(err,DiscordException):
+                if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
@@ -843,7 +841,7 @@ class AutoReactRoleManager(object):
                 if isinstance(err,ConnectionError):
                     return
                 
-                if isinstance(err,DiscordException):
+                if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.unknown_emoji, # emoji deleted
                             ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
@@ -854,7 +852,7 @@ class AutoReactRoleManager(object):
                                 ):
                         return
                 
-                await client.events.error(client,f'{cls.__name__}.__new__',err)
+                await client.events.error(client, f'{cls.__name__}.__new__', err)
                 return
         
         data = bytearray(320)
@@ -863,13 +861,13 @@ class AutoReactRoleManager(object):
         relations = {}
         
         for emoji, role in changes.added:
-            data[position:position+8]=emoji.id.to_bytes(8,byteorder='big')
-            position=position+8
-            data[position:position+8]=role.id.to_bytes(8,byteorder='big')
-            position=position+8
+            data[position:position+8] = emoji.id.to_bytes(8, byteorder='big')
+            position +=8
+            data[position:position+8] = role.id.to_bytes(8, byteorder='big')
+            position +=8
 
-            relations[emoji]=role
-            relations[role]=emoji
+            relations[emoji] = role
+            relations[role] = emoji
         
         async with DB_ENGINE.connect() as connector:
             await connector.execute(AUTO_REACT_ROLE_TABLE.insert().values(
@@ -880,12 +878,12 @@ class AutoReactRoleManager(object):
                 client_id   = client.id))
         
         self = object.__new__(cls)
-        self.message    = message
-        self.relations  = relations
-        self.behaviour  = changes.new_behaviour
-        self.guild      = guild
-        self.client     = client
-        self.destroy_called=False
+        self.message = message
+        self.relations = relations
+        self.behaviour = changes.new_behaviour
+        self.guild = guild
+        self.client = client
+        self.destroy_called = False
         self.add_events()
         return self
     
@@ -927,7 +925,7 @@ class AutoReactRoleManager(object):
                 continue
         
         except BaseException as err:
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
@@ -943,10 +941,10 @@ class AutoReactRoleManager(object):
         relations = {}
         re_do = False
         data = query.data
-        for position in range(0,320,16):
-            emoji_id = int.from_bytes(data[position:position+8],byteorder='big')
+        for position in range(0, 320, 16):
+            emoji_id = int.from_bytes(data[position:position+8], byteorder='big')
             
-            if emoji_id==0:
+            if emoji_id == 0:
                 break
             
             try:
@@ -955,7 +953,7 @@ class AutoReactRoleManager(object):
                 re_do = True
                 continue
             
-            role_id = int.from_bytes(data[position+8:position+16],byteorder='big')
+            role_id = int.from_bytes(data[position+8:position+16], byteorder='big')
             
             try:
                 role = ROLES[role_id]
@@ -970,9 +968,9 @@ class AutoReactRoleManager(object):
                 data = bytearray(320)
                 position = 0
                 for emoji, role in relations.items():
-                    data[position:position+8]=emoji.id.to_bytes(8,byteorder='big')
+                    data[position:position+8]=emoji.id.to_bytes(8, byteorder='big')
                     position +=8
-                    data[position:position+8]=role.id.to_bytes(8,byteorder='big')
+                    data[position:position+8]=role.id.to_bytes(8, byteorder='big')
                     position +=8
                 
                 await connector.execute(AUTO_REACT_ROLE_TABLE.update().values(
@@ -986,18 +984,18 @@ class AutoReactRoleManager(object):
         behaviour = BehaviourFlag(query.behaviour)
         
         self = object.__new__(cls)
-        self.message    = message
-        self.guild      = message.guild
-        self.relations  = relations
-        self.behaviour  = BehaviourFlag(behaviour)
-        self.client     = client
-        self.destroy_called=False
+        self.message = message
+        self.guild = message.guild
+        self.relations = relations
+        self.behaviour = BehaviourFlag(behaviour)
+        self.client = client
+        self.destroy_called = False
         self.add_events()
         return self
     
     def add_events(self):
         client = self.client
-        message=self.message
+        message = self.message
         client.events.reaction_add.append(message, self.action_on_reaction_add)
         client.events.reaction_delete.append(message, self.action_on_reaction_delete)
         client.events.message_delete.append(message, self.action_on_message_delete)
@@ -1023,7 +1021,8 @@ class AutoReactRoleManager(object):
         except KeyError:
             return
         
-        if role in user_profile.roles:
+        roles = user_profile.roles
+        if (roles is not None) and (role in roles):
             return
         
         try:
@@ -1032,7 +1031,7 @@ class AutoReactRoleManager(object):
             if isinstance(err, ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_user, #user deleted
                         ERROR_CODES.unknown_role, # role deleted
@@ -1043,7 +1042,7 @@ class AutoReactRoleManager(object):
                     #handled by other methods
                     return
             
-            await client.events.error(client,f'{self!r}.action_on_reaction_add',err)
+            await client.events.error(client, f'{self!r}.action_on_reaction_add', err)
             return
     
     async def action_on_reaction_delete(self, client, event):
@@ -1061,16 +1060,17 @@ class AutoReactRoleManager(object):
         except KeyError:
             return
         
-        if role not in user_profile.roles:
+        roles = user_profile.roles
+        if (roles is None) or (role not in roles):
             return
         
         try:
             await client.user_role_delete(event.user, role)
         except BaseException as err:
-            if isinstance(err,ConnectionError):
+            if isinstance(err, ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_user, #user deleted
                         ERROR_CODES.unknown_role, # role deleted
@@ -1081,7 +1081,7 @@ class AutoReactRoleManager(object):
                     #handled by other events
                     return
             
-            await client.events.error(client,f'{self!r}.action_on_reaction_delete',err)
+            await client.events.error(client, f'{self!r}.action_on_reaction_delete', err)
             return
     
     async def action_on_guild_delete(self, client, guild, profile):
@@ -1169,10 +1169,10 @@ class AutoReactRoleManager(object):
         try:
             await client.emoji_delete(emoji)
         except BaseException as err:
-            if isinstance(err,ConnectionError):
+            if isinstance(err, ConnectionError):
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.status >= 500:
                     return
                 
@@ -1235,7 +1235,7 @@ class AutoReactRoleManager(object):
                 if isinstance(err,ConnectionError):
                     return
                 
-                if isinstance(err,DiscordException):
+                if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
@@ -1245,7 +1245,7 @@ class AutoReactRoleManager(object):
                         await self.destroy()
                         return
                 
-                await client.events.error(client,f'{self!r}.apply_changes',err)
+                await client.events.error(client, f'{self!r}.apply_changes', err)
                 return
         
         for emoji, role in changes.added:
@@ -1255,15 +1255,15 @@ class AutoReactRoleManager(object):
             if role.guild is None:
                 continue
             
-            relations[emoji]=role
-            relations[role]=emoji
+            relations[emoji] = role
+            relations[role] = emoji
             try:
                 await client.reaction_add(message, emoji)
             except BaseException as err:
                 if isinstance(err,ConnectionError):
                     return
                 
-                if isinstance(err,DiscordException):
+                if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.unknown_emoji, # emoji deleted
                             ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
@@ -1285,10 +1285,10 @@ class AutoReactRoleManager(object):
         data = bytearray(320)
         position = 0
         for emoji, role in self.relations.items():
-            data[position:position+8]=emoji.id.to_bytes(8,byteorder='big')
-            position=position+8
-            data[position:position+8]=role.id.to_bytes(8,byteorder='big')
-            position=position+8
+            data[position:position+8] = emoji.id.to_bytes(8, byteorder='big')
+            position +=8
+            data[position:position+8] = role.id.to_bytes(8, byteorder='big')
+            position +=8
         
         async with DB_ENGINE.connect() as connector:
             await connector.execute(AUTO_REACT_ROLE_TABLE.update().values(
@@ -1371,10 +1371,10 @@ async def show_auto_react_roles(client, message):
     results=[]
     for manager in managers:
         message_ = manager.message
-        title=f'{message_.channel:m} {message.id}'
-        results.append((title,manager),)
+        title = f'{message_.channel:m} {message.id}'
+        results.append((title, manager),)
     
-    await ChooseMenu(client,message.channel,results,select_auto_react_role_gui, embed=embed, prefix='¤')
+    await ChooseMenu(client, message.channel, results, select_auto_react_role_gui, embed=embed, prefix='¤')
 
 async def select_auto_react_role_gui(client, channel, message, title, manager):
     guild = manager.message.channel.guild
