@@ -10,10 +10,10 @@ DISPATCH_TESTS = eventlist(type_=Command)
 DISPTACH_COLOR = Color.from_rgb(120, 108, 128)
 
 def setup(lib):
-    Koishi.commands.extend(DISPATCH_TESTS)
+    main_client.commands.extend(DISPATCH_TESTS)
     
 def teardown(lib):
-    Koishi.commands.unextend(DISPATCH_TESTS)
+    main_client.commands.unextend(DISPATCH_TESTS)
 
 class dispatch_tester:
     channel=None

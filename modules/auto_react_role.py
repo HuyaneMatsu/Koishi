@@ -3,7 +3,6 @@ import re
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
     Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS, WeakKeyDictionary
 from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination, ConverterFlag
-from hata.discord.others import ID_RP
 
 from shared import permission_check_handler
 from models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE

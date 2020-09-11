@@ -21,10 +21,10 @@ TEST_COMMANDS = eventlist(type_=Command, category='TEST COMMANDS',)
 map_module('hata')
 
 def setup(lib):
-    Koishi.commands.extend(TEST_COMMANDS)
+    main_client.commands.extend(TEST_COMMANDS)
     
 def teardown(lib):
-    Koishi.commands.unextend(TEST_COMMANDS)
+    main_client.commands.unextend(TEST_COMMANDS)
 
 @TEST_COMMANDS
 async def test_choose_menu_repr(client, message):

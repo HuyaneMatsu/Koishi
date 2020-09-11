@@ -12,7 +12,7 @@ from sqlalchemy.sql import select, desc
 
 from models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from tools import CooldownHandler
-from koishi import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON
+from shared import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON
 
 GAMBLING_COMMANDS = eventlist(type_=Command)
 

@@ -5,7 +5,7 @@ from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color, YTAud
     Permission, KOKORO, ChannelBase, ChannelVoice, AsyncIO
 from hata.ext.commands import Command, checks, Pagination
 
-import pers_data
+from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE
 
 from flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
 
@@ -28,22 +28,22 @@ def teardown(lib):
     Koishi.commands.unextend(VOICE_COMMANDS_KOISHI)
 
 
-AUDIO_PATH = pers_data.AUDIO_PATH
 
-FILENAMES = []
-def collect_local_audio():
-    for filename in os.listdir(AUDIO_PATH):
-        if filename.endswith('.mp3'):
-            FILENAMES.append(filename)
+if AUDIO_PATH is not None:
+    FILENAMES = []
+    def collect_local_audio():
+        for filename in os.listdir(AUDIO_PATH):
+            if filename.endswith('.mp3'):
+                FILENAMES.append(filename)
 
-collect_local_audio()
+    collect_local_audio()
 
 PERCENT_RP = re.compile('(\d*)[%]?')
 
 
 async def join_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('join',(
+    return Embed('join', (
         'Joins me to your voice channel.\n'
         f'Usage: `{prefix}join *n%*`\n'
         'You can also tell me how loud I should sing for you.'
@@ -96,7 +96,7 @@ async def pause_description(client, message):
         'Pauses the currently playing audio.\n'
         f'Usage: `{prefix}pause`\n'
         ), color=VOICE_COLORS.get(client))
-    
+
 @VOICE_COMMANDS_FLAN(description=pause_description)
 @VOICE_COMMANDS_KOISHI(description=pause_description)
 async def pause(client, message):
@@ -158,181 +158,182 @@ async def leave(client, message):
     await client.message_create(message.channel, text)
 
 
-async def koishi_play_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('play',(
-        'Do you want me to search me some audio to listen to?.\n'
-        f'Usage: `{prefix}play <name>`\n'
-        'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
-        ), color=KOISHI_VOICE_COLOR)
-
-@VOICE_COMMANDS_KOISHI(description=koishi_play_description, name='play')
-async def koishi_play(client, message, content):
-    while True:
-        if YTAudio is None:
-            text = 'This option in unavailable :c'
-            break
-        
-        voice_client=client.voice_client_for(message)
-        
-        if voice_client is None:
-            text='There is no voice client at your guild'
-            break
-        
-        if not content:
-            if voice_client.player is None:
-                text='Nothing is playing now Good Sir!'
-                break
-            
-            if voice_client.is_paused():
-                voice_client.resume()
-                text=f'Resumed playing: {voice_client.player.source.title}'
-                break
-
-            text=f'Now playing: {voice_client.player.source.title}'
-            break
-        
-        try:
-            with client.keep_typing(message.channel):
-                source = await YTAudio(content, stream=True)
-        except DownloadError as err: #raised by YTdl
-            text='Error meanwhile downloading'
-            break
-        
-        if voice_client.append(source):
-            text = f'Now playing {source.title}!'
-        else:
-            text = f'Added to queue {source.title}!'
-        break
-
-    await client.message_create(message.channel,text)
-
-
-async def local_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('local',(
-        'Plays a local audio from my collection.\n'
-        f'Usage: `{prefix}local <name>`\n'
-        'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
-        ), color=KOISHI_VOICE_COLOR)
-
-@VOICE_COMMANDS_KOISHI(name='local', description=local_description)
-async def local_(client, message, content):
-    while True:
-        voice_client=client.voice_client_for(message)
-        
-        if voice_client is None:
-            text = 'There is no voice client at your guild'
-            break
-        
-        if not content:
-            if voice_client.player is None:
-                text = 'Nothing is playing now Good Sir!'
-                break
-            
-            if voice_client.is_paused():
-                voice_client.resume()
-                text = f'Resumed playing: {voice_client.player.source.title}'
-                break
-            
-            text = f'Now playing: {voice_client.player.source.title}'
-            break
-        
-        content = content.split(' ')
-        for index in range(len(content)):
-            word = content[index]
-            word = re.escape(word)
-            content[index] = word
-
-        pattern = re.compile('.*?'.join(content),re.I)
-        
-        most_accurate = None
-        
-        index = 0
-        limit = len(FILENAMES)
-        
+if AUDIO_PLAY_POSSIBLE:
+    async def koishi_play_description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('play',(
+            'Do you want me to search me some audio to listen to?.\n'
+            f'Usage: `{prefix}play <name>`\n'
+            'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
+            ), color=KOISHI_VOICE_COLOR)
+    
+    @VOICE_COMMANDS_KOISHI(description=koishi_play_description, name='play')
+    async def koishi_play(client, message, content):
         while True:
-            if index == limit:
+            if YTAudio is None:
+                text = 'This option in unavailable :c'
                 break
             
-            name = FILENAMES[index]
-            parsed = pattern.search(name)
+            voice_client=client.voice_client_for(message)
             
-            if parsed is None:
-                index +=1
-                continue
-            
-            start = parsed.start()
-            length = parsed.end()-start
-            most_accurate = (start, length, len(name), name)
-            break
-        
-        if most_accurate is None:
-            text = 'Not found anything, what matches.'
-            break
-        
-        while True:
-            index +=1
-            if index==limit:
+            if voice_client is None:
+                text='There is no voice client at your guild'
                 break
             
-            name = FILENAMES[index]
-            parsed = pattern.search(name)
+            if not content:
+                if voice_client.player is None:
+                    text='Nothing is playing now Good Sir!'
+                    break
+                
+                if voice_client.is_paused():
+                    voice_client.resume()
+                    text=f'Resumed playing: {voice_client.player.source.title}'
+                    break
+    
+                text=f'Now playing: {voice_client.player.source.title}'
+                break
             
-            if parsed is None:
-                continue
+            try:
+                with client.keep_typing(message.channel):
+                    source = await YTAudio(content, stream=True)
+            except DownloadError as err: #raised by YTdl
+                text='Error meanwhile downloading'
+                break
+            
+            if voice_client.append(source):
+                text = f'Now playing {source.title}!'
+            else:
+                text = f'Added to queue {source.title}!'
+            break
+    
+        await client.message_create(message.channel,text)
 
-            start = parsed.start()
-            target = most_accurate[0]
-            if start > target:
-                continue
+if (AUDIO_PATH is not None and AUDIO_PLAY_POSSIBLE):
+    async def local_description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('local',(
+            'Plays a local audio from my collection.\n'
+            f'Usage: `{prefix}local <name>`\n'
+            'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
+            ), color=KOISHI_VOICE_COLOR)
+    
+    @VOICE_COMMANDS_KOISHI(name='local', description=local_description)
+    async def local_(client, message, content):
+        while True:
+            voice_client=client.voice_client_for(message)
             
-            if start < target:
-                most_accurate = (start, parsed.end()-start, len(name), name)
-                continue
+            if voice_client is None:
+                text = 'There is no voice client at your guild'
+                break
             
-            length = parsed.end()-start
-            target = most_accurate[1]
+            if not content:
+                if voice_client.player is None:
+                    text = 'Nothing is playing now Good Sir!'
+                    break
+                
+                if voice_client.is_paused():
+                    voice_client.resume()
+                    text = f'Resumed playing: {voice_client.player.source.title}'
+                    break
+                
+                text = f'Now playing: {voice_client.player.source.title}'
+                break
             
-            if length > target:
-                continue
+            content = content.split(' ')
+            for index in range(len(content)):
+                word = content[index]
+                word = re.escape(word)
+                content[index] = word
+    
+            pattern = re.compile('.*?'.join(content),re.I)
             
-            if length < target:
+            most_accurate = None
+            
+            index = 0
+            limit = len(FILENAMES)
+            
+            while True:
+                if index == limit:
+                    break
+                
+                name = FILENAMES[index]
+                parsed = pattern.search(name)
+                
+                if parsed is None:
+                    index +=1
+                    continue
+                
+                start = parsed.start()
+                length = parsed.end()-start
                 most_accurate = (start, length, len(name), name)
-                continue
+                break
             
-            name_length = len(name)
-            target = most_accurate[2]
-            if name_length > target:
-                continue
+            if most_accurate is None:
+                text = 'Not found anything, what matches.'
+                break
             
-            if name_length < target:
+            while True:
+                index +=1
+                if index==limit:
+                    break
+                
+                name = FILENAMES[index]
+                parsed = pattern.search(name)
+                
+                if parsed is None:
+                    continue
+    
+                start = parsed.start()
+                target = most_accurate[0]
+                if start > target:
+                    continue
+                
+                if start < target:
+                    most_accurate = (start, parsed.end()-start, len(name), name)
+                    continue
+                
+                length = parsed.end()-start
+                target = most_accurate[1]
+                
+                if length > target:
+                    continue
+                
+                if length < target:
+                    most_accurate = (start, length, len(name), name)
+                    continue
+                
+                name_length = len(name)
+                target = most_accurate[2]
+                if name_length > target:
+                    continue
+                
+                if name_length < target:
+                    most_accurate = (start, length, name_length, name)
+                    continue
+                
+                target = most_accurate[3]
+                if name > target:
+                    continue
+                
                 most_accurate = (start, length, name_length, name)
                 continue
             
-            target = most_accurate[3]
-            if name > target:
-                continue
+            name = most_accurate[3]
+            path = os.path.join(AUDIO_PATH, name)
             
-            most_accurate = (start, length, name_length, name)
-            continue
-        
-        name = most_accurate[3]
-        path = os.path.join(AUDIO_PATH, name)
-        
-        try:
-            source = await LocalAudio(path)
-        except PermissionError:
-            text = 'The file is already playing somewhere'
+            try:
+                source = await LocalAudio(path)
+            except PermissionError:
+                text = 'The file is already playing somewhere'
+                break
+            
+            if voice_client.append(source):
+                text = f'Now playing {source.title}!'
+            else:
+                text = f'Added to queue {source.title}!'
             break
         
-        if voice_client.append(source):
-            text = f'Now playing {source.title}!'
-        else:
-            text = f'Added to queue {source.title}!'
-        break
-    
-    await client.message_create(message.channel, text)
+        await client.message_create(message.channel, text)
 
 
 async def volume_description(client, message):
@@ -629,53 +630,53 @@ async def loop_all(client, message):
     
     await client.message_create(message.channel, text)
 
-
-async def flan_play_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('play',(
-        'Plays the given chesuto bgm.\n'
-        f'Usage: `{prefix}play <name>`\n'
-        '\n'
-        'Note that the given name can be also given as the position of the track.'
-        ), color=FLAN_HELP_COLOR)
-
-@VOICE_COMMANDS_FLAN(description=flan_play_description, name='play')
-async def flan_play(client, message, content):
-    if not content:
-        await flan_play_description(client, message)
-        return
+if AUDIO_PLAY_POSSIBLE:
+    async def flan_play_description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('play', (
+            'Plays the given chesuto bgm.\n'
+            f'Usage: `{prefix}play <name>`\n'
+            '\n'
+            'Note that the given name can be also given as the position of the track.'
+            ), color=FLAN_HELP_COLOR)
     
-    # GOTO
-    while True:
-        voice_client = client.voice_client_for(message)
+    @VOICE_COMMANDS_FLAN(description=flan_play_description, name='play')
+    async def flan_play(client, message, content):
+        if not content:
+            await flan_play_description(client, message)
+            return
         
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
+        # GOTO
+        while True:
+            voice_client = client.voice_client_for(message)
+            
+            if voice_client is None:
+                text = 'There is no voice client at your guild.'
+                break
+            
+            bgm = get_bgm(content)
+            
+            if bgm is None:
+                text = 'Nothing found.'
+                break
+            
+            path = os.path.join(os.path.abspath('.'), CHESUTO_FOLDER, bgm.source_name)
+            if not os.path.exists(path):
+                data = await client.download_url(bgm.url)
+                with await AsyncIO(path, 'wb') as file:
+                    await file.write(data)
+            
+            source = await LocalAudio(path, title=bgm.display_name)
+            
+            if voice_client.append(source):
+                text = 'Now playing'
+            else:
+                text = 'Added to queue'
+            
+            text = f'{text} {bgm.display_name!r}!'
             break
         
-        bgm = get_bgm(content)
-        
-        if bgm is None:
-            text = 'Nothing found.'
-            break
-        
-        path = os.path.join(os.path.abspath('.'), CHESUTO_FOLDER, bgm.source_name)
-        if not os.path.exists(path):
-            data = await client.download_url(bgm.url)
-            with await AsyncIO(path, 'wb') as file:
-                await file.write(data)
-        
-        source = await LocalAudio(path, title=bgm.display_name)
-        
-        if voice_client.append(source):
-            text = 'Now playing'
-        else:
-            text = 'Added to queue'
-        
-        text = f'{text} {bgm.display_name!r}!'
-        break
-    
-    await client.message_create(message.channel, text)
+        await client.message_create(message.channel, text)
 
 
 

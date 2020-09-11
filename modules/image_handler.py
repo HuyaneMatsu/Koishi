@@ -14,8 +14,8 @@ except ImportError:
 
 from tools import choose
 
-splitext=os.path.splitext
-join=os.path.join
+splitext = os.path.splitext
+join = os.path.join
 
 IMAGE_COLOR = Color(0x5dc66f)
 IMAGE_COMMANDS = eventlist(type_=Command)
@@ -360,9 +360,9 @@ async def process_on_command_upload(client,message,content):
             with (await AsyncIO(filename,'wb')) as file:
                 await file.write(data)
     else:
-        path=f'{index}_{"_".join(tags)}.{ext}'
-        filename=join(IMAGE_PATH,path)
-        with (await AsyncIO(filename,'wb')) as file:
+        path = f'{index}_{"_".join(tags)}.{ext}'
+        filename = join(IMAGE_PATH,path)
+        with (await AsyncIO(filename, 'wb')) as file:
             await file.write(data)
         
     image_details(path)

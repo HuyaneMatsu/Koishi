@@ -2,10 +2,11 @@
 import os, sys, subprocess, re
 from pathlib import Path
 from subprocess import TimeoutExpired
-from hata import eventlist, Color, KOKORO, Embed, ScarletLock, sleep
+from hata import eventlist, Color, KOKORO, Embed, ScarletLock, sleep, Guild
 from hata.ext.commands import Command, checks
 from interpreter import parse_code_content
-from koishi import DUNGEON
+from shared import DUNGEON
+import config
 
 # installing nsjail:
 # make a folder for it somewhere
@@ -17,7 +18,7 @@ from koishi import DUNGEON
 # $ sudo cp ".../nsjail/nsjail" "/usr/sbin/" # Copy it.
 
 SNEKBOX_COLOR = Color.from_rgb(255, 16, 124)
-SNEKBOX_COMMANDS = eventlist(type_=Command, category = 'SNEKBOX')
+SNEKBOX_COMMANDS = eventlist(type_=Command, category='SNEKBOX')
 
 CGROUP_PIDS_PARENT = Path('/sys/fs/cgroup/pids/NSJAIL')
 CGROUP_MEMORY_PARENT = Path('/sys/fs/cgroup/memory/NSJAIL')
@@ -51,14 +52,14 @@ def setup(lib):
             try:
                 (CGROUP_MEMORY_PARENT / 'memory.memsw.limit_in_bytes').write_text(str(MEM_MAX), encoding='utf-8')
             except PermissionError:
-                #sys.stderr.write(f'From {__file__}: Failed to setup memory swap limit\n')
+                # sys.stderr.write(f'From {__file__}: Failed to setup memory swap limit\n')
                 pass
     
-    Koishi.command_processer.create_category('SNEKBOX', checks=[checks.is_guild(DUNGEON)])
-    Koishi.commands.extend(SNEKBOX_COMMANDS)
+    main_client.command_processer.create_category('SNEKBOX', checks=[checks.is_guild(DUNGEON)])
+    main_client.commands.extend(SNEKBOX_COMMANDS)
 
 def teardown(lib):
-    Koishi.command_processer.delete_category('SNEKBOX')
+    main_client.command_processer.delete_category('SNEKBOX')
 
 def build_output(output, returncode):
     lines = output.decode('utf-8').splitlines()

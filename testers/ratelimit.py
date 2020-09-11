@@ -32,11 +32,11 @@ RATELIMIT_PRECISION = Discord_hdrs.RATELIMIT_PRECISION
 RATELIMIT_COMMANDS=eventlist(type_=Command, category='RATELIMIT TESTS')
 
 def setup(lib):
-    Koishi.command_processer.create_category('RATELIMIT TESTS',checks=[checks.owner_only()])
-    Koishi.commands.extend(RATELIMIT_COMMANDS)
+    main_client.command_processer.create_category('RATELIMIT TESTS', checks=[checks.owner_only()])
+    main_client.commands.extend(RATELIMIT_COMMANDS)
     
 def teardown(lib):
-    Koishi.command_processer.delete_category('RATELIMIT TESTS')
+    main_client.command_processer.delete_category('RATELIMIT TESTS')
 
 def parsedate_to_datetime(data):
     *dtuple, tz = _parsedate_tz(data)
@@ -485,13 +485,13 @@ async def message_pinneds(client,channel,):
         )
 
 async def message_logs(client,channel,):
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages',
-        params={'limit':1},)
+        params = {'limit': 1},)
 
-async def message_get(client,channel,message_id,):
-    channel_id=channel.id
+async def message_get(client, channel, message_id,):
+    channel_id = channel.id
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}',
         )

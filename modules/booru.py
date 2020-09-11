@@ -4,9 +4,9 @@ from collections import deque
 
 from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO
 from hata.ext.commands import Timeouter, Cooldown, Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
-    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
+    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
 
-from tools import BeautifulSoup, choose, pop_one, CooldownHandler, mark_as_async, choose_notsame
+from tools import BeautifulSoup, choose, pop_one, CooldownHandler, choose_notsame
 
 
 BOORU_COLOR = Color.from_html('#138a50')
@@ -46,12 +46,12 @@ class cached_booru_command(object):
         await ShuffledShelter(client, message.channel, urls, False, self.title)
 
     async def _request_urls(self, client):
-        url=''.join([SAFE_BOORU, self._FILTER, self._tag_name])
+        url = ''.join([SAFE_BOORU, self._FILTER, self._tag_name])
         async with client.http.get(url) as response:
             result = await response.read()
         if response.status != 200:
             return
-        soup=BeautifulSoup(result, 'lxml')
+        soup = BeautifulSoup(result, 'lxml')
         self.urls = [post['file_url'] for post in soup.find_all('post')]
 
 
@@ -65,7 +65,7 @@ class ShuffledShelter(object):
     
     async def __new__(cls, client, channel, urls, pop, title='Link'):
         if not urls:
-            await client.message_create(channel, rmbed=Embed('No result'))
+            await client.message_create(channel, embed=Embed('No result'))
             return
         
         self = object.__new__(cls)
@@ -88,10 +88,10 @@ class ShuffledShelter(object):
         embed = Embed(title, color=BOORU_COLOR, url=url)
         embed.add_image(url)
         
-        message = await client.message_create(channel, rmbed=embed)
+        message = await client.message_create(channel, embed=embed)
         self.message=message
         
-        if (len(urls)==(0 if pop else 1)) or (not channel.cached_permissions_for(client).can_add_reactions):
+        if (len(urls) == (0 if pop else 1)) or (not channel.cached_permissions_for(client).can_add_reactions):
             return
         
         for emoji in self.EMOJIS:
@@ -147,7 +147,7 @@ class ShuffledShelter(object):
         
         self.task_flag = GUI_STATE_SWITCHING_PAGE
         try:
-            await client.message_edit(self.message, rmbed=embed)
+            await client.message_edit(self.message, embed=embed)
         except BaseException as err:
             self.task_flag = GUI_STATE_CANCELLED
             self.cancel()
@@ -253,7 +253,7 @@ async def answer_booru(client, channel, content, url_base):
         await ShuffledShelter(client, channel, urls, True)
         return
     
-    await client.message_create(channel, rmbed=Embed(
+    await client.message_create(channel, embed=Embed(
         f'Sowwy, but {client.name} could not find anything what matches these tags..',
         color=BOORU_COLOR))
 
@@ -261,9 +261,8 @@ async def answer_booru(client, channel, content, url_base):
 @BOORU_COMMANDS.from_class
 class safebooru:
     @Cooldown('channel',20., limit=2, handler=CooldownHandler())
-    @mark_as_async
-    def safebooru(client, message, content):
-        return answer_booru(client, message.channel, content,SAFE_BOORU)
+    async def command(client, message, content):
+        await answer_booru(client, message.channel, content,SAFE_BOORU)
     
     category = 'UTILITY'
     
@@ -276,24 +275,14 @@ class safebooru:
             ), color=BOORU_COLOR)
 
 
-class nsfw_checker():
-    __slots__ = ('command',)
-    __async_call__ = True
-    
-    def __init__(self, command):
-        self.command = command
-    
-    def __call__(self, client, message, content):
-        if getattr(message.channel, 'nsfw', False):
-            return self.command(client, message, content)
+async def nsfw_handler(client, message, command, check):
+    if re.search(client.name, message.content, re.I) is None:
+        text = 'Onii chaan\~,\nthis is not the right place to lewd.'
+    else:
+        text = 'I love you too\~,\nbut this is not the right place to lewd.'
         
-        if re.search(client.name, content,re.I) is None:
-            text = 'Onii chaan\~,\nthis is not the right place to lewd.'
-        else:
-            text = 'I love you too\~,\nbut this is not the right place to lewd.'
-        
-        return client.message_create(message.channel, rmbed=Embed(
-            text, color=BOORU_COLOR))
+    return client.message_create(message.channel, embed=Embed(
+        text, color=BOORU_COLOR))
 
     @property
     def __name__(self):
@@ -301,13 +290,12 @@ class nsfw_checker():
 
 @BOORU_COMMANDS.from_class
 class nsfwbooru:
-    @nsfw_checker
     @safebooru.shared()
-    @mark_as_async
-    def nsfwbooru(client, message, content):
-        return answer_booru(client, message.channel, content,NSFW_BOORU)
+    async def command(client, message, content):
+        await answer_booru(client, message.channel, content, NSFW_BOORU)
     
     category = 'UTILITY'
+    checks = [checks.nsfw_channel_only(handler=nsfw_handler)]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -448,4 +436,4 @@ for title, tag_name, command_names in (
     BOORU_COMMANDS(cached_booru_command(title, tag_name), name=command_name, aliases=aliases, category='TOUHOU')
 
 del title, tag_name, command_names, command_name, aliases
-del Color, BUILTIN_EMOJIS, Cooldown, CooldownHandler, mark_as_async, eventlist
+del Color, BUILTIN_EMOJIS, Cooldown, CooldownHandler, eventlist

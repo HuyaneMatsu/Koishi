@@ -8,16 +8,15 @@ from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, A
 from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 
-from shared import FLAN_PREFIX
+from shared import FLAN_PREFIX, FLAN_HELP_COLOR
 from tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
 from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, get_card
 
 CHESUTO_GUILD = Guild.precreate(598706074115244042)
-CHESUTO_COLOR = Color.from_rgb(73,245,73)
+CHESUTO_COLOR = Color.from_rgb(73, 245, 73)
 CARDS_ROLE = Role.precreate(598708907816517632)
-CARD_HDR_RP = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',re.I)
+CARD_HDR_RP = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?', re.I)
 VISITORS_ROLE = Role.precreate(669875992159977492)
-FLAN_HELP_COLOR = Color.from_rgb(230, 69, 0)
 CHESUTO_BGM_MESSAGES = set()
 CHESUTO_BGM_CHANNEL = ChannelText.precreate(707892105749594202)
 CHESUTO_BGM_TRACKS = {}

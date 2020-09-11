@@ -6,8 +6,7 @@ from hata.ext.commands import Command, checks, Converter, ConverterFlag, Closer
 from koishi import KOISHI_HELP_COLOR, DUNGEON_INVITE, DUNGEON, WORSHIPPER_ROLE, EVERYNYAN_ROLE, ANNOUNCEMNETS_ROLE, \
     WELCOME_CHANNEL
 
-KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
-HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
+from shared import KOISHI_GIT, HATA_GIT
 
 HELP_COMMANDS = eventlist(type_=Command)
 
@@ -80,12 +79,9 @@ async def aliases_parser_failure_handler(client, message, command, content, args
     await Closer(client, message.channel, aliases_description(client, message))
 
 @HELP_COMMANDS(description=aliases_description, category='HELP', parser_failure_handler=aliases_parser_failure_handler)
-async def aliases(client, message, name:str, target_client:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
-    if type(target_client) is not Client:
-        target_client = client
-    
+async def aliases(client, message, name:str, target_client: Converter('client', flags=ConverterFlag.client_all, default_code='client')):
     while True:
-        if len(name)>64:
+        if len(name) > 64:
             fail = True
             break
         
@@ -120,7 +116,7 @@ async def aliases(client, message, name:str, target_client:Converter('user', fla
             title = f'Aliases for: {command.display_name!r}:'
             description = '\n'.join(aliases)
     
-    await client.message_create(message.channel,embed=Embed(title,description,color=KOISHI_HELP_COLOR))
+    await client.message_create(message.channel, embed=Embed(title, description, color=KOISHI_HELP_COLOR))
     
 @HELP_COMMANDS.from_class
 class rules:

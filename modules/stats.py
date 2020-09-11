@@ -236,191 +236,200 @@ if IS_PYPY:
 
 
 if (psutil is not None) and (sys.platform == 'linux'):
-    def get_cpu_frquence_range():
-        
-        cpu_frequence = psutil.cpu_freq()
-        CPU_MIN_FREQUENCE = cpu_frequence.min
-        CPU_MAX_FREQUENCE = cpu_frequence.max
-        
-        import subprocess
-        
-        for line in subprocess.check_output('lscpu', shell=False).splitlines():
-            if line.startswith(b'CPU min MHz:'):
-                CPU_MIN_FREQUENCE = float(line[len(b'CPU min MHz:'):].strip())
-                continue
-            
-            if line.startswith(b'CPU max MHz:'):
-                CPU_MAX_FREQUENCE = float(line[len(b'CPU max MHz:'):].strip())
-                continue
-        
-        return CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE
-    
-    CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE = get_cpu_frquence_range()
-    del get_cpu_frquence_range
-    
     PROCESS_PID = os.getpid()
-    PROCESS = psutil.Process(PROCESS_PID)
     
-    class CpuUsage(object):
-        
-        __slots__ = ('average_cpu_frequence', 'cpu_percent',)
-        
-        waiter = None
-        
-        async def __new__(cls):
-            waiter = cls.waiter
-            if waiter is None:
-                average_cpu_frequence = psutil.cpu_freq().current
-                PROCESS.cpu_percent()
-                cls.waiter = waiter = Future(KOKORO)
-                await sleep(1.0, KOKORO)
-                cpu_percent = PROCESS.cpu_percent()
-                cpu_frequence = psutil.cpu_freq()
-                average_cpu_frequence = (average_cpu_frequence + cpu_frequence.current) / 2.0
-                
-                result = object.__new__(cls)
-                result.cpu_percent = cpu_percent
-                result.average_cpu_frequence = average_cpu_frequence
-                waiter.set_result(result)
-                cls.waiter = None
+    try:
+        PROCESS = psutil.Process(PROCESS_PID)
+    except (AttributeError, psutil.NoSuchProcess):
+        pass
+    else:
+        def get_cpu_frquence_range():
+            
+            cpu_frequence = psutil.cpu_freq()
+            CPU_MIN_FREQUENCE = cpu_frequence.min
+            CPU_MAX_FREQUENCE = cpu_frequence.max
+            
+            import subprocess
+            
+            try:
+                lscpu_output = subprocess.check_output('lscpu', shell=False)
+            except subprocess.CalledProcessError:
+                pass
             else:
-                result = await waiter
+                for line in lscpu_output.splitlines():
+                    if line.startswith(b'CPU min MHz:'):
+                        CPU_MIN_FREQUENCE = float(line[len(b'CPU min MHz:'):].strip())
+                        continue
+                    
+                    if line.startswith(b'CPU max MHz:'):
+                        CPU_MAX_FREQUENCE = float(line[len(b'CPU max MHz:'):].strip())
+                        continue
             
-            return result
+            return CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE
         
-        @property
-        def cpu_percent_with_max_frequence(self):
-            return (self.average_cpu_frequence / CPU_MAX_FREQUENCE * self.cpu_percent)
+        CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE = get_cpu_frquence_range()
+        del get_cpu_frquence_range
         
-        @property
-        def cpu_percent_total(self):
-            return self.cpu_percent_with_max_frequence / psutil.cpu_count(logical=False)
-    
-    @STAT_COMMANDS.from_class
-    class system_stats:
-        aliases = ['system', 'process', 'process-stats']
+        class CpuUsage(object):
+            
+            __slots__ = ('average_cpu_frequence', 'cpu_percent',)
+            
+            waiter = None
+            
+            async def __new__(cls):
+                waiter = cls.waiter
+                if waiter is None:
+                    average_cpu_frequence = psutil.cpu_freq().current
+                    PROCESS.cpu_percent()
+                    cls.waiter = waiter = Future(KOKORO)
+                    await sleep(1.0, KOKORO)
+                    cpu_percent = PROCESS.cpu_percent()
+                    cpu_frequence = psutil.cpu_freq()
+                    average_cpu_frequence = (average_cpu_frequence + cpu_frequence.current) / 2.0
+                    
+                    result = object.__new__(cls)
+                    result.cpu_percent = cpu_percent
+                    result.average_cpu_frequence = average_cpu_frequence
+                    waiter.set_result(result)
+                    cls.waiter = None
+                else:
+                    result = await waiter
+                
+                return result
+            
+            @property
+            def cpu_percent_with_max_frequence(self):
+                return (self.average_cpu_frequence / CPU_MAX_FREQUENCE * self.cpu_percent)
+            
+            @property
+            def cpu_percent_total(self):
+                return self.cpu_percent_with_max_frequence / psutil.cpu_count(logical=False)
         
-        async def command(client, message):
-            await client.typing(message.channel)
+        @STAT_COMMANDS.from_class
+        class system_stats:
+            aliases = ['system', 'process', 'process-stats']
             
-            process_cpu_usage = await CpuUsage()
-            
-            description = []
-            
-            description.append('**System info**:\n' \
-                               'Platform: ')
-            description.append(sys.platform)
-            description.append('\n' \
-                               'Cores: ')
-            description.append(repr(psutil.cpu_count(logical=False)))
-            description.append('\n' \
-                               'Threads: ')
-            description.append(repr(psutil.cpu_count(logical=True)))
-            description.append('\n' \
-                               'Max CPU frequence: ')
-            description.append(CPU_MAX_FREQUENCE.__format__('.2f'))
-            description.append('MHz\n\n' \
-                               '**Memory and swap**:\n' \
-                               'Memory total: ')
-            memory = psutil.virtual_memory()
-            description.append((memory.total / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Memory used: ')
-            description.append((memory.used / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Memory percent: ')
-            description.append(memory.percent.__format__('.2f'))
-            description.append('%\n' \
-                               'Swap total: ')
-            swap = psutil.swap_memory()
-            description.append((swap.total / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Swap used: ')
-            description.append((swap.used / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Swap percent: ')
-            description.append(swap.percent.__format__('.2f'))
-            description.append('%\n' \
-                               '\n' \
-                               '**Process info**:\n' \
-                               'Name: ')
-            description.append(PROCESS.name())
-            description.append('\n' \
-                               'PID: ')
-            description.append(repr(PROCESS_PID))
-            description.append('\n' \
-                               'File descriptor count: ')
-            description.append(repr(PROCESS.num_fds()))
-            description.append('\n' \
-                               'Thread count: ')
-            description.append(repr(PROCESS.num_threads()))
-            description.append('\n' \
-                               'Created: ')
-            description.append(elapsed_time(datetime.fromtimestamp(PROCESS.create_time())))
-            description.append(' ago\n' \
-                               '\n' \
-                               '**CPU times:**\n' \
-                               'User: ')
-            cpu_times = PROCESS.cpu_times()
-            cpu_time_user = cpu_times.user
-            cpu_time_total = cpu_time_user
-            description.append(cpu_time_user.__format__('.2f'))
-            cpu_time_system = cpu_times.system
-            cpu_time_total +=cpu_time_system
-            description.append('\n' \
-                               'System: ')
-            description.append(cpu_time_system.__format__('.2f'))
-            description.append('\n' \
-                               'Children User: ')
-            cpu_times = PROCESS.cpu_times()
-            cpu_time_children_user = cpu_times.children_user
-            cpu_time_total += cpu_time_children_user
-            description.append(cpu_time_children_user.__format__('.2f'))
-            description.append('\n' \
-                               'Children system: ')
-            cpu_time_children_system = cpu_times.children_system
-            cpu_time_total +=cpu_time_children_system
-            description.append(cpu_time_children_system.__format__('.2f'))
-            description.append('\n' \
-                               'IO wait: ')
-            cputime_io_wait = cpu_times.iowait
-            cpu_time_total +=cputime_io_wait
-            description.append(cputime_io_wait.__format__('.2f'))
-            description.append('\n' \
-                               '--------------------\n' \
-                               'Total: ')
-            description.append(cpu_time_total.__format__('.2f'))
-            description.append('\n' \
-                               '\n' \
-                               '**CPU usage:**\n' \
-                               'CPU usage percent: ')
-            description.append(process_cpu_usage.cpu_percent.__format__('.2f'))
-            description.append('%\n' \
-                               'CPU usage with max frequence: ')
-            description.append(process_cpu_usage.cpu_percent_with_max_frequence.__format__('.2f'))
-            description.append('%\n' \
-                               'CPU usage over all cores: ')
-            description.append(process_cpu_usage.cpu_percent_total.__format__('.2f'))
-            description.append('%\n' \
-                               '\n' \
-                               '**RAM usage**:\n' \
-                               'Total: ')
-            description.append((PROCESS.memory_info().rss / (1 << 20)).__format__('.2f'))
-            description.append('MB\n' \
-                               'Percent: ')
-            description.append(PROCESS.memory_percent().__format__('.2f'))
-            description.append('%')
-            
-            embed = Embed('System and Process stats:', ''.join(description), color=STAT_COLOR)
-            
-            await client.message_create(message.channel, embed=embed)
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+            async def command(client, message):
+                await client.typing(message.channel)
+                
+                process_cpu_usage = await CpuUsage()
+                
+                description = []
+                
+                description.append('**System info**:\n' \
+                                   'Platform: ')
+                description.append(sys.platform)
+                description.append('\n' \
+                                   'Cores: ')
+                description.append(repr(psutil.cpu_count(logical=False)))
+                description.append('\n' \
+                                   'Threads: ')
+                description.append(repr(psutil.cpu_count(logical=True)))
+                description.append('\n' \
+                                   'Max CPU frequence: ')
+                description.append(CPU_MAX_FREQUENCE.__format__('.2f'))
+                description.append('MHz\n\n' \
+                                   '**Memory and swap**:\n' \
+                                   'Memory total: ')
+                memory = psutil.virtual_memory()
+                description.append((memory.total / (1 << 20)).__format__('.2f'))
+                description.append('MB\n' \
+                                   'Memory used: ')
+                description.append((memory.used / (1 << 20)).__format__('.2f'))
+                description.append('MB\n' \
+                                   'Memory percent: ')
+                description.append(memory.percent.__format__('.2f'))
+                description.append('%\n' \
+                                   'Swap total: ')
+                swap = psutil.swap_memory()
+                description.append((swap.total / (1 << 20)).__format__('.2f'))
+                description.append('MB\n' \
+                                   'Swap used: ')
+                description.append((swap.used / (1 << 20)).__format__('.2f'))
+                description.append('MB\n' \
+                                   'Swap percent: ')
+                description.append(swap.percent.__format__('.2f'))
+                description.append('%\n' \
+                                   '\n' \
+                                   '**Process info**:\n' \
+                                   'Name: ')
+                description.append(PROCESS.name())
+                description.append('\n' \
+                                   'PID: ')
+                description.append(repr(PROCESS_PID))
+                description.append('\n' \
+                                   'File descriptor count: ')
+                description.append(repr(PROCESS.num_fds()))
+                description.append('\n' \
+                                   'Thread count: ')
+                description.append(repr(PROCESS.num_threads()))
+                description.append('\n' \
+                                   'Created: ')
+                description.append(elapsed_time(datetime.fromtimestamp(PROCESS.create_time())))
+                description.append(' ago\n' \
+                                   '\n' \
+                                   '**CPU times:**\n' \
+                                   'User: ')
+                cpu_times = PROCESS.cpu_times()
+                cpu_time_user = cpu_times.user
+                cpu_time_total = cpu_time_user
+                description.append(cpu_time_user.__format__('.2f'))
+                cpu_time_system = cpu_times.system
+                cpu_time_total +=cpu_time_system
+                description.append('\n' \
+                                   'System: ')
+                description.append(cpu_time_system.__format__('.2f'))
+                description.append('\n' \
+                                   'Children User: ')
+                cpu_times = PROCESS.cpu_times()
+                cpu_time_children_user = cpu_times.children_user
+                cpu_time_total += cpu_time_children_user
+                description.append(cpu_time_children_user.__format__('.2f'))
+                description.append('\n' \
+                                   'Children system: ')
+                cpu_time_children_system = cpu_times.children_system
+                cpu_time_total +=cpu_time_children_system
+                description.append(cpu_time_children_system.__format__('.2f'))
+                description.append('\n' \
+                                   'IO wait: ')
+                cputime_io_wait = cpu_times.iowait
+                cpu_time_total +=cputime_io_wait
+                description.append(cputime_io_wait.__format__('.2f'))
+                description.append('\n' \
+                                   '--------------------\n' \
+                                   'Total: ')
+                description.append(cpu_time_total.__format__('.2f'))
+                description.append('\n' \
+                                   '\n' \
+                                   '**CPU usage:**\n' \
+                                   'CPU usage percent: ')
+                description.append(process_cpu_usage.cpu_percent.__format__('.2f'))
+                description.append('%\n' \
+                                   'CPU usage with max frequence: ')
+                description.append(process_cpu_usage.cpu_percent_with_max_frequence.__format__('.2f'))
+                description.append('%\n' \
+                                   'CPU usage over all cores: ')
+                description.append(process_cpu_usage.cpu_percent_total.__format__('.2f'))
+                description.append('%\n' \
+                                   '\n' \
+                                   '**RAM usage**:\n' \
+                                   'Total: ')
+                description.append((PROCESS.memory_info().rss / (1 << 20)).__format__('.2f'))
+                description.append('MB\n' \
+                                   'Percent: ')
+                description.append(PROCESS.memory_percent().__format__('.2f'))
+                description.append('%')
+                
+                embed = Embed('System and Process stats:', ''.join(description), color=STAT_COLOR)
+                
+                await client.message_create(message.channel, embed=embed)
         
-        return Embed('system-stats',(
-            'Shows my system\s and processe\'s stats.\n'
-            f'Usage: `{prefix}system-stats`'
-            ), color=STAT_COLOR).add_footer(
-                'Owner only!')
+        async def description(client, message):
+            prefix = client.command_processer.get_prefix_for(message)
+            
+            return Embed('system-stats',(
+                'Shows my system\s and processe\'s stats.\n'
+                f'Usage: `{prefix}system-stats`'
+                ), color=STAT_COLOR).add_footer(
+                    'Owner only!')
 

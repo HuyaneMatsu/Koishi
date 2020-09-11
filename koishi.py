@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import re
-from io import StringIO
 from datetime import datetime, timedelta
 
 from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
@@ -11,36 +10,21 @@ from hata.ext.extension_loader import EXTENSION_LOADER
 
 from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
-from shared import KOISHI_PREFIX
+from shared import KOISHI_PREFIX, category_name_rule, DEFAULT_CATEGORY_NAME, WELCOME_CHANNEL, DUNGEON, EVERYNYAN_ROLE, \
+    ANNOUNCEMNETS_ROLE, WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON_INVITE, KOISHI_HELP_COLOR, SYNC_CHANNEL, \
+    command_error
+
 from interpreter import Interpreter
-
-DUNGEON = Guild.precreate(388267636661682178)
-
-WELCOME_CHANNEL = ChannelText.precreate(445191707491958784)
-EVERYNYAN_ROLE = Role.precreate(445189164703678464)
-ANNOUNCEMNETS_ROLE = Role.precreate(538397994421190657)
-WORSHIPPER_ROLE = Role.precreate(403586901803794432)
-DUNGEON_PREMIUM_ROLE = Role.precreate(585556522558554113)
-DUNGEON_INVITE = Invite.precreate('3cH2r5d')
-
-KOISHI_HELP_COLOR = Color.from_html('#ffd21e')
+from syncer import sync_request_waiter
 
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
 _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
 _KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
 
-KOISHI_DEFAULT_CATEGORY_NAME = 'Uncategorized'
-
-def category_name_rule(name):
-    if name is None:
-        name = KOISHI_DEFAULT_CATEGORY_NAME
-    else:
-        name = name.capitalize()
-    
-    return name
-
-setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name=KOISHI_DEFAULT_CATEGORY_NAME,
+setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)
+
+Koishi.command_processer.append(SYNC_CHANNEL, sync_request_waiter)
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
@@ -65,17 +49,16 @@ class once_on_ready(object):
         
         print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
 
-Koishi.command_processer.create_category('TEST COMMANDS', checks=[checks.owner_only()])
-
 Koishi.commands(SubterraneanHelpCommand(KOISHI_HELP_COLOR), 'help', category='HELP')
 
 @Koishi.commands
 async def default_event(client, message):
     user_mentions = message.user_mentions
     if (user_mentions is not None) and (client in user_mentions):
-        m1 = message.author.mention
+        author = message.author
+        m1 = author.mention
         m2 = client.mention
-        m3 = message.author.mention_nick
+        m3 = author.mention_nick
         m4 = client.mention_nick
         replace = {
             '@everyone'   : '@\u200beveryone',
@@ -85,16 +68,16 @@ async def default_event(client, message):
             re.escape(m3) : m4,
             re.escape(m4) : m3,
                 }
-        pattern = re.compile("|".join(replace.keys()))
+        pattern = re.compile('|'.join(replace.keys()))
         result = pattern.sub(lambda x: replace[re.escape(x.group(0))], message.content)
-        await client.message_create(message.channel, result)
+        await client.message_create(message.channel, result, allowed_mentions=[author])
         return
         
     content = message.content
     if message.channel.cached_permissions_for(client).can_add_reactions and (_KOISHI_NOU_RP.match(content) is not None):
         for value in 'nou':
             emoji = BUILTIN_EMOJIS[f'regional_indicator_{value}']
-            await client.reaction_add(message,emoji)
+            await client.reaction_add(message, emoji)
         return
     
     matched = _KOISHI_OWO_RP.fullmatch(content,)
@@ -109,86 +92,7 @@ async def default_event(client, message):
     
     await client.message_create(message.channel, text)
 
-@Koishi.commands(checks=[checks.is_guild(DUNGEON)])
-async def command_error(client, message, command, content, exception):
-    with StringIO() as buffer:
-        await KOKORO.render_exc_async(exception,[
-            client.full_name,
-            ' ignores an occured exception at command ',
-            repr(command),
-            '\n\nMessage details:\nGuild: ',
-            repr(message.guild),
-            '\nChannel: ',
-            repr(message.channel),
-            '\nAuthor: ',
-            message.author.full_name,
-            ' (',
-            repr(message.author.id),
-            ')\nContent: ',
-            repr(content),
-            '\n```py\n'], '```', file=buffer)
-        
-        buffer.seek(0)
-        lines = buffer.readlines()
-    
-    pages = []
-    
-    page_length = 0
-    page_contents = []
-    
-    index = 0
-    limit = len(lines)
-    
-    while True:
-        if index == limit:
-            embed = Embed(description=''.join(page_contents))
-            pages.append(embed)
-            page_contents = None
-            break
-        
-        line = lines[index]
-        index = index+1
-        
-        line_lenth = len(line)
-        # long line check, should not happen
-        if line_lenth > 500:
-            line = line[:500]+'...\n'
-            line_lenth = 504
-        
-        if page_length+line_lenth > 1997:
-            if index == limit:
-                # If we are at the last element, we dont need to shard up,
-                # because the last element is always '```'
-                page_contents.append(line)
-                embed = Embed(description=''.join(page_contents))
-                pages.append(embed)
-                page_contents = None
-                break
-            
-            page_contents.append('```')
-            embed = Embed(description=''.join(page_contents))
-            pages.append(embed)
-            
-            page_contents.clear()
-            page_contents.append('```py\n')
-            page_contents.append(line)
-            
-            page_length = 6+line_lenth
-            continue
-        
-        page_contents.append(line)
-        page_length += line_lenth
-        continue
-    
-    limit = len(pages)
-    index = 0
-    while index<limit:
-        embed = pages[index]
-        index += 1
-        embed.add_footer(f'page {index}/{limit}')
-    
-    await Pagination(client,message.channel,pages)
-    return False
+Koishi.commands(command_error, checks=[checks.is_guild(DUNGEON)])
 
 @Koishi.commands
 async def invalid_command(client, message, command, content):
@@ -279,7 +183,7 @@ async def execute_description(client, message):
             ), color=KOISHI_HELP_COLOR).add_footer(
             'Owner only!')
 
-Koishi.commands(Interpreter(locals().copy()), name='execute',description=execute_description, category='UTILITY',
+Koishi.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
     checks=[checks.owner_only()])
 
 
