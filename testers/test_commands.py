@@ -4,11 +4,12 @@ from random import random
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     titledstr, multidict_titled, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
-    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis
+    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
-from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer
+from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer, \
+    FlaggedAnnotation
 from hata.discord.others import Discord_hdrs
 from hata.discord.http import API_ENDPOINT, CONTENT_TYPE
 from hata.discord.parsers import PARSERS
@@ -888,4 +889,122 @@ async def test_message_reaction_delete_emoji(client, message, channel_id: int, m
     """
     await client.http.reaction_delete_emoji(channel_id, message_id, emoji.as_reaction)
     await client.message_create(message.channel, 'nya')
+
+@TEST_COMMANDS
+async def avatar_1(client, message, user: FlaggedAnnotation('user', ConverterFlag.user_all) = None):
+    if user is None:
+        user = message.author
+    
+    if user.avatar:
+        color = user.avatar_hash&0xffffff
+    else:
+        color = user.default_avatar.color
+    
+    url = user.avatar_url_as(size=4096)
+    embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
+    embed.add_image(url)
+    
+    await client.message_create(message.channel, embed=embed)
+
+@TEST_COMMANDS
+async def what_is_it_1(client, message, entity: ('user', 'channel', 'role') = None):
+    if entity is None:
+        result = 'Nothing is recognized.'
+    elif isinstance(entity, UserBase):
+        result = 'user'
+    elif isinstance(entity, ChannelBase):
+        result = 'channel'
+    else:
+        result = 'role'
+    
+    await client.message_create(message.channel, result)
+
+
+@TEST_COMMANDS
+async def what_is_it_2(client, message, entity: (
+        FlaggedAnnotation('user', ConverterFlag().update_by_keys(name=True)),
+        FlaggedAnnotation('channel', ConverterFlag().update_by_keys(name=True)),
+        FlaggedAnnotation('role', ConverterFlag().update_by_keys(name=True)),
+            ) = None):
+    
+    if entity is None:
+        result = 'Nothing is recognized.'
+    elif isinstance(entity, UserBase):
+        result = 'user'
+    elif isinstance(entity, ChannelBase):
+        result = 'channel'
+    else:
+        result = 'role'
+    
+    await client.message_create(message.channel, result)
+
+@TEST_COMMANDS
+async def avatar_2(client, message, user: Converter('user', ConverterFlag.user_all, default=None)):
+    if user is None:
+        user = message.author
+    
+    if user.avatar:
+        color = user.avatar_hash&0xffffff
+    else:
+        color = user.default_avatar.color
+    
+    url = user.avatar_url_as(size=4096)
+    embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
+    embed.add_image(url)
+    
+    await client.message_create(message.channel, embed=embed)
+
+@TEST_COMMANDS
+async def avatar_3(client, message, user: Converter('user', ConverterFlag.user_all, default_code='message.author')):
+    if user.avatar:
+        color = user.avatar_hash&0xffffff
+    else:
+        color = user.default_avatar.color
+    
+    url = user.avatar_url_as(size=4096)
+    embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
+    embed.add_image(url)
+    
+    await client.message_create(message.channel, embed=embed)
+
+async def what_is_it_parser_failure_handler(client, message, command, content, args):
+    await client.message_create(message.channel, f'Please give the name of a user, role or of a channel.')
+
+@TEST_COMMANDS(parser_failure_handler=what_is_it_parser_failure_handler)
+async def what_is_it_2(client, message, entity: (
+        FlaggedAnnotation('user', ConverterFlag().update_by_keys(name=True)),
+        FlaggedAnnotation('channel', ConverterFlag().update_by_keys(name=True)),
+        FlaggedAnnotation('role', ConverterFlag().update_by_keys(name=True)),
+            )):
+    
+    if isinstance(entity, UserBase):
+        result = 'user'
+    elif isinstance(entity, ChannelBase):
+        result = 'channel'
+    else:
+        result = 'role'
+    
+    await client.message_create(message.channel, result)
+
+@TEST_COMMANDS(checks=[checks.owner_only()])
+async def owner_1(client, message):
+    await client.message_create(message.channel, f'My masuta is {client.owner:f} !')
+
+# Note, this will be never called, because the category has a check already.
+async def owner_only_handler(client, message, command, check):
+    await client.message_create(message.channel, f'You must be the owner of the bot to use the `{command}` command.')
+
+@TEST_COMMANDS(checks=[checks.owner_only(handler=owner_only_handler)])
+async def owner_2(client, message):
+    await client.message_create(message.channel, f'My masuta is {client.owner:f} !')
+
+@TEST_COMMANDS(name='print_1')
+async def print_1_(client, message, content):
+    if content:
+        await client.message_create(message.channel, content)
+
+@TEST_COMMANDS(name='print_2', aliases=['say_2'])
+async def print_2_(client, message, content):
+    if content:
+        await client.message_create(message.channel, content)
 

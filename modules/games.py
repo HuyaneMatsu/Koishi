@@ -268,14 +268,12 @@ class mine:
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('mine',(
             'I creates a minesweeper game.\n'
-            'If you are mad already from failing, just click on the '
-            f'{MINE_CANCEL.as_emoji} under the mine.\n'
+            f'If you are mad already from failing, just click on the {MINE_CANCEL.as_emoji} under the mine.\n'
             f'Usage : `{prefix}mine (text) <bomb_count>`\n'
-            'By passing a `text` keyword, I will send the whole mine in a '
-            'codeblock, allowing you, to simply copy-paste it.\n'
-            'The default bomb count in 12, but you can change it between '
-            '8 and 24.'
-                ),color=GAMES_COLOR)
+            'By passing a `text` keyword, I will send the whole mine in a codeblock, allowing you, to simply copy-paste'
+            'it.\n'
+            'The default bomb count in 12, but you can change it between 8 and 24.'
+                ), color=GAMES_COLOR)
 
 
 @GAMES_COMMANDS.from_class
@@ -332,16 +330,19 @@ class paranoia:
 
 @GAMES_COMMANDS.from_class
 class command_random:
-    async def command(client,message,v1 :int,v2:int=0):
-        result=randint(v2,v1) if v1>v2 else randint(v1,v2)
-        await client.message_create(message.channel,str(result))
+    async def command(client, message, v1 :int, v2:int=0):
+        if v2 > v1:
+            v1, v2 = v2, v1
+        
+        result = randint(v1, v2)
+        await client.message_create(message.channel, str(result))
     
     name = 'random'
     category = 'GAMES'
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('random',(
+        return Embed('random', (
             'Do you need some random numbers?\n'
             f'Usage: `{prefix}random *number_1* <number_2>`\n'
             'You should pass at least 1 number. The second is optinal and by '
@@ -362,7 +363,7 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(0,2):
+    for x in range(0, 2):
         yield value
 
     value = {
@@ -377,7 +378,7 @@ def generate_love_level():
                 ),
             }
     
-    for x in range(2,6):
+    for x in range(2, 6):
         yield value
 
     value = {
@@ -393,7 +394,7 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(6,21):
+    for x in range(6, 21):
         yield value
 
     value = {
@@ -408,7 +409,7 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(21,31):
+    for x in range(21, 31):
         yield value
 
 
@@ -425,7 +426,7 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(31,46):
+    for x in range(31, 46):
         yield value
     
     value = {
@@ -440,7 +441,7 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(46,61):
+    for x in range(46, 61):
         yield value
 
     value = {
@@ -455,7 +456,7 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(61,86):
+    for x in range(61, 86):
         yield value
 
     value = {
@@ -471,7 +472,7 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(86,96):
+    for x in range(86, 96):
         yield value
 
     value = {
@@ -487,41 +488,41 @@ def generate_love_level():
                 ),
             }
 
-    for x in range(96,101):
+    for x in range(96, 101):
         yield value
 
-LOVE_VALUES=tuple(generate_love_level())
+LOVE_VALUES = tuple(generate_love_level())
 del generate_love_level
 
 @GAMES_COMMANDS.from_class
 class love:
-    async def command(client,message,target:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True))):
-        source=message.author
+    async def command(client,message,target:Converter('user', flags=ConverterFlag.user_all)):
+        source = message.author
         if source is target:
             prefix = client.command_processer.get_prefix_for(message)
-            embed=Embed('love',(
+            embed = Embed('love', (
                 'How much you two fit together?\n'
                 f'Usage: `{prefix}user *user*`'
-                ),color=GAMES_COLOR)
+                ), color=GAMES_COLOR)
         else:
-            percent=((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
-            element=LOVE_VALUES[percent]
+            percent = ((source.id&0x1111111111111111111111)+(target.id&0x1111111111111111111111))%101
+            element = LOVE_VALUES[percent]
             
-            embed=Embed(
+            embed = Embed(
                 choice(element['titles']),
                 f'{source:f} {BUILTIN_EMOJIS["heart"]:e} {target:f} scored {percent}%!',
                 0xad1457,
                     )
-            embed.add_field('My advice:',element['text'])
+            embed.add_field('My advice:', element['text'])
     
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
     
     category = 'GAMES'
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('love',(
-            'How much you two fit together?'
+        return Embed('love', (
+            'How much you two fit together?\n'
             f'Usage: `{prefix}user *user*`\n'
             ), color=GAMES_COLOR)
     

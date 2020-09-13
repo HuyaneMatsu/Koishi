@@ -7,7 +7,7 @@ from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep
     DATETIME_FORMAT_CODE
 
 from hata.discord.others import DISCORD_EPOCH_START
-from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination
+from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination, Closer
 from hata.ext.prettyprint import pchunkify
 
 from PIL import Image as PIL
@@ -393,12 +393,12 @@ class user_info:
                 add_activity(text, user.activities[0])
             else:
                 text.append('Activities : \n')
-                for index,activity in enumerate(user.activities,1):
+                for index,activity in enumerate(user.activities, 1):
                     text.append(f'{index}.: ')
                     add_activity(text, activity)
                     
             embed.add_field('Status and Activity',''.join(text))
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
         
     name='user'
     category = 'UTILITY'
@@ -420,191 +420,230 @@ YELLOW_HEART = BUILTIN_EMOJIS['yellow_heart']
 RED_HEART = BUILTIN_EMOJIS['heart']
 BLACK_HEART = BUILTIN_EMOJIS['black_heart']
 
-@UTILITY_COMMANDS.from_class
-class guild_info:
-    async def command(client, message):
-        guild = message.guild
-        if guild is None:
+async def guild_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('user', (
+        'Do you want me to list, some information about this guild?\n'
+        f'Usage: `{prefix}guild <section>`\n'
+        '\n'
+        'You can also specify which field you wanna display from the following ones:\n'
+        '- *info*\n'
+        '- *counts*\n'
+        '- *emojis*\n'
+        '- *users*\n'
+        '- *boosters*'
+            ), color=UTILITY_COLOR).add_footer(
+            'Guild only!')
+
+def add_guild_info_field(guild, embed, even_if_empty):
+    sections_parts = [
+        '**Created**: ', elapsed_time(guild.created_at), ' ago\n'
+        '**Voice region**: ', guild.region.name,
+            ]
+    
+    features = guild.features
+    if features:
+        sections_parts.append('\n**Features**: ')
+        for feature in features:
+            sections_parts.append(feature.name)
+            sections_parts.append(', ')
+        
+        del sections_parts[-1]
+    
+    embed.add_field('Guild information', ''.join(sections_parts))
+
+def add_guild_counts_field(guild, embed, even_if_empty):
+    channel_text = 0
+    channel_announcements = 0
+    channel_category = 0
+    channel_voice = 0
+    channel_thread = 0
+    channel_store = 0
+    
+    for channel in guild.channels.values():
+        channel_type = channel.__class__
+        if channel_type is ChannelText:
+            channel_text +=1
+            if channel.type == 5:
+                channel_announcements +=1
+            continue
+        
+        if channel_type is ChannelCategory:
+            channel_category +=1
+            continue
+        
+        if channel_type is ChannelVoice:
+            channel_voice +=1
+            continue
+        
+        if channel_type is ChannelThread:
+            channel_thread +=1
+            continue
+        
+        if channel_type is ChannelStore:
+            channel_store +=1
+            continue
+    
+    sections_parts = [
+        '**Users: ', str(guild.user_count), '**\n'
+        '**Roles: ', str(len(guild.role_list)), '**'
+            ]
+    
+    if channel_text:
+        sections_parts.append('\n**Text channels: ')
+        sections_parts.append(str(channel_text))
+        sections_parts.append('**')
+        
+        if channel_announcements:
+            sections_parts.append(' [')
+            sections_parts.append(str(channel_announcements))
+            sections_parts.append(' Announcements]')
+    
+    if channel_voice:
+        sections_parts.append('\n**Voice channels: ')
+        sections_parts.append(str(channel_voice))
+        sections_parts.append('**')
+    
+    if channel_category:
+        sections_parts.append('\n**Category channels: ')
+        sections_parts.append(str(channel_category))
+        sections_parts.append('**')
+    
+    if channel_thread:
+        sections_parts.append('\n**Thread channels: ')
+        sections_parts.append(str(channel_thread))
+        sections_parts.append('**')
+    
+    if channel_store:
+        sections_parts.append('\n**Store channels: ')
+        sections_parts.append(str(channel_store))
+        sections_parts.append('**')
+    
+    embed.add_field('Counts', ''.join(sections_parts))
+
+def add_guild_emojis_field(guild, embed, even_if_empty):
+    emoji_count = len(guild.emojis)
+    if emoji_count:
+        sections_parts = [
+            '**Total: ', str(emoji_count), '**\n'
+            '**Static emojis: '
+                ]
+        
+        normal_static, normal_animated, managed_static, managed_animated = guild.emoji_counts
+        emoji_limit = guild.emoji_limit
+        sections_parts.append(str(normal_static))
+        sections_parts.append('** [')
+        sections_parts.append(str(emoji_limit-normal_static))
+        sections_parts.append(' free]\n')
+        sections_parts.append('**Animated emojis: ')
+        sections_parts.append(str(normal_animated))
+        sections_parts.append('** [')
+        sections_parts.append(str(emoji_limit-normal_animated))
+        sections_parts.append(' free]')
+        
+        managed_total = managed_static+managed_animated
+        if managed_total:
+            sections_parts.append('\n**Managed: ')
+            sections_parts.append(str(managed_total))
+            sections_parts.append('** [')
+            sections_parts.append(str(managed_static))
+            sections_parts.append(' static, ')
+            sections_parts.append(str(managed_animated))
+            sections_parts.append(' anmiated]')
+        
+        embed.add_field('Emojis', ''.join(sections_parts))
+    
+    elif even_if_empty:
+        embed.add_field('Emojis', '*The guild has no emojis*')
+
+def add_guild_users_field(guild, embed, even_if_empty):
+    # most usual first
+    s_grey = Status.offline
+    s_green = Status.online
+    s_yellow = Status.idle
+    s_red = Status.dnd
+    
+    v_grey = 0
+    v_green = 0
+    v_yellow = 0
+    v_red = 0
+
+    for user in guild.users.values():
+        status = user.status
+        if   status is s_grey:
+            v_grey += 1
+        elif status is s_green:
+            v_green += 1
+        elif status is s_yellow:
+            v_yellow += 1
+        elif status is s_red:
+            v_red += 1
+        else:
+            v_grey += 1
+    
+    del s_grey
+    del s_green
+    del s_yellow
+    del s_red
+    
+    embed.add_field('Users',
+        f'{GREEN_HEART:e} **{v_green}**\n'
+        f'{YELLOW_HEART:e} **{v_yellow}**\n'
+        f'{RED_HEART:e} **{v_red}**\n'
+        f'{BLACK_HEART:e} **{v_grey}**')
+
+def add_guild_boosters_field(guild, embed, even_if_empty):
+    boosters = guild.boosters
+    if boosters:
+        emoji = BUILTIN_EMOJIS['gift_heart']
+        count = len(boosters)
+        to_render = count if count < 21 else 21
+        
+        embed.add_field(f'Most awesome people of the guild', f'{to_render} {emoji:e} out of {count} {emoji:e}')
+        
+        for user in boosters[:21]:
+            embed.add_field(user.full_name,
+                f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
+    
+    elif even_if_empty:
+        embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken duggets.*')
+
+GUILD_FIELDS = {
+    'info': add_guild_info_field,
+    'counts': add_guild_counts_field,
+    'emojis': add_guild_emojis_field,
+    'users': add_guild_users_field,
+    'boosters': add_guild_boosters_field
+        }
+
+@UTILITY_COMMANDS(name='guild', category='UTILITY', description=guild_description, checks=[checks.guild_only()])
+async def guild_info(client, message, field: str=None):
+    guild = message.guild
+    if guild is None:
+        return
+    
+    if (field is not None):
+        try:
+            func = GUILD_FIELDS[field.lower()]
+        except KeyError:
+            embed = await guild_description(client, message)
+            await Closer(client, message.channel, embed)
             return
-        
-        embed = Embed(guild.name, color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
-        
-        sections_parts = [
-            '**Created**: ', elapsed_time(guild.created_at), ' ago\n'
-            '**Voice region**: ', guild.region.name,
-                ]
-        
-        features = guild.features
-        if features:
-            sections_parts.append('\n**Features**: ')
-            for feature in features:
-                sections_parts.append(feature.name)
-                sections_parts.append(', ')
-            
-            del sections_parts[-1]
-        
-        embed.add_field('Guild information', ''.join(sections_parts))
-        
-        channel_text = 0
-        channel_announcements = 0
-        channel_category = 0
-        channel_voice = 0
-        channel_thread = 0
-        channel_store = 0
-        
-        for channel in guild.channels.values():
-            channel_type = channel.__class__
-            if channel_type is ChannelText:
-                channel_text +=1
-                if channel.type == 5:
-                    channel_announcements +=1
-                continue
-            
-            if channel_type is ChannelCategory:
-                channel_category +=1
-                continue
-            
-            if channel_type is ChannelVoice:
-                channel_voice +=1
-                continue
-            
-            if channel_type is ChannelThread:
-                channel_thread +=1
-                continue
-            
-            if channel_type is ChannelStore:
-                channel_store +=1
-                continue
-        
-        sections_parts = [
-            '**Users: ', str(guild.user_count), '**\n'
-            '**Roles: ', str(len(guild.role_list)), '**'
-                ]
-        
-        if channel_text:
-            sections_parts.append('\n**Text channels: ')
-            sections_parts.append(str(channel_text))
-            sections_parts.append('**')
-            
-            if channel_announcements:
-                sections_parts.append(' [')
-                sections_parts.append(str(channel_announcements))
-                sections_parts.append(' Announcements]')
-        
-        if channel_voice:
-            sections_parts.append('\n**Voice channels: ')
-            sections_parts.append(str(channel_voice))
-            sections_parts.append('**')
-        
-        if channel_category:
-            sections_parts.append('\n**Category channels: ')
-            sections_parts.append(str(channel_category))
-            sections_parts.append('**')
-        
-        if channel_thread:
-            sections_parts.append('\n**Thread channels: ')
-            sections_parts.append(str(channel_thread))
-            sections_parts.append('**')
-        
-        if channel_store:
-            sections_parts.append('\n**Store channels: ')
-            sections_parts.append(str(channel_store))
-            sections_parts.append('**')
-        
-        embed.add_field('Counts', ''.join(sections_parts))
-        
-        emoji_count = len(guild.emojis)
-        if emoji_count:
-            sections_parts = [
-                '**Total: ', str(emoji_count), '**\n'
-                '**Static emojis: '
-                    ]
-            
-            normal_static, normal_animated, managed_static, managed_animated = guild.emoji_counts
-            emoji_limit = guild.emoji_limit
-            sections_parts.append(str(normal_static))
-            sections_parts.append('** [')
-            sections_parts.append(str(emoji_limit-normal_static))
-            sections_parts.append(' free]\n')
-            sections_parts.append('**Animated emojis: ')
-            sections_parts.append(str(normal_animated))
-            sections_parts.append('** [')
-            sections_parts.append(str(emoji_limit-normal_animated))
-            sections_parts.append(' free]')
-            
-            managed_total = managed_static+managed_animated
-            if managed_total:
-                sections_parts.append('\n**Managed: ')
-                sections_parts.append(str(managed_total))
-                sections_parts.append('** [')
-                sections_parts.append(str(managed_static))
-                sections_parts.append(' static, ')
-                sections_parts.append(str(managed_animated))
-                sections_parts.append(' anmiated]')
-            
-            embed.add_field('Emojis', ''.join(sections_parts))
-        
-        # most usual first
-        s_grey = Status.offline
-        s_green = Status.online
-        s_yellow = Status.idle
-        s_red = Status.dnd
-        
-        v_grey = 0
-        v_green = 0
-        v_yellow = 0
-        v_red = 0
     
-        for user in guild.users.values():
-            status = user.status
-            if   status is s_grey:
-                v_grey +=1
-            elif status is s_green:
-                v_green +=1
-            elif status is s_yellow:
-                v_yellow +=1
-            elif status is s_red:
-                v_red +=1
-            else:
-                v_grey +=1
-        
-        del s_grey
-        del s_green
-        del s_yellow
-        del s_red
-        
-        embed.add_field('Users',
-            f'{GREEN_HEART:e} **{v_green}**\n'
-            f'{YELLOW_HEART:e} **{v_yellow}**\n'
-            f'{RED_HEART:e} **{v_red}**\n'
-            f'{BLACK_HEART:e} **{v_grey}**')
-        
-        boosters = guild.boosters
-        if boosters:
-            emoji = BUILTIN_EMOJIS['gift_heart']
-            count = len(boosters)
-            to_render = count if count<21 else 21
-            
-            embed.add_field(f'Most awesome people of the guild', f'{to_render} {emoji:e} out of {count} {emoji:e}')
-            
-            for user in boosters[:21]:
-                embed.add_field(user.full_name,
-                    f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
-        
-        embed.add_thumbnail(guild.icon_url_as(size=128))
-        
-        await client.message_create(message.channel, embed=embed)
+    embed = Embed(guild.name, color=(
+        guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF)
+            ).add_thumbnail(guild.icon_url_as(size=128))
     
-    name = 'guild'
-    category = 'UTILITY'
+    if field is None:
+        add_guild_info_field(guild, embed, False)
+        add_guild_counts_field(guild, embed, False)
+        add_guild_emojis_field(guild ,embed, False)
+        add_guild_users_field(guild, embed, False)
+        add_guild_boosters_field(guild, embed, False)
+    else:
+        func(guild, embed, True)
     
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('user',(
-            'Do you want me to list, some information about this guild?\n'
-            f'Usage: `{prefix}guild`\n'
-                ), color=UTILITY_COLOR).add_footer(
-                'Guild only!')
+    await client.message_create(message.channel, embed=embed)
 
 
 @UTILITY_COMMANDS.from_class

@@ -7,6 +7,7 @@ from hata.ext.commands import Command, checks, Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE
 
+from shared import DUNGEON
 from flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
 
 KOISHI_VOICE_COLOR = Color.from_rgb(235, 52, 207)
@@ -26,7 +27,6 @@ def setup(lib):
 def teardown(lib):
     Flan.commands.unextend(VOICE_COMMANDS_FLAN)
     Koishi.commands.unextend(VOICE_COMMANDS_KOISHI)
-
 
 
 if AUDIO_PATH is not None:
@@ -167,7 +167,7 @@ if AUDIO_PLAY_POSSIBLE:
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
             ), color=KOISHI_VOICE_COLOR)
     
-    @VOICE_COMMANDS_KOISHI(description=koishi_play_description, name='play')
+    @VOICE_COMMANDS_KOISHI(description=koishi_play_description, name='play', checks=[checks.is_guild(DUNGEON)])
     async def koishi_play(client, message, content):
         while True:
             if YTAudio is None:
@@ -217,7 +217,7 @@ if (AUDIO_PATH is not None and AUDIO_PLAY_POSSIBLE):
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
             ), color=KOISHI_VOICE_COLOR)
     
-    @VOICE_COMMANDS_KOISHI(name='local', description=local_description)
+    @VOICE_COMMANDS_KOISHI(name='local', description=local_description, checks=[checks.is_guild(DUNGEON)])
     async def local_(client, message, content):
         while True:
             voice_client=client.voice_client_for(message)
