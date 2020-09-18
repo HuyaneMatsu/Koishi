@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import re, os, subprocess
+import re, os
 from itertools import cycle
-from io import BytesIO
 
-from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, LocalAudio
+from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, LocalAudio, \
+    KOKORO
 
 from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
@@ -83,15 +83,15 @@ async def invalid_command(client, message, command, content):
         color=FLAN_HELP_COLOR,
             )
     
-    message = await client.message_create(message.channel,embed=embed)
-    await sleep(30.,client.loop)
+    message = await client.message_create(message.channel, embed=embed)
+    await sleep(30., KOKORO)
     await client.message_delete(message)
 
 @Flan.commands.from_class
 class ping:
     @Cooldown('user',30.,handler=CooldownHandler())
     async def ping(client, message):
-        await client.message_create(message.channel,f'{client.gateway.latency*1000.:.0f} ms')
+        await client.message_create(message.channel, f'{client.gateway.latency*1000.:.0f} ms')
     
     aliases=['pong']
     
@@ -224,18 +224,18 @@ class massadd:
                 description='\n'.join(description_parts)
                 description_parts.clear()
                 if Card.update(description,next_id,name,rarity):
-                    new_+=1
+                    new_ += 1
                 else:
-                    modified_+=1
+                    modified_ += 1
         
         del description_parts
         
         if new_ or modified_:
-            await Card.dump_cards(client.loop)
+            await Card.dump_cards(KOKORO)
         
         message = await client.message_create(message.channel,
             embed = Embed(None,f'modified: {modified_}\nnew: {new_}', color=CHESUTO_COLOR))
-        await sleep(30.,client.loop)
+        await sleep(30., KOKORO)
         await client.message_delete(message)
         return
     
@@ -489,8 +489,8 @@ class add_image:
                 await file.write(image_data)
             
             if should_dump:
-                card.image_name=name
-                await Card.dump_cards(client.loop)
+                card.image_name = name
+                await Card.dump_cards(KOKORO)
             
             content = f'Image successfully added for {card.name}.'
             break
@@ -758,13 +758,13 @@ class remove_card:
             content = 'Cancelled.'
         else:
             card._delete()
-            await Card.dump_cards(client.loop)
+            await Card.dump_cards(KOKORO)
             content = f'{card.name!r} successfully removed.'
         
         message = await client.message_create(message.channel,
             embed = Embed(description=content, color=CHESUTO_COLOR))
         
-        await sleep(30.)
+        await sleep(30., KOKORO)
         await client.message_delete(message)
         return
     

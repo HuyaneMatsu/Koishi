@@ -1046,7 +1046,7 @@ class get_id_as_time:
         
         await client.message_create(message.channel, id_to_time(snowflake).__format__(DATETIME_FORMAT_CODE))
     
-    name = 'id-as-id'
+    name = 'id-as-time'
     aliases = ['idastime', 'idtotime', 'id-to-time']
     category = 'UTILITY'
     

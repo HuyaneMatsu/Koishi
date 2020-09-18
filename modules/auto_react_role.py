@@ -1323,22 +1323,22 @@ class load_auto_react_roles(object):
     async def __call__(self, client):
         called = self.called+1
         type(self).called = called
-        if called!=len(CLIENTS):
+        if called != len(CLIENTS):
             return
         
         async with DB_ENGINE.connect() as connector:
             result = await connector.execute(AUTO_REACT_ROLE_TABLE.select())
             async with ScarletExecutor() as scarlet:
                 async for query in result:
-                    await scarlet.add(AutoReactRoleManager.from_query(query,connector))
+                    await scarlet.add(AutoReactRoleManager.from_query(query, connector))
 
 
 async def auto_react_roles_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('show-auto-react-roles',(
+    return Embed('show-auto-react-roles', (
         'Starts an auto react role GUI on the specified message.\n'
-        'If the message has active auto react role on it, will display that, '
-        'and if it has active GUI too, will cancel that.\n'
+        'If the message has active auto react role on it, will display that, and if it has active GUI too, will cancel '
+        'that.\n'
         f'Usage: `{prefix}auto-react-roles *channel* <message_id>`'
             ), color=AUTO_REACT_ROLE_COLOR).add_footer(
                 'Guild only! You must have administrator permission to use this command.')

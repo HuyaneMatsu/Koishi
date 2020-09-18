@@ -236,14 +236,14 @@ class mine:
         if text_mode or (not message.channel.cached_permissions_for(client).can_add_reactions):
             return
         
-        await client.reaction_add(message,emoji)
+        await client.reaction_add(message, emoji)
     
         try:
-            await wait_for_reaction(client,message,check_emoji_and_user(emoji,user),1200.)
+            await wait_for_reaction(client,message,check_emoji_and_user(emoji, user),1200.)
         except TimeoutError:
             return
         finally:
-            await client.reaction_delete_own(message,emoji)
+            await client.reaction_delete_own(message, emoji)
     
         y=0
         while True:
