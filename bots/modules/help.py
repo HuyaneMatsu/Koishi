@@ -3,10 +3,10 @@ import sys
 
 from hata import CLIENTS, USERS, GUILDS, CHANNELS, Embed, eventlist, Client
 from hata.ext.commands import Command, checks, Converter, ConverterFlag, Closer
-from koishi import KOISHI_HELP_COLOR, DUNGEON_INVITE, DUNGEON, WORSHIPPER_ROLE, EVERYNYAN_ROLE, ANNOUNCEMNETS_ROLE, \
-    WELCOME_CHANNEL
+from bots.koishi import KOISHI_HELP_COLOR, DUNGEON_INVITE, DUNGEON, WORSHIPPER_ROLE, EVERYNYAN_ROLE, \
+    ANNOUNCEMNETS_ROLE, WELCOME_CHANNEL
 
-from shared import KOISHI_GIT, HATA_GIT
+from bot_utils.shared import KOISHI_GIT, HATA_GIT
 
 HELP_COMMANDS = eventlist(type_=Command)
 

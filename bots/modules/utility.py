@@ -12,7 +12,7 @@ from hata.ext.prettyprint import pchunkify
 
 from PIL import Image as PIL
 
-from tools import CooldownHandler, PAGINATION_5PN
+from bot_utils.tools import CooldownHandler, PAGINATION_5PN
 
 UTILITY_COLOR = Color(0x5dc66f)
 UTILITY_COMMANDS = eventlist(type_=Command)

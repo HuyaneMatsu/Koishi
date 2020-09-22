@@ -10,9 +10,9 @@ from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_
 
 from sqlalchemy.sql import select, desc
 
-from models import DB_ENGINE, currency_model, CURRENCY_TABLE
-from tools import CooldownHandler
-from shared import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON
+from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
+from bot_utils.tools import CooldownHandler
+from bot_utils.shared import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON
 
 GAMBLING_COMMANDS = eventlist(type_=Command)
 
@@ -24,7 +24,7 @@ def teardown(lib):
     Koishi.commands.unextend(GAMBLING_COMMANDS)
     Koishi.command_processer.remove(DUNGEON, heart_generator)
 
-GAMBLING_COLOR          = Color.from_rgb(254,254,164)
+GAMBLING_COLOR          = Color.from_rgb(254, 254, 164)
 CURRENCY_EMOJI          = Emoji.precreate(603533301516599296)
 DAILY_INTERVAL          = timedelta(hours=22)
 DAILY_STREAK_BREAK      = timedelta(hours=26)
@@ -38,8 +38,8 @@ DAILY_REWARD_LIMIT_W_P  = 600
 
 EVENT_MAX_DURATION      = timedelta(hours=24)
 EVENT_MIN_DURATION      = timedelta(minutes=30)
-EVENT_HEART_MIN_AMOUNT  = DAILY_REWARD//2           #half day of min
-EVENT_HEART_MAX_AMOUNT  = 7*DAILY_REWARD_LIMIT_W_P      #1 week of max
+EVENT_HEART_MIN_AMOUNT  = DAILY_REWARD//2               # half day of min
+EVENT_HEART_MAX_AMOUNT  = 7*DAILY_REWARD_LIMIT_W_P      # 1 week of max
 EVENT_OK_EMOJI          = BUILTIN_EMOJIS['ok_hand']
 EVENT_ABORT_EMOJI       = BUILTIN_EMOJIS['x']
 EVENT_DAILY_MIN_AMOUNT  = 1

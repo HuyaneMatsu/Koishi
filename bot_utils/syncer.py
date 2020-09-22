@@ -9,11 +9,9 @@ from config import HATA_PATH
 from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep
 from hata.ext.commands import wait_for_message
 
-from shared import SYNC_CHANNEL
+from .shared import SYNC_CHANNEL, KOISHI_PATH
 
 CHUNK_SIZE = 128*1024 # 128 KB
-
-KOISHI_PATH = os.path.abspath('.')
 
 HATA_HEAD_NAME = 'hata'
 KOISHI_HEAD_NAME = 'koishi'
@@ -30,6 +28,9 @@ IGNORED_NAMES = {
     '__pycache__',
     '.idea',
     '_sqlite.db',
+    'images',
+    'library',
+    'chesuto_data',
         }
 
 def flatten_directory(path, name, access_path):

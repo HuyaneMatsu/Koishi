@@ -2,9 +2,9 @@
 from hata import Embed
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from shared import category_name_rule, DEFAULT_CATEGORY_NAME, MARISA_PREFIX, MARISA_HELP_COLOR, command_error, DUNGEON
-from syncer import sync_request_comamnd
-from interpreter import Interpreter
+from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, MARISA_PREFIX, MARISA_HELP_COLOR, command_error, DUNGEON
+from bot_utils.syncer import sync_request_comamnd
+from bot_utils.interpreter import Interpreter
 
 setup_ext_commands(Marisa, MARISA_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import re
+import re, sys
 from datetime import datetime, timedelta
 
 from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
@@ -8,14 +8,14 @@ from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter,
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.extension_loader import EXTENSION_LOADER
 
-from tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
+from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
-from shared import KOISHI_PREFIX, category_name_rule, DEFAULT_CATEGORY_NAME, WELCOME_CHANNEL, DUNGEON, EVERYNYAN_ROLE, \
+from bot_utils.shared import KOISHI_PREFIX, category_name_rule, DEFAULT_CATEGORY_NAME, WELCOME_CHANNEL, DUNGEON, \
     ANNOUNCEMNETS_ROLE, WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON_INVITE, KOISHI_HELP_COLOR, SYNC_CHANNEL, \
-    command_error
+    command_error, EVERYNYAN_ROLE
 
-from interpreter import Interpreter
-from syncer import sync_request_waiter
+from bot_utils.interpreter import Interpreter
+from bot_utils.syncer import sync_request_waiter
 
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
 _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
@@ -32,22 +32,6 @@ Koishi.events(RoleDeleteWaitfor)
 Koishi.events(ChannelDeleteWaitfor)
 Koishi.events(EmojiDeleteWaitfor)
 Koishi.events(RoleEditWaitfor)
-
-@Koishi.events
-class once_on_ready(object):
-    __slots__ = ('called',)
-    __event_name__ = 'ready'
-    
-    def __init__(self):
-        self.called = False
-        
-    async def __call__(self, client):
-        if self.called:
-            return
-        
-        self.called = True
-        
-        print(f'{client:f} ({client.id}) logged in\nowner: {client.owner:f} ({client.owner.id})')
 
 Koishi.commands(SubterraneanHelpCommand(KOISHI_HELP_COLOR), 'help', category='HELP')
 
@@ -239,3 +223,13 @@ async def role_giver(client, message):
         break
 
 Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
+
+@Koishi.commands(checks=[checks.owner_only()])
+async def shutdown(client, message):
+    """Shuts the clients down, then stops the process."""
+    for client in CLIENTS:
+        await client.disconnect()
+    
+    await client.message_create(message.channel, 'Clients stopped, stopping process.')
+    KOKORO.stop()
+    sys.exit()

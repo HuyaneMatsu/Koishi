@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 import re, os
-from time import monotonic
 
 from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, eventlist, \
-    KOKORO
+    KOKORO, LOOP_TIME
 
 from hata.ext.commands import Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
     GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
 
 from hata.discord.client_core import GC_CYCLER
 
-from models import DB_ENGINE, DS_TABLE, ds_model
+from bot_utils.models import DB_ENGINE, DS_TABLE, ds_model
+from bot_utils.shared import KOISHI_PATH
 
 DS_COLOR = Color(0xa000c4)
 DS_COMMANDS = eventlist(type_=Command)
@@ -48,7 +48,7 @@ async def _keep_await(function,games):
         await function(game)
 
 def GC_games(cycler):
-    limit = monotonic()-3600. #we delete after 1 hour
+    limit = LOOP_TIME()-3600. #we delete after 1 hour
     to_delete = []
     to_save = []
     for game in DS_GAMES.values():
@@ -147,7 +147,7 @@ class ds_game(object):
         self.task_flag = GUI_STATE_READY
         self.call = type(self).call_menu
         self.cache = [None for _ in range(len(CHARS))]
-        self.last = monotonic()
+        self.last = LOOP_TIME()
         
         DS_GAMES[user.id]= self
         
@@ -298,7 +298,7 @@ class ds_game(object):
             await client.events.error(client, f'{self!r}.start_menu', err)
             return
         
-        self.last = monotonic()
+        self.last = LOOP_TIME()
         self.call = type(self).call_menu
         self.task_flag = GUI_STATE_READY
 
@@ -361,7 +361,7 @@ class ds_game(object):
             await client.events.error(client, f'{self!r}.start_game', err)
             return
         
-        self.last = monotonic()
+        self.last = LOOP_TIME()
         self.call = type(self).call_game
         
         if self.task_flag != GUI_STATE_SWITCHING_CTX:
@@ -414,7 +414,7 @@ class ds_game(object):
         finally:
             await save_task
             
-        self.last = monotonic()
+        self.last = LOOP_TIME()
         self.call = type(self).call_done
         
         if self.task_flag != GUI_STATE_SWITCHING_CTX:
@@ -638,7 +638,7 @@ class ds_game(object):
             await client.events.error(client, f'{self!r}.call_game', err)
             return
         
-        self.last=monotonic()
+        self.last=LOOP_TIME()
         
         if self.task_flag!=GUI_STATE_SWITCHING_CTX:
             self.task_flag = GUI_STATE_READY
@@ -847,7 +847,7 @@ class ds_game(object):
         
         client.events.reaction_add.append(message, self)
         
-        self.last = monotonic()
+        self.last = LOOP_TIME()
         
         if self.task_flag == GUI_STATE_SWITCHING_CTX:
             self.task_flag = GUI_STATE_READY
@@ -1713,7 +1713,7 @@ def loader(filename):
         if map_:
             stage_source(header, map_)
 
-loader(os.path.join('library', 'ds.txt'))
+loader(os.path.join(KOISHI_PATH, 'library', 'ds.txt'))
 
 del DEFAULT_STYLE_PARTS
 

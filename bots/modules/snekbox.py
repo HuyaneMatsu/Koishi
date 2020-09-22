@@ -4,9 +4,8 @@ from pathlib import Path
 from subprocess import TimeoutExpired
 from hata import eventlist, Color, KOKORO, Embed, ScarletLock, sleep, Guild
 from hata.ext.commands import Command, checks
-from interpreter import parse_code_content
-from shared import DUNGEON
-import config
+from bot_utils.interpreter import parse_code_content
+from bot_utils.shared import DUNGEON, KOISHI_PATH
 
 # installing nsjail:
 # make a folder for it somewhere
@@ -27,7 +26,7 @@ MEM_MAX = 52428800
 MAX_TIMEOUT = 13
 
 NSJAIL_EXECUTABLE = os.getenv('NSJAIL_PATH', '/usr/sbin/nsjail')
-NSJAIL_CONFIG = os.getenv('NSJAIL_CFG', './modules/nsjail.cfg')
+NSJAIL_CONFIG = os.getenv('NSJAIL_CFG', os.path.join(KOISHI_PATH, 'bots', 'modules', 'nsjail.cfg'))
 
 PYTHON_EXECUTABLE = '/usr/bin/python3.8'
 SNEKBOXING_PATH = Path('/snekbox')

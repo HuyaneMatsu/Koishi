@@ -6,7 +6,7 @@ from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILT
     Permission
 from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu, checks, Closer
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from shared import SATORI_PREFIX, SATORI_HELP_COLOR
+from bot_utils.shared import SATORI_PREFIX, SATORI_HELP_COLOR
 
 
 setup_ext_commands(Satori, SATORI_PREFIX)

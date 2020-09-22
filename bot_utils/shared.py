@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
+import os
 from io import StringIO
 from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO
 from hata.ext.commands import Pagination
 
 import config
+
+from config import KOISHI_PATH
+if KOISHI_PATH is None:
+    KOISHI_PATH = os.path.abspath('..')
 
 KOISHI_PREFIX = config.KOISHI_PREFIX
 SATORI_PREFIX = config.SATORI_PREFIX

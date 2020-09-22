@@ -3,7 +3,7 @@ from hata import Color, Embed, eventlist, Permission, DiscordException, sleep, M
 from hata.ext.commands import Command, Converter, checks, Pagination, ConverterFlag, wait_for_reaction
 from hata.ext.prettyprint import pchunkify
 
-from shared import KOISHI_PREFIX, permission_check_handler, not_guild_owner_handler, not_bot_owner_handler
+from bot_utils.shared import KOISHI_PREFIX, permission_check_handler, not_guild_owner_handler, not_bot_owner_handler
 
 ADMINISTRATION_COLOR = Color.from_rgb(148,0,211)
 ADMINISTRATION_COMMANDS = eventlist(type_=Command)

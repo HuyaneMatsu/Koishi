@@ -8,9 +8,9 @@ from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, A
 from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 
-from shared import FLAN_PREFIX, FLAN_HELP_COLOR
-from tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
-from chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, get_card
+from bot_utils.shared import FLAN_PREFIX, FLAN_HELP_COLOR
+from bot_utils.tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
+from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, get_card
 
 CHESUTO_GUILD = Guild.precreate(598706074115244042)
 CHESUTO_COLOR = Color.from_rgb(73, 245, 73)
@@ -837,7 +837,7 @@ class Track(object):
         except KeyError:
             return
         
-        path = os.path.join(os.path.abspath('.'), CHESUTO_FOLDER, self.source_name)
+        path = os.path.join(os.path.abspath('..'), CHESUTO_FOLDER, self.source_name)
         if os.path.exists(path):
             try:
                 os.remove(path)

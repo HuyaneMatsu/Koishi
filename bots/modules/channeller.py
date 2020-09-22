@@ -3,7 +3,7 @@ from hata import Task, Client, User, CHANNELS, Embed, eventlist, Color
 
 from hata.ext.commands import checks, Command
 
-CHANNELLER_COMMANDS=eventlist(type_=Command)
+CHANNELLER_COMMANDS = eventlist(type_=Command)
 CHANNELLER_COLOR = Color.from_rgb(129, 158, 0)
 
 def setup(lib):

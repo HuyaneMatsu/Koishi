@@ -7,8 +7,8 @@ from hata.ext.commands import Command, checks, Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE
 
-from shared import DUNGEON
-from flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
+from bot_utils.shared import DUNGEON
+from bots.flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
 
 KOISHI_VOICE_COLOR = Color.from_rgb(235, 52, 207)
 
@@ -660,7 +660,7 @@ if AUDIO_PLAY_POSSIBLE:
                 text = 'Nothing found.'
                 break
             
-            path = os.path.join(os.path.abspath('.'), CHESUTO_FOLDER, bgm.source_name)
+            path = os.path.join(os.path.abspath(''), CHESUTO_FOLDER, bgm.source_name)
             if not os.path.exists(path):
                 data = await client.download_url(bgm.url)
                 with await AsyncIO(path, 'wb') as file:

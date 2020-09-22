@@ -8,7 +8,7 @@ from hata.ext.commands import ChooseMenu, Pagination, Command
 from hata.discord.others import from_json, chunkify
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, QualPath, FolderedUnit
 
-from shared import SATORI_HELP_COLOR
+from bot_utils.shared import SATORI_HELP_COLOR
 
 WORDMATCH_RP = re.compile('[^a-zA-z0-9]+')
 WIKI_COLOR = Color.from_rgb(48, 217, 255)
@@ -136,7 +136,7 @@ async def download_wiki_page(client, title_, url):
             continue
         
         if element_name == 'table':
-            continue #sideinfo
+            continue # sideinfo
         
         if element_name == 'p':
             text = element.text

@@ -1,88 +1,45 @@
 # -*- coding: utf-8 -*-
-import sys, os
-sys.path.append(os.path.abspath('..'))
-# moving to the outer folder, so pers_data will count as a package
+import os, sys
 
-MARISA_MODE = (len(sys.argv) == 2 and sys.argv[1].lower() == 'marisa')
+# Load config
+config_path = os.path.split(__file__)[0]
+if config_path:
+    config_path = os.path.split(config_path)[0]
+else:
+    # second try.
+    config_path = os.path.abspath('..')
+
+if config_path not in sys.path:
+    sys.path.append(config_path)
+
+del config_path
 
 import config
 
+# Load hata lib
+
 hata_path = config.HATA_PATH
-if (hata_path is not None):
+if (hata_path is not None) and (hata_path not in sys.path):
     sys.path.append(hata_path)
 
 del hata_path
 
-from hata import Client, start_clients, ActivityRich, ActivityTypes
-from hata.ext.extension_loader import EXTENSION_LOADER
+import hata
 
-EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
+# Import things depending on settings and which file is started up.
+#
+# As self host, turn `RUN_WEBAPP_AS_MAIN` on and run this file.
+#
+# If hosting, wsgi will import this file, so the bots will not start up. Those need to be started up separatedly by an
+# always running task.
 
-if MARISA_MODE:
-    Marisa = Client(config.MARISA_TOKEN,
-        client_id = config.MARISA_ID,
-            )
-    
-    EXTENSION_LOADER.add_default_variables(Marisa=Marisa, main_client=Marisa)
-    EXTENSION_LOADER.load_extension('marisa', locked=True)
-    
-    EXTENSION_LOADER.add('testers.test_commands')
-    EXTENSION_LOADER.add('testers.ratelimit')
-    EXTENSION_LOADER.add('testers.dispatch_tests')
-    
+if __name__ == '__main__':
+    import bots
+    hata.start_clients()
+
+    if config.RUN_WEBAPP_AS_MAIN:
+        from web import WEBAPP
+        WEBAPP.run()
 else:
-    Koishi = Client(config.KOISHI_TOKEN,
-        secret = config.KOISHI_SECRET,
-        client_id = config.KOISHI_ID,
-        activity = ActivityRich('with Satori'),
-        shard_count = 2,
-            )
-    
-    Satori = Client(config.SATORI_TOKEN,
-        secret = config.SATORI_SECRET,
-        client_id = config.SATORI_ID,
-        activity = ActivityRich('with Koishi'),
-        status = 'dnd',
-            )
-    
-    Flan = Client(config.FLAN_TOKEN,
-        client_id = config.FLAN_ID,
-        activity = ActivityRich('Chesuto development', type_=ActivityTypes.watching),
-        status = 'idle',
-            )
-    
-    EXTENSION_LOADER.add_default_variables(Koishi=Koishi, Satori=Satori, Flan=Flan, main_client=Koishi)
-    EXTENSION_LOADER.load_extension('koishi', locked=True)
-    EXTENSION_LOADER.load_extension('satori', locked=True)
-    EXTENSION_LOADER.load_extension('flan'  , locked=True)
-
-MODULE_NAMES = set()
-
-path = None
-for path in os.listdir('modules'):
-    if not path.endswith('.py'):
-        continue
-    
-    MODULE_NAMES.add(path[:-3])
-
-if MARISA_MODE:
-    if config.ALLOW_MARISA_SNEKBOX:
-        for path in list(MODULE_NAMES):
-            if path != 'snekbox':
-                MODULE_NAMES.remove(path)
-    
-else:
-    if not config.ALLOW_KOISHI_SNEKBOX:
-        try:
-            MODULE_NAMES.remove('snekbox')
-        except KeyError:
-            pass
-
-for path in MODULE_NAMES:
-    EXTENSION_LOADER.add('modules.'+path)
-
-del path
-
-EXTENSION_LOADER.load_all()
-
-start_clients()
+    hata.KOKORO.stop()
+    from web import WEBAPP

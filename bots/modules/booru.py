@@ -6,7 +6,7 @@ from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task, Dis
 from hata.ext.commands import Timeouter, Cooldown, Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
 
-from tools import BeautifulSoup, choose, pop_one, CooldownHandler, choose_notsame
+from bot_utils.tools import BeautifulSoup, choose, pop_one, CooldownHandler, choose_notsame
 
 
 BOORU_COLOR = Color.from_html('#138a50')

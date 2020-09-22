@@ -16,8 +16,8 @@ def teardown(lib):
     main_client.commands.unextend(DISPATCH_TESTS)
 
 class dispatch_tester:
-    channel=None
-    old_events={}
+    channel = None
+    old_events = {}
 
     @classmethod
     async def here(self,client, message):
@@ -26,7 +26,7 @@ class dispatch_tester:
                 await client.message_create(message.channel, 'Current channel removed')
             except DiscordException:
                 return
-            self.channel=None
+            self.channel = None
         else:
             try:
                 await client.message_create(message.channel, f'Channel set to {message.channel.name} {message.channel.id}')

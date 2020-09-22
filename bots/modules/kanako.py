@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
-from time import monotonic
 from random import randint
 
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
-    Embed, DiscordException, ReuBytesIO, eventlist
+    Embed, DiscordException, ReuBytesIO, eventlist, LOOP_TIME
 
 from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
     GUI_STATE_SWITCHING_CTX, Timeouter, Command, checks
 
+from bot_utils.shared import KOISHI_PATH
 from PIL import Image as PIL
 
 KANAKO_COMMANDS = eventlist(type_=Command)
@@ -19,8 +19,8 @@ def setup(lib):
 def teardown(lib):
     Koishi.commands.unextend(KANAKO_COMMANDS)
 
-FONT=PIL.font(os.path.join('library','Kozuka.otf'),90)
-FONT_COLOR=(162,61,229)
+FONT = PIL.font(os.path.join(KOISHI_PATH, 'library', 'Kozuka.otf'), 90)
+FONT_COLOR = (162, 61, 229)
 
 del os
 
@@ -257,7 +257,7 @@ class kanako_game(object):
             except DiscordException:
                 return self.cancel()
             
-            circle_start=monotonic()
+            circle_start=LOOP_TIME()
             waiter=sleep(time_till_notify,client.loop)
             self.waiter=waiter
             try:
@@ -311,7 +311,7 @@ class kanako_game(object):
                     index-=1
                     content=self.options[index]
             
-        self.answers[message.author.id]=(content,monotonic())
+        self.answers[message.author.id]=(content,LOOP_TIME())
                                        
         if len(self.answers)==len(self.users):
             self.waiter.cancel_handles()

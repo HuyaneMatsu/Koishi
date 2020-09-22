@@ -3,6 +3,7 @@ import sys, os, json
 from threading import Lock as SyncLock
 
 from hata import Emoji, alchemy_incendiary, Color, Embed, KOKORO
+from bot_utils.shared import KOISHI_PATH
 
 # Emojis are not used, but we will keep them for a time now
 
@@ -71,7 +72,7 @@ from hata import Emoji, alchemy_incendiary, Color, Embed, KOKORO
 #Emoji.precreate(604698116658167808,name='aG').as_emoji
 
 EMBED_COLOR = Color.from_rgb(73,245,73)
-EMBED_NAME_LENGTH        = 200
+EMBED_NAME_LENGTH = 200
 EMBED_DESCRIPTION_LENGTH = 1600
 
 class Rarity(object):
@@ -216,8 +217,8 @@ class CardFlag(int):
 CARDS_BY_ID = {}
 CARDS_BY_NAME = {}
 
-CHESUTO_FOLDER = os.path.join(os.path.abspath('.'),'chesuto_data')
-CARDS_FILE = os.path.join(CHESUTO_FOLDER,'cards.json')
+CHESUTO_FOLDER = os.path.join(KOISHI_PATH, 'chesuto_data')
+CARDS_FILE = os.path.join(CHESUTO_FOLDER, 'cards.json')
 CARDS_FILE_LOCK = SyncLock()
 
 PROTECTED_FILE_NAMES = {'cards.json'}
@@ -391,7 +392,7 @@ class Card(object):
         
         try:
             with open(CARDS_FILE,'r') as file:
-                cards_data=json.load(file)
+                cards_data = json.load(file)
         except FileNotFoundError:
             exception='file not found'
         except OSError as err:

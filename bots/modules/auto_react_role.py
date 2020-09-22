@@ -4,8 +4,8 @@ from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, Scarlet
     Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS, WeakKeyDictionary
 from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination, ConverterFlag
 
-from shared import permission_check_handler
-from models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
+from bot_utils.shared import permission_check_handler
+from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
 
 ROLE_CONVERTER = Converter('role', flags=ConverterFlag.role_default.update_by_keys(everywhere=True))
 MESSAGE_CONVERTER = Converter('message', flags=ConverterFlag.message_default.update_by_keys(everywhere=True))

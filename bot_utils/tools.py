@@ -10,14 +10,14 @@ from hata.ext.commands import CommandProcesser, Timeouter, GUI_STATE_READY, GUI_
 try:
     from bs4 import BeautifulSoup
 except ImportError:
-    BeautifulSoup=None
+    BeautifulSoup = None
 
 from PIL import Image as PIL
 from PIL.ImageDraw import ImageDraw
 from PIL.ImageFont import truetype
 
-PIL.Image.draw=methodize(ImageDraw)
-PIL.font=truetype
+PIL.Image.draw = methodize(ImageDraw)
+PIL.font = truetype
 del ImageDraw, truetype, methodize
 
 def choose(list_):

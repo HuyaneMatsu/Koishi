@@ -1781,7 +1781,7 @@ async def ratelimit_test0002(client,message):
     Creates 6 achievements.
     '''
     with RLTCTX(client,message.channel,'ratelimit_test0002') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1811,7 +1811,7 @@ async def ratelimit_test0003(client,message):
     First creates 2 achievements with the client normally, then deletes them for testing.
     '''
     with RLTCTX(client,message.channel,'ratelimit_test0003') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1838,7 +1838,7 @@ async def ratelimit_test0004(client,message):
     '''
     
     with RLTCTX(client,message.channel,'ratelimit_test0004') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1863,7 +1863,7 @@ async def ratelimit_test0005(client,message):
     Creates 2 achievements, then edits them once, once for testing. At the end deletes them.
     '''
     with RLTCTX(client,message.channel,'ratelimit_test0005') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1892,7 +1892,7 @@ async def ratelimit_test0006(client,message):
     '''
     
     with RLTCTX(client,message.channel,'ratelimit_test0006') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1927,7 +1927,7 @@ async def ratelimit_test0008(client,message):
     '''
     
     with RLTCTX(client,message.channel,'ratelimit_test0008') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1948,7 +1948,7 @@ async def ratelimit_test0009(client,message):
     Waits 2 seconds after the achievement is created, so it might work this time (nope).
     '''
     with RLTCTX(client,message.channel,'ratelimit_test0009') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1968,7 +1968,7 @@ async def ratelimit_test0010(client,message):
     Updates an achievement of the client's owner. But now one, what has `secure=False`
     '''
     with RLTCTX(client,message.channel,'ratelimit_test0010') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -1988,7 +1988,7 @@ async def ratelimit_test0011(client,message):
     '''
     
     with RLTCTX(client,message.channel,'ratelimit_test0011') as RLT:
-        image_path=join(os.path.abspath('.'),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         

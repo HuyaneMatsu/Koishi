@@ -18,7 +18,7 @@ from hata.discord.player import AudioPlayer
 from hata.discord.reader import AudioReader
 from hata.ext.commands import Command, checks, Pagination
 
-from models import DB_ENGINE
+from bot_utils.models import DB_ENGINE
 
 STAT_COMMANDS = eventlist(type_=Command, category='STATS')
 STAT_COLOR = Color.from_rgb(61, 255, 249)

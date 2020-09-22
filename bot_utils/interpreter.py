@@ -9,15 +9,15 @@ from hata.ext.commands import Pagination, wait_for_message
 from hata.backend.futures import _ignore_frame
 
 _ignore_frame(__spec__.origin, '__call__',
-    'await client.loop.run_in_executor(alchemy_incendiary(exec,(code_object,self.locals),),)')
+    'await client.loop.run_in_executor(alchemy_incendiary(exec, (code_object, self.locals),),)')
 
 
-#emulates a file
+# emulates a file
 class InterpreterPrinter(object):
-    __slots__=('lock','buffer',)
+    __slots__ = ('lock', 'buffer',)
     def __init__(self):
-        self.lock=SyncLock()
-        self.buffer=deque()
+        self.lock = SyncLock()
+        self.buffer = deque()
 
     def write(self,value):
         with self.lock:
@@ -35,17 +35,17 @@ class InterpreterPrinter(object):
 
     def __len__(self):
         with self.lock:
-            ln=0
+            ln = 0
             for value in self.buffer:
-                ln+=value.__len__()
+                ln += value.__len__()
             return ln
 
     def __call__(self,*args,**kwargs):
-        kwargs['file']=self
-        print(*args,**kwargs)
+        kwargs['file'] = self
+        print(*args, **kwargs)
 
-    def get_value(self,wrap_start='```',wrap_end='```',limit=2000,ignore=50):
-        limit=limit-len(wrap_start)-len(wrap_end)-2 #allocate 2 more for linebreaks
+    def get_value(self,wrap_start='```', wrap_end='```', limit=2000, ignore=50):
+        limit = limit-len(wrap_start)-len(wrap_end)-2 # allocate 2 more for linebreaks
         if limit<=ignore:
             raise ValueError('wrap start and wrap end are longer than the limit-ignore itself')
         
@@ -292,7 +292,7 @@ class Interpreter(object):
                 printer.write(f'{err.__class__.__name__} at line {err.lineno}: {err.msg}\n{result[err.lineno-1]}\n{" "*(err.offset-1)}^')
             else:
                 try:
-                    await client.loop.run_in_executor(alchemy_incendiary(exec,(code_object,self.locals),),)
+                    await client.loop.run_in_executor(alchemy_incendiary(exec, (code_object, self.locals),),)
                 except BaseException as err:
                     await client.loop.render_exc_async(err,file=printer)
             

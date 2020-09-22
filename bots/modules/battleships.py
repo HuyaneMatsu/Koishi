@@ -23,9 +23,9 @@ async def bs_description(client, message):
             'Guild only!')
 
 
-OCEAN=BUILTIN_EMOJIS['ocean'].as_emoji
+OCEAN = BUILTIN_EMOJIS['ocean'].as_emoji
 
-LINE_X_LEAD = ''.join( [
+LINE_X_LEAD = ''.join([
     BUILTIN_EMOJIS['black_large_square'].as_emoji,
     BUILTIN_EMOJIS['one'].as_emoji,
     BUILTIN_EMOJIS['two'].as_emoji,
@@ -86,12 +86,12 @@ def render_map(data, values):
         line.append(LINE_Y_LEAD[y])
         while True:
             line.append(values[data[x+y*10]])
-            x +=1
+            x += 1
             if x == 10:
                 break
         result.append(''.join(line))
         line.clear()
-        y +=1
+        y += 1
         if y == 10:
             break
 
@@ -140,9 +140,9 @@ class active_request(object):
     def __ne__(self, other):
         return self.hash != other.hash
     
-BS_GAMES={}
-BS_REQUESTERS=set()
-BS_REQUESTS={}
+BS_GAMES = {}
+BS_REQUESTERS = set()
+BS_REQUESTS = {}
 
 async def battle_manager(client, message, target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
     text = ''
@@ -193,15 +193,15 @@ async def battle_manager(client, message, target:Converter('user', flags=Convert
             f'Waiting on {target.full_name}\'s reply here and at dm.\nType:"accept name/mention" to accept')
         
         
-        future=request.future=Future(KOKORO)
-        check=wait_on_reply(guild, source, target)
-        event=client.events.message_create
+        future = request.future=Future(KOKORO)
+        check = wait_on_reply(guild, source, target)
+        event = client.events.message_create
         
-        waiter1=WaitAndContinue(future, check, channel, event, 300.)
-        waiter2=WaitAndContinue(future, check, private, event, 300.)
+        waiter1 = WaitAndContinue(future, check, channel, event, 300.)
+        waiter2 = WaitAndContinue(future, check, private, event, 300.)
         
         try:
-            result=await future
+            result = await future
         except TimeoutError:
             try:
                 BS_REQUESTERS.remove(source)

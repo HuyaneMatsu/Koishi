@@ -8,11 +8,12 @@ from hata.ext.commands import Command, checks
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
     from PIL.JpegImagePlugin import JpegImageFile as image_type_JPG
-    UPLOAD=True
+    UPLOAD = True
 except ImportError:
-    UPLOAD=False
+    UPLOAD = False
 
-from tools import choose
+from bot_utils.tools import choose
+from bot_utils.shared import KOISHI_PATH
 
 splitext = os.path.splitext
 join = os.path.join
@@ -26,12 +27,12 @@ def setup(lib):
 def teardown(lib):
     Koishi.commands.unextend(IMAGE_COMMANDS)
     
-IMAGES=[]
-VIDS=[]
-ALL=[]
+IMAGES = []
+VIDS = []
+ALL = []
 
-ITGHL={}
-IMAGE_STATISTICS={}
+ITGHL = {}
+IMAGE_STATISTICS = {}
 
 class image_details(set):
     __slots__ = ('path',)
@@ -40,7 +41,7 @@ class image_details(set):
 
         name,ext=splitext(path)
         
-        ext=ext[1:]
+        ext = ext[1:]
         if ext in image_formats:
             IMAGES.append(self)
         elif ext in video_formats:
@@ -48,10 +49,10 @@ class image_details(set):
 
         ALL.append(self)
         
-        tags=name.split('_')
+        tags = name.split('_')
         del tags[0]
 
-        self.path=path
+        self.path = path
         for tag in tags:
             self.add(tag)
             
@@ -77,15 +78,15 @@ class image_details(set):
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.path}>'
     
-    __str__=__repr__
+    __str__ = __repr__
 
 IMAGE_TAG_PAT = ITGHL['pat'] = 0
 IMAGE_TAG_HUG = ITGHL['hug'] = 1
 
-image_formats={'jpg','png','bmp','jpeg'}
-video_formats={'mp4','gif'}
+image_formats = {'jpg','png','bmp','jpeg'}
+video_formats = {'mp4','gif'}
 
-IMAGE_PATH=join(os.path.abspath('.'),'images')
+IMAGE_PATH = join(KOISHI_PATH, 'images')
 
 def load_images():
     for filename in os.listdir(IMAGE_PATH):
