@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import re, sys
+import re, sys, signal
 from datetime import datetime, timedelta
+from threading import main_thread
 
 from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
     Role, ChannelText, Invite, KOKORO
@@ -144,9 +145,32 @@ class reload:
         
         return pages
 
+@Koishi.commands.from_class
+class shutdown:
+    async def command(client, message):
+        
+        for client in CLIENTS:
+            await client.disconnect()
+        
+        await client.message_create(message.channel, 'Clients stopped, stopping process.')
+        KOKORO.stop()
+        thread_id = main_thread().ident
+        signal.pthread_kill(thread_id, signal.SIGKILL)
+    
+    category = 'UTILITY'
+    checks = [checks.owner_only()]
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('shutdown', (
+            'Shuts the clients down, then stops the process.'
+            f'Usage  `{prefix}shutdown`'
+            ), color=KOISHI_HELP_COLOR).add_footer(
+                'Owner only!')
+
 async def execute_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('execute',(
+    return Embed('execute', (
         'Use an interpreter trough me :3\n'
         'Usages:\n'
         f'{prefix}execute #code here\n'
@@ -223,13 +247,3 @@ async def role_giver(client, message):
         break
 
 Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
-
-@Koishi.commands(checks=[checks.owner_only()])
-async def shutdown(client, message):
-    """Shuts the clients down, then stops the process."""
-    for client in CLIENTS:
-        await client.disconnect()
-    
-    await client.message_create(message.channel, 'Clients stopped, stopping process.')
-    KOKORO.stop()
-    sys.exit()

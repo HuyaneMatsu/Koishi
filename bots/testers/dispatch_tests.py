@@ -520,7 +520,7 @@ class dispatch_tester:
         for key, value in old.items():
             if key in ('name', 'icon', 'invite_splash', 'user_count', 'afk_timeout', 'available',
                     'description', 'vanity_code', 'banner', 'max_members', 'max_presences', 'premium_tier',
-                    'booster_count', 'widget_enabled', 'embed_enabled', 'preferred_language', 'discovery_splash',
+                    'booster_count', 'widget_enabled', 'preferred_language', 'discovery_splash',
                     'max_video_channel_users', ):
                 result.append(f'- {key} : {value} - > {getattr(guild, key)}')
                 continue
@@ -544,7 +544,7 @@ class dispatch_tester:
                 
                 continue
             
-            if key in ('system_channel', 'afk_channel', 'widget_channel', 'embed_channel', 'rules_channel', 'public_updates_channel'):
+            if key in ('system_channel', 'afk_channel', 'widget_channel', 'rules_channel', 'public_updates_channel'):
                 other=getattr(guild, key)
                 if value is None:
                     result.append(f'{key} : None -> {other.name} {other.id}')

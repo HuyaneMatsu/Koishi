@@ -7,9 +7,28 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_docs.css') }}">
-
-    <title>Hata Docs{% if title is not None and title %} - {{title}}{% endif %}</title>
+    {% block head_extra%}{% endblock %}
+    <title>Hata Docs{% if (title is not none and title) %} - {{title}}{% endif %}</title>
 </head>
 <body>
+    <div class="header">
+        <div class="header_block_left">
+            {% block head_left %}{% endblock %}
+        </div>
+        <div class="header_block_right">
+            <form class="header_search" method="POST" action="{{ url_for('docs.search') }}">
+                {{ search_form.hidden_tag() }}
+                <div class="entry">
+                    {{ search_form.query }}
+                </div>
+                <div class="submit">
+                    {{ search_form.submit }}
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="main_block">
+        {% block body %}{% endblock %}
+    </div>
 </body>
 </html>

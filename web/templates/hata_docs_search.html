@@ -1,0 +1,28 @@
+{% extends 'hata_docs_layout.html' %}
+{% block body %}
+<div class="search_result_block">
+    {% if found is none %}
+        <div style="margin-top: 8px;">
+            Nothing matched the search query.
+        </div>
+    {% else %}
+        <h2>Results</h2>
+        <div class="underline"></div>
+        <ul class="unit_listing">
+        {% for order_prio, name, url, type_, preview in found %}
+            <li>
+                <a class="listing_linker" href="{{url|safe}}">
+                    <i class="listing_name">{{ name }}</i>
+                    {% if type_ is not none %}
+                        <i class="listing_comment">({{ type_ }})</i>
+                    {% endif %}
+                    {% if preview is not none %}
+                        <span class="lising_preview">{{ preview }}</span>
+                    {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock body %}

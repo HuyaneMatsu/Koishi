@@ -174,7 +174,7 @@ async def receive_sync(client, partner):
                 await file.write(binary)
             
             # Wait some. It can happen that we send this message, befrore the other side gets it's answer.
-            await sleep(0.2, KOKORO)
+            await sleep(0.4, KOKORO)
             await client.message_create(SYNC_CHANNEL, RECEIVED)
 
 

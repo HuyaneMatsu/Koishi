@@ -202,7 +202,7 @@ class auto_pyramid_u:
             if needed_users == 0:
                 break
             
-            user = users.pop(randint(0,user_count-1))
+            user = users.pop(randint(0, user_count-1))
             user_count -=1
             if user.is_bot:
                 continue

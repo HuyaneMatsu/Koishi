@@ -1,0 +1,39 @@
+{% extends 'hata_docs_layout.html' %}
+
+{% block head_extra %}
+<script src="{{ url_for('static', filename='content_table.js') }}"></script>
+<script>
+    var ct = new CT({{ structure_js|safe }});
+</script>
+{% endblock head_extra %}
+
+{% block head_left %}
+<div class="overflow_left_cut">
+    {{ backpath|safe }}
+</div>
+{% endblock head_left %}
+
+{% block body %}
+<div class="content_block">
+    <div class="content_table">
+        <div class="content_search">
+            <input type=text id="ct_input" oninput="ct.entry_update();"/>
+            <button onclick="ct.entry_clear();">
+                <svg id="search-icon" class="search-icon" viewBox="0 0 20 20">
+                    <path d="M 3 1 l -2 2 l 6 6 l 2 -2 m 0 0 l 6 -6 l 2 2 l -6 6 m 0 0 l 6 6 l -2 2 l -6 -6 m 0 0 l -6 6 l -2 -2 l 8 -8 l 2 2"/>
+                </svg>
+            </button>
+        </div>
+        <div class="content_listing">
+            {{ structure_html|safe }}
+        </div>
+    </div>
+    <div class="docs">
+        {% if content is none %}
+            No docs are added yet for this object.
+        {% else %}
+            {{ content|safe }}
+        {% endif %}
+    </div>
+</div>
+{% endblock body %}

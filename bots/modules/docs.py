@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from hata import Color, Task, Embed, KOKORO, eventlist
 from hata.ext.commands import ChooseMenu, Pagination, Command
 from hata.discord.others import from_json, chunkify
-from hata.ext.patchouli import map_module, MAPPED_OBJECTS, QualPath, FolderedUnit
+from hata.ext.patchouli import map_module, MAPPED_OBJECTS, QualPath, FolderedUnit, search_paths
 
 from bot_utils.shared import SATORI_HELP_COLOR
 
@@ -213,8 +213,8 @@ async def download_wiki_page(client, title_, url):
             
             continue
         
-        if element_name=='ul':
-            continue #spellcard table?
+        if element_name == 'ul':
+            continue # spellcard table?
         
         sys.stderr.write('Unhandled element at `TouhouWikiPage.__new__` : ')
         sys.stderr.write(repr(element))
@@ -371,24 +371,19 @@ async def docs(client, message, search_for:str=None):
         await docs_help(client, message)
         return
     
-    search_for = search_for.split('.')
-    if len(search_for) == 1:
-        search_for = search_for[0]
-        searcher = QualPath.endswith
-    else:
-        searcher = QualPath.endswith_multy
+    paths = search_paths(search_for)
     
-    results = []
-    for path in MAPPED_OBJECTS:
-        if searcher(path, search_for):
-            path = str(path)
-            name = path.replace('_', '\_')
-            results.append((name, path))
-    
-    if not results:
+    if not paths:
         embeds = [Embed(f'No search result for: `{search_for}`', color=WIKI_COLOR)]
         await Pagination(client, message.channel, embeds)
         return
+    
+    
+    results = []
+    
+    for path in paths:
+        name = path.replace('_', '\_')
+        results.append((name, path))
     
     embed = Embed(title=f'Search results for `{search_for}`', color=WIKI_COLOR)
     await ChooseMenu(client, message.channel, results, docs_selecter, embed=embed, prefix='@')

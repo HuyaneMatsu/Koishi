@@ -1020,13 +1020,13 @@ class bgms:
                 break
             
             actual = CHESUTO_BGM_TRACKS_SORTED[index].display_name
-            index +=1
+            index += 1
             actual_chunk.append(repr(index))
             actual_chunk.append('.: ')
             actual_chunk.append(actual)
             actual_chunk.append('\n')
             
-            collected+=1
+            collected += 1
             if collected == 20:
                 del actual_chunk[-1]
                 chunks.append(''.join(actual_chunk))

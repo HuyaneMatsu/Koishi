@@ -751,7 +751,7 @@ async def guild_bans(client,guild,):
         )
 
 async def guild_ban_add(client,guild,user_id,):
-    data={'delete-message-days':0}
+    data={'delete_message_days':0}
     guild_id=guild.id
     return await bypass_request(client,METH_PUT,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/bans/{user_id}',
@@ -1153,25 +1153,6 @@ async def channel_create(client,guild, name, category=None, type_=0):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',
         data,)
     return CHANNEL_TYPES[data['type']](data,client,guild)
-
-async def guild_embed_get(client,guild,):
-    guild_id=guild.id
-    return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/embed',
-        )
-
-async def guild_embed_edit(client,guild,value,):
-    data={'enabled':value}
-    guild_id=guild.id
-    return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/embed',
-        data,)
-
-async def guild_embed_image(client,guild,):
-    guild_id=guild.id
-    return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/embed.png',
-        params={'style':'shield'},decode=False,headers={},)
 
 async def guild_emojis(client,guild,):
     guild_id=guild.id
@@ -2940,7 +2921,7 @@ async def ratelimit_test0048(client, message, user:Converter('user',flags=Conver
 @RATELIMIT_COMMANDS
 async def ratelimit_test0049(client, message):
     """
-    Gets the channels of teh guild.
+    Gets the channels of the guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'ratelimit_test0049') as RLT:
@@ -2995,7 +2976,7 @@ async def ratelimit_test0051(client, message):
 @RATELIMIT_COMMANDS
 async def ratelimit_test0052(client, message):
     """
-    Gets the emojis of teh guild.
+    Gets the emojis of the guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'ratelimit_test0052') as RLT:
@@ -3008,7 +2989,7 @@ async def ratelimit_test0052(client, message):
 @RATELIMIT_COMMANDS
 async def ratelimit_test0053(client, message):
     """
-    Gets the emojis of teh guild.
+    Gets the emojis of the guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'ratelimit_test0053') as RLT:
