@@ -173,7 +173,7 @@ class dispatch_tester:
                     value = getattr(message, key)
                     new = list(value)
                     new.sort()
-                    removed,added=listdifference(old,new)
+                    removed, added = listdifference(old,new)
                     if removed:
                         result.append(f'{key} removed : {len(removed)}')
                         for name in removed:
@@ -196,9 +196,9 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'Message {message.id} got embed update:']
+        result = [f'Message {message.id} got embed update:']
 
-        channel=message.channel
+        channel = message.channel
         result.append(f'At channel : {channel:d} {channel.id}')
         guild=channel.guild
         if guild is not None:
@@ -488,7 +488,12 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text = [f'Bai bai {user.full_name}! with your {len(profile.roles)} roles.']
+        roles = profile.roles
+        if roles is None:
+            role_count = 0
+        else:
+            role_count = len(roles)
+        text = [f'Bai bai {user.full_name}! with your {role_count} roles.']
         if profile.boosts_since is not None:
             text.append('Also rip your boost :c')
         text.append(f'The guild is down to {guild.user_count} members!')
@@ -644,26 +649,26 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages,120.)
 
     @classmethod
-    async def role_edit(self,client,role, old):
-        Task(self.old_events['role_edit'](client,role, old), KOKORO)
+    async def role_edit(self, client, role, old):
+        Task(self.old_events['role_edit'](client, role, old), KOKORO)
         if self.channel is None:
             return
         
-        result=[f'A role got edited at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}']
+        result = [f'A role got edited at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}']
         for key, value in old.items():
             if key in ('name', 'separated', 'managed', 'mentionable', 'position',):
                 result.append(f'{key} : {value} -> {getattr(role, key)}')
                 continue
-            if key=='color':
+            if key == 'color':
                 result.append(f'{key} : {value.as_html} -> {role.color.as_html}')
                 continue
-            if key=='permissions':
+            if key == 'permissions':
                 result.append('permissions :')
-                other=role.permissions
+                other = role.permissions
                 for name,index in Permission.__keys__.items():
-                    old_value=(value>>index)&1
-                    new_value=(other>>index)&1
-                    if old_value!=new_value:
+                    old_value = (value>>index)&1
+                    new_value = (other>>index)&1
+                    if old_value != new_value:
                         result.append(f'{name} : {bool(old_value)} -> {bool(new_value)}')
                 continue
         
@@ -712,7 +717,7 @@ class dispatch_tester:
                     result.append(f'channel : {value.name} {value.id} -> {other.name} {other.id}')
                     continue
                 result.append(f'{key} : {value} -> {getattr(state, key)}')
-
+        
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages,120.)
             
@@ -722,7 +727,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=['Typing:']
+        result = ['Typing:']
         if user.partial:
             result.append(f'user : Parital user {user.id}')
         else:
@@ -766,9 +771,49 @@ class dispatch_tester:
         text.insert(0, f'Invite deleted:')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages,120.)
+    
+    @classmethod
+    async def integration_create(self, client, guild, integration):
+        Task(self.old_events['integration_create'](client, guild, integration), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = pretty_print(integration)
+        text.insert(0, f'integration_create at {guild.name} ({guild.id}):')
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        
+        await Pagination(client, self.channel, pages, 120.)
+    
+    @classmethod
+    async def integration_delete(self, client, guild, integration_id, application_id):
+        Task(self.old_events['integration_delete'](client, guild, integration_id, application_id), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'integration_delete at {guild.name} ({guild.id}):',
+            f'- integration_id : {integration_id}',
+            f'- application_id : {application_id}',
+                ]
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages,120.)
+    
+    @classmethod
+    async def integration_update(self, client, guild):
+        Task(self.old_events['integration_update'](client, guild), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'integration_update at {guild.name} ({guild.id}):',
+                ]
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages,120.)
 
 async def here_description(client, message):
-    prefix = client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     return Embed('here', (
         'I set the dispatch tester commands\' output to this channel.\n'
         f'Usage: `{prefix}here`\n'
@@ -781,7 +826,7 @@ async def here_description(client, message):
             'Owner only!')
 
 async def switch_description(client, message):
-    prefix = client.command_processer.prefix(message)
+    prefix = client.command_processer.get_prefix_for(message)
     return Embed('here', (
         'I can turn on a dispatch tester for you.\n'
         f'`{prefix}switch *event_name*`\n'
@@ -817,6 +862,9 @@ async def switch_description(client, message):
         '- `user_presence_update`\n'
         '- `user_profile_edit`\n'
         '- `voice_state_update`\n'
+        '- `integration_create`\n'
+        '- `integration_delete`\n'
+        '- `integration_update`\n'
         '- `webhook_update`\n'
         f'For setting channel, use: `{prefix}here`'
             ), color=DISPTACH_COLOR).add_footer(

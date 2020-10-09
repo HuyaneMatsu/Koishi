@@ -118,7 +118,7 @@ class oauth2_feed:
 @OAUTH2_COMMANDS.from_class
 class oauth2_user:
     async def command(client,message,content):
-        user=_oauth2_query(message,content)
+        user = _oauth2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
             return
@@ -170,9 +170,9 @@ class oauth2_connections:
 @OAUTH2_COMMANDS.from_class
 class oauth2_guilds:
     async def command(client,message,content):
-        user=_oauth2_query(message,content)
+        user = _oauth2_query(message,content)
         if user is None:
-            await client.message_create(message.channel,'Could not find that user')
+            await client.message_create(message.channel, 'Could not find that user')
             return
         
         guilds = await client.user_guilds(user.access)
@@ -181,7 +181,7 @@ class oauth2_guilds:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('oauth2_guilds',(
+        return Embed('oauth2_guilds', (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'By using this command, I ll show your guilds. '
             '*And everything, what I know about them.*\n'

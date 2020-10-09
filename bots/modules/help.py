@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from hata import CLIENTS, USERS, GUILDS, CHANNELS, Embed, eventlist, Client
+from hata import CLIENTS, USERS, GUILDS, CHANNELS, Embed, eventlist, Client, __version__
 from hata.ext.commands import Command, checks, Converter, ConverterFlag, Closer
 from bots.koishi import KOISHI_HELP_COLOR, DUNGEON_INVITE, DUNGEON, WORSHIPPER_ROLE, EVERYNYAN_ROLE, \
     ANNOUNCEMNETS_ROLE, WELCOME_CHANNEL
 
-from bot_utils.shared import KOISHI_GIT, HATA_GIT
+from bot_utils.shared import KOISHI_GIT, HATA_GIT, DUNGEON_INVITE, DUNGEON
 
 HELP_COMMANDS = eventlist(type_=Command)
 
@@ -20,36 +20,29 @@ def teardown(lib):
 class about:
     async def command(client, message):
         implement = sys.implementation
-        embed = Embed('About',(
-            f'Me, {client.full_name}, I am general purpose/test client.'
-            '\n'
-            'My code base is'
-            f' [open source]({KOISHI_GIT}). '
-            'One of the main goal of my existence is to test the best *cough*'
-            f' [discord API wrapper]({HATA_GIT}). '
-            '\n\n'
-            f'My Masutaa is {client.owner.full_name} (send neko pictures pls).\n\n'
-            '**Client info**\n'
-            f'Python version: {implement.version[0]}.{implement.version[1]}'
-            f'{"" if implement.version[3]=="final" else " "+implement.version[3]}\n'
-            f'Interpreter: {implement.name}\n'
-            f'Clients: {len(CLIENTS)}\n'
-            f'Users: {len(USERS)}\n'
-            f'Guilds: {len(GUILDS)}\n'
-            f'Channels: {len(CHANNELS)}\n'
-            'Power level: over 9000!\n'
-                )).add_thumbnail(client.application.icon_url_as(size=128))
+        embed = Embed('About', f'Hello, I am {client.full_name} as you expected. What did you think, who am I?',
+                color=KOISHI_HELP_COLOR) \
+            .add_field('Library', f'[hata {__version__}]({HATA_GIT})', inline=True) \
+            .add_field('Interpreter', (
+                f'Python{implement.version[0]}.{implement.version[1]}'
+                f'{"" if implement.version[3]=="final" else " "+implement.version[3]} {implement.name}'
+                    ), inline=True) \
+            .add_field('Support server', f'[{DUNGEON.name}]({DUNGEON_INVITE.url})', inline=True) \
+            .add_field('Clients', repr(len(CLIENTS)), inline=True) \
+            .add_field('Guilds', repr(len(GUILDS)), inline=True) \
+            .add_field('Users', repr(len(USERS)), inline=True) \
+            .add_thumbnail(client.application.icon_url_as(size=128))
         
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
     
     category = 'HELP'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('about',(
+        return Embed('about', (
             'Just some information about me.'
             f'Usage: `{prefix}about`'
-                ),color=KOISHI_HELP_COLOR)
+                ), color=KOISHI_HELP_COLOR)
 
 @HELP_COMMANDS.from_class
 class invite:

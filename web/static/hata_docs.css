@@ -431,7 +431,7 @@ pre {
     fill: rgb(255 255 255);
         }
 
-.content_table .content-listing a:hover {
+.content_table .content_listing a:hover {
     text-decoration: underline;
         }
 
@@ -445,7 +445,10 @@ pre {
     background-color: rgb(38 42 42);
     border-radius: 8px;
     height: 24px;
-    margin: 3px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-bottom: 3px;
+    margin-top: 5px;
         }
 
 .content_table .content_search input {
@@ -523,9 +526,9 @@ pre {
         display: flow-root;
         width: 299px;
         overflow: overlay;
-        max-height: calc(100vh - 78px);
+        max-height: calc(100vh - 80px);
         overflow: overlay;
-        height: calc(100vh - 78px);
+        height: calc(100vh - 80px);
         position: absolute;
             }
 

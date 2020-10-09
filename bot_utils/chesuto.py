@@ -82,18 +82,18 @@ class Rarity(object):
     __slots__=('index', 'name', 'special', 'outlook')
     
     def __init__(self,index,name,special):
-        self.index=index
-        self.name=name
-        self.special=special
+        self.index = index
+        self.name = name
+        self.special = special
         
         if special:
-            outlook=f'[{name.upper()}]'
+            outlook = f'[{name.upper()}]'
         else:
-            outlook=f'({name})'
+            outlook = f'({name})'
         
-        self.outlook=outlook
-        self.INSTANCES[index]=self
-        self.BY_NAME[name.lower()]=self
+        self.outlook = outlook
+        self.INSTANCES[index] = self
+        self.BY_NAME[name.lower()] = self
     
     def __str__(self):
         return self.name

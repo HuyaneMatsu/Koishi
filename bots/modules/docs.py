@@ -378,11 +378,10 @@ async def docs(client, message, search_for:str=None):
         await Pagination(client, message.channel, embeds)
         return
     
-    
     results = []
     
     for path in paths:
-        name = path.replace('_', '\_')
+        name = str(path).replace('_', '\_')
         results.append((name, path))
     
     embed = Embed(title=f'Search results for `{search_for}`', color=WIKI_COLOR)
@@ -432,30 +431,18 @@ async def list_docs(client, message, search_for:str=None):
         await list_docs_help(client, message)
         return
     
-    search_for = search_for.split('.')
-    if len(search_for) == 1:
-        search_for = search_for[0]
-        searcher = QualPath.endswith
-    else:
-        searcher = QualPath.endswith_multy
+    paths = search_paths(search_for)
     
-    results = []
-    for obj in MAPPED_OBJECTS.values():
-        if not isinstance(obj, FolderedUnit):
-            continue
-        
-        path = obj.path
-        if not searcher(path, search_for):
-            continue
-        
-        path = str(path)
-        name = path.replace('_', '\_')
-        results.append((name, path))
-    
-    if not results:
+    if not paths:
         embeds = [Embed(f'No search result for: `{search_for}`', color=WIKI_COLOR)]
         await Pagination(client, message.channel, embeds)
         return
+    
+    results = []
+    
+    for path in paths:
+        name = str(path).replace('_', '\_')
+        results.append((name, path))
     
     embed = Embed(title=f'Search results for `{search_for}`', color=WIKI_COLOR)
     await ChooseMenu(client, message.channel, results, list_docs_selecter, embed=embed, prefix='@')

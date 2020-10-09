@@ -706,6 +706,8 @@ async def test_channel_pretty_render(client, message):
     await Pagination(client, message.channel, pages,)
 
 # DiscordException Forbidden (403), code=20001: Bots cannot use this endpoint
+# 2020 10 09:
+# DiscordException Not Found (404): 404: Not Found
 @TEST_COMMANDS(checks=[checks.guild_only()])
 async def test_start_channel_thread(client, message):
     """
@@ -813,7 +815,7 @@ async def test_regions(client, message):
     else:
         embeds = [Embed(description=(
             f'Voice region : {region.name!r}\n'
-            f'id : {region.id!r}\n'
+            f'id : {region.value!r}\n'
             f'vip : {region.vip!r}\n'
             f'deprecated : {region.deprecated!r}\n'
             f'custom : {region.custom!r}'

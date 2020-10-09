@@ -29,7 +29,7 @@ RATELIMIT_RESET = Discord_hdrs.RATELIMIT_RESET
 RATELIMIT_RESET_AFTER = Discord_hdrs.RATELIMIT_RESET_AFTER
 RATELIMIT_PRECISION = Discord_hdrs.RATELIMIT_PRECISION
 
-RATELIMIT_COMMANDS=eventlist(type_=Command, category='RATELIMIT TESTS')
+RATELIMIT_COMMANDS = eventlist(type_=Command, category='RATELIMIT TESTS')
 
 def setup(lib):
     main_client.command_processer.create_category('RATELIMIT TESTS', checks=[checks.owner_only()])
@@ -701,7 +701,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
     data = {
         'name'                          : name,
         'icon'                          : None if icon is None else image_to_base64(avatar),
-        'region'                        : region.id,
+        'region'                        : region.value,
         'verification_level'            : verification_level.value,
         'default_message_notifications' : message_notification_level.value,
         'explicit_content_filter'       : content_filter_level.value,
@@ -715,19 +715,19 @@ async def guild_create(client,name,icon=None,avatar=b'',
     #we can create only partial, because the guild data is not completed usually
     return PartialGuild(data)
 
-async def guild_get(client,guild_id,):
+async def guild_get(client, guild_id,):
     return await bypass_request(client,METH_GET,
         f'https://discordapp.com/api/v7/guilds/{guild_id}',
         )
 
-async def guild_delete(client,guild,):
+async def guild_delete(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/guilds/{guild_id}',
         )
 
 async def guild_edit(client,guild, afk_channel=_spaceholder): #keep it short
-    data={}
+    data = {}
     
     if (afk_channel is not _spaceholder):
         data['afk_channel'] = None if afk_channel is None else afk_channel.id
@@ -3405,7 +3405,7 @@ async def ratelimit_test0079(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'ratelimit_test0079') as RLT:
-        guild = message.guild
+        guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
@@ -3420,4 +3420,16 @@ async def ratelimit_test0080(client, message):
     with RLTCTX(client, channel, 'ratelimit_test0080') as RLT:
         await voice_regions(client)
 
-
+@RATELIMIT_COMMANDS
+async def ratelimit_test0081(client, message):
+    """
+    Requests integrations.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0080') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await integration_get_all(client, guild)
+    
