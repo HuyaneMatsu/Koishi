@@ -127,12 +127,14 @@ async def request_sync(client, days_allowed):
 
 async def receive_sync(client, partner):
     async with SYNC_LOCK:
+        # some delay is needed or Koishi might answer too fast.
+        await sleep(0.4, KOKORO)
         await client.message_create(SYNC_CHANNEL, REQUEST_APPROVED)
         
         while True:
             try:
                 message = await wait_for_message(client, SYNC_CHANNEL, check_any(partner), 60.)
-            except TimoutError:
+            except TimeoutError:
                 sys.stderr.write('Sync request failed, timeout\.n')
                 return
             

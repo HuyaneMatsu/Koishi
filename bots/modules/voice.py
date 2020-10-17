@@ -2,31 +2,51 @@
 import re, os
 
 from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, \
-    Permission, KOKORO, ChannelBase, ChannelVoice, AsyncIO
+    Permission, KOKORO, ChannelBase, ChannelVoice, AsyncIO, chunkify
 from hata.ext.commands import Command, checks, Pagination
 
-from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE
+from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
-from bot_utils.shared import DUNGEON
-from bots.flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
+from bot_utils.shared import DUNGEON, WrapMultyple
 
-KOISHI_VOICE_COLOR = Color.from_rgb(235, 52, 207)
+if not MARISA_MODE:
+    from bots.flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
 
-VOICE_COLORS = {
-    Flan : FLAN_HELP_COLOR,
-    Koishi : KOISHI_VOICE_COLOR
-        }
+VOICE_COLORS = {}
+
+if MARISA_MODE:
+    VOICE_COMMANDS_MARISA = eventlist(category='VOICE', checks=[checks.guild_only()])
+    WRAPPER = WrapMultyple(VOICE_COMMANDS_MARISA)
+    VOICE_COMMANDS_MAIN = VOICE_COMMANDS_MARISA
+    VOICE_COMMANDS_CHESUTO = WrapMultyple()
     
-VOICE_COMMANDS_KOISHI = eventlist(category='VOICE', checks=[checks.guild_only()])
-VOICE_COMMANDS_FLAN = eventlist(checks=[checks.guild_only()])
+    MAIN_VOICE_COLOR = Color.from_rgb(121, 231, 78)
+    VOICE_COLORS[Marisa] = MAIN_VOICE_COLOR
+else:
+    VOICE_COMMANDS_KOISHI = eventlist(category='VOICE', checks=[checks.guild_only()])
+    VOICE_COMMANDS_FLAN = eventlist(checks=[checks.guild_only()])
+    WRAPPER = WrapMultyple(VOICE_COMMANDS_KOISHI, VOICE_COMMANDS_FLAN)
+    VOICE_COMMANDS_MAIN = VOICE_COMMANDS_KOISHI
+    VOICE_COMMANDS_CHESUTO = VOICE_COMMANDS_FLAN
+    
+    MAIN_VOICE_COLOR = Color.from_rgb(235, 52, 207)
+    VOICE_COLORS[Flan] = FLAN_HELP_COLOR
+    VOICE_COLORS[Koishi] = MAIN_VOICE_COLOR
+
 
 def setup(lib):
-    Flan.commands.extend(VOICE_COMMANDS_FLAN)
-    Koishi.commands.extend(VOICE_COMMANDS_KOISHI)
+    if MARISA_MODE:
+        Marisa.commands.extend(VOICE_COMMANDS_MARISA)
+    else:
+        Flan.commands.extend(VOICE_COMMANDS_FLAN)
+        Koishi.commands.extend(VOICE_COMMANDS_KOISHI)
 
 def teardown(lib):
-    Flan.commands.unextend(VOICE_COMMANDS_FLAN)
-    Koishi.commands.unextend(VOICE_COMMANDS_KOISHI)
+    if MARISA_MODE:
+        Marisa.commands.unextend(VOICE_COMMANDS_MARISA)
+    else:
+        Flan.commands.unextend(VOICE_COMMANDS_FLAN)
+        Koishi.commands.unextend(VOICE_COMMANDS_KOISHI)
 
 
 if AUDIO_PATH is not None:
@@ -40,7 +60,6 @@ if AUDIO_PATH is not None:
 
 PERCENT_RP = re.compile('(\d*)[%]?')
 
-
 async def join_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
     return Embed('join', (
@@ -49,15 +68,14 @@ async def join_description(client, message):
         'You can also tell me how loud I should sing for you.'
         ), color=VOICE_COLORS.get(client))
     
-@VOICE_COMMANDS_FLAN(description=join_description)
-@VOICE_COMMANDS_KOISHI(description=join_description)
+@WRAPPER(description=join_description)
 async def join(client, message, content):
     channel = message.channel
     guild = channel.guild
     while True:
-        state=guild.voice_states.get(message.author.id, None)
+        state = guild.voice_states.get(message.author.id, None)
         if state is None:
-            text='You are not at a voice channel!'
+            text = 'You are not at a voice channel!'
             break
         
         channel = state.channel
@@ -97,8 +115,7 @@ async def pause_description(client, message):
         f'Usage: `{prefix}pause`\n'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=pause_description)
-@VOICE_COMMANDS_KOISHI(description=pause_description)
+@WRAPPER(description=pause_description)
 async def pause(client, message):
     voice_client=client.voice_client_for(message)
     if voice_client is None:
@@ -117,8 +134,7 @@ async def resume_description(client, message):
         f'Usage: `{prefix}resume`\n'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=resume_description)
-@VOICE_COMMANDS_KOISHI(description=resume_description)
+@WRAPPER(description=resume_description)
 async def resume(client, message):
     while True:
         voice_client = client.voice_client_for(message)
@@ -145,8 +161,7 @@ async def leave_description(client, message):
         f'Usage: `{prefix}leave`'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=leave_description)
-@VOICE_COMMANDS_KOISHI(description=leave_description)
+@WRAPPER(description=leave_description)
 async def leave(client, message):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
@@ -159,16 +174,16 @@ async def leave(client, message):
 
 
 if AUDIO_PLAY_POSSIBLE:
-    async def koishi_play_description(client, message):
+    async def yt_play_description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('play',(
             'Do you want me to search me some audio to listen to?.\n'
             f'Usage: `{prefix}play <name>`\n'
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
-            ), color=KOISHI_VOICE_COLOR)
+            ), color=MAIN_VOICE_COLOR)
     
-    @VOICE_COMMANDS_KOISHI(description=koishi_play_description, name='play', checks=[checks.is_guild(DUNGEON)])
-    async def koishi_play(client, message, content):
+    @VOICE_COMMANDS_MAIN(description=yt_play_description, name='play', checks=[checks.is_guild(DUNGEON)])
+    async def yt_play(client, message, content):
         while True:
             if YTAudio is None:
                 text = 'This option in unavailable :c'
@@ -215,9 +230,9 @@ if (AUDIO_PATH is not None and AUDIO_PLAY_POSSIBLE):
             'Plays a local audio from my collection.\n'
             f'Usage: `{prefix}local <name>`\n'
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
-            ), color=KOISHI_VOICE_COLOR)
+            ), color=MAIN_VOICE_COLOR)
     
-    @VOICE_COMMANDS_KOISHI(name='local', description=local_description, checks=[checks.is_guild(DUNGEON)])
+    @VOICE_COMMANDS_MAIN(name='local', description=local_description, checks=[checks.is_guild(DUNGEON)])
     async def local_(client, message, content):
         while True:
             voice_client=client.voice_client_for(message)
@@ -344,8 +359,7 @@ async def volume_description(client, message):
         'If no volume is passed, then I will tell my current volume.'
         ), color=VOICE_COLORS.get(client))
     
-@VOICE_COMMANDS_FLAN(description=volume_description)
-@VOICE_COMMANDS_KOISHI(description=volume_description)
+@WRAPPER(description=volume_description)
 async def volume(client, message, content):
     while True:
         voice_client = client.voice_client_for(message)
@@ -383,8 +397,7 @@ async def skip_description(client, message):
         'If not giving any index or giving it as `0`, will skip the currently playing audio.'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=skip_description)
-@VOICE_COMMANDS_KOISHI(description=skip_description)
+@WRAPPER(description=skip_description)
 async def skip(client, message, index:int=0):
     while True:
         voice_client = client.voice_client_for(message)
@@ -409,8 +422,7 @@ async def stop_description(client, message):
         f'Usage: `{prefix}stop`'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=stop_description)
-@VOICE_COMMANDS_KOISHI(description=stop_description)
+@WRAPPER(description=stop_description)
 async def stop(client, message):
     while True:
         voice_client=client.voice_client_for(message)
@@ -436,8 +448,7 @@ async def move_description(client, message):
         f'Usage: `{prefix}move <channel>`'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=move_description)
-@VOICE_COMMANDS_KOISHI(description=move_description)
+@WRAPPER(description=move_description)
 async def move(client, message, channel:ChannelVoice = None):
     while True:
         if channel is None:
@@ -474,10 +485,10 @@ async def party_is_over_description(client,message):
     return Embed('party-is-over',(
         'Should I mark the talking party as done?\n'
         f'Usage: `{prefix}party-is-over`'
-        ), color=KOISHI_VOICE_COLOR).add_footer(
+        ), color=MAIN_VOICE_COLOR).add_footer(
             'Administartor only!')
 
-@VOICE_COMMANDS_KOISHI(description=party_is_over_description, checks=[
+@VOICE_COMMANDS_MAIN(description=party_is_over_description, checks=[
     checks.has_guild_permissions(Permission().update_by_keys(administrator=True)),
     checks.client_has_guild_permissions(Permission().update_by_keys(move_users=True))
         ], aliases=['partyisover'])
@@ -523,15 +534,14 @@ async def queue_description(client, message):
         f'Usage: `{prefix}queue`'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=queue_description)
-@VOICE_COMMANDS_KOISHI(description=queue_description)
+@WRAPPER(description=queue_description)
 async def queue(client, message):
     guild = message.guild
     if guild is None:
         return
     
     voice_client = client.voice_client_for(message)
-    color =VOICE_COLORS.get(client)
+    color = VOICE_COLORS.get(client)
     
     title = f'Playing queue for {guild}'
     page = Embed(title, color=color)
@@ -551,7 +561,7 @@ async def queue(client, message):
             index = 0
             while True:
                 source = queue[index]
-                index +=1
+                index += 1
                 page.add_field(f'Track {index}.:', source.title)
                 
                 if index == limit:
@@ -576,8 +586,7 @@ async def loop_description(client, message):
         f'Usage: `{prefix}loop`\n'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=loop_description)
-@VOICE_COMMANDS_KOISHI(description=loop_description)
+@WRAPPER(description=loop_description)
 async def loop(client, message):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
@@ -597,8 +606,7 @@ async def loop_stop_description(client, message):
         f'Usage: `{prefix}loop-stop`\n'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=loop_stop_description)
-@VOICE_COMMANDS_KOISHI(description=loop_stop_description)
+@WRAPPER(description=loop_stop_description)
 async def loop_stop(client, message):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
@@ -618,8 +626,7 @@ async def loop_all_description(client, message):
         f'Usage: `{prefix}loop-all`\n'
         ), color=VOICE_COLORS.get(client))
 
-@VOICE_COMMANDS_FLAN(description=loop_all_description)
-@VOICE_COMMANDS_KOISHI(description=loop_all_description)
+@WRAPPER(description=loop_all_description)
 async def loop_all(client, message):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
@@ -631,7 +638,7 @@ async def loop_all(client, message):
     await client.message_create(message.channel, text)
 
 if AUDIO_PLAY_POSSIBLE:
-    async def flan_play_description(client, message):
+    async def chesuto_play_description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('play', (
             'Plays the given chesuto bgm.\n'
@@ -640,10 +647,10 @@ if AUDIO_PLAY_POSSIBLE:
             'Note that the given name can be also given as the position of the track.'
             ), color=FLAN_HELP_COLOR)
     
-    @VOICE_COMMANDS_FLAN(description=flan_play_description, name='play')
-    async def flan_play(client, message, content):
+    @VOICE_COMMANDS_CHESUTO(description=chesuto_play_description, name='play')
+    async def chesuto_play(client, message, content):
         if not content:
-            await flan_play_description(client, message)
+            await chesuto_play_description(client, message)
             return
         
         # GOTO
@@ -679,5 +686,45 @@ if AUDIO_PLAY_POSSIBLE:
         await client.message_create(message.channel, text)
 
 
+async def voice_state(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('voice-state', (
+        'Gets the voice state of the respective voice client.\n'
+        f'Usage: `{prefix}voice-state`\n'
+        ), color=VOICE_COLORS.get(client)).add_footer('Owner only!')
+
+@WRAPPER(description=loop_all_description, checks=[checks.owner_only()])
+async def voice_state(client, message):
+    voice_client = client.voice_client_for(message)
+    lines = []
+    guild = message.guild
+    if voice_client is None:
+        title = f'No client in {guild.name}.'
+    else:
+        title = f'Client info for {guild.name}.'
+        
+        source = voice_client.source
+        queue = voice_client.queue
+        if (source is not None) or queue:
+            if (source is not None):
+                lines.append(f'Actual: {source.title}')
+            
+            for index, source in enumerate(queue, 1):
+                lines.append(f'Track {index}.: {source.title}')
+        
+        audio_streams = voice_client.get_audio_streams()
+        if audio_streams:
+            if lines:
+                lines.append('')
+            
+            lines.append('Receives')
+            
+            for index, (user, stream) in enumerate(audio_streams):
+                lines.append(f'Stream {index}.: {user.full_name}, {stream!r}')
+    
+    color = VOICE_COLORS.get(client)
+    pages = [Embed(title, chunk, color) for chunk in chunkify(lines)]
+    
+    await Pagination(client, message.channel, pages)
 
 

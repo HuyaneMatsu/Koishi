@@ -136,3 +136,30 @@ async def command_error(client, message, command, content, exception):
     
     await Pagination(client,message.channel,pages)
     return False
+
+class WrapMultyple(object):
+    __slots__ = ('elements')
+    def __init__(self, *elements):
+        self.elements = elements
+    
+    def __call__(self, func=None, **kwargs):
+        if func is not None:
+            return self.add(func, kwargs)
+        else:
+            return self._wrapper(self, kwargs)
+    
+    def add(self, func, kwargs):
+        result = None
+        for element in self.elements:
+            result = element(func, **kwargs)
+        
+        return result
+    
+    class _wrapper(object):
+        __slots__ = ('parent', 'kwargs')
+        def __init__(self, parent, kwargs):
+            self.parent = parent
+            self.kwargs = kwargs
+        
+        def __call__(self, func):
+            return self.parent.add(func, self.kwargs)

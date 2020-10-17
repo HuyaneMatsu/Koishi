@@ -14,8 +14,6 @@ from datetime import datetime
 from threading import enumerate as list_threads, _MainThread as MainThreadType
 
 from hata import eventlist, EventThread, KOKORO, ExecutorThread, chunkify, Embed, Color, elapsed_time, Future, sleep
-from hata.discord.player import AudioPlayer
-from hata.discord.reader import AudioReader
 from hata.ext.commands import Command, checks, Pagination
 
 from bot_utils.models import DB_ENGINE
@@ -107,30 +105,6 @@ class threads:
                 f'--------------------\n'
                 f'Total: {executor_thread_count}'
                     )
-        
-        
-        audio_player_thread_count = thread_count_by_type.pop(AudioPlayer, 0)
-        audio_reader_thread_count = thread_count_by_type.pop(AudioReader, 0)
-        
-        if audio_player_thread_count or audio_reader_thread_count:
-            if add_space:
-                description.append('\n\n')
-            else:
-                add_space = True
-            
-            description.append('**Voice threads**:\n')
-            if audio_player_thread_count:
-                description.append('Audio players: ')
-                description.append(repr(audio_player_thread_count))
-                description.append('\n')
-            
-            if audio_reader_thread_count:
-                description.append('Audio readers: ')
-                description.append(repr(audio_reader_thread_count))
-                description.append('\n')
-            
-            description.append('--------------------\nTotal: ')
-            description.append(repr(audio_player_thread_count+audio_reader_thread_count))
         
         if thread_count_by_type:
             if add_space:

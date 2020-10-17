@@ -69,10 +69,16 @@ for path in os.listdir(os.path.join(KOISHI_PATH, 'bots', 'modules')):
     MODULE_NAMES.add(path[:-3])
 
 if MARISA_MODE:
+    MARISA_ALLOWED_MODULES = set()
+    
     if config.ALLOW_MARISA_SNEKBOX:
-        for path in list(MODULE_NAMES):
-            if path != 'snekbox':
-                MODULE_NAMES.remove(path)
+        MARISA_ALLOWED_MODULES.add('snekbox')
+    
+    MARISA_ALLOWED_MODULES.add('voice')
+    
+    for path in list(MODULE_NAMES):
+        if path not in MARISA_ALLOWED_MODULES:
+            MODULE_NAMES.remove(path)
     
 else:
     if not config.ALLOW_KOISHI_SNEKBOX:

@@ -431,7 +431,7 @@ class heartevent(object):
             raise
         
         try:
-            event = await wait_for_reaction(client, to_check, heartevent_start_checker(client),1800.)
+            event = await wait_for_reaction(client, to_check, heartevent_start_checker(client), 1800.)
         except TimeoutError:
             return
         finally:
