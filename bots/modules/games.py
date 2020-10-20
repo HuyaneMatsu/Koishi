@@ -331,10 +331,13 @@ class paranoia:
 @GAMES_COMMANDS.from_class
 class command_random:
     async def command(client, message, v1 :int, v2:int=0):
-        if v2 > v1:
-            v1, v2 = v2, v1
-        
-        result = randint(v1, v2)
+        if v1 == v2:
+            result = v1
+        else:
+            if v2 < v1:
+                v1, v2 = v2, v1
+            
+            result = randint(v1, v2)
         await client.message_create(message.channel, str(result))
     
     name = 'random'

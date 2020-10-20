@@ -26,7 +26,7 @@ class InterpreterPrinter(object):
     def writelines(self,lines):
         with self.lock:
             self.buffer.extend(lines)
-
+    
     def __bool__(self):
         with self.lock:
             if self.buffer:
@@ -44,13 +44,13 @@ class InterpreterPrinter(object):
         kwargs['file'] = self
         print(*args, **kwargs)
 
-    def get_value(self,wrap_start='```', wrap_end='```', limit=2000, ignore=50):
+    def get_value(self, wrap_start='```', wrap_end='```', limit=2000, ignore=50):
         limit = limit-len(wrap_start)-len(wrap_end)-2 # allocate 2 more for linebreaks
-        if limit<=ignore:
+        if limit <= ignore:
             raise ValueError('wrap start and wrap end are longer than the limit-ignore itself')
         
-        result=[wrap_start,'\n']
-        buffer=self.buffer
+        result = [wrap_start, '\n']
+        buffer = self.buffer
         
         with self.lock:
             while buffer:
@@ -176,66 +176,44 @@ PYTHON_RP=re.compile('(?:python|py|)[ \t]*',re.I)
 ENDER_1_RP=re.compile('[^\\\]`')
 ENDER_3_RP=re.compile('[^\\\]```')
 
-def parse_code_content(content1, content2, no_code_output=None):
-    #if second line is set we ignore the 1st
-    line_break_index=content2.find('\n')
-    if line_break_index==-1:
-        if content1:
-            starter,center,ender=BLOCK_START.fullmatch(content1).groups()
-            if starter:
-                if ender:
-                    if starter!=ender:
-                        return 'inlined 1 code line starter should be same long as it\'s ender.',True
-                    else:
-                        lines=[center]
-                else:
-                    return 'Inlined 1 code line, but has no ender.',True
+def parse_code_content(content, no_code_output=None):
+    lines = content.splitlines()
+    line = lines[0]
+    starter, center, ender=BLOCK_START.fullmatch(line).groups()
+    if starter:
+        if ender:
+            if starter != ender:
+                return '1 code line starter should be same long as it\'s ender.', True
             else:
-                if ender:
-                    return 'Inlined 1 code line with ender, but it has no starter.',True
-                else:
-                    lines=[center]
+                lines = [center]
         else:
-            return no_code_output,True
-    else:
-        lines=content2.splitlines()
-        del lines[0]
-        line=lines[0]
-        starter,center,ender=BLOCK_START.fullmatch(line).groups()
-        if starter:
-            if ender:
-                if starter!=ender:
-                    return '1 code line starter should be same long as it\'s ender.',True
-                else:
-                    lines=[center]
+            lang_match = PYTHON_RP.fullmatch(center)
+            if lang_match is None:
+                return 'Invalid langauge', True
             else:
-                lang_match=PYTHON_RP.fullmatch(center)
-                if lang_match is None:
-                    return 'Invalid langauge',True
-                else:
-                    del lines[0]
-                    if len(starter)==1:
-                        pattern=ENDER_1_RP
-                    else: #3
-                        pattern=ENDER_3_RP
-                    index=0
-                    ln=len(lines)
-                    while index<ln:
-                        line=lines[index]
-                        if line.startswith(starter):
-                            del lines[index:]
-                            break
-                        matched=pattern.search(line)
-                        if matched is None:
-                            index=index+1
-                            continue
-                        line=line[:matched.start()+1]
-                        lines[index]=line
-                        index+=1
+                del lines[0]
+                if len(starter)==1:
+                    pattern=ENDER_1_RP
+                else: #3
+                    pattern=ENDER_3_RP
+                index=0
+                ln=len(lines)
+                while index<ln:
+                    line=lines[index]
+                    if line.startswith(starter):
                         del lines[index:]
                         break
-                    else:
-                        return 'Code block was never ended.',True
+                    matched=pattern.search(line)
+                    if matched is None:
+                        index=index+1
+                        continue
+                    line=line[:matched.start()+1]
+                    lines[index]=line
+                    index+=1
+                    del lines[index:]
+                    break
+                else:
+                    return 'Code block was never ended.', True
                     
     index=len(lines)
     while index:
@@ -279,7 +257,7 @@ class Interpreter(object):
         self.inputter.set(client,message.channel)
         
         async with self.lock:
-            result, is_exception = parse_code_content(content, message.content, 'No code to execute.')
+            result, is_exception = parse_code_content(content, 'No code to execute.')
             if is_exception:
                 await client.message_create(message.channel, embed=Embed('Parsing error',result))
                 return
@@ -287,7 +265,7 @@ class Interpreter(object):
             printer=self.printer
             
             try:
-                code_object=compile(result,'online_interpreter','exec')
+                code_object = compile(result, 'online_interpreter', 'exec')
             except SyntaxError as err:
                 printer.write(f'{err.__class__.__name__} at line {err.lineno}: {err.msg}\n{result[err.lineno-1]}\n{" "*(err.offset-1)}^')
             else:

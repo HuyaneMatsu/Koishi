@@ -21,10 +21,7 @@ async def execute_description(client, message):
     return Embed('execute', (
         'Use an interpreter trough me :3\n'
         'Usages:\n'
-        f'{prefix}execute #code here\n'
-        '*not code*\n'
-        '\n'
-        f'{prefix}execute\n'
+        f'{prefix}execute # code goes here\n'
         '# code goes here\n'
         '# code goes here\n'
         '\n'
