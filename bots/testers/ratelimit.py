@@ -84,32 +84,32 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
             continue
         
         with RLTPrinterBuffer() as buffer:
-            reponse_headers=response.headers
+            response_headers=response.headers
             status=response.status
-            if reponse_headers['content-type']=='application/json':
+            if response_headers['content-type']=='application/json':
                 response_data=from_json(response_data)
             
-            value=reponse_headers.get('X-Ratelimit-Global',None)
+            value=response_headers.get('X-Ratelimit-Global',None)
             if value is not None:
                 buffer.write(f'global : {value}\n')
-            value=reponse_headers.get('X-Ratelimit-Limit',None)
+            value=response_headers.get('X-Ratelimit-Limit',None)
             if value is not None:
                 buffer.write(f'limit : {value}\n')
-            value=reponse_headers.get('X-Ratelimit-Remaining',None)
+            value=response_headers.get('X-Ratelimit-Remaining',None)
             if value is not None:
                 buffer.write(f'remaining : {value}\n')
                 
-            value=reponse_headers.get('X-Ratelimit-Reset',None)
+            value=response_headers.get('X-Ratelimit-Reset',None)
             if value is not None:
-                delay=parse_header_ratelimit(reponse_headers)
+                delay=parse_header_ratelimit(response_headers)
                 buffer.write(f'reset : {value}, after {delay} seconds\n')
-            value=reponse_headers.get('X-Ratelimit-Reset-After',None)
+            value=response_headers.get('X-Ratelimit-Reset-After',None)
             if value is not None:
                 buffer.write(f'reset after : {value}\n')
     
             
             if 199<status<305:
-                if reponse_headers.get('X-Ratelimit-Remaining','1')=='0':
+                if response_headers.get('X-Ratelimit-Remaining','1')=='0':
                     buffer.write(f'reached 0\n try again after {delay}\n',)
                 return response_data
             

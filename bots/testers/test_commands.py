@@ -1,10 +1,11 @@
 import json
 from time import perf_counter
 from random import random
+from datetime import datetime
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     titledstr, multidict_titled, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
-    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase
+    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
@@ -808,7 +809,7 @@ async def test_regions(client, message):
     old_ones = set(VoiceRegion.INSTANCES.values())
     await client.voice_regions()
     new_ones = set(VoiceRegion.INSTANCES.values())
-    print(new_ones)
+    
     difference = new_ones - old_ones
     if not difference:
         embeds = [Embed(description='*There are no new voice regions added*')]
@@ -1010,3 +1011,71 @@ async def print_2_(client, message, content):
     if content:
         await client.message_create(message.channel, content)
 
+@TEST_COMMANDS
+async def estimate_fast_delete_before_2020_02_00(client, message):
+    target_channel = message.channel
+    
+    from config import KOISHI_ID, SATORI_ID, MARISA_ID
+    
+    COUNTER = 0
+    OWNED = 0
+    
+    before = time_to_id(datetime(2020, 2, 1))
+    
+    while True:
+        messages = await client.message_logs(target_channel, before=before)
+        if not messages:
+            break
+        
+        for message in messages:
+            user = message.author
+            if user.id in (KOISHI_ID, SATORI_ID, MARISA_ID):
+                OWNED += 1
+            else:
+                COUNTER += 1
+            
+        before = messages[-1].id
+    
+    PARARELLISM = 3
+    RESET = 120
+    LIMIT = 30
+    DELAY = 0.1
+    
+    times, remainder = divmod(COUNTER, PARARELLISM*LIMIT)
+    
+    DURATION = DELAY + times*(RESET+DELAY)
+    
+    if remainder:
+        DURATION += DELAY + DELAY*remainder/PARARELLISM
+    else:
+        DURATION -= RESET
+        DURATION += LIMIT*DELAY/PARARELLISM
+    
+    await client.message_create(target_channel, f'Total messages: {COUNTER+OWNED}.\nEstimated duration {DURATION:.2f}')
+
+@TEST_COMMANDS
+async def do_delete(client, message):
+    """
+    from config import KOISHI_ID, SATORI_ID, KOISHI_TOKEN, SATORI_TOKEN
+    Koishi = Client(KOISHI_TOKEN, client_id=KOISHI_ID)
+    await Koishi.start()
+    Satori = Client(SATORI_TOKEN, client_id=SATORI_ID)
+    await Satori.start()
+    await sleep(5., )
+    """
+    start = perf_counter()
+    await client.multi_client_message_delete_sequence(message.channel, before=datetime(2020, 2, 1))
+    end = perf_counter()
+    """
+    await Koishi.stop()
+    await Satori.stop()
+    await sleep(1., KOKORO)
+    Koishi._delete()
+    Satori._delete()
+    Koishi = None
+    Satori = None
+    
+    import gc
+    gc.collect()
+    """
+    await client.message_create(message.channel, repr(end-start))
