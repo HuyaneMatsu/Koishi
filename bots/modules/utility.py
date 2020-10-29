@@ -1053,6 +1053,25 @@ class get_id_as_time:
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('id-as-time', (
-            'converts the given Discord snowflake id to time.\n'
+            'Converts the given Discord snowflake id to time.\n'
             f'Usage: `{prefix}now-as-time *id*`'
+                ), color=UTILITY_COLOR)
+
+@Koishi.commands.from_class
+class get_id_as_time_since:
+    async def command(client, message, snowflake:int):
+        if snowflake < 0 or snowflake > ((1<<63)-1):
+            return
+        
+        await client.message_create(message.channel, elapsed_time(id_to_time(snowflake)))
+    
+    name = 'id-as-time-since'
+    aliases = ['idastimesince', 'idtotimesince', 'id-to-time-since']
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('id-as-time-since', (
+            'Returns how much time ealpsed, since the given Discord snowflake.\n'
+            f'Usage: `{prefix}now-as-time-since *id*`'
                 ), color=UTILITY_COLOR)

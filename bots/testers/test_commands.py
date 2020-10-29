@@ -4,7 +4,7 @@ from random import random
 from datetime import datetime
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
-    titledstr, multidict_titled, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
+    istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client
 
 from hata.discord.http import URLS
@@ -146,23 +146,6 @@ async def get_guild(client, message):
     
     data = await client.http.guild_get(guild.id)
     await Pagination(client, message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
-
-@TEST_COMMANDS
-async def test_new_discord_headers(client, message):
-    '''
-    Checks whether Discord ignores header casing.
-    '''
-    headers = multidict_titled()
-    headers[AUTHORIZATION] = f'Bot {client.token}' if client.is_bot else client.token
-    headers[CONTENT_TYPE]='application/json'
-    
-    precision = str.__new__(titledstr,Discord_hdrs.RATELIMIT_PRECISION.lower())
-    headers[precision]='millisecond'
-    
-    async with client.http.request('POST', f'{API_ENDPOINT}/channels/{message.channel.id}/messages',data='{"content":"testing"}', headers=headers) as response:
-        result = response.headers[Discord_hdrs.RATELIMIT_RESET_AFTER]
-    
-    await client.message_create(message.channel, f'If float, ignored: {result}')
 
 @TEST_COMMANDS
 async def test_webhook_response(client, message, user:User, use_user_avatar:int=1):

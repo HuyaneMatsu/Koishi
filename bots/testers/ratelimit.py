@@ -6,11 +6,11 @@ from time import time as time_now
 from email._parseaddr import _parsedate_tz
 from datetime import datetime, timedelta, timezone
 
-from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, multidict_titled, titledstr, Embed, \
+from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imultidict, istr, Embed, \
     alchemy_incendiary, Webhook, eventlist, EventThread, DiscordException, BUILTIN_EMOJIS, Message, ChannelText, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory
+    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji
 
 from hata.backend.dereaddons_local import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -79,7 +79,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                     response_data=''
         except OSError as err:
             #os cant handle more, need to wait for the blocking job to be done
-            await sleep(0.1,self.loop)
+            await sleep(0.1, self.loop)
             #invalid adress causes OSError too, but we will let it run 5 times, then raise a ConnectionError
             continue
         
@@ -124,11 +124,8 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                 continue
             
             raise DiscordException(response,response_data)
-
-    try:
-        raise DiscordException(response,response_data)
-    except UnboundLocalError:
-        raise ConnectionError('Invalid adress')
+    
+    return None
 
 class RLTCTX(object): #rate limit tester context manager
     active_ctx=None
@@ -449,7 +446,7 @@ async def message_delete_multiple(client,messages,):
     data={'messages':[message.id for message in messages]}
     channel_id=messages[0].channel.id
     return await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/bulk_delete',
+        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/bulk-delete',
         data,)
 
 async def message_edit(client,message,content=None,embed=None,):
@@ -501,7 +498,7 @@ async def download_attachment(client,attachment,):
         url=attachment.proxy_url
     else:
         url=attachment.url
-    return await bypass_request(client,METH_GET,url,headers=multidict_titled(),decode=False,
+    return await bypass_request(client,METH_GET,url,headers=imultidict(),decode=False,
         )
 
 
@@ -533,8 +530,8 @@ async def client_connections(client,):
 
 async def client_edit_nick(client,guild,nick,):
     guild_id=guild.id
-    return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/@me/nick',
+    return await bypass_request(client, METH_PATCH,
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/@me/nick',
         {'nick':nick},)
 
 async def client_gateway_bot(client,):
@@ -642,7 +639,7 @@ async def oauth2_token(client,):
         'scope'         : ' connections',
             }
     
-    headers = multidict_titled()
+    headers = imultidict()
     headers[AUTHORIZATION] = BasicAuth(str(client.id), client.secret).encode()
     headers[CONTENT_TYPE]='application/x-www-form-urlencoded'
                 
@@ -1160,7 +1157,7 @@ async def guild_emojis(client,guild,):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis',
         )
 
-async def emoji_create(client,guild,name,image,):
+async def emoji_create(client, guild, name, image,):
     image=image_to_base64(image)
     name=''.join(re.findall('([0-9A-Za-z_]+)',name))
     if not (1<len(name)<33):
@@ -1173,9 +1170,11 @@ async def emoji_create(client,guild,name,image,):
             }
         
     guild_id=guild.id
-    return await bypass_request(client,METH_POST,
+    data = await bypass_request(client,METH_POST,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis',
         data,)
+    
+    return Emoji(data, guild)
 
 async def emoji_get(client, emoji):
     guild = emoji.guild
@@ -1187,19 +1186,19 @@ async def emoji_get(client, emoji):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis/{emoji_id}',
         )
 
-async def emoji_delete(client,guild,emoji,):
-    guild_id=guild.id
-    emoji_id=emoji.id
-    return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis/{emoji_id}',
+async def emoji_delete(client, emoji,):
+    guild_id = emoji.guild.id
+    emoji_id = emoji.id
+    return await bypass_request(client, METH_DELETE,
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/emojis/{emoji_id}',
         )
 
-async def emoji_edit(client,guild,emoji,name,): #keep it short
-    data={'name':name}
-    guild_id=guild.id
-    emoji_id=emoji.id
-    return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis/{emoji_id}',
+async def emoji_edit(client,emoji,name,): #keep it short
+    data = {'name':name}
+    guild_id = emoji.guild.id
+    emoji_id = emoji.id
+    return await bypass_request(client, METH_PATCH,
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/emojis/{emoji_id}',
         data,)
 
 async def integration_get_all(client,guild,):
@@ -1214,8 +1213,9 @@ async def invite_get_guild(client,guild,):
         f'https://discordapp.com/api/v7/guilds/{guild_id}/invites',
         )
 
-async def guild_user_delete(client,guild,user_id,):
-    guild_id=guild.id
+async def guild_user_delete(client, guild, user,):
+    guild_id = guild.id
+    user_id = user.id
     return await bypass_request(client,METH_DELETE,
         f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}',
         )
@@ -1350,7 +1350,7 @@ async def invite_delete(client,invite,):
         )
 
 async def user_info(client,access,):
-    headers=multidict_titled()
+    headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me',
@@ -1372,14 +1372,14 @@ async def channel_private_create(client,user,):
         data={'recipient_id':user.id},)
 
 async def user_connections(client,access,):
-    headers=multidict_titled()
+    headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me/connections',
         headers=headers,)
 
 async def user_guilds(client,access,):
-    headers=multidict_titled()
+    headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
         'https://discordapp.com/api/v7/users/@me/guilds',
@@ -1598,7 +1598,7 @@ async def user_achievement_update(client,user,achievement,percent_complete,):
         data=data,)
 
 async def user_achievements(client,access,):
-    headers=multidict_titled()
+    headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     
     application_id=client.application.id
@@ -3426,10 +3426,138 @@ async def ratelimit_test0081(client, message):
     Requests integrations.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0080') as RLT:
+    with RLTCTX(client, channel, 'ratelimit_test0081') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
         await integration_get_all(client, guild)
     
+@RATELIMIT_COMMANDS
+async def ratelimit_test0082(client, message, name:str, emoji:'Emoji'):
+    """
+    Creates an emoji in 2 guilds and then delets it. Checks emoji deletion.
+    
+    Please also give a name for the emoji and an emoji as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0082') as RLT:
+        if len(client.guild_profiles) < 2:
+            await RLT.send('The client should be at least in 2 guilds.')
+        
+        for index, guild in enumerate(client.guild_profiles):
+            if index == 0:
+                guild1 = guild
+            else:
+                guild2 = guild
+        
+        emoji_data = await client.download_url(emoji.url)
+        emoji1 = await client.emoji_create(guild1, name, emoji_data)
+        emoji2 = await client.emoji_create(guild2, name, emoji_data)
+        
+        await emoji_delete(client, emoji1)
+        await emoji_delete(client, emoji2)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0083(client, message, name:str, emoji:'Emoji'):
+    """
+    Creates an emoji in 2 guilds and then deletes it. Checks emoji creation.
+    
+    Please also give a name for the emoji and an emoji as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0083') as RLT:
+        if len(client.guild_profiles) < 2:
+            await RLT.send('The client should be at least in 2 guilds.')
+        
+        for index, guild in enumerate(client.guild_profiles):
+            if index == 0:
+                guild1 = guild
+            else:
+                guild2 = guild
+        
+        emoji_data = await client.download_url(emoji.url)
+        emoji1 = await emoji_create(client, guild1, name, emoji_data)
+        emoji2 = await emoji_create(client, guild2, name, emoji_data)
+        
+        await client.emoji_delete(emoji1)
+        await client.emoji_delete(emoji2)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0084(client, message, name:str, emoji:'Emoji'):
+    """
+    Creates 2 emoji in 1 guild and then deletes it. Checks emoji creation.
+    
+    Please also give a name for the emoji and an emoji as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0084') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        emoji_data = await client.download_url(emoji.url)
+        emoji1 = await emoji_create(client, guild, name, emoji_data)
+        await client.emoji_delete(emoji1)
+        
+        emoji2 = await emoji_create(client, guild, name, emoji_data)
+        await client.emoji_delete(emoji2)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0085(client, message, name:str, emoji:'Emoji'):
+    """
+    Creates an emoji, edits and then deletes it. Checks emoji edition.
+    
+    Please also give a name for the emoji and an emoji as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0085') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        emoji_data = await client.download_url(emoji.url)
+        emoji = await client.emoji_create( guild, name, emoji_data)
+        await emoji_edit(client, emoji, name='cakehater')
+        await client.emoji_delete(emoji)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0086(client, message, name:str,):
+    """
+    Edits my nick desu.
+    
+    Please also give an mame.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0086') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await client_edit_nick(client, guild, name)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0087(client, message, user:'user',):
+    """
+    Kicks the given user from the guild.
+    
+    Please also give a user to kick.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0087') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await guild_user_delete(client, guild, user)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0088(client, message):
+    """
+    Creates a private channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0088') as RLT:
+        await channel_private_create(client, message.author)
+
+

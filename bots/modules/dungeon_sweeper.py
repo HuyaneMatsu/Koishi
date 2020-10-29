@@ -1599,7 +1599,7 @@ RULES_HELP=Embed('Rules of Dungeon sweeper',
     'If you get a box on the it\'s desired place it\'s color will change:\n'
     f'{REIMU_STYLE[CHAR_E|FLOOR]}{REIMU_STYLE[BOX]}{REIMU_STYLE[TARGET]}{BUILTIN_EMOJIS["arrow_right"]:e}'
     f'{REIMU_STYLE[FLOOR]}{REIMU_STYLE[CHAR_E|FLOOR]}{REIMU_STYLE[BOX_TARGET]}\n'
-    'The game has 3 chapters. *(not 3 now and there will be more.)* Each chapter introduces a different charater to '
+    'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different charater to '
     'play with.',
     COLORS[0])
 RULES_HELP.add_field(f'Chapter 1 {REIMU_EMOJI:e}',

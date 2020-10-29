@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from hata import Color, Embed, eventlist, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
-    cr_pg_channel_object, ChannelText, cchunkify, multidict_titled
+    cr_pg_channel_object, ChannelText, cchunkify, imultidict
 from hata.ext.commands import Command, checks, Pagination
 from hata.ext.prettyprint import pchunkify
 
@@ -26,20 +26,20 @@ VALUABLE_SCOPES = [
     'applications.store.update',
         ]
 
-OA2_accesses={}
+OA2_accesses = {}
 
 def _oauth2_query(message,content):
     author_id=message.author.id
     if not (16<len(content)<33):
-        return OA2_accesses.get(author_id,None)
+        return OA2_accesses.get(author_id)
     try:
         user_id=int(content)
     except ValueError:
-        return OA2_accesses.get(author_id,None)
+        return OA2_accesses.get(author_id)
     
-    user=OA2_accesses.get(user_id,None)
+    user=OA2_accesses.get(user_id)
     if user is None:
-        user=OA2_accesses.get(author_id,None)
+        user=OA2_accesses.get(author_id)
     return user
 
 
