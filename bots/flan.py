@@ -89,11 +89,11 @@ async def invalid_command(client, message, command, content):
 
 @Flan.commands.from_class
 class ping:
-    @Cooldown('user',30.,handler=CooldownHandler())
+    @Cooldown('user', 30., handler=CooldownHandler())
     async def ping(client, message):
         await client.message_create(message.channel, f'{client.gateway.latency*1000.:.0f} ms')
     
-    aliases=['pong']
+    aliases = ['pong']
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)

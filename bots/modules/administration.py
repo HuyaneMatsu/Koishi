@@ -27,7 +27,8 @@ class clear:
             await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
     
     category = 'ADMINISTRATION'
-    checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
+    #checks = [checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
+    checks = [checks.owner_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -48,7 +49,7 @@ class invite_create:
         
         invite_ = None
         if content == 'perma':
-            if client.is_owner(user) or user==message.guild.owner:
+            if client.is_owner(user) or user is message.guild.owner:
                 invite_ = await client.vanity_invite(message.guild)
                 if invite_ is None:
                     max_age = 0

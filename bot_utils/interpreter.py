@@ -178,6 +178,9 @@ ENDER_3_RP=re.compile('[^\\\]```')
 
 def parse_code_content(content, no_code_output=None):
     lines = content.splitlines()
+    if not lines:
+        return 'No content was provided', True
+    
     line = lines[0]
     starter, center, ender=BLOCK_START.fullmatch(line).groups()
     if starter:

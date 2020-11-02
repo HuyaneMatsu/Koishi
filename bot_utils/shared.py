@@ -37,7 +37,7 @@ HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
 SYNC_CHANNEL = ChannelText.precreate(568837922288173058)
 
 async def permission_check_handler(client, message, command, check):
-    permission_names = ' '.join(permission_name.repleace('_', ' ') for permission_name in check.permissions)
+    permission_names = ' '.join(permission_name.replace('_', ' ') for permission_name in check.permissions)
     await client.message_create(message.channel,
         f'You must have {permission_names} permission to invoke `{command.display_name}` command.')
 
