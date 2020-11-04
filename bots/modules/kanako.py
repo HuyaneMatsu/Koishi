@@ -24,10 +24,10 @@ FONT_COLOR = (162, 61, 229)
 
 del os
 
-def draw(buffer,text):
-    image=PIL.new('RGBA',FONT.getsize(text),(0,0,0,0))
-    image.draw().text((0,0),text,fill=FONT_COLOR,font=FONT)
-    image.save(buffer,'png')
+def draw(buffer, text):
+    image = PIL.new('RGBA', FONT.getsize(text), (0, 0, 0, 0))
+    image.draw().text((0,0), text, fill=FONT_COLOR, font=FONT)
+    image.save(buffer, 'png')
     buffer.seek(0)
     return buffer
 

@@ -6,7 +6,7 @@ from hata.ext.commands import Command, checks, Converter, ConverterFlag, Closer
 from bots.koishi import KOISHI_HELP_COLOR, DUNGEON_INVITE, DUNGEON, WORSHIPPER_ROLE, EVERYNYAN_ROLE, \
     ANNOUNCEMNETS_ROLE, WELCOME_CHANNEL
 
-from bot_utils.shared import KOISHI_GIT, HATA_GIT, DUNGEON_INVITE, DUNGEON
+from bot_utils.shared import KOISHI_GIT, HATA_GIT, DUNGEON_INVITE, DUNGEON, HATA_DOCS, TORTOISE_PASTE
 
 HELP_COMMANDS = eventlist(type_=Command)
 
@@ -187,3 +187,61 @@ async def hata(client, message):
     await client.message_create(message.channel, embed= \
         Embed(description=f'[hata repository]({HATA_GIT})', color=KOISHI_HELP_COLOR))
 
+
+@HELP_COMMANDS(category='HELP', aliases=['hata_docs'],)
+async def docs(client, message):
+    """
+    Sends a link to hata's documentation.
+    """
+    await client.message_create(message.channel, embed= \
+        Embed(description=f'[hata docs]({HATA_DOCS})', color=KOISHI_HELP_COLOR))
+
+
+@HELP_COMMANDS(category='HELP', aliases=['how-to-ask'])
+async def ask(client, message):
+    """
+    How to ask!
+    """
+    embed = Embed('How to ask?',
+        'Don\'t ask to ask just ask.\n'
+        '\n'
+        ' • You will have much higher chances of getting an answer\n'
+        ' • It saves time both for us and you as we can skip the whole process of actually getting the question '
+        'out of you\n'
+        '\n'
+        'For more info visit [dontasktoask.com](https://dontasktoask.com/)',
+            color = KOISHI_HELP_COLOR)
+    
+    await Closer(client, message.channel, embed)
+
+
+@HELP_COMMANDS(category='HELP')
+async def markdown(client, message):
+    """
+    How to use markdown.
+    """
+    embed = Embed('Markdown',
+        'You can format your code by using markdown like this:\n'
+        '\n'
+        '\\`\\`\\`py\n'
+        'print(\'Hello world\')\n'
+        '\\`\\`\\`\n'
+        '\n'
+        'This would give you:\n'
+        '```python\n'
+        'print(\'Hello world\')```\n'
+        'Note that character ` is not a quote but a backtick.\n'
+        '\n'
+        f'If, however, you have large amounts of code then it\'s better to use [our paste service]({TORTOISE_PASTE}).',
+            color = KOISHI_HELP_COLOR)
+    
+    await Closer(client, message.channel, embed)
+
+
+@HELP_COMMANDS(category='HELP')
+async def paste(client, message):
+    """
+    A link to our paste service.
+    """
+    embed = Embed(description=f'[Paste link]({TORTOISE_PASTE})', color=KOISHI_HELP_COLOR)
+    await client.message_create(message.channel, embed=embed)

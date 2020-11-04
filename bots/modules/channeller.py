@@ -150,20 +150,20 @@ async def channeling_start(client,message,channel_id:int):
             text='I have no permission at that channel to invoke this command!'
             break
 
-        channeling_1=CHANNELINGS.get(channel_1.id,None)
-        channeling_2=CHANNELINGS.get(channel_2.id,None)
+        channeling_1 = CHANNELINGS.get(channel_1.id,None)
+        channeling_2 = CHANNELINGS.get(channel_2.id,None)
         
         if channeling_1 is not None and channeling_2 is not None and channeling_1 is channeling_2:
-            text='This connection is already set up'
+            text = 'This connection is already set up'
             break
 
-        pairs=[]
+        pairs = []
         if channeling_1 is None:
             webhooks = await client.webhook_get_channel(channel_1)
             if webhooks:
-                webhook=webhooks[0]
+                webhook = webhooks[0]
             else:
-                webhook = await client.webhook_create(channel_1,'Love You')
+                webhook = await client.webhook_create(channel_1, 'Love You')
             pairs.append((channel_1,webhook,),)
         else:
             channeling_1.cancel(None)
@@ -172,9 +172,9 @@ async def channeling_start(client,message,channel_id:int):
         if channeling_2 is None:
             webhooks = await client.webhook_get_channel(channel_2)
             if webhooks:
-                webhook=webhooks[0]
+                webhook = webhooks[0]
             else:
-                webhook = await client.webhook_create(channel_2,'Love You')
+                webhook = await client.webhook_create(channel_2, 'Love You')
             pairs.append((channel_2,webhook,),)
         else:
             channeling_2.cancel(None)
@@ -182,7 +182,7 @@ async def channeling_start(client,message,channel_id:int):
 
 
         Channeller(client,pairs)
-        text=f'Channelling between `{channel_1.guild}/{channel_1}` and `{channel_2.guild}/{channel_2}`'
+        text = f'Channelling between `{channel_1.guild}/{channel_1}` and `{channel_2.guild}/{channel_2}`'
         break
     
     await client.message_create(channel_1,text)

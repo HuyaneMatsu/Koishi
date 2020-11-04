@@ -3,11 +3,12 @@ import os, re, sys
 from os.path import join, isdir, isfile, getmtime, exists
 from os import mkdir as make_dir
 from datetime import datetime, timedelta
+from io import StringIO
 
 from config import HATA_PATH
 
-from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep
-from hata.ext.commands import wait_for_message
+from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep, Embed
+from hata.ext.commands import wait_for_message, Pagination
 
 from .shared import SYNC_CHANNEL, KOISHI_PATH
 
@@ -126,59 +127,123 @@ async def request_sync(client, days_allowed):
         await client.message_create(SYNC_CHANNEL, SYNC_DONE)
 
 async def receive_sync(client, partner):
-    async with SYNC_LOCK:
-        # some delay is needed or Koishi might answer too fast.
-        await sleep(0.4, KOKORO)
-        await client.message_create(SYNC_CHANNEL, REQUEST_APPROVED)
+    try:
+        async with SYNC_LOCK:
+            # some delay is needed or Koishi might answer too fast.
+            await sleep(0.4, KOKORO)
+            await client.message_create(SYNC_CHANNEL, REQUEST_APPROVED)
+            
+            while True:
+                try:
+                    message = await wait_for_message(client, SYNC_CHANNEL, check_any(partner), 60.)
+                except TimeoutError:
+                    sys.stderr.write('Sync request failed, timeout\.n')
+                    return
+                
+                content = message.content
+                if content == SYNC_DONE:
+                    break
+                
+                path_parts = content.split('.')
+                if not path_parts:
+                    sys.stderr.write('Empty content received, aborting sync.\n')
+                    return
+                
+                source_path = path_parts[0]
+                try:
+                    source_path = RELATIONS[source_path]
+                except KeyError:
+                    sys.stderr.write(f'Source path not found: {source_path!r}, aborting sync.\n')
+                    return
+                
+                for path in path_parts[1:]:
+                    source_path = join(source_path, path)
+                    if not exists(source_path):
+                        make_dir(source_path)
+                
+                attachments = message.attachments
+                if attachments is None:
+                    continue
+                
+                attachment = attachments[0]
+                binary = await client.download_attachment(attachment)
+                
+                name = attachment.name
+                if name.startswith('init__'):
+                    name = '__'+name
+                
+                source_path = join(source_path, name)
+                
+                with (await AsyncIO(source_path, 'wb')) as file:
+                    await file.write(binary)
+                
+                # Wait some. It can happen that we send this message, befrore the other side gets it's answer.
+                await sleep(0.4, KOKORO)
+                await client.message_create(SYNC_CHANNEL, RECEIVED)
+    except BaseException as err:
+        with StringIO() as buffer:
+            await KOKORO.render_exc_async(err, ['```'], file=buffer)
+            
+            buffer.seek(0)
+            lines = buffer.readlines()
+        
+        pages = []
+        
+        page_length = 0
+        page_contents = []
+        
+        index = 0
+        limit = len(lines)
         
         while True:
-            try:
-                message = await wait_for_message(client, SYNC_CHANNEL, check_any(partner), 60.)
-            except TimeoutError:
-                sys.stderr.write('Sync request failed, timeout\.n')
-                return
-            
-            content = message.content
-            if content == SYNC_DONE:
+            if index == limit:
+                embed = Embed(description=''.join(page_contents))
+                pages.append(embed)
+                page_contents = None
                 break
             
-            path_parts = content.split('.')
-            if not path_parts:
-                sys.stderr.write('Empty content received, aborting sync.\n')
-                return
+            line = lines[index]
+            index = index+1
             
-            source_path = path_parts[0]
-            try:
-                source_path = RELATIONS[source_path]
-            except KeyError:
-                sys.stderr.write(f'Source path not found: {source_path!r}, aborting sync.\n')
-                return
+            line_lenth = len(line)
+            # long line check, should not happen
+            if line_lenth > 500:
+                line = line[:500]+'...\n'
+                line_lenth = 504
             
-            for path in path_parts[1:]:
-                source_path = join(source_path, path)
-                if not exists(source_path):
-                    make_dir(source_path)
-            
-            attachments = message.attachments
-            if attachments is None:
+            if page_length+line_lenth > 1997:
+                if index == limit:
+                    # If we are at the last element, we dont need to shard up,
+                    # because the last element is always '```'
+                    page_contents.append(line)
+                    embed = Embed(description=''.join(page_contents))
+                    pages.append(embed)
+                    page_contents = None
+                    break
+                
+                page_contents.append('```')
+                embed = Embed(description=''.join(page_contents))
+                pages.append(embed)
+                
+                page_contents.clear()
+                page_contents.append('```py\n')
+                page_contents.append(line)
+                
+                page_length = 6+line_lenth
                 continue
             
-            attachment = attachments[0]
-            binary = await client.download_attachment(attachment)
-            
-            name = attachment.name
-            if name.startswith('init__'):
-                name = '__'+name
-            
-            source_path = join(source_path, name)
-            
-            with (await AsyncIO(source_path, 'wb')) as file:
-                await file.write(binary)
-            
-            # Wait some. It can happen that we send this message, befrore the other side gets it's answer.
-            await sleep(0.4, KOKORO)
-            await client.message_create(SYNC_CHANNEL, RECEIVED)
-
+            page_contents.append(line)
+            page_length += line_lenth
+            continue
+        
+        limit = len(pages)
+        index = 0
+        while index < limit:
+            embed = pages[index]
+            index += 1
+            embed.add_footer(f'page {index}/{limit}')
+        
+        await Pagination(client, message.channel, pages)
 
 async def sync_request_comamnd(client, message, days: int = 7):
     if days < 1 or days > 30:

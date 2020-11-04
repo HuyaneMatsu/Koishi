@@ -33,6 +33,8 @@ MARISA_HELP_COLOR = Color.from_html('#e547ed')
 
 KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
 HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
+HATA_DOCS = 'https://huyanematsu.pythonanywhere.com/docs/hata'
+TORTOISE_PASTE = "https://paste.tortoisecommunity.com/"
 
 SYNC_CHANNEL = ChannelText.precreate(568837922288173058)
 
@@ -129,12 +131,12 @@ async def command_error(client, message, command, content, exception):
     
     limit = len(pages)
     index = 0
-    while index<limit:
+    while index < limit:
         embed = pages[index]
         index += 1
         embed.add_footer(f'page {index}/{limit}')
     
-    await Pagination(client,message.channel,pages)
+    await Pagination(client, message.channel, pages)
     return False
 
 class WrapMultyple(object):

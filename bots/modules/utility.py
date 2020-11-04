@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import re, sys, json
 
+from datetime import timezone, datetime
+from dateutil.relativedelta import relativedelta
+
 from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, now_as_id, \
     elapsed_time, ActivityUnknown, Status, ActivityTypes, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, \
     cchunkify, Permission, ICON_TYPE_NONE, KOKORO, Future, ERROR_CODES, ChannelVoice, ChannelStore, ChannelThread, \
@@ -1075,3 +1078,79 @@ class get_id_as_time_since:
             'Returns how much time ealpsed, since the given Discord snowflake.\n'
             f'Usage: `{prefix}now-as-time-since *id*`'
                 ), color=UTILITY_COLOR)
+
+
+EVENT_DEADLINE = datetime(2020, 11, 18, 0, 0, 0)
+
+async def countdown_description(client, message):
+    now = datetime.utcnow()
+    if now >= EVENT_DEADLINE:
+        result = 'the countdown is already over'
+    else:
+        result = elapsed_time(relativedelta(now, EVENT_DEADLINE))
+        result = f'there is {result} left'
+    
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('countdown', (
+        'Returns when the hata codejam ends!\n'
+        f'Usage: `{prefix}countdown`\n'
+        '\n'
+        f'Dont worry, we got you, {result}.'
+            ), color=UTILITY_COLOR)
+
+@Koishi.commands(aliases=['deadline', 'event_deadline'], description=countdown_description, category='UTILITY')
+async def countdown(client, message):
+    now = datetime.utcnow()
+    if now >= EVENT_DEADLINE:
+        result = 'Countdown over!'
+    else:
+        result = elapsed_time(relativedelta(now, EVENT_DEADLINE))
+    
+    await client.message_create(message.channel, result)
+
+
+async def shared_guilds_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('deadline', (
+        'Returns the shared guilds between you and me.\n'
+        f'Usage: `{prefix}shared-guilds`\n'
+            ), color=UTILITY_COLOR)
+
+@Koishi.commands(description=shared_guilds_description, category='UTILITY')
+async def shared_guilds(client, message):
+    pages = []
+    lines = []
+    lines_count = 0
+    
+    user = message.author
+    for guild, guild_profile in user.guild_profiles.items():
+        nick = guild_profile.nick
+        guild_name = guild.name
+        if nick is None:
+            line = guild_name
+        else:
+            line = f'{guild_name} [{nick}]'
+        
+        lines.append(line)
+        lines_count += 1
+        
+        if lines_count == 10:
+            pages.append('\n'.join(lines))
+            lines.clear()
+            lines_count = 0
+    
+    if lines_count:
+        pages.append('\n'.join(lines))
+    
+    if not pages:
+        pages.append('*none*')
+    
+    embeds = []
+    embed_title = f'Shared guilds with {user.full_name}:'
+    
+    for page in pages:
+        embed = Embed(embed_title, page, color=UTILITY_COLOR)
+        embeds.append(embed)
+    
+    await Pagination(client, message.channel, embeds)
+

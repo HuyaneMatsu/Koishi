@@ -721,10 +721,20 @@ async def voice_state(client, message):
             
             for index, (user, stream) in enumerate(audio_streams):
                 lines.append(f'Stream {index}.: {user.full_name}, {stream!r}')
+        
+        audio_sources = voice_client._audio_sources
+        if audio_sources:
+            if lines:
+                lines.append('')
+            
+            counter = 0
+            for index, source in enumerate(audio_sources.values(), 1):
+                lines.append(f'{index}.: {source}')
     
     color = VOICE_COLORS.get(client)
     pages = [Embed(title, chunk, color) for chunk in chunkify(lines)]
     
     await Pagination(client, message.channel, pages)
+
 
 

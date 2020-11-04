@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 from hata import Embed
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
@@ -15,6 +16,11 @@ Marisa.command_processer.create_category('TEST COMMANDS', checks=[checks.owner_o
 Marisa.commands(SubterraneanHelpCommand(MARISA_HELP_COLOR), 'help', category='HELP')
 
 Marisa.commands(command_error, checks=[checks.is_guild(DUNGEON)])
+
+@Marisa.events
+async def ready(client):
+    sys.stdout.write(f'{client:f} logged in.\n')
+
 
 async def execute_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
