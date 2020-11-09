@@ -149,8 +149,8 @@ class reload:
 class shutdown:
     async def command(client, message):
         
-        for client in CLIENTS:
-            await client.disconnect()
+        for client_ in CLIENTS:
+            await client_.disconnect()
         
         await client.message_create(message.channel, 'Clients stopped, stopping process.')
         KOKORO.stop()

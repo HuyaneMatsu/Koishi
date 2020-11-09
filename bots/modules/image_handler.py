@@ -116,10 +116,8 @@ async def image_description(client, message):
 async def upload_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
     return Embed('upload', (
-        f'You can can upload images with tags, which you can access with the {prefix}image` command after.\n'
-        f'Usage : `{prefix}upload <tag_1> <tag_2> ...`\n'
-        'If you mention anyone, I ll check her messages, instead of your, my dear.\n I look up the last 26 messages '
-        'searching for an attachment.\n'
+        f'You can can upload images with tags, which you can access with the `{prefix}image` command after.\n'
+        f'Usage : `{prefix}upload *message* <tag_1> <tag_2> ...`\n'
         'You can pass any amount of tags, mentions are ignored.'
             ), color=IMAGE_COLOR).add_footer(
             'Owner only!')

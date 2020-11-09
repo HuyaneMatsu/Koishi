@@ -44,15 +44,17 @@ async def invalid_command(client, message, command, content):
             pass
         else:
             if command.category.name == 'touhou':
+                await sleep(random(), KOKORO)
                 await client.typing(message.channel)
-                await sleep(2.0, KOKORO)
+                await sleep(1.0+random()*2.0, KOKORO)
                 await client.message_create(message.channel, f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
+                await sleep(1.5+random(), KOKORO)
                 await Koishi.typing(message.channel)
-                await sleep((random()*2.)+1.0, KOKORO)
+                await sleep(0.5+random(), KOKORO)
                 await command(Koishi, message, content)
                 return
     
-    await client.message_create(message.channel,'I have no idea, hmpff...')
+    await client.message_create(message.channel, 'I have no idea, hmpff...')
 
 TRANSFORMATIONS = {
     ' ': ' ',
@@ -203,18 +205,18 @@ class auto_pyramid_u:
                 break
             
             user = users.pop(randint(0, user_count-1))
-            user_count -=1
+            user_count -= 1
             if user.is_bot:
                 continue
             
             selected_users.append(user)
-            needed_users -=1
+            needed_users -= 1
         
         if needed_users:
             await client.message_create(channel, 'The guild does not have enough users for this size of pyramid.')
             return
         
-        for user, count in zip(selected_users, chain(range(1,size),range(size,0,-1))):
+        for user, count in zip(selected_users, chain(range(1, size), range(size, 0, -1))):
             await client.webhook_send(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)), name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
     
     checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
@@ -235,7 +237,7 @@ class auto_pyramid_u:
 class reverse:
     async def command(client, message, content):
         if content:
-            await client.message_create(message.channel, content[::-1])
+            await client.message_create(message.channel, content[::-1], allowed_mentions=None)
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

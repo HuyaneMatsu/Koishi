@@ -95,7 +95,7 @@ del hata_module
 def search():
     search_form = SearchForm()
     if search_form.validate_on_submit():
-        search_for = search_form.query.data
+        search_for = search_form.query.data.strip()
         
         results = search_paths(search_for)
         

@@ -681,45 +681,65 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text=f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
-        pages=[Embed(description=text)]
-        await Pagination(client, self.channel, pages,120.)
-        
+        text = f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
+        pages = [Embed(description=text)]
+        await Pagination(client, self.channel, pages, 120.)
+    
     @classmethod
-    async def voice_state_update(self,client, state,action, old):
-        Task(self.old_events['voice_state_update'](client, state,action, old), KOKORO)
+    async def user_voice_update(self, client, voice_state, old_attributes):
+        Task(self.old_events['user_voice_update'](client, voice_state, old_attributes), KOKORO)
         if self.channel is None:
             return
         
-        result=[]
-        user=state.user
-        if action=='l':
-            result.append('Voice state update, action: leave')
-            result.extend(pretty_print(state))
-        elif action=='j':
-            result.append('Voice state update, action: join')
-            result.extend(pretty_print(state))
+        result = []
+        result.append('Voice state update')
+        user = voice_state.user
+        if user.partial:
+            result.append(f'user : Parital user {user.id}')
         else:
-            result.append('Voice state update, action: update')
-            user=state.user
-            if user.partial:
-                result.append(f'user : Parital user {user.id}')
-            else:
-                result.append(f'user : {user.full_name} ({user.id})')
-            guild=state.channel.guild
-            if guild is not None:
-                result.append(f'guild : {guild.name} ({guild.id})')
-            result.append(f'session_id : {state.session_id!r}')
-            result.append('Changes:')
-            for key, value in old.items():
-                if key=='channel':
-                    other=state.channel
-                    result.append(f'channel : {value.name} {value.id} -> {other.name} {other.id}')
-                    continue
-                result.append(f'{key} : {value} -> {getattr(state, key)}')
+            result.append(f'user : {user.full_name} ({user.id})')
+        guild = voice_state.channel.guild
+        if guild is not None:
+            result.append(f'guild : {guild.name} ({guild.id})')
+            
+        result.append(f'session_id : {voice_state.session_id!r}')
+        result.append('Changes:')
+        for key, value in old_attributes.items():
+            if key == 'channel':
+                other = voice_state.channel
+                result.append(f'channel : {value.name} {value.id} -> {other.name} {other.id}')
+                continue
+            
+            result.append(f'{key} : {value} -> {getattr(voice_state, key)}')
         
-        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
+        await Pagination(client, self.channel, pages, 120.)
+    
+    @classmethod
+    async def user_voice_join(self, client, voice_state):
+        Task(self.old_events['user_voice_join'](client, voice_state), KOKORO)
+        if self.channel is None:
+            return
+        
+        result = []
+        result.append('User voice join')
+        result.extend(pretty_print(voice_state))
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
+        await Pagination(client, self.channel, pages, 120.)
+    
+    @classmethod
+    async def user_voice_leave(self, client, voice_state):
+        Task(self.old_events['user_voice_leave'](client, voice_state), KOKORO)
+        if self.channel is None:
+            return
+        
+        result = []
+        result.append('User voice leave')
+        result.extend(pretty_print(voice_state))
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
+        await Pagination(client, self.channel, pages, 120.)
             
     @classmethod
     async def typing(self,client,channel, user,timestamp):
@@ -737,7 +757,7 @@ class dispatch_tester:
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages,120.)
-
+    
     @classmethod
     async def client_edit_settings(self,client, old):
         Task(self.old_events['client_edit_settings'](client, old), KOKORO)
@@ -797,7 +817,19 @@ class dispatch_tester:
                 ]
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, 120.)
+    
+    @classmethod
+    async def integration_edit(self, client, guild, integration):
+        Task(self.old_events['integration_edit'](client, guild, integration), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = pretty_print(integration)
+        text.insert(0, f'integration_edit at {guild.name} ({guild.id}):')
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        
+        await Pagination(client, self.channel, pages, 120.)
     
     @classmethod
     async def integration_update(self, client, guild):
@@ -810,7 +842,7 @@ class dispatch_tester:
                 ]
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, 120.)
 
 async def here_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -861,9 +893,12 @@ async def switch_description(client, message):
         '- `user_edit`\n'
         '- `user_presence_update`\n'
         '- `user_profile_edit`\n'
-        '- `voice_state_update`\n'
+        '- `user_voice_join`\n'
+        '- `user_voice_leave`\n'
+        '- `user_voice_update`\n'
         '- `integration_create`\n'
         '- `integration_delete`\n'
+        '- `integration_edit`\n'
         '- `integration_update`\n'
         '- `webhook_update`\n'
         f'For setting channel, use: `{prefix}here`'

@@ -11,21 +11,18 @@ MARISA_MODE = config.MARISA_MODE
 
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 
-LOCAL_DEFAULT_VARIABLES = {}
-
 if MARISA_MODE:
     Marisa = Client(config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
             )
     
-    LOCAL_DEFAULT_VARIABLES['Marisa'] = Marisa
-    LOCAL_DEFAULT_VARIABLES['main_client'] = Marisa
+    EXTENSION_LOADER.add_default_variables(Marisa=Marisa, main_client=Marisa)
     
-    EXTENSION_LOADER.load_extension('bots.marisa', locked=True, **LOCAL_DEFAULT_VARIABLES)
+    EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
-    EXTENSION_LOADER.add('bots.testers.test_commands', **LOCAL_DEFAULT_VARIABLES)
-    EXTENSION_LOADER.add('bots.testers.ratelimit', **LOCAL_DEFAULT_VARIABLES)
-    EXTENSION_LOADER.add('bots.testers.dispatch_tests', **LOCAL_DEFAULT_VARIABLES)
+    EXTENSION_LOADER.add('bots.testers.test_commands')
+    EXTENSION_LOADER.add('bots.testers.ratelimit')
+    EXTENSION_LOADER.add('bots.testers.dispatch_tests')
     
 else:
     Koishi = Client(config.KOISHI_TOKEN,
@@ -35,8 +32,7 @@ else:
         shard_count = 2,
             )
     
-    LOCAL_DEFAULT_VARIABLES['Koishi'] = Koishi
-    LOCAL_DEFAULT_VARIABLES['main_client'] = Koishi
+    EXTENSION_LOADER.add_default_variables(Koishi=Koishi, main_client=Koishi)
     
     Satori = Client(config.SATORI_TOKEN,
         secret = config.SATORI_SECRET,
@@ -45,7 +41,7 @@ else:
         status = 'dnd',
             )
     
-    LOCAL_DEFAULT_VARIABLES['Satori'] = Satori
+    EXTENSION_LOADER.add_default_variables(Satori=Satori)
     
     Flan = Client(config.FLAN_TOKEN,
         client_id = config.FLAN_ID,
@@ -53,11 +49,11 @@ else:
         status = 'idle',
             )
     
-    LOCAL_DEFAULT_VARIABLES['Flan'] = Flan
+    EXTENSION_LOADER.add_default_variables(Flan=Flan)
     
-    EXTENSION_LOADER.load_extension('bots.koishi', locked=True, **LOCAL_DEFAULT_VARIABLES)
-    EXTENSION_LOADER.load_extension('bots.satori', locked=True, **LOCAL_DEFAULT_VARIABLES)
-    EXTENSION_LOADER.load_extension('bots.flan'  , locked=True, **LOCAL_DEFAULT_VARIABLES)
+    EXTENSION_LOADER.load_extension('bots.koishi', locked=True)
+    EXTENSION_LOADER.load_extension('bots.satori', locked=True)
+    EXTENSION_LOADER.load_extension('bots.flan'  , locked=True)
 
 MODULE_NAMES = set()
 
@@ -88,7 +84,7 @@ else:
             pass
 
 for path in MODULE_NAMES:
-    EXTENSION_LOADER.add('bots.modules.'+path, **LOCAL_DEFAULT_VARIABLES)
+    EXTENSION_LOADER.add('bots.modules.'+path)
 
 del path
 

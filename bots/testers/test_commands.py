@@ -1,11 +1,12 @@
-import json
+import json, os
 from time import perf_counter
 from random import random
 from datetime import datetime
 
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
-    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client
+    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
+    ReuAsyncIO
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
@@ -17,6 +18,8 @@ from hata.discord.parsers import PARSERS
 from hata.ext.prettyprint import pchunkify
 from hata.discord.emoji import PartialEmoji
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
+
+from bot_utils.shared import KOISHI_PATH
 
 TEST_COMMANDS = eventlist(type_=Command, category='TEST COMMANDS',)
 
@@ -1062,3 +1065,13 @@ async def do_delete(client, message):
     gc.collect()
     """
     await client.message_create(message.channel, repr(end-start))
+
+
+@TEST_COMMANDS
+async def test_2_attachments(client, message):
+    """
+    Sends a message with 2 attachments.
+    """
+    with await ReuAsyncIO(os.path.join(KOISHI_PATH, 'images', '0000001E_yakumo_yukari_chen.gif')) as file1:
+        with await ReuAsyncIO(os.path.join(KOISHI_PATH, 'images', '0000001F_yuri_hug.gif')) as file2:
+            await client.message_create(message.channel, file=[file1, file2])
