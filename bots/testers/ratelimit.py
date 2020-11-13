@@ -19,7 +19,7 @@ from hata.backend.hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST
 from hata.backend.http import RequestCM
 from hata.backend.quote import quote
 from hata.discord.others import to_json, from_json, image_to_base64, Discord_hdrs
-from hata.discord.guild import PartialGuild, GuildDiscovery
+from hata.discord.guild import create_partial_guild, GuildDiscovery
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
 
@@ -710,7 +710,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
         'https://discordapp.com/api/v7/guilds',
         data,)
     #we can create only partial, because the guild data is not completed usually
-    return PartialGuild(data)
+    return create_partial_guild(data)
 
 async def guild_get(client, guild_id,):
     return await bypass_request(client,METH_GET,

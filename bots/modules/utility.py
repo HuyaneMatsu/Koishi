@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re, sys, json
 
-from datetime import timezone, datetime
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, now_as_id, \
@@ -76,64 +76,32 @@ class rawr:
             ), color=UTILITY_COLOR,).add_footer(
                 'With cooldown of 60 seconds.')
 
-COLOR_HTML_RP = re.compile('#?([0-9a-f]{6})',re.I)
-COLOR_REGULAR_RP = re.compile('([0-9]{1,3})\,? *([0-9]{1,3})\,? *([0-9]{1,3})')
-
 @UTILITY_COMMANDS.from_class
 class color:
-    async def command(client,message,content):
-        while True:
-            parsed=COLOR_HTML_RP.fullmatch(content)
-            if parsed is not None:
-                full_color=int(parsed.group(1),base=16)
-                color_r=(full_color&0xff0000)>>16
-                color_g=(full_color&0x00ff00)>>8
-                color_b=(full_color&0x00ff)
-                break
-            
-            parsed=COLOR_REGULAR_RP.fullmatch(content)
-            if parsed is not None:
-                color_r,color_g,color_b=parsed.groups()
-                color_r=int(color_r)
-                if color_r>255:
-                    return
-                color_g=int(color_g)
-                if color_g>255:
-                    return
-                color_b=int(color_b)
-                if color_b>255:
-                    return
-                full_color=(color_r<<16)|(color_g<<8)|color_b
-                break
-            
-            return
-        
-        color=(color_r,color_g,color_b)
-        
-        embed=Embed(content,color=full_color)
+    async def command(client, message, color: 'color'):
+        embed = Embed(color.__format__('06X'), color=color)
         embed.add_image('attachment://color.png')
         
         with ReuBytesIO() as buffer:
-            image=PIL.new('RGB',(120,30),color)
+            image = PIL.new('RGB', (120, 30), color.as_rgb)
             image.save(buffer,'png')
             buffer.seek(0)
             
-            await client.message_create(message.channel,embed=embed,file=('color.png',buffer))
+            await client.message_create(message.channel, embed=embed, file=('color.png', buffer))
     
     category = 'UTILITY'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('color',(
             'Do you wanna see a color?\n'
             f'Usage: `{prefix}color *color*`\n'
-            'I accept regular RGB or HTML color format.'
                 ), color=UTILITY_COLOR)
 
 @UTILITY_COMMANDS.from_class
 class update_application_info:
     async def update_application_info(client, message, user:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='client')):
-        if type(user) is Client:
+        if isinstance(user, Client):
             await user.update_application_info()
             content = f'Application info of `{user:f}` is updated succesfully!'
         else:
@@ -157,8 +125,8 @@ class update_application_info:
 @UTILITY_COMMANDS.from_class
 class resend_webhook:
     async def command(client,message,message_id:int,channel : Converter('channel', default_code='message.channel')):
-        permissions=message.channel.cached_permissions_for(client)
-        can_delete=permissions.can_manage_messages
+        permissions = message.channel.cached_permissions_for(client)
+        can_delete = permissions.can_manage_messages
         
         if not permissions.can_manage_webhooks:
             message = await client.message_create(message.channel,
@@ -179,7 +147,7 @@ class resend_webhook:
     
         webhooks = await client.webhook_get_channel(channel)
         if webhooks:
-            webhook=webhooks[0]
+            webhook = webhooks[0]
         else:
             webhook = await client.webhook_create(channel,'Love You')
     
@@ -193,7 +161,7 @@ class resend_webhook:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('resend_webhook',(
+        return Embed('resend_webhook', (
             'I can resend a webhook, if chu really want.\n'
             f'Usage: `{prefix}resend_webhook *message_id* <channel>`\n'
             'The `message_id` must be the `id` of the message sent by the '

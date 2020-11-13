@@ -28,7 +28,7 @@ def setup(lib):
 
 def teardown(lib):
     Koishi.commands.unextend(IMAGE_COMMANDS)
-    
+
 IMAGES_STATIC = []
 IMAGES_ANIMATED = []
 IMAGES_ALL = []
@@ -84,8 +84,8 @@ class image_details(set):
     
     __str__ = __repr__
 
-IMAGE_TAG_PAT = ITGHL['pat'] = 0
-IMAGE_TAG_HUG = ITGHL['hug'] = 1
+ITGHL['pat'] = 0
+ITGHL['hug'] = 1
 
 IMAGE_FORMATS_STATIC = {'jpg', 'png', 'bmp', 'jpeg'}
 IMAGE_FORMATS_ANIMATED = {'mp4', 'gif'}
@@ -407,17 +407,55 @@ def random_with_tag(tag):
     
     return result
 
-@IMAGE_COMMANDS.from_class        
-class pat:
-    async def command(client, message):
-        image = random_with_tag(IMAGE_TAG_PAT)
+def generate_cute_content(client, message, action):
+    content = []
+    mentions = message.user_mentions
+    if mentions is None:
+        content.append(client.name)
+        content.append(' ')
+        content.append(action)
+        content.append(' ')
+        content.append(message.author.name)
+        content.append('.')
+    else:
+        content.append(message.author.name)
+        content.append(' ')
+        content.append(action)
+        content.append(' ')
+        content.append(mentions[0].name)
+        if len(mentions) > 1:
+            for user in mentions[1:-1]:
+                content.append(', ')
+                content.append(user.name)
+            content.append(' and ')
+            content.append(mentions[-1].name)
+    
+    return ''.join(content)
+
+class image_with_tag:
+    __slots__ = ('name', 'tag_id', 'name_form__ing', 'name_form__s')
+    def __init__(self, name, name_form__ing, name_form__s):
+        self.tag_id = ITGHL[name]
+        self.name = name
+        self.name_form__ing = name_form__ing
+        self.name_form__s = name_form__s
+    
+    async def __call__(self, client, message):
+        image = random_with_tag(self.tag_id)
         
         if image is None:
-            await client.message_create(message.channel, 'No patting image is added :\'C')
+            await client.message_create(message.channel, f'No {self.name_form__ing} image is added :\'C')
         else:
+            embed = Embed(description=generate_cute_content(client, message, self.name_form__s),
+                color=(message.id>>22)&0xffffff).add_image(f'attachment://{os.path.basename(image.path)}')
+            
             with client.keep_typing(message.channel):
                 with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
-                    await client.message_create(message.channel, file=file)
+                    await client.message_create(message.channel, embed=embed, file=file)
+
+@IMAGE_COMMANDS.from_class        
+class pat:
+    command = image_with_tag('pat', 'patting', 'pats')
     
     category = 'UTILITY'
     
@@ -432,15 +470,7 @@ class pat:
 
 @IMAGE_COMMANDS.from_class
 class hug:
-    async def command(client, message):
-        image = random_with_tag(IMAGE_TAG_HUG)
-        
-        if image is None:
-            await client.message_create(message.channel, 'No hugging image is added :\'C')
-        else:
-            with client.keep_typing(message.channel):
-                with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
-                    await client.message_create(message.channel, file=file)
+    command = image_with_tag('hug', 'hugging', 'hugs')
     
     category = 'UTILITY'
     

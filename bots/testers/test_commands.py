@@ -16,7 +16,7 @@ from hata.discord.others import Discord_hdrs
 from hata.discord.http import API_ENDPOINT, CONTENT_TYPE
 from hata.discord.parsers import PARSERS
 from hata.ext.prettyprint import pchunkify
-from hata.discord.emoji import PartialEmoji
+from hata.discord.emoji import create_partial_emoji
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
 
 from bot_utils.shared import KOISHI_PATH

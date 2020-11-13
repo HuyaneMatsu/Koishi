@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import re, os
+from audioop import add as add_voice
 
 from hata import alchemy_incendiary, sleep, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, \
     Permission, KOKORO, ChannelBase, ChannelVoice, AsyncIO, chunkify
-from hata.ext.commands import Command, checks, Pagination
+from hata.discord.reader import EMPTY_VOICE_FRAME_ENCODED, EMPTY_VOICE_FRAME_DECODED
+from hata.discord.player import AudioSource
+from hata.discord.opus import OpusDecoder
+from hata.ext.commands import Command, checks, Pagination, FlaggedAnnotation, ConverterFlag
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
@@ -197,23 +201,23 @@ if AUDIO_PLAY_POSSIBLE:
             
             if not content:
                 if voice_client.player is None:
-                    text='Nothing is playing now Good Sir!'
+                    text = 'Nothing is playing now Good Sir!'
                     break
                 
                 if voice_client.is_paused():
                     voice_client.resume()
-                    text=f'Resumed playing: {voice_client.player.source.title}'
+                    text = f'Resumed playing: {voice_client.player.source.title}'
                     break
     
-                text=f'Now playing: {voice_client.player.source.title}'
+                text = f'Now playing: {voice_client.player.source.title}'
                 break
             
-            try:
-                with client.keep_typing(message.channel):
+            with client.keep_typing(message.channel):
+                try:
                     source = await YTAudio(content, stream=True)
-            except DownloadError as err: #raised by YTdl
-                text='Error meanwhile downloading'
-                break
+                except DownloadError: #raised by YTdl
+                    text = 'Error meanwhile downloading'
+                    break
             
             if voice_client.append(source):
                 text = f'Now playing {source.title}!'
@@ -498,21 +502,21 @@ async def party_is_over(client, message):
         return
     
     while True:
-        voice_client=client.voice_client_for(message)
+        voice_client = client.voice_client_for(message)
         if voice_client is None:
             text = 'I don\'t see any parties arround me.'
             break
 
         Task(voice_client.disconnect(), KOKORO)
         
-        channel=voice_client.channel
+        channel = voice_client.channel
         users=[]
         for state in guild.voice_states.values():
             if (state.channel is not channel):
                 continue
                 
-            user=state.user
-            if (user==client):
+            user = state.user
+            if (user is client):
                 continue
             
             users.append(user)
@@ -736,5 +740,154 @@ async def voice_state(client, message):
     
     await Pagination(client, message.channel, pages)
 
+class MixerStream(AudioSource):
+    __slots__ = ('_decoder', '_postprocess_called', 'sources', )
+    def __init__(self, *sources):
+        self.sources = list(sources)
+        self._decoder = OpusDecoder()
+        self._postprocess_called = False
+    
+    async def postprocess(self):
+        if self._postprocess_called:
+            return
+        
+        self._postprocess_called = True
+        for source in self.sources:
+            await source.postprocess()
+    
+    async def add(self, source):
+        if self._postprocess_called:
+            await source.postprocess()
+        
+        self.sources.append(source)
+    
+    async def read(self):
+        sources = self.sources
+        result = None
+        
+        for index in reversed(range(len(sources))):
+            source = sources[index]
+            data = await source.read()
+            
+            if data is None:
+                del sources[index]
+                await source.cleanup()
+                continue
+            
+            if not source.NEEDS_ENCODE:
+                data = self._decoder.decode(data)
+            
+            if result is None:
+                result = data
+            else:
+                result = add_voice(result, data, 1)
+            
+            continue
+        
+        return result
+    
+    async def cleanup(self):
+        self._postprocess_called = False
+        sources = self.sources
+        while sources:
+            source = sources.pop()
+            await source.cleanup()
 
 
+if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
+    @Marisa.commands(separator='|', checks=[checks.owner_only()])
+    async def play_double(client, message):
+        guild = message.guild
+        if guild is None:
+            return
+        
+        while True:
+            voice_client = client.voice_client_for(message)
+            if voice_client is None:
+                text = 'I am not in a voice channel.'
+                break
+            
+            source1 = await LocalAudio('/hdd/music/others/Ichigo - Tsuki made todoke, fushi no kemuri.mp3')
+            source2 = await LocalAudio('/hdd/music/others/Nomico - IceBreak.mp3')
+            
+            source = MixerStream(source1, source2)
+
+            if voice_client.append(source):
+                text = f'Now playing {source.title}!'
+            else:
+                text = f'Added to queue {source.title}!'
+            break
+        
+        await client.message_create(message.channel, text)
+
+    @Marisa.commands(separator='|', checks=[checks.owner_only()])
+    async def play_from(client, message, voice_channel: FlaggedAnnotation(ChannelVoice, ConverterFlag.channel_all)):
+        
+        while True:
+            self_guild = message.guild
+            if self_guild is None:
+                text = 'Not in guild.'
+                break
+            
+            other_guild = voice_channel.guild
+            if other_guild is None:
+                text = 'Other channel not in guild.'
+                break
+            
+            self_voice_client = client.voice_client_for(message)
+            if self_voice_client is None:
+                voice_state = self_guild.voice_states.get(message.author.id, None)
+                if voice_state is None:
+                    text = 'You are not at a voice channel.'
+                    break
+                
+                self_channel = voice_state.channel
+                if not self_channel.cached_permissions_for(client).can_connect:
+                    text = 'I have no permissions to connect to that channel'
+                    break
+                
+                try:
+                    self_voice_client = await client.join_voice_channel(self_channel)
+                except TimeoutError:
+                    text = 'Timed out meanwhile tried to connect.'
+                    break
+                except RuntimeError:
+                    text = 'The client cannot play voice, some libraries are not loaded'
+                    break
+            
+            other_voice_states = list(other_guild.voice_states.values())
+            for voice_state in other_voice_states:
+                if voice_state.user is not client:
+                    break
+            else:
+                text = 'No voice states in other guild.'
+                break
+            
+            try:
+                other_voice_client = client.voice_clients[other_guild.id]
+            except KeyError:
+                try:
+                    other_voice_client = await client.join_voice_channel(voice_channel)
+                except TimeoutError:
+                    text = 'Timed out meanwhile tried to connect.'
+                    break
+                except RuntimeError:
+                    text = 'The client cannot play voice, some libraries are not loaded'
+                    break
+            
+            mixer = MixerStream()
+            for voice_state in other_voice_states:
+                user = voice_state.user
+                if user is client:
+                    continue
+                
+                source = other_voice_client.listen_to(user, yield_decoded=True)
+                await mixer.add(source)
+            
+            if self_voice_client.append(mixer):
+                text = f'Now playing {mixer.title}!'
+            else:
+                text = f'Added to queue {mixer.title}!'
+            break
+        
+        await client.message_create(message.channel, text)

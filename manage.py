@@ -26,7 +26,6 @@ if (hata_path is not None) and (hata_path not in sys.path):
 del hata_path
 
 import hata
-
 # Import things depending on settings and which file is started up.
 #
 # As self host, turn `RUN_WEBAPP_AS_MAIN` on and run this file.
@@ -37,7 +36,7 @@ import hata
 if __name__ == '__main__':
     import bots
     hata.start_clients()
-
+    
     if config.RUN_WEBAPP_AS_MAIN:
         from web import WEBAPP
         WEBAPP.run()

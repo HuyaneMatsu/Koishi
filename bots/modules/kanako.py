@@ -37,7 +37,7 @@ KANAKO_COLOR = Color.from_tuple(FONT_COLOR)
 
 async def kanako_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('kanakogame',(
+    return Embed('kanakogame', (
         'Start a hiragana or a katakana quiz!\n'
         f'Usage: `{prefix}kanakogame (subcommand) ...`\n'
         'There can be only one game each channel.\n\n'
