@@ -2,9 +2,8 @@
 import re, os
 from itertools import cycle
 
-from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, LocalAudio, \
-    KOKORO
-
+from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO
+from hata.backend.utils import sortedlist
 from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 
@@ -20,7 +19,7 @@ VISITORS_ROLE = Role.precreate(669875992159977492)
 CHESUTO_BGM_MESSAGES = set()
 CHESUTO_BGM_CHANNEL = ChannelText.precreate(707892105749594202)
 CHESUTO_BGM_TRACKS = {}
-CHESUTO_BGM_TRACKS_SORTED = []
+CHESUTO_BGM_TRACKS_SORTED = sortedlist()
 BGM_SPLITPATTERN = re.compile('([^ _-]+)')
 BGM_NAME_PATTERN = re.compile('[a-z0-9]+',re.I)
 PERCENT_RP = re.compile('(\d*)[%]?')
@@ -672,7 +671,7 @@ class checklist:
         await Pagination(client,message.channel,result)
         return
     
-    checks=[checks.has_role(CARDS_ROLE)]
+    checks = [checks.has_role(CARDS_ROLE)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -768,7 +767,7 @@ class remove_card:
         await client.message_delete(message)
         return
     
-    checks=[checks.has_role(CARDS_ROLE)]
+    checks = [checks.has_role(CARDS_ROLE)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -797,7 +796,7 @@ Flan.events.message_delete.append(CHESUTO_BGM_CHANNEL, bgm_message_delete)
 Flan.events.message_edit.append(CHESUTO_BGM_CHANNEL, bgm_message_edit)
 
 class Track(object):
-    __slots__ = ('display_name', 'source_name', 'url', 'description')
+    __slots__ = ('display_name', 'source_name', 'url', 'description', 'id')
     @classmethod
     def create(cls, message):
         attachments = message.attachments
@@ -816,12 +815,9 @@ class Track(object):
         self.display_name = cls._convert_name(name)
         self.url = attachment.url
         self.description = message.content
+        self.id = message.id
         
-        index = self._relative_index()
-        if index != len(CHESUTO_BGM_TRACKS_SORTED) and CHESUTO_BGM_TRACKS_SORTED[index] == self:
-            return
-        
-        CHESUTO_BGM_TRACKS_SORTED.insert(index, self)
+        CHESUTO_BGM_TRACKS_SORTED.add(self)
         CHESUTO_BGM_MESSAGES.add(message)
         CHESUTO_BGM_TRACKS[message.id] = self
     
@@ -844,15 +840,10 @@ class Track(object):
             except OSError:
                 pass
         
-        index = self._relative_index()
-        
-        if len(CHESUTO_BGM_TRACKS_SORTED) == index:
-            return
-        
-        if CHESUTO_BGM_TRACKS_SORTED[index] != self:
-            return
-        
-        del CHESUTO_BGM_TRACKS_SORTED[index]
+        try:
+            CHESUTO_BGM_TRACKS_SORTED.remove(self)
+        except ValueError:
+            pass
     
     @staticmethod
     def edit(message):
@@ -862,20 +853,6 @@ class Track(object):
             return
         
         self.description = message.content
-    
-    def _relative_index(self):
-        bot = 0
-        top = len(CHESUTO_BGM_TRACKS_SORTED)
-        
-        while True:
-            if bot < top:
-                half = (bot+top)>>1
-                if CHESUTO_BGM_TRACKS_SORTED[half] < self:
-                    bot = half+1
-                else:
-                    top = half
-                continue
-            return bot
     
     @staticmethod
     def _convert_name(name):
@@ -905,19 +882,63 @@ class Track(object):
         return ' '.join(parts)
     
     def __gt__(self, other):
-        return self.source_name > other.source_name
+        self_source_name = self.source_name
+        other_source_name = other.source_name
+        
+        if self_source_name > other_source_name:
+            return True
+        
+        if self_source_name == other_source_name:
+            if self.id > other.id:
+                return True
+        
+        return False
     
     def __ge__(self, other):
-        return self.source_name >= other.source_name
+        self_source_name = self.source_name
+        other_source_name = other.source_name
+        
+        if self_source_name > other_source_name:
+            return True
+        
+        if self_source_name == other_source_name:
+            if self.id >= other.id:
+                return True
+        
+        return False
     
     def __eq__(self, other):
-        return self.source_name == other.source_name
+        if self.id == other.id:
+            return True
+        
+        return False
     
     def __le__(self, other):
-        return self.source_name <= other.source_name
+        self_source_name = self.source_name
+        other_source_name = other.source_name
+        
+        if self_source_name < other_source_name:
+            return True
+        
+        if self_source_name == other_source_name:
+            if self.id <= other.id:
+                return True
+        
+        return False
     
     def __lt__(self, other):
-        return self.source_name < other.source_name
+        self_source_name = self.source_name
+        other_source_name = other.source_name
+        
+        if self_source_name < other_source_name:
+            return True
+        
+        if self_source_name == other_source_name:
+            if self.id < other.id:
+                return True
+        
+        return False
+
 
 def get_bgm(content):
     if not content:
@@ -925,7 +946,7 @@ def get_bgm(content):
     
     if content.isnumeric():
         index = int(content)-1
-        if index >= 0 and index<len(CHESUTO_BGM_TRACKS_SORTED):
+        if index >= 0 and index < len(CHESUTO_BGM_TRACKS_SORTED):
             return CHESUTO_BGM_TRACKS_SORTED[index]
     
     parts = BGM_SPLITPATTERN.findall(content)
@@ -939,7 +960,7 @@ def get_bgm(content):
     while True:
         part = parts[index]
         part = part.replace('\'','')
-        index +=1
+        index += 1
         final.append(re.escape(part))
         
         if index == limit:
@@ -981,7 +1002,7 @@ def get_bgm(content):
 
 async def bgminfo_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('bgminfo',(
+    return Embed('bgminfo', (
         'Shows up the given bgm\'s description..\n'
         f'Usage: `{prefix}bgminfo <name>`\n'
         '\n'
@@ -1044,7 +1065,7 @@ class bgms:
         index = 0
         while index < limit:
             embed = Embed('Chesuto BGMs:', color=FLAN_HELP_COLOR, description=chunks[index])
-            index +=1
+            index += 1
             embed.add_footer(f'page {index}/{limit}')
             embeds.append(embed)
         
@@ -1052,7 +1073,7 @@ class bgms:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('bgms',(
+        return Embed('bgms', (
             'Lists the chesuto bgms.\n'
             f'Usage: `{prefix}bgms`'
             ), color=FLAN_HELP_COLOR)

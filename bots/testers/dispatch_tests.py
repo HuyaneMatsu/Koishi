@@ -4,7 +4,7 @@ from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed,
 from hata.discord.parsers import EVENTS, DEFAULT_EVENT
 from hata.ext.prettyprint import pretty_print
 from hata.ext.commands import Pagination, Command
-from hata.backend.dereaddons_local import method
+from hata.backend.utils import method
 
 DISPATCH_TESTS = eventlist(type_=Command)
 DISPTACH_COLOR = Color.from_rgb(120, 108, 128)

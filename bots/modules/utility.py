@@ -3,13 +3,14 @@ import re, sys, json
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from time import perf_counter
 
 from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, now_as_id, \
     elapsed_time, ActivityUnknown, Status, ActivityTypes, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, \
     cchunkify, Permission, ICON_TYPE_NONE, KOKORO, Future, ERROR_CODES, ChannelVoice, ChannelStore, ChannelThread, \
     DATETIME_FORMAT_CODE
 
-from hata.discord.others import DISCORD_EPOCH_START
+from hata.discord.utils import DISCORD_EPOCH_START
 from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination, Closer
 from hata.ext.prettyprint import pchunkify
 
@@ -43,6 +44,24 @@ class ping:
             f'Usage: `{prefix}ping`'
             ), color=UTILITY_COLOR)
 
+@UTILITY_COMMANDS.from_class
+class ping_http:
+    async def command(client, message):
+        start = perf_counter()
+        message = await client.message_create(message.channel, 'ping-pong')
+        delay = (perf_counter()-start)*1000.0
+        
+        await client.message_edit(message, '', Embed(f'{delay:.0f} ms', color=UTILITY_COLOR))
+    
+    aliases = ['pong-http']
+    category = 'UTILITY'
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('ping',(
+            'Do you wanna see how bad is my http connection to Discord?\n'
+            f'Usage: `{prefix}ping-http`'
+            ), color=UTILITY_COLOR)
 
 @UTILITY_COMMANDS.from_class
 class rawr:
@@ -151,7 +170,7 @@ class resend_webhook:
         else:
             webhook = await client.webhook_create(channel,'Love You')
     
-        await client.webhook_send(webhook,
+        await client.webhook_message_create(webhook,
             embed=target_message.embeds,
             name=target_message.author.name,
             avatar_url=target_message.author.avatar_url)
@@ -196,7 +215,7 @@ def add_activity(text, activity):
     text.append('\n')
     
     activity_type = activity.type
-    text.append(f'**>>** type : {("game", "stream", "spotify", "watching", "custom")[activity_type]} ({activity_type})\n')
+    text.append(f'**>>** type : {("game", "stream", "spotify", "watching", "custom", "competing")[activity_type]} ({activity_type})\n')
     if activity_type == ActivityTypes.custom:
         return
     
@@ -217,7 +236,7 @@ def add_activity(text, activity):
     state = activity
     if (state is not None):
         text.append(f'**>>** state : {state}\n')
-            
+    
     party = activity.party
     if (party is not None):
         id_ = activity.id
@@ -232,7 +251,7 @@ def add_activity(text, activity):
             
             if max_:
                 text.append(f'**>>** party max : {max_}\n')
-
+    
     assets = activity.assets
     if (assets is not None):
         image_large_url = activity.image_large_url
@@ -308,9 +327,12 @@ class user_info:
             f'Profile: {user:m}\n'
             f'ID: {user.id}')
         
-        try:
-            profile = user.guild_profiles[guild]
-        except KeyError:
+        if guild is None:
+            profile = None
+        else:
+            profile = user.guild_profiles.get(guild)
+        
+        if profile is None:
             if user.avatar_type is ICON_TYPE_NONE:
                 color = user.default_avatar.color
             else:
@@ -318,7 +340,7 @@ class user_info:
             embed.color = color
         
         else:
-            embed.color=user.color_at(guild)
+            embed.color = user.color_at(guild)
             roles = profile.roles
             if roles is None:
                 roles = '*none*'
@@ -326,7 +348,7 @@ class user_info:
                 roles.sort()
                 roles = ', '.join(role.mention for role in reversed(roles))
             
-            text=[]
+            text = []
             if profile.nick is not None:
                 text.append(f'Nick: {profile.nick}')
             
@@ -343,9 +365,9 @@ class user_info:
             embed.add_field('In guild profile','\n'.join(text))
         
         embed.add_thumbnail(user.avatar_url_as(size=128))
-    
+        
         if user.activity is not ActivityUnknown or user.status is not Status.offline:
-            text=[]
+            text = []
             
             if user.status is Status.offline:
                 text.append('Status : offline\n')
@@ -367,17 +389,17 @@ class user_info:
                 for index,activity in enumerate(user.activities, 1):
                     text.append(f'{index}.: ')
                     add_activity(text, activity)
-                    
+            
             embed.add_field('Status and Activity',''.join(text))
         await client.message_create(message.channel, embed=embed)
-        
-    name='user'
+    
+    name = 'user'
     category = 'UTILITY'
     aliases = ['profile']
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('user',(
+        return Embed('user', (
             'I show you some information about the given user.\n'
             'If you use it inside of a guild and the user is inside as well, '
             'will show information, about their guild profile too.\n'

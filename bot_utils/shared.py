@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from io import StringIO
-from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO
+from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory
 from hata.ext.commands import Pagination
 
 import config
@@ -23,6 +23,8 @@ ANNOUNCEMNETS_ROLE = Role.precreate(538397994421190657)
 WORSHIPPER_ROLE = Role.precreate(403586901803794432)
 DUNGEON_PREMIUM_ROLE = Role.precreate(585556522558554113)
 DUNGEON_INVITE = Invite.precreate('3cH2r5d')
+BOT_CHANNEL_CATEGORY = ChannelCategory.precreate(445191611727478795)
+STAFF_ROLE = Role.precreate(726171592509358093)
 
 DEFAULT_CATEGORY_NAME = 'Uncategorized'
 

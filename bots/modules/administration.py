@@ -5,7 +5,7 @@ from hata.ext.prettyprint import pchunkify
 
 from bot_utils.shared import KOISHI_PREFIX, permission_check_handler, not_guild_owner_handler, not_bot_owner_handler
 
-ADMINISTRATION_COLOR = Color.from_rgb(148,0,211)
+ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
 ADMINISTRATION_COMMANDS = eventlist(type_=Command)
 
 def setup(lib):
@@ -394,7 +394,7 @@ class emoji_role:
         
         embed.add_footer(footer)
         
-        await client.message_edit(message,embed=embed)
+        await client.message_edit(message, embed=embed)
     
     name = 'emoji-role'
     category = 'ADMINISTRATION'
@@ -474,7 +474,7 @@ class logs:
             except AttributeError:
                 pass
             
-            event=None
+            event = None
             break
     
         with client.keep_typing(message.channel):

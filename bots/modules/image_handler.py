@@ -24,10 +24,12 @@ IMAGE_COLOR = Color(0x5dc66f)
 IMAGE_COMMANDS = eventlist(type_=Command)
 
 def setup(lib):
+    load_images()
     Koishi.commands.extend(IMAGE_COMMANDS)
 
 def teardown(lib):
     Koishi.commands.unextend(IMAGE_COMMANDS)
+
 
 IMAGES_STATIC = []
 IMAGES_ANIMATED = []
@@ -84,9 +86,6 @@ class image_details(set):
     
     __str__ = __repr__
 
-ITGHL['pat'] = 0
-ITGHL['hug'] = 1
-
 IMAGE_FORMATS_STATIC = {'jpg', 'png', 'bmp', 'jpeg'}
 IMAGE_FORMATS_ANIMATED = {'mp4', 'gif'}
 
@@ -95,8 +94,6 @@ IMAGE_PATH = join(KOISHI_PATH, 'images')
 def load_images():
     for filename in os.listdir(IMAGE_PATH):
         image_details(filename)
-
-load_images()
 
 async def image_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -123,13 +120,13 @@ async def upload_description(client, message):
             'Owner only!')
 
 
-RESERVED_TAGS = {'animated','static','count','index','hex',}
+RESERVED_TAGS = {'animated', 'static', 'count', 'index', 'hex',}
 
-@IMAGE_COMMANDS(category='UTILITY', description=image_description)
-async def image(client,message,content):
+@IMAGE_COMMANDS(category='UTILITY', description=image_description, checks=[checks.guild_only()])
+async def image(client, message, content):
     result = process_on_command_image(content)
     if type(result) is str:
-        await client.message_create(message.channel,result)
+        await client.message_create(message.channel, result)
     else:
         with client.keep_typing(message.channel):
             with (await ReuAsyncIO(join(IMAGE_PATH, result.path))) as image:
@@ -432,52 +429,63 @@ def generate_cute_content(client, message, action):
     
     return ''.join(content)
 
+
 class image_with_tag:
-    __slots__ = ('name', 'tag_id', 'name_form__ing', 'name_form__s')
-    def __init__(self, name, name_form__ing, name_form__s):
-        self.tag_id = ITGHL[name]
-        self.name = name
+    __slots__ = ('__name__', 'tag_id', 'name_form__ing', 'name_form__s', '__doc__')
+    def __init__(self, name, name_form__ing, name_form__s, docs):
+        try:
+            tag_id = ITGHL[name]
+        except KeyError:
+            tag_id = len(ITGHL)
+            ITGHL[name] = tag_id
+        
+        self.tag_id = tag_id
+        self.__name__ = name
         self.name_form__ing = name_form__ing
         self.name_form__s = name_form__s
-    
+        self.__doc__ = docs
+        
     async def __call__(self, client, message):
         image = random_with_tag(self.tag_id)
         
         if image is None:
             await client.message_create(message.channel, f'No {self.name_form__ing} image is added :\'C')
         else:
-            embed = Embed(description=generate_cute_content(client, message, self.name_form__s),
+            embed = Embed(generate_cute_content(client, message, self.name_form__s),
                 color=(message.id>>22)&0xffffff).add_image(f'attachment://{os.path.basename(image.path)}')
             
             with client.keep_typing(message.channel):
                 with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
                     await client.message_create(message.channel, embed=embed, file=file)
 
-@IMAGE_COMMANDS.from_class        
-class pat:
-    command = image_with_tag('pat', 'patting', 'pats')
-    
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        
-        return Embed('pat', (
-            'Pat pat pat pat!\n'
-            f'Usage : `{prefix}pat`'
-                ), color=IMAGE_COLOR)
 
+IMAGE_COMMANDS(
+    image_with_tag('pat', 'patting', 'pats', 'Do you like pats as well?'),
+    category = 'UTILITY',
+    checks = [checks.guild_only()],
+    aliases = ['pet'],
+        )
 
-@IMAGE_COMMANDS.from_class
-class hug:
-    command = image_with_tag('hug', 'hugging', 'hugs')
-    
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        
-        return Embed('hug', (
-            'Huh.. Huggu? HUGG YOUUU!!!\n'
-            f'Usage : `{prefix}hug`'
-                ), color=IMAGE_COLOR)
+IMAGE_COMMANDS(
+    image_with_tag('hug', 'hugging', 'hugs', 'Huh.. Huggu? HUGG YOUUU!!!'),
+    category = 'UTILITY',
+    checks = [checks.guild_only()],
+        )
+
+IMAGE_COMMANDS(
+    image_with_tag('kiss', 'kissing', 'kisses', 'If you really really like your onee, give her a kiss <3'),
+    category = 'UTILITY',
+    checks = [checks.guild_only()],
+        )
+
+IMAGE_COMMANDS(
+    image_with_tag('slap', 'slapping', 'slaps', 'Slapping others is not nice.'),
+    category = 'UTILITY',
+    checks = [checks.guild_only()],
+        )
+
+IMAGE_COMMANDS(
+    image_with_tag('lick', 'licking', 'licks', 'Licking is a favored activity of cat girls.'),
+    category = 'UTILITY',
+    checks = [checks.guild_only()],
+        )

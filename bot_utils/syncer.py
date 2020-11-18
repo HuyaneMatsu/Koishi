@@ -32,6 +32,7 @@ IGNORED_NAMES = {
     'images',
     'library',
     'chesuto_data',
+    'channel_names.csv',
         }
 
 def flatten_directory(path, name, access_path):

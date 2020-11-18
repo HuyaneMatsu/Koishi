@@ -217,7 +217,7 @@ class auto_pyramid_u:
             return
         
         for user, count in zip(selected_users, chain(range(1, size), range(size, 0, -1))):
-            await client.webhook_send(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)), name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
+            await client.webhook_message_create(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)), name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
     
     checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
     

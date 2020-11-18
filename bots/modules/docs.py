@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 from hata import Color, Task, Embed, KOKORO, eventlist
 from hata.ext.commands import ChooseMenu, Pagination, Command
-from hata.discord.others import from_json, chunkify
+from hata.discord.utils import from_json, chunkify
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, QualPath, FolderedUnit, search_paths
 
 from bot_utils.shared import SATORI_HELP_COLOR

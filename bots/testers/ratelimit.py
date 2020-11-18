@@ -12,13 +12,13 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji
 
-from hata.backend.dereaddons_local import _spaceholder, change_on_switch
+from hata.backend.utils import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
 from hata.backend.hdrs import DATE, METH_PATCH, METH_GET, METH_DELETE, METH_POST, METH_PUT, AUTHORIZATION, \
     CONTENT_TYPE
 from hata.backend.http import RequestCM
 from hata.backend.quote import quote
-from hata.discord.others import to_json, from_json, image_to_base64, Discord_hdrs
+from hata.discord.utils import to_json, from_json, image_to_base64, Discord_hdrs
 from hata.discord.guild import create_partial_guild, GuildDiscovery
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
@@ -42,15 +42,15 @@ def parsedate_to_datetime(data):
     *dtuple, tz = _parsedate_tz(data)
     if tz is None:
         return datetime(*dtuple[:6])
-    return datetime(*dtuple[:6],tzinfo=timezone(timedelta(seconds=tz)))
+    return datetime(*dtuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
 
 def parse_header_ratelimit(headers):
-    delay1=( \
-        datetime.fromtimestamp(float(headers[RATELIMIT_RESET]),timezone.utc)
+    delay1 = ( \
+        datetime.fromtimestamp(float(headers[RATELIMIT_RESET]), timezone.utc)
         -parsedate_to_datetime(headers[DATE])
             ).total_seconds()
     delay2=float(headers[RATELIMIT_RESET_AFTER])
-    return (delay1 if delay1<delay2 else delay2)
+    return (delay1 if delay1 < delay2 else delay2)
 
 async def bypass_request(client,method,url,data=None,params=None,reason=None,headers=None,decode=True,):
     self=client.http
@@ -58,25 +58,25 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
         headers=self.headers.copy()
     
     if CONTENT_TYPE not in headers and data and isinstance(data,(dict,list)):
-        headers[CONTENT_TYPE]='application/json'
+        headers[CONTENT_TYPE] = 'application/json'
         #converting data to json
         data=to_json(data)
 
     if reason:
-        headers['X-Audit-Log-Reason']=quote(reason)
+        headers['X-Audit-Log-Reason'] = quote(reason)
     
-    try_again=5
+    try_again = 5
     while try_again:
-        try_again-=1
+        try_again -= 1
         with RLTPrinterBuffer() as buffer:
             buffer.write(f'Request started : {url} {method}\n')
             
         try:
-            async with RequestCM(self._request(method,url,headers,data,params)) as response:
+            async with RequestCM(self._request(method, url, headers, data, params)) as response:
                 if decode:
                     response_data = await response.text(encoding='utf-8')
                 else:
-                    response_data=''
+                    response_data = ''
         except OSError as err:
             #os cant handle more, need to wait for the blocking job to be done
             await sleep(0.1, self.loop)
@@ -1427,11 +1427,27 @@ async def webhook_edit_token(client,webhook,name,): #keep it short
         webhook.url,
         data={'name':name},headers={},)
 
-async def webhook_execute(client,webhook,content,wait=False,):
-    return await bypass_request(client,METH_POST,
-        f'{webhook.url}?wait={wait:d}',
-        data={'content':content},headers={},)
+async def webhook_execute(client, webhook, content,):
+    data = await bypass_request(client,METH_POST,
+        f'{webhook.url}?wait=1',
+        data={'content':content}, headers={},)
+
+    channel = webhook.channel
+    if channel is None:
+        channel = ChannelText.precreate(int(data['channel_id']))
     
+    return channel._create_new_message(data)
+
+async def webhook_message_edit(client, webhook, message, content):
+    return await bypass_request(client, METH_PATCH,
+        f'{webhook.url}/messages/{message.id}',
+        data={'content':content}, headers={},)
+
+async def webhook_message_delete(client, webhook, message):
+    return await bypass_request(client, METH_DELETE,
+        f'{webhook.url}/messages/{message.id}',
+        headers={},)
+
 async def guild_users(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
@@ -3560,4 +3576,57 @@ async def ratelimit_test0088(client, message):
     with RLTCTX(client, channel, 'ratelimit_test0088') as RLT:
         await channel_private_create(client, message.author)
 
+@RATELIMIT_COMMANDS
+async def ratelimit_test0089(client, message):
+    """
+    Creates a message with a webhook, then edits it.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0089') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_manage_webhooks:
+            await RLT.send('I need manage webhooks permission to complete this command.')
+        
+        channel = message.channel
+        webhooks = await client.webhook_get_channel(channel)
+        for webhook in webhooks:
+            if webhook.type is WebhookType.bot:
+                executor_webhook = webhook
+                break
+        
+        else:
+            executor_webhook = await client.webhook_create(channel, 'testing')
+        
+        new_message = await webhook_execute(client, executor_webhook, 'ayaya')
+        await webhook_message_edit(client, executor_webhook, new_message, 'nya')
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0090(client, message):
+    """
+    Creates a message with a webhook, then deletes it.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0090') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_manage_webhooks:
+            await RLT.send('I need manage webhooks permission to complete this command.')
+        
+        channel = message.channel
+        webhooks = await client.webhook_get_channel(channel)
+        for webhook in webhooks:
+            if webhook.type is WebhookType.bot:
+                executor_webhook = webhook
+                break
+        
+        else:
+            executor_webhook = await client.webhook_create(channel, 'testing')
+        
+        new_message = await webhook_execute(client, executor_webhook, 'ayaya')
+        await webhook_message_delete(client, executor_webhook, new_message)
 

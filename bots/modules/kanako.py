@@ -709,19 +709,19 @@ class embedination(object):
         if self.page==page:
             return
 
-        self.page=page
-        self.task_flag=GUI_STATE_SWITCHING_PAGE
+        self.page = page
+        self.task_flag = GUI_STATE_SWITCHING_PAGE
         try:
-            await client.message_edit(message,embed=self.pages[page])
+            await client.message_edit(message, embed=self.pages[page])
         except BaseException as err:
-            self.task_flag=GUI_STATE_CANCELLED
+            self.task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
-            if isinstance(err,ConnectionError):
+            if isinstance(err, ConnectionError):
                 # no internet
                 return
             
-            if isinstance(err,DiscordException):
+            if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
@@ -729,7 +729,7 @@ class embedination(object):
                     return
             
             # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
-            await client.events.error(client,f'{self!r}.__call__',err)
+            await client.events.error(client, f'{self!r}.__call__', err)
             return
         
         self.task_flag=GUI_STATE_READY
