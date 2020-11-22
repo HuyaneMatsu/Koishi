@@ -237,8 +237,8 @@ def setup(lib):
     
     Koishi.commands.extend(CHANNEL_NAME_COMMANDS)
 
-    module_locals.handle = KOKORO.call_at(
-        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp()+DAY, do_rename)
+    module_locals.handle = KOKORO.call_later(
+        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp()-time_now()+DAY, do_rename)
 
 def teardown(lib):
     Koishi.commands.unextend(CHANNEL_NAME_COMMANDS)
