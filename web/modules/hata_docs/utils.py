@@ -196,7 +196,11 @@ def get_searched_info(path):
             del url_parts[-2:]
     
     url = ''.join(url_parts)
-    return order_prio, name, url, type_, unit.preview
+    if unit is None:
+        preview = None
+    else:
+        preview = unit.preview
+    return order_prio, name, url, type_, preview
 
 
 def build_js_structure(structure):

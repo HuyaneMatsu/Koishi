@@ -131,7 +131,7 @@ async def daily(client, message, target_user: Converter(
                 results = await response.fetchall()
                 if results:
                     source_result = results[0]
-                    daily_next=source_result.daily_next
+                    daily_next = source_result.daily_next
                     if daily_next > now:
                         embed = Embed(
                             'You already claimed your daily love for today~',
@@ -141,7 +141,7 @@ async def daily(client, message, target_user: Converter(
                     daily_streak = source_result.daily_streak
                     daily_next = daily_next+DAILY_STREAK_BREAK
                     if daily_next < now:
-                        daily_streak=daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
+                        daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
                         if daily_streak < 0:
                             daily_streak = 0
                         streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
@@ -271,21 +271,55 @@ async def hearts(client,message, target_user: Converter('user', default_code='me
         results = await response.fetchall()
     
     if results:
-        total_love = results[0].total_love
+        result = results[0]
+        total_love = result.total_love
+        daily_next = result.daily_next
+        daily_streak = result.daily_streak
+        now = datetime.utcnow()
+        if daily_next > now:
+            ready_to_claim = False
+        else:
+            ready_to_claim = True
+            
+            daily_next = daily_next+DAILY_STREAK_BREAK
+            if daily_next < now:
+                daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
+                if daily_streak < 0:
+                    daily_streak = 0
+    
     else:
         total_love = 0
-
-    if message.author is target_user:
-        embed = Embed(
-            f'You have {total_love} {CURRENCY_EMOJI:e}',
-            '' if total_love else 'Awww, you seem so lonely..',
-            GAMBLING_COLOR)
+        daily_streak = 0
+        ready_to_claim = True
+    
+    is_own = ( message.author is target_user)
+    
+    if is_own:
+        title_prefix = 'You have'
     else:
-        embed = Embed(
-            f'{target_user:f} has {total_love} {CURRENCY_EMOJI:e}',
-            '' if total_love else 'Awww, they seem so lonely..',
-            GAMBLING_COLOR)
+        title_prefix = target_user.full_name+' has'
+    
+    title = f'{title_prefix} {total_love} {CURRENCY_EMOJI:e}'
+    
+    if total_love == 0 and daily_streak == 0:
+        if is_own:
+            description = 'Awww, you seem so lonely..'
+        else:
+            description = 'Awww, they seem so lonely..'
+    elif daily_streak:
+        if is_own:
+            if ready_to_claim:
+                description_postfix = 'and you are ready to claim your daily'
+            else:
+                description_postfix = 'keep up the good work'
+            description = f'You are on a {daily_streak} day streak, {description_postfix}!'
         
+        else:
+            description = f'They are on a {daily_streak} day streak, hope they will keep up their good work.'
+    else:
+        description = None
+    
+    embed = Embed( title, description, color=GAMBLING_COLOR)
     await client.message_create(message.channel, embed=embed)
 
 
@@ -523,8 +557,8 @@ class heartevent(object):
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
         results = await response.fetchall()
         if results:
-            result=results[0]
-            to_execute=CURRENCY_TABLE.update().values(
+            result = results[0]
+            to_execute = CURRENCY_TABLE.update().values(
                 total_love  = result.total_love+self.amount,
                     ).where(currency_model.user_id==user_id)
         else:

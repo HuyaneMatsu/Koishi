@@ -657,7 +657,7 @@ async def test_get_integrations(client, message):
     if guild is None:
         return
     
-    integrations = await client.integration_get_all(guild, include_applications=True)
+    integrations = await client.integration_get_all(guild)
     pages = [Embed(description=chunk) for chunk in pchunkify(integrations)]
     await Pagination(client, message.channel, pages,)
 
@@ -1278,3 +1278,18 @@ async def test_webhook_message_edit_9(client, message):
     
     new_message = await client.webhook_message_create(executor_webhook, embed=Embed('cake'), wait=True)
     await client.webhook_message_edit(executor_webhook, new_message, embed=Embed('cake'))
+
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def update_and_display_roles(client, message):
+    """
+    Syncs the guild's roles then displays them.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    await client.guild_sync_roles(guild)
+    
+    pages = [Embed(description=chunk) for chunk in pchunkify(guild.role_list, detailed=False)]
+    await Pagination(client, message.channel, pages,)

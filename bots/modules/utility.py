@@ -416,7 +416,7 @@ BLACK_HEART = BUILTIN_EMOJIS['black_heart']
 async def guild_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
     return Embed('user', (
-        'Do you want me to list, some information about this guild?\n'
+        'Do you want me to list some information about this guild?\n'
         f'Usage: `{prefix}guild <section>`\n'
         '\n'
         'You can also specify which field you wanna display from the following ones:\n'
