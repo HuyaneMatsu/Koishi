@@ -17,11 +17,11 @@ SATORI_PREFIX = '&'             # default prefix (str)
 
 FLAN_TOKEN = ''                 # bot token (str) for third bot.
 FLAN_ID = 0                     # bot id (int) for third bot, can be 0.
-FLAN_PREFIX = '\\'              # default prefix. (str)
+FLAN_PREFIX = '/'               # default prefix. (str)
 
 MARISA_TOKEN = ''               # bot token (str) for third bot.
 MARISA_ID = 0                   # bot id (int) for 4th bot, can be 0.
-MARISA_PREFIX  = '*'            # default prefix (str)
+MARISA_PREFIX  = '$'            # default prefix (str)
 
 AUDIO_PLAY_POSSIBLE = False     # Whether FFmpeg and other voice requirement as satisfied
 AUDIO_PATH = None               # path for local audio files, can be None
