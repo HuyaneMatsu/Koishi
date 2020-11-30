@@ -343,7 +343,8 @@ async def docs_help(client, message):
 
 async def docs(client, message, search_for:str=None):
     if (search_for is None) or (len(search_for) < 4):
-        await docs_help(client, message)
+        embed = await docs_help(client, message)
+        await Closer(client, message.channel, embed)
         return
     
     async with client.http.get(HATA_DOCS_SEARCH_API, params={'search_for': search_for}) as response:
