@@ -360,6 +360,7 @@ async def docs(client, message, search_for:str=None):
     for data in datas:
         section_parts.append('[**')
         name = data['name']
+        name = name.replace('_', '\_')
         section_parts.append(name)
         section_parts.append('**](')
         section_parts.append(HATA_DOCS_BASE_URL)
@@ -371,6 +372,7 @@ async def docs(client, message, search_for:str=None):
         section_parts.append('*')
         preview = data.get('preview')
         if (preview is not None):
+            preview = preview.replace('_', '\_')
             section_parts.append('\n')
             section_parts.append(preview)
         
