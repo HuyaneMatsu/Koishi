@@ -9,7 +9,7 @@ from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath,
 
 map_module('hata')
 
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 
 from .forms import SearchForm
 from .utils import get_backpath, get_searched_info, UNIT_TYPE_ORDER_PRIO_TYPE, build_js_structure, build_html_structure
@@ -108,12 +108,12 @@ def search():
                 return redirect(url)
             
             found = []
-            for path in results:
-                found.append(get_searched_info(path))
-            found.sort()
+            for index, path in enumerate(results):
+                found.append(get_searched_info(path, index))
+            found.sort(key=lambda x: x[0])
             
             first = found[0]
-            if first[0] == UNIT_TYPE_ORDER_PRIO_TYPE and first[1] == search_for:
+            if first[3] == 'class' and first[1] == search_for:
                 url = first[2]
                 return redirect(url)
     
@@ -121,3 +121,47 @@ def search():
         found = None
     
     return render_template('hata_docs_search.html', search_form=search_form, found=found)
+
+
+DEFAULT_LIMIT = 100
+
+@ROUTES.route('api/v1/search')
+def api_search():
+    query_parameters = request.args
+    
+    search_for = query_parameters.get('search_for')
+    limit = query_parameters.get('limit')
+    
+    response = []
+    
+    if (search_for is not None):
+        if limit is None:
+            limit = DEFAULT_LIMIT
+        else:
+            try:
+                limit = int(limit)
+            except ValueError:
+                limit = DEFAULT_LIMIT
+            else:
+                if limit <= 0:
+                    limit = DEFAULT_LIMIT
+        
+        found = []
+        for index, path in  enumerate(search_paths(search_for, limit=limit)):
+            found.append(get_searched_info(path, index))
+        found.sort(key=lambda x: x[0])
+        
+        for order_prio, name, url, type_, preview in found:
+            element = {
+                'name' : name,
+                'url' : url,
+                'type' : type_,
+                    }
+            
+            if (preview is not None):
+               element['preview'] = preview
+            
+            response.append(element)
+    
+    
+    return jsonify(response)

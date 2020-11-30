@@ -27,8 +27,7 @@ class clear:
             await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
     
     category = 'ADMINISTRATION'
-    #checks = [checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
-    checks = [checks.owner_only()]
+    checks = [checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

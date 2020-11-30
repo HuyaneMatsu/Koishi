@@ -120,7 +120,7 @@ class reload:
                 break
             
             if extension.locked:
-                result = 'The extension is locked, propably for reason.'
+                result = 'The extension is locked, probably for reason.'
                 break
             
             try:
@@ -163,7 +163,7 @@ class unload:
                 break
             
             if extension.locked:
-                result = 'The extension is locked, propably for reason.'
+                result = 'The extension is locked, probably for reason.'
                 break
             
             try:

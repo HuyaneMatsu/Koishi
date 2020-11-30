@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 import re, sys
+from math import ceil
 
 from bs4 import BeautifulSoup
 
 from hata import Color, Task, Embed, KOKORO, eventlist
-from hata.ext.commands import ChooseMenu, Pagination, Command
+from hata.ext.commands import ChooseMenu, Pagination, Command, Closer
 from hata.discord.utils import from_json, chunkify
-from hata.ext.patchouli import map_module, MAPPED_OBJECTS, QualPath, FolderedUnit, search_paths
 
 from bot_utils.shared import SATORI_HELP_COLOR
 
 WORDMATCH_RP = re.compile('[^a-zA-z0-9]+')
 WIKI_COLOR = Color.from_rgb(48, 217, 255)
+HATA_DOCS_BASE_URL = 'https://huyanematsu.pythonanywhere.com/docs/'
+HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
 
 DOCS_COMMANDS = eventlist(type_=Command)
 
@@ -21,8 +23,6 @@ def setup(lib):
 def teardown(lib):
     Satori.commands.unextend(DOCS_COMMANDS)
 
-map_module('hata')
-
 async def wiki_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
     return Embed('wiki',
@@ -30,7 +30,7 @@ async def wiki_description(client, message):
         'was found, shows that instantly.\n'
         f'Usage: `{prefix}wiki *search-term*`',
         color=WIKI_COLOR)
-    
+
 @DOCS_COMMANDS(description=wiki_description)
 async def wiki(client, message, content):
     if not content:
@@ -325,7 +325,7 @@ async def download_wiki_page(client, title_, url):
     limit = len(pages)
     while True:
         embed = pages[index]
-        index +=1
+        index += 1
         embed.add_footer(f'Page: {index}/{limit}.')
         
         if index == limit:
@@ -333,31 +333,6 @@ async def download_wiki_page(client, title_, url):
     
     pages[0].url = url
     return pages
-
-
-async def docs_selecter(client, channel, message, name, path):
-    unit = MAPPED_OBJECTS[path]
-    chunks = unit.embed_sized
-    
-    title_parts = []
-    path = unit.path - unit.name
-    if path:
-        title_parts.append('*')
-        title_parts.append(str(path))
-        title_parts.append('*.')
-    
-    title_parts.append('**')
-    title_parts.append(unit.name)
-    title_parts.append('**')
-    
-    title = ''.join(title_parts).replace('_', '\_')
-    
-    if chunks is None:
-        embeds = [Embed(title, '*The given object has no description included*', color=WIKI_COLOR)]
-    else:
-        embeds = [Embed(title, chunk, color=WIKI_COLOR) for chunk in chunks]
-    
-    await Pagination(client, channel, embeds, message=message)
 
 async def docs_help(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -371,80 +346,74 @@ async def docs(client, message, search_for:str=None):
         await docs_help(client, message)
         return
     
-    paths = search_paths(search_for)
+    async with client.http.get(HATA_DOCS_SEARCH_API, params={'search_for': search_for}) as response:
+        datas = await response.json()
     
-    if not paths:
-        embeds = [Embed(f'No search result for: `{search_for}`', color=WIKI_COLOR)]
-        await Pagination(client, message.channel, embeds)
+    if not datas:
+        embed = Embed(f'No search result for: `{search_for}`', color=WIKI_COLOR)
+        await Closer(client, message.channel, embed)
         return
     
-    results = []
+    sections = []
+    section_parts = []
+    for data in datas:
+        section_parts.append('[**')
+        name = data['name']
+        section_parts.append(name)
+        section_parts.append('**](')
+        section_parts.append(HATA_DOCS_BASE_URL)
+        url = data['url']
+        section_parts.append(url)
+        section_parts.append(') *')
+        type_ = data['type']
+        section_parts.append(type_)
+        section_parts.append('*')
+        preview = data.get('preview')
+        if (preview is not None):
+            section_parts.append('\n')
+            section_parts.append(preview)
+        
+        section = ''.join(section_parts)
+        sections.append(section)
+        section_parts.clear()
     
-    for path in paths:
-        name = str(path).replace('_', '\_')
-        results.append((name, path))
     
-    embed = Embed(title=f'Search results for `{search_for}`', color=WIKI_COLOR)
-    await ChooseMenu(client, message.channel, results, docs_selecter, embed=embed, prefix='@')
+    descriptions = []
+    description_parts = []
+    description_length = 0
+    
+    for section in sections:
+        section_length = len(section)
+        description_length += section_length
+        if description_length > 2000:
+            description = ''.join(description_parts)
+            descriptions.append(description)
+            description_parts.clear()
+            
+            description_parts.append(section)
+            description_length = section_length
+            continue
+        
+        if description_parts:
+            description_parts.append('\n\n')
+            description_length += 2
+        
+        description_parts.append(section)
+        continue
+    
+    if description_parts:
+        description = ''.join(description_parts)
+        descriptions.append(description)
+    
+    
+    title = f'Search results for guild `{search_for}`'
+    
+    embeds = []
+    for index, description in enumerate(descriptions, 1):
+        embed = Embed(title, description, color=WIKI_COLOR).add_footer(f'Page {index}/{len(descriptions)}')
+        embeds.append(embed)
+    
+    await Pagination(client, message.channel, embeds)
 
 DOCS_COMMANDS(docs, description=docs_help, aliases=['d'])
 
-
-async def list_docs_selecter(client, channel, message, name, path):
-    unit = MAPPED_OBJECTS[path]
-    lines = []
-    for name in unit.references:
-        name = name.replace('_', '\_')
-        lines.append('**¤** '+name)
-    
-    chunks = chunkify(lines)
-    
-    title_parts = []
-    path = unit.path - unit.name
-    if path:
-        title_parts.append('*')
-        title_parts.append(str(path))
-        title_parts.append('*.')
-    
-    title_parts.append('**')
-    title_parts.append(unit.name)
-    title_parts.append('**')
-    
-    title = ''.join(title_parts).replace('_', '\_')
-    
-    if chunks is None:
-        embeds = [Embed(title, '*The object has no attributes*', color=WIKI_COLOR)]
-    else:
-        embeds = [Embed(title, chunk, color=WIKI_COLOR) for chunk in chunks]
-    
-    await Pagination(client, channel, embeds, message=message)
-
-async def list_docs_help(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('list-docs', (
-        'Searchers the given type or module in hata docs.\n'
-        f'Usage: `{prefix}list-docs <search_for>`'
-            ), color=SATORI_HELP_COLOR)
-
-async def list_docs(client, message, search_for:str=None):
-    if (search_for is None) or (len(search_for)<4):
-        await list_docs_help(client, message)
-        return
-    
-    paths = search_paths(search_for)
-    
-    if not paths:
-        embeds = [Embed(f'No search result for: `{search_for}`', color=WIKI_COLOR)]
-        await Pagination(client, message.channel, embeds)
-        return
-    
-    results = []
-    
-    for path in paths:
-        name = str(path).replace('_', '\_')
-        results.append((name, path))
-    
-    embed = Embed(title=f'Search results for `{search_for}`', color=WIKI_COLOR)
-    await ChooseMenu(client, message.channel, results, list_docs_selecter, embed=embed, prefix='@')
-
-DOCS_COMMANDS(list_docs, description=list_docs_help, aliases=['lsd'])

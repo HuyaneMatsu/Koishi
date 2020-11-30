@@ -8,16 +8,16 @@ from hata.ext.patchouli.parser import ATTRIBUTE_SECTION_NAME_RP
 
 UNIT_TYPE_ORDER_PRIO_TYPE = 0
 
-UNIT_TYPE_ORDER_PRIO_FUNCTION = 10
-UNIT_TYPE_ORDER_PRIO_PROPERTY = 11
-UNIT_TYPE_ORDER_PRIO_METHOD = 12
+UNIT_TYPE_ORDER_PRIO_MODULE = 10
 
-UNIT_TYPE_ORDER_PRIO_INSTANCE_ATTRIBUTE = 20
-UNIT_TYPE_ORDER_PRIO_CLASS_ATTRIBUTE = 21
+UNIT_TYPE_ORDER_PRIO_FUNCTION = 8
+UNIT_TYPE_ORDER_PRIO_PROPERTY = 24
+UNIT_TYPE_ORDER_PRIO_METHOD = 16
 
-UNIT_TYPE_ORDER_PRIO_MODULE = 30
+UNIT_TYPE_ORDER_PRIO_INSTANCE_ATTRIBUTE = 24
+UNIT_TYPE_ORDER_PRIO_CLASS_ATTRIBUTE = 30
 
-UNIT_TYPE_ORDER_PRIO_NONE = 100
+UNIT_TYPE_ORDER_PRIO_NONE = 40
 
 UNIT_TYPE_ORDER_PRIO_TYPE_NAME_RELATION = {
     ModuleUnit : ('module', UNIT_TYPE_ORDER_PRIO_MODULE),
@@ -68,7 +68,7 @@ def get_backpath(unit):
     
     return ''.join(result)
 
-def get_searched_info(path):
+def get_searched_info(path, order_prio_base=0):
     unit = MAPPED_OBJECTS.get(path)
     if unit is None:
         type_ = None
@@ -200,7 +200,7 @@ def get_searched_info(path):
         preview = None
     else:
         preview = unit.preview
-    return order_prio, name, url, type_, preview
+    return order_prio_base+order_prio, name, url, type_, preview
 
 
 def build_js_structure(structure):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, re
-join=os.path.join
+join = os.path.join
 from threading import current_thread
 from time import time as time_now
 from email._parseaddr import _parsedate_tz
@@ -10,7 +10,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     alchemy_incendiary, Webhook, eventlist, EventThread, DiscordException, BUILTIN_EMOJIS, Message, ChannelText, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji
+    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO
 
 from hata.backend.utils import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -384,7 +384,7 @@ async def reaction_add(client,message,emoji,):
     message_id=message.id
     reaction=emoji.as_reaction
     return await bypass_request(client,METH_PUT,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
         )
         
 async def reaction_delete(client,message,emoji,user,):
@@ -393,7 +393,7 @@ async def reaction_delete(client,message,emoji,user,):
     reaction=emoji.as_reaction
     user_id=user.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/{user_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/{user_id}',
         )
 
 async def reaction_delete_own(client,message,emoji,):
@@ -401,14 +401,14 @@ async def reaction_delete_own(client,message,emoji,):
     message_id=message.id
     reaction=emoji.as_reaction
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
         )
 
 async def reaction_clear(client,message,):
     channel_id=message.channel.id
     message_id=message.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions',)
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}/reactions',)
 
 async def reaction_users(client,message,emoji,):
     if message.reactions is None:
@@ -417,26 +417,28 @@ async def reaction_users(client,message,emoji,):
     message_id=message.id
     reaction=emoji.as_reaction
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/reactions/{reaction}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}/reactions/{reaction}',
         params={'limit':100},)
 
-async def message_create(client,channel,content=None,embed=None,):
-    data={}
+async def message_create(client, channel, content=None, embed=None,):
+    data = {}
     if content is not None and content:
-        data['content']=content
+        data['content'] = content
     if embed is not None:
-        data['embed']=embed.to_data()
-    channel_id=channel.id
+        data['embed'] = embed.to_data()
+    channel_id = channel.id
+    
     data = await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages',
         data,)
-    return Message.new(data,channel)
+    
+    return channel._create_new_message(data)
 
 async def message_delete(client,message,):
     channel_id=message.channel.id
     message_id=message.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}',)
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}',)
 
 async def message_delete_multiple(client,messages,):
     if len(messages)==0:
@@ -446,7 +448,7 @@ async def message_delete_multiple(client,messages,):
     data={'messages':[message.id for message in messages]}
     channel_id=messages[0].channel.id
     return await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/bulk-delete',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/bulk-delete',
         data,)
 
 async def message_edit(client,message,content=None,embed=None,):
@@ -458,39 +460,39 @@ async def message_edit(client,message,content=None,embed=None,):
     channel_id=message.channel.id
     message_id=message.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}',
         data,)
 
 async def message_pin(client,message,):
     channel_id=message.channel.id
     message_id=message.id
     return await bypass_request(client,METH_PUT,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/pins/{message_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/pins/{message_id}',
         )
 
 async def message_unpin(client,message,):
     channel_id=message.channel.id
     message_id=message.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/pins/{message_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/pins/{message_id}',
         )
 
 async def message_pinneds(client,channel,):
     channel_id=channel.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/pins',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/pins',
         )
 
 async def message_logs(client,channel,):
     channel_id = channel.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages',
         params = {'limit': 1},)
 
 async def message_get(client, channel, message_id,):
     channel_id = channel.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}',
         )
 
 async def download_attachment(client,attachment,):
@@ -505,7 +507,7 @@ async def download_attachment(client,attachment,):
 async def typing(client,channel,):
     channel_id=channel.id
     return await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/typing',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/typing',
         )
 
 async def client_edit(client,name='',avatar=b'',):
@@ -520,12 +522,12 @@ async def client_edit(client,name='',avatar=b'',):
     elif avatar:
         avatar_data=image_to_base64(avatar)
     return await bypass_request(client,METH_PATCH,
-        'https://discordapp.com/api/v7/users/@me',
+        'https://discordapp.com/api/v8/users/@me',
         data,)
 
 async def client_connections(client,):
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me/connections',
+        'https://discordapp.com/api/v8/users/@me/connections',
         )
 
 async def client_edit_nick(client,guild,nick,):
@@ -536,22 +538,22 @@ async def client_edit_nick(client,guild,nick,):
 
 async def client_gateway_bot(client,):
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/gateway/bot',
+        'https://discordapp.com/api/v8/gateway/bot',
         )
 
 async def client_application_info(client,):
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/oauth2/applications/@me',
+        'https://discordapp.com/api/v8/oauth2/applications/@me',
         )
 
 async def client_login_static(client,):
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me',
+        'https://discordapp.com/api/v8/users/@me',
         )
 
 async def client_logout(client,):
     return await bypass_request(client,METH_POST,
-        'https://discordapp.com/api/v7/auth/logout',
+        'https://discordapp.com/api/v8/auth/logout',
         )
 
 
@@ -571,7 +573,7 @@ async def permission_ow_create(client,channel,target,allow,deny,):
     channel_id=channel.id
     overwrite_id=target.id
     await bypass_request(client,METH_PUT,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/permissions/{overwrite_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/permissions/{overwrite_id}',
         data,)
     
     return PermOW.custom(target,allow,deny)
@@ -580,7 +582,7 @@ async def permission_ow_delete(client,channel,overwrite,):
     channel_id=channel.id
     overwrite_id=overwrite.target.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/permissions/{overwrite_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/permissions/{overwrite_id}',
         )
 
 async def channel_edit(client,channel,name='',topic='',nsfw=None,slowmode=None,user_limit=None,bitrate=None,type_=128,):
@@ -624,13 +626,13 @@ async def channel_edit(client,channel,name='',topic='',nsfw=None,slowmode=None,u
 
     channel_id=channel.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/channels/{channel_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}',
         data,)
 
 async def channel_delete(client,channel,):
     channel_id=channel.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{channel_id}',
+        f'https://discordapp.com/api/v8/channels/{channel_id}',
         )
 
 async def oauth2_token(client,):
@@ -656,13 +658,13 @@ async def invite_create(client,channel,):
             }
     channel_id=channel.id
     return await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/invites',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/invites',
         data,)
 
 async def invite_get_channel(client,channel,):
     channel_id=channel.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/invites',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/invites',
         )
 
 async def webhook_create(client,channel,name,avatar=b'',):
@@ -672,14 +674,14 @@ async def webhook_create(client,channel,name,avatar=b'',):
             
     channel_id=channel.id
     data = await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/webhooks',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/webhooks',
         data,)
     return Webhook(data)
 
 async def webhook_get_channel(client,channel,):
     channel_id=channel.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/webhooks',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/webhooks',
         )
 
 async def guild_create(client,name,icon=None,avatar=b'',
@@ -707,20 +709,20 @@ async def guild_create(client,name,icon=None,avatar=b'',
             }
 
     data = await bypass_request(client,METH_POST,
-        'https://discordapp.com/api/v7/guilds',
+        'https://discordapp.com/api/v8/guilds',
         data,)
     #we can create only partial, because the guild data is not completed usually
     return create_partial_guild(data)
 
 async def guild_get(client, guild_id,):
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}',
         )
 
 async def guild_delete(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}',
         )
 
 async def guild_edit(client,guild, afk_channel=_spaceholder): #keep it short
@@ -731,39 +733,39 @@ async def guild_edit(client,guild, afk_channel=_spaceholder): #keep it short
     
     guild_id=guild.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}',
         data,)
 
 async def audit_logs(client,guild,):
     data={'limit':100}
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/audit-logs',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/audit-logs',
         params=data,)
 
 async def guild_bans(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/bans',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/bans',
         )
 
 async def guild_ban_add(client,guild,user_id,):
     data={'delete_message_days':0}
     guild_id=guild.id
     return await bypass_request(client,METH_PUT,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/bans/{user_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/bans/{user_id}',
         params=data,)
 
 async def guild_ban_delete(client,guild,user_id,):
     guild_id=guild.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/bans/{user_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/bans/{user_id}',
         )
 
 async def guild_ban_get(client,guild,user_id,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/bans/{user_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/bans/{user_id}',
         )
 
 async def channel_move(client, channel, visual_position, category=_spaceholder, lock_permissions=False, reason=None):
@@ -1139,7 +1141,7 @@ async def channel_move(client, channel, visual_position, category=_spaceholder, 
     
     guild_id = guild.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',data,
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/channels',data,
         )
 
 async def channel_create(client,guild, name, category=None, type_=0):
@@ -1147,14 +1149,14 @@ async def channel_create(client,guild, name, category=None, type_=0):
     data['parent_id']=category.id if type(category) is ChannelCategory else None
     guild_id=guild.id
     data = await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/channels',
         data,)
     return CHANNEL_TYPES[data['type']](data,client,guild)
 
 async def guild_emojis(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/emojis',
         )
 
 async def emoji_create(client, guild, name, image,):
@@ -1171,7 +1173,7 @@ async def emoji_create(client, guild, name, image,):
         
     guild_id=guild.id
     data = await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/emojis',
         data,)
     
     return Emoji(data, guild)
@@ -1183,7 +1185,7 @@ async def emoji_get(client, emoji):
     guild_id=guild.id
     emoji_id = emoji.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/emojis/{emoji_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/emojis/{emoji_id}',
         )
 
 async def emoji_delete(client, emoji,):
@@ -1204,34 +1206,34 @@ async def emoji_edit(client,emoji,name,): #keep it short
 async def integration_get_all(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/integrations',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/integrations',
         )
 
 async def invite_get_guild(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/invites',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/invites',
         )
 
 async def guild_user_delete(client, guild, user,):
     guild_id = guild.id
     user_id = user.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/{user_id}',
         )
 
 async def user_edit(client,guild,user,nick,mute=False,):
     guild_id=guild.id
     user_id=user.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/{user_id}',
         data={'nick':nick,'mute':mute},)
 
 async def guild_user_add(client,guild,user,):
     guild_id=guild.id
     user_id=user.id
     return await bypass_request(client,METH_PUT,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/{user_id}',
         data={'access_token':user.access.access_token},)
 
 async def user_role_add(client,user,role,):
@@ -1239,7 +1241,7 @@ async def user_role_add(client,user,role,):
     user_id=user.id
     role_id=role.id
     return await bypass_request(client,METH_PUT,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
         )
 
 async def user_role_delete(client,user,role,):
@@ -1247,19 +1249,19 @@ async def user_role_delete(client,user,role,):
     user_id=user.id
     role_id=role.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
         )
 
 async def guild_prune(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/prune',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/prune',
         params={'days':30},)
 
 async def guild_prune_estimate(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/prune',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/prune',
         params={'days':30},)
 
 async def role_create(client,guild,name=None,permissions=None,color=None,
@@ -1279,7 +1281,7 @@ async def role_create(client,guild,name=None,permissions=None,color=None,
 
     guild_id=guild.id
     return await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/roles',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/roles',
         data=data,)
 
 async def role_move(client,role,new_position,):
@@ -1287,7 +1289,7 @@ async def role_move(client,role,new_position,):
     data= change_on_switch(guild.role_list, role,new_position,key=lambda role,pos:{'id':role.id,'position':pos})
     guild_id=role.guild.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/roles',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/roles',
         data=data,)
 
 async def role_edit(client,role,color=None,separated=None,mentionable=None,
@@ -1314,104 +1316,104 @@ async def role_edit(client,role,color=None,separated=None,mentionable=None,
     guild_id=role.guild.id
     role_id=role.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/roles/{role_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/roles/{role_id}',
         data=data,)
 
 async def role_delete(client,role,):
     guild_id=role.guild.id
     role_id=role.id
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/roles/{role_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/roles/{role_id}',
         )
 
 
 async def webhook_get_guild(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/webhooks',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/webhooks',
         )
 
 async def guild_widget_image(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/widget.png',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/widget.png',
         params={'style':'shield'},decode=False,headers={},)
 
 async def invite_get(client,invite,):
     invite_code=invite.code
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/invites/{invite_code}',
+        f'https://discordapp.com/api/v8/invites/{invite_code}',
         )
 
 async def invite_delete(client,invite,):
     invite_code=invite.code
     return await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/invites/{invite_code}',
+        f'https://discordapp.com/api/v8/invites/{invite_code}',
         )
 
 async def user_info(client,access,):
     headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me',
+        'https://discordapp.com/api/v8/users/@me',
         headers=headers,)
 
 async def client_user(client,):
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me',
+        'https://discordapp.com/api/v8/users/@me',
         )
 
 async def channel_private_get_all(client,):
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me/channels',
+        'https://discordapp.com/api/v8/users/@me/channels',
         )
 
 async def channel_private_create(client,user,):
     return await bypass_request(client,METH_POST,
-        'https://discordapp.com/api/v7/users/@me/channels',
+        'https://discordapp.com/api/v8/users/@me/channels',
         data={'recipient_id':user.id},)
 
 async def user_connections(client,access,):
     headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me/connections',
+        'https://discordapp.com/api/v8/users/@me/connections',
         headers=headers,)
 
 async def user_guilds(client,access,):
     headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me/guilds',
+        'https://discordapp.com/api/v8/users/@me/guilds',
         headers=headers,)
 
 async def guild_get_all(client,):
     return await bypass_request(client,METH_GET,
-        'https://discordapp.com/api/v7/users/@me/guilds',
+        'https://discordapp.com/api/v8/users/@me/guilds',
         params={'after':0},)
 
 async def user_get(client,user,):
     user_id=user.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/users/{user_id}',
+        f'https://discordapp.com/api/v8/users/{user_id}',
         )
 
 async def webhook_get(client,webhook,):
     webhook_id=webhook.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/webhooks/{webhook_id}',
+        f'https://discordapp.com/api/v8/webhooks/{webhook_id}',
         )
 
 async def webhook_delete(client,webhook,):
     webhook_id=webhook.id
     return  bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/webhooks/{webhook_id}',
+        f'https://discordapp.com/api/v8/webhooks/{webhook_id}',
         )
 
 async def webhook_edit(client,webhook,name,): #keep it short
     webhook_id=webhook.id
     return await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/webhooks/{webhook_id}',
+        f'https://discordapp.com/api/v8/webhooks/{webhook_id}',
         data={'name':name},)
 
 async def webhook_get_token(client,webhook,):
@@ -1451,31 +1453,31 @@ async def webhook_message_delete(client, webhook, message):
 async def guild_users(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members',
         )
 
 async def guild_regions(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/regions',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/regions',
         )
 
 async def guild_channels(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/channels',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/channels',
         )
 
 async def guild_roles(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/roles',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/roles',
         )
 
 async def guild_user_get(client,guild,user_id,):
     guild_id=guild.id
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/{user_id}',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/{user_id}',
         )
 
 async def guild_user_search(client, guild, query, limit=1):
@@ -1491,19 +1493,19 @@ async def guild_user_search(client, guild, query, limit=1):
     
     guild_id=guild.id
     return await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/members/search', params = data,
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/members/search', params = data,
             )
 
 async def guild_widget_get(client,guild_id,):
     return await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/widget.json',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/widget.json',
         headers={},)
 
 async def message_suppress_embeds(client,message,suppress=True,):
     message_id=message.id
     channel_id=message.channel.id
     return await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/messages/{message_id}/suppress-embeds',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/messages/{message_id}/suppress-embeds',
         data={'suppress':suppress},)
 
 async def channel_follow(client,source_channel,target_channel,):
@@ -1519,7 +1521,7 @@ async def channel_follow(client,source_channel,target_channel,):
     channel_id=source_channel.id
     
     data = await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/channels/{channel_id}/followers',
+        f'https://discordapp.com/api/v8/channels/{channel_id}/followers',
         data,)
     webhook = await Webhook._from_follow_data(data,source_channel,target_channel,client)
     return webhook
@@ -1528,7 +1530,7 @@ async def achievement_get(client,achievement_id,):
     application_id=client.application.id
         
     data = await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/applications/{application_id}/achievements/{achievement_id}',
+        f'https://discordapp.com/api/v8/applications/{application_id}/achievements/{achievement_id}',
         )
     
     return Achievement(data)
@@ -1552,7 +1554,7 @@ async def achievement_create(client,name,description,icon,secret=False,secure=Fa
     application_id=client.application.id
         
     data =  await bypass_request(client,METH_POST,
-        f'https://discordapp.com/api/v7/applications/{application_id}/achievements',
+        f'https://discordapp.com/api/v8/applications/{application_id}/achievements',
         data=data,)
     
     return Achievement(data)
@@ -1561,7 +1563,7 @@ async def achievement_delete(client,achievement,):
     application_id=client.application.id
     achievement_id=achievement.id
     await bypass_request(client,METH_DELETE,
-        f'https://discordapp.com/api/v7/applications/{application_id}/achievements/{achievement_id}',
+        f'https://discordapp.com/api/v8/applications/{application_id}/achievements/{achievement_id}',
         )
 
 async def achievement_edit(client,achievement,name=None,description=None,secret=None,secure=None,icon=_spaceholder,):
@@ -1587,7 +1589,7 @@ async def achievement_edit(client,achievement,name=None,description=None,secret=
     achievement_id=achievement.id
     
     data = await bypass_request(client,METH_PATCH,
-        f'https://discordapp.com/api/v7/applications/{application_id}/achievements/{achievement_id}',
+        f'https://discordapp.com/api/v8/applications/{application_id}/achievements/{achievement_id}',
         data=data,)
 
     achievement._update_no_return(data)
@@ -1597,7 +1599,7 @@ async def achievement_get_all(client,):
     application_id=client.application.id
     
     data = await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/applications/{application_id}/achievements',
+        f'https://discordapp.com/api/v8/applications/{application_id}/achievements',
         )
     
     return [Achievement(achievement_data) for achievement_data in data]
@@ -1610,7 +1612,7 @@ async def user_achievement_update(client,user,achievement,percent_complete,):
     achievement_id=achievement.id
     
     await bypass_request(client,METH_PUT,
-        f'https://discordapp.com/api/v7/users/{user_id}/applications/{application_id}/achievements/{achievement_id}',
+        f'https://discordapp.com/api/v8/users/{user_id}/applications/{application_id}/achievements/{achievement_id}',
         data=data,)
 
 async def user_achievements(client,access,):
@@ -1620,32 +1622,32 @@ async def user_achievements(client,access,):
     application_id=client.application.id
     
     data = await bypass_request(client,METH_GET,
-        f'https://discordapp.com/api/v7/users/@me/applications/{application_id}/achievements',
+        f'https://discordapp.com/api/v8/users/@me/applications/{application_id}/achievements',
         headers=headers,)
     
     return [Achievement(achievement_data) for achievement_data in data]
 
 async def reaction_delete_emoji(client, message, emoji):
     await bypass_request(client, METH_DELETE,
-        f'https://discordapp.com/api/v7/channels/{message.channel.id}/messages/{message.id}/reactions/{emoji.as_reaction}')
+        f'https://discordapp.com/api/v8/channels/{message.channel.id}/messages/{message.id}/reactions/{emoji.as_reaction}')
 
 async def guild_preview(client, guild_id):
     await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/preview')
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/preview')
 
 async def message_crosspost(client, message):
     await bypass_request(client, METH_POST,
-        f'https://discordapp.com/api/v7/channels/{message.channel.id}/messages/{message.id}/crosspost')
+        f'https://discordapp.com/api/v8/channels/{message.channel.id}/messages/{message.id}/crosspost')
 
 async def vanity_get(client, guild):
     guild_id = guild.id
     await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/vanity-url')
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/vanity-url')
 
 async def guild_discovery_get(client, guild):
     guild_id = guild.id
     guild_discovery_data = await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-metadata')
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/discovery-metadata')
     return GuildDiscovery(guild_discovery_data, guild)
 
 async def guild_discovery_edit(client, guild, primary_category_id=_spaceholder, keywords=_spaceholder,
@@ -1663,50 +1665,50 @@ async def guild_discovery_edit(client, guild, primary_category_id=_spaceholder, 
         data['emoji_discoverability_enabled'] = emoji_discovery
     
     await bypass_request(client, METH_PATCH,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-metadata',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/discovery-metadata',
         data=data)
 
 async def guild_discovery_add_subcategory(client, guild, category_id):
     guild_id = guild.id
     await bypass_request(client, METH_POST,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-categories/{category_id}')
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/discovery-categories/{category_id}')
 
 async def guild_discovery_delete_subcategory(client, guild, category_id):
     guild_id = guild.id
     await bypass_request(client, METH_DELETE,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/discovery-categories/{category_id}')
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/discovery-categories/{category_id}')
 
 async def discovery_categories(client):
     discovery_category_datas = await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/discovery/categories')
+        f'https://discordapp.com/api/v8/discovery/categories')
     return [DiscoveryCategory(discovery_category_data) for discovery_category_data in discovery_category_datas]
 
 async def discovery_validate_term(client, term):
     data = await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/discovery/valid-term',
+        f'https://discordapp.com/api/v8/discovery/valid-term',
         params={'term': term})
     
     return data['valid']
 
 async def applications_detectable(client):
     data = await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/applications/detectable',
+        f'https://discordapp.com/api/v8/applications/detectable',
             )
 
 async def welcome_screen_get(client, guild_id):
     data = await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/guilds/{guild_id}/welcome-screen',
+        f'https://discordapp.com/api/v8/guilds/{guild_id}/welcome-screen',
             )
 
 async def eula_get(client):
     eula_id = 542074049984200704
     data = await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/store/eulas/{eula_id}',
+        f'https://discordapp.com/api/v8/store/eulas/{eula_id}',
             )
 
 async def voice_regions(client):
     data = await bypass_request(client, METH_GET,
-        f'https://discordapp.com/api/v7/voice/regions',
+        f'https://discordapp.com/api/v8/voice/regions',
             )
     return data
 
@@ -2030,9 +2032,9 @@ async def ratelimit_test0012(client,message):
         except TimeoutError:
             await RLT.send('Timeout meanwhile waiting for redirect url.')
     
-        Task(client.message_delete(message),client.loop)
+        Task(client.message_delete(message), KOKORO)
         try:
-            result=parse_oauth2_redirect_url(message.content)
+            result = parse_oauth2_redirect_url(message.content)
         except ValueError:
             await RLT.send('Bad redirect url.')
         
@@ -2083,16 +2085,16 @@ async def ratelimit_test0013(client,message):
                 continue
             break
         
-        now=time_now()
+        now = time_now()
         time_bounds=[]
         for day in range(41):
             before= int((now-(day  )*86400.+100.)*1000.-DISCORD_EPOCH)<<22
             after = int((now-(day+1)*86400.-100.)*1000.-DISCORD_EPOCH)<<22
             time_bounds.append((before,after),)
         
-        messages=[]
+        messages = []
         for day in range(41):
-            messages.append((None,None),)
+            messages.append((None, None),)
         
         for message_ in channel.messages:
             for day,(before,after) in enumerate(time_bounds):
@@ -2102,7 +2104,7 @@ async def ratelimit_test0013(client,message):
                 if message_.id<after:
                     continue
                 
-                message_own,message_other=messages[day]
+                message_own, message_other=messages[day]
                 if (message_own is not None) and (message_other is not None):
                     break
                 
@@ -2141,15 +2143,14 @@ async def ratelimit_test0013(client,message):
             raise CancelledError()
         
         if emoji is ratelimit_test0013_OK:
-            loop=client.loop
             for day,(message_own, message_other) in enumerate(messages):
                 if (message_own is not None):
                     RLT.write(f'day {day}, own:')
-                    await Task(message_delete(client,message_own),loop)
+                    await Task(message_delete(client, message_own), KOKORO)
                 
                 if (message_other is not None):
                     RLT.write(f'day {day}, other:')
-                    await Task(message_delete(client,message_other),loop)
+                    await Task(message_delete(client, message_other), KOKORO)
             
             return
             
@@ -3629,4 +3630,99 @@ async def ratelimit_test0090(client, message):
         
         new_message = await webhook_execute(client, executor_webhook, 'ayaya')
         await webhook_message_delete(client, executor_webhook, new_message)
+
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0091(client, message):
+    """
+    Creates 6 messages and deletes them.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0091') as RLT:
+        messages = []
+        for index in range(6):
+            message = await client.message_create(channel, str(index))
+            messages.append(message)
+        
+        for message in messages:
+            await message_delete(client, message)
+
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0092(client, message, channel2:ChannelText=None):
+    """
+    Creates 3 messages in 2 channels and deletes them. Please also define an other channel.
+    """
+    channel1 = message.channel
+    with RLTCTX(client, channel1, 'ratelimit_test0092') as RLT:
+        if channel2 is None:
+            await RLT.send('No second channel was given.')
+        
+        if not channel2.cached_permissions_for(client).can_send_messages:
+            await RLT.send('I have no permissions to send messages at the other channel.')
+        
+        messages = []
+        for index in range(3):
+            message = await client.message_create(channel1, str(index))
+            messages.append(message)
+        
+        for index in range(3):
+            message = await client.message_create(channel2, str(index))
+            messages.append(message)
+        
+        for message in messages:
+            await message_delete(client, message)
+
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0093(client, message):
+    """
+    Creates and edits messages.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0093') as RLT:
+        messages = []
+        for index in range(3):
+            message = await message_create(client, channel, str(index))
+            messages.append(message)
+        
+        for index, message in enumerate(messages, 3):
+            await message_edit(client, message, str(index))
+        
+        for message in messages:
+            await client.message_delete(message)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0094(client, message):
+    """
+    Creates 7 messages and deletes 5 1 by 1 and the last 2 together.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0094') as RLT:
+        messages = []
+        for index in range(7):
+            message = await client.message_create(channel, str(index))
+            messages.append(message)
+        
+        for index in range(5):
+            message = messages[index]
+            await message_delete(client, message)
+        
+        await message_delete_multiple(client, messages[5:])
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0095(client, message):
+    """
+    Edits the channel's name 3 times
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0095') as RLT:
+        if channel.guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        for name in ('ayayay', 'nainainai', 'ahaha'):
+            await channel_edit(client, channel, name=name)
 
