@@ -28,18 +28,18 @@ VALUABLE_SCOPES = [
 
 OA2_accesses = {}
 
-def _oauth2_query(message,content):
-    author_id=message.author.id
+def _oauth2_query(message, content):
+    author_id = message.author.id
     if not (16<len(content)<33):
         return OA2_accesses.get(author_id)
     try:
-        user_id=int(content)
+        user_id = int(content)
     except ValueError:
         return OA2_accesses.get(author_id)
     
-    user=OA2_accesses.get(user_id)
+    user = OA2_accesses.get(user_id)
     if user is None:
-        user=OA2_accesses.get(author_id)
+        user = OA2_accesses.get(author_id)
     return user
 
 
@@ -117,8 +117,8 @@ class oauth2_feed:
 
 @OAUTH2_COMMANDS.from_class
 class oauth2_user:
-    async def command(client,message,content):
-        user = _oauth2_query(message,content)
+    async def command(client, message, content):
+        user = _oauth2_query(message, content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
             return
@@ -127,7 +127,7 @@ class oauth2_user:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('oauth2_user',(
+        return Embed('oauth2_user', (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'Using this command, I ll show the extra user information , I '
             'received.\n'
@@ -197,7 +197,7 @@ class oauth2_guilds:
 @OAUTH2_COMMANDS.from_class
 class oauth2_my_guild:
     async def command(client,message,content):
-        user=_oauth2_query(message,content)
+        user = _oauth2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
             return
@@ -205,19 +205,19 @@ class oauth2_my_guild:
         try:
             guild = await client.guild_create(name='Luv ya',
                 channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
-    
-            await sleep(1.,client.loop)
-            await client.guild_user_add(guild,user)
-            await sleep(1.,client.loop)
-            await client.guild_edit(guild,owner=user)
-        except Exception as err:
-            await client.loop.render_exc_async(err,'Exception occured at oauth2_my_guild\n')
+            
+            await sleep(1.0, client.loop)
+            await client.guild_user_add(guild, user)
+            await sleep(1.0, client.loop)
+            await client.guild_edit(guild, owner=user.id)
+        except BaseException as err:
+            await client.loop.render_exc_async(err, 'Exception occured at oauth2_my_guild\n')
         finally:
             try:
                 guild
             except UnboundLocalError:
                 return
-            await sleep(1.,client.loop)
+            await sleep(1.0, client.loop)
             if client is guild.owner:
                 await client.guild_delete(guild)
             else:

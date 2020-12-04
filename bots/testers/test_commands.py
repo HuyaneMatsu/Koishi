@@ -3,10 +3,14 @@ from time import perf_counter
 from random import random
 from datetime import datetime
 
+from io import BytesIO
+from PIL import Image as PIL
+from PIL.ImageSequence import Iterator as ImageSequenceIterator
+
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
-    istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, \
+    istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
-    ReuAsyncIO
+    ReuAsyncIO, enter_executor
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
@@ -1293,3 +1297,47 @@ async def update_and_display_roles(client, message):
     
     pages = [Embed(description=chunk) for chunk in pchunkify(guild.role_list, detailed=False)]
     await Pagination(client, message.channel, pages,)
+
+
+@TEST_COMMANDS
+async def half_size(client, message):
+    """
+    Halves the given gif's size.
+    """
+    attachments = message.attachments
+    if attachments is None:
+        await client.message_create(message.channel, 'The message has no attachments.')
+        return
+    
+    for attachment in attachments:
+        if attachment.name.endswith(('.gif', '.GIF')):
+            break
+    else:
+        await client.message_create(message.channel, 'The message has no gif attachments.')
+        return
+    
+    data = await client.download_attachment(attachment)
+    
+    async with enter_executor():
+        source_gif = PIL.open(BytesIO(data))
+        new_image = None
+        frames = []
+        
+        for frame in ImageSequenceIterator(source_gif):
+            frame = frame.convert('RGB')
+            if new_image is None:
+                size = frame.size
+                size = (size[0]>>1, size[1]>>1)
+                frame = frame.resize(size)
+                new_image = frame
+            else:
+                frame = frame.resize(size)
+                frames.append(frame)
+        
+        buffer = ReuBytesIO()
+        new_image.save(buffer, format='gif', save_all=True, append_images=frames, loop=0, optimize=False,
+            transparency=0, disposal=2)
+        
+        buffer.seek(0)
+    
+    await client.message_create(message, file=(attachment.name, buffer))

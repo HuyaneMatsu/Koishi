@@ -139,7 +139,7 @@ async def command_error(client, message, command, content, exception):
         embed.add_footer(f'page {index}/{limit}')
     
     await Pagination(client, message.channel, pages)
-    return False
+
 
 class WrapMultyple(object):
     __slots__ = ('elements')

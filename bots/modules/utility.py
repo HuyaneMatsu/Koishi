@@ -98,7 +98,7 @@ class rawr:
 @UTILITY_COMMANDS.from_class
 class color:
     async def command(client, message, color: 'color'):
-        embed = Embed(color.__format__('06X'), color=color)
+        embed = Embed(f'#{color:06X}', color=color)
         embed.add_image('attachment://color.png')
         
         with ReuBytesIO() as buffer:
