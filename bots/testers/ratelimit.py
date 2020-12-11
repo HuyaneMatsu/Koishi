@@ -1351,7 +1351,7 @@ async def invite_delete(client,invite,):
         f'https://discordapp.com/api/v8/invites/{invite_code}',
         )
 
-async def user_info(client,access,):
+async def get_user_info(client,access,):
     headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METH_GET,
@@ -1714,10 +1714,10 @@ async def voice_regions(client):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
-    '''
+    """
     Does 6 achievement get request towards 1 achievemt.
     The bot's application must have at least 1 achievement created.
-    '''
+    """
     with RLTCTX(client,message.channel,'ratelimit_test0000') as RLT:
         try:
             achievements = await client.achievement_get_all()
@@ -1742,10 +1742,10 @@ async def ratelimit_test0000(client,message):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0001(client,message):
-    '''
+    """
     Does 3-3 achievement get request towards 2 achievemts.
     The bot's application must have at least 2 achievement created.
-    '''
+    """
     with RLTCTX(client,message.channel,'ratelimit_test0001') as RLT:
         try:
             achievements = await client.achievement_get_all()
@@ -1776,9 +1776,9 @@ async def ratelimit_test0001(client,message):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0002(client,message):
-    '''
+    """
     Creates 6 achievements.
-    '''
+    """
     with RLTCTX(client,message.channel,'ratelimit_test0002') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1806,9 +1806,9 @@ async def ratelimit_test0002(client,message):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0003(client,message):
-    '''
+    """
     First creates 2 achievements with the client normally, then deletes them for testing.
-    '''
+    """
     with RLTCTX(client,message.channel,'ratelimit_test0003') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1832,9 +1832,9 @@ async def ratelimit_test0003(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0004(client,message):
-    '''
+    """
     Creates an achievent, then edits it twice for testing. When done, deletes it.
-    '''
+    """
     
     with RLTCTX(client,message.channel,'ratelimit_test0004') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
@@ -1858,9 +1858,9 @@ async def ratelimit_test0004(client,message):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0005(client,message):
-    '''
+    """
     Creates 2 achievements, then edits them once, once for testing. At the end deletes them.
-    '''
+    """
     with RLTCTX(client,message.channel,'ratelimit_test0005') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1886,9 +1886,9 @@ async def ratelimit_test0005(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0006(client,message):
-    '''
+    """
     Creates, edits and deletes an achievment.
-    '''
+    """
     
     with RLTCTX(client,message.channel,'ratelimit_test0006') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
@@ -1904,9 +1904,9 @@ async def ratelimit_test0006(client,message):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0007(client,message):
-    '''
+    """
     Requests all the achievemenets.
-    '''
+    """
     
     with RLTCTX(client,message.channel,'ratelimit_test0007') as RLT:
         loop=client.loop
@@ -1921,9 +1921,9 @@ async def ratelimit_test0007(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0008(client,message):
-    '''
+    """
     Updates an achievement of the client's owner.
-    '''
+    """
     
     with RLTCTX(client,message.channel,'ratelimit_test0008') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
@@ -1942,10 +1942,10 @@ async def ratelimit_test0008(client,message):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0009(client,message):
-    '''
+    """
     Updates an achievement of the client's owner.
     Waits 2 seconds after the achievement is created, so it might work this time (nope).
-    '''
+    """
     with RLTCTX(client,message.channel,'ratelimit_test0009') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1963,9 +1963,9 @@ async def ratelimit_test0009(client,message):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0010(client,message):
-    '''
+    """
     Updates an achievement of the client's owner. But now one, what has `secure=False`
-    '''
+    """
     with RLTCTX(client,message.channel,'ratelimit_test0010') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
@@ -1982,9 +1982,9 @@ async def ratelimit_test0010(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0011(client,message):
-    '''
+    """
     Updates the achievemenets of all the owners of the client.
-    '''
+    """
     
     with RLTCTX(client,message.channel,'ratelimit_test0011') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
@@ -2016,9 +2016,9 @@ class check_is_owner(object):
     
 @RATELIMIT_COMMANDS
 async def ratelimit_test0012(client,message):
-    '''
+    """
     Tries to get a user's achievemenets after oauth2 authorization.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0012') as RLT:
         await client.message_create(channel, (
@@ -2068,9 +2068,9 @@ class ratelimit_test0013_checker(object):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0013(client,message):
-    '''
+    """
     Requests messages for each day from the channel if can, then deletes them if you agree with it as well.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0013') as RLT:
         if channel.guild is None:
@@ -2080,7 +2080,7 @@ async def ratelimit_test0013(client,message):
             await RLT.send('I need admin permission to complete this command.')
         
         target_time=int((time_now()-40*86400.)*1000.-DISCORD_EPOCH)<<22
-        async for message_ in client.message_iterator(channel):
+        async for message_ in await client.message_iterator(channel):
             if message_.id>target_time:
                 continue
             break
@@ -2158,9 +2158,9 @@ async def ratelimit_test0013(client,message):
         
 @RATELIMIT_COMMANDS
 async def ratelimit_test0014(client,message):
-    '''
+    """
     Creates 2 message.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0014') as RLT:
         if channel.guild is None:
@@ -2178,9 +2178,9 @@ async def ratelimit_test0014(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0015(client,message):
-    '''
+    """
     Deletes all the reactions of a single emoji from a message.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0015') as RLT:
         if channel.guild is None:
@@ -2194,9 +2194,9 @@ async def ratelimit_test0015(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0016(client,message):
-    '''
+    """
     Adds a reaction and deletes alll the same type from the message.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0016') as RLT:
         if channel.guild is None:
@@ -2211,18 +2211,18 @@ async def ratelimit_test0016(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0017(client,message):
-    '''
+    """
     Requests 1 guild preview.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0017') as RLT:
         await guild_preview(client, 197038439483310086)
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0018(client,message):
-    '''
+    """
     Requests 2 guild preview.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0018') as RLT:
         await guild_preview(client, 302094807046684672)
@@ -2230,9 +2230,9 @@ async def ratelimit_test0018(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0019(client,message):
-    '''
+    """
     Edits the channel twice.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0019') as RLT:
         if channel.guild is None:
@@ -2248,9 +2248,9 @@ async def ratelimit_test0019(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0020(client,message):
-    '''
+    """
     Creates a channel.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0020') as RLT:
         guild = channel.guild
@@ -2266,9 +2266,9 @@ async def ratelimit_test0020(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0021(client,message):
-    '''
+    """
     Deletes a channel.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0021') as RLT:
         guild = channel.guild
@@ -2283,9 +2283,9 @@ async def ratelimit_test0021(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0022(client,message):
-    '''
+    """
     Edits a role.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0022') as RLT:
         guild = channel.guild
@@ -2301,9 +2301,9 @@ async def ratelimit_test0022(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0023(client,message):
-    '''
+    """
     Creates a role.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0023') as RLT:
         guild = channel.guild
@@ -2319,9 +2319,9 @@ async def ratelimit_test0023(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0024(client,message):
-    '''
+    """
     Deletes a role.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0024') as RLT:
         guild = channel.guild
@@ -2340,9 +2340,9 @@ async def ratelimit_test0024(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0025(client,message):
-    '''
+    """
     Edits 2 channel.
-    '''
+    """
     channel_1 = message.channel
     with RLTCTX(client,channel_1,'ratelimit_test0025') as RLT:
         if channel_1.guild is None:
@@ -2380,9 +2380,9 @@ async def ratelimit_test0025(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0026(client,message):
-    '''
+    """
     Edits 2 roles at the same guild.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0026') as RLT:
         guild = channel.guild
@@ -2401,9 +2401,9 @@ async def ratelimit_test0026(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0027(client, message, guild_id:str=''):
-    '''
+    """
     Edits 1-1 roles at separate guilds.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0027') as RLT:
         guild_1 = channel.guild
@@ -2430,9 +2430,9 @@ async def ratelimit_test0027(client, message, guild_id:str=''):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0028(client, message, guild_id:str=''):
-    '''
+    """
     Creates 1-1 roles at separate guilds
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0027') as RLT:
         guild_1 = channel.guild
@@ -2459,9 +2459,9 @@ async def ratelimit_test0028(client, message, guild_id:str=''):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0029(client,message):
-    '''
+    """
     Moves a role.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0029') as RLT:
         guild = channel.guild
@@ -2481,9 +2481,9 @@ async def ratelimit_test0029(client,message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0030(client, message):
-    '''
+    """
     Crossposts 2 message at the current channel.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0030') as RLT:
         guild = channel.guild
@@ -2507,9 +2507,9 @@ async def ratelimit_test0030(client, message):
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0031(client, message):
-    '''
+    """
     Crossposts 1-1 messages at 2 different channels.
-    '''
+    """
     channel = message.channel
     with RLTCTX(client,channel,'ratelimit_test0031') as RLT:
         guild = channel.guild
@@ -3158,7 +3158,7 @@ async def ratelimit_test0062(client, message):
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
-        await user_info(client_, access)
+        await get_user_info(client_, access)
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0063(client, message):

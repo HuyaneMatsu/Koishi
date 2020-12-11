@@ -152,7 +152,11 @@ class rules:
             ).add_field(
                 'No political or religious topics.',
                 'I do not say either that aliens exists, even tho they do.',
+            ).add_field(
+                'Alternative accounts',
+                'Instant ban.'
             )
+        
         await client.message_create(message.channel, embed=embed, allowed_mentions=None)
         
         if message.channel.cached_permissions_for(client).can_manage_messages:

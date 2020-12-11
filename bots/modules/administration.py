@@ -484,7 +484,7 @@ class logs:
         await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(logs)])
     
     category = 'ADMINISTRATION'
-    checks=[checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True), handler=permission_check_handler)]
+    checks = [checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True), handler=permission_check_handler)]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -500,7 +500,7 @@ class logs:
 
 @ADMINISTRATION_COMMANDS.from_class
 class telekinesisban:
-    async def command(client, message, guild:Converter('guild', default_code='message.guild'),
+    async def command(client, message, guild: 'guild',
             user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), reason):
         
         # Should not happen normally
@@ -508,7 +508,7 @@ class telekinesisban:
             return
         
         if user is None:
-            await client.message_create(message.channel, 'Please define a user to ban.')
+            await client.message_create(message.channel, 'Please define the user to ban.')
             return
         
         if not reason:
@@ -520,7 +520,7 @@ class telekinesisban:
                 banner = maybe_banner
                 break
         else:
-            await client.message_create(message.channel, 'No one of has can ban the user in the guild.')
+            await client.message_create(message.channel, 'No permisison to ban user in the guild.')
             return
         
         await banner.guild_ban_add(guild, user, reason=reason)
@@ -528,14 +528,52 @@ class telekinesisban:
             f'{user.full_name} banned at guild {guild.name} by {banner.full_name}.')
     
     category = 'ADMINISTRATION'
-    checks=[checks.owner_only()]
+    checks = [checks.owner_only()]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('telekinesisban', (
             'Bans the given user at the specified guild.\n'
-            f'Usage: `{prefix}telekinesisban <guild> *user* <reason>`\n'
+            f'Usage: `{prefix}telekinesisban *guild* *user* <reason>`\n'
                 ), color=ADMINISTRATION_COLOR).add_footer(
                 'Owner only!')
 
-
+@ADMINISTRATION_COMMANDS.from_class
+class ban:
+    async def command(client, message,
+            user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), reason):
+        
+        guild = message.guild
+        if guild is None:
+            return
+        
+        if user is None:
+            await client.message_create(message.channel, 'Please define the user to ban.')
+            return
+        
+        if not reason:
+            author = message.author
+            reason = f'For the request of {author.full_name} ({author.id})'
+        
+        for maybe_banner in guild.clients:
+            if guild.cached_permissions_for(client).can_ban_users:
+                banner = maybe_banner
+                break
+        else:
+            await client.message_create(message.channel, 'No permisison to ban user in the guild.')
+            return
+        
+        await banner.guild_ban_add(guild, user, reason=reason)
+        await client.message_create(message.channel, f'{user.full_name} banned Hecatia yeah!')
+    
+    category = 'ADMINISTRATION'
+    checks = checks.has_guild_permissions(Permission().update_by_keys(ban_users=True), handler=permission_check_handler)
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('ban', (
+            'Bans the given user.\n'
+            f'Usage: `{prefix}ban *user* <reason>`\n'
+                ), color=ADMINISTRATION_COLOR).add_footer(
+                'You must have ban users permission to use this command!')
+        

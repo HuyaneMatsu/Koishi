@@ -779,7 +779,7 @@ class remove_card:
 
 @Flan.events
 async def ready(client):
-    async for message in client.message_iterator(CHESUTO_BGM_CHANNEL):
+    async for message in await client.message_iterator(CHESUTO_BGM_CHANNEL):
         Track.create(message)
 
 async def bgm_message_create(client, message):

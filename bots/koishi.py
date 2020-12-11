@@ -7,7 +7,6 @@ from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHA
     Role, ChannelText, Invite, KOKORO
 from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter, ConverterFlag, Closer
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.extension_loader import EXTENSION_LOADER
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
@@ -91,108 +90,6 @@ async def invalid_command(client, message, command, content):
     message = await client.message_create(message.channel,embed=embed)
     await sleep(30., KOKORO)
     await client.message_delete(message)
-
-
-
-def build_extension_pages(lines):
-    for extension in  EXTENSION_LOADER.extensions.values():
-        lines.append(f'- `{extension.name}`{" (locked)" if extension.locked else ""}')
-    
-    pages = [Embed('reload', chunk, color=KOISHI_HELP_COLOR) for chunk in chunkify(lines)]
-    
-    limit = len(pages)
-    index = 0
-    while index < limit:
-        embed = pages[index]
-        index += 1
-        embed.add_footer(f'page {index}/{limit}')
-    
-    return pages
-
-@Koishi.commands.from_class
-class reload:
-    async def command(client, message, name:str):
-        while True:
-            try:
-                extension = EXTENSION_LOADER.extensions[name]
-            except KeyError:
-                result = 'There is no extension with the specified name'
-                break
-            
-            if extension.locked:
-                result = 'The extension is locked, probably for reason.'
-                break
-            
-            try:
-                await EXTENSION_LOADER.reload(name)
-            except BaseException as err:
-                result = repr(err)
-                if len(result) > 2000:
-                    result = result[-2000:]
-                
-                break
-                
-            result = 'Extension successfully reloaded.'
-            break
-        
-        await client.message_create(message.channel, result)
-        return
-    
-    category = 'UTILITY'
-    checks = [checks.owner_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        lines = [
-            'Reloads the specified extension by it\'s name.',
-            f'Usage : `{prefix}reload <name>`',
-            '\nAvailable extensions:',
-                ]
-        
-        return build_extension_pages(lines)
-
-
-@Koishi.commands.from_class
-class unload:
-    async def command(client, message, name:str):
-        while True:
-            try:
-                extension = EXTENSION_LOADER.extensions[name]
-            except KeyError:
-                result = 'There is no extension with the specified name'
-                break
-            
-            if extension.locked:
-                result = 'The extension is locked, probably for reason.'
-                break
-            
-            try:
-                await EXTENSION_LOADER.unload(name)
-            except BaseException as err:
-                result = repr(err)
-                if len(result) > 2000:
-                    result = result[-2000:]
-                
-                break
-                
-            result = 'Extension successfully unloaded.'
-            break
-        
-        await client.message_create(message.channel, result)
-        return
-    
-    category = 'UTILITY'
-    checks = [checks.owner_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        lines = [
-            'Unloads the specified extension by it\'s name.',
-            f'Usage : `{prefix}unload <name>`',
-            '\nAvailable extensions:',
-                ]
-        
-        return build_extension_pages(lines)
 
 
 @Koishi.commands.from_class

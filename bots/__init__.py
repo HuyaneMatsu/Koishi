@@ -71,6 +71,7 @@ if MARISA_MODE:
         MARISA_ALLOWED_MODULES.add('snekbox')
     
     MARISA_ALLOWED_MODULES.add('voice')
+    MARISA_ALLOWED_MODULES.add('extensions')
     
     for path in list(MODULE_NAMES):
         if path not in MARISA_ALLOWED_MODULES:

@@ -95,7 +95,7 @@ class oauth2_feed:
         if access is None:
             await client.message_create(message.channel,'Too old link')
             return
-        user = await client.user_info(access)
+        user = await client.get_user_info(access)
         OA2_accesses[user.id]=user
         await client.message_create(message.channel,'Thanks')
     

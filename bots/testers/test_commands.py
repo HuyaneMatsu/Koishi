@@ -61,7 +61,7 @@ async def test_allowed_edit(client, message):
     '''
     user = message.author
     message = await client.message_create(message.channel, 'Test')
-    await client.message_edit(message, user.mention,allowed_mentions=None)
+    await client.message_edit(message, user.mention, allowed_mentions=None)
 
 @TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_ratelimit(client, message):

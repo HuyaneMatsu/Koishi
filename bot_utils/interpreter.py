@@ -40,10 +40,10 @@ class InterpreterPrinter(object):
                 ln += value.__len__()
             return ln
 
-    def __call__(self,*args,**kwargs):
+    def __call__(self, *args, **kwargs):
         kwargs['file'] = self
         print(*args, **kwargs)
-
+    
     def get_value(self, wrap_start='```', wrap_end='```', limit=2000, ignore=50):
         limit = limit-len(wrap_start)-len(wrap_end)-2 # allocate 2 more for linebreaks
         if limit <= ignore:

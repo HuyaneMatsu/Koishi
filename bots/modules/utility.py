@@ -51,14 +51,14 @@ class ping_http:
         message = await client.message_create(message.channel, 'ping-pong')
         delay = (perf_counter()-start)*1000.0
         
-        await client.message_edit(message, '', Embed(f'{delay:.0f} ms', color=UTILITY_COLOR))
+        await client.message_edit(message, '', embed=Embed(f'{delay:.0f} ms', color=UTILITY_COLOR))
     
-    aliases = ['pong-http']
+    aliases = 'pong-http'
     category = 'UTILITY'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('ping',(
+        return Embed('ping', (
             'Do you wanna see how bad is my http connection to Discord?\n'
             f'Usage: `{prefix}ping-http`'
             ), color=UTILITY_COLOR)
@@ -67,19 +67,18 @@ class ping_http:
 class rawr:
     @Cooldown('channel', 60.0, handler = CooldownHandler())
     async def command(client, message):
-        channel=message.channel
-        loop=client.loop
-        tasks=[]
+        channel = message.channel
+        tasks = []
         
         for client_ in channel.clients:
             if client_ is not client:
                 if not channel.cached_permissions_for(client_).can_send_messages:
                     continue
-            task=loop.create_task(client_.message_create(channel,'Rawrr !'))
+            task = KOKORO.create_task(client_.message_create(channel, 'Rawrr !'))
             tasks.append(task)
         
         try:
-            await WaitTillExc(tasks,loop)
+            await WaitTillExc(tasks, KOKORO)
         except:
             for task in tasks:
                 task.cancel()
@@ -89,7 +88,7 @@ class rawr:
 
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('rawr',(
+        return Embed('rawr', (
             'Sends a message with every client, who can send a message to the channel.\n'
             f'Usage: `{prefix}rawr`'
             ), color=UTILITY_COLOR,).add_footer(
@@ -322,8 +321,9 @@ class user_info:
         guild = message.guild
         
         embed = Embed(user.full_name)
+        created_at = user.created_at
         embed.add_field('User Information',
-            f'Created: {elapsed_time(user.created_at)} ago\n'
+            f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
             f'Profile: {user:m}\n'
             f'ID: {user.id}')
         
@@ -355,11 +355,14 @@ class user_info:
             if profile.joined_at is None:
                 await client.guild_user_get(user.id)
             
-            text.append(f'Joined: {elapsed_time(profile.joined_at)} ago')
+            # Joined at can be `None` if the user is in lurking mode.
+            joined_at = profile.joined_at
+            if joined_at is not None:
+                text.append(f'Joined: {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]')
             
             boosts_since = profile.boosts_since
             if (boosts_since is not None):
-                text.append(f'Booster since: {elapsed_time(boosts_since)}')
+                text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
             
             text.append(f'Roles: {roles}')
             embed.add_field('In guild profile','\n'.join(text))
@@ -371,7 +374,7 @@ class user_info:
             
             if user.status is Status.offline:
                 text.append('Status : offline\n')
-            elif len(user.statuses)==1:
+            elif len(user.statuses) == 1:
                 for platform,status in user.statuses.items():
                     text.append(f'Status : {status} ({platform})\n')
             else:
@@ -429,8 +432,9 @@ async def guild_description(client, message):
             'Guild only!')
 
 def add_guild_info_field(guild, embed, even_if_empty):
+    created_at = guild.created_at
     sections_parts = [
-        '**Created**: ', elapsed_time(guild.created_at), ' ago\n'
+        '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]\n'
         '**Voice region**: ', guild.region.name,
             ]
     
@@ -458,23 +462,23 @@ def add_guild_counts_field(guild, embed, even_if_empty):
         if channel_type is ChannelText:
             channel_text +=1
             if channel.type == 5:
-                channel_announcements +=1
+                channel_announcements += 1
             continue
         
         if channel_type is ChannelCategory:
-            channel_category +=1
+            channel_category += 1
             continue
         
         if channel_type is ChannelVoice:
-            channel_voice +=1
+            channel_voice += 1
             continue
         
         if channel_type is ChannelThread:
-            channel_thread +=1
+            channel_thread += 1
             continue
         
         if channel_type is ChannelStore:
-            channel_store +=1
+            channel_store += 1
             continue
     
     sections_parts = [
@@ -1037,7 +1041,8 @@ class get_id_as_time:
         if snowflake < 0 or snowflake > ((1<<63)-1):
             return
         
-        await client.message_create(message.channel, id_to_time(snowflake).__format__(DATETIME_FORMAT_CODE))
+        time = id_to_time(snowflake)
+        await client.message_create(message.channel, f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago')
     
     name = 'id-as-time'
     aliases = ['idastime', 'idtotime', 'id-to-time']
@@ -1050,26 +1055,8 @@ class get_id_as_time:
             f'Usage: `{prefix}now-as-time *id*`'
                 ), color=UTILITY_COLOR)
 
-@Koishi.commands.from_class
-class get_id_as_time_since:
-    async def command(client, message, snowflake:int):
-        if snowflake < 0 or snowflake > ((1<<63)-1):
-            return
-        
-        await client.message_create(message.channel, elapsed_time(id_to_time(snowflake)))
-    
-    name = 'id-as-time-since'
-    aliases = ['idastimesince', 'idtotimesince', 'id-to-time-since']
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('id-as-time-since', (
-            'Returns how much time ealpsed, since the given Discord snowflake.\n'
-            f'Usage: `{prefix}now-as-time-since *id*`'
-                ), color=UTILITY_COLOR)
 
-
+# COUNTDOWN DISABLED, SINCE IT IS OVER
 EVENT_DEADLINE = datetime(2020, 11, 18, 0, 0, 0)
 
 async def countdown_description(client, message):
@@ -1088,7 +1075,7 @@ async def countdown_description(client, message):
         f'Dont worry, we got you, {result}.'
             ), color=UTILITY_COLOR)
 
-@Koishi.commands(aliases=['deadline', 'event_deadline'], description=countdown_description, category='UTILITY')
+#@Koishi.commands(aliases=['deadline', 'event_deadline'], description=countdown_description, category='UTILITY')
 async def countdown(client, message):
     now = datetime.utcnow()
     if now >= EVENT_DEADLINE:
@@ -1105,6 +1092,7 @@ async def shared_guilds_description(client, message):
         'Returns the shared guilds between you and me.\n'
         f'Usage: `{prefix}shared-guilds`\n'
             ), color=UTILITY_COLOR)
+
 
 @Koishi.commands(description=shared_guilds_description, category='UTILITY')
 async def shared_guilds(client, message):

@@ -17,7 +17,6 @@ from bot_utils.shared import DUNGEON, KOISHI_PATH
 # $ sudo cp ".../nsjail/nsjail" "/usr/sbin/" # Copy it.
 
 SNEKBOX_COLOR = Color.from_rgb(255, 16, 124)
-SNEKBOX_COMMANDS = eventlist(type_=Command, category='SNEKBOX')
 
 CGROUP_PIDS_PARENT = Path('/sys/fs/cgroup/pids/NSJAIL')
 CGROUP_MEMORY_PARENT = Path('/sys/fs/cgroup/memory/NSJAIL')
@@ -37,28 +36,24 @@ LOG_RP = re.compile('\[[IDWEF]\]\[.+?\] (.*)')
 
 EVAL_LOCK = ScarletLock(KOKORO, 2)
 
-def setup(lib):
-    if IS_UNIX:
-        CGROUP_PIDS_PARENT.mkdir(parents=True, exist_ok=True)
-        CGROUP_MEMORY_PARENT.mkdir(parents=True, exist_ok=True)
-        SNEKBOXING_PATH.mkdir(parents=True, exist_ok=True)
-        
-        try:
-            (CGROUP_MEMORY_PARENT / 'memory.limit_in_bytes').write_text(str(MEM_MAX), encoding='utf-8')
-        except PermissionError:
-            pass
-        else:
-            try:
-                (CGROUP_MEMORY_PARENT / 'memory.memsw.limit_in_bytes').write_text(str(MEM_MAX), encoding='utf-8')
-            except PermissionError:
-                # sys.stderr.write(f'From {__file__}: Failed to setup memory swap limit\n')
-                pass
+if IS_UNIX:
+    CGROUP_PIDS_PARENT.mkdir(parents=True, exist_ok=True)
+    CGROUP_MEMORY_PARENT.mkdir(parents=True, exist_ok=True)
+    SNEKBOXING_PATH.mkdir(parents=True, exist_ok=True)
     
-    main_client.command_processer.create_category('SNEKBOX', checks=[checks.is_guild(DUNGEON)])
-    main_client.commands.extend(SNEKBOX_COMMANDS)
+    try:
+        (CGROUP_MEMORY_PARENT / 'memory.limit_in_bytes').write_text(str(MEM_MAX), encoding='utf-8')
+    except PermissionError:
+        pass
+    else:
+        try:
+            (CGROUP_MEMORY_PARENT / 'memory.memsw.limit_in_bytes').write_text(str(MEM_MAX), encoding='utf-8')
+        except PermissionError:
+            # sys.stderr.write(f'From {__file__}: Failed to setup memory swap limit\n')
+            pass
 
-def teardown(lib):
-    main_client.command_processer.delete_category('SNEKBOX')
+
+main_client.command_processer.create_category('SNEKBOX', checks=checks.is_guild(DUNGEON))
 
 def build_output(output, returncode):
     lines = output.decode('utf-8').splitlines()
@@ -98,16 +93,21 @@ def build_output(output, returncode):
             break
         
         line = lines[index]
-        index +=1
+        index += 1
         line_length = len(line)
         
         content_left_length -= line_length
         if content_left_length < 0:
-            lines[index-1] = line[:line_length-content_left_length]
+            lines[index-1] = line[:line_length+content_left_length]
             del lines[index:]
             is_truncated = True
             break
-    
+        
+        content_left_length -= 1
+        if content_left_length <= 0:
+            if index == limit:
+                is_truncated = True
+            break
     
     if is_truncated:
         lines.append('[OUTPUT TRUNCATED]')
@@ -150,10 +150,7 @@ class EvalUserLock(object):
         await stdin.drain()
     
     def __exit__(self, exc_type, exc_val, exc_tb):
-        try:
-            ACTIVE_EXECUTORS.remove(self.user_id)
-        except KeyError:
-            pass
+        ACTIVE_EXECUTORS.discard(self.user_id)
         
         self.client.command_processer.remove(self.channel, self)
 
@@ -178,7 +175,7 @@ if IS_UNIX:
                 ), color=SNEKBOX_COLOR).add_footer(
                 f'{DUNGEON} only!')
      
-    @SNEKBOX_COMMANDS(name='eval', aliases=['e'], description=eval_description)
+    @main_client.commands(name='eval', aliases='e', description=eval_description)
     async def eval_(client, message, content):
         code, is_exception = parse_code_content(content)
         if is_exception and (code is None):
