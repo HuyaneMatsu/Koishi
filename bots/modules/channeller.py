@@ -1,16 +1,9 @@
 # -*- coding: utf-8 -*-
-from hata import Task, Client, User, CHANNELS, Embed, eventlist, Color, WebhookType
+from hata import Task, User, CHANNELS, Embed, Client, Color, WebhookType
 
-from hata.ext.commands import checks, Command
+from hata.ext.commands import checks
 
-CHANNELLER_COMMANDS = eventlist(type_=Command)
 CHANNELLER_COLOR = Color.from_rgb(129, 158, 0)
-
-def setup(lib):
-    Koishi.commands.extend(CHANNELLER_COMMANDS)
-
-def teardown(lib):
-    Koishi.commands.unextend(CHANNELLER_COMMANDS)
     
 class Channeller_v_del(object):
     __slots__ = ('parent',)
@@ -232,12 +225,13 @@ async def channeling_stop_description(client, message):
         ), color=CHANNELLER_COLOR).add_footer(
             'Owner only!')
 
+Koishi: Client
+Koishi.commands(channeling_start,
+    description = channeling_start_description,
+    checks = [checks.guild_only(), checks.owner_only()],
+    category = 'UTILITY')
 
-CHANNELLER_COMMANDS(channeling_start,
-    description=channeling_start_description,
-    checks=[checks.guild_only(), checks.owner_only()],
-    category='UTILITY')
-CHANNELLER_COMMANDS(channeling_stop,
-    description=channeling_stop_description,
-    checks=[checks.owner_only()],
-    category='UTILITY')
+Koishi.commands(channeling_stop,
+    description = channeling_stop_description,
+    checks = [checks.owner_only()],
+    category = 'UTILITY')

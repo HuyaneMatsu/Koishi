@@ -2,19 +2,22 @@
 import re, os
 from itertools import cycle
 
-from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO
+from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO, Client
 from hata.backend.utils import sortedlist
 from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import FLAN_PREFIX, FLAN_HELP_COLOR
+from bot_utils.shared import FLAN_PREFIX, FLAN_HELP_COLOR, category_name_rule
 from bot_utils.tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
-from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, get_card
+from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, \
+    get_card
 
 CHESUTO_GUILD = Guild.precreate(598706074115244042)
 CHESUTO_COLOR = Color.from_rgb(73, 245, 73)
 CARDS_ROLE = Role.precreate(598708907816517632)
-CARD_HDR_RP = re.compile(' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?', re.I)
+CARD_HDR_RP = re.compile(
+    ' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',
+    re.I,)
 VISITORS_ROLE = Role.precreate(669875992159977492)
 CHESUTO_BGM_MESSAGES = set()
 CHESUTO_BGM_CHANNEL = ChannelText.precreate(707892105749594202)
@@ -52,11 +55,17 @@ BMG_NAMES_W_S = {
     'yshar',
         }
 
-setup_ext_commands(Flan, FLAN_PREFIX)
+Flan: Client
+setup_ext_commands(Flan, FLAN_PREFIX,
+    default_category_name='GENERAL COMMANDS',
+    category_name_rule=category_name_rule,
+        )
+
 Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
 
 Flan.commands(SubterraneanHelpCommand(FLAN_HELP_COLOR), 'help')
+Flan.command_processer.create_category('VOICE', checks=checks.guild_only())
 
 @Flan.events
 async def guild_user_add(client, guild, user):
@@ -92,7 +101,7 @@ class ping:
     async def ping(client, message):
         await client.message_create(message.channel, f'{client.gateway.latency*1000.:.0f} ms')
     
-    aliases = ['pong']
+    aliases = 'pong'
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -103,10 +112,10 @@ class ping:
 
 @Flan.commands.from_class
 class sync_avatar:
-    async def command(client,message):
-        avatar_url=client.application.icon_url_as(ext='png',size=4096)
+    async def command(client, message):
+        avatar_url = client.application.icon_url_as(ext='png', size=4096)
         if avatar_url is None:
-            await client.message_create(message.channel,'The application has no avatar set.')
+            await client.message_create(message.channel, 'The application has no avatar set.')
             return
         
         avatar = await client.download_url(avatar_url)
@@ -114,7 +123,7 @@ class sync_avatar:
         
         await client.message_create(message.channel,'Avatar synced.')
     
-    checks=[checks.owner_only()]
+    checks= checks.owner_only()
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -687,8 +696,9 @@ class dump_all_card:
     async def command(client, message):
         channel = message.channel
         clients = channel.clients
-        if len(clients)<2:
-            await client.message_create(channel.channel,'I need at least 2 clients at the channel to execute this command.')
+        if len(clients) < 2:
+            await client.message_create(channel.channel,
+                'I need at least 2 clients at the channel to execute this command.')
             return
         
         for other_client in clients:
@@ -698,7 +708,8 @@ class dump_all_card:
             if channel.cached_permissions_for(other_client).can_send_messages:
                 break
         else:
-            await client.message_create(channel.channel,'I need at least 2 clients at the channel, which can sen messages as well!')
+            await client.message_create(channel.channel,
+                'I need at least 2 clients at the channel, which can sen messages as well!')
             return
         
         clients = (client,other_client)
@@ -715,7 +726,7 @@ class dump_all_card:
             
             await client.message_create(channel,embed=embed)
     
-    checks=[checks.has_role(CARDS_ROLE)]
+    checks = checks.has_role(CARDS_ROLE)
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -767,7 +778,7 @@ class remove_card:
         await client.message_delete(message)
         return
     
-    checks = [checks.has_role(CARDS_ROLE)]
+    checks = checks.has_role(CARDS_ROLE)
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -1026,7 +1037,7 @@ async def bgminfo_command(client, message, content):
     embed = Embed(title, description, color=CHESUTO_COLOR)
     await client.message_create(message.channel, embed=embed)
 
-Flan.commands(bgminfo_command, name='bgminfo', description=bgminfo_description)
+Flan.commands(bgminfo_command, name='bgminfo', description=bgminfo_description, category='VOICE')
 
 @Flan.commands.from_class
 class bgms:
@@ -1070,6 +1081,8 @@ class bgms:
             embeds.append(embed)
         
         await Pagination(client, message.channel, embeds)
+    
+    category = 'VOICE'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

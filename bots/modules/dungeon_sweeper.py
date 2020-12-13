@@ -2,10 +2,10 @@
 import re, os
 
 from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, eventlist, \
-    KOKORO, LOOP_TIME
+    KOKORO, LOOP_TIME, Client
 
-from hata.ext.commands import Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
-    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
+from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
+    GUI_STATE_SWITCHING_CTX, checks
 
 from hata.discord.client_core import GC_CYCLER
 
@@ -13,13 +13,7 @@ from bot_utils.models import DB_ENGINE, DS_TABLE, ds_model
 from bot_utils.shared import KOISHI_PATH
 
 DS_COLOR = Color(0xa000c4)
-DS_COMMANDS = eventlist(type_=Command)
 
-def setup(lib):
-    Koishi.commands.extend(DS_COMMANDS)
-
-def teardown(lib):
-    Koishi.commands.unextend(DS_COMMANDS)
 
 async def ds_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -1732,7 +1726,6 @@ del YUKARI_SKILL_ACTIVATE
 del YUKARI_SKILL_USE
 del YUKARI_EMOJI
 
-DS_COMMANDS(ds_manager, name='ds', category='GAMES', description=ds_description)
 
 async def ds_modify_best(client, message, content):
     if not client.is_owner(message.author):
@@ -1788,4 +1781,14 @@ async def ds_modify_best_description(client, message):
             ), color=DS_COLOR).add_footer(
             'Owner only!')
 
-DS_COMMANDS(ds_modify_best, checks=[checks.owner_only()], category='GAMES', description=ds_modify_best_description)
+Koishi: Client
+Koishi.commands(ds_manager,
+    name = 'ds',
+    category = 'GAMES',
+    description = ds_description,
+        )
+Koishi.commands(ds_modify_best,
+    checks = checks.owner_only(),
+    category = 'GAMES',
+    description = ds_modify_best_description,
+        )

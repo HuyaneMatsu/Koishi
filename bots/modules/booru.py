@@ -1,22 +1,15 @@
 # -*- coding: utf-8 -*-
-import re
 from collections import deque
 
-from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO
-from hata.ext.commands import Timeouter, Cooldown, Command, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
-    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, checks
+from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO, Client
+from hata.ext.commands import Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
+    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
+from bot_utils.command_utils import CHECH_NSFW_CHANNEL
 from bot_utils.tools import BeautifulSoup, choose, pop_one, CooldownHandler, choose_notsame
 
 
 BOORU_COLOR = Color.from_html('#138a50')
-BOORU_COMMANDS = eventlist(type_=Command)
-
-def setup(lib):
-    Koishi.commands.extend(BOORU_COMMANDS)
-
-def teardown(lib):
-    Koishi.commands.unextend(BOORU_COMMANDS)
 
 
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
@@ -120,7 +113,7 @@ class ShuffledShelter(object):
         while True:
             emoji = event.emoji
             if emoji is self.CYCLE:
-                url=pop_one(self.urls) if self.pop else choose_notsame(self.urls, self.message.embeds[0].image.url)
+                url = pop_one(self.urls) if self.pop else choose_notsame(self.urls, self.message.embeds[0].image.url)
                 self.history.append(url)
                 self.history_step=1
                 break
@@ -139,7 +132,7 @@ class ShuffledShelter(object):
                 self.history_step = history_step
                 url = history[history_ln - history_step]
                 break
-                
+            
             return
         
         embed = Embed(self.title, color=BOORU_COLOR, url=url)
@@ -257,8 +250,8 @@ async def answer_booru(client, channel, content, url_base):
         f'Sowwy, but {client.name} could not find anything what matches these tags..',
         color=BOORU_COLOR))
 
-
-@BOORU_COMMANDS.from_class
+Koishi: Client
+@Koishi.commands.from_class
 class safebooru:
     @Cooldown('channel',20., limit=2, handler=CooldownHandler())
     async def command(client, message, content):
@@ -275,27 +268,14 @@ class safebooru:
             ), color=BOORU_COLOR)
 
 
-async def nsfw_handler(client, message, command, check):
-    if re.search(client.name, message.content, re.I) is None:
-        text = 'Onii chaan\~,\nthis is not the right place to lewd.'
-    else:
-        text = 'I love you too\~,\nbut this is not the right place to lewd.'
-        
-    return client.message_create(message.channel, embed=Embed(
-        text, color=BOORU_COLOR))
-
-    @property
-    def __name__(self):
-        return self.command.__name__
-
-@BOORU_COMMANDS.from_class
+@Koishi.commands.from_class
 class nsfwbooru:
     @safebooru.shared()
     async def command(client, message, content):
         await answer_booru(client, message.channel, content, NSFW_BOORU)
     
     category = 'UTILITY'
-    checks = [checks.nsfw_channel_only(handler=nsfw_handler)]
+    checks = CHECH_NSFW_CHANNEL
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -433,7 +413,7 @@ for title, tag_name, command_names in (
     else:
         aliases = None
     
-    BOORU_COMMANDS(cached_booru_command(title, tag_name), name=command_name, aliases=aliases, category='TOUHOU')
+    Koishi.commands(cached_booru_command(title, tag_name), name=command_name, aliases=aliases, category='TOUHOU')
 
 del title, tag_name, command_names, command_name, aliases
 del Color, BUILTIN_EMOJIS, Cooldown, CooldownHandler, eventlist

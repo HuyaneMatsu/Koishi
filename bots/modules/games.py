@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
 from random import choice, randint
 
-from hata import Color, Embed, eventlist, DiscordException, parse_emoji, CLIENTS, BUILTIN_EMOJIS, ERROR_CODES
-from hata.ext.commands import Command, wait_for_message, ConverterFlag, Converter, wait_for_reaction, Closer
+from hata import Color, Embed, Client, DiscordException, parse_emoji, CLIENTS, BUILTIN_EMOJIS, ERROR_CODES
+from hata.ext.commands import wait_for_message, wait_for_reaction, Closer
+
+from bot_utils.command_utils import USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT, USER_CONVERTER_ALL_CLIENT_DEFAULT
 
 GAMES_COLOR = Color.from_rgb(148,0,211)
-GAMES_COMMANDS = eventlist(type_=Command)
 
-def setup(lib):
-    Koishi.commands.extend(GAMES_COMMANDS)
-    
-def teardown(lib):
-    Koishi.commands.unextend(GAMES_COMMANDS)
+Koishi: Client
 
-
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class message_me:
     async def command(client, message):
         channel = await client.channel_private_create(message.author)
@@ -34,7 +30,7 @@ class message_me:
             ), color=GAMES_COLOR)
 
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class dice:
     async def command(client, message, times:int = 1):
         if times <= 0:
@@ -75,7 +71,7 @@ def check_message_for_emoji(message):
     
     return parsed
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class waitemoji:
     async def command(client,message):
         channel = message.channel
@@ -103,9 +99,9 @@ class waitemoji:
             ), color=GAMES_COLOR)
 
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class rate:
-    async def command(client, message, target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='message.author')):
+    async def command(client, message, target: USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT):
         if target in CLIENTS or client.is_owner(target):
             result=10
         else:
@@ -137,8 +133,8 @@ MINE_MINE_CLEAR = (
     BUILTIN_EMOJIS['bomb'].as_emoji,
         )
 
-MINE_MINE=tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
-MINE_CANCEL=BUILTIN_EMOJIS['anger']
+MINE_MINE = tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
+MINE_CANCEL = BUILTIN_EMOJIS['anger']
 
 class check_emoji_and_user(object):
     __slots__=('emoji', 'user',)
@@ -148,77 +144,77 @@ class check_emoji_and_user(object):
     def __call__(self, event):
         return (self.emoji is event.emoji) and (self.user==event.user)
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class mine:
-    async def command(client,message,word:str='',word2:str=''):
+    async def command(client, message, word: str='', word2: str=''):
         text_mode=False
         amount=0
         
         if word:
-            if word=='text':
-                text_mode=True
-                word=word2
+            if word == 'text':
+                text_mode = True
+                word = word2
             
             if word.isdigit():
-                amount=int(word)
-                if amount>24:
-                    amount=24
-                elif amount<8:
-                    amount=8
+                amount = int(word)
+                if amount > 24:
+                    amount = 24
+                elif amount < 8:
+                    amount = 8
         
-        if amount==0:
-            amount=12
+        if amount == 0:
+            amount = 12
         
-        data=[0 for x in range(100)]
+        data  =[0 for x in range(100)]
         
         while amount:
-            x=randint(0,9)
-            y=randint(0,9)
-            position=x+y*10
+            x = randint(0,9)
+            y = randint(0,9)
+            position = x+y*10
     
-            value=data[position]
-            if value==9:
+            value = data[position]
+            if value == 9:
                 continue
             
-            local_count=0
+            local_count = 0
     
-            for c_x,c_y in ((-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)):
-                local_x=x+c_x
-                local_y=y+c_y
-                if local_x!=10 and local_x!=-1 and local_y!=10 and local_y!=-1 and data[local_x+local_y*10]==9:
-                    local_count+=1
+            for c_x, c_y in ((-1,-1), (0,-1), (1,-1), (1,0), (1,1), (0,1), (-1,1), (-1,0)):
+                local_x = x+c_x
+                local_y = y+c_y
+                if local_x != 10 and local_x != -1 and local_y != 10 and local_y != -1 and data[local_x+local_y*10]==9:
+                    local_count += 1
             
-            if local_count>3:
+            if local_count > 3:
                 continue
     
-            for c_x,c_y in ((-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)):
-                local_x=x+c_x
-                local_y=y+c_y
-                if local_x!=10 and local_x!=-1 and local_y!=10 and local_y!=-1:
-                    local_position=local_x+local_y*10
-                    local_value=data[local_position]
-                    if local_value==9:
+            for c_x,c_y in ((-1,-1), (0,-1), (1,-1), (1,0), (1,1), (0,1), (-1,1), (-1,0)):
+                local_x = x+c_x
+                local_y = y+c_y
+                if local_x != 10 and local_x != -1 and local_y != 10 and local_y != -1:
+                    local_position = local_x+local_y*10
+                    local_value = data[local_position]
+                    if local_value == 9:
                         continue
-                    data[local_position]=local_value+1
+                    data[local_position] = local_value+1
                     
-            data[position]=9
+            data[position] = 9
             
-            amount-=1
+            amount -= 1
     
-        result=[]
-        result_sub=[]
-        y=0
+        result = []
+        result_sub = []
+        y = 0
         while True:
-            x=0
+            x = 0
             while True:
                 result_sub.append(MINE_MINE[data[x+y]])
-                x+=1
-                if x==10:
+                x += 1
+                if x == 10:
                     break
             result.append(''.join(result_sub))
             result_sub.clear()
-            y+=10
-            if y==100:
+            y += 10
+            if y == 100:
                 break
         
         if text_mode:
@@ -245,20 +241,20 @@ class mine:
         finally:
             await client.reaction_delete_own(message, emoji)
     
-        y=0
+        y = 0
         while True:
-            x=0
+            x = 0
             while True:
                 result_sub.append(MINE_MINE_CLEAR[data[x+y]])
-                x+=1
-                if x==10:
+                x += 1
+                if x == 10:
                     break
             result.append(''.join(result_sub))
             result_sub.clear()
-            y+=10
-            if y==100:
+            y += 10
+            if y == 100:
                 break
-        text='\n'.join(result)
+        text = '\n'.join(result)
     
         await client.message_edit(message,text)
 
@@ -276,7 +272,7 @@ class mine:
                 ), color=GAMES_COLOR)
 
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class yuno:
     async def command(client,message):
         await client.message_create(message.channel, embed=Embed('YUKI YUKI YUKI!',
@@ -312,7 +308,7 @@ class yuno:
                 ), color=GAMES_COLOR)
 
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class paranoia:
     async def command(client, message):
         await client.message_create(message.channel,
@@ -328,9 +324,9 @@ class paranoia:
                 ), color=GAMES_COLOR)
 
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class command_random:
-    async def command(client, message, v1 :int, v2:int=0):
+    async def command(client, message, v1: int, v2: int=0):
         if v1 == v2:
             result = v1
         else:
@@ -497,9 +493,9 @@ def generate_love_level():
 LOVE_VALUES = tuple(generate_love_level())
 del generate_love_level
 
-@GAMES_COMMANDS.from_class
+@Koishi.commands.from_class
 class love:
-    async def command(client,message,target:Converter('user', flags=ConverterFlag.user_all)):
+    async def command(client, message, target: USER_CONVERTER_ALL_CLIENT_DEFAULT):
         source = message.author
         if source is target:
             prefix = client.command_processer.get_prefix_for(message)
@@ -522,7 +518,7 @@ class love:
     
     category = 'GAMES'
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('love', (
             'How much you two fit together?\n'

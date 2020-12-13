@@ -3,26 +3,25 @@ from datetime import datetime, timedelta
 from random import random
 from math import log, ceil
 
-from hata import eventlist, elapsed_time, Embed, Color, Emoji, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future, \
+from hata import Client, elapsed_time, Embed, Color, Emoji, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future, \
     KOKORO, ERROR_CODES, USERS, ZEROUSER
-from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, Closer,\
-    GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, Converter, checks, Command, ConverterFlag
+from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
+    GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, Converter, checks, ConverterFlag, Closer
 
 from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from bot_utils.tools import CooldownHandler
 from bot_utils.shared import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON
+from bot_utils.command_utils import USER_CONVERTER_EVERYWHERE, USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT
 
-GAMBLING_COMMANDS = eventlist(type_=Command)
-
+Koishi: Client
 def setup(lib):
-    Koishi.commands.extend(GAMBLING_COMMANDS)
     Koishi.command_processer.append(DUNGEON, heart_generator)
 
 def teardown(lib):
-    Koishi.commands.unextend(GAMBLING_COMMANDS)
     Koishi.command_processer.remove(DUNGEON, heart_generator)
+
 
 GAMBLING_COLOR          = Color.from_rgb(254, 254, 164)
 CURRENCY_EMOJI          = Emoji.precreate(603533301516599296)
@@ -114,15 +113,12 @@ async def daily_description(client,message):
         ), color=GAMBLING_COLOR)
 
 
-@GAMBLING_COMMANDS(description=daily_description, category='GAMBLING')
+@Koishi.commands(description=daily_description, category='GAMBLING')
 @Cooldown('user', 40., limit=4, weight=2, handler=CooldownHandler())
-async def daily(client, message, target_user: Converter(
-        'user', ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='message.author')
-            ):
-    
+async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT):
     source_user = message.author
     if target_user.is_bot:
-        target_user=source_user
+        target_user = source_user
     now = datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
         while True:
@@ -263,9 +259,9 @@ async def hearts_description(client,message):
             ), color=GAMBLING_COLOR)
 
 
-@GAMBLING_COMMANDS(description=hearts_description, category='GAMBLING')
+@Koishi.commands(description=hearts_description, category='GAMBLING')
 @daily.shared(weight=1)
-async def hearts(client,message, target_user: Converter('user', default_code='message.author')):
+async def hearts(client,message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==target_user.id))
         results = await response.fetchall()
@@ -372,7 +368,7 @@ async def heartevent_description(client,message):
             'Owner only!')
 
 
-@GAMBLING_COMMANDS(checks=[checks.owner_only()], description=heartevent_description, category='GAMBLING')
+@Koishi.commands(checks=checks.owner_only(), description=heartevent_description, category='GAMBLING')
 class heartevent(object):
     _update_time = 60.
     _update_delta = timedelta(seconds=_update_time)
@@ -654,13 +650,13 @@ async def dailyevent_description(client,message):
             'Owner only!')
 
     
-@GAMBLING_COMMANDS(checks=[checks.owner_only()],description=dailyevent_description,category='GAMBLING')
+@Koishi.commands(checks=checks.owner_only(), description=dailyevent_description, category='GAMBLING')
 class dailyevent(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
 
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls,client,message,duration:timedelta,amount:int,user_limit:int=0):
+    async def __new__(cls, client, message, duration:timedelta, amount:int, user_limit: int=0):
         channel = message.channel
         while True:
             if duration > EVENT_MAX_DURATION:
@@ -951,11 +947,11 @@ async def game21_description(client, message):
             ), color=GAMBLING_COLOR)
 
 
-@GAMBLING_COMMANDS(name='21', description=game21_description, category='GAMBLING')
+@Koishi.commands(name='21', description=game21_description, category='GAMBLING')
 class Game21(object):
     NEW = BUILTIN_EMOJIS['new']
     STOP = BUILTIN_EMOJIS['octagonal_sign']
-    EMOJIS = (NEW,STOP)
+    EMOJIS = (NEW, STOP)
     
     __slots__ = ('all_pulled', 'amount', 'canceller', 'channel', 'client', 'client_hand', 'client_total', 'message',
         'task_flag', 'timeouter', 'user', 'user_ace', 'user_hand', 'user_total')
@@ -963,10 +959,10 @@ class Game21(object):
     def pull_card(all_pulled):
         card = int((DECK_SIZE-len(all_pulled))*random())
         for pulled in all_pulled:
-            if pulled>card:
+            if pulled > card:
                 break
             
-            card +=1
+            card += 1
             continue
         
         all_pulled.append(card)
@@ -1032,8 +1028,8 @@ class Game21(object):
             
             number_index = card%len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
-                client_ace +=1
-                card_weight = 10
+                client_ace += 1
+                card_weight = 11
             elif number_index > 7:
                 card_weight = 10
             else:
@@ -1042,8 +1038,8 @@ class Game21(object):
             client_total += card_weight
             
             while client_total>21 and client_ace:
-                client_total -= 9
-                client_ace -=1
+                client_total -= 10
+                client_ace -= 1
             
             if client_total > (17 if client_ace else 15):
                 break
@@ -1062,8 +1058,8 @@ class Game21(object):
             
             number_index = card%len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
-                user_ace +=1
-                card_weight = 10
+                user_ace += 1
+                card_weight = 11
             elif number_index > 7:
                 card_weight = 10
             else:
@@ -1078,7 +1074,7 @@ class Game21(object):
             f'You have cards equal to {user_total} weight at your hand',
             color=GAMBLING_COLOR)
         
-        for round_,card in enumerate(user_hand,1):
+        for round_,card in enumerate(user_hand, 1):
             type_index, number_index = divmod(card,len(CARD_NUMBERS))
             embed.add_field(f'Round {round_}',
                 f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
@@ -1172,17 +1168,17 @@ class Game21(object):
             user_ace = self.user_ace
             number_index = card%len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
-                user_ace +=1
-                card_weight = 10
+                user_ace += 1
+                card_weight = 11
             elif number_index > 7:
                 card_weight = 10
             else:
                 card_weight = number_index+2
             
             user_total = self.user_total + card_weight
-            while user_total>21 and user_ace:
-                user_total -= 9
-                user_ace -=1
+            while user_total > 21 and user_ace:
+                user_total -= 10
+                user_ace -= 1
             
             self.user_total = user_total
             self.user_ace = user_ace
@@ -1332,7 +1328,7 @@ class Game21(object):
                         return
                 
                 # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
-                await client.events.error(client,f'{self!r}.__call__',err)
+                await client.events.error(client, f'{self!r}.__call__', err)
                 return
             
             self.task_flag = GUI_STATE_READY
@@ -1415,7 +1411,8 @@ async def gift_description(client, message):
             f'You must have {WORSHIPPER_ROLE.name} or {DUNGEON_PREMIUM_ROLE.name} role!')
 
 
-@GAMBLING_COMMANDS(description=gift_description, category='GAMBLING', checks=[checks.has_any_role([WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE])])
+@Koishi.commands(description=gift_description, category='GAMBLING',
+    checks=checks.has_any_role([WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE]))
 @daily.shared(weight=1)
 async def gift(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
     source_user = message.author
@@ -1501,13 +1498,13 @@ async def parser_failure_handler(client, message, command, content, args):
     embed = await command.description(client, message)
     await Closer(client, message.channel, embed)
 
-@GAMBLING_COMMANDS(
+@Koishi.commands(
     description = gift_description,
     category = 'GAMBLING',
     checks = [checks.owner_only()],
     parser_failure_handler = parser_failure_handler,
         )
-async def award(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
+async def award(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
     
     if amount <= 0:
         await award_description(client, message)
@@ -1553,13 +1550,13 @@ async def take_description(client, message):
         ), color=GAMBLING_COLOR).add_footer(
             f'Owner only.')
 
-@GAMBLING_COMMANDS(
+@Koishi.commands(
     description = take_description,
     category = 'GAMBLING',
     checks = [checks.owner_only()],
     parser_failure_handler = parser_failure_handler,
         )
-async def take(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
+async def take(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
     
     if amount <= 0:
         await take_description(client, message)
@@ -1599,7 +1596,7 @@ async def top_description(client, message):
         ), color=GAMBLING_COLOR)
 
 
-@GAMBLING_COMMANDS(description=top_description, category='GAMBLING', aliases=['top-list'])
+@Koishi.commands(description=top_description, category='GAMBLING', aliases='top-list')
 @daily.shared(weight=1)
 async def top(client, message):
     async with DB_ENGINE.connect() as connector:
@@ -1693,11 +1690,3 @@ async def heart_generator(client, message):
                 daily_streak= 0,)
         
         await connector.execute(to_execute)
-
-del Emoji
-del Color
-del Cooldown
-del eventlist
-del CooldownHandler
-del ConverterFlag
-del Converter

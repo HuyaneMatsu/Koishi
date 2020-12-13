@@ -13,25 +13,17 @@ except ModuleNotFoundError:
 from datetime import datetime
 from threading import enumerate as list_threads, _MainThread as MainThreadType
 
-from hata import eventlist, EventThread, KOKORO, ExecutorThread, chunkify, Embed, Color, elapsed_time, Future, sleep
-from hata.ext.commands import Command, checks, Pagination
+from hata import EventThread, KOKORO, ExecutorThread, Client, Embed, Color, elapsed_time, Future, sleep
+from hata.ext.commands import checks
 
 from bot_utils.models import DB_ENGINE
 
-STAT_COMMANDS = eventlist(type_=Command, category='STATS')
 STAT_COLOR = Color.from_rgb(61, 255, 249)
 
-def setup(lib):
-    category = Koishi.command_processer.get_category('STATS')
-    if (category is None):
-        Koishi.command_processer.create_category('STATS', checks=[checks.owner_only()])
-    
-    Koishi.commands.extend(STAT_COMMANDS)
+Koishi: Client
+Koishi.command_processer.create_category('STATS', checks=checks.owner_only())
 
-def teardown(lib):
-    Koishi.commands.unextend(STAT_COMMANDS)
-
-@STAT_COMMANDS.from_class
+@Koishi.commands.from_class
 class threads:
     async def command(client, message):
         thread_count_by_type = {}
@@ -158,6 +150,8 @@ class threads:
         
         await client.message_create(message.channel, embed=embed)
     
+    category = 'STATS'
+    
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         
@@ -168,7 +162,7 @@ class threads:
                 'Owner only!')
 
 if IS_PYPY:
-    @STAT_COMMANDS.from_class
+    @Koishi.commands.from_class
     class gc_stats:
         async def command(client, message):
             stats = get_gc_stats()
@@ -198,6 +192,7 @@ if IS_PYPY:
             await client.message_create(message.channel, embed=embed)
         
         aliases = ['gc', 'gc-info',]
+        category = 'STATS'
         
         async def description(client, message):
             prefix = client.command_processer.get_prefix_for(message)
@@ -279,7 +274,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
             def cpu_percent_total(self):
                 return self.cpu_percent_with_max_frequence / psutil.cpu_count(logical=False)
         
-        @STAT_COMMANDS.from_class
+        @Koishi.commands.from_class
         class system_stats:
             aliases = ['system', 'process', 'process-stats']
             
@@ -397,6 +392,8 @@ if (psutil is not None) and (sys.platform == 'linux'):
                 embed = Embed('System and Process stats:', ''.join(description), color=STAT_COLOR)
                 
                 await client.message_create(message.channel, embed=embed)
+        
+        category = 'STATS'
         
         async def description(client, message):
             prefix = client.command_processer.get_prefix_for(message)

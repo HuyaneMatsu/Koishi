@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
-import re, sys, signal
+import re, signal
 from datetime import datetime, timedelta
 from threading import main_thread
 
-from hata import BUILTIN_EMOJIS, Guild, Embed, Color, sleep, CLIENTS, USERS, CHANNELS, GUILDS, chunkify, Client, \
-    Role, ChannelText, Invite, KOKORO
-from hata.ext.commands import Pagination, checks, setup_ext_commands, Converter, ConverterFlag, Closer
+from hata import BUILTIN_EMOJIS, Embed, sleep, CLIENTS,  Client, KOKORO
+from hata.ext.commands import checks, setup_ext_commands
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
 from bot_utils.shared import KOISHI_PREFIX, category_name_rule, DEFAULT_CATEGORY_NAME, WELCOME_CHANNEL, DUNGEON, \
-    ANNOUNCEMNETS_ROLE, WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON_INVITE, KOISHI_HELP_COLOR, SYNC_CHANNEL, \
-    command_error, EVERYNYAN_ROLE
+    ANNOUNCEMNETS_ROLE, WORSHIPPER_ROLE, KOISHI_HELP_COLOR, SYNC_CHANNEL, command_error, EVERYNYAN_ROLE
 
 from bot_utils.interpreter import Interpreter
 from bot_utils.syncer import sync_request_waiter
@@ -20,6 +18,8 @@ from bot_utils.syncer import sync_request_waiter
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
 _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
 _KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
+
+Koishi: Client
 
 setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)
@@ -34,6 +34,11 @@ Koishi.events(EmojiDeleteWaitfor)
 Koishi.events(RoleEditWaitfor)
 
 Koishi.commands(SubterraneanHelpCommand(KOISHI_HELP_COLOR), 'help', category='HELP')
+
+Koishi.command_processer.create_category('ADMINISTRATION',)
+Koishi.command_processer.create_category('GAMES',)
+Koishi.command_processer.create_category('UTILITY',)
+Koishi.command_processer.create_category('VOICE', checks=checks.guild_only())
 
 @Koishi.commands
 async def default_event(client, message):

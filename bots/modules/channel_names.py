@@ -6,9 +6,10 @@ from random import random
 from datetime import datetime
 from difflib import get_close_matches
 
-from bot_utils.shared import BOT_CHANNEL_CATEGORY, KOISHI_PATH, DUNGEON, STAFF_ROLE
+from bot_utils.shared import BOT_CHANNEL_CATEGORY, KOISHI_PATH, STAFF_ROLE
 
-from hata import Lock, KOKORO, alchemy_incendiary, Task, eventlist, Embed, DiscordException, ERROR_CODES, BUILTIN_EMOJIS
+from hata import Lock, KOKORO, alchemy_incendiary, Task, eventlist, Embed, DiscordException, ERROR_CODES, Client, \
+    BUILTIN_EMOJIS
 from hata.ext.commands import checks, Command, Pagination, Closer, wait_for_reaction
 
 FILE_NAME = 'channel_names.csv'
@@ -227,29 +228,21 @@ class module_locals:
     handle = None
 
 
-
-CHANNEL_NAME_COMMANDS = eventlist(type_=Command)
+Koishi: Client
+Koishi.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(STAFF_ROLE)])
 
 def setup(lib):
-    category = Koishi.command_processer.get_category('CHANNEL NAMES')
-    if (category is None):
-        Koishi.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(STAFF_ROLE)])
-    
-    Koishi.commands.extend(CHANNEL_NAME_COMMANDS)
-
     module_locals.handle = KOKORO.call_later(
         datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp()-time_now()+DAY, do_rename)
 
 def teardown(lib):
-    Koishi.commands.unextend(CHANNEL_NAME_COMMANDS)
-    
     handle = module_locals.handle
     if (handle is not None):
         module_locals.handle = None
         handle.cancel()
 
 
-@CHANNEL_NAME_COMMANDS(category='CHANNEL NAMES')
+@Koishi.commands(category='CHANNEL NAMES')
 async def list_bot_channel_names(client, message):
     """
     Lists the already added bot channel names.
@@ -289,7 +282,7 @@ ADD_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 ADD_EMOJI_EMOJIS = (ADD_EMOJI_OK, ADD_EMOJI_CANCEL)
 
-@CHANNEL_NAME_COMMANDS( category='CHANNEL NAMES', separator='|')
+@Koishi.commands( category='CHANNEL NAMES', separator='|')
 async def add_bot_channel_name(client, message, weight:int, name):
     """
     Adds the given channel name to the bot channel names.
@@ -379,7 +372,7 @@ async def add_bot_channel_name(client, message, weight:int, name):
         await client.message_edit(message, embed=embed)
 
 
-@CHANNEL_NAME_COMMANDS(category='CHANNEL NAMES')
+@Koishi.commands(category='CHANNEL NAMES')
 async def do_bot_channel_rename(client, message):
     """
     Adds the given channel name to the bot channel names.

@@ -3,21 +3,15 @@ import os
 from random import randint
 
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
-    Embed, DiscordException, ReuBytesIO, eventlist, LOOP_TIME
+    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO
 
 from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
-    GUI_STATE_SWITCHING_CTX, Timeouter, Command, checks
+    GUI_STATE_SWITCHING_CTX, Timeouter, checks
 
 from bot_utils.shared import KOISHI_PATH
 from PIL import Image as PIL
 
-KANAKO_COMMANDS = eventlist(type_=Command)
-
-def setup(lib):
-    Koishi.commands.extend(KANAKO_COMMANDS)
-
-def teardown(lib):
-    Koishi.commands.unextend(KANAKO_COMMANDS)
+Koishi: Client
 
 FONT = PIL.font(os.path.join(KOISHI_PATH, 'library', 'Kozuka.otf'), 90)
 FONT_COLOR = (162, 61, 229)
@@ -66,22 +60,22 @@ _pairsD=('a','i','e','o','u')
 _hiragana=[('あ','a'),('い','i'),('う','u'),('え','e'),('お','o'),('か','ka'),('き','ki'),('く','ku'),('け','ke'),('こ','ko'),('が','ga'),('ぎ','gi'),('ぐ','gu'),('げ','ge'),('ご','go'),('さ','sa'),('し','shi'),('す','su'),('せ','se'),('そ','so'),('ざ','za'),('じ','ji'),('ず','zu'),('ぜ','ze'),('ぞ','zo'),('た','ta'),('ち','chi'),('つ','tsu'),('て','te'),('と','to'),('だ','da'),('ぢ','ji'),('づ','zu'),('で','de'),('ど','do'),('な','na'),('に','ni'),('ぬ','nu'),('ね','ne'),('の','no'),('は','ha'),('ひ','hi'),('ふ','fu'),('へ','he'),('ほ','ho'),('ば','ba'),('び','bi'),('ぶ','bu'),('べ','be'),('ぼ','bo'),('ぱ','pa'),('ぴ','pi'),('ぷ','pu'),('ぺ','pe'),('ぽ','po'),('ま','ma'),('み','mi'),('む','mu'),('め','me'),('も','mo'),('ら','ra'),('り','ri'),('る','ru'),('れ','re'),('ろ','ro'),('わ','wa'),('ゐ','wi'),('ゔ','vu'),('ゑ','we'),('を','wo'),('や','ya'),('ゆ','yu'),('よ','yo'),('ん','n'),('きゃ','kya'),('きゅ','kyu'),('きょ','kyo'),('ぎゃ','gya'),('ぎゅ','gyu'),('ぎょ','gyo'),('しゃ','sha'),('しゅ','shu'),('しょ','sho'),('じゃ','ja'),('じゅ','ju'),('じょ','jo'),('ちゃ','cha'),('ちゅ','chu'),('ちょ','cho'),('ぢゃ','ja'),('ぢゅ','ju'),('ぢょ','jo'),('にゃ','nya'),('にゅ','nyu'),('にょ','nyo'),('ひゃ','hya'),('ひゅ','hyu'),('ひょ','hyo'),('びゃ','bya'),('びゅ','byu'),('びょ','byo'),('ぴゃ','pya'),('ぴゅ','pyu'),('ぴょ','pyo'),('みゃ','mya'),('みゅ','myu'),('みょ','myo'),('りゃ','rya'),('りゅ','ryu'),('りょ','ryo')]
 _katakana=[('ア','a'),('イ','i'),('ウ','u'),('エ','e'),('オ','o'),('カ','ka'),('キ','ki'),('ク','ku'),('ケ','ke'),('コ','ko'),('ガ','ga'),('ギ','gi'),('グ','gu'),('ゲ','ge'),('ゴ','go'),('サ','sa'),('シ','shi'),('ス','su'),('セ','se'),('ソ','so'),('ザ','za'),('ジ','ji'),('ズ','zu'),('ゼ','ze'),('ゾ','zo'),('タ','ta'),('チ','chi'),('ツ','tsu'),('テ','te'),('ト','to'),('ダ','da'),('ヂ','ji'),('ヅ','zu'),('デ','de'),('ド','do'),('ナ','na'),('ニ','ni'),('ヌ','nu'),('ネ','ne'),('ノ','no'),('ハ','ha'),('ヒ','hi'),('フ','fu'),('ヘ','he'),('ホ','ho'),('バ','ba'),('ビ','bi'),('ブ','bu'),('ベ','be'),('ボ','bo'),('パ','pa'),('ピ','pi'),('プ','pu'),('ペ','pe'),('ポ','po'),('マ','ma'),('ミ','mi'),('ム','mu'),('メ','me'),('モ','mo'),('ラ','ra'),('リ','ri'),('ル','ru'),('レ','re'),('ロ','ro'),('ワ','wa'),('ヸ','wi'),('ヴ','vu'),('ヹ','we'),('ヲ','wo'),('ヤ','ya'),('ュ','yu'),('ョ','yo'),('ン','n'),('キャ','kya'),('キュ','kyu'),('キョ','kyo'),('ギャ','gya'),('ギュ','gyu'),('ギョ','gyo'),('シャ','sha'),('シュ','shu'),('ショ','sho'),('ジャ','ja'),('ジュ','ju'),('ジョ','jo'),('チャ','cha'),('チュ','chu'),('チョ','cho'),('ヂャ','ja'),('ヂュ','ju'),('ヂョ','jo'),('ニャ','nya'),('ニュ','nyu'),('ニョ','nyo'),('ヒャ','hya'),('ヒュ','hyu'),('ヒョ','hyo'),('ビャ','bya'),('ビュ','byu'),('ビョ','byo'),('ピャ','pya'),('ピュ','pyu'),('ピョ','pyo'),('ミャ','mya'),('ミュ','myu'),('ミョ','myo'),('リャ','rya'),('リュ','ryu'),('リョ','ryo')]
 
-MAPS={'hiragana':_hiragana,'katakana':_katakana}
+MAPS = {'hiragana':_hiragana, 'katakana':_katakana}
 
 def render_showcase(name,map_):
-    result=[]
-    element_index=0
-    element_limit=len(map_)
+    result = []
+    element_index = 0
+    element_limit = len(map_)
     
-    page_index=1
-    page_limit=(element_limit+29)//30
+    page_index = 1
+    page_limit = (element_limit+29)//30
 
-    field_text=[]
+    field_text = []
     
     while True:
-        if page_index>page_limit:
+        if page_index > page_limit:
             break
-        embed=Embed(name.capitalize(),'',KANAKO_COLOR)
+        embed = Embed(name.capitalize(),'',KANAKO_COLOR)
         embed.add_footer(f'page {page_index} / {page_limit}')
         
         for _ in range(((element_limit%30)+9)//10 if page_index==page_limit else 3):
@@ -102,28 +96,27 @@ def render_showcase(name,map_):
 
     return result
 
-MAP_showcases={name:render_showcase(name,map_) for name,map_ in MAPS.items()}
+MAP_showcases = {name:render_showcase(name, map_) for name,map_ in MAPS.items()}
 
 class history_element(object):
-    __slots__=('answer', 'answers', 'options', 'question',)
+    __slots__ = ('answer', 'answers', 'options', 'question',)
 
 class kanako_game(object):
-    __slots__=('amount', 'answers', 'client', 'history', 'map', 'map_name',
-        'options', 'possibilities', 'romajis', 'running', 'channel', 'users',
-        'waiter',)
-    def __init__(self,client,channel,user,map_name,amount,possibilities):
-        self.client=client
-        self.channel=channel
-        self.users=[user]
-
-        self.map_name=map_name
-        self.amount=amount
-        self.possibilities=possibilities
+    __slots__ = ('amount', 'answers', 'client', 'history', 'map', 'map_name', 'options', 'possibilities', 'romajis',
+        'running', 'channel', 'users', 'waiter',)
+    def __init__(self, client, channel, user, map_name, amount, possibilities):
+        self.client = client
+        self.channel = channel
+        self.users = [user]
         
-        self.running=False
-        self.waiter=sleep(300.,client.loop)
-
-        Task(self.start_waiting(),client.loop)
+        self.map_name = map_name
+        self.amount = amount
+        self.possibilities = possibilities
+        
+        self.running = False
+        self.waiter = sleep(300., KOKORO)
+        
+        Task(self.start_waiting(), KOKORO)
         
     async def start_waiting(self):
     
@@ -136,21 +129,21 @@ class kanako_game(object):
         else:
             return self.cancel()
 
-        full_map=MAPS[self.map_name].copy()
-        limit=len(full_map)-1
+        full_map = MAPS[self.map_name].copy()
+        limit = len(full_map)-1
         
-        self.map=[full_map.pop(randint(0,limit)) for limit in range(limit,limit-self.amount,-1)]
+        self.map = [full_map.pop(randint(0,limit)) for limit in range(limit, limit-self.amount, -1)]
         if self.possibilities:
-            self.romajis={element[1] for element in self.map}
+            self.romajis = {element[1] for element in self.map}
         else:
-            self.options=None
+            self.options = None
         
-        self.history=[]
-        self.answers={}
-        self.running=True
+        self.history = []
+        self.answers = {}
+        self.running = True
         self.client.events.message_create.append(self.channel, self)
         
-        Task(self.run(),self.client.loop)
+        Task(self.run(), KOKORO)
 
     @property
     def info(self):
@@ -258,15 +251,15 @@ class kanako_game(object):
                 return self.cancel()
             
             circle_start=LOOP_TIME()
-            waiter=sleep(time_till_notify,client.loop)
+            waiter=sleep(time_till_notify, KOKORO)
             self.waiter=waiter
             try:
                 await waiter
                 Task(self.send_or_except(
                     Embed('Hurry! Only 10 seconds left!',
                         '\n'.join([user.full_name for user in self.users if user.id not in answers]),
-                        KANAKO_COLOR)),client.loop)
-                waiter=sleep(time_till_notify,client.loop)
+                        KANAKO_COLOR)), KOKORO)
+                waiter=sleep(time_till_notify, KOKORO)
                 self.waiter=waiter
                 await waiter
                 self.calculate_leavers()
@@ -336,24 +329,26 @@ class kanako_game(object):
             return
         raise InterruptedError
         
-    def append(self,user):
+    def append(self, user):
         while True:
             if self.running:
-                message='There is active game running, you cannot do that.'
-                break
-            if user in self.users:
-                message='You are already at the game'
+                message = 'There is active game running, you cannot do that.'
                 break
             
-            message='You succesfully joined to the current game.'
+            if user in self.users:
+                message = 'You are already at the game'
+                break
+            
+            message = 'You succesfully joined to the current game.'
             self.users.append(user)
             
-            if len(self.users)==10:
-                message+=f'\n The game is full, starting.'
+            if len(self.users) == 10:
+                message += f'\n The game is full, starting.'
                 self.waiter.cancel()
-                
+            
             break
-        Task(self.client.message_create(self.channel,embed=Embed('',message,KANAKO_COLOR)),self.client.loop)
+        
+        Task(self.client.message_create(self.channel, embed=Embed('', message, KANAKO_COLOR)), KOKORO)
         
     def remove(self,user):
         while True:
@@ -381,7 +376,7 @@ class kanako_game(object):
             
             break
         
-        Task(self.client.message_create(self.channel,embed=Embed('',message,KANAKO_COLOR)),self.client.loop)
+        Task(self.client.message_create(self.channel,embed=Embed('',message,KANAKO_COLOR)), KOKORO)
 
     def cancel(self):
         client=self.client
@@ -389,7 +384,7 @@ class kanako_game(object):
         if self.running:
             client.events.message_create.remove(self.channel, self)
             self.running=False
-        Task(client.message_create(self.channel,embed=Embed('','Game cancelled',KANAKO_COLOR)),client.loop)
+        Task(client.message_create(self.channel,embed=Embed('','Game cancelled',KANAKO_COLOR)), KOKORO)
 
 class game_statistics(object):
     __slots__=('cache', 'source',)
@@ -627,28 +622,27 @@ class embedination(object):
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']
     RIGHT2  = BUILTIN_EMOJIS['fast_forward']
     RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
-    EMOJIS  = (LEFT2,LEFT,RIGHT,RIGHT2,RESET)
+    EMOJIS  = (LEFT2, LEFT, RIGHT, RIGHT2, RESET)
     
-    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages',
-        'task_flag', 'timeouter')
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', 'task_flag', 'timeouter')
     
     async def __new__(cls,client,channel,pages):
-        self=object.__new__(cls)
-        self.client=client
-        self.channel=channel
-        self.pages=pages
-        self.page=0
-        self.canceller=cls._canceller
-        self.task_flag=GUI_STATE_READY
-        self.timeouter=None
+        self = object.__new__(cls)
+        self.client = client
+        self.channel = channel
+        self.pages = pages
+        self.page = 0
+        self.canceller = cls._canceller
+        self.task_flag = GUI_STATE_READY
+        self.timeouter = None
         
         try:
-            message = await client.message_create(self.channel,embed=self.pages[0])
+            message = await client.message_create(self.channel, embed=self.pages[0])
         except:
-            self.message=None
+            self.message = None
             raise
         
-        self.message=message
+        self.message = message
         
         if not channel.cached_permissions_for(client).can_add_reactions:
             return self
@@ -656,57 +650,57 @@ class embedination(object):
         if len(self.pages)>1:
             for emoji in self.EMOJIS:
                 await client.reaction_add(message,emoji)
-
+        
         
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
-        self.timeouter=Timeouter(self,timeout=150)
+        self.timeouter = Timeouter(self, timeout=150)
         return self
     
     async def __call__(self, client, event):
         if event.user.is_bot or (event.emoji not in self.EMOJIS):
             return
         
-        message=self.message
+        message = self.message
         
         if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
             return
         
-        task_flag=self.task_flag
-        if task_flag!=GUI_STATE_READY:
+        task_flag = self.task_flag
+        if task_flag != GUI_STATE_READY:
             # ignore GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
             return
         
         emoji = event.emoji
         while True:
             if emoji is self.LEFT:
-                page=self.page-1
+                page = self.page-1
                 break
                 
             if emoji is self.RIGHT:
-                page=self.page+1
+                page = self.page+1
                 break
                 
             if emoji is self.RESET:
-                page=0
+                page = 0
                 break
                 
             if emoji is self.LEFT2:
-                page=self.page-10
+                page = self.page-10
                 break
                 
             if emoji is self.RIGHT2:
-                page=self.page+10
+                page = self.page+10
                 break
                 
             return
         
-        if page<0:
-            page=0
-        elif page>=len(self.pages):
-            page=len(self.pages)-1
+        if page < 0:
+            page = 0
+        elif page >= len(self.pages):
+            page = len(self.pages)-1
         
-        if self.page==page:
+        if self.page == page:
             return
 
         self.page = page
@@ -736,29 +730,29 @@ class embedination(object):
         
         self.timeouter.set_timeout(10)
     
-    async def _canceller(self,exception,):
-        client=self.client
-        message=self.message
+    async def _canceller(self, exception):
+        client = self.client
+        message = self.message
         
         client.events.reaction_add.remove(message, self)
         client.events.reaction_delete.remove(message, self)
         
-        if self.task_flag==GUI_STATE_SWITCHING_CTX:
+        if self.task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
 
-        self.task_flag=GUI_STATE_CANCELLED
+        self.task_flag = GUI_STATE_CANCELLED
         
         if exception is None:
             return
         
-        if isinstance(exception,TimeoutError):
+        if isinstance(exception, TimeoutError):
             if self.channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(message)
                 except BaseException as err:
                     
-                    if isinstance(err,ConnectionError):
+                    if isinstance(err, ConnectionError):
                         # no internet
                         return
                     
@@ -774,25 +768,32 @@ class embedination(object):
                     return
             return
         
-        timeouter=self.timeouter
+        timeouter = self.timeouter
         if timeouter is not None:
+            self.timeouter = None
             timeouter.cancel()
         #we do nothing
     
     def cancel(self):
-        canceller=self.canceller
+        canceller = self.canceller
         if canceller is None:
             return
         
-        self.canceller=None
+        self.canceller = None
         
-        timeouter=self.timeouter
+        timeouter = self.timeouter
         if timeouter is not None:
+            self.timeouter = None
             timeouter.cancel()
         
-        return Task(canceller(self,None),self.client.loop)
+        return Task(canceller(self, None), KOKORO)
 
-KANAKO_COMMANDS(kanako_manager,name='kanako_game', description=kanako_description,category='GAMES', checks=[checks.guild_only()])
+Koishi.commands(kanako_manager,
+    name = 'kanako_game',
+    description = kanako_description,
+    category = 'GAMES',
+    checks = checks.guild_only(),
+        )
 
 del BUILTIN_EMOJIS
 del Color

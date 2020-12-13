@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import re, sys
-from math import ceil
 
 from bs4 import BeautifulSoup
 
-from hata import Color, Task, Embed, KOKORO, eventlist
-from hata.ext.commands import ChooseMenu, Pagination, Command, Closer
-from hata.discord.utils import from_json, chunkify
+from hata import Color, Task, Embed, KOKORO, Client
+from hata.ext.commands import ChooseMenu, Pagination, Closer
+from hata.discord.utils import from_json
 
 from bot_utils.shared import SATORI_HELP_COLOR
 
@@ -14,14 +13,6 @@ WORDMATCH_RP = re.compile('[^a-zA-z0-9]+')
 WIKI_COLOR = Color.from_rgb(48, 217, 255)
 HATA_DOCS_BASE_URL = 'https://huyanematsu.pythonanywhere.com/docs/'
 HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
-
-DOCS_COMMANDS = eventlist(type_=Command)
-
-def setup(lib):
-    Satori.commands.extend(DOCS_COMMANDS)
-
-def teardown(lib):
-    Satori.commands.unextend(DOCS_COMMANDS)
 
 async def wiki_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -31,7 +22,8 @@ async def wiki_description(client, message):
         f'Usage: `{prefix}wiki *search-term*`',
         color=WIKI_COLOR)
 
-@DOCS_COMMANDS(description=wiki_description)
+Satori: Client
+@Satori.commands(description=wiki_description)
 async def wiki(client, message, content):
     if not content:
         await client.message_create(message.channel, embed=Embed(
@@ -278,9 +270,9 @@ async def download_wiki_page(client, title_, url):
                         pre_part = block[:break_point]+' ...'
                         post_part = '...'+block[break_point:]
                     
-                    index +=1
+                    index += 1
                     blocks.insert(index, post_part)
-                    limit +=1
+                    limit += 1
                     collected.append(pre_part)
                     sections.append('\n'.join(collected))
                     collected.clear()
@@ -291,7 +283,7 @@ async def download_wiki_page(client, title_, url):
                 section_ln=section_ln+len(block)
                 collected.append(block)
             
-            index +=1
+            index += 1
             if index == limit:
                 if collected:
                     sections.append('\n'.join(collected))
@@ -310,7 +302,7 @@ async def download_wiki_page(client, title_, url):
             index = 0
             while True:
                 embed_content=sections[index]
-                index +=1
+                index += 1
                 if name is None:
                     embed_title = f'{title} ({index} / {limit})'
                 else:
@@ -418,5 +410,5 @@ async def docs(client, message, search_for:str=None):
     
     await Pagination(client, message.channel, embeds)
 
-DOCS_COMMANDS(docs, description=docs_help, aliases=['d'])
+Satori.commands(docs, description=docs_help, aliases='d')
 

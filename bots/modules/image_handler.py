@@ -2,8 +2,8 @@
 import re, os, functools
 from io import BytesIO
 
-from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, eventlist, Color, KOKORO, Lock
-from hata.ext.commands import Command, checks, Closer, Converter, ConverterFlag
+from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, Color, KOKORO, Lock, Client
+from hata.ext.commands import checks, Closer
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -16,20 +16,14 @@ UPLOAD_LOCK = Lock(KOKORO)
 
 from bot_utils.tools import choose
 from bot_utils.shared import KOISHI_PATH
+from bot_utils.command_utils import MESSAGE_CONVERTER_ALL
+
 
 splitext = os.path.splitext
 join = os.path.join
 
 IMAGE_COLOR = Color(0x5dc66f)
-IMAGE_COMMANDS = eventlist(type_=Command)
-
-def setup(lib):
-    load_images()
-    Koishi.commands.extend(IMAGE_COMMANDS)
-
-def teardown(lib):
-    Koishi.commands.unextend(IMAGE_COMMANDS)
-
+Koishi: Client
 
 IMAGES_STATIC = []
 IMAGES_ANIMATED = []
@@ -91,9 +85,8 @@ IMAGE_FORMATS_ANIMATED = {'mp4', 'gif'}
 
 IMAGE_PATH = join(KOISHI_PATH, 'images')
 
-def load_images():
-    for filename in os.listdir(IMAGE_PATH):
-        image_details(filename)
+for filename in os.listdir(IMAGE_PATH):
+    image_details(filename)
 
 async def image_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -122,7 +115,7 @@ async def upload_description(client, message):
 
 RESERVED_TAGS = {'animated', 'static', 'count', 'index', 'hex',}
 
-@IMAGE_COMMANDS(category='UTILITY', description=image_description, checks=[checks.guild_only()])
+@Koishi.commands(category='UTILITY', description=image_description, checks=checks.guild_only())
 async def image(client, message, content):
     result = process_on_command_image(content)
     if type(result) is str:
@@ -278,8 +271,8 @@ def process_on_command_image(content):
             else:
                 return 'Sowwy, no result.'
 
-@IMAGE_COMMANDS(category='UTILITY', checks=[checks.owner_only()], description=upload_description)
-async def upload(client, message, target_message: Converter('message', flags=ConverterFlag.user_default.update_by_keys(everywhere=True)), *tags):
+@Koishi.commands(category='UTILITY', checks=checks.owner_only(), description=upload_description)
+async def upload(client, message, target_message: MESSAGE_CONVERTER_ALL, *tags):
     if UPLOAD:
         tags = [tag.lower() for tag in tags if not is_mention(tag)]
         for tag in tags:
@@ -459,32 +452,32 @@ class image_with_tag:
                     await client.message_create(message.channel, embed=embed, file=file)
 
 
-IMAGE_COMMANDS(
+Koishi.commands(
     image_with_tag('pat', 'patting', 'pats', 'Do you like pats as well?'),
     category = 'UTILITY',
     checks = [checks.guild_only()],
     aliases = ['pet'],
         )
 
-IMAGE_COMMANDS(
+Koishi.commands(
     image_with_tag('hug', 'hugging', 'hugs', 'Huh.. Huggu? HUGG YOUUU!!!'),
     category = 'UTILITY',
     checks = [checks.guild_only()],
         )
 
-IMAGE_COMMANDS(
+Koishi.commands(
     image_with_tag('kiss', 'kissing', 'kisses', 'If you really really like your onee, give her a kiss <3'),
     category = 'UTILITY',
     checks = [checks.guild_only()],
         )
 
-IMAGE_COMMANDS(
+Koishi.commands(
     image_with_tag('slap', 'slapping', 'slaps', 'Slapping others is not nice.'),
     category = 'UTILITY',
     checks = [checks.guild_only()],
         )
 
-IMAGE_COMMANDS(
+Koishi.commands(
     image_with_tag('lick', 'licking', 'licks', 'Licking is a favored activity of cat girls.'),
     category = 'UTILITY',
     checks = [checks.guild_only()],

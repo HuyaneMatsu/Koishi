@@ -1,22 +1,15 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from hata import CLIENTS, USERS, GUILDS, CHANNELS, Embed, eventlist, Client, __version__
-from hata.ext.commands import Command, checks, Converter, ConverterFlag, Closer
-from bots.koishi import KOISHI_HELP_COLOR, DUNGEON_INVITE, DUNGEON, WORSHIPPER_ROLE, EVERYNYAN_ROLE, \
-    ANNOUNCEMNETS_ROLE, WELCOME_CHANNEL
+from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__
+from hata.ext.commands import checks, Closer
+from bots.koishi import KOISHI_HELP_COLOR, WORSHIPPER_ROLE, EVERYNYAN_ROLE, ANNOUNCEMNETS_ROLE, WELCOME_CHANNEL
 
 from bot_utils.shared import KOISHI_GIT, HATA_GIT, DUNGEON_INVITE, DUNGEON, HATA_DOCS, TORTOISE_PASTE
+from bot_utils.command_utils import CLIENT_CONVERTER_ALL_CLIENT_DEFAULT
 
-HELP_COMMANDS = eventlist(type_=Command)
-
-def setup(lib):
-    Koishi.commands.extend(HELP_COMMANDS)
-
-def teardown(lib):
-    Koishi.commands.unextend(HELP_COMMANDS)
-
-@HELP_COMMANDS.from_class
+Koishi: Client
+@Koishi.commands.from_class
 class about:
     async def command(client, message):
         implement = sys.implementation
@@ -44,7 +37,7 @@ class about:
             f'Usage: `{prefix}about`'
                 ), color=KOISHI_HELP_COLOR)
 
-@HELP_COMMANDS.from_class
+@Koishi.commands.from_class
 class invite:
     async def command(client, message):
         await client.message_create(message.channel, DUNGEON_INVITE.url)
@@ -71,8 +64,12 @@ async def aliases_description(client, message):
 async def aliases_parser_failure_handler(client, message, command, content, args):
     await Closer(client, message.channel, aliases_description(client, message))
 
-@HELP_COMMANDS(description=aliases_description, category='HELP', parser_failure_handler=aliases_parser_failure_handler)
-async def aliases(client, message, name:str, target_client: Converter('client', flags=ConverterFlag.client_all, default_code='client')):
+@Koishi.commands(
+    description = aliases_description,
+    category = 'HELP',
+    parser_failure_handler = aliases_parser_failure_handler,
+        )
+async def aliases(client, message, name:str, target_client: CLIENT_CONVERTER_ALL_CLIENT_DEFAULT):
     while True:
         if len(name) > 64:
             fail = True
@@ -111,7 +108,7 @@ async def aliases(client, message, name:str, target_client: Converter('client', 
     
     await client.message_create(message.channel, embed=Embed(title, description, color=KOISHI_HELP_COLOR))
     
-@HELP_COMMANDS.from_class
+@Koishi.commands.from_class
 class rules:
     async def command(client, message):
         embed = Embed(f'Rules of {DUNGEON}:', color = KOISHI_HELP_COLOR,
@@ -174,7 +171,7 @@ class rules:
                 f'Owner only and can be used only at {DUNGEON}.')
 
 
-@HELP_COMMANDS(category='HELP')
+@Koishi.commands(category='HELP')
 async def git(client, message):
     """
     Sends a link to my git repository.
@@ -183,7 +180,7 @@ async def git(client, message):
         Embed(description=f'[Koishi repository]({KOISHI_GIT})', color=KOISHI_HELP_COLOR))
 
 
-@HELP_COMMANDS(category='HELP', aliases=['wrapper'])
+@Koishi.commands(category='HELP', aliases='wrapper')
 async def hata(client, message):
     """
     Sends a link to my wrapper's git repository.
@@ -192,7 +189,7 @@ async def hata(client, message):
         Embed(description=f'[hata repository]({HATA_GIT})', color=KOISHI_HELP_COLOR))
 
 
-@HELP_COMMANDS(category='HELP', aliases=['hata_docs'],)
+@Koishi.commands(category='HELP', aliases='hata-docs',)
 async def docs(client, message):
     """
     Sends a link to hata's documentation.
@@ -201,7 +198,7 @@ async def docs(client, message):
         Embed(description=f'[hata docs]({HATA_DOCS})', color=KOISHI_HELP_COLOR))
 
 
-@HELP_COMMANDS(category='HELP', aliases=['how-to-ask'])
+@Koishi.commands(category='HELP', aliases='how-to-ask')
 async def ask(client, message):
     """
     How to ask!
@@ -219,7 +216,7 @@ async def ask(client, message):
     await Closer(client, message.channel, embed)
 
 
-@HELP_COMMANDS(category='HELP')
+@Koishi.commands(category='HELP')
 async def markdown(client, message):
     """
     How to use markdown.
@@ -242,7 +239,7 @@ async def markdown(client, message):
     await Closer(client, message.channel, embed)
 
 
-@HELP_COMMANDS(category='HELP')
+@Koishi.commands(category='HELP')
 async def paste(client, message):
     """
     A link to our paste service.

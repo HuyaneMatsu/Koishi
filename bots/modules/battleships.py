@@ -3,25 +3,10 @@ import re, time
 from random import randint
 
 from hata import Color, filter_content, is_user_mention, Future, FutureWM, future_or_timeout, sleep, Task, \
-    DiscordException, BUILTIN_EMOJIS, Embed, KOKORO, ERROR_CODES
+    DiscordException, BUILTIN_EMOJIS, Embed, KOKORO, ERROR_CODES, Client
 from hata.ext.commands import WaitAndContinue, Converter, ConverterFlag, checks, Closer
 
 BS_COLOR = Color.from_rgb(71, 130, 255)
-
-def setup(lib):
-    Koishi.commands(battle_manager, name='bs', checks=[checks.guild_only()], category='GAMES')
-
-def teardown(lib):
-    Koishi.commands.remove(battle_manager, name='bs')
-
-async def bs_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('bs', (
-        'Requests a battleship game with the given user.\n'
-        f'Usage: `{prefix}bs *user*`'
-        ), color=BS_COLOR).add_footer(
-            'Guild only!')
-
 
 OCEAN = BUILTIN_EMOJIS['ocean'].as_emoji
 
@@ -74,7 +59,7 @@ HIDDEN_VALUES = (
     BUILTIN_EMOJIS['boom'].as_emoji,
         )
 
-SWITCH=BUILTIN_EMOJIS['arrows_counterclockwise']
+SWITCH = BUILTIN_EMOJIS['arrows_counterclockwise']
 
 def render_map(data, values):
     
@@ -842,3 +827,14 @@ class battleships_game:
 
         self.player1.cancel()
         self.player2.cancel()
+
+async def bs_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('bs', (
+        'Requests a battleship game with the given user.\n'
+        f'Usage: `{prefix}bs *user*`'
+        ), color=BS_COLOR).add_footer(
+            'Guild only!')
+
+Koishi: Client
+Koishi.commands(battle_manager, name='bs', checks=checks.guild_only(), category='GAMES')

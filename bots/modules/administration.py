@@ -1,33 +1,28 @@
-from hata import Color, Embed, eventlist, Permission, DiscordException, sleep, Message, Emoji, BUILTIN_EMOJIS, \
-    ERROR_CODES, ChannelBase, User, AuditLogEvent, KOKORO
-from hata.ext.commands import Command, Converter, checks, Pagination, ConverterFlag, wait_for_reaction
+# -*- coding: utf-8 -*-
+from hata import Color, Embed, DiscordException, sleep, Emoji, BUILTIN_EMOJIS, ERROR_CODES, ChannelBase, User, \
+    AuditLogEvent, KOKORO, Client
+from hata.ext.commands import Converter, Pagination, wait_for_reaction
 from hata.ext.prettyprint import pchunkify
 
-from bot_utils.shared import KOISHI_PREFIX, permission_check_handler, not_guild_owner_handler, not_bot_owner_handler
+from bot_utils.command_utils import CHECK_MANAGE_MESSAGES, CHECK_OWNER_OR_CAN_INVITE, CHECK_BAN_USERS, \
+    CHECK_OWNER_OR_GUILD_OWNER, CHECK_MANAGE_CHANNEL_AND_INVITES, CHECK_OWNER_ONLY, CHECK_VIEW_LOGS, \
+    USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, USER_CONVERTER_ALL_NONE_DEFAULT
+
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
-ADMINISTRATION_COMMANDS = eventlist(type_=Command)
 
-def setup(lib):
-    category = Koishi.command_processer.get_category('ADMINISTRATION')
-    if (category is None):
-        Koishi.command_processer.create_category('ADMINISTRATION',)
-    
-    Koishi.commands.extend(ADMINISTRATION_COMMANDS)
+Koishi: Client
 
-def teardown(lib):
-    Koishi.commands.unextend(ADMINISTRATION_COMMANDS)
-
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class clear:
     async def command(client, message, limit : Converter('int', default=1,), reason):
         if not reason:
             reason = f'{message.author.full_name} asked for it'
-        if limit>0:
+        if limit > 0:
             await client.message_delete_sequence(channel=message.channel,limit=limit,reason=reason)
     
     category = 'ADMINISTRATION'
-    checks = [checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
+    checks = CHECK_MANAGE_MESSAGES
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -41,7 +36,7 @@ class clear:
                 '`manage messages` permission as well.')
 
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class invite_create:
     async def command(client, message, content):
         user = message.author
@@ -78,11 +73,11 @@ class invite_create:
         try:
             await client.message_create(channel, content)
         except DiscordException as err:
-            if err.code == ERROR_CODES.cannot_send_message_to_user:
+            if err.code == ERROR_CODES.invalid_message_send_user: # User has dm-s disallowed
                 await client.message_create(message.channel, 'You have DM disabled, could not send the invite.')
     
     category = 'ADMINISTRATION'
-    checks = [checks.owner_or_has_guild_permissions(Permission().update_by_keys(create_instant_invite=True), handler=permission_check_handler)]
+    checks = CHECK_OWNER_OR_CAN_INVITE
     
     async def description(client, message):
         guild = message.channel.guild
@@ -106,7 +101,7 @@ class invite_create:
                 'By passing `perma` after the command, I ll create for you, my dear A permanent invite to the guild.'
                     )
         else:
-            content=(
+            content = (
                 'I create an invite for you, to this guild.\n'
                 f'Usage: `{prefix}invite-create`'
                     )
@@ -115,7 +110,7 @@ class invite_create:
             'Guild only. You must have `create instant invite` permission to invoke this command.')
 
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class bans:
     async def command(client, message):
         guild = message.channel.guild
@@ -180,7 +175,7 @@ class bans:
         await Pagination(client, message.channel, result)
     
     category = 'ADMINISTRATION'
-    checks = [checks.has_guild_permissions(Permission().update_by_keys(ban_users=True), handler=permission_check_handler)]
+    checks = CHECK_BAN_USERS
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -192,46 +187,13 @@ class bans:
                 'invoke this command.')
 
 
-@ADMINISTRATION_COMMANDS.from_class
-class prefix:
-    async def command(client, message, prefix:str=None):
-        if prefix is None:
-            response = prefix = client.command_processer.get_prefix_for(message)
-        else:
-            prefix_ln = len(prefix)
-            if prefix_ln == 0 or prefix_ln > 32:
-                response=f'Prefix lenght should be between 1 and 32, got {prefix_ln}.'
-            else:
-                if '`' in prefix:
-                    response=f'The prefix should not include `\`` in it.'
-                else:
-                    guild = message.guild
-                    if KOISHI_PREFIX.add(guild,prefix):
-                        response='Prefix modified.'
-                    else:
-                        response='Thats the frefix already.'
-            
-        await client.message_create(message.channel,response)
-    
-    category = 'ADMINISTRATION'
-    checks = [checks.owner_or_guild_owner(handler=not_guild_owner_handler)]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('prefix', (
-            'Do you have any preferred prefix for my commands?\n'
-            f'Usage: `{prefix}prefix *prefix*`'
-            ), color=ADMINISTRATION_COLOR).add_footer(
-                'Guild only. You must be the owner of the guild to use this command.')
-
-
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class leave_guild:
     async def command(client, message):
         await client.guild_leave(message.guild)
     
     category = 'ADMINISTRATION'
-    checks = [checks.owner_or_guild_owner(handler=not_guild_owner_handler)]
+    checks = CHECK_OWNER_OR_GUILD_OWNER
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -241,7 +203,8 @@ class leave_guild:
             ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only. You must be the owner of the guild to use this command.')
 
-@ADMINISTRATION_COMMANDS.from_class
+
+@Koishi.commands.from_class
 class reaction_clear:
     async def command(client, message, message_id:int):
         while True:
@@ -264,7 +227,7 @@ class reaction_clear:
         await client.message_delete(message)
     
     category = 'ADMINISTRATION'
-    checks=[checks.has_permissions(Permission().update_by_keys(manage_messages=True), handler=permission_check_handler)]
+    checks = CHECK_MANAGE_MESSAGES
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -274,9 +237,9 @@ class reaction_clear:
                 ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only! You must have manage messages permission to invoke this command.!')
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class show_help_for:
-    async def command(client, message,user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), rest):
+    async def command(client, message, user: USER_CONVERTER_ALL_NONE_DEFAULT, rest):
         if user is None:
             await client.message_create(message.channel,
                 'Please define a user as well.')
@@ -284,10 +247,10 @@ class show_help_for:
         
         message = message.custom(author=user)
         
-        await client.command_processer.commands['help'](client, message,rest)
+        await client.command_processer.commands['help'](client, message, rest)
     
     category = 'ADMINISTRATION'
-    checks = [checks.owner_only(handler=not_bot_owner_handler)]
+    checks = CHECK_OWNER_ONLY
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -320,7 +283,7 @@ class _role_emoji_emoji_checker(object):
         
         return True
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class emoji_role:
     async def command(client, message, emoji:Emoji, *roles:'role'):
         permissions = message.channel.cached_permissions_for(client)
@@ -397,7 +360,7 @@ class emoji_role:
     
     name = 'emoji-role'
     category = 'ADMINISTRATION'
-    checks = [checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler)]
+    checks = CHECK_MANAGE_MESSAGES
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -408,7 +371,7 @@ class emoji_role:
                 'Guild only. You must have adminsitartor permission to execute this command')
 
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class invites:
     async def command(client, message, channel:ChannelBase=None):
         guild = message.channel.guild
@@ -425,11 +388,11 @@ class invites:
                 return
             invites = await client.invite_get_channel(channel)
         
-        pages=[Embed(description=chunk) for chunk in pchunkify(invites,write_parents=False)]
+        pages = [Embed(description=chunk) for chunk in pchunkify(invites,write_parents=False)]
         await Pagination(client, message.channel,pages,120.)
     
     category = 'ADMINISTRATION'
-    checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_channel=True), handler=permission_check_handler)]
+    checks = CHECK_MANAGE_CHANNEL_AND_INVITES
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -438,10 +401,10 @@ class invites:
             f'Usage: `{prefix}invites <channel>`\n'
             'If `channel` is passed, I ll check the invites only at that channel.'
                 ), color=ADMINISTRATION_COLOR).add_footer(
-                'Guild only! You must have manage_channel permission to use this command.')
+                'Guild only! You must have manage channel & create instant invite permission to use this command.')
 
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class logs:
     async def command(client, message, guild:'guild'=None, user:User=None, event_name: str=''):
         if guild is None:
@@ -484,7 +447,7 @@ class logs:
         await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(logs)])
     
     category = 'ADMINISTRATION'
-    checks = [checks.has_guild_permissions(Permission().update_by_keys(view_audit_logs=True), handler=permission_check_handler)]
+    checks = CHECK_VIEW_LOGS
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -498,10 +461,9 @@ class logs:
                 ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only!')
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class telekinesisban:
-    async def command(client, message, guild: 'guild',
-            user:Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), reason):
+    async def command(client, message, guild: 'guild', user:USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, reason):
         
         # Should not happen normally
         if guild is None:
@@ -528,7 +490,7 @@ class telekinesisban:
             f'{user.full_name} banned at guild {guild.name} by {banner.full_name}.')
     
     category = 'ADMINISTRATION'
-    checks = [checks.owner_only()]
+    checks = CHECK_OWNER_ONLY
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -538,10 +500,9 @@ class telekinesisban:
                 ), color=ADMINISTRATION_COLOR).add_footer(
                 'Owner only!')
 
-@ADMINISTRATION_COMMANDS.from_class
+@Koishi.commands.from_class
 class ban:
-    async def command(client, message,
-            user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True), default=None), reason):
+    async def command(client, message, user: USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, reason):
         
         guild = message.guild
         if guild is None:
@@ -567,7 +528,7 @@ class ban:
         await client.message_create(message.channel, f'{user.full_name} banned Hecatia yeah!')
     
     category = 'ADMINISTRATION'
-    checks = checks.has_guild_permissions(Permission().update_by_keys(ban_users=True), handler=permission_check_handler)
+    checks = CHECK_BAN_USERS
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

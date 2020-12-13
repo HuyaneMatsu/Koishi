@@ -11,7 +11,8 @@ setup_ext_commands(Marisa, MARISA_PREFIX, default_category_name=DEFAULT_CATEGORY
     category_name_rule=category_name_rule)
 
 
-Marisa.command_processer.create_category('TEST COMMANDS', checks=[checks.owner_only()])
+Marisa.command_processer.create_category('TEST COMMANDS', checks=checks.owner_only())
+Marisa.command_processer.create_category('VOICE', checks=checks.guild_only())
 
 Marisa.commands(SubterraneanHelpCommand(MARISA_HELP_COLOR), 'help', category='HELP')
 

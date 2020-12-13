@@ -1,40 +1,36 @@
 # -*- coding: utf-8 -*-
-import re, sys, json
+import json
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from time import perf_counter
 
-from hata import Color, Embed, eventlist, WaitTillExc, ReuBytesIO, Client, sleep, DiscordException, Emoji, now_as_id, \
+from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, sleep, DiscordException, Emoji, now_as_id, WebhookType,\
     elapsed_time, ActivityUnknown, Status, ActivityTypes, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, \
-    cchunkify, Permission, ICON_TYPE_NONE, KOKORO, Future, ERROR_CODES, ChannelVoice, ChannelStore, ChannelThread, \
-    DATETIME_FORMAT_CODE
+    cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE
 
 from hata.discord.utils import DISCORD_EPOCH_START
-from hata.ext.commands import Command, Cooldown, Converter, ConverterFlag, checks, Pagination, Closer
+from hata.ext.commands import Cooldown, Converter, ConverterFlag, checks, Pagination, Closer
 from hata.ext.prettyprint import pchunkify
 
 from PIL import Image as PIL
 
 from bot_utils.tools import CooldownHandler, PAGINATION_5PN
+from bot_utils.shared import TESTER_ROLE
+from bot_utils.command_utils import CHECK_ADMINISTRATIOR, CHANNEL_TEXT_CONVERTER_MESSAGE_CHANNEL_DEFAULT, \
+    CLIENT_CONVERTER_ALL_CLIENT_DEFAULT, USER_CONVERTER_ALL_AUTHOR_DEFAULT, USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT, \
+    MESSAGE_CONVERTER_ALL
 
 UTILITY_COLOR = Color(0x5dc66f)
-UTILITY_COMMANDS = eventlist(type_=Command)
 
-def setup(lib):
-    Koishi.commands.extend(UTILITY_COMMANDS)
-
-def teardown(lib):
-    Koishi.commands.unextend(UTILITY_COMMANDS)
-
-
-@UTILITY_COMMANDS.from_class
+Koishi: Client
+@Koishi.commands.from_class
 class ping:
     async def command(client, message):
         await client.message_create(message.channel,
             embed=Embed(f'{client.gateway.latency*1000.:.0f} ms',color=UTILITY_COLOR))
     
-    aliases = ['pong']
+    aliases = 'pong'
     category = 'UTILITY'
     
     async def description(client, message):
@@ -44,7 +40,7 @@ class ping:
             f'Usage: `{prefix}ping`'
             ), color=UTILITY_COLOR)
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class ping_http:
     async def command(client, message):
         start = perf_counter()
@@ -63,9 +59,9 @@ class ping_http:
             f'Usage: `{prefix}ping-http`'
             ), color=UTILITY_COLOR)
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class rawr:
-    @Cooldown('channel', 60.0, handler = CooldownHandler())
+    @Cooldown('guild', 60.0, handler=CooldownHandler())
     async def command(client, message):
         channel = message.channel
         tasks = []
@@ -94,7 +90,7 @@ class rawr:
             ), color=UTILITY_COLOR,).add_footer(
                 'With cooldown of 60 seconds.')
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class color:
     async def command(client, message, color: 'color'):
         embed = Embed(f'#{color:06X}', color=color)
@@ -116,15 +112,11 @@ class color:
             f'Usage: `{prefix}color *color*`\n'
                 ), color=UTILITY_COLOR)
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class update_application_info:
-    async def update_application_info(client, message, user:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default_code='client')):
-        if isinstance(user, Client):
-            await user.update_application_info()
-            content = f'Application info of `{user:f}` is updated succesfully!'
-        else:
-             content = 'I can update application info only of a client.'
-        
+    async def update_application_info(client, message, user: CLIENT_CONVERTER_ALL_CLIENT_DEFAULT):
+        await user.update_application_info()
+        content = f'Application info of `{user:f}` is updated succesfully!'
         await client.message_create(message.channel, content)
     
     category = 'UTILITY'
@@ -140,9 +132,9 @@ class update_application_info:
                 ), color=UTILITY_COLOR).add_footer(
                 'Owner only!')
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class resend_webhook:
-    async def command(client,message,message_id:int,channel : Converter('channel', default_code='message.channel')):
+    async def command(client,message, message_id:int, channel: CHANNEL_TEXT_CONVERTER_MESSAGE_CHANNEL_DEFAULT):
         permissions = message.channel.cached_permissions_for(client)
         can_delete = permissions.can_manage_messages
         
@@ -164,10 +156,11 @@ class resend_webhook:
             return
     
         webhooks = await client.webhook_get_channel(channel)
-        if webhooks:
-            webhook = webhooks[0]
+        for webhook in webhooks:
+            if webhook.type is WebhookType.bot:
+                break
         else:
-            webhook = await client.webhook_create(channel,'Love You')
+            webhook = await client.webhook_create(channel, 'Love You')
     
         await client.webhook_message_create(webhook,
             embed=target_message.embeds,
@@ -190,7 +183,7 @@ class resend_webhook:
                 'Guild only. Owner only!')
 
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class show_emoji:
     async def command(client, message, emoji : Emoji):
         if emoji.is_custom_emoji():
@@ -315,9 +308,9 @@ def add_activity(text, activity):
     if id_:
         text.append(f'**>>** id : {id_}\n')
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class user_info:
-    async def command(client, message, user : Converter('user', ConverterFlag.user_default.update_by_keys(everywhere = True, profile = True), default_code='message.author')):
+    async def command(client, message, user: USER_CONVERTER_ALL_AUTHOR_DEFAULT):
         guild = message.guild
         
         embed = Embed(user.full_name)
@@ -398,7 +391,7 @@ class user_info:
     
     name = 'user'
     category = 'UTILITY'
-    aliases = ['profile']
+    aliases = 'profile'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -613,7 +606,7 @@ GUILD_FIELDS = {
     'boosters': add_guild_boosters_field
         }
 
-@UTILITY_COMMANDS(name='guild', category='UTILITY', description=guild_description, checks=[checks.guild_only()])
+@Koishi.commands(name='guild', category='UTILITY', description=guild_description, checks=checks.guild_only())
 async def guild_info(client, message, field: str=None):
     guild = message.guild
     if guild is None:
@@ -643,23 +636,13 @@ async def guild_info(client, message, field: str=None):
     await client.message_create(message.channel, embed=embed)
 
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class message:
-    async def command(client, message, message_id:int, channel:Converter('channel', default_code='message.channel')):
-        if not channel.cached_permissions_for(client).can_read_message_history:
-            await client.message_create(message.channel,
-                'I am unable to read the messages at the specified channel.')
-            return
-        
-        try:
-            target_message = await client.message_get(channel,message_id)
-        except DiscordException as err:
-            await client.message_create(message.channel,err.__repr__())
-            return
-        await Pagination(client,message.channel,[Embed(description=chunk) for chunk in pchunkify(target_message)])
+    async def command(client, message, target_message: MESSAGE_CONVERTER_ALL):
+        await Pagination(client,message.channel, [Embed(description=chunk) for chunk in pchunkify(target_message)])
     
     category = 'UTILITY'
-    checks=[checks.has_permissions(Permission().update_by_keys(administrator=True))]
+    checks = [checks.guild_only(), CHECK_ADMINISTRATIOR | checks.has_role(TESTER_ROLE)]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -668,27 +651,24 @@ class message:
             f'Usage: `{prefix}message *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
                 ), color=UTILITY_COLOR).add_footer(
-                'Guild only! Administrator only!')
+                f'Guild only! You must have dministrator permission or {TESTER_ROLE.name}!')
 
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class message_pure:
-    async def command(client,message,message_id:int,channel:Converter('channel',default_code='message.channel')):
-        if not channel.cached_permissions_for(client).can_read_message_history:
-            await client.message_create(message.channel,
-                'I am unable to read the messages at the specified channel.')
-            return
-        
+    async def command(client, message, target_message: MESSAGE_CONVERTER_ALL):
         try:
-            data = await client.http.message_get(channel.id,message_id)
+            data = await client.http.message_get(target_message.channel.id, target_message.id)
         except DiscordException as err:
             await client.message_create(message.channel,repr(err))
             return
         
-        await Pagination(client,message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data,indent=4,sort_keys=True).splitlines())])
+        await Pagination(client, message.channel, [
+            Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+                ])
     
     category = 'UTILITY'
-    checks=[checks.has_permissions(Permission().update_by_keys(administrator=True))]
+    checks = [checks.guild_only(), CHECK_ADMINISTRATIOR | checks.has_role(TESTER_ROLE)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -697,15 +677,15 @@ class message_pure:
             f'Usage: `{prefix}message_pure *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
                 ),color=UTILITY_COLOR).add_footer(
-                'Guild only! Administrator only!')
+                f'Guild only! You must have dministrator permission or {TESTER_ROLE.name}!')
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class roles:
     class command(object):
-        __slots__=('cache','guild','roles',)
+        __slots__ = ('cache','guild','roles',)
         async def __new__(cls,client,message):
-            channel=message.channel
-            self=object.__new__(cls)
+            channel = message.channel
+            self = object.__new__(cls)
             roles = channel.guild.role_list
             roles.reverse()
             self.roles = roles
@@ -715,7 +695,7 @@ class roles:
             return await PAGINATION_5PN(client,channel,self)
             
         def __len__(self):
-            return self.cache.__len__()
+            return len(self.cache)
         
         def createpage0(self,guild):
             embed=Embed(f'Roles of **{guild.name}**:',
@@ -747,13 +727,13 @@ class roles:
                 color=role.color)
             embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
             
-            self.cache[index]=embed
+            self.cache[index] = embed
             return embed
     
     category = 'UTILITY'
-    checks = [checks.guild_only()]
+    checks = checks.guild_only()
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('roles',(
             'Cutie, do you want me, to list the roles of the guild and their '
@@ -762,17 +742,17 @@ class roles:
                 ),color=UTILITY_COLOR).add_footer(
                 'Guild only!')
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class avatar:
-    async def command(client, message, user : Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default_code='message.author')):
+    async def command(client, message, user: USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT):
         color = user.avatar_hash
         if color:
             color &=0xffffff
         else:
             color = user.default_avatar.color
         
-        url=user.avatar_url_as(size=4096)
-        embed=Embed(f'{user:f}\'s avatar', color=color, url=url)
+        url = user.avatar_url_as(size=4096)
+        embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
         embed.add_image(url)
         
         await client.message_create(message.channel, embed=embed)
@@ -787,7 +767,7 @@ class avatar:
             'If no `user` is passed, I will showcase your avatar.'
                 ), color=UTILITY_COLOR)
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class guild_icon:
     async def command(client, message):
         guild = message.guild
@@ -796,16 +776,16 @@ class guild_icon:
         
         icon_url = guild.icon_url_as(size=4096)
         if icon_url is None:
-            embed=Embed(description=f'`{guild.name}` has no icon.')
+            embed = Embed(description=f'`{guild.name}` has no icon.')
         else:
-            color=guild.icon_hash&0xffffff
-            embed=Embed(f'{guild.name}\' icon', color=color, url=icon_url)
+            color = guild.icon_hash&0xffffff
+            embed = Embed(f'{guild.name}\' icon', color=color, url=icon_url)
             embed.add_image(icon_url)
         
-        await client.message_create(message.channel,embed=embed)
+        await client.message_create(message.channel, embed=embed)
     
     category = 'UTILITY'
-    checks = [checks.guild_only()]
+    checks = checks.guild_only()
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -816,7 +796,7 @@ class guild_icon:
                 'Guild only!')
 
 
-@UTILITY_COMMANDS.from_class
+@Koishi.commands.from_class
 class welcome_screen:
     async def command(client, message):
         guild = message.guild
@@ -839,9 +819,9 @@ class welcome_screen:
         
         await client.message_create(message.channel, embed=embed)
     
-    aliases = ['guild_welcome_screen']
+    aliases = 'guild_welcome_screen'
     category = 'UTILITY'
-    checks = [checks.guild_only()]
+    checks = checks.guild_only()
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -850,88 +830,6 @@ class welcome_screen:
             f'Usage: `{prefix}welcome-screen`'
                 ), color=UTILITY_COLOR).add_footer(
                 'Guild only!')
-
-
-INVITE_GEN_WORDS = ['loli', 'dung', 'neko', 'koishi', 'hata', 'flan', '514', 'meow', 'nya', 'touhou', '2hu', 'kokoro',]
-INVITE_GEN_RP = re.compile('|'.join(re.escape(word) for word in INVITE_GEN_WORDS), re.I)
-
-@Koishi.commands.from_class
-class invite_gen:
-    async def command(client, message, target_channel:ChannelText, time:int):
-        guild = message.guild
-        if guild is None:
-            return
-        
-        if time < 1:
-            await client.message_create(message.channel, f'Time cannot be less than 1, got {time!r}')
-            return
-        
-        canceller = Future(KOKORO)
-        KOKORO.call_later(time*3600.0, Future.set_result_if_pending, canceller, None)
-        
-        await client.message_create(message.channel,
-            f'Starting loop over {target_channel.mention} for {time} hours.')
-        
-        invites = []
-        total = 0
-        
-        while True:
-            try:
-                invite = await client.invite_create(target_channel)
-                parsed = INVITE_GEN_RP.search(invite.code)
-                if parsed is None:
-                    await client.invite_delete(invite)
-                else:
-                    invites.append(invite)
-                
-                total +=1
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    canceller.cancel()
-                    sys.stderr.write('invite_gen failed, connection error occured meanwhile!\n')
-                    return
-                
-                if isinstance(err, DiscordException):
-                    err_code = err.code
-                    if err_code in (
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                            ERROR_CODES.invalid_access, # client removed
-                                ):
-                        
-                        canceller.set_result_if_pending(None)
-                        break
-                    
-                    if err_code == ERROR_CODES.unknown_channel: # message's channel deleted
-                        canceller.cancel()
-                        return
-                    
-                    if err_code == ERROR_CODES.max_invites:
-                        canceller.set_result_if_pending(None)
-                        break
-                
-                canceller.cancel()
-                await client.events.error(client, 'invite_gen', err)
-                return
-            
-            if canceller.done():
-                break
-        
-        title = f'{total} invites generated, from this {len(invites)} passed.'
-        pages = [Embed(title, chunk) for chunk in cchunkify([invite.url for invite in invites])]
-        
-        await Pagination(client, message.channel, pages, timeout=7200.0)
-    
-    category = 'UTILITY'
-    checks = [checks.guild_only(), checks.owner_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('invite-gen', (
-            'Creates invite at the guild with any of the predefined words.\n'
-            f'Usage: `{prefix}invite-gen *text-channel* *time*`\n'
-            'Note that time is in hours, for how much time it should circle the invites!'
-                ), color=UTILITY_COLOR).add_footer(
-                'Guild and owner only!')
 
 
 @Koishi.commands.from_class
@@ -983,7 +881,7 @@ class get_guild_id:
     name = 'guildid'
     aliases = ['guild-id', 'serverid', 'server-id', 'gid', 'sid']
     category = 'UTILITY'
-    checks = [checks.guild_only()]
+    checks = checks.guild_only()
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

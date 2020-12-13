@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS
-from hata import chunkify,  Embed
+from hata import chunkify, Embed, Client
 from hata.ext.commands import checks, Pagination
 
+main_client : Client
 main_client.command_processer.create_category('EXTENSIONS', checks=checks.owner_only())
 
 @main_client.commands(category='EXTENSIONS')

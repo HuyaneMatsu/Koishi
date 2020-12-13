@@ -1,34 +1,22 @@
 import re
 
-from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, MESSAGES, Permission, \
-    Color, Embed, Emoji, CLIENTS, Role, eventlist, ROLES, EMOJIS, WeakKeyDictionary
+from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, ClientWrapper, Permission, \
+    Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client
 from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination, ConverterFlag
 
-from bot_utils.shared import permission_check_handler
+from bot_utils.command_utils import CHECK_ADMINISTRATIOR
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
 
 ROLE_CONVERTER = Converter('role', flags=ConverterFlag.role_default.update_by_keys(everywhere=True))
 MESSAGE_CONVERTER = Converter('message', flags=ConverterFlag.message_default.update_by_keys(everywhere=True))
 
-def setup(lib):
-    for client in CLIENTS:
-        client.events(load_auto_react_roles,'ready')
-    
-    Koishi.commands.extend(AUTO_REACT_ROLE_COMMANDS)
 
 async def teardown(lib):
-    for client in CLIENTS:
-        client.events.remove(load_auto_react_roles,'ready',by_type=True)
-    
-    Koishi.commands.unextend(AUTO_REACT_ROLE_COMMANDS)
-    
     async with ScarletExecutor(limit=20) as executor:
         for gui in AUTO_REACT_ROLE_GUIS.values():
             await executor.add(gui.cancel())
     
     AUTO_REACT_ROLE_GUIS.clear()
-    
-AUTO_REACT_ROLE_COMMANDS = eventlist()
 
 AUTO_REACT_ROLE_COLOR = Color.from_rgb(219, 31, 87)
 
@@ -1332,6 +1320,7 @@ class load_auto_react_roles(object):
                 async for query in result:
                     await scarlet.add(AutoReactRoleManager.from_query(query, connector))
 
+ClientWrapper().events(load_auto_react_roles, name='ready')
 
 async def auto_react_roles_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -1343,14 +1332,14 @@ async def auto_react_roles_description(client, message):
             ), color=AUTO_REACT_ROLE_COLOR).add_footer(
                 'Guild only! You must have administrator permission to use this command.')
 
-
-AUTO_REACT_ROLE_COMMANDS(create_auto_react_role,
+Koishi: Client
+Koishi.commands(create_auto_react_role,
     name = 'auto-react-role',
     category = 'ADMINISTRATION',
     description = auto_react_roles_description,
     checks = [
         checks.guild_only(),
-        checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler),
+        CHECK_ADMINISTRATIOR,
             ]
         )
 
@@ -1393,12 +1382,12 @@ async def show_auto_react_roles_description(client, message):
                 'Guild only! You must have administrator permission to use this command.')
 
 
-AUTO_REACT_ROLE_COMMANDS(show_auto_react_roles,
+Koishi.commands(show_auto_react_roles,
     name = 'show-auto-react-roles',
     description = show_auto_react_roles_description,
     category = 'ADMINISTRATION',
     checks = [
         checks.guild_only(),
-        checks.has_permissions(Permission().update_by_keys(administrator=True), handler=permission_check_handler),
+        CHECK_ADMINISTRATIOR,
             ]
         )

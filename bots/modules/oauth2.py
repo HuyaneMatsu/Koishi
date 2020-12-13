@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
-from hata import Color, Embed, eventlist, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
-    cr_pg_channel_object, ChannelText, cchunkify, imultidict
-from hata.ext.commands import Command, checks, Pagination
+from hata import Color, Embed, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
+    cr_pg_channel_object, ChannelText, Client
+from hata.ext.commands import checks, Pagination
 from hata.ext.prettyprint import pchunkify
 
 OAUTH2_COLOR = Color.from_rgb(148, 0, 211)
-OAUTH2_COMMANDS = eventlist(type_=Command, category = 'OAUTH2')
 
-def setup(lib):
-    Koishi.command_processer.create_category('OAUTH2',checks=[checks.owner_only()])
-    Koishi.commands.extend(OAUTH2_COMMANDS)
-    
-def teardown(lib):
-    Koishi.command_processer.delete_category('OAUTH2')
+Koishi: Client
+Koishi.command_processer.create_category('OAUTH2', checks=checks.owner_only())
 
 VALUABLE_SCOPES = [
     'identify',
@@ -43,7 +38,7 @@ def _oauth2_query(message, content):
     return user
 
 
-@OAUTH2_COMMANDS.from_class
+@Koishi.commands.from_class
 class oauth2_link:
     async def command(client,message,): #just a test link
         await client.message_create(message.channel,(
@@ -69,7 +64,7 @@ class oauth2_link:
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
-@OAUTH2_COMMANDS.from_class
+@Koishi.commands.from_class
 class oauth2_feed:
     async def command(client,message,content):
         try:
@@ -115,7 +110,7 @@ class oauth2_feed:
                 'Owner only!')
 
 
-@OAUTH2_COMMANDS.from_class
+@Koishi.commands.from_class
 class oauth2_user:
     async def command(client, message, content):
         user = _oauth2_query(message, content)
@@ -140,7 +135,7 @@ class oauth2_user:
                 'Owner only!')
 
 
-@OAUTH2_COMMANDS.from_class
+@Koishi.commands.from_class
 class oauth2_connections:
     async def command(client, message, content):
         user=_oauth2_query(message,content)
@@ -167,7 +162,7 @@ class oauth2_connections:
                 'Owner only!')
 
 
-@OAUTH2_COMMANDS.from_class
+@Koishi.commands.from_class
 class oauth2_guilds:
     async def command(client,message,content):
         user = _oauth2_query(message,content)
@@ -194,7 +189,7 @@ class oauth2_guilds:
                 'Owner only!')
 
 
-@OAUTH2_COMMANDS.from_class
+@Koishi.commands.from_class
 class oauth2_my_guild:
     async def command(client,message,content):
         user = _oauth2_query(message,content)
@@ -237,7 +232,7 @@ class oauth2_my_guild:
                 'Owner only!')
 
 
-@OAUTH2_COMMANDS.from_class
+@Koishi.commands.from_class
 class oauth2_renew:
     async def command(client,message,content):
         user=_oauth2_query(message,content)
