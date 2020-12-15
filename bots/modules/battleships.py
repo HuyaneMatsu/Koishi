@@ -82,8 +82,8 @@ def render_map(data, values):
 
     return result
 
-POS_PATTERN_0 = re.compile('^([\d]{1, 2}|[a-jA-J]) */? *([\d]{1, 2}|[a-jA-J]) +([1-4])([xX]?| *)([1-4])$')
-POS_PATTERN_1 = re.compile('^([\d]{1, 2}|[a-jA-J]) */? *([\d]{1, 2}|[a-jA-J])$')
+POS_PATTERN_0 = re.compile('(\d{1,2}|[a-j]) */? *(\d{1,2}|[a-j]) +([1-4]) *x? *([1-4])', re.I)
+POS_PATTERN_1 = re.compile('(\d{1,2}|[a-j]) */? *(\d{1,2}|[a-j])', re.I)
 NEW_RP = re.compile('new', re.I)
 
 class wait_on_reply(object):
@@ -130,7 +130,7 @@ BS_REQUESTERS = set()
 BS_REQUESTS = {}
 
 async def battle_manager(client, message, target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
-    text = ''
+    text = None
     while True:
         if target is None:
             break
@@ -178,7 +178,7 @@ async def battle_manager(client, message, target:Converter('user', flags=Convert
             f'Waiting on {target.full_name}\'s reply here and at dm.\nType:"accept name/mention" to accept')
         
         
-        future = request.future=Future(KOKORO)
+        future = request.future = Future(KOKORO)
         check = wait_on_reply(guild, source, target)
         event = client.events.message_create
         
@@ -190,17 +190,18 @@ async def battle_manager(client, message, target:Converter('user', flags=Convert
         except TimeoutError:
             try:
                 BS_REQUESTERS.remove(source)
-                text = f'The request from {source.full_name} timed out'
             except KeyError:
                 pass
-            break
+            else:
+                text = f'The request from {source.full_name} timed out'
+                break
         finally:
             try:
                 del BS_REQUESTS[request]
             except KeyError:
                 pass
 
-            for waiter in (waiter1,waiter2):
+            for waiter in (waiter1, waiter2):
                 waiter.cancel()
 
         try:
@@ -210,7 +211,7 @@ async def battle_manager(client, message, target:Converter('user', flags=Convert
             break
         
         if target in BS_GAMES:
-            text='You already accepted a game'
+            text = 'You already accepted a game'
             break
 
         try:
@@ -218,15 +219,16 @@ async def battle_manager(client, message, target:Converter('user', flags=Convert
             await client.message_create(channel, f'Request from {target.full_name} got cancelled')
         except KeyError:
             pass
-            
-        game = battleships_game(client, source, target, private)
+        
+        battleships_game(client, source, target, private)
+        text = f'Game between {source.full_name} and {target.full_name} begun.'
         break
     
-    if text:
-        await client.message_create(message.channel, text)
-    else:
+    if text is None:
         embed = await bs_description(client, message)
         await Closer(client, message.channel, embed)
+    else:
+        await client.message_create(message.channel, text)
 
 class ship_type(object):
     __slots__ = ('parts_left', 'size1', 'size2', 'type', 'x', 'y',)
@@ -248,8 +250,8 @@ class ship_type(object):
                 yield n_x+n_y
 
 class user_profile(object):
-    __slots__=('channel', 'client', 'data', 'last_switch', 'message', 'other', 'page', 'process', 'ship_positions',
-        'ships_left', 'state', 'text', 'user', 'won',)
+    __slots__ = ('channel', 'client', 'data', 'last_switch', 'message', 'other', 'page', 'process', 'ship_positions',
+        'ships_left', 'state', 'text', 'user')
     ships = [0, 2, 1, 1]
     def __init__(self, user, client):
         self.user = user
@@ -258,6 +260,11 @@ class user_profile(object):
         self.ship_positions = {}
         self.data = [0 for _ in range(100)]
         self.text = ''
+        self.other = None
+        self.process = None
+        self.message = None
+        self.state = False
+        self.last_switch = 0.0
         #we set channel and other from outside
     
     async def process_state_0(self, new, text):
@@ -337,12 +344,12 @@ class user_profile(object):
         message = await client.message_create(self.channel, embed=self.render_state_2())
         self.message = message
         Task(client.reaction_add(message, SWITCH), KOKORO)
-
+        
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
         
         self.last_switch = 0.
-        
+    
     async def __call__(self, client, event):
         if event.user is client:
             return
@@ -367,7 +374,7 @@ class user_profile(object):
             Task(self.cancel_later(), KOKORO)
             return
         
-        del self.other
+        self.other = None
         if self.process.__func__ is type(self).process_state_1:
             client.events.reaction_add.remove(self.message, self)
             client.events.reaction_delete.remove(self.message, self)
@@ -377,7 +384,7 @@ class user_profile(object):
         await sleep(300., KOKORO)
         client.events.reaction_add.remove(self.message, self)
         client.events.reaction_delete.remove(self.message, self)
-        del self.other
+        self.other = None
 
 
     def render_state_0(self):
@@ -458,7 +465,7 @@ class user_profile(object):
         return embed
 
 class battleships_game:
-    __slots__=('actual', 'client', 'future', 'player1', 'player2', 'process',)
+    __slots__ = ('actual', 'client', 'future', 'player1', 'player2', 'process',)
     def __init__(self, client, user1, user2, channel2):
         
         BS_GAMES[user1] = self
@@ -492,7 +499,7 @@ class battleships_game:
             #game starts            
             self.future = FutureWM(KOKORO, 2)
             future_or_timeout(self.future, 300.)
-
+            
             #startup
             self.process = self.process_state_0
             Task(player1.set_state_0(), KOKORO)
@@ -501,18 +508,19 @@ class battleships_game:
             try:
                 await self.future
             except TimeoutError:
-                if not self.future._result:
-                    text1 = text2 ='The time is over, both players timed out'
-                elif player1 in self.future._result:
+                if sum(player1.ships_left) == 0:
                     text1 = 'The other player timed out'
                     text2 = 'You timed out'
-                else:
+                elif sum(player2.ships_left) == 0:
                     text1 = 'You timed out'
                     text2 = 'The other player timed out'
+                else:
+                    text1 = text2 ='The time is over, both players timed out'
+                
                 Task(client.message_create(player1.channel, text1), KOKORO)
                 Task(client.message_create(player2.channel, text2), KOKORO)
                 return
-
+            
             self.process = self.process_state_1
             player1.ships_left[:] = user_profile.ships
             player2.ships_left[:] = user_profile.ships
@@ -561,20 +569,22 @@ class battleships_game:
         
         while True:
             if sum(player.ships_left) == 0:
-                text='Waiting on the other player.'
+                text = 'Waiting on the other player.'
                 break
             
             result = NEW_RP.fullmatch(message.content)
             if result is not None:
-                text='new'
+                text = 'new'
                 break
-            result = POS_PATTERN_0.match(message.content)
-            if result is None:
-                text='Bad input format'
-                break
-            result=result.groups()
             
-            value=result[0]
+            result = POS_PATTERN_0.fullmatch(message.content)
+            if result is None:
+                text = 'Bad input format'
+                break
+            
+            result = result.groups()
+            
+            value = result[0]
             if value.isdigit():
                 x = int(value)
                 if x > 10:
@@ -603,7 +613,7 @@ class battleships_game:
                 y = ('abcdefghij').index(value)
             
             size1 = int(result[2])
-            size2 = int(result[4])
+            size2 = int(result[3])
             if (size1 == 1 and size2 == 3) or (size1 == 3 and size2 == 1):
                 type_=1
             elif (size1 == 1 and size2 == 4) or (size1 == 4 and size2 == 1):
@@ -673,7 +683,7 @@ class battleships_game:
             player.ships_left[type_] -= 1
             
             if sum(player.ships_left) == 0:
-                self.future.set_result(player)
+                self.future.set_result(None)
                 text = (
                     f'You placed all of your ships. Last ship placed at: {", ".join(cords)}; waiting on the other '
                     'player.'
@@ -683,8 +693,6 @@ class battleships_game:
             
             break
         
-        client = self.client
-        
         if text == 'new':
             await player.process(True, None)
             return
@@ -693,7 +701,7 @@ class battleships_game:
             return
         
         await player.process(False, text)
-
+    
     async def process_state_1(self, message):
         if self.actual is self.player1:
             player = self.player1
@@ -701,8 +709,6 @@ class battleships_game:
         else:
             player = self.player2
             other = self.player1
-
-        client = self.client
         
         if message.author is not self.actual.user:
             result = NEW_RP.fullmatch(message.content)
@@ -710,7 +716,7 @@ class battleships_game:
                 await player.process(True, None)
             return
 
-        data=other.data
+        data = other.data
         
         while True:
             result = NEW_RP.fullmatch(message.content)
@@ -718,7 +724,7 @@ class battleships_game:
                 text = 'new'
                 break
             
-            result = POS_PATTERN_1.match(message.content)
+            result = POS_PATTERN_1.fullmatch(message.content)
             if result is None:
                 text = 'Bad input format'
                 break
@@ -748,8 +754,8 @@ class battleships_game:
                     break
                 x = x-1
             else:
-                if y!=100:
-                    text='Dupe coordinate'
+                if y != 100:
+                    text = 'Dupe coordinate'
                     break
                 y = ('abcdefghij').index(value)
             
@@ -778,11 +784,11 @@ class battleships_game:
             await other.process(True, f'Your opponent shot {chr(65+y)}/{1+x}, it missed!\n')
             self.future.set_result(True)
             return
-
+        
         del text
         
         data[x+y*10] = 6
-        ship=other.ship_positions.pop(x+y*10)
+        ship = other.ship_positions.pop(x+y*10)
         ship.parts_left -= 1
         if ship.parts_left == 0:
             other.ships_left[ship.type] -= 1
@@ -837,4 +843,4 @@ async def bs_description(client, message):
             'Guild only!')
 
 Koishi: Client
-Koishi.commands(battle_manager, name='bs', checks=checks.guild_only(), category='GAMES')
+Koishi.commands(battle_manager, name='bs', checks=checks.guild_only(), category='GAMES', description=bs_description)

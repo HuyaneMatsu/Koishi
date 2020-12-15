@@ -1039,11 +1039,13 @@ async def bgminfo_command(client, message, content):
 
 Flan.commands(bgminfo_command, name='bgminfo', description=bgminfo_description, category='VOICE')
 
+BGM_NOTE = 'Note: If a bgm\'s name has no specified route, it highly likely belongs in the good route.\n\n'
+
 @Flan.commands.from_class
 class bgms:
     async def command(client, message):
         chunks = []
-        actual_chunk = []
+        actual_chunk = [BGM_NOTE]
         index = 0
         limit = len(CHESUTO_BGM_TRACKS_SORTED)
         collected = 0
@@ -1063,6 +1065,7 @@ class bgms:
                 del actual_chunk[-1]
                 chunks.append(''.join(actual_chunk))
                 actual_chunk.clear()
+                actual_chunk.append(BGM_NOTE)
                 collected = 0
         
         if collected:

@@ -392,15 +392,15 @@ if (psutil is not None) and (sys.platform == 'linux'):
                 embed = Embed('System and Process stats:', ''.join(description), color=STAT_COLOR)
                 
                 await client.message_create(message.channel, embed=embed)
-        
-        category = 'STATS'
-        
-        async def description(client, message):
-            prefix = client.command_processer.get_prefix_for(message)
             
-            return Embed('system-stats',(
-                'Shows my system\s and processe\'s stats.\n'
-                f'Usage: `{prefix}system-stats`'
-                ), color=STAT_COLOR).add_footer(
-                    'Owner only!')
+            category = 'STATS'
+            
+            async def description(client, message):
+                prefix = client.command_processer.get_prefix_for(message)
+                
+                return Embed('system-stats',(
+                    'Shows my system\s and processe\'s stats.\n'
+                    f'Usage: `{prefix}system-stats`'
+                    ), color=STAT_COLOR).add_footer(
+                        'Owner only!')
 

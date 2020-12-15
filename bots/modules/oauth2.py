@@ -47,6 +47,8 @@ class oauth2_link:
             '&response_type=code&scope=identify%20connections%20guilds%20guilds.join'
             '%20email%20applications.entitlements'))
     
+    category = 'OAUTH2'
+    
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('oauth2_link',(
@@ -94,6 +96,8 @@ class oauth2_feed:
         OA2_accesses[user.id]=user
         await client.message_create(message.channel,'Thanks')
     
+    category = 'OAUTH2'
+    
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('oauth2_feed',(
@@ -119,6 +123,8 @@ class oauth2_user:
             return
         
         await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(user)])
+    
+    category = 'OAUTH2'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -147,6 +153,8 @@ class oauth2_connections:
         
         await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(connections)])
     
+    category = 'OAUTH2'
+    
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('oauth2_connections',(
@@ -173,6 +181,8 @@ class oauth2_guilds:
         guilds = await client.user_guilds(user.access)
         
         await Pagination(client, message.channel,[Embed(description=chunk) for chunk in pchunkify(guilds)])
+    
+    category = 'OAUTH2'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -218,6 +228,8 @@ class oauth2_my_guild:
             else:
                 await client.guild_leave(guild)
     
+    category = 'OAUTH2'
+    
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('oauth2_my_guild',(
@@ -249,6 +261,8 @@ class oauth2_renew:
             f'From creation time at: {last:%Y.%m.%d-%H:%M:%S}\n'
             f'To creation time at: {new:%Y.%m.%d-%H:%M:%S}'
                 )
+    
+    category = 'OAUTH2'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

@@ -940,7 +940,7 @@ async def game21_description(client, message):
         'Starts a 21 game at the channel.\n'
         f'Usage: `{prefix}21 *amount*`\n'
         'Your chalange is to collect cards with weight up to 21. Each card with number 2-10 has the same weight as '
-        'their number says, meanwhile J, Q and K has fix weight of 10. Ace has weight of 10, but if You whould pass '
+        'their number says, meanwhile J, Q and K has fix weight of 10. Ace has weight of 11, but if You would pass '
         '21, it loses 9 of it.\n'
         'At this game you are fighting me, so if we boss lose, it is a draw.\n'
         'You start with 2 cards initially drawed and at every round, you have option to draw a new card, or to stop.'
@@ -1405,7 +1405,7 @@ class Game21(object):
 async def gift_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
     return Embed('gift',(
-        'Gifts hearts to you heart\'s chosen one.\n'
+        'Gifts hearts to your heart\'s chosen one.\n'
         f'Usage: `{prefix}gift *user* *amount*`\n'
         ), color=GAMBLING_COLOR).add_footer(
             f'You must have {WORSHIPPER_ROLE.name} or {DUNGEON_PREMIUM_ROLE.name} role!')
@@ -1414,7 +1414,7 @@ async def gift_description(client, message):
 @Koishi.commands(description=gift_description, category='GAMBLING',
     checks=checks.has_any_role([WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE]))
 @daily.shared(weight=1)
-async def gift(client, message, target_user: Converter('user', ConverterFlag.user_default.update_by_keys(everywhere=True)), amount:int):
+async def gift(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
     source_user = message.author
     while True:
         if source_user == target_user:
