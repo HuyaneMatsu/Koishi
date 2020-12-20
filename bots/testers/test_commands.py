@@ -10,7 +10,8 @@ from PIL.ImageSequence import Iterator as ImageSequenceIterator
 from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
-    ReuAsyncIO, enter_executor
+    ReuAsyncIO, enter_executor, ApplicationCommand, InteractionResponseTypes, ApplicationCommandOption, \
+    ApplicationCommandOptionType
 
 from hata.discord.http import URLS
 from hata.backend.hdrs import AUTHORIZATION
@@ -912,25 +913,6 @@ async def what_is_it_1(client, message, entity: ('user', 'channel', 'role') = No
     
     await client.message_create(message.channel, result)
 
-
-@TEST_COMMANDS
-async def what_is_it_2(client, message, entity: (
-        FlaggedAnnotation('user', ConverterFlag().update_by_keys(name=True)),
-        FlaggedAnnotation('channel', ConverterFlag().update_by_keys(name=True)),
-        FlaggedAnnotation('role', ConverterFlag().update_by_keys(name=True)),
-            ) = None):
-    
-    if entity is None:
-        result = 'Nothing is recognized.'
-    elif isinstance(entity, UserBase):
-        result = 'user'
-    elif isinstance(entity, ChannelBase):
-        result = 'channel'
-    else:
-        result = 'role'
-    
-    await client.message_create(message.channel, result)
-
 @TEST_COMMANDS
 async def avatar_2(client, message, user: Converter('user', ConverterFlag.user_all, default=None)):
     if user is None:
@@ -1341,3 +1323,224 @@ async def half_size(client, message):
         buffer.seek(0)
     
     await client.message_create(message, file=(attachment.name, buffer))
+
+class check_interacter(object):
+    __slots__ = ('user', 'channel', 'application_command')
+    def __init__(self, channel, user, application_command):
+        self.channel = channel
+        self.user = user
+        self.application_command = application_command
+        
+    def __call__(self, event):
+        channel, user, interaction_command = event
+        if channel is not self.channel:
+            return False
+        
+        if user is not self.user:
+            return False
+        
+        if interaction_command.id != self.application_command.id:
+            return False
+        
+        return True
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_response_twice(client, message):
+    """
+    Tries to respond on an interaction twice, because why not.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0000',
+        'ayaya',
+            )
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0000`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occured')
+            return
+        
+        # Send twice, ayaya
+        await client.interaction_response_message_create(interaction, 'Ayaya')
+        await client.interaction_response_message_create(interaction, 'Ayaya')
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_response_multiple_embeds(client, message):
+    """
+    Tries to respond on an interaction with multiple embeds.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0001',
+        'ayaya',
+            )
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0001`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occured')
+            return
+        
+        await client.interaction_response_message_create(interaction, [Embed('cake'), Embed('Ayaya')])
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_followup_first(client, message):
+    """
+    Tries to respond on an interaction with followup.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0002',
+        'ayaya',
+            )
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0002`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occured')
+            return
+        
+        # ops
+        await client.interaction_followup_message_create(interaction, 'ayaya')
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_followup(client, message):
+    """
+    Tries to respond on an interaction normally, then with followup.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0003',
+        'ayaya',
+            )
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0003`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occured')
+            return
+        
+        await client.interaction_response_message_create(interaction, 'Ayaya')
+        await client.interaction_followup_message_create(interaction, 'ayaya')
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+# Name param is removed since it wont work.
+'''
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_followup_alt_name(client, message):
+    """
+    Tries to respond on an interaction with a different name.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0004',
+        'ayaya',
+            )
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0004`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occured')
+            return
+        
+        await client.interaction_response_message_create(interaction)
+        await client.interaction_followup_message_create(interaction, 'ayaya', name='Not Marisa')
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+'''
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_option_value_1(client, message):
+    """
+    Tests user type application command value.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0004',
+        'ayaya',
+            )
+    
+    application_command_schema.add_option(ApplicationCommandOption(
+        'user',
+        'Dunno something',
+        ApplicationCommandOptionType.STRING,
+            ))
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0004`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occured')
+            return
+        
+        await client.interaction_response_message_create(interaction,
+            repr(interaction.interaction.options[0].value))
+    finally:
+        await client.application_command_guild_delete(guild, application_command)

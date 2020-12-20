@@ -2,15 +2,17 @@
 import re, os
 from itertools import cycle
 
-from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO, Client
+from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO, Client, \
+    Lock, alchemy_incendiary, DiscordException, ERROR_CODES
 from hata.backend.utils import sortedlist
-from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction
+from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction, wait_for_message
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import FLAN_PREFIX, FLAN_HELP_COLOR, category_name_rule
+from bot_utils.shared import FLAN_PREFIX, FLAN_HELP_COLOR, category_name_rule, KOISHI_PATH
 from bot_utils.tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
 from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, \
     get_card
+from csv import reader as CSVReader, writer as CSVWriter
 
 CHESUTO_GUILD = Guild.precreate(598706074115244042)
 CHESUTO_COLOR = Color.from_rgb(73, 245, 73)
@@ -24,7 +26,7 @@ CHESUTO_BGM_CHANNEL = ChannelText.precreate(707892105749594202)
 CHESUTO_BGM_TRACKS = {}
 CHESUTO_BGM_TRACKS_SORTED = sortedlist()
 BGM_SPLITPATTERN = re.compile('([^ _-]+)')
-BGM_NAME_PATTERN = re.compile('[a-z0-9]+',re.I)
+BGM_NAME_PATTERN = re.compile('[a-z0-9]+', re.I)
 PERCENT_RP = re.compile('(\d*)[%]?')
 
 BMG_NAMES_W_S = {
@@ -54,6 +56,75 @@ BMG_NAMES_W_S = {
     'radialt',
     'yshar',
         }
+
+FILE_NAME = 'bgm_names.csv'
+
+FILE_PATH = os.path.join(KOISHI_PATH, 'chesuto_data', FILE_NAME)
+FILE_LOCK = Lock(KOKORO)
+
+def read_bgm_name_task():
+    names = {}
+    if os.path.exists(FILE_PATH):
+        with open(FILE_PATH, 'r') as file:
+            reader = CSVReader(file)
+            for key, value in reader:
+                names[key] = value
+    
+    return names
+
+
+def write_bgm_name_task():
+    with open(FILE_PATH, 'w') as file:
+        writer = CSVWriter(file)
+        writer.writerows(BGM_NAMES.items())
+
+
+async def read_bgm_names():
+    async with FILE_LOCK:
+        return await KOKORO.run_in_executor(read_bgm_name_task)
+
+
+async def write_bgm_names():
+    async with FILE_LOCK:
+        await KOKORO.run_in_executor(alchemy_incendiary(write_bgm_name_task, ()))
+
+BGM_NAMES = read_bgm_name_task()
+
+
+def get_bgm_name_for(name):
+    try:
+        name = BGM_NAMES[name]
+    except KeyError:
+        name = get_auto_bgm_name(name)
+    
+    return name
+
+
+def get_auto_bgm_name(name):
+    parts = BGM_NAME_PATTERN.findall(name)
+    if not parts:
+        return ''
+    
+    last = parts[-1]
+    if len(last) == 3 and last.lower() == 'mp3':
+        del parts[-1]
+    
+    index = 0
+    limit = len(parts)
+    while True:
+        if index == limit:
+            break
+        
+        part = parts[index]
+        if part.endswith('s'):
+            word = part[:-1]
+            if word.lower() in BMG_NAMES_W_S:
+                parts[index] = f'{word}\'s'
+        
+        index += 1
+        continue
+    
+    return ' '.join(parts)
 
 Flan: Client
 setup_ext_commands(Flan, FLAN_PREFIX,
@@ -510,9 +581,9 @@ class add_image:
         await client.message_delete(message)
         return
     
-    checks=[checks.has_role(CARDS_ROLE)]
+    checks = checks.has_role(CARDS_ROLE)
     
-    async def description(client,message):
+    async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('add_image',(
             'Adds or updates an image of a card.\n'
@@ -525,11 +596,11 @@ class add_image:
 class checklist:
 
     async def command(client, message, content):
-        result=[]
+        result = []
         if content:
-            rarity=Rarity.BY_NAME.get(content.lower())
+            rarity = Rarity.BY_NAME.get(content.lower())
             if rarity is None:
-                if len(content)>50:
+                if len(content) > 50:
                     content = content[:50]+'...'
                 result.append(Embed(f'{content!r} is not a rarity', color=CHESUTO_COLOR))
                 
@@ -680,7 +751,7 @@ class checklist:
         await Pagination(client,message.channel,result)
         return
     
-    checks = [checks.has_role(CARDS_ROLE)]
+    checks = checks.has_role(CARDS_ROLE)
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -724,7 +795,7 @@ class dump_all_card:
         for card, client in zip(cards,cycle(clients),):
             embed = card.render_to_embed()
             
-            await client.message_create(channel,embed=embed)
+            await client.message_create(channel, embed=embed)
     
     checks = checks.has_role(CARDS_ROLE)
     
@@ -746,10 +817,10 @@ class remove_card:
         card = get_card(content)
         
         if card is None:
-            await client.message_create(message.channel,embed = Embed(None,'*Nothing found.*',CHESUTO_COLOR))
+            await client.message_create(message.channel, embed=Embed(None, '*Nothing found.*', CHESUTO_COLOR))
             return
         
-        message = await client.message_create(message.channel,embed = Embed(
+        message = await client.message_create(message.channel, embed = Embed(
             None, f'Are you sure, to remove {card.name!r}?', CHESUTO_COLOR,))
         
         for emoji in REMOVE_CARD_EMOJIS:
@@ -823,7 +894,7 @@ class Track(object):
         self = cls()
         name = attachment.name
         self.source_name = name
-        self.display_name = cls._convert_name(name)
+        self.display_name = get_bgm_name_for(name)
         self.url = attachment.url
         self.description = message.content
         self.id = message.id
@@ -864,33 +935,6 @@ class Track(object):
             return
         
         self.description = message.content
-    
-    @staticmethod
-    def _convert_name(name):
-        parts = BGM_NAME_PATTERN.findall(name)
-        if not parts:
-            return ''
-        
-        last = parts[-1]
-        if len(last) == 3 and last.lower() == 'mp3':
-            del parts[-1]
-        
-        index = 0
-        limit = len(parts)
-        while True:
-            if index == limit:
-                break
-            
-            part = parts[index]
-            if part.endswith('s'):
-                word = part[:-1]
-                if word.lower() in BMG_NAMES_W_S:
-                    parts[index] = f'{word}\'s'
-            
-            index+=1
-            continue
-        
-        return ' '.join(parts)
     
     def __gt__(self, other):
         self_source_name = self.source_name
@@ -1094,8 +1138,132 @@ class bgms:
             f'Usage: `{prefix}bgms`'
             ), color=FLAN_HELP_COLOR)
 
-del Cooldown
-del CooldownHandler
-del ChannelText
-del MessageDeleteWaitfor
-del MessageEditWaitfor
+
+def check_has_cards_role(message):
+    user = message.author
+    if user.is_bot:
+        return False
+    
+    if user.has_role(CARDS_ROLE):
+        return True
+    
+    return False
+
+SET_BGM_NAME_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
+SET_BGM_NAME_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
+SET_BGM_NAME_EMOJI_EMOJIS = (SET_BGM_NAME_EMOJI_OK, SET_BGM_NAME_EMOJI_CANCEL)
+
+def check_reaction_cards_role(event):
+    if event.emoji not in SET_BGM_NAME_EMOJI_EMOJIS:
+        return False
+    
+    user = event.user
+    if user.is_bot:
+        return False
+    
+    if user.has_role(CARDS_ROLE):
+        return True
+    
+    return False
+
+async def set_bgm_name_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('set-bgm-name', (
+        'Changes a bgm\'s name\n'
+        f'Usage: `{prefix}set-bgm-name <bgm name>`\n'
+        'After it please define the new name and react with the OK emoji.'
+        ), color=FLAN_HELP_COLOR).add_footer(
+            f'You must have `{CARDS_ROLE}` role to use this command.')
+
+@Flan.commands(checks=checks.has_role(CARDS_ROLE), category='VOICE', description=set_bgm_name_description)
+async def set_bgm_name(client, message, content):
+    bgm = get_bgm(content)
+    
+    if bgm is None:
+        await client.message_create(message.channel, embed=Embed(None, '*Nothing found.*', CHESUTO_COLOR))
+        return
+    
+    embed = Embed(f'Renaming: *{bgm.display_name}*', bgm.description, color=CHESUTO_COLOR) \
+        .add_footer('Your next message will be captured as the new display name of the bgm.')
+    
+    message = await client.message_create(message.channel, embed=embed)
+    
+    try:
+        response = await wait_for_message(client, message.channel, check_has_cards_role, 300.0)
+    except TimeoutError:
+        content = None
+        footer = 'Timeout occured.'
+    else:
+        content = response.content
+        if len(content) > 100:
+            content = None
+            footer = \
+                '*Thats pretty long*. Thats what she said. Please give a display name with maximum of 100 characters.'
+        else:
+            footer = f'Are you sure to set the bgm\'s display name as: {content!r}?'
+    
+    embed.add_footer(footer)
+    await client.message_edit(message, embed=embed)
+    if content is None:
+        return
+    
+    if message.channel.cached_permissions_for(client).can_manage_messages:
+        try:
+            await client.message_delete(response)
+        except BaseException as err:
+            if isinstance(err, ConnectionError):
+                # no internet
+                return
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ):
+                    return
+            
+            raise
+    
+    for emoji_ in SET_BGM_NAME_EMOJI_EMOJIS:
+        await client.reaction_add(message, emoji_)
+    
+    try:
+        event = await wait_for_reaction(client, message, check_reaction_cards_role, 300.)
+    except TimeoutError:
+        emoji_ = None
+    else:
+        emoji_ = event.emoji
+    
+        if message.channel.cached_permissions_for(client).can_manage_messages:
+            try:
+                await client.reaction_clear(message)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    # no internet
+                    return
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.unknown_channel, # channel deleted
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ):
+                        return
+                
+                raise
+    
+    if emoji_ is None:
+        footer = 'Timeout occured.'
+    elif emoji_ is SET_BGM_NAME_EMOJI_OK:
+        BGM_NAMES[bgm.source_name] = content
+        await write_bgm_names()
+        bgm.display_name = content
+        footer = 'Rename done.'
+    else:
+        footer = 'Rename cancelled.'
+    
+    embed.add_footer(footer)
+    await client.message_edit(message, embed=embed)

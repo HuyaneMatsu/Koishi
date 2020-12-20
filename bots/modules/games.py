@@ -522,7 +522,7 @@ class love:
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('love', (
             'How much you two fit together?\n'
-            f'Usage: `{prefix}user *user*`\n'
+            f'Usage: `{prefix}love *user*`\n'
             ), color=GAMES_COLOR)
     
     async def parser_failure_handler(client, message, command, content, args):

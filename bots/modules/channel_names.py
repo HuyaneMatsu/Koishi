@@ -8,9 +8,9 @@ from difflib import get_close_matches
 
 from bot_utils.shared import BOT_CHANNEL_CATEGORY, KOISHI_PATH, STAFF_ROLE
 
-from hata import Lock, KOKORO, alchemy_incendiary, Task, eventlist, Embed, DiscordException, ERROR_CODES, Client, \
+from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \
     BUILTIN_EMOJIS
-from hata.ext.commands import checks, Command, Pagination, Closer, wait_for_reaction
+from hata.ext.commands import checks, Pagination, Closer, wait_for_reaction
 
 FILE_NAME = 'channel_names.csv'
 

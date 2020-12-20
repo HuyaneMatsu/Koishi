@@ -174,8 +174,8 @@ if IS_UNIX:
             '... and many more ways.'
                 ), color=SNEKBOX_COLOR).add_footer(
                 f'{DUNGEON} only!')
-     
-    @main_client.commands(name='eval', aliases='e', description=eval_description)
+    
+    @main_client.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
     async def eval_(client, message, content):
         code, is_exception = parse_code_content(content)
         if is_exception and (code is None):

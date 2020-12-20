@@ -149,7 +149,7 @@ class auto_pyramid:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('execute',(
+        return Embed('auto-pyramid', (
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid <emoji> <size>`'
                 ), color=SATORI_HELP_COLOR).add_footer(
@@ -223,7 +223,7 @@ class auto_pyramid_u:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('execute',(
+        return Embed('auto-pyramid-u', (
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid-u <emoji> <size>`'
                 ), color=SATORI_HELP_COLOR).add_footer(
@@ -241,7 +241,7 @@ class reverse:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('reverse',(
+        return Embed('reverse', (
             'Reverses your message\n'
             f'Usage: `{prefix}reverse <content>`'
                 ), color=SATORI_HELP_COLOR)
