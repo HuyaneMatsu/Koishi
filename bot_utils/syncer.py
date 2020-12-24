@@ -176,7 +176,8 @@ async def receive_sync(client, partner):
                 source_path = join(source_path, name)
                 
                 with (await AsyncIO(source_path, 'wb')) as file:
-                    await file.write(binary)
+                    if (binary is not None):
+                        await file.write(binary)
                 
                 # Wait some. It can happen that we send this message, befrore the other side gets it's answer.
                 await sleep(0.4, KOKORO)

@@ -668,7 +668,7 @@ class message_pure:
                 ])
     
     category = 'UTILITY'
-    checks = [checks.guild_only(), CHECK_ADMINISTRATIOR | checks.has_role(TESTER_ROLE)]
+    checks = [checks.guild_only(), checks.has_role(TESTER_ROLE)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -807,15 +807,23 @@ class welcome_screen:
         if welscome_screen is None:
             embed = Embed(description=f'**{guild.name}** *has no welcome screen enabled*.')
         else:
-            embed = Embed(f'Welcome to **{guild.name}**', f'{welscome_screen.description}\n\n*TOP THINGS TO DO HERE*')
+            description = welcome_screen.description
+            if (description is None):
+                description = '*TOP THINGS TO DO HERE*'
+            else:
+                description = f'{welscome_screen.description}\n\n*TOP THINGS TO DO HERE*'
+            
+            embed = Embed(f'Welcome to **{guild.name}**', description)
             
             icon_url = guild.icon_url
             if (icon_url is not None):
                 embed.add_thumbnail(icon_url)
             
-            for welcome_channel in welscome_screen.welcome_channels:
-                embed.add_field(f'{welcome_channel.emoji:e} {welcome_channel.description}',
-                    f'#{welcome_channel.channel:d}')
+            welcome_channels = welscome_screen.welcome_channels
+            if (welcome_channels is not None):
+                for welcome_channel in welcome_channels:
+                    embed.add_field(f'{welcome_channel.emoji:e} {welcome_channel.description}',
+                        f'#{welcome_channel.channel:d}')
         
         await client.message_create(message.channel, embed=embed)
     
@@ -825,7 +833,7 @@ class welcome_screen:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('welcome-screen',(
+        return Embed('welcome-screen', (
             'Displays the guild\'s welcome screen\n'
             f'Usage: `{prefix}welcome-screen`'
                 ), color=UTILITY_COLOR).add_footer(

@@ -132,7 +132,7 @@ class rules:
                 'Forbidden in any form. Spamming server members in DM-s counts as well.',
             ).add_field(
                 'NSFW',
-                'Keep explicit content in nsfw channels',
+                'Keep explicit content in nsfw channels.',
             ).add_field(
                 'Roles',
                 f'Do not beg for roles. You can claim {EVERYNYAN_ROLE.mention} role, what gives you access to '

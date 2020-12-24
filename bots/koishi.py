@@ -42,8 +42,11 @@ Koishi.command_processer.create_category('VOICE', checks=checks.guild_only())
 
 @Koishi.commands
 async def default_event(client, message):
+    if (message.referenced_message is not None):
+        return
+    
     user_mentions = message.user_mentions
-    if (user_mentions is not None) and (client in user_mentions):
+    if  (user_mentions is not None) and (client in user_mentions):
         author = message.author
         m1 = author.mention
         m2 = client.mention

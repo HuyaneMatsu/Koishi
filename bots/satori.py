@@ -101,7 +101,7 @@ async def emojify(client, message, content):
     
     result = '\u200b'.join(result)
     # If the message is empty, we will check that anyways
-    await client.message_create(message.channel, result)
+    await client.message_create(message, result, allowed_mentions=None)
     return
 
 @Satori.commands.from_class
@@ -237,7 +237,7 @@ class auto_pyramid_u:
 class reverse:
     async def command(client, message, content):
         if content:
-            await client.message_create(message.channel, content[::-1], allowed_mentions=None)
+            await client.message_create(message, content[::-1], allowed_mentions=None)
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

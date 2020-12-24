@@ -11,7 +11,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, ApplicationCommand, \
-    InteractionResponseTypes
+    InteractionResponseTypes, VerificationScreen, WelcomeScreen
 
 from hata.backend.utils import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -25,7 +25,8 @@ from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
 from hata.discord.http.URLS import API_ENDPOINT
 
-from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks, Converter, ConverterFlag
+from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks, Converter, \
+    ConverterFlag, FlaggedAnnotation
 
 RATELIMIT_RESET = Discord_hdrs.RATELIMIT_RESET
 RATELIMIT_RESET_AFTER = Discord_hdrs.RATELIMIT_RESET_AFTER
@@ -1576,20 +1577,20 @@ async def achievement_edit(client,achievement,name=None,description=None,secret=
     data={}
     if (name is not None):
         data['name'] = {
-            'default'   : name,
+            'default': name,
                 }
     if (description is not None):
         data['description'] = {
-            'default'   : description,
+            'default': description,
                 }
     if (secret is not None):
-        data['secret']=secret
+        data['secret'] = secret
         
     if (secure is not None):
-        data['secure']=secure
+        data['secure'] = secure
         
     if (icon is not _spaceholder):
-        data['icon']=image_to_base64(icon)
+        data['icon'] = image_to_base64(icon)
     
     application_id=client.application.id
     achievement_id=achievement.id
@@ -1904,6 +1905,34 @@ async def interaction_followup_message_delete(client, interaction, message):
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/{message_id}',
             )
 
+async def verification_screen_get(client, guild):
+    guild_id = guild.id
+    
+    data = await bypass_request(client, METH_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/member-verification',
+            )
+    
+    return VerificationScreen.from_data(data)
+
+async def verification_screen_edit(client, guild):
+    guild_id = guild.id
+    data = {'enabled': True}
+
+    data = await bypass_request(client, METH_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/member-verification',
+        data)
+    
+    return VerificationScreen.from_data(data)
+
+async def welcome_screen_edit(client, guild):
+    guild_id = guild.id
+    data = {'enabled': True}
+    
+    data = await bypass_request(client, METH_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/welcome-screen',
+        data)
+    
+    return WelcomeScreen.from_data(data)
 
 @RATELIMIT_COMMANDS
 async def ratelimit_test0000(client,message):
@@ -4123,3 +4152,62 @@ async def ratelimit_test0102(client, message):
             await interaction_followup_message_delete(client, interaction, message)
         finally:
             await client.application_command_guild_delete(guild, application_command)
+
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0103(client, message):
+    """
+    Gets the verification screen of the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0103') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await verification_screen_get(client, guild)
+
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0104(client, message):
+    """
+    Edits the verification screen of the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0104') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await verification_screen_edit(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0105(client, message):
+    """
+    Edits the welcome screen of the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0105') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await welcome_screen_edit(client, guild)
+
+@RATELIMIT_COMMANDS
+async def ratelimit_test0106(client, message, guild2:'guild'=None):
+    """
+    Edits the welcome screen of 2 guilds. Please also define the second guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'ratelimit_test0106') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if guild2 is None:
+            await RLT.send('Second guild unknown.')
+        
+        await welcome_screen_edit(client, guild)
+        await welcome_screen_edit(client, guild2)
+
