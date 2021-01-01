@@ -55,7 +55,7 @@ if IS_UNIX:
 
 main_client.command_processer.create_category('SNEKBOX', checks=checks.is_guild(DUNGEON))
 
-def build_output(output, returncode):
+def build_output(output, return_code):
     lines = output.decode('utf-8').splitlines()
     index = 0
     limit = len(lines)
@@ -72,7 +72,7 @@ def build_output(output, returncode):
             continue
         
         if parsed.group(1).startswith('Executing'):
-            lines = lines[index:-(1+(returncode == 137))]
+            lines = lines[index:-(1+(return_code == 137))]
             break
     
     if not lines:
@@ -216,18 +216,18 @@ if IS_UNIX:
                 except TimeoutExpired:
                     await process.kill()
                 
-                returncode = process.returncode
-                if returncode is None or returncode == 255:
-                    title = f'Your eval job has failed! Returncode: {returncode!r}'
+                return_code = process.return_code
+                if return_code is None or return_code == 255:
+                    title = f'Your eval job has failed! Returncode: {return_code!r}'
                     description = 'A fatal NsJail error occurred'
                 else:
-                    if returncode == 137:
-                        title = f'Your eval job timed out or ran out of memory. Returncode: {returncode!r}'
+                    if return_code == 137:
+                        title = f'Your eval job timed out or ran out of memory. Returncode: {return_code!r}'
                     else:
-                        title = f'Your eval job has completed with return code {returncode}.'
+                        title = f'Your eval job has completed with return code {return_code}.'
                     
                     output = await process.stdout.read()
-                    description = build_output(output, returncode)
+                    description = build_output(output, return_code)
                 
                 author = message.author
                 await client.message_create(message.channel,

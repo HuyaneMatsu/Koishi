@@ -486,7 +486,7 @@ async def party_is_over_description(client,message):
         'Should I mark the talking party as done?\n'
         f'Usage: `{prefix}party-is-over`'
         ), color=MAIN_VOICE_COLOR).add_footer(
-            'Administartor only!')
+            'Administrator only!')
 
 @main_client.commands(
     description = party_is_over_description,
@@ -502,7 +502,7 @@ async def party_is_over(client, message):
     while True:
         voice_client = client.voice_client_for(message)
         if voice_client is None:
-            text = 'I don\'t see any parties arround me.'
+            text = 'I don\'t see any parties around me.'
             break
 
         Task(voice_client.disconnect(), KOKORO)

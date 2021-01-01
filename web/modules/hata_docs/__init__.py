@@ -3,6 +3,7 @@ import hata
 import hata.ext.patchouli
 import hata.ext.extension_loader
 import hata.ext.commands
+import hata.ext.slash
 
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath, FunctionUnit, ClassAttributeUnit, \
     InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths

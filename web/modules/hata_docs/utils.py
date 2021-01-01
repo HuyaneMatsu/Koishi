@@ -205,9 +205,9 @@ def get_searched_info(path, order_prio_base=0):
 
 def build_js_structure(structure):
     parts = ['[']
-    childs = structure.childs
-    if (childs is not None):
-        for index, child in enumerate(childs):
+    children = structure.children
+    if (children is not None):
+        for index, child in enumerate(children):
             parts.extend(build_js_structure_gen(child, f'ct_{index}'))
     
     parts.append(']')
@@ -219,12 +219,12 @@ def build_js_structure_gen(structure, prefix):
     yield '\',\''
     yield html_escape(structure.title.lower())
     yield '\','
-    childs = structure.childs
-    if childs is None:
+    children = structure.children
+    if children is None:
         yield 'null'
     else:
         yield '['
-        for index, child in enumerate(childs):
+        for index, child in enumerate(children):
             yield from build_js_structure_gen(child, f'{prefix}_{index}')
         yield ']'
     
@@ -235,11 +235,11 @@ SVG_PATH_NONE = '<path d="M 3 6 a 3 3 0 1 1 6 0 a 3 3 0 1 1 -6 0"></path>'
 
 def build_html_structure(structure):
     parts = []
-    childs = structure.childs
-    if (childs is not None):
+    children = structure.children
+    if (children is not None):
         parts.append('<ul>')
         
-        for index, child in enumerate(childs):
+        for index, child in enumerate(children):
             parts.extend(build_html_structure_gen(child, f'ct_{index}'))
         
         parts.append('</ul>')
@@ -251,13 +251,13 @@ def build_html_structure_gen(structure, prefix):
     yield prefix
     yield '">'
     
-    childs = structure.childs
+    children = structure.children
     yield '<svg id="'
     yield prefix
     yield '_s" onclick="ct.click(\''
     yield prefix
     yield '\');">'
-    if childs is None:
+    if children is None:
         yield SVG_PATH_NONE
     else:
         yield SVG_PATH_CLOSED
@@ -269,12 +269,12 @@ def build_html_structure_gen(structure, prefix):
     yield structure.title
     yield '</a>'
     
-    if (childs is not None):
+    if (children is not None):
         yield '<ul id="'
         yield prefix
         yield '_c" style="display: none;">'
         
-        for index, child in enumerate(childs):
+        for index, child in enumerate(children):
             yield from build_html_structure_gen(child, f'{prefix}_{index}')
         
         yield '</ul>'

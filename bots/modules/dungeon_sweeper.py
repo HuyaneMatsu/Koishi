@@ -52,11 +52,11 @@ def GC_games(cycler):
             to_save.append(game)
 
     if to_delete:
-        KOKORO.call_soon_threadsafe(Task, _keep_await(ds_game.cancel, to_delete), KOKORO)
+        KOKORO.call_soon_thread_safe(Task, _keep_await(ds_game.cancel, to_delete), KOKORO)
 
 
     if to_save:
-        KOKORO.call_soon_threadsafe(Task, _keep_await(ds_game.save_position, to_save), KOKORO)
+        KOKORO.call_soon_thread_safe(Task, _keep_await(ds_game.save_position, to_save), KOKORO)
 
 
 GC_CYCLER.append(GC_games)

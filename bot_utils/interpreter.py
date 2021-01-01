@@ -152,12 +152,12 @@ class InterpreterInputter(object):
             pages=[Embed('Waiting for input (timeout 5 min):')]
         
         with client.loop.enter():
-            task=Task(Pagination(client,channel,pages,300.),client.loop)
-            future=wait_for_message(client,channel,self.check_is_owner,300.)
+            task = Task(Pagination(client, channel, pages, 300.), client.loop)
+            future = wait_for_message(client, channel, self.check_is_owner, 300.)
         
-        task.syncwrap().wait()
+        task.sync_wrap().wait()
         try:
-            message=future.syncwrap().wait()
+            message=future.sync_wrap().wait()
         except TimeoutError:
             raise SystemExit from None
         

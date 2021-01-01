@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
-    listdifference, ActivityChange, KOKORO
+    list_difference, ActivityChange, KOKORO
 from hata.discord.parsers import EVENTS, DEFAULT_EVENT
 from hata.ext.prettyprint import pretty_print
 from hata.ext.commands import Pagination, Command
@@ -154,7 +154,7 @@ class dispatch_tester:
                         result.append('To:')
                     continue
                 if key in ('user_mentions', 'role_mentions', 'cross_mentions'):
-                    removed, added = listdifference(value, getattr(message, key))
+                    removed, added = list_difference(value, getattr(message, key))
                     if removed:
                         result.append(f'{key} removed : {len(removed)}')
                         for obj in removed:
@@ -173,7 +173,7 @@ class dispatch_tester:
                     value = getattr(message, key)
                     new = list(value)
                     new.sort()
-                    removed, added = listdifference(old,new)
+                    removed, added = list_difference(old,new)
                     if removed:
                         result.append(f'{key} removed : {len(removed)}')
                         for name in removed:
@@ -350,7 +350,7 @@ class dispatch_tester:
                 continue
             
             if key=='roles':
-                removed, added = listdifference(value, profile.roles)
+                removed, added = list_difference(value, profile.roles)
                 if removed:
                     result.append(f'Roles removed: ({len(removed)})')
                     for role in removed:
@@ -386,7 +386,7 @@ class dispatch_tester:
         result=[f'A channel was edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
         for key, value in old.items():
             if key=='overwrites':
-                removed,added=listdifference(sorted(value), sorted(channel.overwrites))
+                removed,added=list_difference(sorted(value), sorted(channel.overwrites))
                 if removed:
                     result.append(f'Overwrites removed : ({len(removed)})')
                     for value in removed:
@@ -454,7 +454,7 @@ class dispatch_tester:
         result.append(f'Emoji edited: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         for key, value in old.items():
             if key=='roles':
-                removed, added = listdifference(value, emoji.roles)
+                removed, added = list_difference(value, emoji.roles)
                 
                 if removed:
                     result.append(f'Removed roles: ({len(removed)})')
@@ -536,7 +536,7 @@ class dispatch_tester:
                 continue
             
             if key=='features':
-                removed, added = listdifference(value, guild.features)
+                removed, added = list_difference(value, guild.features)
                 if removed:
                     result.append(f'Features removed: ({len(removed)}')
                     for feature in removed:
@@ -564,7 +564,7 @@ class dispatch_tester:
                 old.sort()
                 new=list(getattr(guild, key))
                 new.sort()
-                removed, added = listdifference(old,new)
+                removed, added = list_difference(old,new)
                 
                 if removed:
                     result.append(f'{key} removed : ({len(removed)})')

@@ -3,7 +3,7 @@ import os
 
 import config
 
-from hata import Client, start_clients, ActivityRich, ActivityTypes
+from hata import Client, ActivityRich, ActivityTypes
 from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.shared import KOISHI_PATH
 
@@ -14,6 +14,7 @@ EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 if MARISA_MODE:
     Marisa = Client(config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
+        application_id = config.MARISA_ID,
             )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, main_client=Marisa)
@@ -30,6 +31,7 @@ else:
         client_id = config.KOISHI_ID,
         activity = ActivityRich('with Satori'),
         shard_count = 2,
+        application_id = config.KOISHI_ID,
             )
     
     EXTENSION_LOADER.add_default_variables(Koishi=Koishi, main_client=Koishi)
@@ -39,6 +41,7 @@ else:
         client_id = config.SATORI_ID,
         activity = ActivityRich('with Koishi'),
         status = 'dnd',
+        application_id = config.SATORI_ID,
             )
     
     EXTENSION_LOADER.add_default_variables(Satori=Satori)
@@ -47,6 +50,7 @@ else:
         client_id = config.FLAN_ID,
         activity = ActivityRich('Chesuto development', type_=ActivityTypes.watching),
         status = 'idle',
+        application_id = config.FLAN_ID,
             )
     
     EXTENSION_LOADER.add_default_variables(Flan=Flan)

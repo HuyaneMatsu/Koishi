@@ -187,7 +187,7 @@ class resend_webhook:
 class show_emoji:
     async def command(client, message, emoji : Emoji):
         if emoji.is_custom_emoji():
-            await client.message_create(message.channel,f'**Name:** {emoji:e} **Link:** {emoji.url}')
+            await client.message_create(message.channel, f'**Name:** {emoji:e} **Link:** {emoji.url}')
     
     name = 'showemoji'
     category = 'UTILITY'
@@ -672,12 +672,12 @@ class message_pure:
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('message_pure',(
+        return Embed('message-pure', (
             'If you want, I show the pure json representing a message.\n'
-            f'Usage: `{prefix}message_pure *message_id* <channel>`\n'
+            f'Usage: `{prefix}message-pure *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
-                ),color=UTILITY_COLOR).add_footer(
-                f'Guild only! You must have dministrator permission or {TESTER_ROLE.name}!')
+                ), color=UTILITY_COLOR).add_footer(
+                f'Guild only! You must {TESTER_ROLE.name} to use it!')
 
 @Koishi.commands.from_class
 class roles:

@@ -10,35 +10,35 @@ class CTPart {
     constructor(structure, elements){
         var id_ = structure[0];
         var name = structure[1];
-        var raw_childs = structure[2];
+        var raw_children = structure[2];
 
         this.clicked = 0;
         this.should_display = 1;
         this.id = id_;
         this.name = name;
 
-        var childs;
-        var should_display_childs;
-        if (raw_childs == null){
-            childs = null;
-            should_display_childs = 0;
+        var children;
+        var should_display_children;
+        if (raw_children == null){
+            children = null;
+            should_display_children = 0;
         } else {
-            childs = [];
+            children = [];
 
             var index = 0;
-            var limit = raw_childs.length;
+            var limit = raw_children.length;
             while (index < limit) {
-                var element = raw_childs[index];
+                var element = raw_children[index];
                 var new_element = new CTPart(element, elements);
-                childs.push(new_element);
+                children.push(new_element);
 
                 index = index+1;
                     }
-            should_display_childs = 1;
+            should_display_children = 1;
                 }
 
-        this.childs = childs;
-        this.should_display_childs = should_display_childs;
+        this.children = children;
+        this.should_display_children = should_display_children;
         elements[id_] = this;
             }
 
@@ -50,19 +50,19 @@ class CTPart {
             should_display = 1;
                 }
 
-        var childs = this.childs;
-        var should_display_childs = 0;
+        var children = this.children;
+        var should_display_children = 0;
 
-        if (childs != null){
+        if (children != null){
             var index = 0;
-            var limit = childs.length;
+            var limit = children.length;
 
             var child;
             while (index < limit){
-                child = childs[index];
+                child = children[index];
 
                 if (child.entry_updated(entry_content)){
-                    should_display_childs = 1;
+                    should_display_children = 1;
                     should_display = 1;
                         }
 
@@ -72,7 +72,7 @@ class CTPart {
 
 
         this.should_display = should_display;
-        this.should_display_childs = should_display_childs;
+        this.should_display_children = should_display_children;
         this.update_display_state();
 
         return should_display;
@@ -99,14 +99,14 @@ class CTPart {
             var new_display = 'list-item';
             if (this.clicked){
                 new_display_childrens = 'block';
-                if (this.should_display_childs){
+                if (this.should_display_children){
                     new_svg = svg_open;
                 } else {
                     new_svg = svg_none;
                         }
             } else {
                 new_display_childrens = 'none';
-                if (this.should_display_childs){
+                if (this.should_display_children){
                     new_svg = svg_closed;
                 } else {
                     new_svg = svg_none;
@@ -124,7 +124,7 @@ class CTPart {
         html_element = $(id_);
         html_element.style["display"] = new_display;
 
-        if (this.childs != null){
+        if (this.children != null){
             html_element = $(id_+'_c');
             html_element.style["display"] = new_display_childrens;
 

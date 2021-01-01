@@ -7,21 +7,16 @@ from io import BytesIO
 from PIL import Image as PIL
 from PIL.ImageSequence import Iterator as ImageSequenceIterator
 
-from hata import eventlist, Future, RATELIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
+from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
     ReuAsyncIO, enter_executor, ApplicationCommand, InteractionResponseTypes, ApplicationCommandOption, \
     ApplicationCommandOptionType
 
-from hata.discord.http import URLS
-from hata.backend.hdrs import AUTHORIZATION
 from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer, \
     FlaggedAnnotation
-from hata.discord.utils import Discord_hdrs
-from hata.discord.http import API_ENDPOINT, CONTENT_TYPE
 from hata.discord.parsers import PARSERS
 from hata.ext.prettyprint import pchunkify
-from hata.discord.emoji import create_partial_emoji
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
 
 from bot_utils.shared import KOISHI_PATH
@@ -58,22 +53,22 @@ async def test_role_create(client, message):
 @TEST_COMMANDS
 async def test_allowed_edit(client, message):
     '''
-    Creates a message and edits it. Shoult not ping you.
+    Creates a message and edits it. Should not ping you.
     '''
     user = message.author
     message = await client.message_create(message.channel, 'Test')
     await client.message_edit(message, user.mention, allowed_mentions=None)
 
 @TEST_COMMANDS(checks = [checks.guild_only()])
-async def test_ratelimit(client, message):
+async def test_rate_limit(client, message):
     '''
-    A fast ratelimit test for next patch to validate anything.
+    A fast rate limit test for next patch to validate anything.
     '''
     guild = message.guild
     if guild is None:
         return
     
-    proxy = client.get_ratelimits_of(RATELIMIT_GROUPS.role_edit, limiter = guild)
+    proxy = client.get_rate_limits_of(RATE_LIMIT_GROUPS.role_edit, limiter = guild)
     if (not proxy.is_alive()) or (not proxy.has_size_set()):
         if not guild.cached_permissions_for(client).can_manage_roles:
             await client.message_create(message.channel, 'Current state unknown -> No permissions.')
