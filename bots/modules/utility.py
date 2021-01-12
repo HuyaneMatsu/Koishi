@@ -17,7 +17,7 @@ from PIL import Image as PIL
 
 from bot_utils.tools import CooldownHandler, PAGINATION_5PN
 from bot_utils.shared import TESTER_ROLE
-from bot_utils.command_utils import CHECK_ADMINISTRATIOR, CHANNEL_TEXT_CONVERTER_MESSAGE_CHANNEL_DEFAULT, \
+from bot_utils.command_utils import CHECK_ADMINISTRATION, CHANNEL_TEXT_CONVERTER_MESSAGE_CHANNEL_DEFAULT, \
     CLIENT_CONVERTER_ALL_CLIENT_DEFAULT, USER_CONVERTER_ALL_AUTHOR_DEFAULT, USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT, \
     MESSAGE_CONVERTER_ALL
 
@@ -642,7 +642,7 @@ class message:
         await Pagination(client,message.channel, [Embed(description=chunk) for chunk in pchunkify(target_message)])
     
     category = 'UTILITY'
-    checks = [checks.guild_only(), CHECK_ADMINISTRATIOR | checks.has_role(TESTER_ROLE)]
+    checks = [checks.guild_only(), CHECK_ADMINISTRATION | checks.has_role(TESTER_ROLE)]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)

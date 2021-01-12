@@ -194,7 +194,7 @@ if IS_UNIX:
         
         with client.keep_typing(message.channel), EvalUserLock(user_id) as user_lock:
             async with EVAL_LOCK:
-                process = await KOKORO.subprocess_exec(NSJAIL_EXECUTABLE, [
+                process = await KOKORO.subprocess_exec(NSJAIL_EXECUTABLE,
                         '--config', NSJAIL_CONFIG,
                         f'--cgroup_mem_max={MEM_MAX}',
                         '--cgroup_mem_mount', str(CGROUP_MEMORY_PARENT.parent),
@@ -202,9 +202,7 @@ if IS_UNIX:
                         '--cgroup_pids_max=1',
                         '--cgroup_pids_mount', str(CGROUP_PIDS_PARENT.parent),
                         '--cgroup_pids_parent', CGROUP_PIDS_PARENT.name,
-                        '--',
-                        PYTHON_EXECUTABLE, '-Iqu', '-c', code
-                            ],
+                        '--', PYTHON_EXECUTABLE, '-Iqu', '-c', code,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                         )

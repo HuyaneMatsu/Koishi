@@ -6,11 +6,12 @@ from threading import main_thread
 from hata import BUILTIN_EMOJIS, Embed, sleep, CLIENTS,  Client, KOKORO
 from hata.ext.commands import checks, setup_ext_commands
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
+from hata.ext.slash import setup_ext_slash
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
 from bot_utils.shared import KOISHI_PREFIX, category_name_rule, DEFAULT_CATEGORY_NAME, WELCOME_CHANNEL, DUNGEON, \
-    ANNOUNCEMNETS_ROLE, WORSHIPPER_ROLE, KOISHI_HELP_COLOR, SYNC_CHANNEL, command_error, EVERYNYAN_ROLE
+    ANNOUNCEMENTS_ROLE, WORSHIPPER_ROLE, KOISHI_HELP_COLOR, SYNC_CHANNEL, command_error, EVERYNYAN_ROLE
 
 from bot_utils.interpreter import Interpreter
 from bot_utils.syncer import sync_request_waiter
@@ -23,6 +24,7 @@ Koishi: Client
 
 setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)
+setup_ext_slash(Koishi, immediate_sync=True)
 
 Koishi.command_processer.append(SYNC_CHANNEL, sync_request_waiter)
 
@@ -149,8 +151,8 @@ Koishi.commands(Interpreter(locals().copy()), name='execute', description=execut
 
 PATTERN_ROLE_RELATION = [
     (re.compile('nya+', re.I), EVERYNYAN_ROLE, timedelta(minutes=10), True),
-    (re.compile('[il] *meow+', re.I), ANNOUNCEMNETS_ROLE, timedelta(), True),
-    (re.compile('[il] *not? *meow+', re.I), ANNOUNCEMNETS_ROLE, timedelta(), False),
+    (re.compile('[il] *meow+', re.I), ANNOUNCEMENTS_ROLE, timedelta(), True),
+    (re.compile('[il] *not? *meow+', re.I), ANNOUNCEMENTS_ROLE, timedelta(), False),
     (re.compile('nekogirl', re.I), WORSHIPPER_ROLE, timedelta(days=183), True),
         ]
 

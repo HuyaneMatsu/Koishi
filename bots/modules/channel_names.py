@@ -233,7 +233,7 @@ Koishi.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_rol
 
 def setup(lib):
     module_locals.handle = KOKORO.call_later(
-        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp()-time_now()+DAY, do_rename)
+        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp()-time_now()+DAY, cycle_rename)
 
 def teardown(lib):
     handle = module_locals.handle

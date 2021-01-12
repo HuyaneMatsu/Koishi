@@ -1,51 +1,67 @@
 # -*- coding: utf-8 -*-
 from collections import deque
+from difflib import get_close_matches
 
-from hata import Embed, ERROR_CODES, eventlist, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO, Client
-from hata.ext.commands import Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
+from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO, Client
+from hata.ext.commands import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
-from bot_utils.command_utils import CHECH_NSFW_CHANNEL
-from bot_utils.tools import BeautifulSoup, choose, pop_one, CooldownHandler, choose_notsame
+from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_notsame
 
 
 BOORU_COLOR = Color.from_html('#138a50')
 
-
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 NSFW_BOORU = 'http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags='
 
-class cached_booru_command(object):
+DEFAULT_TITLE = 'Link'
+
+Koishi: Client
+
+class CachedBooruCommand(object):
     _FILTER = (
         'solo+-underwear+-sideboob+-pov_feet+-underboob+-upskirt+-sexually_suggestive+-ass+-bikini+-6%2Bgirls+-comic'
         '+-greyscale+'
             )
     
-    __slots__ = ('_tag_name', 'title', 'urls',)
+    __slots__ = ('tag_name', 'title', 'urls',)
     def __init__(self, title, tag_name):
-        self._tag_name = tag_name
+        self.tag_name = tag_name
         self.title = title
         self.urls = None
+    
+    async def __call__(self, client, event):
+        yield
         
-    async def __call__(self, client, message, content):
         urls = self.urls
         if urls is None:
-            await self._request_urls(client)
-            urls = self.urls
+            urls = await self._request_urls(client)
             if urls is None:
-                await client.message_create(message.channel, embed=Embed('Booru is unavailable', color=BOORU_COLOR))
+                yield Embed('Error desu', 'Booru is unavailable', color=BOORU_COLOR)
                 return
-
-        await ShuffledShelter(client, message.channel, urls, False, self.title)
-
+        
+        guild = event.guild
+        if (guild is None) or (client not in guild.clients):
+            image_url = choose(urls)
+            yield Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
+            return
+        
+        await ShuffledShelter(client, event.channel, urls, False, self.title)
+        return
+    
     async def _request_urls(self, client):
-        url = ''.join([SAFE_BOORU, self._FILTER, self._tag_name])
+        url = ''.join([SAFE_BOORU, self._FILTER, self.tag_name])
+        
         async with client.http.get(url) as response:
             result = await response.read()
+        
         if response.status != 200:
             return
+        
         soup = BeautifulSoup(result, 'lxml')
-        self.urls = [post['file_url'] for post in soup.find_all('post')]
+        urls = [post['file_url'] for post in soup.find_all('post')]
+        self.urls = urls
+        return urls
 
 
 class ShuffledShelter(object):
@@ -56,7 +72,7 @@ class ShuffledShelter(object):
     __slots__ = ('canceller', 'channel', 'client', 'history', 'history_step', 'message', 'pop', 'task_flag',
         'timeouter', 'title', 'urls')
     
-    async def __new__(cls, client, channel, urls, pop, title='Link'):
+    async def __new__(cls, client, channel, urls, pop, title=DEFAULT_TITLE):
         if not urls:
             await client.message_create(channel, embed=Embed('No result'))
             return
@@ -75,14 +91,13 @@ class ShuffledShelter(object):
         self.history_step = 1
         
         
-        url = pop_one(urls) if pop else choose(urls)
-        history.append(url)
+        image_url = pop_one(urls) if pop else choose(urls)
+        history.append(image_url)
         
-        embed = Embed(title, color=BOORU_COLOR, url=url)
-        embed.add_image(url)
+        embed = Embed(title, color=BOORU_COLOR, url=image_url).add_image(image_url)
         
         message = await client.message_create(channel, embed=embed)
-        self.message=message
+        self.message = message
         
         if (len(urls) == (0 if pop else 1)) or (not channel.cached_permissions_for(client).can_add_reactions):
             return
@@ -113,9 +128,11 @@ class ShuffledShelter(object):
         while True:
             emoji = event.emoji
             if emoji is self.CYCLE:
-                url = pop_one(self.urls) if self.pop else choose_notsame(self.urls, self.message.embeds[0].image.url)
-                self.history.append(url)
-                self.history_step=1
+                image_url = pop_one(self.urls) if self.pop else choose_notsame(self.urls,
+                    self.message.embeds[0].image.url)
+                
+                self.history.append(image_url)
+                self.history_step = 1
                 break
             
             if emoji is self.BACK:
@@ -130,13 +147,12 @@ class ShuffledShelter(object):
                 
                 history_step += 1
                 self.history_step = history_step
-                url = history[history_ln - history_step]
+                image_url = history[history_ln - history_step]
                 break
             
             return
         
-        embed = Embed(self.title, color=BOORU_COLOR, url=url)
-        embed.add_image(url)
+        embed = Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
         
         self.task_flag = GUI_STATE_SWITCHING_PAGE
         try:
@@ -156,7 +172,7 @@ class ShuffledShelter(object):
                             ):
                     return
             
-            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
             await client.events.error(client, f'{self!r}.__call__', err)
             return
             
@@ -225,195 +241,242 @@ class ShuffledShelter(object):
         
         return Task(canceller(self, exception), KOKORO)
 
-async def answer_booru(client, channel, content, url_base):
+async def answer_booru(client, event, content, url_base):
+    yield
+    
     if content:
-        content = content.split()
-        content.insert(0, url_base)
-        url = '+'.join(content)
+        url = '+'.join([url_base, *content.split()])
     else:
         url = url_base
     
     async with client.http.get(url) as response:
         result = await response.read()
-    if response.status!=200:
-        await client.message_create(channel,
-            embed=Embed('Booru is unavailable', color=BOORU_COLOR))
+    
+    if response.status != 200:
+        yield Embed('Error desu.', 'Booru is unavailable', color=BOORU_COLOR)
         return
     
     soup = BeautifulSoup(result, 'lxml')
     urls = [post['file_url'] for post in soup.find_all('post')]
-    if urls:
-        await ShuffledShelter(client, channel, urls, True)
+    if not urls:
+        yield Embed('Error desu.', f'Could not find anything what matches these tags..', color=BOORU_COLOR)
         return
     
-    await client.message_create(channel, embed=Embed(
-        f'Sowwy, but {client.name} could not find anything what matches these tags..',
-        color=BOORU_COLOR))
-
-Koishi: Client
-@Koishi.commands.from_class
-class safebooru:
-    @Cooldown('channel',20., limit=2, handler=CooldownHandler())
-    async def command(client, message, content):
-        await answer_booru(client, message.channel, content,SAFE_BOORU)
+    guild = event.guild
+    if (guild is None) or (client not in guild.clients):
+        image_url = choose(urls)
+        yield Embed(DEFAULT_TITLE, color=BOORU_COLOR, url=image_url).add_image(image_url)
+        return
     
-    category = 'UTILITY'
+    await ShuffledShelter(client, event.channel, urls, True)
+    return
     
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('safebooru', (
-            'Do you want me, to request some images from safebooru?\n'
-            f'Usage: `{prefix}safebooru *tags*`\n'
-            'You should pass at least 1 tag.'
-            ), color=BOORU_COLOR)
 
+TOUHOU_NAME_RELATIONS = {}
+TOUHOU_NAMES = []
 
-@Koishi.commands.from_class
-class nsfwbooru:
-    @safebooru.shared()
-    async def command(client, message, content):
-        await answer_booru(client, message.channel, content, NSFW_BOORU)
-    
-    category = 'UTILITY'
-    checks = CHECH_NSFW_CHANNEL
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('nsfwbooru', (
-            'Do you want me, to request some images from gelbooru?... You perv!\n'
-            f'Usage: `{prefix}nsfwbooru *tags*`\n'
-            'You should pass at least 1 tag. '
-            'Passing nsfw tags is recommended as well.'
-                ), color=BOORU_COLOR).add_footer(
-                'NSFW channel only!')
-
-for title, tag_name, command_names in (
-        ('Aki Minoriko',            'aki_minoriko',         ('minoriko',),),
-        ('Aki Shizuha',             'aki_shizuha',          ('shizuha',),),
-        ('Chairudo Runa',           'luna_child',           ('luna', 'runa',),),
-        ('Chen',                    'chen',                 ('chen',),),
-        ('Chiruno',                 'cirno',                ('chiruno', 'cirno',),),
-        ('Daiyousei',               'daiyousei',            ('daiyousei',),),
-        ('Ebisu Eika',              'ebisu_eika',           ('eika',),),
-        ('Erii',                    'elly',                 ('erii', 'elly',),),
-        ('Etanitiraruba',           'eternity_larva',       ('eternity', 'Etanitiraruba',),),
-        ('Fujiwara no Mokou',       'fujiwara_no_mokou',    ('mokou',),),
-        ('Futatsuiwa Mamizou',      'futatsuiwa_mamizou',   ('mamizou',),),
-        ('Haan Maeriberii',         'maribel_hearn',        ('maribel', 'maeriberii',),),
-        ('Haniyasushin Keiki',      'haniyasushin_keiki',   ('keiki',),),
-        ('Hakurei Reimu',           'hakurei_reimu',        ('reimu',),),
-        ('Hata no Kokoro',          'hata_no_kokoro',       ('kokoro',),),
-        ('Hei Meirin',              'hei_meiling',          ('hei',),),
-        ('Hieda no Akyuu',          'hieda_no_akyuu',       ('akyuu',),),
-        ('Hijiri Byakuren',         'hijiri_byakuren',      ('byakuren',),),
-        ('Himekaidou Hatate',       'himekaidou_hatate',    ('hatate',),),
-        ('Hinanawi Tenshi',         'hinanawi_tenshi',      ('tenshi',),),
-        ('Hon Meirin',              'hong_meiling',         ('meiling', 'meirin', 'hong',),),
-        ('Horikawa Raiko',          'horikawa_raiko',       ('raiko',),),
-        ('Hoshiguma Yuugi',         'hoshiguma_yuugi',      ('yuugi',),),
-        ('Houjuu Nue',              'houjuu_nue',           ('nue',),),
-        ('Houraisan Kaguya',        'houraisan_kaguya',     ('kaguya',),),
-        ('Howaito Ririi',           'lily_white',           ('lily', 'ririi',),),
-        ('Howaitorokku Retii',      'letty_whiterock',      ('letty', 'retii',),),
-        ('Ibaraki Kasen',           'ibaraki_kasen',        ('kasen',),),
-        ('Ibuki Suika',             'ibuki_suika',          ('suika',),),
-        ('Imaizumi Kagerou',        'imaizumi_kagerou',     ('kagerou',),),
-        ('Inaba Tewi',              'inaba_tewi',           ('tewi',),),
-        ('Inubashiri Momiji',       'inubashiri_momiji',    ('momiji',),),
-        ('Izayoi Sakuya',           'izayoi_sakuya',        ('sakuya',),),
-        ('Joutouguu Mayumi',        'joutougu_mayumi',      ('mayumi',),), # same as 'joutouguu_mayumi'
-        ('Junko',                   'junko_(touhou)',       ('junko',),),
-        ('Kaenbyou Rin',            'kaenbyou_rin',         ('orin', 'rin',),),
-        ('Kagiyama Hina',           'kagiyama_hina',        ('hina',),),
-        ('Kaku Seiga',              'kaku_seiga',           ('seiga',),),
-        ('Kamishirasawa Keine',     'kamishirasawa_keine',  ('keine',),),
-        ('Kasodani Kyouko',         'kasodani_kyouko',      ('kyouko',),),
-        ('Kawashiro Nitori',        'kawashiro_nitori',     ('nitori',),),
-        ('Kazami Yuuka',            'kazami_yuuka',         ('yuuka',),), # same as 'kazami_youka'
-        ('Kicchou Yachie',          'kitcho_yachie',        ('yachie',),), # same as 'kicchou_yachie'
-        ('Kijin Seija',             'kijin_seija',          ('seija',),),
-        ('Kirisame Marisa',         'kirisame_marisa',      ('marisa',),),
-        ('Kishin Sagume',           'kishin_sagume',        ('sagume',),),
-        ('Kisume',                  'kisume',               ('kisume',),),
-        ('Kitashirakawa Chiyuri',   'kitashirakawa_chiyuri', ('chiyuri',),),
-        ('Koakuma',                 'koakuma',              ('koakuma',),),
-        ('Kochiya Sanae',           'kochiya_sanae',        ('sanae',),),
-        ('Komano Aunn',             'komano_aun',           ('aunn', 'aun',),),
-        ('Komeiji Koishi',          'komeiji_koishi',       ('koishi',),),
-        ('Komeiji Satori',          'komeiji_satori',       ('satori',),),
-        ('Konngara',                'konngara',             ('konngara',),),
-        ('Konpaku Youmu',           'konpaku_youmu',        ('youmu',),),
-        ('Kokuu Haruto',            'kokuu_haruto',         ('kokuu',),), # no result now
-        ('Kumoi Ichirin',           'kumoi_ichirin',        ('ichirin',),),
-        ('Kuraunpiisu',             'clownpiece',           ('clownpiece', 'kuraunpiisu',),),
-        ('Kurodani Yamame',         'kurodani_yamame',      ('yamame',),),
-        ('Kurokoma Saki',           'kurokoma_saki',        ('saki',),),
-        ('Maagatoroido Arisu',      'alice_margatroid',     ('arisu', 'alice',),),
-        ('Matara Okina',            'matara_okina',         ('okina',),),
-        ('Merankorii Medisun',      'medicine_melancholy',  ('medicine', 'medisun',),),
-        ('Mima',                    'mima',                 ('mima',),),
-        ('Sanii Miruku',            'sunny_milk',           ('sunny', 'sanii',),),
-        ('Miyako Yoshika',          'miyako_yoshika',       ('yoshika',),),
-        ('Mizuhashi Parusi',        'mizuhashi_parsee',     ('parsee', 'parusi',),),
-        ('Mononobe no Futo',        'mononobe_no_futo',     ('futo',),),
-        ('Morichika Rinnosuke',     'morichika_rinnosuke',  ('rinnosuke',),),
-        ('Moriya Suwako',           'moriya_suwako',        ('suwako',),),
-        ('Motoori Kosuzu',          'motoori_kosuzu',       ('kosuzu',),),
-        ('Murasa Minamitsu',        'murasa_minamitsu',     ('minamitsu',),),
-        ('Nagae Iku',               'nagae_iku',            ('iku',),),
-        ('Nazuurin',                'nazrin',               ('nazrin', 'nazuurin',),),
-        ('Nishida Satono',          'nishida_satono',       ('satono',),),
-        ('Niwatari Kutaka',         'niwatari_kutaka',      ('kutaka',),),
-        ('Okunoda Miyoi',           'okunoda_miyoi',        ('miyoi',),),
-        ('Onozuka Komachi',         'onozuka_komachi',      ('komachi',),),
-        ('Pachurii Noorejji',       'patchouli_knowledge',  ('patchouli',),),
-        ('Purizumuribaa Meruran',   'merlin_prismriver',    ('merlin', 'meruran',),),
-        ('Purizumuribaa Ririka',    'lyrica_prismriver',    ('lyrica', 'ririka',),),
-        ('Purizumuribaa Runasa',    'lunasa_prismriver',    ('lunasa', 'runasa',),),
-        ('Rapisurazuri Hekaatia',   'hecatia_lapislazuli',  ('hecatia', 'hekaatia',),),
-        ('Reisen Udongein Inaba',   'reisen_udongein_inaba', ('reisen',),),
-        ('Reiuji Utsuho',           'reiuji_utsuho',        ('utsuho', 'okuu',),),
-        ('Riguru Naitobagu',        'wriggle_nightbug',     ('riguru', 'wriggle',),),
-        ('Ringo',                   'ringo_(touhou)',       ('ringo',),),
-        ('Roorerai Misutia',        'mystia_lorelei',       ('mystia', 'misutia',),),
-        ('Ruumia',                  'rumia',                ('rumia', 'ruumia',),),
-        ('Safaia Sutaa',            'star_sapphire',        ('star', 'sutaa',),),
-        ('Saigyouji Yuyuko',        'saigyouji_yuyuko',     ('yuyuko',),),
-        ('Saigyouji Yuyuko',        'saigyouji_yuyuko',     ('yuyuko',),),
-        ('Sakata Nemuno',           'sakata_nemuno',        ('nemuno',),),
-        ('Seiran',                  'seiran_(touhou)',      ('seiran',),),
-        ('Sekibanki',               'sekibanki',            ('sekibanki',),),
-        ('Shameimaru Aya',          'shameimaru_aya',       ('aya',),),
-        ('Shiki Eiki Yamazanadu',   'shiki_eiki',           ('eiki',),),
-        ('Suiito Doremii',          'doremy_sweet',         ('doremy',),),
-        ('Sukaaretto Furandooru',   'flandre_scarlet',      ('flandre', 'furandooru', 'flan'),),
-        ('Sukaaretto Remiria',      'remilia_scarlet',      ('remilia', 'remiria',),),
-        ('Sukuna Shinmyoumaru',     'sukuna_shinmyoumaru',  ('sukuna',),),
-        ('Tatara Kogasa',           'tatara_kogasa',        ('kogasa',),),
-        ('Teireida Mai',            'teireida_mai',         ('mai',),),
-        ('Toramaru Shou',           'toramaru_shou',        ('shou',),),
-        ('Toyosatomimi no Miko',    'toyosatomimi_no_miko', ('miko',),),
-        ('Usami Renko',             'usami_renko',          ('renko',),),
-        ('Usami Sumireko',          'usami_sumireko',       ('sumireko',),),
-        ('Ushizaki Urumi',          'ushizaki_urumi',       ('urumi',),),
-        ('Wakasagihime',            'wakasagihime',         ('wakasagi', 'wakasagihime',),),
-        ('Watatsuki no Toyohime',   'watatsuki_no_toyohime', ('toyohime',),),
-        ('Watatsuki no Yorihime',   'watatsuki_no_yorihime', ('yorihime',),),
-        ('Yagokoro Eirin',          'yagokoro_eirin',       ('eirin',),),
-        ('Yakumo Ran',              'yakumo_ran',           ('ran',),),
-        ('Yakumo Yukari',           'yakumo_yukari',        ('yukari',),),
-        ('Yasaka Kanako',           'yasaka_kanako',        ('kanako',),),
-        ('Yatadera Narumi',         'yatadera_narumi',      ('narumi',),),
-        ('Yorigami Joon',           'yorigami_jo\'on',      ('joon',),),
-        ('Yorigami Shion',          'yorigami_shion',       ('shion',),),
+for name, tag_name, *alternative_names in (
+        ('Aki Minoriko'         , 'aki_minoriko'         , '秋 穣子', 'Minoriko',),
+        ('Aki Shizuha'          , 'aki_shizuha'          , '秋 静葉', 'Shizuha',),
+        ('Luna Child'           , 'luna_child'           , 'ルナチャイルド', 'Chairudo Runa', 'Luna', 'Runa',),
+        ('Chen'                 , 'chen'                 , '橙',),
+        ('Chiruno'              , 'cirno'                , 'チルノ', 'Cirno',),
+        ('Daiyousei'            , 'daiyousei'            , '大妖精'),
+        ('Ebisu Eika'           , 'ebisu_eika'           , '戎 瓔花', 'Eika Ebisu'),
+        ('Elly'                 , 'elly'                 , 'エリー', 'Erii', 'Elly',),
+        ('Eternity Larva'       , 'eternity_larva'       , 'エタニティラルバ', 'Eternity', 'Etanitiraruba',),
+        ('Fujiwara no Mokou'    , 'fujiwara_no_mokou'    , '藤原 妹紅', 'Mokou',),
+        ('Futatsuiwa Mamizou'   , 'futatsuiwa_mamizou'   , '二ッ岩 マミゾウ', 'Mamizou', 'Mamizou Futatsuiwa'),
+        ('Hearn Maribel'        , 'maribel_hearn'        , 'マエリベリー ハーン', 'Maribel', 'Maeriberii', 'Haan Maeriberii', 'Maribel Hearn'),
+        ('Haniyasushin Keiki'   , 'haniyasushin_keiki'   , '埴安神 袿姫', 'Keiki', 'Keiki Haniyasushin',),
+        ('Hakurei Reimu'        , 'hakurei_reimu'        , '博麗 霊夢', 'Reimu', 'Reimu Hakurei'),
+        ('Hata no Kokoro'       , 'hata_no_kokoro'       , '秦 こころ', 'Kokoro',),
+        ('Hei Meiling'          , 'hei_meiling'          , 'Hei Meirin', 'Meiling Hei'),
+        ('Hieda no Akyuu'       , 'hieda_no_akyuu'       , '稗田 阿求', 'Akyuu',),
+        ('Hijiri Byakuren'      , 'hijiri_byakuren'      , '聖 白蓮', 'Byakuren', 'Hijiri Byakuren'),
+        ('Himekaidou Hatate'    , 'himekaidou_hatate'    , '姫海棠 はたて', 'Hatate', 'Hatate Himekaidou'),
+        ('Hinanawi Tenshi'      , 'hinanawi_tenshi'      , '比那名居 天子', 'Tenshi', 'Tenshi Hinanawi',),
+        ('Hong Meiling'         , 'hong_meiling'         , '紅 美鈴', 'Meiling', 'Meirin', 'Hon Meirin', 'Meiling Hong'),
+        ('Horikawa Raiko'       , 'horikawa_raiko'       , '堀川 雷鼓', 'Raiko', 'Raiko Horikawa'),
+        ('Hoshiguma Yuugi'      , 'hoshiguma_yuugi'      , '星熊 勇儀', 'Yuugi', 'Yuugi Hoshiguma'),
+        ('Houjuu Nue'           , 'houjuu_nue'           , '封獣 ぬえ', 'Nue', 'Nue Houjuu'),
+        ('Houraisan Kaguya'     , 'houraisan_kaguya'     , '蓬莱山 輝夜', 'Kaguya', 'Kaguya Houraisan'),
+        ('Lily White'           , 'lily_white'           , 'リリーホワイト', 'Lily', 'Ririi', 'Ririi Howaito'),
+        ('Letty Whiterock'      , 'letty_whiterock'      , 'レティ ホワイトロック', 'Reti Howaitorokku',),
+        ('Ibaraki Kasen'        , 'ibaraki_kasen'        , '茨木 華扇', 'Kasen', 'Kasen Ibaraki'),
+        ('Ibuki Suika'          , 'ibuki_suika'          , '伊吹 萃香', 'Suika', 'Suika Ibuk'),
+        ('Imaizumi Kagerou'     , 'imaizumi_kagerou'     , '今泉 影狼', 'Kagerou', 'Kagerou Imaizumi'),
+        ('Inaba Tewi'           , 'inaba_tewi'           , '因幡 てゐ', 'Tewi', 'Tewi Inaba'),
+        ('Inubashiri Momiji'    , 'inubashiri_momiji'    , '犬走 椛', 'Momiji', 'Momiji Inubashiri'),
+        ('Izayoi Sakuya'        , 'izayoi_sakuya'        , '十六夜 咲夜', 'Sakuya', 'Sakuya Izayoi'),
+        ('Joutouguu Mayumi'     , 'joutouguu_mayumi'     , '杖刀偶 磨弓', 'Mayumi', 'Mayumi Joutouguu'), # same as 'joutougu_mayumi'
+        ('Junko'                , 'junko_(touhou)'       , '純狐', 'Junko',),
+        ('Kaenbyou Rin'         , 'kaenbyou_rin'         , '火焔猫 燐', 'Orin', 'Rin', 'Rin Kaenbyou'),
+        ('Kagiyama Hina'        , 'kagiyama_hina'        , '鍵山 雛', 'Hina', 'Hina Kagiyama'),
+        ('Kaku Seiga'           , 'kaku_seiga'           , '霍 青娥,', 'Seiga', 'Seiga Kaku'),
+        ('Kamishirasawa Keine'  , 'kamishirasawa_keine'  , '上白沢 慧音', 'Keine', 'Keine Kamishirasawa'),
+        ('Kasodani Kyouko'      , 'kasodani_kyouko'      , '幽谷 響子', 'Kyouko', 'Kyouko Kasodani'),
+        ('Kawashiro Nitori'     , 'kawashiro_nitori'     , '河城 にとり', 'Nitori', 'Nitori Kawashiro', 'Phoenix Kappashiro'),
+        ('Kazami Yuuka'         , 'kazami_yuuka'         , '風見 幽香', 'Yuuka', 'Yuuka Kazami'), # same as 'kazami_youka'
+        ('Kicchou Yachie'       , 'kitcho_yachie'        , '吉弔 八千慧', 'Yachie', 'Yachie Kicchou'), # same as 'kicchou_yachie'
+        ('Kijin Seija'          , 'kijin_seija'          , '鬼人 正邪', 'Seija Kijin', 'Seija',),
+        ('Kirisame Marisa'      , 'kirisame_marisa'      , '霧雨 魔理沙', 'Marisa', 'Marisa Kirisame'),
+        ('Kishin Sagume'        , 'kishin_sagume'        , '稀神 サグメ', 'Sagume Kishin',),
+        ('Kisume'               , 'kisume'               , 'キスメ',),
+        ('Kitashirakawa Chiyuri', 'kitashirakawa_chiyuri', '北白河 ちゆり', 'Chiyuri Kitashirakawa'),
+        ('Koakuma'              , 'koakuma'              , '小悪魔', 'Koakuma',),
+        ('Kochiya Sanae'        , 'kochiya_sanae'        , '東風谷 早苗', 'Sanae', 'Sanae Kochiya'),
+        ('Komano Aunn'          , 'komano_aun'           , '高麗野 あうん', 'Aunn', 'Aun', 'Aunn Komano'),
+        ('Komeiji Koishi'       , 'komeiji_koishi'       , '古明地 こいし', 'Koishi', 'Koishi Komeiji'),
+        ('Komeiji Satori'       , 'komeiji_satori'       , '古明地 さとり', 'Satori', 'Satori Komeiji'),
+        ('Konngara'             , 'konngara'             , '矜羯羅', 'Konngara',),
+        ('Konpaku Youmu'        , 'konpaku_youmu'        , '魂魄 妖夢', 'Youmu', 'Youmu Konpaku'),
+        ('Kokuu Haruto'         , 'kokuu_haruto'         , 'Haruto Kokuu',), # no result now
+        ('Kumoi Ichirin'        , 'kumoi_ichirin'        , '雲居 一輪', 'Ichirin Kumoi', 'Ichirin',),
+        ('Clownpiece'           , 'clownpiece'           , 'クラウンピース', 'Kuraunpiisu', ),
+        ('Kurodani Yamame'      , 'kurodani_yamame'      , '黒谷 ヤマメ', 'Yamame Kurodani',),
+        ('Kurokoma Saki'        , 'kurokoma_saki'        , '驪駒 早鬼', 'Saki', 'Saki Kurokoma'),
+        ('Margatroid Alice'     , 'alice_margatroid'     , 'アリス マーガトロイド', 'Arisu', 'Alice', 'Maagatoroido Arisu', 'Alice Margatroid'),
+        ('Matara Okina'         , 'matara_okina'         , '摩多羅 隠岐奈', 'Okina', 'Okina Matara'),
+        ('Medicine Melancholy'  , 'medicine_melancholy'  , 'メディスン メランコリー', 'Merankorii Medisun'),
+        ('Mima'                 , 'mima'                 , '魅魔', 'Mima',),
+        ('Sunny Milk'           , 'sunny_milk'           , 'サニーミルク', 'Sanii Miruku',),
+        ('Miyako Yoshika'       , 'miyako_yoshika'       , '宮古 芳香', 'Yoshika', 'Yoshika Miyako',),
+        ('Mizuhashi Parsee'     , 'mizuhashi_parsee'     , '水橋 パルスィ', 'Mizuhashi Parusi', 'Parsee Mizuhashi'),
+        ('Mononobe no Futo'     , 'mononobe_no_futo'     , '物部 布都', 'Futo',),
+        ('Morichika Rinnosuke'  , 'morichika_rinnosuke'  , '森近 霖之助', 'Rinnosuke', 'Rinnosuke Morichika'),
+        ('Moriya Suwako'        , 'moriya_suwako'        , '洩矢 諏訪子', 'Suwako Moriya', 'Suwako',),
+        ('Motoori Kosuzu'       , 'motoori_kosuzu'       , '本居 小鈴', 'Kosuzu', 'Kosuzu Motoori'),
+        ('Murasa Minamitsu'     , 'murasa_minamitsu'     , '村紗 水蜜', 'Minamitsu Murasa'),
+        ('Nagae Iku'            , 'nagae_iku'            , '永江 衣玖', 'Iku Nagae'),
+        ('Nazrin'               , 'nazrin'               , 'ナズーリン', 'Nazuurin',),
+        ('Nishida Satono'       , 'nishida_satono'       , '爾子田 里乃', 'Satono Nishida',),
+        ('Niwatari Kutaka'      , 'niwatari_kutaka'      , '庭渡 久侘歌', 'Kutaka Niwatar',),
+        ('Okunoda Miyoi'        , 'okunoda_miyoi'        , '奥野田 美宵', 'Miyoi Okunoda',),
+        ('Onozuka Komachi'      , 'onozuka_komachi'      , '小野塚 小町', 'Komachi Onozuka',),
+        ('Patchouli Knowledge'  , 'patchouli_knowledge'  , 'パチュリー ノーレッジ', 'Patchouli', 'Pachurii Noorejji'),
+        ('Merlin Prismriver'    , 'merlin_prismriver'    , 'メルラン プリズムリバ', 'Merlin', 'Merlin Prismriver', 'Meruran Purizumuribaa'),
+        ('Lyrica Prismriver'    , 'lyrica_prismriver'    , 'リリカ プリズムリバー', 'Lyrica', 'Ririka Purizumuribaa',),
+        ('Lunasa Prismriver'    , 'lunasa_prismriver'    , 'ルナサ プリズムリバー', 'Lunasa', 'Runasa Purizumuribaa',),
+        ('Hecatia Lapislazuli'  , 'hecatia_lapislazuli'  , 'ヘカーティア ラピスラズリ', 'Hecatia', 'Hekaatia', 'Hekaatia Rapisurazuri'),
+        ('Reisen Udongein Inaba', 'reisen_udongein_inaba', '鈴仙 優曇華院 イナバ', 'Reisen',),
+        ('Reiuji Utsuho'        , 'reiuji_utsuho'        , '霊烏路 空', 'Okuu', 'Utsuho Reiuji '),
+        ('Wriggle Nightbug'     , 'wriggle_nightbug'     , 'リグル ナイトバグ', 'Wriggle', 'Riguru Naitobagu'),
+        ('Ringo'                , 'ringo_(touhou)'       , '鈴瑚', 'Ringo',),
+        ('Mystia Lorelei'       , 'mystia_lorelei'       , 'ミスティア ローレライ', 'Misutia Roorerai',),
+        ('Rumia'                , 'rumia'                , 'ルーミア', 'Ruumia',),
+        ('Star Sapphire'        , 'star_sapphire'        , 'スターサファイア', 'Safaia Sutaa',),
+        ('Saigyouji Yuyuko'     , 'saigyouji_yuyuko'     , '西行寺 幽々子', 'Yuyuko', 'Yuyuko Saigyouji'),
+        ('Sakata Nemuno'        , 'sakata_nemuno'        , '坂田 ネムノ', 'Nemuno', 'Nemuno Sakata'),
+        ('Seiran'               , 'seiran_(touhou)'      , '清蘭', 'Seiran',),
+        ('Sekibanki'            , 'sekibanki'            , '赤蛮奇', 'Sekibanki',),
+        ('Shameimaru Aya'       , 'shameimaru_aya'       , '射命丸 文', 'Aya', 'Aya Shameimaru'),
+        ('Shiki Eiki Yamaxanadu', 'shiki_eiki'           , '四季映姫 ヤマザナドゥ', 'Eiki', 'Shiki Eiki Yamazanadu', 'Eiki Shiki, Yamaxanadu',),
+        ('Doremy Sweet'         , 'doremy_sweet'         , 'ドレミー スイート', 'Doremy', 'Doremii Suiito'),
+        ('Scarlet Flandre'      , 'flandre_scarlet'      , 'スカーレット フランドール', 'Flandre', 'Flandre Scarlet', 'Flan', 'Sukaaretto Furandooru'),
+        ('Scarlet Remilia'      , 'remilia_scarlet'      , 'スカーレット レミリア', 'Remilia', 'Remilia Scarlet', 'Sukaaretto Remiria'),
+        ('Sukuna Shinmyoumaru'  , 'sukuna_shinmyoumaru'  , '少名 針妙丸', 'Shinmyoumaru Sukuna',),
+        ('Tatara Kogasa'        , 'tatara_kogasa'        , '多々良 小傘', 'Kogasa Tatara'),
+        ('Teireida Mai'         , 'teireida_mai'         , '丁礼田 舞', 'Mai Teireida', 'Mai'),
+        ('Toramaru Shou'        , 'toramaru_shou'        , '寅丸 星', 'Shou Toramaru',),
+        ('Toyosatomimi no Miko' , 'toyosatomimi_no_miko' , '豊聡耳 神子', 'Miko',),
+        ('Usami Renko'          , 'usami_renko'          , '宇佐見 蓮子', 'Renko', 'Renko Usami'),
+        ('Usami Sumireko'       , 'usami_sumireko'       , '宇佐見 菫子', 'Sumireko', 'Sumireko Usami'),
+        ('Ushizaki Urumi'       , 'ushizaki_urumi'       , '牛崎 潤美', 'Urumi Ushizaki',),
+        ('Wakasagihime'         , 'wakasagihime'         , 'わかさぎ姫', ),
+        ('Watatsuki no Toyohime', 'watatsuki_no_toyohime', '綿月 豊姫', 'Toyohime',),
+        ('Watatsuki no Yorihime', 'watatsuki_no_yorihime', '綿月 依姫', 'Yorihime',),
+        ('Yagokoro Eirin'       , 'yagokoro_eirin'       , '八意 永琳', 'Eirin', 'Eirin Yagokoro'),
+        ('Yakumo Ran'           , 'yakumo_ran'           , '八雲 藍', 'Ran', 'Ran Yakumo'),
+        ('Yakumo Yukari'        , 'yakumo_yukari'        , '八雲 紫', 'Yukari', 'Yukari Yakumo'),
+        ('Yasaka Kanako'        , 'yasaka_kanako'        , '八坂 神奈子', 'Kanako', 'Kanako Yasaka'),
+        ('Yatadera Narumi'      , 'yatadera_narumi'      , '矢田寺 成美', 'Narumi', 'Narumi Yatadera'),
+        ('Yorigami Joon'        , 'yorigami_jo\'on'      , '依神 女苑', 'Joon', 'Joon Yorigami',),
+        ('Yorigami Shion'       , 'yorigami_shion'       , '依神 紫苑', 'Shion', 'Shion Yorigami'),
             ):
-    command_name = command_names[0]
-    if len(command_names) > 1:
-        aliases = command_names[1:]
-    else:
-        aliases = None
     
-    Koishi.commands(cached_booru_command(title, tag_name), name=command_name, aliases=aliases, category='TOUHOU')
+    TOUHOU_NAMES.append(name)
+    cache = CachedBooruCommand(name, tag_name)
+    TOUHOU_NAME_RELATIONS[name] = cache
+    TOUHOU_NAMES.extend(alternative_names)
+    for alternative_name in alternative_names:
+        TOUHOU_NAME_RELATIONS[alternative_name] = cache
+        
 
-del title, tag_name, command_names, command_name, aliases
-del Color, BUILTIN_EMOJIS, Cooldown, CooldownHandler, eventlist
+del name
+del tag_name
+del alternative_name
+del alternative_names
+del cache
+
+@Koishi.interactions(is_global=True)
+async def touhou(client, event,
+        name: ('str', 'Who\'s?'),
+            ):
+    """Shows you the given Touhou character's portrait."""
+    matcheds = get_close_matches(name, TOUHOU_NAMES, n=1, cutoff=0.80)
+    if matcheds:
+        async for response in TOUHOU_NAME_RELATIONS[matcheds[0]](client, event):
+            yield response
+    else:
+        embed = Embed('No match', color=BOORU_COLOR)
+        matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.60)
+        if matcheds:
+            field_value_parts = []
+            for index, matched in enumerate(matcheds, 1):
+                field_value_parts.append(str(index))
+                field_value_parts.append('.: **')
+                field_value_parts.append(matched)
+                field_value_parts.append('**')
+                name = TOUHOU_NAME_RELATIONS[matched].title
+                if matched != name:
+                    field_value_parts.append(' [')
+                    field_value_parts.append(name)
+                    field_value_parts.append(']')
+                
+                field_value_parts.append('\n')
+            
+            del field_value_parts[-1]
+            
+            embed.add_field('Close matches:', ''.join(field_value_parts))
+        yield embed
+
+
+@Koishi.interactions(is_global=True)
+async def safe_booru(client, event,
+        tags: ('str', 'Some tags to spice it up?') = '',
+            ):
+    """Some safe images?"""
+    guild = event.guild
+    if (guild is None) or guild.partial:
+        yield Embed('Ayaya', f'Please invite me, {client:f} first!', color=BOORU_COLOR)
+        return
+    
+    async for response in answer_booru(client, event, tags, SAFE_BOORU):
+        yield response
+
+
+@Koishi.interactions(is_global=True)
+async def nsfw_booru(client, event,
+        tags: ('str', 'Some tags to spice it up?') = '',
+            ):
+    """Some not so safe images? You perv!"""
+    guild = event.guild
+    if (guild is None) or guild.partial:
+        yield Embed('Ayaya', f'Please invite me, {client:f} first!', color=BOORU_COLOR)
+        return
+    
+    channel = event.channel
+    if not channel.nsfw:
+        if 'koishi' in tags.lower():
+            description = 'I love you too\~,\nbut this is not the right place to lewd.'
+        else:
+            description = 'Onii chaan\~,\nthis is not the right place to lewd.'
+        
+        yield Embed('Ayaya', description, color=BOORU_COLOR)
+        return
+    
+    async for response in  answer_booru(client, event, tags, SAFE_BOORU):
+        yield response
+
+

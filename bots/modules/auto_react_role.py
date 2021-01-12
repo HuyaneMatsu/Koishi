@@ -4,7 +4,7 @@ from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, Scarlet
     Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client
 from hata.ext.commands import ContentParser, checks, Converter, ChooseMenu, Pagination, ConverterFlag
 
-from bot_utils.command_utils import CHECK_ADMINISTRATIOR
+from bot_utils.command_utils import CHECK_ADMINISTRATION
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
 
 ROLE_CONVERTER = Converter('role', flags=ConverterFlag.role_default.update_by_keys(everywhere=True))
@@ -1339,7 +1339,7 @@ Koishi.commands(create_auto_react_role,
     description = auto_react_roles_description,
     checks = [
         checks.guild_only(),
-        CHECK_ADMINISTRATIOR,
+        CHECK_ADMINISTRATION,
             ]
         )
 
@@ -1388,6 +1388,6 @@ Koishi.commands(show_auto_react_roles,
     category = 'ADMINISTRATION',
     checks = [
         checks.guild_only(),
-        CHECK_ADMINISTRATIOR,
+        CHECK_ADMINISTRATION,
             ]
         )

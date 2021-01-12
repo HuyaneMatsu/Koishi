@@ -11,7 +11,7 @@ from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed,
     istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
     ReuAsyncIO, enter_executor, ApplicationCommand, InteractionResponseTypes, ApplicationCommandOption, \
-    ApplicationCommandOptionType
+    ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice
 
 from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer, \
     FlaggedAnnotation
@@ -1363,7 +1363,7 @@ async def test_application_command_response_twice(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(message.channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await client.message_create(message.channel, 'timeout occured')
+            await client.message_create(message.channel, 'timeout occurred')
             return
         
         # Send twice, ayaya
@@ -1396,7 +1396,7 @@ async def test_application_command_response_multiple_embeds(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(message.channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await client.message_create(message.channel, 'timeout occured')
+            await client.message_create(message.channel, 'timeout occurred')
             return
         
         await client.interaction_response_message_create(interaction, [Embed('cake'), Embed('Ayaya')])
@@ -1427,7 +1427,7 @@ async def test_application_command_followup_first(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(message.channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await client.message_create(message.channel, 'timeout occured')
+            await client.message_create(message.channel, 'timeout occurred')
             return
         
         # ops
@@ -1459,7 +1459,7 @@ async def test_application_command_followup(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(message.channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await client.message_create(message.channel, 'timeout occured')
+            await client.message_create(message.channel, 'timeout occurred')
             return
         
         await client.interaction_response_message_create(interaction, 'Ayaya')
@@ -1493,7 +1493,7 @@ async def test_application_command_followup_alt_name(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(message.channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await client.message_create(message.channel, 'timeout occured')
+            await client.message_create(message.channel, 'timeout occurred')
             return
         
         await client.interaction_response_message_create(interaction)
@@ -1519,7 +1519,7 @@ async def test_application_command_option_value_1(client, message):
     application_command_schema.add_option(ApplicationCommandOption(
         'user',
         'Dunno something',
-        ApplicationCommandOptionType.STRING,
+        ApplicationCommandOptionType.USER,
             ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
@@ -1532,10 +1532,257 @@ async def test_application_command_option_value_1(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(message.channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await client.message_create(message.channel, 'timeout occured')
+            await client.message_create(message.channel, 'timeout occurred')
             return
         
         await client.interaction_response_message_create(interaction,
             repr(interaction.interaction.options[0].value))
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def load_messages(client, message, channel:ChannelText):
+    start = perf_counter()
+    collected = 0
+    limit = 2000
+    
+    async for _ in await client.message_iterator(channel):
+        collected += 1
+        if collected == limit:
+            break
+    
+    delay = (perf_counter()-start)
+    
+    return f'Loaded: {collected} messages (limit={limit}); Took: {delay:.3f} seconds.'
+    
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_option_choice_type_1(client, message):
+    """
+    Tests int type application command choice value.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0005',
+        'ayaya',
+            )
+    
+    application_command_schema.add_option(ApplicationCommandOption(
+        'number',
+        'Dunno something',
+        ApplicationCommandOptionType.INTEGER,
+        choices = [ApplicationCommandOptionChoice('cake', '6'), ApplicationCommandOptionChoice('cookie', '8')]
+            ))
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0005`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occurred')
+            return
+        
+        await client.interaction_response_message_create(interaction,
+            repr(interaction.interaction.options[0].value))
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_option_choice_type_2(client, message):
+    """
+    Tests big-int type application command choice value.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0005',
+        'ayaya',
+            )
+    
+    application_command_schema.add_option(ApplicationCommandOption(
+        'number',
+        'Dunno something',
+        ApplicationCommandOptionType.INTEGER,
+        choices = [ApplicationCommandOptionChoice('cake', 798636232133181511), ApplicationCommandOptionChoice('cookie', 7986362321331815111545)]
+            ))
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0006`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occurred')
+            return
+        
+        await client.interaction_response_message_create(interaction,
+            repr(interaction.interaction.options[0].value))
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_option_choice_type_3(client, message):
+    """
+    Tests 33 bit big-int type application command choice value.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0006',
+        'ayaya',
+            )
+    
+    application_command_schema.add_option(ApplicationCommandOption(
+        'number',
+        'Dunno something',
+        ApplicationCommandOptionType.INTEGER,
+        choices = [ApplicationCommandOptionChoice('cake', 4294967296), ApplicationCommandOptionChoice('cookie', 4294967296)]
+            ))
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0007`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occurred')
+            return
+        
+        await client.interaction_response_message_create(interaction,
+            repr(interaction.interaction.options[0].value))
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_option_choice_type_4(client, message):
+    """
+    Tests 61 bit big-int type application command choice value.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0007',
+        'ayaya',
+            )
+    
+    application_command_schema.add_option(ApplicationCommandOption(
+        'number',
+        'Dunno something',
+        ApplicationCommandOptionType.INTEGER,
+        choices = [ApplicationCommandOptionChoice('cake', 1<<60), ApplicationCommandOptionChoice('cookie', (1<<60)+1556656)]
+            ))
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0007`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occurred')
+            return
+        
+        await client.interaction_response_message_create(interaction,
+            repr(interaction.interaction.options[0].value))
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_option_choice_type_5(client, message):
+    """
+    Tests 65 bit big-int type application command choice value.
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0008',
+        'ayaya',
+            )
+    
+    application_command_schema.add_option(ApplicationCommandOption(
+        'number',
+        'Dunno something',
+        ApplicationCommandOptionType.INTEGER,
+        choices = [ApplicationCommandOptionChoice('cake', 1<<64), ApplicationCommandOptionChoice('cookie', (1<<64)+4554656)]
+            ))
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0008`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occurred')
+            return
+        
+        await client.interaction_response_message_create(interaction,
+            repr(interaction.interaction.options[0].value))
+    finally:
+        await client.application_command_guild_delete(guild, application_command)
+
+@TEST_COMMANDS(checks=checks.guild_only())
+async def test_application_command_normal_edit(client, message):
+    """
+    Normally edits a sus message
+    """
+    guild = message.guild
+    if guild is None:
+        return
+    
+    application_command_schema = ApplicationCommand(
+        'test_command0009',
+        'ayaya',
+            )
+    
+    application_command = await client.application_command_guild_create(guild, application_command_schema)
+    
+    try:
+        await client.message_create(message.channel, 'Please use `/test_command0009`')
+        
+        # Wait
+        try:
+            interaction_event = await client.wait_for('interaction_create',
+                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await client.message_create(message.channel, 'timeout occurred')
+            return
+        
+        await client.interaction_response_message_create(interaction_event)
+        
+        message = await client.interaction_followup_message_create(interaction_event, 'test')
+        
+        await client.message_edit(message, 'uhum?')
+    
     finally:
         await client.application_command_guild_delete(guild, application_command)

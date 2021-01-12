@@ -3,9 +3,9 @@ import sys
 
 from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__
 from hata.ext.commands import checks, Closer
-from bots.koishi import KOISHI_HELP_COLOR, WORSHIPPER_ROLE, EVERYNYAN_ROLE, ANNOUNCEMNETS_ROLE, WELCOME_CHANNEL
+from bots.koishi import KOISHI_HELP_COLOR, WORSHIPPER_ROLE, EVERYNYAN_ROLE, WELCOME_CHANNEL
 
-from bot_utils.shared import KOISHI_GIT, HATA_GIT, DUNGEON_INVITE, DUNGEON, HATA_DOCS, TORTOISE_PASTE
+from bot_utils.shared import KOISHI_GIT, HATA_GIT, DUNGEON_INVITE, DUNGEON, HATA_DOCS, PASTE, ANNOUNCEMENTS_ROLE
 from bot_utils.command_utils import CLIENT_CONVERTER_ALL_CLIENT_DEFAULT
 
 Koishi: Client
@@ -57,7 +57,7 @@ async def aliases_description(client, message):
     return Embed('aliases',(
         'Do you wanna know one of my command\'s aliases?\n'
         f'Type `{prefix}aliases <name>` and check them out!\n\n'
-        'Or if you wanna know someone elses, who I might spy on, type her name after the command\'s :3.'
+        'Or if you wanna know someone else\'s, who I might spy on, type her name after the command\'s :3.'
             ), color=KOISHI_HELP_COLOR)
 
 
@@ -100,7 +100,7 @@ async def aliases(client, message, name:str, target_client: CLIENT_CONVERTER_ALL
     else:
         aliases = command.aliases
         if aliases is None:
-            title = f'There are no alises provided for command: {name!r}.'
+            title = f'There are no aliases provided for command: {name!r}.'
             description = None
         else:
             title = f'Aliases for: {command.display_name!r}:'
@@ -140,7 +140,7 @@ class rules:
                 f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
                 f'as well.*'
                 '\n\n'
-                f'Addtionally you can also claim (or unclaim) {ANNOUNCEMNETS_ROLE.mention} by typing `i meow` '
+                f'Additionally you can also claim (or un-claim) {ANNOUNCEMENTS_ROLE.mention} by typing `i meow` '
                 '(or `i not meow`), or if you are the member of the server for at least half year, you can claim the '
                 f'superior {WORSHIPPER_ROLE.mention} role by typing `nekogirl`!'
             ).add_field(
@@ -231,9 +231,9 @@ async def markdown(client, message):
         'This would give you:\n'
         '```python\n'
         'print(\'Hello world\')```\n'
-        'Note that character ` is not a quote but a backtick.\n'
+        'Note that character \` is not a quote but a backtick.\n'
         '\n'
-        f'If, however, you have large amounts of code then it\'s better to use [our paste service]({TORTOISE_PASTE}).',
+        f'If, however, you have large amounts of code then it\'s better to use [our paste service]({PASTE}).',
             color = KOISHI_HELP_COLOR)
     
     await Closer(client, message.channel, embed)
@@ -244,5 +244,5 @@ async def paste(client, message):
     """
     A link to our paste service.
     """
-    embed = Embed(description=f'[Paste link]({TORTOISE_PASTE})', color=KOISHI_HELP_COLOR)
+    embed = Embed(description=f'[Paste link]({PASTE})', color=KOISHI_HELP_COLOR)
     await client.message_create(message.channel, embed=embed)

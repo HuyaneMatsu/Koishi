@@ -11,7 +11,7 @@ from hata.ext.commands import checks, Pagination, FlaggedAnnotation, ConverterFl
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
 from bot_utils.shared import DUNGEON
-from bot_utils.command_utils import CHECK_ADMINISTRATIOR, SELF_CHECK_MOVE_USERS
+from bot_utils.command_utils import CHECK_ADMINISTRATION, SELF_CHECK_MOVE_USERS
 
 if not MARISA_MODE:
     from bots.flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
@@ -490,7 +490,7 @@ async def party_is_over_description(client,message):
 
 @main_client.commands(
     description = party_is_over_description,
-    checks = [CHECK_ADMINISTRATIOR, SELF_CHECK_MOVE_USERS],
+    checks = [CHECK_ADMINISTRATION, SELF_CHECK_MOVE_USERS],
     aliases = 'partyisover',
     category = 'VOICE',
         )

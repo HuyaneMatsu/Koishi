@@ -7,6 +7,7 @@ from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, A
 from hata.backend.utils import sortedlist
 from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction, wait_for_message
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
+from hata.ext.slash import setup_ext_slash
 
 from bot_utils.shared import FLAN_PREFIX, FLAN_HELP_COLOR, category_name_rule, KOISHI_PATH
 from bot_utils.tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
@@ -127,10 +128,12 @@ def get_auto_bgm_name(name):
     return ' '.join(parts)
 
 Flan: Client
+
 setup_ext_commands(Flan, FLAN_PREFIX,
     default_category_name='GENERAL COMMANDS',
     category_name_rule=category_name_rule,
         )
+setup_ext_slash(Flan, immediate_sync=True)
 
 Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
@@ -151,7 +154,7 @@ async def guild_user_add(client, guild, user):
         return
     
     await client.user_role_add(user, VISITORS_ROLE)
-    await client.message_create(channel,f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
+    await client.message_create(channel, f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
 @Flan.commands
 async def invalid_command(client, message, command, content):
@@ -1192,13 +1195,13 @@ async def set_bgm_name(client, message, content):
         response = await wait_for_message(client, message.channel, check_has_cards_role, 300.0)
     except TimeoutError:
         content = None
-        footer = 'Timeout occured.'
+        footer = 'Timeout occurred.'
     else:
         content = response.content
         if len(content) > 100:
             content = None
-            footer = \
-                '*Thats pretty long*. Thats what she said. Please give a display name with maximum of 100 characters.'
+            footer = '*That\'s pretty long*. That\'s what she said. Please give a display name with maximum of 100 ' \
+                     'characters.'
         else:
             footer = f'Are you sure to set the bgm\'s display name as: {content!r}?'
     
@@ -1256,7 +1259,7 @@ async def set_bgm_name(client, message, content):
                 raise
     
     if emoji_ is None:
-        footer = 'Timeout occured.'
+        footer = 'Timeout occurred.'
     elif emoji_ is SET_BGM_NAME_EMOJI_OK:
         BGM_NAMES[bgm.source_name] = content
         await write_bgm_names()

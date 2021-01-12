@@ -16,37 +16,39 @@ if DATABASE_NAME is None:
 else:
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer, BIGINT, LargeBinary, create_engine, DateTime, String
+    from sqlalchemy.sql.expression import func
     from hata.ext.kokoro_sqlalchemy import KOKORO_STRATEGY
     
     BASE = declarative_base()
     
     class ds_model(BASE):
-        __tablename__ = 'DS_TABLE'
-        id            = Column(BIGINT, primary_key=True)
-        user_id       = Column(BIGINT, unique = True)
-        position      = Column(Integer)
-        data          = Column(LargeBinary(800))
+        __tablename__   = 'DS_TABLE'
+        id              = Column(BIGINT, primary_key=True)
+        user_id         = Column(BIGINT, unique = True)
+        position        = Column(Integer)
+        data            = Column(LargeBinary(800))
     
     DS_TABLE = ds_model.__table__
     
     class currency_model(BASE):
-        __tablename__ = 'CURRENCY'
-        id            = Column(BIGINT, primary_key=True)
-        user_id       = Column(BIGINT, unique = True)
-        total_love    = Column(BIGINT)
-        daily_next    = Column(DateTime)
-        daily_streak  = Column(Integer)
+        __tablename__   = 'CURRENCY'
+        id              = Column(BIGINT, primary_key=True)
+        user_id         = Column(BIGINT, unique = True)
+        total_love      = Column(BIGINT, default=0)
+        total_allocated = Column(BIGINT, default=0)
+        daily_next      = Column(DateTime, default=func.utc_timestamp())
+        daily_streak    = Column(Integer, default=0)
     
     CURRENCY_TABLE = currency_model.__table__
     
     class auto_react_role_model(BASE):
-        __tablename__ = 'AUTO_REACT_ROLE'
-        id            = Column(BIGINT, primary_key=True)
-        message_id    = Column(BIGINT, unique = True)
-        channel_id    = Column(BIGINT)
-        data          = Column(LargeBinary(320))
-        behaviour     = Column(Integer)
-        client_id     = Column(BIGINT)
+        __tablename__   = 'AUTO_REACT_ROLE'
+        id              = Column(BIGINT, primary_key=True)
+        message_id      = Column(BIGINT, unique = True)
+        channel_id      = Column(BIGINT)
+        data            = Column(LargeBinary(320))
+        behaviour       = Column(Integer)
+        client_id       = Column(BIGINT)
     
     AUTO_REACT_ROLE_TABLE = auto_react_role_model.__table__
     

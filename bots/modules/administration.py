@@ -6,7 +6,7 @@ from hata.ext.prettyprint import pchunkify
 
 from bot_utils.command_utils import CHECK_MANAGE_MESSAGES, CHECK_OWNER_OR_CAN_INVITE, CHECK_BAN_USERS, \
     CHECK_OWNER_OR_GUILD_OWNER, CHECK_MANAGE_CHANNEL_AND_INVITES, CHECK_OWNER_ONLY, CHECK_VIEW_LOGS, \
-    USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, USER_CONVERTER_ALL_NONE_DEFAULT
+    USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, USER_CONVERTER_ALL_NONE_DEFAULT, CHECK_YEET_USERS
 
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
@@ -65,7 +65,7 @@ class invite_create:
             content = err.args[0]
         else:
             if invite_ is None:
-                content = 'I do not have enought permission to create invite from the guild\'s prefered channel.'
+                content = 'I do not have enough permission to create invite from the guild\'s prefered channel.'
             else:
                 content = f'Here is your invite, dear:\n\n{invite_.url}'
             
@@ -130,14 +130,14 @@ class bans:
             return
         
         embeds = []
-        maintext = f'Guild bans for {guild.name} {guild.id}:'
+        main_text = f'Guild bans for {guild.name} {guild.id}:'
         limit = len(ban_data)
         index = 0
     
         while True:
             field_count = 0
-            embed_length = len(maintext)
-            embed = Embed(title=maintext)
+            embed_length = len(main_text)
+            embed = Embed(title=main_text)
             embeds.append(embed)
             while True:
                 user, reason = ban_data[index]
@@ -197,7 +197,7 @@ class leave_guild:
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('leave_-uild', (
+        return Embed('leave-guild', (
             'You really want me to leave? :c\n'
             f'Usage: `{prefix}leave_guild`'
             ), color=ADMINISTRATION_COLOR).add_footer(
@@ -232,7 +232,7 @@ class reaction_clear:
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('reaction_clear', (
-            'Do you want me to remvoe all the reactions from a message?\n'
+            'Do you want me to remove all the reactions from a message?\n'
             f'Usage: `{prefix}reaction_clear *message_id*`'
                 ), color=ADMINISTRATION_COLOR).add_footer(
                 'Guild only! You must have manage messages permission to invoke this command.!')
@@ -347,7 +347,7 @@ class emoji_role:
             except DiscordException as err:
                 footer = repr(err)
             else:
-                footer = 'Emoji edited succesfully.'
+                footer = 'Emoji edited successfully.'
         
         elif emoji_ is ROLE_EMOJI_CANCEL:
             footer = 'Emoji edit cancelled'
@@ -369,7 +369,7 @@ class emoji_role:
             'Edits the emoji for which roles is available for.\n'
             f'Usage: `{prefix}emoji-role *emoji* <role_1> <role_2> ...`\n'
                 ), color=ADMINISTRATION_COLOR).add_footer(
-                'Guild only. You must have adminsitartor permission to execute this command')
+                'Guild only. You must have administration permission to execute this command')
 
 
 @Koishi.commands.from_class
@@ -456,7 +456,7 @@ class logs:
             'I can list you the audit logs of the guild.\n'
             f'Usage: `{prefix}logs <guild> <user> <event>`\n'
             'Both `user` and `event` is optional.\n'
-            '`user` is the user, who executed the logged oprations.\n'
+            '`user` is the user, who executed the logged operations.\n'
             'The `event` is the internal value or name of the type of the '
             'operation.'
                 ), color=ADMINISTRATION_COLOR).add_footer(
@@ -483,7 +483,7 @@ class telekinesisban:
                 banner = maybe_banner
                 break
         else:
-            await client.message_create(message.channel, 'No permisison to ban user in the guild.')
+            await client.message_create(message.channel, 'No permission to ban user in the guild.')
             return
         
         await banner.guild_ban_add(guild, user, reason=reason)
@@ -502,7 +502,7 @@ class telekinesisban:
                 'Owner only!')
 
 @Koishi.commands.from_class
-class ban:
+class yeet:
     async def command(client, message, user: USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, reason):
         
         guild = message.guild
@@ -510,7 +510,7 @@ class ban:
             return
         
         if user is None:
-            await client.message_create(message.channel, 'Please define the user to ban.')
+            await client.message_create(message.channel, 'Please define the user to yeet.')
             return
         
         if not reason:
@@ -522,20 +522,21 @@ class ban:
                 banner = maybe_banner
                 break
         else:
-            await client.message_create(message.channel, 'No permisison to ban user in the guild.')
+            await client.message_create(message.channel, 'No permission to yeet user in the guild.')
             return
         
         await banner.guild_ban_add(guild, user, reason=reason)
-        await client.message_create(message.channel, f'{user.full_name} banned Hecatia yeah!')
+        await client.message_create(message.channel, f'{user.full_name} yeeted Hecatia yeah!')
     
     category = 'ADMINISTRATION'
-    checks = CHECK_BAN_USERS
+    checks = CHECK_YEET_USERS
+    aliases = 'ban'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
-        return Embed('ban', (
+        return Embed('yeet', (
             'Bans the given user.\n'
-            f'Usage: `{prefix}ban *user* <reason>`\n'
+            f'Usage: `{prefix}yeet *user* <reason>`\n'
                 ), color=ADMINISTRATION_COLOR).add_footer(
-                'You must have ban users permission to use this command!')
+                'You must have yeet users permission to use this command!')
         

@@ -38,19 +38,21 @@ RUN_WEBAPP_AS_MAIN = True       # (bool) Whether web app should be started if ma
 WEBAPP_SECRET_KEY = None        # (str) Secret key for webapp.
 ```
 
-#### Hata requirements
-- [chardet](https://pypi.python.org/pypi/chardet)
-- [dateutil](https://pypi.org/project/python-dateutil/)
-
 #### Koishi requirements
+- [hata](https://pypi.org/project/hata/)
+- [lxml](https://pypi.org/project/lxml/)
 - [BeautifulSoup](https://pypi.org/project/beautifulsoup4/)
 - [SQLAlchemy](https://pypi.org/project/SQLAlchemy/)
 - [PIL](https://pypi.org/project/PIL/)
 
+#### Hata requirements
+- [chardet](https://pypi.python.org/pypi/chardet)
+- [dateutil](https://pypi.org/project/python-dateutil/)
+
 #### Voice requirements
 - `ffmpeg.exe`
 - [PyNaCl](https://pypi.org/project/PyNaCl/)
-- `youtube_dl`
+- [youtube_dl](https://pypi.org/project/youtube_dl/)
 
 #### Web requirements
 - [Flask](https://pypi.org/project/Flask/)
@@ -58,3 +60,4 @@ WEBAPP_SECRET_KEY = None        # (str) Secret key for webapp.
 #### More requirements
 - [psutil](https://pypi.org/project/psutil/)
 - [nsjail](https://github.com/google/nsjail)
+

@@ -3,7 +3,7 @@ import re
 from hata import Permission, ChannelText
 from hata.ext.commands import checks, Converter, ConverterFlag
 
-# CHECKHANDLERS
+# CHECK_HANDLERS
 
 async def PERMISSION_CHECK_HANDLER(client, message, command, check):
     permission_names = ' '.join(permission_name.replace('_', ' ') for permission_name in check.permissions)
@@ -15,7 +15,7 @@ async def SELF_PERMISSION_CHECK_HANDLER(client, message, command, check):
     text = f'I need to have {permission_names} permission to invoke `{command.display_name}` command, what I lack.'
     await client.message_create(message, text, allowed_mentions='!replied_user')
 
-async def GUILD_OWNER_CHECK_HANLDER(client, message, command, check):
+async def GUILD_OWNER_CHECK_HANDLER(client, message, command, check):
     text = f'You must be the owner of the guild to invoke `{command.display_name}` command.'
     await client.message_create(message, text, allowed_mentions='!replied_user')
 
@@ -30,6 +30,9 @@ async def NSFW_HANDLER(client, message, command, check):
         text = 'I love you too\~,\nbut this is not the right place to lewd.'
     await client.message_create(message, text, allowed_mentions='!replied_user')
 
+async def YEET_CHECK_HANDLER(client, message, command, check):
+    text = f'You must have yeet permission to invoke `{command.display_name}` command.'
+    await client.message_create(message, text, allowed_mentions='!replied_user')
 
 # CHECKS
 
@@ -50,7 +53,7 @@ CHECK_BAN_USERS = checks.has_guild_permissions(
         )
 
 CHECK_OWNER_OR_GUILD_OWNER = checks.owner_or_guild_owner(
-    handler=GUILD_OWNER_CHECK_HANLDER,
+    handler=GUILD_OWNER_CHECK_HANDLER,
         )
 
 CHECK_MANAGE_CHANNEL_AND_INVITES = checks.has_guild_permissions(
@@ -67,18 +70,23 @@ CHECK_VIEW_LOGS = checks.owner_or_has_guild_permissions(
     handler=PERMISSION_CHECK_HANDLER,
         )
 
-CHECK_ADMINISTRATIOR = checks.owner_or_has_guild_permissions(
+CHECK_ADMINISTRATION = checks.owner_or_has_guild_permissions(
     Permission().update_by_keys(administrator=True),
     handler=PERMISSION_CHECK_HANDLER,
         )
 
-CHECH_NSFW_CHANNEL = checks.nsfw_channel_only(
+CHECK_NSFW_CHANNEL = checks.nsfw_channel_only(
     handler=NSFW_HANDLER,
         )
 
 SELF_CHECK_MOVE_USERS = checks.client_has_guild_permissions(
     Permission().update_by_keys(move_users=True),
     handler=SELF_PERMISSION_CHECK_HANDLER,
+        )
+
+CHECK_YEET_USERS = checks.has_guild_permissions(
+    Permission().update_by_keys(ban_users=True),
+    handler=YEET_CHECK_HANDLER,
         )
 
 # CONVERTERS

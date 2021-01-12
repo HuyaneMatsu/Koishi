@@ -2,14 +2,18 @@
 from random import random, randint
 from itertools import cycle, chain
 
-from hata import DiscordException, sleep, Embed, Color, Task, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, \
+from hata import DiscordException, sleep, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, \
     Permission
-from hata.ext.commands import setup_ext_commands, Pagination, ChooseMenu, checks, Closer
+from hata.ext.commands import setup_ext_commands, checks, Closer
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
+from hata.ext.slash import setup_ext_slash
+
 from bot_utils.shared import SATORI_PREFIX, SATORI_HELP_COLOR
 
+Satori : Client
 
 setup_ext_commands(Satori, SATORI_PREFIX)
+setup_ext_slash(Satori, immediate_sync=True)
 
 Satori.commands(SubterraneanHelpCommand(SATORI_HELP_COLOR), 'help')
 

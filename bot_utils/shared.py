@@ -19,7 +19,7 @@ DUNGEON = Guild.precreate(388267636661682178)
 
 WELCOME_CHANNEL = ChannelText.precreate(445191707491958784)
 EVERYNYAN_ROLE = Role.precreate(445189164703678464)
-ANNOUNCEMNETS_ROLE = Role.precreate(538397994421190657)
+ANNOUNCEMENTS_ROLE = Role.precreate(538397994421190657)
 WORSHIPPER_ROLE = Role.precreate(403586901803794432)
 DUNGEON_PREMIUM_ROLE = Role.precreate(585556522558554113)
 DUNGEON_INVITE = Invite.precreate('3cH2r5d')
@@ -37,7 +37,7 @@ MARISA_HELP_COLOR = Color.from_html('#e547ed')
 KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
 HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
 HATA_DOCS = 'https://huyanematsu.pythonanywhere.com/docs/hata'
-TORTOISE_PASTE = "https://paste.tortoisecommunity.com/"
+PASTE = 'https://hastebin.com/'
 
 SYNC_CHANNEL = ChannelText.precreate(568837922288173058)
 
@@ -53,7 +53,7 @@ async def command_error(client, message, command, content, exception):
     with StringIO() as buffer:
         await KOKORO.render_exc_async(exception,[
             client.full_name,
-            ' ignores an occured exception at command ',
+            ' ignores an occurred exception at command ',
             repr(command),
             '\n\nMessage details:\nGuild: ',
             repr(message.guild),
@@ -88,15 +88,15 @@ async def command_error(client, message, command, content, exception):
         line = lines[index]
         index = index+1
         
-        line_lenth = len(line)
+        line_length = len(line)
         # long line check, should not happen
-        if line_lenth > 500:
+        if line_length > 500:
             line = line[:500]+'...\n'
-            line_lenth = 504
+            line_length = 504
         
-        if page_length+line_lenth > 1997:
+        if page_length+line_length > 1997:
             if index == limit:
-                # If we are at the last element, we dont need to shard up,
+                # If we are at the last element, we don\'t need to shard up,
                 # because the last element is always '```'
                 page_contents.append(line)
                 embed = Embed(description=''.join(page_contents))
@@ -112,11 +112,11 @@ async def command_error(client, message, command, content, exception):
             page_contents.append('```py\n')
             page_contents.append(line)
             
-            page_length = 6+line_lenth
+            page_length = 6+line_length
             continue
         
         page_contents.append(line)
-        page_length += line_lenth
+        page_length += line_length
         continue
     
     limit = len(pages)

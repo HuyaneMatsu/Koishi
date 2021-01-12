@@ -147,10 +147,11 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                     received = calculate_daily_for(source_user, daily_streak)
                     total_love = source_result.total_love+received
                     
+                    daily_streak += 1
                     await connector.execute(CURRENCY_TABLE.update().values(
                         total_love  = total_love,
                         daily_next  = now+DAILY_INTERVAL,
-                        daily_streak= daily_streak+1,
+                        daily_streak= daily_streak,
                             ).where(currency_model.user_id==source_user.id))
                     
                     embed = Embed(
@@ -161,10 +162,12 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                     break
                 
                 await connector.execute(CURRENCY_TABLE.insert().values(
-                    user_id     = source_user.id,
-                    total_love  = DAILY_REWARD,
-                    daily_next  = now+DAILY_INTERVAL,
-                    daily_streak= 1,))
+                    user_id         = source_user.id,
+                    total_love      = DAILY_REWARD,
+                    daily_next      = now+DAILY_INTERVAL,
+                    daily_streak    = 1,
+                    total_allocated = 0,
+                        ))
                 
                 embed = Embed(
                     'Here, some love for you~\nCome back tomorrow !',
@@ -195,13 +198,15 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
             now=datetime.utcnow()
             if source_result is None:
                 daily_streak = 0
-                streak_text='I am happy you joined the sect too.'
+                streak_text = 'I am happy you joined the sect too.'
 
                 await connector.execute(CURRENCY_TABLE.insert().values(
-                    user_id     = source_user.id,
-                    total_love  = 0,
-                    daily_next  = now+DAILY_INTERVAL,
-                    daily_streak= 1,))
+                    user_id         = source_user.id,
+                    total_love      = 0,
+                    daily_next      = now+DAILY_INTERVAL,
+                    daily_streak    = 1,
+                    total_allocated = 0,
+                        ))
             else:
                 daily_next=source_result.daily_next
                 if daily_next > now:
@@ -217,21 +222,25 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                     if daily_streak < 0:
                         daily_streak = 0
                     streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
+                    daily_streak += 1
                 else:
+                    daily_streak += 1
                     streak_text = f'You are in a {daily_streak} day streak! Keep up the good work!'
                 
                 await connector.execute(CURRENCY_TABLE.update().values(
                     daily_next  = now+DAILY_INTERVAL,
-                    daily_streak= daily_streak+1,
+                    daily_streak= daily_streak,
                         ).where(currency_model.user_id==source_user.id))
             
             received = calculate_daily_for(source_user, daily_streak)
             if target_result is None:
                 await connector.execute(CURRENCY_TABLE.insert().values(
-                    user_id     = target_user.id,
-                    total_love  = received,
-                    daily_next  = now,
-                    daily_streak= 0,))
+                    user_id         = target_user.id,
+                    total_love      = received,
+                    daily_next      = now,
+                    daily_streak    = 0,
+                    total_allocated = 0,
+                        ))
                 
                 total_love = received
             else:
@@ -545,7 +554,7 @@ class heartevent(object):
             return
 
         if new_ln == self.user_limit:
-            self.duration=timedelta()
+            self.duration = timedelta()
             self.waiter.set_result(None)
         
         connector = self.connector
@@ -558,11 +567,13 @@ class heartevent(object):
                 total_love  = result.total_love+self.amount,
                     ).where(currency_model.user_id==user_id)
         else:
-            to_execute=CURRENCY_TABLE.insert().values(
-                user_id     = user_id,
-                total_love  = self.amount,
-                daily_next  = datetime.utcnow(),
-                daily_streak= 0,)
+            to_execute = CURRENCY_TABLE.insert().values(
+                user_id         = user_id,
+                total_love      = self.amount,
+                daily_next      = datetime.utcnow(),
+                daily_streak    = 0,
+                total_allocated = 0,
+                    )
         await connector.execute(to_execute)
 
     async def countdown(self, client, message):
@@ -849,17 +860,19 @@ class dailyevent(object):
                 else:
                     daily_streak = daily_streak+self.amount
 
-                to_execute=CURRENCY_TABLE.update().values(
+                to_execute = CURRENCY_TABLE.update().values(
                     daily_streak= daily_streak,
                     daily_next  = now,
                         ).where(currency_model.user_id==user_id)
 
         else:
-            to_execute=CURRENCY_TABLE.insert().values(
-                user_id     = user_id,
-                total_love  = 0,
-                daily_next  = datetime.utcnow(),
-                daily_streak= self.amount,)
+            to_execute = CURRENCY_TABLE.insert().values(
+                user_id         = user_id,
+                total_love      = 0,
+                daily_next      = datetime.utcnow(),
+                daily_streak    = self.amount,
+                total_allocated = 0,
+                    )
         await connector.execute(to_execute)
     
     async def countdown(self, client, message):
@@ -939,11 +952,11 @@ async def game21_description(client, message):
     return Embed('21',(
         'Starts a 21 game at the channel.\n'
         f'Usage: `{prefix}21 *amount*`\n'
-        'Your chalange is to collect cards with weight up to 21. Each card with number 2-10 has the same weight as '
+        'Your challenge is to collect cards with weight up to 21. Each card with number 2-10 has the same weight as '
         'their number says, meanwhile J, Q and K has fix weight of 10. Ace has weight of 11, but if You would pass '
         '21, it loses 9 of it.\n'
         'At this game you are fighting me, so if we boss lose, it is a draw.\n'
-        'You start with 2 cards initially drawed and at every round, you have option to draw a new card, or to stop.'
+        'You start with 2 cards initially drawn and at every round, you have option to draw a new card, or to stop.'
             ), color=GAMBLING_COLOR)
 
 
@@ -976,44 +989,45 @@ class Game21(object):
         
         while True:
             if user.id in IN_GAME_IDS:
-                error_msg = f'You are already at a game.'
+                error_message = f'You are already at a game.'
                 break
             
             if amount < BET_MIN:
-                error_msg = f'You must bet at least {BET_MIN} {CURRENCY_EMOJI.as_emoji}'
+                error_message = f'You must bet at least {BET_MIN} {CURRENCY_EMOJI.as_emoji}'
                 break
-        
+            
             if not channel.cached_permissions_for(client).can_add_reactions:
-                error_msg = 'I cannot start this command here, not enough permissions provided.'
+                error_message = 'I cannot start this command here, not enough permissions provided.'
                 break
+            
             
             async with DB_ENGINE.connect() as connector:
                 response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user.id))
                 results = await response.fetchall()
                 if results:
-                    total_love = results[0].total_love
+                    result = results[0]
+                    total_love = result.total_love
 
                     if total_love < amount:
-                        error_msg=f'You have just {total_love} {CURRENCY_EMOJI.as_emoji}'
+                        error_message = f'You have just {total_love} {CURRENCY_EMOJI.as_emoji}'
                         break
                     
-                    await connector.execute(CURRENCY_TABLE.update().values(
-                        total_love  = total_love-amount,
-                            ).where(currency_model.user_id==user.id))
+                    total_allocated = result.total_allocated
+                    
+                    if total_allocated+amount < 0:
+                        error_message = f'You are trying gamble more than you have.'
+                        break
                 
                 else:
-                    error_msg=f'You have 0 {CURRENCY_EMOJI.as_emoji}'
+                    error_message = f'You have 0 {CURRENCY_EMOJI.as_emoji}'
                     break
             
-            error_msg = None
+            error_message = None
             break
         
-        if (error_msg is not None):
-            await client.message_create(channel,
-                embed=Embed(error_msg, color=GAMBLING_COLOR))
+        if (error_message is not None):
+            await client.message_create(channel, embed=Embed(error_message, color=GAMBLING_COLOR))
             return None
-        
-        IN_GAME_IDS.add(user.id)
         
         all_pulled = []
         
@@ -1067,15 +1081,46 @@ class Game21(object):
             
             user_total += card_weight
             
-            if user_total > 10:
+            if user_total > 10 and len(user_hand) >= 2:
                 break
+        
+        if user_total == 21:
+            embed = await cls._game_ended(user, client, user_total, client_total, user_hand, client_hand,
+                source_message.guild, amount, False)
+            
+            try:
+                await client.message_create(channel, embed=embed)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    return None
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_channel, # message's channel deleted
+                            ERROR_CODES.invalid_access, # client removed
+                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ):
+                     return None
+                
+                raise
+            
+            return None
+        
+        IN_GAME_IDS.add(user.id)
+        
+        async with DB_ENGINE.connect() as connector:
+            await connector.execute(CURRENCY_TABLE. \
+                update(currency_model.user_id == user.id). \
+                values(
+                     total_allocated = currency_model.total_allocated+amount,
+                        ))
         
         embed = Embed(f'How to gamble {amount} {CURRENCY_EMOJI.as_emoji}',
             f'You have cards equal to {user_total} weight at your hand',
             color=GAMBLING_COLOR)
         
-        for round_,card in enumerate(user_hand, 1):
-            type_index, number_index = divmod(card,len(CARD_NUMBERS))
+        for round_, card in enumerate(user_hand, 1):
+            type_index, number_index = divmod(card, len(CARD_NUMBERS))
             embed.add_field(f'Round {round_}',
                 f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
         
@@ -1085,26 +1130,15 @@ class Game21(object):
                 await client.reaction_add(message, emoji)
         
         except BaseException as err:
-            # If exception occures right here we need to remove the game from
-            # games and revert the heart amount
+            # If exception occurs right here we need to remove the game from games and revert the heart amount
             IN_GAME_IDS.remove(user.id)
-
+            
             async with DB_ENGINE.connect() as connector:
-                response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user.id))
-                results = await response.fetchall()
-                if results:
-                    total_love = results[0].total_love
-                    to_execute = CURRENCY_TABLE.update().values(
-                        total_love  = total_love,
-                            ).where(currency_model.user_id==user.id)
-                else:
-                    to_execute = CURRENCY_TABLE.insert().values(
-                        user_id     = user.id,
-                        total_love  = amount,
-                        daily_next  = datetime.utcnow(),
-                        daily_streak= 0,)
-                
-                await connector.execute(to_execute)
+                await connector.execute(CURRENCY_TABLE. \
+                    update(currency_model.user_id == user.id). \
+                    values(
+                         total_allocated = currency_model.total_allocated-amount,
+                            ))
             
             if isinstance(err, ConnectionError):
                 return None
@@ -1139,6 +1173,88 @@ class Game21(object):
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
         return self
+    
+    @staticmethod
+    async def _game_ended(user, client, user_total, client_total, user_hand, client_hand, guild, amount, unallocate):
+        if client_total > 21:
+            if user_total > 21:
+                winner = None
+            else:
+                winner = user
+        else:
+            if user_total > 21:
+                winner = client
+            else:
+                if client_total > user_total:
+                    winner = client
+                elif client_total < user_total:
+                    winner = user
+                else:
+                    winner = None
+        
+        if winner is client:
+            bonus = -amount
+        elif winner is None:
+            bonus = 0
+        else:
+            bonus = amount
+        
+        async with DB_ENGINE.connect() as connector:
+            if unallocate:
+                to_execute = CURRENCY_TABLE. \
+                    update(currency_model.user_id == user.id). \
+                    values(
+                        total_allocated = currency_model.total_allocated-amount,
+                        total_love = currency_model.total_love+bonus,
+                            )
+            else:
+                to_execute = CURRENCY_TABLE. \
+                    update(currency_model.user_id == user.id). \
+                    values(
+                        total_love = currency_model.total_love+bonus,
+                            )
+            
+            await connector.execute(to_execute)
+        
+        if winner is None:
+            title = f'How to draw.'
+        elif winner is client:
+            title = f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}'
+        else:
+            title = f'How to win {amount} {CURRENCY_EMOJI.as_emoji}'
+        
+        embed = Embed(title, color=GAMBLING_COLOR)
+        
+        field_content = []
+        
+        for round_, card in enumerate(user_hand, 1):
+            type_index, number_index = divmod(card, len(CARD_NUMBERS))
+            field_content.append('Round ')
+            field_content.append(str(round_))
+            field_content.append(': ')
+            field_content.append(CARD_TYPES[type_index])
+            field_content.append(' ')
+            field_content.append(CARD_NUMBERS[number_index])
+            field_content.append('\n')
+        
+        embed.add_field(f'{user.name_at(guild)}\'s cards\' weight: {user_total}',
+            ''.join(field_content))
+        field_content.clear()
+        
+        for round_, card in enumerate(client_hand, 1):
+            type_index, number_index = divmod(card, len(CARD_NUMBERS))
+            field_content.append('Round ')
+            field_content.append(str(round_))
+            field_content.append(': ')
+            field_content.append(CARD_TYPES[type_index])
+            field_content.append(' ')
+            field_content.append(CARD_NUMBERS[number_index])
+            field_content.append('\n')
+        
+        embed.add_field(f'{client.name_at(guild)}\'s cards\' weight: {client_total}',
+            ''.join(field_content))
+        
+        return embed
     
     async def __call__(self, client, event):
         if (event.user != self.user) or (event.emoji not in self.EMOJIS):
@@ -1183,7 +1299,7 @@ class Game21(object):
             self.user_total = user_total
             self.user_ace = user_ace
             
-            game_ended = (user_total>21)
+            game_ended = (user_total>=21)
             
         elif emoji is self.STOP:
             game_ended = True
@@ -1199,85 +1315,8 @@ class Game21(object):
             user_total = self.user_total
             client_total = self.client_total
             
-            if client_total > 21:
-                if user_total > 21:
-                    winner = None
-                else:
-                    winner = self.user
-            else:
-                if user_total > 21:
-                    winner = client
-                else:
-                    if client_total > user_total:
-                        winner = client
-                    elif client_total < user_total:
-                        winner = self.user
-                    else:
-                        winner = None
-            
-            if (winner is not client):
-                if winner is None:
-                    bonus = self.amount
-                else:
-                    bonus = self.amount*2
-                    
-                async with DB_ENGINE.connect() as connector:
-                    response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==self.user.id))
-                    results = await response.fetchall()
-
-                    if results:
-                        total_love = results[0].total_love
-                        
-                        to_execute=CURRENCY_TABLE.update().values(
-                            total_love  = total_love+bonus,
-                                ).where(currency_model.user_id==self.user.id)
-                    else:
-                        to_execute=CURRENCY_TABLE.insert().values(
-                            user_id     = self.user.id,
-                            total_love  = bonus,
-                            daily_next  = datetime.utcnow(),
-                            daily_streak= 0,)
-                    
-                    await connector.execute(to_execute)
-                
-            if winner is None:
-                title = f'How to draw.'
-            elif winner is client:
-                title = f'How to lose {self.amount} {CURRENCY_EMOJI.as_emoji}'
-            else:
-                title = f'How to win {self.amount} {CURRENCY_EMOJI.as_emoji}'
-            
-            embed=Embed(title,color=GAMBLING_COLOR)
-            
-            field_content=[]
-            
-            for round_, card in enumerate(self.user_hand, 1):
-                type_index, number_index = divmod(card, len(CARD_NUMBERS))
-                field_content.append('Round ')
-                field_content.append(str(round_))
-                field_content.append(': ')
-                field_content.append(CARD_TYPES[type_index])
-                field_content.append(' ')
-                field_content.append(CARD_NUMBERS[number_index])
-                field_content.append('\n')
-            
-            embed.add_field(f'{self.user.name_at(self.message.guild)}\'s cards\' weight: {user_total}',
-                ''.join(field_content))
-            field_content.clear()
-            
-            for round_, card in enumerate(self.client_hand, 1):
-                type_index, number_index = divmod(card, len(CARD_NUMBERS))
-                field_content.append('Round ')
-                field_content.append(str(round_))
-                field_content.append(': ')
-                field_content.append(CARD_TYPES[type_index])
-                field_content.append(' ')
-                field_content.append(CARD_NUMBERS[number_index])
-                field_content.append('\n')
-            
-            embed.add_field(f'{client.name_at(self.message.guild)}\'s cards\' weight: {client_total}',
-                ''.join(field_content))
-            field_content = None
+            embed = await self._game_ended(self.user, client, user_total, client_total, self.user_hand,
+                self.client_hand, self.message.guild, self.amount, True)
             
             try:
                 await client.message_edit(self.message, embed=embed)
@@ -1294,8 +1333,8 @@ class Game21(object):
                                 ):
                         return
                 
-                # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
-                await client.events.error(client,f'{self!r}.__call__',err)
+                # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
+                await client.events.error(client, f'{self!r}.__call__', err)
                 return
                 
         else:
@@ -1327,13 +1366,13 @@ class Game21(object):
                                 ):
                         return
                 
-                # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+                # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
                 await client.events.error(client, f'{self!r}.__call__', err)
                 return
             
             self.task_flag = GUI_STATE_READY
             self.timeouter.set_timeout(300.0)
-        
+    
     async def _canceller(self, exception,):
         IN_GAME_IDS.remove(self.user.id)
         
@@ -1360,7 +1399,16 @@ class Game21(object):
         if isinstance(exception, TimeoutError):
             IN_GAME_IDS.remove(self.user.id)
             
-            embed = Embed(f'Timeout occured, you lost your {self.amount} {CURRENCY_EMOJI.as_emoji} forever.')
+            async with DB_ENGINE.connect() as connector:
+                amount = self.amount
+                await connector.execute(CURRENCY_TABLE. \
+                    update(currency_model.user_id == self.user.id). \
+                    values(
+                        total_allocated = currency_model.total_allocated-amount,
+                        total_love = currency_model.total_love-amount,
+                            ))
+            
+            embed = Embed(f'Timeout occurred, you lost your {self.amount} {CURRENCY_EMOJI.as_emoji} forever.')
             
             try:
                 await client.message_edit(message, embed=embed)
@@ -1377,7 +1425,7 @@ class Game21(object):
                                 ):
                         return
                 
-                # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+                # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
                 await client.events.error(client, f'{self!r}._canceller', err)
                 return
             
@@ -1393,7 +1441,7 @@ class Game21(object):
         if canceller is None:
             return
         
-        self.canceller=None
+        self.canceller = None
         
         timeouter = self.timeouter
         if (timeouter is not None):
@@ -1404,7 +1452,7 @@ class Game21(object):
 
 async def gift_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('gift',(
+    return Embed('gift', (
         'Gifts hearts to your heart\'s chosen one.\n'
         f'Usage: `{prefix}gift *user* *amount*`\n'
         ), color=GAMBLING_COLOR).add_footer(
@@ -1417,27 +1465,40 @@ async def gift_description(client, message):
 async def gift(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
     source_user = message.author
     while True:
-        if source_user == target_user:
+        if source_user is target_user:
             embed = Embed('BAKA !!','You cannot give love to yourself..', GAMBLING_COLOR)
             break
     
         if amount <= 0:
-            embed = Embed('BAKA !!','You cannot gift non-positive amount of hreats..', GAMBLING_COLOR)
+            embed = Embed('BAKA !!','You cannot gift non-positive amount of hearts..', GAMBLING_COLOR)
             break
             
         async with DB_ENGINE.connect() as connector:
-            response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==source_user.id))
+            response = await connector.execute(
+                select([currency_model.total_love, currency_model.total_allocated]). \
+                where(currency_model.user_id==source_user.id)
+                    )
+            
             results = await response.fetchall()
             if results:
-                source_user_total_love = results[0][0]
+                source_user_total_love, source_user_total_allocated = results[0]
             else:
                 source_user_total_love = 0
+                source_user_total_allocated = 0
             
             if source_user_total_love == 0:
-                embed = Embed('So lonely...', 'You do not have any hreats to gift.', GAMBLING_COLOR)
+                embed = Embed('So lonely...', 'You do not have any hearts to gift.', GAMBLING_COLOR)
                 break
             
-            response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==target_user.id))
+            if source_user_total_love == source_user_total_allocated:
+                embed = Embed('Like a flower', 'Whithering to the dust.', GAMBLING_COLOR)
+                break
+            
+            response = await connector.execute(
+                select([currency_model.total_love]). \
+                where(currency_model.user_id==target_user.id)
+                    )
+            
             results = await response.fetchall()
             if results:
                 target_user_exists = True
@@ -1446,29 +1507,34 @@ async def gift(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:i
                 target_user_exists = False
                 target_user_total_love = 0
             
+            source_user_total_love -= source_user_total_allocated
+            
             if amount > source_user_total_love:
-                amount = source_user_total_love
-                source_user_new_love = 0
+                amount = source_user_total_love-source_user_total_allocated
+                source_user_new_love = source_user_total_allocated
             else:
                 source_user_new_love = source_user_total_love-amount
             
             target_user_new_love = target_user_total_love + amount
             
-            await connector.execute(CURRENCY_TABLE.update().values(
-                    total_love  = source_user_new_love,
-                    ).where(currency_model.user_id==source_user.id)
-                )
+            await connector.execute(CURRENCY_TABLE. \
+                update(currency_model.user_id==source_user.id). \
+                values(total_love = currency_model.total_love-amount)
+                    )
             
             if target_user_exists:
-                to_execute = CURRENCY_TABLE.update().values(
-                    total_love  = target_user_new_love,
-                    ).where(currency_model.user_id==target_user.id)
+                to_execute = CURRENCY_TABLE. \
+                    update(currency_model.user_id==target_user.id). \
+                    values(total_love = currency_model.total_love+amount)
+            
             else:
                 to_execute = CURRENCY_TABLE.insert().values(
-                    user_id     = target_user.id,
-                    total_love  = target_user_new_love,
-                    daily_next  = datetime.utcnow(),
-                    daily_streak= 0,)
+                    user_id         = target_user.id,
+                    total_love      = target_user_new_love,
+                    daily_next      = datetime.utcnow(),
+                    daily_streak    = 0,
+                    total_allocated = 0,
+                        )
             
             await connector.execute(to_execute)
             
@@ -1488,7 +1554,7 @@ async def gift(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:i
 
 async def award_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('award',(
+    return Embed('award', (
         'Awards someone with the given amount of hearts.\n'
         f'Usage: `{prefix}award *user* *amount*`'
         ), color=GAMBLING_COLOR).add_footer(
@@ -1501,7 +1567,7 @@ async def parser_failure_handler(client, message, command, content, args):
 @Koishi.commands(
     description = gift_description,
     category = 'GAMBLING',
-    checks = [checks.owner_only()],
+    checks = checks.owner_only(),
     parser_failure_handler = parser_failure_handler,
         )
 async def award(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
@@ -1525,13 +1591,15 @@ async def award(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:
         if target_user_exists:
             to_execute = CURRENCY_TABLE.update().values(
                 total_love  = target_user_new_love,
-                ).where(currency_model.user_id==target_user.id)
+                ).where(currency_model.user_id == target_user.id)
         else:
             to_execute = CURRENCY_TABLE.insert().values(
-                user_id     = target_user.id,
-                total_love  = target_user_new_love,
-                daily_next  = datetime.utcnow(),
-                daily_streak= 0,)
+                user_id         = target_user.id,
+                total_love      = target_user_new_love,
+                daily_next      = datetime.utcnow(),
+                daily_streak    = 0,
+                total_allocated = 0,
+                    )
         
         await connector.execute(to_execute)
     
@@ -1553,7 +1621,7 @@ async def take_description(client, message):
 @Koishi.commands(
     description = take_description,
     category = 'GAMBLING',
-    checks = [checks.owner_only()],
+    checks = checks.owner_only(),
     parser_failure_handler = parser_failure_handler,
         )
 async def take(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
@@ -1582,7 +1650,7 @@ async def take(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:i
             target_user_new_love = 0
     
     embed = Embed(f'You took {amount} {CURRENCY_EMOJI.as_emoji} away from {target_user.full_name}',
-        f'Theiy got down from {target_user_total_love} to {target_user_new_love} {CURRENCY_EMOJI.as_emoji}',
+        f'They got down from {target_user_total_love} to {target_user_new_love} {CURRENCY_EMOJI.as_emoji}',
         color=GAMBLING_COLOR)
     
     await client.message_create(message.channel, embed=embed)
@@ -1684,9 +1752,11 @@ async def heart_generator(client, message):
                 ).where(currency_model.user_id==user_id)
         else:
             to_execute = CURRENCY_TABLE.insert().values(
-                user_id     = user_id,
-                total_love  = target_user_new_love,
-                daily_next  = datetime.utcnow(),
-                daily_streak= 0,)
+                user_id         = user_id,
+                total_love      = target_user_new_love,
+                daily_next      = datetime.utcnow(),
+                daily_streak    = 0,
+                total_allocated = 0,
+                    )
         
         await connector.execute(to_execute)
