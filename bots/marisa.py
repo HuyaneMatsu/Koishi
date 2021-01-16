@@ -5,13 +5,15 @@ from time import perf_counter
 
 from bs4 import BeautifulSoup
 
-from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO
+from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
+    alchemy_incendiary
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
+from hata.backend.futures import render_exc_to_list
 
 from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, MARISA_PREFIX, MARISA_HELP_COLOR, \
-    command_error, DUNGEON
+    command_error, DUNGEON, DEFAULT_TEST_CHANNEL
 from bot_utils.syncer import sync_request_comamnd
 from bot_utils.interpreter import Interpreter
 from bot_utils.tools import choose
@@ -60,83 +62,27 @@ Marisa.commands(Interpreter(locals().copy()), name='execute', description=execut
 
 Marisa.commands(sync_request_comamnd, name='sync', category='UTILITY', checks=[checks.owner_only()])
 
-
-@Marisa.interactions(guild=DUNGEON)
-async def avatar(client, event,
-        user : ('user', 'Choose a user!') = None,
-            ):
-    """Shows your or the chosen user's avatar."""
-    if user is None:
-        user = event.user
+@Marisa.events(overwrite=True)
+async def error(client, name, err):
+    extracted = [
+        client.full_name,
+        ' ignores occurred exception at ',
+        name,
+        '\n',
+            ]
     
-    if user.avatar:
-        color = user.avatar_hash&0xffffff
+    if isinstance(err, BaseException):
+        await KOKORO.run_in_executor(alchemy_incendiary(render_exc_to_list, (err, extracted)))
     else:
-        color = user.default_avatar.color
+        if not isinstance(err, str):
+            err = repr(err)
+        
+        extracted.append(err)
+        extracted.append('\n')
     
-    url = user.avatar_url_as(size=4096)
-    return Embed(f'{user:f}\'s avatar', color=color, url=url).add_image(url)
-
-@Marisa.interactions(guild=DUNGEON)
-async def guild_icon(client, event,
-        choice: ({
-            'Icon'             : 'icon'             ,
-            'Banner'           : 'banner'           ,
-            'Discovery-splash' : 'discovery_splash' ,
-            'Invite-splash'    : 'invite_splash'    ,
-                }, 'Which icon of the guild?' ) = 'icon',
-            ):
-    """Shows the guild's icon."""
-    guild = event.guild
-    if (guild is None) or guild.partial:
-        return Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
-    
-    if choice == 'icon':
-        name = 'icon'
-        url = guild.icon_url_as(size=4096)
-        hash_value = guild.icon_hash
-    elif choice == 'banner':
-        name = 'banner'
-        url = guild.banner_url_as(size=4096)
-        hash_value = guild.banner_hash
-    elif choice == 'discovery_splash':
-        name = 'discovery splash'
-        url = guild.discovery_splash_url_as(size=4096)
-        hash_value = guild.discovery_splash_hash
-    else:
-        name = 'invite splash'
-        url = guild.invite_splash_url_as(size=4096)
-        hash_value = guild.invite_splash_hash
-    
-    if url is None:
-        color = (event.id>>22)&0xFFFFFF
-        return Embed(f'{guild.name} has no {name}', color=color)
-    
-    color = hash_value&0xFFFFFF
-    return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
-
-@Marisa.interactions(guild=DUNGEON)
-async def showemoji(client, event,
-        emoji : ('str', 'Yes?'),
-            ):
-    """Shows the given emoji."""
-    emoji = parse_emoji(emoji)
-    if emoji is None:
-        return 'That\'s not an emoji.'
-    
-    if emoji.is_unicode_emoji():
-        return 'That\' an unicode emoji, cannot link it.'
-    
-    return f'**Name:** {emoji:e} **Link:** {emoji.url}'
-
-
-@Marisa.interactions(guild=DUNGEON, name='id-to-time')
-async def idtotime(client, event,
-        snowflake : ('int', 'Id please!'),
-            ):
-    """Converts the given Discord snowflake id to time."""
-    time = id_to_time(snowflake)
-    return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
+    extracted = ''.join(extracted).split('\n')
+    for chunk in cchunkify(extracted, lang='py'):
+        await client.message_create(DEFAULT_TEST_CHANNEL, chunk)
 
 
 @Marisa.interactions(guild=DUNGEON, show_source=False)
@@ -231,14 +177,6 @@ async def enable_ping(client, event,
             content = 'The command is not present.'
     
     return Embed('Success', content)
-
-
-@Marisa.interactions(guild=DUNGEON)
-async def roll(client, event,
-        dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
-            ):
-    """Rolls with dices."""
-    return str(round((1.+(random()*5.))*dice_count))
 
 # You might wanna add `-tag`-s to surely avoid nsfw pictures
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='

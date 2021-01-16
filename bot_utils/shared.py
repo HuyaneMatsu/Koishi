@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 from io import StringIO
-from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory
+from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory, Emoji
 from hata.ext.commands import Pagination
 
 import config
@@ -26,8 +26,11 @@ DUNGEON_INVITE = Invite.precreate('3cH2r5d')
 BOT_CHANNEL_CATEGORY = ChannelCategory.precreate(445191611727478795)
 STAFF_ROLE = Role.precreate(726171592509358093)
 TESTER_ROLE = Role.precreate(648138238250319876)
-
+EVENT_LOLI_ROLE = Role.precreate(798913709019103284)
+EVENT_CHANNEL = ChannelText.precreate(798911148292309002)
+CURRENCY_EMOJI = Emoji.precreate(603533301516599296, name='youkai_kokoro')
 DEFAULT_CATEGORY_NAME = 'Uncategorized'
+DEFAULT_TEST_CHANNEL = ChannelText.precreate(557187647831932938)
 
 SATORI_HELP_COLOR = Color.from_rgb(118, 0, 161)
 KOISHI_HELP_COLOR = Color.from_html('#ffd21e')

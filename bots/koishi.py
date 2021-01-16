@@ -3,15 +3,17 @@ import re, signal
 from datetime import datetime, timedelta
 from threading import main_thread
 
-from hata import BUILTIN_EMOJIS, Embed, sleep, CLIENTS,  Client, KOKORO
+from hata import BUILTIN_EMOJIS, Embed, sleep, CLIENTS,  Client, KOKORO, cchunkify, alchemy_incendiary
 from hata.ext.commands import checks, setup_ext_commands
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
+from hata.backend.futures import render_exc_to_list
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
 from bot_utils.shared import KOISHI_PREFIX, category_name_rule, DEFAULT_CATEGORY_NAME, WELCOME_CHANNEL, DUNGEON, \
-    ANNOUNCEMENTS_ROLE, WORSHIPPER_ROLE, KOISHI_HELP_COLOR, SYNC_CHANNEL, command_error, EVERYNYAN_ROLE
+    ANNOUNCEMENTS_ROLE, WORSHIPPER_ROLE, KOISHI_HELP_COLOR, SYNC_CHANNEL, command_error, EVERYNYAN_ROLE, \
+    DEFAULT_TEST_CHANNEL
 
 from bot_utils.interpreter import Interpreter
 from bot_utils.syncer import sync_request_waiter
@@ -201,3 +203,25 @@ async def role_giver(client, message):
         break
 
 Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
+
+@Koishi.events(overwrite=True)
+async def error(client, name, err):
+    extracted = [
+        client.full_name,
+        ' ignores occurred exception at ',
+        name,
+        '\n',
+            ]
+    
+    if isinstance(err, BaseException):
+        await KOKORO.run_in_executor(alchemy_incendiary(render_exc_to_list, (err, extracted)))
+    else:
+        if not isinstance(err, str):
+            err = repr(err)
+        
+        extracted.append(err)
+        extracted.append('\n')
+    
+    extracted = ''.join(extracted).split('\n')
+    for chunk in cchunkify(extracted, lang='py'):
+        await client.message_create(DEFAULT_TEST_CHANNEL, chunk)

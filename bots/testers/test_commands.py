@@ -173,7 +173,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     
     http_type.webhook_message_create = replace_webhook_message_create
     
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.avatar_type is ICON_TYPE_NONE:
             continue
@@ -283,7 +283,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     http_type.webhook_message_create = replace_webhook_message_create
     
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -326,7 +326,7 @@ async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
     
     content = str(random_id())
     
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -673,7 +673,7 @@ async def test_get_webhooks(client, message):
     if guild is None:
         return
     
-    webhooks = await client.webhook_get_guild(guild,)
+    webhooks = await client.webhook_get_all_guild(guild,)
     pages = [Embed(description=chunk) for chunk in pchunkify(webhooks)]
     await Pagination(client, message.channel, pages,)
 
@@ -700,17 +700,17 @@ async def test_start_channel_thread(client, message):
     """
     Does a post request to the channel's threads.
     """
-    data = await client.http.channel_thread_start(message.channel.id, None)
+    data = await client.http.thread_create(message.channel.id, None)
     pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 # DiscordException Not Found (404): 404: Not Found
 @TEST_COMMANDS(checks=[checks.guild_only()])
-async def test_get_channel_thread_users(client, message):
+async def test_get_channel_thread_user_get_all(client, message):
     """
     Gets the channel's threads' users probably, no clue.
     """
-    data = await client.http.thread_users(message.channel.id)
+    data = await client.http.thread_user_get_all(message.channel.id)
     pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
@@ -735,7 +735,7 @@ async def test_delete_channel_thread_user(client, message):
     await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
-async def test_get_applications_detectable(client, message):
+async def test_application_get_all_detectable(client, message):
     """
     Requests the detectable applications.
     """
@@ -788,19 +788,19 @@ async def test_get_welcome_screen(client, message):
 @TEST_COMMANDS
 async def test_regions(client, message):
     """
-    Returns the difference between the predefined and the requestable voice regions.
+    Returns the difference between the predefined and the request-able voice regions.
     
     Note, this command should be called only once to yield the new regions.
     """
     old_ones = set(VoiceRegion.INSTANCES.values())
-    await client.voice_regions()
+    await client.voice_region_get_all()
     new_ones = set(VoiceRegion.INSTANCES.values())
     
     difference = new_ones - old_ones
     if not difference:
         embeds = [Embed(description='*There are no new voice regions added*')]
     else:
-        embeds = [Embed(description=(
+        embeds = [Embed(description= (
             f'Voice region : {region.name!r}\n'
             f'id : {region.value!r}\n'
             f'vip : {region.vip!r}\n'
@@ -826,7 +826,7 @@ async def test_list_invites(client, message):
     if guild is None:
         return
     
-    invites = await client.invite_get_guild(guild)
+    invites = await client.invite_get_all_guild(guild)
     embeds = [Embed('Invites', chunk) for chunk in pchunkify(invites)]
     await Pagination(client, message.channel, embeds)
 
@@ -990,7 +990,7 @@ async def estimate_fast_delete_before_2020_02_00(client, message):
     before = time_to_id(datetime(2020, 2, 1))
     
     while True:
-        messages = await client.message_logs(target_channel, before=before)
+        messages = await client.message_get_chunk(target_channel, before=before)
         if not messages:
             break
         
@@ -1003,20 +1003,20 @@ async def estimate_fast_delete_before_2020_02_00(client, message):
             
         before = messages[-1].id
     
-    PARARELLISM = 3
+    PARALLELISM = 3
     RESET = 120
     LIMIT = 30
     DELAY = 0.1
     
-    times, remainder = divmod(COUNTER, PARARELLISM*LIMIT)
+    times, remainder = divmod(COUNTER, PARALLELISM*LIMIT)
     
     DURATION = DELAY + times*(RESET+DELAY)
     
     if remainder:
-        DURATION += DELAY + DELAY*remainder/PARARELLISM
+        DURATION += DELAY + DELAY*remainder/PARALLELISM
     else:
         DURATION -= RESET
-        DURATION += LIMIT*DELAY/PARARELLISM
+        DURATION += LIMIT*DELAY/PARALLELISM
     
     await client.message_create(target_channel, f'Total messages: {COUNTER+OWNED}.\nEstimated duration {DURATION:.2f}')
 
@@ -1063,7 +1063,7 @@ async def test_webhook_message_edit_0(client, message):
     Creates a message with a webhook, then edits it's content out with `None`.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1081,7 +1081,7 @@ async def test_webhook_message_edit_1(client, message):
     Creates a message with a webhook, then edits it's content with `'ayaya''`.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1099,7 +1099,7 @@ async def test_webhook_message_edit_2(client, message):
     Creates a message with a webhook, then edits it's content out and changing sending it's embeds.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1117,7 +1117,7 @@ async def test_webhook_message_edit_3(client, message):
     Creates a message with a webhook, then edits it's embeds out.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1138,7 +1138,7 @@ async def test_webhook_message_edit_4(client, message):
     Note, that embed data is not included now.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1156,7 +1156,7 @@ async def test_webhook_message_edit_5(client, message):
     Creates a message with a webhook, then edits it to empty.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1174,7 +1174,7 @@ async def test_webhook_message_edit_6(client, message):
     Creates a message with a webhook, then removes it's embeds with `None`.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1192,7 +1192,7 @@ async def test_webhook_message_delete(client, message):
     Creates a message with a webhook, then deletes it.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1212,7 +1212,7 @@ async def test_webhook_message_edit_7(client, message):
     Note that this works only with the current implementation (2020.11.17 20:55).
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1230,7 +1230,7 @@ async def test_webhook_message_edit_8(client, message):
     Creates a message with a webhook, then edits it to the same value.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook
@@ -1248,7 +1248,7 @@ async def test_webhook_message_edit_9(client, message):
     Creates a message with a webhook, then edits it to the same value. (embed version)
     """
     channel = message.channel
-    webhooks = await client.webhook_get_channel(channel)
+    webhooks = await client.webhook_get_all_channel(channel)
     for webhook in webhooks:
         if webhook.type is WebhookType.bot:
             executor_webhook = webhook

@@ -12,7 +12,7 @@ from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from bot_utils.tools import CooldownHandler
-from bot_utils.shared import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON
+from bot_utils.shared import WORSHIPPER_ROLE, DUNGEON_PREMIUM_ROLE, DUNGEON, CURRENCY_EMOJI
 from bot_utils.command_utils import USER_CONVERTER_EVERYWHERE, USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT
 
 Koishi: Client
@@ -24,7 +24,6 @@ def teardown(lib):
 
 
 GAMBLING_COLOR          = Color.from_rgb(254, 254, 164)
-CURRENCY_EMOJI          = Emoji.precreate(603533301516599296)
 DAILY_INTERVAL          = timedelta(hours=22)
 DAILY_STREAK_BREAK      = timedelta(hours=26)
 DAILY_STREAK_LOSE       = timedelta(hours=12)
@@ -122,7 +121,7 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
     now = datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
         while True:
-            if source_user == target_user:
+            if source_user is target_user:
                 response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==source_user.id))
                 results = await response.fetchall()
                 if results:
@@ -138,11 +137,15 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                     daily_next = daily_next+DAILY_STREAK_BREAK
                     if daily_next < now:
                         daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                        if daily_streak < 0:
-                            daily_streak = 0
+                    
+                    # Security
+                    if daily_streak < 0:
+                        daily_streak = 0
+                    
+                    if daily_next < now:
                         streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
                     else:
-                        streak_text = f'You are in a {daily_streak} day streak! Keep up the good work!'
+                        streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
                     
                     received = calculate_daily_for(source_user, daily_streak)
                     total_love = source_result.total_love+received
@@ -172,7 +175,7 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                 embed = Embed(
                     'Here, some love for you~\nCome back tomorrow !',
                     f'You received {DAILY_REWARD} {CURRENCY_EMOJI:e} and now have {DAILY_REWARD} {CURRENCY_EMOJI:e}',
-                    GAMBLING_COLOR)
+                    color = GAMBLING_COLOR)
                 break
             
             response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,])))
@@ -194,12 +197,12 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                 else:
                     source_result = results[1]
                     target_result = results[0]
-                    
-            now=datetime.utcnow()
+            
+            now = datetime.utcnow()
             if source_result is None:
                 daily_streak = 0
                 streak_text = 'I am happy you joined the sect too.'
-
+                
                 await connector.execute(CURRENCY_TABLE.insert().values(
                     user_id         = source_user.id,
                     total_love      = 0,
@@ -213,26 +216,29 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                     embed = Embed(
                         'You already claimed your daily love for today~',
                         f'Come back in {elapsed_time(daily_next)}.',
-                        GAMBLING_COLOR)
+                        color = GAMBLING_COLOR)
                     break
+                
                 daily_streak = source_result.daily_streak
                 daily_next = daily_next+DAILY_STREAK_BREAK
                 if daily_next < now:
                     daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                    if daily_streak < 0:
-                        daily_streak = 0
+                
+                if daily_streak < 0:
+                    daily_streak = 0
+                
+                if daily_next < now:
                     streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
-                    daily_streak += 1
                 else:
-                    daily_streak += 1
-                    streak_text = f'You are in a {daily_streak} day streak! Keep up the good work!'
+                    streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
                 
                 await connector.execute(CURRENCY_TABLE.update().values(
                     daily_next  = now+DAILY_INTERVAL,
-                    daily_streak= daily_streak,
+                    daily_streak= daily_streak+1,
                         ).where(currency_model.user_id==source_user.id))
             
             received = calculate_daily_for(source_user, daily_streak)
+            
             if target_result is None:
                 await connector.execute(CURRENCY_TABLE.insert().values(
                     user_id         = target_user.id,
@@ -250,7 +256,7 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                     total_love  = total_love,
                         ).where(currency_model.user_id==target_user.id))
             
-            embed=Embed(
+            embed = Embed(
                 f'Awww, you claimed your daily love for {target_user:f}, how sweet~',
                 f'You gifted {received} {CURRENCY_EMOJI:e} and they have {total_love} {CURRENCY_EMOJI:e}\n{streak_text}',
                 GAMBLING_COLOR)
@@ -383,7 +389,12 @@ class heartevent(object):
     _update_delta = timedelta(seconds=_update_time)
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls, client, message, duration:timedelta, amount:int, user_limit:int=0):
+    async def __new__(cls, client, message, duration:timedelta=None, amount:int=0, user_limit:int=0):
+        if (duration is None) or (amount == 0):
+            embed = await heartevent_description(client, message)
+            await client.message_create(message.channel, embed)
+            return
+        
         channel = message.channel
         while True:
             if duration > EVENT_MAX_DURATION:
@@ -559,34 +570,37 @@ class heartevent(object):
         
         connector = self.connector
         
-        response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
-        results = await response.fetchall()
-        if results:
-            result = results[0]
-            to_execute = CURRENCY_TABLE.update().values(
-                total_love  = result.total_love+self.amount,
-                    ).where(currency_model.user_id==user_id)
-        else:
-            to_execute = CURRENCY_TABLE.insert().values(
-                user_id         = user_id,
-                total_love      = self.amount,
-                daily_next      = datetime.utcnow(),
-                daily_streak    = 0,
-                total_allocated = 0,
-                    )
-        await connector.execute(to_execute)
-
+        try:
+            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
+            results = await response.fetchall()
+            if results:
+                result = results[0]
+                to_execute = CURRENCY_TABLE.update().values(
+                    total_love  = result.total_love+self.amount,
+                        ).where(currency_model.user_id==user_id)
+            else:
+                to_execute = CURRENCY_TABLE.insert().values(
+                    user_id         = user_id,
+                    total_love      = self.amount,
+                    daily_next      = datetime.utcnow(),
+                    daily_streak    = 0,
+                    total_allocated = 0,
+                        )
+            await connector.execute(to_execute)
+        except BaseException as err:
+            await client.events.error(client, f'{self!r}.__call__', err)
+    
     async def countdown(self, client, message):
         update_delta = self._update_delta
         waiter = self.waiter
-
+        
         sleep_time = (self.duration%update_delta).seconds
         if sleep_time:
             self.duration -= timedelta(seconds=sleep_time)
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
             waiter.clear()
-
+        
         sleep_time = self._update_time
         while True:
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)

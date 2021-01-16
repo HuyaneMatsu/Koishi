@@ -6,7 +6,7 @@ from hata.ext.prettyprint import pchunkify
 
 from bot_utils.command_utils import CHECK_MANAGE_MESSAGES, CHECK_OWNER_OR_CAN_INVITE, CHECK_BAN_USERS, \
     CHECK_OWNER_OR_GUILD_OWNER, CHECK_MANAGE_CHANNEL_AND_INVITES, CHECK_OWNER_ONLY, CHECK_VIEW_LOGS, \
-    USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, USER_CONVERTER_ALL_NONE_DEFAULT, CHECK_YEET_USERS
+    USER_CONVERTER_EVERYWHERE_NONE_DEFAULT, USER_CONVERTER_ALL_NONE_DEFAULT, CHECK_YEET_USERS, CHECK_ADMINISTRATION
 
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
@@ -44,7 +44,7 @@ class invite_create:
         invite_ = None
         if content == 'perma':
             if client.is_owner(user) or user is message.guild.owner:
-                invite_ = await client.vanity_invite(message.guild)
+                invite_ = await client.vanity_invite_get(message.guild)
                 if invite_ is None:
                     max_age = 0
                     max_use = 0
@@ -58,14 +58,14 @@ class invite_create:
         
         try:
             if invite_ is None:
-                invite_ = await client.invite_create_pref(message.guild, max_age, max_use)
+                invite_ = await client.invite_create_preferred(message.guild, max_age, max_use)
         except DiscordException as err:
             content = repr(err)
         except ValueError as err:
             content = err.args[0]
         else:
             if invite_ is None:
-                content = 'I do not have enough permission to create invite from the guild\'s prefered channel.'
+                content = 'I do not have enough permission to create invite from the guild\'s preferred channel.'
             else:
                 content = f'Here is your invite, dear:\n\n{invite_.url}'
             
@@ -123,7 +123,7 @@ class bans:
                 color=ADMINISTRATION_COLOR))
             return
         
-        ban_data = await client.guild_bans(guild)
+        ban_data = await client.message_id(guild)
         
         if not ban_data:
             await client.message_create(message.channel, 'None')
@@ -292,6 +292,15 @@ class emoji_role:
                 embed = Embed(description='I have no permissions to edit emojis, or to add reactions.'))
             return
         
+        if emoji.is_unicode_emoji():
+            await client.message_create(message.channel, embed=Embed('Ayaya', 'Unicode emoji cannot be edited.'))
+            return
+        
+        emoji_guild = emoji.guild
+        if (emoji_guild is None) or (emoji_guild is not message.guild):
+            await client.message_create(message.channel, embed=Embed('Ayaya', 'The emoji is from a different guild.'))
+            return
+            
         roles = sorted(roles)
         roles_ = emoji.roles
         
@@ -361,7 +370,7 @@ class emoji_role:
     
     name = 'emoji-role'
     category = 'ADMINISTRATION'
-    checks = CHECK_MANAGE_MESSAGES
+    checks = CHECK_ADMINISTRATION
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -379,13 +388,13 @@ class invites:
         if channel is None:
             if not guild.cached_permissions_for(client).can_manage_guild:
                 await client.message_create(message.channel,
-                    'I dont have enough permission, to request the invites.')
+                    'I don\'t have enough permission, to request the invites.')
                 return
-            invites = await client.invite_get_guild(guild)
+            invites = await client.invite_get_all_guild(guild)
         else:
             if not channel.cached_permissions_for(client).can_manage_channel:
                 await client.message_create(message.channel,
-                    'I dont have enough permission, to request the invites.')
+                    'I don\'t have enough permission, to request the invites.')
                 return
             invites = await client.invite_get_channel(channel)
         
@@ -441,7 +450,7 @@ class logs:
             break
     
         with client.keep_typing(message.channel):
-            iterator = client.audit_log_iterator(guild,user,event)
+            iterator = await client.audit_log_iterator(guild,user,event)
             await iterator.load_all()
             logs = iterator.transform()
         
@@ -518,7 +527,7 @@ class yeet:
             reason = f'For the request of {author.full_name} ({author.id})'
         
         for maybe_banner in guild.clients:
-            if guild.cached_permissions_for(client).can_ban_users:
+            if guild.cached_permissions_for(maybe_banner).can_ban_users:
                 banner = maybe_banner
                 break
         else:

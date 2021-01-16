@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 from time import perf_counter
 
 from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, sleep, DiscordException, Emoji, now_as_id, WebhookType,\
@@ -155,7 +153,7 @@ class resend_webhook:
                 await client.message_delete(message)
             return
     
-        webhooks = await client.webhook_get_channel(channel)
+        webhooks = await client.webhook_get_all_channel(channel)
         for webhook in webhooks:
             if webhook.type is WebhookType.bot:
                 break
@@ -960,36 +958,6 @@ class get_id_as_time:
             'Converts the given Discord snowflake id to time.\n'
             f'Usage: `{prefix}now-as-time *id*`'
                 ), color=UTILITY_COLOR)
-
-
-# COUNTDOWN DISABLED, SINCE IT IS OVER
-EVENT_DEADLINE = datetime(2020, 11, 18, 0, 0, 0)
-
-async def countdown_description(client, message):
-    now = datetime.utcnow()
-    if now >= EVENT_DEADLINE:
-        result = 'the countdown is already over'
-    else:
-        result = elapsed_time(relativedelta(now, EVENT_DEADLINE))
-        result = f'there is {result} left'
-    
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('countdown', (
-        'Returns when the hata codejam ends!\n'
-        f'Usage: `{prefix}countdown`\n'
-        '\n'
-        f'Dont worry, we got you, {result}.'
-            ), color=UTILITY_COLOR)
-
-#@Koishi.commands(aliases=['deadline', 'event_deadline'], description=countdown_description, category='UTILITY')
-async def countdown(client, message):
-    now = datetime.utcnow()
-    if now >= EVENT_DEADLINE:
-        result = 'Countdown over!'
-    else:
-        result = elapsed_time(relativedelta(now, EVENT_DEADLINE))
-    
-    await client.message_create(message.channel, result)
 
 
 async def shared_guilds_description(client, message):

@@ -56,7 +56,7 @@ class oauth2_link:
             f'Usage: `{prefix}oauth2_link`\n'
             'After you authorized yourself, you should call the `oauth2_feed` '
             'command, to feed the authorized link to me.\n'
-            f'Example: `{prefix}oaut2_feed *link*`\n'
+            f'Example: `{prefix}oauth2_feed *link*`\n'
             'By doing this you will unlock other oauth 2 commands, like:\n'
             f'- `{prefix}oauth2_user <user_id>`\n'
             f'- `{prefix}oauth2_connections <user_id>`\n'
@@ -68,7 +68,7 @@ class oauth2_link:
 
 @Koishi.commands.from_class
 class oauth2_feed:
-    async def command(client,message,content):
+    async def command(client, message, content):
         try:
             await client.message_delete(message)
         except BaseException as err:
@@ -76,7 +76,7 @@ class oauth2_feed:
                 # no internet
                 return
             
-            elif isinstance(err,DiscordException):
+            elif isinstance(err, DiscordException):
                 if err.code == ERROR_CODES.invalid_access: # client removed
                     return
             
@@ -92,8 +92,9 @@ class oauth2_feed:
         if access is None:
             await client.message_create(message.channel,'Too old link')
             return
-        user = await client.get_user_info(access)
-        OA2_accesses[user.id]=user
+        
+        user = await client.user_info_get(access)
+        OA2_accesses[user.id] = user
         await client.message_create(message.channel,'Thanks')
     
     category = 'OAUTH2'
@@ -149,7 +150,7 @@ class oauth2_connections:
             await client.message_create(message.channel,'Could not find that user')
             return
         
-        connections = await client.user_connections(user.access)
+        connections = await client.user_connection_get_all(user.access)
         
         await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(connections)])
     
@@ -178,7 +179,7 @@ class oauth2_guilds:
             await client.message_create(message.channel, 'Could not find that user')
             return
         
-        guilds = await client.user_guilds(user.access)
+        guilds = await client.user_guild_get_all(user.access)
         
         await Pagination(client, message.channel,[Embed(description=chunk) for chunk in pchunkify(guilds)])
     

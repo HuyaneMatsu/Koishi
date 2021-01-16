@@ -10,8 +10,8 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     alchemy_incendiary, Webhook, eventlist, EventThread, DiscordException, BUILTIN_EMOJIS, Message, ChannelText, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, PermOW, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, ApplicationCommand, \
-    InteractionResponseTypes, VerificationScreen, WelcomeScreen
+    Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
+    ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen
 
 from hata.backend.utils import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -411,7 +411,7 @@ async def reaction_clear(client,message,):
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions',)
 
-async def reaction_users(client,message,emoji,):
+async def reaction_user_get_chunk(client,message,emoji,):
     if message.reactions is None:
         return []
     channel_id=message.channel.id
@@ -484,7 +484,7 @@ async def message_pinneds(client,channel,):
         f'{API_ENDPOINT}/channels/{channel_id}/pins',
         )
 
-async def message_logs(client,channel,):
+async def message_get_chunk(client,channel,):
     channel_id = channel.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/messages',
@@ -530,7 +530,7 @@ async def client_edit(client, name='', avatar=...,):
         f'{API_ENDPOINT}/users/@me',
         data,)
 
-async def client_connections(client,):
+async def client_connection_get_all(client,):
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/users/@me/connections',
         )
@@ -546,7 +546,7 @@ async def client_gateway_bot(client,):
         f'{API_ENDPOINT}/gateway/bot',
         )
 
-async def client_application_info(client,):
+async def client_application_get(client,):
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/oauth2/applications/@me',
         )
@@ -562,7 +562,7 @@ async def client_logout(client,):
         )
 
 
-async def permission_ow_create(client,channel,target,allow,deny,):
+async def permission_overwrite_create(client,channel,target,allow,deny,):
     if type(target) is Role:
         type_='role'
     elif type(target) in (User,Client,UserOA2):
@@ -581,9 +581,9 @@ async def permission_ow_create(client,channel,target,allow,deny,):
         f'{API_ENDPOINT}/channels/{channel_id}/permissions/{overwrite_id}',
         data,)
     
-    return PermOW.custom(target,allow,deny)
+    return PermissionOverwrite.custom(target,allow,deny)
 
-async def permission_ow_delete(client,channel,overwrite,):
+async def permission_overwrite_delete(client,channel,overwrite,):
     channel_id=channel.id
     overwrite_id=overwrite.target.id
     return await bypass_request(client,METHOD_DELETE,
@@ -683,7 +683,7 @@ async def webhook_create(client,channel,name,avatar=b'',):
         data,)
     return Webhook(data)
 
-async def webhook_get_channel(client,channel,):
+async def webhook_get_all_channel(client,channel,):
     channel_id=channel.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/webhooks',
@@ -741,14 +741,14 @@ async def guild_edit(client,guild, afk_channel=_spaceholder): #keep it short
         f'{API_ENDPOINT}/guilds/{guild_id}',
         data,)
 
-async def audit_logs(client,guild,):
+async def audit_log_get_chunk(client,guild,):
     data={'limit':100}
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/audit-logs',
         params=data,)
 
-async def guild_bans(client,guild,):
+async def guild_ban_get_all(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans',
@@ -1158,7 +1158,7 @@ async def channel_create(client,guild, name, category=None, type_=0):
         data,)
     return CHANNEL_TYPES[data['type']](data,client,guild)
 
-async def guild_emojis(client,guild,):
+async def guild_emoji_get_all(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis',
@@ -1214,7 +1214,7 @@ async def integration_get_all(client,guild,):
         f'{API_ENDPOINT}/guilds/{guild_id}/integrations',
         )
 
-async def invite_get_guild(client,guild,):
+async def invite_get_all_guild(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/invites',
@@ -1332,7 +1332,7 @@ async def role_delete(client,role,):
         )
 
 
-async def webhook_get_guild(client,guild,):
+async def webhook_get_all_guild(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/webhooks',
@@ -1356,14 +1356,14 @@ async def invite_delete(client,invite,):
         f'{API_ENDPOINT}/invites/{invite_code}',
         )
 
-async def get_user_info(client,access,):
+async def user_info_get(client,access,):
     headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/users/@me',
         headers=headers,)
 
-async def client_user(client,):
+async def client_user_get(client,):
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/users/@me',
         )
@@ -1378,14 +1378,14 @@ async def channel_private_create(client,user,):
         f'{API_ENDPOINT}/users/@me/channels',
         data={'recipient_id':user.id},)
 
-async def user_connections(client,access,):
+async def user_connection_get_all(client,access,):
     headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/users/@me/connections',
         headers=headers,)
 
-async def user_guilds(client,access,):
+async def user_guild_get_all(client,access,):
     headers=imultidict()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     return await bypass_request(client,METHOD_GET,
@@ -1455,13 +1455,13 @@ async def webhook_message_delete(client, webhook, message):
         f'{webhook.url}/messages/{message.id}',
         headers={},)
 
-async def guild_users(client,guild,):
+async def guild_user_get_chunk(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members',
         )
 
-async def guild_regions(client,guild,):
+async def guild_voice_region_get_all(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/regions',
@@ -1473,7 +1473,7 @@ async def guild_channels(client,guild,):
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         )
 
-async def guild_roles(client,guild,):
+async def guild_role_get_all(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
@@ -1636,7 +1636,7 @@ async def reaction_delete_emoji(client, message, emoji):
     await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{message.channel.id}/messages/{message.id}/reactions/{emoji.as_reaction}')
 
-async def guild_preview(client, guild_id):
+async def guild_preview_get(client, guild_id):
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/preview')
 
@@ -1644,7 +1644,7 @@ async def message_crosspost(client, message):
     await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/channels/{message.channel.id}/messages/{message.id}/crosspost')
 
-async def vanity_get(client, guild):
+async def vanity_invite_get(client, guild):
     guild_id = guild.id
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/vanity-url')
@@ -1683,7 +1683,7 @@ async def guild_discovery_delete_subcategory(client, guild, category_id):
     await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/discovery-categories/{category_id}')
 
-async def discovery_categories(client):
+async def discovery_category_get_all(client):
     discovery_category_datas = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/discovery/categories')
     return [DiscoveryCategory(discovery_category_data) for discovery_category_data in discovery_category_datas]
@@ -1933,12 +1933,12 @@ async def welcome_screen_edit(client, guild):
     return WelcomeScreen.from_data(data)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0000(client,message):
+async def rate_limit_test0000(client,message):
     """
     Does 6 achievement get request towards 1 achievemt.
     The bot's application must have at least 1 achievement created.
     """
-    with RLTCTX(client,message.channel,'ratelimit_test0000') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0000') as RLT:
         try:
             achievements = await client.achievement_get_all()
         except BaseException as err:
@@ -1961,12 +1961,12 @@ async def ratelimit_test0000(client,message):
     #achievement_get limited. limit:5, reset:5
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0001(client,message):
+async def rate_limit_test0001(client,message):
     """
     Does 3-3 achievement get request towards 2 achievemts.
     The bot's application must have at least 2 achievement created.
     """
-    with RLTCTX(client,message.channel,'ratelimit_test0001') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0001') as RLT:
         try:
             achievements = await client.achievement_get_all()
         except BaseException as err:
@@ -1995,11 +1995,11 @@ async def ratelimit_test0001(client,message):
     #achievement_get limited globally
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0002(client,message):
+async def rate_limit_test0002(client,message):
     """
     Creates 6 achievements.
     """
-    with RLTCTX(client,message.channel,'ratelimit_test0002') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0002') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2025,11 +2025,11 @@ async def ratelimit_test0002(client,message):
     #achievement_create limited. limit:5, reset:5, globally
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0003(client,message):
+async def rate_limit_test0003(client,message):
     """
     First creates 2 achievements with the client normally, then deletes them for testing.
     """
-    with RLTCTX(client,message.channel,'ratelimit_test0003') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0003') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2051,12 +2051,12 @@ async def ratelimit_test0003(client,message):
     #achievement_delete limited. limit:5, reset:5, globally
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0004(client,message):
+async def rate_limit_test0004(client,message):
     """
     Creates an achievent, then edits it twice for testing. When done, deletes it.
     """
     
-    with RLTCTX(client,message.channel,'ratelimit_test0004') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0004') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2077,11 +2077,11 @@ async def ratelimit_test0004(client,message):
     #achievement_edit limited. limit:5, reset:5
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0005(client,message):
+async def rate_limit_test0005(client,message):
     """
     Creates 2 achievements, then edits them once, once for testing. At the end deletes them.
     """
-    with RLTCTX(client,message.channel,'ratelimit_test0005') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0005') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2105,12 +2105,12 @@ async def ratelimit_test0005(client,message):
     #achievement_edit limited globally
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0006(client,message):
+async def rate_limit_test0006(client,message):
     """
     Creates, edits and deletes an achievment.
     """
     
-    with RLTCTX(client,message.channel,'ratelimit_test0006') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0006') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2123,12 +2123,12 @@ async def ratelimit_test0006(client,message):
     # achievement_create, achievement_get, achievement_edit, achievement_delete are NOT grouped
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0007(client,message):
+async def rate_limit_test0007(client,message):
     """
     Requests all the achievemenets.
     """
     
-    with RLTCTX(client,message.channel,'ratelimit_test0007') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0007') as RLT:
         loop=client.loop
         tasks = []
         for _ in range(2):
@@ -2140,12 +2140,12 @@ async def ratelimit_test0007(client,message):
     #achievement_get_all limited. limit:5, reset:5, globally
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0008(client,message):
+async def rate_limit_test0008(client,message):
     """
     Updates an achievement of the client's owner.
     """
     
-    with RLTCTX(client,message.channel,'ratelimit_test0008') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0008') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2161,12 +2161,12 @@ async def ratelimit_test0008(client,message):
     # user_achievement_update limited. Limit : 5, reset : 5.
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0009(client,message):
+async def rate_limit_test0009(client,message):
     """
     Updates an achievement of the client's owner.
     Waits 2 seconds after the achievement is created, so it might work this time (nope).
     """
-    with RLTCTX(client,message.channel,'ratelimit_test0009') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0009') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2182,11 +2182,11 @@ async def ratelimit_test0009(client,message):
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0010(client,message):
+async def rate_limit_test0010(client,message):
     """
     Updates an achievement of the client's owner. But now one, what has `secure=False`
     """
-    with RLTCTX(client,message.channel,'ratelimit_test0010') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0010') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2201,12 +2201,12 @@ async def ratelimit_test0010(client,message):
     # DiscordException FORBIDDEN (403), code=40001: Unauthorized
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0011(client,message):
+async def rate_limit_test0011(client,message):
     """
     Updates the achievemenets of all the owners of the client.
     """
     
-    with RLTCTX(client,message.channel,'ratelimit_test0011') as RLT:
+    with RLTCTX(client,message.channel,'rate_limit_test0011') as RLT:
         image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
@@ -2234,12 +2234,12 @@ class check_is_owner(object):
         return self.client.is_owner(message.author)
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0012(client,message):
+async def rate_limit_test0012(client,message):
     """
     Tries to get a user's achievemenets after oauth2 authorization.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0012') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0012') as RLT:
         await client.message_create(channel, (
             'Please authorize yourself and resend the redirected url after it\n'
             'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
@@ -2266,11 +2266,11 @@ async def ratelimit_test0012(client,message):
     #DiscordException UNAUTHORIZED (401): 401: Unauthorized
     # no limit data provided
 
-ratelimit_test0013_OK       = BUILTIN_EMOJIS['ok_hand']
-ratelimit_test0013_CANCEL   = BUILTIN_EMOJIS['x']
-ratelimit_test0013_EMOJIS   = (ratelimit_test0013_OK, ratelimit_test0013_CANCEL)
+rate_limit_test0013_OK       = BUILTIN_EMOJIS['ok_hand']
+rate_limit_test0013_CANCEL   = BUILTIN_EMOJIS['x']
+rate_limit_test0013_EMOJIS   = (rate_limit_test0013_OK, rate_limit_test0013_CANCEL)
 
-class ratelimit_test0013_checker(object):
+class rate_limit_test0013_checker(object):
     __slots__ = ('client',)
     
     def __init__(self, client):
@@ -2280,18 +2280,18 @@ class ratelimit_test0013_checker(object):
         if not self.client.is_owner(event.user):
             return False
         
-        if event.emoji not in ratelimit_test0013_EMOJIS:
+        if event.emoji not in rate_limit_test0013_EMOJIS:
             return False
         
         return True
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0013(client,message):
+async def rate_limit_test0013(client,message):
     """
     Requests messages for each day from the channel if can, then deletes them if you agree with it as well.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0013') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0013') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -2344,24 +2344,24 @@ async def ratelimit_test0013(client,message):
         
         message = await client.message_create(channel,embed=embed)
         
-        for emoji in ratelimit_test0013_EMOJIS:
+        for emoji in rate_limit_test0013_EMOJIS:
             await client.reaction_add(message,emoji)
         
         try:
-            event = await wait_for_reaction(client, message, ratelimit_test0013_checker(client), 40.)
+            event = await wait_for_reaction(client, message, rate_limit_test0013_checker(client), 40.)
         except TimeoutError:
-            emoji = ratelimit_test0013_CANCEL
+            emoji = rate_limit_test0013_CANCEL
         else:
             emoji = event.emoji
         
         await client.reaction_clear(message)
         
-        if emoji is ratelimit_test0013_CANCEL:
-            embed.add_footer('ratelimit_test0020 cancelled')
+        if emoji is rate_limit_test0013_CANCEL:
+            embed.add_footer('rate_limit_test0020 cancelled')
             await client.message_edit(message,embed=embed)
             raise CancelledError()
         
-        if emoji is ratelimit_test0013_OK:
+        if emoji is rate_limit_test0013_OK:
             for day,(message_own, message_other) in enumerate(messages):
                 if (message_own is not None):
                     RLT.write(f'day {day}, own:')
@@ -2376,12 +2376,12 @@ async def ratelimit_test0013(client,message):
         # no more case
         
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0014(client,message):
+async def rate_limit_test0014(client,message):
     """
     Creates 2 message.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0014') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0014') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -2390,18 +2390,18 @@ async def ratelimit_test0014(client,message):
             
         messages=[]
         for index in range(2):
-            message_ = await client.message_create(channel,f'testing ratelimit: message {index}')
+            message_ = await client.message_create(channel,f'testing rate_limit: message {index}')
             messages.append(message_)
         
         await Task(message_delete_multiple(client,messages),client.loop)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0015(client,message):
+async def rate_limit_test0015(client,message):
     """
     Deletes all the reactions of a single emoji from a message.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0015') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0015') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -2412,12 +2412,12 @@ async def ratelimit_test0015(client,message):
         await reaction_delete_emoji(client, message, emoji)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0016(client,message):
+async def rate_limit_test0016(client,message):
     """
     Adds a reaction and deletes alll the same type from the message.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0016') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0016') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -2429,31 +2429,31 @@ async def ratelimit_test0016(client,message):
         await reaction_delete_emoji(client, message, emoji)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0017(client,message):
+async def rate_limit_test0017(client,message):
     """
     Requests 1 guild preview.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0017') as RLT:
-        await guild_preview(client, 197038439483310086)
+    with RLTCTX(client,channel,'rate_limit_test0017') as RLT:
+        await guild_preview_get(client, 197038439483310086)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0018(client,message):
+async def rate_limit_test0018(client,message):
     """
     Requests 2 guild preview.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0018') as RLT:
-        await guild_preview(client, 302094807046684672)
-        await guild_preview(client, 197038439483310086)
+    with RLTCTX(client,channel,'rate_limit_test0018') as RLT:
+        await guild_preview_get(client, 302094807046684672)
+        await guild_preview_get(client, 197038439483310086)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0019(client,message):
+async def rate_limit_test0019(client,message):
     """
     Edits the channel twice.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0019') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0019') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
             
@@ -2466,12 +2466,12 @@ async def ratelimit_test0019(client,message):
         await channel_edit(client, channel, nsfw = nsfw)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0020(client,message):
+async def rate_limit_test0020(client,message):
     """
     Creates a channel.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0020') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0020') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2484,12 +2484,12 @@ async def ratelimit_test0020(client,message):
         await client.http.channel_delete(channel_id,None)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0021(client,message):
+async def rate_limit_test0021(client,message):
     """
     Deletes a channel.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0021') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0021') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2501,12 +2501,12 @@ async def ratelimit_test0021(client,message):
         await channel_delete(client, channel)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0022(client,message):
+async def rate_limit_test0022(client,message):
     """
     Edits a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0022') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0022') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2519,12 +2519,12 @@ async def ratelimit_test0022(client,message):
         await client.role_delete(role)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0023(client,message):
+async def rate_limit_test0023(client,message):
     """
     Creates a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0023') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0023') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2537,12 +2537,12 @@ async def ratelimit_test0023(client,message):
         await client.http.role_delete(guild.id,role_id,None)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0024(client,message):
+async def rate_limit_test0024(client,message):
     """
     Deletes a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0024') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0024') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2558,12 +2558,12 @@ async def ratelimit_test0024(client,message):
         await role_delete(client, role)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0025(client,message):
+async def rate_limit_test0025(client,message):
     """
     Edits 2 channel.
     """
     channel_1 = message.channel
-    with RLTCTX(client,channel_1,'ratelimit_test0025') as RLT:
+    with RLTCTX(client,channel_1,'rate_limit_test0025') as RLT:
         if channel_1.guild is None:
             await RLT.send('Please use this command at a guild.')
         
@@ -2598,12 +2598,12 @@ async def ratelimit_test0025(client,message):
         await client.channel_edit(channel_2, nsfw = nsfw_2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0026(client,message):
+async def rate_limit_test0026(client,message):
     """
     Edits 2 roles at the same guild.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0026') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0026') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2619,12 +2619,12 @@ async def ratelimit_test0026(client,message):
         await client.role_delete(role_2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0027(client, message, guild_id:str=''):
+async def rate_limit_test0027(client, message, guild_id:str=''):
     """
     Edits 1-1 roles at separate guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0027') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0027') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -2648,12 +2648,12 @@ async def ratelimit_test0027(client, message, guild_id:str=''):
         await client.role_delete(role_2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0028(client, message, guild_id:str=''):
+async def rate_limit_test0028(client, message, guild_id:str=''):
     """
     Creates 1-1 roles at separate guilds
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0027') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0027') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -2677,12 +2677,12 @@ async def ratelimit_test0028(client, message, guild_id:str=''):
         await client.http.role_delete(guild_2.id,role_2_id,None)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0029(client,message):
+async def rate_limit_test0029(client,message):
     """
     Moves a role.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0029') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0029') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2699,12 +2699,12 @@ async def ratelimit_test0029(client,message):
         await client.role_delete(role)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0030(client, message):
+async def rate_limit_test0030(client, message):
     """
     Crossposts 2 message at the current channel.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0030') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0030') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2725,12 +2725,12 @@ async def ratelimit_test0030(client, message):
         await client.message_delete(message_2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0031(client, message):
+async def rate_limit_test0031(client, message):
     """
     Crossposts 1-1 messages at 2 different channels.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0031') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0031') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2770,12 +2770,12 @@ async def ratelimit_test0031(client, message):
         await client.message_delete(message_2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0032(client, message):
+async def rate_limit_test0032(client, message):
     """
     Requests a user (myself) at 2 guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0032') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0032') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -2793,12 +2793,12 @@ async def ratelimit_test0032(client, message):
         await guild_user_get(client, guild_2, client.id)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0033(client, message):
+async def rate_limit_test0033(client, message):
     """
     Requests users with name `nyan` at 2 guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0033') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0033') as RLT:
         guild_1 = channel.guild
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
@@ -2816,12 +2816,12 @@ async def ratelimit_test0033(client, message):
         await guild_user_search(client, guild_2, 'nyan')
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0034(client, message):
+async def rate_limit_test0034(client, message):
     """
     Requests an application's owner's access.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0034') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0034') as RLT:
         for client_ in CLIENTS:
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
@@ -2834,12 +2834,12 @@ async def ratelimit_test0034(client, message):
         await oauth2_token(client_)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0035(client, message):
+async def rate_limit_test0035(client, message):
     """
     Follows a channel like a boss.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0035') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0035') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2857,7 +2857,7 @@ async def ratelimit_test0035(client, message):
         if source_channel is None:
             await RLT.send('The guild should have at least 1 news channel')
         
-        webhooks = await client.webhook_get_guild(guild)
+        webhooks = await client.webhook_get_all_guild(guild)
         used_channels = set()
         for webhook in webhooks:
             if webhook.type is WebhookType.server:
@@ -2884,12 +2884,12 @@ async def ratelimit_test0035(client, message):
         await client.webhook_delete(webhook)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0036(client, message):
+async def rate_limit_test0036(client, message):
     """
     Gets the invites of the channel
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0036') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0036') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2901,48 +2901,48 @@ async def ratelimit_test0036(client, message):
         await invite_get_channel(client, channel)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0037(client, message):
+async def rate_limit_test0037(client, message):
     """
     Requests the messages of the channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0037') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0037') as RLT:
         if not channel.cached_permissions_for(client).can_read_message_history:
             await RLT.send('I need permission to read message history to execute this command.')
         
-        await message_logs(client, channel)
+        await message_get_chunk(client, channel)
         
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0038(client, message):
+async def rate_limit_test0038(client, message):
     """
     Gets the source message.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0038') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0038') as RLT:
         await message_get(client, channel, message.id)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0039(client, message):
+async def rate_limit_test0039(client, message):
     """
-    Requests the reacters of an emoji on the source message.
+    Requests the reactors of an emoji on the source message.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0039') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0039') as RLT:
         if not channel.cached_permissions_for(client).can_add_reactions:
             await RLT.send('I need permission to add reactions to execute this command.')
         
         emoji = BUILTIN_EMOJIS['x']
         await client.reaction_add(message, emoji)
         
-        await reaction_users(client, message, emoji)
+        await reaction_user_get_chunk(client, message, emoji)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0040(client, message):
+async def rate_limit_test0040(client, message):
     """
     Removes a permission overwrite from a channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0040') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0040') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -2973,16 +2973,16 @@ async def ratelimit_test0040(client, message):
         if target_channel is None:
             await RLT.send('Every channel has an overwrite for the bottom role.')
         
-        permission_overwrite = await client.permission_ow_create(channel, role, 0b1000, 0b0100, 'tesing ratelimits')
-        await permission_ow_delete(client, channel, permission_overwrite)
+        permission_overwrite = await client.permission_overwrite_create(channel, role, 0b1000, 0b0100, 'testing rate_limits')
+        await permission_overwrite_delete(client, channel, permission_overwrite)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0041(client, message):
+async def rate_limit_test0041(client, message):
     """
     Creates a permission overwrite at a channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0041') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0041') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3013,16 +3013,16 @@ async def ratelimit_test0041(client, message):
         if target_channel is None:
             await RLT.send('Every channel has an overwrite for the bottom role.')
         
-        permission_overwrite = await permission_ow_create(client, target_channel, role, 0b1000, 0b0100)
-        await client.permission_ow_delete(channel, permission_overwrite)
+        permission_overwrite = await permission_overwrite_create(client, target_channel, role, 0b1000, 0b0100)
+        await client.permission_overwrite_delete(channel, permission_overwrite)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0042(client, message):
+async def rate_limit_test0042(client, message):
     """
     Gets the webhooks of the channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0042') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0042') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3030,15 +3030,15 @@ async def ratelimit_test0042(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        await webhook_get_channel(client, channel)
+        await webhook_get_all_channel(client, channel)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0043(client, message):
+async def rate_limit_test0043(client, message):
     """
     Creates a webhook at the channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0043') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0043') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3050,12 +3050,12 @@ async def ratelimit_test0043(client, message):
         await client.webhook_delete(webhook)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0044(client, message):
+async def rate_limit_test0044(client, message):
     """
     Gets the current guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0044') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0044') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3063,12 +3063,12 @@ async def ratelimit_test0044(client, message):
         await guild_get(client, guild.id)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0045(client, message):
+async def rate_limit_test0045(client, message):
     """
     Edist the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0045') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0045') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3097,28 +3097,28 @@ async def ratelimit_test0045(client, message):
         await client.guild_edit(guild, afk_channel=afk_channel)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0046(client, message):
+async def rate_limit_test0046(client, message):
     """
     Requests audit logs from the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0046') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0046') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        if not guild.cached_permissions_for(client).can_view_audit_logs:
+        if not guild.cached_permissions_for(client).can_view_audit_log_get_chunk:
             await RLT.send('I need view audit log permission to complete this command.')
         
-        await audit_logs(client, guild)
+        await audit_log_get_chunk(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0047(client, message):
+async def rate_limit_test0047(client, message):
     """
     Gets the bans of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0047') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0047') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3126,17 +3126,17 @@ async def ratelimit_test0047(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        await guild_bans(client, guild)
+        await guild_ban_get_all(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0048(client, message, user:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default=None)):
+async def rate_limit_test0048(client, message, user:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default=None)):
     """
     Bans gets the ban and ubnans the given user.
     
     Derpy, right?
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0048') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0048') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3155,12 +3155,12 @@ async def ratelimit_test0048(client, message, user:Converter('user',flags=Conver
         await guild_ban_delete(client, guild, user.id)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0049(client, message):
+async def rate_limit_test0049(client, message):
     """
     Gets the channels of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0049') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0049') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3168,12 +3168,12 @@ async def ratelimit_test0049(client, message):
         await guild_channels(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0050(client, message):
+async def rate_limit_test0050(client, message):
     """
     Moves a channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0050') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0050') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3192,12 +3192,12 @@ async def ratelimit_test0050(client, message):
         await client.channel_delete(target_channel)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0051(client, message):
+async def rate_limit_test0051(client, message):
     """
     Creates a channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0051') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0051') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3210,25 +3210,25 @@ async def ratelimit_test0051(client, message):
         await client.channel_delete(created_channel)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0052(client, message):
+async def rate_limit_test0052(client, message):
     """
     Gets the emojis of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0052') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0052') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await guild_emojis(client, guild)
+        await guild_emoji_get_all(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0053(client, message):
+async def rate_limit_test0053(client, message):
     """
     Gets the emojis of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0053') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0053') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3242,12 +3242,12 @@ async def ratelimit_test0053(client, message):
         await emoji_get(client, emoji)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0054(client, message):
+async def rate_limit_test0054(client, message):
     """
     Estimates guild prune.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0054') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0054') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3258,12 +3258,12 @@ async def ratelimit_test0054(client, message):
         await guild_prune_estimate(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0055(client, message):
+async def rate_limit_test0055(client, message):
     """
     Guild prunes.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0055') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0055') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3274,12 +3274,12 @@ async def ratelimit_test0055(client, message):
         await guild_prune(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0056(client, message):
+async def rate_limit_test0056(client, message):
     """
     Gets he guild's regions.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0056') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0056') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3287,15 +3287,15 @@ async def ratelimit_test0056(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        await guild_regions(client, guild)
+        await guild_voice_region_get_all(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0057(client, message):
+async def rate_limit_test0057(client, message):
     """
     Gets the guild's roles.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0057') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0057') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3303,28 +3303,28 @@ async def ratelimit_test0057(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        await guild_roles(client, guild)
+        await guild_role_get_all(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0058(client, message):
+async def rate_limit_test0058(client, message):
     """
     Gets the guild's vanity code. This endpoint is not used tho.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0058') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0058') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await vanity_get(client, guild)
+        await vanity_invite_get(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0059(client, message):
+async def rate_limit_test0059(client, message):
     """
     Gets the webhooks of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0059') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0059') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3332,15 +3332,15 @@ async def ratelimit_test0059(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        await webhook_get_guild(client, guild)
+        await webhook_get_all_guild(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0060(client, message):
+async def rate_limit_test0060(client, message):
     """
     Creates and deletes an invite.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0060') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0060') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3348,25 +3348,25 @@ async def ratelimit_test0060(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        invite = await client.invite_create_pref(guild)
+        invite = await client.invite_create_preferred(guild)
         await invite_delete(client, invite)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0061(client, message):
+async def rate_limit_test0061(client, message):
     """
-    Gets the client's applciation info.
+    Gets the client's application info.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0061') as RLT:
-        await client_application_info(client)
+    with RLTCTX(client, channel, 'rate_limit_test0061') as RLT:
+        await client_application_get(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0062(client, message):
+async def rate_limit_test0062(client, message):
     """
     Requests the application owner's user information.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0062') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0062') as RLT:
         for client_ in CLIENTS:
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
@@ -3376,43 +3376,43 @@ async def ratelimit_test0062(client, message):
         if client_ is None:
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
-        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
-        await get_user_info(client_, access)
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
+        await user_info_get(client_, access)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0063(client, message):
+async def rate_limit_test0063(client, message):
     """
     Requests the client's profile.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0063') as RLT:
-        await client_user(client)
+    with RLTCTX(client,channel,'rate_limit_test0063') as RLT:
+        await client_user_get(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0064(client, message):
+async def rate_limit_test0064(client, message):
     """
     Gets the private channels of the client.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0064') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0064') as RLT:
         await channel_private_get_all(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0065(client, message):
+async def rate_limit_test0065(client, message):
     """
     Gets the client's connections.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0065') as RLT:
-        await client_connections(client)
+    with RLTCTX(client,channel,'rate_limit_test0065') as RLT:
+        await client_connection_get_all(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0066(client, message):
+async def rate_limit_test0066(client, message):
     """
-    Requests the owner's connnections.
+    Requests the owner's connections.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0066') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0066') as RLT:
         for client_ in CLIENTS:
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
@@ -3423,15 +3423,15 @@ async def ratelimit_test0066(client, message):
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
-        await user_connections(client_, access)
+        await user_connection_get_all(client_, access)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0067(client, message):
+async def rate_limit_test0067(client, message):
     """
     Requests the owner's guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0067') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0067') as RLT:
         for client_ in CLIENTS:
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
@@ -3442,24 +3442,24 @@ async def ratelimit_test0067(client, message):
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
-        await user_guilds(client_, access)
+        await user_guild_get_all(client_, access)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0068(client, message):
+async def rate_limit_test0068(client, message):
     """
     Requests the client's guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0068') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0068') as RLT:
         await guild_get_all(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0069(client, message):
+async def rate_limit_test0069(client, message):
     """
     Requests the owner's and the client' guilds.
     """
     channel = message.channel
-    with RLTCTX(client,channel,'ratelimit_test0069') as RLT:
+    with RLTCTX(client,channel,'rate_limit_test0069') as RLT:
         for client_ in CLIENTS:
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
@@ -3472,7 +3472,7 @@ async def ratelimit_test0069(client, message):
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
         tasks = []
         loop = client.loop
-        task = Task(user_guilds(client_, access), loop)
+        task = Task(user_guild_get_all(client_, access), loop)
         tasks.append(task)
         task = Task(guild_get_all(client), loop)
         tasks.append(task)
@@ -3486,12 +3486,12 @@ async def ratelimit_test0069(client, message):
             task.result()
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0070(client, message):
+async def rate_limit_test0070(client, message):
     """
     Edits a webhook.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0070') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0070') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3504,12 +3504,12 @@ async def ratelimit_test0070(client, message):
         await client.webhook_delete(webhook)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0071(client, message):
+async def rate_limit_test0071(client, message):
     """
     Edits a webhook with it's token.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0071') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0071') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3517,17 +3517,17 @@ async def ratelimit_test0071(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        webhook = await client.webhook_create(channel,name='Suzuya')
+        webhook = await client.webhook_create(channel, name='Suzuya')
         await webhook_edit_token(client, webhook, 'Saki')
         await client.webhook_delete(webhook)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0072(client, message):
+async def rate_limit_test0072(client, message):
     """
     Requests the guild's discovery object.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0072') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0072') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3538,12 +3538,12 @@ async def ratelimit_test0072(client, message):
         await guild_discovery_get(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0073(client, message):
+async def rate_limit_test0073(client, message):
     """
     Edits the guild's discovery object.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0073') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0073') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3558,12 +3558,12 @@ async def ratelimit_test0073(client, message):
         await client.guild_discovery_edit(guild, emoji_discovery = discovery)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0074(client, message):
+async def rate_limit_test0074(client, message):
     """
     Adds and deletes or deletes and adds a subcategory to the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0074') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0074') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3571,7 +3571,7 @@ async def ratelimit_test0074(client, message):
         if not guild.cached_permissions_for(client).can_manage_guild:
             await RLT.send('I need manage guild permission to complete this command.')
         
-        discovery_categories = await client.discovery_categories()
+        discovery_category_get_all = await client.discovery_category_get_all()
         guild_discovery = await client.guild_discovery_get(guild)
         
         actual_category_ids = guild_discovery.category_ids
@@ -3580,7 +3580,7 @@ async def ratelimit_test0074(client, message):
             id_ = next(iter(actual_category_ids))
         else:
             remove_first = False
-            for category in discovery_categories:
+            for category in discovery_category_get_all:
                 id_ = category.id
                 
                 if id_ == guild_discovery.primary_category_id:
@@ -3599,48 +3599,48 @@ async def ratelimit_test0074(client, message):
             await action(client, guild, id_)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0075(client, message):
+async def rate_limit_test0075(client, message):
     """
     Requests the discovery categories.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0075') as RLT:
-        await discovery_categories(client)
+    with RLTCTX(client, channel, 'rate_limit_test0075') as RLT:
+        await discovery_category_get_all(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0076(client, message):
+async def rate_limit_test0076(client, message):
     """
     Validates a discovery search term.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0076') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0076') as RLT:
         await discovery_validate_term(client, 'gaming')
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0077(client, message):
+async def rate_limit_test0077(client, message):
     """
     Requests the detectable applications.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0077') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0077') as RLT:
         await applications_detectable(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0078(client, message):
+async def rate_limit_test0078(client, message):
     """
     Requests an eula.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0078') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0078') as RLT:
         await eula_get(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0079(client, message):
+async def rate_limit_test0079(client, message):
     """
-    Requests the guild's welcoem screen.
+    Requests the guild's welcome screen.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0079') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0079') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3648,21 +3648,21 @@ async def ratelimit_test0079(client, message):
         await welcome_screen_get(client, guild.id)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0080(client, message):
+async def rate_limit_test0080(client, message):
     """
     Request all the voice regions.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0080') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0080') as RLT:
         await voice_regions(client)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0081(client, message):
+async def rate_limit_test0081(client, message):
     """
     Requests integrations.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0081') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0081') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3670,14 +3670,14 @@ async def ratelimit_test0081(client, message):
         await integration_get_all(client, guild)
     
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0082(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test0082(client, message, name:str, emoji:'Emoji'):
     """
-    Creates an emoji in 2 guilds and then delets it. Checks emoji deletion.
+    Creates an emoji in 2 guilds and then deletes it. Checks emoji deletion.
     
     Please also give a name for the emoji and an emoji as well.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0082') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0082') as RLT:
         if len(client.guild_profiles) < 2:
             await RLT.send('The client should be at least in 2 guilds.')
         
@@ -3695,14 +3695,14 @@ async def ratelimit_test0082(client, message, name:str, emoji:'Emoji'):
         await emoji_delete(client, emoji2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0083(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test0083(client, message, name:str, emoji:'Emoji'):
     """
     Creates an emoji in 2 guilds and then deletes it. Checks emoji creation.
     
     Please also give a name for the emoji and an emoji as well.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0083') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0083') as RLT:
         if len(client.guild_profiles) < 2:
             await RLT.send('The client should be at least in 2 guilds.')
         
@@ -3720,14 +3720,14 @@ async def ratelimit_test0083(client, message, name:str, emoji:'Emoji'):
         await client.emoji_delete(emoji2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0084(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test0084(client, message, name:str, emoji:'Emoji'):
     """
     Creates 2 emoji in 1 guild and then deletes it. Checks emoji creation.
     
     Please also give a name for the emoji and an emoji as well.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0084') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0084') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3740,32 +3740,32 @@ async def ratelimit_test0084(client, message, name:str, emoji:'Emoji'):
         await client.emoji_delete(emoji2)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0085(client, message, name:str, emoji:'Emoji'):
+async def rate_limit_test0085(client, message, name:str, emoji:'Emoji'):
     """
     Creates an emoji, edits and then deletes it. Checks emoji edition.
     
     Please also give a name for the emoji and an emoji as well.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0085') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0085') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
         emoji_data = await client.download_url(emoji.url)
         emoji = await client.emoji_create( guild, name, emoji_data)
-        await emoji_edit(client, emoji, name='cakehater')
+        await emoji_edit(client, emoji, name='cake_hater')
         await client.emoji_delete(emoji)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0086(client, message, name:str,):
+async def rate_limit_test0086(client, message, name:str,):
     """
     Edits my nick desu.
     
     Please also give an mame.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0086') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0086') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3773,14 +3773,14 @@ async def ratelimit_test0086(client, message, name:str,):
         await client_edit_nick(client, guild, name)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0087(client, message, user:'user',):
+async def rate_limit_test0087(client, message, user:'user',):
     """
     Kicks the given user from the guild.
     
     Please also give a user to kick.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0087') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0087') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3788,21 +3788,21 @@ async def ratelimit_test0087(client, message, user:'user',):
         await guild_user_delete(client, guild, user)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0088(client, message):
+async def rate_limit_test0088(client, message):
     """
     Creates a private channel.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0088') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0088') as RLT:
         await channel_private_create(client, message.author)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0089(client, message):
+async def rate_limit_test0089(client, message):
     """
     Creates a message with a webhook, then edits it.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0089') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0089') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3811,7 +3811,7 @@ async def ratelimit_test0089(client, message):
             await RLT.send('I need manage webhooks permission to complete this command.')
         
         channel = message.channel
-        webhooks = await client.webhook_get_channel(channel)
+        webhooks = await client.webhook_get_all_channel(channel)
         for webhook in webhooks:
             if webhook.type is WebhookType.bot:
                 executor_webhook = webhook
@@ -3824,12 +3824,12 @@ async def ratelimit_test0089(client, message):
         await webhook_message_edit(client, executor_webhook, new_message, 'nya')
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0090(client, message):
+async def rate_limit_test0090(client, message):
     """
     Creates a message with a webhook, then deletes it.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0090') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0090') as RLT:
         guild = message.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3838,7 +3838,7 @@ async def ratelimit_test0090(client, message):
             await RLT.send('I need manage webhooks permission to complete this command.')
         
         channel = message.channel
-        webhooks = await client.webhook_get_channel(channel)
+        webhooks = await client.webhook_get_all_channel(channel)
         for webhook in webhooks:
             if webhook.type is WebhookType.bot:
                 executor_webhook = webhook
@@ -3852,12 +3852,12 @@ async def ratelimit_test0090(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0091(client, message):
+async def rate_limit_test0091(client, message):
     """
     Creates 6 messages and deletes them.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0091') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0091') as RLT:
         messages = []
         for index in range(6):
             message = await client.message_create(channel, str(index))
@@ -3868,12 +3868,12 @@ async def ratelimit_test0091(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0092(client, message, channel2:ChannelText=None):
+async def rate_limit_test0092(client, message, channel2:ChannelText=None):
     """
     Creates 3 messages in 2 channels and deletes them. Please also define an other channel.
     """
     channel1 = message.channel
-    with RLTCTX(client, channel1, 'ratelimit_test0092') as RLT:
+    with RLTCTX(client, channel1, 'rate_limit_test0092') as RLT:
         if channel2 is None:
             await RLT.send('No second channel was given.')
         
@@ -3894,12 +3894,12 @@ async def ratelimit_test0092(client, message, channel2:ChannelText=None):
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0093(client, message):
+async def rate_limit_test0093(client, message):
     """
     Creates and edits messages.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0093') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0093') as RLT:
         messages = []
         for index in range(3):
             message = await message_create(client, channel, str(index))
@@ -3912,12 +3912,12 @@ async def ratelimit_test0093(client, message):
             await client.message_delete(message)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0094(client, message):
+async def rate_limit_test0094(client, message):
     """
     Creates 7 messages and deletes 5 1 by 1 and the last 2 together.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0094') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0094') as RLT:
         messages = []
         for index in range(7):
             message = await client.message_create(channel, str(index))
@@ -3930,12 +3930,12 @@ async def ratelimit_test0094(client, message):
         await message_delete_multiple(client, messages[5:])
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0095(client, message):
+async def rate_limit_test0095(client, message):
     """
     Edits the channel's name 3 times.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0095') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0095') as RLT:
         if channel.guild is None:
             await RLT.send('Please use this command at a guild.')
         
@@ -3946,22 +3946,22 @@ async def ratelimit_test0095(client, message):
             await channel_edit(client, channel, name=name)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0096(client, message):
+async def rate_limit_test0096(client, message):
     """
     Gets the global application commands.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0096') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0096') as RLT:
         await application_command_global_get_all(client)
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0097(client, message):
+async def rate_limit_test0097(client, message):
     """
     Creates, edits and the deletes an application command.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0097') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0097') as RLT:
         application_command_schema = ApplicationCommand(
             'This-command_cake',
             'But does nothing for real, pls dont use it.',
@@ -3976,12 +3976,12 @@ async def ratelimit_test0097(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0098(client, message):
+async def rate_limit_test0098(client, message):
     """
     Gets the guild application commands for the channel's respective guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0098') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0098') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -3990,12 +3990,12 @@ async def ratelimit_test0098(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0099(client, message):
+async def rate_limit_test0099(client, message):
     """
     Creates, edits and the deletes a guild bound application command.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0099') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0099') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -4033,12 +4033,12 @@ class check_interacter(object):
         return True
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0100(client, message):
+async def rate_limit_test0100(client, message):
     """
     Adds a new interaction command to the guild, what u should use, then creates edits and deletes it's message.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0100') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0100') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -4067,12 +4067,12 @@ async def ratelimit_test0100(client, message):
             await client.application_command_guild_delete(guild, application_command)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0101(client, message):
+async def rate_limit_test0101(client, message):
     """
     Adds a new interaction command to the guild, what u should use twice, then creates edits and deletes it's message.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0101') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0101') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -4115,12 +4115,12 @@ async def ratelimit_test0101(client, message):
             await client.application_command_guild_delete(guild, application_command)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0102(client, message):
+async def rate_limit_test0102(client, message):
     """
     Adds a new interaction command to the guild, what u should call and the does 2 messages edits an deletes them.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0102') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0102') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -4153,12 +4153,12 @@ async def ratelimit_test0102(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0103(client, message):
+async def rate_limit_test0103(client, message):
     """
     Gets the verification screen of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0103') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0103') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -4167,12 +4167,12 @@ async def ratelimit_test0103(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0104(client, message):
+async def rate_limit_test0104(client, message):
     """
     Edits the verification screen of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0104') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0104') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -4180,12 +4180,12 @@ async def ratelimit_test0104(client, message):
         await verification_screen_edit(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0105(client, message):
+async def rate_limit_test0105(client, message):
     """
     Edits the welcome screen of the guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0105') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0105') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -4193,12 +4193,12 @@ async def ratelimit_test0105(client, message):
         await welcome_screen_edit(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def ratelimit_test0106(client, message, guild2:'guild'=None):
+async def rate_limit_test0106(client, message, guild2:'guild'=None):
     """
     Edits the welcome screen of 2 guilds. Please also define the second guild.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'ratelimit_test0106') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0106') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')

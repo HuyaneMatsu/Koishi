@@ -155,7 +155,7 @@ async def channeling_start(client, message, channel_id:int):
         
         pairs = []
         if channeling_1 is None:
-            webhooks = await client.webhook_get_channel(channel_1)
+            webhooks = await client.webhook_get_all_channel(channel_1)
             for webhook in webhooks:
                 if webhook.type is WebhookType.bot:
                     break
@@ -167,7 +167,7 @@ async def channeling_start(client, message, channel_id:int):
             pairs.extend(channeling_1.pairs)
         
         if channeling_2 is None:
-            webhooks = await client.webhook_get_channel(channel_2)
+            webhooks = await client.webhook_get_all_channel(channel_2)
             for webhook in webhooks:
                 if webhook.type is WebhookType.bot:
                     break

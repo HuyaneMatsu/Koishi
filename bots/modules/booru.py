@@ -414,13 +414,23 @@ async def touhou(client, event,
         name: ('str', 'Who\'s?'),
             ):
     """Shows you the given Touhou character's portrait."""
-    matcheds = get_close_matches(name, TOUHOU_NAMES, n=1, cutoff=0.80)
+    name_length = len(name)
+    if name_length == 0:
+        yield Embed('Empty content', color=BOORU_COLOR)
+        return
+    
+    if name_length > 10:
+        name_length = 10
+    
+    diversity = 0.2+(10-name_length)*0.02
+    
+    matcheds = get_close_matches(name, TOUHOU_NAMES, n=1, cutoff=1.0-diversity)
     if matcheds:
         async for response in TOUHOU_NAME_RELATIONS[matcheds[0]](client, event):
             yield response
     else:
         embed = Embed('No match', color=BOORU_COLOR)
-        matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.60)
+        matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.8-diversity)
         if matcheds:
             field_value_parts = []
             for index, matched in enumerate(matcheds, 1):

@@ -186,7 +186,7 @@ class auto_pyramid_u:
             await client.message_create(channel, 'I need manage webhooks permission to execute this command.')
             return
         
-        webhooks = await client.webhook_get_channel(channel)
+        webhooks = await client.webhook_get_all_channel(channel)
         for webhook in webhooks:
             if webhook.type is WebhookType.bot:
                 executor_webhook = webhook
