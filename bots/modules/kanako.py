@@ -31,27 +31,27 @@ KANAKO_COLOR = Color.from_tuple(FONT_COLOR)
 
 async def kanako_description(client,message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('kanakogame', (
+    return Embed('kanako', (
         'Start a hiragana or a katakana quiz!\n'
-        f'Usage: `{prefix}kanakogame (subcommand) ...`\n'
+        f'Usage: `{prefix}kanako (sub-command) ...`\n'
         'There can be only one game each channel.\n\n'
-        'Subcommands:'
-        f'- `{prefix}kanakogame create <map> <amount> <possibilities>` : '
-        'Creates a kanakogame at the channel, to what users can join. You '
+        'Sub-commands:'
+        f'- `{prefix}kanako create <map> <amount> <possibilities>` : '
+        'Creates a kanako at the channel, to what users can join. You '
         'as the creator can start or cancel it anytime. `map` can be '
         '`hiragana` (default) or `katakana`. `amount` need to be at least '
         '`10` and maximum as long as the `map` is. `20` is the default. '
         '`possibilities` can be one of : `0`, `3`, `4` or `5` (default)\n'
-        f'- `{prefix}kanakogame start` : Starts the game. *Game owner only.*\n'
-        f'- `{prefix}kanakogame join` : Joins you to the game. Cannot join to '
+        f'- `{prefix}kanako start` : Starts the game. *Game owner only.*\n'
+        f'- `{prefix}kanako join` : Joins you to the game. Cannot join to '
         'already started games.\n'
-        f'- `{prefix}kanakogame leave` : Leaves from the current game.'
-        'The ownership passes on the user who joined second. If noone is left '
+        f'- `{prefix}kanako leave` : Leaves from the current game.'
+        'The ownership passes on the user who joined second. If no-one is left '
         'at the game, I cancel it.\n'
-        f'- `{prefix}kanakogame cancel` : Cancels the current game. '
+        f'- `{prefix}kanako cancel` : Cancels the current game. '
         '*Game owner only.*\n'
-        f'- `{prefix}kanakogame hiragana` : Shows up the hiragana map.\n'
-        f'- `{prefix}kanakogame katakana` : Shows up the katakana map.'
+        f'- `{prefix}kanako hiragana` : Shows up the hiragana map.\n'
+        f'- `{prefix}kanako katakana` : Shows up the katakana map.'
         ), color=KANAKO_COLOR)
 
 _pairsK=('k','g','s','z','c','t','d','f','h','b','p','n','m','y','r','w','j')
@@ -101,7 +101,7 @@ MAP_showcases = {name:render_showcase(name, map_) for name,map_ in MAPS.items()}
 class history_element(object):
     __slots__ = ('answer', 'answers', 'options', 'question',)
 
-class kanako_game(object):
+class kanako(object):
     __slots__ = ('amount', 'answers', 'client', 'history', 'map', 'map_name', 'options', 'possibilities', 'romajis',
         'running', 'channel', 'users', 'waiter',)
     def __init__(self, client, channel, user, map_name, amount, possibilities):
@@ -235,7 +235,7 @@ class kanako_game(object):
         answers=self.answers
         buffer=ReuBytesIO()
         embed=Embed(color=KANAKO_COLOR)
-        embed.add_image('attachment://guessme.png')
+        embed.add_image('attachment://guess_me.png')
         embed.add_footer('')
         time_till_notify=CIRCLE_TIME-10
         
@@ -339,7 +339,7 @@ class kanako_game(object):
                 message = 'You are already at the game'
                 break
             
-            message = 'You succesfully joined to the current game.'
+            message = 'You successfully joined to the current game.'
             self.users.append(user)
             
             if len(self.users) == 10:
@@ -461,7 +461,7 @@ class game_statistics(object):
                 f'Good answer time median : {win_median:.2f} s\n'
                 f'Bad answer time median : {lose_median:.2f} s\n'
                 f'Answered first: {win_first} GOOD / {lose_first} BAD\n'
-                f'Raited : {total:.2f}'
+                f'Rated : {total:.2f}'
                     )
 
         embed.add_footer(f'Page 1 /  {len(self.cache)}')
@@ -590,7 +590,7 @@ def kanako_create(client,game,message,args):
                     break
 
                 if possibilities not in (5,4,3,0):
-                    text=f'Possibilites can be set to 5, 4, 3, 0, got {possibilities}'
+                    text=f'Possibilities can be set to 5, 4, 3, 0, got {possibilities}'
                     break
                 
                 break
@@ -603,11 +603,11 @@ def kanako_create(client,game,message,args):
             amount=20
             possibilities=5
 
-        game=kanako_game(client,message.channel,message.author,map_name,amount,possibilities)
+        game=kanako(client,message.channel,message.author,map_name,amount,possibilities)
         
         ACTIVE_GAMES[message.channel.id]=game
         embed=game.info
-        embed.title='Game succesfully created'
+        embed.title='Game successfully created'
         return embed
     else:
         text='There is already an active game at the channel.'
@@ -722,7 +722,7 @@ class embedination(object):
                             ):
                     return
             
-            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
             await client.events.error(client, f'{self!r}.__call__', err)
             return
         
@@ -789,7 +789,7 @@ class embedination(object):
         return Task(canceller(self, None), KOKORO)
 
 Koishi.commands(kanako_manager,
-    name = 'kanako_game',
+    name = 'kanako',
     description = kanako_description,
     category = 'GAMES',
     checks = checks.guild_only(),

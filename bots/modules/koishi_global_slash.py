@@ -3,7 +3,7 @@ from time import perf_counter
 from random import random
 
 from hata import Client, Embed, parse_emoji, DATETIME_FORMAT_CODE, id_to_time, elapsed_time, parse_emoji, \
-    DiscordException, BUILTIN_EMOJIS, ERROR_CODES
+    DiscordException, BUILTIN_EMOJIS, ERROR_CODES, ICON_TYPE_NONE
 from hata.ext.commands import wait_for_reaction
 
 Koishi : Client
@@ -11,121 +11,8 @@ Koishi : Client
 COMMAND_LIMIT = 50
 SWITCHABLE_COMMANDS = {}
 
-def switchable(command):
-    SWITCHABLE_COMMANDS[command.name] = command
-    return command
 
-def prettify_command_name(command_name):
-    return command_name.lower().replace('_', '-').replace(' ', '-')
-
-COMMANDS_CATEGORY = Koishi.interactions(None, name='commands', is_global=True,
-    description='Command to manage Koishi\'s slash commands inside of the guild.')
-
-@COMMANDS_CATEGORY.interactions(name='list')
-async def list_(client, event,
-        current: ('bool', 'Whether the current commands should be listed.') = True,
-            ):
-    """Lists every available switchable commands or the switchable commands."""
-    guild = event.guild
-    if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
-    
-    if current:
-        yield
-        
-        commands = await client.application_command_guild_get_all(guild)
-        command_names = [command.name for command in commands]
-        command_names.sort()
-        
-        title = f'{guild.name}\' current commands'
-    else:
-        command_names = sorted(SWITCHABLE_COMMANDS)
-        title = 'All switchable command'
-    
-    description_parts = []
-    
-    for index, command_name in enumerate(command_names, 1):
-        description_parts.append(str(index))
-        description_parts.append('.: `')
-        description_parts.append(command_name)
-        description_parts.append('`\n')
-    
-    description_parts[-1] = '`'
-    
-    description = ''.join(description_parts)
-    
-    yield Embed(title, description)
-    return
-
-
-@COMMANDS_CATEGORY.interactions
-async def enable(client, event,
-        command_name: ('str', 'The command\'s name to enable or disable.'),
-        allow: ('bool', 'Enable?') = True,
-            ):
-    """Enables or disables a switchable command."""
-    guild = event.guild
-    if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
-    
-    if not event.user_permissions.can_administrator:
-        yield Embed('Permission denied', 'You must have administrator permission to use this command.')
-        return
-    
-    command_name = prettify_command_name(command_name)
-    if command_name not in SWITCHABLE_COMMANDS:
-        yield Embed('Error', 'Unknown command-name.')
-        return
-    
-    yield
-    
-    application_commands = await client.application_command_guild_get_all(guild)
-    for application_command in application_commands:
-        # If you are not working with overlapping names, a name check should be enough.
-        if application_command.name == command_name:
-            command_present = True
-            break
-    else:
-        command_present = False
-    
-    if allow:
-        if command_present:
-            content = 'is already present'
-        else:
-            if len(application_commands) == COMMAND_LIMIT:
-                content = f'could not be added; command limit ({COMMAND_LIMIT}) is reached'
-            else:
-                command = SWITCHABLE_COMMANDS[command_name]
-                await client.application_command_guild_create(guild, command.get_schema())
-                content = 'has been added'
-    else:
-        if command_present:
-            await client.application_command_guild_delete(guild, application_command)
-            content = 'has been disabled'
-        else:
-            content = 'is not present'
-    
-    yield Embed('Success', f'Command `{command_name}` {content}.')
-    return
-
-@COMMANDS_CATEGORY.interactions
-async def describe(client, event,
-        command_name: ('str', 'The command\'s name to enable or disable.'),
-            ):
-    """Shows the given switchable command's description."""
-    command_name = prettify_command_name(command_name)
-    
-    try:
-        command = SWITCHABLE_COMMANDS[command_name]
-    except KeyError:
-        return Embed('Error', f'No command found with name:\n{command_name})')
-    
-    return Embed(command_name, command.description)
-
-@switchable
-@Koishi.interactions
+@Koishi.interactions(is_global=True)
 async def ping(client, event):
     """HTTP ping-pong."""
     start = perf_counter()
@@ -135,8 +22,7 @@ async def ping(client, event):
     yield f'{delay:.0f} ms'
 
 
-@switchable
-@Koishi.interactions
+@Koishi.interactions(is_global=True)
 async def avatar(client, event,
         user : ('user', 'Choose a user!') = None,
             ):
@@ -153,9 +39,8 @@ async def avatar(client, event,
     return Embed(f'{user:f}\'s avatar', color=color, url=url).add_image(url)
 
 
-@switchable
-@Koishi.interactions
-async def showemoji(client, event,
+@Koishi.interactions(is_global=True)
+async def show_emoji(client, event,
         emoji : ('str', 'Yes?'),
             ):
     """Shows the given custom emoji."""
@@ -168,9 +53,9 @@ async def showemoji(client, event,
     
     return f'**Name:** {emoji:e} **Link:** {emoji.url}'
 
-@switchable
-@Koishi.interactions(name='id-to-time')
-async def idtotime(client, event,
+
+@Koishi.interactions(name='id-to-time', is_global=True)
+async def id_to_time_(client, event,
         snowflake : ('int', 'Id please!'),
             ):
     """Converts the given Discord snowflake id to time."""
@@ -178,8 +63,7 @@ async def idtotime(client, event,
     return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
 
 
-@switchable
-@Koishi.interactions
+@Koishi.interactions(is_global=True)
 async def guild_icon(client, event,
         choice: ({
             'Icon'             : 'icon'             ,
@@ -217,8 +101,8 @@ async def guild_icon(client, event,
     color = hash_value&0xFFFFFF
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
 
-@switchable
-@Koishi.interactions
+
+@Koishi.interactions(is_global=True)
 async def roll(client, event,
         dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
             ):
@@ -229,12 +113,13 @@ async def roll(client, event,
     
     return str(amount)
 
-@switchable
-@Koishi.interactions
+
+@Koishi.interactions(is_global=True)
 async def yeet(client, event,
         user :('user', 'Select the user to yeet!'),
         reason : ('str', 'Any reason why you would want to yeet?') = None,
         delete_message_days : ([(str(v), v) for v in range(8)], 'Delete previous messages?') = 0,
+        notify_user : ('bool', 'Whether the user should get DM about the ban.') = True,
             ):
     """Yeets someone out of the guild. You must have ban users permission."""
     guild = event.guild
@@ -257,13 +142,52 @@ async def yeet(client, event,
         yield Embed('Permission denied', f'{client.name_at(guild)} cannot yeet in the guild.')
         return
     
-    if (reason is None) or (not reason):
-        caller = event.author
-        reason = f'Requested by: {caller.full_name} [{caller.id}]'
+    if (reason is not None) and (not reason):
+        reason = None
     
     yield
-    await banner.guild_ban_add(guild, user, reason=reason)
-    yield Embed('Hecatia yeah!', f'{user.full_name} has been yeeted.')
+    
+    if notify_user:
+        if user.is_bot:
+            notify_note = None
+        else:
+            try:
+                channel = await client.channel_private_create(user)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    return # We cannot help no internet
+                
+                raise
+            
+            embed = Embed('Yeeted', f'You were yeeted from {guild.name}.'). \
+                add_field('Reason', '*No reason provided.*' if reason is None else reason)
+            
+            try:
+                await client.message_create(channel, embed=embed)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    return # We cannot help no internet
+                
+                elif isinstance(err, DiscordException) and (err.code == ERROR_CODES.cannot_message_user):
+                    notify_note = 'Notification cannot be delivered: user has DM disabled.'
+                else:
+                    raise
+            else:
+                notify_note = None
+    else:
+        notify_note = None
+    
+    if reason is None:
+        caller = event.user
+        reason = f'Requested by: {caller.full_name} [{caller.id}]'
+        
+    await banner.guild_ban_add(guild, user, delete_message_days=delete_message_days, reason=reason)
+    
+    embed = Embed('Hecatia yeah!', f'{user.full_name} has been yeeted.')
+    if (notify_note is not None):
+        embed.add_footer(notify_note)
+    
+    yield embed
 
 
 ROLE_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
@@ -289,8 +213,7 @@ class _role_emoji_emoji_checker(object):
         
         return True
 
-@switchable
-@Koishi.interactions
+@Koishi.interactions(is_global=True)
 async def emoji_role(client, event,
         emoji : ('str', 'Select the emoji to bind to roles.'),
         role_1 : ('role', 'Select a role.') = None,
@@ -417,3 +340,65 @@ async def emoji_role(client, event,
     
     await client.interaction_followup_message_edit(event, message, embed=embed)
 
+
+@Koishi.interactions(name='user', is_global=True)
+async def user_(client, event,
+        user :('user', '*spy?*') = None,
+            ):
+    """Shows some information about your or about the selected user."""
+    
+    if user is None:
+        user = event.user
+    
+    guild = event.guild
+    
+    embed = Embed(user.full_name)
+    created_at = user.created_at
+    embed.add_field('User Information',
+        f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+        f'Profile: {user:m}\n'
+        f'ID: {user.id}')
+    
+    if guild is None:
+        profile = None
+    else:
+        profile = user.guild_profiles.get(guild)
+    
+    if profile is None:
+        if user.avatar_type is ICON_TYPE_NONE:
+            color = user.default_avatar.color
+        else:
+            color = user.avatar_hash&0xFFFFFF
+        embed.color = color
+    
+    else:
+        embed.color = user.color_at(guild)
+        roles = profile.roles
+        if roles is None:
+            roles = '*none*'
+        else:
+            roles.sort()
+            roles = ', '.join(role.mention for role in reversed(roles))
+        
+        text = []
+        if profile.nick is not None:
+            text.append(f'Nick: {profile.nick}')
+        
+        if profile.joined_at is None:
+            await client.guild_user_get(user.id)
+        
+        # Joined at can be `None` if the user is in lurking mode.
+        joined_at = profile.joined_at
+        if joined_at is not None:
+            text.append(f'Joined: {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]')
+        
+        boosts_since = profile.boosts_since
+        if (boosts_since is not None):
+            text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
+        
+        text.append(f'Roles: {roles}')
+        embed.add_field('In guild profile','\n'.join(text))
+    
+    embed.add_thumbnail(user.avatar_url_as(size=128))
+    
+    return embed

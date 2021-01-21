@@ -47,18 +47,18 @@ class invite_create:
                 invite_ = await client.vanity_invite_get(message.guild)
                 if invite_ is None:
                     max_age = 0
-                    max_use = 0
+                    max_uses = 0
             else:
                 await client.message_create(message.channel,
                     'You must be the owner of the guild, to create a permanent invite.')
                 return
         else:
             max_age = 21600
-            max_use = 1
+            max_uses = 1
         
         try:
             if invite_ is None:
-                invite_ = await client.invite_create_preferred(message.guild, max_age, max_use)
+                invite_ = await client.invite_create_preferred(message.guild, max_age=max_age, max_uses=max_uses)
         except DiscordException as err:
             content = repr(err)
         except ValueError as err:
@@ -73,7 +73,7 @@ class invite_create:
         try:
             await client.message_create(channel, content)
         except DiscordException as err:
-            if err.code == ERROR_CODES.invalid_message_send_user: # User has dm-s disallowed
+            if err.code == ERROR_CODES.cannot_message_user: # User has dm-s disallowed
                 await client.message_create(message.channel, 'You have DM disabled, could not send the invite.')
     
     category = 'ADMINISTRATION'
@@ -123,7 +123,7 @@ class bans:
                 color=ADMINISTRATION_COLOR))
             return
         
-        ban_data = await client.message_id(guild)
+        ban_data = await client.guild_ban_get_all(guild)
         
         if not ban_data:
             await client.message_create(message.channel, 'None')

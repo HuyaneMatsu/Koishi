@@ -17,7 +17,7 @@ class message_me:
         try:
             await client.message_create(channel, 'Love you!')
         except DiscordException as err:
-            if err.code == ERROR_CODES.invalid_message_send_user:
+            if err.code == ERROR_CODES.cannot_message_user:
                 await client.message_create(message.channel, 'Pls turn on private messages from this server!')
     
     category = 'GAMES'

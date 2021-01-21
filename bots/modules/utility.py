@@ -114,7 +114,7 @@ class color:
 class update_application_info:
     async def update_application_info(client, message, user: CLIENT_CONVERTER_ALL_CLIENT_DEFAULT):
         await user.update_application_info()
-        content = f'Application info of `{user:f}` is updated succesfully!'
+        content = f'Application info of `{user:f}` is updated successfully!'
         await client.message_create(message.channel, content)
     
     category = 'UTILITY'
@@ -123,10 +123,10 @@ class update_application_info:
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('update_application_info',(
-            'I can update applicaction info of any of the active clients '
+            'I can update application info of any of the active clients '
             'at my mansion.\n'
             f'Usage: `{prefix}update_application_info <user>`\n'
-            '`user` is otional and can be only an another client.'
+            '`user` is optional and can be only an another client.'
                 ), color=UTILITY_COLOR).add_footer(
                 'Owner only!')
 
@@ -175,7 +175,7 @@ class resend_webhook:
             f'Usage: `{prefix}resend_webhook *message_id* <channel>`\n'
             'The `message_id` must be the `id` of the message sent by the '
             'webhook.\n'
-            'The `channel` by default is zhis channel, but if the message '
+            'The `channel` by default is this channel, but if the message '
             'is at a different channel, you should tell me > <.'
                 ), color=UTILITY_COLOR).add_footer(
                 'Guild only. Owner only!')
@@ -635,12 +635,13 @@ async def guild_info(client, message, field: str=None):
 
 
 @Koishi.commands.from_class
-class message:
+class message_:
     async def command(client, message, target_message: MESSAGE_CONVERTER_ALL):
         await Pagination(client,message.channel, [Embed(description=chunk) for chunk in pchunkify(target_message)])
     
     category = 'UTILITY'
-    checks = [checks.guild_only(), CHECK_ADMINISTRATION | checks.has_role(TESTER_ROLE)]
+    checks = [checks.has_role(TESTER_ROLE)]
+    name = 'message'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -649,7 +650,7 @@ class message:
             f'Usage: `{prefix}message *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
                 ), color=UTILITY_COLOR).add_footer(
-                f'Guild only! You must have dministrator permission or {TESTER_ROLE.name}!')
+                f'Guild only! You must have {TESTER_ROLE.name}!')
 
 
 @Koishi.commands.from_class
@@ -675,7 +676,7 @@ class message_pure:
             f'Usage: `{prefix}message-pure *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
                 ), color=UTILITY_COLOR).add_footer(
-                f'Guild only! You must {TESTER_ROLE.name} to use it!')
+                f'Guild only! You must have {TESTER_ROLE.name} to use it!')
 
 @Koishi.commands.from_class
 class roles:
