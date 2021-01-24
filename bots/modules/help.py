@@ -62,7 +62,8 @@ async def aliases_description(client, message):
 
 
 async def aliases_parser_failure_handler(client, message, command, content, args):
-    await Closer(client, message.channel, aliases_description(client, message))
+    embed = await aliases_description(client, message)
+    await Closer(client, message.channel, embed)
 
 @Koishi.commands(
     description = aliases_description,
