@@ -6,7 +6,8 @@ from time import perf_counter
 from bs4 import BeautifulSoup
 
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
-    alchemy_incendiary
+    alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, \
+    ChannelCategory, ChannelStore, ChannelThread
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
@@ -218,13 +219,17 @@ async def flandre(client, event):
     yield # Yield one to acknowledge the interaction
     yield await get_image_embed(client, 'flandre_scarlet', 'Scarlet Flandre', 0xdc143c)
 
-
 @SCARLET.interactions
 async def remilia(client, event):
     """Remilia!"""
     yield # Yield one to acknowledge the interaction
-    yield await get_image_embed(client, 'remilia_scarlet', 'Remilia Flandre', 0x9400d3)
+    yield await get_image_embed(client, 'remilia_scarlet', 'Scarlet Remilia', 0x9400d3)
 
+@SCARLET.interactions(is_default=True)
+async def devil(client, event):
+    """Flandre & Remilia!"""
+    yield # Yield one to acknowledge the interaction
+    yield await get_image_embed(client, 'flandre_scarlet+remilia_scarlet', 'Scarlet Flandre & Remilia', 0xa12a2a)
 
 class Action(object):
     __slots__ = ('action_name', 'embed_color', )

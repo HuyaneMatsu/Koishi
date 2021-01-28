@@ -1932,10 +1932,29 @@ async def welcome_screen_edit(client, guild):
     
     return WelcomeScreen.from_data(data)
 
+async def application_command_global_get(client, application_command_id):
+    application_id = client.application.id
+    
+    data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/applications/{application_id}/commands/{application_command_id}',
+            )
+    
+    return ApplicationCommand.from_data(data)
+
+async def application_command_guild_get(client, guild, application_command_id):
+    application_id = client.application.id
+    guild_id = guild.id
+    
+    data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
+            )
+    
+    return ApplicationCommand.from_data(data)
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0000(client,message):
     """
-    Does 6 achievement get request towards 1 achievemt.
+    Does 6 achievement get request towards 1 achievement.
     The bot's application must have at least 1 achievement created.
     """
     with RLTCTX(client,message.channel,'rate_limit_test0000') as RLT:
@@ -1963,7 +1982,7 @@ async def rate_limit_test0000(client,message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0001(client,message):
     """
-    Does 3-3 achievement get request towards 2 achievemts.
+    Does 3-3 achievement get request towards 2 achievement.
     The bot's application must have at least 2 achievement created.
     """
     with RLTCTX(client,message.channel,'rate_limit_test0001') as RLT:
@@ -2053,7 +2072,7 @@ async def rate_limit_test0003(client,message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0004(client,message):
     """
-    Creates an achievent, then edits it twice for testing. When done, deletes it.
+    Creates an achievement, then edits it twice for testing. When done, deletes it.
     """
     
     with RLTCTX(client,message.channel,'rate_limit_test0004') as RLT:
@@ -4208,4 +4227,50 @@ async def rate_limit_test0106(client, message, guild2:'guild'=None):
         
         await welcome_screen_edit(client, guild)
         await welcome_screen_edit(client, guild2)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0107(client, message):
+    """
+    Gets a global application command.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0107') as RLT:
+        application_commands = await client.application_command_global_get_all()
+        if application_commands:
+            application_command = application_commands[0]
+            delete_after = False
+        else:
+            application_command = client.application_command_global_create(ApplicationCommand('test_command','ayaya'))
+            delete_after = True
+        
+        try:
+            await application_command_global_get(client, application_command.id)
+        finally:
+            if delete_after:
+                await client.application_command_global_delete(application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0108(client, message):
+    """
+    Gets a guild bound application command.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0108') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        application_commands = await client.application_command_guild_get_all(guild)
+        if application_commands:
+            application_command = application_commands[0]
+            delete_after = False
+        else:
+            application_command = client.application_command_guild_create(guild, ApplicationCommand('test_command','ayaya'))
+            delete_after = True
+        
+        try:
+            await application_command_guild_get(client, guild, application_command.id)
+        finally:
+            if delete_after:
+                await client.application_command_guild_delete(guild, application_command)
 

@@ -172,6 +172,9 @@ async def qualifier(client, message):
         yield embed
 
 QUALIFIER_DEADLINE = datetime(2021, 1, 27, 0, 0, 0)
+JAM_START = datetime(2021, 1, 29, 0, 0, 0)
+JAM_DEADLINE = datetime(2021, 2, 12, 0, 0, 0)
+
 
 @Koishi.commands(category='EVENTS', checks=[checks.private_only(), checks.has_role(EVERYNYAN_ROLE)])
 @Cooldown('user', 7200., limit=2, handler=CooldownHandler())
@@ -207,20 +210,22 @@ async def submit(client, message):
     return Embed('Success', 'Noice', color=EVENT_COLOR)
 
 
-# COUNTDOWN DISABLED, SINCE IT IS OVER
-EVENT_DEADLINE = QUALIFIER_DEADLINE
-
 async def countdown_description(client, message):
     now = datetime.utcnow()
-    if now >= EVENT_DEADLINE:
-        result = 'the countdown is already over'
+    for description, date in (
+            ('hata code jam 2 qualifier end', QUALIFIER_DEADLINE),
+            ('hata code jam 2 start', JAM_START),
+            ('hata code jam 2 end', JAM_DEADLINE),
+                ):
+        if now < date:
+            result = f'there is {elapsed_time(relativedelta(now, date))} left'
+            break
     else:
-        result = elapsed_time(relativedelta(now, EVENT_DEADLINE))
-        result = f'there is {result} left'
+        result = 'the countdown is already over'
     
     prefix = client.command_processer.get_prefix_for(message)
     return Embed('countdown', (
-        'Returns when the hata codejam ends!\n'
+        f'Returns when the {description}s!\n'
         f'Usage: `{prefix}countdown`\n'
         '\n'
         f'Don\'t worry, we got you, {result}.'
@@ -229,10 +234,12 @@ async def countdown_description(client, message):
 @Koishi.commands(aliases=['deadline', 'event_deadline'], description=countdown_description, category='EVENTS')
 async def countdown(client, message):
     now = datetime.utcnow()
-    if now >= EVENT_DEADLINE:
-        result = 'Countdown over!'
+    for date in (QUALIFIER_DEADLINE, JAM_START, JAM_DEADLINE):
+        if now < date:
+            result = elapsed_time(relativedelta(now, date))
+            break
     else:
-        result = elapsed_time(relativedelta(now, EVENT_DEADLINE))
+        result = 'Countdown over!'
     
     await client.message_create(message.channel, result)
 

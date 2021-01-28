@@ -2,8 +2,9 @@
 from time import perf_counter
 from random import random
 
-from hata import Client, Embed, parse_emoji, DATETIME_FORMAT_CODE, id_to_time, elapsed_time, parse_emoji, \
-    DiscordException, BUILTIN_EMOJIS, ERROR_CODES, ICON_TYPE_NONE
+from hata import Client, Embed, parse_emoji, DATETIME_FORMAT_CODE, id_to_time, elapsed_time, parse_emoji, Status, \
+    DiscordException, BUILTIN_EMOJIS, ERROR_CODES, ICON_TYPE_NONE, RoleManagerType, ChannelCategory, ChannelVoice, \
+    ChannelText, ChannelStore, ChannelThread
 from hata.ext.commands import wait_for_reaction
 
 Koishi : Client
@@ -400,5 +401,271 @@ async def user_(client, event,
         embed.add_field('In guild profile','\n'.join(text))
     
     embed.add_thumbnail(user.avatar_url_as(size=128))
+    
+    return embed
+
+@Koishi.interactions(name='role')
+async def role_(client, event,
+        role: ('role', 'Select the role to show information of.'),
+            ):
+    """Shows the information about a role."""
+    if role.partial:
+        return Embed('Error', 'I must be in the guild, where the role is.')
+    
+    embed = Embed(f'Role information for: {role.name}', color=role.color)
+    embed.add_field('Position', str(role.position), inline=True)
+    embed.add_field('Id', str(role.id), inline=True)
+    
+    embed.add_field('Separated', 'true' if role.separated else 'false', inline=True)
+    embed.add_field('Mentionable', 'true' if role.mentionable else 'false', inline=True)
+    
+    manager_type = role.manager_type
+    if manager_type is RoleManagerType.NONE:
+        managed_description = 'false'
+    else:
+        if manager_type is RoleManagerType.UNSET:
+            await client.sync_roles(role.guild)
+            manager_type = role.manager_type
+        
+        if manager_type is RoleManagerType.BOT:
+            managed_description = f'Special role for bot: {role.manager:f}'
+        elif manager_type is RoleManagerType.BOOSTER:
+            managed_description = 'Role for the boosters of the guild.'
+        elif manager_type is RoleManagerType.INTEGRATION:
+            managed_description = f'Special role for integration: {role.manager.name}'
+        elif manager_type is RoleManagerType.UNKNOWN:
+            managed_description = 'Some new things.. Never heard of them.'
+        else:
+            managed_description = 'I have no clue.'
+    
+    embed.add_field('Managed', managed_description, inline=True)
+    
+    color = role.color
+    embed.add_field('color',
+        f'html: {color.as_html}\n'
+        f'rgb: {color.as_rgb}\n'
+        f'int: {color:d}',
+            inline = True)
+    
+    created_at = role.created_at
+    embed.add_field('Created at',
+        f'{created_at:{DATETIME_FORMAT_CODE}}\n'
+        f'{elapsed_time(created_at)} ago',
+            inline=True)
+    
+    return embed
+
+
+GREEN_HEART = BUILTIN_EMOJIS['green_heart']
+YELLOW_HEART = BUILTIN_EMOJIS['yellow_heart']
+RED_HEART = BUILTIN_EMOJIS['heart']
+BLACK_HEART = BUILTIN_EMOJIS['black_heart']
+GIFT_HEART = BUILTIN_EMOJIS['gift_heart']
+
+def add_guild_all_field(guild, embed, even_if_empty):
+    add_guild_info_field(guild, embed, False)
+    add_guild_counts_field(guild, embed, False)
+    add_guild_emojis_field(guild ,embed, False)
+    add_guild_users_field(guild, embed, False)
+    add_guild_boosters_field(guild, embed, False)
+
+
+def add_guild_info_field(guild, embed, even_if_empty):
+    created_at = guild.created_at
+    sections_parts = [
+        '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]\n'
+        '**Voice region**: ', guild.region.name,
+            ]
+    
+    features = guild.features
+    if features:
+        sections_parts.append('\n**Features**: ')
+        for feature in features:
+            sections_parts.append(feature.name)
+            sections_parts.append(', ')
+        
+        del sections_parts[-1]
+    
+    embed.add_field('Guild information', ''.join(sections_parts))
+
+def add_guild_counts_field(guild, embed, even_if_empty):
+    channel_text = 0
+    channel_announcements = 0
+    channel_category = 0
+    channel_voice = 0
+    channel_thread = 0
+    channel_store = 0
+    
+    for channel in guild.channels.values():
+        channel_type = channel.__class__
+        if channel_type is ChannelText:
+            channel_text +=1
+            if channel.type == 5:
+                channel_announcements += 1
+            continue
+        
+        if channel_type is ChannelCategory:
+            channel_category += 1
+            continue
+        
+        if channel_type is ChannelVoice:
+            channel_voice += 1
+            continue
+        
+        if channel_type is ChannelThread:
+            channel_thread += 1
+            continue
+        
+        if channel_type is ChannelStore:
+            channel_store += 1
+            continue
+    
+    sections_parts = [
+        '**Users: ', str(guild.user_count), '**\n'
+        '**Roles: ', str(len(guild.role_list)), '**'
+            ]
+    
+    if channel_text:
+        sections_parts.append('\n**Text channels: ')
+        sections_parts.append(str(channel_text))
+        sections_parts.append('**')
+        
+        if channel_announcements:
+            sections_parts.append(' [')
+            sections_parts.append(str(channel_announcements))
+            sections_parts.append(' Announcements]')
+    
+    if channel_voice:
+        sections_parts.append('\n**Voice channels: ')
+        sections_parts.append(str(channel_voice))
+        sections_parts.append('**')
+    
+    if channel_category:
+        sections_parts.append('\n**Category channels: ')
+        sections_parts.append(str(channel_category))
+        sections_parts.append('**')
+    
+    if channel_thread:
+        sections_parts.append('\n**Thread channels: ')
+        sections_parts.append(str(channel_thread))
+        sections_parts.append('**')
+    
+    if channel_store:
+        sections_parts.append('\n**Store channels: ')
+        sections_parts.append(str(channel_store))
+        sections_parts.append('**')
+    
+    embed.add_field('Counts', ''.join(sections_parts))
+
+def add_guild_emojis_field(guild, embed, even_if_empty):
+    emoji_count = len(guild.emojis)
+    if emoji_count:
+        sections_parts = [
+            '**Total: ', str(emoji_count), '**\n'
+            '**Static emojis: '
+                ]
+        
+        normal_static, normal_animated, managed_static, managed_animated = guild.emoji_counts
+        emoji_limit = guild.emoji_limit
+        sections_parts.append(str(normal_static))
+        sections_parts.append('** [')
+        sections_parts.append(str(emoji_limit-normal_static))
+        sections_parts.append(' free]\n')
+        sections_parts.append('**Animated emojis: ')
+        sections_parts.append(str(normal_animated))
+        sections_parts.append('** [')
+        sections_parts.append(str(emoji_limit-normal_animated))
+        sections_parts.append(' free]')
+        
+        managed_total = managed_static+managed_animated
+        if managed_total:
+            sections_parts.append('\n**Managed: ')
+            sections_parts.append(str(managed_total))
+            sections_parts.append('** [')
+            sections_parts.append(str(managed_static))
+            sections_parts.append(' static, ')
+            sections_parts.append(str(managed_animated))
+            sections_parts.append(' animated]')
+        
+        embed.add_field('Emojis', ''.join(sections_parts))
+    
+    elif even_if_empty:
+        embed.add_field('Emojis', '*The guild has no emojis*')
+
+def add_guild_users_field(guild, embed, even_if_empty):
+    # most usual first
+    s_grey = Status.offline
+    s_green = Status.online
+    s_yellow = Status.idle
+    s_red = Status.dnd
+    
+    v_grey = 0
+    v_green = 0
+    v_yellow = 0
+    v_red = 0
+
+    for user in guild.users.values():
+        status = user.status
+        if   status is s_grey:
+            v_grey += 1
+        elif status is s_green:
+            v_green += 1
+        elif status is s_yellow:
+            v_yellow += 1
+        elif status is s_red:
+            v_red += 1
+        else:
+            v_grey += 1
+    
+    del s_grey
+    del s_green
+    del s_yellow
+    del s_red
+    
+    embed.add_field('Users',
+        f'{GREEN_HEART:e} **{v_green}**\n'
+        f'{YELLOW_HEART:e} **{v_yellow}**\n'
+        f'{RED_HEART:e} **{v_red}**\n'
+        f'{BLACK_HEART:e} **{v_grey}**')
+
+def add_guild_boosters_field(guild, embed, even_if_empty):
+    boosters = guild.boosters
+    if boosters:
+        count = len(boosters)
+        to_render = count if count < 21 else 21
+        
+        embed.add_field(f'Most awesome people of the guild',
+            f'{to_render} {GIFT_HEART:e} out of {count} {GIFT_HEART:e}')
+        
+        for user in boosters[:21]:
+            embed.add_field(user.full_name,
+                f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
+    
+    elif even_if_empty:
+        embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken nuggets.*')
+
+GUILD_FIELDS = {
+    'all'      : add_guild_all_field      ,
+    'info'     : add_guild_info_field     ,
+    'counts'   : add_guild_counts_field   ,
+    'emojis'   : add_guild_emojis_field   ,
+    'users'    : add_guild_users_field    ,
+    'boosters' : add_guild_boosters_field ,
+        }
+
+@Koishi.interactions(name='guild')
+async def guild_(client, event,
+        field: ([(name, name) for name in GUILD_FIELDS], 'Which field of the info should I show?') = 'all',
+            ):
+    """Shows some information about the guild."""
+    guild = event.guild
+    if guild.partial:
+        return Embed('Error', 'I must be in the guild to execute this command.')
+    
+    embed = Embed(guild.name, color=(
+        guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF)
+            ).add_thumbnail(guild.icon_url_as(size=128))
+    
+    GUILD_FIELDS[field](guild, embed, True)
     
     return embed

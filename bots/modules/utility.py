@@ -406,6 +406,7 @@ GREEN_HEART = BUILTIN_EMOJIS['green_heart']
 YELLOW_HEART = BUILTIN_EMOJIS['yellow_heart']
 RED_HEART = BUILTIN_EMOJIS['heart']
 BLACK_HEART = BUILTIN_EMOJIS['black_heart']
+GIFT_HEART = BUILTIN_EMOJIS['gift_heart']
 
 async def guild_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -537,7 +538,7 @@ def add_guild_emojis_field(guild, embed, even_if_empty):
             sections_parts.append(str(managed_static))
             sections_parts.append(' static, ')
             sections_parts.append(str(managed_animated))
-            sections_parts.append(' anmiated]')
+            sections_parts.append(' animated]')
         
         embed.add_field('Emojis', ''.join(sections_parts))
     
@@ -583,18 +584,18 @@ def add_guild_users_field(guild, embed, even_if_empty):
 def add_guild_boosters_field(guild, embed, even_if_empty):
     boosters = guild.boosters
     if boosters:
-        emoji = BUILTIN_EMOJIS['gift_heart']
         count = len(boosters)
         to_render = count if count < 21 else 21
         
-        embed.add_field(f'Most awesome people of the guild', f'{to_render} {emoji:e} out of {count} {emoji:e}')
+        embed.add_field(f'Most awesome people of the guild',
+            f'{to_render} {GIFT_HEART:e} out of {count} {GIFT_HEART:e}')
         
         for user in boosters[:21]:
             embed.add_field(user.full_name,
                 f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
     
     elif even_if_empty:
-        embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken duggets.*')
+        embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken nuggets.*')
 
 GUILD_FIELDS = {
     'info': add_guild_info_field,
