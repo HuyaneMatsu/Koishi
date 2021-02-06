@@ -133,7 +133,7 @@ setup_ext_commands(Flan, FLAN_PREFIX,
     default_category_name='GENERAL COMMANDS',
     category_name_rule=category_name_rule,
         )
-setup_ext_slash(Flan, immediate_sync=True)
+setup_ext_slash(Flan)
 
 Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
@@ -146,14 +146,15 @@ async def guild_user_add(client, guild, user):
     if guild is not CHESUTO_GUILD:
         return
     
-    channel = CHESUTO_GUILD.system_channel
-    if channel is None:
-        return
-    
     if user.is_bot:
         return
     
     await client.user_role_add(user, VISITORS_ROLE)
+    
+    channel = CHESUTO_GUILD.system_channel
+    if channel is None:
+        return
+    
     await client.message_create(channel, f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
 @Flan.commands

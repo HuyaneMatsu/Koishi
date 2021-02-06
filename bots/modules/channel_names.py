@@ -7,6 +7,7 @@ from datetime import datetime
 from difflib import get_close_matches
 
 from bot_utils.shared import BOT_CHANNEL_CATEGORY, KOISHI_PATH, STAFF_ROLE
+from bot_utils.tools import Cell
 
 from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \
     BUILTIN_EMOJIS
@@ -219,27 +220,23 @@ async def do_rename():
 
 
 def cycle_rename():
-    module_locals.handle = KOKORO.call_later(DAY, cycle_rename)
+    NAME_CYCLER_HANDLER.value = KOKORO.call_later(DAY, cycle_rename)
     Task(do_rename(), KOKORO)
 
-# Use class to store changeable global variables since module globals might not be collected.
-class module_locals:
-    # schedule renaming
-    handle = None
-
+NAME_CYCLER_HANDLER = Cell()
 
 Koishi: Client
 Koishi.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(STAFF_ROLE)])
 
 def setup(lib):
-    module_locals.handle = KOKORO.call_later(
+    NAME_CYCLER_HANDLER.value = KOKORO.call_later(
         datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp()-time_now()+DAY, cycle_rename)
 
 def teardown(lib):
-    handle = module_locals.handle
-    if (handle is not None):
-        module_locals.handle = None
-        handle.cancel()
+    value = NAME_CYCLER_HANDLER.value
+    if (value is not None):
+        NAME_CYCLER_HANDLER.value = None
+        value.cancel()
 
 
 @Koishi.commands(category='CHANNEL NAMES')

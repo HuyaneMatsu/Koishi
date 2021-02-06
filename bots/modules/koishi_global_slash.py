@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from time import perf_counter
 from random import random
+from math import ceil
+from html import unescape as html_unescape
 
 from hata import Client, Embed, parse_emoji, DATETIME_FORMAT_CODE, id_to_time, elapsed_time, parse_emoji, Status, \
     DiscordException, BUILTIN_EMOJIS, ERROR_CODES, ICON_TYPE_NONE, RoleManagerType, ChannelCategory, ChannelVoice, \
-    ChannelText, ChannelStore, ChannelThread
-from hata.ext.commands import wait_for_reaction
+    ChannelText, ChannelStore, ChannelThread, Lock, KOKORO
+from hata.ext.commands import wait_for_reaction, Pagination
+
+from bot_utils.tools import Cell
 
 Koishi : Client
 
@@ -404,7 +408,7 @@ async def user_(client, event,
     
     return embed
 
-@Koishi.interactions(name='role')
+@Koishi.interactions(name='role', is_global=True)
 async def role_(client, event,
         role: ('role', 'Select the role to show information of.'),
             ):
@@ -653,7 +657,7 @@ GUILD_FIELDS = {
     'boosters' : add_guild_boosters_field ,
         }
 
-@Koishi.interactions(name='guild')
+@Koishi.interactions(name='guild', is_global=True)
 async def guild_(client, event,
         field: ([(name, name) for name in GUILD_FIELDS], 'Which field of the info should I show?') = 'all',
             ):
@@ -669,3 +673,358 @@ async def guild_(client, event,
     GUILD_FIELDS[field](guild, embed, True)
     
     return embed
+
+
+USER_PER_PAGE = 16
+class InRolePageGetter(object):
+    __slots__ = ('users', 'guild', 'title')
+    def __init__(self, users, guild, roles):
+        title_parts = ['Users with roles: ']
+        
+        roles = sorted(roles)
+        index = 0
+        limit = len(roles)
+        
+        while True:
+            role = roles[index]
+            index += 1
+            role_name = role.name
+            
+            # Handle special case, when the role is an application's role, what means it's length can be over 32-
+            if len(role_name) > 32:
+                role_name = role_name[:32]+'...'
+            
+            title_parts.append(role_name)
+            
+            if index == limit:
+                break
+            
+            title_parts.append(', ')
+            
+        self.title = ''.join(title_parts)
+        self.users = users
+        self.guild = guild
+    
+    def __len__(self):
+        length = len(self.users)
+        if length:
+            length = ceil(length/USER_PER_PAGE)
+        else:
+            length = 1
+        
+        return length
+    
+    def __getitem__(self, index):
+        users = self.users
+        length = len(users)
+        if length:
+            user_index = index*USER_PER_PAGE
+            user_limit = user_index+USER_PER_PAGE
+            
+            if user_limit > length:
+                user_limit = length
+            
+            description_parts = []
+            guild = self.guild
+            while True:
+                user = users[user_index]
+                user_index += 1
+                description_parts.append(user.full_name)
+                try:
+                    guild_profile = user.guild_profiles[guild]
+                except KeyError:
+                    pass
+                else:
+                    nick = guild_profile.nick
+                    if nick is not None:
+                        description_parts.append(' *[')
+                        description_parts.append(nick)
+                        description_parts.append(']*')
+                
+                if user_index == user_limit:
+                    break
+                
+                description_parts.append('\n')
+                continue
+            
+            description = ''.join(description_parts)
+        
+        else:
+            description = '*none*'
+        
+        return Embed(self.title, description). \
+            add_author(guild.icon_url, guild.name). \
+            add_footer(f'Page {index+1}/{ceil(len(self.users)/USER_PER_PAGE)}')
+
+class PaginationCheckUserOrPermission(object):
+    __slots__ = ('user', 'channel')
+    def __init__(self, user, channel):
+        self.user = user
+        self.channel = channel
+    
+    def __call__(self, event):
+        user = event.user
+        if user is self.user:
+            return True
+        
+        if self.channel.permissions_for(user).can_manage_messages:
+            return True
+        
+        return False
+
+@Koishi.interactions(is_global=True)
+async def in_role(client, event,
+        role_1 : ('role', 'Select a role.'),
+        role_2 : ('role', 'Double role!') = None,
+        role_3 : ('role', 'Triple role!') = None,
+        role_4 : ('role', 'Quadra role!') = None,
+        role_5 : ('role', 'Penta role!') = None,
+        role_6 : ('role', 'Epic!') = None,
+        role_7 : ('role', 'Legendary!') = None,
+        role_8 : ('role', 'Mythical!') = None,
+        role_9 : ('role', 'Lunatic!') = None,
+            ):
+    """Shows the users with the given roles."""
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command.')
+        return
+    
+    if guild not in client.guild_profiles:
+        yield Embed('Ohoho', 'I must be in the guild to do this.')
+        return
+    
+    roles = set()
+    for role in role_1, role_2, role_3, role_4, role_5, role_6, role_7, role_8, role_9:
+        if role is None:
+            continue
+        
+        if role.guild is guild:
+            roles.add(role)
+            continue
+        
+        yield Embed('Error', f'Role {role.name}, [{role.id}] is bound to an other guild.')
+        return
+    
+    users = []
+    for user in guild.users.values():
+        try:
+            guild_profile = user.guild_profiles[guild]
+        except KeyError:
+            continue
+        
+        guild_profile_roles = guild_profile.roles
+        if guild_profile_roles is None:
+            continue
+        
+        if not roles.issubset(guild_profile_roles):
+            continue
+        
+        users.append(user)
+    
+    pages = InRolePageGetter(users, guild, roles)
+    
+    yield
+    
+    channel = event.channel
+    await Pagination(client, channel, pages, check=PaginationCheckUserOrPermission(event.user, channel))
+
+
+
+LAST_MEME_AFTER = Cell()
+MEME_QUEUE = []
+MEME_URL = 'https://www.reddit.com/r/goodanimemes.json'
+MEME_REQUEST_LOCK = Lock(KOKORO)
+
+async def get_memes():
+    if MEME_REQUEST_LOCK.locked():
+        await MEME_REQUEST_LOCK
+        return
+    
+    async with MEME_REQUEST_LOCK:
+        after = LAST_MEME_AFTER.value
+        if after is None:
+            after = ''
+        
+        async with Koishi.http.get(MEME_URL, params={'limit': 100, 'after': after}) as response:
+            json = await response.json()
+        
+        for meme_children in json['data']['children']:
+            meme_children_data = meme_children['data']
+            if meme_children_data.get('is_self', False) or \
+                    meme_children_data.get('is_video', False) or \
+                    meme_children_data.get('over_18', False):
+                continue
+            
+            url = meme_children_data['url']
+            if url.startswith('https://www.reddit.com/gallery/'):
+                continue
+            
+            MEME_QUEUE.append((meme_children_data['title'], url))
+        
+        LAST_MEME_AFTER.value = json['data'].get(after)
+
+async def get_meme():
+    if MEME_QUEUE:
+        return MEME_QUEUE.pop()
+    
+    await get_memes()
+    
+    if MEME_QUEUE:
+        return MEME_QUEUE.pop()
+    
+    return None
+
+@Koishi.interactions(is_global=True, name='meme')
+async def meme_(client, event):
+    """Shows a meme."""
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command.')
+        return
+    
+    if guild not in client.guild_profiles:
+        yield Embed('Ohoho', 'I must be in the guild to do this.')
+        return
+    
+    yield
+    
+    meme = await get_meme()
+    if meme is None:
+        embed = Embed('Oof', 'No memes for now.')
+    else:
+        title, url = meme
+        embed = Embed(title, url=url).add_image(url)
+    
+    yield embed
+    return
+
+TRIVIA_QUEUE = []
+TRIVIA_URL = 'https://opentdb.com/api.php'
+TRIVIA_REQUEST_LOCK = Lock(KOKORO)
+TRIVIA_USER_LOCK = set()
+
+async def get_trivias():
+    if TRIVIA_REQUEST_LOCK.locked():
+        await TRIVIA_REQUEST_LOCK
+        return
+    
+    async with TRIVIA_REQUEST_LOCK:
+        async with Koishi.http.get(TRIVIA_URL, params={'amount': 100, 'category': 31}) as response:
+            json = await response.json()
+        
+        for trivia_data in json['results']:
+            trivia = (
+                html_unescape(trivia_data['question']),
+                html_unescape(trivia_data['correct_answer']),
+                [html_unescape(element) for element in trivia_data['incorrect_answers']],
+                    )
+            
+            TRIVIA_QUEUE.append(trivia)
+    
+    
+async def get_trivia():
+    if TRIVIA_QUEUE:
+        return TRIVIA_QUEUE.pop()
+    
+    await get_trivias()
+    
+    if TRIVIA_QUEUE:
+        return TRIVIA_QUEUE.pop()
+    
+    return None
+
+TRIVIA_OPTIONS = (
+    BUILTIN_EMOJIS['regional_indicator_a'],
+    BUILTIN_EMOJIS['regional_indicator_b'],
+    BUILTIN_EMOJIS['regional_indicator_c'],
+    BUILTIN_EMOJIS['regional_indicator_d'],
+        )
+
+class check_for_trivia_emoji(object):
+    __slots__ = ('user',)
+    
+    def __init__(self, user):
+        self.user = user
+    
+    def __call__(self, event):
+        if event.user is not self.user:
+            return False
+        
+        if event.emoji not in TRIVIA_OPTIONS:
+            return False
+        
+        return True
+
+
+@Koishi.interactions(is_global=True, name='trivia')
+async def trivia_(client, event):
+    """Asks a trivia."""
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command.')
+        return
+    
+    if guild not in client.guild_profiles:
+        yield Embed('Ohoho', 'I must be in the guild to do this.')
+        return
+    
+    if not event.channel.cached_permissions_for(client).can_add_reactions:
+        yield Embed('Permission error', 'I need add reactions permission to execute this command.')
+        return
+    
+    user = event.user
+    if user.id in TRIVIA_USER_LOCK:
+        yield Embed('Ohoho', 'You are already in a trivia game.')
+        return
+    
+    TRIVIA_USER_LOCK.add(user.id)
+    try:
+        yield
+        
+        trivia = await get_trivia()
+        if trivia is None:
+            yield Embed('Oof', 'No memes for now.')
+            return
+        
+        question, correct, wrong = trivia
+        possibilities = [correct, *wrong]
+        correct_emoji = TRIVIA_OPTIONS[possibilities.index(correct)]
+        
+        description_parts = []
+        for emoji, possibility in zip(TRIVIA_OPTIONS, possibilities):
+            description_parts.append(emoji.as_emoji)
+            description_parts.append(' ')
+            description_parts.append(possibility)
+            description_parts.append('\n')
+        
+        del description_parts[-1]
+        
+        description = ''.join(description_parts)
+        
+       
+        message = yield Embed(question, description).add_author(user.avatar_url, user.full_name)
+        
+        for emoji in TRIVIA_OPTIONS:
+            await client.reaction_add(message, emoji)
+        
+        try:
+           reaction_add_event = await wait_for_reaction(client, message, check_for_trivia_emoji(user), 300.)
+        except TimeoutError:
+            title = 'Oof'
+            description = 'Timeout occurred.'
+        else:
+            if reaction_add_event.emoji is correct_emoji:
+                title = 'Noice'
+                description = f'I raised that neko.\n\n{correct_emoji.as_emoji} {correct}'
+            else:
+                title = 'Oof'
+                description = f'The correct answer is:\n\n{correct_emoji.as_emoji} {correct}'
+        
+        yield Embed(title, description).add_author(user.avatar_url, user.full_name)
+        
+        if message.channel.cached_permissions_for(client).can_manage_messages:
+            await client.reaction_clear(message)
+    
+    finally:
+        TRIVIA_USER_LOCK.discard(user.id)

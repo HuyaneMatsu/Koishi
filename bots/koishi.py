@@ -26,7 +26,7 @@ Koishi: Client
 
 setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)
-setup_ext_slash(Koishi, immediate_sync=True)
+setup_ext_slash(Koishi)
 
 Koishi.command_processer.append(SYNC_CHANNEL, sync_request_waiter)
 

@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 import sys
-from random import random, choice
+from random import random, choice, shuffle
 from time import perf_counter
+from math import ceil
+from collections import deque
+from html import unescape as html_unescape
 
 from bs4 import BeautifulSoup
 
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
-    alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, \
+    alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
     ChannelCategory, ChannelStore, ChannelThread
-from hata.ext.commands import setup_ext_commands, checks
+from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
 from hata.backend.futures import render_exc_to_list
@@ -17,14 +20,14 @@ from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, MARISA_P
     command_error, DUNGEON, DEFAULT_TEST_CHANNEL
 from bot_utils.syncer import sync_request_comamnd
 from bot_utils.interpreter import Interpreter
-from bot_utils.tools import choose
+from bot_utils.tools import choose, Cell
 
 Marisa : Client
 
 setup_ext_commands(Marisa, MARISA_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)
 
-setup_ext_slash(Marisa, immediate_sync=True)
+setup_ext_slash(Marisa)
 
 Marisa.command_processer.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processer.create_category('VOICE', checks=checks.guild_only())
@@ -285,6 +288,7 @@ async def kaboom(client, event):
         await sleep(1.0)
         await client.interaction_followup_message_delete(event, message)
 
+
 @Marisa.interactions(guild=DUNGEON)
 async def kaboom_mixed(client, event):
     """Kabooom!!"""
@@ -301,3 +305,44 @@ async def kaboom_mixed(client, event):
     for message in messages:
         await sleep(1.0)
         await client.interaction_followup_message_delete(event, message)
+
+
+
+@Marisa.interactions(guild=DUNGEON)
+async def retardify(client, event,
+        text : ('str', 'Some text to retardify.'),
+            ):
+    """Translates the given text to retard language."""
+    if text:
+        description_parts = []
+        chance = 0.5
+        
+        for char in text:
+            if random() > chance:
+                if chance > 0.5:
+                    chance = 1.0-(chance*0.5)
+                else:
+                    chance = 0.5
+                
+                char = char.lower()
+            else:
+                if chance <= 0.5:
+                    chance = chance*0.5
+                else:
+                    chance = 0.5
+                
+                char = char.upper()
+            
+            description_parts.append(char)
+        
+        description = ''.join(description_parts)
+    else:
+        description = 'Nothing to retardify.'
+    
+    embed = Embed(description=description)
+    user = event.user
+    embed.add_author(user.avatar_url, user.full_name)
+    
+    await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None, show_source=False)
+
+

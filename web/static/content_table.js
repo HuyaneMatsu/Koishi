@@ -92,20 +92,20 @@ class CTPart {
 
     update_display_state(){
         var new_display;
-        var new_display_childrens;
+        var new_display_children;
         var new_svg;
 
         if (this.should_display){
             var new_display = 'list-item';
             if (this.clicked){
-                new_display_childrens = 'block';
+                new_display_children = 'block';
                 if (this.should_display_children){
                     new_svg = svg_open;
                 } else {
                     new_svg = svg_none;
                         }
             } else {
-                new_display_childrens = 'none';
+                new_display_children = 'none';
                 if (this.should_display_children){
                     new_svg = svg_closed;
                 } else {
@@ -115,7 +115,7 @@ class CTPart {
         } else {
             new_display = 'none';
             new_svg = svg_none;
-            new_display_childrens = 'none';
+            new_display_children = 'none';
                 }
 
         var id_ = this.id;
@@ -126,7 +126,7 @@ class CTPart {
 
         if (this.children != null){
             html_element = $(id_+'_c');
-            html_element.style["display"] = new_display_childrens;
+            html_element.style["display"] = new_display_children;
 
             html_element = $(id_+'_s');
             html_element.innerHTML = new_svg;

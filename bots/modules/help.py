@@ -172,7 +172,7 @@ class rules:
                 f'Owner only and can be used only at {DUNGEON}.')
 
 
-@Koishi.commands(category='HELP')
+@Koishi.commands(category='HELP', aliases='github')
 async def git(client, message):
     """
     Sends a link to my git repository.

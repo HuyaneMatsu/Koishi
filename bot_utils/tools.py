@@ -406,5 +406,10 @@ class PAGINATION_5PN(object):
         
         return Task(canceller(self,exception), KOKORO)
 
+class Cell(object):
+    __slots__ = ('value', )
+    def __init__(self, value=None):
+        self.value = value
+
 del CommandProcesser
 del re

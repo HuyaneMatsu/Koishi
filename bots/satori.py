@@ -13,7 +13,7 @@ from bot_utils.shared import SATORI_PREFIX, SATORI_HELP_COLOR
 Satori : Client
 
 setup_ext_commands(Satori, SATORI_PREFIX)
-setup_ext_slash(Satori, immediate_sync=True)
+setup_ext_slash(Satori)
 
 Satori.commands(SubterraneanHelpCommand(SATORI_HELP_COLOR), 'help')
 

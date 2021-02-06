@@ -1,7 +1,7 @@
 # Koishi
 The most awesome bot built with Hata no Kokoro's Discord API wrapper.
 
-When setupping Koishi, create an importable file, called `config.py`, what's structure should be the following:
+When setting up Koishi, create an importable `config.py` file, whose structure should be the following:
 ```python
 MARISA_MODE = True              # (bool) Whether Marisa or the other clients should run up.
 

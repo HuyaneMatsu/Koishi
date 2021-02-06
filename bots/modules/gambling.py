@@ -2,9 +2,10 @@
 from datetime import datetime, timedelta
 from random import random
 from math import log, ceil
+from itertools import chain
 
-from hata import Client, elapsed_time, Embed, Color, Emoji, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future, \
-    KOKORO, ERROR_CODES, USERS, ZEROUSER
+from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future, KOKORO, \
+    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout
 from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, Converter, checks, ConverterFlag, Closer
 
@@ -973,17 +974,50 @@ async def game21_description(client, message):
         'You start with 2 cards initially drawn and at every round, you have option to draw a new card, or to stop.'
             ), color=GAMBLING_COLOR)
 
+async def game21_multiplayer_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('21-mp', (
+        'Starts a 21 multiplayer game.\n'
+        f'Usage: `{prefix}21-mp *amount*`\n'
+            ), color=GAMBLING_COLOR)
 
-@Koishi.commands(name='21', description=game21_description, category='GAMBLING')
-class Game21(object):
-    NEW = BUILTIN_EMOJIS['new']
-    STOP = BUILTIN_EMOJIS['octagonal_sign']
-    EMOJIS = (NEW, STOP)
+def should_render_exception(exception):
+    if isinstance(exception, ConnectionError):
+        # no internet
+        return False
     
-    __slots__ = ('all_pulled', 'amount', 'canceller', 'channel', 'client', 'client_hand', 'client_total', 'message',
-        'task_flag', 'timeouter', 'user', 'user_ace', 'user_hand', 'user_total')
+    if isinstance(exception, DiscordException) and exception.code in (
+                ERROR_CODES.unknown_message, # message deleted
+                ERROR_CODES.unknown_channel, # message's channel deleted
+                ERROR_CODES.invalid_access, # client removed
+                ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                ERROR_CODES.cannot_message_user, # user dm-s disabled or bot blocked.
+                ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+            ):
+         return False
     
-    def pull_card(all_pulled):
+    return True
+
+
+
+class Game21Base(object):
+    __slots__ = ('guild', 'all_pulled')
+    def __new__(cls, guild):
+        self = object.__new__(cls)
+        self.guild = guild
+        self.all_pulled = []
+        return self
+    
+    def create_user_player(self, user):
+        return Game21Player(self, user)
+    
+    def create_bot_player(self, user):
+        player = Game21Player(self, user)
+        player.auto_finish()
+        return player
+    
+    def pull_card(self):
+        all_pulled = self.all_pulled
         card = int((DECK_SIZE-len(all_pulled))*random())
         for pulled in all_pulled:
             if pulled > card:
@@ -996,282 +1030,227 @@ class Game21(object):
         all_pulled.sort()
         
         return card
-    
-    async def __new__(cls, client, source_message, amount:int=0):
-        user = source_message.author
-        channel = source_message.channel
-        
-        while True:
-            if user.id in IN_GAME_IDS:
-                error_message = f'You are already at a game.'
-                break
-            
-            if amount < BET_MIN:
-                error_message = f'You must bet at least {BET_MIN} {CURRENCY_EMOJI.as_emoji}'
-                break
-            
-            if not channel.cached_permissions_for(client).can_add_reactions:
-                error_message = 'I cannot start this command here, not enough permissions provided.'
-                break
-            
-            
-            async with DB_ENGINE.connect() as connector:
-                response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user.id))
-                results = await response.fetchall()
-                if results:
-                    result = results[0]
-                    total_love = result.total_love
 
-                    if total_love < amount:
-                        error_message = f'You have just {total_love} {CURRENCY_EMOJI.as_emoji}'
-                        break
-                    
-                    total_allocated = result.total_allocated
-                    
-                    if total_allocated+amount < 0:
-                        error_message = f'You are trying gamble more than you have.'
-                        break
-                
-                else:
-                    error_message = f'You have 0 {CURRENCY_EMOJI.as_emoji}'
-                    break
-            
-            error_message = None
-            break
-        
-        if (error_message is not None):
-            await client.message_create(channel, embed=Embed(error_message, color=GAMBLING_COLOR))
-            return None
-        
-        all_pulled = []
-        
-        client_hand = []
-        client_total = 0
-        client_ace = 0
+class Game21Player(object):
+    __slots__ = ('parent', 'user', 'hand', 'total', 'ace')
+    def __new__(cls, parent, user):
+        hand = []
+        total = 0
+        ace = 0
         
         while True:
-            card = cls.pull_card(all_pulled)
+            card = parent.pull_card()
             
-            client_hand.append(card)
+            hand.append(card)
             
             number_index = card%len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
-                client_ace += 1
+                ace += 1
                 card_weight = 11
             elif number_index > 7:
                 card_weight = 10
             else:
                 card_weight = number_index+2
             
-            client_total += card_weight
+            total += card_weight
             
-            while client_total>21 and client_ace:
-                client_total -= 10
-                client_ace -= 1
-            
-            if client_total > (17 if client_ace else 15):
+            if total > 10 and len(hand) >= 2:
                 break
+        
+        self = object.__new__(cls)
+        self.parent = parent
+        self.user = user
+        self.hand = hand
+        self.total = total
+        self.ace = ace
+        return self
+    
+    def auto_finish(self):
+        hand = self.hand
+        total = self.total
+        ace = self.ace
+        
+        while True:
+            if total > (17 if ace else 15):
+                break
+            
+            card = self.parent.pull_card()
+            
+            hand.append(card)
+            
+            number_index = card%len(CARD_NUMBERS)
+            if number_index == ACE_INDEX:
+                ace += 1
+                card_weight = 11
+            elif number_index > 7:
+                card_weight = 10
+            else:
+                card_weight = number_index+2
+            
+            total += card_weight
+            
+            while total>21 and ace:
+                total -= 10
+                ace -= 1
             
             continue
         
+        self.total = total
+        self.ace = ace
+    
+    def pull_card(self):
+        hand = self.hand
+        total = self.total
+        ace = self.ace
         
-        user_hand = []
-        user_total = 0
-        user_ace = 0
+        card = self.parent.pull_card()
         
-        while True:
-            card = cls.pull_card(all_pulled)
+        hand.append(card)
+        
+        number_index = card%len(CARD_NUMBERS)
+        if number_index == ACE_INDEX:
+            ace += 1
+            card_weight = 11
+        elif number_index > 7:
+            card_weight = 10
+        else:
+            card_weight = number_index+2
+        
+        total += card_weight
+        
+        while total>21 and ace:
+            total -= 10
+            ace -= 1
             
-            user_hand.append(card)
-            
-            number_index = card%len(CARD_NUMBERS)
-            if number_index == ACE_INDEX:
-                user_ace += 1
-                card_weight = 11
-            elif number_index > 7:
-                card_weight = 10
-            else:
-                card_weight = number_index+2
-            
-            user_total += card_weight
-            
-            if user_total > 10 and len(user_hand) >= 2:
-                break
+        self.total = total
+        self.ace = ace
         
-        if user_total == 21:
-            embed = await cls._game_ended(user, client, user_total, client_total, user_hand, client_hand,
-                source_message.guild, amount, False)
-            
-            try:
-                await client.message_create(channel, embed=embed)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return None
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                        ):
-                     return None
-                
-                raise
-            
-            return None
+        # Return whether the user is done.
+        if total >= 21:
+            return True
         
-        IN_GAME_IDS.add(user.id)
+        return False
+    
+    def add_done_embed_field(self, embed):
+        field_content = []
         
-        async with DB_ENGINE.connect() as connector:
-            await connector.execute(CURRENCY_TABLE. \
-                update(currency_model.user_id == user.id). \
-                values(
-                     total_allocated = currency_model.total_allocated+amount,
-                        ))
+        for round_, card in enumerate(self.hand, 1):
+            type_index, number_index = divmod(card, len(CARD_NUMBERS))
+            field_content.append('Round ')
+            field_content.append(str(round_))
+            field_content.append(': ')
+            field_content.append(CARD_TYPES[type_index])
+            field_content.append(' ')
+            field_content.append(CARD_NUMBERS[number_index])
+            field_content.append('\n')
         
-        embed = Embed(f'How to gamble {amount} {CURRENCY_EMOJI.as_emoji}',
-            f'You have cards equal to {user_total} weight at your hand',
-            color=GAMBLING_COLOR)
-        
-        for round_, card in enumerate(user_hand, 1):
+        embed.add_field(f'{self.user.name_at(self.parent.guild)}\'s cards\'\nWeight: {self.total}',
+            ''.join(field_content), inline=True)
+    
+    def add_hand(self, embed):
+        for round_, card in enumerate(self.hand, 1):
             type_index, number_index = divmod(card, len(CARD_NUMBERS))
             embed.add_field(f'Round {round_}',
                 f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
         
-        try:
-            message = await client.message_create(channel, embed=embed)
-            for emoji in cls.EMOJIS:
-                await client.reaction_add(message, emoji)
+    def create_gamble_embed(self, amount):
+        embed = Embed(f'How to gamble {amount} {CURRENCY_EMOJI.as_emoji}',
+            f'You have cards equal to {self.total} weight at your hand.',
+            color=GAMBLING_COLOR)
         
-        except BaseException as err:
-            # If exception occurs right here we need to remove the game from games and revert the heart amount
-            IN_GAME_IDS.remove(user.id)
-            
-            async with DB_ENGINE.connect() as connector:
-                await connector.execute(CURRENCY_TABLE. \
-                    update(currency_model.user_id == user.id). \
-                    values(
-                         total_allocated = currency_model.total_allocated-amount,
-                            ))
-            
-            if isinstance(err, ConnectionError):
-                return None
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                    ):
-                 return None
-            
-            raise
-        
-        self = object.__new__(cls)
-        self.client = client
-        self.channel = channel
-        self.canceller = cls._canceller
-        self.task_flag = GUI_STATE_READY
-        self.message = message
-        self.user = user
-        self.amount = amount
-        self.all_pulled = all_pulled
-        self.user_hand = user_hand
-        self.user_total = user_total
-        self.user_ace = user_ace
-        self.client_hand = client_hand
-        self.client_total = client_total
-        self.timeouter = Timeouter(self, timeout=300.)
-        client.events.reaction_add.append(message, self)
-        client.events.reaction_delete.append(message, self)
-        return self
-    
-    @staticmethod
-    async def _game_ended(user, client, user_total, client_total, user_hand, client_hand, guild, amount, unallocate):
-        if client_total > 21:
-            if user_total > 21:
-                winner = None
-            else:
-                winner = user
-        else:
-            if user_total > 21:
-                winner = client
-            else:
-                if client_total > user_total:
-                    winner = client
-                elif client_total < user_total:
-                    winner = user
-                else:
-                    winner = None
-        
-        if winner is client:
-            bonus = -amount
-        elif winner is None:
-            bonus = 0
-        else:
-            bonus = amount
-        
-        async with DB_ENGINE.connect() as connector:
-            if unallocate:
-                to_execute = CURRENCY_TABLE. \
-                    update(currency_model.user_id == user.id). \
-                    values(
-                        total_allocated = currency_model.total_allocated-amount,
-                        total_love = currency_model.total_love+bonus,
-                            )
-            else:
-                to_execute = CURRENCY_TABLE. \
-                    update(currency_model.user_id == user.id). \
-                    values(
-                        total_love = currency_model.total_love+bonus,
-                            )
-            
-            await connector.execute(to_execute)
-        
-        if winner is None:
-            title = f'How to draw.'
-        elif winner is client:
-            title = f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}'
-        else:
-            title = f'How to win {amount} {CURRENCY_EMOJI.as_emoji}'
-        
-        embed = Embed(title, color=GAMBLING_COLOR)
-        
-        field_content = []
-        
-        for round_, card in enumerate(user_hand, 1):
-            type_index, number_index = divmod(card, len(CARD_NUMBERS))
-            field_content.append('Round ')
-            field_content.append(str(round_))
-            field_content.append(': ')
-            field_content.append(CARD_TYPES[type_index])
-            field_content.append(' ')
-            field_content.append(CARD_NUMBERS[number_index])
-            field_content.append('\n')
-        
-        embed.add_field(f'{user.name_at(guild)}\'s cards\' weight: {user_total}',
-            ''.join(field_content))
-        field_content.clear()
-        
-        for round_, card in enumerate(client_hand, 1):
-            type_index, number_index = divmod(card, len(CARD_NUMBERS))
-            field_content.append('Round ')
-            field_content.append(str(round_))
-            field_content.append(': ')
-            field_content.append(CARD_TYPES[type_index])
-            field_content.append(' ')
-            field_content.append(CARD_NUMBERS[number_index])
-            field_content.append('\n')
-        
-        embed.add_field(f'{client.name_at(guild)}\'s cards\' weight: {client_total}',
-            ''.join(field_content))
+        self.add_hand(embed)
         
         return embed
     
+    def create_after_embed(self, amount):
+        embed = Embed(f'Gambled {amount} {CURRENCY_EMOJI.as_emoji}',
+            f'You have cards equal to {self.total} weight at your hand.\n'
+            'Go back to the other channel and wait till all the player finishes the game and the winner will be '
+            'announced!',
+            color=GAMBLING_COLOR)
+        
+        self.add_hand(embed)
+        
+        return embed
+
+GAME_21_STEP_NEW = BUILTIN_EMOJIS['new']
+GAME_21_STEP_STOP = BUILTIN_EMOJIS['octagonal_sign']
+GAME_21_STEP_EMOJIS = (GAME_21_STEP_NEW, GAME_21_STEP_STOP)
+
+GAME_21_JOIN_ENTER = BUILTIN_EMOJIS['hand_splayed']
+GAME_21_JOIN_START = BUILTIN_EMOJIS['ok_hand']
+GAME_21_JOIN_CANCEL = BUILTIN_EMOJIS['x']
+GAME_21_JOIN_EMOJIS = (GAME_21_JOIN_ENTER, GAME_21_JOIN_START, GAME_21_JOIN_CANCEL)
+
+GAME_21_RESULT_FINISH = 0
+GAME_21_RESULT_INITIALIZATION_ERROR = 1
+GAME_21_RESULT_IN_GAME_ERROR = 2
+GAME_21_RESULT_CANCELLED_TIMEOUT = 3
+GAME_21_RESULT_CANCELLED_UNKNOWN = 4
+GAME_21_RESULT_CANCELLED_BY_USER = 5
+
+GAME_21_TIMEOUT = 300.0
+GAME_21_CANCELLATION_TIMEOUT = 5.0
+
+class Game21PlayerRunner(object):
+    __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', 'timeouter', 'canceller', 'task_flag',
+        'render_after', )
+    
+    async def __new__(cls, client, base, user, channel, amount, render_after):
+        player = base.create_user_player(user)
+        
+        waiter = Future(KOKORO)
+        if player.total >= 21:
+            if render_after:
+                embed = player.create_after_embed(amount)
+                try:
+                    message = await client.message_create(channel, embed=embed)
+                except BaseException as err:
+                    if should_render_exception(err):
+                        await client.events.error(client, f'{cls.__name__}.__new__', err)
+                    message = None
+            else:
+                message = None
+            
+            waiter.set_result(GAME_21_RESULT_FINISH)
+        else:
+            embed = player.create_gamble_embed(amount)
+            
+            try:
+                message = await client.message_create(channel, embed=embed)
+                for emoji in GAME_21_STEP_EMOJIS:
+                    await client.reaction_add(message, emoji)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, f'{cls.__name__}.__new__', err)
+                
+                waiter.set_result_if_pending(GAME_21_RESULT_INITIALIZATION_ERROR)
+                message = None
+        
+        self = object.__new__(cls)
+        self.player = player
+        self.waiter = waiter
+        self.message = message
+        self.channel = channel
+        self.amount = amount
+        self.client = client
+        self.render_after = render_after
+        
+        if message is None:
+            self.timeouter = None
+            self.canceller = None
+            self.task_flag = GUI_STATE_SWITCHING_CTX
+        else:
+            self.timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
+            self.canceller = cls._canceller
+            self.task_flag = GUI_STATE_READY
+            client.events.reaction_add.append(message, self)
+            client.events.reaction_delete.append(message, self)
+            
+        return self
+    
     async def __call__(self, client, event):
-        if (event.user != self.user) or (event.emoji not in self.EMOJIS):
+        if (event.user is not self.player.user) or (event.emoji not in GAME_21_STEP_EMOJIS):
             return
         
         if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
@@ -1281,41 +1260,19 @@ class Game21(object):
         task_flag = self.task_flag
         if task_flag != GUI_STATE_READY:
             if task_flag == GUI_STATE_SWITCHING_PAGE:
-                if emoji is self.CANCEL:
+                if emoji is GAME_21_STEP_STOP:
                     self.task_flag = GUI_STATE_CANCELLING
                 return
-
+            
             # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
             return
         
-        if emoji is self.NEW:
+        if emoji is GAME_21_STEP_NEW:
             # It is enough to delete the reaction at this ase if needed,
             # because after the other cases we will delete them anyways.
-            card = type(self).pull_card(self.all_pulled)
+            game_ended = self.player.pull_card()
             
-            self.user_hand.append(card)
-            
-            user_ace = self.user_ace
-            number_index = card%len(CARD_NUMBERS)
-            if number_index == ACE_INDEX:
-                user_ace += 1
-                card_weight = 11
-            elif number_index > 7:
-                card_weight = 10
-            else:
-                card_weight = number_index+2
-            
-            user_total = self.user_total + card_weight
-            while user_total > 21 and user_ace:
-                user_total -= 10
-                user_ace -= 1
-            
-            self.user_total = user_total
-            self.user_ace = user_ace
-            
-            game_ended = (user_total>=21)
-            
-        elif emoji is self.STOP:
+        elif emoji is GAME_21_STEP_STOP:
             game_ended = True
         
         else:
@@ -1323,73 +1280,39 @@ class Game21(object):
             return
         
         if game_ended:
+            self.task_flag = GUI_STATE_SWITCHING_CTX
+            self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
+            
+            if self.render_after:
+                await self._canceller_render_after()
+            
+            self.cancel()
+            return
+        
+        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        
+        embed = self.player.create_gamble_embed(self.amount)
+        
+        try:
+            await client.message_edit(self.message, embed)
+        except BaseException as err:
             self.task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
-            user_total = self.user_total
-            client_total = self.client_total
+            if should_render_exception(err):
+                await client.events.error(client, f'{self.__class__.__name__}.__new__', err)
             
-            embed = await self._game_ended(self.user, client, user_total, client_total, self.user_hand,
-                self.client_hand, self.message.guild, self.amount, True)
-            
-            try:
-                await client.message_edit(self.message, embed=embed)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    # no internet
-                    return
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_message, # message already deleted
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                                ):
-                        return
-                
-                # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
-                await client.events.error(client, f'{self!r}.__call__', err)
-                return
-                
-        else:
-            embed = Embed(f'How to gamble {self.amount} {CURRENCY_EMOJI.as_emoji}',
-                f'You have cards equal to {user_total} weight at your hand',
-                color=GAMBLING_COLOR)
-            
-            for round_, card in enumerate(self.user_hand, 1):
-                type_index, number_index = divmod(card, len(CARD_NUMBERS))
-                embed.add_field(f'Round {round_}',
-                    f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
-            
-            self.task_flag = GUI_STATE_SWITCHING_PAGE
-            
-            try:
-                await client.message_edit(self.message, embed=embed)
-            except BaseException as err:
-                self.task_flag = GUI_STATE_CANCELLED
-                self.cancel()
-                if isinstance(err, ConnectionError):
-                    # no internet
-                    return
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_message, # message already deleted
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                                ):
-                        return
-                
-                # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
-                await client.events.error(client, f'{self!r}.__call__', err)
-                return
-            
-            self.task_flag = GUI_STATE_READY
-            self.timeouter.set_timeout(300.0)
-    
-    async def _canceller(self, exception,):
-        IN_GAME_IDS.remove(self.user.id)
+            self.waiter.set_result_if_pending(GAME_21_RESULT_IN_GAME_ERROR)
         
+        if self.task_flag == GUI_STATE_CANCELLING:
+            self.task_flag = GUI_STATE_CANCELLED
+            self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
+            self.cancel()
+        else:
+            self.task_flag = GUI_STATE_READY
+            self.timeouter.set_timeout(GAME_21_TIMEOUT)
+    
+    async def _canceller(self, exception):
         client = self.client
         message = self.message
         
@@ -1399,56 +1322,33 @@ class Game21(object):
         if self.task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
-
+        
         self.task_flag = GUI_STATE_CANCELLED
-
-        if self.channel.cached_permissions_for(client).can_manage_messages:
-            task = Task(client.reaction_clear(message), KOKORO)
-            if __debug__:
-                task.__silence__()
         
         if exception is None:
+            if self.render_after:
+                await self._canceller_render_after()
             return
         
         if isinstance(exception, TimeoutError):
-            IN_GAME_IDS.remove(self.user.id)
-            
-            async with DB_ENGINE.connect() as connector:
-                amount = self.amount
-                await connector.execute(CURRENCY_TABLE. \
-                    update(currency_model.user_id == self.user.id). \
-                    values(
-                        total_allocated = currency_model.total_allocated-amount,
-                        total_love = currency_model.total_love-amount,
-                            ))
-            
-            embed = Embed(f'Timeout occurred, you lost your {self.amount} {CURRENCY_EMOJI.as_emoji} forever.')
-            
-            try:
-                await client.message_edit(message, embed=embed)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    # no internet
-                    return
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_message, # message already deleted
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                                ):
-                        return
-                
-                # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
-                await client.events.error(client, f'{self!r}._canceller', err)
-                return
-            
+            self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_TIMEOUT)
+            if self.render_after:
+                await self._canceller_render_after()
+            else:
+                if self.channel.cached_permissions_for(client).can_manage_messages:
+                    try:
+                        await client.reaction_clear(message)
+                    except BaseException as err:
+                        if should_render_exception(err):
+                            await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
             return
         
+        self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
         timeouter = self.timeouter
-        if timeouter is not None:
+        if (timeouter is not None):
             timeouter.cancel()
-        #we do nothing
+        
+        # We do nothing.
     
     def cancel(self, exception=None):
         canceller = self.canceller
@@ -1461,7 +1361,840 @@ class Game21(object):
         if (timeouter is not None):
             timeouter.cancel()
         
+        return Task(canceller(self, exception), KOKORO)
+    
+    async def _canceller_render_after(self):
+        client = self.client
+        message = self.message
+        embed = self.player.create_after_embed(self.amount)
+        try:
+            await client.message_edit(message, embed)
+        except BaseException as err:
+            if should_render_exception(err):
+                await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
+        
+        if self.channel.cached_permissions_for(client).can_manage_messages:
+            try:
+                await client.reaction_clear(message)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
+        else:
+            for emoji in GAME_21_STEP_EMOJIS:
+                try:
+                    await client.reaction_delete_own(message, emoji)
+                except BaseException as err:
+                    if should_render_exception(err):
+                        await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
+                    break
+
+async def game_21_precheck(client, user, channel, amount, require_guild):
+    if user.id in IN_GAME_IDS:
+        error_message = 'You are already at a game.'
+    elif amount < BET_MIN:
+        error_message = f'You must bet at least {BET_MIN} {CURRENCY_EMOJI.as_emoji}'
+    elif not channel.cached_permissions_for(client).can_add_reactions:
+        error_message = 'I need to have `add reactions` permissions to execute this command.'
+    elif require_guild and (not isinstance(channel, ChannelGuildBase)):
+        error_message = 'Guild only command.'
+    else:
+        return False
+    
+    embed = Embed('Ohoho', error_message, color=GAMBLING_COLOR)
+    try:
+        await client.message_create(channel, embed=embed)
+    except BaseException as err:
+        if should_render_exception(err):
+            await client.events.error(client, 'game_21_precheck', err)
+    
+    return True
+
+async def game_21_postcheck(client, user, channel, amount):
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select([currency_model.total_love, currency_model.total_allocated]). \
+                where(currency_model.user_id==user.id))
+        
+        results = await response.fetchall()
+        if results:
+            total_love, total_allocated = results[0]
+        else:
+            total_love = 0
+            total_allocated = 0
+        
+        if total_love-total_allocated < amount:
+            error_message = f'You have just {total_love} {CURRENCY_EMOJI.as_emoji}'
+        else:
+            return False
+    
+    embed = Embed('Ohoho', error_message, color=GAMBLING_COLOR)
+    try:
+        await client.message_create(channel, embed=embed)
+    except BaseException as err:
+        if should_render_exception(err):
+            await client.events.error(client, 'game_21_postcheck', err)
+        
+    return True
+
+
+@Koishi.commands(name='21', description=game21_description, category='GAMBLING')
+async def game_21_single_player(client, source_message, amount:int=0):
+    user = source_message.author
+    channel = source_message.channel
+    
+    if await game_21_precheck(client, user, channel, amount, False):
+        return
+    
+    IN_GAME_IDS.add(user.id)
+    try:
+        if await game_21_postcheck(client, user, channel, amount):
+            return
+        
+        base = Game21Base(channel.guild)
+        
+        player_client = base.create_bot_player(client)
+        
+        player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False)
+        player_user_waiter = player_runner.waiter
+        if player_user_waiter.done():
+            unallocate = True
+            
+            async with DB_ENGINE.connect() as connector:
+                await connector.execute(CURRENCY_TABLE. \
+                    update(currency_model.user_id == user.id). \
+                    values(total_allocated = currency_model.total_allocated-amount)
+                        )
+            
+        else:
+            unallocate = False
+        
+        game_state = await player_user_waiter
+        
+        if game_state == GAME_21_RESULT_FINISH:
+            client_total = player_client.total
+            user_total = player_runner.player.total
+            if client_total > 21:
+                if user_total > 21:
+                    winner = None
+                else:
+                    winner = user
+            else:
+                if user_total > 21:
+                    winner = client
+                else:
+                    if client_total > user_total:
+                        winner = client
+                    elif client_total < user_total:
+                        winner = user
+                    else:
+                        winner = None
+            
+            if winner is client:
+                bonus = -amount
+            elif winner is None:
+                bonus = 0
+            else:
+                bonus = amount
+            
+            async with DB_ENGINE.connect() as connector:
+                expression = CURRENCY_TABLE.update(currency_model.user_id == user.id)
+                
+                if amount:
+                    expression = expression.values(total_love=currency_model.total_love+bonus)
+                
+                if unallocate:
+                    expression = expression.values(total_allocated=currency_model.total_allocated-amount)
+                
+                await connector.execute(expression)
+            
+            if winner is None:
+                title = f'How to draw.'
+            elif winner is client:
+                title = f'How to lose {amount} {CURRENCY_EMOJI.as_emoji}'
+            else:
+                title = f'How to win {amount} {CURRENCY_EMOJI.as_emoji}'
+            
+            embed = Embed(title, color=GAMBLING_COLOR)
+            player_runner.player.add_done_embed_field(embed)
+            player_client.add_done_embed_field(embed)
+            
+            if player_runner.message is None:
+                coro = client.message_create(channel, embed=embed)
+            else:
+                coro = client.message_edit(player_runner.message, embed=embed)
+            
+            try:
+                await coro
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_single_player', err)
+            
+            if channel.cached_permissions_for(client).can_manage_messages:
+                try:
+                    await client.reaction_clear(player_runner.message)
+                except BaseException as err:
+                    if should_render_exception(err):
+                        await client.events.error(client, 'game_21_single_player', err)
+            
+            return
+        
+        if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
+            async with DB_ENGINE.connect() as connector:
+                expression = CURRENCY_TABLE. \
+                    update(currency_model.user_id == user.id). \
+                    values(total_love=currency_model.total_love-amount)
+                
+                if unallocate:
+                    expression = expression.values(total_allocated = currency_model.total_allocated-amount)
+                
+                await connector.execute(expression)
+            
+            embed = Embed(f'Timeout occurred, you lost your {amount} {CURRENCY_EMOJI.as_emoji} forever.')
+            
+            if player_runner.message is None:
+                coro = client.message_create(channel, embed=embed)
+            else:
+                coro = client.message_edit(player_runner.message, embed=embed)
+            
+            try:
+                await coro
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_single_player', err)
+                return
+            
+            return
+        
+        # Error occurred
+        if unallocate:
+            async with DB_ENGINE.connect() as connector:
+                expression = CURRENCY_TABLE. \
+                    update(currency_model.user_id == user.id). \
+                    values(total_allocated = currency_model.total_allocated-amount)
+                
+                await connector.execute(expression)
+    
+    finally:
+        IN_GAME_IDS.discard(user.id)
+
+
+def create_join_embed(users, amount):
+    description_parts = [
+        'Bet amount: ', str(amount), ' ', CURRENCY_EMOJI.as_emoji, '\n'
+        'Creator: ', users[0].mention, '\n',
+            ]
+    
+    if len(users) > 1:
+        description_parts.append('\nJoined users:\n')
+        for user in users[1:]:
+            description_parts.append(user.mention)
+            description_parts.append('\n')
+    
+    description_parts.append('\nReact with ')
+    description_parts.append(GAME_21_JOIN_ENTER.as_emoji)
+    description_parts.append(' to join.')
+    
+    description = ''.join(description_parts)
+    
+    return Embed('Game 21 multiplayer', description, color=GAMBLING_COLOR)
+
+
+async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, joined_user_ids, private_channel):
+    try:
+        private_channel = await client.channel_private_create(user)
+    except BaseException as err:
+        if not isinstance(err, ConnectionError):
+            await client.events.error(client, 'game_21_mp_user_joiner', err)
+        
+        return None
+    
+    if user.id in IN_GAME_IDS:
+        embed = Embed('Ohoho', 'You are already at a game.', color=GAMBLING_COLOR)
+        try:
+            await client.message_create(private_channel, embed=embed)
+        except BaseException as err:
+            if should_render_exception(err):
+                await client.events.error(client, 'game_21_mp_user_joiner', err)
+        
+        return None
+    
+    result = False
+    IN_GAME_IDS.add(user.id)
+    joined_user_ids.add(user.id)
+    
+    try:
+        if not await game_21_postcheck(client, user, private_channel, amount):
+            embed = Embed('21 multiplayer game joined.',
+                f'Bet amount: {amount} {CURRENCY_EMOJI.as_emoji}\n'
+                f'Guild: {guild.name}\n'
+                f'Channel: {source_channel.mention}',
+                    color=GAMBLING_COLOR)
+            
+            try:
+                await client.message_create(private_channel, embed)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_mp_user_joiner', err)
+                
+            else:
+                result = True
+    finally:
+        if result:
+            pair = user, private_channel
+            
+            async with DB_ENGINE.connect() as connector:
+                await connector.execute(CURRENCY_TABLE. \
+                    update(currency_model.user_id == user.id). \
+                    values(total_allocated = currency_model.total_allocated+amount)
+                        )
+        
+        else:
+            IN_GAME_IDS.discard(user.id)
+            joined_user_ids.discard(user.id)
+            pair = None
+    
+    return pair
+
+
+
+async def game_21_refund(user, amount):
+    async with DB_ENGINE.connect() as connector:
+        await connector.execute(CURRENCY_TABLE. \
+            update(currency_model.user_id == user.id). \
+            values(total_allocated = currency_model.total_allocated-amount)
+                )
+
+async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, joined_user_ids, private_channel):
+    IN_GAME_IDS.discard(user.id)
+    joined_user_ids.discard(user.id)
+    
+    await game_21_refund(user, amount)
+    
+    embed = Embed('21 multiplayer game left.',
+        f'Bet amount: {amount} {CURRENCY_EMOJI.as_emoji}\n'
+        f'Guild: {guild.name}\n'
+        f'Channel: {source_channel.mention}',
+            color=GAMBLING_COLOR)
+    
+    try:
+        await client.message_create(private_channel, embed=embed)
+    except BaseException as err:
+        if should_render_exception(err):
+            await client.events.error(client, 'game_21_mp_user_leaver', err)
+
+
+async def game_21_mp_cancelled(client, user, guild, source_channel, amount, private_channel, joined_user_ids):
+    IN_GAME_IDS.discard(user.id)
+    joined_user_ids.discard(user.id)
+    
+    async with DB_ENGINE.connect() as connector:
+        await connector.execute(CURRENCY_TABLE. \
+            update(currency_model.user_id == user.id). \
+            values(total_allocated = currency_model.total_allocated-amount)
+                )
+    
+    embed = Embed('21 multiplayer game was cancelled.',
+        f'Bet amount: {amount} {CURRENCY_EMOJI.as_emoji}\n'
+        f'Guild: {guild.name}\n'
+        f'Channel: {source_channel.mention}',
+            color=GAMBLING_COLOR)
+    
+    try:
+        await client.message_create(private_channel, embed)
+    except BaseException as err:
+        if should_render_exception(err):
+            await client.events.error(client, 'game_21_mp_cancelled', err)
+
+
+def game_21_mp_notify_cancellation(client, joined_pairs, amount, channel, guild, joined_user_ids):
+    Task(game_21_refund(joined_pairs[0][0], amount), KOKORO)
+    for notify_user, private_channel in joined_pairs[1:]:
+        Task(game_21_mp_cancelled(client, notify_user, guild, channel, amount, private_channel,
+            joined_user_ids), KOKORO)
+
+GAME_21_MP_MAX_USERS = 10
+GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'
+
+class Game21JoinGUI(object):
+    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_pairs', 'timeouter', 'task_flag',
+        'canceller', 'user_locks', 'joined_user_ids', 'workers', 'guild', 'message_sync_last_state',
+        'message_sync_in_progress', 'message_sync_handle')
+    
+    async def __new__(cls, client, channel, joined_user_and_channel, amount, joined_user_ids, guild):
+        waiter = Future(KOKORO)
+        
+        embed = create_join_embed([joined_user_and_channel[0]], amount)
+        embed.add_footer(GAME_21_MP_FOOTER)
+        
+        try:
+            message = await client.message_create(channel, embed=embed)
+            for emoji in GAME_21_JOIN_EMOJIS:
+                await client.reaction_add(message, emoji)
+            
+        except BaseException as err:
+            if should_render_exception(err):
+                await client.events.error(client, f'{cls.__name__}.__new__', err)
+            
+            waiter.set_result_if_pending(GAME_21_RESULT_INITIALIZATION_ERROR)
+            message = None
+        
+        self = object.__new__(cls)
+        self.client = client
+        self.channel = channel
+        self.message = message
+        self.waiter = waiter
+        self.amount = amount
+        self.joined_pairs = [joined_user_and_channel]
+        self.user_locks = set()
+        self.joined_user_ids = joined_user_ids
+        self.workers = set()
+        self.guild = guild
+        self.message_sync_last_state = self.joined_pairs.copy()
+        self.message_sync_in_progress = False
+        self.message_sync_handle = None
+        
+        if message is None:
+            self.timeouter = None
+            self.canceller = None
+            self.task_flag = GUI_STATE_SWITCHING_CTX
+        else:
+            self.timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
+            self.canceller = cls._canceller
+            self.task_flag = GUI_STATE_READY
+            client.events.reaction_add.append(message, self)
+            client.events.reaction_delete.append(message, self)
+        
+        return self
+    
+    async def __call__(self, client, event):
+        if event.user.is_bot:
+            return
+        
+        emoji = event.emoji
+        if (emoji not in GAME_21_JOIN_EMOJIS):
+            return
+        
+        # Do not remove emoji enter emoji if the user is the source one, instead leave.
+        if event.user is not self.joined_pairs[0][0]:
+            if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
+                return
+        
+        task_flag = self.task_flag
+        if task_flag != GUI_STATE_READY:
+            if emoji is GAME_21_JOIN_CANCEL:
+                self.task_flag = GUI_STATE_CANCELLING
+            return
+            
+            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
+            return
+        
+        if emoji is GAME_21_JOIN_ENTER:
+            user = event.user
+            
+            if user.id in self.user_locks:
+                # already doing something.
+                return
+            
+            joined_pairs = self.joined_pairs
+            if user is joined_pairs[0][0]:
+                return
+            
+            for maybe_user, private_channel in joined_pairs[1:]:
+                if maybe_user is user:
+                    join = False
+                    break
+            else:
+                private_channel = None
+                join = True
+            
+            if join and len(joined_pairs) == GAME_21_MP_MAX_USERS:
+                return
+            
+            self.user_locks.add(user.id)
+            try:
+                if join:
+                    coroutine_function = game_21_mp_user_joiner
+                else:
+                    coroutine_function = game_21_mp_user_leaver
+                
+                task = Task(coroutine_function(client, user, self.guild, self.channel, self.amount,
+                    self.joined_user_ids, private_channel), KOKORO)
+                
+                self.workers.add(task)
+                try:
+                    result = await task
+                    if join and (result is not None):
+                        self.joined_pairs.append(result)
+                    
+                finally:
+                    self.workers.discard(task)
+            
+            finally:
+                self.user_locks.discard(user.id)
+            
+            self.maybe_message_sync()
+            return
+        
+        if (event.user is not self.joined_pairs[0][0]):
+            return
+        
+        if emoji is GAME_21_JOIN_START:
+            self.task_flag = GUI_STATE_SWITCHING_CTX
+            
+            # Wait for all worker to finish
+            await self._wait_for_cancellation()
+            
+            self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
+            self.cancel()
+            return
+        
+        if emoji is GAME_21_JOIN_CANCEL:
+            self.task_flag = GUI_STATE_CANCELLING
+            
+            # Wait for all workers to finish
+            await self._wait_for_cancellation()
+            
+            self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_BY_USER)
+            self.cancel()
+            return
+    
+    async def _canceller(self, exception):
+        client = self.client
+        message = self.message
+        
+        client.events.reaction_add.remove(message, self)
+        client.events.reaction_delete.remove(message, self)
+        
+        message_sync_handle = self.message_sync_handle
+        if (message_sync_handle is not None):
+            self.message_sync_handle = None
+            message_sync_handle.cancel()
+        
+        if self.task_flag == GUI_STATE_SWITCHING_CTX:
+            # the message is not our, we should not do anything with it.
+            return
+        
+        self.task_flag = GUI_STATE_CANCELLED
+        
+        if exception is None:
+            return
+        
+        await self._wait_for_cancellation()
+        game_21_mp_notify_cancellation(client, self.joined_pairs, self.amount, self.channel, self.guild,
+            self.joined_user_ids)
+        
+        if isinstance(exception, TimeoutError):
+            self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_TIMEOUT)
+            if self.channel.cached_permissions_for(client).can_manage_messages:
+                try:
+                    await client.reaction_clear(message)
+                except BaseException as err:
+                    if should_render_exception(err):
+                        await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
+            return
+        
+        self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
+        timeouter = self.timeouter
+        if (timeouter is not None):
+            timeouter.cancel()
+        
+    def cancel(self, exception=None):
+        canceller = self.canceller
+        if canceller is None:
+            return
+        
+        self.canceller = None
+        
+        timeouter = self.timeouter
+        if (timeouter is not None):
+            timeouter.cancel()
+        
         return Task(canceller(self,exception), KOKORO)
+
+    
+    async def _wait_for_cancellation(self):
+        workers = self.workers
+        if workers:
+            future = WaitTillAll(workers, KOKORO)
+            future_or_timeout(future, GAME_21_CANCELLATION_TIMEOUT)
+            done, pending = await future
+            for future in chain(done, pending):
+                future.cancel()
+    
+    def maybe_message_sync(self):
+        if not self.message_sync_in_progress:
+            self.message_sync_in_progress = True
+            Task(self.do_message_sync(), KOKORO)
+    
+    def call_message_sync(self):
+        Task(self.do_message_sync(), KOKORO)
+    
+    async def do_message_sync(self):
+        self.message_sync_handle = None
+        
+        if (self.task_flag != GUI_STATE_READY) or (self.joined_pairs == self.message_sync_last_state):
+            self.message_sync_in_progress = False
+            return
+        
+        self.message_sync_last_state = self.joined_pairs.copy()
+        
+        embed = create_join_embed([item[0] for item in self.joined_pairs], self.amount)
+        embed.add_footer(GAME_21_MP_FOOTER)
+        
+        task = Task(self.client.message_edit(self.message, embed=embed), KOKORO)
+        self.workers.add(task)
+        try:
+            try:
+                await task
+            except BaseException as err:
+                if should_render_exception(err):
+                    client = self.client
+                    await client.events.error(client, f'{self.__class__.__name__}.__new__', err)
+        finally:
+            self.workers.discard(task)
+        
+        if (self.task_flag != GUI_STATE_READY) or (self.joined_pairs == self.message_sync_last_state):
+            self.message_sync_in_progress = False
+            return
+        
+        self.message_sync_handle = KOKORO.call_later(1.0, self.__class__.call_message_sync, self)
+
+@Koishi.commands(name='21-mp', description=game21_multiplayer_description, category='GAMBLING',
+    aliases=['21-multi', '21-multiplayer'], checks=checks.guild_only())
+async def game_21_multi_player(client, source_message, amount:int=0):
+    user = source_message.author
+    channel = source_message.channel
+    
+    if await game_21_precheck(client, user, channel, amount, True):
+        return
+    
+    guild = channel.guild
+    
+    IN_GAME_IDS.add(user.id)
+    joined_user_ids = set()
+    joined_user_ids.add(user.id)
+    try:
+        if await game_21_postcheck(client, user, channel, amount):
+            return
+        
+        try:
+            private_channel = await client.channel_private_create(user)
+        except BaseException as err:
+            if not isinstance(err, ConnectionError):
+                await client.events.error(client, 'game_21_multi_player', err)
+            
+            return
+        
+        embed = Embed('21 multiplayer game created.',
+            f'Bet amount: {amount} {CURRENCY_EMOJI.as_emoji}\n'
+            f'Guild: {guild.name}\n'
+            f'Channel: {channel.mention}',
+                color=GAMBLING_COLOR)
+        
+        try:
+            await client.message_create(private_channel, embed)
+        except BaseException as err:
+            if isinstance(err, ConnectionError):
+                return
+            
+            if (not isinstance(err, DiscordException)) or (err.code != ERROR_CODES.cannot_message_user):
+                await client.events.error(client, 'game_21_single_player', err)
+                return
+            
+            private_open = False
+        else:
+            private_open = True
+        
+        if (not private_open):
+            embed = Embed('Error', 'I cannot send private message to you.', color=GAMBLING_COLOR)
+            
+            try:
+                await client.message_create(channel, embed=embed)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_multi_player', err)
+            return
+        
+        join_gui = await Game21JoinGUI(client, channel, (user, private_channel), amount, joined_user_ids, guild)
+        game_state = await join_gui.waiter
+        message = join_gui.message
+        
+        if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
+            embed = Embed('Timeout', 'Timeout occurred, the hearts were refund', color=GAMBLING_COLOR)
+            
+            try:
+                await client.message_edit(message, embed=embed)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_multi_player', err)
+            return
+        
+        if not (game_state == GAME_21_RESULT_FINISH or game_state == GAME_21_RESULT_CANCELLED_BY_USER):
+            return
+        
+        if channel.cached_permissions_for(client).can_manage_messages:
+            try:
+                await client.reaction_clear(message)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_multi_player', err)
+                return
+        
+        if game_state == GAME_21_RESULT_CANCELLED_BY_USER:
+            game_21_mp_notify_cancellation(client, join_gui.joined_pairs, amount, channel, guild, joined_user_ids)
+            
+            embed = Embed('Cancelled', 'The game has been cancelled, the hearts are refund.', color=GAMBLING_COLOR)
+            try:
+                await client.message_edit(message, embed=embed)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_multi_player', err)
+            return
+        
+        joined_pairs = join_gui.joined_pairs
+        if len(joined_pairs) == 1:
+            await game_21_refund(joined_pairs[0][0], amount)
+            
+            embed = Embed('RIP', 'Starting the game alone, is just sad.', color=GAMBLING_COLOR)
+            
+            try:
+                await client.message_edit(message, embed=embed)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_multi_player', err)
+            return
+        
+        total_bet_amount = len(joined_pairs)*amount
+        # Update message
+        description_parts = ['Total bet amount: ', str(total_bet_amount), CURRENCY_EMOJI.as_emoji, '\n\nPlayers:\n',]
+        for pair_user, pair_channel in joined_pairs:
+            description_parts.append(pair_user.mention)
+            description_parts.append('\n')
+        
+        del description_parts[-1]
+        
+        description = ''.join(description_parts)
+        embed = Embed('Game 21 in progress', description, color=GAMBLING_COLOR)
+        try:
+            await client.message_edit(message, embed=embed)
+        except BaseException as err:
+            game_21_mp_notify_cancellation(client, joined_pairs, amount, channel, guild, joined_user_ids)
+            if should_render_exception(err):
+                await client.events.error(client, 'game_21_multi_player', err)
+            return
+        
+        # Start game
+        base = Game21Base(guild)
+        tasks = []
+        for pair_user, pair_channel in joined_pairs:
+            task = Task(Game21PlayerRunner(client, base, pair_user, pair_channel, amount, True), KOKORO)
+            tasks.append(task)
+        
+        done, pending = await WaitTillAll(tasks, KOKORO)
+        
+        waiters_to_runners = {}
+        
+        for task in done:
+            runner = await task
+            waiter = runner.waiter
+            waiters_to_runners[waiter] = runner
+        
+        done, pending = await WaitTillAll(waiters_to_runners, KOKORO)
+        
+        max_point = 0
+        losers = []
+        winners = []
+        for waiter in done:
+            game_state = waiter.result()
+            runner = waiters_to_runners[waiter]
+            if game_state != GAME_21_RESULT_FINISH:
+                losers.append(user)
+                continue
+            
+            user_total = runner.player.total
+            user = runner.player.user
+            if user_total > 21:
+                losers.append(user)
+                continue
+            
+            if user_total > max_point:
+                losers.extend(winners)
+                winners.clear()
+                winners.append(user)
+                max_point = user_total
+                continue
+            
+            if user_total == max_point:
+                winners.append(user)
+                continue
+            
+            losers.append(user)
+            continue
+            
+
+        
+        async with DB_ENGINE.connect() as connector:
+            if losers:
+                await connector.execute(CURRENCY_TABLE. \
+                    update(currency_model.user_id.in_([user.id for user in losers])). \
+                    values(
+                        total_allocated = currency_model.total_allocated-amount,
+                        total_love = currency_model.total_love-amount,
+                            ))
+                
+                if winners:
+                    won_per_user = int(len(losers)*amount//len(winners))
+                    
+                    await connector.execute(CURRENCY_TABLE. \
+                        update(currency_model.user_id.in_([user.id for user in winners])). \
+                        values(
+                            total_allocated = currency_model.total_allocated-amount,
+                            total_love = currency_model.total_love+won_per_user,
+                                ))
+                
+            else:
+                await connector.execute(CURRENCY_TABLE. \
+                    update(currency_model.user_id.in_([user.id for user in winners])). \
+                    values(
+                        total_allocated = currency_model.total_allocated-amount,
+                            ))
+        
+        description_parts = ['Total bet amount: ', str(total_bet_amount), CURRENCY_EMOJI.as_emoji, '\n\n']
+        
+        if winners:
+            description_parts.append('Winners:\n')
+            for user in winners:
+                description_parts.append(user.mention)
+                description_parts.append('\n')
+            
+            description_parts.append('\n')
+        
+        if losers:
+            description_parts.append('Losers:\n')
+            for user in losers:
+                description_parts.append(user.mention)
+                description_parts.append('\n')
+        
+        if description_parts[-1] == '\n':
+            del description_parts[-1]
+        
+        description = ''.join(description_parts)
+        
+        embed = Embed('Game ended', description, color=GAMBLING_COLOR)
+        for runner in waiters_to_runners.values():
+            runner.player.add_done_embed_field(embed)
+        
+        try:
+            await client.message_edit(message, embed=embed)
+        except BaseException as err:
+            if should_render_exception(err):
+                await client.events.error(client, 'game_21_multi_player', err)
+        return
+    
+    finally:
+        for user_id in joined_user_ids:
+            IN_GAME_IDS.discard(user_id)
+
 
 
 async def gift_description(client, message):
@@ -1529,7 +2262,7 @@ async def gift(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:i
             else:
                 source_user_new_love = source_user_total_love-amount
             
-            target_user_new_love = target_user_total_love + amount
+            target_user_new_love = target_user_total_love+amount
             
             await connector.execute(CURRENCY_TABLE. \
                 update(currency_model.user_id==source_user.id). \
@@ -1579,7 +2312,7 @@ async def parser_failure_handler(client, message, command, content, args):
     await Closer(client, message.channel, embed)
 
 @Koishi.commands(
-    description = gift_description,
+    description = award_description,
     category = 'GAMBLING',
     checks = checks.owner_only(),
     parser_failure_handler = parser_failure_handler,
