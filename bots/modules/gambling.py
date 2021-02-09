@@ -287,6 +287,7 @@ async def hearts(client,message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
         total_love = result.total_love
         daily_next = result.daily_next
         daily_streak = result.daily_streak
+        total_allocated = result.total_allocated
         now = datetime.utcnow()
         if daily_next > now:
             ready_to_claim = False
@@ -302,9 +303,17 @@ async def hearts(client,message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
     else:
         total_love = 0
         daily_streak = 0
+        total_allocated = 0
         ready_to_claim = True
     
-    is_own = ( message.author is target_user)
+    if total_allocated and (target_user.id not in IN_GAME_IDS):
+        async with DB_ENGINE.connect() as connector:
+            await connector.execute(CURRENCY_TABLE. \
+                update(currency_model.user_id == target_user.id). \
+                values(total_allocated = 0)
+                    )
+    
+    is_own = (message.author is target_user)
     
     if is_own:
         title_prefix = 'You have'
@@ -1057,6 +1066,11 @@ class Game21Player(object):
             if total > 10 and len(hand) >= 2:
                 break
         
+        # We might draw 2 ace, at that case we hit 22.
+        if total > 21:
+            ace -= 1
+            total -= 10
+        
         self = object.__new__(cls)
         self.parent = parent
         self.user = user
@@ -1457,6 +1471,8 @@ async def game_21_single_player(client, source_message, amount:int=0):
         player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False)
         player_user_waiter = player_runner.waiter
         if player_user_waiter.done():
+            unallocate = False
+        else:
             unallocate = True
             
             async with DB_ENGINE.connect() as connector:
@@ -1464,9 +1480,6 @@ async def game_21_single_player(client, source_message, amount:int=0):
                     update(currency_model.user_id == user.id). \
                     values(total_allocated = currency_model.total_allocated-amount)
                         )
-            
-        else:
-            unallocate = False
         
         game_state = await player_user_waiter
         

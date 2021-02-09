@@ -3983,12 +3983,13 @@ async def rate_limit_test0097(client, message):
     with RLTCTX(client, channel, 'rate_limit_test0097') as RLT:
         application_command_schema = ApplicationCommand(
             'This-command_cake',
-            'But does nothing for real, pls dont use it.',
+            'But does nothing for real, pls don\'t use it.',
                 )
         
         application_command = await application_command_global_create(client, application_command_schema)
         
         application_command_schema.description = 'The floor is lava.'
+        application_command_schema.name = 'derping-out'
         
         await application_command_global_edit(client, application_command, application_command_schema)
         await application_command_global_delete(client, application_command)
@@ -4021,12 +4022,13 @@ async def rate_limit_test0099(client, message):
         
         application_command_schema = ApplicationCommand(
             'This-command_cake',
-            'But does nothing for real, pls dont use it.',
+            'But does nothing for real, pls don\'t use it.',
                 )
         
         application_command = await application_command_guild_create(client, guild, application_command_schema)
         
         application_command_schema.description = 'The floor is lava.'
+        application_command_schema.name = 'derping-out'
         
         await application_command_guild_edit(client, guild, application_command, application_command_schema)
         await application_command_guild_delete(client, guild, application_command)
