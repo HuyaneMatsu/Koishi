@@ -1542,7 +1542,7 @@ async def game_21_single_player(client, source_message, amount:int=0):
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_single_player', err)
             
-            if channel.cached_permissions_for(client).can_manage_messages:
+            if (player_runner.message is not None) and channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(player_runner.message)
                 except BaseException as err:
