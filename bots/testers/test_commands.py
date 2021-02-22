@@ -19,7 +19,7 @@ from hata.discord.parsers import PARSERS
 from hata.ext.prettyprint import pchunkify
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
 
-from bot_utils.shared import KOISHI_PATH
+from bot_utils.shared import PATH__KOISHI
 
 TEST_COMMANDS = eventlist(type_=Command, category='TEST COMMANDS',)
 
@@ -1053,8 +1053,8 @@ async def test_2_attachments(client, message):
     """
     Sends a message with 2 attachments.
     """
-    with await ReuAsyncIO(os.path.join(KOISHI_PATH, 'images', '0000001E_yakumo_yukari_chen.gif')) as file1:
-        with await ReuAsyncIO(os.path.join(KOISHI_PATH, 'images', '0000001F_yuri_hug.gif')) as file2:
+    with await ReuAsyncIO(os.path.join(PATH__KOISHI, 'images', '0000001E_yakumo_yukari_chen.gif')) as file1:
+        with await ReuAsyncIO(os.path.join(PATH__KOISHI, 'images', '0000001F_yuri_hug.gif')) as file2:
             await client.message_create(message.channel, file=[file1, file2])
 
 @TEST_COMMANDS

@@ -1028,3 +1028,6 @@ async def trivia_(client, event):
     
     finally:
         TRIVIA_USER_LOCK.discard(user.id)
+
+
+

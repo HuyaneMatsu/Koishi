@@ -7,9 +7,9 @@ from hata import Color, Task, Embed, KOKORO, Client
 from hata.ext.commands import ChooseMenu, Pagination, Closer
 from hata.discord.utils import from_json
 
-from bot_utils.shared import SATORI_HELP_COLOR
+from bot_utils.shared import COLOR__SATORI_HELP
 
-WORDMATCH_RP = re.compile('[^a-zA-z0-9]+')
+WORD_MATCH_RP = re.compile('[^a-zA-z0-9]+')
 WIKI_COLOR = Color.from_rgb(48, 217, 255)
 HATA_DOCS_BASE_URL = 'https://huyanematsu.pythonanywhere.com/docs/'
 HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
@@ -32,7 +32,7 @@ async def wiki(client, message, content):
             color=WIKI_COLOR))
         return
     
-    words = WORDMATCH_RP.split(content)
+    words = WORD_MATCH_RP.split(content)
     search_for = ' '.join(words)
     
     # this takes a while, lets type a little.
@@ -331,7 +331,7 @@ async def docs_help(client, message):
     return Embed('docs', (
         'Searchers the given term in hata docs.\n'
         f'Usage: `{prefix}docs <search_for>`'
-            ), color=SATORI_HELP_COLOR)
+            ), color=COLOR__SATORI_HELP)
 
 async def docs(client, message, search_for:str=None):
     if (search_for is None) or (len(search_for) < 4):

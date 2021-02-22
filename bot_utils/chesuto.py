@@ -3,7 +3,7 @@ import sys, os, json
 from threading import Lock as SyncLock
 
 from hata import Emoji, alchemy_incendiary, Color, Embed, KOKORO
-from bot_utils.shared import KOISHI_PATH
+from bot_utils.shared import PATH__KOISHI
 
 # Emojis are not used, but we will keep them for a time now
 
@@ -217,7 +217,7 @@ class CardFlag(int):
 CARDS_BY_ID = {}
 CARDS_BY_NAME = {}
 
-CHESUTO_FOLDER = os.path.join(KOISHI_PATH, 'chesuto_data')
+CHESUTO_FOLDER = os.path.join(PATH__KOISHI, 'chesuto_data')
 CARDS_FILE = os.path.join(CHESUTO_FOLDER, 'cards.json')
 CARDS_FILE_LOCK = SyncLock()
 

@@ -5,7 +5,7 @@ import config
 
 from hata import Client, ActivityRich, ActivityTypes
 from hata.ext.extension_loader import EXTENSION_LOADER
-from bot_utils.shared import KOISHI_PATH
+from bot_utils.shared import PATH__KOISHI
 
 MARISA_MODE = config.MARISA_MODE
 
@@ -62,7 +62,7 @@ else:
 MODULE_NAMES = set()
 
 path = None
-for path in os.listdir(os.path.join(KOISHI_PATH, 'bots', 'modules')):
+for path in os.listdir(os.path.join(PATH__KOISHI, 'bots', 'modules')):
     if not path.endswith('.py'):
         continue
     

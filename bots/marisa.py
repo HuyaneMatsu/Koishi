@@ -5,26 +5,28 @@ from time import perf_counter
 from math import ceil
 from collections import deque
 from html import unescape as html_unescape
+from functools import partial as partial_func
 
 from bs4 import BeautifulSoup
+from dateparser import parse as parse_date
 
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
-    ChannelCategory, ChannelStore, ChannelThread
+    ChannelCategory, ChannelStore, ChannelThread, time_to_id
 from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
 from hata.backend.futures import render_exc_to_list
 
-from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, MARISA_PREFIX, MARISA_HELP_COLOR, \
-    command_error, DUNGEON, DEFAULT_TEST_CHANNEL
-from bot_utils.syncer import sync_request_comamnd
+from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, COLOR__MARISA_HELP, \
+    command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
+from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter import Interpreter
 from bot_utils.tools import choose, Cell
 
 Marisa : Client
 
-setup_ext_commands(Marisa, MARISA_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
+setup_ext_commands(Marisa, PREFIX__MARISA, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)
 
 setup_ext_slash(Marisa)
@@ -32,9 +34,9 @@ setup_ext_slash(Marisa)
 Marisa.command_processer.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processer.create_category('VOICE', checks=checks.guild_only())
 
-Marisa.commands(SubterraneanHelpCommand(MARISA_HELP_COLOR), 'help', category='HELP')
+Marisa.commands(SubterraneanHelpCommand(COLOR__MARISA_HELP), 'help', category='HELP')
 
-Marisa.commands(command_error, checks=[checks.is_guild(DUNGEON)])
+Marisa.commands(command_error, checks=[checks.is_guild(GUILD__NEKO_DUNGEON)])
 
 @Marisa.events
 async def ready(client):
@@ -58,13 +60,13 @@ async def execute_description(client, message):
         '*not code*\n'
         '\n'
         '... and many more ways.'
-            ), color=MARISA_HELP_COLOR).add_footer(
+            ), color=COLOR__MARISA_HELP).add_footer(
             'Owner only!')
 
 Marisa.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
     checks=[checks.owner_only()])
 
-Marisa.commands(sync_request_comamnd, name='sync', category='UTILITY', checks=[checks.owner_only()])
+Marisa.commands(sync_request_command, name='sync', category='UTILITY', checks=[checks.owner_only()])
 
 @Marisa.events(overwrite=True)
 async def error(client, name, err):
@@ -86,10 +88,10 @@ async def error(client, name, err):
     
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang='py'):
-        await client.message_create(DEFAULT_TEST_CHANNEL, chunk)
+        await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, chunk)
 
 
-@Marisa.interactions(guild=DUNGEON, show_source=False)
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def cookie(client, event,
         user : ('user', 'To who?') = None,
             ):
@@ -115,7 +117,7 @@ DO_THINGS_CHOICES = [
     'Have you heard of Izaoyi love-shop?',
         ]
 
-@Marisa.interactions(guild=DUNGEON, show_source=False)
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def do_things(client, event):
     """I will do things!"""
     yield '*Doing things*'
@@ -123,17 +125,16 @@ async def do_things(client, event):
     yield choose(DO_THINGS_CHOICES)
 
 
-@Marisa.interactions(guild=DUNGEON, show_source=False)
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
 async def perms(client, event):
     """Shows your permissions."""
     user_permissions = event.user_permissions
     if user_permissions:
-        description = '\n'.join(permission_name.replace('_', '-') for permission_name in user_permissions)
+        content = '\n'.join(permission_name.replace('_', '-') for permission_name in user_permissions)
     else:
-        description = '*none*'
+        content = '*none*'
     
-    user = event.user
-    return Embed('Permissions', description).add_author(user.avatar_url, user.full_name)
+    return content
 
 
 @Marisa.interactions
@@ -214,7 +215,7 @@ async def get_image_embed(client, tags, name, color):
     return Embed(name, color=color, url=image_url).add_image(image_url)
 
 
-SCARLET = Marisa.interactions(None, name='scarlet', description='Scarlet?', guild=DUNGEON)
+SCARLET = Marisa.interactions(None, name='scarlet', description='Scarlet?', guild=GUILD__NEKO_DUNGEON)
 
 @SCARLET.interactions
 async def flandre(client, event):
@@ -256,22 +257,21 @@ for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 
     Marisa.interactions(Action(action_name, embed_color),
         name = action_name,
         description = f'Do you want some {action_name}s, or to {action_name} someone?',
-        guild = DUNGEON,
-        show_source = False,
+        guild = GUILD__NEKO_DUNGEON,
             )
 
 # Cleanup
 del action_name, embed_color
 
 
-@Marisa.interactions(guild=DUNGEON)
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def repeat(client, event,
         text: ('str', 'Uhum?')
             ):
     """What should I exactly repeat?"""
-    await client.interaction_response_message_create(event, text, allowed_mentions=None, show_source=True)
+    await client.interaction_response_message_create(event, text, allowed_mentions=None)
 
-@Marisa.interactions(guild=DUNGEON)
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def kaboom(client, event):
     """Kabooom!!"""
     await client.interaction_response_message_create(event)
@@ -289,7 +289,7 @@ async def kaboom(client, event):
         await client.interaction_followup_message_delete(event, message)
 
 
-@Marisa.interactions(guild=DUNGEON)
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def kaboom_mixed(client, event):
     """Kabooom!!"""
     yield
@@ -308,7 +308,7 @@ async def kaboom_mixed(client, event):
 
 
 
-@Marisa.interactions(guild=DUNGEON)
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def retardify(client, event,
         text : ('str', 'Some text to retardify.'),
             ):
@@ -343,6 +343,106 @@ async def retardify(client, event,
     user = event.user
     embed.add_author(user.avatar_url, user.full_name)
     
-    await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None, show_source=False)
+    await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
+
+def match_message_author(user, message):
+    return (message.author is user)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def clear(client, event,
+        limit : ('int'      , 'How much message?'                        )        ,
+        before : ('str'     , 'Till when?'                               ) = None ,
+        after  : ('str'     , 'Since when?'                              ) = None ,
+        where  : ('channel' , 'Where?'                                   ) = None ,
+        whos   : ('user'    , 'Who\'s message?'                          ) = None ,
+        reason : ('str'     , 'Will show up in the guild\'s audit logs.' ) = None ,
+            ):
+    """Yeets messages."""
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command.')
+        return
+    
+    if guild not in client.guild_profiles:
+        yield Embed('Ohoho', 'I must be in the guild to do this.')
+        return
+    
+    if where is None:
+        channel = event.channel
+    else:
+        if not isinstance(where, ChannelText):
+            yield Embed('Error', 'The channel must be a text channel.')
+            return
+        
+        channel = where
+    
+    if limit < 1:
+        yield Embed('Ohoho', '`limit` cannot be non-positive.')
+        return
+    
+    if not event.user_permissions.can_administrator:
+        yield Embed('Permission denied', 'You must have administrator permission to use this command.')
+        return
+    
+    client_permissions = channel.cached_permissions_for(client)
+    if (not client_permissions.can_manage_messages) or (not client_permissions.can_read_message_history):
+        yield Embed('Permission denied',
+            'I must have manage messages and read message history in the channel to do it.')
+        return
+    
+    if (before is None) or (not before):
+        before = event.id
+    else:
+        try:
+            date = parse_date(before)
+        except ValueError:
+            yield Embed('Error', '`before` could not be parsed.')
+            return
+        
+        before = time_to_id(date)
+    
+    if (after is None) or (not after):
+        after = 0
+    else:
+        try:
+            date = parse_date(after)
+        except ValueError:
+            yield Embed('Error', '`after` could not be parsed.')
+            return
+        
+        after = time_to_id(date)
+    
+    yield
+    
+    if whos is None:
+        filter = None
+    else:
+        filter = partial_func(match_message_author, whos)
+    
+    if (reason is not None) and (not reason):
+        reason = None
+    
+    await client.multi_client_message_delete_sequence(channel, after=after, before=before, limit=limit, filter=filter,
+        reason=reason)
 
 
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def test_channel_and_role(client, event,
+        user : ('user', 'Please input a user') = None,
+        channel : ('channel', 'Please input a channel') = None,
+        role : ('role', 'Please input a role') = None,
+            ):
+    """Testing entities."""
+    return \
+        f'resolved_users = {event.resolved_users!r}\n' \
+        f'resolved_channels = {event.resolved_channels!r}\n' \
+        f'resolved_roles = {event.resolved_roles!r}\n' \
+        f'user = {user!r}\n' \
+        f'channel = {channel!r}\n' \
+        f'role = {role!r}'
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
+async def invoking_user_only(client, event):
+    """SHows for the invoking user only, maybe?"""
+    return 'Beep-boop'

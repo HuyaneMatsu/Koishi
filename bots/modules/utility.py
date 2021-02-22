@@ -14,7 +14,7 @@ from hata.ext.prettyprint import pchunkify
 from PIL import Image as PIL
 
 from bot_utils.tools import CooldownHandler, PAGINATION_5PN
-from bot_utils.shared import TESTER_ROLE
+from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
 from bot_utils.command_utils import CHECK_ADMINISTRATION, CHANNEL_TEXT_CONVERTER_MESSAGE_CHANNEL_DEFAULT, \
     CLIENT_CONVERTER_ALL_CLIENT_DEFAULT, USER_CONVERTER_ALL_AUTHOR_DEFAULT, USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT, \
     MESSAGE_CONVERTER_ALL
@@ -641,7 +641,7 @@ class message_:
         await Pagination(client,message.channel, [Embed(description=chunk) for chunk in pchunkify(target_message)])
     
     category = 'UTILITY'
-    checks = [checks.has_role(TESTER_ROLE)]
+    checks = [checks.has_role(ROLE__NEKO_DUNGEON__TESTER)]
     name = 'message'
     
     async def description(client, message):
@@ -651,7 +651,7 @@ class message_:
             f'Usage: `{prefix}message *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
                 ), color=UTILITY_COLOR).add_footer(
-                f'Guild only! You must have {TESTER_ROLE.name}!')
+                f'Guild only! You must have {ROLE__NEKO_DUNGEON__TESTER.name}!')
 
 
 @Koishi.commands.from_class
@@ -668,7 +668,7 @@ class message_pure:
                 ])
     
     category = 'UTILITY'
-    checks = [checks.guild_only(), checks.has_role(TESTER_ROLE)]
+    checks = [checks.guild_only(), checks.has_role(ROLE__NEKO_DUNGEON__TESTER)]
     
     async def description(client,message):
         prefix = client.command_processer.get_prefix_for(message)
@@ -677,7 +677,7 @@ class message_pure:
             f'Usage: `{prefix}message-pure *message_id* <channel>`\n'
             'By default `channel` is the channel, where you used the command.'
                 ), color=UTILITY_COLOR).add_footer(
-                f'Guild only! You must have {TESTER_ROLE.name} to use it!')
+                f'Guild only! You must have {ROLE__NEKO_DUNGEON__TESTER.name} to use it!')
 
 @Koishi.commands.from_class
 class roles:

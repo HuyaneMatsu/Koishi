@@ -11,9 +11,9 @@ from hata.backend.futures import render_exc_to_list
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
     EmojiDeleteWaitfor, RoleEditWaitfor
-from bot_utils.shared import KOISHI_PREFIX, category_name_rule, DEFAULT_CATEGORY_NAME, WELCOME_CHANNEL, DUNGEON, \
-    ANNOUNCEMENTS_ROLE, WORSHIPPER_ROLE, KOISHI_HELP_COLOR, SYNC_CHANNEL, command_error, EVERYNYAN_ROLE, \
-    DEFAULT_TEST_CHANNEL
+from bot_utils.shared import PREFIX__KOISHI, category_name_rule, DEFAULT_CATEGORY_NAME, CHANNEL__NEKO_DUNGEON__SYSTEM, \
+    GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, ROLE__NEKO_DUNGEON__ELEVATED, COLOR__KOISHI_HELP, \
+    CHANNEL__SYSTEM__SYNC, command_error, ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
 
 from bot_utils.interpreter import Interpreter
 from bot_utils.syncer import sync_request_waiter
@@ -24,11 +24,11 @@ _KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
 
 Koishi: Client
 
-setup_ext_commands(Koishi, KOISHI_PREFIX, default_category_name=DEFAULT_CATEGORY_NAME,
+setup_ext_commands(Koishi, PREFIX__KOISHI, default_category_name=DEFAULT_CATEGORY_NAME,
     category_name_rule=category_name_rule)
 setup_ext_slash(Koishi)
 
-Koishi.command_processer.append(SYNC_CHANNEL, sync_request_waiter)
+Koishi.command_processer.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
@@ -37,7 +37,7 @@ Koishi.events(ChannelDeleteWaitfor)
 Koishi.events(EmojiDeleteWaitfor)
 Koishi.events(RoleEditWaitfor)
 
-Koishi.commands(SubterraneanHelpCommand(KOISHI_HELP_COLOR), 'help', category='HELP')
+Koishi.commands(SubterraneanHelpCommand(COLOR__KOISHI_HELP), 'help', category='HELP')
 
 Koishi.command_processer.create_category('ADMINISTRATION',)
 Koishi.command_processer.create_category('GAMES',)
@@ -88,7 +88,7 @@ async def default_event(client, message):
     
     await client.message_create(message.channel, text)
 
-Koishi.commands(command_error, checks=[checks.is_guild(DUNGEON)])
+Koishi.commands(command_error, checks=[checks.is_guild(GUILD__NEKO_DUNGEON)])
 
 @Koishi.commands
 async def invalid_command(client, message, command, content):
@@ -96,7 +96,7 @@ async def invalid_command(client, message, command, content):
     embed = Embed(
         f'Invalid command `{command}`',
         f'try using: `{prefix}help`',
-        color=KOISHI_HELP_COLOR,
+        color=COLOR__KOISHI_HELP,
             )
     
     message = await client.message_create(message.channel,embed=embed)
@@ -124,7 +124,7 @@ class shutdown:
         return Embed('shutdown', (
             'Shuts the clients down, then stops the process.'
             f'Usage  `{prefix}shutdown`'
-            ), color=KOISHI_HELP_COLOR).add_footer(
+            ), color=COLOR__KOISHI_HELP).add_footer(
                 'Owner only!')
 
 async def execute_description(client, message):
@@ -144,7 +144,7 @@ async def execute_description(client, message):
         '*not code*\n'
         '\n'
         '... and many more ways.'
-            ), color=KOISHI_HELP_COLOR).add_footer(
+            ), color=COLOR__KOISHI_HELP).add_footer(
             'Owner only!')
 
 Koishi.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
@@ -152,10 +152,10 @@ Koishi.commands(Interpreter(locals().copy()), name='execute', description=execut
 
 
 PATTERN_ROLE_RELATION = [
-    (re.compile('nya+', re.I), EVERYNYAN_ROLE, timedelta(minutes=10), True),
-    (re.compile('[il] *meow+', re.I), ANNOUNCEMENTS_ROLE, timedelta(), True),
-    (re.compile('[il] *not? *meow+', re.I), ANNOUNCEMENTS_ROLE, timedelta(), False),
-    (re.compile('nekogirl', re.I), WORSHIPPER_ROLE, timedelta(days=183), True),
+    (re.compile('nya+', re.I), ROLE__NEKO_DUNGEON__VERIFIED, timedelta(minutes=10), True),
+    (re.compile('[il] *meow+', re.I), ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, timedelta(), True),
+    (re.compile('[il] *not? *meow+', re.I), ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, timedelta(), False),
+    (re.compile('nekogirl', re.I), ROLE__NEKO_DUNGEON__ELEVATED, timedelta(days=183), True),
         ]
 
 async def role_giver(client, message):
@@ -168,7 +168,7 @@ async def role_giver(client, message):
         if add == user.has_role(role):
             break
         
-        guild_profile = user.guild_profiles.get(DUNGEON)
+        guild_profile = user.guild_profiles.get(GUILD__NEKO_DUNGEON)
         if guild_profile is None:
             break
         
@@ -202,7 +202,7 @@ async def role_giver(client, message):
         await client.message_delete(message)
         break
 
-Koishi.command_processer.append(WELCOME_CHANNEL, role_giver)
+Koishi.command_processer.append(CHANNEL__NEKO_DUNGEON__SYSTEM, role_giver)
 
 @Koishi.events(overwrite=True)
 async def error(client, name, err):
@@ -224,4 +224,4 @@ async def error(client, name, err):
     
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang='py'):
-        await client.message_create(DEFAULT_TEST_CHANNEL, chunk)
+        await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, chunk)

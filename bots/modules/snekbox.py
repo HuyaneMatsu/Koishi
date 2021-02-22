@@ -2,10 +2,10 @@
 import os, sys, subprocess, re
 from pathlib import Path
 from subprocess import TimeoutExpired
-from hata import eventlist, Color, KOKORO, Embed, ScarletLock, sleep, Guild
+from hata import eventlist, Color, KOKORO, Embed, ScarletLock, sleep, Guild, Client
 from hata.ext.commands import Command, checks
 from bot_utils.interpreter import parse_code_content
-from bot_utils.shared import DUNGEON, KOISHI_PATH
+from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
 
 # installing nsjail:
 # make a folder for it somewhere
@@ -16,6 +16,8 @@ from bot_utils.shared import DUNGEON, KOISHI_PATH
 # $ make
 # $ sudo cp ".../nsjail/nsjail" "/usr/sbin/" # Copy it.
 
+main_client : Client
+
 SNEKBOX_COLOR = Color.from_rgb(255, 16, 124)
 
 CGROUP_PIDS_PARENT = Path('/sys/fs/cgroup/pids/NSJAIL')
@@ -25,10 +27,10 @@ MEM_MAX = 52428800
 MAX_TIMEOUT = 13
 
 NSJAIL_EXECUTABLE = os.getenv('NSJAIL_PATH', '/usr/sbin/nsjail')
-NSJAIL_CONFIG = os.getenv('NSJAIL_CFG', os.path.join(KOISHI_PATH, 'bots', 'modules', 'nsjail.cfg'))
+NSJAIL_CONFIG = os.getenv('NSJAIL_CFG', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail.cfg'))
 
-PYTHON_EXECUTABLE = '/usr/bin/python3.8'
-SNEKBOXING_PATH = Path('/snekbox')
+PATH__PYTHON_EXECUTABLE = '/usr/bin/python3.8'
+PATH__SNEKBOX = Path('/snekbox')
 
 IS_UNIX = (sys.platform != 'win32')
 
@@ -39,7 +41,7 @@ EVAL_LOCK = ScarletLock(KOKORO, 2)
 if IS_UNIX:
     CGROUP_PIDS_PARENT.mkdir(parents=True, exist_ok=True)
     CGROUP_MEMORY_PARENT.mkdir(parents=True, exist_ok=True)
-    SNEKBOXING_PATH.mkdir(parents=True, exist_ok=True)
+    PATH__SNEKBOX.mkdir(parents=True, exist_ok=True)
     
     try:
         (CGROUP_MEMORY_PARENT / 'memory.limit_in_bytes').write_text(str(MEM_MAX), encoding='utf-8')
@@ -53,7 +55,7 @@ if IS_UNIX:
             pass
 
 
-main_client.command_processer.create_category('SNEKBOX', checks=checks.is_guild(DUNGEON))
+main_client.command_processer.create_category('SNEKBOX', checks=checks.is_guild(GUILD__NEKO_DUNGEON))
 
 def build_output(output, return_code):
     lines = output.decode('utf-8').splitlines()
@@ -173,7 +175,7 @@ if IS_UNIX:
             '\n'
             '... and many more ways.'
                 ), color=SNEKBOX_COLOR).add_footer(
-                f'{DUNGEON} only!')
+                f'{GUILD__NEKO_DUNGEON} only!')
     
     @main_client.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
     async def eval_(client, message, content):
@@ -202,7 +204,7 @@ if IS_UNIX:
                         '--cgroup_pids_max=1',
                         '--cgroup_pids_mount', str(CGROUP_PIDS_PARENT.parent),
                         '--cgroup_pids_parent', CGROUP_PIDS_PARENT.name,
-                        '--', PYTHON_EXECUTABLE, '-Iqu', '-c', code,
+                        '--', PATH__PYTHON_EXECUTABLE, '-Iqu', '-c', code,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                         )

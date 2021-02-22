@@ -3,9 +3,10 @@ import sys
 
 from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__
 from hata.ext.commands import checks, Closer
-from bots.koishi import KOISHI_HELP_COLOR, WORSHIPPER_ROLE, EVERYNYAN_ROLE, WELCOME_CHANNEL
 
-from bot_utils.shared import KOISHI_GIT, HATA_GIT, DUNGEON_INVITE, DUNGEON, HATA_DOCS, PASTE, ANNOUNCEMENTS_ROLE
+from bot_utils.shared import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNGEON, GUILD__NEKO_DUNGEON, \
+    LINK__HATA_DOCS, LINK__PASTE, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__NEKO_DUNGEON__ELEVATED, \
+    ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM
 from bot_utils.command_utils import CLIENT_CONVERTER_ALL_CLIENT_DEFAULT
 
 Koishi: Client
@@ -14,13 +15,13 @@ class about:
     async def command(client, message):
         implement = sys.implementation
         embed = Embed('About', f'Hello, I am {client.full_name} as you expected. What did you think, who am I?',
-                color=KOISHI_HELP_COLOR) \
-            .add_field('Library', f'[hata {__version__}]({HATA_GIT})', inline=True) \
+                color=COLOR__KOISHI_HELP) \
+            .add_field('Library', f'[hata {__version__}]({LINK__HATA_GIT})', inline=True) \
             .add_field('Interpreter', (
                 f'Python{implement.version[0]}.{implement.version[1]}'
                 f'{"" if implement.version[3]=="final" else " "+implement.version[3]} {implement.name}'
                     ), inline=True) \
-            .add_field('Support server', f'[{DUNGEON.name}]({DUNGEON_INVITE.url})', inline=True) \
+            .add_field('Support server', f'[{GUILD__NEKO_DUNGEON.name}]({INVITE__NEKO_DUNGEON.url})', inline=True) \
             .add_field('Clients', repr(len(CLIENTS)), inline=True) \
             .add_field('Guilds', repr(len(GUILDS)), inline=True) \
             .add_field('Users', repr(len(USERS)), inline=True) \
@@ -35,21 +36,21 @@ class about:
         return Embed('about', (
             'Just some information about me.'
             f'Usage: `{prefix}about`'
-                ), color=KOISHI_HELP_COLOR)
+                ), color=COLOR__KOISHI_HELP)
 
 @Koishi.commands.from_class
 class invite:
     async def command(client, message):
-        await client.message_create(message.channel, DUNGEON_INVITE.url)
+        await client.message_create(message.channel, INVITE__NEKO_DUNGEON.url)
     
     category = 'HELP'
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('invite',(
-            f'Sends an invite to our {DUNGEON} guild.\n'
+            f'Sends an invite to our {GUILD__NEKO_DUNGEON} guild.\n'
             f'Usage : `{prefix}invite`'
-                ),color=KOISHI_HELP_COLOR)
+                ),color=COLOR__KOISHI_HELP)
 
 
 async def aliases_description(client, message):
@@ -58,7 +59,7 @@ async def aliases_description(client, message):
         'Do you wanna know one of my command\'s aliases?\n'
         f'Type `{prefix}aliases <name>` and check them out!\n\n'
         'Or if you wanna know someone else\'s, who I might spy on, type her name after the command\'s :3.'
-            ), color=KOISHI_HELP_COLOR)
+            ), color=COLOR__KOISHI_HELP)
 
 
 async def aliases_parser_failure_handler(client, message, command, content, args):
@@ -107,12 +108,12 @@ async def aliases(client, message, name:str, target_client: CLIENT_CONVERTER_ALL
             title = f'Aliases for: {command.display_name!r}:'
             description = '\n'.join(aliases)
     
-    await client.message_create(message.channel, embed=Embed(title, description, color=KOISHI_HELP_COLOR))
+    await client.message_create(message.channel, embed=Embed(title, description, color=COLOR__KOISHI_HELP))
     
 @Koishi.commands.from_class
 class rules:
     async def command(client, message):
-        embed = Embed(f'Rules of {DUNGEON}:', color = KOISHI_HELP_COLOR,
+        embed = Embed(f'Rules of {GUILD__NEKO_DUNGEON}:', color = COLOR__KOISHI_HELP,
             ).add_field(
                 'Guidelines',
                 'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
@@ -121,7 +122,7 @@ class rules:
                 'Listen to staff and follow their instructions.',
             ).add_field(
                 'Language',
-                f'{DUNGEON} is an english speaking server, please try to stick yourself to it.',
+                f'{GUILD__NEKO_DUNGEON} is an english speaking server, please try to stick yourself to it.',
             ).add_field(
                 'Channels',
                 'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
@@ -136,14 +137,14 @@ class rules:
                 'Keep explicit content in nsfw channels.',
             ).add_field(
                 'Roles',
-                f'Do not beg for roles. You can claim {EVERYNYAN_ROLE.mention} role, what gives you access to '
-                f'additional channels by typing `nya` at {WELCOME_CHANNEL.mention}.\n'
+                f'Do not beg for roles. You can claim {ROLE__NEKO_DUNGEON__VERIFIED.mention} role, what gives you access to '
+                f'additional channels by typing `nya` at {CHANNEL__NEKO_DUNGEON__SYSTEM.mention}.\n'
                 f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
                 f'as well.*'
                 '\n\n'
-                f'Additionally you can also claim (or un-claim) {ANNOUNCEMENTS_ROLE.mention} by typing `i meow` '
-                '(or `i not meow`), or if you are the member of the server for at least half year, you can claim the '
-                f'superior {WORSHIPPER_ROLE.mention} role by typing `nekogirl`!'
+                f'Additionally you can also claim (or un-claim) {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.mention} by typing '
+                f'`i meow` (or `i not meow`), or if you are the member of the server for at least half year, you can '
+                f'claim the superior {ROLE__NEKO_DUNGEON__ELEVATED.mention} role by typing `nekogirl`!'
             ).add_field(
                 'Advertisements',
                 'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
@@ -161,15 +162,15 @@ class rules:
             await client.message_delete(message)
         
     category = 'HELP'
-    checks = [checks.owner_only(), checks.is_guild(DUNGEON)]
+    checks = [checks.owner_only(), checks.is_guild(GUILD__NEKO_DUNGEON)]
     
     async def description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('rules',(
-            f'Shows the rules of the {DUNGEON} guild.'
+            f'Shows the rules of the {GUILD__NEKO_DUNGEON} guild.'
             f'Usage : `{prefix}rules`'
-                ),color=KOISHI_HELP_COLOR).add_footer(
-                f'Owner only and can be used only at {DUNGEON}.')
+                ),color=COLOR__KOISHI_HELP).add_footer(
+                f'Owner only and can be used only at {GUILD__NEKO_DUNGEON}.')
 
 
 @Koishi.commands(category='HELP', aliases='github')
@@ -178,7 +179,7 @@ async def git(client, message):
     Sends a link to my git repository.
     """
     await client.message_create(message.channel, embed= \
-        Embed(description=f'[Koishi repository]({KOISHI_GIT})', color=KOISHI_HELP_COLOR))
+        Embed(description=f'[Koishi repository]({LINK__KOISHI_GIT})', color=COLOR__KOISHI_HELP))
 
 
 @Koishi.commands(category='HELP', aliases='wrapper')
@@ -187,7 +188,7 @@ async def hata(client, message):
     Sends a link to my wrapper's git repository.
     """
     await client.message_create(message.channel, embed= \
-        Embed(description=f'[hata repository]({HATA_GIT})', color=KOISHI_HELP_COLOR))
+        Embed(description=f'[hata repository]({LINK__HATA_GIT})', color=COLOR__KOISHI_HELP))
 
 
 @Koishi.commands(category='HELP', aliases='hata-docs',)
@@ -196,7 +197,7 @@ async def docs(client, message):
     Sends a link to hata's documentation.
     """
     await client.message_create(message.channel, embed= \
-        Embed(description=f'[hata docs]({HATA_DOCS})', color=KOISHI_HELP_COLOR))
+        Embed(description=f'[hata docs]({LINK__HATA_DOCS})', color=COLOR__KOISHI_HELP))
 
 
 @Koishi.commands(category='HELP', aliases='how-to-ask')
@@ -212,7 +213,7 @@ async def ask(client, message):
         'out of you\n'
         '\n'
         'For more info visit [dontasktoask.com](https://dontasktoask.com/)',
-            color = KOISHI_HELP_COLOR)
+            color = COLOR__KOISHI_HELP)
     
     await Closer(client, message.channel, embed)
 
@@ -234,8 +235,8 @@ async def markdown(client, message):
         'print(\'Hello world\')```\n'
         'Note that character \` is not a quote but a backtick.\n'
         '\n'
-        f'If, however, you have large amounts of code then it\'s better to use [our paste service]({PASTE}).',
-            color = KOISHI_HELP_COLOR)
+        f'If, however, you have large amounts of code then it\'s better to use [our paste service]({LINK__PASTE}).',
+            color = COLOR__KOISHI_HELP)
     
     await Closer(client, message.channel, embed)
 
@@ -245,5 +246,5 @@ async def paste(client, message):
     """
     A link to our paste service.
     """
-    embed = Embed(description=f'[Paste link]({PASTE})', color=KOISHI_HELP_COLOR)
+    embed = Embed(description=f'[Paste link]({LINK__PASTE})', color=COLOR__KOISHI_HELP)
     await client.message_create(message.channel, embed=embed)

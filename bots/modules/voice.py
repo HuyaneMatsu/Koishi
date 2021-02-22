@@ -10,11 +10,11 @@ from hata.ext.commands import checks, Pagination, FlaggedAnnotation, ConverterFl
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
-from bot_utils.shared import DUNGEON
+from bot_utils.shared import GUILD__NEKO_DUNGEON
 from bot_utils.command_utils import CHECK_ADMINISTRATION, SELF_CHECK_MOVE_USERS
 
 if not MARISA_MODE:
-    from bots.flan import FLAN_HELP_COLOR, CHESUTO_FOLDER, get_bgm, FLAN_HELP_COLOR
+    from bots.flan import COLOR__FLAN_HELP, CHESUTO_FOLDER, get_bgm
 
 VOICE_COLORS = {}
 
@@ -34,16 +34,16 @@ else:
     WRAPPER = ClientWrapper(Koishi, Flan)
     
     MAIN_VOICE_COLOR = Color.from_rgb(235, 52, 207)
-    VOICE_COLORS[Flan] = FLAN_HELP_COLOR
+    VOICE_COLORS[Flan] = COLOR__FLAN_HELP
     VOICE_COLORS[Koishi] = MAIN_VOICE_COLOR
 
 
 if AUDIO_PATH is not None:
-    FILENAMES = []
+    FILE_NAMES = []
     def collect_local_audio():
         for filename in os.listdir(AUDIO_PATH):
             if filename.endswith('.mp3'):
-                FILENAMES.append(filename)
+                FILE_NAMES.append(filename)
 
     collect_local_audio()
 
@@ -175,7 +175,7 @@ if AUDIO_PLAY_POSSIBLE:
     @main_client.commands(
         description=yt_play_description,
         name='play',
-        checks=checks.is_guild(DUNGEON),
+        checks=checks.is_guild(GUILD__NEKO_DUNGEON),
         category='VOICE',
             )
     async def yt_play(client, message, content):
@@ -230,7 +230,7 @@ if (AUDIO_PATH is not None and AUDIO_PLAY_POSSIBLE):
     @main_client.commands(
         name='local',
         description=local_description,
-        checks=checks.is_guild(DUNGEON),
+        checks=checks.is_guild(GUILD__NEKO_DUNGEON),
         category='VOICE',
             )
     async def local_(client, message, content):
@@ -265,13 +265,13 @@ if (AUDIO_PATH is not None and AUDIO_PLAY_POSSIBLE):
             most_accurate = None
             
             index = 0
-            limit = len(FILENAMES)
+            limit = len(FILE_NAMES)
             
             while True:
                 if index == limit:
                     break
                 
-                name = FILENAMES[index]
+                name = FILE_NAMES[index]
                 parsed = pattern.search(name)
                 
                 if parsed is None:
@@ -292,7 +292,7 @@ if (AUDIO_PATH is not None and AUDIO_PLAY_POSSIBLE):
                 if index==limit:
                     break
                 
-                name = FILENAMES[index]
+                name = FILE_NAMES[index]
                 parsed = pattern.search(name)
                 
                 if parsed is None:
@@ -458,7 +458,7 @@ async def move(client, message, channel:ChannelVoice = None):
             
             state = guild.voice_states.get(message.author.id, None)
             if state is None:
-                text = 'You must be in vocie channel, or you should pass a voice channel.'
+                text = 'You must be in voice channel, or you should pass a voice channel.'
                 break
             
             channel = state.channel
@@ -647,7 +647,7 @@ if AUDIO_PLAY_POSSIBLE and not MARISA_MODE:
             f'Usage: `{prefix}play <name>`\n'
             '\n'
             'Note that the given name can be also given as the position of the track.'
-            ), color=FLAN_HELP_COLOR)
+            ), color=COLOR__FLAN_HELP)
     
     @Flan.commands(description=chesuto_play_description, name='play', category='VOICE')
     async def chesuto_play(client, message, content):

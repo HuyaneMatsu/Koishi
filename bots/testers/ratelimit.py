@@ -1798,7 +1798,7 @@ async def application_command_guild_delete(client, guild, application_command):
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
             )
 
-async def interaction_response_message_create(client, interaction, content=None, embed=None, show_source=True):
+async def interaction_response_message_create(client, interaction, content=None, embed=None):
     message_data = {}
     contains_content = False
     
@@ -1814,15 +1814,9 @@ async def interaction_response_message_create(client, interaction, content=None,
     if contains_content:
         data['data'] = message_data
         
-        if show_source:
-            response_type = InteractionResponseTypes.message_and_source
-        else:
-            response_type = InteractionResponseTypes.message
+        response_type = InteractionResponseTypes.message_and_source
     else:
-        if show_source:
-            response_type = InteractionResponseTypes.source
-        else:
-            response_type = InteractionResponseTypes.acknowledge
+        response_type = InteractionResponseTypes.source
     
     data['type'] = response_type
     

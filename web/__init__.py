@@ -1,12 +1,12 @@
 import os
 from flask import Flask
-from bot_utils.shared import KOISHI_PATH
+from bot_utils.shared import PATH__KOISHI
 
 ROUTE = ('web', 'modules')
 
 WEBAPP = Flask('koishi_web',
-    template_folder = os.path.join(KOISHI_PATH, 'web', 'templates'),
-    static_folder = os.path.join(KOISHI_PATH, 'web', 'static'),
+    template_folder = os.path.join(PATH__KOISHI, 'web', 'templates'),
+    static_folder = os.path.join(PATH__KOISHI, 'web', 'static'),
         )
 
 from config import WEBAPP_SECRET_KEY as SECRET_KEY
@@ -19,7 +19,7 @@ def hello_world():
 
 path = None
 full_path = None
-base_path = os.path.join(KOISHI_PATH, *ROUTE)
+base_path = os.path.join(PATH__KOISHI, *ROUTE)
 
 for path in os.listdir(base_path):
     full_path = os.path.join(base_path, path)

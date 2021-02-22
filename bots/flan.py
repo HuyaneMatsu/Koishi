@@ -9,7 +9,7 @@ from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, 
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
 
-from bot_utils.shared import FLAN_PREFIX, FLAN_HELP_COLOR, category_name_rule, KOISHI_PATH
+from bot_utils.shared import PREFIX__FLAN, COLOR__FLAN_HELP, category_name_rule, PATH__KOISHI
 from bot_utils.tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
 from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, \
     get_card
@@ -26,7 +26,7 @@ CHESUTO_BGM_MESSAGES = set()
 CHESUTO_BGM_CHANNEL = ChannelText.precreate(707892105749594202)
 CHESUTO_BGM_TRACKS = {}
 CHESUTO_BGM_TRACKS_SORTED = sortedlist()
-BGM_SPLITPATTERN = re.compile('([^ _-]+)')
+BGM_SPLIT_PATTERN = re.compile('([^ _-]+)')
 BGM_NAME_PATTERN = re.compile('[a-z0-9]+', re.I)
 PERCENT_RP = re.compile('(\d*)[%]?')
 
@@ -60,7 +60,7 @@ BMG_NAMES_W_S = {
 
 FILE_NAME = 'bgm_names.csv'
 
-FILE_PATH = os.path.join(KOISHI_PATH, 'chesuto_data', FILE_NAME)
+FILE_PATH = os.path.join(PATH__KOISHI, 'chesuto_data', FILE_NAME)
 FILE_LOCK = Lock(KOKORO)
 
 def read_bgm_name_task():
@@ -129,7 +129,7 @@ def get_auto_bgm_name(name):
 
 Flan: Client
 
-setup_ext_commands(Flan, FLAN_PREFIX,
+setup_ext_commands(Flan, PREFIX__FLAN,
     default_category_name='GENERAL COMMANDS',
     category_name_rule=category_name_rule,
         )
@@ -138,7 +138,7 @@ setup_ext_slash(Flan)
 Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
 
-Flan.commands(SubterraneanHelpCommand(FLAN_HELP_COLOR), 'help')
+Flan.commands(SubterraneanHelpCommand(COLOR__FLAN_HELP), 'help')
 Flan.command_processer.create_category('VOICE', checks=checks.guild_only())
 
 @Flan.events
@@ -163,7 +163,7 @@ async def invalid_command(client, message, command, content):
     embed = Embed(
         f'Invalid command `{command}`',
         f'try using: `{prefix}help`',
-        color=FLAN_HELP_COLOR,
+        color=COLOR__FLAN_HELP,
             )
     
     message = await client.message_create(message.channel, embed=embed)
@@ -183,7 +183,7 @@ class ping:
         return Embed('ping',(
             'Ping - Pong?\n'
             f'Usage: `{prefix}ping`'
-            ), color=FLAN_HELP_COLOR)
+            ), color=COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
 class sync_avatar:
@@ -209,7 +209,7 @@ class sync_avatar:
             'bot\'s avatar the other way, so I made a command for it.\n'
             'Have a nice day!\n'
             f'Usage: `{prefix}sync_avatar`'
-            ), color=FLAN_HELP_COLOR)
+            ), color=COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
 class massadd:
@@ -331,7 +331,7 @@ class massadd:
             'searching for card definitions. If it finds one, then updates it, if '
             'already added, or creates a new one.\n'
             f'Usage: `{prefix}massadd`'
-            ), color=FLAN_HELP_COLOR).add_footer(
+            ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 @Flan.commands.from_class
@@ -359,8 +359,8 @@ class showcard:
     async def description(client,message):
         return Embed('showcard',(
             'Shows the specified card by it\'s name.\n'
-            f'Usage: `{FLAN_PREFIX}showcard *name*`'
-            ), color=FLAN_HELP_COLOR)
+            f'Usage: `{PREFIX__FLAN}showcard *name*`'
+            ), color=COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
 class showcards:
@@ -408,7 +408,7 @@ class showcards:
         return Embed('showcards',(
             'Searches all the cards, which contain the specified string.\n'
             f'Usage: `{prefix}showcards *name*`'
-            ), color=FLAN_HELP_COLOR)
+            ), color=COLOR__FLAN_HELP)
 
 class CardPaginator(object):
     __slots__ = ('title', 'rendered', 'collected', 'page_information')
@@ -593,7 +593,7 @@ class add_image:
             'Adds or updates an image of a card.\n'
             f'Usage: `{prefix}add_image <card name>`\n'
             'Also include an image as attachment.'
-            ), color=FLAN_HELP_COLOR).add_footer(
+            ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 @Flan.commands.from_class
@@ -763,7 +763,7 @@ class checklist:
             'Lists the cards of the given rarity, which have images added to them.\n'
             'If no rarity is provided, I will list all the cards with images.\n'
             f'Usage: `{prefix}checklist *rarity*`\n'
-            ), color=FLAN_HELP_COLOR).add_footer(
+            ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
     
 @Flan.commands.from_class
@@ -808,7 +808,7 @@ class dump_all_card:
         return Embed('dump-all-card',(
             'Lists all the cards to this channel.\n'
             f'Usage: `{prefix}dump-all-card`\n'
-            ), color=FLAN_HELP_COLOR).add_footer(
+            ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 REMOVE_CARD_OK = BUILTIN_EMOJIS['ok_hand']
@@ -860,7 +860,7 @@ class remove_card:
         return Embed('remove-card',(
             'Removes the specific card\n'
             f'Usage: `{prefix}remove-card <name>`\n'
-            ), color=FLAN_HELP_COLOR).add_footer(
+            ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 @Flan.events
@@ -1008,7 +1008,7 @@ def get_bgm(content):
         if index >= 0 and index < len(CHESUTO_BGM_TRACKS_SORTED):
             return CHESUTO_BGM_TRACKS_SORTED[index]
     
-    parts = BGM_SPLITPATTERN.findall(content)
+    parts = BGM_SPLIT_PATTERN.findall(content)
     if not parts:
         return None
     
@@ -1066,7 +1066,7 @@ async def bgminfo_description(client, message):
         f'Usage: `{prefix}bgminfo <name>`\n'
         '\n'
         'Note that the given name can be also given as the position of the track.'
-            ), color=FLAN_HELP_COLOR)
+            ), color=COLOR__FLAN_HELP)
 
 async def bgminfo_command(client, message, content):
     if not content:
@@ -1126,7 +1126,7 @@ class bgms:
         limit = len(chunks)
         index = 0
         while index < limit:
-            embed = Embed('Chesuto BGMs:', color=FLAN_HELP_COLOR, description=chunks[index])
+            embed = Embed('Chesuto BGMs:', color=COLOR__FLAN_HELP, description=chunks[index])
             index += 1
             embed.add_footer(f'page {index}/{limit}')
             embeds.append(embed)
@@ -1140,7 +1140,7 @@ class bgms:
         return Embed('bgms', (
             'Lists the chesuto bgms.\n'
             f'Usage: `{prefix}bgms`'
-            ), color=FLAN_HELP_COLOR)
+            ), color=COLOR__FLAN_HELP)
 
 
 def check_has_cards_role(message):
@@ -1176,7 +1176,7 @@ async def set_bgm_name_description(client, message):
         'Changes a bgm\'s name\n'
         f'Usage: `{prefix}set-bgm-name <bgm name>`\n'
         'After it please define the new name and react with the OK emoji.'
-        ), color=FLAN_HELP_COLOR).add_footer(
+        ), color=COLOR__FLAN_HELP).add_footer(
             f'You must have `{CARDS_ROLE}` role to use this command.')
 
 @Flan.commands(checks=checks.has_role(CARDS_ROLE), category='VOICE', description=set_bgm_name_description)

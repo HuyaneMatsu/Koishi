@@ -8,14 +8,15 @@ from hata.ext.commands import setup_ext_commands, checks, Closer
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
 
-from bot_utils.shared import SATORI_PREFIX, SATORI_HELP_COLOR
+from bot_utils.shared import PREFIX__SATORI, COLOR__SATORI_HELP
 
 Satori : Client
+Koishi : Client
 
-setup_ext_commands(Satori, SATORI_PREFIX)
+setup_ext_commands(Satori, PREFIX__SATORI)
 setup_ext_slash(Satori)
 
-Satori.commands(SubterraneanHelpCommand(SATORI_HELP_COLOR), 'help')
+Satori.commands(SubterraneanHelpCommand(COLOR__SATORI_HELP), 'help')
 
 @Satori.commands
 async def invalid_command(client, message, command, content):
@@ -115,7 +116,7 @@ class auto_pyramid:
             if size < 2:
                 error_message = 'That is pretty small. OOF'
             elif size > 23:
-                error_message = 'That is HUGE! Thats what she said...'
+                error_message = 'That is HUGE! That\'s what she said...'
             else:
                 break
             
@@ -156,7 +157,7 @@ class auto_pyramid:
         return Embed('auto-pyramid', (
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid <emoji> <size>`'
-                ), color=SATORI_HELP_COLOR).add_footer(
+                ), color=COLOR__SATORI_HELP).add_footer(
                 'Guild only! You must have manage messages permission to use it.')
     
     async def parser_failure_handler(client, message, command, content, args):
@@ -170,7 +171,7 @@ class auto_pyramid_u:
             if size < 2:
                 error_message = 'That is pretty small. OOF'
             elif size > 23:
-                error_message = 'That is HUGE! Thats what she said...'
+                error_message = 'That is HUGE! That\'s what she said...'
             else:
                 break
             
@@ -221,7 +222,8 @@ class auto_pyramid_u:
             return
         
         for user, count in zip(selected_users, chain(range(1, size), range(size, 0, -1))):
-            await client.webhook_message_create(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)), name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
+            await client.webhook_message_create(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)),
+                name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
     
     checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
     
@@ -230,7 +232,7 @@ class auto_pyramid_u:
         return Embed('auto-pyramid-u', (
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid-u <emoji> <size>`'
-                ), color=SATORI_HELP_COLOR).add_footer(
+                ), color=COLOR__SATORI_HELP).add_footer(
                 'Guild only! You must have manage messages permission to use it.')
     
     async def parser_failure_handler(client, message, command, content, args):
@@ -248,5 +250,5 @@ class reverse:
         return Embed('reverse', (
             'Reverses your message\n'
             f'Usage: `{prefix}reverse <content>`'
-                ), color=SATORI_HELP_COLOR)
+                ), color=COLOR__SATORI_HELP)
 

@@ -6,16 +6,15 @@ from hata import elapsed_time, Color, Embed, Client, ChannelText
 from hata.ext.commands import Cooldown, checks
 
 from bot_utils.tools import CooldownHandler
-from bot_utils.shared import EVERYNYAN_ROLE, STAFF_ROLE, EVENT_CHANNEL, EVENT_LOLI_ROLE, HATA_GIT, CURRENCY_EMOJI
+from bot_utils.shared import ROLE__NEKO_DUNGEON__VERIFIED, ROLE__NEKO_DUNGEON__MODERATOR, COLOR__EVENT, \
+    CHANNEL__NEKO_DUNGEON__EVENT, ROLE__NEKO_DUNGEON__EVENT_MANAGER, LINK__HATA_GIT, EMOJI__HEART_CURRENCY
 
-EVENT_COLOR = Color(2316923)
-
-EVENT_TEST_CHECK = None # checks.has_any_role((STAFF_ROLE, EVENT_LOLI_ROLE))
+EVENT_TEST_CHECK = None # checks.has_any_role((ROLE__NEKO_DUNGEON__MODERATOR, ROLE__NEKO_DUNGEON__EVENT_MANAGER))
 
 Koishi: Client
 Koishi.command_processer.create_category('EVENTS', checks=EVENT_TEST_CHECK)
 
-HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', color=EVENT_COLOR). \
+HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', color=COLOR__EVENT). \
     add_field(
         'Event theme: Cats & Nekogirls',
         'Make cat or nekogirl related slash commands.'
@@ -23,21 +22,21 @@ HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', colo
     add_field(
         'Event technology',
         '**Language**: Python3\n'
-        f'**Library**: [Hata]({HATA_GIT})\n'
+        f'**Library**: [Hata]({LINK__HATA_GIT})\n'
         '**Implementations**: Pypy, Cpython\n'
         '**Python version**: >=3.6'
             ). \
     add_field(
         'Prize pool',
-        f'1st place: 6 month of Discord Nitro + 24k {CURRENCY_EMOJI:e} + NEKOPARA Vol. 4 on Steam\n'
-        f'2nd place: 4 month of Discord Nitro + 16k {CURRENCY_EMOJI:e} \n'
-        f'3rd place: 2 month of Discord Nitro + 8k {CURRENCY_EMOJI:e}'
+        f'1st place: 6 month of Discord Nitro + 24k {EMOJI__HEART_CURRENCY:e} + NEKOPARA Vol. 4 on Steam\n'
+        f'2nd place: 4 month of Discord Nitro + 16k {EMOJI__HEART_CURRENCY:e} \n'
+        f'3rd place: 2 month of Discord Nitro + 8k {EMOJI__HEART_CURRENCY:e}'
             ). \
     add_field(
         'Event organizers',
         'HuyaneMatsu#2016\n'
         '\n'
-        f'If you have any questions ping us specifically or by pinging the role {EVENT_LOLI_ROLE:m}, '
+        f'If you have any questions ping us specifically or by pinging the role {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}, '
         'although try not to spam.'
             ). \
     add_field(
@@ -51,7 +50,7 @@ HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', colo
     add_field(
         'Qualifier',
         'You need to complete the qualifier test shown by Koishi\'s `k!qualifier` command and submit it in '
-        f'DM with the `k!submit` one. (You must have {EVERYNYAN_ROLE:m} role to submit your solution.)'
+        f'DM with the `k!submit` one. (You must have {ROLE__NEKO_DUNGEON__VERIFIED:m} role to submit your solution.)'
             ). \
     add_field(
         'Teams',
@@ -59,22 +58,22 @@ HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', colo
             ). \
     add_field(
         'Advertising',
-        f'If you want to advertise you can should not. Really, ask {EVENT_LOLI_ROLE:m} and the owner(s) of teh other '
-        f'guild as well, whether they allow it.'
+        f'If you want to advertise you can should not. Really, ask {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m} and the '
+        f'owner(s) of the other guild as well, whether they allow it.'
             ). \
     add_field(
         'Codejam rating rules',
         'To get you approximate idea on what we rate on how will your submissions be scored we\'ve made the following '
         'table:\n'
         '\n'
-    
+        
         'Clean code: (25%)\n'
         'Idea: (40%)\n'
         'Functionality: (35%)'
             ). \
     add_field(
         'Codejam submissions',
-        f'Please open a git repo for your submission and send the link to an {EVENT_LOLI_ROLE:m}.\n'
+        f'Please open a git repo for your submission and send the link to an {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}.\n'
         '\n'
         'Your project has to include documentation. At the very least, it should include instructions on how to set-up '
         'and run your projects, but keep in mind that a README is the first thing people typically see when they look '
@@ -126,7 +125,7 @@ HATA_JAM_2_QUALIFIER = (
         '- Cost and type should be separated by a ` ` character.\n'
         '- Type and each extra trait should be separated by `, ` characters.\n'
         '- Extra traits should be sorted by name.'
-        , color=EVENT_COLOR),
+        , color=COLOR__EVENT),
     
     Embed(None,
         'The following code:\n'
@@ -155,7 +154,7 @@ HATA_JAM_2_QUALIFIER = (
         'tail(s)\n'
         '59755 Horny Maine Coon nekogirl, Boing-Boing, Heterochromia, Lunatic, Red eye(s)\n'
         '```'
-        , color=EVENT_COLOR)
+        , color=COLOR__EVENT)
         
     )
 
@@ -176,7 +175,7 @@ JAM_START = datetime(2021, 1, 29, 0, 0, 0)
 JAM_DEADLINE = datetime(2021, 2, 12, 0, 0, 0)
 
 
-@Koishi.commands(category='EVENTS', checks=[checks.private_only(), checks.has_role(EVERYNYAN_ROLE)])
+@Koishi.commands(category='EVENTS', checks=[checks.private_only(), checks.has_role(ROLE__NEKO_DUNGEON__VERIFIED)])
 @Cooldown('user', 7200., limit=2, handler=CooldownHandler())
 async def submit(client, message):
     """
@@ -185,7 +184,7 @@ async def submit(client, message):
     Please include your file as a `.py` file attachment.
     """
     if datetime.utcnow() >= QUALIFIER_DEADLINE:
-        return Embed('Oh No!', 'Qualifier over', color=EVENT_COLOR)
+        return Embed('Oh No!', 'Qualifier over', color=COLOR__EVENT)
     
     attachments = message.attachments
     if attachments is None:
@@ -198,16 +197,16 @@ async def submit(client, message):
             attachment = None
     
     if attachment is None:
-        return Embed('Error', 'No attachment or no `.py` attachment found.', color=EVENT_COLOR)
+        return Embed('Error', 'No attachment or no `.py` attachment found.', color=COLOR__EVENT)
     
     if attachment.size > 1048576:
-        return Embed('Error', 'Size limit exceeded.', color=EVENT_COLOR)
+        return Embed('Error', 'Size limit exceeded.', color=COLOR__EVENT)
     
     file = await client.download_attachment(attachment)
-    await client.message_create(EVENT_CHANNEL, f'{message.author:f}, [{message.author.id}] submitted:',
+    await client.message_create(CHANNEL__NEKO_DUNGEON__EVENT, f'{message.author:f}, [{message.author.id}] submitted:',
         file=('submission.py', file))
     
-    return Embed('Success', 'Noice', color=EVENT_COLOR)
+    return Embed('Success', 'Noice', color=COLOR__EVENT)
 
 
 async def countdown_description(client, message):
@@ -229,7 +228,7 @@ async def countdown_description(client, message):
         f'Usage: `{prefix}countdown`\n'
         '\n'
         f'Don\'t worry, we got you, {result}.'
-            ), color=EVENT_COLOR)
+            ), color=COLOR__EVENT)
 
 @Koishi.commands(aliases=['deadline', 'event_deadline'], description=countdown_description, category='EVENTS')
 async def countdown(client, message):

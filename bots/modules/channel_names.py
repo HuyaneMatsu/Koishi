@@ -6,7 +6,7 @@ from random import random
 from datetime import datetime
 from difflib import get_close_matches
 
-from bot_utils.shared import BOT_CHANNEL_CATEGORY, KOISHI_PATH, STAFF_ROLE
+from bot_utils.shared import CATEGORY__NEKO_DUNGEON__BOTS, PATH__KOISHI, ROLE__NEKO_DUNGEON__MODERATOR
 from bot_utils.tools import Cell
 
 from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \
@@ -15,14 +15,14 @@ from hata.ext.commands import checks, Pagination, Closer, wait_for_reaction
 
 FILE_NAME = 'channel_names.csv'
 
-FILE_PATH = os.path.join(KOISHI_PATH, 'bots', 'modules', FILE_NAME)
+FILE_PATH = os.path.join(PATH__KOISHI, 'bots', 'modules', FILE_NAME)
 FILE_LOCK = Lock(KOKORO)
 EDIT_LOCK = Lock(KOKORO)
 
-DEFAULT_NAME = 'gogo-maniac'
+DEFAULT_NAME = 'go-go-maniac'
 
 DAY = 24.0 * 60.0 * 60.0
-DAY_CHANCE_MULTIPLINER = 0.01 / DAY
+DAY_CHANCE_MULTIPLIER = 0.01 / DAY
 
 SPACE_CHAR = '-'
 
@@ -117,7 +117,7 @@ class ChannelNameDescriber(object):
     def chance(self):
         chance = self._chance
         if chance is None:
-            self._chance = chance = (1.0 + (time_now()-self.last_present)*DAY_CHANCE_MULTIPLINER) * self.weight
+            self._chance = chance = (1.0 + (time_now()-self.last_present)*DAY_CHANCE_MULTIPLIER) * self.weight
         
         return chance
     
@@ -136,14 +136,14 @@ class ChannelNameDescriber(object):
 
 async def get_random_names(count):
     names = await read_channels()
-    choosed = []
+    chosen = []
     if len(names) <= count:
         for describer in names:
-            choosed.append(describer.name)
+            chosen.append(describer.name)
             describer.present()
         
         for _ in range(len(names), count):
-            choosed.append(DEFAULT_NAME)
+            chosen.append(DEFAULT_NAME)
     
     else:
         total_chance = 0.0
@@ -166,11 +166,11 @@ async def get_random_names(count):
                 
                 total_chance -= chance
                 describer.present()
-                choosed.append(describer.name)
+                chosen.append(describer.name)
                 break
     
     await write_channels(names)
-    return choosed
+    return chosen
 
 
 def read_channels_task():
@@ -205,10 +205,10 @@ async def write_channels(names):
 
 async def do_rename():
     async with EDIT_LOCK:
-        if not BOT_CHANNEL_CATEGORY.guild.permissions_for(Koishi).can_manage_channel:
+        if not CATEGORY__NEKO_DUNGEON__BOTS.guild.permissions_for(Koishi).can_manage_channel:
             return
         
-        channels = BOT_CHANNEL_CATEGORY.channel_list
+        channels = CATEGORY__NEKO_DUNGEON__BOTS.channel_list
         count = len(channels)
         if not count:
             return
@@ -226,7 +226,7 @@ def cycle_rename():
 NAME_CYCLER_HANDLER = Cell()
 
 Koishi: Client
-Koishi.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(STAFF_ROLE)])
+Koishi.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__NEKO_DUNGEON__MODERATOR)])
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(
@@ -273,7 +273,7 @@ async def list_bot_channel_names(client, message):
 
 
 def check_staff_role(event):
-    return event.user.has_role(STAFF_ROLE)
+    return event.user.has_role(ROLE__NEKO_DUNGEON__MODERATOR)
 
 ADD_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
@@ -351,11 +351,11 @@ async def add_bot_channel_name(client, message, weight:int, name):
                     if describer.name == describer:
                         describer.weight = weight
                 
-                footer = 'Name overwritten succesfully.'
+                footer = 'Name overwritten successfully.'
             else:
                 describer = ChannelNameDescriber.from_name_and_weight(name, weight)
                 names.append(describer)
-                footer = 'Name added succesfully.'
+                footer = 'Name added successfully.'
             await write_channels(names)
         
         elif emoji_ is ADD_EMOJI_CANCEL:

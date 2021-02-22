@@ -8,12 +8,12 @@ from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, Inval
 from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
     GUI_STATE_SWITCHING_CTX, Timeouter, checks
 
-from bot_utils.shared import KOISHI_PATH
+from bot_utils.shared import PATH__KOISHI
 from PIL import Image as PIL
 
 Koishi: Client
 
-FONT = PIL.font(os.path.join(KOISHI_PATH, 'library', 'Kozuka.otf'), 90)
+FONT = PIL.font(os.path.join(PATH__KOISHI, 'library', 'Kozuka.otf'), 90)
 FONT_COLOR = (162, 61, 229)
 
 del os

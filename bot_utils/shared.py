@@ -1,48 +1,56 @@
 # -*- coding: utf-8 -*-
 import os
 from io import StringIO
-from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory, Emoji
+from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory, Emoji, User
 from hata.ext.commands import Pagination
 
 import config
 
-from config import KOISHI_PATH
-if KOISHI_PATH is None:
-    KOISHI_PATH = os.path.abspath('..')
+from config import KOISHI_PATH as PATH__KOISHI
+if PATH__KOISHI is None:
+    PATH__KOISHI = os.path.abspath('..')
 
-KOISHI_PREFIX = config.KOISHI_PREFIX
-SATORI_PREFIX = config.SATORI_PREFIX
-FLAN_PREFIX = config.FLAN_PREFIX
-MARISA_PREFIX = config.MARISA_PREFIX
+PREFIX__KOISHI = config.KOISHI_PREFIX
+PREFIX__SATORI = config.SATORI_PREFIX
+PREFIX__FLAN = config.FLAN_PREFIX
+PREFIX__MARISA = config.MARISA_PREFIX
 
-DUNGEON = Guild.precreate(388267636661682178)
+GUILD__NEKO_DUNGEON = Guild.precreate(388267636661682178)
 
-WELCOME_CHANNEL = ChannelText.precreate(445191707491958784)
-EVERYNYAN_ROLE = Role.precreate(445189164703678464)
-ANNOUNCEMENTS_ROLE = Role.precreate(538397994421190657)
-WORSHIPPER_ROLE = Role.precreate(403586901803794432)
-DUNGEON_PREMIUM_ROLE = Role.precreate(585556522558554113)
-DUNGEON_INVITE = Invite.precreate('3cH2r5d')
-BOT_CHANNEL_CATEGORY = ChannelCategory.precreate(445191611727478795)
-STAFF_ROLE = Role.precreate(726171592509358093)
-TESTER_ROLE = Role.precreate(648138238250319876)
-EVENT_LOLI_ROLE = Role.precreate(798913709019103284)
-EVENT_CHANNEL = ChannelText.precreate(798911148292309002)
-CURRENCY_EMOJI = Emoji.precreate(603533301516599296, name='youkai_kokoro')
+CHANNEL__NEKO_DUNGEON__SYSTEM = ChannelText.precreate(445191707491958784)
+CHANNEL__NEKO_DUNGEON__EVENT = ChannelText.precreate(798911148292309002)
+CHANNEL__NEKO_DUNGEON__DEFAULT_TEST = ChannelText.precreate(557187647831932938)
+
+CHANNEL__SYSTEM__SYNC = ChannelText.precreate(568837922288173058)
+
+ROLE__NEKO_DUNGEON__VERIFIED = Role.precreate(445189164703678464)
+ROLE__NEKO_DUNGEON__ANNOUNCEMENTS = Role.precreate(538397994421190657)
+ROLE__NEKO_DUNGEON__ELEVATED = Role.precreate(403586901803794432)
+ROLE__NEKO_DUNGEON__BOOSTER = Role.precreate(585556522558554113)
+ROLE__NEKO_DUNGEON__MODERATOR = Role.precreate(726171592509358093)
+ROLE__NEKO_DUNGEON__TESTER = Role.precreate(648138238250319876)
+ROLE__NEKO_DUNGEON__EVENT_MANAGER = Role.precreate(798913709019103284)
+
+INVITE__NEKO_DUNGEON = Invite.precreate('3cH2r5d')
+
+CATEGORY__NEKO_DUNGEON__BOTS = ChannelCategory.precreate(445191611727478795)
+
+EMOJI__HEART_CURRENCY = Emoji.precreate(603533301516599296, name='youkai_kokoro')
+
+COLOR__SATORI_HELP = Color.from_rgb(118, 0, 161)
+COLOR__KOISHI_HELP = Color.from_html('#ffd21e')
+COLOR__FLAN_HELP = Color.from_rgb(230, 69, 0)
+COLOR__MARISA_HELP = Color.from_html('#e547ed')
+COLOR__EVENT = Color(2316923)
+
+LINK__KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
+LINK__HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
+LINK__HATA_DOCS = 'https://huyanematsu.pythonanywhere.com/docs/hata'
+LINK__PASTE = 'https://hastebin.com/'
+
+USER__DISBOARD = User.precreate(302050872383242240, is_bot=True)
+
 DEFAULT_CATEGORY_NAME = 'Uncategorized'
-DEFAULT_TEST_CHANNEL = ChannelText.precreate(557187647831932938)
-
-SATORI_HELP_COLOR = Color.from_rgb(118, 0, 161)
-KOISHI_HELP_COLOR = Color.from_html('#ffd21e')
-FLAN_HELP_COLOR = Color.from_rgb(230, 69, 0)
-MARISA_HELP_COLOR = Color.from_html('#e547ed')
-
-KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
-HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
-HATA_DOCS = 'https://huyanematsu.pythonanywhere.com/docs/hata'
-PASTE = 'https://hastebin.com/'
-
-SYNC_CHANNEL = ChannelText.precreate(568837922288173058)
 
 def category_name_rule(name):
     if name is None:

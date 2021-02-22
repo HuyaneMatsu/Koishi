@@ -10,7 +10,7 @@ from config import HATA_PATH
 from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep, Embed
 from hata.ext.commands import wait_for_message, Pagination
 
-from .shared import SYNC_CHANNEL, KOISHI_PATH
+from .shared import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
 
 CHUNK_SIZE = 128*1024 # 128 KB
 
@@ -19,7 +19,7 @@ KOISHI_HEAD_NAME = 'koishi'
 
 RELATIONS = {
     HATA_HEAD_NAME: HATA_PATH,
-    KOISHI_HEAD_NAME: KOISHI_PATH,
+    KOISHI_HEAD_NAME: PATH__KOISHI,
         }
 
 DATETIME_FORMAT_CODE = '%Y.%m.%d-%H:%M:%S'
@@ -105,10 +105,10 @@ def get_modified_files(days_allowed):
 async def request_sync(client, days_allowed):
     async with SYNC_LOCK:
         
-        await client.message_create(SYNC_CHANNEL, INITIAL_MESSAGE)
+        await client.message_create(CHANNEL__SYSTEM__SYNC, INITIAL_MESSAGE)
         
         try:
-            await wait_for_message(client, SYNC_CHANNEL, check_approved, 30.)
+            await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_approved, 30.)
         except TimeoutError:
             sys.stderr.write('Sync request failed, timeout\.n')
             return
@@ -117,26 +117,26 @@ async def request_sync(client, days_allowed):
         
         for file in files:
             with (await ReuAsyncIO(file.path)) as io:
-                await client.message_create(SYNC_CHANNEL, '.'.join(file.access_path), file=io)
+                await client.message_create(CHANNEL__SYSTEM__SYNC, '.'.join(file.access_path), file=io)
             
             try:
-                await wait_for_message(client, SYNC_CHANNEL, check_received, 60.)
+                await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_received, 60.)
             except TimeoutError:
                 sys.stderr.write('Sync request failed, timeout\.n')
                 return
         
-        await client.message_create(SYNC_CHANNEL, SYNC_DONE)
+        await client.message_create(CHANNEL__SYSTEM__SYNC, SYNC_DONE)
 
 async def receive_sync(client, partner):
     try:
         async with SYNC_LOCK:
             # some delay is needed or Koishi might answer too fast.
             await sleep(0.4, KOKORO)
-            await client.message_create(SYNC_CHANNEL, REQUEST_APPROVED)
+            await client.message_create(CHANNEL__SYSTEM__SYNC, REQUEST_APPROVED)
             
             while True:
                 try:
-                    message = await wait_for_message(client, SYNC_CHANNEL, check_any(partner), 60.)
+                    message = await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_any(partner), 60.)
                 except TimeoutError:
                     sys.stderr.write('Sync request failed, timeout\.n')
                     return
@@ -179,9 +179,9 @@ async def receive_sync(client, partner):
                     if (binary is not None):
                         await file.write(binary)
                 
-                # Wait some. It can happen that we send this message, befrore the other side gets it's answer.
+                # Wait some. It can happen that we send this message, before the other side gets it's answer.
                 await sleep(0.4, KOKORO)
-                await client.message_create(SYNC_CHANNEL, RECEIVED)
+                await client.message_create(CHANNEL__SYSTEM__SYNC, RECEIVED)
     except BaseException as err:
         with StringIO() as buffer:
             await KOKORO.render_exc_async(err, ['```'], file=buffer)
@@ -207,15 +207,15 @@ async def receive_sync(client, partner):
             line = lines[index]
             index = index+1
             
-            line_lenth = len(line)
+            line_length = len(line)
             # long line check, should not happen
-            if line_lenth > 500:
+            if line_length > 500:
                 line = line[:500]+'...\n'
-                line_lenth = 504
+                line_length = 504
             
-            if page_length+line_lenth > 1997:
+            if page_length+line_length > 1997:
                 if index == limit:
-                    # If we are at the last element, we dont need to shard up,
+                    # If we are at the last element, we don't need to shard up,
                     # because the last element is always '```'
                     page_contents.append(line)
                     embed = Embed(description=''.join(page_contents))
@@ -231,11 +231,11 @@ async def receive_sync(client, partner):
                 page_contents.append('```py\n')
                 page_contents.append(line)
                 
-                page_length = 6+line_lenth
+                page_length = 6+line_length
                 continue
             
             page_contents.append(line)
-            page_length += line_lenth
+            page_length += line_length
             continue
         
         limit = len(pages)
@@ -247,7 +247,7 @@ async def receive_sync(client, partner):
         
         await Pagination(client, message.channel, pages)
 
-async def sync_request_comamnd(client, message, days: int = 7):
+async def sync_request_command(client, message, days: int = 7):
     if days < 1 or days > 30:
         await client.message_create(message.channel, f'lease enter a valid day between 1 and 30 days, got {days}')
         return

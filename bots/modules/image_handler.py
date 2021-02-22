@@ -15,7 +15,7 @@ except ImportError:
 UPLOAD_LOCK = Lock(KOKORO)
 
 from bot_utils.tools import choose
-from bot_utils.shared import KOISHI_PATH
+from bot_utils.shared import PATH__KOISHI
 from bot_utils.command_utils import MESSAGE_CONVERTER_ALL
 
 
@@ -83,7 +83,7 @@ class image_details(set):
 IMAGE_FORMATS_STATIC = {'jpg', 'png', 'bmp', 'jpeg'}
 IMAGE_FORMATS_ANIMATED = {'mp4', 'gif'}
 
-IMAGE_PATH = join(KOISHI_PATH, 'images')
+IMAGE_PATH = join(PATH__KOISHI, 'images')
 
 for filename in os.listdir(IMAGE_PATH):
     image_details(filename)

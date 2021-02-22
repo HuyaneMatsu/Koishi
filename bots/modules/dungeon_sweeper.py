@@ -10,7 +10,7 @@ from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STA
 from hata.discord.client_core import GC_CYCLER
 
 from bot_utils.models import DB_ENGINE, DS_TABLE, ds_model
-from bot_utils.shared import KOISHI_PATH
+from bot_utils.shared import PATH__KOISHI
 
 DS_COLOR = Color(0xa000c4)
 
@@ -1707,7 +1707,7 @@ def loader(filename):
         if map_:
             stage_source(header, map_)
 
-loader(os.path.join(KOISHI_PATH, 'library', 'ds.txt'))
+loader(os.path.join(PATH__KOISHI, 'library', 'ds.txt'))
 
 del DEFAULT_STYLE_PARTS
 

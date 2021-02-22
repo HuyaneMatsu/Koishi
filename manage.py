@@ -30,7 +30,7 @@ import hata
 #
 # As self host, turn `RUN_WEBAPP_AS_MAIN` on and run this file.
 #
-# If hosting, wsgi will import this file, so the bots will not start up. Those need to be started up separatedly by an
+# If hosting, wsgi will import this file, so the bots will not start up. Those need to be started up separately by an
 # always running task.
 
 if __name__ == '__main__':
