@@ -10,7 +10,7 @@ WAIFU_API_BASE_URL = 'https://waifu.pics/api'
 HEADERS = imultidict()
 HEADERS[CONTENT_TYPE] = 'application/json'
 
-WAIFU_CACHE_BY_NAME = {}
+WAIFU_CACHE_BY_KEY = {}
 
 ACTIONS = [
     'pat',
@@ -66,10 +66,11 @@ async def get_waifu_image(client, event, endpoint, safe):
         yield Embed('Ohoho', 'Nsfw channel only!')
         return
     
+    key = (endpoint, safe)
     try:
-        cache = WAIFU_CACHE_BY_NAME[endpoint]
+        cache = WAIFU_CACHE_BY_KEY[key]
     except KeyError:
-        cache = WAIFU_CACHE_BY_NAME[endpoint] = []
+        cache = WAIFU_CACHE_BY_KEY[key] = []
     else:
         if cache:
             yield cache.pop()
