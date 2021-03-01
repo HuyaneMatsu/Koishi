@@ -2,17 +2,18 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from hata import elapsed_time, Color, Embed, Client, ChannelText
-from hata.ext.commands import Cooldown, checks
-
-from bot_utils.tools import CooldownHandler
-from bot_utils.shared import ROLE__NEKO_DUNGEON__VERIFIED, ROLE__NEKO_DUNGEON__MODERATOR, COLOR__EVENT, \
-    CHANNEL__NEKO_DUNGEON__EVENT, ROLE__NEKO_DUNGEON__EVENT_MANAGER, LINK__HATA_GIT, EMOJI__HEART_CURRENCY
+from hata import elapsed_time, Embed, Client
+from bot_utils.shared import ROLE__NEKO_DUNGEON__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
+    CHANNEL__NEKO_DUNGEON__EVENT, ROLE__NEKO_DUNGEON__EVENT_MANAGER, LINK__HATA_GIT
 
 EVENT_TEST_CHECK = None # checks.has_any_role((ROLE__NEKO_DUNGEON__MODERATOR, ROLE__NEKO_DUNGEON__EVENT_MANAGER))
 
-Koishi: Client
-Koishi.command_processer.create_category('EVENTS', checks=EVENT_TEST_CHECK)
+SLASH_CLIENT: Client
+EVENTS = SLASH_CLIENT.interactions(None,
+    name = 'events',
+    description = 'Neko Dungeon event information.',
+    is_global = True,
+        )
 
 HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', color=COLOR__EVENT). \
     add_field(
@@ -158,15 +159,14 @@ HATA_JAM_2_QUALIFIER = (
         
     )
 
-@Koishi.commands(category='EVENTS')
-async def jam(client, message):
+@EVENTS.interactions
+async def jam(client, event):
+    """Hata jam 2 description."""
     return HATA_JAM_2_DESCRIPTION
 
-@Koishi.commands(category='EVENTS')
-async def qualifier(client, message):
-    """
-    Shows you hata jam 2's qualifier.
-    """
+@EVENTS.interactions
+async def qualifier(client, event):
+    """Hata jam 2's qualifier."""
     for embed in HATA_JAM_2_QUALIFIER:
         yield embed
 
@@ -175,70 +175,34 @@ JAM_START = datetime(2021, 1, 29, 0, 0, 0)
 JAM_DEADLINE = datetime(2021, 2, 12, 0, 0, 0)
 
 
-@Koishi.commands(category='EVENTS', checks=[checks.private_only(), checks.has_role(ROLE__NEKO_DUNGEON__VERIFIED)])
-@Cooldown('user', 7200., limit=2, handler=CooldownHandler())
-async def submit(client, message):
-    """
-    Submit your qualifier solution!
+@EVENTS.interactions
+async def submit(client, event,
+        submission_reference_url: ('str', 'Please give a link to your submission'),
+            ):
+    """Submit your qualifier solution!"""
+    if (event.guild is not None):
+        return Embed('Error', 'Please use this channel in a private channel.')
     
-    Please include your file as a `.py` file attachment.
-    """
+    if not event.user.has_roole(ROLE__NEKO_DUNGEON__VERIFIED):
+        return Embed('Permission denied', f'You must have {ROLE__NEKO_DUNGEON__VERIFIED.mention} role to invoke this '
+            f'command.')
+    
     if datetime.utcnow() >= QUALIFIER_DEADLINE:
         return Embed('Oh No!', 'Qualifier over', color=COLOR__EVENT)
     
-    attachments = message.attachments
-    if attachments is None:
-        attachment = None
-    else:
-        for attachment in attachments:
-            if attachment.name.endswith('.py'):
-                break
-        else:
-            attachment = None
-    
-    if attachment is None:
-        return Embed('Error', 'No attachment or no `.py` attachment found.', color=COLOR__EVENT)
-    
-    if attachment.size > 1048576:
-        return Embed('Error', 'Size limit exceeded.', color=COLOR__EVENT)
-    
-    file = await client.download_attachment(attachment)
-    await client.message_create(CHANNEL__NEKO_DUNGEON__EVENT, f'{message.author:f}, [{message.author.id}] submitted:',
-        file=('submission.py', file))
+    user = event.user
+    await client.message_create(CHANNEL__NEKO_DUNGEON__EVENT, f'{user:f}, [{user.id}] submitted:\n'
+        f'`{submission_reference_url}`')
     
     return Embed('Success', 'Noice', color=COLOR__EVENT)
 
-
-async def countdown_description(client, message):
-    now = datetime.utcnow()
-    for description, date in (
-            ('hata code jam 2 qualifier end', QUALIFIER_DEADLINE),
-            ('hata code jam 2 start', JAM_START),
-            ('hata code jam 2 end', JAM_DEADLINE),
-                ):
-        if now < date:
-            result = f'there is {elapsed_time(relativedelta(now, date))} left'
-            break
-    else:
-        result = 'the countdown is already over'
-    
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('countdown', (
-        f'Returns when the {description}s!\n'
-        f'Usage: `{prefix}countdown`\n'
-        '\n'
-        f'Don\'t worry, we got you, {result}.'
-            ), color=COLOR__EVENT)
-
-@Koishi.commands(aliases=['deadline', 'event_deadline'], description=countdown_description, category='EVENTS')
-async def countdown(client, message):
+@EVENTS.interactions
+async def countdown(client, event):
+    """Countdown till the end of the event\'s next important date."""
     now = datetime.utcnow()
     for date in (QUALIFIER_DEADLINE, JAM_START, JAM_DEADLINE):
         if now < date:
-            result = elapsed_time(relativedelta(now, date))
-            break
-    else:
-        result = 'Countdown over!'
+            return elapsed_time(relativedelta(now, date))
     
-    await client.message_create(message.channel, result)
+    return 'Countdown over!'
 

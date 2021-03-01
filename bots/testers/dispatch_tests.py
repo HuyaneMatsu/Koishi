@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
-    list_difference, ActivityChange, KOKORO
+    list_difference, ActivityChange, KOKORO, Client
 from hata.discord.parsers import EVENTS, DEFAULT_EVENT
 from hata.ext.prettyprint import pretty_print
 from hata.ext.commands import Pagination, Command
 from hata.backend.utils import method
 
 DISPATCH_TESTS = eventlist(type_=Command)
-DISPTACH_COLOR = Color.from_rgb(120, 108, 128)
+DISPATCH_COLOR = Color.from_rgb(120, 108, 128)
+MAIN_CLIENT : Client
 
 def setup(lib):
-    main_client.commands.extend(DISPATCH_TESTS)
+    MAIN_CLIENT.commands.extend(DISPATCH_TESTS)
     
 def teardown(lib):
-    main_client.commands.unextend(DISPATCH_TESTS)
+    MAIN_CLIENT.commands.unextend(DISPATCH_TESTS)
 
 class dispatch_tester:
     channel = None
@@ -854,7 +855,7 @@ async def here_description(client, message):
         f'`{prefix}switch *event_name*`\n'
         'For the event names, use:\n'
         f'`{prefix}help switch`'
-            ), color=DISPTACH_COLOR).add_footer(
+            ), color=DISPATCH_COLOR).add_footer(
             'Owner only!')
 
 async def switch_description(client, message):
@@ -902,7 +903,7 @@ async def switch_description(client, message):
         '- `integration_update`\n'
         '- `webhook_update`\n'
         f'For setting channel, use: `{prefix}here`'
-            ), color=DISPTACH_COLOR).add_footer(
+            ), color=DISPATCH_COLOR).add_footer(
             'Owner only!')
 
 DISPATCH_TESTS(dispatch_tester.here, description=here_description, category='TEST COMMANDS')

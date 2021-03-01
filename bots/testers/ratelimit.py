@@ -29,26 +29,26 @@ from hata.discord.http.URLS import API_ENDPOINT
 from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks, Converter, \
     ConverterFlag, FlaggedAnnotation
 
-
+MAIN_CLIENT : Client
 RATE_LIMIT_COMMANDS = eventlist(type_=Command, category='RATE_LIMIT TESTS')
 
 def setup(lib):
-    main_client.command_processer.create_category('RATE_LIMIT TESTS', checks=[checks.owner_only()])
-    main_client.commands.extend(RATE_LIMIT_COMMANDS)
+    MAIN_CLIENT.command_processer.create_category('RATE_LIMIT TESTS', checks=[checks.owner_only()])
+    MAIN_CLIENT.commands.extend(RATE_LIMIT_COMMANDS)
     
 def teardown(lib):
-    main_client.command_processer.delete_category('RATE_LIMIT TESTS')
+    MAIN_CLIENT.command_processer.delete_category('RATE_LIMIT TESTS')
 
-def parsedate_to_datetime(data):
-    *dtuple, tz = _parsedate_tz(data)
+def parse_date_to_datetime(data):
+    *date_tuple, tz = _parsedate_tz(data)
     if tz is None:
-        return datetime(*dtuple[:6])
-    return datetime(*dtuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
+        return datetime(*date_tuple[:6])
+    return datetime(*date_tuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
 
 def parse_header_rate_limit(headers):
     delay1 = ( \
         datetime.fromtimestamp(float(headers[RATE_LIMIT_RESET]), timezone.utc)
-        -parsedate_to_datetime(headers[DATE])
+        -parse_date_to_datetime(headers[DATE])
             ).total_seconds()
     delay2=float(headers[RATE_LIMIT_RESET_AFTER])
     return (delay1 if delay1 < delay2 else delay2)
@@ -4073,7 +4073,7 @@ async def rate_limit_test0100(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await RLT.send('timeout occured.')
+            await RLT.send('timeout occurred.')
         else:
             await interaction_response_message_create(client, interaction, 'Ayaya')
             await interaction_response_message_edit(client, interaction, 'Nayaya?')
@@ -4108,7 +4108,7 @@ async def rate_limit_test0101(client, message):
                 interaction1 = await client.wait_for('interaction_create',
                     check_interacter(channel, message.author, application_command), timeout=300.0)
             except TimeoutError:
-                await RLT.send('timeout occured.')
+                await RLT.send('timeout occurred.')
             
             await interaction_response_message_create(client, interaction1, 'resp1')
             
@@ -4116,7 +4116,7 @@ async def rate_limit_test0101(client, message):
                 interaction2 = await client.wait_for('interaction_create',
                     check_interacter(channel, message.author, application_command), timeout=300.0)
             except TimeoutError:
-                await RLT.send('timeout occured.')
+                await RLT.send('timeout occurred.')
             
             await interaction_response_message_create(client, interaction2, 'resp2')
             
@@ -4155,7 +4155,7 @@ async def rate_limit_test0102(client, message):
             interaction = await client.wait_for('interaction_create',
                 check_interacter(channel, message.author, application_command), timeout=300.0)
         except TimeoutError:
-            await RLT.send('timeout occured.')
+            await RLT.send('timeout occurred.')
         else:
             await interaction_response_message_create(client, interaction, 'Ayaya')
             await interaction_response_message_edit(client, interaction, 'Nayaya?')

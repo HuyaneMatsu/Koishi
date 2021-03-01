@@ -12,18 +12,20 @@ MARISA_MODE = config.MARISA_MODE
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 
 if MARISA_MODE:
+    EXTENSION_LOADER.add_default_variables(SLASH_CLIENT=None)
+    
     Marisa = Client(config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
         application_id = config.MARISA_ID,
             )
     
-    EXTENSION_LOADER.add_default_variables(Marisa=Marisa, main_client=Marisa)
+    EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa)
     
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
-    EXTENSION_LOADER.add('bots.testers.test_commands')
-    EXTENSION_LOADER.add('bots.testers.ratelimit')
-    EXTENSION_LOADER.add('bots.testers.dispatch_tests')
+    EXTENSION_LOADER.add('bots.testers.test_commands', MAIN_CLIENT=Marisa)
+    EXTENSION_LOADER.add('bots.testers.ratelimit', MAIN_CLIENT=Marisa)
+    EXTENSION_LOADER.add('bots.testers.dispatch_tests', MAIN_CLIENT=Marisa)
     
 else:
     Koishi = Client(config.KOISHI_TOKEN,
@@ -34,7 +36,7 @@ else:
         application_id = config.KOISHI_ID,
             )
     
-    EXTENSION_LOADER.add_default_variables(Koishi=Koishi, main_client=Koishi)
+    EXTENSION_LOADER.add_default_variables(Koishi=Koishi, SLASH_CLIENT=Koishi)
     
     Satori = Client(config.SATORI_TOKEN,
         secret = config.SATORI_SECRET,
@@ -44,7 +46,7 @@ else:
         application_id = config.SATORI_ID,
             )
     
-    EXTENSION_LOADER.add_default_variables(Satori=Satori)
+    EXTENSION_LOADER.add_default_variables(Satori=Satori, COMMAND_CLIENT=Satori)
     
     Flan = Client(config.FLAN_TOKEN,
         client_id = config.FLAN_ID,

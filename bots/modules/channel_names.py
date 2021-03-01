@@ -205,7 +205,7 @@ async def write_channels(names):
 
 async def do_rename():
     async with EDIT_LOCK:
-        if not CATEGORY__NEKO_DUNGEON__BOTS.guild.permissions_for(Koishi).can_manage_channel:
+        if not CATEGORY__NEKO_DUNGEON__BOTS.guild.permissions_for(COMMAND_CLIENT).can_manage_channel:
             return
         
         channels = CATEGORY__NEKO_DUNGEON__BOTS.channel_list
@@ -216,7 +216,7 @@ async def do_rename():
         names = await get_random_names(count)
         
         for channel, name in zip(channels, names):
-            await Koishi.channel_edit(channel, name=name)
+            await COMMAND_CLIENT.channel_edit(channel, name=name)
 
 
 def cycle_rename():
@@ -225,8 +225,8 @@ def cycle_rename():
 
 NAME_CYCLER_HANDLER = Cell()
 
-Koishi: Client
-Koishi.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__NEKO_DUNGEON__MODERATOR)])
+COMMAND_CLIENT: Client
+COMMAND_CLIENT.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__NEKO_DUNGEON__MODERATOR)])
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(
@@ -239,7 +239,7 @@ def teardown(lib):
         value.cancel()
 
 
-@Koishi.commands(category='CHANNEL NAMES')
+@COMMAND_CLIENT.commands(category='CHANNEL NAMES')
 async def list_bot_channel_names(client, message):
     """
     Lists the already added bot channel names.
@@ -279,7 +279,7 @@ ADD_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 ADD_EMOJI_EMOJIS = (ADD_EMOJI_OK, ADD_EMOJI_CANCEL)
 
-@Koishi.commands( category='CHANNEL NAMES', separator='|')
+@COMMAND_CLIENT.commands( category='CHANNEL NAMES', separator='|')
 async def add_bot_channel_name(client, message, weight:int, name):
     """
     Adds the given channel name to the bot channel names.
@@ -369,7 +369,7 @@ async def add_bot_channel_name(client, message, weight:int, name):
         await client.message_edit(message, embed=embed)
 
 
-@Koishi.commands(category='CHANNEL NAMES')
+@COMMAND_CLIENT.commands(category='CHANNEL NAMES')
 async def do_bot_channel_rename(client, message):
     """
     Adds the given channel name to the bot channel names.

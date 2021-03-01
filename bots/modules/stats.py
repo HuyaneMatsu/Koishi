@@ -20,10 +20,10 @@ from bot_utils.models import DB_ENGINE
 
 STAT_COLOR = Color.from_rgb(61, 255, 249)
 
-Koishi: Client
-Koishi.command_processer.create_category('STATS', checks=checks.owner_only())
+COMMAND_CLIENT: Client
+COMMAND_CLIENT.command_processer.create_category('STATS', checks=checks.owner_only())
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class threads:
     async def command(client, message):
         thread_count_by_type = {}
@@ -162,7 +162,7 @@ class threads:
                 'Owner only!')
 
 if IS_PYPY:
-    @Koishi.commands.from_class
+    @COMMAND_CLIENT.commands.from_class
     class gc_stats:
         async def command(client, message):
             stats = get_gc_stats()
@@ -274,7 +274,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
             def cpu_percent_total(self):
                 return self.cpu_percent_with_max_frequence / psutil.cpu_count(logical=False)
         
-        @Koishi.commands.from_class
+        @COMMAND_CLIENT.commands.from_class
         class system_stats:
             aliases = ['system', 'process', 'process-stats']
             

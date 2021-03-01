@@ -8,7 +8,6 @@ from html import unescape as html_unescape
 from functools import partial as partial_func
 
 from bs4 import BeautifulSoup
-from dateparser import parse as parse_date
 
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
@@ -235,6 +234,7 @@ async def devil(client, event):
     yield # Yield one to acknowledge the interaction
     yield await get_image_embed(client, 'flandre_scarlet+remilia_scarlet', 'Scarlet Flandre & Remilia', 0xa12a2a)
 
+'''
 class Action(object):
     __slots__ = ('action_name', 'embed_color', )
     def __init__(self, action_name, embed_color):
@@ -262,7 +262,7 @@ for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 
 
 # Cleanup
 del action_name, embed_color
-
+'''
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def repeat(client, event,
@@ -344,88 +344,7 @@ async def retardify(client, event,
     embed.add_author(user.avatar_url, user.full_name)
     
     await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
-
-def match_message_author(user, message):
-    return (message.author is user)
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def clear(client, event,
-        limit : ('int'      , 'How much message?'                        )        ,
-        before : ('str'     , 'Till when?'                               ) = None ,
-        after  : ('str'     , 'Since when?'                              ) = None ,
-        where  : ('channel' , 'Where?'                                   ) = None ,
-        whos   : ('user'    , 'Who\'s message?'                          ) = None ,
-        reason : ('str'     , 'Will show up in the guild\'s audit logs.' ) = None ,
-            ):
-    """Yeets messages."""
-    guild = event.guild
-    if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
     
-    if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-        return
-    
-    if where is None:
-        channel = event.channel
-    else:
-        if not isinstance(where, ChannelText):
-            yield Embed('Error', 'The channel must be a text channel.')
-            return
-        
-        channel = where
-    
-    if limit < 1:
-        yield Embed('Ohoho', '`limit` cannot be non-positive.')
-        return
-    
-    if not event.user_permissions.can_administrator:
-        yield Embed('Permission denied', 'You must have administrator permission to use this command.')
-        return
-    
-    client_permissions = channel.cached_permissions_for(client)
-    if (not client_permissions.can_manage_messages) or (not client_permissions.can_read_message_history):
-        yield Embed('Permission denied',
-            'I must have manage messages and read message history in the channel to do it.')
-        return
-    
-    if (before is None) or (not before):
-        before = event.id
-    else:
-        try:
-            date = parse_date(before)
-        except ValueError:
-            yield Embed('Error', '`before` could not be parsed.')
-            return
-        
-        before = time_to_id(date)
-    
-    if (after is None) or (not after):
-        after = 0
-    else:
-        try:
-            date = parse_date(after)
-        except ValueError:
-            yield Embed('Error', '`after` could not be parsed.')
-            return
-        
-        after = time_to_id(date)
-    
-    yield
-    
-    if whos is None:
-        filter = None
-    else:
-        filter = partial_func(match_message_author, whos)
-    
-    if (reason is not None) and (not reason):
-        reason = None
-    
-    await client.multi_client_message_delete_sequence(channel, after=after, before=before, limit=limit, filter=filter,
-        reason=reason)
-
-
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def test_channel_and_role(client, event,
         user : ('user', 'Please input a user') = None,

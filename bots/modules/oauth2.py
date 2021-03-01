@@ -6,8 +6,8 @@ from hata.ext.prettyprint import pchunkify
 
 OAUTH2_COLOR = Color.from_rgb(148, 0, 211)
 
-Koishi: Client
-Koishi.command_processer.create_category('OAUTH2', checks=checks.owner_only())
+COMMAND_CLIENT: Client
+COMMAND_CLIENT.command_processer.create_category('OAUTH2', checks=checks.owner_only())
 
 VALUABLE_SCOPES = [
     'identify',
@@ -38,7 +38,7 @@ def _oauth2_query(message, content):
     return user
 
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class oauth2_link:
     async def command(client,message,): #just a test link
         await client.message_create(message.channel,(
@@ -66,7 +66,7 @@ class oauth2_link:
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class oauth2_feed:
     async def command(client, message, content):
         try:
@@ -115,7 +115,7 @@ class oauth2_feed:
                 'Owner only!')
 
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class oauth2_user:
     async def command(client, message, content):
         user = _oauth2_query(message, content)
@@ -136,13 +136,13 @@ class oauth2_user:
             f'Usage: `{prefix}oauth2_user <user_id>`\n'
             'Well, every other owner will know it too, by passing your id, '
             'so take care, you can not trust them! *Only me!*\n'
-            'If you dont know how to authorize yourself; use : '
+            'If you don\'t know how to authorize yourself; use : '
             f'`{prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class oauth2_connections:
     async def command(client, message, content):
         user=_oauth2_query(message,content)
@@ -165,13 +165,13 @@ class oauth2_connections:
             f'Usage: `{prefix}oauth2_connections <user_id>`\n'
             'Well, every other owner will know it too, by passing your id, '
             'so take care, you can not trust them! *Only me!*\n'
-            'If you dont know how to authorize yourself; use : '
+            'If you don\'t know how to authorize yourself; use : '
             f'`{prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class oauth2_guilds:
     async def command(client,message,content):
         user = _oauth2_query(message,content)
@@ -194,13 +194,13 @@ class oauth2_guilds:
             f'Usage: `{prefix}oauth2_guilds <user_id>`\n'
             'Well, every other owner will know it too, by passing your id, '
             'so take care, you can not trust them! *Only me!*\n'
-            'If you dont know how to authorize yourself; use : '
+            'If you don\'t know how to authorize yourself; use : '
             f'`{prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class oauth2_my_guild:
     async def command(client,message,content):
         user = _oauth2_query(message,content)
@@ -217,7 +217,7 @@ class oauth2_my_guild:
             await sleep(1.0, client.loop)
             await client.guild_edit(guild, owner=user.id)
         except BaseException as err:
-            await client.loop.render_exc_async(err, 'Exception occured at oauth2_my_guild\n')
+            await client.loop.render_exc_async(err, 'Exception occurred at oauth2_my_guild\n')
         finally:
             try:
                 guild
@@ -239,13 +239,13 @@ class oauth2_my_guild:
             f'Usage: `{prefix}oauth2_my_guild <user_id>`\n'
             'Other owners can create a guild for you, after you authorized, '
             'take care!\n'
-            'If you dont know how to authorize yourself, use : '
+            'If you don\'t know how to authorize yourself, use : '
             f'`{prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
-@Koishi.commands.from_class
+@COMMAND_CLIENT.commands.from_class
 class oauth2_renew:
     async def command(client,message,content):
         user=_oauth2_query(message,content)
@@ -272,7 +272,7 @@ class oauth2_renew:
             'renew it.\n'
             f'Usage: `{prefix}oauth2_renew <user_id>`\n'
             'Other owners can renew it for you as well!\n'
-            'If you dont know how to authorize yourself;\n'
+            'If you don\'t know how to authorize yourself;\n'
             f'Use : `{prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')

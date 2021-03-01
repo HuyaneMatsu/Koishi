@@ -842,5 +842,10 @@ async def bs_description(client, message):
         ), color=BS_COLOR).add_footer(
             'Guild only!')
 
-Koishi: Client
-Koishi.commands(battle_manager, name='bs', checks=checks.guild_only(), category='GAMES', description=bs_description)
+COMMAND_CLIENT: Client
+COMMAND_CLIENT.commands(battle_manager,
+    name='bs',
+    checks=checks.guild_only(),
+    category='GAMES',
+    description=bs_description,
+        )

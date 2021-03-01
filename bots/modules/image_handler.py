@@ -2,8 +2,8 @@
 import re, os, functools
 from io import BytesIO
 
-from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, Color, KOKORO, Lock, Client
-from hata.ext.commands import checks, Closer
+from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, Color, KOKORO, Lock, Client, parse_message_reference, \
+    MESSAGES, DiscordException, ERROR_CODES, CHANNELS, Attachment, sanitize_mentions
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -12,69 +12,72 @@ try:
 except ImportError:
     UPLOAD = False
 
-UPLOAD_LOCK = Lock(KOKORO)
-
 from bot_utils.tools import choose
-from bot_utils.shared import PATH__KOISHI
-from bot_utils.command_utils import MESSAGE_CONVERTER_ALL
+from bot_utils.shared import PATH__KOISHI, GUILD__NEKO_DUNGEON
 
+
+SLASH_CLIENT : Client
+UPLOAD_LOCK = Lock(KOKORO)
 
 splitext = os.path.splitext
 join = os.path.join
 
 IMAGE_COLOR = Color(0x5dc66f)
-Koishi: Client
 
-IMAGES_STATIC = []
-IMAGES_ANIMATED = []
-IMAGES_ALL = []
+IMAGES = []
 
-ITGHL = {}
+IMAGE_TAG_HASHES = {}
 IMAGE_STATISTICS = {}
 
 FIND_TAGS_RP = re.compile('\S+')
 
-class image_details(set):
-    __slots__ = ('path',)
-    def __init__(self, path):
-        set.__init__(self)
-        
+class ImageDetail(set):
+    __slots__ = ('path', 'animated')
+    @classmethod
+    def create(cls, path):
         name, ext = splitext(path)
-        
         ext = ext[1:]
         if ext in IMAGE_FORMATS_STATIC:
-            IMAGES_STATIC.append(self)
+            animated = False
         elif ext in IMAGE_FORMATS_ANIMATED:
-            IMAGES_ANIMATED.append(self)
-
-        IMAGES_ALL.append(self)
+            animated = True
+        else:
+            return
+        
+        self = set.__new__(cls)
+        self.animated = animated
+        set.__init__(self)
         
         tags = name.split('_')
         del tags[0]
-
+        
         self.path = path
         for tag in tags:
             self.add(tag)
-            
-    def hastags(self, tags):
+        
+        IMAGES.append(self)
+    
+    def has_tags(self, tags):
         for tag in tags:
             if tag not in self:
                 return False
+        
         return True
     
     def add(self, value):
         try:
-            hashresult = ITGHL[value]
+            hash_result = IMAGE_TAG_HASHES[value]
         except KeyError:
-            hashresult = len(ITGHL)
-            ITGHL.setdefault(value, hashresult)
+            hash_result = len(IMAGE_TAG_HASHES)
+            IMAGE_TAG_HASHES.setdefault(value, hash_result)
+        
         try:
             IMAGE_STATISTICS[value] += 1
         except KeyError:
             IMAGE_STATISTICS[value] = 1
         
-        set.add(self, hashresult)
-        
+        set.add(self, hash_result)
+    
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.path}>'
     
@@ -85,308 +88,330 @@ IMAGE_FORMATS_ANIMATED = {'mp4', 'gif'}
 
 IMAGE_PATH = join(PATH__KOISHI, 'images')
 
-for filename in os.listdir(IMAGE_PATH):
-    image_details(filename)
+for file_name in os.listdir(IMAGE_PATH):
+    ImageDetail.create(file_name)
 
-async def image_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('image', (
-        'I ll search images by tags from my collection, then send 1 of the results.\n'
-        f'Usage : `{prefix}image (count) (static / animated) (index (hex) *n*) <tag_1> <tag_2> ...`\n'
-        'If `count` is passed, I ll count how much image there is with that combination. *Count does not goes with '
-        '`index`*\n'
-        'With Passing `any`, `pic` or `vid` keywords you can define, if you wanna search anything (default), between '
-        'normal images or between animated ones.\n'
-        'By passing `index`, then a number, you can define which one result You want from the found ones. If you do '
-        '`index hex`, I ll expect a hexadecimal number.\n'
-        'You can pass any amount of tags, mentions are ignored.'
-            ), color=IMAGE_COLOR)
+RESERVED_TAGS = {'animated', 'static', 'count'}
 
+IMAGE_ANY = 0
+IMAGE_STATIC = 1
+IMAGE_ANIMATED = 2
 
-async def upload_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('upload', (
-        f'You can can upload images with tags, which you can access with the `{prefix}image` command after.\n'
-        f'Usage : `{prefix}upload *message* <tag_1> <tag_2> ...`\n'
-        'You can pass any amount of tags, mentions are ignored.'
-            ), color=IMAGE_COLOR).add_footer(
-            'Owner only!')
-
-
-RESERVED_TAGS = {'animated', 'static', 'count', 'index', 'hex',}
-
-@Koishi.commands(category='UTILITY', description=image_description, checks=checks.guild_only())
-async def image(client, message, content):
-    result = process_on_command_image(content)
-    if type(result) is str:
-        await client.message_create(message.channel, result)
-    else:
-        with client.keep_typing(message.channel):
-            with (await ReuAsyncIO(join(IMAGE_PATH, result.path))) as image:
-                await client.message_create(message.channel, file=image)
-
-
-def process_on_command_image(content):
-    content = [x.lower() for x in FIND_TAGS_RP.findall(content) if not is_mention(x)]
-    limit = len(content)
-    index = 0
+@SLASH_CLIENT.interactions(is_global=True)
+async def image_(client, event,
+        tags : ('str', 'Give some tags!') = None,
+        type_ : ([
+            ('Any', IMAGE_ANY),
+            ('static', IMAGE_STATIC),
+            ('animated', IMAGE_ANIMATED)
+                ], 'Specific image type?') = IMAGE_ANY,
+        count : ('bool', 'Do you want to get the amount of images instead?') = False,
+            ):
+    """Gets an image from my local storage!"""
+    # Check for permissions!
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command', color=IMAGE_COLOR)
+        return
     
-    count = False
-    if index < limit:
-        value = content[index]
-        if value == 'count':
-            count = True
-            index += 1
+    if guild not in client.guild_profiles:
+        yield Embed('Error', 'I must be in the guild to execute this command.', color=IMAGE_COLOR)
+        return
     
-    if index < limit:
-        value = content[index]
-        if value == 'animated':
-            search_from = IMAGES_ANIMATED
-            index += 1
-        elif value == 'static':
-            search_from = IMAGES_STATIC
-            index += 1
-        else:
-            search_from = IMAGES_ALL
-        
-    else:
-        search_from = IMAGES_ALL
+    if not count:
+        # Check for more permissions!
+        permissions = event.channel.cached_permissions_for(client)
+        if (not permissions.can_send_messages):
+            yield Embed('Permission denied',
+                'I need `send messages` permission to execute this command.',
+                color=IMAGE_COLOR)
+            return
     
-    by_index = False
-    if index < limit:
-        value = content[index]
-        if value == 'index':
-            if count:
-                return '"count" and "index" cant be used at the same time BAKA!'
+    hashes = None
+    missing_tag = False
+    
+    if (tags is not None) and tags:
+        for tag in FIND_TAGS_RP.findall(tags):
+            if is_mention(tag):
+                continue
             
-            by_index = True
+            tag = tag.lower()
             
-            index += 1
-            
-            if index == limit:
-                return '"index" needs after it a number!'
-            
-            value = content[index]
-            if value == 'hex':
-                index += 1
-                if index == limit:
-                    return '"hex" needs after it a number!'
-                value = content[index]
-                try:
-                    number = int(value, 16)
-                    index += 1
-                except ValueError:
-                    return f'Falied to convert "{value}" to integer with base 16'
-
-            else:
-                try:
-                    number = int(value)
-                    index += 1
-                except ValueError:
-                    return f'Falied to convert "{value}" to integer.'
-                
-            if number < 0:
-                return 'Only positivity pls!'
-    
-    if index == limit:
-        if count:
-            return str(len(search_from))
-        elif by_index:
-            if number < len(search_from):
-                return search_from[number]
-            else:
-                return 'I could not find any image with that criteria.'
-        else:
-            # must have at least 1 static and naimated image
-            return choose(search_from)
-    
-    left = limit-index
-    
-    if left == 0:
-        try:
-            value = ITGHL[content[index]]
-        except KeyError:
-            if count:
-                return '0'
-            else:
-                return 'No result.'
-            
-        if count:
-            number = 0
-            for image in search_from:
-                if value in image:
-                    number += 1
-            return str(number)
-        
-        elif by_index:
-            for image in search_from:
-                if value in image:
-                    if number == 0:
-                        return image
-                    else:
-                        number -= 1
-            return 'Out of index or no result.'
-        
-        else:
-            results = []
-            for image in search_from:
-                if value in image:
-                    results.append(image)
-            if results:
-                return choose(results)
-            else:
-                return 'Sowwy, no result.'
-    else:
-        try:
-            values = {ITGHL[x] for x in content[index:]}
-        except KeyError:
-            if count:
-                return '0'
-            else:
-                return 'No result.'
-        
-        if count:
-            number = 0
-            for image in search_from:
-                if values.issubset(image):
-                    number += 1
-            return str(number)
-        
-        elif by_index:
-            for image in search_from:
-                if values.issubset(image):
-                    if number == 0:
-                        return image
-                    else:
-                        number -= 1
-            return 'Sowwy, no result or out of index.'
-        
-        else:
-            results = []
-            for image in search_from:
-                if values.issubset(image):
-                    results.append(image)
-            if results:
-                return choose(results)
-            else:
-                return 'Sowwy, no result.'
-
-@Koishi.commands(category='UTILITY', checks=checks.owner_only(), description=upload_description)
-async def upload(client, message, target_message: MESSAGE_CONVERTER_ALL, *tags):
-    if UPLOAD:
-        tags = [tag.lower() for tag in tags if not is_mention(tag)]
-        for tag in tags:
-            if tag in RESERVED_TAGS:
-                result_message = f'Reserved tag: {tag!r}!'
+            try:
+                hash_ = IMAGE_TAG_HASHES[tag]
+            except KeyError:
+                missing_tag = True
                 break
-        else:
-            if tags:
-                found_image = None
-                attachments = target_message.attachments
-                if (attachments is not None):
-                    for attachment in attachments:
-                        filename = attachment.name
-                        
-                        index = filename.rfind('.')
-                        if index < 0:
-                            continue
-                        
-                        extension = filename[index+1:].lower()
-                        
-                        if extension in IMAGE_FORMATS_STATIC:
-                            is_static = True
-                        elif extension in IMAGE_FORMATS_ANIMATED:
-                            is_static = False
-                        else:
-                            continue
-                        
-                        found_image = attachment
-                        break
-                
-                if (found_image is None):
-                    embeds = target_message.embeds
-                    if (embeds is not None):
-                        for embed in embeds:
-                            embed_image = embed.image
-                            if embed_image is None:
-                                continue
-                            
-                            filename = embed_image.url
-                            if filename is None:
-                                continue
-                            
-                            index = filename.rfind('.')
-                            if index < 0:
-                                continue
-                            
-                            extension = filename[index+1:].lower()
-                            
-                            if extension in IMAGE_FORMATS_STATIC:
-                                is_static = True
-                            elif extension in IMAGE_FORMATS_ANIMATED:
-                                is_static = False
-                            else:
-                                continue
-                            
-                            found_image = embed_image
-                            break
-                
-                if found_image is None:
-                    result_message = 'The given message has no image attached.'
-                else:
-                    with client.keep_typing(message.channel):
-                        async with UPLOAD_LOCK:
-                            data = await client.download_attachment(found_image)
-                            
-                            index = f'{(len(IMAGES_STATIC)+len(IMAGES_ANIMATED)):08X}'
-                            if is_static:
-                                path = f'{index}_{"_".join(tags)}.png'
-                                filename=join(IMAGE_PATH, path)
-                                if extension != 'png':
-                                    #we save everything in png, ~~rasism~~
-                                    if extension in ('jpg', 'jpeg'):
-                                        image_type = image_type_JPG
-                                    elif extension == 'bmp':
-                                        image_type = image_type_BMP
-                                    image = object.__new__(image_type)
-                                    image.fp = BytesIO(data)
-                                    image.info = {}
-                                    image.palette = None
-                                    image.im = None
-                                    image.filename = None
-                                    image._exclusive_fp = None
-                                    image.decoderconfig = ()
-                                    image.decodermaxblock = 65536
-                                    image.readonly = False
-                                    image._exif = None
-                                    image.pyaccess = None
-                                    image._open()
-                                    await KOKORO.run_in_executor(functools.partial(image.save, filename))
-                                else:
-                                    with (await AsyncIO(filename, 'wb')) as file:
-                                        await file.write(data)
-                            else:
-                                path = f'{index}_{"_".join(tags)}.{extension}'
-                                filename = join(IMAGE_PATH, path)
-                                with (await AsyncIO(filename, 'wb')) as file:
-                                    await file.write(data)
-                            
-                            image_details(path)
-                        
-                    result_message = 'Done Masuta~!'
-    
-            else:
-                result_message = 'Please give tags as well!'
             
-    else:
-        result_message = 'Upload is not supported, PIL library not found.'
-        
-    await Closer(client, message.channel, Embed(result_message, color = IMAGE_COLOR))
+            if hashes is None:
+                hashes = set()
+            
+            hashes.add(hash_)
+            continue
+    
+    image_details = []
+    
+    if not missing_tag:
+        for image_detail in IMAGES:
+            if type_ == IMAGE_ANY:
+                pass
+            elif type_ == IMAGE_STATIC:
+                if image_detail.animated:
+                    continue
+            else: # elif type_ == IMAGE_ANIMATED:
+                if not image_detail.animated:
+                    continue
+            
+            if (hashes is not None) and (not hashes.issubset(image_detail)):
+                continue
+                
+            image_details.append(image_detail)
+    
+    if count:
+        yield str(len(image_details))
+        return
+    
+    if not image_details:
+        yield 'Sowwy, no result.'
+        return
+    
+    yield
+    
+    image_detail = choose(image_details)
+    
+    with (await ReuAsyncIO(join(IMAGE_PATH, image_detail.path))) as image:
+        await client.message_create(event.channel, file=image)
 
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def upload(client, event,
+        message : ('str', 'Link to the message'),
+        tags : ('str', 'Give some tags!'),
+            ):
+    """Uploads an image to my local storage. (Bot owner only!)"""
+    # Check for permissions!
+    if not client.is_owner(event.user):
+        yield Embed('Ohoho', 'Bot owner only!', color=IMAGE_COLOR)
+        return
+    
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command', color=IMAGE_COLOR)
+        return
+    
+    if guild not in client.guild_profiles:
+        yield Embed('Error', 'I must be in the guild to execute this command.', color=IMAGE_COLOR)
+        return
+    
+    if not event.channel.cached_permissions_for(client).can_send_messages:
+        yield Embed('Permission denied', 'I need `send messages` permission to execute this command.',
+            color=IMAGE_COLOR)
+        return
+    
+    if not UPLOAD:
+        yield Embed('Ayaya', 'Upload is not supported, PIL library not found.', color=IMAGE_COLOR)
+        return
+    
+    image_tags = []
+    for tag in FIND_TAGS_RP.findall(tags):
+        if is_mention(tag):
+            continue
+        
+        tag = tag.lower()
+        if tag in image_tags:
+            continue
+        
+        image_tags.append(tag)
+        continue
+    
+    if not tags:
+        yield Embed('Ayaya', 'Please give tags as well!', color=IMAGE_COLOR)
+        return
+    
+    message_reference = parse_message_reference(message)
+    guild_id, channel_id, message_id = message_reference
+    try:
+        message = MESSAGES[message_id]
+    except KeyError:
+        if channel_id:
+            try:
+                channel = CHANNELS[channel_id]
+            except KeyError:
+                yield Embed('Ohoho', 'I have no access to the channel.', color=IMAGE_COLOR)
+                return
+        else:
+            channel = event.channel
+        
+        if not channel.cached_permissions_for(client).can_read_message_history:
+            yield Embed('Ohoho', 'I have no permission to get that message.', color=IMAGE_COLOR)
+            return
+        
+        yield
+        
+        try:
+            message = client.message_get(channel, message_id)
+        except ConnectionError:
+            # No internet
+            return
+        except DiscordException as err:
+            if err.code in (
+                    ERROR_CODES.unknown_channel, # message deleted
+                    ERROR_CODES.unknown_message, # channel deleted
+                        ):
+                # The message is already deleted.
+                yield Embed('OOf', 'The referenced message is already yeeted.', color=IMAGE_COLOR)
+                return
+            
+            if err.code == ERROR_CODES.invalid_access: # client removed
+                # This is not nice.
+                return
+            
+            if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+                yield Embed('Ohoho', 'I have no permission to get that message.', color=IMAGE_COLOR)
+                return
+            
+            raise
+    
+    attachments = message.attachments
+    found_images = []
+    if (attachments is not None):
+        for attachment in attachments:
+            file_name = attachment.name
+            
+            index = file_name.rfind('.')
+            if index < 0:
+                continue
+            
+            extension = file_name[index+1:].lower()
+
+            if not ((extension in IMAGE_FORMATS_STATIC) or (extension in IMAGE_FORMATS_ANIMATED)):
+                continue
+            
+            found_images.append(attachment)
+            continue
+    
+    embeds = message.embeds
+    if (embeds is not None):
+        for embed in embeds:
+            embed_image = embed.image
+            if embed_image is None:
+                continue
+            
+            file_name = embed_image.url
+            if file_name is None:
+                continue
+            
+            index = file_name.rfind('.')
+            if index < 0:
+                continue
+            
+            extension = file_name[index+1:].lower()
+
+            if not ((extension in IMAGE_FORMATS_STATIC) or (extension in IMAGE_FORMATS_ANIMATED)):
+                continue
+            
+            found_images.append(embed_image)
+            continue
+    
+    found_images_count = len(found_images)
+    if found_images_count != 1:
+        if found_images_count:
+            description_parts = ['Multiple attachments found:\n']
+            
+            for index, found_image in zip(range(1, 6), found_images):
+                image_url = found_image.url
+                if len(image_url) > 200:
+                    image_url = image_url[:200]+' ...'
+                
+                description_parts.append(str(index))
+                description_parts.append('.: `')
+                description_parts.append(image_url)
+                description_parts.append('`\n')
+                
+            if found_images_count > 5:
+                description_parts.append('And ')
+                description_parts.append(str(found_images_count-5))
+                description_parts.append('more.')
+            else:
+                del description_parts[-1]
+            
+            description = ''.join(description_parts)
+        else:
+            description = 'No images found.'
+        
+        yield Embed('Ayaya', description, color=IMAGE_COLOR)
+        return
+    
+    yield
+    
+    found_image = found_images[0]
+    
+    async with UPLOAD_LOCK:
+        data = await client.download_attachment(found_image)
+        if isinstance(found_image, Attachment):
+            file_name = found_image.name
+        else:
+            file_name = found_image.url
+        
+        extension = file_name[file_name.rfind('.')+1:].lower()
+        
+        file_path_parts = [len(IMAGES).__format__('08X'), '_']
+        
+        index = 0
+        limit = len(image_tags)
+        while True:
+            tag = image_tags[index]
+            file_path_parts.append(tag)
+            
+            index += 1
+            if index == limit:
+                break
+            
+            file_path_parts.append('_')
+        
+        file_path_parts.append('.')
+        
+        if extension in IMAGE_FORMATS_ANIMATED:
+            file_path_extension = extension
+        else:
+            file_path_extension = 'png'
+        
+        file_path_parts.append(file_path_extension)
+        
+        file_path = ''.join(file_path_parts)
+        full_file_path = join(IMAGE_PATH, file_path)
+        
+        if (extension not in IMAGE_FORMATS_ANIMATED) and (extension != 'png'):
+            if extension in ('jpg', 'jpeg'):
+                image_type = image_type_JPG
+            elif extension == 'bmp':
+                image_type = image_type_BMP
+            image = object.__new__(image_type)
+            image.fp = BytesIO(data)
+            image.info = {}
+            image.palette = None
+            image.im = None
+            image.file_name = None
+            image._exclusive_fp = None
+            image.decoderconfig = ()
+            image.decodermaxblock = 65536
+            image.readonly = False
+            image._exif = None
+            image.pyaccess = None
+            image._open()
+            await KOKORO.run_in_executor(functools.partial(image.save, full_file_path))
+        else:
+            with (await AsyncIO(full_file_path, 'wb')) as file:
+                await file.write(data)
+        
+        ImageDetail.create(file_path)
+    
+    yield Embed('Done Masuta!!!', color=IMAGE_COLOR)
+    return
 
 def random_with_tag(tag):
     results = []
-    for image in IMAGES_ALL:
+    for image in IMAGES:
         if tag in image:
             results.append(image)
     
@@ -397,88 +422,70 @@ def random_with_tag(tag):
     
     return result
 
-def generate_cute_content(client, message, action):
-    content = []
-    mentions = message.user_mentions
-    if mentions is None:
-        content.append(client.name)
-        content.append(' ')
-        content.append(action)
-        content.append(' ')
-        content.append(message.author.name)
-        content.append('.')
-    else:
-        content.append(message.author.name)
-        content.append(' ')
-        content.append(action)
-        content.append(' ')
-        content.append(mentions[0].name)
-        if len(mentions) > 1:
-            for user in mentions[1:-1]:
-                content.append(', ')
-                content.append(user.name)
-            content.append(' and ')
-            content.append(mentions[-1].name)
-    
-    return ''.join(content)
 
-
-class image_with_tag:
-    __slots__ = ('__name__', 'tag_id', 'name_form__ing', 'name_form__s', '__doc__')
-    def __init__(self, name, name_form__ing, name_form__s, docs):
+class ImageWithTag(object):
+    __slots__ = ('tag_id', 'name_form__ing', 'name_form__s')
+    def __init__(self, name, name_form__ing, name_form__s):
         try:
-            tag_id = ITGHL[name]
+            tag_id = IMAGE_TAG_HASHES[name]
         except KeyError:
-            tag_id = len(ITGHL)
-            ITGHL[name] = tag_id
+            tag_id = len(IMAGE_TAG_HASHES)
+            IMAGE_TAG_HASHES[name] = tag_id
         
         self.tag_id = tag_id
-        self.__name__ = name
         self.name_form__ing = name_form__ing
         self.name_form__s = name_form__s
-        self.__doc__ = docs
         
-    async def __call__(self, client, message):
+    async def __call__(self, client, event,
+            message : ('str', 'Additional message to send?') = '',
+                ):
+        # Check for permissions!
+        guild = event.guild
+        if guild is None:
+            yield Embed('Error', 'Guild only command', color=IMAGE_COLOR)
+            return
+        
+        if guild not in client.guild_profiles:
+            yield Embed('Error', 'I must be in the guild to execute this command.', color=IMAGE_COLOR)
+            return
+        
+        permissions = event.channel.cached_permissions_for(client)
+        if (not permissions.can_send_messages):
+            yield Embed('Permission denied',
+                'I need `send messages` permission to execute this command.',
+                color=IMAGE_COLOR)
+            return
+        
         image = random_with_tag(self.tag_id)
         
         if image is None:
-            await client.message_create(message.channel, f'No {self.name_form__ing} image is added :\'C')
+            yield Embed('Oh No', f'No {self.name_form__ing} image is added :\'C', color=IMAGE_COLOR)
+            return
+        
+        yield
+        
+        if message:
+            first_word = event.user.name
+            last_word = sanitize_mentions(message, event.guild)
         else:
-            embed = Embed(generate_cute_content(client, message, self.name_form__s),
-                color=(message.id>>22)&0xffffff).add_image(f'attachment://{os.path.basename(image.path)}')
-            
-            with client.keep_typing(message.channel):
-                with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
-                    await client.message_create(message.channel, embed=embed, file=file)
+            first_word = client.name
+            last_word = event.user.name
+        
+        title = f'{first_word} {self.name_form__s} {last_word}.'
+        
+        embed = Embed(title, color=(event.id>>22)&0xffffff) \
+            .add_image(f'attachment://{os.path.basename(image.path)}')
+        
+        with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
+            await client.message_create(event.channel, embed=embed, file=file, allowed_mentions='users')
 
+for name, name_form__ing, name_form__s, description in (
+        ('pat', 'patting', 'pats', 'Do you like pats as well?'),
+        ('hug', 'hugging', 'hugs', 'Huh.. Huggu? HUGG YOUUU!!!'),
+        ('kiss', 'kissing', 'kisses', 'If you really really like your onee, give her a kiss <3'),
+        ('slap', 'slapping', 'slaps', 'Slapping others is not nice.'),
+        ('lick', 'licking', 'licks', 'Licking is a favored activity of cat girls.'),
+            ):
 
-Koishi.commands(
-    image_with_tag('pat', 'patting', 'pats', 'Do you like pats as well?'),
-    category = 'UTILITY',
-    checks = [checks.guild_only()],
-    aliases = ['pet'],
-        )
-
-Koishi.commands(
-    image_with_tag('hug', 'hugging', 'hugs', 'Huh.. Huggu? HUGG YOUUU!!!'),
-    category = 'UTILITY',
-    checks = [checks.guild_only()],
-        )
-
-Koishi.commands(
-    image_with_tag('kiss', 'kissing', 'kisses', 'If you really really like your onee, give her a kiss <3'),
-    category = 'UTILITY',
-    checks = [checks.guild_only()],
-        )
-
-Koishi.commands(
-    image_with_tag('slap', 'slapping', 'slaps', 'Slapping others is not nice.'),
-    category = 'UTILITY',
-    checks = [checks.guild_only()],
-        )
-
-Koishi.commands(
-    image_with_tag('lick', 'licking', 'licks', 'Licking is a favored activity of cat girls.'),
-    category = 'UTILITY',
-    checks = [checks.guild_only()],
-        )
+    SLASH_CLIENT.interactions(ImageWithTag(name, name_form__ing, name_form__s),
+        name=name, description=description, is_global=True)

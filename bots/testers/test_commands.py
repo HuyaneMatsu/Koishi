@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import json, os
 from time import perf_counter
 from random import random
 from datetime import datetime
+from audioop import add as add_voice
 
 from io import BytesIO
 from PIL import Image as PIL
@@ -10,8 +12,8 @@ from PIL.ImageSequence import Iterator as ImageSequenceIterator
 from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
-    ReuAsyncIO, enter_executor, ApplicationCommand, InteractionResponseTypes, ApplicationCommandOption, \
-    ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice
+    ReuAsyncIO, enter_executor, ApplicationCommand, InteractionResponseTypes, ApplicationCommandOption, ChannelVoice, \
+    ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder
 
 from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer, \
     FlaggedAnnotation
@@ -19,32 +21,36 @@ from hata.discord.parsers import PARSERS
 from hata.ext.prettyprint import pchunkify
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
 
+from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
+
 from bot_utils.shared import PATH__KOISHI
 
 TEST_COMMANDS = eventlist(type_=Command, category='TEST COMMANDS',)
 
+MAIN_CLIENT : Client
+
 map_module('hata')
 
 def setup(lib):
-    main_client.commands.extend(TEST_COMMANDS)
+    MAIN_CLIENT.commands.extend(TEST_COMMANDS)
     
 def teardown(lib):
-    main_client.commands.unextend(TEST_COMMANDS)
+    MAIN_CLIENT.commands.unextend(TEST_COMMANDS)
 
 @TEST_COMMANDS
 async def test_choose_menu_repr(client, message):
-    '''
+    """
     Creates a ChooseMenu and returns it's repr.
-    '''
+    """
     choices = ['nice', 'cat']
     choose_menu = await ChooseMenu(client, message.channel, choices, lambda *args: Future(KOKORO))
     await client.message_create(message.channel, repr(choose_menu))
 
 @TEST_COMMANDS(checks=[checks.guild_only()])
 async def test_role_create(client, message):
-    '''
+    """
     Creates and deletes a role.
-    '''
+    """
     guild = message.guild
     role = await client.role_create(guild, 'Mokou')
     await client.role_delete(role)
@@ -52,18 +58,18 @@ async def test_role_create(client, message):
 
 @TEST_COMMANDS
 async def test_allowed_edit(client, message):
-    '''
+    """
     Creates a message and edits it. Should not ping you.
-    '''
+    """
     user = message.author
     message = await client.message_create(message.channel, 'Test')
     await client.message_edit(message, user.mention, allowed_mentions=None)
 
 @TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_rate_limit(client, message):
-    '''
+    """
     A fast rate limit test for next patch to validate anything.
-    '''
+    """
     guild = message.guild
     if guild is None:
         return
@@ -106,17 +112,17 @@ async def test_rate_limit(client, message):
     
 @TEST_COMMANDS
 async def test_user_data(client, message, user:User):
-    '''
+    """
     Prints out user data as received json
-    '''
+    """
     data = await client.http.user_get(user.id)
     await Pagination(client, message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
 
 @TEST_COMMANDS
 async def test_100_messages(client, message):
-    '''
+    """
     Sends 100 messages, like a boss!
-    '''
+    """
     tasks = []
     for x in range(100):
         task = KOKORO.create_task(client.message_create(message.channel, repr(x)))
@@ -130,9 +136,9 @@ async def test_100_messages(client, message):
 
 @TEST_COMMANDS
 async def crosspost(client, message, message_id:int):
-    '''
+    """
     Crossposts, pls pass a mssage id from the current channel!
-    '''
+    """
     to_message = await client.message_get(message.channel, message_id)
     await client.message_crosspost(to_message)
     
@@ -140,9 +146,9 @@ async def crosspost(client, message, message_id:int):
 
 @TEST_COMMANDS
 async def get_guild(client, message):
-    '''
+    """
     Gets the current guild.
-    '''
+    """
     guild = message.guild
     if guild is None:
         await client.message_create(message.channel, 'Please use this command at a guild.')
@@ -1786,3 +1792,206 @@ async def test_application_command_normal_edit(client, message):
     
     finally:
         await client.application_command_guild_delete(guild, application_command)
+
+
+
+async def voice_state(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('voice-state', (
+        'Gets the voice state of the respective voice client.\n'
+        f'Usage: `{prefix}voice-state`\n'
+        )).add_footer('Owner only!')
+
+@TEST_COMMANDS(description=voice_state, checks=checks.owner_only(), category='VOICE')
+async def voice_state(client, message):
+    voice_client = client.voice_client_for(message)
+    lines = []
+    guild = message.guild
+    if voice_client is None:
+        title = f'No client in {guild.name}.'
+    else:
+        title = f'Client info for {guild.name}.'
+        
+        source = voice_client.source
+        queue = voice_client.queue
+        if (source is not None) or queue:
+            if (source is not None):
+                lines.append(f'Actual: {source.title}')
+            
+            for index, source in enumerate(queue, 1):
+                lines.append(f'Track {index}.: {source.title}')
+        
+        audio_streams = voice_client.get_audio_streams()
+        if audio_streams:
+            if lines:
+                lines.append('')
+            
+            lines.append('Receives')
+            
+            for index, (user, stream) in enumerate(audio_streams):
+                lines.append(f'Stream {index}.: {user.full_name}, {stream!r}')
+        
+        audio_sources = voice_client._audio_sources
+        if audio_sources:
+            if lines:
+                lines.append('')
+            
+            for index, source in enumerate(audio_sources.values(), 1):
+                lines.append(f'{index}.: {source}')
+    
+    pages = [Embed(title, chunk) for chunk in chunkify(lines)]
+    
+    await Pagination(client, message.channel, pages)
+
+class MixerStream(AudioSource):
+    __slots__ = ('_decoder', '_postprocess_called', 'sources', )
+    def __init__(self, *sources):
+        self.sources = list(sources)
+        self._decoder = OpusDecoder()
+        self._postprocess_called = False
+    
+    async def postprocess(self):
+        if self._postprocess_called:
+            return
+        
+        self._postprocess_called = True
+        for source in self.sources:
+            await source.postprocess()
+    
+    async def add(self, source):
+        if self._postprocess_called:
+            await source.postprocess()
+        
+        self.sources.append(source)
+    
+    async def read(self):
+        sources = self.sources
+        result = None
+        
+        for index in reversed(range(len(sources))):
+            source = sources[index]
+            data = await source.read()
+            
+            if data is None:
+                del sources[index]
+                await source.cleanup()
+                continue
+            
+            if not source.NEEDS_ENCODE:
+                data = self._decoder.decode(data)
+            
+            if result is None:
+                result = data
+            else:
+                result = add_voice(result, data, 1)
+            
+            continue
+        
+        return result
+    
+    async def cleanup(self):
+        self._postprocess_called = False
+        sources = self.sources
+        while sources:
+            source = sources.pop()
+            await source.cleanup()
+
+
+if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
+    @TEST_COMMANDS(separator='|', checks=checks.owner_only(), category='VOICE')
+    async def play_double(client, message):
+        guild = message.guild
+        if guild is None:
+            return
+        
+        while True:
+            voice_client = client.voice_client_for(message)
+            if voice_client is None:
+                text = 'I am not in a voice channel.'
+                break
+            
+            source1 = await LocalAudio('/hdd/music/others/Ichigo - Tsuki made todoke, fushi no kemuri.mp3')
+            source2 = await LocalAudio('/hdd/music/others/Nomico - IceBreak.mp3')
+            
+            source = MixerStream(source1, source2)
+
+            if voice_client.append(source):
+                text = f'Now playing {source.title}!'
+            else:
+                text = f'Added to queue {source.title}!'
+            break
+        
+        await client.message_create(message.channel, text)
+
+    @Marisa.commands(separator='|', checks=checks.owner_only(), category='VOICE')
+    async def play_from(client, message, voice_channel: FlaggedAnnotation(ChannelVoice, ConverterFlag.channel_all)):
+        
+        while True:
+            self_guild = message.guild
+            if self_guild is None:
+                text = 'Not in guild.'
+                break
+            
+            other_guild = voice_channel.guild
+            if other_guild is None:
+                text = 'Other channel not in guild.'
+                break
+            
+            self_voice_client = client.voice_client_for(message)
+            if self_voice_client is None:
+                voice_state = self_guild.voice_states.get(message.author.id, None)
+                if voice_state is None:
+                    text = 'You are not at a voice channel.'
+                    break
+                
+                self_channel = voice_state.channel
+                if not self_channel.cached_permissions_for(client).can_connect:
+                    text = 'I have no permissions to connect to that channel'
+                    break
+                
+                try:
+                    self_voice_client = await client.join_voice_channel(self_channel)
+                except TimeoutError:
+                    text = 'Timed out meanwhile tried to connect.'
+                    break
+                except RuntimeError:
+                    text = 'The client cannot play voice, some libraries are not loaded'
+                    break
+            
+            other_voice_states = list(other_guild.voice_states.values())
+            for voice_state in other_voice_states:
+                if voice_state.user is not client:
+                    break
+            else:
+                text = 'No voice states in other guild.'
+                break
+            
+            try:
+                other_voice_client = client.voice_clients[other_guild.id]
+            except KeyError:
+                try:
+                    other_voice_client = await client.join_voice_channel(voice_channel)
+                except TimeoutError:
+                    text = 'Timed out meanwhile tried to connect.'
+                    break
+                except RuntimeError:
+                    text = 'The client cannot play voice, some libraries are not loaded'
+                    break
+            
+            mixer = MixerStream()
+            for voice_state in other_voice_states:
+                user = voice_state.user
+                if user is client:
+                    continue
+                
+                source = other_voice_client.listen_to(user, yield_decoded=True)
+                await mixer.add(source)
+            
+            if self_voice_client.append(mixer):
+                text = f'Now playing {mixer.title}!'
+            else:
+                text = f'Added to queue {mixer.title}!'
+            break
+        
+        await client.message_create(message.channel, text)
+

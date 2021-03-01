@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import re, signal
+import re
 from datetime import datetime, timedelta
-from threading import main_thread
 
-from hata import BUILTIN_EMOJIS, Embed, sleep, CLIENTS,  Client, KOKORO, cchunkify, alchemy_incendiary
+from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary
 from hata.ext.commands import checks, setup_ext_commands
-from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
 from hata.backend.futures import render_exc_to_list
 
@@ -13,9 +11,9 @@ from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDelete
     EmojiDeleteWaitfor, RoleEditWaitfor
 from bot_utils.shared import PREFIX__KOISHI, category_name_rule, DEFAULT_CATEGORY_NAME, CHANNEL__NEKO_DUNGEON__SYSTEM, \
     GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, ROLE__NEKO_DUNGEON__ELEVATED, COLOR__KOISHI_HELP, \
-    CHANNEL__SYSTEM__SYNC, command_error, ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
+    CHANNEL__SYSTEM__SYNC, ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
 
-from bot_utils.interpreter import Interpreter
+
 from bot_utils.syncer import sync_request_waiter
 
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
@@ -24,11 +22,10 @@ _KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
 
 Koishi: Client
 
-setup_ext_commands(Koishi, PREFIX__KOISHI, default_category_name=DEFAULT_CATEGORY_NAME,
-    category_name_rule=category_name_rule)
+setup_ext_commands(Koishi, lite=True)
 setup_ext_slash(Koishi)
 
-Koishi.command_processer.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
+Koishi.events.message_create.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
@@ -37,16 +34,15 @@ Koishi.events(ChannelDeleteWaitfor)
 Koishi.events(EmojiDeleteWaitfor)
 Koishi.events(RoleEditWaitfor)
 
-Koishi.commands(SubterraneanHelpCommand(COLOR__KOISHI_HELP), 'help', category='HELP')
-
-Koishi.command_processer.create_category('ADMINISTRATION',)
-Koishi.command_processer.create_category('GAMES',)
-Koishi.command_processer.create_category('UTILITY',)
-Koishi.command_processer.create_category('VOICE', checks=checks.guild_only())
-
-@Koishi.commands
-async def default_event(client, message):
+@Koishi.events
+async def message_create(client, message):
     if (message.referenced_message is not None):
+        return
+    
+    if not message.channel.cached_permissions_for(client).can_send_messages:
+        return
+    
+    if message.author.is_bot:
         return
     
     user_mentions = message.user_mentions
@@ -87,68 +83,6 @@ async def default_event(client, message):
         return
     
     await client.message_create(message.channel, text)
-
-Koishi.commands(command_error, checks=[checks.is_guild(GUILD__NEKO_DUNGEON)])
-
-@Koishi.commands
-async def invalid_command(client, message, command, content):
-    prefix = client.command_processer.get_prefix_for(message)
-    embed = Embed(
-        f'Invalid command `{command}`',
-        f'try using: `{prefix}help`',
-        color=COLOR__KOISHI_HELP,
-            )
-    
-    message = await client.message_create(message.channel,embed=embed)
-    await sleep(30., KOKORO)
-    await client.message_delete(message)
-
-
-@Koishi.commands.from_class
-class shutdown:
-    async def command(client, message):
-        
-        for client_ in CLIENTS:
-            await client_.disconnect()
-        
-        await client.message_create(message.channel, 'Clients stopped, stopping process.')
-        KOKORO.stop()
-        thread_id = main_thread().ident
-        signal.pthread_kill(thread_id, signal.SIGKILL)
-    
-    category = 'UTILITY'
-    checks = [checks.owner_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('shutdown', (
-            'Shuts the clients down, then stops the process.'
-            f'Usage  `{prefix}shutdown`'
-            ), color=COLOR__KOISHI_HELP).add_footer(
-                'Owner only!')
-
-async def execute_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('execute', (
-        'Use an interpreter trough me :3\n'
-        'Usages:\n'
-        f'{prefix}execute # code goes here\n'
-        '# code goes here\n'
-        '# code goes here\n'
-        '\n'
-        f'{prefix}execute\n'
-        '```\n'
-        '# code goes here\n'
-        '# code goes here\n'
-        '```\n'
-        '*not code*\n'
-        '\n'
-        '... and many more ways.'
-            ), color=COLOR__KOISHI_HELP).add_footer(
-            'Owner only!')
-
-Koishi.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
-    checks=[checks.owner_only()])
 
 
 PATTERN_ROLE_RELATION = [
@@ -198,11 +132,11 @@ async def role_giver(client, message):
                 break
         
         message = await client.message_create(message.channel, content, allowed_mentions=None)
-        await sleep(30.0)
+        await sleep(30.0, KOKORO)
         await client.message_delete(message)
         break
 
-Koishi.command_processer.append(CHANNEL__NEKO_DUNGEON__SYSTEM, role_giver)
+Koishi.events.message_create.append(CHANNEL__NEKO_DUNGEON__SYSTEM, role_giver)
 
 @Koishi.events(overwrite=True)
 async def error(client, name, err):
@@ -225,3 +159,4 @@ async def error(client, name, err):
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang='py'):
         await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, chunk)
+

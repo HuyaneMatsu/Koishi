@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from hata import Task, User, CHANNELS, Embed, Client, Color, WebhookType
+from hata import Task, User, CHANNELS, Embed, Client, Color, WebhookType, KOKORO
 
 from hata.ext.commands import checks
 
@@ -10,61 +10,156 @@ class Channeller_v_del(object):
     def __init__(self, parent):
         self.parent = parent
 
-    async def __call__(self,client,message):
+    async def __call__(self, client, message):
         if not isinstance(message.author, (Client, User)):
             return
 
         source_channel = message.channel
         user = message.author
         
-        content     = message.clean_content
-        embed       = message.clean_embeds
-        file        = None if message.attachments is None else [attachment.name for attachment in message.attachments]
-        tts         = message.tts
-        #avatar_url  = message.author.avatar_url #cannot compare avatar urls.
+        source_content = message.content
+        source_embeds = message.embds
+        source_attachments = message.attachments
+        if source_attachments is None:
+            source_attachment_names = None
+        else:
+            source_attachment_names = [attachment.name for attachment in source_attachments]
+        source_tts = message.tts
         
         for channel, webhook in self.parent.pairs:
             if channel is source_channel:
                 continue
-        
+                
             for message in channel.messages:
                 if isinstance(message.author, (Client, User)):
                     continue
                 
-                if (user.name_at(webhook.guild) != message.author.name or
-                    #avatar_url  != message.author.avatar_url or \
-                    content     != message.clean_content or
-                    file        != (None if message.attachments is None else [attachment.name for attachment in message.attachments]) or \
-                    embed       != message.clean_embeds or
-                    tts         != message.tts
-                        ):
-                    
+                if user.name_at(webhook.guild) != message.author.name:
                     continue
                 
-                Task(client.message_delete(message), client.loop)
+                if source_content != message.content:
+                    continue
+                
+                if source_embeds != message.emebds:
+                    continue
+                
+                attachments = message.attachments
+                if attachments is None:
+                    attachment_names = None
+                else:
+                    attachment_names = [attachment.name for attachment in attachments]
+                
+                if source_attachment_names != attachment_names:
+                    continue
+                
+                if source_tts != message.tts:
+                    continue
+                
+                Task(client.webhook_message_delete(webhook, message), KOKORO)
                 break
-                    
+
+
+class Channeller_v_edit(object):
+    __slots__ = ('parent',)
+    def __init__(self, parent):
+        self.parent = parent
+    
+    async def __call__(self, client, message, old_attributes):
+        if old_attributes is None:
+            return
+        
+        source_channel = message.channel
+        user = message.author
+        
+        edited = False
+        try:
+            old_content = old_attributes['content']
+        except KeyError:
+            old_content = message.content
+        else:
+            edited = True
+        
+        try:
+            old_embeds = old_attributes['embeds']
+        except KeyError:
+            old_embeds = message.embeds
+        else:
+            edited = True
+        
+        if not edited:
+            return
+        
+        new_content = message.content
+        new_embeds = message.embds
+        
+        attachments = message.attachments
+        if attachments is None:
+            old_attachment_names = None
+        else:
+            old_attachment_names = [attachment.name for attachment in attachments]
+        
+        old_tts = message.tts
+        
+        for channel, webhook in self.parent.pairs:
+            if channel is source_channel:
+                continue
+                
+            for message in channel.messages:
+                if isinstance(message.author, (Client, User)):
+                    continue
+                
+                if user.name_at(webhook.guild) != message.author.name:
+                    continue
+                
+                if old_content != message.content:
+                    continue
+                
+                if old_embeds != message.emebds:
+                    continue
+                
+                attachments = message.attachments
+                if attachments is None:
+                    attachment_names = None
+                else:
+                    attachment_names = [attachment.name for attachment in attachments]
+                
+                if old_attachment_names != attachment_names:
+                    continue
+                
+                if old_tts != message.tts:
+                    continue
+                
+                Task(client.webhook_message_edit(webhook, message, new_content, embeds=new_embeds), KOKORO)
+                break
+
+
 class Channeller(object):
-    __slots__ = ('client', 'deleter', 'pairs')
+    __slots__ = ('client', 'deleter', 'editer', 'pairs')
     def __init__(self, client, pairs):
         self.client = client
         self.pairs = pairs
         self.deleter = deleter = Channeller_v_del(self)
+        self.editer = editer = Channeller_v_edit(self)
         
         event_1 = client.events.message_create
         event_2 = client.events.message_delete
+        event_3 = client.events_message_edit
         for pair in pairs:
             channel = pair[0]
-            channel.message_keep_limit=30 #if caching is diabled we turn this on
+            channel.message_keep_limit=30 #if caching is disabled we turn this on
             event_1.append(channel, self)
             event_2.append(channel, deleter)
+            event_3.append(channel, editer)
             CHANNELINGS[channel.id] = self
     
     def cancel(self, channel):
-        event_1 = self.client.events.message_create
-        event_2 = self.client.events.message_delete
+        client = self.client
+        event_1 = client.events.message_create
+        event_2 = client.events.message_delete
+        event_3 = client.events_message_edit
         pairs = self.pairs
         deleter = self.deleter
+        editer = self.editer
         if channel is None:
             pass
         elif len(pairs) < 3:
@@ -80,6 +175,7 @@ class Channeller(object):
             channel.message_keep_limit = channel.MESSAGE_KEEP_LIMIT
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
+            event_3.remove(channel, editer)
             del CHANNELINGS[channel.id]
             return
 
@@ -88,7 +184,8 @@ class Channeller(object):
             channel.message_keep_limit = channel.MESSAGE_KEEP_LIMIT
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
-            
+            event_3.remove(channel, editer)
+        
         deleter.parent = None
         self.deleter = None
 
@@ -121,7 +218,7 @@ class Channeller(object):
                     avatar_url  = message.author.avatar_url,
                         ),client.loop)
 
-CHANNELINGS={}
+CHANNELINGS = {}
 
 async def channeling_start(client, message, channel_id:int):
     channel_1 = message.channel
@@ -225,13 +322,13 @@ async def channeling_stop_description(client, message):
         ), color=CHANNELLER_COLOR).add_footer(
             'Owner only!')
 
-Koishi: Client
-Koishi.commands(channeling_start,
+COMMAND_CLIENT: Client
+COMMAND_CLIENT.commands(channeling_start,
     description = channeling_start_description,
     checks = [checks.guild_only(), checks.owner_only()],
     category = 'UTILITY')
 
-Koishi.commands(channeling_stop,
+COMMAND_CLIENT.commands(channeling_stop,
     description = channeling_stop_description,
     checks = [checks.owner_only()],
     category = 'UTILITY')

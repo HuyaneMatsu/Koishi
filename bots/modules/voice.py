@@ -1,29 +1,26 @@
 # -*- coding: utf-8 -*-
 import re, os
-from audioop import add as add_voice
 
-from hata import Client, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, ClientWrapper, \
-    KOKORO, ChannelVoice, AsyncIO, chunkify
-from hata.discord.player import AudioSource
-from hata.discord.opus import OpusDecoder
-from hata.ext.commands import checks, Pagination, FlaggedAnnotation, ConverterFlag
+from hata import Client, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
+    KOKORO, ChannelVoice, AsyncIO, WaitTillAll
+from hata.ext.commands import checks, Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON
-from bot_utils.command_utils import CHECK_ADMINISTRATION, SELF_CHECK_MOVE_USERS
+from bot_utils.command_utils import CHECK_ADMINISTRATION
 
 if not MARISA_MODE:
     from bots.flan import COLOR__FLAN_HELP, CHESUTO_FOLDER, get_bgm
 
 VOICE_COLORS = {}
 
-main_client: Client
+SLASH_CLIENT : [type(None), Client]
 
 if MARISA_MODE:
     Marisa: Client
     VOICE_COMMANDS_MARISA = eventlist(category='VOICE', )
-    WRAPPER = Marisa
+    VOICE_COMMAND_CLIENT = Marisa
     
     MAIN_VOICE_COLOR = Color.from_rgb(121, 231, 78)
     VOICE_COLORS[Marisa] = MAIN_VOICE_COLOR
@@ -31,7 +28,7 @@ else:
     Flan: Client
     Koishi: Client
     VOICE_COMMANDS_FLAN = eventlist(checks=checks.guild_only())
-    WRAPPER = ClientWrapper(Koishi, Flan)
+    VOICE_COMMAND_CLIENT = Flan
     
     MAIN_VOICE_COLOR = Color.from_rgb(235, 52, 207)
     VOICE_COLORS[Flan] = COLOR__FLAN_HELP
@@ -44,505 +41,347 @@ if AUDIO_PATH is not None:
         for filename in os.listdir(AUDIO_PATH):
             if filename.endswith('.mp3'):
                 FILE_NAMES.append(filename)
-
+    
     collect_local_audio()
 
 
-PERCENT_RP = re.compile('(\d*)[%]?')
 
-async def join_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('join', (
-        'Joins me to your voice channel.\n'
-        f'Usage: `{prefix}join *n%*`\n'
-        'You can also tell me how loud I should sing for you.'
-        ), color=VOICE_COLORS.get(client))
+async def join(client, user, guild, volume):
+    state = guild.voice_states.get(user.id, None)
+    if state is None:
+        yield 'You are not at a voice channel!'
+        return
     
-@WRAPPER.commands(description=join_description, category='VOICE')
-async def join(client, message, content):
-    channel = message.channel
-    guild = channel.guild
-    while True:
-        state = guild.voice_states.get(message.author.id, None)
-        if state is None:
-            text = 'You are not at a voice channel!'
-            break
-        
-        channel = state.channel
-        if not channel.cached_permissions_for(client).can_connect:
-            text = 'I have no permissions to connect to that channel'
-            break
-        
-        try:
-            voice_client = await client.join_voice_channel(channel)
-        except TimeoutError:
-            text = 'Timed out meanwhile tried to connect.'
-            break
-        except RuntimeError:
-            text = 'The client cannot play voice, some libraries are not loaded'
-            break
-        
-        text = f'Joined to {state.channel.name}'
-        if content:
-            amount = PERCENT_RP.fullmatch(content)
-            if amount:
-                amount = int(amount.groups()[0])
-                if amount < 0:
-                    amount = 0
-                elif amount > 200:
-                    amount = 200
-                voice_client.volume = amount/100.
-                text = f'{text}; Volume set to {amount}%'
-        break
+    channel = state.channel
+    if not channel.cached_permissions_for(client).can_connect:
+        yield 'I have no permissions to connect to that channel'
+        return
     
-    await client.message_create(message.channel,text)
+    yield
+    try:
+        voice_client = await client.join_voice_channel(channel)
+    except TimeoutError:
+        yield 'Timed out meanwhile tried to connect.'
+        return
+    except RuntimeError:
+        yield 'The client cannot play voice, some libraries are not loaded.'
+        return
+    
+    content = f'Joined to {state.channel.name}'
+    if (volume is not None):
+        if volume < 0:
+            volume = 0
+        elif volume > 200:
+            volume = 200
+        voice_client.volume = volume/100.
+        content = f'{content}; Volume set to {volume}%'
+    
+    yield content
+    return
 
 
-async def pause_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('pause',(
-        'Pauses the currently playing audio.\n'
-        f'Usage: `{prefix}pause`\n'
-        ), color=VOICE_COLORS.get(client))
-
-@WRAPPER.commands(description=pause_description, category='VOICE')
 async def pause(client, message):
-    voice_client=client.voice_client_for(message)
-    if voice_client is None:
-        text = 'There is no voice client at your guild.'
-    else:
-        voice_client.pause()
-        text = 'Voice paused.'
-    
-    await client.message_create(message.channel, text)
-
-
-async def resume_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('resume',(
-        'Resumes the currently playing audio.\n'
-        f'Usage: `{prefix}resume`\n'
-        ), color=VOICE_COLORS.get(client))
-
-@WRAPPER.commands(description=resume_description, category='VOICE')
-async def resume(client, message):
-    while True:
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-            break
-        
-        source = voice_client.source
-        if source is None:
-            text = 'Nothing to resume.'
-        else:
-            voice_client.resume()
-            text = f'{source.title!r} resumed.'
-        
-        break
-    
-    await client.message_create(message.channel, text)
-
-
-async def leave_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('leave', (
-        'Leaves me from the voice channel..\n'
-        f'Usage: `{prefix}leave`'
-        ), color=VOICE_COLORS.get(client))
-
-@WRAPPER.commands(description=leave_description, category='VOICE')
-async def leave(client, message):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
-        text = 'There is no voice client at your guild.'
+        content = 'There is no voice client at your guild.'
     else:
-        await voice_client.disconnect()
-        text = f'{client.name_at(message.channel.guild)} out.'
+        voice_client.pause()
+        content = 'Voice paused.'
     
-    await client.message_create(message.channel, text)
+    return content
+
+
+async def resume(client, event_or_message):
+    voice_client = client.voice_client_for(event_or_message)
+    if voice_client is None:
+        return 'There is no voice client at your guild.'
+    
+    source = voice_client.source
+    if source is None:
+        content = 'Nothing to resume.'
+    else:
+        voice_client.resume()
+        content = f'{source.title!r} resumed.'
+    
+    return content
+
+
+async def leave(client, message_or_event):
+    voice_client = client.voice_client_for(message_or_event)
+    if voice_client is None:
+        yield 'There is no voice client at your guild.'
+        return
+    
+    yield
+    await voice_client.disconnect()
+    yield f'{client.name_at(message_or_event.guild)} out.'
+    return
 
 
 if AUDIO_PLAY_POSSIBLE:
-    async def yt_play_description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('play',(
-            'Do you want me to search me some audio to listen to?.\n'
-            f'Usage: `{prefix}play <name>`\n'
-            'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
-            ), color=MAIN_VOICE_COLOR)
-    
-    @main_client.commands(
-        description=yt_play_description,
-        name='play',
-        checks=checks.is_guild(GUILD__NEKO_DUNGEON),
-        category='VOICE',
-            )
-    async def yt_play(client, message, content):
-        while True:
-            if YTAudio is None:
-                text = 'This option in unavailable :c'
-                break
+    async def yt_play(client, message_or_event, name):
+        if YTAudio is None:
+            yield 'This option in unavailable :c'
+            return
+        
+        voice_client = client.voice_client_for(message_or_event)
+        
+        if voice_client is None:
+            yield 'There is no voice client at your guild'
+            return
+        
+        if not name:
+            if voice_client.player is None:
+                yield 'Nothing is playing now Good Sir!'
+                return
             
-            voice_client = client.voice_client_for(message)
+            if voice_client.is_paused():
+                voice_client.resume()
+                yield f'Resumed playing: {voice_client.player.source.title}'
+                return
             
-            if voice_client is None:
-                text = 'There is no voice client at your guild'
-                break
-            
-            if not content:
-                if voice_client.player is None:
-                    text = 'Nothing is playing now Good Sir!'
-                    break
-                
-                if voice_client.is_paused():
-                    voice_client.resume()
-                    text = f'Resumed playing: {voice_client.player.source.title}'
-                    break
-    
-                text = f'Now playing: {voice_client.player.source.title}'
-                break
-            
-            with client.keep_typing(message.channel):
-                try:
-                    source = await YTAudio(content, stream=True)
-                except DownloadError: #raised by YTdl
-                    text = 'Error meanwhile downloading'
-                    break
-            
-            if voice_client.append(source):
-                text = f'Now playing {source.title}!'
-            else:
-                text = f'Added to queue {source.title}!'
-            break
-    
-        await client.message_create(message.channel,text)
+            yield f'Now playing: {voice_client.player.source.title}'
+            return
+        
+        yield
+        try:
+            source = await YTAudio(name, stream=True)
+        except DownloadError: # Raised by YTdl
+            yield 'Error meanwhile downloading'
+            return
+        
+        if voice_client.append(source):
+            content = 'Now playing'
+        else:
+            content = 'Added to queue'
+        
+        yield f'{content} {source.title}!'
+        return
 
-if (AUDIO_PATH is not None and AUDIO_PLAY_POSSIBLE):
-    async def local_description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('local',(
-            'Plays a local audio from my collection.\n'
-            f'Usage: `{prefix}local <name>`\n'
-            'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
-            ), color=MAIN_VOICE_COLOR)
-    
-    @main_client.commands(
-        name='local',
-        description=local_description,
-        checks=checks.is_guild(GUILD__NEKO_DUNGEON),
-        category='VOICE',
-            )
-    async def local_(client, message, content):
+
+if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
+    async def local_play(client, message_or_event, content):
+        voice_client = client.voice_client_for(message_or_event)
+        if voice_client is None:
+            yield 'There is no voice client at your guild'
+            return
+        
+        if not content:
+            if voice_client.player is None:
+                yield 'Nothing is playing now Good Sir!'
+                return
+            
+            if voice_client.is_paused():
+                voice_client.resume()
+                yield f'Resumed playing: {voice_client.player.source.title}'
+                return
+            
+            yield f'Now playing: {voice_client.player.source.title}'
+            return
+        
+        content = content.split(' ')
+        for index in range(len(content)):
+            word = content[index]
+            word = re.escape(word)
+            content[index] = word
+
+        pattern = re.compile('.*?'.join(content),re.I)
+        
+        most_accurate = None
+        
+        index = 0
+        limit = len(FILE_NAMES)
+        
         while True:
-            voice_client=client.voice_client_for(message)
-            
-            if voice_client is None:
-                text = 'There is no voice client at your guild'
+            if index == limit:
                 break
             
-            if not content:
-                if voice_client.player is None:
-                    text = 'Nothing is playing now Good Sir!'
-                    break
-                
-                if voice_client.is_paused():
-                    voice_client.resume()
-                    text = f'Resumed playing: {voice_client.player.source.title}'
-                    break
-                
-                text = f'Now playing: {voice_client.player.source.title}'
+            name = FILE_NAMES[index]
+            parsed = pattern.search(name)
+            
+            if parsed is None:
+                index += 1
+                continue
+            
+            start = parsed.start()
+            length = parsed.end()-start
+            most_accurate = (start, length, len(name), name)
+            break
+        
+        if most_accurate is None:
+            yield 'Not found anything matching.'
+            return
+        
+        while True:
+            index +=1
+            if index==limit:
                 break
             
-            content = content.split(' ')
-            for index in range(len(content)):
-                word = content[index]
-                word = re.escape(word)
-                content[index] = word
-    
-            pattern = re.compile('.*?'.join(content),re.I)
+            name = FILE_NAMES[index]
+            parsed = pattern.search(name)
             
-            most_accurate = None
+            if parsed is None:
+                continue
+
+            start = parsed.start()
+            target = most_accurate[0]
+            if start > target:
+                continue
             
-            index = 0
-            limit = len(FILE_NAMES)
+            if start < target:
+                most_accurate = (start, parsed.end()-start, len(name), name)
+                continue
             
-            while True:
-                if index == limit:
-                    break
-                
-                name = FILE_NAMES[index]
-                parsed = pattern.search(name)
-                
-                if parsed is None:
-                    index += 1
-                    continue
-                
-                start = parsed.start()
-                length = parsed.end()-start
+            length = parsed.end()-start
+            target = most_accurate[1]
+            
+            if length > target:
+                continue
+            
+            if length < target:
                 most_accurate = (start, length, len(name), name)
-                break
+                continue
             
-            if most_accurate is None:
-                text = 'Not found anything, what matches.'
-                break
+            name_length = len(name)
+            target = most_accurate[2]
+            if name_length > target:
+                continue
             
-            while True:
-                index +=1
-                if index==limit:
-                    break
-                
-                name = FILE_NAMES[index]
-                parsed = pattern.search(name)
-                
-                if parsed is None:
-                    continue
-    
-                start = parsed.start()
-                target = most_accurate[0]
-                if start > target:
-                    continue
-                
-                if start < target:
-                    most_accurate = (start, parsed.end()-start, len(name), name)
-                    continue
-                
-                length = parsed.end()-start
-                target = most_accurate[1]
-                
-                if length > target:
-                    continue
-                
-                if length < target:
-                    most_accurate = (start, length, len(name), name)
-                    continue
-                
-                name_length = len(name)
-                target = most_accurate[2]
-                if name_length > target:
-                    continue
-                
-                if name_length < target:
-                    most_accurate = (start, length, name_length, name)
-                    continue
-                
-                target = most_accurate[3]
-                if name > target:
-                    continue
-                
+            if name_length < target:
                 most_accurate = (start, length, name_length, name)
                 continue
             
-            name = most_accurate[3]
-            path = os.path.join(AUDIO_PATH, name)
-            
-            try:
-                source = await LocalAudio(path)
-            except PermissionError:
-                text = 'The file is already playing somewhere'
-                break
-            
-            if voice_client.append(source):
-                text = f'Now playing {source.title}!'
-            else:
-                text = f'Added to queue {source.title}!'
-            break
-        
-        await client.message_create(message.channel, text)
-
-
-async def volume_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('volume',(
-        'Sets my volume to the given percentage.\n'
-        f'Usage: `{prefix}volume *n%*`\n'
-        'If no volume is passed, then I will tell my current volume.'
-        ), color=VOICE_COLORS.get(client))
-    
-@WRAPPER.commands(description=volume_description, category='VOICE')
-async def volume(client, message, content):
-    while True:
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-            break
-        
-        if not content:
-            text = f'{voice_client.volume*100.:.0f}%'
-            break
-        
-        amount = PERCENT_RP.fullmatch(content)
-        if not amount:
-            text = 'Number please'
-            break
-        
-        amount = int(amount.groups()[0])
-        if amount < 0:
-            amount = 0
-        elif amount > 200:
-            amount = 200
-        
-        voice_client.volume=amount/100.
-        text = f'Volume set to {amount}%.'
-        break
-    
-    await client.message_create(message.channel, text)
-
-
-async def skip_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('skip',(
-        'Skips the audio at the given index.\n'
-        f'Usage: `{prefix}skip *index*`\n'
-        'If not giving any index or giving it as `0`, will skip the currently playing audio.'
-        ), color=VOICE_COLORS.get(client))
-
-@WRAPPER.commands(description=skip_description, category='VOICE')
-async def skip(client, message, index:int=0):
-    while True:
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild.'
-            break
-        
-        source = voice_client.skip(index)
-        if source is None:
-            text = 'Nothing was skipped.'
-        else:
-            text = f'Skipped {source.title!r}.'
-        break
-    
-    await client.message_create(message.channel, text)
-
-
-async def stop_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('stop',(
-        'Well, if you really want I can stop playing audio.\n'
-        f'Usage: `{prefix}stop`'
-        ), color=VOICE_COLORS.get(client))
-
-@WRAPPER.commands(description=stop_description, category='VOICE')
-async def stop(client, message):
-    while True:
-        voice_client=client.voice_client_for(message)
-        if voice_client is None:
-            text = 'There is no voice client at your guild'
-            break
-        
-        if voice_client.player is None:
-            text = 'I don\'t play anything, so I can not stop it.'
-            break
-        
-        text = 'Stopped playing'
-        voice_client.stop()
-        break
-    
-    await client.message_create(message.channel, text)
-
-
-async def move_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('move',(
-        'Should I move to an other channel, or next to You, my Love??\n'
-        f'Usage: `{prefix}move <channel>`'
-        ), color=VOICE_COLORS.get(client))
-
-@WRAPPER.commands(description=move_description, category='VOICE')
-async def move(client, message, channel:ChannelVoice = None):
-    while True:
-        if channel is None:
-            guild = message.guild
-            if guild is None:
-                return
-            
-            state = guild.voice_states.get(message.author.id, None)
-            if state is None:
-                text = 'You must be in voice channel, or you should pass a voice channel.'
-                break
-            
-            channel = state.channel
-        
-        if not channel.cached_permissions_for(client).can_connect:
-            text = 'I have no permissions to connect to that channel.'
-            break
-        
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            await client.join_voice_channel(channel)
-        else:
-            #client.join_voice_channel works too, if u wanna move, but this is an option as well
-            await voice_client.move_to(channel)
-        
-        text = f'Joined channel: {channel.name}.'
-        break
-    
-    await client.message_create(message.channel, text)
-    
-
-async def party_is_over_description(client,message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('party-is-over',(
-        'Should I mark the talking party as done?\n'
-        f'Usage: `{prefix}party-is-over`'
-        ), color=MAIN_VOICE_COLOR).add_footer(
-            'Administrator only!')
-
-@main_client.commands(
-    description = party_is_over_description,
-    checks = [CHECK_ADMINISTRATION, SELF_CHECK_MOVE_USERS],
-    aliases = 'partyisover',
-    category = 'VOICE',
-        )
-async def party_is_over(client, message):
-    guild = message.guild
-    if guild is None:
-        return
-    
-    while True:
-        voice_client = client.voice_client_for(message)
-        if voice_client is None:
-            text = 'I don\'t see any parties around me.'
-            break
-
-        Task(voice_client.disconnect(), KOKORO)
-        
-        channel = voice_client.channel
-        users = []
-        for state in guild.voice_states.values():
-            if (state.channel is not channel):
-                continue
-                
-            user = state.user
-            if (user is client):
+            target = most_accurate[3]
+            if name > target:
                 continue
             
-            users.append(user)
+            most_accurate = (start, length, name_length, name)
+            continue
         
-        if not users:
+        name = most_accurate[3]
+        path = os.path.join(AUDIO_PATH, name)
+        
+        yield
+        
+        try:
+            source = await LocalAudio(path)
+        except PermissionError:
+            yield 'Internal permission error occurred, what a derpy cats working here.'
             return
         
-        for user in users:
-            Task(client.user_voice_kick(user,guild), KOKORO)
+        if voice_client.append(source):
+            yield f'Now playing {source.title}!'
+            return
+        
+        yield f'Added to queue {source.title}!'
         return
-    
-    await client.message_create(message.channel,text)
-    
 
-async def queue_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('queue',(
-        'Shows the audio player queue of the current guild.\n'
-        f'Usage: `{prefix}queue`'
-        ), color=VOICE_COLORS.get(client))
 
-@WRAPPER.commands(description=queue_description, category='VOICE')
-async def queue(client, message):
-    guild = message.guild
-    if guild is None:
-        return
+async def volume_(client, event_or_message, volume):
+    voice_client = client.voice_client_for(event_or_message)
+    if voice_client is None:
+        return 'There is no voice client at your guild.'
     
+    if volume is None:
+        return f'{voice_client.volume*100.:.0f}%'
+    
+    if volume < 0:
+        volume = 0
+    elif volume > 200:
+        volume = 200
+    
+    voice_client.volume = volume/100.
+    return f'Volume set to {volume}%.'
+
+
+async def skip(client, message, index):
     voice_client = client.voice_client_for(message)
+    if voice_client is None:
+        return 'There is no voice client at your guild.'
+    
+    source = voice_client.skip(index)
+    if source is None:
+        return 'Nothing was skipped.'
+    else:
+        return f'Skipped {source.title!r}.'
+
+
+async def stop(client, message_or_event):
+    voice_client = client.voice_client_for(message_or_event)
+    if voice_client is None:
+        return 'There is no voice client at your guild'
+    
+    voice_client.stop()
+    return 'Stopped playing'
+
+
+async def move(client, message_or_event, user, voice_channel):
+    if voice_channel is None:
+        
+        state = GUILD__NEKO_DUNGEON.voice_states.get(user.id, None)
+        if state is None:
+            yield 'You must be in voice channel, or you should pass a voice channel.'
+            return
+        
+        voice_channel = state.channel
+    
+    if not voice_channel.cached_permissions_for(client).can_connect:
+        yield 'I have no permissions to connect to that channel.'
+        return
+    
+    voice_client = client.voice_client_for(message_or_event)
+    
+    yield
+    if voice_client is None:
+        await client.join_voice_channel(voice_channel)
+    else:
+        # `client.join_voice_channel` works too, if u wanna move, but this is an option as well
+        await voice_client.move_to(voice_channel)
+    
+    yield f'Joined to channel: {voice_channel.name}.'
+
+
+async def party_is_over(client, message_or_event):
+    voice_client = client.voice_client_for(message_or_event)
+    if voice_client is None:
+        yield 'I don\'t see any parties around me.'
+        return
+    
+    channel = voice_client.channel
+    if not channel.cached_permissions_for(client).can_move_users:
+        yield 'I must have move users permission in the respective channel to invoke this command.'
+        return
+    
+    yield
+    tasks = []
+    task = Task(voice_client.disconnect(), KOKORO)
+    tasks.append(task)
+    
+    users = []
+    for state in GUILD__NEKO_DUNGEON.voice_states.values():
+        if (state.channel is not channel):
+            continue
+            
+        user = state.user
+        if (user is client):
+            continue
+        
+        users.append(user)
+    
+    for user in users:
+        task = Task(client.user_voice_kick(user, GUILD__NEKO_DUNGEON), KOKORO)
+        tasks.append(task)
+    
+    await WaitTillAll(tasks, KOKORO)
+    
+    yield 'Nooo, the party is over nyaaa~~h!'
+    return
+
+
+async def queue(client, message_or_event, channel, guild):
+    yield
+    
+    voice_client = client.voice_client_for(message_or_event)
     color = VOICE_COLORS.get(client)
     
     title = f'Playing queue for {guild}'
@@ -579,68 +418,216 @@ async def queue(client, message):
         
         break
     
-    await Pagination(client, message.channel, pages)
+    await Pagination(client, channel, pages)
 
-async def loop_description(client, message):
+
+VOICE_LOOPER_BEHAVIOUR_TO_FUNCTIONS_AND_JOIN_DESCRIPTIONS = {
+    'queue'  : (VoiceClient._loop_queue  , 'Started looping over the whole queue.'  ) ,
+    'actual' : (VoiceClient._loop_actual , 'Started looping over the actual audio.' ),
+    'stop'   : (VoiceClient._play_next   , 'Stopped looping.'                       ),
+        }
+
+VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS = {
+    VoiceClient._loop_queue  : 'Looping over the whole queue.'  ,
+    VoiceClient._loop_actual : 'Looping over the actual audio.' ,
+    VoiceClient._play_next   : 'Not looping.'                   ,
+        }
+
+VOICE_LOOPER_BEHAVIOURS = (
+    'queue'  ,
+    'actual' ,
+    'stop'   ,
+        )
+
+VOICE_LOOPER_BEHAVIOURS_PAIRS = [
+    ('Loop over the queue'  , 'queue'  ,),
+    ('Loop over the actual' , 'actual' ,),
+    ('Stop looping'         , 'stop'   ,),
+        ]
+
+async def loop(client, message_or_event, behaviour):
+    voice_client = client.voice_client_for(message_or_event)
+    if voice_client is None:
+        return 'There is no voice client at your guild.'
+    
+    if behaviour is None:
+        description = VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS.get(voice_client.call_after)
+        if description is None:
+            return 'Error 404, Unknown looping behaviour.'
+        
+        return description
+    
+    function, description = VOICE_LOOPER_BEHAVIOUR_TO_FUNCTIONS_AND_JOIN_DESCRIPTIONS[behaviour]
+    voice_client.call_after = function
+    return description
+
+
+if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
+    async def chesuto_play(client, message, name):
+        voice_client = client.voice_client_for(message)
+        
+        if voice_client is None:
+            yield 'There is no voice client at your guild.'
+            return
+        
+        bgm = get_bgm(name)
+        
+        if bgm is None:
+            yield 'Nothing found.'
+            return
+        
+        yield
+        
+        path = os.path.join(os.path.abspath(''), CHESUTO_FOLDER, bgm.source_name)
+        if not os.path.exists(path):
+            data = await client.download_url(bgm.url)
+            with await AsyncIO(path, 'wb') as file:
+                await file.write(data)
+        
+        source = await LocalAudio(path, title=bgm.display_name)
+        
+        if voice_client.append(source):
+            text = 'Now playing'
+        else:
+            text = 'Added to queue'
+        
+        yield f'{text} {bgm.display_name!r}!'
+        return
+
+
+#### #### #### #### Add as normal commands #### #### #### ####
+
+async def command_join_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('loop', (
-        'Loops over the currently playing audio.\n'
-        f'Usage: `{prefix}loop`\n'
+    return Embed('join', (
+        'Joins me to your voice channel.\n'
+        f'Usage: `{prefix}join *n*`\n'
+        'You can also tell me how loud I should sing for you.'
         ), color=VOICE_COLORS.get(client))
 
-@WRAPPER.commands(description=loop_description, category='VOICE')
-async def loop(client, message):
-    voice_client = client.voice_client_for(message)
-    if voice_client is None:
-        text = 'There is no voice client at your guild.'
-    else:
-        voice_client.call_after = voice_client._loop_actual
-        text = 'Started looping over the actual audio.'
-    
-    await client.message_create(message.channel, text)
+
+@VOICE_COMMAND_CLIENT.commands(name='join', description=command_join_description, category='VOICE')
+async def command_join(client, message, volume:int=None):
+    async for content in join(client, message.author, message.guild, volume):
+        if (content is not None):
+            yield content
 
 
-
-async def loop_stop_description(client, message):
+async def command_pause_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('loop-stop',(
-        'Stops looping over the actual audio or over the queue.\n'
-        f'Usage: `{prefix}loop-stop`\n'
+    return Embed('pause',(
+        'Pauses the currently playing audio.\n'
+        f'Usage: `{prefix}pause`\n'
         ), color=VOICE_COLORS.get(client))
 
-@WRAPPER.commands(description=loop_stop_description, category='VOICE')
-async def loop_stop(client, message):
-    voice_client = client.voice_client_for(message)
-    if voice_client is None:
-        text = 'There is no voice client at your guild.'
-    else:
-        voice_client.call_after = voice_client._play_next
-        text = 'Stopped looping over the actual audio(s).'
-    
-    await client.message_create(message.channel, text)
+
+@VOICE_COMMAND_CLIENT.commands(name='pause', description=command_pause_description, category='VOICE')
+async def command_resume(client, message):
+    return await pause(client, message)
 
 
-
-async def loop_all_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('loop-all', (
-        'Starts to loop over the queue.\n'
-        f'Usage: `{prefix}loop-all`\n'
+async def command_resume_description(client, event_or_message):
+    prefix = client.command_processer.get_prefix_for(event_or_message)
+    return Embed('resume',(
+        'Resumes the currently playing audio.\n'
+        f'Usage: `{prefix}resume`\n'
         ), color=VOICE_COLORS.get(client))
 
-@WRAPPER.commands(description=loop_all_description, category='VOICE')
-async def loop_all(client, message):
-    voice_client = client.voice_client_for(message)
-    if voice_client is None:
-        text = 'There is no voice client at your guild.'
-    else:
-        voice_client.call_after = voice_client._loop_queue
-        text = 'Started looping over the audio queue.'
-    
-    await client.message_create(message.channel, text)
+@VOICE_COMMAND_CLIENT.commands(name='resume', description=command_resume_description, category='VOICE')
+async def command_resume(client, message):
+    return await resume(client, message)
 
-if AUDIO_PLAY_POSSIBLE and not MARISA_MODE:
-    async def chesuto_play_description(client, message):
+
+async def command_leave_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('leave', (
+        'Leaves me from the voice channel.\n'
+        f'Usage: `{prefix}leave`'
+        ), color=VOICE_COLORS.get(client))
+
+@VOICE_COMMAND_CLIENT.commands(name='leave', description=command_leave_description, category='VOICE')
+async def command_leave(client, message):
+    async for content in leave(client, message):
+        if (content is not None):
+            yield content
+
+if AUDIO_PLAY_POSSIBLE and MARISA_MODE:
+    async def command_yt_play_description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('play', (
+            'Do you want me to search me some audio to listen to?.\n'
+            f'Usage: `{prefix}play <name>`\n'
+            'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
+            ), color=MAIN_VOICE_COLOR)
+    
+    @VOICE_COMMAND_CLIENT.commands(
+        name = 'play',
+        description = command_yt_play_description,
+        checks = checks.is_guild(GUILD__NEKO_DUNGEON),
+        category = 'VOICE',
+            )
+    async def command_yt_play(client, message, name):
+        async for content in yt_play(client, message, name):
+            if (content is not None):
+                yield content
+
+
+async def command_move_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('move', (
+        'Should I move to an other channel, or next to You, my Love??\n'
+        f'Usage: `{prefix}move <channel>`'
+        ), color=VOICE_COLORS.get(client))
+
+@VOICE_COMMAND_CLIENT.commands(name='move', description=command_move_description, category='VOICE')
+async def command_move(client, message, voice_channel: ChannelVoice=None):
+    async for content in move(client, message, message.author, voice_channel):
+        if (content is not None):
+            yield content
+
+
+async def party_is_over_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('party-is-over', (
+        'Should I mark the talking party as done?\n'
+        f'Usage: `{prefix}party-is-over`'
+        ), color=MAIN_VOICE_COLOR).add_footer(
+            'Administrator only!')
+
+@VOICE_COMMAND_CLIENT.commands(
+    name = 'party-is-over',
+    description = party_is_over_description,
+    checks = CHECK_ADMINISTRATION,
+    aliases = 'partyisover',
+    category = 'VOICE',
+        )
+async def command_party_is_over(client, message):
+    async for content in party_is_over(client, message):
+        if (content is not None):
+            yield content
+
+if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
+    async def command_local_description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('local',(
+            'Plays a local audio from my collection.\n'
+            f'Usage: `{prefix}local <name>`\n'
+            'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
+            ), color=MAIN_VOICE_COLOR)
+    
+    @VOICE_COMMAND_CLIENT.commands(
+        name = 'local',
+        description = command_local_description,
+        checks = checks.is_guild(GUILD__NEKO_DUNGEON),
+        category = 'VOICE',
+            )
+    async def command_local(client, message, name):
+        async for content in local_play(client, message, name):
+            if (content is not None):
+                yield content
+
+if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
+    async def command_chesuto_play_description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('play', (
             'Plays the given chesuto bgm.\n'
@@ -649,243 +636,186 @@ if AUDIO_PLAY_POSSIBLE and not MARISA_MODE:
             'Note that the given name can be also given as the position of the track.'
             ), color=COLOR__FLAN_HELP)
     
-    @Flan.commands(description=chesuto_play_description, name='play', category='VOICE')
-    async def chesuto_play(client, message, content):
-        if not content:
-            await chesuto_play_description(client, message)
+    @Flan.commands(name='play', description=command_chesuto_play_description, category='VOICE')
+    async def command_chesuto_play(client, message, name):
+        if not name:
+            yield await command_chesuto_play_description(client, message)
             return
         
-        # GOTO
-        while True:
-            voice_client = client.voice_client_for(message)
-            
-            if voice_client is None:
-                text = 'There is no voice client at your guild.'
-                break
-            
-            bgm = get_bgm(content)
-            
-            if bgm is None:
-                text = 'Nothing found.'
-                break
-            
-            path = os.path.join(os.path.abspath(''), CHESUTO_FOLDER, bgm.source_name)
-            if not os.path.exists(path):
-                data = await client.download_url(bgm.url)
-                with await AsyncIO(path, 'wb') as file:
-                    await file.write(data)
-            
-            source = await LocalAudio(path, title=bgm.display_name)
-            
-            if voice_client.append(source):
-                text = 'Now playing'
-            else:
-                text = 'Added to queue'
-            
-            text = f'{text} {bgm.display_name!r}!'
-            break
-        
-        await client.message_create(message.channel, text)
+        for content in chesuto_play(client, message, name):
+            if (content is not None):
+                yield content
 
-
-async def voice_state(client, message):
+async def command_loop_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
-    return Embed('voice-state', (
-        'Gets the voice state of the respective voice client.\n'
-        f'Usage: `{prefix}voice-state`\n'
-        ), color=VOICE_COLORS.get(client)).add_footer('Owner only!')
+    return Embed('loop', (
+        'Sets the voice client\'s looping behaviour or returns the current one.\n'
+        f'Usage: `{prefix}loop <queue|actual|stop>`\n'
+        ), color=VOICE_COLORS.get(client))
 
-@WRAPPER.commands(description=voice_state, checks=checks.owner_only(), category='VOICE')
-async def voice_state(client, message):
-    voice_client = client.voice_client_for(message)
-    lines = []
+@VOICE_COMMAND_CLIENT.commands(name='loop', description=command_loop_description, category='VOICE')
+async def command_loop(client, message, behaviour:'str' = None):
+    if (behaviour is not None):
+        state = behaviour.lower()
+        if state not in VOICE_LOOPER_BEHAVIOURS:
+            return f'Behaviour: {behaviour} is not any of the expected ones..'
+    
+    return await loop(client, message, behaviour)
+
+
+async def command_queue_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('queue', (
+        'Shows the voice client\'s queue of the guild.\n'
+        f'Usage: `{prefix}queue`'
+        ), color=VOICE_COLORS.get(client))
+
+
+@VOICE_COMMAND_CLIENT.commands(name='queue', description=command_queue_description, category='VOICE')
+async def command_queue(client, message):
+    channel = message.channel
     guild = message.guild
-    if voice_client is None:
-        title = f'No client in {guild.name}.'
-    else:
-        title = f'Client info for {guild.name}.'
-        
-        source = voice_client.source
-        queue = voice_client.queue
-        if (source is not None) or queue:
-            if (source is not None):
-                lines.append(f'Actual: {source.title}')
-            
-            for index, source in enumerate(queue, 1):
-                lines.append(f'Track {index}.: {source.title}')
-        
-        audio_streams = voice_client.get_audio_streams()
-        if audio_streams:
-            if lines:
-                lines.append('')
-            
-            lines.append('Receives')
-            
-            for index, (user, stream) in enumerate(audio_streams):
-                lines.append(f'Stream {index}.: {user.full_name}, {stream!r}')
-        
-        audio_sources = voice_client._audio_sources
-        if audio_sources:
-            if lines:
-                lines.append('')
-            
-            counter = 0
-            for index, source in enumerate(audio_sources.values(), 1):
-                lines.append(f'{index}.: {source}')
+    if guild is None:
+        return
     
-    color = VOICE_COLORS.get(client)
-    pages = [Embed(title, chunk, color) for chunk in chunkify(lines)]
-    
-    await Pagination(client, message.channel, pages)
+    async for content in queue(client, message, channel, guild):
+        if (content is not None):
+            yield content
 
-class MixerStream(AudioSource):
-    __slots__ = ('_decoder', '_postprocess_called', 'sources', )
-    def __init__(self, *sources):
-        self.sources = list(sources)
-        self._decoder = OpusDecoder()
-        self._postprocess_called = False
+
+async def command_volume_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('volume', (
+        'Sets my volume to the given percentage.\n'
+        f'Usage: `{prefix}volume *n*`\n'
+        'If no volume is passed, then I will tell my current volume.'
+        ), color=VOICE_COLORS.get(client))
+
+@VOICE_COMMAND_CLIENT.commands(name='volume', description=command_volume_description, category='VOICE')
+async def command_volume(client, message, volume:int=None):
+    return await volume_(client, message, volume)
+
+
+async def command_stop_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('stop', (
+        'Well, if you really want I can stop playing audio.\n'
+        f'Usage: `{prefix}stop`'
+        ), color=VOICE_COLORS.get(client))
+
+
+@VOICE_COMMAND_CLIENT.commands(name='stop', description=command_stop_description, category='VOICE')
+async def command_stop(client, message):
+    return await stop(client, message)
+
+async def command_skip_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('skip', (
+        'Skips the audio at the given index.\n'
+        f'Usage: `{prefix}skip *index*`\n'
+        'If not giving any index or giving it as `0`, will skip the currently playing audio.'
+        ), color=VOICE_COLORS.get(client))
+
+@VOICE_COMMAND_CLIENT.commands(name='skip', description=command_skip_description, category='VOICE')
+async def command_skip(client, message, index:int=0):
+    return await skip(client, message, index)
+
+#### #### #### #### Add as slash commands #### #### #### ####
+
+if SLASH_CLIENT is not None:
+    @SLASH_CLIENT.interactions(name='join', guild=GUILD__NEKO_DUNGEON)
+    async def slash_join(client, event,
+            volume : ('int', 'Any preset volume?')=None,
+                ):
+        """Joins the voice channel."""
+        async for content in join(client, event.user, event.guild, volume):
+            yield content
     
-    async def postprocess(self):
-        if self._postprocess_called:
+    @SLASH_CLIENT.interactions(name='pause', guild=GUILD__NEKO_DUNGEON)
+    async def slash_pause(client, event):
+        """Pauses the currently playing audio."""
+        return await pause(client, event)
+    
+    @SLASH_CLIENT.interactions(name='resume', guild=GUILD__NEKO_DUNGEON)
+    async def slash_resume(client, event):
+        """Resumes the currently playing audio."""
+        return await resume(client, event)
+    
+    @SLASH_CLIENT.interactions(name='leave', guild=GUILD__NEKO_DUNGEON)
+    async def slash_leave(client, message):
+        """Leaves me from the voice channel."""
+        async for content in leave(client, message):
+            yield content
+    
+    if AUDIO_PLAY_POSSIBLE:
+        @SLASH_CLIENT.interactions(name='play', guild=GUILD__NEKO_DUNGEON)
+        async def slash_yt_play(client, message,
+                name:('str', 'The name of the audio to play.') = '',
+                    ):
+            """Plays the chosen audio or shows what is playing right now."""
+            async for content in yt_play(client, message, name):
+                yield content
+    
+    @SLASH_CLIENT.interactions(name='move', guild=GUILD__NEKO_DUNGEON)
+    async def slash_move(client, message,
+            voice_channel: ('channel', 'To which channel should I move to?') = None
+                ):
+        """Moves to the selected channel or next to You, my Love?"""
+        if (voice_channel is not None) and (not isinstance(voice_channel, ChannelVoice)):
+            yield 'Please select a voice channel.'
             return
         
-        self._postprocess_called = True
-        for source in self.sources:
-            await source.postprocess()
+        async for content in move(client, message, message.author, voice_channel):
+            if (content is not None):
+                yield content
     
-    async def add(self, source):
-        if self._postprocess_called:
-            await source.postprocess()
-        
-        self.sources.append(source)
-    
-    async def read(self):
-        sources = self.sources
-        result = None
-        
-        for index in reversed(range(len(sources))):
-            source = sources[index]
-            data = await source.read()
-            
-            if data is None:
-                del sources[index]
-                await source.cleanup()
-                continue
-            
-            if not source.NEEDS_ENCODE:
-                data = self._decoder.decode(data)
-            
-            if result is None:
-                result = data
-            else:
-                result = add_voice(result, data, 1)
-            
-            continue
-        
-        return result
-    
-    async def cleanup(self):
-        self._postprocess_called = False
-        sources = self.sources
-        while sources:
-            source = sources.pop()
-            await source.cleanup()
-
-
-if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
-    @Marisa.commands(separator='|', checks=checks.owner_only(), category='VOICE')
-    async def play_double(client, message):
-        guild = message.guild
-        if guild is None:
+    @SLASH_CLIENT.interactions(name='party-is-over', guild=GUILD__NEKO_DUNGEON)
+    async def slash_party_is_over(client, event):
+        """I mark the talking party as done?"""
+        if not event.user_permissions.can_administrator:
+            yield 'You must have administrator permission to invoke this command.'
             return
         
-        while True:
-            voice_client = client.voice_client_for(message)
-            if voice_client is None:
-                text = 'I am not in a voice channel.'
-                break
-            
-            source1 = await LocalAudio('/hdd/music/others/Ichigo - Tsuki made todoke, fushi no kemuri.mp3')
-            source2 = await LocalAudio('/hdd/music/others/Nomico - IceBreak.mp3')
-            
-            source = MixerStream(source1, source2)
-
-            if voice_client.append(source):
-                text = f'Now playing {source.title}!'
-            else:
-                text = f'Added to queue {source.title}!'
-            break
-        
-        await client.message_create(message.channel, text)
-
-    @Marisa.commands(separator='|', checks=checks.owner_only(), category='VOICE')
-    async def play_from(client, message, voice_channel: FlaggedAnnotation(ChannelVoice, ConverterFlag.channel_all)):
-        
-        while True:
-            self_guild = message.guild
-            if self_guild is None:
-                text = 'Not in guild.'
-                break
-            
-            other_guild = voice_channel.guild
-            if other_guild is None:
-                text = 'Other channel not in guild.'
-                break
-            
-            self_voice_client = client.voice_client_for(message)
-            if self_voice_client is None:
-                voice_state = self_guild.voice_states.get(message.author.id, None)
-                if voice_state is None:
-                    text = 'You are not at a voice channel.'
-                    break
-                
-                self_channel = voice_state.channel
-                if not self_channel.cached_permissions_for(client).can_connect:
-                    text = 'I have no permissions to connect to that channel'
-                    break
-                
-                try:
-                    self_voice_client = await client.join_voice_channel(self_channel)
-                except TimeoutError:
-                    text = 'Timed out meanwhile tried to connect.'
-                    break
-                except RuntimeError:
-                    text = 'The client cannot play voice, some libraries are not loaded'
-                    break
-            
-            other_voice_states = list(other_guild.voice_states.values())
-            for voice_state in other_voice_states:
-                if voice_state.user is not client:
-                    break
-            else:
-                text = 'No voice states in other guild.'
-                break
-            
-            try:
-                other_voice_client = client.voice_clients[other_guild.id]
-            except KeyError:
-                try:
-                    other_voice_client = await client.join_voice_channel(voice_channel)
-                except TimeoutError:
-                    text = 'Timed out meanwhile tried to connect.'
-                    break
-                except RuntimeError:
-                    text = 'The client cannot play voice, some libraries are not loaded'
-                    break
-            
-            mixer = MixerStream()
-            for voice_state in other_voice_states:
-                user = voice_state.user
-                if user is client:
-                    continue
-                
-                source = other_voice_client.listen_to(user, yield_decoded=True)
-                await mixer.add(source)
-            
-            if self_voice_client.append(mixer):
-                text = f'Now playing {mixer.title}!'
-            else:
-                text = f'Added to queue {mixer.title}!'
-            break
-        
-        await client.message_create(message.channel, text)
+        async for content in party_is_over(client, event):
+            yield content
+    
+    if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
+        @SLASH_CLIENT.interactions(name='local', guild=GUILD__NEKO_DUNGEON)
+        async def slash_local(client, event,
+                name : ('str', 'The audio\'s name') = '',
+                    ):
+            """Plays a local audio file from my own collection UwU."""
+            async for content in local_play(client, event, name):
+                yield content
+    
+    @SLASH_CLIENT.interactions(name='loop', guild=GUILD__NEKO_DUNGEON)
+    async def slash_loop(client, event,
+            behaviour : (VOICE_LOOPER_BEHAVIOURS_PAIRS, 'Set looping as?') = None,
+                ):
+        """Sets the voice client's looping behaviour or returns the current one."""
+        return await loop(client, event, behaviour)
+    
+    @SLASH_CLIENT.interactions(name='queue', guild=GUILD__NEKO_DUNGEON)
+    async def slash_queue(client, event):
+        """Shows the voice client\'s queue of the guild."""
+        async for content in queue(client, event, event.channel, GUILD__NEKO_DUNGEON):
+            yield content
+    
+    @SLASH_CLIENT.interactions(name='volume', guild=GUILD__NEKO_DUNGEON)
+    async def slash_volume(client, event,
+            volume: ('str', 'Percentage?') = None,
+                ):
+        """Sets my volume to the given percentage."""
+        return await volume_(client, event, volume)
+    
+    @SLASH_CLIENT.interactions(name='stop', guild=GUILD__NEKO_DUNGEON)
+    async def slash_stop(client, event):
+        """Nyahh, if you really want I can stop playing audio."""
+        return await stop(client, event)
+    
+    @SLASH_CLIENT.interactions(name='skip', guild=GUILD__NEKO_DUNGEON)
+    async def slash_skip(client, event,
+            index: ('int', 'Which audio to skip?') = 0,
+                ):
+        """I skip the audio at the given index."""
+        return await skip(client, event, index)

@@ -1,30 +1,28 @@
 # -*- coding: utf-8 -*-
 import re
-
+from functools import partial as partial_func
 from datetime import datetime, timedelta
 from random import random
 from math import log, ceil
 from itertools import chain
 
-from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, sleep, Task, Future, KOKORO, \
-    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout
-from hata.ext.commands import wait_for_reaction, Timeouter, Cooldown, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
-    GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE, Converter, checks, ConverterFlag, Closer
+from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
+    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta
+from hata.ext.commands import wait_for_reaction, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
+    GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
 
 from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
-from bot_utils.tools import CooldownHandler
 from bot_utils.shared import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
     EMOJI__HEART_CURRENCY, USER__DISBOARD
-from bot_utils.command_utils import USER_CONVERTER_EVERYWHERE, USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT
 
-Koishi: Client
+SLASH_CLIENT: Client
 def setup(lib):
-    Koishi.command_processer.append(GUILD__NEKO_DUNGEON, heart_generator)
+    SLASH_CLIENT.events.message_create.append(GUILD__NEKO_DUNGEON, heart_generator)
 
 def teardown(lib):
-    Koishi.command_processer.remove(GUILD__NEKO_DUNGEON, heart_generator)
+    SLASH_CLIENT.events.message_create.remove(GUILD__NEKO_DUNGEON, heart_generator)
 
 
 GAMBLING_COLOR          = Color.from_rgb(254, 254, 164)
@@ -107,127 +105,36 @@ def calculate_daily_for(user, daily_streak):
     
     return received
 
-async def daily_description(client,message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('daily',(
-        'Claim everyday your share of my love!\n'
-        f'Usage: `{prefix}daily <user>`\n'
-        'You can also gift your daily reward to your lovely imouto.'
-        ), color=GAMBLING_COLOR)
 
-
-@Koishi.commands(description=daily_description, category='GAMBLING')
-@Cooldown('user', 40., limit=4, weight=2, handler=CooldownHandler())
-async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT):
-    source_user = message.author
-    if target_user.is_bot:
+@SLASH_CLIENT.interactions(is_global=True)
+async def daily(client, event,
+        target_user : ('user', 'Anyone to gift your daily love?') = None,
+             ):
+    """Claim a share of my love every day or gift it to your imouto nya!"""
+    source_user = event.user
+    if target_user is None:
         target_user = source_user
+    
     now = datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
-        while True:
-            if source_user is target_user:
-                response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==source_user.id))
-                results = await response.fetchall()
-                if results:
-                    source_result = results[0]
-                    daily_next = source_result.daily_next
-                    if daily_next > now:
-                        embed = Embed(
-                            'You already claimed your daily love for today~',
-                            f'Come back in {elapsed_time(daily_next)}.',
-                            GAMBLING_COLOR)
-                        break
-                    daily_streak = source_result.daily_streak
-                    daily_next = daily_next+DAILY_STREAK_BREAK
-                    if daily_next < now:
-                        daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                    
-                    # Security
-                    if daily_streak < 0:
-                        daily_streak = 0
-                    
-                    if daily_next < now:
-                        streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
-                    else:
-                        streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
-                    
-                    received = calculate_daily_for(source_user, daily_streak)
-                    total_love = source_result.total_love+received
-                    
-                    daily_streak += 1
-                    await connector.execute(CURRENCY_TABLE.update().values(
-                        total_love  = total_love,
-                        daily_next  = now+DAILY_INTERVAL,
-                        daily_streak= daily_streak,
-                            ).where(currency_model.user_id==source_user.id))
-                    
-                    embed = Embed(
-                        'Here, some love for you~\nCome back tomorrow !',
-                        f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} {EMOJI__HEART_CURRENCY:e}\n'
-                        f'{streak_text}',
-                        GAMBLING_COLOR)
-                    break
-                
-                await connector.execute(CURRENCY_TABLE.insert().values(
-                    user_id         = source_user.id,
-                    total_love      = DAILY_REWARD,
-                    daily_next      = now+DAILY_INTERVAL,
-                    daily_streak    = 1,
-                    total_allocated = 0,
-                        ))
-                
-                embed = Embed(
-                    'Here, some love for you~\nCome back tomorrow !',
-                    f'You received {DAILY_REWARD} {EMOJI__HEART_CURRENCY:e} and now have {DAILY_REWARD} {EMOJI__HEART_CURRENCY:e}',
-                    color = GAMBLING_COLOR)
-                break
-            
-            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,])))
+        if source_user is target_user:
+            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==source_user.id))
             results = await response.fetchall()
-            if len(results) == 0:
-                source_result = None
-                target_result = None
-            elif len(results) == 1:
-                if results[0].user_id == source_user.id:
-                    source_result = results[0]
-                    target_result = None
-                else:
-                    source_result = None
-                    target_result = results[0]
-            else:
-                if results[0].user_id == source_user.id:
-                    source_result = results[0]
-                    target_result = results[1]
-                else:
-                    source_result = results[1]
-                    target_result = results[0]
-            
-            now = datetime.utcnow()
-            if source_result is None:
-                daily_streak = 0
-                streak_text = 'I am happy you joined the sect too.'
-                
-                await connector.execute(CURRENCY_TABLE.insert().values(
-                    user_id         = source_user.id,
-                    total_love      = 0,
-                    daily_next      = now+DAILY_INTERVAL,
-                    daily_streak    = 1,
-                    total_allocated = 0,
-                        ))
-            else:
-                daily_next=source_result.daily_next
+            if results:
+                source_result = results[0]
+                daily_next = source_result.daily_next
                 if daily_next > now:
-                    embed = Embed(
+                    return Embed(
                         'You already claimed your daily love for today~',
                         f'Come back in {elapsed_time(daily_next)}.',
-                        color = GAMBLING_COLOR)
-                    break
+                        GAMBLING_COLOR)
                 
                 daily_streak = source_result.daily_streak
                 daily_next = daily_next+DAILY_STREAK_BREAK
                 if daily_next < now:
                     daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
                 
+                # Security
                 if daily_streak < 0:
                     daily_streak = 0
                 
@@ -236,51 +143,126 @@ async def daily(client, message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                 else:
                     streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
                 
-                await connector.execute(CURRENCY_TABLE.update().values(
-                    daily_next  = now+DAILY_INTERVAL,
-                    daily_streak= daily_streak+1,
-                        ).where(currency_model.user_id==source_user.id))
-            
-            received = calculate_daily_for(source_user, daily_streak)
-            
-            if target_result is None:
-                await connector.execute(CURRENCY_TABLE.insert().values(
-                    user_id         = target_user.id,
-                    total_love      = received,
-                    daily_next      = now,
-                    daily_streak    = 0,
-                    total_allocated = 0,
-                        ))
+                received = calculate_daily_for(source_user, daily_streak)
+                total_love = source_result.total_love+received
                 
-                total_love = received
-            else:
-                total_love = target_result.total_love+received
-                
+                daily_streak += 1
                 await connector.execute(CURRENCY_TABLE.update().values(
                     total_love  = total_love,
-                        ).where(currency_model.user_id==target_user.id))
+                    daily_next  = now+DAILY_INTERVAL,
+                    daily_streak= daily_streak,
+                        ).where(currency_model.user_id==source_user.id))
+                
+                return Embed(
+                    'Here, some love for you~\nCome back tomorrow !',
+                    f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} {EMOJI__HEART_CURRENCY:e}\n'
+                    f'{streak_text}',
+                    GAMBLING_COLOR)
             
-            embed = Embed(
-                f'Awww, you claimed your daily love for {target_user:f}, how sweet~',
-                f'You gifted {received} {EMOJI__HEART_CURRENCY:e} and they have {total_love} {EMOJI__HEART_CURRENCY:e}\n{streak_text}',
-                GAMBLING_COLOR)
-            break
+            await connector.execute(CURRENCY_TABLE.insert().values(
+                user_id         = source_user.id,
+                total_love      = DAILY_REWARD,
+                daily_next      = now+DAILY_INTERVAL,
+                daily_streak    = 1,
+                total_allocated = 0,
+                    ))
+            
+            return Embed(
+                'Here, some love for you~\nCome back tomorrow !',
+                f'You received {DAILY_REWARD} {EMOJI__HEART_CURRENCY:e} and now have {DAILY_REWARD} {EMOJI__HEART_CURRENCY:e}',
+                color = GAMBLING_COLOR)
+        
+        response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,])))
+        results = await response.fetchall()
+        if len(results) == 0:
+            source_result = None
+            target_result = None
+        elif len(results) == 1:
+            if results[0].user_id == source_user.id:
+                source_result = results[0]
+                target_result = None
+            else:
+                source_result = None
+                target_result = results[0]
+        else:
+            if results[0].user_id == source_user.id:
+                source_result = results[0]
+                target_result = results[1]
+            else:
+                source_result = results[1]
+                target_result = results[0]
+        
+        now = datetime.utcnow()
+        if source_result is None:
+            daily_streak = 0
+            streak_text = 'I am happy you joined the sect too.'
+            
+            await connector.execute(CURRENCY_TABLE.insert().values(
+                user_id         = source_user.id,
+                total_love      = 0,
+                daily_next      = now+DAILY_INTERVAL,
+                daily_streak    = 1,
+                total_allocated = 0,
+                    ))
+        else:
+            daily_next=source_result.daily_next
+            if daily_next > now:
+                return Embed(
+                    'You already claimed your daily love for today~',
+                    f'Come back in {elapsed_time(daily_next)}.',
+                    color = GAMBLING_COLOR)
+            
+            daily_streak = source_result.daily_streak
+            daily_next = daily_next+DAILY_STREAK_BREAK
+            if daily_next < now:
+                daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
+            
+            if daily_streak < 0:
+                daily_streak = 0
+            
+            if daily_next < now:
+                streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
+            else:
+                streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
+            
+            await connector.execute(CURRENCY_TABLE.update().values(
+                daily_next  = now+DAILY_INTERVAL,
+                daily_streak= daily_streak+1,
+                    ).where(currency_model.user_id==source_user.id))
+        
+        received = calculate_daily_for(source_user, daily_streak)
+        
+        if target_result is None:
+            await connector.execute(CURRENCY_TABLE.insert().values(
+                user_id         = target_user.id,
+                total_love      = received,
+                daily_next      = now,
+                daily_streak    = 0,
+                total_allocated = 0,
+                    ))
+            
+            total_love = received
+        else:
+            total_love = target_result.total_love+received
+            
+            await connector.execute(CURRENCY_TABLE.update().values(
+                total_love  = total_love,
+                    ).where(currency_model.user_id==target_user.id))
     
-    await client.message_create(message.channel,embed=embed)
+    return Embed(
+        f'Awww, you claimed your daily love for {target_user:f}, how sweet~',
+        f'You gifted {received} {EMOJI__HEART_CURRENCY:e} and they have {total_love} {EMOJI__HEART_CURRENCY:e}\n{streak_text}',
+        GAMBLING_COLOR)
 
 
-async def hearts_description(client,message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('hearts', (
-        'How many hearts do you have?\n'
-        f'Usage: `{prefix}hearts <user>`\n'
-        'You can also check other user\'s hearts too.'
-            ), color=GAMBLING_COLOR)
-
-
-@Koishi.commands(description=hearts_description, category='GAMBLING')
-@daily.shared(weight=1)
-async def hearts(client,message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT):
+@SLASH_CLIENT.interactions(is_global=True)
+async def hearts(client, event,
+        target_user: ('user', 'Do you wanna know some1 else\'s hearts?') = None,
+            ):
+    """How many hearts do you have?"""
+    if target_user is None:
+        target_user = event.user
+    
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==target_user.id))
         results = await response.fetchall()
@@ -316,7 +298,7 @@ async def hearts(client,message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
                 values(total_allocated = 0)
                     )
     
-    is_own = (message.author is target_user)
+    is_own = (event.user is target_user)
     
     if is_own:
         title_prefix = 'You have'
@@ -343,8 +325,7 @@ async def hearts(client,message, target_user: USER_CONVERTER_EVERYWHERE_AUTHOR_D
     else:
         description = None
     
-    embed = Embed( title, description, color=GAMBLING_COLOR)
-    await client.message_create(message.channel, embed=embed)
+    return Embed( title, description, color=GAMBLING_COLOR)
 
 
 def convert_tdelta(delta):
@@ -366,99 +347,86 @@ def convert_tdelta(delta):
     return ', '.join(result)
 
 
-class heartevent_start_checker(object):
-    __slots__ = ('client',)
-    def __init__(self,client):
-        self.client=client
-
-    def __call__(self, event):
-        if not self.client.is_owner(event.user):
-            return False
-        
-        emoji = event.emoji
-        if (emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI):
-            return True
-        
+def heart_event_start_checker(client, event):
+    if not client.is_owner(event.user):
         return False
+    
+    emoji = event.emoji
+    if (emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI):
+        return True
+    
+    return False
 
 
-async def heartevent_description(client,message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('heartevent', (
-        'Starts a heart event at the channel.\n'
-        f'Usage: `{prefix}heartevent *duration* *amount* <users_limit>`\n'
-        f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
-        f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
-        f'Min `amount`: {EVENT_HEART_MIN_AMOUNT}\n'
-        f'Max `amount`: {EVENT_HEART_MAX_AMOUNT}\n'
-        'If `user_limit` is not included, the event will have no user limit.'
-            ), color=GAMBLING_COLOR).add_footer(
-            'Owner only!')
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
+async def heart_event(client, event,
+        duration : ('str', 'The event\'s duration.'),
+        amount : ('int', 'The hearst to earn.'),
+        user_limit : ('int', 'The maximal amount fo claimers.') = 0,
+            ):
+    """Starts a heart event at the channel. (Bot owner only)"""
+    if not client.is_owner(event.user):
+        yield '**Permission denied**\nOwner only!'
+        return
+    
+    permissions = event.channel.cached_permissions_for(client)
+    if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
+            (not permissions.can_use_external_emojis):
+        yield '**Permission denied**\nI require `send messages`, `add reactions` and `user external emojis` ' \
+            'permissions to invoke this command.'
+        return
+    
+    guild = event.guild
+    if (guild is not None):
+        if guild not in client.guild_profiles:
+            yield '**Ohoho**\nPlease add me to the guild before invoking the command.'
+            return
+    
+    duration = parse_tdelta(duration)
+    if (duration is None):
+        yield '**Parsing error**\nCould not interpret the given duration.'
+        return
+    
+    if duration > EVENT_MAX_DURATION:
+        yield '**Duration passed the upper limit**\n' \
+             f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n' \
+             f'**>**  passed : {convert_tdelta(duration)}'
+        return
+    
+    if duration < EVENT_MIN_DURATION:
+        yield '**Duration passed the lower limit**\n' \
+             f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n' \
+             f'**>**  passed : {convert_tdelta(duration)}'
+        return
+    
+    if amount > EVENT_HEART_MAX_AMOUNT:
+        yield '**Amount passed the upper limit**\n' \
+             f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n' \
+             f'**>**  passed : {amount}'
+        return
+    
+    if amount < EVENT_HEART_MIN_AMOUNT:
+        yield '**Amount passed the lower limit**\n' \
+             f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n' \
+             f'**>**  passed : {amount}'
+        return
+    
+    if user_limit < 0:
+        yield '**User limit passed the lower limit**\n' \
+              '**>** lower limit : 0\n' \
+             f'**>**  - passed : {user_limit}'
+        return
+    
+    yield
+    await HeartEventGUI(client, event.channel, duration, amount, user_limit)
+    return
 
-
-@Koishi.commands(checks=checks.owner_only(), description=heartevent_description, category='GAMBLING')
-class heartevent(object):
+class HeartEventGUI(object):
     _update_time = 60.
     _update_delta = timedelta(seconds=_update_time)
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls, client, message, duration:timedelta=None, amount:int=0, user_limit:int=0):
-        if (duration is None) or (amount == 0):
-            embed = await heartevent_description(client, message)
-            await client.message_create(message.channel, embed)
-            return
-        
-        channel = message.channel
-        while True:
-            if duration > EVENT_MAX_DURATION:
-                embed = Embed('Duration passed the upper limit\n',
-                     f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
-                     f'**>**  passed : {convert_tdelta(duration)}',
-                      color=GAMBLING_COLOR)
-            elif duration < EVENT_MIN_DURATION:
-                embed = Embed('Duration passed the lower limit\n',
-                     f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
-                     f'**>**  passed : {convert_tdelta(duration)}',
-                      color=GAMBLING_COLOR)
-            elif amount > EVENT_HEART_MAX_AMOUNT:
-                embed = Embed('Amount passed the upper limit\n',
-                     f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n'
-                     f'**>**  passed : {amount}',
-                      color=GAMBLING_COLOR)
-            elif amount < EVENT_HEART_MIN_AMOUNT:
-                embed = Embed('Amount passed the lower limit\n',
-                     f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n'
-                     f'**>**  passed : {amount}',
-                      color=GAMBLING_COLOR)
-            elif user_limit < 0:
-                embed = Embed('User limit passed the lower limit\n',
-                      '**>** lower limit : 0\n'
-                     f'**>**  - passed : {user_limit}',
-                      color=GAMBLING_COLOR)
-            else:
-                break
-            
-            to_delete = await client.message_create(channel, embed=embed)
-            await sleep(30., KOKORO)
-            try:
-                await client.message_delete(to_delete)
-                await client.message_delete(message)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return None
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                                ):
-                        return None
-                
-                raise
-            
-            return None
+    async def __new__(cls, client, channel, duration, amount, user_limit):
         
         result = []
         result.append('Duration: ')
@@ -494,13 +462,12 @@ class heartevent(object):
             raise
         
         try:
-            event = await wait_for_reaction(client, to_check, heartevent_start_checker(client), 1800.)
+            event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client), 1800.)
         except TimeoutError:
             return
         finally:
             try:
                 await client.message_delete(to_check)
-                await client.message_delete(message)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     return None
@@ -673,80 +640,77 @@ class heartevent(object):
         
         self.connector = None
         Task(connector.close(), KOKORO)
-        
-async def dailyevent_description(client,message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('dailyevent',(
-        'Starts a daily event at the channel.\n'
-        f'Usage: `{prefix}dailyevent *duration* *amount* <users_limit>`\n'
-        f'Min `duration`: {convert_tdelta(EVENT_MIN_DURATION)}\n'
-        f'Max `duration`: {convert_tdelta(EVENT_MAX_DURATION)}\n'
-        f'Min `amount`: {EVENT_DAILY_MIN_AMOUNT}\n'
-        f'Max `amount`: {EVENT_DAILY_MAX_AMOUNT}\n'
-        'If `user_limit` is not included, the event will have no user limit.'
-            ), color=GAMBLING_COLOR).add_footer(
-            'Owner only!')
 
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
+async def daily_event(client, event,
+        duration : ('str', 'The event\'s duration.'),
+        amount : ('int', 'The extra daily steaks to earn.'),
+        user_limit : ('int', 'The maximal amount fo claimers.') = 0,
+            ):
+    """Starts a heart event at the channel. (Bot owner only)"""
+    if not client.is_owner(event.user):
+        yield '**Permission denied**\nOwner only!'
+        return
     
-@Koishi.commands(checks=checks.owner_only(), description=dailyevent_description, category='GAMBLING')
-class dailyevent(object):
+    permissions = event.channel.cached_permissions_for(client)
+    if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
+            (not permissions.can_use_external_emojis):
+        yield '**Permission denied**\nI require `send messages`, `add reactions` and `user external emojis` ' \
+            'permissions to invoke this command.'
+        return
+    
+    guild = event.guild
+    if (guild is not None):
+        if guild not in client.guild_profiles:
+            yield '**Ohoho**\nPlease add me to the guild before invoking the command.'
+            return
+    
+    
+    duration = parse_tdelta(duration)
+    if (duration is None):
+        yield '**Parsing error**\nCould not interpret the given duration.'
+        return
+    
+    if duration > EVENT_MAX_DURATION:
+        yield 'Duration passed the upper limit\n' \
+             f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n' \
+             f'**>**  passed : {convert_tdelta(duration)}'
+        return
+    
+    if duration < EVENT_MIN_DURATION:
+        yield 'Duration passed the lower limit\n' \
+             f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n' \
+             f'**>**  passed : {convert_tdelta(duration)}'
+        return
+    
+    if amount > EVENT_DAILY_MAX_AMOUNT:
+        yield 'Amount passed the upper limit\n' \
+             f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n' \
+             f'**>**  passed : {amount}'
+    
+    if amount < EVENT_DAILY_MIN_AMOUNT:
+        yield 'Amount passed the lower limit\n' \
+             f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n' \
+             f'**>**  passed : {amount}'
+        return
+    
+    if user_limit < 0:
+        yield 'User limit passed the lower limit\n' \
+              '**>** lower limit : 0\n' \
+             f'**>**  - passed : {user_limit}'
+        return
+    
+    yield
+    await DailyEventGUI(client, event.channel, duration, amount, user_limit)
+    return
+
+class DailyEventGUI(object):
     _update_time=60.
     _update_delta=timedelta(seconds=_update_time)
 
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls, client, message, duration:timedelta, amount:int, user_limit: int=0):
-        channel = message.channel
-        while True:
-            if duration > EVENT_MAX_DURATION:
-                embed = Embed('Duration passed the upper limit\n',
-                     f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
-                     f'**>**  passed : {convert_tdelta(duration)}',
-                      color=GAMBLING_COLOR)
-            elif duration < EVENT_MIN_DURATION:
-                embed = Embed('Duration passed the lower limit\n',
-                     f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
-                     f'**>**  passed : {convert_tdelta(duration)}',
-                      color=GAMBLING_COLOR)
-            elif amount > EVENT_DAILY_MAX_AMOUNT:
-                embed = Embed('Amount passed the upper limit\n',
-                     f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n'
-                     f'**>**  passed : {amount}',
-                      color=GAMBLING_COLOR)
-            elif amount < EVENT_DAILY_MIN_AMOUNT:
-                embed = Embed('Amount passed the lower limit\n',
-                     f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n'
-                     f'**>**  passed : {amount}',
-                      color=GAMBLING_COLOR)
-            elif user_limit < 0:
-                embed = Embed('User limit passed the lower limit\n',
-                      '**>** lower limit : 0\n'
-                     f'**>**  - passed : {user_limit}',
-                      color=GAMBLING_COLOR)
-            else:
-                break
-            
-            to_delete = await client.message_create(channel, embed=embed)
-            await sleep(30., KOKORO)
-            try:
-                await client.message_delete(to_delete)
-                await client.message_delete(message)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return None
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                            ERROR_CODES.cannot_message_user, # user has dm-s disallowed
-                                ):
-                        return None
-                
-                raise
-            
-            return None
+    async def __new__(cls, client, channel, duration, amount, user_limit):
         
         result = []
         result.append('Duration: ')
@@ -782,13 +746,12 @@ class dailyevent(object):
             raise
         
         try:
-            event = await wait_for_reaction(client, to_check, heartevent_start_checker(client), 1800.)
+            event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client), 1800.)
         except TimeoutError:
             return
         finally:
             try:
                 await client.message_delete(to_check)
-                await client.message_delete(message)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     return None
@@ -974,24 +937,34 @@ class dailyevent(object):
         Task(connector.close(), KOKORO)
 
 
-async def game21_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('21',(
-        'Starts a 21 game at the channel.\n'
-        f'Usage: `{prefix}21 *amount*`\n'
-        'Your challenge is to collect cards with weight up to 21. Each card with number 2-10 has the same weight as '
-        'their number says, meanwhile J, Q and K has fix weight of 10. Ace has weight of 11, but if You would pass '
-        '21, it loses 9 of it.\n'
-        'At this game you are fighting me, so if we boss lose, it is a draw.\n'
-        'You start with 2 cards initially drawn and at every round, you have option to draw a new card, or to stop.'
-            ), color=GAMBLING_COLOR)
-
-async def game21_multiplayer_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('21-mp', (
-        'Starts a 21 multiplayer game.\n'
-        f'Usage: `{prefix}21-mp *amount*`\n'
-            ), color=GAMBLING_COLOR)
+@SLASH_CLIENT.interactions(name='21', is_global=True)
+async def game_21(client, event,
+        amount : ('int', 'The amount of hearts to bet'),
+        mode : ([('single-player', 'sg'), ('multi-player', 'mp')], 'Game mode, yayyy') = 'sg',
+            ):
+    """Starts a card game where you can bet your hearts."""
+    is_multi_player = (mode == 'mp')
+    
+    permissions = event.channel.cached_permissions_for(client)
+    if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
+            (not permissions.can_use_external_emojis):
+        yield Embed('Permission denied',
+            'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this command.',
+            color = GAMBLING_COLOR,
+                )
+        return
+    
+    embed = game_21_precheck(client, event.user, event.channel, amount, is_multi_player)
+    yield embed
+    if (embed is not None):
+        return
+    
+    if is_multi_player:
+        coroutine_function = game_21_multi_player
+    else:
+        coroutine_function = game_21_single_player
+    
+    await coroutine_function(client, event, amount)
 
 def should_render_exception(exception):
     if isinstance(exception, ConnectionError):
@@ -1405,7 +1378,7 @@ class Game21PlayerRunner(object):
                         await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
                     break
 
-async def game_21_precheck(client, user, channel, amount, require_guild):
+def game_21_precheck(client, user, channel, amount, require_guild):
     if user.id in IN_GAME_IDS:
         error_message = 'You are already at a game.'
     elif amount < BET_MIN:
@@ -1415,16 +1388,9 @@ async def game_21_precheck(client, user, channel, amount, require_guild):
     elif require_guild and (not isinstance(channel, ChannelGuildBase)):
         error_message = 'Guild only command.'
     else:
-        return False
+        return None
     
-    embed = Embed('Ohoho', error_message, color=GAMBLING_COLOR)
-    try:
-        await client.message_create(channel, embed=embed)
-    except BaseException as err:
-        if should_render_exception(err):
-            await client.events.error(client, 'game_21_precheck', err)
-    
-    return True
+    return Embed('Ohoho', error_message, color=GAMBLING_COLOR)
 
 async def game_21_postcheck(client, user, channel, amount):
     async with DB_ENGINE.connect() as connector:
@@ -1454,13 +1420,9 @@ async def game_21_postcheck(client, user, channel, amount):
     return True
 
 
-@Koishi.commands(name='21', description=game21_description, category='GAMBLING')
-async def game_21_single_player(client, source_message, amount:int=0):
-    user = source_message.author
-    channel = source_message.channel
-    
-    if await game_21_precheck(client, user, channel, amount, False):
-        return
+async def game_21_single_player(client, event, amount):
+    user = event.user
+    channel = event.channel
     
     IN_GAME_IDS.add(user.id)
     try:
@@ -1981,14 +1943,10 @@ class Game21JoinGUI(object):
         
         self.message_sync_handle = KOKORO.call_later(1.0, self.__class__.call_message_sync, self)
 
-@Koishi.commands(name='21-mp', description=game21_multiplayer_description, category='GAMBLING',
-    aliases=['21-multi', '21-multiplayer'], checks=checks.guild_only())
-async def game_21_multi_player(client, source_message, amount:int=0):
-    user = source_message.author
-    channel = source_message.channel
-    
-    if await game_21_precheck(client, user, channel, amount, True):
-        return
+
+async def game_21_multi_player(client, event, amount):
+    user = event.user
+    channel = event.channel
     
     guild = channel.guild
     
@@ -2220,30 +2178,30 @@ async def game_21_multi_player(client, source_message, amount:int=0):
             IN_GAME_IDS.discard(user_id)
 
 
-
-async def gift_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('gift', (
-        'Gifts hearts to your heart\'s chosen one.\n'
-        f'Usage: `{prefix}gift *user* *amount*`\n'
-        ), color=GAMBLING_COLOR).add_footer(
-            f'You must have {ROLE__NEKO_DUNGEON__ELEVATED.name} or {ROLE__NEKO_DUNGEON__BOOSTER.name} role!')
-
-
-@Koishi.commands(description=gift_description, category='GAMBLING',
-    checks=checks.has_any_role([ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER]))
-@daily.shared(weight=1)
-async def gift(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
-    source_user = message.author
+@SLASH_CLIENT.interactions(is_global=True)
+async def gift(client, event,
+        target_user: ('user', 'Who is your heart\'s chosen one?'),
+        amount : ('int', 'How much do u love them?'),
+            ):
+    """
+    Gifts hearts to the chosen by your heart.
+    You must have Neko Lover or NekoGirl Worshipper role.
+    """
+    source_user = event.user
+    
+    if not (source_user.has_role(ROLE__NEKO_DUNGEON__ELEVATED) or source_user.has_role(ROLE__NEKO_DUNGEON__BOOSTER)):
+        yield Embed('Ohoho', f'You must have either {ROLE__NEKO_DUNGEON__ELEVATED.name} or '
+            f'{ROLE__NEKO_DUNGEON__BOOSTER.name} role to invoke this command.', color=GAMBLING_COLOR)
+        return
     
     if source_user is target_user:
         yield Embed('BAKA !!', 'You cannot give love to yourself..', color=GAMBLING_COLOR)
         return
-
+    
     if amount <= 0:
         yield Embed('BAKA !!', 'You cannot gift non-positive amount of hearts..', color=GAMBLING_COLOR)
         return
-        
+    
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select([currency_model.total_love, currency_model.total_allocated]). \
@@ -2344,32 +2302,26 @@ async def gift(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:i
         raise
 
 
-async def award_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('award', (
-        'Awards someone with the given amount of hearts.\n'
-        f'Usage: `{prefix}award *user* *amount*`'
-        ), color=GAMBLING_COLOR).add_footer(
-            f'Owner only.')
-
-async def parser_failure_handler(client, message, command, content, args):
-    embed = await command.description(client, message)
-    await Closer(client, message.channel, embed)
-
-@Koishi.commands(
-    description = award_description,
-    category = 'GAMBLING',
-    checks = checks.owner_only(),
-    parser_failure_handler = parser_failure_handler,
-        )
-async def award(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def award(client, event,
+        target_user: ('user', 'Who do you want to award?'),
+        amount: ('int', 'With how much love do you wanna award them?'),
+            ):
+    """Awards the user with love. (Bot owner only)"""
+    if not client.is_owner(event.user):
+        yield Embed('Ohoho', 'You must be my Masuta to invoke this command.', color=GAMBLING_COLOR)
+        return
     
     if amount <= 0:
-        yield await award_description(client, message)
+        yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=GAMBLING_COLOR)
         return
     
     async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==target_user.id))
+        response = await connector.execute(
+            select([currency_model.total_love]). \
+            where(currency_model.user_id==target_user.id)
+                )
+        
         results = await response.fetchall()
         if results:
             target_user_exists = True
@@ -2405,7 +2357,7 @@ async def award(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:
         return
     
     embed = Embed('Aww, love is in the air',
-        f'You have been awarded {amount} {EMOJI__HEART_CURRENCY.as_emoji} by {message.author.full_name}',
+        f'You have been awarded {amount} {EMOJI__HEART_CURRENCY.as_emoji} by {event.user.full_name}',
         color=GAMBLING_COLOR,
             ).add_field(
                 f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
@@ -2423,24 +2375,18 @@ async def award(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:
         raise
 
 
-async def take_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('take',(
-        'Takes the given amount of hearts from someone.\n'
-        f'Usage: `{prefix}take *user* *amount*`'
-        ), color=GAMBLING_COLOR).add_footer(
-            f'Owner only.')
-
-@Koishi.commands(
-    description = take_description,
-    category = 'GAMBLING',
-    checks = checks.owner_only(),
-    parser_failure_handler = parser_failure_handler,
-        )
-async def take(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:int):
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def take(client, event,
+        target_user: ('user', 'From who do you want to take love away?'),
+        amount: ('int', 'How much love do you want to take away?'),
+            ):
+    """Takes away hearts form the lucky user. (Bot owner only)"""
+    if not client.is_owner(event.user):
+        yield Embed('Ohoho', 'You must be my Masuta to invoke this command.', color=GAMBLING_COLOR)
+        return
     
     if amount <= 0:
-        await take_description(client, message)
+        yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=GAMBLING_COLOR)
         return
     
     async with DB_ENGINE.connect() as connector:
@@ -2462,24 +2408,14 @@ async def take(client, message, target_user: USER_CONVERTER_EVERYWHERE, amount:i
             target_user_total_love = 0
             target_user_new_love = 0
     
-    embed = Embed(f'You took {amount} {EMOJI__HEART_CURRENCY.as_emoji} away from {target_user.full_name}',
+    yield Embed(f'You took {amount} {EMOJI__HEART_CURRENCY.as_emoji} away from {target_user.full_name}',
         f'They got down from {target_user_total_love} to {target_user_new_love} {EMOJI__HEART_CURRENCY.as_emoji}',
         color=GAMBLING_COLOR)
-    
-    await client.message_create(message.channel, embed=embed)
+    return
 
-
-async def top_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('top',(
-        'Shows the most favored persons by myself.\n'
-        f'Usage: `{prefix}top`'
-        ), color=GAMBLING_COLOR)
-
-
-@Koishi.commands(description=top_description, category='GAMBLING', aliases='top-list')
-@daily.shared(weight=1)
-async def top(client, message):
+@SLASH_CLIENT.interactions(is_global=True)
+async def top_list(client, event):
+    """A list of my best simps."""
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select([currency_model.user_id, currency_model.total_love])
@@ -2524,7 +2460,8 @@ async def top(client, message):
     
     result_lines.append('```')
     
-    await client.message_create(message.channel, ''.join(result_lines))
+    yield ''.join(result_lines)
+    return
 
 
 HEART_GENERATOR_COOLDOWNS = set()
@@ -2532,7 +2469,12 @@ HEART_GENERATOR_COOLDOWN = 3600.0
 HEART_GENERATION_AMOUNT = 10
 HEART_BUMP_AMOUNT = 100
 
-BUMP_RP = re.compile('<@!?(\d{7,21})>, \n {6}Bump done :thumbsup:\n {6}Check it on DISBOARD: https://disboard.org/')
+BUMP_RP = re.compile(
+    f'<@!?(\d{{7,21}})>, \n'
+    f' {{6}}Bump done {BUILTIN_EMOJIS["thumbsup"].as_emoji}\n'
+    f' {{6}}Check it on DISBOARD: https://disboard\.org/'
+        )
+
 
 async def increase_user_total_love(user_id, increase):
     async with DB_ENGINE.connect() as connector:

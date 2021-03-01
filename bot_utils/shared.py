@@ -47,6 +47,7 @@ LINK__KOISHI_GIT = 'https://github.com/HuyaneMatsu/Koishi'
 LINK__HATA_GIT = 'https://github.com/HuyaneMatsu/hata'
 LINK__HATA_DOCS = 'https://huyanematsu.pythonanywhere.com/docs/hata'
 LINK__PASTE = 'https://hastebin.com/'
+LINK__HATA_SLASH = 'https://github.com/HuyaneMatsu/hata/blob/master/docs/topics/slash.md'
 
 USER__DISBOARD = User.precreate(302050872383242240, is_bot=True)
 

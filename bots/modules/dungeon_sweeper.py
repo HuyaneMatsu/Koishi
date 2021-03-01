@@ -14,22 +14,6 @@ from bot_utils.shared import PATH__KOISHI
 
 DS_COLOR = Color(0xa000c4)
 
-
-async def ds_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('ds', (
-        'Play **Dungeon sweeper** game! A simple box pushing game with cute touhou characters!\n'
-        f'Usage : `{prefix}ds *subcommand*`'
-        'A user can have only one activate game at a time.\n\n'
-        'Subcommand cases:\n'
-        f'- `{prefix}ds` : Starts a game at this channel or moves your actual game.\n'
-        f'- `{prefix}ds rules` : The rules of the game desu!\n'
-        f'- `{prefix}ds help` : Shows you this message.\n\n'
-        'The game is based on a mobile game '
-        '[Sweeper of Suika](https://play.google.com/store/apps/details?id=net.satoritan.suika&hl=en), '
-        'So please go and give love to it as well!'
-        ), color=DS_COLOR)
-
 DS_GAMES = {}
 STAGES = []
 CHARS = []
@@ -50,11 +34,10 @@ def GC_games(cycler):
             to_delete.append(game)
         else:
             to_save.append(game)
-
+    
     if to_delete:
         KOKORO.call_soon_thread_safe(Task, _keep_await(ds_game.cancel, to_delete), KOKORO)
-
-
+    
     if to_save:
         KOKORO.call_soon_thread_safe(Task, _keep_await(ds_game.save_position, to_save), KOKORO)
 
@@ -66,40 +49,39 @@ del GC_games
 
 #:-> @ <-:#}{#:-> @ <-:#{ command }#:-> @ <-:#}{#:-> @ <-:#
 
-async def ds_manager(client, message, command: str=''):
-    permissions = message.channel.cached_permissions_for(client)
+SLASH_CLIENT : Client
+
+DUNGEON_SWEEPER = SLASH_CLIENT.interactions(None,
+    name='ds',
+    description='Touhou themed puzzle game.',
+    is_global=True,
+        )
+
+@DUNGEON_SWEEPER.interactions
+async def rules(client, event):
+    """Shows the rules of DS!"""
+    if not event.channel.cached_permissions_for(client).can_use_external_emojis:
+        return Embed('Permissions denied', 'I have no permissions at this channel to render this message.')
     
-    while True:
-        if not (0 <= len(command) < 10):
-            await ds_description(client, message)
-            return
-        
-        command = command.lower()
-        
-        game = DS_GAMES.get(message.author.id)
-        
-        if command == '':
-            if not (permissions.can_add_reactions and permissions.can_use_external_emojis and permissions.can_manage_messages):
-                embed=Embed('Permissions denied', 'I have not all permissions to start a game at this channel.')
-                break
-            
-            if game is None:
-                await ds_game(client, message.channel, message.author)
-            else:
-                await game.renew(message.channel)
-            return
-        
-        if command == 'rules':
-            if permissions.can_use_external_emojis:
-                embed = RULES_HELP
-            else:
-                embed = ('Permissions denied', 'I have no permissions at this channel to render this message.')
-            break
-        
-        await ds_description(client, message)
+    return RULES_HELP
+
+@DUNGEON_SWEEPER.interactions(is_default=True)
+async def play(client, event):
+    """Starts the game"""
+    permissions = event.channel.cached_permissions_for(client)
+    if not (permissions.can_send_messages and permissions.can_add_reactions and permissions.can_use_external_emojis \
+            and permissions.can_manage_messages):
+        yield Embed('Permissions denied', 'I have not all permissions to start a game at this channel.')
         return
-        
-    await client.message_create(message.channel, embed=embed)
+    
+    yield
+    
+    game = DS_GAMES.get(event.user.id)
+    if game is None:
+        await ds_game(client, event.channel, event.user)
+    else:
+        await game.renew(event.channel)
+    return
 
 #:-> @ <-:#}{#:-> @ <-:#{ backend }#:-> @ <-:#}{#:-> @ <-:#
 
@@ -1068,7 +1050,7 @@ class history_element:
         self.was_skill=was_skill
         self.changes=changes
 
-DIFFICULITY_NAMES = ('Tutorial', 'Easy', 'Normal', 'Hard')
+DIFFICULTY_NAMES = ('Tutorial', 'Easy', 'Normal', 'Hard')
 class stage_source:
     __slots__ = ('best', 'chapter', 'char', 'difficulty', 'level', 'map', 'size', 'start', 'targets')
     
@@ -1121,7 +1103,7 @@ class stage_source:
     
     @property
     def name(self):
-        return f'Chapter {chr(49+self.chapter)} {DIFFICULITY_NAMES[self.difficulty]} level {self.level+1}'
+        return f'Chapter {chr(49+self.chapter)} {DIFFICULTY_NAMES[self.difficulty]} level {self.level+1}'
 
 class stage_backend:
     __slots__ = ('best', 'has_skill', 'history', 'map', 'next_skill', 'position', 'source')
@@ -1336,9 +1318,9 @@ REIMU_STYLE = {
 REIMU_STYLE.update(DEFAULT_STYLE_PARTS)
 
 def REIMU_SKILL_ACTIVATE(self):
-    size=self.source.size
-    position=self.position
-    map_=self.map
+    size = self.source.size
+    position = self.position
+    map_ = self.map
     
     for step in (-size, 1, size, -1):
         target_tile=map_[position+step]
@@ -1569,9 +1551,9 @@ YUKARI_EMOJI = Emoji.precreate(575389643424661505, name='YUKARI')
 
 CHARS.append((YUKARI_STYLE, YUKARI_SKILL_ACTIVATE, YUKARI_SKILL_USE, YUKARI_EMOJI),)
 
-RULES_HELP=Embed('Rules of Dungeon sweeper',
-    'Your quest is to help our cute Touhou characters to put their stuffs on places, where they supposed be. Theese '
-    f'places are marked with an {BUILTIN_EMOJIS["x"]:e} on the floor. Because our caharcters are lazy, the less steps '
+RULES_HELP = Embed('Rules of Dungeon sweeper',
+    'Your quest is to help our cute Touhou characters to put their stuffs on places, where they supposed be. These '
+    f'places are marked with an {BUILTIN_EMOJIS["x"]:e} on the floor. Because our characters are lazy, the less steps '
     'required to sort their stuffs, makes them give you a better rating.\n'
     '\n'
     'You can move with the reactions under the embed, to activate your characters\' skill, or go back, reset the map '
@@ -1593,7 +1575,7 @@ RULES_HELP=Embed('Rules of Dungeon sweeper',
     'If you get a box on the it\'s desired place it\'s color will change:\n'
     f'{REIMU_STYLE[CHAR_E|FLOOR]}{REIMU_STYLE[BOX]}{REIMU_STYLE[TARGET]}{BUILTIN_EMOJIS["arrow_right"]:e}'
     f'{REIMU_STYLE[FLOOR]}{REIMU_STYLE[CHAR_E|FLOOR]}{REIMU_STYLE[BOX_TARGET]}\n'
-    'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different charater to '
+    'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
     'play with.',
     COLORS[0])
 RULES_HELP.add_field(f'Chapter 1 {REIMU_EMOJI:e}',
@@ -1781,13 +1763,8 @@ async def ds_modify_best_description(client, message):
             ), color=DS_COLOR).add_footer(
             'Owner only!')
 
-Koishi: Client
-Koishi.commands(ds_manager,
-    name = 'ds',
-    category = 'GAMES',
-    description = ds_description,
-        )
-Koishi.commands(ds_modify_best,
+COMMAND_CLIENT : Client
+COMMAND_CLIENT.commands(ds_modify_best,
     checks = checks.owner_only(),
     category = 'GAMES',
     description = ds_modify_best_description,

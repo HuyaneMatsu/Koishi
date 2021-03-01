@@ -41,9 +41,9 @@ WEBAPP_SECRET_KEY = None        # (str) Secret key for webapp.
 #### Koishi requirements
 - [hata](https://pypi.org/project/hata/)
 - [lxml](https://pypi.org/project/lxml/)
-- [BeautifulSoup](https://pypi.org/project/beautifulsoup4/)
-- [SQLAlchemy](https://pypi.org/project/SQLAlchemy/)
-- [PIL](https://pypi.org/project/PIL/)
+- [beautifulsoup4](https://pypi.org/project/beautifulsoup4/)
+- [sqlalchemy](https://pypi.org/project/SQLAlchemy/)
+- [pillow](https://pypi.org/project/Pillow/)
 
 #### Hata requirements
 - [chardet](https://pypi.python.org/pypi/chardet)
@@ -56,6 +56,8 @@ WEBAPP_SECRET_KEY = None        # (str) Secret key for webapp.
 
 #### Web requirements
 - [Flask](https://pypi.org/project/Flask/)
+- [Flask-WTF](https://pypi.org/project/Flask-WTF/)
+- [WTForms](https://pypi.org/project/WTForms/)
 
 #### More requirements
 - [psutil](https://pypi.org/project/psutil/)

@@ -1,204 +1,76 @@
 # -*- coding: utf-8 -*-
 import json
 
+from math import ceil
 from time import perf_counter
+from functools import partial as partial_func
 
-from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, sleep, DiscordException, Emoji, now_as_id, WebhookType,\
-    elapsed_time, ActivityUnknown, Status, ActivityTypes, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, \
-    cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE
+from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, \
+    elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, RoleManagerType, ERROR_CODES, \
+    cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
+    parse_message_reference, MESSAGES, CHANNELS
 
-from hata.discord.utils import DISCORD_EPOCH_START
-from hata.ext.commands import Cooldown, Converter, ConverterFlag, checks, Pagination, Closer
+from hata.ext.commands import Pagination
 from hata.ext.prettyprint import pchunkify
 
 from PIL import Image as PIL
 
-from bot_utils.tools import CooldownHandler, PAGINATION_5PN
+from bot_utils.tools import PAGINATION_5PN
 from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
-from bot_utils.command_utils import CHECK_ADMINISTRATION, CHANNEL_TEXT_CONVERTER_MESSAGE_CHANNEL_DEFAULT, \
-    CLIENT_CONVERTER_ALL_CLIENT_DEFAULT, USER_CONVERTER_ALL_AUTHOR_DEFAULT, USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT, \
-    MESSAGE_CONVERTER_ALL
 
 UTILITY_COLOR = Color(0x5dc66f)
 
-Koishi: Client
-@Koishi.commands.from_class
-class ping:
-    async def command(client, message):
-        await client.message_create(message.channel,
-            embed=Embed(f'{client.gateway.latency*1000.:.0f} ms',color=UTILITY_COLOR))
-    
-    aliases = 'pong'
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('ping',(
-            'Do you wanna know how bad my connection is to Discord?\n'
-            f'Usage: `{prefix}ping`'
-            ), color=UTILITY_COLOR)
+SLASH_CLIENT: Client
 
-@Koishi.commands.from_class
-class ping_http:
-    async def command(client, message):
-        start = perf_counter()
-        message = await client.message_create(message.channel, 'ping-pong')
-        delay = (perf_counter()-start)*1000.0
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def rawr(client, event):
+    """Sends a message with everyone from my universe."""
+    yield
+    
+    channel = event.channel
+    tasks = []
+    
+    for client_ in channel.clients:
+        if client_ is not client:
+            if not channel.cached_permissions_for(client_).can_send_messages:
+                continue
+        task = KOKORO.create_task(client_.message_create(channel, 'Rawrr !'))
+        tasks.append(task)
+    
+    try:
+        await WaitTillExc(tasks, KOKORO)
+    except:
+        for task in tasks:
+            task.cancel()
+        raise
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def color_(client, event,
+        color: ('str', 'Beauty!')):
+    """Shows the given color"""
+    
+    color = parse_color(color)
+    if color is None:
+        yield 'Could not recognize the color.'
+        return
+    
+    yield
+    
+    embed = Embed(f'#{color:06X}', color=color)
+    embed.add_image('attachment://color.png')
+    
+    with ReuBytesIO() as buffer:
+        image = PIL.new('RGB', (120, 30), color.as_rgb)
+        image.save(buffer,'png')
+        buffer.seek(0)
         
-        await client.message_edit(message, '', embed=Embed(f'{delay:.0f} ms', color=UTILITY_COLOR))
-    
-    aliases = 'pong-http'
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('ping', (
-            'Do you wanna see how bad is my http connection to Discord?\n'
-            f'Usage: `{prefix}ping-http`'
-            ), color=UTILITY_COLOR)
-
-@Koishi.commands.from_class
-class rawr:
-    @Cooldown('guild', 60.0, handler=CooldownHandler())
-    async def command(client, message):
-        channel = message.channel
-        tasks = []
-        
-        for client_ in channel.clients:
-            if client_ is not client:
-                if not channel.cached_permissions_for(client_).can_send_messages:
-                    continue
-            task = KOKORO.create_task(client_.message_create(channel, 'Rawrr !'))
-            tasks.append(task)
-        
-        try:
-            await WaitTillExc(tasks, KOKORO)
-        except:
-            for task in tasks:
-                task.cancel()
-            raise
-
-    category = 'UTILITY'
-
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('rawr', (
-            'Sends a message with every client, who can send a message to the channel.\n'
-            f'Usage: `{prefix}rawr`'
-            ), color=UTILITY_COLOR,).add_footer(
-                'With cooldown of 60 seconds.')
-
-@Koishi.commands.from_class
-class color:
-    async def command(client, message, color: 'color'):
-        embed = Embed(f'#{color:06X}', color=color)
-        embed.add_image('attachment://color.png')
-        
-        with ReuBytesIO() as buffer:
-            image = PIL.new('RGB', (120, 30), color.as_rgb)
-            image.save(buffer,'png')
-            buffer.seek(0)
-            
-            await client.message_create(message.channel, embed=embed, file=('color.png', buffer))
-    
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('color',(
-            'Do you wanna see a color?\n'
-            f'Usage: `{prefix}color *color*`\n'
-                ), color=UTILITY_COLOR)
-
-@Koishi.commands.from_class
-class update_application_info:
-    async def update_application_info(client, message, user: CLIENT_CONVERTER_ALL_CLIENT_DEFAULT):
-        await user.update_application_info()
-        content = f'Application info of `{user:f}` is updated successfully!'
-        await client.message_create(message.channel, content)
-    
-    category = 'UTILITY'
-    checks = [checks.owner_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('update_application_info',(
-            'I can update application info of any of the active clients '
-            'at my mansion.\n'
-            f'Usage: `{prefix}update_application_info <user>`\n'
-            '`user` is optional and can be only an another client.'
-                ), color=UTILITY_COLOR).add_footer(
-                'Owner only!')
-
-@Koishi.commands.from_class
-class resend_webhook:
-    async def command(client,message, message_id:int, channel: CHANNEL_TEXT_CONVERTER_MESSAGE_CHANNEL_DEFAULT):
-        permissions = message.channel.cached_permissions_for(client)
-        can_delete = permissions.can_manage_messages
-        
-        if not permissions.can_manage_webhooks:
-            message = await client.message_create(message.channel,
-                'I have no permissions to get webhooks from this channel.')
-            if can_delete:
-                await sleep(30.0,client.loop)
-                await client.message_delete(message)
-            return
-        
-        try:
-            target_message = await client.message_get(channel,message_id)
-        except DiscordException as err:
-            message = await client.message_create(message.channel,repr(err))
-            if can_delete:
-                await sleep(30.0,client.loop)
-                await client.message_delete(message)
-            return
-    
-        webhooks = await client.webhook_get_all_channel(channel)
-        for webhook in webhooks:
-            if webhook.type is WebhookType.bot:
-                break
-        else:
-            webhook = await client.webhook_create(channel, 'Love You')
-    
-        await client.webhook_message_create(webhook,
-            embed=target_message.embeds,
-            name=target_message.author.name,
-            avatar_url=target_message.author.avatar_url)
-    
-    category = 'UTILITY'
-    checks = [checks.guild_only(), checks.owner_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('resend_webhook', (
-            'I can resend a webhook, if chu really want.\n'
-            f'Usage: `{prefix}resend_webhook *message_id* <channel>`\n'
-            'The `message_id` must be the `id` of the message sent by the '
-            'webhook.\n'
-            'The `channel` by default is this channel, but if the message '
-            'is at a different channel, you should tell me > <.'
-                ), color=UTILITY_COLOR).add_footer(
-                'Guild only. Owner only!')
+        await client.interaction_followup_message_create(event, embed=embed, file=('color.png', buffer))
 
 
-@Koishi.commands.from_class
-class show_emoji:
-    async def command(client, message, emoji : Emoji):
-        if emoji.is_custom_emoji():
-            await client.message_create(message.channel, f'**Name:** {emoji:e} **Link:** {emoji.url}')
-    
-    name = 'showemoji'
-    category = 'UTILITY'
-    aliases = ['show-emoji', 'se']
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('se',(
-            'I show the given emoji, tho I can only the custom ones.\n'
-            f'Usage: `{prefix}showemoji *emoji*`\n'
-                ), color=UTILITY_COLOR)
-
-
+# We don't need it rn.
+"""
 def add_activity(text, activity):
     
     text.append(activity.name)
@@ -305,101 +177,454 @@ def add_activity(text, activity):
     id_ = activity.id
     if id_:
         text.append(f'**>>** id : {id_}\n')
+"""
 
-@Koishi.commands.from_class
-class user_info:
-    async def command(client, message, user: USER_CONVERTER_ALL_AUTHOR_DEFAULT):
-        guild = message.guild
-        
-        embed = Embed(user.full_name)
-        created_at = user.created_at
-        embed.add_field('User Information',
-            f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-            f'Profile: {user:m}\n'
-            f'ID: {user.id}')
-        
-        if guild is None:
-            profile = None
-        else:
-            profile = user.guild_profiles.get(guild)
-        
-        if profile is None:
-            if user.avatar_type is ICON_TYPE_NONE:
-                color = user.default_avatar.color
-            else:
-                color = user.avatar_hash&0xFFFFFF
-            embed.color = color
-        
-        else:
-            embed.color = user.color_at(guild)
-            roles = profile.roles
-            if roles is None:
-                roles = '*none*'
-            else:
-                roles.sort()
-                roles = ', '.join(role.mention for role in reversed(roles))
-            
-            text = []
-            if profile.nick is not None:
-                text.append(f'Nick: {profile.nick}')
-            
-            if profile.joined_at is None:
-                await client.guild_user_get(user.id)
-            
-            # Joined at can be `None` if the user is in lurking mode.
-            joined_at = profile.joined_at
-            if joined_at is not None:
-                text.append(f'Joined: {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]')
-            
-            boosts_since = profile.boosts_since
-            if (boosts_since is not None):
-                text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
-            
-            text.append(f'Roles: {roles}')
-            embed.add_field('In guild profile','\n'.join(text))
-        
-        embed.add_thumbnail(user.avatar_url_as(size=128))
-        
-        if user.activity is not ActivityUnknown or user.status is not Status.offline:
-            text = []
-            
-            if user.status is Status.offline:
-                text.append('Status : offline\n')
-            elif len(user.statuses) == 1:
-                for platform,status in user.statuses.items():
-                    text.append(f'Status : {status} ({platform})\n')
-            else:
-                text.append('Statuses :\n')
-                for platform,status in user.statuses.items():
-                    text.append(f'**>>** {status} ({platform})\n')
-            
-            if user.activity is ActivityUnknown:
-                text.append('Activity : *unknown*\n')
-            elif len(user.activities) == 1:
-                text.append('Activity : ')
-                add_activity(text, user.activities[0])
-            else:
-                text.append('Activities : \n')
-                for index,activity in enumerate(user.activities, 1):
-                    text.append(f'{index}.: ')
-                    add_activity(text, activity)
-            
-            embed.add_field('Status and Activity',''.join(text))
-        await client.message_create(message.channel, embed=embed)
+def message_pagination_check(user, event):
+    event_user = event.user
+    if user is event.user:
+        return True
     
-    name = 'user'
-    category = 'UTILITY'
-    aliases = 'profile'
+    if event.channel.permissions_for(event_user).can_manage_messages:
+        return True
     
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('user', (
-            'I show you some information about the given user.\n'
-            'If you use it inside of a guild and the user is inside as well, '
-            'will show information, about their guild profile too.\n'
-            f'Usage: `{prefix}user <user>`\n'
-            'If no user is passed, I will tell your secrets :3'
-                ), color=UTILITY_COLOR)
+    return False
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def message_(client, event,
+        message : ('str', 'Link to the message'),
+        raw : ('bool', 'Should display json?') = True,
+            ):
+    """Shows up the message's payload. (You must have Tester role in ND)"""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER):
+        yield Embed('Ohoho', f'You must have {ROLE__NEKO_DUNGEON__TESTER.mention} to invoke this command.',
+            color=UTILITY_COLOR)
+        return
+    
+    if not event.channel.cached_permissions_for(client).can_send_messages:
+        yield Embed('Permission denied', 'I need `send messages` permission to execute this command.',
+            color=UTILITY_COLOR)
+        return
+    
+    message_reference = parse_message_reference(message)
+    if message_reference is None:
+        yield Embed('Error', 'Could not identify the message.', color=UTILITY_COLOR)
+        return
+    
+    guild_id, channel_id, message_id = message_reference
+    try:
+        message = MESSAGES[message_id]
+    except KeyError:
+        if channel_id:
+            try:
+                channel = CHANNELS[channel_id]
+            except KeyError:
+                yield Embed('Ohoho', 'I have no access to the channel.', color=UTILITY_COLOR)
+                return
+        else:
+            channel = event.channel
+        
+        if not channel.cached_permissions_for(client).can_read_message_history:
+            yield Embed('Ohoho', 'I have no permission to get that message.', color=UTILITY_COLOR)
+            return
+        
+        # We only really need `channel_id` and `guild_id`, so we can ignore `guild_id`.
+        
+        if raw:
+            getter_coroutine = client.http.message_get(message.channel.id, message_id)
+        else:
+            getter_coroutine = client.message_get(channel, message_id)
+    else:
+        if raw:
+            getter_coroutine = client.http.message_get(message.channel.id, message_id)
+        else:
+            getter_coroutine = None
+    
+    if (getter_coroutine is not None):
+        yield
+        
+        try:
+            response = await getter_coroutine
+            if raw:
+                data = response
+            else:
+                message = response
+        except ConnectionError:
+            # No internet
+            return
+        except DiscordException as err:
+            if err.code in (
+                    ERROR_CODES.unknown_channel, # message deleted
+                    ERROR_CODES.unknown_message, # channel deleted
+                        ):
+                # The message is already deleted.
+                yield Embed('OOf', 'The referenced message is already yeeted.', color=UTILITY_COLOR)
+                return
+            
+            if err.code == ERROR_CODES.invalid_access: # client removed
+                # This is not nice.
+                return
+            
+            if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+                yield Embed('Ohoho', 'I have no permission to get that message.', color=UTILITY_COLOR)
+                return
+            
+            raise
+    
+    if raw:
+        chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    else:
+        chunks = pchunkify(message)
+    
+    pages = [Embed(description=chunk) for chunk in chunks]
+    await Pagination(client, event.channel, pages, check=partial_func(message_pagination_check, event.user))
+
+
+class RoleCache(object):
+    __slots__ = ('cache', 'guild', 'roles',)
+    def __new__(cls, guild):
+        self = object.__new__(cls)
+        self.guild = guild
+        roles = guild.role_list
+        roles.reverse()
+        self.roles = roles
+        self.cache = {}
+        
+        self.create_page_0(guild)
+        return self
+    
+    def create_page_0(self, guild):
+        embed = Embed(f'Roles of **{guild.name}**:',
+            '\n'.join([role.mention for role in self.roles]),
+            color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
+        
+        embed.add_footer(f'Page 1 / {len(self.roles)}')
+        self.cache[0] = embed
+    
+    def __getitem__(self,index):
+        page = self.cache[index]
+        if page is None:
+            page = self.create_page(index)
+        
+        return page
+
+    def create_page(self,index):
+        role = self.roles[index-1]
+        embed = Embed(role.name,
+            '\n'.join([
+                f'id : {role.id!r}',
+                f'color : {role.color.as_html}',
+                f'permission number : {role.permissions:d}',
+                f'managed : {role.managed}',
+                f'separated : {role.separated}',
+                f'mentionable : {role.mentionable}',
+                '\nPermissions:\n```diff',
+                *(f'{"+" if value else "-"}{key.replace("_", "-")}' for key, value in role.permissions.items()),
+                '```',
+                    ]),
+            color=role.color)
+        embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
+        
+        self.cache[index] = embed
+        return embed
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def roles_(client, event):
+    """Lists the roles of the guild for my cutie!"""
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
+        return
+    
+    if guild not in client.guild_profiles:
+        yield Embed('Error', 'I must be in the guild to execute this command', color=UTILITY_COLOR)
+        return
+    
+    permissions = event.channel.cached_permissions_for(client)
+    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+        yield Embed('Permission denied',
+            'I require `send messages` and `add reactions` permissions to execute this command.',
+            color=UTILITY_COLOR,
+                )
+        return
+    
+    yield
+    await PAGINATION_5PN(client, event.channel, RoleCache(guild))
+    return
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def welcome_screen_(client, event):
+    """SHows the guild's welcome screen."""
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
+        return
+    
+    if guild not in client.guild_profiles:
+        yield Embed('Error', 'I must be in the guild to execute this command', color=UTILITY_COLOR)
+        return
+    
+    yield
+    
+    welcome_screen = await client.welcome_screen_get(guild)
+    if welcome_screen is None:
+        yield Embed(description=f'**{guild.name}** *has no welcome screen enabled*.')
+        return
+    
+    description = welcome_screen.description
+    if (description is None):
+        description = '*TOP THINGS TO DO HERE*'
+    else:
+        description = f'{welcome_screen.description}\n\n*TOP THINGS TO DO HERE*'
+    
+    embed = Embed(f'Welcome to **{guild.name}**', description)
+    
+    icon_url = guild.icon_url
+    if (icon_url is not None):
+        embed.add_thumbnail(icon_url)
+    
+    welcome_channels = welcome_screen.welcome_channels
+    if (welcome_channels is not None):
+        for welcome_channel in welcome_channels:
+            embed.add_field(f'{welcome_channel.emoji:e} {welcome_channel.description}',
+                f'#{welcome_channel.channel:d}')
+    
+    yield embed
+
+ID = SLASH_CLIENT.interactions(None,
+    name = 'id',
+    description = 'Shows the id of the selected entity',
+    is_global = True,
+        )
+
+@ID.interactions
+async def user_(client, event,
+        user : ('user', 'Who\'s id do you want to see?') = None,
+           ):
+    """Returns your or the selected user's identifier."""
+    if user is None:
+        user = event.user
+    
+    return str(user.id)
+
+
+@ID.interactions
+async def channel_(client, event,
+        channel : ('channel', 'Which channel\'s id do you want to see?') = None,
+           ):
+    """Returns this or the selected channel's identifier."""
+    if channel is None:
+        channel = event.channel
+    
+    return str(channel.id)
+
+
+@ID.interactions
+async def guild_(client, event):
+    """Returns the guild's identifier."""
+    guild = event.guild
+    if guild is None:
+        return Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
+    
+    return str(guild.id)
+
+@ID.interactions
+async def role_(client, event,
+        role : ('role', 'Which role\'s id do you want to see?') = None,
+           ):
+    """Returns this or the guild\'s default role's identifier."""
+    guild = event.guild
+    if guild is None:
+        return Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
+    
+    if role is None:
+        # Hax
+        role_id = guild.id
+    else:
+        role_id = role.id
+    
+    return str(role_id)
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def now_as_id_(client, event):
+    """Returns the current time as discord snowflake."""
+    return str(now_as_id())
+
+
+def shared_guilds_pagination_check(user, event):
+    event_user = event.user
+    if user is event.user:
+        return True
+    
+    if event.channel.permissions_for(event_user).can_manage_messages:
+        return True
+    
+    return False
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def shared_guilds(client, event):
+    """Returns the shared guilds between you and me."""
+    permissions = event.channel.cached_permissions_for(client)
+    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+        yield Embed('Permission denied',
+            'I require `send messages` and `add reactions` permissions to execute this command.',
+            color=UTILITY_COLOR,
+                )
+        return
+    
+    # Ack the event, hell yeah!
+    yield
+    
+    pages = []
+    lines = []
+    lines_count = 0
+    
+    user = event.user
+    for guild, guild_profile in user.guild_profiles.items():
+        nick = guild_profile.nick
+        guild_name = guild.name
+        if nick is None:
+            line = guild_name
+        else:
+            line = f'{guild_name} [{nick}]'
+        
+        lines.append(line)
+        lines_count += 1
+        
+        if lines_count == 10:
+            pages.append('\n'.join(lines))
+            lines.clear()
+            lines_count = 0
+    
+    if lines_count:
+        pages.append('\n'.join(lines))
+    
+    if not pages:
+        pages.append('*none*')
+    
+    embeds = []
+    embed_title = f'Shared guilds with {user.full_name}:'
+    
+    for page in pages:
+        embed = Embed(embed_title, page, color=UTILITY_COLOR)
+        embeds.append(embed)
+    
+    await Pagination(client, event.channel, embeds, check=partial_func(shared_guilds_pagination_check, user))
+
+
+@SLASH_CLIENT.interactions(name='user', is_global=True)
+async def user_(client, event,
+        user :('user', '*spy?*') = None,
+            ):
+    """Shows some information about your or about the selected user."""
+    
+    if user is None:
+        user = event.user
+    
+    guild = event.guild
+    
+    embed = Embed(user.full_name)
+    created_at = user.created_at
+    embed.add_field('User Information',
+        f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+        f'Profile: {user:m}\n'
+        f'ID: {user.id}')
+    
+    if guild is None:
+        profile = None
+    else:
+        profile = user.guild_profiles.get(guild)
+    
+    if profile is None:
+        if user.avatar_type is ICON_TYPE_NONE:
+            color = user.default_avatar.color
+        else:
+            color = user.avatar_hash&0xFFFFFF
+        embed.color = color
+    
+    else:
+        embed.color = user.color_at(guild)
+        roles = profile.roles
+        if roles is None:
+            roles = '*none*'
+        else:
+            roles.sort()
+            roles = ', '.join(role.mention for role in reversed(roles))
+        
+        text = []
+        if profile.nick is not None:
+            text.append(f'Nick: {profile.nick}')
+        
+        if profile.joined_at is None:
+            await client.guild_user_get(user.id)
+        
+        # Joined at can be `None` if the user is in lurking mode.
+        joined_at = profile.joined_at
+        if joined_at is not None:
+            text.append(f'Joined: {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]')
+        
+        boosts_since = profile.boosts_since
+        if (boosts_since is not None):
+            text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
+        
+        text.append(f'Roles: {roles}')
+        embed.add_field('In guild profile','\n'.join(text))
+    
+    embed.add_thumbnail(user.avatar_url_as(size=128))
+    
+    return embed
+
+@SLASH_CLIENT.interactions(name='role', is_global=True)
+async def role_(client, event,
+        role: ('role', 'Select the role to show information of.'),
+            ):
+    """Shows the information about a role."""
+    if role.partial:
+        return Embed('Error', 'I must be in the guild, where the role is.')
+    
+    embed = Embed(f'Role information for: {role.name}', color=role.color)
+    embed.add_field('Position', str(role.position), inline=True)
+    embed.add_field('Id', str(role.id), inline=True)
+    
+    embed.add_field('Separated', 'true' if role.separated else 'false', inline=True)
+    embed.add_field('Mentionable', 'true' if role.mentionable else 'false', inline=True)
+    
+    manager_type = role.manager_type
+    if manager_type is RoleManagerType.NONE:
+        managed_description = 'false'
+    else:
+        if manager_type is RoleManagerType.UNSET:
+            await client.sync_roles(role.guild)
+            manager_type = role.manager_type
+        
+        if manager_type is RoleManagerType.BOT:
+            managed_description = f'Special role for bot: {role.manager:f}'
+        elif manager_type is RoleManagerType.BOOSTER:
+            managed_description = 'Role for the boosters of the guild.'
+        elif manager_type is RoleManagerType.INTEGRATION:
+            managed_description = f'Special role for integration: {role.manager.name}'
+        elif manager_type is RoleManagerType.UNKNOWN:
+            managed_description = 'Some new things.. Never heard of them.'
+        else:
+            managed_description = 'I have no clue.'
+    
+    embed.add_field('Managed', managed_description, inline=True)
+    
+    color = role.color
+    embed.add_field('color',
+        f'html: {color.as_html}\n'
+        f'rgb: {color.as_rgb}\n'
+        f'int: {color:d}',
+            inline = True)
+    
+    created_at = role.created_at
+    embed.add_field('Created at',
+        f'{created_at:{DATETIME_FORMAT_CODE}}\n'
+        f'{elapsed_time(created_at)} ago',
+            inline=True)
+    
+    return embed
 
 
 GREEN_HEART = BUILTIN_EMOJIS['green_heart']
@@ -408,20 +633,13 @@ RED_HEART = BUILTIN_EMOJIS['heart']
 BLACK_HEART = BUILTIN_EMOJIS['black_heart']
 GIFT_HEART = BUILTIN_EMOJIS['gift_heart']
 
-async def guild_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('user', (
-        'Do you want me to list some information about this guild?\n'
-        f'Usage: `{prefix}guild <section>`\n'
-        '\n'
-        'You can also specify which field you wanna display from the following ones:\n'
-        '- *info*\n'
-        '- *counts*\n'
-        '- *emojis*\n'
-        '- *users*\n'
-        '- *boosters*'
-            ), color=UTILITY_COLOR).add_footer(
-            'Guild only!')
+def add_guild_all_field(guild, embed, even_if_empty):
+    add_guild_info_field(guild, embed, False)
+    add_guild_counts_field(guild, embed, False)
+    add_guild_emojis_field(guild ,embed, False)
+    add_guild_users_field(guild, embed, False)
+    add_guild_boosters_field(guild, embed, False)
+
 
 def add_guild_info_field(guild, embed, even_if_empty):
     created_at = guild.created_at
@@ -598,413 +816,267 @@ def add_guild_boosters_field(guild, embed, even_if_empty):
         embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken nuggets.*')
 
 GUILD_FIELDS = {
-    'info': add_guild_info_field,
-    'counts': add_guild_counts_field,
-    'emojis': add_guild_emojis_field,
-    'users': add_guild_users_field,
-    'boosters': add_guild_boosters_field
+    'all'      : add_guild_all_field      ,
+    'info'     : add_guild_info_field     ,
+    'counts'   : add_guild_counts_field   ,
+    'emojis'   : add_guild_emojis_field   ,
+    'users'    : add_guild_users_field    ,
+    'boosters' : add_guild_boosters_field ,
         }
 
-@Koishi.commands(name='guild', category='UTILITY', description=guild_description, checks=checks.guild_only())
-async def guild_info(client, message, field: str=None):
-    guild = message.guild
-    if guild is None:
-        return
-    
-    if (field is not None):
-        try:
-            func = GUILD_FIELDS[field.lower()]
-        except KeyError:
-            embed = await guild_description(client, message)
-            await Closer(client, message.channel, embed)
-            return
+@SLASH_CLIENT.interactions(name='guild', is_global=True)
+async def guild_(client, event,
+        field: ([(name, name) for name in GUILD_FIELDS], 'Which field of the info should I show?') = 'all',
+            ):
+    """Shows some information about the guild."""
+    guild = event.guild
+    if guild.partial:
+        return Embed('Error', 'I must be in the guild to execute this command.')
     
     embed = Embed(guild.name, color=(
         guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF)
             ).add_thumbnail(guild.icon_url_as(size=128))
     
-    if field is None:
-        add_guild_info_field(guild, embed, False)
-        add_guild_counts_field(guild, embed, False)
-        add_guild_emojis_field(guild ,embed, False)
-        add_guild_users_field(guild, embed, False)
-        add_guild_boosters_field(guild, embed, False)
-    else:
-        func(guild, embed, True)
+    GUILD_FIELDS[field](guild, embed, True)
     
-    await client.message_create(message.channel, embed=embed)
+    return embed
 
 
-@Koishi.commands.from_class
-class message_:
-    async def command(client, message, target_message: MESSAGE_CONVERTER_ALL):
-        await Pagination(client,message.channel, [Embed(description=chunk) for chunk in pchunkify(target_message)])
-    
-    category = 'UTILITY'
-    checks = [checks.has_role(ROLE__NEKO_DUNGEON__TESTER)]
-    name = 'message'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('message',(
-            'If you want, I show the representation of a message.\n'
-            f'Usage: `{prefix}message *message_id* <channel>`\n'
-            'By default `channel` is the channel, where you used the command.'
-                ), color=UTILITY_COLOR).add_footer(
-                f'Guild only! You must have {ROLE__NEKO_DUNGEON__TESTER.name}!')
-
-
-@Koishi.commands.from_class
-class message_pure:
-    async def command(client, message, target_message: MESSAGE_CONVERTER_ALL):
-        try:
-            data = await client.http.message_get(target_message.channel.id, target_message.id)
-        except DiscordException as err:
-            await client.message_create(message.channel,repr(err))
-            return
+USER_PER_PAGE = 16
+class InRolePageGetter(object):
+    __slots__ = ('users', 'guild', 'title')
+    def __init__(self, users, guild, roles):
+        title_parts = ['Users with roles: ']
         
-        await Pagination(client, message.channel, [
-            Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
-                ])
-    
-    category = 'UTILITY'
-    checks = [checks.guild_only(), checks.has_role(ROLE__NEKO_DUNGEON__TESTER)]
-    
-    async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('message-pure', (
-            'If you want, I show the pure json representing a message.\n'
-            f'Usage: `{prefix}message-pure *message_id* <channel>`\n'
-            'By default `channel` is the channel, where you used the command.'
-                ), color=UTILITY_COLOR).add_footer(
-                f'Guild only! You must have {ROLE__NEKO_DUNGEON__TESTER.name} to use it!')
-
-@Koishi.commands.from_class
-class roles:
-    class command(object):
-        __slots__ = ('cache','guild','roles',)
-        async def __new__(cls,client,message):
-            channel = message.channel
-            self = object.__new__(cls)
-            roles = channel.guild.role_list
-            roles.reverse()
-            self.roles = roles
-            self.cache=[None for _ in range(len(self.roles)+1)]
-            self.createpage0(channel.guild)
-            #we return awaitable, so it is OK
-            return await PAGINATION_5PN(client,channel,self)
+        roles = sorted(roles)
+        index = 0
+        limit = len(roles)
+        
+        while True:
+            role = roles[index]
+            index += 1
+            role_name = role.name
             
-        def __len__(self):
-            return len(self.cache)
-        
-        def createpage0(self,guild):
-            embed=Embed(f'Roles of **{guild.name}**:',
-                '\n'.join([role.mention for role in self.roles]),
-                color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
-            embed.add_footer(f'Page 1 /  {len(self.cache)}')
-            self.cache[0]=embed
-        
-        def __getitem__(self,index):
-            page=self.cache[index]
-            if page is None:
-                return self.create_page(index)
-            return page
-        
-        def create_page(self,index):
-            role = self.roles[index-1]
-            embed = Embed(role.name,
-                '\n'.join([
-                    f'id : {role.id!r}',
-                    f'color : {role.color.as_html}',
-                    f'permission number : {role.permissions}',
-                    f'managed : {role.managed}',
-                    f'separated : {role.separated}',
-                    f'mentionable : {role.mentionable}',
-                    '\nPermissions:\n```diff',
-                    *(f'{"+" if value else "-"}{key}' for key,value in role.permissions.items()),
-                    '```',
-                        ]),
-                color=role.color)
-            embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
+            # Handle special case, when the role is an application's role, what means it's length can be over 32-
+            if len(role_name) > 32:
+                role_name = role_name[:32]+'...'
             
-            self.cache[index] = embed
-            return embed
+            title_parts.append(role_name)
+            
+            if index == limit:
+                break
+            
+            title_parts.append(', ')
+            
+        self.title = ''.join(title_parts)
+        self.users = users
+        self.guild = guild
     
-    category = 'UTILITY'
-    checks = checks.guild_only()
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('roles',(
-            'Cutie, do you want me, to list the roles of the guild and their '
-            'permissions?\n'
-            f'Usage: `{prefix}roles`'
-                ),color=UTILITY_COLOR).add_footer(
-                'Guild only!')
-
-@Koishi.commands.from_class
-class avatar:
-    async def command(client, message, user: USER_CONVERTER_EVERYWHERE_AUTHOR_DEFAULT):
-        color = user.avatar_hash
-        if color:
-            color &=0xffffff
+    def __len__(self):
+        length = len(self.users)
+        if length:
+            length = ceil(length/USER_PER_PAGE)
         else:
-            color = user.default_avatar.color
+            length = 1
         
-        url = user.avatar_url_as(size=4096)
-        embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
-        embed.add_image(url)
-        
-        await client.message_create(message.channel, embed=embed)
+        return length
     
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('avatar',(
-            'Pure 4K user avatar showcase!\n'
-            f'Usage: `{prefix}avatar <user>`\n'
-            'If no `user` is passed, I will showcase your avatar.'
-                ), color=UTILITY_COLOR)
-
-@Koishi.commands.from_class
-class guild_icon:
-    async def command(client, message):
-        guild = message.guild
-        if guild is None:
-            return
+    def __getitem__(self, index):
+        users = self.users
+        length = len(users)
+        if length:
+            user_index = index*USER_PER_PAGE
+            user_limit = user_index+USER_PER_PAGE
+            
+            if user_limit > length:
+                user_limit = length
+            
+            description_parts = []
+            guild = self.guild
+            while True:
+                user = users[user_index]
+                user_index += 1
+                description_parts.append(user.full_name)
+                try:
+                    guild_profile = user.guild_profiles[guild]
+                except KeyError:
+                    pass
+                else:
+                    nick = guild_profile.nick
+                    if nick is not None:
+                        description_parts.append(' *[')
+                        description_parts.append(nick)
+                        description_parts.append(']*')
+                
+                if user_index == user_limit:
+                    break
+                
+                description_parts.append('\n')
+                continue
+            
+            description = ''.join(description_parts)
         
-        icon_url = guild.icon_url_as(size=4096)
-        if icon_url is None:
-            embed = Embed(description=f'`{guild.name}` has no icon.')
         else:
-            color = guild.icon_hash&0xffffff
-            embed = Embed(f'{guild.name}\' icon', color=color, url=icon_url)
-            embed.add_image(icon_url)
+            description = '*none*'
         
-        await client.message_create(message.channel, embed=embed)
-    
-    category = 'UTILITY'
-    checks = checks.guild_only()
-    
-    async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('guild-icon',(
-            'Do you wanna see the guild\'s icon in 4K?!\n'
-            f'Usage: `{prefix}guild-icon`\n'
-                ),color=UTILITY_COLOR).add_footer(
-                'Guild only!')
+        return Embed(self.title, description). \
+            add_author(guild.icon_url, guild.name). \
+            add_footer(f'Page {index+1}/{ceil(len(self.users)/USER_PER_PAGE)}')
 
 
-@Koishi.commands.from_class
-class welcome_screen:
-    async def command(client, message):
-        guild = message.guild
-        if guild is None:
-            return
-        
-        welscome_screen = await client.welcome_screen_get(guild)
-        if welscome_screen is None:
-            embed = Embed(description=f'**{guild.name}** *has no welcome screen enabled*.')
-        else:
-            description = welcome_screen.description
-            if (description is None):
-                description = '*TOP THINGS TO DO HERE*'
-            else:
-                description = f'{welscome_screen.description}\n\n*TOP THINGS TO DO HERE*'
-            
-            embed = Embed(f'Welcome to **{guild.name}**', description)
-            
-            icon_url = guild.icon_url
-            if (icon_url is not None):
-                embed.add_thumbnail(icon_url)
-            
-            welcome_channels = welscome_screen.welcome_channels
-            if (welcome_channels is not None):
-                for welcome_channel in welcome_channels:
-                    embed.add_field(f'{welcome_channel.emoji:e} {welcome_channel.description}',
-                        f'#{welcome_channel.channel:d}')
-        
-        await client.message_create(message.channel, embed=embed)
+def in_role_pagination_check(user, event):
+    event_user = event.user
+    if user is event.user:
+        return True
     
-    aliases = 'guild_welcome_screen'
-    category = 'UTILITY'
-    checks = checks.guild_only()
+    if event.channel.permissions_for(event_user).can_manage_messages:
+        return True
     
-    async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('welcome-screen', (
-            'Displays the guild\'s welcome screen\n'
-            f'Usage: `{prefix}welcome-screen`'
-                ), color=UTILITY_COLOR).add_footer(
-                'Guild only!')
+    return False
 
-
-@Koishi.commands.from_class
-class get_user_id:
-    async def command(client, message, user: Converter('user',
-            ConverterFlag().update_by_keys(mention=True, name=True), default_code='message.author')):
-        await client.message_create(message.channel, str(user.id))
+@SLASH_CLIENT.interactions(is_global=True)
+async def in_role(client, event,
+        role_1 : ('role', 'Select a role.'),
+        role_2 : ('role', 'Double role!') = None,
+        role_3 : ('role', 'Triple role!') = None,
+        role_4 : ('role', 'Quadra role!') = None,
+        role_5 : ('role', 'Penta role!') = None,
+        role_6 : ('role', 'Epic!') = None,
+        role_7 : ('role', 'Legendary!') = None,
+        role_8 : ('role', 'Mythical!') = None,
+        role_9 : ('role', 'Lunatic!') = None,
+            ):
+    """Shows the users with the given roles."""
+    guild = event.guild
+    if guild is None:
+        yield Embed('Error', 'Guild only command.')
+        return
     
-    name = 'userid'
-    aliases = ['user-id', 'uid']
-    category = 'UTILITY'
+    if guild not in client.guild_profiles:
+        yield Embed('Ohoho', 'I must be in the guild to do this.')
+        return
     
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('userid', (
-            'Sends your or the given user\'s id.\n'
-            f'Usage: `{prefix}userid <user name / mention>`'
-                ), color=UTILITY_COLOR)
-
-
-@Koishi.commands.from_class
-class get_channel_id:
-    async def command(client, message, channel: Converter('channel',
-            ConverterFlag().update_by_keys(mention=True, name=True), default_code='message.channel')):
-        await client.message_create(message.channel, str(channel.id))
-    
-    name = 'channelid'
-    aliases = ['channel-id', 'cid']
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('channelid', (
-            'Sends this or the given channel\'s id.\n'
-            f'Usage: `{prefix}channelid <channel name / mention>`'
-                ), color=UTILITY_COLOR)
-
-
-@Koishi.commands.from_class
-class get_guild_id:
-    async def command(client, message):
-        channel = message.channel
-        guild = channel.guild
-        if guild is None:
-            return
-        
-        await client.message_create(channel, str(guild.id))
-    
-    name = 'guildid'
-    aliases = ['guild-id', 'serverid', 'server-id', 'gid', 'sid']
-    category = 'UTILITY'
-    checks = checks.guild_only()
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('guildid', (
-            'Sends the guild\'s id.\n'
-            f'Usage: `{prefix}guildid`'
-                ), color=UTILITY_COLOR).add_footer('Guild only.')
-
-
-@Koishi.commands.from_class
-class get_role_id:
-    async def command(client, message, role: Converter('role',
-            ConverterFlag().update_by_keys(mention=True, name=True), default_code='message.guild.default_role')):
-        
+    roles = set()
+    for role in role_1, role_2, role_3, role_4, role_5, role_6, role_7, role_8, role_9:
         if role is None:
-            role_id = 'N/A'
-        else:
-            role_id = str(role.id)
+            continue
         
-        await client.message_create(message.channel, role_id)
-    
-    name = 'roleid'
-    aliases = ['role-id', 'rid']
-    category = 'UTILITY'
-    checks = [checks.guild_only()]
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('roleid', (
-            'Sends the guild\'s default role\'s or the given role\'s id.\n'
-            f'Usage: `{prefix}roleid <role name / mention>`'
-                ), color=UTILITY_COLOR).add_footer('Guild only.')
-
-
-@Koishi.commands.from_class
-class get_now_as_id:
-    async def command(client, message):
-        await client.message_create(message.channel, str(now_as_id()))
-    
-    name = 'now-as-id'
-    aliases = ['nowasid']
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('now-as-id', (
-            'Sends the current time as Discord snowflake id.\n'
-            f'Usage: `{prefix}now-as-id`'
-                ), color=UTILITY_COLOR)
-
-
-@Koishi.commands.from_class
-class get_id_as_time:
-    async def command(client, message, snowflake:int):
-        if snowflake < 0 or snowflake > ((1<<63)-1):
-            return
+        if role.guild is guild:
+            roles.add(role)
+            continue
         
-        time = id_to_time(snowflake)
-        await client.message_create(message.channel, f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago')
+        yield Embed('Error', f'Role {role.name}, [{role.id}] is bound to an other guild.')
+        return
     
-    name = 'id-as-time'
-    aliases = ['idastime', 'idtotime', 'id-to-time']
-    category = 'UTILITY'
-    
-    async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
-        return Embed('id-as-time', (
-            'Converts the given Discord snowflake id to time.\n'
-            f'Usage: `{prefix}now-as-time *id*`'
-                ), color=UTILITY_COLOR)
-
-
-async def shared_guilds_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
-    return Embed('deadline', (
-        'Returns the shared guilds between you and me.\n'
-        f'Usage: `{prefix}shared-guilds`\n'
-            ), color=UTILITY_COLOR)
-
-
-@Koishi.commands(description=shared_guilds_description, category='UTILITY')
-async def shared_guilds(client, message):
-    pages = []
-    lines = []
-    lines_count = 0
-    
-    user = message.author
-    for guild, guild_profile in user.guild_profiles.items():
-        nick = guild_profile.nick
-        guild_name = guild.name
-        if nick is None:
-            line = guild_name
-        else:
-            line = f'{guild_name} [{nick}]'
+    users = []
+    for user in guild.users.values():
+        try:
+            guild_profile = user.guild_profiles[guild]
+        except KeyError:
+            continue
         
-        lines.append(line)
-        lines_count += 1
+        guild_profile_roles = guild_profile.roles
+        if guild_profile_roles is None:
+            continue
         
-        if lines_count == 10:
-            pages.append('\n'.join(lines))
-            lines.clear()
-            lines_count = 0
+        if not roles.issubset(guild_profile_roles):
+            continue
+        
+        users.append(user)
     
-    if lines_count:
-        pages.append('\n'.join(lines))
+    pages = InRolePageGetter(users, guild, roles)
     
-    if not pages:
-        pages.append('*none*')
+    yield
     
-    embeds = []
-    embed_title = f'Shared guilds with {user.full_name}:'
-    
-    for page in pages:
-        embed = Embed(embed_title, page, color=UTILITY_COLOR)
-        embeds.append(embed)
-    
-    await Pagination(client, message.channel, embeds)
+    await Pagination(client, event.channel, pages, check=partial_func(in_role_pagination_check, event.user))
 
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def ping(client, event):
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    delay = (perf_counter()-start)*1000.0
+    
+    yield f'{delay:.0f} ms'
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def avatar(client, event,
+        user : ('user', 'Choose a user!') = None,
+            ):
+    """Shows your or the chosen user's avatar."""
+    if user is None:
+        user = event.user
+    
+    if user.avatar:
+        color = user.avatar_hash&0xffffff
+    else:
+        color = user.default_avatar.color
+    
+    url = user.avatar_url_as(size=4096)
+    return Embed(f'{user:f}\'s avatar', color=color, url=url).add_image(url)
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def show_emoji(client, event,
+        emoji : ('str', 'Yes?'),
+            ):
+    """Shows the given custom emoji."""
+    emoji = parse_emoji(emoji)
+    if emoji is None:
+        return 'That\'s not an emoji.'
+    
+    if emoji.is_unicode_emoji():
+        return 'That\' an unicode emoji, cannot link it.'
+    
+    return f'**Name:** {emoji:e} **Link:** {emoji.url}'
+
+
+@SLASH_CLIENT.interactions(name='id-to-time', is_global=True)
+async def id_to_time_(client, event,
+        snowflake : ('int', 'Id please!'),
+            ):
+    """Converts the given Discord snowflake id to time."""
+    time = id_to_time(snowflake)
+    return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def guild_icon(client, event,
+        choice: ({
+            'Icon'             : 'icon'             ,
+            'Banner'           : 'banner'           ,
+            'Discovery-splash' : 'discovery_splash' ,
+            'Invite-splash'    : 'invite_splash'    ,
+                }, 'Which icon of the guild?' ) = 'icon',
+            ):
+    """Shows the guild's icon or it's selected splash."""
+    guild = event.guild
+    if (guild is None) or guild.partial:
+        return Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
+    
+    if choice == 'icon':
+        name = 'icon'
+        url = guild.icon_url_as(size=4096)
+        hash_value = guild.icon_hash
+    elif choice == 'banner':
+        name = 'banner'
+        url = guild.banner_url_as(size=4096)
+        hash_value = guild.banner_hash
+    elif choice == 'discovery_splash':
+        name = 'discovery splash'
+        url = guild.discovery_splash_url_as(size=4096)
+        hash_value = guild.discovery_splash_hash
+    else:
+        name = 'invite splash'
+        url = guild.invite_splash_url_as(size=4096)
+        hash_value = guild.invite_splash_hash
+    
+    if url is None:
+        color = (event.id>>22)&0xFFFFFF
+        return Embed(f'{guild.name} has no {name}', color=color)
+    
+    color = hash_value&0xFFFFFF
+    return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)

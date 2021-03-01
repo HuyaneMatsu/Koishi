@@ -16,7 +16,7 @@ from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
 # $ make
 # $ sudo cp ".../nsjail/nsjail" "/usr/sbin/" # Copy it.
 
-main_client : Client
+COMMAND_CLIENT : Client
 
 SNEKBOX_COLOR = Color.from_rgb(255, 16, 124)
 
@@ -55,7 +55,7 @@ if IS_UNIX:
             pass
 
 
-main_client.command_processer.create_category('SNEKBOX', checks=checks.is_guild(GUILD__NEKO_DUNGEON))
+COMMAND_CLIENT.command_processer.create_category('SNEKBOX', checks=checks.is_guild(GUILD__NEKO_DUNGEON))
 
 def build_output(output, return_code):
     lines = output.decode('utf-8').splitlines()
@@ -177,7 +177,7 @@ if IS_UNIX:
                 ), color=SNEKBOX_COLOR).add_footer(
                 f'{GUILD__NEKO_DUNGEON} only!')
     
-    @main_client.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
+    @COMMAND_CLIENT.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
     async def eval_(client, message, content):
         code, is_exception = parse_code_content(content)
         if is_exception and (code is None):

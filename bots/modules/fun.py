@@ -1,834 +1,14 @@
 # -*- coding: utf-8 -*-
-from time import perf_counter
-from random import random
-from math import ceil
+from random import random, randint, choice
 from html import unescape as html_unescape
+from functools import partial as partial_func
 
-from hata import Client, Embed, parse_emoji, DATETIME_FORMAT_CODE, id_to_time, elapsed_time, parse_emoji, Status, \
-    DiscordException, BUILTIN_EMOJIS, ERROR_CODES, ICON_TYPE_NONE, RoleManagerType, ChannelCategory, ChannelVoice, \
-    ChannelText, ChannelStore, ChannelThread, Lock, KOKORO
-from hata.ext.commands import wait_for_reaction, Pagination
+from hata import Client, Embed, BUILTIN_EMOJIS, Lock, KOKORO, DiscordException, ERROR_CODES
+from hata.ext.commands import wait_for_reaction
 
 from bot_utils.tools import Cell
 
-Koishi : Client
-
-COMMAND_LIMIT = 50
-SWITCHABLE_COMMANDS = {}
-
-
-@Koishi.interactions(is_global=True)
-async def ping(client, event):
-    """HTTP ping-pong."""
-    start = perf_counter()
-    yield
-    delay = (perf_counter()-start)*1000.0
-    
-    yield f'{delay:.0f} ms'
-
-
-@Koishi.interactions(is_global=True)
-async def avatar(client, event,
-        user : ('user', 'Choose a user!') = None,
-            ):
-    """Shows your or the chosen user's avatar."""
-    if user is None:
-        user = event.user
-    
-    if user.avatar:
-        color = user.avatar_hash&0xffffff
-    else:
-        color = user.default_avatar.color
-    
-    url = user.avatar_url_as(size=4096)
-    return Embed(f'{user:f}\'s avatar', color=color, url=url).add_image(url)
-
-
-@Koishi.interactions(is_global=True)
-async def show_emoji(client, event,
-        emoji : ('str', 'Yes?'),
-            ):
-    """Shows the given custom emoji."""
-    emoji = parse_emoji(emoji)
-    if emoji is None:
-        return 'That\'s not an emoji.'
-    
-    if emoji.is_unicode_emoji():
-        return 'That\' an unicode emoji, cannot link it.'
-    
-    return f'**Name:** {emoji:e} **Link:** {emoji.url}'
-
-
-@Koishi.interactions(name='id-to-time', is_global=True)
-async def id_to_time_(client, event,
-        snowflake : ('int', 'Id please!'),
-            ):
-    """Converts the given Discord snowflake id to time."""
-    time = id_to_time(snowflake)
-    return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
-
-
-@Koishi.interactions(is_global=True)
-async def guild_icon(client, event,
-        choice: ({
-            'Icon'             : 'icon'             ,
-            'Banner'           : 'banner'           ,
-            'Discovery-splash' : 'discovery_splash' ,
-            'Invite-splash'    : 'invite_splash'    ,
-                }, 'Which icon of the guild?' ) = 'icon',
-            ):
-    """Shows the guild's icon or it's selected splash."""
-    guild = event.guild
-    if (guild is None) or guild.partial:
-        return Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
-    
-    if choice == 'icon':
-        name = 'icon'
-        url = guild.icon_url_as(size=4096)
-        hash_value = guild.icon_hash
-    elif choice == 'banner':
-        name = 'banner'
-        url = guild.banner_url_as(size=4096)
-        hash_value = guild.banner_hash
-    elif choice == 'discovery_splash':
-        name = 'discovery splash'
-        url = guild.discovery_splash_url_as(size=4096)
-        hash_value = guild.discovery_splash_hash
-    else:
-        name = 'invite splash'
-        url = guild.invite_splash_url_as(size=4096)
-        hash_value = guild.invite_splash_hash
-    
-    if url is None:
-        color = (event.id>>22)&0xFFFFFF
-        return Embed(f'{guild.name} has no {name}', color=color)
-    
-    color = hash_value&0xFFFFFF
-    return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
-
-
-@Koishi.interactions(is_global=True)
-async def roll(client, event,
-        dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
-            ):
-    """Rolls with dices."""
-    amount = 0
-    for _ in range(dice_count):
-        amount += round(1.+(random()*5.))
-    
-    return str(amount)
-
-
-@Koishi.interactions(is_global=True)
-async def yeet(client, event,
-        user :('user', 'Select the user to yeet!'),
-        reason : ('str', 'Any reason why you would want to yeet?') = None,
-        delete_message_days : ([(str(v), v) for v in range(8)], 'Delete previous messages?') = 0,
-        notify_user : ('bool', 'Whether the user should get DM about the ban.') = True,
-            ):
-    """Yeets someone out of the guild. You must have ban users permission."""
-    guild = event.guild
-    if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
-    
-    if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-    
-    if not event.user_permissions.can_ban_users:
-        yield Embed('Permission denied', 'You must have ban users permission to use this command.')
-        return
-    
-    for maybe_banner in guild.clients:
-        if guild.cached_permissions_for(maybe_banner).can_ban_users:
-            banner = maybe_banner
-            break
-    else:
-        yield Embed('Permission denied', f'{client.name_at(guild)} cannot yeet in the guild.')
-        return
-    
-    if (reason is not None) and (not reason):
-        reason = None
-    
-    yield
-    
-    if notify_user:
-        if user.is_bot:
-            notify_note = None
-        else:
-            try:
-                channel = await client.channel_private_create(user)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return # We cannot help no internet
-                
-                raise
-            
-            embed = Embed('Yeeted', f'You were yeeted from {guild.name}.'). \
-                add_field('Reason', '*No reason provided.*' if reason is None else reason)
-            
-            try:
-                await client.message_create(channel, embed=embed)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return # We cannot help no internet
-                
-                elif isinstance(err, DiscordException) and (err.code == ERROR_CODES.cannot_message_user):
-                    notify_note = 'Notification cannot be delivered: user has DM disabled.'
-                else:
-                    raise
-            else:
-                notify_note = None
-    else:
-        notify_note = None
-    
-    if reason is None:
-        caller = event.user
-        reason = f'Requested by: {caller.full_name} [{caller.id}]'
-        
-    await banner.guild_ban_add(guild, user, delete_message_days=delete_message_days, reason=reason)
-    
-    embed = Embed('Hecatia yeah!', f'{user.full_name} has been yeeted.')
-    if (notify_note is not None):
-        embed.add_footer(notify_note)
-    
-    yield embed
-
-
-ROLE_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
-ROLE_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
-ROLE_EMOJI_EMOJIS = (ROLE_EMOJI_OK, ROLE_EMOJI_CANCEL)
-
-class _role_emoji_emoji_checker(object):
-    __slots__ = ('guild',)
-    
-    def __init__(self, guild):
-        self.guild = guild
-    
-    def __call__(self, event):
-        if event.emoji not in ROLE_EMOJI_EMOJIS:
-            return False
-        
-        user = event.user
-        if user.is_bot:
-            return False
-        
-        if not self.guild.permissions_for(user).can_administrator:
-            return False
-        
-        return True
-
-@Koishi.interactions(is_global=True)
-async def emoji_role(client, event,
-        emoji : ('str', 'Select the emoji to bind to roles.'),
-        role_1 : ('role', 'Select a role.') = None,
-        role_2 : ('role', 'Double role!') = None,
-        role_3 : ('role', 'Triple role!') = None,
-        role_4 : ('role', 'Quadra role!') = None,
-        role_5 : ('role', 'Penta role!') = None,
-        role_6 : ('role', 'Epic!') = None,
-        role_7 : ('role', 'Legendary!') = None,
-        role_8 : ('role', 'Mythical!') = None,
-        role_9 : ('role', 'Lunatic!') = None,
-            ):
-    """Binds the given emoji to the selected roles. You must have administrator permission."""
-    guild = event.guild
-    if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
-    
-    if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-        return
-    
-    if not event.user_permissions.can_ban_users:
-        yield Embed('Permission denied', 'You must have ban users permission to use this command.')
-        return
-    
-    permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            f'{client.name_at(guild)} requires manage emojis and add reactions permissions for this command.')
-        return
-    
-    emoji = parse_emoji(emoji)
-    if emoji is None:
-        yield Embed('Error', 'That\'s not an emoji.')
-        return
-    
-    if emoji.is_unicode_emoji():
-        yield Embed('Error', 'Cannot edit unicode emojis.')
-        return
-    
-    emoji_guild = emoji.guild
-    if (emoji_guild is None) or (emoji_guild is not guild):
-        yield Embed('Error', 'Wont edit emojis from an other guild.')
-        return
-    
-    roles = set()
-    for role in role_1, role_2, role_3, role_4, role_5, role_6, role_7, role_8, role_9:
-        if role is None:
-            continue
-        
-        if role.guild is guild:
-            roles.add(role)
-            continue
-        
-        yield Embed('Error', f'Role {role.name}, [{role.id}] is bound to an other guild.')
-        return
-    
-    roles = sorted(roles)
-    roles_ = emoji.roles
-    
-    embed = Embed().add_author(emoji.url, emoji.name)
-    
-    if (roles_ is None) or (not roles_):
-        role_text = '*none*'
-    else:
-        role_text = ', '.join([role.mention for role in roles_])
-    
-    embed.add_field('Roles before:', role_text)
-    
-    if (not roles):
-        role_text = '*none*'
-    else:
-        role_text = ', '.join([role.mention for role in roles])
-    
-    embed.add_field('Roles after:', role_text)
-    
-    yield
-    message = yield embed
-    for emoji_ in ROLE_EMOJI_EMOJIS:
-        await client.reaction_add(message, emoji_)
-    
-    try:
-        event = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
-    except TimeoutError:
-        emoji_ = ROLE_EMOJI_CANCEL
-    else:
-        emoji_ = event.emoji
-    
-    if message.channel.cached_permissions_for(client).can_manage_messages:
-        try:
-            await client.reaction_clear(message)
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            raise
-    
-    if emoji_ is ROLE_EMOJI_OK:
-        try:
-            await client.emoji_edit(emoji, roles=roles)
-        except DiscordException as err:
-            footer = repr(err)
-        else:
-            footer = 'Emoji edited successfully.'
-    
-    elif emoji_ is ROLE_EMOJI_CANCEL:
-        footer = 'Emoji edit cancelled'
-    
-    else: # should not happen
-        return
-    
-    embed.add_footer(footer)
-    
-    await client.interaction_followup_message_edit(event, message, embed=embed)
-
-
-@Koishi.interactions(name='user', is_global=True)
-async def user_(client, event,
-        user :('user', '*spy?*') = None,
-            ):
-    """Shows some information about your or about the selected user."""
-    
-    if user is None:
-        user = event.user
-    
-    guild = event.guild
-    
-    embed = Embed(user.full_name)
-    created_at = user.created_at
-    embed.add_field('User Information',
-        f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-        f'Profile: {user:m}\n'
-        f'ID: {user.id}')
-    
-    if guild is None:
-        profile = None
-    else:
-        profile = user.guild_profiles.get(guild)
-    
-    if profile is None:
-        if user.avatar_type is ICON_TYPE_NONE:
-            color = user.default_avatar.color
-        else:
-            color = user.avatar_hash&0xFFFFFF
-        embed.color = color
-    
-    else:
-        embed.color = user.color_at(guild)
-        roles = profile.roles
-        if roles is None:
-            roles = '*none*'
-        else:
-            roles.sort()
-            roles = ', '.join(role.mention for role in reversed(roles))
-        
-        text = []
-        if profile.nick is not None:
-            text.append(f'Nick: {profile.nick}')
-        
-        if profile.joined_at is None:
-            await client.guild_user_get(user.id)
-        
-        # Joined at can be `None` if the user is in lurking mode.
-        joined_at = profile.joined_at
-        if joined_at is not None:
-            text.append(f'Joined: {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]')
-        
-        boosts_since = profile.boosts_since
-        if (boosts_since is not None):
-            text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
-        
-        text.append(f'Roles: {roles}')
-        embed.add_field('In guild profile','\n'.join(text))
-    
-    embed.add_thumbnail(user.avatar_url_as(size=128))
-    
-    return embed
-
-@Koishi.interactions(name='role', is_global=True)
-async def role_(client, event,
-        role: ('role', 'Select the role to show information of.'),
-            ):
-    """Shows the information about a role."""
-    if role.partial:
-        return Embed('Error', 'I must be in the guild, where the role is.')
-    
-    embed = Embed(f'Role information for: {role.name}', color=role.color)
-    embed.add_field('Position', str(role.position), inline=True)
-    embed.add_field('Id', str(role.id), inline=True)
-    
-    embed.add_field('Separated', 'true' if role.separated else 'false', inline=True)
-    embed.add_field('Mentionable', 'true' if role.mentionable else 'false', inline=True)
-    
-    manager_type = role.manager_type
-    if manager_type is RoleManagerType.NONE:
-        managed_description = 'false'
-    else:
-        if manager_type is RoleManagerType.UNSET:
-            await client.sync_roles(role.guild)
-            manager_type = role.manager_type
-        
-        if manager_type is RoleManagerType.BOT:
-            managed_description = f'Special role for bot: {role.manager:f}'
-        elif manager_type is RoleManagerType.BOOSTER:
-            managed_description = 'Role for the boosters of the guild.'
-        elif manager_type is RoleManagerType.INTEGRATION:
-            managed_description = f'Special role for integration: {role.manager.name}'
-        elif manager_type is RoleManagerType.UNKNOWN:
-            managed_description = 'Some new things.. Never heard of them.'
-        else:
-            managed_description = 'I have no clue.'
-    
-    embed.add_field('Managed', managed_description, inline=True)
-    
-    color = role.color
-    embed.add_field('color',
-        f'html: {color.as_html}\n'
-        f'rgb: {color.as_rgb}\n'
-        f'int: {color:d}',
-            inline = True)
-    
-    created_at = role.created_at
-    embed.add_field('Created at',
-        f'{created_at:{DATETIME_FORMAT_CODE}}\n'
-        f'{elapsed_time(created_at)} ago',
-            inline=True)
-    
-    return embed
-
-
-GREEN_HEART = BUILTIN_EMOJIS['green_heart']
-YELLOW_HEART = BUILTIN_EMOJIS['yellow_heart']
-RED_HEART = BUILTIN_EMOJIS['heart']
-BLACK_HEART = BUILTIN_EMOJIS['black_heart']
-GIFT_HEART = BUILTIN_EMOJIS['gift_heart']
-
-def add_guild_all_field(guild, embed, even_if_empty):
-    add_guild_info_field(guild, embed, False)
-    add_guild_counts_field(guild, embed, False)
-    add_guild_emojis_field(guild ,embed, False)
-    add_guild_users_field(guild, embed, False)
-    add_guild_boosters_field(guild, embed, False)
-
-
-def add_guild_info_field(guild, embed, even_if_empty):
-    created_at = guild.created_at
-    sections_parts = [
-        '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]\n'
-        '**Voice region**: ', guild.region.name,
-            ]
-    
-    features = guild.features
-    if features:
-        sections_parts.append('\n**Features**: ')
-        for feature in features:
-            sections_parts.append(feature.name)
-            sections_parts.append(', ')
-        
-        del sections_parts[-1]
-    
-    embed.add_field('Guild information', ''.join(sections_parts))
-
-def add_guild_counts_field(guild, embed, even_if_empty):
-    channel_text = 0
-    channel_announcements = 0
-    channel_category = 0
-    channel_voice = 0
-    channel_thread = 0
-    channel_store = 0
-    
-    for channel in guild.channels.values():
-        channel_type = channel.__class__
-        if channel_type is ChannelText:
-            channel_text +=1
-            if channel.type == 5:
-                channel_announcements += 1
-            continue
-        
-        if channel_type is ChannelCategory:
-            channel_category += 1
-            continue
-        
-        if channel_type is ChannelVoice:
-            channel_voice += 1
-            continue
-        
-        if channel_type is ChannelThread:
-            channel_thread += 1
-            continue
-        
-        if channel_type is ChannelStore:
-            channel_store += 1
-            continue
-    
-    sections_parts = [
-        '**Users: ', str(guild.user_count), '**\n'
-        '**Roles: ', str(len(guild.role_list)), '**'
-            ]
-    
-    if channel_text:
-        sections_parts.append('\n**Text channels: ')
-        sections_parts.append(str(channel_text))
-        sections_parts.append('**')
-        
-        if channel_announcements:
-            sections_parts.append(' [')
-            sections_parts.append(str(channel_announcements))
-            sections_parts.append(' Announcements]')
-    
-    if channel_voice:
-        sections_parts.append('\n**Voice channels: ')
-        sections_parts.append(str(channel_voice))
-        sections_parts.append('**')
-    
-    if channel_category:
-        sections_parts.append('\n**Category channels: ')
-        sections_parts.append(str(channel_category))
-        sections_parts.append('**')
-    
-    if channel_thread:
-        sections_parts.append('\n**Thread channels: ')
-        sections_parts.append(str(channel_thread))
-        sections_parts.append('**')
-    
-    if channel_store:
-        sections_parts.append('\n**Store channels: ')
-        sections_parts.append(str(channel_store))
-        sections_parts.append('**')
-    
-    embed.add_field('Counts', ''.join(sections_parts))
-
-def add_guild_emojis_field(guild, embed, even_if_empty):
-    emoji_count = len(guild.emojis)
-    if emoji_count:
-        sections_parts = [
-            '**Total: ', str(emoji_count), '**\n'
-            '**Static emojis: '
-                ]
-        
-        normal_static, normal_animated, managed_static, managed_animated = guild.emoji_counts
-        emoji_limit = guild.emoji_limit
-        sections_parts.append(str(normal_static))
-        sections_parts.append('** [')
-        sections_parts.append(str(emoji_limit-normal_static))
-        sections_parts.append(' free]\n')
-        sections_parts.append('**Animated emojis: ')
-        sections_parts.append(str(normal_animated))
-        sections_parts.append('** [')
-        sections_parts.append(str(emoji_limit-normal_animated))
-        sections_parts.append(' free]')
-        
-        managed_total = managed_static+managed_animated
-        if managed_total:
-            sections_parts.append('\n**Managed: ')
-            sections_parts.append(str(managed_total))
-            sections_parts.append('** [')
-            sections_parts.append(str(managed_static))
-            sections_parts.append(' static, ')
-            sections_parts.append(str(managed_animated))
-            sections_parts.append(' animated]')
-        
-        embed.add_field('Emojis', ''.join(sections_parts))
-    
-    elif even_if_empty:
-        embed.add_field('Emojis', '*The guild has no emojis*')
-
-def add_guild_users_field(guild, embed, even_if_empty):
-    # most usual first
-    s_grey = Status.offline
-    s_green = Status.online
-    s_yellow = Status.idle
-    s_red = Status.dnd
-    
-    v_grey = 0
-    v_green = 0
-    v_yellow = 0
-    v_red = 0
-
-    for user in guild.users.values():
-        status = user.status
-        if   status is s_grey:
-            v_grey += 1
-        elif status is s_green:
-            v_green += 1
-        elif status is s_yellow:
-            v_yellow += 1
-        elif status is s_red:
-            v_red += 1
-        else:
-            v_grey += 1
-    
-    del s_grey
-    del s_green
-    del s_yellow
-    del s_red
-    
-    embed.add_field('Users',
-        f'{GREEN_HEART:e} **{v_green}**\n'
-        f'{YELLOW_HEART:e} **{v_yellow}**\n'
-        f'{RED_HEART:e} **{v_red}**\n'
-        f'{BLACK_HEART:e} **{v_grey}**')
-
-def add_guild_boosters_field(guild, embed, even_if_empty):
-    boosters = guild.boosters
-    if boosters:
-        count = len(boosters)
-        to_render = count if count < 21 else 21
-        
-        embed.add_field(f'Most awesome people of the guild',
-            f'{to_render} {GIFT_HEART:e} out of {count} {GIFT_HEART:e}')
-        
-        for user in boosters[:21]:
-            embed.add_field(user.full_name,
-                f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
-    
-    elif even_if_empty:
-        embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken nuggets.*')
-
-GUILD_FIELDS = {
-    'all'      : add_guild_all_field      ,
-    'info'     : add_guild_info_field     ,
-    'counts'   : add_guild_counts_field   ,
-    'emojis'   : add_guild_emojis_field   ,
-    'users'    : add_guild_users_field    ,
-    'boosters' : add_guild_boosters_field ,
-        }
-
-@Koishi.interactions(name='guild', is_global=True)
-async def guild_(client, event,
-        field: ([(name, name) for name in GUILD_FIELDS], 'Which field of the info should I show?') = 'all',
-            ):
-    """Shows some information about the guild."""
-    guild = event.guild
-    if guild.partial:
-        return Embed('Error', 'I must be in the guild to execute this command.')
-    
-    embed = Embed(guild.name, color=(
-        guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF)
-            ).add_thumbnail(guild.icon_url_as(size=128))
-    
-    GUILD_FIELDS[field](guild, embed, True)
-    
-    return embed
-
-
-USER_PER_PAGE = 16
-class InRolePageGetter(object):
-    __slots__ = ('users', 'guild', 'title')
-    def __init__(self, users, guild, roles):
-        title_parts = ['Users with roles: ']
-        
-        roles = sorted(roles)
-        index = 0
-        limit = len(roles)
-        
-        while True:
-            role = roles[index]
-            index += 1
-            role_name = role.name
-            
-            # Handle special case, when the role is an application's role, what means it's length can be over 32-
-            if len(role_name) > 32:
-                role_name = role_name[:32]+'...'
-            
-            title_parts.append(role_name)
-            
-            if index == limit:
-                break
-            
-            title_parts.append(', ')
-            
-        self.title = ''.join(title_parts)
-        self.users = users
-        self.guild = guild
-    
-    def __len__(self):
-        length = len(self.users)
-        if length:
-            length = ceil(length/USER_PER_PAGE)
-        else:
-            length = 1
-        
-        return length
-    
-    def __getitem__(self, index):
-        users = self.users
-        length = len(users)
-        if length:
-            user_index = index*USER_PER_PAGE
-            user_limit = user_index+USER_PER_PAGE
-            
-            if user_limit > length:
-                user_limit = length
-            
-            description_parts = []
-            guild = self.guild
-            while True:
-                user = users[user_index]
-                user_index += 1
-                description_parts.append(user.full_name)
-                try:
-                    guild_profile = user.guild_profiles[guild]
-                except KeyError:
-                    pass
-                else:
-                    nick = guild_profile.nick
-                    if nick is not None:
-                        description_parts.append(' *[')
-                        description_parts.append(nick)
-                        description_parts.append(']*')
-                
-                if user_index == user_limit:
-                    break
-                
-                description_parts.append('\n')
-                continue
-            
-            description = ''.join(description_parts)
-        
-        else:
-            description = '*none*'
-        
-        return Embed(self.title, description). \
-            add_author(guild.icon_url, guild.name). \
-            add_footer(f'Page {index+1}/{ceil(len(self.users)/USER_PER_PAGE)}')
-
-class PaginationCheckUserOrPermission(object):
-    __slots__ = ('user', 'channel')
-    def __init__(self, user, channel):
-        self.user = user
-        self.channel = channel
-    
-    def __call__(self, event):
-        user = event.user
-        if user is self.user:
-            return True
-        
-        if self.channel.permissions_for(user).can_manage_messages:
-            return True
-        
-        return False
-
-@Koishi.interactions(is_global=True)
-async def in_role(client, event,
-        role_1 : ('role', 'Select a role.'),
-        role_2 : ('role', 'Double role!') = None,
-        role_3 : ('role', 'Triple role!') = None,
-        role_4 : ('role', 'Quadra role!') = None,
-        role_5 : ('role', 'Penta role!') = None,
-        role_6 : ('role', 'Epic!') = None,
-        role_7 : ('role', 'Legendary!') = None,
-        role_8 : ('role', 'Mythical!') = None,
-        role_9 : ('role', 'Lunatic!') = None,
-            ):
-    """Shows the users with the given roles."""
-    guild = event.guild
-    if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
-    
-    if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-        return
-    
-    roles = set()
-    for role in role_1, role_2, role_3, role_4, role_5, role_6, role_7, role_8, role_9:
-        if role is None:
-            continue
-        
-        if role.guild is guild:
-            roles.add(role)
-            continue
-        
-        yield Embed('Error', f'Role {role.name}, [{role.id}] is bound to an other guild.')
-        return
-    
-    users = []
-    for user in guild.users.values():
-        try:
-            guild_profile = user.guild_profiles[guild]
-        except KeyError:
-            continue
-        
-        guild_profile_roles = guild_profile.roles
-        if guild_profile_roles is None:
-            continue
-        
-        if not roles.issubset(guild_profile_roles):
-            continue
-        
-        users.append(user)
-    
-    pages = InRolePageGetter(users, guild, roles)
-    
-    yield
-    
-    channel = event.channel
-    await Pagination(client, channel, pages, check=PaginationCheckUserOrPermission(event.user, channel))
-
+SLASH_CLIENT : Client
 
 
 LAST_MEME_AFTER = Cell()
@@ -846,7 +26,7 @@ async def get_memes():
         if after is None:
             after = ''
         
-        async with Koishi.http.get(MEME_URL, params={'limit': 100, 'after': after}) as response:
+        async with SLASH_CLIENT.http.get(MEME_URL, params={'limit': 100, 'after': after}) as response:
             json = await response.json()
         
         for meme_children in json['data']['children']:
@@ -875,7 +55,7 @@ async def get_meme():
     
     return None
 
-@Koishi.interactions(is_global=True, name='meme')
+@SLASH_CLIENT.interactions(is_global=True, name='meme')
 async def meme_(client, event):
     """Shows a meme."""
     guild = event.guild
@@ -910,7 +90,7 @@ async def get_trivias():
         return
     
     async with TRIVIA_REQUEST_LOCK:
-        async with Koishi.http.get(TRIVIA_URL, params={'amount': 100, 'category': 31}) as response:
+        async with SLASH_CLIENT.http.get(TRIVIA_URL, params={'amount': 100, 'category': 31}) as response:
             json = await response.json()
         
         for trivia_data in json['results']:
@@ -921,8 +101,7 @@ async def get_trivias():
                     )
             
             TRIVIA_QUEUE.append(trivia)
-    
-    
+
 async def get_trivia():
     if TRIVIA_QUEUE:
         return TRIVIA_QUEUE.pop()
@@ -941,23 +120,17 @@ TRIVIA_OPTIONS = (
     BUILTIN_EMOJIS['regional_indicator_d'],
         )
 
-class check_for_trivia_emoji(object):
-    __slots__ = ('user',)
+def check_for_trivia_emoji(user, event):
+    if event.user is not user:
+        return False
     
-    def __init__(self, user):
-        self.user = user
+    if event.emoji not in TRIVIA_OPTIONS:
+        return False
     
-    def __call__(self, event):
-        if event.user is not self.user:
-            return False
-        
-        if event.emoji not in TRIVIA_OPTIONS:
-            return False
-        
-        return True
+    return True
 
 
-@Koishi.interactions(is_global=True, name='trivia')
+@SLASH_CLIENT.interactions(is_global=True, name='trivia')
 async def trivia_(client, event):
     """Asks a trivia."""
     guild = event.guild
@@ -966,11 +139,11 @@ async def trivia_(client, event):
         return
     
     if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
+        yield Embed('Ohoho', 'I must be in the guild to execute this command.')
         return
     
     if not event.channel.cached_permissions_for(client).can_add_reactions:
-        yield Embed('Permission error', 'I need add reactions permission to execute this command.')
+        yield Embed('Permission error', 'I need add `reactions permission` to execute this command.')
         return
     
     user = event.user
@@ -1009,7 +182,7 @@ async def trivia_(client, event):
             await client.reaction_add(message, emoji)
         
         try:
-           reaction_add_event = await wait_for_reaction(client, message, check_for_trivia_emoji(user), 300.)
+           reaction_add_event = await wait_for_reaction(client, message, partial_func(check_for_trivia_emoji, user), 300.)
         except TimeoutError:
             title = 'Oof'
             description = 'Timeout occurred.'
@@ -1029,5 +202,360 @@ async def trivia_(client, event):
     finally:
         TRIVIA_USER_LOCK.discard(user.id)
 
+
+FUN = SLASH_CLIENT.interactions(None,
+    name = 'fun',
+    description = 'Some random commands.',
+    is_global = True,
+        )
+
+@FUN.interactions(show_for_invoking_user_only=True)
+async def message_me(client, event):
+    """Messages you!"""
+    yield
+    
+    channel = await client.channel_private_create(event.user)
+    try:
+        await client.message_create(channel, 'Love you!')
+    except DiscordException as err:
+        if err.code == ERROR_CODES.cannot_message_user:
+            yield 'Pls turn on private messages from this server!'
+        
+        raise
+    
+    yield ':3'
+
+
+@FUN.interactions
+async def roll(client, event,
+        dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
+            ):
+    """Rolls with dices."""
+    amount = 0
+    for _ in range(dice_count):
+        amount += round(1.+(random()*5.))
+    
+    return str(amount)
+
+
+@FUN.interactions
+async def rate(client, event,
+        target_user : ('user', 'Do you want me to rate someone else?') = None,
+            ):
+    """Rates someone!"""
+    if target_user is None:
+        target_user = event.user
+    
+    if isinstance(target_user, Client) or client.is_owner(target_user):
+        result = 10
+    else:
+        result = target_user.id%11
+    
+    return f'I rate {target_user.name_at(event.guild)} {result}/10'
+
+
+@FUN.interactions
+async def yuno(client, event):
+    """Your personal yandere!"""
+    return Embed('YUKI YUKI YUKI!',
+        '░░░░░░░░░░░▄▄▀▀▀▀▀▀▀▀▄▄░░░░░░░░░░░░░\n'
+        '░░░░░░░░▄▀▀░░░░░░░░░░░░▀▄▄░░░░░░░░░░\n'
+        '░░░░░░▄▀░░░░░░░░░░░░░░░░░░▀▄░░░░░░░░\n'
+        '░░░░░▌░░░░░░░░░░░░░▀▄░░░░░░░▀▀▄░░░░░\n'
+        '░░░░▌░░░░░░░░░░░░░░░░▀▌░░░░░░░░▌░░░░\n'
+        '░░░▐░░░░░░░░░░░░▒░░░░░▌░░░░░░░░▐░░░░\n'
+        '░░░▌▐░░░░▐░░░░▐▒▒░░░░░▌░░░░░░░░░▌░░░\n'
+        '░░▐░▌░░░░▌░░▐░▌▒▒▒░░░▐░░░░░▒░▌▐░▐░░░\n'
+        '░░▐░▌▒░░░▌▄▄▀▀▌▌▒▒░▒░▐▀▌▀▌▄▒░▐▒▌░▌░░\n'
+        '░░░▌▌░▒░░▐▀▄▌▌▐▐▒▒▒▒▐▐▐▒▐▒▌▌░▐▒▌▄▐░░\n'
+        '░▄▀▄▐▒▒▒░▌▌▄▀▄▐░▌▌▒▐░▌▄▀▄░▐▒░▐▒▌░▀▄░\n'
+        '▀▄▀▒▒▌▒▒▄▀░▌█▐░░▐▐▀░░░▌█▐░▀▄▐▒▌▌░░░▀\n'
+        '░▀▀▄▄▐▒▀▄▀░▀▄▀░░░░░░░░▀▄▀▄▀▒▌░▐░░░░░\n'
+        '░░░░▀▐▀▄▒▀▄░░░░░░░░▐░░░░░░▀▌▐░░░░░░░\n'
+        '░░░░░░▌▒▌▐▒▀░░░░░░░░░░░░░░▐▒▐░░░░░░░\n'
+        '░░░░░░▐░▐▒▌░░░░▄▄▀▀▀▀▄░░░░▌▒▐░░░░░░░\n'
+        '░░░░░░░▌▐▒▐▄░░░▐▒▒▒▒▒▌░░▄▀▒░▐░░░░░░░\n'
+        '░░░░░░▐░░▌▐▐▀▄░░▀▄▄▄▀░▄▀▐▒░░▐░░░░░░░\n'
+        '░░░░░░▌▌░▌▐░▌▒▀▄▄░░░░▄▌▐░▌▒░▐░░░░░░░\n'
+        '░░░░░▐▒▐░▐▐░▌▒▒▒▒▀▀▄▀▌▐░░▌▒░▌░░░░░░░\n'
+        '░░░░░▌▒▒▌▐▒▌▒▒▒▒▒▒▒▒▐▀▄▌░▐▒▒▌░░░░░░░\n',
+        color = 0xffafde,
+        url = 'https://www.youtube.com/watch?v=TaDAn_S_4Y8',
+            )
+
+
+@FUN.interactions
+async def paranoia(client, event):
+    """Pa-Pa-Pa-Pa-Paranoia!!!"""
+    return Embed('Pa-Pa-Pa-Pa-Paranoia', color=0x08963c, url='https://www.youtube.com/watch?v=wnli28pjsn4'
+        ).add_image('https://i.ytimg.com/vi/wnli28pjsn4/hqdefault.jpg?sqp=-oaymwEZCPYBEIoBSFXyq4qpAwsIARUAAIhCG'
+                    'AFwAQ==&rs=AOn4CLC27YDJ7qBQhLzq7y5iD85vlIYuHw')
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def random_(client, event,
+    n1 : ('int', 'Number limit.'),
+    n2 : ('int', 'Other number limit!') = 0,
+        ):
+    """Do you need some random numbers?"""
+    if n1 == n2:
+        result = n1
+    else:
+        if n2 < n1:
+            n1, n2 = n2, n1
+        
+        result = randint(n1, n2)
+    
+    return str(result)
+
+
+def generate_love_level():
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["blue_heart"]:e} There\'s no real connection between you two {BUILTIN_EMOJIS["blue_heart"]:e}',
+                ),
+        'text' : (
+            'The chance of this relationship working out is really low. You '
+            'can get it to work, but with high costs and no guarantee of '
+            'working out. Do not sit back, spend as much time together as '
+            'possible, talk a lot with each other to increase the chances of '
+            'this relationship\'s survival.'
+                ),
+            }
+
+    for x in range(0, 2):
+        yield value
+
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["blue_heart"]:e} A small acquaintance {BUILTIN_EMOJIS["blue_heart"]:e}',
+                ),
+        'text' : (
+            'There might be a chance of this relationship working out somewhat '
+            'well, but it is not very high. With a lot of time and effort '
+            'you\'ll get it to work eventually, however don\'t count on it. It '
+            'might fall apart quicker than you\'d expect.'
+                ),
+            }
+    
+    for x in range(2, 6):
+        yield value
+
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["purple_heart"]:e} You two seem like casual friends {BUILTIN_EMOJIS["purple_heart"]:e}',
+                ),
+        'text' : (
+            'The chance of this relationship working is not very high. You both '
+            'need to put time and effort into this relationship, if you want it '
+            'to work out well for both of you. Talk with each other about '
+            'everything and don\'t lock yourself up. Spend time together. This '
+            'will improve the chances of this relationship\'s survival by a lot.'
+                ),
+            }
+
+    for x in range(6, 21):
+        yield value
+
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["heartpulse"]:e} You seem like you are good friends {BUILTIN_EMOJIS["heartpulse"]:e}',
+                ),
+        'text' : (
+            'The chance of this relationship working is not very high, but its '
+            'not that low either. If you both want this relationship to work, '
+            'and put time and effort into it, meaning spending time together, '
+            'talking to each other etc., than nothing shall stand in your way.'
+                ),
+            }
+
+    for x in range(21, 31):
+        yield value
+
+
+    value = {
+        'titles':(
+            f'{BUILTIN_EMOJIS["cupid"]:e} You two are really close aren\'t you? {BUILTIN_EMOJIS["cupid"]:e}',
+                ),
+        'text' : (
+            'Your relationship has a reasonable amount of working out. But do '
+            'not overestimate yourself there. Your relationship will suffer '
+            'good and bad times. Make sure to not let the bad times destroy '
+            'your relationship, so do not hesitate to talk to each other, '
+            'figure problems out together etc.'
+                ),
+            }
+
+    for x in range(31, 46):
+        yield value
+    
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["heart"]:e} So when will you two go on a date? {BUILTIN_EMOJIS["heart"]:e}',
+                ),
+        'text' : (
+            'Your relationship will most likely work out. It won\'t be perfect '
+            'and you two need to spend a lot of time together, but if you keep '
+            'on having contact, the good times in your relationship will '
+            'outweigh the bad ones.'
+                ),
+            }
+
+    for x in range(46, 61):
+        yield value
+
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["two_hearts"]:e} Aww look you two fit so well together {BUILTIN_EMOJIS["two_hearts"]:e}',
+                ),
+        'text' : (
+            'Your relationship will most likely work out well. Don\'t hesitate '
+            'on making contact with each other though, as your relationship '
+            'might suffer from a lack of time spent together. Talking with '
+            'each other and spending time together is key.'
+                ),
+            }
+
+    for x in range(61, 86):
+        yield value
+
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Love is in the air {BUILTIN_EMOJIS["sparkling_heart"]:e}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Planned your future yet? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
+                ),
+        'text' : (
+            'Your relationship will most likely work out perfect. This '
+            'doesn\'t mean thought that you don\'t need to put effort into it. '
+            'Talk to each other, spend time together, and you two won\'t have '
+            'a hard time.'
+                ),
+            }
+
+    for x in range(86, 96):
+        yield value
+
+    value = {
+        'titles' : (
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} When will you two marry? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
+            f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Now kiss already {BUILTIN_EMOJIS["sparkling_heart"]:e}',
+                ),
+        'text' : (
+            'You two will most likely have the perfect relationship. But don\'t '
+            'think that this means you don\'t have to do anything for it to '
+            'work. Talking to each other and spending time together is key, '
+            'even in a seemingly perfect relationship.'
+                ),
+            }
+
+    for x in range(96, 101):
+        yield value
+
+LOVE_VALUES = tuple(generate_love_level())
+del generate_love_level
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def love(client, event,
+    user : ('user', 'Select your heart\'s chosen one!') = None,
+        ):
+    """How much you two fit together?"""
+    source_user = event.user
+    
+    if user is None:
+        user = client
+    elif user is source_user:
+        return 'huh?'
+    
+    percent = ((source_user.id&0x1111111111111111111111)+(user.id&0x1111111111111111111111))%101
+    element = LOVE_VALUES[percent]
+    
+    return Embed(
+        choice(element['titles']),
+        f'{source_user:f} {BUILTIN_EMOJIS["heart"]:e} {user:f} scored {percent}%!',
+        0xad1457,
+            ).add_field('My advice:', element['text'])
+
+
+MINE_MINE_CLEAR = (
+    BUILTIN_EMOJIS['white_large_square'].as_emoji,
+    BUILTIN_EMOJIS['one'].as_emoji,
+    BUILTIN_EMOJIS['two'].as_emoji,
+    BUILTIN_EMOJIS['three'].as_emoji,
+    BUILTIN_EMOJIS['four'].as_emoji,
+    BUILTIN_EMOJIS['five'].as_emoji,
+    BUILTIN_EMOJIS['six'].as_emoji,
+    BUILTIN_EMOJIS['seven'].as_emoji,
+    BUILTIN_EMOJIS['eight'].as_emoji,
+    BUILTIN_EMOJIS['bomb'].as_emoji,
+        )
+
+MINE_MINE = tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def minesweeper(client, message,
+        bomb_count: ([(str(x), x) for x in range(8, 17)], 'How much bombs should be on the field?') = 12,
+        raw : ('bool', 'Raw text?') = False,
+            ):
+    """Minesweeping is fun!? (not in irl)"""
+    
+    data = [0 for x in range(100)]
+    
+    while bomb_count:
+        x = randint(0, 9)
+        y = randint(0, 9)
+        position = x+y*10
+        
+        value = data[position]
+        if value == 9:
+            continue
+        
+        local_count = 0
+
+        for c_x, c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
+            local_x = x+c_x
+            local_y = y+c_y
+            if local_x != 10 and local_x != -1 and local_y != 10 and local_y != -1 and data[local_x+local_y*10] == 9:
+                local_count += 1
+        
+        if local_count > 3:
+            continue
+
+        for c_x,c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
+            local_x = x+c_x
+            local_y = y+c_y
+            if local_x != 10 and local_x != -1 and local_y != 10 and local_y != -1:
+                local_position = local_x+local_y*10
+                local_value = data[local_position]
+                if local_value == 9:
+                    continue
+                data[local_position] = local_value+1
+        
+        data[position] = 9
+        
+        bomb_count -= 1
+    
+    result = []
+    if raw:
+        result.append('```')
+    
+    result_sub = []
+    y = 0
+    while True:
+        x = 0
+        while True:
+            result_sub.append(MINE_MINE[data[x+y]])
+            x += 1
+            if x == 10:
+                break
+        result.append(''.join(result_sub))
+        result_sub.clear()
+        y += 10
+        if y == 100:
+            break
+    
+    if raw:
+        result.append('```')
+    
+    return '\n'.join(result)
 
 

@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
-from random import random, randint
+import signal
+from random import randint
 from itertools import cycle, chain
+from threading import main_thread
 
-from hata import DiscordException, sleep, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, \
+from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, CLIENTS, \
     Permission
 from hata.ext.commands import setup_ext_commands, checks, Closer
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash
 
-from bot_utils.shared import PREFIX__SATORI, COLOR__SATORI_HELP
+from bot_utils.shared import PREFIX__SATORI, COLOR__SATORI_HELP, category_name_rule, DEFAULT_CATEGORY_NAME
+from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor
+from bot_utils.interpreter import Interpreter
 
 Satori : Client
-Koishi : Client
 
-setup_ext_commands(Satori, PREFIX__SATORI)
+Satori.events(MessageDeleteWaitfor)
+Satori.events(MessageEditWaitfor)
+
+setup_ext_commands(Satori, PREFIX__SATORI, default_category_name=DEFAULT_CATEGORY_NAME,
+    category_name_rule=category_name_rule)
 setup_ext_slash(Satori)
 
 Satori.commands(SubterraneanHelpCommand(COLOR__SATORI_HELP), 'help')
@@ -41,23 +48,6 @@ async def invalid_command(client, message, command, content):
             await client.events.error(client, 'invalid_command', err)
             return
         return
-    
-    if (Koishi in guild.clients) and message.channel.cached_permissions_for(Koishi).can_send_messages:
-        try:
-            command = Koishi.command_processer.commands[command]
-        except KeyError:
-            pass
-        else:
-            if command.category.name == 'touhou':
-                await sleep(random(), KOKORO)
-                await client.typing(message.channel)
-                await sleep(1.0+random()*2.0, KOKORO)
-                await client.message_create(message.channel, f'Lemme ask my Sister, {Koishi.name_at(guild)}.')
-                await sleep(1.5+random(), KOKORO)
-                await Koishi.typing(message.channel)
-                await sleep(0.5+random(), KOKORO)
-                await command(Koishi, message, content)
-                return
     
     await client.message_create(message.channel, 'I have no idea, hmpff...')
 
@@ -251,4 +241,51 @@ class reverse:
             'Reverses your message\n'
             f'Usage: `{prefix}reverse <content>`'
                 ), color=COLOR__SATORI_HELP)
+
+
+@Satori.commands.from_class
+class shutdown:
+    async def command(client, message):
+        
+        for client_ in CLIENTS:
+            await client_.disconnect()
+        
+        await client.message_create(message.channel, 'Clients stopped, stopping process.')
+        KOKORO.stop()
+        thread_id = main_thread().ident
+        signal.pthread_kill(thread_id, signal.SIGKILL)
+    
+    category = 'UTILITY'
+    checks = checks.owner_only()
+    
+    async def description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('shutdown', (
+            'Shuts the clients down, then stops the process.'
+            f'Usage  `{prefix}shutdown`'
+            ), color=COLOR__SATORI_HELP).add_footer(
+                'Owner only!')
+
+async def execute_description(client, message):
+    prefix = client.command_processer.get_prefix_for(message)
+    return Embed('execute', (
+        'Use an interpreter trough me :3\n'
+        'Usages:\n'
+        f'{prefix}execute # code goes here\n'
+        '# code goes here\n'
+        '# code goes here\n'
+        '\n'
+        f'{prefix}execute\n'
+        '```\n'
+        '# code goes here\n'
+        '# code goes here\n'
+        '```\n'
+        '*not code*\n'
+        '\n'
+        '... and many more ways.'
+            ), color=COLOR__SATORI_HELP).add_footer(
+            'Owner only!')
+
+Satori.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
+    checks=[checks.owner_only()])
 
