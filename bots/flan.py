@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re, os
 from itertools import cycle
+from random import choice
 
 from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO, Client, \
     Lock, alchemy_incendiary, DiscordException, ERROR_CODES
@@ -1058,6 +1059,14 @@ def get_bgm(content):
         continue
     
     return best_found
+
+def get_random_bgm():
+    if CHESUTO_BGM_TRACKS_SORTED:
+        selected = choice(CHESUTO_BGM_TRACKS_SORTED)
+    else:
+        selected = None
+    
+    return selected
 
 async def bgminfo_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)

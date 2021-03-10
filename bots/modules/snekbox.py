@@ -57,6 +57,7 @@ if IS_UNIX:
 
 COMMAND_CLIENT.command_processer.create_category('SNEKBOX', checks=checks.is_guild(GUILD__NEKO_DUNGEON))
 
+
 def build_output(output, return_code):
     lines = output.decode('utf-8').splitlines()
     index = 0
@@ -67,7 +68,7 @@ def build_output(output, return_code):
             break
         
         line = lines[index]
-        index +=1
+        index += 1
         
         parsed = LOG_RP.fullmatch(line)
         if parsed is None:
@@ -114,7 +115,13 @@ def build_output(output, return_code):
     if is_truncated:
         lines.append('[OUTPUT TRUNCATED]')
     
-    return '\n'.join(lines)
+    result = '\n'.join(lines)
+    result = result.replace('\\', '\\\\')
+    result = result.replace('_', '\\_')
+    result = result.replace('*', '\\*')
+    result = result.replace('|', '\\|')
+    result = result.replace('~', '\\~')
+    return result
 
 ACTIVE_EXECUTORS = set()
 

@@ -8,6 +8,57 @@
     --size-min601-space-right: calc(12.5% - 75px);
     --size-min601-width: calc(75% + 150px);
     --size-min601-min-width: 601px;
+
+    --color-body-font: rgb(255 255 255);
+    --color-body-background: rgb(54 57 63);
+    --color-link-font: rgb(255 255 255);
+    --color-code-background: rgb(166 193 220 / 0.10);
+    --color-code-link-font: rgb(227 255 197);
+    --color-code-link-hover-background: rgb(195 181 255 / 0.20);
+    --color-table-border: rgb(200 225 255 / 0.30);
+    --color-table-head-background: rgb(0 128 255 / 0.05);
+    --color-table-line-even-background: rgb(255 245 178 / 0.05);
+    --color-table-line-even-hover-background: rgb(255 245 178 / 0.20);
+    --color-table-line-odd-background: rgb(172 179 172 / 0.05);
+    --color-table-line-odd-hover-background: rgb(172 179 172 / 0.20);
+    --color-code-block-background: rgb(246 248 250 / 0.1);
+    --color-scrollbar-track: rgb(87 96 96 / 0.50);
+    --color-scrollbar-thumb: rgb(26 29 29 / 0.75);
+    --color-underline: rgb(200 225 255 / 0.30);
+    --color-anchor: rgb(255 255 255);
+    --color-listing-comment-font: rgb(146 137 152);
+    --color-listing-preview-background: rgb(90 90 90);
+    --color-header-background: rgb(127 127 127 / 0.1);
+    --color-header-path-font: rgb(255 255 255 / 0.2);
+    --color-search-entry-border: rgb(127 127 127 / 0.20);
+    --color-search-entry-border-focus: rgb(189 150 222 / 0.30);
+    --color-search-entry-input-font: rgb(255 255 255);
+    --color-search-entry-input-background: rgb(0 0 0 / 0.50);
+    --color-search-entry-submit-font: rgb(255 255 255);
+    --color-content-table-svg: rgb(255 255 255);
+    --color-content-table-search-background: rgb(19 21 21 / 0.50);
+    --color-content-table-search-input: rgb(255 255 255);
+    --color-content-table-search-submit: rgb(255 0 31 / 1.00);
+    --color-block-quote-background: rgb(152 167 80 / 0.10);
+    --color-block-quote-border: rgb(152 167 80 / 0.50);
+    --color-block-quote-font: rgb(220 221 222);
+        }
+
+[variable-theme="black"] {
+    --color-body-background: rgb(0 0 0);
+    --color-code-background: rgb(184 203 222 / 0.20);
+    --color-search-entry-border-focus: rgb(213 192 230 / 0.6);
+    --color-content-table-search-background: rgb(91 101 101 / 0.50);
+    --color-search-entry-border: rgb(127 127 127 / 0.4);
+    --color-table-head-background: rgb(0 128 255 / 0.15);
+    --color-table-line-even-background: rgb(255 245 178 / 0.15);
+    --color-table-line-even-hover-background: rgb(255 245 178 / 0.30);
+    --color-table-line-odd-background: rgb(172 179 172 / 0.15);
+    --color-table-line-odd-hover-background: rgb(172 179 172 / 0.30);
+    --color-scrollbar-thumb: rgb(91 103 103 / 0.75);
+    --color-block-quote-background: rgb(80 152 167 / 0.10);
+    --color-block-quote-border: rgb(80 152 167 / 0.50);
+    --color-header-background: rgb(127 127 127 / 0.2);
         }
 
 body {
@@ -15,8 +66,8 @@ body {
     max-height: 100%;
     margin: 0;
     padding: 0;
-    background-color: rgb(54 57 63);
-    color: rgb(255 255 255);
+    background-color: var(--color-body-background);
+    color: var(--color-body-font);
         }
 
 p {
@@ -65,13 +116,17 @@ h2, h3, h4, h5, h6, h7 {
     margin-left: -0.8em;
     margin-right: 0px;
     padding-left: 0.8em;
-    padding
         }
 
 h2, h4, h6 {
     font-weight: lighter;
         }
 
+h1 .anchor, h2 .anchor, h3 .anchor, h4 .anchor, h5 .anchor, h6 .anchor, h7 .anchor, h7 .anchor, .with_anchor .anchor {
+    cursor: pointer;
+    position: sticky;
+        }
+
 h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
 h7:hover .anchor, .with_anchor:hover .anchor {
     visibility: visible;
@@ -80,11 +135,16 @@ h7:hover .anchor, .with_anchor:hover .anchor {
 h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
 h7:hover .anchor, .with_anchor:hover .anchor {
     visibility: visible;
+        }
+
+svg {
+    z-index: -1;
         }
 
 h1 .anchor svg, h2 .anchor svg, h3 .anchor svg, h4 .anchor svg, h5 .anchor svg, h6 .anchor svg,
 h7 .anchor svg, .with_anchor .anchor svg{
-    margin-top: 0.06em;
+    margin-top: 0.07em;
+    cursor: pointer;
         }
 
 ul {
@@ -98,7 +158,7 @@ li {
 
 a {
     text-decoration: none;
-    color : rgb(255 255 255);
+    color : var(--color-link-font);
         }
 
 a svg {
@@ -109,19 +169,19 @@ a svg {
         }
 
 a code {
-    color: rgb(227 255 197);
+    color: var(--color-code-link-font);
     transition: background-color 400ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
 a code:hover {
-    background-color: rgb(195 181 255 / 0.20);
+    background-color: var(--color-code-link-hover-background);
         }
 
 code {
     padding: .2em .3em;
     margin: 0;
     font-size: 85%;
-    background-color: rgb(166 193 220 / 0.10);
+    background-color: var(--color-code-background);
     border-radius: 6px;
         }
 
@@ -138,29 +198,29 @@ table {
 
 td, th {
     padding: 6px 13px;
-    border-color: rgb(200 225 255 / 0.30);
+    border-color: var(--color-underline);
     border-width: 1px;
     border-style: solid;
         }
 
 thead tr {
-    background-color: rgb(0 128 255 / 0.05);
+    background-color: var(--color-table-head-background);
         }
 
 tbody tr:nth-child(even) {
-    background-color: rgb(255 245 178 / 0.05)
+    background-color: var(--color-table-line-even-background);
         }
 
 tbody tr:nth-child(even):hover {
-    background-color: rgb(255 245 178 / 0.20)
+    background-color: var(--color-table-line-even-hover-background);
         }
 
 tbody tr:nth-child(odd) {
-    background-color: rgb(172 179 172 / 0.05);
+    background-color: var(--color-table-line-odd-background);
         }
 
 tbody tr:nth-child(odd):hover {
-    background-color: rgb(172 179 172 / 0.20);
+    background-color: var(--color-table-line-odd-hover-background);
         }
 
 form {
@@ -177,7 +237,7 @@ pre {
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
-    background-color: rgb(246 248 250 / 0.1);
+    background-color: var(--color-table-line-odd-hover-background);
     border-radius: 6px;
         }
 
@@ -196,16 +256,16 @@ blockquote {
     margin-bottom: 0px;
     margin-left: 0px;
     margin-right: 0px;
-    background-color: rgb(87 96 96 / 0.50);
+    background-color: var(--color-scrollbar-track);
         }
 
 ::-webkit-scrollbar-thumb{
     border-radius: 8px;
-    background-color: rgb(26 29 29 / 75%);
+    background-color: var(--color-scrollbar-thumb);
         }
 
 ::-webkit-scrollbar-corner{
-    background-color: rgb(87 96 96 / 0.50);
+    background-color: var(--color-scrollbar-track);
         }
 
 .sub_section {
@@ -266,7 +326,7 @@ blockquote {
     padding-bottom: 0.3em;
     border-bottom-width: 1px;
     border-bottom-style: solid;
-    border-bottom-color: rgb(200 225 255 / 0.30);
+    border-bottom-color: var(--color-underline);
         }
 
 .anchor {
@@ -274,7 +334,7 @@ blockquote {
     padding-right: 0.15em;
     margin-left: -0.8em;
     line-height: 1;
-    fill: rgb(255 255 255);
+    fill: var(--color-anchor);
     vertical-align: middle;
     visibility: hidden;
         }
@@ -290,7 +350,7 @@ blockquote {
         }
 
 .unit_listing .listing_linker .listing_comment {
-    color: rgb(146 137 152);
+    color: var(--color-listing-comment-font);
         }
 
 .unit_listing .listing_linker .listing_preview {
@@ -299,7 +359,7 @@ blockquote {
     width: max-content;
     min-width: 240px;
     max-width: calc(20vw + 400px);
-    background-color: rgb(90 90 90);
+    background-color: var(--color-listing-preview-background);
     text-align: left;
     padding-top: 3px;
     padding-bottom: 3px;
@@ -322,7 +382,7 @@ blockquote {
 
 .header {
     position: fixed;
-    background-color: rgb(127 127 127 / 0.1);
+    background-color: var(--color-header-background);
     height: 24px;
     display: block;
     padding-top: 8px;
@@ -349,7 +409,7 @@ blockquote {
 
 .header_block_left {
     float: left!important;
-    width: calc(100% - 320px);
+    width: calc(100% - 400px);
     overflow: hidden;
     max-width: fit-content;
         }
@@ -357,13 +417,13 @@ blockquote {
 .header_block_left .overflow_left_cut {
     font-size: 20px;
     line-height: 24px;
-    color: rgb(255 255 255 / 0.2);
+    color: var(--color-header-path-font);
     float: right;
     width: max-content;
         }
 
 .header_block_left .overflow_left_cut a {
-    color: rgb(255 255 255 / 0.2);
+    color: var(--color-header-path-font);
         }
 
 .header_block_left .overflow_left_cut a:hover {
@@ -379,18 +439,19 @@ blockquote {
     flex: 1;
     display: flex;
     flex-direction: row;
+    float: left;
         }
 
 .header_search .entry {
-    background-color: rgb(127 127 127 / 0.2);
+    background-color: var(--color-search-entry-border);
     height: 20px;
     padding: 2px;
         }
 
 .header_search .entry input {
     border: none;
-    background-color: rgb(0 0 0 / 0.8);
-    color: rgb(255 255 255);
+    background-color: var(--color-search-entry-input-background);
+    color: var(--color-search-entry-input-font);
     line-height: 20px;
     height: 20px;
     width: 240px;
@@ -405,21 +466,87 @@ blockquote {
     line-height: 20px;
     font-size: 14px;
     border: none;
-    background-color: rgb(127 127 127 / 0.2);
-    color: rgb(255 255 255);
+    background-color: var(--color-search-entry-border);
+    color: var(--color-search-entry-submit-font);
     width: 60px;
     outline-offset: -2px;
         }
 
 .header_search .entry input:focus, .header_search .submit input:focus {
-    outline-color: rgb(189 150 222 / 0.30);
+    outline-color: var(--color-search-entry-border-focus);
     outline-style: solid;
     outline-width: 2px;
         }
 
+.header_theme_picker {
+    height: 24px;
+    max-height: 24px;
+    float: right;
+    margin-left: 10px;
+    line-height: 24px;
+    width: 80px;
+    text-align: center;
+        }
+
+.header_theme_picker summary {
+    cursor: pointer;
+        }
+
+.header_theme_picker summary:focus {
+    outline-style: none;
+        }
+
+.header_theme_list_box {
+    width: 80px;
+    /* display: none; */
+    display: block;
+    text-align: inherit;
+    background-color: var(--color-body-background);
+    border-bottom-style: solid;
+    border-left-style: solid;
+    border-right-style: solid;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-color: var(--color-underline);
+    border-right-color: var(--color-underline);
+    border-left-color: var(--color-underline);
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    border-left-width: 1px;
+        }
+
+.header_theme_list_spacer {
+    height: 8px;
+    width: inherit;
+        }
+
+.header_theme_list {
+    background-color: var(--color-header-background);
+        }
+
+.header_theme_list_element {
+    width: inherit;
+    display: inherit;
+    text-align: inherit;
+    cursor: pointer;
+    padding-top: 2px;
+    padding-bottom: 2px;
+        }
+
+.header_theme_list_element:hover {
+    border-style: solid;
+    border-color: var(--color-underline);
+    border-width: 1px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    width: calc(inherit - 2px);
+        }
+
 .content_table {}
 
-.content_table .content_listing ul{
+.content_table .content_listing ul {
     list-style-type: none;
     margin-block-start: 0;
     margin-block-end: 0;
@@ -429,11 +556,11 @@ blockquote {
         }
 
 .content_table .content_listing svg {
-    padding-top: 0.1em;
+    padding-top: 0.175em;
     width: 1em;
     height: 0.65em;
     margin-left: -1em;
-    fill: rgb(255 255 255);
+    fill: var(--color-content-table-svg);
         }
 
 .content_table .content_listing a:hover {
@@ -447,7 +574,7 @@ blockquote {
     padding-bottom: 4px;
     padding-left: 8px;
     padding-right: 4px;
-    background-color: rgb(38 42 42);
+    background-color: var(--color-content-table-search-background);
     border-radius: 8px;
     height: 24px;
     margin-left: 3px;
@@ -465,14 +592,14 @@ blockquote {
     border: none;
     outline: none;
     width: calc(100% - 24px);
-    background-color: inherit;
-    color: rgb(255 255 255);
+    background-color: rgb(0 0 0 / 0.0);
+    color: var(--color-content-table-search-input);
         }
 
 .content_table .content_search button {
     height: 24px;
     width: 24px;
-    background-color: inherit;
+    background-color: rgb(0 0 0 / 0.0);
     padding-top: 0px;
     padding-left: 0px;
     padding-right: 0px;
@@ -485,7 +612,7 @@ blockquote {
         }
 
 .content_table .content_search button svg {
-    fill: rgb(179 13 33 / 0.80);
+    fill: var(--color-content-table-search-submit);
     width: 24px;
     height: 24px;
     margin-top: -10px;
@@ -497,10 +624,10 @@ blockquote {
 .docs {}
 
 .docs blockquote {
-    background-color: rgb(152 167 80 / 0.10);
+    background-color: var(--color-block-quote-background);
     border-width: 2px;
     border-style: solid;
-    border-color: rgb(152 167 80 / 0.50);
+    border-color: var(--color-block-quote-border);
     border-radius: 6px;
     margin-top : 20px;
     margin-bottom: 10px;
@@ -508,7 +635,7 @@ blockquote {
     padding-left: 0.75em;
     padding-right: 0.75em;
     padding-bottom: 0em;
-    color: rgb(220 221 222);
+    color: var(--color-block-quote-font);
         }
 
 .docs blockquote p {
@@ -523,7 +650,7 @@ blockquote {
         margin-bottom: 6px;
         border-bottom-width: 1px;
         border-bottom-style: solid;
-        border-bottom-color: rgb(200 225 255 / 0.30);
+        border-bottom-color: var(--color-underline);
             }
 
     .content_table .content_listing {
@@ -547,7 +674,7 @@ blockquote {
     .content_table .content_listing {
         border-right-width: 1px;
         border-right-style: solid;
-        border-right-color: rgb(200 225 255 / 0.30);
+        border-right-color: var(--color-underline);
         display: flow-root;
         width: 299px;
         overflow: overlay;

@@ -106,8 +106,7 @@ async def action(client, event,
         action : ([(x, x) for x in ACTIONS], 'What should I do?'),
             ):
     """Please do nice things."""
-    async for content in get_waifu_image(client, event, action, True):
-        yield content
+    return get_waifu_image(client, event, action, True)
 
 
 WAIFU = SLASH_CLIENT.interactions(None,
@@ -116,18 +115,17 @@ WAIFU = SLASH_CLIENT.interactions(None,
     is_global = True,
         )
 
-@WAIFU.interactions
+@WAIFU.interactions(is_default=True)
 async def sfw(client, event,
         type_ : ([(x, x) for x in SFW_WAIFUS], 'Waifu type!') = SFW_WAIFUS[0],
             ):
     """Safe working waifu."""
-    async for content in get_waifu_image(client, event, type_, True):
-        yield content
+    return get_waifu_image(client, event, type_, True)
+
 
 @WAIFU.interactions
 async def nsfw(client, event,
         type_ : ([(x, x) for x in NSFW_WAIFUS], 'Waifu type!') = NSFW_WAIFUS[0],
             ):
     """Waifu with extras!"""
-    async for content in get_waifu_image(client, event, type_, False):
-        yield content
+    return get_waifu_image(client, event, type_, False)

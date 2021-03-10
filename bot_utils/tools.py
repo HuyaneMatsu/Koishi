@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import re
 from random import random
+from functools import partial as partial_func
+from collections import deque
 
 from hata import CancelledError, sleep, Task, DiscordException, methodize, ERROR_CODES, BUILTIN_EMOJIS, \
-    EventWaitforBase, KOKORO, ERROR_CODES
+    EventWaitforBase, KOKORO, ERROR_CODES, is_coroutine_function
 from hata.ext.commands import CommandProcesser, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
@@ -37,12 +39,12 @@ def choose_notsame(list_,last):
 def pop_one(list_):
     return list_.pop(int((random()*len(list_))))
 
-def smart_join(list_,limit=2000,sep='\n'):
+def smart_join(list_, limit=2000, sep='\n'):
     result = []
-    seplen = len(sep)
-    limit -= (3+seplen)
+    separator_length = len(sep)
+    limit -= (3+separator_length)
     for value in list_:
-        limit -= (len(value)+seplen)
+        limit -= (len(value)+separator_length)
         if limit < 0:
             result.append('...')
             break
@@ -321,7 +323,7 @@ class PAGINATION_5PN(object):
                             ):
                     return
             
-            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
             await client.events.error(client, f'{self!r}.__call__',err)
             return
         
@@ -406,10 +408,12 @@ class PAGINATION_5PN(object):
         
         return Task(canceller(self,exception), KOKORO)
 
+
 class Cell(object):
     __slots__ = ('value', )
     def __init__(self, value=None):
         self.value = value
+
 
 del CommandProcesser
 del re

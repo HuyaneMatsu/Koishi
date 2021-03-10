@@ -3,19 +3,25 @@ import sys
 from random import random, choice, shuffle
 from time import perf_counter
 from math import ceil
-from collections import deque
+from collections import deque, OrderedDict
 from html import unescape as html_unescape
 from functools import partial as partial_func
+from datetime import datetime
+from hata.discord.rate_limit import parse_date_to_datetime
 
 from bs4 import BeautifulSoup
 
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
-    ChannelCategory, ChannelStore, ChannelThread, time_to_id
+    ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
+    MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME
 from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.slash import setup_ext_slash
+from hata.ext.slash import setup_ext_slash, SlashResponse
 from hata.backend.futures import render_exc_to_list
+from hata.backend.quote import quote
+from hata.discord.http import LIB_USER_AGENT
+from hata.backend.headers import USER_AGENT, DATE
 
 from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, COLOR__MARISA_HELP, \
     command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
@@ -265,13 +271,6 @@ del action_name, embed_color
 '''
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def repeat(client, event,
-        text: ('str', 'Uhum?')
-            ):
-    """What should I exactly repeat?"""
-    await client.interaction_response_message_create(event, text, allowed_mentions=None)
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def kaboom(client, event):
     """Kabooom!!"""
     await client.interaction_response_message_create(event)
@@ -365,3 +364,145 @@ async def test_channel_and_role(client, event,
 async def invoking_user_only(client, event):
     """SHows for the invoking user only, maybe?"""
     return 'Beep-boop'
+
+async def async_gen():
+    yield 'beep'
+    yield 'boop'
+    
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def yield_async_gen(client, event):
+    """Yields an async gen."""
+    yield async_gen()
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def return_async_gen(client, event):
+    """Returns an async gen."""
+    return async_gen()
+
+
+NEKO_LIFE = 'https://nekos.life/api/v2'
+
+async def get_neko_life(client, keyword):
+    yield
+    url = f'{NEKO_LIFE}/{keyword}'
+    
+    async with client.http.get(url) as response:
+        if response.status == 200:
+            data = await response.json()
+            content = data[keyword]
+        else:
+            content = 'Couldn\'t contact the API right now... OwO'
+    
+    yield content
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def text_cat(client, event):
+    """I will send text cats :3"""
+    return get_neko_life(client, 'cat')
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def why(client, event):
+    """why are you using this commands?"""
+    yield get_neko_life(client, 'why')
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def repeat(client, event,
+        text : ('str', 'The content to repeat')
+            ):
+    """Repeats nya!"""
+    if not text:
+        text = 'nothing to repeat'
+    
+    return SlashResponse(text, allowed_mentions=None)
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def raffle(client, event,
+        message : ('str', 'The message to raffle from'),
+        emoji : ('str', 'The reactor users to raffle from.'),
+            ):
+    """Raffles an user out who reacted on a message."""
+    guild = event.guild
+    if (guild is None) or (guild not in client.guild_profiles):
+        yield Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
+        return
+    
+    emoji = parse_emoji(emoji)
+    if emoji is None:
+        yield Embed('Error', 'That\'s not an emoji.')
+        return
+    
+    message_reference = parse_message_reference(message)
+    if message_reference is None:
+        yield Embed('Error', 'Could not identify the message.')
+        return
+    
+    guild_id, channel_id, message_id = message_reference
+    try:
+        message = MESSAGES[message_id]
+    except KeyError:
+        if channel_id:
+            try:
+                channel = CHANNELS[channel_id]
+            except KeyError:
+                yield Embed('Ohoho', 'I have no access to the channel.')
+                return
+        else:
+            channel = event.channel
+        
+        if not channel.cached_permissions_for(client).can_read_message_history:
+            yield Embed('Ohoho', 'I have no permission to get that message.')
+            return
+        
+        yield
+        
+        try:
+            message = client.message_get(channel, message_id)
+        except ConnectionError:
+            # No internet
+            return
+        except DiscordException as err:
+            if err.code in (
+                    ERROR_CODES.unknown_channel, # message deleted
+                    ERROR_CODES.unknown_message, # channel deleted
+                        ):
+                # The message is already deleted.
+                yield Embed('OOf', 'The referenced message is already yeeted.')
+                return
+            
+            if err.code == ERROR_CODES.invalid_access: # client removed
+                # This is not nice.
+                return
+            
+            if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+                yield Embed('Ohoho', 'I have no permission to get that message.')
+                return
+            
+            raise
+    
+    yield
+    
+    users = await client.reaction_user_get_all(message)
+    
+    if users:
+        user = choice(users)
+        content = user.mention
+    else:
+        content = 'Could not find any user.'
+    
+    yield content
+    return
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def loading(client, event):
+    """Loading screen nya!"""
+    if not client.is_owner(event.user):
+        return 'Owner only.'
+    
+    await client.interaction_response_message_create(event)
+    await sleep(0.5)
+    await client.interaction_response_message_edit(event, content='loaded')
+
+
+

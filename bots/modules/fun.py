@@ -202,14 +202,8 @@ async def trivia_(client, event):
     finally:
         TRIVIA_USER_LOCK.discard(user.id)
 
-
-FUN = SLASH_CLIENT.interactions(None,
-    name = 'fun',
-    description = 'Some random commands.',
-    is_global = True,
-        )
-
-@FUN.interactions(show_for_invoking_user_only=True)
+'''
+@SLASH_CLIENT.interactions(show_for_invoking_user_only=True, is_global=True)
 async def message_me(client, event):
     """Messages you!"""
     yield
@@ -226,7 +220,7 @@ async def message_me(client, event):
     yield ':3'
 
 
-@FUN.interactions
+@SLASH_CLIENT.interactions(is_global=True)
 async def roll(client, event,
         dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
             ):
@@ -238,7 +232,7 @@ async def roll(client, event,
     return str(amount)
 
 
-@FUN.interactions
+@SLASH_CLIENT.interactions(is_global=True)
 async def rate(client, event,
         target_user : ('user', 'Do you want me to rate someone else?') = None,
             ):
@@ -254,7 +248,7 @@ async def rate(client, event,
     return f'I rate {target_user.name_at(event.guild)} {result}/10'
 
 
-@FUN.interactions
+@SLASH_CLIENT.interactions(is_global=True)
 async def yuno(client, event):
     """Your personal yandere!"""
     return Embed('YUKI YUKI YUKI!',
@@ -284,7 +278,7 @@ async def yuno(client, event):
             )
 
 
-@FUN.interactions
+@SLASH_CLIENT.interactions(is_global=True)
 async def paranoia(client, event):
     """Pa-Pa-Pa-Pa-Paranoia!!!"""
     return Embed('Pa-Pa-Pa-Pa-Paranoia', color=0x08963c, url='https://www.youtube.com/watch?v=wnli28pjsn4'
@@ -307,7 +301,7 @@ async def random_(client, event,
         result = randint(n1, n2)
     
     return str(result)
-
+'''
 
 def generate_love_level():
     value = {
@@ -322,10 +316,10 @@ def generate_love_level():
             'this relationship\'s survival.'
                 ),
             }
-
+    
     for x in range(0, 2):
         yield value
-
+    
     value = {
         'titles' : (
             f'{BUILTIN_EMOJIS["blue_heart"]:e} A small acquaintance {BUILTIN_EMOJIS["blue_heart"]:e}',
@@ -340,7 +334,7 @@ def generate_love_level():
     
     for x in range(2, 6):
         yield value
-
+    
     value = {
         'titles' : (
             f'{BUILTIN_EMOJIS["purple_heart"]:e} You two seem like casual friends {BUILTIN_EMOJIS["purple_heart"]:e}',
@@ -353,10 +347,10 @@ def generate_love_level():
             'will improve the chances of this relationship\'s survival by a lot.'
                 ),
             }
-
+    
     for x in range(6, 21):
         yield value
-
+    
     value = {
         'titles' : (
             f'{BUILTIN_EMOJIS["heartpulse"]:e} You seem like you are good friends {BUILTIN_EMOJIS["heartpulse"]:e}',
@@ -368,11 +362,10 @@ def generate_love_level():
             'talking to each other etc., than nothing shall stand in your way.'
                 ),
             }
-
+    
     for x in range(21, 31):
         yield value
-
-
+    
     value = {
         'titles':(
             f'{BUILTIN_EMOJIS["cupid"]:e} You two are really close aren\'t you? {BUILTIN_EMOJIS["cupid"]:e}',
@@ -385,7 +378,7 @@ def generate_love_level():
             'figure problems out together etc.'
                 ),
             }
-
+    
     for x in range(31, 46):
         yield value
     
@@ -400,10 +393,10 @@ def generate_love_level():
             'outweigh the bad ones.'
                 ),
             }
-
+    
     for x in range(46, 61):
         yield value
-
+    
     value = {
         'titles' : (
             f'{BUILTIN_EMOJIS["two_hearts"]:e} Aww look you two fit so well together {BUILTIN_EMOJIS["two_hearts"]:e}',
@@ -418,7 +411,7 @@ def generate_love_level():
 
     for x in range(61, 86):
         yield value
-
+    
     value = {
         'titles' : (
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} Love is in the air {BUILTIN_EMOJIS["sparkling_heart"]:e}',
@@ -431,10 +424,10 @@ def generate_love_level():
             'a hard time.'
                 ),
             }
-
+    
     for x in range(86, 96):
         yield value
-
+    
     value = {
         'titles' : (
             f'{BUILTIN_EMOJIS["sparkling_heart"]:e} When will you two marry? {BUILTIN_EMOJIS["sparkling_heart"]:e}',
@@ -447,7 +440,7 @@ def generate_love_level():
             'even in a seemingly perfect relationship.'
                 ),
             }
-
+    
     for x in range(96, 101):
         yield value
 

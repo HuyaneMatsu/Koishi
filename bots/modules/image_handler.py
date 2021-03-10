@@ -229,6 +229,10 @@ async def upload(client, event,
         return
     
     message_reference = parse_message_reference(message)
+    if message_reference is None:
+        yield Embed('Error', 'Could not identify the message.', color=IMAGE_COLOR)
+        return
+    
     guild_id, channel_id, message_id = message_reference
     try:
         message = MESSAGES[message_id]
@@ -467,6 +471,9 @@ class ImageWithTag(object):
         if message:
             first_word = event.user.name
             last_word = sanitize_mentions(message, event.guild)
+            # Security goes brrr
+            if len(last_word) > 200:
+                last_word = last_word[:200] + ' ...'
         else:
             first_word = client.name
             last_word = event.user.name
@@ -477,7 +484,7 @@ class ImageWithTag(object):
             .add_image(f'attachment://{os.path.basename(image.path)}')
         
         with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
-            await client.message_create(event.channel, embed=embed, file=file, allowed_mentions='users')
+            await client.message_create(event.channel, embed=embed, file=file)
 
 for name, name_form__ing, name_form__s, description in (
         ('pat', 'patting', 'pats', 'Do you like pats as well?'),

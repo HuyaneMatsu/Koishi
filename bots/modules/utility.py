@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
-
 from math import ceil
 from time import perf_counter
 from functools import partial as partial_func
+from colorsys import rgb_to_hsv, rgb_to_yiq
 
 from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, RoleManagerType, ERROR_CODES, \
@@ -58,11 +58,20 @@ async def color_(client, event,
     
     yield
     
-    embed = Embed(f'#{color:06X}', color=color)
+    embed = Embed(color=color)
+    embed.add_field('hex', f'#{color:06X}', inline=True)
+    embed.add_field('rgb', f'{color>>16} r\n{(color>>8)&255} g\n{color>>16} b', inline=True)
+    r, g, b = color.as_rgb_float_tuple
+    embed.add_field('rgb%', f'{r*100.0:0.2f}% r\n{g*100.0:0.2f}% g\n{b*100.0:0.2f} b', inline=True)
+    h, s, v = rgb_to_hsv(r, g, b)
+    embed.add_field('hsv%', f'{h*100.0:0.2f}% h\n{s*100.0:0.2f}% s\n{v*100.0:0.2f}% v', inline=True)
+    y, i, q = rgb_to_yiq(r, g, b)
+    embed.add_field('yiq%', f'{y*100.0:0.2f}% y\n{i*100.0:0.2f}% i\n{q*100.0:0.2f}% q', inline=True)
+    
     embed.add_image('attachment://color.png')
     
     with ReuBytesIO() as buffer:
-        image = PIL.new('RGB', (120, 30), color.as_rgb)
+        image = PIL.new('RGB', (240, 30), color.as_rgb)
         image.save(buffer,'png')
         buffer.seek(0)
         
@@ -230,7 +239,7 @@ async def message_(client, event,
         # We only really need `channel_id` and `guild_id`, so we can ignore `guild_id`.
         
         if raw:
-            getter_coroutine = client.http.message_get(message.channel.id, message_id)
+            getter_coroutine = client.http.message_get(channel.id, message_id)
         else:
             getter_coroutine = client.message_get(channel, message_id)
     else:
@@ -297,11 +306,11 @@ class RoleCache(object):
             '\n'.join([role.mention for role in self.roles]),
             color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
         
-        embed.add_footer(f'Page 1 / {len(self.roles)}')
+        embed.add_footer(f'Page 1 / {len(self.roles)+1}')
         self.cache[0] = embed
     
     def __getitem__(self,index):
-        page = self.cache[index]
+        page = self.cache.get(index)
         if page is None:
             page = self.create_page(index)
         
@@ -322,11 +331,13 @@ class RoleCache(object):
                 '```',
                     ]),
             color=role.color)
-        embed.add_footer(f'Page {index+1} /  {len(self.cache)}')
+        embed.add_footer(f'Page {index+1} /  {len(self.roles)+1}')
         
         self.cache[index] = embed
         return embed
-
+    
+    def __len__(self):
+        return len(self.roles)+1
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def roles_(client, event):
@@ -354,7 +365,7 @@ async def roles_(client, event):
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def welcome_screen_(client, event):
-    """SHows the guild's welcome screen."""
+    """Shows the guild's welcome screen."""
     guild = event.guild
     if guild is None:
         yield Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
@@ -1054,7 +1065,7 @@ async def guild_icon(client, event,
             ):
     """Shows the guild's icon or it's selected splash."""
     guild = event.guild
-    if (guild is None) or guild.partial:
+    if (guild is None) or (guild not in client.guild_profiles):
         return Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
     
     if choice == 'icon':
@@ -1080,3 +1091,4 @@ async def guild_icon(client, event,
     
     color = hash_value&0xFFFFFF
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
+

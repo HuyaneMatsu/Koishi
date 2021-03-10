@@ -1995,3 +1995,21 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
         
         await client.message_create(message.channel, text)
 
+
+@TEST_COMMANDS
+async def test_webhook_message_edit_10(client, message):
+    """
+    Creates a message with a webhook, then adds attachments to it.
+    """
+    channel = message.channel
+    webhooks = await client.webhook_get_all_channel(channel)
+    for webhook in webhooks:
+        if webhook.type is WebhookType.bot:
+            executor_webhook = webhook
+            break
+    
+    else:
+        executor_webhook = await client.webhook_create(channel, 'testing')
+    
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', wait=True)
+    await client.webhook_message_edit(executor_webhook, new_message, file=('cake', b'cakes are great'))

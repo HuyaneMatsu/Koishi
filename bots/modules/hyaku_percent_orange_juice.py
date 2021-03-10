@@ -43,9 +43,10 @@ CARD_COST_TYPE_MUL_OTHERS_CARDS = 4
 CARD_COST_TYPE_ALL_STARS = 5
 
 class OJCardCost(object):
+    __slots__ = ('type', 'factor')
     def __new__(cls, type_, factor):
         self = object.__new__(cls)
-        self.type_ = type_
+        self.type = type_
         self.factor = factor
         return self
     
@@ -229,6 +230,7 @@ class OJEntityBase(object):
         return f'<{self.__class__.__name__} id={self.id}, name={self.name!r}>'
 
 class OJOrigin(OJEntityBase):
+    __slots__ = ()
     def __new__(cls, identifier, name):
         self = object.__new__(cls)
         self.id = identifier
@@ -279,6 +281,7 @@ def get_characters(order, reverse):
     return [character_sorter.character for character_sorter in character_sorters]
 
 class OJCardPack(OJEntityBase):
+    __slots__ = ('cost', )
     def __new__(cls, identifier, name, cost):
         self = object.__new__(cls)
         self.id = identifier

@@ -167,8 +167,7 @@ async def jam(client, event):
 @EVENTS.interactions
 async def qualifier(client, event):
     """Hata jam 2's qualifier."""
-    for embed in HATA_JAM_2_QUALIFIER:
-        yield embed
+    return HATA_JAM_2_QUALIFIER
 
 QUALIFIER_DEADLINE = datetime(2021, 1, 27, 0, 0, 0)
 JAM_START = datetime(2021, 1, 29, 0, 0, 0)

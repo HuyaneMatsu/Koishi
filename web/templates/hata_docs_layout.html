@@ -5,9 +5,34 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
+    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_docs.css') }}">
+
+    <!-- JS -->
+    <script type="module">
+        var theme = localStorage.getItem('theme');
+        if (theme != null){
+            document.documentElement.setAttribute('variable-theme', theme);
+                }
+    </script>
+    <script>
+        function set_theme(theme_value){
+            localStorage.setItem('theme', theme_value);
+            document.documentElement.setAttribute('variable-theme', theme_value);
+                }
+
+        function turn_off_theme_picker(){
+            var element = document.getElementById('header_theme_list_spacer');
+            if (element.open == true){
+                element.open = false;
+                    }
+                }
+
+        document.onclick = turn_off_theme_picker;
+
+    </script>
     {% block head_extra%}{% endblock %}
+
     <title>Hata Docs{% if (title is not none and title) %} - {{title}}{% endif %}</title>
 </head>
 <body>
@@ -25,6 +50,18 @@
                     {{ search_form.submit }}
                 </div>
             </form>
+            <details class="header_theme_picker" id="header_theme_list_spacer">
+                <summary onclick="turn_off_theme_picker()">
+                    Themes
+                </summary>
+                <div class="header_theme_list_spacer"></div>
+                <details-menu class="header_theme_list_box">
+                    <div class="header_theme_list">
+                        <a class="header_theme_list_element" onclick="set_theme('dark')">Dark</a>
+                        <a class="header_theme_list_element" onclick="set_theme('black')">Black</a>
+                    </div>
+                </details-menu>
+            </details>
         </div>
     </div>
     <div class="main_block">

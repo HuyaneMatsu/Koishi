@@ -12,14 +12,12 @@ MARISA_MODE = config.MARISA_MODE
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 
 if MARISA_MODE:
-    EXTENSION_LOADER.add_default_variables(SLASH_CLIENT=None)
-    
     Marisa = Client(config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
         application_id = config.MARISA_ID,
             )
     
-    EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa)
+    EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
     
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     

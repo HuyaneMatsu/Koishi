@@ -103,11 +103,11 @@ class dispatch_tester:
         if old is None:
             result.append('The message is uncached, cannot provide changes!')
             content = message.content
-            content_ln = len(content)
-            result.append(f'content: (len={content_ln})')
-            if content_ln > 500:
+            content_length = len(content)
+            result.append(f'content: (len={content_length})')
+            if content_length > 500:
                 content = content[:500].replace('`', '\\`')
-                result.append(f'--------------------\n{content}\n... +{content_ln-500} more\n--------------------')
+                result.append(f'--------------------\n{content}\n... +{content_length-500} more\n--------------------')
             else:
                 content=content.replace('`', '\\`')
                 result.append(f'--------------------\n{content}\n--------------------')
@@ -140,11 +140,11 @@ class dispatch_tester:
                     content=value
                     break_ = False
                     while True:
-                        content_ln = len(content)
-                        result.append(f'{key}: (len={content_ln})')
-                        if content_ln > 500:
+                        content_length = len(content)
+                        result.append(f'{key}: (len={content_length})')
+                        if content_length > 500:
                             content = content[:500].replace('`', '\\`')
-                            result.append(f'--------------------\n{content}\n... +{content_ln-500} more\n--------------------')
+                            result.append(f'--------------------\n{content}\n... +{content_length-500} more\n--------------------')
                         else:
                             content = content.replace('`', '\\`')
                             result.append(f'--------------------\n{content}\n--------------------')
@@ -379,15 +379,19 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages,120.)
 
     @classmethod
-    async def channel_edit(self,client,channel, old):
-        Task(self.old_events['channel_edit'](client,channel, old), KOKORO)
+    async def channel_edit(self, client, channel, old):
+        Task(self.old_events['channel_edit'](client, channel, old), KOKORO)
         if self.channel is None:
             return
         
-        result=[f'A channel was edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} {("(text) ","","(news) ")[(3+channel.type)//4]}({channel.type})']
+        result = [
+            f'A channel was edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} '
+            f'{("(text) ", "" ,"(news) ")[(3+channel.type)//4]}({channel.type})'
+                ]
+        
         for key, value in old.items():
-            if key=='overwrites':
-                removed,added=list_difference(sorted(value), sorted(channel.overwrites))
+            if key == 'overwrites':
+                removed,added = list_difference(sorted(value), sorted(channel.overwrites))
                 if removed:
                     result.append(f'Overwrites removed : ({len(removed)})')
                     for value in removed:
@@ -398,9 +402,15 @@ class dispatch_tester:
                         result.append(f'- {value.target!r} : {value.allow} {value.deny}')
                 continue
             
+            if key == 'region':
+                other = getattr(channel, key)
+                result.append(f'- {key} : {value!s} {value.value} -> {other!s} {other.value}')
+                continue
+            
             result.append(f'{key} changed: {value!r} -> {getattr(channel, key)!r}')
-        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
+        await Pagination(client, self.channel, pages, 120.)
 
     @classmethod
     async def channel_create(self,client,channel):
@@ -532,7 +542,7 @@ class dispatch_tester:
                 continue
             
             if key in ('verification_level', 'message_notification', 'mfa', 'content_filter', 'region', 'preferred_language'):
-                other=getattr(guild, key)
+                other = getattr(guild, key)
                 result.append(f'- {key} : {value!s} {value.value} -> {other!s} {other.value}')
                 continue
             

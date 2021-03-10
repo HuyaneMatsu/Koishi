@@ -11,7 +11,7 @@ from bot_utils.shared import GUILD__NEKO_DUNGEON
 from bot_utils.command_utils import CHECK_ADMINISTRATION
 
 if not MARISA_MODE:
-    from bots.flan import COLOR__FLAN_HELP, CHESUTO_FOLDER, get_bgm
+    from bots.flan import COLOR__FLAN_HELP, CHESUTO_FOLDER, get_bgm, get_random_bgm
 
 VOICE_COLORS = {}
 
@@ -463,21 +463,7 @@ async def loop(client, message_or_event, behaviour):
 
 
 if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
-    async def chesuto_play(client, message, name):
-        voice_client = client.voice_client_for(message)
-        
-        if voice_client is None:
-            yield 'There is no voice client at your guild.'
-            return
-        
-        bgm = get_bgm(name)
-        
-        if bgm is None:
-            yield 'Nothing found.'
-            return
-        
-        yield
-        
+    async def chesuto_play(client, voice_client, bgm):
         path = os.path.join(os.path.abspath(''), CHESUTO_FOLDER, bgm.source_name)
         if not os.path.exists(path):
             data = await client.download_url(bgm.url)
@@ -491,10 +477,43 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
         else:
             text = 'Added to queue'
         
-        yield f'{text} {bgm.display_name!r}!'
+        return f'{text} {bgm.display_name!r}!'
+    
+    async def chesuto_play_by_name(client, message, name):
+        voice_client = client.voice_client_for(message)
+        
+        if voice_client is None:
+            yield 'There is no voice client at your guild.'
+            return
+        
+        bgm = get_bgm(name)
+        
+        if bgm is None:
+            yield 'Nothing found.'
+            return
+        
+        yield
+        yield await chesuto_play(client, voice_client, bgm)
         return
 
-
+    
+    async def chesuto_play_random(client, message):
+        voice_client = client.voice_client_for(message)
+        
+        if voice_client is None:
+            yield 'There is no voice client at your guild.'
+            return
+        
+        bgm = get_random_bgm()
+        
+        if bgm is None:
+            yield 'No bgms added, something is messed up.'
+            return
+        
+        yield
+        yield await chesuto_play(client, voice_client, bgm)
+        return
+    
 #### #### #### #### Add as normal commands #### #### #### ####
 
 async def command_join_description(client, message):
@@ -528,7 +547,7 @@ async def command_resume(client, message):
 
 async def command_resume_description(client, event_or_message):
     prefix = client.command_processer.get_prefix_for(event_or_message)
-    return Embed('resume',(
+    return Embed('resume', (
         'Resumes the currently playing audio.\n'
         f'Usage: `{prefix}resume`\n'
         ), color=VOICE_COLORS.get(client))
@@ -627,22 +646,35 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
                 yield content
 
 if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
-    async def command_chesuto_play_description(client, message):
+    async def command_chesuto_chesuto_play_by_name_description(client, message):
         prefix = client.command_processer.get_prefix_for(message)
         return Embed('play', (
             'Plays the given chesuto bgm.\n'
             f'Usage: `{prefix}play <name>`\n'
             '\n'
             'Note that the given name can be also given as the position of the track.'
-            ), color=COLOR__FLAN_HELP)
+                ), color=COLOR__FLAN_HELP)
     
-    @Flan.commands(name='play', description=command_chesuto_play_description, category='VOICE')
+    @Flan.commands(name='play', description=command_chesuto_chesuto_play_by_name_description, category='VOICE')
     async def command_chesuto_play(client, message, name):
         if not name:
-            yield await command_chesuto_play_description(client, message)
+            yield await command_chesuto_chesuto_play_by_name_description(client, message)
             return
         
-        for content in chesuto_play(client, message, name):
+        async for content in chesuto_play_by_name(client, message, name):
+            if (content is not None):
+                yield content
+    
+    async def command_chesuto_play_random_description(client, message):
+        prefix = client.command_processer.get_prefix_for(message)
+        return Embed('play', (
+            'Plays a random chesuto bgm.\n'
+            f'Usage: `{prefix}random`\n'
+                ), color=COLOR__FLAN_HELP)
+    
+    @Flan.commands(name='random', description=command_chesuto_play_random_description, category='VOICE')
+    async def command_chesuto_random(client, message):
+        async for content in chesuto_play_random(client, message):
             if (content is not None):
                 yield content
 
@@ -728,8 +760,7 @@ if SLASH_CLIENT is not None:
             volume : ('int', 'Any preset volume?')=None,
                 ):
         """Joins the voice channel."""
-        async for content in join(client, event.user, event.guild, volume):
-            yield content
+        return join(client, event.user, event.guild, volume)
     
     @SLASH_CLIENT.interactions(name='pause', guild=GUILD__NEKO_DUNGEON)
     async def slash_pause(client, event):
@@ -744,8 +775,8 @@ if SLASH_CLIENT is not None:
     @SLASH_CLIENT.interactions(name='leave', guild=GUILD__NEKO_DUNGEON)
     async def slash_leave(client, message):
         """Leaves me from the voice channel."""
-        async for content in leave(client, message):
-            yield content
+        return leave(client, message)
+    
     
     if AUDIO_PLAY_POSSIBLE:
         @SLASH_CLIENT.interactions(name='play', guild=GUILD__NEKO_DUNGEON)
@@ -753,8 +784,7 @@ if SLASH_CLIENT is not None:
                 name:('str', 'The name of the audio to play.') = '',
                     ):
             """Plays the chosen audio or shows what is playing right now."""
-            async for content in yt_play(client, message, name):
-                yield content
+            return yt_play(client, message, name)
     
     @SLASH_CLIENT.interactions(name='move', guild=GUILD__NEKO_DUNGEON)
     async def slash_move(client, message,
@@ -762,22 +792,17 @@ if SLASH_CLIENT is not None:
                 ):
         """Moves to the selected channel or next to You, my Love?"""
         if (voice_channel is not None) and (not isinstance(voice_channel, ChannelVoice)):
-            yield 'Please select a voice channel.'
-            return
+            return 'Please select a voice channel.'
         
-        async for content in move(client, message, message.author, voice_channel):
-            if (content is not None):
-                yield content
+        return move(client, message, message.author, voice_channel)
     
     @SLASH_CLIENT.interactions(name='party-is-over', guild=GUILD__NEKO_DUNGEON)
     async def slash_party_is_over(client, event):
         """I mark the talking party as done?"""
         if not event.user_permissions.can_administrator:
-            yield 'You must have administrator permission to invoke this command.'
-            return
+            return 'You must have administrator permission to invoke this command.'
         
-        async for content in party_is_over(client, event):
-            yield content
+        return party_is_over(client, event)
     
     if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
         @SLASH_CLIENT.interactions(name='local', guild=GUILD__NEKO_DUNGEON)
@@ -785,8 +810,7 @@ if SLASH_CLIENT is not None:
                 name : ('str', 'The audio\'s name') = '',
                     ):
             """Plays a local audio file from my own collection UwU."""
-            async for content in local_play(client, event, name):
-                yield content
+            return local_play(client, event, name)
     
     @SLASH_CLIENT.interactions(name='loop', guild=GUILD__NEKO_DUNGEON)
     async def slash_loop(client, event,
@@ -798,8 +822,7 @@ if SLASH_CLIENT is not None:
     @SLASH_CLIENT.interactions(name='queue', guild=GUILD__NEKO_DUNGEON)
     async def slash_queue(client, event):
         """Shows the voice client\'s queue of the guild."""
-        async for content in queue(client, event, event.channel, GUILD__NEKO_DUNGEON):
-            yield content
+        return queue(client, event, event.channel, GUILD__NEKO_DUNGEON)
     
     @SLASH_CLIENT.interactions(name='volume', guild=GUILD__NEKO_DUNGEON)
     async def slash_volume(client, event,

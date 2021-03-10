@@ -328,17 +328,21 @@ async def yeet(client, event,
         yield Embed('Ohoho', 'I must be in the guild to do this.')
     
     if not event.user_permissions.can_ban_users:
-        yield Embed('Permission denied', 'You must have ban users permission to use this command.')
+        yield Embed('Permission denied', 'You must have yeet users permission to use this command.')
         return
     
-    for maybe_banner in guild.clients:
-        if guild.cached_permissions_for(maybe_banner).can_ban_users:
-            banner = maybe_banner
-            break
-    else:
+    if not guild.cached_permissions_for(client).can_ban_users:
         yield Embed('Permission denied', f'{client.name_at(guild)} cannot yeet in the guild.')
         return
+    '''
+    if not event.user.has_higher_role_than_at(user, guild):
+        yield Embed('Permission denied', 'You must have higher role than the person to be yeeted.')
+        return
     
+    if not client.has_higher_role_than_at(user, guild):
+        yield Embed('Permission denied', 'I must have higher role than the person to yeeted.')
+        return
+    '''
     if (reason is not None) and (not reason):
         reason = None
     
@@ -377,8 +381,8 @@ async def yeet(client, event,
     if reason is None:
         caller = event.user
         reason = f'Requested by: {caller.full_name} [{caller.id}]'
-        
-    await banner.guild_ban_add(guild, user, delete_message_days=delete_message_days, reason=reason)
+    
+    await client.guild_ban_add(guild, user, delete_message_days=delete_message_days, reason=reason)
     
     embed = Embed('Hecatia yeah!', f'{user.full_name} has been yeeted.')
     if (notify_note is not None):
