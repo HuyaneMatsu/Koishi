@@ -60,9 +60,9 @@ async def color_(client, event,
     
     embed = Embed(color=color)
     embed.add_field('hex', f'#{color:06X}', inline=True)
-    embed.add_field('rgb', f'{color>>16} r\n{(color>>8)&255} g\n{color>>16} b', inline=True)
+    embed.add_field('rgb', f'{color>>16} r\n{(color>>8)&255} g\n{color&255} b', inline=True)
     r, g, b = color.as_rgb_float_tuple
-    embed.add_field('rgb%', f'{r*100.0:0.2f}% r\n{g*100.0:0.2f}% g\n{b*100.0:0.2f} b', inline=True)
+    embed.add_field('rgb%', f'{r*100.0:0.2f}% r\n{g*100.0:0.2f}% g\n{b*100.0:0.2f}% b', inline=True)
     h, s, v = rgb_to_hsv(r, g, b)
     embed.add_field('hsv%', f'{h*100.0:0.2f}% h\n{s*100.0:0.2f}% s\n{v*100.0:0.2f}% v', inline=True)
     y, i, q = rgb_to_yiq(r, g, b)

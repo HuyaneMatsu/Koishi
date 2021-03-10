@@ -334,7 +334,7 @@ async def yeet(client, event,
     if not guild.cached_permissions_for(client).can_ban_users:
         yield Embed('Permission denied', f'{client.name_at(guild)} cannot yeet in the guild.')
         return
-    '''
+    
     if not event.user.has_higher_role_than_at(user, guild):
         yield Embed('Permission denied', 'You must have higher role than the person to be yeeted.')
         return
@@ -342,7 +342,7 @@ async def yeet(client, event,
     if not client.has_higher_role_than_at(user, guild):
         yield Embed('Permission denied', 'I must have higher role than the person to yeeted.')
         return
-    '''
+    
     if (reason is not None) and (not reason):
         reason = None
     
