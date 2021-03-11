@@ -33,6 +33,7 @@ IGNORED_NAMES = {
     'library',
     'chesuto_data',
     'channel_names.csv',
+    '.git',
         }
 
 def flatten_directory(path, name, access_path):
@@ -84,7 +85,7 @@ class check_any(object):
         
         return False
 
-INITIAL_MESSAGE = 'message_initital'
+INITIAL_MESSAGE = 'message_initial'
 REQUEST_APPROVED = 'message_approved'
 RECEIVED = 'message_received'
 SYNC_DONE = 'message_done'
