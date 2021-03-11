@@ -2471,7 +2471,7 @@ HEART_BUMP_AMOUNT = 100
 
 BUMP_RP = re.compile(
     f'<@!?(\d{{7,21}})>, \n'
-    f' {{6}}Bump done {BUILTIN_EMOJIS["thumbsup"].as_emoji}\n'
+    f' {{6}}Bump done :thumbsup:\n' # This is really not an emoji!
     f' {{6}}Check it on DISBOARD: https://disboard\.org/'
         )
 
@@ -2505,10 +2505,11 @@ async def heart_generator(client, message):
             embeds = message.embeds
             if (embeds is not None):
                 content = embeds[0].description
-                matched = BUMP_RP.fullmatch(content)
-                if (matched is not None):
-                    user_id = int(matched.group(1))
-                    await increase_user_total_love(user_id, HEART_BUMP_AMOUNT)
+                if (content is not None):
+                    matched = BUMP_RP.fullmatch(content)
+                    if (matched is not None):
+                        user_id = int(matched.group(1))
+                        await increase_user_total_love(user_id, HEART_BUMP_AMOUNT)
         
         return
     

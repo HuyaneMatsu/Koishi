@@ -1,0 +1,11 @@
+# Python
+*.pyc
+__pycache__/
+
+# Editor
+.idea
+
+# Some data files
+/images/*
+/chesuto_data/*.mp3
+

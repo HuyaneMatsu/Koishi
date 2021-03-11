@@ -11,7 +11,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
-    ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen
+    ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined
 
 from hata.backend.utils import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -1156,7 +1156,7 @@ async def channel_create(client,guild, name, category=None, type_=0):
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         data,)
-    return CHANNEL_TYPES[data['type']](data,client,guild)
+    return CHANNEL_TYPES.get(data['type'], ChannelGuildUndefined)(data, client, guild)
 
 async def guild_emoji_get_all(client,guild,):
     guild_id=guild.id

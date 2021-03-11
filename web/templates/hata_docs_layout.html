@@ -21,9 +21,13 @@
             document.documentElement.setAttribute('variable-theme', theme_value);
                 }
 
-        function turn_off_theme_picker(){
+        function turn_off_theme_picker(event){
+            if (event.target.tagName == 'SUMMARY'){
+                return;
+                    }
+
             var element = document.getElementById('header_theme_list_spacer');
-            if (element.open == true){
+            if (element.open){
                 element.open = false;
                     }
                 }
@@ -51,7 +55,7 @@
                 </div>
             </form>
             <details class="header_theme_picker" id="header_theme_list_spacer">
-                <summary onclick="turn_off_theme_picker()">
+                <summary>
                     Themes
                 </summary>
                 <div class="header_theme_list_spacer"></div>

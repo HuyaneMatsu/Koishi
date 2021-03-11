@@ -496,9 +496,12 @@ blockquote {
     outline-style: none;
         }
 
+.header_theme_picker summary::-webkit-details-marker {
+    display: none;
+        }
+
 .header_theme_list_box {
     width: 80px;
-    /* display: none; */
     display: block;
     text-align: inherit;
     background-color: var(--color-body-background);

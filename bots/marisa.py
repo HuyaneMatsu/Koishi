@@ -504,5 +504,8 @@ async def loading(client, event):
     await sleep(0.5)
     await client.interaction_response_message_edit(event, content='loaded')
 
-
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def number(client, event, number:('number', 'number')):
+    """Loading screen nya!"""
+    return str(number)
 
