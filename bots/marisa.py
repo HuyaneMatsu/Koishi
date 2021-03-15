@@ -17,7 +17,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME
 from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.slash import setup_ext_slash, SlashResponse
+from hata.ext.slash import setup_ext_slash, SlashResponse, abort
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
@@ -198,11 +198,13 @@ IMAGE_URL_CACHE = {}
 async def get_image_embed(client, tags, name, color):
     image_urls = IMAGE_URL_CACHE.get(tags)
     if image_urls is None:
+        # Yield to acknowledge the event.
+        yield
         
         # Request image information
         async with client.http.get(SAFE_BOORU+tags) as response:
             if response.status != 200:
-                return Embed('Error', 'Safe-booru unavailable', color=color)
+                abort('Safe-booru unavailable')
             
             result = await response.read()
         
@@ -211,34 +213,31 @@ async def get_image_embed(client, tags, name, color):
         image_urls = [post['file_url'] for post in soup.find_all('post')]
         
         if not image_urls:
-            return Embed('Error', 'No images found.\nPlease try again later.', color=color)
+            abort('No images found.\nPlease try again later.')
         
         # If we received image urls, cache them
         IMAGE_URL_CACHE[tags] = image_urls
     
     image_url = choice(image_urls)
-    return Embed(name, color=color, url=image_url).add_image(image_url)
-
+    yield SlashResponse(Embed(name, color=color, url=image_url).add_image(image_url), show_for_invoking_user_only=False)
+    return
 
 SCARLET = Marisa.interactions(None, name='scarlet', description='Scarlet?', guild=GUILD__NEKO_DUNGEON)
 
-@SCARLET.interactions
+@SCARLET.interactions(show_for_invoking_user_only=True)
 async def flandre(client, event):
     """Flandre!"""
-    yield # Yield one to acknowledge the interaction
-    yield await get_image_embed(client, 'flandre_scarlet', 'Scarlet Flandre', 0xdc143c)
+    return get_image_embed(client, 'flandre_scarlet', 'Scarlet Flandre', 0xdc143c)
 
-@SCARLET.interactions
+@SCARLET.interactions(show_for_invoking_user_only=True)
 async def remilia(client, event):
     """Remilia!"""
-    yield # Yield one to acknowledge the interaction
-    yield await get_image_embed(client, 'remilia_scarlet', 'Scarlet Remilia', 0x9400d3)
+    return get_image_embed(client, 'remilia_scarlet', 'Scarlet Remilia', 0x9400d3)
 
-@SCARLET.interactions(is_default=True)
+@SCARLET.interactions(is_default=True, show_for_invoking_user_only=True)
 async def devil(client, event):
     """Flandre & Remilia!"""
-    yield # Yield one to acknowledge the interaction
-    yield await get_image_embed(client, 'flandre_scarlet+remilia_scarlet', 'Scarlet Flandre & Remilia', 0xa12a2a)
+    return get_image_embed(client, 'flandre_scarlet+remilia_scarlet', 'Scarlet Flandre & Remilia', 0xa12a2a)
 
 '''
 class Action(object):
@@ -425,18 +424,15 @@ async def raffle(client, event,
     """Raffles an user out who reacted on a message."""
     guild = event.guild
     if (guild is None) or (guild not in client.guild_profiles):
-        yield Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
-        return
+        abort('The command unavailable in guilds, where the application\'s bot is not in.')
     
     emoji = parse_emoji(emoji)
     if emoji is None:
-        yield Embed('Error', 'That\'s not an emoji.')
-        return
+        abort('That\'s not an emoji.')
     
     message_reference = parse_message_reference(message)
     if message_reference is None:
-        yield Embed('Error', 'Could not identify the message.')
-        return
+        abort('Could not identify the message.')
     
     guild_id, channel_id, message_id = message_reference
     try:
@@ -446,14 +442,13 @@ async def raffle(client, event,
             try:
                 channel = CHANNELS[channel_id]
             except KeyError:
-                yield Embed('Ohoho', 'I have no access to the channel.')
+                abort('I have no access to the channel.')
                 return
         else:
             channel = event.channel
         
         if not channel.cached_permissions_for(client).can_read_message_history:
-            yield Embed('Ohoho', 'I have no permission to get that message.')
-            return
+            abort('I have no permission to get that message.')
         
         yield
         
@@ -468,7 +463,7 @@ async def raffle(client, event,
                     ERROR_CODES.unknown_message, # channel deleted
                         ):
                 # The message is already deleted.
-                yield Embed('OOf', 'The referenced message is already yeeted.')
+                abort('The referenced message is already yeeted.')
                 return
             
             if err.code == ERROR_CODES.invalid_access: # client removed
@@ -476,7 +471,7 @@ async def raffle(client, event,
                 return
             
             if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
-                yield Embed('Ohoho', 'I have no permission to get that message.')
+                abort('I have no permission to get that message.')
                 return
             
             raise
@@ -508,4 +503,52 @@ async def loading(client, event):
 async def number(client, event, number:('number', 'number')):
     """Loading screen nya!"""
     return str(number)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def is_banned(client, event,
+        user: ('user', 'Who should I check?')
+            ):
+    """Checks whether the user is banned."""
+    if not event.user_permissions.can_ban_users:
+        abort('You need to have `ban users` permissions to do this.')
+    
+    if not event.channel.cached_permissions_for(client).can_ban_users:
+        abort('I need to have `ban users` permissions to do this.')
+    
+    yield # acknowledge the event
+    
+    try:
+        ban_entry = await client.guild_ban_get(event.guild, user)
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_ban:
+            ban_entry = None
+        else:
+            raise
+    
+    embed = Embed(f'Ban entry for {user:f}').add_thumbnail(user.avatar_url)
+    
+    if ban_entry is None:
+        embed.description = 'The user **NOT YET** banned.'
+    
+    else:
+        embed.description = 'The user is banned.'
+        
+        reason = ban_entry.reason
+        if reason is None:
+            reason = '*No reason was specified.*'
+        
+        embed.add_field('Reason:', reason)
+    
+    yield embed
+
+
+async def async_gen_2():
+    abort('beep')
+    yield
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def abort_from_async_gen(client, event):
+    """Aborts from an async gen."""
+    return async_gen_2()
+
 

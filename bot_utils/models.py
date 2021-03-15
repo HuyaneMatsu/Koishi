@@ -24,7 +24,7 @@ else:
     class ds_model(BASE):
         __tablename__   = 'DS_TABLE'
         id              = Column(BIGINT, primary_key=True)
-        user_id         = Column(BIGINT, unique = True)
+        user_id         = Column(BIGINT, unique=True)
         position        = Column(Integer)
         data            = Column(LargeBinary(800))
     
@@ -33,7 +33,7 @@ else:
     class currency_model(BASE):
         __tablename__   = 'CURRENCY'
         id              = Column(BIGINT, primary_key=True)
-        user_id         = Column(BIGINT, unique = True)
+        user_id         = Column(BIGINT, unique=True)
         total_love      = Column(BIGINT, default=0)
         total_allocated = Column(BIGINT, default=0)
         daily_next      = Column(DateTime, default=func.utc_timestamp())
@@ -44,13 +44,23 @@ else:
     class auto_react_role_model(BASE):
         __tablename__   = 'AUTO_REACT_ROLE'
         id              = Column(BIGINT, primary_key=True)
-        message_id      = Column(BIGINT, unique = True)
+        message_id      = Column(BIGINT, unique=True)
         channel_id      = Column(BIGINT)
         data            = Column(LargeBinary(320))
         behaviour       = Column(Integer)
         client_id       = Column(BIGINT)
     
     AUTO_REACT_ROLE_TABLE = auto_react_role_model.__table__
+    
+    class item_model(BASE):
+        __tablename__   = 'ITEM'
+        id              = Column(BIGINT, primary_key=True)
+        user_id         = Column(BIGINT)
+        amount          = Column(BIGINT, default=0)
+        type            = Column(Integer, default=0)
+    
+    
+    ITEM_TABLE = item_model.__table__
     
     # Creating tables
     DB_ENGINE = create_engine(DATABASE_NAME)

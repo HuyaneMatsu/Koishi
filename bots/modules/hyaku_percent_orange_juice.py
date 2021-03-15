@@ -240,8 +240,10 @@ class OJOrigin(OJEntityBase):
         return self
 
 class OJCharacter(OJEntityBase):
-    __slots__ = ('description', 'hyper_card_ids', 'origin', 'attack', 'defense', 'evasion', 'name', 'recovery', 'hp', )
-    def __new__(cls, identifier, name, hp, attack, defense, evasion, recovery, origin, description, hyper_card_ids):
+    __slots__ = ('description', 'hyper_card_ids', 'origin', 'attack', 'defense', 'evasion', 'name', 'recovery', 'hp',
+        'card_name',)
+    def __new__(cls, identifier, name, hp, attack, defense, evasion, recovery, origin, description, hyper_card_ids,
+            card_name=None):
         self = object.__new__(cls)
         self.id = identifier
         self.name = name
@@ -253,6 +255,7 @@ class OJCharacter(OJEntityBase):
         self.origin = origin
         self.description = description
         self.hyper_card_ids = hyper_card_ids
+        self.card_name = card_name
         CHARACTERS[identifier] = self
         
         return self
@@ -1947,6 +1950,7 @@ CHARACTER_QP = OJCharacter(1,
     ORIGIN_QP_SHOOTING,
     None,
     (CARD_HYPER_MODE,),
+    'QP_(unit).png',
         )
 
 CHARACTER_SUGURI = OJCharacter(2,
@@ -1955,6 +1959,7 @@ CHARACTER_SUGURI = OJCharacter(2,
     ORIGIN_SUGURI,
     None,
     (CARD_ACCELERATOR,),
+    'Suguri_(unit).png',
         )
 
 CHARACTER_MARC = OJCharacter(3,
@@ -1963,6 +1968,7 @@ CHARACTER_MARC = OJCharacter(3,
     ORIGIN_FLYING_RED_BARREL,
     None,
     (CARD_X16_BIG_ROCKET,),
+    'Marc_(unit).png',
         )
 
 CHARACTER_KAI = OJCharacter(4,
@@ -1971,6 +1977,7 @@ CHARACTER_KAI = OJCharacter(4,
     ORIGIN_100_ORANGE_JUICE,
     None,
     (CARD_PROTAGONISTS_PRIVILEGE,),
+    'Kai_(unit).png',
         )
 
 CHARACTER_YUKI = OJCharacter(5,
@@ -1979,6 +1986,7 @@ CHARACTER_YUKI = OJCharacter(5,
     ORIGIN_QP_SHOOTING,
     None,
     (CARD_GAMBLE,),
+    'Yuki_(unit).png',
         )
 
 CHARACTER_ARU = OJCharacter(6,
@@ -1987,6 +1995,7 @@ CHARACTER_ARU = OJCharacter(6,
     ORIGIN_CHRISTMAS_SHOOTING,
     'Can hold 4 cards.',
     (CARD_PRESENT_FOR_YOU,),
+    'Aru_(unit).png',
         )
 
 CHARACTER_HIME = OJCharacter(7,
@@ -1995,6 +2004,7 @@ CHARACTER_HIME = OJCharacter(7,
     ORIGIN_SUGURI,
     None,
     (CARD_BINDING_CHAINS,),
+    'Hime_(unit).png',
         )
 
 CHARACTER_SORA = OJCharacter(8,
@@ -2003,6 +2013,7 @@ CHARACTER_SORA = OJCharacter(8,
     ORIGIN_SORA,
     None,
     (CARD_EXTRAORDINARY_SPECS,),
+    'Sora_(unit).png',
         )
 
 CHARACTER_FERNET = OJCharacter(9,
@@ -2011,6 +2022,7 @@ CHARACTER_FERNET = OJCharacter(9,
     ORIGIN_FLYING_RED_BARREL,
     None,
     (CARD_AIR_STRIKE,),
+    'Fernet_(unit).png',
         )
 
 CHARACTER_PEAT = OJCharacter(10,
@@ -2019,6 +2031,7 @@ CHARACTER_PEAT = OJCharacter(10,
     ORIGIN_FLYING_RED_BARREL,
     None,
     (CARD_BLUE_CROW_THE_SECOND,),
+    'Peat_(unit).png',
         )
 
 CHARACTER_MARIE_POPPO = OJCharacter(11,
@@ -2027,6 +2040,7 @@ CHARACTER_MARIE_POPPO = OJCharacter(11,
     ORIGIN_100_ORANGE_JUICE,
     None,
     (CARD_UBIQUITOUS,),
+    'Marie_Poppo_(unit).png',
         )
 
 CHARACTER_TOMOMO_UNSOFTENED = OJCharacter(12,
@@ -2035,6 +2049,7 @@ CHARACTER_TOMOMO_UNSOFTENED = OJCharacter(12,
     ORIGIN_100_ORANGE_JUICE,
     None,
     (CARD_MAGICAL_MASSACRE,),
+    'Tomomo_(Softened)_(unit).png',
         )
 
 CHARACTER_TOMOMO_SOFTENED = OJCharacter(13,
@@ -2043,6 +2058,7 @@ CHARACTER_TOMOMO_SOFTENED = OJCharacter(13,
     ORIGIN_100_ORANGE_JUICE,
     'Softened: Tomomo is playing with friends, and has lowered her attributes.',
     (CARD_MAGICAL_MASSACRE,),
+    'Tomomo_(Softened)_(unit).png',
         )
 
 CHARACTER_MIO = OJCharacter(14,
@@ -2051,6 +2067,7 @@ CHARACTER_MIO = OJCharacter(14,
     ORIGIN_100_ORANGE_JUICE,
     None,
     (CARD_MAGICAL_INFERNO,),
+    'Mio_(unit).png',
         )
 
 CHARACTER_SYURA = OJCharacter(15,
@@ -2059,6 +2076,7 @@ CHARACTER_SYURA = OJCharacter(15,
     ORIGIN_QP_SHOOTING_DANGEROUS,
     'When at 1 HP at the start of a battle, gain +1 ATK and +1 EVD until the end of the battle.',
     (CARD_BEYOND_HELL,),
+    'Syura_(unit).png',
         )
 
 CHARACTER_NANAKO = OJCharacter(16,
@@ -2067,6 +2085,7 @@ CHARACTER_NANAKO = OJCharacter(16,
     ORIGIN_SUGURI,
     None,
     (CARD_DEPLOY_BITS,),
+    'Nanako_(unit).png',
         )
 
 CHARACTER_SAKI = OJCharacter(17,
@@ -2075,6 +2094,7 @@ CHARACTER_SAKI = OJCharacter(17,
     ORIGIN_SUGURI,
     None,
     (CARD_BIG_BANG_BELL,),
+    'Saki_(unit).png',
         )
 
 CHARACTER_KYOUSUKE = OJCharacter(18,
@@ -2083,6 +2103,7 @@ CHARACTER_KYOUSUKE = OJCharacter(18,
     ORIGIN_QP_KISS,
     None,
     (CARD_CAST_OFF,),
+    'Kyousuke_(unit).png',
         )
 
 CHARACTER_KRILA = OJCharacter(19,
@@ -2091,6 +2112,7 @@ CHARACTER_KRILA = OJCharacter(19,
     ORIGIN_QP_SHOOTING_DANGEROUS,
     None,
     (CARD_PLUSHIE_MASTER, CARD_DANCE_LONG_EARED_BEASTS),
+    'Krila_(unit).png',
         )
 
 CHARACTER_KAE = OJCharacter(20,
@@ -2099,6 +2121,7 @@ CHARACTER_KAE = OJCharacter(20,
     ORIGIN_SUGURI,
     'Add reverse value of DEF to ATK. Gain -1 DEF when attacking.',
     (CARD_BLAZING,),
+    'Kae_(unit).png',
         )
 
 CHARACTER_ALTE = OJCharacter(21,
@@ -2107,6 +2130,7 @@ CHARACTER_ALTE = OJCharacter(21,
     ORIGIN_SORA,
     'In battle, see a random card from the opponent\'s hand. On Self-destruct, gain +1 ATK (up to +3).',
     (CARD_SELF_DESTRUCT,),
+    'Alte_(unit).png',
         )
 
 CHARACTER_KYOKO = OJCharacter(22,
@@ -2115,6 +2139,7 @@ CHARACTER_KYOKO = OJCharacter(22,
     ORIGIN_SUGURI,
     'Cannot use the Evade command in battle.',
     (CARD_CRYSTAL_BARRIER,),
+    'Kyoko_(unit).png',
         )
 
 CHARACTER_SHAM = OJCharacter(23,
@@ -2123,6 +2148,7 @@ CHARACTER_SHAM = OJCharacter(23,
     ORIGIN_SORA,
     None,
     (CARD_DELTA_FIELD,),
+    'Sham_(unit).png',
         )
 
 CHARACTER_SHERRY = OJCharacter(24,
@@ -2131,6 +2157,7 @@ CHARACTER_SHERRY = OJCharacter(24,
     ORIGIN_FLYING_RED_BARREL,
     'Enemy always goes first. If the enemy is Sherry, ignore this effect.',
     (CARD_WHIMSICAL_WINDMILL,),
+    'Sherry_(unit).png',
         )
 
 CHARACTER_STAR_BREAKER = OJCharacter(25,
@@ -2139,6 +2166,7 @@ CHARACTER_STAR_BREAKER = OJCharacter(25,
     ORIGIN_SORA,
     'can only choose Wins norma.',
     (CARD_STAR_BLASTING_FUSE, CARD_INVISIBLE_BOMB),
+    'Star_Breaker_(unit).png',
         )
 
 CHARACTER_SWEET_BREAKER = OJCharacter(26,
@@ -2147,6 +2175,7 @@ CHARACTER_SWEET_BREAKER = OJCharacter(26,
     ORIGIN_QP_SHOOTING_DANGEROUS,
     'When battling a player with reversed cards, gain +1 to ATK, DEF and EVD for each.',
     (CARD_MELTING_MEMORIES,),
+    'Sweet_Breaker_(unit).png',
         )
 
 CHARACTER_NATH = OJCharacter(27,
@@ -2156,6 +2185,7 @@ CHARACTER_NATH = OJCharacter(27,
     'Gain 1 stack of Active Extension in each battle where a battle card is played (max 3). Lose 1 stack on KO. '
     'Stock Effect: gain +1 ATK, +1 DEF, and -1 EVD.',
     (CARD_ANOTHER_ULTIMATE_WEAPON,),
+    'Nath_(unit).png',
         )
 
 CHARACTER_MIMYUU = OJCharacter(28,
@@ -2164,6 +2194,7 @@ CHARACTER_MIMYUU = OJCharacter(28,
     ORIGIN_QP_SHOOTING,
     'Revive as Tomato and act on revival. Lose 1/4 stars and given 1 WIN when KO\'d in battle.',
     (CARD_EVIL_SPY_WORK_EXECUTION,),
+    'Mimyuu_(unit).png',
         )
 
 CHARACTER_TOMATO = OJCharacter(29,
@@ -2172,6 +2203,7 @@ CHARACTER_TOMATO = OJCharacter(29,
     ORIGIN_QP_SHOOTING,
     'Revive as Mimyuu and act on revival. Draw Evil Spy Work - Execution cards as Waruda Machine, Blast Off!',
     (CARD_WARUDA_MACHINE_BLAST_OFF,),
+    'Tomato_(unit).png',
         )
 
 CHARACTER_KIRIKO = OJCharacter(30,
@@ -2181,6 +2213,7 @@ CHARACTER_KIRIKO = OJCharacter(30,
     'Ignore healing effects. When playing a battle card, gain +1 ATK & EVD in battle, and MAX HP is reduced by 1 '
     '(To a minimum of 2).',
     (CARD_FINAL_SURGERY,),
+    'Kiriko_(unit).png',
         )
 
 CHARACTER_NONAME = OJCharacter(31,
@@ -2189,6 +2222,7 @@ CHARACTER_NONAME = OJCharacter(31,
     ORIGIN_ACCELERATION_OF_SUGURI,
     'If KO\'d, turn into NoName (Head) instead. Give no stars or Wins if KO\'d in battle.',
     (CARD_OVERSEER,),
+    'NoName_(unit).png',
         )
 
 CHARACTER_NONAME_HEAD = OJCharacter(32,
@@ -2197,6 +2231,7 @@ CHARACTER_NONAME_HEAD = OJCharacter(32,
     ORIGIN_ACCELERATION_OF_SUGURI,
     'Change into NoName after reaching a home or getting KO\'d. Gain -1 MOV.',
     (CARD_OVERSEER,),
+    'NoName_(Head)_(unit).png',
         )
 
 CHARACTER_MIUSAKI = OJCharacter(33,
@@ -2205,6 +2240,7 @@ CHARACTER_MIUSAKI = OJCharacter(33,
     ORIGIN_ALICIANRONE,
     'When using Defend in battle, never take more than 2 damage at once.',
     (CARD_SOLID_WITCH,),
+    'Miusaki_(unit).png',
         )
 
 CHARACTER_CEOREPARQUE = OJCharacter(34,
@@ -2213,6 +2249,7 @@ CHARACTER_CEOREPARQUE = OJCharacter(34,
     ORIGIN_ALICIANRONE,
     'On successful Evasion, deal 1 damage to opponent.',
     (CARD_WITCHS_HAIR_LOCK,),
+    'Ceoreparque_(unit).png',
         )
 
 CHARACTER_YUKI_DANGEROUS = OJCharacter(35,
@@ -2222,6 +2259,7 @@ CHARACTER_YUKI_DANGEROUS = OJCharacter(35,
     'Permanently turn every help card with Pudding in name into Tragedy in the Dead of Night.\n'
     'When someone else triggers your trap, gain 1 Win. Gain no wins from fighting neutral enemies.',
     (CARD_EVIL_MASTERMIND,),
+    'Yuki_(Dangerous)_(unit).png',
         )
 
 CHARACTER_TOMOMO_CASUAL = OJCharacter(36,
@@ -2230,6 +2268,7 @@ CHARACTER_TOMOMO_CASUAL = OJCharacter(36,
     ORIGIN_100_ORANGE_JUICE,
     None,
     (CARD_MIRACLE_RED_BEAN_ICE_CREAM,),
+    'Tomomo_(Casual)_(unit).png',
         )
 
 CHARACTER_TOMOMO_SWEET_EATER = OJCharacter(37,
@@ -2238,6 +2277,7 @@ CHARACTER_TOMOMO_SWEET_EATER = OJCharacter(37,
     ORIGIN_100_ORANGE_JUICE,
     'When KO\'d, discard your hand and turn back to Tomomo (Casual).',
     (CARD_MAGICAL_REVENGE,),
+    'Tomomo_(Sweet_Eater)_(unit).png',
         )
 
 CHARACTER_TEQUILA = OJCharacter(38,
@@ -2246,6 +2286,7 @@ CHARACTER_TEQUILA = OJCharacter(38,
     ORIGIN_FLYING_RED_BARREL,
     'A Pirate Crew Member appears as enemy unit. Gain +1 ATK for every HP lost during a battle.',
     (CARD_DO_PIRATES_FLY_IN_THE_SKY, CARD_FLYING_PIRATE),
+    'Tequila_(unit).png',
         )
 
 CHARACTER_TSIH = OJCharacter(39,
@@ -2254,6 +2295,7 @@ CHARACTER_TSIH = OJCharacter(39,
     ORIGIN_SORA,
     'Gain +2ATK if holding a Gift card.',
     (CARD_STEALTH_ON,),
+    'Tsih_(unit).png',
         )
 
 CHARACTER_MEI = OJCharacter(40,
@@ -2262,6 +2304,7 @@ CHARACTER_MEI = OJCharacter(40,
     ORIGIN_QP_SHOOTING,
     'Gain "Red & Blue" when holding no cards at the end of turn.',
     (CARD_TRUE_WHITE_CHRISTSMASHER, CARD_WHITE_CHRISTSMASHER),
+    'Mei_(unit).png',
         )
 
 CHARACTER_NATSUMI = OJCharacter(41,
@@ -2271,6 +2314,7 @@ CHARACTER_NATSUMI = OJCharacter(41,
     'If not KO\'d and standing on the same panel with other players at the end of your turn, each unit on the panel '
     'recovers 1 HP. For each other players you heal, gain 5 stars.',
     (CARD_COOKING_TIME,),
+    'Natsumi_(unit).png',
         )
 
 CHARACTER_NICO = OJCharacter(42,
@@ -2280,6 +2324,7 @@ CHARACTER_NICO = OJCharacter(42,
     'No effect from Gift cards. Gain X additional stars from all sources, where X is the number of Gift cards in hand. '
     'Can hold 4 cards.',
     (CARD_MIRACLE_WALKER,),
+    'Nico_(unit).png',
         )
 
 CHARACTER_ARTHUR = OJCharacter(43,
@@ -2288,6 +2333,7 @@ CHARACTER_ARTHUR = OJCharacter(43,
     ORIGIN_CHRISTMAS_SHOOTING,
     'Gain X additional stars from all sources, where X is the number of Shops in play, up to current Lvl.',
     (CARD_BRANCH_EXPANSION_STRATEGY, CARD_RBIT_HOBBY_SHOP),
+    'Arthur_(unit).png',
         )
 
 CHARACTER_IRU = OJCharacter(44,
@@ -2297,6 +2343,7 @@ CHARACTER_IRU = OJCharacter(44,
     'When challenging an enemy, they take 1 damage and attack first if no other effect affect turn order. KO from this '
     'effect counts as battle KO.',
     (CARD_EXTENDED_PHOTON_RIFLE,),
+    'Iru_(unit).png',
         )
 
 CHARACTER_MIRA = OJCharacter(45,
@@ -2306,6 +2353,7 @@ CHARACTER_MIRA = OJCharacter(45,
     'Your traps triggered by enemies add the following additional effect: Binding Smoke (For 2 chapters: Move rolls '
     'are limited to 1, 2, or 3).',
     (CARD_LEAP_THROUGH_SPACE, CARD_LEAP_THROUGH_SPACE_MARKING),
+    'Mira_(unit).png',
         )
 
 CHARACTER_CUTIES = OJCharacter(46,
@@ -2315,6 +2363,7 @@ CHARACTER_CUTIES = OJCharacter(46,
     'Can only choose Stars norma. Gain X additional stars from all sources, where X is the number of different Event '
     'cards you played. In battle, randomly gain +1 ATK or DEF.',
     (CARD_SPECIAL_STAGE,),
+    'Sora_&_Sham_(Cuties)_(unit).png',
         )
 
 CHARACTER_YUUKI = OJCharacter(47,
@@ -2323,6 +2372,7 @@ CHARACTER_YUUKI = OJCharacter(47,
     ORIGIN_QP_SHOOTING,
     'In odd-numbered chapters, gain -1 ATK and +2 in DEF. In even-numbered chapters, gain +2 ATK and -1 DEF.',
     (CARD_ANGEL_HAND, CARD_DEVIL_HAND),
+    'Yuuki_(unit).png',
         )
 
 CHARACTER_ISLAY = OJCharacter(48,
@@ -2331,6 +2381,7 @@ CHARACTER_ISLAY = OJCharacter(48,
     ORIGIN_FLYING_RED_BARREL,
     'cannot challenge other players when meeting them on the field.',
     (CARD_RIVAL,),
+    'Islay_(unit).png',
         )
 
 CHARACTER_SUGURI_46_BILLION_YEARS = OJCharacter(49,
@@ -2340,6 +2391,7 @@ CHARACTER_SUGURI_46_BILLION_YEARS = OJCharacter(49,
     'When choosing a damage dealing Boost/Event card to play, you may pay double its cost to double the damage on use. '
     'If you do, gain +1 die to your next movement roll.',
     (CARD_OBSERVER_OF_ETERNITY,),
+    'Suguri_(46_Billion_Years)_(unit).png',
         )
 
 CHARACTER_SUMIKA = OJCharacter(50,
@@ -2348,6 +2400,7 @@ CHARACTER_SUMIKA = OJCharacter(50,
     ORIGIN_200_MIXED_JUICE,
     None,
     (CARD_REPRODUCTION_OF_RECORDS,),
+    'Sumika_(unit).png',
         )
 
 CHARACTER_ELLIE = OJCharacter(51,
@@ -2356,6 +2409,7 @@ CHARACTER_ELLIE = OJCharacter(51,
     ORIGIN_100_ORANGE_JUICE,
     None,
     (CARD_ELLIES_MIRACLE,),
+    'Ellie_(unit).png',
         )
 
 CHARACTER_LULU = OJCharacter(52,
@@ -2364,6 +2418,7 @@ CHARACTER_LULU = OJCharacter(52,
     ORIGIN_100_ORANGE_JUICE,
     None,
     (CARD_LULUS_LUCKY_EGG,),
+    'Lulu_(unit).png',
         )
 
 CHARACTER_ALICIANRONE = OJCharacter(53,
@@ -2373,6 +2428,7 @@ CHARACTER_ALICIANRONE = OJCharacter(53,
     'When battling an opponent with more than +1 ATK, gain +1 EVD, until end of battle. If they have more than +2 ATK, '
     'gain an additional +1 EVD.',
     (CARD_FULL_SPEED_ALICIANRONE,),
+    'Alicianrone_(unit).png',
         )
 
 CHARACTER_TEOTORATTA = OJCharacter(54,
@@ -2381,6 +2437,7 @@ CHARACTER_TEOTORATTA = OJCharacter(54,
     ORIGIN_ALICIANRONE,
     'Do not trigger Encounter panels.',
     (CARD_BEAST_WITCH,),
+    'Teotoratta_(unit).png',
         )
 
 CHARACTER_ARNELLE = OJCharacter(55,
@@ -2389,6 +2446,7 @@ CHARACTER_ARNELLE = OJCharacter(55,
     ORIGIN_100_ORANGE_JUICE,
     'Can see the card on the top of the deck when holding Intelligence Officer in hand.',
     (CARD_INTELLIGENCE_OFFICER,),
+    'Arnelle_(unit).png',
         )
 
 CHARACTER_MAYNIE = OJCharacter(56,
@@ -2397,6 +2455,7 @@ CHARACTER_MAYNIE = OJCharacter(56,
     ORIGIN_100_ORANGE_JUICE,
     'When not in Raging Mode, gain a rage Counter upon taking damage and lose a rage Counter upon healing.',
     (CARD_RAGING_MADNESS,),
+    'Maynie_(unit).png',
         )
 
 CHARACTER_CHRIS = OJCharacter(57,
@@ -2406,6 +2465,7 @@ CHARACTER_CHRIS = OJCharacter(57,
     'Can hold 4 cards. Cannot challenge to battles without Chef or Store manager active. Gain a Store manager Counter '
     'upon using a Max 1 copy limit non-Gift card.',
     (CARD_CHEF_I_COULD_USE_SOME_HELP, CARD_MANAGER_I_COULD_USE_SOME_HELP),
+    'Chris_(unit).png',
         )
 
 CHARACTER_KYUPITA = OJCharacter(58,
@@ -2414,6 +2474,7 @@ CHARACTER_KYUPITA = OJCharacter(58,
     ORIGIN_QP_KISS,
     None,
     (CARD_SAINT_EYES,),
+    'Kyupita_(unit).png',
         )
 
 CHARACTER_QP_DANGEROUS = OJCharacter(59,
@@ -2426,30 +2487,34 @@ CHARACTER_QP_DANGEROUS = OJCharacter(59,
     'Pudding (+1EVD)\n'
     'Portable Pudding (+1MAXHP).',
     (CARD_SWEET_GUARDIAN,),
+    'QP_(Dangerous)_(unit).png',
         )
-        
+
 CHARACTER_MARIE_POPPO_MIXED = OJCharacter(60,
     'Marie Poppo (Mixed)',
     7, -1, -1, -1, 5,
     ORIGIN_200_MIXED_JUICE,
     'When warping from any effect: If player level is odd, gain Lvl x3 in stars. If player level is even, draw a card.',
     (CARD_SUBSPACE_TUNNEL,),
+    'Marie_Poppo_(Mixed)_(unit).png',
         )
-        
+
 CHARACTER_SORA_MILITARY = OJCharacter(61,
     'Sora (Military)',
     4, 1, 0, 1, 5,
     ORIGIN_SORA,
     'When KO\'d in battle, revive with 2 HP on the next turn.',
     (CARD_AWAKENING_OF_TALENT,),
+    'Sora_(Military)_(unit).png',
         )
-        
+
 CHARACTER_ARU_SCRAMBLE = OJCharacter(62,
     'Aru (Scramble)',
     5, -1, -1, 2, 5,
     ORIGIN_XMAS_SHOOTING_SCRAMBLE,
     'Can hold 4 cards.',
     (CARD_SANTAS_JOB,),
+    'Aru_(Scramble)_(unit).png',
         )
         
 CHARACTER_SUGURI_VER_2 = OJCharacter(63,
@@ -2458,6 +2523,7 @@ CHARACTER_SUGURI_VER_2 = OJCharacter(63,
     ORIGIN_ACCELERATION_OF_SUGURI_2,
     'Can hold 2 cards. Restore 1 HP at the start of every turn.',
     (CARD_REVIVAL_OF_STARS,),
+    'Suguri_(Ver.2)_(unit).png',
         )
         
 CHARACTER_MARC_PILOT = OJCharacter(64,
@@ -2466,6 +2532,7 @@ CHARACTER_MARC_PILOT = OJCharacter(64,
     ORIGIN_FLYING_RED_BARREL,
     None,
     (CARD_BIG_ROCKET_CANNON, CARD_ROCKET_CANNON),
+    'Marc_(Pilot)_(unit).png',
         )
         
 CHARACTER_CHICKEN = OJCharacter(65,
@@ -2474,6 +2541,7 @@ CHARACTER_CHICKEN = OJCharacter(65,
     ORIGIN_QP_SHOOTING,
     'Lose 1/4 stars and given 1 WIn when KO\'d in battle.',
     (CARD_GOLDEN_EGG,),
+    'Chicken_(unit).png',
         )
         
 CHARACTER_ROBO_BALL = OJCharacter(66,
@@ -2482,6 +2550,7 @@ CHARACTER_ROBO_BALL = OJCharacter(66,
     ORIGIN_SUGURI,
     'Lose 1/4 stars and given 1 WIn when KO\'d in battle.',
     (CARD_REFLECTIVE_SHELL,),
+    'Robo_Ball_(unit).png',
         )
         
 CHARACTER_SEAGULL = OJCharacter(67,
@@ -2490,6 +2559,7 @@ CHARACTER_SEAGULL = OJCharacter(67,
     ORIGIN_FLYING_RED_BARREL,
     'Lose 1/4 stars and given 1 WIn when KO\'d in battle.',
     (CARD_JONATHAN_RUSH,),
+    'Seagull_(unit).png',
         )
         
 CHARACTER_STORE_MANAGER = OJCharacter(68,
@@ -2498,6 +2568,7 @@ CHARACTER_STORE_MANAGER = OJCharacter(68,
     ORIGIN_QP_SHOOTING,
     'No stars from bonus panel. Can only use Gift type cards. Takes 1 damage on card discard.',
     (CARD_BANNER_FOR_LIFE,),
+    'Store_Manager_(unit).png',
         )
         
 CHARACTER_SHIFU_ROBOT = OJCharacter(69,
@@ -2506,6 +2577,7 @@ CHARACTER_SHIFU_ROBOT = OJCharacter(69,
     ORIGIN_SUGURI,
     'Starts and Revives with 1 HP Auto-repair (Recover 1 HP every 3 chapters or after being KO\'d.',
     (CARD_TURBO_CHARGED,),
+    'Shifu_Robot_(unit).png',
         )
 
 CHARACTER_FLYING_CASTLE = OJCharacter(70,
@@ -2514,6 +2586,7 @@ CHARACTER_FLYING_CASTLE = OJCharacter(70,
     ORIGIN_FLYING_RED_BARREL,
     'Immune to Battle Cards when defending Cannot Counterattack.',
     (CARD_IMMOVABLE_OBJECT,),
+    'Flying_Castle_(unit).png',
         )
 
 

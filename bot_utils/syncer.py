@@ -111,14 +111,28 @@ async def request_sync(client, days_allowed):
         try:
             await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_approved, 30.)
         except TimeoutError:
-            sys.stderr.write('Sync request failed, timeout\.n')
+            sys.stderr.write('Sync request failed, timeout.\n')
             return
         
         files = get_modified_files(days_allowed)
         
         for file in files:
             with (await ReuAsyncIO(file.path)) as io:
-                await client.message_create(CHANNEL__SYSTEM__SYNC, '.'.join(file.access_path), file=io)
+                file_name_parts = []
+                for part in file.access_path:
+                    file_name_parts.append(part)
+                    file_name_parts.append('.')
+                
+                if file_name_parts:
+                    del file_name_parts[-1]
+                
+                
+                file_name_parts.append(':')
+                file_name_parts.append(file.name)
+                
+                file_name = ''.join(file_name_parts)
+                
+                await client.message_create(CHANNEL__SYSTEM__SYNC, file_name, file=io)
             
             try:
                 await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_received, 60.)
@@ -139,14 +153,15 @@ async def receive_sync(client, partner):
                 try:
                     message = await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_any(partner), 60.)
                 except TimeoutError:
-                    sys.stderr.write('Sync request failed, timeout\.n')
+                    sys.stderr.write('Sync request failed, timeout.\n')
                     return
                 
                 content = message.content
                 if content == SYNC_DONE:
                     break
                 
-                path_parts = content.split('.')
+                path_full, file_name = content.split(':')
+                path_parts = path_full.split('.')
                 if not path_parts:
                     sys.stderr.write('Empty content received, aborting sync.\n')
                     return
@@ -158,8 +173,8 @@ async def receive_sync(client, partner):
                     sys.stderr.write(f'Source path not found: {source_path!r}, aborting sync.\n')
                     return
                 
-                for path in path_parts[1:]:
-                    source_path = join(source_path, path)
+                for path_part in path_parts[1:]:
+                    source_path = join(source_path, path_part)
                     if not exists(source_path):
                         make_dir(source_path)
                 
@@ -170,11 +185,7 @@ async def receive_sync(client, partner):
                 attachment = attachments[0]
                 binary = await client.download_attachment(attachment)
                 
-                name = attachment.name
-                if name.startswith('init__'):
-                    name = '__'+name
-                
-                source_path = join(source_path, name)
+                source_path = join(source_path, file_name)
                 
                 with (await AsyncIO(source_path, 'wb')) as file:
                     if (binary is not None):
