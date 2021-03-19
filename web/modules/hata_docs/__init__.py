@@ -7,17 +7,30 @@ import hata.ext.commands.helps.subterranean
 import hata.ext.slash
 
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath, FunctionUnit, ClassAttributeUnit, \
-    InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths
+    InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths, set_highlight_html_class, highlight
 
 map_module('hata')
 
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 
 from .forms import SearchForm
-from .utils import get_backpath, get_searched_info, UNIT_TYPE_ORDER_PRIO_TYPE, build_js_structure, build_html_structure
+from .utils import get_back_path, get_searched_info, UNIT_TYPE_ORDER_PRIORITY_TYPE, build_js_structure, \
+    build_html_structure
 
 URL_PREFIX = '/docs'
 ROUTES = Blueprint('docs', 'hata_docs', url_prefix=URL_PREFIX)
+
+
+set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_OPERATOR, 'c_py_operator')
+set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_MAGIC, 'c_py_magic')
+set_highlight_html_class(highlight.TOKEN_TYPE_NUMERIC, 'c_py_numeric')
+set_highlight_html_class(highlight.TOKEN_TYPE_NUMERIC, 'c_py_string')
+set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_KEYWORD, 'c_py_keyword')
+set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_BUILTIN, 'c_py_builtin')
+set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_BUILTIN_EXCEPTION, 'c_py_builtin_exception')
+set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_PUNCTUATION, 'c_py_punctuation')
+set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_OPERATOR_ATTRIBUTE, 'c_py_operator_attribute')
+set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_ATTRIBUTE, 'c_py_identifier_attribute')
 
 class DocsWrapper(object):
     __slots__ = ('path', 'unit',)
@@ -33,7 +46,7 @@ class DocsWrapper(object):
     def __call__(self):
         search_form = SearchForm()
         unit = self.unit
-        backpath = get_backpath(unit)
+        back_path = get_back_path(unit)
         content, structure = unit.html_extended_with_structure
         structure_html = build_html_structure(structure)
         structure_js = build_js_structure(structure)
@@ -42,7 +55,7 @@ class DocsWrapper(object):
             title = unit.name,
             content = content,
             search_form = search_form,
-            backpath = backpath,
+            back_path = back_path,
             structure_html = structure_html,
             structure_js = structure_js,
                 )
@@ -153,7 +166,7 @@ def api_search():
             found.append(get_searched_info(path, index))
         found.sort(key=lambda x: x[0])
         
-        for order_prio, name, url, type_, preview in found:
+        for order_priority, name, url, type_, preview in found:
             element = {
                 'name' : name,
                 'url' : url,

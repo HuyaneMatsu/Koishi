@@ -6,28 +6,28 @@ from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath,
     InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths
 from hata.ext.patchouli.parser import ATTRIBUTE_SECTION_NAME_RP
 
-UNIT_TYPE_ORDER_PRIO_TYPE = 0
+UNIT_TYPE_ORDER_PRIORITY_TYPE = 0
 
-UNIT_TYPE_ORDER_PRIO_MODULE = 10
+UNIT_TYPE_ORDER_PRIORITY_MODULE = 10
 
-UNIT_TYPE_ORDER_PRIO_FUNCTION = 8
-UNIT_TYPE_ORDER_PRIO_PROPERTY = 24
-UNIT_TYPE_ORDER_PRIO_METHOD = 16
+UNIT_TYPE_ORDER_PRIORITY_FUNCTION = 8
+UNIT_TYPE_ORDER_PRIORITY_PROPERTY = 24
+UNIT_TYPE_ORDER_PRIORITY_METHOD = 16
 
-UNIT_TYPE_ORDER_PRIO_INSTANCE_ATTRIBUTE = 24
-UNIT_TYPE_ORDER_PRIO_CLASS_ATTRIBUTE = 30
+UNIT_TYPE_ORDER_PRIORITY_INSTANCE_ATTRIBUTE = 24
+UNIT_TYPE_ORDER_PRIORITY_CLASS_ATTRIBUTE = 30
 
-UNIT_TYPE_ORDER_PRIO_NONE = 40
+UNIT_TYPE_ORDER_PRIORITY_NONE = 40
 
-UNIT_TYPE_ORDER_PRIO_TYPE_NAME_RELATION = {
-    ModuleUnit : ('module', UNIT_TYPE_ORDER_PRIO_MODULE),
-    TypeUnit : ('class', UNIT_TYPE_ORDER_PRIO_TYPE),
-    PropertyUnit : ('property', UNIT_TYPE_ORDER_PRIO_PROPERTY),
-    InstanceAttributeUnit : ('attribute', UNIT_TYPE_ORDER_PRIO_INSTANCE_ATTRIBUTE),
-    ClassAttributeUnit : ('class attribute', UNIT_TYPE_ORDER_PRIO_CLASS_ATTRIBUTE),
+UNIT_TYPE_ORDER_PRIORITY_TYPE_NAME_RELATION = {
+    ModuleUnit : ('module', UNIT_TYPE_ORDER_PRIORITY_MODULE),
+    TypeUnit : ('class', UNIT_TYPE_ORDER_PRIORITY_TYPE),
+    PropertyUnit : ('property', UNIT_TYPE_ORDER_PRIORITY_PROPERTY),
+    InstanceAttributeUnit : ('attribute', UNIT_TYPE_ORDER_PRIORITY_INSTANCE_ATTRIBUTE),
+    ClassAttributeUnit : ('class attribute', UNIT_TYPE_ORDER_PRIORITY_CLASS_ATTRIBUTE),
         }
 
-CLASS_ATTRIBUTE_SECTION_PRIOS = {
+CLASS_ATTRIBUTE_SECTION_PRIORITIES = {
     'Class Attributes' : 0,
     'Type Attributes' : 1,
     'Attributes' : 2,
@@ -36,7 +36,7 @@ CLASS_ATTRIBUTE_SECTION_PRIOS = {
 
 CLASS_ATTRIBUTE_SECTION_DEFAULT = 4
 
-def get_backpath(unit):
+def get_back_path(unit):
     parts = [(unit.name, '#')]
     
     counter = 1
@@ -68,11 +68,11 @@ def get_backpath(unit):
     
     return ''.join(result)
 
-def get_searched_info(path, order_prio_base=0):
+def get_searched_info(path, order_priority_base=0):
     unit = MAPPED_OBJECTS.get(path)
     if unit is None:
         type_ = None
-        order_prio = 100
+        order_priority = 100
     else:
         unit_type = type(unit)
         if unit_type is FunctionUnit:
@@ -80,19 +80,19 @@ def get_searched_info(path, order_prio_base=0):
             parent_unit = MAPPED_OBJECTS.get(parent)
             if parent_unit is None:
                 type_ = 'function'
-                order_prio = UNIT_TYPE_ORDER_PRIO_FUNCTION
+                order_priority = UNIT_TYPE_ORDER_PRIORITY_FUNCTION
             elif type(parent_unit) is TypeUnit:
                 type_ = 'method'
-                order_prio = UNIT_TYPE_ORDER_PRIO_METHOD
+                order_priority = UNIT_TYPE_ORDER_PRIORITY_METHOD
             else:
                 type_ = 'function'
-                order_prio = UNIT_TYPE_ORDER_PRIO_FUNCTION
+                order_priority = UNIT_TYPE_ORDER_PRIORITY_FUNCTION
         else:
             try:
-                type_, order_prio = UNIT_TYPE_ORDER_PRIO_TYPE_NAME_RELATION[unit_type]
+                type_, order_priority = UNIT_TYPE_ORDER_PRIORITY_TYPE_NAME_RELATION[unit_type]
             except KeyError:
                 type_ = None
-                order_prio = UNIT_TYPE_ORDER_PRIO_NONE
+                order_priority = UNIT_TYPE_ORDER_PRIORITY_NONE
     
     backfetched = []
     while True:
@@ -148,7 +148,7 @@ def get_searched_info(path, order_prio_base=0):
             continue
     
     name = '.'.join(name_parts)
-    if order_prio == UNIT_TYPE_ORDER_PRIO_CLASS_ATTRIBUTE:
+    if order_priority == UNIT_TYPE_ORDER_PRIORITY_CLASS_ATTRIBUTE:
         while True:
             docs = unit.docs
             if (docs is None):
@@ -181,11 +181,11 @@ def get_searched_info(path, order_prio_base=0):
                 break
             
             best_match_name = None
-            best_match_prio = 100
+            best_match_priority = 100
             for attribute_section_name in attribute_sections:
-                prio = CLASS_ATTRIBUTE_SECTION_PRIOS.get(attribute_section_name, CLASS_ATTRIBUTE_SECTION_DEFAULT)
-                if prio < best_match_prio:
-                    best_match_prio = prio
+                priority = CLASS_ATTRIBUTE_SECTION_PRIORITIES.get(attribute_section_name, CLASS_ATTRIBUTE_SECTION_DEFAULT)
+                if priority < best_match_priority:
+                    best_match_priority = priority
                     best_match_name = attribute_section_name
             
             url_parts[-1] = best_match_name.lower().replace(' ', '-')
@@ -200,7 +200,7 @@ def get_searched_info(path, order_prio_base=0):
         preview = None
     else:
         preview = unit.preview
-    return order_prio_base+order_prio, name, url, type_, preview
+    return order_priority_base+order_priority, name, url, type_, preview
 
 
 def build_js_structure(structure):

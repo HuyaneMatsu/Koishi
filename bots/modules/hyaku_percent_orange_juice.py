@@ -295,8 +295,9 @@ class OJCardPack(OJEntityBase):
         return self
 
 class OJCard(OJEntityBase):
-    __slots__ = ('name', 'cost', 'description', 'level', 'type', 'events', 'quote', 'limit',)
-    def __new__(cls, identifier, name, level, cost, limit, type_, pack, rarity, description, quote, events):
+    __slots__ = ('name', 'cost', 'description', 'level', 'type', 'events', 'quote', 'limit', 'card_name')
+    def __new__(cls, identifier, name, level, cost, limit, type_, pack, rarity, description, quote, events,
+            card_name=None):
         self = object.__new__(cls)
         self.id = identifier
         self.name = name
@@ -307,6 +308,7 @@ class OJCard(OJEntityBase):
         self.events = events
         self.quote = quote
         self.limit = limit
+        self.card_name = card_name
         return self
 
 
@@ -440,6 +442,7 @@ CARD_ACCEL_HYPER = OJCard(1,
     'Roll double dice for attack.',
     '"Unlimited Charge!" —Sora',
     None,
+    'Accel_Hyper.png',
         )
 
 CARD_BIG_MAGNUM = OJCard(2,
@@ -449,6 +452,7 @@ CARD_BIG_MAGNUM = OJCard(2,
     'the card cannot be used.',
     '"Go! Big Magnum!" —Captain Tequila',
     None,
+    'Big_Magnum.png',
         )
 
 CARD_DARK_SIDE_OF_BUSINESS = OJCard(3,
@@ -458,6 +462,7 @@ CARD_DARK_SIDE_OF_BUSINESS = OJCard(3,
     'instead.',
     '"Go! Big Magnum!" —Captain Tequila',
     None,
+    'Dark_Side_of_Business.png',
         )
 
 CARD_DESPERATE_MODIFICATION = OJCard(4,
@@ -466,6 +471,7 @@ CARD_DESPERATE_MODIFICATION = OJCard(4,
     'For this battle, randomly roll either a natural 1 or 6 for each attack, defense and evasion.',
     '"Poor Blue Crow. You loaded him with all that heavy stuff!" —Marc',
     None,
+    'Desperate_Modification.png',
         )
 
 CARD_EXTENSION = OJCard(5,
@@ -474,6 +480,7 @@ CARD_EXTENSION = OJCard(5,
     'Play one randomly chosen Battle card (including Hyper cards) for no additional cost.',
     '"It\'s my job to kill you." —Nath',
     None,
+    'Extension.png',
         )
 
 CARD_FINAL_BATTLE = OJCard(6,
@@ -482,6 +489,7 @@ CARD_FINAL_BATTLE = OJCard(6,
     'This battle will last until either unit suffers KO (Maximum of 10 rounds).',
     '"To protect everyone!" —Suguri & Hime',
     None,
+    'Final_Battle.png',
         )
 
 CARD_IM_ON_FIRE = OJCard(7,
@@ -490,6 +498,7 @@ CARD_IM_ON_FIRE = OJCard(7,
     'During this battle, gain +1 ATK and -1 DEF.',
     '"Let\'s play our lives away!" —Kae',
     None,
+    'I\'m_on_Fire!.png',
         )
 
 CARD_PORTABLE_PUDDING = OJCard(8,
@@ -498,6 +507,7 @@ CARD_PORTABLE_PUDDING = OJCard(8,
     'At the start of this battle, reset your HP to your max HP.',
     '"I\'ve got pudding for lunch today!" ―QP',
     None,
+    'Portable_Pudding.png',
         )
 
 CARD_QUICK_RESTORATION = OJCard(9,
@@ -506,6 +516,7 @@ CARD_QUICK_RESTORATION = OJCard(9,
     'All damage taken during the battle will be healed after the battle. Effect is cancelled if the player is KO\'d',
     '"I\'m not going to die." —Suguri',
     None,
+    'Quick_Restoration.png',
         )
 
 CARD_RAINBOW_COLORED_CIRCLE = OJCard(10,
@@ -514,6 +525,7 @@ CARD_RAINBOW_COLORED_CIRCLE = OJCard(10,
     'During this battle, gain +2 EVD and -1 DEF.',
     '"Like drawing a rainbow-colored circle."',
     None,
+    'Rainbow-Colored_Circle.png',
         )
 
 CARD_RBITS = OJCard(11,
@@ -522,6 +534,7 @@ CARD_RBITS = OJCard(11,
     'During this battle, gain +2 DEF. You may not use the Evade command.',
     '"Formation Orbit!" —QP',
     None,
+    'Rbits.png',
         )
 
 CARD_REVERSE_ATTRIBUTE_FIELDS = OJCard(12,
@@ -530,6 +543,7 @@ CARD_REVERSE_ATTRIBUTE_FIELDS = OJCard(12,
     'During this battle, the positive and negative values of each ability of both units are inverted after adjustment.',
     '"Aren\'t you too serious about this game? You\'re so da... I mean, far too immature!" —Mei',
     None,
+    'Reverse_Attribute_Field.png',
         )
 
 CARD_SERIOUS_BATTLE = OJCard(13,
@@ -538,6 +552,7 @@ CARD_SERIOUS_BATTLE = OJCard(13,
     'During this battle, ATK, DEF and EVD of both units will be 0.',
     '"This battle will be a true test of strength!" ―Tomomo',
     None,
+    'Serious_Battle.png',
         )
 
 CARD_SHIELD = OJCard(14,

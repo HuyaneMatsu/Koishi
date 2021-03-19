@@ -9,7 +9,7 @@
         <h2>Results</h2>
         <div class="underline"></div>
         <ul class="unit_listing">
-        {% for order_prio, name, url, type_, preview in found %}
+        {% for order_priority, name, url, type_, preview in found %}
             <li>
                 <a class="listing_linker" href="{{url|safe}}">
                     <i class="listing_name">{{ name }}</i>

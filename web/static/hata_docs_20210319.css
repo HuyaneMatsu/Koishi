@@ -693,3 +693,44 @@ blockquote {
             }
 
         }
+
+
+.c_py_operator {
+    color: rgb(255 199 222);
+        }
+
+.c_py_magic {
+    color: rgb(122 255 244);
+        }
+
+.c_py_numeric {
+    color: rgb(64 0 170);
+        }
+
+.c_py_string {
+    color: rgb(174 230 151);
+        }
+
+.c_py_keyword {
+    color: rgb(255 109 109);
+        }
+
+.c_py_builtin {
+    color: rgb(0 170 255);
+        }
+
+.c_py_builtin_exception {
+    color: rgb(176 88 255);
+        }
+
+.c_py_punctuation {
+    color: rgb(157 157 255);
+        }
+
+.c_py_operator_attribute {
+    color: rgb(255 255 194);
+        }
+
+.c_py_identifier_attribute {
+    color: rgb(255 255 194);
+        }

@@ -335,7 +335,7 @@ for name, tag_name, *alternative_names in (
         ('Koakuma'              , 'koakuma'              , '小悪魔', 'Koakuma',),
         ('Kochiya Sanae'        , 'kochiya_sanae'        , '東風谷 早苗', 'Sanae', 'Sanae Kochiya'),
         ('Komano Aunn'          , 'komano_aun'           , '高麗野 あうん', 'Aunn', 'Aun', 'Aunn Komano'),
-        ('Komeiji SLASH_CLIENT'       , 'komeiji_koishi'       , '古明地 こいし', 'SLASH_CLIENT', 'SLASH_CLIENT Komeiji'),
+        ('Komeiji Koishi'       , 'komeiji_koishi'       , '古明地 こいし', 'Koishi', 'Koishi Komeiji'),
         ('Komeiji Satori'       , 'komeiji_satori'       , '古明地 さとり', 'Satori', 'Satori Komeiji'),
         ('Konngara'             , 'konngara'             , '矜羯羅', 'Konngara',),
         ('Konpaku Youmu'        , 'konpaku_youmu'        , '魂魄 妖夢', 'Youmu', 'Youmu Konpaku'),
