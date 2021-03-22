@@ -1945,8 +1945,33 @@ async def application_command_guild_get(client, guild, application_command_id):
     
     return ApplicationCommand.from_data(data)
 
+async def application_command_global_update_many(client, application_commands):
+    application_id = client.application.id
+    application_command_datas = [application_command.to_data() for application_command in application_commands]
+    
+    application_command_datas = await bypass_request(client, METHOD_PUT,
+        f'{API_ENDPOINT}/applications/{application_id}/commands',
+        application_command_datas,
+            )
+    
+    return [ApplicationCommand.from_data(application_command_data) \
+        for application_command_data in application_command_datas]
+
+async def application_command_guild_update_many(client, guild, application_commands):
+    application_id = client.application.id
+    guild_id = guild.id
+    application_command_datas = [application_command.to_data() for application_command in application_commands]
+    
+    application_command_datas = await bypass_request(client, METHOD_PUT,
+        f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands',
+        application_command_datas,
+            )
+    
+    return [ApplicationCommand.from_data(application_command_data) \
+        for application_command_data in application_command_datas]
+
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0000(client,message):
+async def rate_limit_test0000(client, message):
     """
     Does 6 achievement get request towards 1 achievement.
     The bot's application must have at least 1 achievement created.
@@ -2012,25 +2037,23 @@ async def rate_limit_test0002(client,message):
     """
     Creates 6 achievements.
     """
-    with RLTCTX(client,message.channel,'rate_limit_test0002') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client, message.channel, 'rate_limit_test0002') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        loop=client.loop
-        
-        tasks=[]
-        names=('Yura','Hana','Neko','Kaze','Scarlet','Yukari')
+        tasks = []
+        names = ('Yura','Hana','Neko','Kaze','Scarlet','Yukari')
         for name in names:
-            description=name+'boroshi'
-            task=Task(achievement_create(client,name,description,image),loop)
+            description = name+'boroshi'
+            task = Task(achievement_create(client,name,description,image), KOKORO)
             tasks.append(task)
             
-        await WaitTillAll(tasks,loop)
+        await WaitTillAll(tasks, KOKORO)
         
         for task in tasks:
             try:
-                achievement=task.result()
+                achievement = task.result()
             except:
                 pass
             else:
@@ -2120,7 +2143,7 @@ async def rate_limit_test0005(client,message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0006(client,message):
     """
-    Creates, edits and deletes an achievment.
+    Creates, edits and deletes an achievement.
     """
     
     with RLTCTX(client,message.channel,'rate_limit_test0006') as RLT:
@@ -2138,7 +2161,7 @@ async def rate_limit_test0006(client,message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0007(client,message):
     """
-    Requests all the achievemenets.
+    Requests all the achievements.
     """
     
     with RLTCTX(client,message.channel,'rate_limit_test0007') as RLT:
@@ -4236,7 +4259,7 @@ async def rate_limit_test0107(client, message):
             application_command = application_commands[0]
             delete_after = False
         else:
-            application_command = client.application_command_global_create(ApplicationCommand('test_command','ayaya'))
+            application_command = client.application_command_global_create(ApplicationCommand('test_command', 'ayaya'))
             delete_after = True
         
         try:
@@ -4261,7 +4284,8 @@ async def rate_limit_test0108(client, message):
             application_command = application_commands[0]
             delete_after = False
         else:
-            application_command = client.application_command_guild_create(guild, ApplicationCommand('test_command','ayaya'))
+            application_command = client.application_command_guild_create(guild,
+                ApplicationCommand('test_command', 'ayaya'))
             delete_after = True
         
         try:
@@ -4270,3 +4294,150 @@ async def rate_limit_test0108(client, message):
             if delete_after:
                 await client.application_command_guild_delete(guild, application_command)
 
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0109(client, message):
+    """
+    Adds guild and global command with the update many endpoint, then deletes them.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0109') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        application_commands = await client.application_command_global_get_all()
+        if application_commands:
+            application_command = application_commands[0]
+            delete_command_after = False
+        else:
+            application_command = ApplicationCommand('test_command', 'ayaya')
+            delete_command_after = True
+        
+        try:
+            application_commands = await application_command_global_update_many(client, [application_command])
+        finally:
+            if delete_command_after:
+                application_command = application_commands[0]
+                await client.application_command_global_delete(application_command)
+        
+        application_commands = await client.application_command_guild_get_all(guild)
+        if application_commands:
+            application_command = application_commands[0]
+            delete_command_after = False
+        else:
+            application_command = ApplicationCommand('test_command', 'ayaya')
+            delete_command_after = True
+        
+        try:
+            application_commands = await application_command_guild_update_many(client, guild, [application_command])
+        finally:
+            if delete_command_after:
+                application_command = application_commands[0]
+                await client.application_command_guild_delete(guild, application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0110(client, message, guild2:'guild'=None):
+    """
+    Adds command with 2 guilds, then uses the update many endpoint. Please give an additional guild to use teh command
+    within.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0110') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if guild2 is None:
+            await RLT.send('Second guild unknown.')
+        
+        application_commands = await client.application_command_guild_get_all(guild2)
+        if application_commands:
+            application_command = application_commands[0]
+            delete_command_after = False
+        else:
+            application_command = ApplicationCommand('test_command', 'ayaya')
+            delete_command_after = True
+        
+        try:
+            application_commands = await application_command_guild_update_many(client, guild2, [application_command])
+        finally:
+            if delete_command_after:
+                application_command = application_commands[0]
+                await client.application_command_guild_delete(guild2, application_command)
+        
+        application_commands = await client.application_command_guild_get_all(guild)
+        if application_commands:
+            application_command = application_commands[0]
+            delete_command_after = False
+        else:
+            application_command = ApplicationCommand('test_command', 'ayaya')
+            delete_command_after = True
+        
+        try:
+            application_commands = await application_command_guild_update_many(client, guild, [application_command])
+        finally:
+            if delete_command_after:
+                application_command = application_commands[0]
+                await client.application_command_guild_delete(guild, application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0111(client, message, guild2:'guild'=None):
+    """
+    Creates application command within 2 guilds. Please define a second guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0111') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if guild2 is None:
+            await RLT.send('Second guild unknown.')
+        
+        application_command = ApplicationCommand('test_command', 'ayaya')
+        application_command = await application_command_guild_create(client, guild2, application_command)
+        await client.application_command_guild_delete(guild2, application_command)
+        
+        application_command = ApplicationCommand('test_command', 'ayaya')
+        application_command = await application_command_guild_create(client, guild, application_command)
+        await client.application_command_guild_delete(guild, application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0112(client, message, guild2:'guild'=None):
+    """
+    Creates, edits and the deletes a guild bound application command. Please define a second guild as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0112') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if guild2 is None:
+            await RLT.send('Second guild unknown.')
+        
+        application_command_schema = ApplicationCommand(
+            'This-command_cake',
+            'But does nothing for real, pls don\'t use it.',
+                )
+        
+        application_command = await application_command_guild_create(client, guild, application_command_schema)
+        
+        application_command_schema.description = 'The floor is lava.'
+        application_command_schema.name = 'derping-out'
+        
+        await application_command_guild_edit(client, guild, application_command, application_command_schema)
+        await application_command_guild_delete(client, guild, application_command)
+        
+        application_command_schema = ApplicationCommand(
+            'This-command_cake',
+            'But does nothing for real, pls don\'t use it.',
+                )
+        
+        application_command = await application_command_guild_create(client, guild2, application_command_schema)
+        
+        application_command_schema.description = 'The floor is lava.'
+        application_command_schema.name = 'derping-out'
+        
+        await application_command_guild_edit(client, guild2, application_command, application_command_schema)
+        await application_command_guild_delete(client, guild2, application_command)

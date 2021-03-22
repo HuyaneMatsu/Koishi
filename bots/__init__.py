@@ -76,7 +76,6 @@ if MARISA_MODE:
     
     MARISA_ALLOWED_MODULES.add('voice')
     MARISA_ALLOWED_MODULES.add('extensions')
-    MARISA_ALLOWED_MODULES.add('witch_craft')
     
     for path in list(MODULE_NAMES):
         if path not in MARISA_ALLOWED_MODULES:
@@ -86,6 +85,11 @@ else:
     if not config.ALLOW_KOISHI_SNEKBOX:
         try:
             MODULE_NAMES.remove('snekbox')
+        except KeyError:
+            pass
+
+        try:
+            MODULE_NAMES.remove('witch_craft')
         except KeyError:
             pass
 

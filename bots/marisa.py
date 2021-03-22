@@ -504,43 +504,6 @@ async def number(client, event, number:('number', 'number')):
     """Loading screen nya!"""
     return str(number)
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def is_banned(client, event,
-        user: ('user', 'Who should I check?')
-            ):
-    """Checks whether the user is banned."""
-    if not event.user_permissions.can_ban_users:
-        abort('You need to have `ban users` permissions to do this.')
-    
-    if not event.channel.cached_permissions_for(client).can_ban_users:
-        abort('I need to have `ban users` permissions to do this.')
-    
-    yield # acknowledge the event
-    
-    try:
-        ban_entry = await client.guild_ban_get(event.guild, user)
-    except DiscordException as err:
-        if err.code == ERROR_CODES.unknown_ban:
-            ban_entry = None
-        else:
-            raise
-    
-    embed = Embed(f'Ban entry for {user:f}').add_thumbnail(user.avatar_url)
-    
-    if ban_entry is None:
-        embed.description = 'The user **NOT YET** banned.'
-    
-    else:
-        embed.description = 'The user is banned.'
-        
-        reason = ban_entry.reason
-        if reason is None:
-            reason = '*No reason was specified.*'
-        
-        embed.add_field('Reason:', reason)
-    
-    yield embed
-
 
 async def async_gen_2():
     abort('beep')

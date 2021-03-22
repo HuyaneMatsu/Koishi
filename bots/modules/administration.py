@@ -5,6 +5,7 @@ from functools import partial as partial_func
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
     parse_rdelta, time_to_id, ChannelCategory
 from hata.ext.commands import Pagination, wait_for_reaction
+from hata.ext.slash import abort
 from hata.ext.prettyprint import pchunkify
 
 
@@ -387,6 +388,44 @@ async def yeet(client, event,
     embed = Embed('Hecatia yeah!', f'{user.full_name} has been yeeted.')
     if (notify_note is not None):
         embed.add_footer(notify_note)
+    
+    yield embed
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def is_banned(client, event,
+        user: ('user', 'Who should I check?')
+            ):
+    """Checks whether the user is banned."""
+    if not event.user_permissions.can_ban_users:
+        abort('You need to have `ban users` permissions to do this.')
+    
+    if not event.channel.cached_permissions_for(client).can_ban_users:
+        abort('I need to have `ban users` permissions to do this.')
+    
+    yield # acknowledge the event
+    
+    try:
+        ban_entry = await client.guild_ban_get(event.guild, user)
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_ban:
+            ban_entry = None
+        else:
+            raise
+    
+    embed = Embed(f'Ban entry for {user:f}').add_thumbnail(user.avatar_url)
+    
+    if ban_entry is None:
+        embed.description = 'The user **NOT YET** banned.'
+    
+    else:
+        embed.description = 'The user is banned.'
+        
+        reason = ban_entry.reason
+        if reason is None:
+            reason = '*No reason was specified.*'
+        
+        embed.add_field('Reason:', reason)
     
     yield embed
 

@@ -9,6 +9,9 @@
     --size-min601-width: calc(75% + 150px);
     --size-min601-min-width: 601px;
 
+    --docs-size-min-width-border : 28px;
+    --content-table-size-min-width : 300px;
+
     --color-body-font: rgb(255 255 255);
     --color-body-background: rgb(54 57 63);
     --color-link-font: rgb(255 255 255);
@@ -71,8 +74,12 @@ body {
         }
 
 p {
-    margin-top: 1em;
-    margin-bottom: 0.5em;
+    padding-top: 0.75em;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0.75em;
     margin-left: 0px;
     margin-right: 0px;
         }
@@ -244,6 +251,9 @@ pre {
 blockquote {
     margin: 0;
     padding: 0;
+    width: max-content;
+    max-width: 100%;
+    min-width: calc(35% + 200px);
         }
 
 ::-webkit-scrollbar {
@@ -276,8 +286,9 @@ blockquote {
     padding-left: 12px;
         }
 
-.sub_section p, .unit_section p {
-    margin-top: 0.4em;
+.sub_section p:first-child, .unit_section p:first-child {
+    padding-top: 0px;
+    margin-top: 0.2em;
         }
 
 .main_block {
@@ -641,15 +652,21 @@ blockquote {
     color: var(--color-block-quote-font);
         }
 
-.docs blockquote p {
-    margin-top: 0.75em;
-    margin-bottom: 0.75em;
+.docs blockquote p,  .docs blockquote p:first-child{
+    padding-top: 0.75em;
+    padding-bottom: 0.75em;
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
         }
 
 @media screen and (max-width: 1100px) {
     .content_table {
-        margin-left: 28px;
-        margin-right: 28px;
+        margin-left: var(--docs-size-min-width-border);
+        margin-right: var(--docs-size-min-width-border);
         margin-bottom: 6px;
         border-bottom-width: 1px;
         border-bottom-style: solid;
@@ -661,14 +678,14 @@ blockquote {
             }
 
     .docs {
-        margin-left: 28px;
-        margin-right: 28px;
+        margin-left: var(--docs-size-min-width-border);
+        margin-right: var(--docs-size-min-width-border);
             }
         }
 
 @media screen and (min-width: 1101px) {
     .content_table {
-        width: 300px;
+        width: var(--content-table-size-min-width);
         position: fixed;
         max-height: calc(100vh - 40px);
         height: calc(100vh - 40px);
@@ -688,7 +705,7 @@ blockquote {
             }
 
     .docs {
-        width: calc(100% - 332px);
+        width: calc(100% - var(--content-table-size-min-width) - var(--docs-size-min-width-border) - 4px);
         float: right;
             }
 
@@ -704,7 +721,7 @@ blockquote {
         }
 
 .c_py_numeric {
-    color: rgb(64 0 170);
+    color: rgb(96 0 255);
         }
 
 .c_py_string {
@@ -733,4 +750,24 @@ blockquote {
 
 .c_py_identifier_attribute {
     color: rgb(255 255 194);
+        }
+
+.c_py_identifier_console_prefix {
+    color: rgb(255 121 25);
+        }
+
+.c_py_format_string_mark {
+    color: rgb(249 17 17);
+        }
+
+.c_py_comment {
+    color: rgb(155 185 243);
+        }
+
+.c_py_format_string_code {
+    color: rgb(255 152 44);
+        }
+
+.c_py_format_string_postfix {
+    color: rgb(255 152 44);
         }
