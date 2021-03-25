@@ -343,6 +343,11 @@ async def load_data():
 def calculate_buy_cost(market_cost, n):
     return floor((n*((market_cost<<1)+n+1)>>1)*(1.0+MARKET_COST_FEE))
 
+def calculate_sell_price(market_cost, n):
+    market_cost_min = market_cost-n
+    if market_cost_min < MARKET_COST_MIN:
+        pass
+        # TODO
 
 def calculate_buyable_and_cost(market_cost, n, usable):
     if usable < market_cost:

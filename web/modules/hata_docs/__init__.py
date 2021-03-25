@@ -39,14 +39,13 @@ set_highlight_html_class(highlight.TOKEN_TYPE_STRING_UNICODE_FORMAT_POSTFIX, 'c_
 
 
 class DocsWrapper(object):
-    __slots__ = ('path', 'unit',)
+    __slots__ = ('unit',)
     
     @property
     def __name__(self):
         return self.path
     
-    def __init__(self, path, unit):
-        self.path = path
+    def __init__(self, unit):
         self.unit = unit
     
     def __call__(self):
@@ -67,14 +66,9 @@ class DocsWrapper(object):
                 )
 
 class Redirecter(object):
-    __slots__ = ('path', 'redirect_to')
+    __slots__ = ('redirect_to')
     
-    @property
-    def __name__(self):
-        return self.path
-    
-    def __init__(self, path, redirect_to):
-        self.path = path
+    def __init__(self, redirect_to):
         self.redirect_to = redirect_to
     
     def __call__(self):
@@ -84,11 +78,10 @@ ADDED_OBJECTS = set()
 
 def unit_adder(unit):
     path = '/'+'/'.join(unit.path.parts)
-    ROUTES.route(path)(DocsWrapper(path, unit))
+    ROUTES.add_url_rule(path, path, DocsWrapper(unit))
     
     path += '/'
-    ROUTES.route(path)(Redirecter(path, '../'+unit.path.parts[-1]))
-    
+    ROUTES.add_url_rule(path, path, Redirecter('../'+unit.path.parts[-1]))
     ADDED_OBJECTS.add(unit)
 
 def recursive_unit_adder(module_unit):

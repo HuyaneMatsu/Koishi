@@ -322,27 +322,22 @@ async def yeet(client, event,
     """Yeets someone out of the guild. You must have ban users permission."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
+        abort('I must be in the guild to do this.')
     
     if not event.user_permissions.can_ban_users:
-        yield Embed('Permission denied', 'You must have yeet users permission to use this command.')
-        return
+        abort('You must have yeet users permission to use this command.')
     
     if not guild.cached_permissions_for(client).can_ban_users:
-        yield Embed('Permission denied', f'{client.name_at(guild)} cannot yeet in the guild.')
-        return
+        abort(f'{client.name_at(guild)} cannot yeet in the guild.')
     
     if not event.user.has_higher_role_than_at(user, guild):
-        yield Embed('Permission denied', 'You must have higher role than the person to be yeeted.')
-        return
+        abort('You must have higher role than the person to be yeeted.')
     
     if not client.has_higher_role_than_at(user, guild):
-        yield Embed('Permission denied', 'I must have higher role than the person to yeeted.')
-        return
+        abort('I must have higher role than the person to yeeted.')
     
     if (reason is not None) and (not reason):
         reason = None

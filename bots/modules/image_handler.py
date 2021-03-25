@@ -4,6 +4,7 @@ from io import BytesIO
 
 from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, Color, KOKORO, Lock, Client, parse_message_reference, \
     MESSAGES, DiscordException, ERROR_CODES, CHANNELS, Attachment, sanitize_mentions
+from hata.ext.slash import SlashResponse, abort
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -111,21 +112,16 @@ async def image_(client, event,
     # Check for permissions!
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command', color=IMAGE_COLOR)
-        return
+        abort('Guild only command')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild to execute this command.', color=IMAGE_COLOR)
-        return
+        abort('I must be in the guild to execute this command.')
     
     if not count:
         # Check for more permissions!
         permissions = event.channel.cached_permissions_for(client)
         if (not permissions.can_send_messages):
-            yield Embed('Permission denied',
-                'I need `send messages` permission to execute this command.',
-                color=IMAGE_COLOR)
-            return
+            abort('I need `send messages` permission to execute this command.')
     
     hashes = None
     missing_tag = False
@@ -168,19 +164,15 @@ async def image_(client, event,
             image_details.append(image_detail)
     
     if count:
-        yield str(len(image_details))
-        return
+        return str(len(image_details))
     
     if not image_details:
-        yield 'Sowwy, no result.'
-        return
-    
-    yield
+        return 'Sowwy, no result.'
     
     image_detail = choose(image_details)
     
-    with (await ReuAsyncIO(join(IMAGE_PATH, image_detail.path))) as image:
-        await client.message_create(event.channel, file=image)
+    image = await ReuAsyncIO(join(IMAGE_PATH, image_detail.path))
+    return SlashResponse(file=image)
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)

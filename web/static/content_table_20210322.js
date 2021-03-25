@@ -84,7 +84,7 @@ class CTPart {
             clicked = 0;
         } else {
             clicked = 1;
-                    }
+                }
 
         this.clicked = clicked;
         this.update_display_state();
@@ -96,7 +96,7 @@ class CTPart {
         var new_svg;
 
         if (this.should_display){
-            var new_display = 'list-item';
+            var new_display = 'inline-block';
             if (this.clicked){
                 new_display_children = 'block';
                 if (this.should_display_children){

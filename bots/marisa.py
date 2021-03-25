@@ -6,9 +6,10 @@ from math import ceil
 from collections import deque, OrderedDict
 from html import unescape as html_unescape
 from functools import partial as partial_func
-from datetime import datetime
+from datetime import datetime, timedelta
 from hata.discord.rate_limit import parse_date_to_datetime
 
+from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
@@ -513,5 +514,53 @@ async def async_gen_2():
 async def abort_from_async_gen(client, event):
     """Aborts from an async gen."""
     return async_gen_2()
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def latest_users(client, event,):
+    """Shows the new users of the guild."""
+    date_limit = datetime.now() - timedelta(days=7)
+    
+    users = []
+    guild = event.guild
+    for user in guild.users.values():
+        # Use created at and not `joined_at`, we can ignore lurkers.
+        created_at = user.guild_profiles[guild].created_at
+        if created_at > date_limit:
+            users.append((created_at, user))
+    
+    users.sort()
+    del users[15:]
+    
+    embed = Embed('Recently joined users')
+    if users:
+        for index, (joined_at, user) in enumerate(users, 1):
+            created_at = user.created_at
+            embed.add_field(
+                f'{index}. {user.full_name}',
+                f'Id: {user.id}\n'
+                f'Mention: {user.mention}\n'
+                '\n'
+                f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
+                f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+                f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
+                    )
+    
+    else:
+        embed.description = '*none*'
+    
+    return SlashResponse(embed=embed, allowed_mentions=None)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def file_edit(client, event,):
+    """Tests interaction with file edit."""
+    await client.interaction_response_message_create(event)
+    await client.interaction_response_message_edit(event, file=b'cake')
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def file_edit_2(client, event,):
+    """Tests interaction with file edit."""
+    return SlashResponse(file=b'cake')
+
 
 

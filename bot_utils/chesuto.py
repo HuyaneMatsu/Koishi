@@ -384,8 +384,8 @@ class Card(object):
     @classmethod
     def _dump_cards(cls,card_datas):
         with CARDS_FILE_LOCK:
-            with open(CARDS_FILE,'w') as file:
-                json.dump(card_datas,file,indent=4)
+            with open(CARDS_FILE, 'w') as file:
+                json.dump(card_datas, file, indent=4)
     
     @classmethod
     def load_cards(cls):

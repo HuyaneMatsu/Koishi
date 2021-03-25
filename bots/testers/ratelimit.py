@@ -1945,7 +1945,7 @@ async def application_command_guild_get(client, guild, application_command_id):
     
     return ApplicationCommand.from_data(data)
 
-async def application_command_global_update_many(client, application_commands):
+async def application_command_global_update_multiple(client, application_commands):
     application_id = client.application.id
     application_command_datas = [application_command.to_data() for application_command in application_commands]
     
@@ -1957,7 +1957,7 @@ async def application_command_global_update_many(client, application_commands):
     return [ApplicationCommand.from_data(application_command_data) \
         for application_command_data in application_command_datas]
 
-async def application_command_guild_update_many(client, guild, application_commands):
+async def application_command_guild_update_multiple(client, guild, application_commands):
     application_id = client.application.id
     guild_id = guild.id
     application_command_datas = [application_command.to_data() for application_command in application_commands]
@@ -4314,7 +4314,7 @@ async def rate_limit_test0109(client, message):
             delete_command_after = True
         
         try:
-            application_commands = await application_command_global_update_many(client, [application_command])
+            application_commands = await application_command_global_update_multiple(client, [application_command])
         finally:
             if delete_command_after:
                 application_command = application_commands[0]
@@ -4329,7 +4329,7 @@ async def rate_limit_test0109(client, message):
             delete_command_after = True
         
         try:
-            application_commands = await application_command_guild_update_many(client, guild, [application_command])
+            application_commands = await application_command_guild_update_multiple(client, guild, [application_command])
         finally:
             if delete_command_after:
                 application_command = application_commands[0]
@@ -4359,7 +4359,7 @@ async def rate_limit_test0110(client, message, guild2:'guild'=None):
             delete_command_after = True
         
         try:
-            application_commands = await application_command_guild_update_many(client, guild2, [application_command])
+            application_commands = await application_command_guild_update_multiple(client, guild2, [application_command])
         finally:
             if delete_command_after:
                 application_command = application_commands[0]
@@ -4374,7 +4374,7 @@ async def rate_limit_test0110(client, message, guild2:'guild'=None):
             delete_command_after = True
         
         try:
-            application_commands = await application_command_guild_update_many(client, guild, [application_command])
+            application_commands = await application_command_guild_update_multiple(client, guild, [application_command])
         finally:
             if delete_command_after:
                 application_command = application_commands[0]

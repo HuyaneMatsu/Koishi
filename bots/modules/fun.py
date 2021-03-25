@@ -202,7 +202,7 @@ async def trivia_(client, event):
     finally:
         TRIVIA_USER_LOCK.discard(user.id)
 
-'''
+
 @SLASH_CLIENT.interactions(show_for_invoking_user_only=True, is_global=True)
 async def message_me(client, event):
     """Messages you!"""
@@ -301,7 +301,7 @@ async def random_(client, event,
         result = randint(n1, n2)
     
     return str(result)
-'''
+
 
 def generate_love_level():
     value = {
