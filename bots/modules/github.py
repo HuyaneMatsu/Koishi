@@ -7,6 +7,7 @@ from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
 from hata.discord.rate_limit import parse_date_to_datetime
 from hata.backend.quote import quote
+from hata.ext.slash import abort
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON
 
@@ -385,23 +386,21 @@ async def github_profile(client, event,
     """Gets the user's guild profile."""
     guild = event.guild
     if (guild is None) or (guild not in client.guild_profiles):
-        yield Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
-        return
+        abort('The command unavailable in guilds, where the application\'s bot is not in.')
     
     if not user:
-        yield Embed('Ohoho', 'User name cannot be empty.')
-        return
+        abort('User parameter cannot be empty.')
+    
+    yield
     
     # Was the user requested recently?
     user_search, rate_limited = await SEARCH_USER_NAME(user)
     if rate_limited:
-        yield Embed('Oh no!', 'We are being rate limited, please try again later!')
-        return
+        abort('We are being rate limited, please try again later!')
     
     names = user_search.names
     if not names:
-        yield Embed('Oof', 'No user matched the given name.')
-        return
+        abort('No user matched the given name.')
     
     if user == names[0]:
         name = user
@@ -414,13 +413,11 @@ async def github_profile(client, event,
     
     user_object, rate_limited = await GET_USER(name)
     if rate_limited:
-        yield Embed('Oh no!', 'We are being rate limited, please try again later!')
-        return
+        abort('We are being rate limited, please try again later!')
     
     organization_container, rate_limited = await GET_ORGANIZATIONS(name)
     if rate_limited:
-        yield Embed('Oh no!', 'We are being rate limited, please try again later!')
-        return
+        abort('We are being rate limited, please try again later!')
     
     description_parts = []
     user_object.render_description_to(description_parts)

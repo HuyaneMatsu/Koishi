@@ -2,9 +2,12 @@
 import re
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, ClientWrapper, MESSAGES, \
-    Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference
+    Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference, ChannelBase
 
-from hata.ext.commands import ContentParser, Converter, ChooseMenu, Pagination, ConverterFlag
+from hata.ext.commands import ContentParser, Converter, ChooseMenu, Pagination, ConverterFlag, Closer
+from hata.ext.slash import abort
+from hata.discord.parsers import INTERACTION_EVENT_RESPONSE_STATE_NONE, INTERACTION_EVENT_RESPONSE_STATE_DEFERRED, \
+    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED
 
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
 
@@ -58,24 +61,21 @@ AUTO_REACT_ROLE = SLASH_CLIENT.interactions(None,
     is_global=True,
         )
 
-AUTO_REACT_ROLE.interactions(name='create')
+AUTO_REACT_ROLE.interactions(name='create', show_for_invking_user_only=True)
 async def create_auto_react_role(client, event,
         message: ('str', 'Please reference a message!'),
             ):
     """Adds roles if the users reacts on a message. (Admin only)"""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command!')
-        return
+        abort('Guild only command!')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild to execute this command.')
-        return
+        abort('I must be in the guild to execute this command.')
     
     message_reference = parse_message_reference(message)
     if message_reference is None:
-        yield Embed('Error', 'Could not identify the message.')
-        return
+        abort('Could not identify the message.')
     
     guild_id, channel_id, message_id = message_reference
     try:
@@ -85,13 +85,13 @@ async def create_auto_react_role(client, event,
             try:
                 channel = CHANNELS[channel_id]
             except KeyError:
-                yield Embed('Ohoho', 'I have no access to the channel.')
-                return
+                abort('I have no access to the channel.')
+                return # Or hinter goes brr
         else:
             channel = event.channel
         
         if not channel.cached_permissions_for(client).can_read_message_history:
-            yield Embed('Ohoho', 'I have no permission to get that message.')
+            abort('Ohoho', 'I have no permission to get that message.')
             return
         
         # We only really need `channel_id` and `guild_id`, so we can ignore `guild_id`.
@@ -108,31 +108,27 @@ async def create_auto_react_role(client, event,
                     ERROR_CODES.unknown_message, # channel deleted
                         ):
                 # The message is already deleted.
-                yield Embed('OOf', 'The referenced message is already yeeted.')
-                return
+                abort('The referenced message is already yeeted.')
             
             if err.code == ERROR_CODES.invalid_access: # client removed
                 # This is not nice.
                 return
             
             if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
-                yield Embed('Ohoho', 'I have no permission to get that message.')
-                return
+                abort('I have no permission to get that message.')
             
             raise
     
     target_guild = target_message.guild
     if target_guild is None:
-        yield Embed('Ohoho', 'The referenced message is inside of a private channel.')
-        return
+        abort('The referenced message is inside of a private channel.')
     
     if not target_guild.permissions_for(event.user).can_administrator:
         if guild is target_guild:
             error_message = 'You must have `administrator` permission to invoke this command.'
         else:
             error_message = 'You must have `administrator` permission in the respective guild to invoke this command.'
-        yield Embed('Permission denied', error_message)
-        return
+        abort(error_message)
     
     permissions = target_guild.cached_permissions_for(client)
     if (not permissions.can_manage_messages) or (not permissions.can_manage_roles):
@@ -141,12 +137,9 @@ async def create_auto_react_role(client, event,
         else:
             error_message = 'I need to have `manage messages` and `manage roles` permissions in the respective guild ' \
                             'to invoke this command.'
-        yield Embed('Permission denied', error_message)
-        return
+        abort(error_message)
     
-    yield
-    
-    await AutoReactRoleGUI(client, target_message, target_message.channel, guild)
+    await AutoReactRoleGUI(client, target_message, event, guild)
 
 
 def iterate_embed_parts(embed):
@@ -549,17 +542,17 @@ class AutoReactRoleGUI(object):
         embed.add_field(AUTO_REACT_ROLE_GUI_EMBED_FIELD_NAME, AUTO_REACT_ROLE_GUI_EMBED_FIELD_VALUE)
         return embed
     
-    async def __new__(cls, client, target_message, channel, guild, message = None):
+    async def __new__(cls, client, target_message, channel_or_event, guild, message = None):
         try:
             old_gui = AUTO_REACT_ROLE_GUIS.pop(target_message)
         except KeyError:
             manager = client.events.reaction_add.get_waiter(target_message, AutoReactRoleManager, by_type = True, is_method=True)
-            changes = AutoReactRoleChange(manager, channel.guild)
+            changes = AutoReactRoleChange(manager, channel_or_event.guild)
         else:
             await old_gui.cancel()
             manager = old_gui.manager
             changes = old_gui.changes
-            changes.guild = channel.guild
+            changes.guild = channel_or_event.guild
         
         self = object.__new__(cls)
         self.target_message = target_message
@@ -572,7 +565,13 @@ class AutoReactRoleGUI(object):
         try:
             embed = self.render()
             if message is None:
-                message = await client.message_create(channel, embed=embed)
+                if isinstance(channel_or_event, ChannelBase):
+                    message = await client.message_create(channel_or_event, embed=embed)
+                else:
+                    if channel_or_event._response_state == INTERACTION_EVENT_RESPONSE_STATE_NONE:
+                        await client.interaction_response_message_create(channel_or_event)
+                    
+                    message = await client.interaction_followup_message_create(channel_or_event, embed=embed)
             else:
                 await client.message_edit(message, embed=embed)
         except BaseException as err:
@@ -1399,32 +1398,24 @@ async def show_auto_react_roles(client, event):
     """Lists the currently active `auto-react-roles` in the guild. (Admin only)"""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command!')
-        return
+        abort('Guild only command!')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild to execute this command.')
-        return
+        abort('I must be in the guild to execute this command.')
     
     if not guild.permissions_for(event.user).can_administrator:
-        yield Embed('Permission denied', 'You must have `administrator` permission to invoke this command.')
-        return
+        abort('You must have `administrator` permission to invoke this command.')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            'I require `send messages` and `add reactions` permissions to execute this command.',
-                )
-        return
-    
-    yield
+        abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
     managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type=True, is_method=True)
     
-    embed = Embed(f'Auto role managers for: {guild}',color=AUTO_REACT_ROLE_COLOR)
+    embed = Embed(f'Auto role managers for: {guild}', color=AUTO_REACT_ROLE_COLOR)
     if not managers:
         embed.description = '*none*'
-        await Pagination(client, event.channel, [embed])
+        await Closer(client, event, embed)
         return
     
     results = []
@@ -1433,13 +1424,24 @@ async def show_auto_react_roles(client, event):
         title = f'{message.channel:m} {message.id}'
         results.append((title, manager),)
     
-    await ChooseMenu(client, event.channel, results, select_auto_react_role_gui, embed=embed, prefix='¤')
+    await ChooseMenu(client, event, results, select_auto_react_role_gui, embed=embed, prefix='¤')
 
-async def select_auto_react_role_gui(client, channel, message, title, manager):
+async def select_auto_react_role_gui(client, channel_or_event, message, title, manager):
     guild = manager.message.channel.guild
     if manager.destroy_called or (guild is None):
-        await client.message_create(message.channel,embed=Embed(
-            'The selected embed was already destroyed',color=AUTO_REACT_ROLE_COLOR),)
+        embed = Embed('The selected entity was already destroyed', color=AUTO_REACT_ROLE_COLOR)
+        if isinstance(channel_or_event, ChannelBase):
+            await client.message_create(channel_or_event, embed=embed)
+        else:
+            response_state = channel_or_event._response_state
+            
+            if response_state == INTERACTION_EVENT_RESPONSE_STATE_NONE:
+                await client.interaction_response_message_create(channel_or_event, embed=embed)
+            elif response_state == INTERACTION_EVENT_RESPONSE_STATE_DEFERRED:
+                await client.interaction_response_message_edit(channel_or_event, embed=embed)
+            else:
+                await client.interaction_followup_message_create(channel_or_event, embed=embed)
+        
         return
     
-    await AutoReactRoleGUI(client, manager.message, channel, guild, message=message)
+    await AutoReactRoleGUI(client, manager.message, channel_or_event, guild, message=message)

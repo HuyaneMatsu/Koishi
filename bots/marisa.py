@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
-    MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME
+    MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta
 from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort
@@ -515,52 +515,55 @@ async def abort_from_async_gen(client, event):
     """Aborts from an async gen."""
     return async_gen_2()
 
-
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def latest_users(client, event,):
-    """Shows the new users of the guild."""
-    date_limit = datetime.now() - timedelta(days=7)
-    
-    users = []
-    guild = event.guild
-    for user in guild.users.values():
-        # Use created at and not `joined_at`, we can ignore lurkers.
-        created_at = user.guild_profiles[guild].created_at
-        if created_at > date_limit:
-            users.append((created_at, user))
-    
-    users.sort()
-    del users[15:]
-    
-    embed = Embed('Recently joined users')
-    if users:
-        for index, (joined_at, user) in enumerate(users, 1):
-            created_at = user.created_at
-            embed.add_field(
-                f'{index}. {user.full_name}',
-                f'Id: {user.id}\n'
-                f'Mention: {user.mention}\n'
-                '\n'
-                f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
-                f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-                f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
-                    )
-    
+async def parse_time_delta(client, event,
+        delta: (str, 'The delta to parse'),
+            ):
+    """Tries to parse a time delta."""
+    delta = parse_tdelta(delta)
+    if delta is None:
+        result = 'Parsing failed.'
     else:
-        embed.description = '*none*'
+        result = repr(delta)
     
-    return SlashResponse(embed=embed, allowed_mentions=None)
+    return result
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def file_edit(client, event,):
-    """Tests interaction with file edit."""
-    await client.interaction_response_message_create(event)
-    await client.interaction_response_message_edit(event, file=b'cake')
+async def parse_relative_delta(client, event,
+        delta: (str, 'The delta to parse'),
+            ):
+    """Tries to parse a relative delta."""
+    delta = parse_rdelta(delta)
+    if delta is None:
+        result = 'Parsing failed.'
+    else:
+        result = repr(delta)
+    
+    return result
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def file_edit_2(client, event,):
-    """Tests interaction with file edit."""
-    return SlashResponse(file=b'cake')
+async def user_id(client, event,
+        user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
+            ):
+    """Shows your or the selected user's id."""
+    if user_id is None:
+        user_id = event.user.id
+    
+    return str(user_id)
 
-
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def collect_reactions(client, event):
+    """Collects reactions"""
+    message = yield SlashResponse('Collecting reactions for 1 minute!', force_new_message=True)
+    await sleep(60.0)
+    
+    reactions = message.reactions
+    if reactions:
+        emojis = list(reactions)
+        # Limit reactions to 16 to avoid error from Discord
+        del emojis[16:]
+        
+        yield ' '.join(emoji.as_emoji for emoji in emojis)
+    else:
+        yield 'No reactions were collected.'
 

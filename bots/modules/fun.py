@@ -484,19 +484,23 @@ MINE_MINE_CLEAR = (
 
 MINE_MINE = tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
 
+MINE_X_SIZE = 9
+MINE_Y_SIZE = 9
+MINE_SIZE = MINE_X_SIZE*MINE_Y_SIZE
+
 @SLASH_CLIENT.interactions(is_global=True)
 async def minesweeper(client, message,
-        bomb_count: ([(str(x), x) for x in range(8, 17)], 'How much bombs should be on the field?') = 12,
+        bomb_count: ([(str(x), x) for x in range(7, 15)], 'How much bombs should be on the field?') = 10,
         raw : ('bool', 'Raw text?') = False,
             ):
     """Minesweeping is fun!? (not in irl)"""
     
-    data = [0 for x in range(100)]
+    data = [0 for x in range(MINE_SIZE)]
     
     while bomb_count:
-        x = randint(0, 9)
-        y = randint(0, 9)
-        position = x+y*10
+        x = randint(0, 8)
+        y = randint(0, 8)
+        position = x+y*MINE_X_SIZE
         
         value = data[position]
         if value == 9:
@@ -507,7 +511,8 @@ async def minesweeper(client, message,
         for c_x, c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
             local_x = x+c_x
             local_y = y+c_y
-            if local_x != 10 and local_x != -1 and local_y != 10 and local_y != -1 and data[local_x+local_y*10] == 9:
+            if local_x != MINE_X_SIZE and local_x != -1 and local_y != MINE_Y_SIZE and local_y != -1 and \
+                    data[local_x+local_y*MINE_X_SIZE] == 9:
                 local_count += 1
         
         if local_count > 3:
@@ -516,8 +521,8 @@ async def minesweeper(client, message,
         for c_x,c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
             local_x = x+c_x
             local_y = y+c_y
-            if local_x != 10 and local_x != -1 and local_y != 10 and local_y != -1:
-                local_position = local_x+local_y*10
+            if local_x != MINE_X_SIZE and local_x != -1 and local_y != MINE_Y_SIZE and local_y != -1:
+                local_position = local_x+local_y*MINE_X_SIZE
                 local_value = data[local_position]
                 if local_value == 9:
                     continue
@@ -538,12 +543,12 @@ async def minesweeper(client, message,
         while True:
             result_sub.append(MINE_MINE[data[x+y]])
             x += 1
-            if x == 10:
+            if x == MINE_X_SIZE:
                 break
         result.append(''.join(result_sub))
         result_sub.clear()
-        y += 10
-        if y == 100:
+        y += MINE_X_SIZE
+        if y == MINE_SIZE:
             break
     
     if raw:

@@ -4,6 +4,8 @@ from math import ceil
 from time import perf_counter
 from functools import partial as partial_func
 from colorsys import rgb_to_hsv, rgb_to_yiq
+from datetime import datetime, timedelta
+
 
 from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, RoleManagerType, ERROR_CODES, \
@@ -12,8 +14,10 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
 
 from hata.ext.commands import Pagination
 from hata.ext.prettyprint import pchunkify
+from hata.ext.slash import abort, SlashResponse
 
 from PIL import Image as PIL
+from dateutil.relativedelta import relativedelta
 
 from bot_utils.tools import PAGINATION_5PN
 from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
@@ -285,7 +289,7 @@ async def message_(client, event,
         chunks = pchunkify(message)
     
     pages = [Embed(description=chunk) for chunk in chunks]
-    await Pagination(client, event.channel, pages, check=partial_func(message_pagination_check, event.user))
+    await Pagination(client, event, pages, check=partial_func(message_pagination_check, event.user))
 
 
 class RoleCache(object):
@@ -521,7 +525,7 @@ async def shared_guilds(client, event):
         embed = Embed(embed_title, page, color=UTILITY_COLOR)
         embeds.append(embed)
     
-    await Pagination(client, event.channel, embeds, check=partial_func(shared_guilds_pagination_check, user))
+    await Pagination(client, event, embeds, check=partial_func(shared_guilds_pagination_check, user))
 
 
 @SLASH_CLIENT.interactions(name='user', is_global=True)
@@ -592,7 +596,7 @@ async def role_(client, event,
             ):
     """Shows the information about a role."""
     if role.partial:
-        return Embed('Error', 'I must be in the guild, where the role is.')
+        abort('I must be in the guild, where the role is.')
     
     embed = Embed(f'Role information for: {role.name}', color=role.color)
     embed.add_field('Position', str(role.position), inline=True)
@@ -842,7 +846,7 @@ async def guild_(client, event,
     """Shows some information about the guild."""
     guild = event.guild
     if guild.partial:
-        return Embed('Error', 'I must be in the guild to execute this command.')
+        abort('I must be in the guild to execute this command.')
     
     embed = Embed(guild.name, color=(
         guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF)
@@ -960,12 +964,10 @@ async def in_role(client, event,
     """Shows the users with the given roles."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-        return
+        abort('I must be in the guild to do this.')
     
     roles = set()
     for role in role_1, role_2, role_3, role_4, role_5, role_6, role_7, role_8, role_9:
@@ -976,8 +978,7 @@ async def in_role(client, event,
             roles.add(role)
             continue
         
-        yield Embed('Error', f'Role {role.name}, [{role.id}] is bound to an other guild.')
-        return
+        abort(f'Role {role.name}, [{role.id}] is bound to an other guild.')
     
     users = []
     for user in guild.users.values():
@@ -997,9 +998,7 @@ async def in_role(client, event,
     
     pages = InRolePageGetter(users, guild, roles)
     
-    yield
-    
-    await Pagination(client, event.channel, pages, check=partial_func(in_role_pagination_check, event.user))
+    await Pagination(client, event, pages, check=partial_func(in_role_pagination_check, event.user))
 
 
 
@@ -1092,3 +1091,38 @@ async def guild_icon(client, event,
     color = hash_value&0xFFFFFF
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
 
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def latest_users(client, event,):
+    """Shows the new users of the guild."""
+    date_limit = datetime.now() - timedelta(days=7)
+    
+    users = []
+    guild = event.guild
+    for user in guild.users.values():
+        # Use created at and not `joined_at`, we can ignore lurkers.
+        created_at = user.guild_profiles[guild].created_at
+        if created_at > date_limit:
+            users.append((created_at, user))
+    
+    users.sort(reverse=True)
+    del users[10:]
+    
+    embed = Embed('Recently joined users')
+    if users:
+        for index, (joined_at, user) in enumerate(users, 1):
+            created_at = user.created_at
+            embed.add_field(
+                f'{index}. {user.full_name}',
+                f'Id: {user.id}\n'
+                f'Mention: {user.mention}\n'
+                '\n'
+                f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
+                f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+                f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
+                    )
+    
+    else:
+        embed.description = '*none*'
+    
+    return SlashResponse(embed=embed, allowed_mentions=None)

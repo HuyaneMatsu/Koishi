@@ -117,12 +117,6 @@ async def image_(client, event,
     if guild not in client.guild_profiles:
         abort('I must be in the guild to execute this command.')
     
-    if not count:
-        # Check for more permissions!
-        permissions = event.channel.cached_permissions_for(client)
-        if (not permissions.can_send_messages):
-            abort('I need `send messages` permission to execute this command.')
-    
     hashes = None
     missing_tag = False
     
@@ -438,27 +432,15 @@ class ImageWithTag(object):
         # Check for permissions!
         guild = event.guild
         if guild is None:
-            yield Embed('Error', 'Guild only command', color=IMAGE_COLOR)
-            return
+            abort('Guild only command')
         
         if guild not in client.guild_profiles:
-            yield Embed('Error', 'I must be in the guild to execute this command.', color=IMAGE_COLOR)
-            return
-        
-        permissions = event.channel.cached_permissions_for(client)
-        if (not permissions.can_send_messages):
-            yield Embed('Permission denied',
-                'I need `send messages` permission to execute this command.',
-                color=IMAGE_COLOR)
-            return
+            abort('I must be in the guild to execute this command.')
         
         image = random_with_tag(self.tag_id)
         
         if image is None:
-            yield Embed('Oh No', f'No {self.name_form__ing} image is added :\'C', color=IMAGE_COLOR)
-            return
-        
-        yield
+            abort(f'No {self.name_form__ing} image is added :\'C')
         
         if message:
             first_word = event.user.name
@@ -475,8 +457,8 @@ class ImageWithTag(object):
         embed = Embed(title, color=(event.id>>22)&0xffffff) \
             .add_image(f'attachment://{os.path.basename(image.path)}')
         
-        with (await ReuAsyncIO(join(IMAGE_PATH, image.path))) as file:
-            await client.message_create(event.channel, embed=embed, file=file)
+        file = await ReuAsyncIO(join(IMAGE_PATH, image.path))
+        return SlashResponse(embed=embed, file=file)
 
 for name, name_form__ing, name_form__s, description in (
         ('pat', 'patting', 'pats', 'Do you like pats as well?'),

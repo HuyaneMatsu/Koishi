@@ -8,6 +8,7 @@ from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Task, DiscordExcepti
 from hata.ext.commands import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, ChooseMenu, Pagination, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 from hata.discord.utils import from_json
+from hata.ext.slash import SlashResponse, abort
 
 from bs4 import BeautifulSoup
 
@@ -54,7 +55,7 @@ class CachedBooruCommand(object):
             yield Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
             return
         
-        await ShuffledShelter(client, event.channel, urls, False, self.title)
+        yield ShuffledShelter(client, event, urls, False, self.title)
         return
     
     async def _request_urls(self, client):
@@ -80,14 +81,14 @@ class ShuffledShelter(object):
     __slots__ = ('canceller', 'channel', 'client', 'history', 'history_step', 'message', 'pop', 'task_flag',
         'timeouter', 'title', 'urls')
     
-    async def __new__(cls, client, channel, urls, pop, title=DEFAULT_TITLE):
+    async def __new__(cls, client, event, urls, pop, title=DEFAULT_TITLE):
         if not urls:
-            await client.message_create(channel, embed=Embed('No result'))
+            yield Embed('No result')
             return
         
         self = object.__new__(cls)
         self.client = client
-        self.channel = channel
+        self.channel = event.channel
         self.canceller = self.__class__._canceller
         self.task_flag = GUI_STATE_READY
         self.urls = urls
@@ -104,10 +105,10 @@ class ShuffledShelter(object):
         
         embed = Embed(title, color=BOORU_COLOR, url=image_url).add_image(image_url)
         
-        message = await client.message_create(channel, embed=embed)
+        message = yield SlashResponse(embed=embed, force_new_message=True)
         self.message = message
         
-        if (len(urls) == (0 if pop else 1)) or (not channel.cached_permissions_for(client).can_add_reactions):
+        if (len(urls) == (0 if pop else 1)) or (not event.channel.cached_permissions_for(client).can_add_reactions):
             return
         
         for emoji in self.EMOJIS:
@@ -117,7 +118,7 @@ class ShuffledShelter(object):
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
         
-        return self
+        return
     
     async def __call__(self, client, event):
         if event.user.is_bot:
@@ -276,7 +277,7 @@ async def answer_booru(client, event, content, url_base):
         yield Embed(DEFAULT_TITLE, color=BOORU_COLOR, url=image_url).add_image(image_url)
         return
     
-    await ShuffledShelter(client, event.channel, urls, True)
+    yield ShuffledShelter(client, event, urls, True)
     return
     
 
@@ -430,8 +431,7 @@ async def character(client, event,
     """Shows you the given Touhou character's portrait."""
     name_length = len(name)
     if name_length == 0:
-        yield Embed('Empty content', color=BOORU_COLOR)
-        return
+        abort('Empty name was given.')
     
     if name_length > 10:
         name_length = 10
@@ -440,8 +440,7 @@ async def character(client, event,
     
     matcheds = get_close_matches(name, TOUHOU_NAMES, n=1, cutoff=1.0-diversity)
     if matcheds:
-        async for response in TOUHOU_NAME_RELATIONS[matcheds[0]](client, event):
-            yield response
+        return TOUHOU_NAME_RELATIONS[matcheds[0]](client, event)
     else:
         embed = Embed('No match', color=BOORU_COLOR)
         matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.8-diversity)
@@ -463,7 +462,7 @@ async def character(client, event,
             del field_value_parts[-1]
             
             embed.add_field('Close matches:', ''.join(field_value_parts))
-        yield embed
+        return embed
 
 
 @TOUHOU.interactions
@@ -473,19 +472,14 @@ async def wiki_(client, event,
     """Searches the given query in touhou wiki."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command', color=BOORU_COLOR)
-        return
+        abort('Guild only command')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild to execute this command.', color=BOORU_COLOR)
-        return
+        abort('I must be in the guild to execute this command.')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            'I need `send messages` and `add reactions` permission to execute this command.',
-            color=BOORU_COLOR)
-        return
+        abort('I need `send messages` and `add reactions` permission to execute this command.')
     
     words = WORD_MATCH_RP.split(search_for)
     search_for = ' '.join(words)
@@ -514,12 +508,12 @@ async def wiki_(client, event,
     if (results is None) or (not results):
         await client.message_create(event.channel, embed=Embed(
             'No result',
-            'No search result for: `{search_for}`',
+            f'No search result for: `{search_for}`',
             color=BOORU_COLOR))
         return
     
     embed = Embed(title=f'Search results for `{search_for}`', color=BOORU_COLOR)
-    await ChooseMenu(client, event.channel, results, wiki_page_selected, embed=embed, prefix='>>')
+    await ChooseMenu(client, event, results, wiki_page_selected, embed=embed, prefix='>>')
 
 async def wiki_page_selected(client, channel, message, title, url):
     pages = await download_wiki_page(client, title, url)
@@ -789,11 +783,9 @@ async def safe_booru(client, event,
     """Some safe images?"""
     guild = event.guild
     if (guild is None) or guild.partial:
-        yield Embed('Ayaya', f'Please invite me, {client:f} first!', color=BOORU_COLOR)
-        return
+        abort(f'Please invite me, {client:f} first!')
     
-    async for response in answer_booru(client, event, tags, SAFE_BOORU):
-        yield response
+    return answer_booru(client, event, tags, SAFE_BOORU)
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -803,8 +795,7 @@ async def nsfw_booru(client, event,
     """Some not so safe images? You perv!"""
     guild = event.guild
     if (guild is None) or guild.partial:
-        yield Embed('Ayaya', f'Please invite me, {client:f} first!', color=BOORU_COLOR)
-        return
+        abort(f'Please invite me, {client:f} first!')
     
     channel = event.channel
     if not channel.nsfw:
@@ -813,10 +804,8 @@ async def nsfw_booru(client, event,
         else:
             description = 'Onii chaan\~,\nthis is not the right place to lewd.'
         
-        yield Embed('Ayaya', description, color=BOORU_COLOR)
-        return
+        abort(description)
     
-    async for response in  answer_booru(client, event, tags, SAFE_BOORU):
-        yield response
+    return answer_booru(client, event, tags, SAFE_BOORU)
 
 

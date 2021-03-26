@@ -8,6 +8,7 @@ from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STA
     GUI_STATE_SWITCHING_CTX, checks
 
 from hata.discord.client_core import GC_CYCLER
+from hata.ext.slash import SlashResponse, abort
 
 from bot_utils.models import DB_ENGINE, DS_TABLE, ds_model
 from bot_utils.shared import PATH__KOISHI
@@ -61,7 +62,7 @@ DUNGEON_SWEEPER = SLASH_CLIENT.interactions(None,
 async def rules(client, event):
     """Shows the rules of DS!"""
     if not event.channel.cached_permissions_for(client).can_use_external_emojis:
-        return Embed('Permissions denied', 'I have no permissions at this channel to render this message.')
+        abort('I have no permissions at this channel to render this message.')
     
     return RULES_HELP
 
@@ -71,17 +72,14 @@ async def play(client, event):
     permissions = event.channel.cached_permissions_for(client)
     if not (permissions.can_send_messages and permissions.can_add_reactions and permissions.can_use_external_emojis \
             and permissions.can_manage_messages):
-        yield Embed('Permissions denied', 'I have not all permissions to start a game at this channel.')
+        abort('I have not all permissions to start a game at this channel.')
         return
-    
-    yield
     
     game = DS_GAMES.get(event.user.id)
     if game is None:
-        await ds_game(client, event.channel, event.user)
+        yield ds_game(client, event)
     else:
-        await game.renew(event.channel)
-    return
+        yield game.renew(event)
 
 #:-> @ <-:#}{#:-> @ <-:#{ backend }#:-> @ <-:#}{#:-> @ <-:#
 
@@ -113,11 +111,11 @@ class ds_game(object):
     __slots__ = ('cache', 'call', 'channel', 'client', 'data', 'last', 'message', 'position', 'position_ori', 'stage',
         'task_flag', 'user', )
     
-    async def __new__(cls, client, channel, user):
-        self=object.__new__(cls)
+    async def __new__(cls, client, event):
+        self = object.__new__(cls)
         self.client = client
-        self.user = user
-        self.channel = channel
+        self.user = event.user
+        self.channel = event.channel
         self.message = None
         self.stage = None
         self.task_flag = GUI_STATE_READY
@@ -125,7 +123,7 @@ class ds_game(object):
         self.cache = [None for _ in range(len(CHARS))]
         self.last = LOOP_TIME()
         
-        DS_GAMES[user.id]= self
+        DS_GAMES[self.user.id]= self
         
         async with DB_ENGINE.connect() as connector:
             result = await connector.execute(DS_TABLE.select(ds_model.user_id == self.user.id))
@@ -140,31 +138,31 @@ class ds_game(object):
             self.data = bytearray(800)
         
         try:
-            message = await client.message_create(self.channel, embed=self.render_menu())
+            message = yield SlashResponse(embed=self.render_menu(), force_new_message=True)
         except BaseException as err:
             self.task_flag = GUI_STATE_CANCELLED
             del DS_GAMES[self.user.id]
             
             if isinstance(err, ConnectionError):
                 # no internet
-                return self
+                return
             
             if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                             ):
-                    return self
+                    return
             
             await client.events.error(client, f'{self!r}.__new__', err)
-            return self
-            
-        self.message=message
+            return
         
-        tasks=[]
+        self.message = message
+        
+        tasks = []
         
         for emoji in self.emojis_menu:
-            task=Task(client.reaction_add(message, emoji), KOKORO)
+            task = Task(client.reaction_add(message, emoji), KOKORO)
             tasks.append(task)
         
         try:
@@ -178,7 +176,7 @@ class ds_game(object):
             
             if isinstance(err, ConnectionError):
                 # no internet
-                return self
+                return
             
             if isinstance(err, DiscordException):
                 if err.code in (
@@ -188,14 +186,13 @@ class ds_game(object):
                         ERROR_CODES.unknown_emoji, # no permission to use external emoji
                         ERROR_CODES.max_reactions, # maximal amount of reactions reached
                             ):
-                    return self
+                    return
             
             await client.events.error(client, f'{self!r}.__new__', err)
-            return self
+            return
         
         client.events.reaction_add.append(message, self)
-        
-        return self
+        return
     
     def __repr___(self):
         result = [
@@ -716,18 +713,18 @@ class ds_game(object):
             return
         
         self.task_flag = GUI_STATE_SWITCHING_CTX
-
+        
         client = self.client
         
         if self.call is type(self).call_game:
-            coro = client.message_create(channel, embed=self.render_game())
+            embed = self.render_game()
         elif self.call is type(self).call_menu:
-            coro = client.message_create(channel, embed=self.render_menu())
+            embed = self.render_menu()
         else:
-            coro = client.message_create(channel, embed=self.render_done())
+            embed = self.render_done()
         
         try:
-            message = await coro
+            message = yield SlashResponse(embed=embed, force_new_message=True)
         except BaseException as err:
             
             if self.task_flag == GUI_STATE_SWITCHING_CTX:

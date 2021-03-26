@@ -10,6 +10,7 @@ from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordExce
     ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta
 from hata.ext.commands import wait_for_reaction, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
+from hata.ext.slash import abort, SlashResponse
 
 from sqlalchemy.sql import select, desc
 
@@ -358,7 +359,7 @@ def heart_event_start_checker(client, event):
     return False
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def heart_event(client, event,
         duration : ('str', 'The event\'s duration.'),
         amount : ('int', 'The hearst to earn.'),
@@ -366,67 +367,56 @@ async def heart_event(client, event,
             ):
     """Starts a heart event at the channel. (Bot owner only)"""
     if not client.is_owner(event.user):
-        yield '**Permission denied**\nOwner only!'
-        return
+        abort('Owner only!')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
             (not permissions.can_use_external_emojis):
-        yield '**Permission denied**\nI require `send messages`, `add reactions` and `user external emojis` ' \
-            'permissions to invoke this command.'
-        return
+        abort('I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this ' \
+           'command.')
     
     guild = event.guild
     if (guild is not None):
         if guild not in client.guild_profiles:
-            yield '**Ohoho**\nPlease add me to the guild before invoking the command.'
-            return
+            abort('Please add me to the guild before invoking the command.')
     
     duration = parse_tdelta(duration)
     if (duration is None):
-        yield '**Parsing error**\nCould not interpret the given duration.'
-        return
+        abort('Could not interpret the given duration.')
     
     if duration > EVENT_MAX_DURATION:
-        yield '**Duration passed the upper limit**\n' \
+        abort('**Duration passed the upper limit**\n' \
              f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n' \
-             f'**>**  passed : {convert_tdelta(duration)}'
-        return
+             f'**>**  passed : {convert_tdelta(duration)}')
     
     if duration < EVENT_MIN_DURATION:
-        yield '**Duration passed the lower limit**\n' \
+        abort('**Duration passed the lower limit**\n' \
              f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n' \
-             f'**>**  passed : {convert_tdelta(duration)}'
-        return
+             f'**>**  passed : {convert_tdelta(duration)}')
     
     if amount > EVENT_HEART_MAX_AMOUNT:
-        yield '**Amount passed the upper limit**\n' \
+        abort('**Amount passed the upper limit**\n' \
              f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n' \
-             f'**>**  passed : {amount}'
-        return
+             f'**>**  passed : {amount}')
     
     if amount < EVENT_HEART_MIN_AMOUNT:
-        yield '**Amount passed the lower limit**\n' \
+        abort('**Amount passed the lower limit**\n' \
              f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n' \
-             f'**>**  passed : {amount}'
-        return
+             f'**>**  passed : {amount}')
     
     if user_limit < 0:
-        yield '**User limit passed the lower limit**\n' \
+        abort('**User limit passed the lower limit**\n' \
               '**>** lower limit : 0\n' \
-             f'**>**  - passed : {user_limit}'
-        return
+             f'**>**  - passed : {user_limit}')
     
-    yield
-    await HeartEventGUI(client, event.channel, duration, amount, user_limit)
-    return
+    return HeartEventGUI(client, event, duration, amount, user_limit)
 
 class HeartEventGUI(object):
     _update_time = 60.
     _update_delta = timedelta(seconds=_update_time)
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls, client, channel, duration, amount, user_limit):
+    async def __new__(cls, client, event, duration, amount, user_limit):
         
         result = []
         result.append('Duration: ')
@@ -440,14 +430,14 @@ class HeartEventGUI(object):
         embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
         del result
         
-        to_check = await client.message_create(channel, embed=embed)
+        to_check = yield SlashResponse(embed=embed, force_new_message=True)
         
         try:
             await client.reaction_add(to_check, EVENT_OK_EMOJI)
             await client.reaction_add(to_check, EVENT_ABORT_EMOJI)
         except BaseException as err:
             if isinstance(err, ConnectionError):
-                return None
+                return
             
             if isinstance(err, DiscordException):
                 if err.code in (
@@ -457,12 +447,12 @@ class HeartEventGUI(object):
                         ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                             ):
-                    return None
+                    return
             
             raise
         
         try:
-            event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client), 1800.)
+            reaction_event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client), 1800.)
         except TimeoutError:
             return
         finally:
@@ -470,7 +460,7 @@ class HeartEventGUI(object):
                 await client.message_delete(to_check)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
-                    return None
+                    return
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
@@ -479,11 +469,11 @@ class HeartEventGUI(object):
                             ERROR_CODES.invalid_access, # client removed
                             ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                                 ):
-                        return None
+                        return
                 
                 raise
         
-        if event.emoji is EVENT_ABORT_EMOJI:
+        if reaction_event.emoji is EVENT_ABORT_EMOJI:
             return
         
         self = object.__new__(cls)
@@ -496,11 +486,11 @@ class HeartEventGUI(object):
         self.waiter = Future(KOKORO)
         
         try:
-            message = await client.message_create(channel, embed=self.generate_embed())
+            message = await client.message_create(event.channel, embed=self.generate_embed())
         except BaseException as err:
             self.message = None
             if isinstance(err, ConnectionError):
-                return None
+                return
             
             if isinstance(err, DiscordException):
                 if err.code in (
@@ -508,7 +498,7 @@ class HeartEventGUI(object):
                         ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                             ):
-                    return None
+                    return
             
             raise
         
@@ -519,7 +509,7 @@ class HeartEventGUI(object):
         client.events.reaction_add.append(message, self)
         Task(self.countdown(client, message), KOKORO)
         await client.reaction_add(message, EMOJI__HEART_CURRENCY)
-        return self
+        return
     
     def generate_embed(self):
         title = f'React with {EMOJI__HEART_CURRENCY:e} to receive {self.amount}'
@@ -642,7 +632,7 @@ class HeartEventGUI(object):
         Task(connector.close(), KOKORO)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def daily_event(client, event,
         duration : ('str', 'The event\'s duration.'),
         amount : ('int', 'The extra daily steaks to earn.'),
@@ -650,67 +640,58 @@ async def daily_event(client, event,
             ):
     """Starts a heart event at the channel. (Bot owner only)"""
     if not client.is_owner(event.user):
-        yield '**Permission denied**\nOwner only!'
-        return
+        abort('Owner only!')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
             (not permissions.can_use_external_emojis):
-        yield '**Permission denied**\nI require `send messages`, `add reactions` and `user external emojis` ' \
-            'permissions to invoke this command.'
-        return
+        abort('I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
+            'command.')
     
     guild = event.guild
     if (guild is not None):
         if guild not in client.guild_profiles:
-            yield '**Ohoho**\nPlease add me to the guild before invoking the command.'
-            return
+            abort('Please add me to the guild before invoking the command.')
     
     
     duration = parse_tdelta(duration)
     if (duration is None):
-        yield '**Parsing error**\nCould not interpret the given duration.'
-        return
+        abort('Could not interpret the given duration.')
     
     if duration > EVENT_MAX_DURATION:
-        yield 'Duration passed the upper limit\n' \
+        abort('Duration passed the upper limit\n' \
              f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n' \
-             f'**>**  passed : {convert_tdelta(duration)}'
-        return
+             f'**>**  passed : {convert_tdelta(duration)}')
     
     if duration < EVENT_MIN_DURATION:
-        yield 'Duration passed the lower limit\n' \
+        abort('Duration passed the lower limit\n' \
              f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n' \
-             f'**>**  passed : {convert_tdelta(duration)}'
-        return
+             f'**>**  passed : {convert_tdelta(duration)}')
     
     if amount > EVENT_DAILY_MAX_AMOUNT:
-        yield 'Amount passed the upper limit\n' \
+        abort('Amount passed the upper limit\n' \
              f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n' \
-             f'**>**  passed : {amount}'
+             f'**>**  passed : {amount}')
     
     if amount < EVENT_DAILY_MIN_AMOUNT:
-        yield 'Amount passed the lower limit\n' \
+        abort('Amount passed the lower limit\n' \
              f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n' \
-             f'**>**  passed : {amount}'
-        return
+             f'**>**  passed : {amount}')
     
     if user_limit < 0:
-        yield 'User limit passed the lower limit\n' \
+        abort('User limit passed the lower limit\n' \
               '**>** lower limit : 0\n' \
-             f'**>**  - passed : {user_limit}'
-        return
+             f'**>**  - passed : {user_limit}')
     
-    yield
-    await DailyEventGUI(client, event.channel, duration, amount, user_limit)
-    return
+    return DailyEventGUI(client, event, duration, amount, user_limit)
+
 
 class DailyEventGUI(object):
-    _update_time=60.
-    _update_delta=timedelta(seconds=_update_time)
+    _update_time = 60.
+    _update_delta = timedelta(seconds=_update_time)
 
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
-    async def __new__(cls, client, channel, duration, amount, user_limit):
+    async def __new__(cls, client, event, duration, amount, user_limit):
         
         result = []
         result.append('Duration: ')
@@ -724,14 +705,14 @@ class DailyEventGUI(object):
         embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
         del result
         
-        to_check = await client.message_create(channel, embed=embed)
+        to_check = yield SlashResponse(embed=embed, force_new_message=True)
         
         try:
             await client.reaction_add(to_check, EVENT_OK_EMOJI)
             await client.reaction_add(to_check, EVENT_ABORT_EMOJI)
         except BaseException as err:
             if isinstance(err, ConnectionError):
-                return None
+                return
             
             if isinstance(err, DiscordException):
                 if err.code in (
@@ -741,12 +722,12 @@ class DailyEventGUI(object):
                         ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                             ):
-                    return None
+                    return
             
             raise
         
         try:
-            event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client), 1800.)
+            reaction_event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client), 1800.)
         except TimeoutError:
             return
         finally:
@@ -754,7 +735,7 @@ class DailyEventGUI(object):
                 await client.message_delete(to_check)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
-                    return None
+                    return
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
@@ -763,11 +744,11 @@ class DailyEventGUI(object):
                             ERROR_CODES.invalid_access, # client removed
                             ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                                 ):
-                        return None
+                        return
                 
                 raise
         
-        if event.emoji is EVENT_ABORT_EMOJI:
+        if reaction_event.emoji is EVENT_ABORT_EMOJI:
             return
         
         self = object.__new__(cls)
@@ -780,11 +761,11 @@ class DailyEventGUI(object):
         self.waiter = Future(KOKORO)
         
         try:
-            message = await client.message_create(channel, embed=self.generate_embed())
+            message = await client.message_create(event.channel, embed=self.generate_embed())
         except BaseException as err:
             self.message = None
             if isinstance(err, ConnectionError):
-                return None
+                return
             
             if isinstance(err, DiscordException):
                 if err.code in (
@@ -792,7 +773,7 @@ class DailyEventGUI(object):
                         ERROR_CODES.invalid_access, # client removed
                         ERROR_CODES.invalid_permissions, # permissions changed meanwhile
                             ):
-                    return None
+                    return
             
             raise
         
@@ -802,7 +783,7 @@ class DailyEventGUI(object):
         client.events.reaction_add.append(message, self)
         Task(self.countdown(client, message), KOKORO)
         await client.reaction_add(message, EMOJI__HEART_CURRENCY)
-        return self
+        return
     
     def generate_embed(self):
         title = f'React with {EMOJI__HEART_CURRENCY:e} to increase your daily streak by {self.amount}'
@@ -948,11 +929,8 @@ async def game_21(client, event,
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
             (not permissions.can_use_external_emojis):
-        yield Embed('Permission denied',
-            'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this command.',
-            color = GAMBLING_COLOR,
-                )
-        return
+        abort('I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
+            'command.')
     
     embed = game_21_precheck(client, event.user, event.channel, amount, is_multi_player)
     yield embed
@@ -991,7 +969,7 @@ class Game21Base(object):
         self = object.__new__(cls)
         self.guild = guild
         self.all_pulled = []
-        return self
+        return
     
     def create_user_player(self, user):
         return Game21Player(self, user)
@@ -1053,7 +1031,7 @@ class Game21Player(object):
         self.hand = hand
         self.total = total
         self.ace = ace
-        return self
+        return
     
     def auto_finish(self):
         hand = self.hand
@@ -1237,7 +1215,7 @@ class Game21PlayerRunner(object):
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
             
-        return self
+        return
     
     async def __call__(self, client, event):
         if (event.user is not self.player.user) or (event.emoji not in GAME_21_STEP_EMOJIS):
@@ -1388,7 +1366,7 @@ def game_21_precheck(client, user, channel, amount, require_guild):
     elif require_guild and (not isinstance(channel, ChannelGuildBase)):
         error_message = 'Guild only command.'
     else:
-        return None
+        return
     
     return Embed('Ohoho', error_message, color=GAMBLING_COLOR)
 
@@ -1408,16 +1386,9 @@ async def game_21_postcheck(client, user, channel, amount):
         if total_love-total_allocated < amount:
             error_message = f'You have just {total_love} {EMOJI__HEART_CURRENCY.as_emoji}'
         else:
-            return False
+            return None
     
-    embed = Embed('Ohoho', error_message, color=GAMBLING_COLOR)
-    try:
-        await client.message_create(channel, embed=embed)
-    except BaseException as err:
-        if should_render_exception(err):
-            await client.events.error(client, 'game_21_postcheck', err)
-        
-    return True
+    return Embed('Ohoho', error_message, color=GAMBLING_COLOR)
 
 
 async def game_21_single_player(client, event, amount):
@@ -1426,7 +1397,13 @@ async def game_21_single_player(client, event, amount):
     
     IN_GAME_IDS.add(user.id)
     try:
-        if await game_21_postcheck(client, user, channel, amount):
+        embed = await game_21_postcheck(client, user, channel, amount)
+        if (embed is not None):
+            try:
+                await client.interaction_followup_message_create(event, embed=embed)
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, 'game_21_single_player', err)
             return
         
         base = Game21Base(channel.guild)
@@ -1584,7 +1561,7 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
         if not isinstance(err, ConnectionError):
             await client.events.error(client, 'game_21_mp_user_joiner', err)
         
-        return None
+        return
     
     if user.id in IN_GAME_IDS:
         embed = Embed('Ohoho', 'You are already at a game.', color=GAMBLING_COLOR)
@@ -1594,7 +1571,7 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
             if should_render_exception(err):
                 await client.events.error(client, 'game_21_mp_user_joiner', err)
         
-        return None
+        return
     
     result = False
     IN_GAME_IDS.add(user.id)
@@ -1742,7 +1719,7 @@ class Game21JoinGUI(object):
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
         
-        return self
+        return
     
     async def __call__(self, client, event):
         if event.user.is_bot:
@@ -1978,7 +1955,7 @@ async def game_21_multi_player(client, event, amount):
                 return
             
             if (not isinstance(err, DiscordException)) or (err.code != ERROR_CODES.cannot_message_user):
-                await client.events.error(client, 'game_21_single_player', err)
+                await client.events.error(client, 'game_21_multi_player', err)
                 return
             
             private_open = False
@@ -1989,7 +1966,7 @@ async def game_21_multi_player(client, event, amount):
             embed = Embed('Error', 'I cannot send private message to you.', color=GAMBLING_COLOR)
             
             try:
-                await client.message_create(channel, embed=embed)
+                await client.interaction_followup_message_create(event, embed=embed)
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_multi_player', err)

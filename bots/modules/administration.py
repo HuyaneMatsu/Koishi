@@ -5,7 +5,7 @@ from functools import partial as partial_func
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
     parse_rdelta, time_to_id, ChannelCategory
 from hata.ext.commands import Pagination, wait_for_reaction
-from hata.ext.slash import abort
+from hata.ext.slash import abort, SlashResponse
 from hata.ext.prettyprint import pchunkify
 
 
@@ -16,7 +16,7 @@ SLASH_CLIENT: Client
 def match_message_author(user, message):
     return (message.author is user)
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global=True, show_for_invoking_user_only=True)
 async def clear(client, event,
         limit  : ('int'     , 'How much message?'                       )        ,
         before : ('str'     , 'Till when?'                               ) = None ,
@@ -28,43 +28,35 @@ async def clear(client, event,
     """Yeets messages."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-        return
+        abort('I must be in the guild to do this.')
     
     if where is None:
         channel = event.channel
     else:
         if not isinstance(where, ChannelText):
-            yield Embed('Error', 'The channel must be a text channel.')
-            return
+            abort('The channel must be a text channel.')
         
         channel = where
     
     if limit < 1:
-        yield Embed('Ohoho', '`limit` cannot be non-positive.')
-        return
+        abort('`limit` cannot be non-positive.')
     
     if not event.user_permissions.can_administrator:
-        yield Embed('Permission denied', 'You must have administrator permission to use this command.')
-        return
+        abort('You must have administrator permission to use this command.')
     
     client_permissions = channel.cached_permissions_for(client)
     if (not client_permissions.can_manage_messages) or (not client_permissions.can_read_message_history):
-        yield Embed('Permission denied',
-            'I must have manage messages and read message history in the channel to do it.')
-        return
+        abort('I must have manage messages and read message history in the channel to do it.')
     
     if (before is None) or (not before):
         before = event.id
     else:
         delta = parse_rdelta(before)
         if delta is None:
-            yield Embed('Error', '`before` could not be parsed.')
-            return
+            abort('`before` could not be parsed.')
         
         before = time_to_id(datetime.now()-delta)
     
@@ -77,7 +69,7 @@ async def clear(client, event,
         
         before = time_to_id(datetime.now()-delta)
     
-    yield
+    yield 'Yeeting messages began'
     
     if whos is None:
         filter = None
@@ -97,20 +89,16 @@ async def invite_create(client, event,
     """I create an invite for you!"""
     guild = event.guild
     if guild is None:
-        yield '**Error**\nGuild only command'
-        return
+        abort('Guild only command')
     
     if guild not in client.guild_profiles:
-        yield '**Error**\nI must be in the guild to execute the command.'
-        return
+        abort('I must be in the guild to execute the command.')
     
     if not event.user_permissions.can_create_instant_invite:
-        yield '**Permission denied**\nYou must have `create instant invite` permission to invoke this command.'
-        return
+        abort('You must have `create instant invite` permission to invoke this command.')
     
     if not guild.cached_permissions_for(client).can_create_instant_invite:
-        yield '**Permission denied**\nI must have `create instant invite` permission invite to execute this command.'
-        return
+        abort('I must have `create instant invite` permission invite to execute this command.')
     
     yield
     
@@ -136,7 +124,7 @@ async def invite_create(client, event,
     yield content
 
 def bans_pagination_check(event):
-    guild = event.guild
+    guild = event.message.channel.guild
     if guild is None:
         return False
     
@@ -150,22 +138,16 @@ async def bans(client, event):
     """Lists the guild's bans."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command')
-        return
+        abort('Guild only command')
     
     if guild not in client.guild_profiles:
-        yield 'I must be in the guild to execute the command.'
-        return
+        abort('I must be in the guild to execute the command.')
     
     if not event.user_permissions.can_ban_users:
-        yield Embed('Permission denied',
-            'You must have `ban users` permission to invoke this command.')
-        return
+        abort('You must have `ban users` permission to invoke this command.')
     
     if not guild.cached_permissions_for(client).can_ban_users:
-        yield Embed('Permission denied',
-            'I must have `ban users` permission invite to execute this command.')
-        return
+        abort('I must have `ban users` permission invite to execute this command.')
     
     yield
     
@@ -218,8 +200,7 @@ async def bans(client, event):
         
         if index == embed_ln:
             break
-    
-    await Pagination(client, event.channel, result, check=bans_pagination_check)
+    await Pagination(client, event, result, check=bans_pagination_check)
 
 def check_channel_invites_pagination_permissions(event):
     permissions = event.message.channel.permissions_for(event.user)
@@ -253,45 +234,34 @@ async def invites_(client, event,
     """Shows up the guild's or the selected channel's invites."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command')
-        return
+        abort('Guild only command')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild to execute the command.')
-        return
+        abort('I must be in the guild to execute the command.')
     
     if (channel is not None) and isinstance(channel, ChannelCategory):
-        yield Embed('Error', 'Category channels have no invites.')
-        return
+        abort('Category channels have no invites.')
     
     if not event.channel.cached_permissions_for(client).can_send_messages:
-        yield Embed('Permission denied', 'I must have `send messages` permission to invoke this command correctly.')
-        return
+        abort('I must have `send messages` permission to invoke this command correctly.')
     
     if channel is None:
         permissions = event.user_permissions
         if (not permissions.can_create_instant_invite) or (not permissions.can_manage_guild):
-            yield Embed('Permission denied',
-                'You must have `create instant invite` and `manage guild` permission to invoke this command.')
-            return
+            abort('You must have `create instant invite` and `manage guild` permission to invoke this command.')
         
         permissions = guild.cached_permissions_for(client)
         if (not permissions.can_create_instant_invite) or (not permissions.can_manage_guild):
-            yield Embed('Permission denied',
-                'I must have `create instant invite` and `manage guild` to invite to execute this command.')
-            return
+            abort('I must have `create instant invite` and `manage guild` to invite to execute this command.')
+    
     else:
         permissions = event.user_permissions
         if (not permissions.can_create_instant_invite) or (not permissions.can_manage_channel):
-            yield Embed('Permission denied',
-                'You must have `create instant invite` and `manage channel` permission to invoke this command.')
-            return
+            abort('You must have `create instant invite` and `manage channel` permission to invoke this command.')
         
         permissions = channel.cached_permissions_for(client)
         if (not permissions.can_create_instant_invite) or (not permissions.can_manage_channel):
-            yield Embed('Permission denied',
-                'I must have `create instant invite` and `manage channel` to invite to execute this command.')
-            return
+            abort('I must have `create instant invite` and `manage channel` to invite to execute this command.')
     
     yield
     
@@ -308,7 +278,7 @@ async def invites_(client, event,
     else:
         check = check_channel_invites_pagination_permissions
     
-    await Pagination(client, event.channel, pages, 120., check=check)
+    await Pagination(client, event, pages, 120., check=check)
 
 
 
@@ -464,36 +434,28 @@ async def emoji_role(client, event,
     """Binds the given emoji to the selected roles. You must have administrator permission."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-        return
+        abort('I must be in the guild to do this.')
     
     if not event.user_permissions.can_ban_users:
-        yield Embed('Permission denied', 'You must have ban users permission to use this command.')
-        return
+        abort('You must have ban users permission to use this command.')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            f'{client.name_at(guild)} requires manage emojis and add reactions permissions for this command.')
-        return
+        abort(f'{client.name_at(guild)} requires manage emojis and add reactions permissions for this command.')
     
     emoji = parse_emoji(emoji)
     if emoji is None:
-        yield Embed('Error', 'That\'s not an emoji.')
-        return
+        abort('That\'s not an emoji.')
     
     if emoji.is_unicode_emoji():
-        yield Embed('Error', 'Cannot edit unicode emojis.')
-        return
+        abort('Cannot edit unicode emojis.')
     
     emoji_guild = emoji.guild
     if (emoji_guild is None) or (emoji_guild is not guild):
-        yield Embed('Error', 'Wont edit emojis from an other guild.')
-        return
+        abort('Wont edit emojis from an other guild.')
     
     roles = set()
     for role in role_1, role_2, role_3, role_4, role_5, role_6, role_7, role_8, role_9:
@@ -504,8 +466,7 @@ async def emoji_role(client, event,
             roles.add(role)
             continue
         
-        yield Embed('Error', f'Role {role.name}, [{role.id}] is bound to an other guild.')
-        return
+        abort(f'Role {role.name}, [{role.id}] is bound to an other guild.')
     
     roles = sorted(roles)
     roles_ = emoji.roles
@@ -526,17 +487,17 @@ async def emoji_role(client, event,
     
     embed.add_field('Roles after:', role_text)
     
-    yield
-    message = yield embed
+    message = yield SlashResponse(embed=embed, force_new_message=True)
+    
     for emoji_ in ROLE_EMOJI_EMOJIS:
         await client.reaction_add(message, emoji_)
     
     try:
-        event = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
+        reaction_event = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
     except TimeoutError:
         emoji_ = ROLE_EMOJI_CANCEL
     else:
-        emoji_ = event.emoji
+        emoji_ = reaction_event.emoji
     
     if message.channel.cached_permissions_for(client).can_manage_messages:
         try:
@@ -566,7 +527,7 @@ async def emoji_role(client, event,
             content = 'Emoji edited successfully.'
     
     elif emoji_ is ROLE_EMOJI_CANCEL:
-        content = 'Emoji edit cancelled'
+        content = 'Emoji edit cancelled.'
     
     else: # should not happen
         return

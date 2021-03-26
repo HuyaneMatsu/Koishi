@@ -3,10 +3,12 @@ import os
 from random import randint
 
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
-    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future
+    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future, InteractionEvent, \
+    INTERACTION_EVENT_RESPONSE_STATE_NONE
 
 from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
     GUI_STATE_SWITCHING_CTX, Timeouter, checks
+from hata.ext.slash import abort, SlashResponse
 
 from bot_utils.shared import PATH__KOISHI
 from PIL import Image as PIL
@@ -34,7 +36,6 @@ KANAKO = SLASH_CLIENT.interactions(None,
     is_global=True,
         )
 
-
 @KANAKO.interactions
 async def create_(client, event,
         map_ : ([('hiragana', 'hiragana'), ('katakana', 'katakana')], 'Choose a map to play!') = 'hiragana',
@@ -44,16 +45,14 @@ async def create_(client, event,
     """Create a new game!"""
     guild = event.guild
     if guild is None:
-        return Embed('Error', 'Guild only command', color=KANAKO_COLOR)
+        abort('Guild only command')
     
     if guild not in client.guild_profiles:
-        return Embed('Error', 'I must be in the guild to execute this command.', color=KANAKO_COLOR)
+        abort('I must be in the guild to execute this command.')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
-        return Embed('Permission denied',
-            'I need `send messages` and `add reactions` permission to execute this command.',
-            color=KANAKO_COLOR)
+        abort('I need `send messages` and `add reactions` permission to execute this command.')
     
     game = ACTIVE_GAMES.get(event.channel.id)
 
@@ -65,7 +64,7 @@ async def create_(client, event,
             if length > map_length:
                 length = map_length
         
-        game = KanakoJoinWaiter(client, event.channel, event.user, map_, length, possibilities)
+        game = KanakoJoinWaiter(client, event, map_, length, possibilities)
         
         embed = game.get_information()
         embed.title = 'Game successfully created'
@@ -74,14 +73,27 @@ async def create_(client, event,
     description = 'There is already an active game at the channel.'
     if isinstance(game, KanakoJoinWaiter):
         description += '\n use **/kanako join** to join into it'
+    
     return Embed(None, description, color=KANAKO_COLOR)
+
+@KANAKO.interactions
+async def start_(client, event):
+    """Starts the current game."""
+    game = ACTIVE_GAMES.get(event.channel.id)
+    if game is None:
+        abort('There is no active game at the channel.')
+    
+    if isinstance(game, KanakoRunner):
+        abort('The game is already started, oof.')
+    
+    return game.start_user(event.user)
 
 @KANAKO.interactions
 async def info(client, event):
     """Shows information about the current game."""
     game = ACTIVE_GAMES.get(event.channel.id)
     if game is None:
-        return Embed(None, 'There is no active game at the channel', color=KANAKO_COLOR)
+        abort('There is no active game at the channel.')
     
     return game.get_information()
 
@@ -90,24 +102,21 @@ async def join(client, event):
     """Join to the currently active game inside of the channel!"""
     game = ACTIVE_GAMES.get(event.channel.id)
     if game is None:
-        description = 'There is nothing to join into at the channel.',
-    elif isinstance(game, KanakoRunner):
-        description = 'The game is already started, oof.'
-    else:
-        description = game.join_user(event.user)
+        abort('There is nothing to join into at the channel.')
     
-    return Embed(None, description, color=KANAKO_COLOR)
+    if isinstance(game, KanakoRunner):
+        abort('The game is already started, oof.')
+    
+    return Embed(None, game.join_user(event.user), color=KANAKO_COLOR)
 
 @KANAKO.interactions
 async def leave(client, event):
     """Leave from the current game, pls no."""
     game = ACTIVE_GAMES.get(event.channel.id)
     if game is None:
-        description = 'Nothing to leave from.'
-    else:
-        description = game.leave_user(event.user)
+        abort('Nothing to leave from.')
     
-    return Embed(None, description, color=KANAKO_COLOR)
+    return Embed(None, game.leave_user(event.user), color=KANAKO_COLOR)
 
 @KANAKO.interactions
 async def cancel_(client, event):
@@ -127,18 +136,12 @@ async def show_map(client, event,
         map_ : ([('hiragana', 'hiragana'), ('katakana', 'katakana')], 'Choose a map to display!')
             ):
     """Shows the selected map!"""
-    channel = event.channel
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            'I need `send messages` and `add reactions` permission to execute this command.',
-            color=KANAKO_COLOR)
-        return
-    
-    yield
+        abort('I need `send messages` and `add reactions` permission to execute this command.')
     
     pages = MAP_SHOWCASES[map_]
-    await KanakoPagination(client, channel, pages)
+    await KanakoPagination(client, event, pages)
 
 _pairsK = ('k', 'g', 's', 'z', 'c', 't', 'd', 'f', 'h', 'b', 'p', 'n', 'm', 'y', 'r', 'w', 'j',)
 _pairsKx = {
@@ -260,11 +263,11 @@ class HistoryElement(object):
 
 class KanakoJoinWaiter(object):
     __slots__ = ('client', 'channel', 'users', 'map_name', 'length', 'possibilities', 'cancelled', 'waiter',)
-    def __new__(cls, client, channel, user, map_name, length, possibilities):
+    def __new__(cls, client, event, map_name, length, possibilities):
         self = object.__new__(cls)
         self.client = client
-        self.channel = channel
-        self.users = [user]
+        self.channel = event.channel
+        self.users = [event.user]
         
         self.map_name = map_name
         self.length = length
@@ -275,7 +278,7 @@ class KanakoJoinWaiter(object):
         future_or_timeout(waiter, 300.0)
         
         Task(self.start_waiting(), KOKORO)
-        ACTIVE_GAMES[channel.id] = self
+        ACTIVE_GAMES[event.channel.id] = self
         
         return self
     
@@ -313,6 +316,10 @@ class KanakoJoinWaiter(object):
                 
                 await client.events.error(client, f'{self.__class__.__name__}.start_waiting', err)
                 return
+            
+            return
+        
+        KanakoRunner(self)
     
     def get_information(self):
         return Embed(
@@ -365,13 +372,23 @@ class KanakoJoinWaiter(object):
         leaders = users[0]
         if user is leaders:
             self.cancelled = True
-            self.waiter.set_reuslt_if_pending(None)
+            self.waiter.set_result_if_pending(None)
             description = 'Game cancelled'
         else:
             description = f'Only the leader can cancel the game: {leaders.full_name}'
         
         return description
-
+    
+    def start_user(self, user):
+        users = self.users
+        leaders = users[0]
+        if user is leaders:
+            self.waiter.set_result_if_pending(None)
+            description = 'Game started'
+        else:
+            description = f'Only the leader can start the game: {leaders.full_name}'
+        
+        return description
 
 class KanakoRunner(object):
     __slots__ = ('client', 'channel', 'users', 'map_name', 'length', 'possibilities', 'cancelled', 'waiter', 'history',
@@ -749,7 +766,7 @@ class GameStatistics(object):
         self.cache = [None for _ in range((len(self.source.history)+9)//10+1)]
         self.create_page_0()
         #we return a coro, so it is valid ^.^
-        return KanakoPagination(source.client,source.channel,self)
+        return KanakoPagination(source.client, source.channel, self)
 
     def create_page_0(self):
         user_count  = len(self.source.users)
@@ -865,28 +882,40 @@ class KanakoPagination(object):
     
     __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', 'task_flag', 'timeouter')
     
-    async def __new__(cls,client,channel,pages):
+    async def __new__(cls, client, event_or_channel, pages):
+        if isinstance(event_or_channel, InteractionEvent):
+            target_channel = event_or_channel.channel
+            is_interaction = True
+        else:
+            target_channel = event_or_channel
+            is_interaction = False
+        
         self = object.__new__(cls)
         self.client = client
-        self.channel = channel
+        self.channel = target_channel
         self.pages = pages
         self.page = 0
         self.canceller = cls._canceller
         self.task_flag = GUI_STATE_READY
         self.timeouter = None
+        self.message = None
         
-        try:
-            message = await client.message_create(self.channel, embed=self.pages[0])
-        except:
-            self.message = None
-            raise
+        
+        if is_interaction:
+            if event_or_channel._response_state == INTERACTION_EVENT_RESPONSE_STATE_NONE:
+                await client.interaction_response_message_create(event_or_channel)
+            
+            message = await client.interaction_followup_message_create(event_or_channel, embed=pages[0])
+        
+        else:
+            message = await client.message_create(target_channel, embed=pages[0])
         
         self.message = message
         
-        if not channel.cached_permissions_for(client).can_add_reactions:
+        if not target_channel.cached_permissions_for(client).can_add_reactions:
             return self
         
-        if len(self.pages)>1:
+        if len(pages)>1:
             for emoji in self.EMOJIS:
                 await client.reaction_add(message,emoji)
         

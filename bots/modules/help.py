@@ -164,7 +164,7 @@ async def docs_search(client, event,
     
     if not datas:
         embed = Embed(f'No search result for: `{search_for}`', color=COLOR__KOISHI_HELP)
-        await Closer(client, event.channel, embed)
+        await Closer(client, event, embed)
         return
     
     sections = []
@@ -228,7 +228,7 @@ async def docs_search(client, event,
         embed = Embed(title, description, color=COLOR__KOISHI_HELP).add_footer(f'Page {index}/{len(descriptions)}')
         embeds.append(embed)
     
-    await Pagination(client, event.channel, embeds, check=partial_func(docs_search_pagination_check, event.user))
+    await Pagination(client, event, embeds, check=partial_func(docs_search_pagination_check, event.user))
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
