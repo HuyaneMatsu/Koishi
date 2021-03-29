@@ -3,6 +3,8 @@ from hata import Client, Embed
 from hata.backend.headers import CONTENT_TYPE
 from hata import imultidict
 
+from hata.ext.slash import abort
+
 SLASH_CLIENT : Client
 
 WAIFU_API_BASE_URL = 'https://waifu.pics/api'
@@ -55,16 +57,13 @@ NSFW_WAIFUS = [
 async def get_waifu_image(client, event, endpoint, safe):
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild execute this command.')
-        return
+        abort('I must be in the guild execute this command.')
     
     if (not safe) and (not event.channel.nsfw):
-        yield Embed('Ohoho', 'Nsfw channel only!')
-        return
+        abort('Nsfw channel only!')
     
     key = (endpoint, safe)
     try:
@@ -97,7 +96,7 @@ async def get_waifu_image(client, event, endpoint, safe):
                 yield cache.pop()
                 return
     
-    yield '*Could not get any images, please try again later.*'
+    abort('*Could not get any images, please try again later.*')
     return
 
 

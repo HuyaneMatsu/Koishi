@@ -969,7 +969,7 @@ class Game21Base(object):
         self = object.__new__(cls)
         self.guild = guild
         self.all_pulled = []
-        return
+        return self
     
     def create_user_player(self, user):
         return Game21Player(self, user)

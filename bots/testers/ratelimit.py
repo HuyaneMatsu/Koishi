@@ -11,7 +11,8 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
-    ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined
+    ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
+    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite
 
 from hata.backend.utils import _spaceholder, change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -1970,13 +1971,45 @@ async def application_command_guild_update_multiple(client, guild, application_c
     return [ApplicationCommand.from_data(application_command_data) \
         for application_command_data in application_command_datas]
 
+
+async def application_command_permission_get_all_guild(client, guild):
+    application_id = client.application.id
+    guild_id = guild.id
+    permission_datas = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/permissions',
+            )
+    
+    return [ApplicationCommandPermission.from_data(permission_data) for permission_data in permission_datas]
+
+async def application_command_permission_get(client, guild, application_command):
+    application_id = client.application.id
+    guild_id = guild.id
+    application_command_id = application_command.id
+    permission_data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}/permissions',
+            )
+    
+    return ApplicationCommandPermission.from_data(permission_data)
+
+async def application_command_permission_edit(client, guild, application_command, overwrites):
+    application_id = client.application.id
+    guild_id = guild.id
+    application_command_id = application_command.id
+    
+    data = {'permissions': [overwrite.to_data() for overwrite in overwrites]}
+    
+    await bypass_request(client, METHOD_PUT,
+        f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}/permissions',
+        data)
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0000(client, message):
     """
     Does 6 achievement get request towards 1 achievement.
     The bot's application must have at least 1 achievement created.
     """
-    with RLTCTX(client,message.channel,'rate_limit_test0000') as RLT:
+    with RLTCTX(client, message.channel, 'rate_limit_test0000') as RLT:
         try:
             achievements = await client.achievement_get_all()
         except BaseException as err:
@@ -1985,17 +2018,15 @@ async def rate_limit_test0000(client, message):
         if not achievements:
             await RLT.send(repr('The application has no achievement'))
         
-        achievement=achievements[0]
-        achievement_id=achievement.id
+        achievement = achievements[0]
+        achievement_id = achievement.id
         
-        loop=client.loop
-        
-        tasks=[]
+        tasks = []
         for _ in range(6):
-            task=Task(achievement_get(client,achievement_id),loop)
+            task = Task(achievement_get(client, achievement_id), KOKORO)
             tasks.append(task)
         
-        await WaitTillAll(tasks,loop)
+        await WaitTillAll(tasks, KOKORO)
     #achievement_get limited. limit:5, reset:5
     
 @RATE_LIMIT_COMMANDS
@@ -2004,7 +2035,7 @@ async def rate_limit_test0001(client,message):
     Does 3-3 achievement get request towards 2 achievement.
     The bot's application must have at least 2 achievement created.
     """
-    with RLTCTX(client,message.channel,'rate_limit_test0001') as RLT:
+    with RLTCTX(client,message.channel, 'rate_limit_test0001') as RLT:
         try:
             achievements = await client.achievement_get_all()
         except BaseException as err:
@@ -2013,23 +2044,21 @@ async def rate_limit_test0001(client,message):
         if len(achievements)<3:
             await RLT.send(repr('The application has less than 2 achievements'))
         
-        achievement_1=achievements[0]
-        achievement_2=achievements[1]
+        achievement_1 = achievements[0]
+        achievement_2 = achievements[1]
         
-        achievement_id_1=achievement_1.id
-        achievement_id_2=achievement_2.id
+        achievement_id_1 = achievement_1.id
+        achievement_id_2 = achievement_2.id
         
-        loop=client.loop
-        
-        tasks=[]
+        tasks = []
         for _ in range(4):
-            task=Task(achievement_get(client,achievement_id_1),loop)
+            task = Task(achievement_get(client,achievement_id_1), KOKORO)
             tasks.append(task)
             
-            task=Task(achievement_get(client,achievement_id_2),loop)
+            task = Task(achievement_get(client,achievement_id_2), KOKORO)
             tasks.append(task)
         
-        await WaitTillAll(tasks,loop)
+        await WaitTillAll(tasks, KOKORO)
     #achievement_get limited globally
     
 @RATE_LIMIT_COMMANDS
@@ -2239,7 +2268,7 @@ async def rate_limit_test0010(client,message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0011(client,message):
     """
-    Updates the achievemenets of all the owners of the client.
+    Updates the achievements of all the owners of the client.
     """
     
     with RLTCTX(client,message.channel,'rate_limit_test0011') as RLT:
@@ -2272,7 +2301,7 @@ class check_is_owner(object):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0012(client,message):
     """
-    Tries to get a user's achievemenets after oauth2 authorization.
+    Tries to get a user's achievements after oauth2 authorization.
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test0012') as RLT:
@@ -2448,9 +2477,9 @@ async def rate_limit_test0015(client,message):
         await reaction_delete_emoji(client, message, emoji)
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0016(client,message):
+async def rate_limit_test0016(client, message):
     """
-    Adds a reaction and deletes alll the same type from the message.
+    Adds a reaction and deletes all the same type from the message.
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test0016') as RLT:
@@ -2573,7 +2602,7 @@ async def rate_limit_test0023(client,message):
         await client.http.role_delete(guild.id,role_id,None)
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0024(client,message):
+async def rate_limit_test0024(client, message):
     """
     Deletes a role.
     """
@@ -3101,7 +3130,7 @@ async def rate_limit_test0044(client, message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0045(client, message):
     """
-    Edist the guild.
+    Edits the guild.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test0045') as RLT:
@@ -3167,7 +3196,7 @@ async def rate_limit_test0047(client, message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0048(client, message, user:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default=None)):
     """
-    Bans gets the ban and ubnans the given user.
+    Bans gets the ban and un-bans the given user.
     
     Derpy, right?
     """
@@ -3181,7 +3210,7 @@ async def rate_limit_test0048(client, message, user:Converter('user',flags=Conve
             await RLT.send('I need admin permission to complete this command.')
         
         if user is None:
-            await RLT.send('plase pass a user as well.')
+            await RLT.send('please pass a user as well.')
         
         if user.id in guild.users:
             await RLT.send('Please don\'t ban a member of your guild, hehe.')
@@ -3458,7 +3487,7 @@ async def rate_limit_test0066(client, message):
         if client_ is None:
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
-        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
         await user_connection_get_all(client_, access)
 
 @RATE_LIMIT_COMMANDS
@@ -3477,7 +3506,7 @@ async def rate_limit_test0067(client, message):
         if client_ is None:
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
-        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
         await user_guild_get_all(client_, access)
 
 @RATE_LIMIT_COMMANDS
@@ -3978,7 +4007,7 @@ async def rate_limit_test0095(client, message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        for name in ('ayayay', 'nainainai', 'ahaha'):
+        for name in ('ayaya', 'nyan', 'ahaha'):
             await channel_edit(client, channel, name=name)
 
 @RATE_LIMIT_COMMANDS
@@ -4338,7 +4367,7 @@ async def rate_limit_test0109(client, message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0110(client, message, guild2:'guild'=None):
     """
-    Adds command with 2 guilds, then uses the update many endpoint. Please give an additional guild to use teh command
+    Adds command with 2 guilds, then uses the update many endpoint. Please give an additional guild to use the command
     within.
     """
     channel = message.channel
@@ -4441,3 +4470,115 @@ async def rate_limit_test0112(client, message, guild2:'guild'=None):
         
         await application_command_guild_edit(client, guild2, application_command, application_command_schema)
         await application_command_guild_delete(client, guild2, application_command)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0113(client, message):
+    """
+    Request all the application command permissions in the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0113') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await application_command_permission_get_all_guild(client, guild)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0114(client, message):
+    """
+    Request an application command's permissions in the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0114') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        application_command = ApplicationCommand('test_command_56', 'ayaya')
+        application_command = await client.application_command_guild_create(guild, application_command)
+        
+        await application_command_permission_edit(client, guild, application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        await application_command_permission_get(client, guild, application_command)
+        
+        await client.application_command_guild_delete(guild, application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0115(client, message):
+    """
+    Edits an application command's permissions in the guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0115') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        application_command = ApplicationCommand('test_command_56', 'ayaya')
+        application_command = await client.application_command_guild_create(guild, application_command)
+        
+        await application_command_permission_edit(client, guild, application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        
+        await client.application_command_guild_delete(guild, application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0116(client, message):
+    """
+    Edits a guild and a global application command inside of the same guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0116') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        application_command = ApplicationCommand('test_command_56', 'ayaya')
+        application_command = await client.application_command_guild_create(guild, application_command)
+        
+        await application_command_permission_edit(client, guild, application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        
+        await client.application_command_guild_delete(guild, application_command)
+
+        application_command = ApplicationCommand('test_command_56', 'ayaya')
+        application_command = await client.application_command_global_create(application_command)
+        
+        await application_command_permission_edit(client, guild, application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        
+        await client.application_command_global_delete(application_command)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0117(client, message, guild2:'guild'=None):
+    """
+    Creates and edits application commands inside of 2 guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0117') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if guild2 is None:
+            await RLT.send('Second guild unknown.')
+
+        application_command = ApplicationCommand('test_command_56', 'ayaya')
+        application_command = await client.application_command_guild_create(guild, application_command)
+        
+        await application_command_permission_edit(client, guild, application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        
+        await client.application_command_guild_delete(guild, application_command)
+        
+        application_command = ApplicationCommand('test_command_56', 'ayaya')
+        application_command = await client.application_command_guild_create(guild2, application_command)
+        
+        await application_command_permission_edit(client, guild2, application_command,
+            [ApplicationCommandPermissionOverwrite(client.owner, True)])
+        
+        await client.application_command_guild_delete(guild2, application_command)

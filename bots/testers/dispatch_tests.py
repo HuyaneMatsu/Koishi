@@ -854,6 +854,29 @@ class dispatch_tester:
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, 120.)
+    
+    @classmethod
+    async def application_command_permission_update(self, client, guild, permission):
+        Task(self.old_events['application_command_permission_update'](client, guild, permission), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'application_command_permission_update called at {guild.name} {guild.id}',
+            f'application_command_id: {permission.application_command_id}',
+            'Overwrites:'
+                ]
+        
+        overwrites = permission.overwrites
+        if (overwrites is None):
+            text.append('*none*')
+        else:
+            for overwrite in overwrites:
+                text.append(f'- {overwrite.target!r}; allow: {overwrite.allow!r}')
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages, 120.)
+
 
 async def here_description(client, message):
     prefix = client.command_processer.get_prefix_for(message)
@@ -912,6 +935,7 @@ async def switch_description(client, message):
         '- `integration_edit`\n'
         '- `integration_update`\n'
         '- `webhook_update`\n'
+        '- `application_command_permission_update`\n'
         f'For setting channel, use: `{prefix}here`'
             ), color=DISPATCH_COLOR).add_footer(
             'Owner only!')

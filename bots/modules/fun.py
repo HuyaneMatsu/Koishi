@@ -5,6 +5,7 @@ from functools import partial as partial_func
 
 from hata import Client, Embed, BUILTIN_EMOJIS, Lock, KOKORO, DiscordException, ERROR_CODES
 from hata.ext.commands import wait_for_reaction
+from hata.ext.slash import abort
 
 from bot_utils.tools import Cell
 
@@ -60,21 +61,19 @@ async def meme_(client, event):
     """Shows a meme."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to do this.')
-        return
+        abort('I must be in the guild to do this.')
     
     yield
     
     meme = await get_meme()
     if meme is None:
-        embed = Embed('Oof', 'No memes for now.')
-    else:
-        title, url = meme
-        embed = Embed(title, url=url).add_image(url)
+        abort('No memes for now.')
+    
+    title, url = meme
+    embed = Embed(title, url=url).add_image(url)
     
     yield embed
     return
@@ -135,21 +134,17 @@ async def trivia_(client, event):
     """Asks a trivia."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.')
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Ohoho', 'I must be in the guild to execute this command.')
-        return
+        abort('I must be in the guild to execute this command.')
     
     if not event.channel.cached_permissions_for(client).can_add_reactions:
-        yield Embed('Permission error', 'I need add `reactions permission` to execute this command.')
-        return
+        abort('I need add `reactions permission` to execute this command.')
     
     user = event.user
     if user.id in TRIVIA_USER_LOCK:
-        yield Embed('Ohoho', 'You are already in a trivia game.')
-        return
+        abort('You are already in a trivia game.')
     
     TRIVIA_USER_LOCK.add(user.id)
     try:
@@ -157,7 +152,7 @@ async def trivia_(client, event):
         
         trivia = await get_trivia()
         if trivia is None:
-            yield Embed('Oof', 'No memes for now.')
+            abort('No memes for now.')
             return
         
         question, correct, wrong = trivia
