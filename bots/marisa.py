@@ -15,17 +15,18 @@ from bs4 import BeautifulSoup
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, cchunkify, \
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
-    MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta
+    MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
+    ApplicationCommandPermissionOverwriteType
 from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.slash import setup_ext_slash, SlashResponse, abort
+from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
 
 from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, COLOR__MARISA_HELP, \
-    command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
+    command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
 from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter import Interpreter
 from bot_utils.tools import choose, Cell
@@ -567,3 +568,89 @@ async def collect_reactions(client, event):
     else:
         yield 'No reactions were collected.'
 
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
+async def tester_only(client, event):
+    """Tester only hopefully."""
+    return 'Noice'
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
+async def Late_abort(client, event):
+    """Aborts after acknowledging."""
+    yield
+    abort('Nice?')
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def debug_command(client, event,
+        command_name: (str, 'The command\'s name.')
+            ):
+    """Gets debug information about the given command."""
+    if not client.is_owner(event.user):
+        abort('Owner only.')
+    
+    if not command_name:
+        abort('Empty command name.')
+    
+    application_commands = await client.application_command_guild_get_all(GUILD__NEKO_DUNGEON)
+    for application_command in application_commands:
+        if application_command.name == command_name:
+            break
+    else:
+        abort('Command could not be found.')
+    
+    try:
+        permission = await client.application_command_permission_get(GUILD__NEKO_DUNGEON, application_command)
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_application_command_permissions:
+            permission = None
+        else:
+            raise
+    
+    text_parts = [
+        '**Application command**:\n'
+        'Name : `', application_command.name, '`\n'
+        'Id : `', repr(application_command.id), '`\n'
+        'Allow by default : `', repr(application_command.allow_by_default), '`\n'
+        '**Permission overwrites**:\n'
+            ]
+    
+    if permission is None:
+        overwrites = None
+    else:
+        overwrites = permission.overwrites
+    
+    if overwrites is None:
+        text_parts.append('*none*')
+    else:
+        for index, overwrite in enumerate(overwrites):
+            text_parts.append(repr(index))
+            text_parts.append('.: type: `')
+            text_parts.append(overwrite.type.name)
+            text_parts.append('`; id: `')
+            text_parts.append(repr(overwrite.target_id))
+            
+            target_name = overwrite.target.name
+            if target_name:
+                text_parts.append('`; name: `')
+                text_parts.append(target_name)
+            
+            text_parts.append('`; allowed: `')
+            text_parts.append(repr(overwrite.allow))
+            text_parts.append('`\n')
+    
+    return ''.join(text_parts)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ('user', 707113350785400884), True)
+@set_permission(GUILD__NEKO_DUNGEON, ('user', 385575610006765579), True)
+async def zeref_and_sleep_only(client, event):
+    """Zeref and sleep only."""
+    return 'LuL'
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@set_permission(GUILD__NEKO_DUNGEON, ('user', 707113350785400884), False)
+async def only_zeref_not(client, event):
+    """Loli Police"""
+    return 'Lets go nekos.'

@@ -856,13 +856,13 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, 120.)
     
     @classmethod
-    async def application_command_permission_update(self, client, guild, permission):
-        Task(self.old_events['application_command_permission_update'](client, guild, permission), KOKORO)
+    async def application_command_permission_update(self, client, permission):
+        Task(self.old_events['application_command_permission_update'](client, permission), KOKORO)
         if self.channel is None:
             return
         
         text = [
-            f'application_command_permission_update called at {guild.name} {guild.id}',
+            f'application_command_permission_update called at {permission.guild_id}',
             f'application_command_id: {permission.application_command_id}',
             'Overwrites:'
                 ]

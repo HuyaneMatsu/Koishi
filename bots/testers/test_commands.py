@@ -1525,7 +1525,7 @@ async def test_application_command_option_value_1(client, message):
     application_command_schema.add_option(ApplicationCommandOption(
         'user',
         'Dunno something',
-        ApplicationCommandOptionType.USER,
+        ApplicationCommandOptionType.user,
             ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
@@ -1579,7 +1579,7 @@ async def test_application_command_option_choice_type_1(client, message):
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
-        ApplicationCommandOptionType.INTEGER,
+        ApplicationCommandOptionType.integer,
         choices = [ApplicationCommandOptionChoice('cake', '6'), ApplicationCommandOptionChoice('cookie', '8')]
             ))
     
@@ -1618,7 +1618,7 @@ async def test_application_command_option_choice_type_2(client, message):
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
-        ApplicationCommandOptionType.INTEGER,
+        ApplicationCommandOptionType.integer,
         choices = [ApplicationCommandOptionChoice('cake', 798636232133181511), ApplicationCommandOptionChoice('cookie', 7986362321331815111545)]
             ))
     
@@ -1657,7 +1657,7 @@ async def test_application_command_option_choice_type_3(client, message):
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
-        ApplicationCommandOptionType.INTEGER,
+        ApplicationCommandOptionType.integer,
         choices = [ApplicationCommandOptionChoice('cake', 4294967296), ApplicationCommandOptionChoice('cookie', 4294967296)]
             ))
     
@@ -1696,7 +1696,7 @@ async def test_application_command_option_choice_type_4(client, message):
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
-        ApplicationCommandOptionType.INTEGER,
+        ApplicationCommandOptionType.integer,
         choices = [ApplicationCommandOptionChoice('cake', 1<<60), ApplicationCommandOptionChoice('cookie', (1<<60)+1556656)]
             ))
     
@@ -1735,7 +1735,7 @@ async def test_application_command_option_choice_type_5(client, message):
     application_command_schema.add_option(ApplicationCommandOption(
         'number',
         'Dunno something',
-        ApplicationCommandOptionType.INTEGER,
+        ApplicationCommandOptionType.integer,
         choices = [ApplicationCommandOptionChoice('cake', 1<<64), ApplicationCommandOptionChoice('cookie', (1<<64)+4554656)]
             ))
     

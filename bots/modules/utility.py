@@ -606,20 +606,20 @@ async def role_(client, event,
     embed.add_field('Mentionable', 'true' if role.mentionable else 'false', inline=True)
     
     manager_type = role.manager_type
-    if manager_type is RoleManagerType.NONE:
+    if manager_type is RoleManagerType.none:
         managed_description = 'false'
     else:
-        if manager_type is RoleManagerType.UNSET:
+        if manager_type is RoleManagerType.unset:
             await client.sync_roles(role.guild)
             manager_type = role.manager_type
         
-        if manager_type is RoleManagerType.BOT:
+        if manager_type is RoleManagerType.bot:
             managed_description = f'Special role for bot: {role.manager:f}'
-        elif manager_type is RoleManagerType.BOOSTER:
+        elif manager_type is RoleManagerType.booster:
             managed_description = 'Role for the boosters of the guild.'
-        elif manager_type is RoleManagerType.INTEGRATION:
+        elif manager_type is RoleManagerType.integration:
             managed_description = f'Special role for integration: {role.manager.name}'
-        elif manager_type is RoleManagerType.UNKNOWN:
+        elif manager_type is RoleManagerType.unknown:
             managed_description = 'Some new things.. Never heard of them.'
         else:
             managed_description = 'I have no clue.'

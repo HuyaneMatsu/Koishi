@@ -1031,7 +1031,7 @@ class Game21Player(object):
         self.hand = hand
         self.total = total
         self.ace = ace
-        return
+        return self
     
     def auto_finish(self):
         hand = self.hand
@@ -1164,7 +1164,7 @@ class Game21PlayerRunner(object):
     __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', 'timeouter', 'canceller', 'task_flag',
         'render_after', )
     
-    async def __new__(cls, client, base, user, channel, amount, render_after):
+    async def __new__(cls, client, base, user, channel, amount, render_after, event=None):
         player = base.create_user_player(user)
         
         waiter = Future(KOKORO)
@@ -1185,7 +1185,12 @@ class Game21PlayerRunner(object):
             embed = player.create_gamble_embed(amount)
             
             try:
-                message = await client.message_create(channel, embed=embed)
+                if event is None:
+                    message = await client.message_create(channel, embed=embed)
+                else:
+                    if not event.is_acknowledged():
+                        await client.interaction_response_message_create(event)
+                    message = await client.interaction_followup_message_create(event, embed=embed)
                 for emoji in GAME_21_STEP_EMOJIS:
                     await client.reaction_add(message, emoji)
             except BaseException as err:
@@ -1214,8 +1219,8 @@ class Game21PlayerRunner(object):
             self.task_flag = GUI_STATE_READY
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
-            
-        return
+        
+        return self
     
     async def __call__(self, client, event):
         if (event.user is not self.player.user) or (event.emoji not in GAME_21_STEP_EMOJIS):
@@ -1395,9 +1400,9 @@ async def game_21_single_player(client, event, amount):
     user = event.user
     channel = event.channel
     
-    IN_GAME_IDS.add(user.id)
+    IN_GAME_IDS.add(event.user.id)
     try:
-        embed = await game_21_postcheck(client, user, channel, amount)
+        embed = await game_21_postcheck(client, event.user, event.channel, amount)
         if (embed is not None):
             try:
                 await client.interaction_followup_message_create(event, embed=embed)
@@ -1410,7 +1415,7 @@ async def game_21_single_player(client, event, amount):
         
         player_client = base.create_bot_player(client)
         
-        player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False)
+        player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False, event=event)
         player_user_waiter = player_runner.waiter
         if player_user_waiter.done():
             unallocate = False
@@ -1675,14 +1680,19 @@ class Game21JoinGUI(object):
         'canceller', 'user_locks', 'joined_user_ids', 'workers', 'guild', 'message_sync_last_state',
         'message_sync_in_progress', 'message_sync_handle')
     
-    async def __new__(cls, client, channel, joined_user_and_channel, amount, joined_user_ids, guild):
+    async def __new__(cls, client, channel, joined_user_and_channel, amount, joined_user_ids, guild, event=None):
         waiter = Future(KOKORO)
         
         embed = create_join_embed([joined_user_and_channel[0]], amount)
         embed.add_footer(GAME_21_MP_FOOTER)
         
         try:
-            message = await client.message_create(channel, embed=embed)
+            if event is None:
+                message = await client.message_create(channel, embed=embed)
+            else:
+                if not event.is_acknowledged():
+                    await client.interaction_response_message_create(event)
+                message = await client.interaction_followup_message_create(event, embed=embed)
             for emoji in GAME_21_JOIN_EMOJIS:
                 await client.reaction_add(message, emoji)
             
@@ -1719,7 +1729,7 @@ class Game21JoinGUI(object):
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
         
-        return
+        return self
     
     async def __call__(self, client, event):
         if event.user.is_bot:
@@ -1972,7 +1982,8 @@ async def game_21_multi_player(client, event, amount):
                     await client.events.error(client, 'game_21_multi_player', err)
             return
         
-        join_gui = await Game21JoinGUI(client, channel, (user, private_channel), amount, joined_user_ids, guild)
+        join_gui = await Game21JoinGUI(client, channel, (user, private_channel), amount, joined_user_ids, guild,
+            event=event)
         game_state = await join_gui.waiter
         message = join_gui.message
         
