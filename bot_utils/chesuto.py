@@ -75,7 +75,7 @@ EMBED_COLOR = Color.from_rgb(73,245,73)
 EMBED_NAME_LENGTH = 200
 EMBED_DESCRIPTION_LENGTH = 1600
 
-class Rarity(object):
+class Rarity:
     INSTANCES = [NotImplemented] * 8
     BY_NAME   = {}
     
@@ -223,7 +223,7 @@ CARDS_FILE_LOCK = SyncLock()
 
 PROTECTED_FILE_NAMES = {'cards.json'}
 
-class Card(object):
+class Card:
     __slots__=('_length_hint', 'description', 'flags', 'id', 'image_name', 'name', 'rarity')
     def __init__(self, description, id_, name, rarity, flags = 0, image_name = None):
         self.id         = id_

@@ -19,7 +19,7 @@ GITHUB_HEADERS[USER_AGENT] = LIB_USER_AGENT
 GITHUB_HEADER_RATE_LIMIT_REMAINING = istr('x-ratelimit-remaining')
 GITHUB_HEADER_RATE_LIMIT_RESET_AT = istr('x-ratelimit-reset')
 
-class GitHubQueryLimit(object):
+class GitHubQueryLimit:
     __slots__ = ('rate_limit_reset_at', 'lock')
     def __init__(self):
         self.rate_limit_reset_at = 0.0
@@ -34,7 +34,7 @@ class GitHubQueryLimit(object):
             reset = int(headers[GITHUB_HEADER_RATE_LIMIT_RESET_AT])
             self.rate_limit_reset_at = LOOP_TIME() + float(reset-now)
 
-class GitHubQuery(object):
+class GitHubQuery:
     __slots__ = ('active', 'limit', 'http', 'query_builder', 'cache', 'object_type')
     def __new__(cls, query_builder, http, object_type, limit=None):
         if limit is None:
@@ -133,7 +133,7 @@ def build_get_organizations_url(key):
     return f'https://api.github.com/users/{key}/orgs'
 
 
-class SearchUserType(object):
+class SearchUserType:
     __slots__ = ('names', 'total_count')
     def __new__(cls, data):
         names = []
@@ -171,7 +171,7 @@ class SearchUserType(object):
         
         return extend
 
-class UserType(object):
+class UserType:
     __slots__ = ('user_name', 'nick_name', 'avatar_url', 'created_at', 'reference_url', 'follower_count',
         'repo_count', 'gist_count', 'bio', 'following_count', 'company', 'location', 'twitter_user_name', 'blog_name',
         'blog_link', 'has_extra_fields', )
@@ -301,7 +301,7 @@ class UserType(object):
     
 ORGANIZATION_LIMIT = 6
 
-class Organization(object):
+class Organization:
     __slots__ = ('name', 'description')
     def __new__(cls, data):
         name = data['login']
@@ -315,7 +315,7 @@ class Organization(object):
         
         return self
 
-class OrganizationContainerType(object):
+class OrganizationContainerType:
     __slots__ = ('organizations', 'truncated')
     def __new__(cls, data):
         if (data is None) or (not data):

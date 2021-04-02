@@ -399,7 +399,7 @@ ROLE_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
 ROLE_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 ROLE_EMOJI_EMOJIS = (ROLE_EMOJI_OK, ROLE_EMOJI_CANCEL)
 
-class _role_emoji_emoji_checker(object):
+class _role_emoji_emoji_checker:
     __slots__ = ('guild',)
     
     def __init__(self, guild):

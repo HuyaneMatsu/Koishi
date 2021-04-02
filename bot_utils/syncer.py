@@ -53,7 +53,7 @@ def flatten_directory(path, name, access_path):
             yield File(directory_path, name, access_path)
             continue
 
-class File(object):
+class File:
     __slots__ = ('path', 'modified', 'name', 'access_path',)
     
     def __init__(self, path, name, access_path):
@@ -74,7 +74,7 @@ def check_approved(message):
 def check_received(message):
     return (message.content == RECEIVED)
 
-class check_any(object):
+class check_any:
     __slots__ = ('partner', )
     def __init__(self, partner):
         self.partner = partner

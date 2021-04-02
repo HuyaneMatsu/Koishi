@@ -219,7 +219,7 @@ CHANGE_STATE_ADDED   = 1
 CHANGE_STATE_ACTUAL  = 2
 CHANGE_STATE_REMOVED = 3
 
-class AutoReactRoleChange(object):
+class AutoReactRoleChange:
     __slots__ = ('added', 'removed', 'actual', 'old_behaviour', 'new_behaviour', 'guild',)
     
     def __init__(self, manager, guild):
@@ -533,7 +533,7 @@ class AutoReactRoleChange(object):
 
 AUTO_REACT_ROLE_GUIS = WeakKeyDictionary()
 
-class AutoReactRoleGUI(object):
+class AutoReactRoleGUI:
     __slots__ = ('target_message', 'changes', 'manager', 'message', 'client', 'guild', )
     def render(self):
         message = self.target_message
@@ -855,7 +855,7 @@ class AutoReactRoleGUI(object):
             await client.events.error(client,f'{self!r}.delete_message',err)
             return
 
-class AutoReactRoleManager(object):
+class AutoReactRoleManager:
     __slots__ = ('message', 'relations', 'behaviour', 'guild', 'client', 'destroy_called')
     async def __new__(cls, client, message, guild, changes):
         unused_emojis = set(message.reactions.keys())
@@ -1365,7 +1365,7 @@ class AutoReactRoleManager(object):
             await connector.execute(AUTO_REACT_ROLE_TABLE.delete().where(
                 auto_react_role_model.message_id == self.message.id))
 
-class load_auto_react_roles(object):
+class load_auto_react_roles:
     called = 0
     
     async def __call__(self, client):

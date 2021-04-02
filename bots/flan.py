@@ -411,7 +411,7 @@ class showcards:
             f'Usage: `{prefix}showcards *name*`'
             ), color=COLOR__FLAN_HELP)
 
-class CardPaginator(object):
+class CardPaginator:
     __slots__ = ('title', 'rendered', 'collected', 'page_information')
     def __init__(self, title, collected):
         self.title=title
@@ -882,7 +882,7 @@ Flan.command_processer.append(CHESUTO_BGM_CHANNEL, bgm_message_create)
 Flan.events.message_delete.append(CHESUTO_BGM_CHANNEL, bgm_message_delete)
 Flan.events.message_edit.append(CHESUTO_BGM_CHANNEL, bgm_message_edit)
 
-class Track(object):
+class Track:
     __slots__ = ('display_name', 'source_name', 'url', 'description', 'id')
     @classmethod
     def create(cls, message):

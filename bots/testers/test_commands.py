@@ -409,7 +409,7 @@ async def test_receive_voice(client, message, target: User = None):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
         try:
-            voice_client = await client.join_voice_channel(channel)
+            voice_client = await client.join_voice(channel)
         except BaseException as err:
             if isinstance(err, TimeoutError):
                 text = 'Timed out meanwhile tried to connect.'
@@ -456,7 +456,7 @@ async def test_receive_voice_decoded(client, message, target: User = None):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
         try:
-            voice_client = await client.join_voice_channel(channel)
+            voice_client = await client.join_voice(channel)
         except BaseException as err:
             if isinstance(err, TimeoutError):
                 text = 'Timed out meanwhile tried to connect.'
@@ -503,7 +503,7 @@ async def test_receive_voice_repeat(client, message, target: User = None):
     voice_client = client.voice_client_for(message)
     if voice_client is None:
         try:
-            voice_client = await client.join_voice_channel(channel)
+            voice_client = await client.join_voice(channel)
         except BaseException as err:
             if isinstance(err, TimeoutError):
                 text = 'Timed out meanwhile tried to connect.'
@@ -1325,7 +1325,7 @@ async def half_size(client, message):
     
     await client.message_create(message, file=(attachment.name, buffer))
 
-class check_interacter(object):
+class check_interacter:
     __slots__ = ('user', 'channel', 'application_command')
     def __init__(self, channel, user, application_command):
         self.channel = channel
@@ -1950,7 +1950,7 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
                     break
                 
                 try:
-                    self_voice_client = await client.join_voice_channel(self_channel)
+                    self_voice_client = await client.join_voice(self_channel)
                 except TimeoutError:
                     text = 'Timed out meanwhile tried to connect.'
                     break
@@ -1970,7 +1970,7 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
                 other_voice_client = client.voice_clients[other_guild.id]
             except KeyError:
                 try:
-                    other_voice_client = await client.join_voice_channel(voice_channel)
+                    other_voice_client = await client.join_voice(voice_channel)
                 except TimeoutError:
                     text = 'Timed out meanwhile tried to connect.'
                     break

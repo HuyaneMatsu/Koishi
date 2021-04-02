@@ -24,7 +24,7 @@ MARKET_COST_MIN = 40
 COST_FILE_LOCK = Lock(KOKORO)
 COST_FILE_PATH = os.path.join(PATH__KOISHI, 'library', 'witch_craft_costs.json')
 
-class CookingFactor(object):
+class CookingFactor:
     __slots__ = ('flavor', 'fruit', 'meat', 'monster', 'mushroom', 'vegetable')
     def __new__(cls, *, flavor=0, fruit=0, meat=0, monster=0, mushroom=0, vegetable=0):
         self = object.__new__(cls)
@@ -126,7 +126,7 @@ class CookingFactor(object):
         return cost
 
 
-class EdibilityFactor(object):
+class EdibilityFactor:
     __slots__ = ('health', 'hunger', 'sanity')
     def __new__(cls, *, health=0, hunger=0, sanity=0):
         self = object.__new__(cls)
@@ -183,7 +183,7 @@ class EdibilityFactor(object):
         return cost
 
 
-class Item(object):
+class Item:
     __slots__ = ('cost', 'cooking', 'edibility', 'emoji', 'id', 'market_cost', 'name',)
     def __new__(cls, id_, name, emoji, *, cooking=None, edibility=None):
         cost = 0

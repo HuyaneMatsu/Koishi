@@ -239,7 +239,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
         CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE = get_cpu_frquence_range()
         del get_cpu_frquence_range
         
-        class CpuUsage(object):
+        class CpuUsage:
             
             __slots__ = ('average_cpu_frequence', 'cpu_percent',)
             

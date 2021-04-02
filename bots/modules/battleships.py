@@ -86,7 +86,7 @@ POS_PATTERN_0 = re.compile('(\d{1,2}|[a-j]) */? *(\d{1,2}|[a-j]) +([1-4]) *x? *(
 POS_PATTERN_1 = re.compile('(\d{1,2}|[a-j]) */? *(\d{1,2}|[a-j])', re.I)
 NEW_RP = re.compile('new', re.I)
 
-class wait_on_reply(object):
+class wait_on_reply:
     __slots__ = ('guild', 'source', 'target',)
     def __init__(self, guild, source, target):
         self.guild = guild
@@ -112,7 +112,7 @@ class wait_on_reply(object):
         return (self.source == user)
 
  
-class active_request(object):
+class active_request:
     __slots__ = ('future', 'hash', 'source', 'target',)
     def __init__(self, source, target):
         self.source = source
@@ -230,7 +230,7 @@ async def battle_manager(client, message, target:Converter('user', flags=Convert
     else:
         await client.message_create(message.channel, text)
 
-class ship_type(object):
+class ship_type:
     __slots__ = ('parts_left', 'size1', 'size2', 'type', 'x', 'y',)
     def __init__(self, x, y, size1, size2, type_):
         self.x = x
@@ -249,7 +249,7 @@ class ship_type(object):
             for n_y in range(y_start, y_end, 10):
                 yield n_x+n_y
 
-class user_profile(object):
+class user_profile:
     __slots__ = ('channel', 'client', 'data', 'last_switch', 'message', 'other', 'page', 'process', 'ship_positions',
         'ships_left', 'state', 'text', 'user')
     ships = [0, 2, 1, 1]

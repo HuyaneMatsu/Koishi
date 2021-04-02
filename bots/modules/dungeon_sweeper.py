@@ -83,7 +83,7 @@ async def play(client, event):
 
 #:-> @ <-:#}{#:-> @ <-:#{ backend }#:-> @ <-:#}{#:-> @ <-:#
 
-class ds_game(object):
+class ds_game:
 
     WEST   = BUILTIN_EMOJIS['arrow_left']
     NORTH  = BUILTIN_EMOJIS['arrow_up']

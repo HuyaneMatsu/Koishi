@@ -129,7 +129,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
     
     return None
 
-class RLTCTX(object): #rate limit tester context manager
+class RLTCTX: #rate limit tester context manager
     active_ctx=None
     
     __slots__ = ('task', 'client', 'channel', 'title',)
@@ -332,7 +332,7 @@ class RLTCTX(object): #rate limit tester context manager
         await Pagination(self.client,self.channel,[Embed(self.title,description).add_footer('Page 1/1')])
         raise CancelledError()
             
-class RLTPrinterUnit(object):
+class RLTPrinterUnit:
     __slots__=('task','buffer','start_new_block',)
     def __init__(self,task):
         self.task=task
@@ -349,7 +349,7 @@ class RLTPrinterUnit(object):
         
         buffer.append(content)
     
-class RLTPrinterBuffer(object):
+class RLTPrinterBuffer:
     buffers=[]
     __slots__=('buffer',)
     
@@ -2002,6 +2002,39 @@ async def application_command_permission_edit(client, guild, application_command
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}/permissions',
         data)
 
+async def voice_state_client_edit(client, channel, suppress=False, request_to_speak=False):
+    channel_id = channel.id
+    guild_id = channel.guild.id
+    
+    if request_to_speak:
+        request_to_speak_timestamp = datetime.now().isoformat()
+    else:
+        request_to_speak_timestamp = None
+    
+    data = {
+        'suppress': suppress,
+        'request_to_speak_timestamp': request_to_speak_timestamp,
+        'channel_id': channel_id,
+            }
+    
+    await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/@me',
+        data)
+
+async def voice_state_user_edit(client, channel, user, suppress=False):
+    channel_id = channel.id
+    guild_id = channel.guild.id
+    user_id = user.id
+    
+    data = {
+        'suppress': suppress,
+        'channel_id': channel_id,
+            }
+    
+    await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/{user_id}',
+        data)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0000(client, message):
@@ -2290,7 +2323,7 @@ async def rate_limit_test0011(client,message):
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     #limited globally
 
-class check_is_owner(object):
+class check_is_owner:
     __slots__ = ('client', )
     def __init__(self, client):
         self.client = client
@@ -2335,7 +2368,7 @@ rate_limit_test0013_OK       = BUILTIN_EMOJIS['ok_hand']
 rate_limit_test0013_CANCEL   = BUILTIN_EMOJIS['x']
 rate_limit_test0013_EMOJIS   = (rate_limit_test0013_OK, rate_limit_test0013_CANCEL)
 
-class rate_limit_test0013_checker(object):
+class rate_limit_test0013_checker:
     __slots__ = ('client',)
     
     def __init__(self, client):
@@ -2734,12 +2767,12 @@ async def rate_limit_test0028(client, message, guild_id:str=''):
         if not guild_2.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
-        role_1_data = await role_create(client,guild_1,name='Yuyuko')
-        role_2_data = await role_create(client,guild_2,name='Yoshika')
-        role_1_id=int(role_1_data['id'])
-        role_2_id=int(role_2_data['id'])
-        await client.http.role_delete(guild_1.id,role_1_id,None)
-        await client.http.role_delete(guild_2.id,role_2_id,None)
+        role_1_data = await role_create(client, guild_1, name='Yuyuko')
+        role_2_data = await role_create(client, guild_2, name='Yoshika')
+        role_1_id = int(role_1_data['id'])
+        role_2_id = int(role_2_data['id'])
+        await client.http.role_delete(guild_1.id, role_1_id, None)
+        await client.http.role_delete(guild_2.id, role_2_id, None)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0029(client,message):
@@ -3248,7 +3281,7 @@ async def rate_limit_test0050(client, message):
         
         target_channel = await client.channel_create(guild, name='tesuto_next:gen', category=channel.category, type_=0)
         if channel.position == 0:
-            positon = 1
+            position = 1
         else:
             position = 0
         
@@ -4079,7 +4112,7 @@ async def rate_limit_test0099(client, message):
         await application_command_guild_edit(client, guild, application_command, application_command_schema)
         await application_command_guild_delete(client, guild, application_command)
 
-class check_interacter(object):
+class check_interacter:
     __slots__ = ('user', 'channel', 'application_command')
     def __init__(self, channel, user, application_command):
         self.channel = channel
@@ -4582,3 +4615,127 @@ async def rate_limit_test0117(client, message, guild2:'guild'=None):
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
         await client.application_command_guild_delete(guild2, application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0118(client, message):
+    """
+    Joins to a stage channel.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'rate_limit_test0118') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        stage_channels = guild.stage_channels
+        if not stage_channels:
+            await RLT.send('The guild has no stage channels.')
+        
+        stage_channel = stage_channels[0]
+        
+        voice_client = await client.join_voice(stage_channel)
+        await voice_state_client_edit(client, stage_channel)
+        await voice_client.disconnect()
+
+
+async def rate_limit_test0119_parallel(client, stage_channel):
+    voice_client = await client.join_voice(stage_channel)
+    await voice_state_client_edit(client, stage_channel)
+    await voice_client.disconnect()
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0119(client, message, guild2:'guild'=None):
+    """
+    Joins to 2 stage channels. Please also define a second guild.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'rate_limit_test0119') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if guild2 is None:
+            await RLT.send('Second guild unknown.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        stage_channels_1 = guild.stage_channels
+        if not stage_channels_1:
+            await RLT.send('The guild has no stage channels.')
+        
+        stage_channels_2 = guild.stage_channels
+        if not stage_channels_2:
+            await RLT.send('The second guild has no stage channels.')
+        
+        tasks = []
+        for stage_channel in (stage_channels_1[0], stage_channels_2[0]):
+            task = Task(rate_limit_test0119_parallel(client, stage_channel), KOKORO)
+            tasks.append(task)
+        
+        await WaitTillAll(tasks, KOKORO)
+
+async def rate_limit_test0120_parallel(client, stage_channel, user):
+    voice_client = await client.join_voice(stage_channel)
+    await voice_state_user_edit(client, stage_channel, user, True)
+    await voice_client.disconnect()
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0120(client, message, guild2:'guild'=None):
+    """
+    Moves 2 users in stage channels. Please also define an other guild.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'rate_limit_test0120') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if guild2 is None:
+            await RLT.send('Second guild unknown.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        stage_channels_1 = guild.stage_channels
+        if not stage_channels_1:
+            await RLT.send('The guild has no stage channels.')
+        
+        stage_channel_1 = stage_channels_1[0]
+        
+        users_1 = stage_channel_1.voice_users
+        if not users_1:
+            await RLT.send('The stage channel has no users in it.')
+        
+        user_1 = users_1[0]
+        
+        stage_channels_2 = guild.stage_channels
+        if not stage_channels_2:
+            await RLT.send('The second guild has no stage channels.')
+        
+        stage_channel_2 = stage_channels_2[0]
+        
+        users_2 = stage_channel_2.voice_users
+        if not users_2:
+            await RLT.send('The second guild has no stage channels.')
+        
+        user_2 = users_2[0]
+        
+        tasks = []
+        for stage_channel, user in ((stage_channel_1, user_1), (stage_channel_2, user_2)):
+            task = Task(rate_limit_test0120_parallel(client, stage_channel, user), KOKORO)
+            tasks.append(task)
+        
+        await WaitTillAll(tasks, KOKORO)
+
+

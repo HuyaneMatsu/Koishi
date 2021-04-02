@@ -42,7 +42,7 @@ CARD_COST_TYPE_MUL_CARDS = 3
 CARD_COST_TYPE_MUL_OTHERS_CARDS = 4
 CARD_COST_TYPE_ALL_STARS = 5
 
-class OJCardCost(object):
+class OJCardCost:
     __slots__ = ('type', 'factor')
     def __new__(cls, type_, factor):
         self = object.__new__(cls)
@@ -143,7 +143,7 @@ class OJCardCost(object):
         return False
 
 
-class OJEntitySorter(object):
+class OJEntitySorter:
     __slots__ = ('character', 'key', )
     def __new__(cls, character, key):
         self = object.__new__(cls)
@@ -187,7 +187,7 @@ class OJEntitySorter(object):
         
         return self.key < other.key
 
-class OJEntityBase(object):
+class OJEntityBase:
     __slots__ = ('id', 'name')
     
     def __gt__(self, other):
@@ -2605,7 +2605,7 @@ CHARACTER_FLYING_CASTLE = OJCharacter(70,
         )
 
 
-class CharacterDescription(object):
+class CharacterDescription:
     __slots__ = ('title', 'description_parts', 'sub_parts')
     def __new__(cls, title):
         self = object.__new__(cls)

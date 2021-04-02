@@ -27,7 +27,7 @@ DEFAULT_TITLE = 'Link'
 
 SLASH_CLIENT: Client
 
-class CachedBooruCommand(object):
+class CachedBooruCommand:
     _FILTER = (
         'solo+-underwear+-sideboob+-pov_feet+-underboob+-upskirt+-sexually_suggestive+-ass+-bikini+-6%2Bgirls+-comic'
         '+-greyscale+'
@@ -73,7 +73,7 @@ class CachedBooruCommand(object):
         return urls
 
 
-class ShuffledShelter(object):
+class ShuffledShelter:
     CYCLE  = BUILTIN_EMOJIS['arrows_counterclockwise']
     BACK   = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
     EMOJIS = (CYCLE, BACK)

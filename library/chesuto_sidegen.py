@@ -2,14 +2,14 @@ from PIL import Image as PIL
 from PIL.ImageDraw import ImageDraw
 from PIL.ImageFont import truetype
 
-class ms_cache(object):
-    __slots__=['parent', 'obj']
+class ms_cache:
+    __slots__ = ('parent', 'obj')
 
     def get_doc(self):
         return self.parent.klass.__doc__
     def set_doc(self,value):
         self.parent.klass.__doc__=value
-    __doc__=property(get_doc,set_doc)
+    __doc__ = property(get_doc, set_doc)
     del get_doc,set_doc
 
     def __init__(self,parent,obj):
@@ -19,8 +19,8 @@ class ms_cache(object):
     def __call__(self,*args,**kwargs):
         return self.parent.klass(self.obj,*args,**kwargs)
     
-class methodsimulator(object):
-    __slots__=['klass']
+class methodsimulator:
+    __slots__ = ('klass',)
     
     def get_doc(self):
         return self.klass.__doc__

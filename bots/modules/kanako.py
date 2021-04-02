@@ -258,10 +258,10 @@ def render_showcase(name,map_):
 
 MAP_SHOWCASES = {name:render_showcase(name, map_) for name,map_ in MAPS.items()}
 
-class HistoryElement(object):
+class HistoryElement:
     __slots__ = ('answer', 'answers', 'options', 'question',)
 
-class KanakoJoinWaiter(object):
+class KanakoJoinWaiter:
     __slots__ = ('client', 'channel', 'users', 'map_name', 'length', 'possibilities', 'cancelled', 'waiter',)
     def __new__(cls, client, event, map_name, length, possibilities):
         self = object.__new__(cls)
@@ -390,7 +390,7 @@ class KanakoJoinWaiter(object):
         
         return description
 
-class KanakoRunner(object):
+class KanakoRunner:
     __slots__ = ('client', 'channel', 'users', 'map_name', 'length', 'possibilities', 'cancelled', 'waiter', 'history',
         'answers', 'map', 'romajis', 'options')
     def __new__(cls, join_waiter):
@@ -754,7 +754,7 @@ class KanakoRunner(object):
         return description
 
 
-class GameStatistics(object):
+class GameStatistics:
     __slots__ = ('cache', 'source',)
     
     def __len__(self):
@@ -872,7 +872,7 @@ class GameStatistics(object):
         self.cache[index] = embed
         return embed
 
-class KanakoPagination(object):
+class KanakoPagination:
     LEFT2   = BUILTIN_EMOJIS['rewind']
     LEFT    = BUILTIN_EMOJIS['arrow_backward']
     RIGHT   = BUILTIN_EMOJIS['arrow_forward']

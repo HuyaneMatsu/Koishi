@@ -125,7 +125,7 @@ def build_output(output, return_code):
 
 ACTIVE_EXECUTORS = set()
 
-class EvalUserLock(object):
+class EvalUserLock:
     __slots__ = ('channel', 'client', 'process', 'user_id',)
     def __new__(cls, user_id):
         self = object.__new__(cls)

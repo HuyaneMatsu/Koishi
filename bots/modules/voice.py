@@ -2,7 +2,7 @@
 import re, os
 
 from hata import Client, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
-    KOKORO, ChannelVoice, AsyncIO, WaitTillAll
+    KOKORO, ChannelVoice, AsyncIO, WaitTillAll, ChannelStage
 from hata.ext.commands import checks, Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
@@ -59,7 +59,7 @@ async def join(client, user, guild, volume):
     
     yield
     try:
-        voice_client = await client.join_voice_channel(channel)
+        voice_client = await client.join_voice(channel)
     except TimeoutError:
         yield 'Timed out meanwhile tried to connect.'
         return
@@ -80,8 +80,38 @@ async def join(client, user, guild, volume):
     return
 
 
-async def pause(client, message):
-    voice_client = client.voice_client_for(message)
+async def join_speakers(client, event_or_message):
+    voice_client = client.voice_client_for(event_or_message)
+    if voice_client is None:
+        yield 'There is no voice client at your guild.'
+        return
+    
+    if not isinstance(voice_client.channel, ChannelStage):
+        yield 'Can perform this action only in stage channel.'
+        return
+    
+    yield
+    await voice_client.join_speakers()
+    yield 'Joined speakers.'
+
+
+async def join_audience(client, event_or_message):
+    voice_client = client.voice_client_for(event_or_message)
+    if voice_client is None:
+        yield 'There is no voice client at your guild.'
+        return
+    
+    if not isinstance(voice_client.channel, ChannelStage):
+        yield 'Can perform this action only in stage channel.'
+        return
+    
+    yield
+    await voice_client.join_audience()
+    yield 'Joined audience.'
+
+
+async def pause(client, event_or_message):
+    voice_client = client.voice_client_for(event_or_message)
     if voice_client is None:
         content = 'There is no voice client at your guild.'
     else:
@@ -333,9 +363,9 @@ async def move(client, message_or_event, user, voice_channel):
     
     yield
     if voice_client is None:
-        await client.join_voice_channel(voice_channel)
+        await client.join_voice(voice_channel)
     else:
-        # `client.join_voice_channel` works too, if u wanna move, but this is an option as well
+        # `client.join_voice` works too, if u wanna move, but this is an option as well
         await voice_client.move_to(voice_channel)
     
     yield f'Joined to channel: {voice_channel.name}.'
@@ -418,7 +448,7 @@ async def queue(client, message_or_event, channel, guild):
         
         break
     
-    await Pagination(client, channel, pages)
+    await Pagination(client, message_or_event, pages)
 
 
 VOICE_LOOPER_BEHAVIOUR_TO_FUNCTIONS_AND_JOIN_DESCRIPTIONS = {
@@ -826,7 +856,7 @@ if SLASH_CLIENT is not None:
     
     @SLASH_CLIENT.interactions(name='volume', guild=GUILD__NEKO_DUNGEON)
     async def slash_volume(client, event,
-            volume: ('str', 'Percentage?') = None,
+            volume: ('number', 'Percentage?') = None,
                 ):
         """Sets my volume to the given percentage."""
         return await volume_(client, event, volume)
@@ -842,3 +872,13 @@ if SLASH_CLIENT is not None:
                 ):
         """I skip the audio at the given index."""
         return await skip(client, event, index)
+    
+    @SLASH_CLIENT.interactions(name='join-speakers', guild=GUILD__NEKO_DUNGEON)
+    async def slash_join_speakers(client, event):
+        """Joins the speakers in a stage channel."""
+        return join_speakers(client, event)
+    
+    @SLASH_CLIENT.interactions(name='join-audience', guild=GUILD__NEKO_DUNGEON)
+    async def slash_join_audience(client, event):
+        """Joins the audience in a stage channel."""
+        return join_audience(client, event)

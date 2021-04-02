@@ -411,7 +411,7 @@ async def heart_event(client, event,
     
     return HeartEventGUI(client, event, duration, amount, user_limit)
 
-class HeartEventGUI(object):
+class HeartEventGUI:
     _update_time = 60.
     _update_delta = timedelta(seconds=_update_time)
     
@@ -686,7 +686,7 @@ async def daily_event(client, event,
     return DailyEventGUI(client, event, duration, amount, user_limit)
 
 
-class DailyEventGUI(object):
+class DailyEventGUI:
     _update_time = 60.
     _update_delta = timedelta(seconds=_update_time)
 
@@ -963,7 +963,7 @@ def should_render_exception(exception):
 
 
 
-class Game21Base(object):
+class Game21Base:
     __slots__ = ('guild', 'all_pulled')
     def __new__(cls, guild):
         self = object.__new__(cls)
@@ -994,7 +994,7 @@ class Game21Base(object):
         
         return card
 
-class Game21Player(object):
+class Game21Player:
     __slots__ = ('parent', 'user', 'hand', 'total', 'ace')
     def __new__(cls, parent, user):
         hand = []
@@ -1160,7 +1160,7 @@ GAME_21_RESULT_CANCELLED_BY_USER = 5
 GAME_21_TIMEOUT = 300.0
 GAME_21_CANCELLATION_TIMEOUT = 5.0
 
-class Game21PlayerRunner(object):
+class Game21PlayerRunner:
     __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', 'timeouter', 'canceller', 'task_flag',
         'render_after', )
     
@@ -1675,7 +1675,7 @@ def game_21_mp_notify_cancellation(client, joined_pairs, amount, channel, guild,
 GAME_21_MP_MAX_USERS = 10
 GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'
 
-class Game21JoinGUI(object):
+class Game21JoinGUI:
     __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_pairs', 'timeouter', 'task_flag',
         'canceller', 'user_locks', 'joined_user_ids', 'workers', 'guild', 'message_sync_last_state',
         'message_sync_in_progress', 'message_sync_handle')

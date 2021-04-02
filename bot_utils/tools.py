@@ -155,7 +155,7 @@ class CooldownHandler:
             await client.events.error(client, f'{self!r}.__call__', err)
 
 
-class PAGINATION_5PN(object):
+class PAGINATION_5PN:
     LEFT2 = BUILTIN_EMOJIS['rewind']
     LEFT  = BUILTIN_EMOJIS['arrow_backward']
     RIGHT = BUILTIN_EMOJIS['arrow_forward']
@@ -409,7 +409,7 @@ class PAGINATION_5PN(object):
         return Task(canceller(self,exception), KOKORO)
 
 
-class Cell(object):
+class Cell:
     __slots__ = ('value', )
     def __init__(self, value=None):
         self.value = value

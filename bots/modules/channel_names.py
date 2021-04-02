@@ -83,7 +83,7 @@ def escape_name(name):
     return ''.join(created)
 
 
-class ChannelNameDescriber(object):
+class ChannelNameDescriber:
     __slots__ = ('_chance', 'last_present', 'name', 'weight')
     
     @classmethod

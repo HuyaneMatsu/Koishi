@@ -413,7 +413,7 @@ def random_with_tag(tag):
     return result
 
 
-class ImageWithTag(object):
+class ImageWithTag:
     __slots__ = ('tag_id', 'name_form__ing', 'name_form__s')
     def __init__(self, name, name_form__ing, name_form__s):
         try:

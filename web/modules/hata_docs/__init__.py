@@ -38,7 +38,7 @@ set_highlight_html_class(highlight.TOKEN_TYPE_STRING_UNICODE_FORMAT_CODE, 'c_py_
 set_highlight_html_class(highlight.TOKEN_TYPE_STRING_UNICODE_FORMAT_POSTFIX, 'c_py_format_string_postfix')
 
 
-class DocsWrapper(object):
+class DocsWrapper:
     __slots__ = ('unit',)
     
     @property
@@ -65,7 +65,7 @@ class DocsWrapper(object):
             structure_js = structure_js,
                 )
 
-class Redirecter(object):
+class Redirecter:
     __slots__ = ('redirect_to')
     
     def __init__(self, redirect_to):

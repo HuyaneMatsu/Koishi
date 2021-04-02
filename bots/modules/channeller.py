@@ -5,7 +5,7 @@ from hata.ext.commands import checks
 
 CHANNELLER_COLOR = Color.from_rgb(129, 158, 0)
     
-class Channeller_v_del(object):
+class Channeller_v_del:
     __slots__ = ('parent',)
     def __init__(self, parent):
         self.parent = parent
@@ -59,7 +59,7 @@ class Channeller_v_del(object):
                 break
 
 
-class Channeller_v_edit(object):
+class Channeller_v_edit:
     __slots__ = ('parent',)
     def __init__(self, parent):
         self.parent = parent
@@ -133,7 +133,7 @@ class Channeller_v_edit(object):
                 break
 
 
-class Channeller(object):
+class Channeller:
     __slots__ = ('client', 'deleter', 'editer', 'pairs')
     def __init__(self, client, pairs):
         self.client = client

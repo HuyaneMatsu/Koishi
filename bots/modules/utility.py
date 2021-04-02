@@ -292,7 +292,7 @@ async def message_(client, event,
     await Pagination(client, event, pages, check=partial_func(message_pagination_check, event.user))
 
 
-class RoleCache(object):
+class RoleCache:
     __slots__ = ('cache', 'guild', 'roles',)
     def __new__(cls, guild):
         self = object.__new__(cls)
@@ -858,7 +858,7 @@ async def guild_(client, event,
 
 
 USER_PER_PAGE = 16
-class InRolePageGetter(object):
+class InRolePageGetter:
     __slots__ = ('users', 'guild', 'title')
     def __init__(self, users, guild, roles):
         title_parts = ['Users with roles: ']

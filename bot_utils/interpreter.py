@@ -13,7 +13,7 @@ _ignore_frame(__spec__.origin, '__call__',
 
 
 # emulates a file
-class InterpreterPrinter(object):
+class InterpreterPrinter:
     __slots__ = ('lock', 'buffer',)
     def __init__(self):
         self.lock = SyncLock()
@@ -121,7 +121,7 @@ class InterpreterPrinter(object):
 
         return ''.join(result)
 
-class InterpreterInputter(object):
+class InterpreterInputter:
     def __init__(self,owner):
         self.owner=owner
         self.client=None
@@ -233,7 +233,7 @@ def parse_code_content(content, no_code_output=None):
     
     return '\n'.join(lines), False
 
-class Interpreter(object):
+class Interpreter:
     __slots__=('inputter', 'locals', 'lock', 'printer',)
     def __init__(self,locals_):
         self.lock=Lock(KOKORO)
