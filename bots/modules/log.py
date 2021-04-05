@@ -20,10 +20,8 @@ async def logger(client, message):
     everyone_mention = message.everyone_mention
     user_mentions = message.user_mentions
     role_mentions = message.role_mentions
-    
     if (not everyone_mention) and (user_mentions is None) and (role_mentions is None):
         return
-    
     
     description_parts = []
     

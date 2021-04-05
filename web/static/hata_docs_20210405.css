@@ -14,7 +14,7 @@
 
     --color-body-font: rgb(255 255 255);
     --color-body-background: rgb(54 57 63);
-    --color-link-font: rgb(255 255 255);
+    --color-link-font: var(--color-body-font);
     --color-code-background: rgb(166 193 220 / 0.10);
     --color-code-link-font: rgb(227 255 197);
     --color-code-link-hover-background: rgb(195 181 255 / 0.20);
@@ -24,27 +24,44 @@
     --color-table-line-even-hover-background: rgb(255 245 178 / 0.20);
     --color-table-line-odd-background: rgb(172 179 172 / 0.05);
     --color-table-line-odd-hover-background: rgb(172 179 172 / 0.20);
-    --color-code-block-background: rgb(246 248 250 / 0.1);
+    --color-code-block-background: rgb(246 248 250 / 0.10);
     --color-scrollbar-track: rgb(87 96 96 / 0.50);
     --color-scrollbar-thumb: rgb(26 29 29 / 0.75);
     --color-underline: rgb(200 225 255 / 0.30);
-    --color-anchor: rgb(255 255 255);
+    --color-anchor: var(--color-body-font);
     --color-listing-comment-font: rgb(146 137 152);
     --color-listing-preview-background: rgb(90 90 90);
-    --color-header-background: rgb(127 127 127 / 0.1);
-    --color-header-path-font: rgb(255 255 255 / 0.2);
+    --color-header-background: rgb(127 127 127 / 0.10);
+    --color-header-path-font: rgb(255 255 255 / 0.20);
     --color-search-entry-border: rgb(127 127 127 / 0.20);
     --color-search-entry-border-focus: rgb(189 150 222 / 0.30);
-    --color-search-entry-input-font: rgb(255 255 255);
+    --color-search-entry-input-font: var(--color-body-font);
     --color-search-entry-input-background: rgb(0 0 0 / 0.50);
-    --color-search-entry-submit-font: rgb(255 255 255);
-    --color-content-table-svg: rgb(255 255 255);
+    --color-search-entry-submit-font: var(--color-body-font);
+    --color-content-table-svg: var(--color-body-font);
     --color-content-table-search-background: rgb(19 21 21 / 0.50);
-    --color-content-table-search-input: rgb(255 255 255);
+    --color-content-table-search-input: var(--color-body-font);
     --color-content-table-search-submit: rgb(255 0 31 / 1.00);
     --color-block-quote-background: rgb(152 167 80 / 0.10);
     --color-block-quote-border: rgb(152 167 80 / 0.50);
     --color-block-quote-font: rgb(220 221 222);
+
+    --color-python-operator: rgb(255 199 222);
+    --color-python-magic: rgb(122 255 244);
+    --color-python-numeric: rgb(96 0 255);
+    --color-python-string: rgb(174 230 151);
+    --color-python-keyword: rgb(255 109 109);
+    --color-python-builtin: rgb(0 170 255);
+    --color-python-builtin-exception: rgb(176 88 255);
+    --color-python-punctuation: rgb(157 157 255);
+    --color-python-operator-attribute: rgb(255 255 194);
+    --color-python-identifier-attribute: rgb(255 255 194);
+    --color-python-identifier-console-prefix: rgb(255 121 25);
+    --color-python-format-string-mark: rgb(249 17 17);
+    --color-python-format-string-code: rgb(255 152 44);
+    --color-python-format-string-postfix: rgb(255 152 44);
+    --color-python-comment: rgb(155 185 243);
+
         }
 
 [variable-theme="black"] {
@@ -61,8 +78,39 @@
     --color-scrollbar-thumb: rgb(91 103 103 / 0.75);
     --color-block-quote-background: rgb(80 152 167 / 0.10);
     --color-block-quote-border: rgb(80 152 167 / 0.50);
-    --color-header-background: rgb(127 127 127 / 0.2);
+    --color-header-background: rgb(127 127 127 / 0.20);
         }
+
+[variable-theme="white"] {
+    --color-body-font: rgb(0 0 0);
+    --color-body-background: rgb(255 255 255);
+    --color-header-path-font: rgb(0 0 0 / 0.30);
+    --color-underline: rgb(0 0 0 / 0.30);
+    --color-code-background: rgb(34 61 88 / 0.10);
+    --color-code-link-font: rgb(58 112 0);
+    --color-code-link-hover-background: rgb(195 181 255 / 0.30);
+    --color-search-entry-input-background: rgb(0 0 0 / 0.1);
+    --color-content-table-search-background: rgb(19 21 21 / 0.10);
+    --color-block-quote-font: rgb(49 51 53);
+    --color-python-comment: rgb(19 66 160);
+    --color-python-string: rgb(66 144 35);
+    --color-python-format-string-code: rgb(201 104 0);
+    --color-python-format-string-postfix: rgb(201 104 0);
+    --color-python-punctuation: rgb(0 0 153);
+    --color-python-identifier-console-prefix: rgb(230 96 0);
+    --color-listing-preview-background: rgb(209 209 209);
+    --color-listing-comment-font: rgb(90 83 95);
+    --color-python-operator-attribute: rgb(174 174 0);
+    --color-python-identifier-attribute: rgb(174 174 0);
+    --color-python-operator: rgb(153 0 64);
+    --color-python-magic: rgb(0 128 117);
+    --color-python-numeric: rgb(98 0 255);
+    --color-python-builtin: rgb(0 136 204);
+    --color-python-keyword: rgb(230 0 0);
+    --color-block-quote-background: rgb(80 86 167 / 0.10);
+    --color-block-quote-border: rgb(80 86 167 / 0.50);
+        }
+
 
 body {
     min-height: 100%;
@@ -713,61 +761,61 @@ blockquote {
 
 
 .c_py_operator {
-    color: rgb(255 199 222);
+    color: var(--color-python-operator);
         }
 
 .c_py_magic {
-    color: rgb(122 255 244);
+    color: var(--color-python-magic);
         }
 
 .c_py_numeric {
-    color: rgb(96 0 255);
+    color: var(--color-python-numeric);
         }
 
 .c_py_string {
-    color: rgb(174 230 151);
+    color: var(--color-python-string);
         }
 
 .c_py_keyword {
-    color: rgb(255 109 109);
+    color: var(--color-python-keyword);
         }
 
 .c_py_builtin {
-    color: rgb(0 170 255);
+    color: var(--color-python-builtin);
         }
 
 .c_py_builtin_exception {
-    color: rgb(176 88 255);
+    color: var(--color-python-builtin-exception);
         }
 
 .c_py_punctuation {
-    color: rgb(157 157 255);
+    color: var(--color-python-punctuation);
         }
 
 .c_py_operator_attribute {
-    color: rgb(255 255 194);
+    color: var(--color-python-operator-attribute);
         }
 
 .c_py_identifier_attribute {
-    color: rgb(255 255 194);
+    color: var(--color-python-identifier-attribute);
         }
 
 .c_py_identifier_console_prefix {
-    color: rgb(255 121 25);
+    color: var(--color-python-identifier-console-prefix);
         }
 
 .c_py_format_string_mark {
-    color: rgb(249 17 17);
+    color: var(--color-python-format-string-mark);
         }
 
 .c_py_comment {
-    color: rgb(155 185 243);
+    color: var(--color-python-comment);
         }
 
 .c_py_format_string_code {
-    color: rgb(255 152 44);
+    color: var(--color-python-format-string-code);
         }
 
 .c_py_format_string_postfix {
-    color: rgb(255 152 44);
+    color: var(--color-python-format-string-postfix);
         }
