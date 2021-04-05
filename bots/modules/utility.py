@@ -14,13 +14,13 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
 
 from hata.ext.commands import Pagination
 from hata.ext.prettyprint import pchunkify
-from hata.ext.slash import abort, SlashResponse
+from hata.ext.slash import abort, SlashResponse, set_permission
 
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 
 from bot_utils.tools import PAGINATION_5PN
-from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
+from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR
 
 UTILITY_COLOR = Color(0x5dc66f)
 
@@ -197,7 +197,7 @@ def message_pagination_check(user, event):
     if user is event.user:
         return True
     
-    if event.channel.permissions_for(event_user).can_manage_messages:
+    if event.message.channel.permissions_for(event_user).can_manage_messages:
         return True
     
     return False
@@ -348,36 +348,26 @@ async def roles_(client, event):
     """Lists the roles of the guild for my cutie!"""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild to execute this command', color=UTILITY_COLOR)
-        return
+        abort('I must be in the guild to execute this command')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            'I require `send messages` and `add reactions` permissions to execute this command.',
-            color=UTILITY_COLOR,
-                )
-        return
+        abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
-    yield
-    await PAGINATION_5PN(client, event.channel, RoleCache(guild))
-    return
+    await PAGINATION_5PN(client, event, RoleCache(guild))
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def welcome_screen_(client, event):
     """Shows the guild's welcome screen."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
-        return
+        abort('Guild only command.')
     
     if guild not in client.guild_profiles:
-        yield Embed('Error', 'I must be in the guild to execute this command', color=UTILITY_COLOR)
-        return
+        abort('I must be in the guild to execute this command')
     
     yield
     
@@ -401,8 +391,10 @@ async def welcome_screen_(client, event):
     welcome_channels = welcome_screen.welcome_channels
     if (welcome_channels is not None):
         for welcome_channel in welcome_channels:
-            embed.add_field(f'{welcome_channel.emoji:e} {welcome_channel.description}',
-                f'#{welcome_channel.channel:d}')
+            embed.add_field(
+                f'{welcome_channel.emoji:e} {welcome_channel.description}',
+                f'#{welcome_channel.channel:d}'
+                    )
     
     yield embed
 
@@ -944,7 +936,7 @@ def in_role_pagination_check(user, event):
     if user is event.user:
         return True
     
-    if event.channel.permissions_for(event_user).can_manage_messages:
+    if event.message.channel.permissions_for(event_user).can_manage_messages:
         return True
     
     return False
@@ -1092,7 +1084,8 @@ async def guild_icon(client, event,
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, True)
 async def latest_users(client, event,):
     """Shows the new users of the guild."""
     date_limit = datetime.now() - timedelta(days=7)

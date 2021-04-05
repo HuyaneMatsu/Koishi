@@ -5,7 +5,7 @@ from functools import partial as partial_func
 from collections import deque
 
 from hata import CancelledError, sleep, Task, DiscordException, methodize, ERROR_CODES, BUILTIN_EMOJIS, \
-    EventWaitforBase, KOKORO, ERROR_CODES, is_coroutine_function
+    EventWaitforBase, KOKORO, ERROR_CODES, is_coroutine_function, InteractionEvent
 from hata.ext.commands import CommandProcesser, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 
@@ -167,9 +167,16 @@ class PAGINATION_5PN:
     __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', 'task_flag', 'timeouter')
     
     async def __new__(cls, client, channel, pages):
+        if isinstance(channel, InteractionEvent):
+            target_channel = channel.channel
+            received_interaction = True
+        else:
+            target_channel = channel
+            received_interaction = False
+        
         self = object.__new__(cls)
         self.client = client
-        self.channel = channel
+        self.channel = target_channel
         self.pages = pages
         self.page = 0
         self.canceller = cls._canceller
@@ -177,7 +184,13 @@ class PAGINATION_5PN:
         self.timeouter = None
         
         try:
-            message = await client.message_create(self.channel,embed=self.pages[0])
+            if received_interaction:
+                if not channel.is_acknowledged():
+                    await client.interaction_response_message_create(channel)
+                
+                message = await client.interaction_followup_message_create(channel, embed=pages[0])
+            else:
+                message = await client.message_create(channel, embed=pages[0])
         except BaseException as err:
             self.message = None
             
