@@ -144,7 +144,7 @@ async def logger(client, message):
                 nick = None
             else:
                 try:
-                    guild_profile = user.guild_profiless[guild]
+                    guild_profile = user.guild_profiles[guild]
                 except KeyError:
                     nick = None
                 else:
