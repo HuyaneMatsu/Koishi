@@ -22,6 +22,7 @@ def teardown(lib):
     Koishi.events.channel_edit.remove(GUILD__NEKO_DUNGEON, big_bro_channel_edit_waiter)
     checkout_category()
 
+
 CLEAN_CONTENT_MAX_LENGTH = 1000
 USER_MENTION_MAX = 7
 ROLE_MENTION_MAX = 5
@@ -514,10 +515,10 @@ def render_activity(render_to, activity):
         
         assets = activity.assets
         if (assets is not None):
-            asset_image_large_url = activity.image_large_url
-            if (asset_image_large_url is not None):
-                render_to.append('**asset image large url:** ')
-                render_to.append(repr(asset_image_large_url))
+            asset_image_large = activity.image_large
+            if (asset_image_large is not None):
+                render_to.append('**asset image large:** ')
+                render_to.append(repr(asset_image_large))
                 render_to.append('\n')
             
             asset_text_large = assets.text_large
@@ -526,10 +527,10 @@ def render_activity(render_to, activity):
                 render_to.append(repr(asset_text_large))
                 render_to.append('\n')
             
-            asset_image_small_url = activity.image_small_url
-            if (asset_image_small_url is not None):
-                render_to.append('**asset image small url:** ')
-                render_to.append(repr(asset_image_small_url))
+            asset_image_small = activity.image_small
+            if (asset_image_small is not None):
+                render_to.append('**asset image small:** ')
+                render_to.append(repr(asset_image_small))
                 render_to.append('\n')
             
             asset_text_small = assets.text_small
@@ -705,11 +706,11 @@ def render_party_difference(render_to, old_value, activity):
 def render_assets_difference(render_to, old_value, activity):
     new_value = activity.assets
     
-    old_asset_image_large_url = old_value.image_large_url
-    mew_asset_image_large_url = new_value.image_large_url
-    if old_asset_image_large_url != mew_asset_image_large_url:
-        render_to.append('**asset image large url:** ')
-        render_simple_difference(render_to, old_asset_image_large_url, mew_asset_image_large_url)
+    old_asset_image_large = old_value.image_large
+    mew_asset_image_large = new_value.image_large
+    if old_asset_image_large != mew_asset_image_large:
+        render_to.append('**asset image large:** ')
+        render_simple_difference(render_to, old_asset_image_large, mew_asset_image_large)
     
     old_asset_text_large = old_value.text_large
     new_asset_text_large = new_value.text_large
@@ -717,11 +718,11 @@ def render_assets_difference(render_to, old_value, activity):
         render_to.append('**asset text large:** ')
         render_simple_difference(render_to, old_asset_text_large, new_asset_text_large)
     
-    old_asset_image_small_url = old_value.image_small_url
-    mew_asset_image_small_url = new_value.image_small_url
-    if old_asset_image_small_url != mew_asset_image_small_url:
-        render_to.append('**asset image small url:** ')
-        render_simple_difference(render_to, old_asset_image_small_url, mew_asset_image_small_url)
+    old_asset_image_small = old_value.image_small
+    mew_asset_image_small = new_value.image_small
+    if old_asset_image_small != mew_asset_image_small:
+        render_to.append('**asset image small:** ')
+        render_simple_difference(render_to, old_asset_image_small, mew_asset_image_small)
     
     old_asset_text_small = old_value.text_small
     new_asset_text_small = new_value.text_small
