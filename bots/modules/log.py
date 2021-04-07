@@ -417,6 +417,7 @@ def render_contents(user, old_attributes):
                 content_parts.append('**Added activity**:')
                 content_parts.append('\n')
                 render_activity(content_parts, activity)
+                content_parts.append('\n')
         
         if (updated is not None):
             for activity_change in updated:
@@ -425,12 +426,14 @@ def render_contents(user, old_attributes):
                 activity = activity_change.activity
                 for key, value in activity_change.old_attributes.items():
                     ACTIVITY_DIFFERENCE_RENDERERS[key](content_parts, value, activity)
-         
+                content_parts.append('\n')
+        
         if (removed is not None):
             for activity in removed:
                 content_parts.append('**Removed activity**:')
                 content_parts.append('\n')
                 render_activity(content_parts, activity)
+                content_parts.append('\n')
     
     return content_parts
 
@@ -652,7 +655,7 @@ def render_type_difference(render_to, old_value, activity):
 
 
 def render_timestamps_difference(render_to, old_value, activity):
-    new_value = activity.timestamp
+    new_value = activity.timestamps
     old_timestamp_start = old_value.start
     new_timestamp_start = new_value.start
     
