@@ -515,7 +515,7 @@ def render_activity(render_to, activity):
         
         assets = activity.assets
         if (assets is not None):
-            asset_image_large = activity.image_large
+            asset_image_large = assets.image_large
             if (asset_image_large is not None):
                 render_to.append('**asset image large:** ')
                 render_to.append(repr(asset_image_large))
@@ -527,7 +527,7 @@ def render_activity(render_to, activity):
                 render_to.append(repr(asset_text_large))
                 render_to.append('\n')
             
-            asset_image_small = activity.image_small
+            asset_image_small = assets.image_small
             if (asset_image_small is not None):
                 render_to.append('**asset image small:** ')
                 render_to.append(repr(asset_image_small))
