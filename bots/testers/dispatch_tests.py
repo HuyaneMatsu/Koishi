@@ -322,7 +322,7 @@ class dispatch_tester:
                     result.extend(pretty_print(activity))
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, 120.)
 
     @classmethod
     async def user_edit(self,client, user, old):

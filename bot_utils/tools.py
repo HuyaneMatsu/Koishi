@@ -66,6 +66,12 @@ class RoleDeleteWaitfor(EventWaitforBase):
 class ChannelDeleteWaitfor(EventWaitforBase):
     __event_name__ = 'channel_delete'
 
+class ChannelCreateWaitfor(EventWaitforBase):
+    __event_name__ = 'channel_create'
+
+class ChannelEditWaitfor(EventWaitforBase):
+    __event_name__ = 'channel_edit'
+
 class EmojiDeleteWaitfor(EventWaitforBase):
     __event_name__ = 'emoji_delete'
 

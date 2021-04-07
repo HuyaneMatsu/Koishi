@@ -108,7 +108,7 @@ def add_activity(text, activity):
     if (details is not None):
         text.append(f'**>>** details : {details}\n')
     
-    state = activity
+    state = activity.state
     if (state is not None):
         text.append(f'**>>** state : {state}\n')
     

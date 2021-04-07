@@ -3,12 +3,12 @@ import re
 from datetime import datetime, timedelta
 
 from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary
-from hata.ext.commands import checks, setup_ext_commands
+from hata.ext.commands import setup_ext_commands
 from hata.ext.slash import setup_ext_slash
 from hata.backend.futures import render_exc_to_list
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
-    EmojiDeleteWaitfor, RoleEditWaitfor
+    EmojiDeleteWaitfor, RoleEditWaitfor, ChannelCreateWaitfor, ChannelEditWaitfor
 from bot_utils.shared import PREFIX__KOISHI, category_name_rule, DEFAULT_CATEGORY_NAME, CHANNEL__NEKO_DUNGEON__SYSTEM, \
     GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, ROLE__NEKO_DUNGEON__ELEVATED, COLOR__KOISHI_HELP, \
     CHANNEL__SYSTEM__SYNC, ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
@@ -33,6 +33,9 @@ Koishi.events(RoleDeleteWaitfor)
 Koishi.events(ChannelDeleteWaitfor)
 Koishi.events(EmojiDeleteWaitfor)
 Koishi.events(RoleEditWaitfor)
+Koishi.events(ChannelCreateWaitfor)
+Koishi.events(ChannelEditWaitfor)
+
 
 @Koishi.events
 async def message_create(client, message):
