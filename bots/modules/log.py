@@ -656,15 +656,27 @@ def render_type_difference(render_to, old_value, activity):
 
 def render_timestamps_difference(render_to, old_value, activity):
     new_value = activity.timestamps
-    old_timestamp_start = old_value.start
-    new_timestamp_start = new_value.start
+    if old_value is None:
+        old_timestamp_start = None
+    else:
+        old_timestamp_start = old_value.start
+    if new_value is None:
+        new_timestamp_start = None
+    else:
+        new_timestamp_start = new_value.start
     
     if old_timestamp_start != new_timestamp_start:
         render_to.append('**timestamp start:** ')
         render_simple_datetime_difference(render_to, old_timestamp_start, new_timestamp_start)
     
-    old_timestamp_end = old_value.end
-    new_timestamp_end = new_value.end
+    if old_value is None:
+        old_timestamp_end = None
+    else:
+        old_timestamp_end = old_value.end
+    if new_value is None:
+        new_timestamp_end = None
+    else:
+        new_timestamp_end = new_value.end
     
     if old_timestamp_end != new_timestamp_end:
         render_to.append('**timestamp end:** ')
@@ -684,17 +696,31 @@ def render_state_difference(render_to, old_value, activity):
 def render_party_difference(render_to, old_value, activity):
     new_value = activity.party
     
-    old_party_id = old_value.id
-    new_party_id = new_value.id
+    if old_value is None:
+        old_party_id = None
+    else:
+        old_party_id = old_value.id
+    if new_value is None:
+        new_party_id = None
+    else:
+        new_party_id = new_value.id
     
     if old_party_id != new_party_id:
         render_to.append('**party id:** ')
         render_simple_difference(render_to, old_party_id, new_party_id)
-
-    old_party_size = old_value.size
-    old_party_max = old_value.max
-    new_party_size = new_value.size
-    new_party_max = new_value.max
+    
+    if old_value is None:
+        old_party_size = 0
+        old_party_max = 0
+    else:
+        old_party_size = old_value.size
+        old_party_max = old_value.max
+    if new_value is None:
+        new_party_size = 0
+        new_party_max = 0
+    else:
+        new_party_size = new_value.size
+        new_party_max = new_value.max
     
     if old_party_size or old_party_max or new_party_size or new_party_max:
         if (old_party_size or new_party_size) and (old_party_size != new_party_size):
@@ -709,26 +735,50 @@ def render_party_difference(render_to, old_value, activity):
 def render_assets_difference(render_to, old_value, activity):
     new_value = activity.assets
     
-    old_asset_image_large = old_value.image_large
-    mew_asset_image_large = new_value.image_large
+    if old_value is None:
+        old_asset_image_large = None
+    else:
+        old_asset_image_large = old_value.image_large
+    if new_value is None:
+        mew_asset_image_large = None
+    else:
+        mew_asset_image_large = new_value.image_large
     if old_asset_image_large != mew_asset_image_large:
         render_to.append('**asset image large:** ')
         render_simple_difference(render_to, old_asset_image_large, mew_asset_image_large)
     
-    old_asset_text_large = old_value.text_large
-    new_asset_text_large = new_value.text_large
+    if old_value is None:
+        old_asset_text_large = None
+    else:
+        old_asset_text_large = old_value.text_large
+    if new_value is None:
+        new_asset_text_large = None
+    else:
+        new_asset_text_large = new_value.text_large
     if old_asset_text_large != new_asset_text_large:
         render_to.append('**asset text large:** ')
         render_simple_difference(render_to, old_asset_text_large, new_asset_text_large)
     
-    old_asset_image_small = old_value.image_small
-    mew_asset_image_small = new_value.image_small
+    if old_value is None:
+        old_asset_image_small = None
+    else:
+        old_asset_image_small = old_value.image_small
+    if new_value is None:
+        mew_asset_image_small = None
+    else:
+        mew_asset_image_small = new_value.image_small
     if old_asset_image_small != mew_asset_image_small:
         render_to.append('**asset image small:** ')
         render_simple_difference(render_to, old_asset_image_small, mew_asset_image_small)
     
-    old_asset_text_small = old_value.text_small
-    new_asset_text_small = new_value.text_small
+    if old_value is None:
+        old_asset_text_small = None
+    else:
+        old_asset_text_small = old_value.text_small
+    if new_value is None:
+        new_asset_text_small = None
+    else:
+        new_asset_text_small = new_value.text_small
     if old_asset_text_small != new_asset_text_small:
         render_to.append('**asset text small:** ')
         render_simple_difference(render_to, old_asset_text_small, new_asset_text_small)
@@ -742,20 +792,38 @@ def render_album_cover_url_difference(render_to, old_value, activity):
 def render_secret_difference(render_to, old_value, activity):
     new_value = activity.secrets
     
-    old_secret_join = old_value.join
-    new_secret_join = new_value.join
+    if old_value is None:
+        old_secret_join = None
+    else:
+        old_secret_join = old_value.join
+    if new_value is None:
+        new_secret_join = None
+    else:
+        new_secret_join = new_value.join
     if old_secret_join != new_secret_join:
         render_to.append('**secrets join:** ')
         render_simple_difference(render_to, old_secret_join, new_secret_join)
     
-    old_secret_spectate = old_value.spectate
-    new_secret_spectate = new_value.spectate
+    if old_value is None:
+        old_secret_spectate = None
+    else:
+        old_secret_spectate = old_value.spectate
+    if new_value is None:
+        new_secret_spectate = None
+    else:
+        new_secret_spectate = new_value.spectate
     if old_secret_spectate != new_secret_spectate:
         render_to.append('**secrets spectate:** ')
         render_simple_difference(render_to, old_secret_spectate, new_secret_spectate)
     
-    old_secret_match = old_value.match
-    new_secret_match = new_value.match
+    if old_value is None:
+        old_secret_match = None
+    else:
+        old_secret_match = old_value.match
+    if new_value is None:
+        new_secret_match = None
+    else:
+        new_secret_match = new_value.match
     if old_secret_match != new_secret_match:
         render_to.append('**secrets spectate:** ')
         render_simple_difference(render_to, old_secret_match, new_secret_match)
