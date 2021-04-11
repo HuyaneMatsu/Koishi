@@ -217,7 +217,7 @@ class PAGINATION_5PN:
         
         self.message = message
         
-        if not channel.cached_permissions_for(client).can_add_reactions:
+        if not target_channel.cached_permissions_for(client).can_add_reactions:
             return self
         
         try:
