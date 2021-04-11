@@ -122,7 +122,7 @@ def docs_search_pagination_check(user, event):
     if user is event.user:
         return True
     
-    guild = event.guild
+    guild = event.channel.guild
     if guild is None:
         return False
     

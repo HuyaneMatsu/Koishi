@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import os, sys, subprocess, re
+from functools import partial as partial_func
 from pathlib import Path
 from subprocess import TimeoutExpired
-from hata import eventlist, Color, KOKORO, Embed, ScarletLock, sleep, Guild, Client
-from hata.ext.commands import Command, checks
+from hata import Color, KOKORO, Embed, ScarletLock, Client, sanitize_mentions
+from hata.ext.commands import checks
+from hata.ext.command_utils import Closer
 from bot_utils.interpreter import parse_code_content
 from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
 
@@ -12,7 +14,7 @@ from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
 # $ sudo apt install autoconf bison flex gcc g++ git libprotobuf-dev libtool make pkg-config protobuf-compiler
 # $ sudo apt-get install libnl-route-3-dev
 # $ git clone https://github.com/google/nsjail.git
-# $ cd nsjail && git checkout 3.0 # <- verison number
+# $ cd nsjail && git checkout 3.0 # <- version number
 # $ make
 # $ sudo cp ".../nsjail/nsjail" "/usr/sbin/" # Copy it.
 
@@ -121,7 +123,19 @@ def build_output(output, return_code):
     result = result.replace('*', '\\*')
     result = result.replace('|', '\\|')
     result = result.replace('~', '\\~')
+    result = sanitize_mentions(result)
     return result
+
+
+def check_reactor(author, event):
+    user = event.user
+    if author is user:
+        return True
+    
+    if event.channel.permissions_for(event.user).can_manage_messages:
+        return True
+    
+    return False
 
 ACTIVE_EXECUTORS = set()
 
@@ -235,8 +249,7 @@ if IS_UNIX:
                     
                     output = await process.stdout.read()
                     description = build_output(output, return_code)
-                
-                author = message.author
-                await client.message_create(message.channel,
-                    embed=Embed(title, description, color=SNEKBOX_COLOR).add_author(author.avatar_url, author.full_name),
-                    allowed_mentions=None)
+        
+        author = message.author
+        embed = Embed(title, description, color=SNEKBOX_COLOR).add_author(author.avatar_url, author.full_name)
+        await Closer(client, message.channel, embed, check=partial_func(check_reactor, author))

@@ -16,7 +16,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
-    ApplicationCommandPermissionOverwriteType
+    ApplicationCommandPermissionOverwriteType, ClientWrapper
 from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission
@@ -45,7 +45,9 @@ Marisa.commands(SubterraneanHelpCommand(COLOR__MARISA_HELP), 'help', category='H
 
 Marisa.commands(command_error, checks=[checks.is_guild(GUILD__NEKO_DUNGEON)])
 
-@Marisa.events
+ALL = ClientWrapper()
+
+@ALL.events
 async def ready(client):
     sys.stdout.write(f'{client:f} logged in.\n')
 
@@ -75,7 +77,8 @@ Marisa.commands(Interpreter(locals().copy()), name='execute', description=execut
 
 Marisa.commands(sync_request_command, name='sync', category='UTILITY', checks=[checks.owner_only()])
 
-@Marisa.events(overwrite=True)
+
+@ALL.events(overwrite=True)
 async def error(client, name, err):
     extracted = [
         client.full_name,

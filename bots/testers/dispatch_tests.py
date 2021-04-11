@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
     list_difference, ActivityChange, KOKORO, Client
-from hata.discord.parsers import EVENTS, DEFAULT_EVENT
+from hata.discord.parsers import EVENTS, DEFAULT_EVENT_HANDLER
 from hata.ext.prettyprint import pretty_print
 from hata.ext.commands import Pagination, Command
 from hata.backend.utils import method
@@ -52,7 +52,7 @@ class dispatch_tester:
         
         actual = getattr(client.events, content)
         if type(actual) is method and actual.__self__ is self:
-            setattr(client.events, content, DEFAULT_EVENT)
+            setattr(client.events, content, DEFAULT_EVENT_HANDLER)
             await client.message_create(message.channel, 'Event removed')
         else:
             self.old_events[content] = actual
