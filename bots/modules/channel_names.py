@@ -67,7 +67,7 @@ def escape_name(name):
     created = []
     last = SPACE_CHAR
     for char in name:
-        char = CHANNEL_CHAR_TABLE.get(char)
+        char = CHANNEL_CHAR_TABLE.get(char, None)
         if char is None:
             continue
         

@@ -610,7 +610,7 @@ async def download_wiki_page(client, title_, url):
                     subs = element.findAll(recursive=False)
                     for index_ in range(len(subs)):
                         sub = subs[index_]
-                        classes=sub.attrs.get('class')
+                        classes = sub.attrs.get('class')
                         if (classes is not None) and ('error' in classes):
                             errored = True
                             break

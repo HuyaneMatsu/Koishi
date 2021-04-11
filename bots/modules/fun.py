@@ -43,7 +43,7 @@ async def get_memes():
             
             MEME_QUEUE.append((meme_children_data['title'], url))
         
-        LAST_MEME_AFTER.value = json['data'].get(after)
+        LAST_MEME_AFTER.value = json['data'].get(after, None)
 
 async def get_meme():
     if MEME_QUEUE:

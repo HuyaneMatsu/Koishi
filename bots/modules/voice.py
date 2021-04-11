@@ -412,7 +412,7 @@ async def queue(client, message_or_event, channel, guild):
     yield
     
     voice_client = client.voice_client_for(message_or_event)
-    color = VOICE_COLORS.get(client)
+    color = VOICE_COLORS.get(client, None)
     
     title = f'Playing queue for {guild}'
     page = Embed(title, color=color)
@@ -481,7 +481,7 @@ async def loop(client, message_or_event, behaviour):
         return 'There is no voice client at your guild.'
     
     if behaviour is None:
-        description = VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS.get(voice_client.call_after)
+        description = VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS.get(voice_client.call_after, None)
         if description is None:
             return 'Error 404, Unknown looping behaviour.'
         
@@ -552,7 +552,7 @@ async def command_join_description(client, message):
         'Joins me to your voice channel.\n'
         f'Usage: `{prefix}join *n*`\n'
         'You can also tell me how loud I should sing for you.'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='join', description=command_join_description, category='VOICE')
@@ -567,7 +567,7 @@ async def command_pause_description(client, message):
     return Embed('pause',(
         'Pauses the currently playing audio.\n'
         f'Usage: `{prefix}pause`\n'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='pause', description=command_pause_description, category='VOICE')
@@ -580,7 +580,7 @@ async def command_resume_description(client, event_or_message):
     return Embed('resume', (
         'Resumes the currently playing audio.\n'
         f'Usage: `{prefix}resume`\n'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='resume', description=command_resume_description, category='VOICE')
 async def command_resume(client, message):
@@ -592,7 +592,7 @@ async def command_leave_description(client, message):
     return Embed('leave', (
         'Leaves me from the voice channel.\n'
         f'Usage: `{prefix}leave`'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='leave', description=command_leave_description, category='VOICE')
 async def command_leave(client, message):
@@ -626,7 +626,7 @@ async def command_move_description(client, message):
     return Embed('move', (
         'Should I move to an other channel, or next to You, my Love??\n'
         f'Usage: `{prefix}move <channel>`'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='move', description=command_move_description, category='VOICE')
 async def command_move(client, message, voice_channel: ChannelVoice=None):
@@ -713,7 +713,7 @@ async def command_loop_description(client, message):
     return Embed('loop', (
         'Sets the voice client\'s looping behaviour or returns the current one.\n'
         f'Usage: `{prefix}loop <queue|actual|stop>`\n'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='loop', description=command_loop_description, category='VOICE')
 async def command_loop(client, message, behaviour:'str' = None):
@@ -730,7 +730,7 @@ async def command_queue_description(client, message):
     return Embed('queue', (
         'Shows the voice client\'s queue of the guild.\n'
         f'Usage: `{prefix}queue`'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='queue', description=command_queue_description, category='VOICE')
@@ -751,7 +751,7 @@ async def command_volume_description(client, message):
         'Sets my volume to the given percentage.\n'
         f'Usage: `{prefix}volume *n*`\n'
         'If no volume is passed, then I will tell my current volume.'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='volume', description=command_volume_description, category='VOICE')
 async def command_volume(client, message, volume:int=None):
@@ -763,7 +763,7 @@ async def command_stop_description(client, message):
     return Embed('stop', (
         'Well, if you really want I can stop playing audio.\n'
         f'Usage: `{prefix}stop`'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='stop', description=command_stop_description, category='VOICE')
@@ -776,7 +776,7 @@ async def command_skip_description(client, message):
         'Skips the audio at the given index.\n'
         f'Usage: `{prefix}skip *index*`\n'
         'If not giving any index or giving it as `0`, will skip the currently playing audio.'
-        ), color=VOICE_COLORS.get(client))
+        ), color=VOICE_COLORS.get(client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='skip', description=command_skip_description, category='VOICE')
 async def command_skip(client, message, index:int=0):

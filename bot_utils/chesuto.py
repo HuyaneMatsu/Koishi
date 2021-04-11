@@ -433,7 +433,7 @@ class Card:
                     exception=f'Expected type \'int\' for \'id\', got \'{id_.__class__.__name__}\''
                     break
                 
-                image_name=card_data.get('image_name')
+                image_name = card_data.get('image_name', None)
                 if (image_name is not None):
                     if type(image_name) is not str:
                         exception=f'Expected type \'str\' or None for \'image_name\', got \'{image_name.__class__.__name__}\''

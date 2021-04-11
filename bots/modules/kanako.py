@@ -54,7 +54,7 @@ async def create_(client, event,
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
         abort('I need `send messages` and `add reactions` permission to execute this command.')
     
-    game = ACTIVE_GAMES.get(event.channel.id)
+    game = ACTIVE_GAMES.get(event.channel.id, None)
 
     if game is None:
         if length < 10:
@@ -79,7 +79,7 @@ async def create_(client, event,
 @KANAKO.interactions
 async def start_(client, event):
     """Starts the current game."""
-    game = ACTIVE_GAMES.get(event.channel.id)
+    game = ACTIVE_GAMES.get(event.channel.id, None)
     if game is None:
         abort('There is no active game at the channel.')
     
@@ -91,7 +91,7 @@ async def start_(client, event):
 @KANAKO.interactions
 async def info(client, event):
     """Shows information about the current game."""
-    game = ACTIVE_GAMES.get(event.channel.id)
+    game = ACTIVE_GAMES.get(event.channel.id, None)
     if game is None:
         abort('There is no active game at the channel.')
     
@@ -100,7 +100,7 @@ async def info(client, event):
 @KANAKO.interactions
 async def join(client, event):
     """Join to the currently active game inside of the channel!"""
-    game = ACTIVE_GAMES.get(event.channel.id)
+    game = ACTIVE_GAMES.get(event.channel.id, None)
     if game is None:
         abort('There is nothing to join into at the channel.')
     
@@ -112,7 +112,7 @@ async def join(client, event):
 @KANAKO.interactions
 async def leave(client, event):
     """Leave from the current game, pls no."""
-    game = ACTIVE_GAMES.get(event.channel.id)
+    game = ACTIVE_GAMES.get(event.channel.id, None)
     if game is None:
         abort('Nothing to leave from.')
     
@@ -121,7 +121,7 @@ async def leave(client, event):
 @KANAKO.interactions
 async def cancel_(client, event):
     """Cancels the current game, pls no."""
-    game = ACTIVE_GAMES.get(event.channel.id)
+    game = ACTIVE_GAMES.get(event.channel.id, None)
     if game is None:
         description = 'Nothing to cancel.'
     elif isinstance(game, KanakoRunner):

@@ -173,7 +173,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     
     async def replace_webhook_message_create(client, *args):
         data = await original_webhook_message_create(client, *args)
-        if (data is not None) and (data.get('content') == content):
+        if (data is not None) and (data.get('content', '') == content):
             result[0] = str(data)
         return data
     
@@ -201,7 +201,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     source_MESSAGE_CREATE = PARSERS['MESSAGE_CREATE']
     
     def replace_MESSAGE_CREATE(client, data):
-        if data.get('content') == content:
+        if data.get('content', '') == content:
             result.append(str(data))
         
         return source_MESSAGE_CREATE(client, data)
@@ -239,7 +239,7 @@ async def test_webhook_response_with_url(client, message, url):
     
     async def replace_webhook_message_create(client, *args):
         data = await original_webhook_message_create(client, *args)
-        if data.get('content') == content:
+        if data.get('content', '') == content:
             result[0] = str(data)
         return data
     
@@ -248,7 +248,7 @@ async def test_webhook_response_with_url(client, message, url):
     source_MESSAGE_CREATE = PARSERS['MESSAGE_CREATE']
     
     def replace_MESSAGE_CREATE(client, data):
-        if data.get('content') == content:
+        if data.get('content', '') == content:
             result.append(str(data))
         
         return source_MESSAGE_CREATE(client, data)
@@ -283,7 +283,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     async def replace_webhook_message_create(client, *args):
         data = await original_webhook_message_create(client, *args)
-        if (data is not None) and (data.get('content') == content):
+        if (data is not None) and (data.get('content', '') == content):
             result[0] = str(data)
         return data
     
@@ -304,7 +304,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     source_MESSAGE_CREATE = PARSERS['MESSAGE_CREATE']
     
     def replace_MESSAGE_CREATE(client, data):
-        if data.get('content') == content:
+        if data.get('content', '') == content:
             result.append(str(data))
         
         return source_MESSAGE_CREATE(client, data)
@@ -347,7 +347,7 @@ async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
     source_MESSAGE_CREATE = PARSERS['MESSAGE_CREATE']
     
     def replace_MESSAGE_CREATE(client, data):
-        if data.get('content') == content:
+        if data.get('content', '') == content:
             result.append(str(data))
         
         return source_MESSAGE_CREATE(client, data)

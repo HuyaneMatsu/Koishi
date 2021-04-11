@@ -143,8 +143,8 @@ DEFAULT_LIMIT = 100
 def api_search():
     query_parameters = request.args
     
-    search_for = query_parameters.get('search_for')
-    limit = query_parameters.get('limit')
+    search_for = query_parameters.get('search_for', None)
+    limit = query_parameters.get('limit', None)
     
     response = []
     

@@ -201,7 +201,7 @@ SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 IMAGE_URL_CACHE = {}
 
 async def get_image_embed(client, tags, name, color):
-    image_urls = IMAGE_URL_CACHE.get(tags)
+    image_urls = IMAGE_URL_CACHE.get(tags, None)
     if image_urls is None:
         # Yield to acknowledge the event.
         yield

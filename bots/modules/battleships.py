@@ -161,7 +161,7 @@ async def battle_manager(client, message, target:Converter('user', flags=Convert
         
         request = active_request(source, target)
         
-        is_reversed = BS_REQUESTS.get(request)
+        is_reversed = BS_REQUESTS.get(request, None)
 
         if is_reversed is not None:
             is_reversed.future.set_result(message)

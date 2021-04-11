@@ -69,7 +69,7 @@ def get_back_path(unit):
     return ''.join(result)
 
 def get_searched_info(path, order_priority_base=0):
-    unit = MAPPED_OBJECTS.get(path)
+    unit = MAPPED_OBJECTS.get(path, None)
     if unit is None:
         type_ = None
         order_priority = 100
@@ -77,7 +77,7 @@ def get_searched_info(path, order_priority_base=0):
         unit_type = type(unit)
         if unit_type is FunctionUnit:
             parent = path.parent
-            parent_unit = MAPPED_OBJECTS.get(parent)
+            parent_unit = MAPPED_OBJECTS.get(parent, None)
             if parent_unit is None:
                 type_ = 'function'
                 order_priority = UNIT_TYPE_ORDER_PRIORITY_FUNCTION
@@ -97,7 +97,7 @@ def get_searched_info(path, order_priority_base=0):
     backfetched = []
     while True:
         parent = path.parent
-        parent_unit = MAPPED_OBJECTS.get(parent)
+        parent_unit = MAPPED_OBJECTS.get(parent, None)
         if parent_unit is None:
             break
         

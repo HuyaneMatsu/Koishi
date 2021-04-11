@@ -26,15 +26,15 @@ OA2_accesses = {}
 def _oauth2_query(message, content):
     author_id = message.author.id
     if not (16<len(content)<33):
-        return OA2_accesses.get(author_id)
+        return OA2_accesses.get(author_id, None)
     try:
         user_id = int(content)
     except ValueError:
-        return OA2_accesses.get(author_id)
+        return OA2_accesses.get(author_id, None)
     
-    user = OA2_accesses.get(user_id)
+    user = OA2_accesses.get(user_id, None)
     if user is None:
-        user = OA2_accesses.get(author_id)
+        user = OA2_accesses.get(author_id, None)
     return user
 
 

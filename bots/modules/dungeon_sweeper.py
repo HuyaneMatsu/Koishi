@@ -75,7 +75,7 @@ async def play(client, event):
         abort('I have not all permissions to start a game at this channel.')
         return
     
-    game = DS_GAMES.get(event.user.id)
+    game = DS_GAMES.get(event.user.id, None)
     if game is None:
         yield ds_game(client, event)
     else:

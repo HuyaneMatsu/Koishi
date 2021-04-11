@@ -314,7 +314,7 @@ class RoleCache:
         self.cache[0] = embed
     
     def __getitem__(self,index):
-        page = self.cache.get(index)
+        page = self.cache.get(index, None)
         if page is None:
             page = self.create_page(index)
         
@@ -541,7 +541,7 @@ async def user_(client, event,
     if guild is None:
         profile = None
     else:
-        profile = user.guild_profiles.get(guild)
+        profile = user.guild_profiles.get(guild, None)
     
     if profile is None:
         if user.avatar_type is ICON_TYPE_NONE:

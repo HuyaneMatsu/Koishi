@@ -182,7 +182,7 @@ async def docs_search(client, event,
         type_ = data['type']
         section_parts.append(type_)
         section_parts.append('*')
-        preview = data.get('preview')
+        preview = data.get('preview', None)
         if (preview is not None):
             preview = preview.replace('_', '\_')
             section_parts.append('\n')

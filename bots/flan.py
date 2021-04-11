@@ -367,14 +367,14 @@ class showcard:
 class showcards:
     async def command(client, message, content):
         while True:
-            if len(content)>32:
-                result=None
+            if len(content) > 32:
+                result = None
                 break
             
             if content:
-                filtered=[]
-                search_for=content.lower()
-                rarity=Rarity.BY_NAME.get(search_for)
+                filtered = []
+                search_for = content.lower()
+                rarity = Rarity.BY_NAME.get(search_for, None)
                 if rarity is None:
                     for name,card in CARDS_BY_NAME.items():
                         if search_for in name:
@@ -520,7 +520,7 @@ class add_image:
                 content = 'The file\'s name is same as a protected file\'s name.'
                 break
             
-            card = CARDS_BY_NAME.get(cards_name.lower())
+            card = CARDS_BY_NAME.get(cards_name.lower(), None)
             if card is None:
                 content = 'Could not find a card with that name.'
                 break
@@ -603,7 +603,7 @@ class checklist:
     async def command(client, message, content):
         result = []
         if content:
-            rarity = Rarity.BY_NAME.get(content.lower())
+            rarity = Rarity.BY_NAME.get(content.lower(), None)
             if rarity is None:
                 if len(content) > 50:
                     content = content[:50]+'...'
