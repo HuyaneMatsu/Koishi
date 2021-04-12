@@ -2920,7 +2920,7 @@ async def rate_limit_test0034(client, message):
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test0034') as RLT:
-        for client_ in CLIENTS:
+        for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
         else:
@@ -3465,7 +3465,7 @@ async def rate_limit_test0062(client, message):
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test0062') as RLT:
-        for client_ in CLIENTS:
+        for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
         else:
@@ -3511,7 +3511,7 @@ async def rate_limit_test0066(client, message):
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test0066') as RLT:
-        for client_ in CLIENTS:
+        for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
         else:
@@ -3530,7 +3530,7 @@ async def rate_limit_test0067(client, message):
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test0067') as RLT:
-        for client_ in CLIENTS:
+        for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
         else:
@@ -3558,7 +3558,7 @@ async def rate_limit_test0069(client, message):
     """
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test0069') as RLT:
-        for client_ in CLIENTS:
+        for client_ in CLIENTS.values():
             if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
                 break
         else:
