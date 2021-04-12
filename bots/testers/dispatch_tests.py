@@ -4,7 +4,7 @@ from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed,
 from hata.discord.parsers import EVENTS, DEFAULT_EVENT_HANDLER
 from hata.ext.prettyprint import pretty_print
 from hata.ext.commands import Pagination, Command
-from hata.backend.utils import method
+from hata.backend.utils import MethodType
 
 DISPATCH_TESTS = eventlist(type_=Command)
 DISPATCH_COLOR = Color.from_rgb(120, 108, 128)
@@ -51,7 +51,7 @@ class dispatch_tester:
             return
         
         actual = getattr(client.events, content)
-        if type(actual) is method and actual.__self__ is self:
+        if type(actual) is MethodType and actual.__self__ is self:
             setattr(client.events, content, DEFAULT_EVENT_HANDLER)
             await client.message_create(message.channel, 'Event removed')
         else:
@@ -635,7 +635,7 @@ class dispatch_tester:
 
     #Auto dispatched:
     #guild_user_chunk
-    #Need integartion:
+    #Need integration:
     #integration_edit
 
     @classmethod

@@ -39,20 +39,20 @@ ACTIONS = [
     'wink',
     'dance',
     'cringe',
-        ]
+]
 
 SFW_WAIFUS = [
     'waifu',
     'neko',
     'shinobu',
     'megumin',
-        ]
+]
 
 NSFW_WAIFUS = [
     'waifu',
     'neko',
     'trap',
-        ]
+]
 
 async def get_waifu_image(client, event, endpoint, safe):
     guild = event.guild
@@ -112,7 +112,7 @@ WAIFU = SLASH_CLIENT.interactions(None,
     name = 'Waifu',
     description = 'Waifu pictures!',
     is_global = True,
-        )
+)
 
 @WAIFU.interactions(is_default=True)
 async def sfw(client, event,

@@ -205,7 +205,7 @@ class ds_game:
             ', channel=',
             repr(self.channel),
             ', task_flag=',
-                ]
+        ]
         
         task_flag = self.task_flag
         result.append(repr(task_flag))

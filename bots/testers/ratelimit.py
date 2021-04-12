@@ -14,7 +14,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite
 
-from hata.backend.utils import _spaceholder, change_on_switch
+from hata.backend.utils import change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
 from hata.backend.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, AUTHORIZATION, \
     CONTENT_TYPE
@@ -25,10 +25,10 @@ from hata.discord.utils.DISCORD_HEADERS import RATE_LIMIT_RESET, RATE_LIMIT_RESE
 from hata.discord.guild import create_partial_guild, GuildDiscovery
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
-from hata.discord.http.URLS import API_ENDPOINT
+from hata.discord.urls import API_ENDPOINT
 
 from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks, Converter, \
-    ConverterFlag, FlaggedAnnotation
+    ConverterFlag
 
 MAIN_CLIENT : Client
 RATE_LIMIT_COMMANDS = eventlist(type_=Command, category='RATE_LIMIT TESTS')
@@ -731,10 +731,10 @@ async def guild_delete(client, guild,):
         f'{API_ENDPOINT}/guilds/{guild_id}',
         )
 
-async def guild_edit(client,guild, afk_channel=_spaceholder): #keep it short
+async def guild_edit(client,guild, afk_channel=...): #keep it short
     data = {}
     
-    if (afk_channel is not _spaceholder):
+    if (afk_channel is not ...):
         data['afk_channel'] = None if afk_channel is None else afk_channel.id
     
     guild_id=guild.id
@@ -774,15 +774,15 @@ async def guild_ban_get(client,guild,user_id,):
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         )
 
-async def channel_move(client, channel, visual_position, category=_spaceholder, lock_permissions=False, reason=None):
+async def channel_move(client, channel, visual_position, category=..., lock_permissions=False, reason=None):
     guild = channel.guild
     if guild is None:
         return
     
-    if category is _spaceholder:
-        category=channel.category
+    if category is ...:
+        category = channel.category
     elif category is None:
-        category=guild
+        category = guild
     elif type(category) is Guild:
         if guild is not category:
             raise ValueError('Can not move channel between guilds!')
@@ -1572,7 +1572,7 @@ async def achievement_delete(client,achievement,):
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
         )
 
-async def achievement_edit(client,achievement,name=None,description=None,secret=None,secure=None,icon=_spaceholder,):
+async def achievement_edit(client,achievement,name=None,description=None,secret=None,secure=None,icon=...,):
     data={}
     if (name is not None):
         data['name'] = {
@@ -1588,7 +1588,7 @@ async def achievement_edit(client,achievement,name=None,description=None,secret=
     if (secure is not None):
         data['secure'] = secure
         
-    if (icon is not _spaceholder):
+    if (icon is not ...):
         data['icon'] = image_to_base64(icon)
     
     application_id=client.application.id
@@ -1656,18 +1656,18 @@ async def guild_discovery_get(client, guild):
         f'{API_ENDPOINT}/guilds/{guild_id}/discovery-metadata')
     return GuildDiscovery(guild_discovery_data, guild)
 
-async def guild_discovery_edit(client, guild, primary_category_id=_spaceholder, keywords=_spaceholder,
-            emoji_discovery=_spaceholder):
+async def guild_discovery_edit(client, guild, primary_category_id=..., keywords=...,
+            emoji_discovery=...):
     
     guild_id = guild.id
     data = {}
-    if (primary_category_id is not _spaceholder):
+    if (primary_category_id is not ...):
         data['primary_category_id'] = primary_category_id
     
-    if (keywords is not _spaceholder):
+    if (keywords is not ...):
         data['keywords'] = keywords
     
-    if (emoji_discovery is not _spaceholder):
+    if (emoji_discovery is not ...):
         data['emoji_discoverability_enabled'] = emoji_discovery
     
     await bypass_request(client, METHOD_PATCH,
