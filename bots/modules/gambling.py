@@ -3,7 +3,7 @@ import re
 from functools import partial as partial_func
 from datetime import datetime, timedelta
 from random import random
-from math import log, ceil
+from math import log, ceil, floor
 from itertools import chain
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
@@ -2402,21 +2402,28 @@ async def take(client, event,
     return
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def top_list(client, event):
+async def top_list(client, event,
+        page : ('number', 'page?') = 1,
+            ):
     """A list of my best simps."""
+    if page < 1:
+        page = 1
+    
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select([currency_model.user_id, currency_model.total_love])
                 .where(currency_model.total_love != 0)
                 .order_by(desc(currency_model.total_love))
                 .limit(20)
-                    )
+                .offset(20*(page-1))
+            )
+        
         results = await response.fetchall()
         
         parts = []
-        total_hearts_longest = 1
+        max_hearts = 0
         
-        for index, (user_id, total_hearts) in enumerate(results, 1):
+        for index, (user_id, total_hearts) in enumerate(results, (page*20)-19):
             try:
                 user = USERS[user_id]
             except KeyError:
@@ -2437,18 +2444,37 @@ async def top_list(client, event):
                     else:
                         raise
             
-            total_hearts_length = ceil(log(total_hearts, 10))
-            if total_hearts_length > total_hearts_longest:
-                total_hearts_longest = total_hearts_length
+            if total_hearts > max_hearts:
+                max_hearts = total_hearts
             parts.append((index, total_hearts, user.full_name))
     
-    result_lines = [f'{EMOJI__HEART_CURRENCY.as_emoji} **Toplist** {EMOJI__HEART_CURRENCY.as_emoji}\n```cs\n']
+    index_adjust = floor(log((page-1)*20+len(parts), 10.0))+1
+    hearts_adjust = floor(log(max_hearts, 10.0))+1
+    
+    result_parts = [
+        EMOJI__HEART_CURRENCY.as_emoji,
+        ' **Top-list** ',
+        EMOJI__HEART_CURRENCY.as_emoji,
+    ]
+    
+    if page != 1:
+        result_parts.append(' *[Page ')
+        result_parts.append(repr(page))
+        result_parts.append(']*')
+    
+    result_parts.append('\n```cs\n')
+    
     for index, total_hearts, full_name in parts:
-        result_lines.append(f'{index:>2}.: {total_hearts:>{total_hearts_longest}} {full_name}\n')
+        result_parts.append(str(index).rjust(index_adjust))
+        result_parts.append('.: ')
+        result_parts.append(str(total_hearts).rjust(hearts_adjust))
+        result_parts.append(' ')
+        result_parts.append(full_name)
+        result_parts.append('\n')
     
-    result_lines.append('```')
+    result_parts.append('```')
     
-    yield ''.join(result_lines)
+    yield ''.join(result_parts)
     return
 
 

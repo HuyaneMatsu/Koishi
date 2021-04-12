@@ -247,7 +247,7 @@ class reverse:
 class shutdown:
     async def command(client, message):
         
-        for client_ in CLIENTS:
+        for client_ in CLIENTS.values():
             await client_.disconnect()
         
         await client.message_create(message.channel, 'Clients stopped, stopping process.')
