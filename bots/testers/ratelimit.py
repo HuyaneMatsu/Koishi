@@ -20,7 +20,8 @@ from hata.backend.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, 
     CONTENT_TYPE
 from hata.backend.http import RequestCM
 from hata.backend.quote import quote
-from hata.backend.utils import to_json, from_json, image_to_base64
+from hata.backend.utils import to_json, from_json
+from hata.discord.utils import image_to_base64
 from hata.discord.utils.DISCORD_HEADERS import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
 from hata.discord.guild import create_partial_guild, GuildDiscovery
 from hata.backend.helpers import BasicAuth
