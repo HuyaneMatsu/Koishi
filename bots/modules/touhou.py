@@ -7,10 +7,8 @@ from difflib import get_close_matches
 from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO, Client
 from hata.ext.commands import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, ChooseMenu, Pagination, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
-from hata.discord.utils import from_json
+from hata.backend.utils import from_json
 from hata.ext.slash import SlashResponse, abort
-
-from bs4 import BeautifulSoup
 
 from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_notsame
 
@@ -23,16 +21,85 @@ BOORU_COLOR = Color.from_html('#138a50')
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 NSFW_BOORU = 'http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags='
 
+TOUHOU_REQUIRED = {
+    'solo',
+}
+
+TOUHOU_BANNED = {
+    'underwear',
+    'sideboob',
+    'pov_feet',
+    'underboob',
+    'upskirt',
+    'sexually_suggestive',
+    'ass',
+    'bikini',
+    '6%2Bgirls',
+    'comic',
+    'greyscale',
+    'bdsm',
+    'huge_filesize',
+    'lovestruck',
+}
+
+SAFE_BANNED = (
+    'bdsm',
+    'huge_filesize',
+    'underwear',
+    'sideboob',
+    'pov_feet',
+    'underboob',
+    'upskirt',
+    'sexually_suggestive',
+    'ass',
+    'bikini',
+)
+
+NSFW_BANNED = (
+    'loli',
+    'lolicon',
+    'shota',
+    'shotacon',
+    'huge_filesize',
+)
+
+
 DEFAULT_TITLE = 'Link'
+
+def make_url(base, requested_tags, required_tags, banned_tags):
+    url_parts = [base]
+    is_tag_first = True
+    
+    for tag in requested_tags:
+        if tag not in banned_tags:
+            if is_tag_first:
+                is_tag_first = False
+            else:
+                url_parts.append('+')
+            url_parts.append(tag)
+    
+    if (required_tags is not None):
+        for tag in required_tags:
+            if (tag not in requested_tags):
+                if is_tag_first:
+                    is_tag_first = False
+                else:
+                    url_parts.append('+')
+                url_parts.append(tag)
+    
+    for tag in banned_tags:
+        if is_tag_first:
+            is_tag_first = False
+        else:
+            url_parts.append('+')
+        url_parts.append('-')
+        url_parts.append(tag)
+    
+    return ''.join(url_parts)
 
 SLASH_CLIENT: Client
 
 class CachedBooruCommand:
-    _FILTER = (
-        'solo+-underwear+-sideboob+-pov_feet+-underboob+-upskirt+-sexually_suggestive+-ass+-bikini+-6%2Bgirls+-comic'
-        '+-greyscale+'
-            )
-    
     __slots__ = ('tag_name', 'title', 'urls',)
     def __init__(self, title, tag_name):
         self.tag_name = tag_name
@@ -59,7 +126,7 @@ class CachedBooruCommand:
         return
     
     async def _request_urls(self, client):
-        url = ''.join([SAFE_BOORU, self._FILTER, self.tag_name])
+        url = make_url(SAFE_BOORU, {self.tag_name}, TOUHOU_REQUIRED, TOUHOU_BANNED)
         
         async with client.http.get(url) as response:
             result = await response.read()
@@ -89,7 +156,7 @@ class ShuffledShelter:
         self = object.__new__(cls)
         self.client = client
         self.channel = event.channel
-        self.canceller = self.__class__._canceller
+        self.canceller = cls._canceller
         self.task_flag = GUI_STATE_READY
         self.urls = urls
         self.pop = pop
@@ -123,7 +190,6 @@ class ShuffledShelter:
     async def __call__(self, client, event):
         if event.user.is_bot:
             return
-        
         
         if (event.emoji not in self.EMOJIS):
             return
@@ -250,13 +316,10 @@ class ShuffledShelter:
         
         return Task(canceller(self, exception), KOKORO)
 
-async def answer_booru(client, event, content, url_base):
+async def answer_booru(client, event, content, url_base, banned):
     yield
     
-    if content:
-        url = '+'.join([url_base, *content.split()])
-    else:
-        url = url_base
+    url = make_url(url_base, set(content.split()), None, banned)
     
     async with client.http.get(url) as response:
         result = await response.read()
@@ -422,7 +485,7 @@ TOUHOU = SLASH_CLIENT.interactions(None,
     name = 'touhou',
     description = 'Some touhou commands.',
     is_global=True,
-        )
+)
 
 @TOUHOU.interactions
 async def character(client, event,
@@ -785,7 +848,7 @@ async def safe_booru(client, event,
     if (guild is None) or guild.partial:
         abort(f'Please invite me, {client:f} first!')
     
-    return answer_booru(client, event, tags, SAFE_BOORU)
+    return answer_booru(client, event, tags, SAFE_BOORU, SAFE_BANNED)
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -806,6 +869,6 @@ async def nsfw_booru(client, event,
         
         abort(description)
     
-    return answer_booru(client, event, tags, SAFE_BOORU)
+    return answer_booru(client, event, tags, NSFW_BOORU, NSFW_BANNED)
 
 

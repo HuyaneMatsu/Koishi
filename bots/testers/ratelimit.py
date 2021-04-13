@@ -20,7 +20,7 @@ from hata.backend.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, 
     CONTENT_TYPE
 from hata.backend.http import RequestCM
 from hata.backend.quote import quote
-from hata.discord.utils import to_json, from_json, image_to_base64
+from hata.backend.utils import to_json, from_json, image_to_base64
 from hata.discord.utils.DISCORD_HEADERS import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
 from hata.discord.guild import create_partial_guild, GuildDiscovery
 from hata.backend.helpers import BasicAuth
@@ -86,15 +86,15 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
             continue
         
         with RLTPrinterBuffer() as buffer:
-            response_headers=response.headers
-            status=response.status
+            response_headers = response.headers
+            status = response.status
             if response_headers['content-type']=='application/json':
-                response_data=from_json(response_data)
+                response_data = from_json(response_data)
             
-            value=response_headers.get('X-Ratelimit-Global', None)
+            value = response_headers.get('X-Ratelimit-Global', None)
             if value is not None:
                 buffer.write(f'global : {value}\n')
-            value=response_headers.get('X-Ratelimit-Limit', None)
+            value = response_headers.get('X-Ratelimit-Limit', None)
             if value is not None:
                 buffer.write(f'limit : {value}\n')
             value = response_headers.get('X-Ratelimit-Remaining', None)

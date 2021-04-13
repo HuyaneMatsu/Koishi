@@ -9,6 +9,8 @@ from hata.ext.slash import abort, SlashResponse
 from hata.ext.prettyprint import pchunkify
 
 
+from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
+
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
 
 SLASH_CLIENT: Client
@@ -18,7 +20,7 @@ def match_message_author(user, message):
 
 @SLASH_CLIENT.interactions(is_global=True, show_for_invoking_user_only=True)
 async def clear(client, event,
-        limit  : ('int'     , 'How much message?'                       )        ,
+        limit  : ('int'     , 'How much message?'                        )        ,
         before : ('str'     , 'Till when?'                               ) = None ,
         after  : ('str'     , 'Since when?'                              ) = None ,
         where  : ('channel' , 'Where?'                                   ) = None ,
@@ -362,7 +364,7 @@ async def is_banned(client, event,
         user: ('user', 'Who should I check?')
             ):
     """Checks whether the user is banned."""
-    if not event.user_permissions.can_ban_users:
+    if (not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER)) and (not event.user_permissions.can_ban_users):
         abort('You need to have `ban users` permissions to do this.')
     
     if not event.channel.cached_permissions_for(client).can_ban_users:
