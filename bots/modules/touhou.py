@@ -42,7 +42,7 @@ TOUHOU_BANNED = {
     'lovestruck',
 }
 
-SAFE_BANNED = (
+SAFE_BANNED = {
     'bdsm',
     'huge_filesize',
     'underwear',
@@ -53,15 +53,15 @@ SAFE_BANNED = (
     'sexually_suggestive',
     'ass',
     'bikini',
-)
+}
 
-NSFW_BANNED = (
+NSFW_BANNED = {
     'loli',
     'lolicon',
     'shota',
     'shotacon',
     'huge_filesize',
-)
+}
 
 
 DEFAULT_TITLE = 'Link'

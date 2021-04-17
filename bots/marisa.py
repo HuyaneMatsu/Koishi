@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from random import random, choice, shuffle
+from random import random, choice, shuffle, randint
 from time import perf_counter
 from math import ceil
 from collections import deque, OrderedDict
@@ -657,3 +657,15 @@ async def zeref_and_sleep_only(client, event):
 async def only_zeref_not(client, event):
     """Loli Police"""
     return 'Lets go nekos.'
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def roll(client, event,
+    dice_count: (set(range(1, 7)), 'With how much dice do you wanna roll with?') = 1,
+        ):
+    """Loli Police"""
+    value = 0
+    for dice in range(dice_count):
+        value += randint(1, 6)
+    
+    return str(value)

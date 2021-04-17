@@ -221,7 +221,7 @@ async def docs_search(client, event,
         descriptions.append(description)
     
     
-    title = f'Search results for guild `{search_for}`'
+    title = f'Search results for `{search_for}`'
     
     embeds = []
     for index, description in enumerate(descriptions, 1):

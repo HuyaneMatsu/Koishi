@@ -98,16 +98,24 @@ def build_output(output, return_code):
             break
         
         line = lines[index]
+        
+        line = line.replace('\\', '\\\\')
+        line = line.replace('_', '\\_')
+        line = line.replace('*', '\\*')
+        line = line.replace('|', '\\|')
+        line = line.replace('~', '\\~')
+        line = sanitize_mentions(line)
+        
         index += 1
         line_length = len(line)
         
         content_left_length -= line_length
         if content_left_length < 0:
-            lines[index-1] = line[:line_length+content_left_length]
+            lines[index-1] = line[:content_left_length]
             del lines[index:]
             is_truncated = True
             break
-        
+       
         content_left_length -= 1
         if content_left_length <= 0:
             if index == limit:
@@ -118,14 +126,7 @@ def build_output(output, return_code):
         lines.append('[OUTPUT TRUNCATED]')
     
     result = '\n'.join(lines)
-    result = result.replace('\\', '\\\\')
-    result = result.replace('_', '\\_')
-    result = result.replace('*', '\\*')
-    result = result.replace('|', '\\|')
-    result = result.replace('~', '\\~')
-    result = sanitize_mentions(result)
     return result
-
 
 def check_reactor(author, event):
     user = event.user

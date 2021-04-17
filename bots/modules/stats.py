@@ -374,7 +374,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
                                    'CPU usage percent: ')
                 description.append(process_cpu_usage.cpu_percent.__format__('.2f'))
                 description.append('%\n' \
-                                   'CPU usage with max frequence: ')
+                                   'CPU usage with max frequency: ')
                 description.append(process_cpu_usage.cpu_percent_with_max_frequence.__format__('.2f'))
                 description.append('%\n' \
                                    'CPU usage over all cores: ')
