@@ -96,7 +96,7 @@ class CTPart {
         var new_svg;
 
         if (this.should_display){
-            var new_display = 'inline-block';
+            var new_display = 'table';
             if (this.clicked){
                 new_display_children = 'block';
                 if (this.should_display_children){

@@ -13,7 +13,8 @@ from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed,
     istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
     ReuAsyncIO, enter_executor, ApplicationCommand, InteractionResponseTypes, ApplicationCommandOption, ChannelVoice, \
-    ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder
+    ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, \
+    StagePrivacyLevel
 
 from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer, \
     FlaggedAnnotation
@@ -2013,4 +2014,60 @@ async def test_webhook_message_edit_10(client, message):
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', wait=True)
     await client.webhook_message_edit(executor_webhook, new_message, file=('cake', b'cakes are great'))
+
+
+@TEST_COMMANDS
+async def test_stage_discovery_get(client, message):
+    """
+    Tries to get stage discovery.
+    """
+    data = await client.http.stage_discovery_get()
+    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    pages = [Embed(description=chunk) for chunk in chunks]
+    await Pagination(client, message.channel, pages)
+
+
+@TEST_COMMANDS
+async def test_stage_get_all(client, message):
+    """
+    Gets all the stages.
+    """
+    data = await client.http.stage_get_all()
+    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    pages = [Embed(description=chunk) for chunk in chunks]
+    await Pagination(client, message.channel, pages)
+
+
+@TEST_COMMANDS
+async def test_stage_edit(client, message):
+    """
+    Edits stage topic.
+    """
+    data = {'topic':'Ayaya'}
+    data = await client.http.stage_edit(826912003452436510, data)
+    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    pages = [Embed(description=chunk) for chunk in chunks]
+    await Pagination(client, message.channel, pages)
+
+@TEST_COMMANDS
+async def test_stage_create(client, message):
+    """
+    Edits stage.
+    """
+    data = {'channel_id':826912003452436510, 'topic':'Ayaya', 'privacy_level': StagePrivacyLevel.guild_only.value}
+    data = await client.http.stage_create(data)
+    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    pages = [Embed(description=chunk) for chunk in chunks]
+    await Pagination(client, message.channel, pages)
+
+
+@TEST_COMMANDS
+async def test_stage_delete(client, message):
+    """
+    Deletes the stage topic?
+    """
+    data = await client.http.stage_delete(826912003452436510)
+    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
+    pages = [Embed(description=chunk) for chunk in chunks]
+    await Pagination(client, message.channel, pages)
 

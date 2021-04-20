@@ -104,7 +104,9 @@ def build_output(output, return_code):
         line = line.replace('*', '\\*')
         line = line.replace('|', '\\|')
         line = line.replace('~', '\\~')
+        line = line.replace('`', '\\`')
         line = sanitize_mentions(line)
+        lines[index] = line
         
         index += 1
         line_length = len(line)

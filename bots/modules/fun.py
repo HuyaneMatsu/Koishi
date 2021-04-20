@@ -3,7 +3,7 @@ from random import random, randint, choice
 from html import unescape as html_unescape
 from functools import partial as partial_func
 
-from hata import Client, Embed, BUILTIN_EMOJIS, Lock, KOKORO, DiscordException, ERROR_CODES
+from hata import Client, Embed, BUILTIN_EMOJIS, Lock, KOKORO, DiscordException, ERROR_CODES, WebhookType, Emoji
 from hata.ext.commands import wait_for_reaction
 from hata.ext.slash import abort
 
@@ -552,3 +552,27 @@ async def minesweeper(client, message,
     return '\n'.join(result)
 
 
+EMOJI_1 = Emoji.precreate(814618830106132511, name='T90Salute')
+EMOJI_2 = Emoji.precreate(588052578214871053, name='tatohaHola')
+
+@SLASH_CLIENT.interactions(guild=388267636661682178, show_for_invoking_user_only=True)
+async def crywolf_(client, event):
+    """Crywolf is a bot"""
+    yield 'crywolf is a sus'
+    channel = event.channel
+    webhooks = await client.webhook_get_all_channel(channel)
+    for webhook in webhooks:
+        if webhook.type is WebhookType.bot:
+            executor_webhook = webhook
+            break
+    else:
+        executor_webhook = None
+    
+    if (executor_webhook is None):
+        executor_webhook = await client.webhook_create(channel, 'crywolf-bot')
+    
+    crywolf = await client.user_get(151446521311789057)
+    await client.webhook_message_create(executor_webhook, 'Good morning, how are yous?',
+        name=crywolf.name, avatar_url=crywolf.avatar_url)
+    await client.webhook_message_create(executor_webhook, f'{EMOJI_1:e} {EMOJI_2:e}',
+        name=crywolf.name, avatar_url=crywolf.avatar_url)

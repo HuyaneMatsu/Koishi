@@ -380,14 +380,15 @@ class dispatch_tester:
 
     @classmethod
     async def channel_edit(self, client, channel, old):
+        print(client, channel, old)
         Task(self.old_events['channel_edit'](client, channel, old), KOKORO)
         if self.channel is None:
             return
         
         result = [
-            f'A channel was edited: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} '
-            f'{("(text) ", "" ,"(news) ")[(3+channel.type)//4]}({channel.type})'
-                ]
+            f'A channel was edited: {channel.name} {channel.id}\n'
+            f'channel type: {channel.__class__.__name__} ({channel.type})'
+        ]
         
         for key, value in old.items():
             if key == 'overwrites':
@@ -865,7 +866,7 @@ class dispatch_tester:
             f'application_command_permission_update called at {permission.guild_id}',
             f'application_command_id: {permission.application_command_id}',
             'Overwrites:'
-                ]
+        ]
         
         overwrites = permission.overwrites
         if (overwrites is None):
@@ -876,6 +877,31 @@ class dispatch_tester:
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, 120.)
+    
+    
+    @classmethod
+    async def stage_create(self, client, stage):
+        Task(self.old_events['stage_create'](client, stage), KOKORO)
+        
+        pages = [Embed(description=f'Stage create: {stage!r}')]
+        await Pagination(client, self.channel, pages, 120.)
+
+
+    @classmethod
+    async def stage_delete(self, client, stage):
+        Task(self.old_events['stage_delete'](client, stage), KOKORO)
+        
+        pages = [Embed(description=f'Stage delete: {stage!r}')]
+        await Pagination(client, self.channel, pages, 120.)
+    
+    
+    @classmethod
+    async def stage_edit(self, client, stage):
+        Task(self.old_events['stage_edit'](client, stage), KOKORO)
+        
+        pages = [Embed(description=f'Stage edit: {stage!r}')]
+        await Pagination(client, self.channel, pages, 120.)
+
 
 
 async def here_description(client, message):
@@ -936,6 +962,9 @@ async def switch_description(client, message):
         '- `integration_update`\n'
         '- `webhook_update`\n'
         '- `application_command_permission_update`\n'
+        '- `stage_create`\n'
+        '- `stage_edit`\n'
+        '- `stage_delete`\n'
         f'For setting channel, use: `{prefix}here`'
             ), color=DISPATCH_COLOR).add_footer(
             'Owner only!')

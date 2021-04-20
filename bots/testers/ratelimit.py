@@ -12,7 +12,8 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
     ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
-    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite
+    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, StagePrivacyLevel, ChannelStage, \
+    ERROR_CODES
 
 from hata.backend.utils import change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -117,7 +118,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                 return response_data
             
             if status==429:
-                retry_after=response_data['retry_after']/1000.
+                retry_after=response_data['retry_after']
                 buffer.write(f'RATE LIMITED\nretry after : {retry_after}\n',)
                 await sleep(retry_after,self.loop)
                 continue
@@ -2037,6 +2038,52 @@ async def voice_state_user_edit(client, channel, user, suppress=False):
         data)
 
 
+async def stage_discovery_get(client):
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/discovery',
+        )
+
+async def guild_discovery_get_all(client):
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guild-discovery',
+        )
+
+async def stage_get_all(client):
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/stage-instances',
+        )
+
+async def stage_create(client, channel, topic):
+    data = {
+        'channel_id': channel.id,
+        'topic': topic,
+        'privacy_level': StagePrivacyLevel.guild_only.value
+    }
+    
+    await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/stage-instances',
+        data)
+
+async def stage_edit(client, channel, topic):
+    channel_id = channel.id
+    
+    data = {
+        'topic': topic,
+    }
+    
+    await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/stage-instances/{channel_id}',
+        data)
+
+
+async def stage_delete(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_DELETE,
+        f'{API_ENDPOINT}/stage-instances/{channel_id}',
+        )
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0000(client, message):
     """
@@ -3072,7 +3119,7 @@ async def rate_limit_test0040(client, message):
         if target_channel is None:
             await RLT.send('Every channel has an overwrite for the bottom role.')
         
-        permission_overwrite = await client.permission_overwrite_create(channel, role, 0b1000, 0b0100, 'testing rate_limits')
+        permission_overwrite = await client.permission_overwrite_create(channel, role, 0b1000, 0b0100)
         await permission_overwrite_delete(client, channel, permission_overwrite)
 
 @RATE_LIMIT_COMMANDS
@@ -4740,3 +4787,105 @@ async def rate_limit_test0120(client, message, guild2:'guild'=None):
         await WaitTillAll(tasks, KOKORO)
 
 
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0121(client, message):
+    """
+    Gets stage discovery.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0121') as RLT:
+        await stage_discovery_get(client)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0122(client, message):
+    """
+    Gets stage channels and such maybe?.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0122') as RLT:
+        try:
+            await stage_get_all(client)
+        except DiscordException as err:
+            if err.code == ERROR_CODES.bots_not_allowed:
+                pass
+            else:
+                raise
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0123(client, message, stage_channel:'channel'=None):
+    """
+    Edits a stage channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0123') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if stage_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not isinstance(stage_channel, ChannelStage):
+            await RLT.send('Stage channel only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        
+        await stage_create(client, stage_channel, 'Ayaya')
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0124(client, message, stage_channel:'channel'=None):
+    """
+    Edits a stage channel's topic only.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0124') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if stage_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not isinstance(stage_channel, ChannelStage):
+            await RLT.send('Stage channel only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await stage_edit(client, stage_channel, 'Ayaya')
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0125(client, message):
+    """
+    Gets the discoverable guilds.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0125') as RLT:
+        await guild_discovery_get_all(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0126(client, message, stage_channel:'channel'=None):
+    """
+    Deletes a stage.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0126') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if stage_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not isinstance(stage_channel, ChannelStage):
+            await RLT.send('Stage channel only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await stage_delete(client, stage_channel)

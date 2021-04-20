@@ -104,6 +104,8 @@ def calculate_daily_for(user, daily_streak):
     if received > daily_bonus_limit:
         received = daily_bonus_limit
     
+    received += daily_streak
+    
     return received
 
 
@@ -2448,9 +2450,6 @@ async def top_list(client, event,
                 max_hearts = total_hearts
             parts.append((index, total_hearts, user.full_name))
     
-    index_adjust = floor(log((page-1)*20+len(parts), 10.0))+1
-    hearts_adjust = floor(log(max_hearts, 10.0))+1
-    
     result_parts = [
         EMOJI__HEART_CURRENCY.as_emoji,
         ' **Top-list** ',
@@ -2462,15 +2461,22 @@ async def top_list(client, event,
         result_parts.append(repr(page))
         result_parts.append(']*')
     
-    result_parts.append('\n```cs\n')
+    result_parts.append('\n```')
     
-    for index, total_hearts, full_name in parts:
-        result_parts.append(str(index).rjust(index_adjust))
-        result_parts.append('.: ')
-        result_parts.append(str(total_hearts).rjust(hearts_adjust))
-        result_parts.append(' ')
-        result_parts.append(full_name)
-        result_parts.append('\n')
+    if max_hearts:
+        result_parts.append('cs\n')
+        index_adjust = floor(log((page-1)*20+len(parts), 10.0))+1
+        hearts_adjust = floor(log(max_hearts, 10.0))+1
+        
+        for index, total_hearts, full_name in parts:
+            result_parts.append(str(index).rjust(index_adjust))
+            result_parts.append('.: ')
+            result_parts.append(str(total_hearts).rjust(hearts_adjust))
+            result_parts.append(' ')
+            result_parts.append(full_name)
+            result_parts.append('\n')
+    else:
+        result_parts.append('\n*no result*\n')
     
     result_parts.append('```')
     
@@ -2484,9 +2490,9 @@ HEART_GENERATION_AMOUNT = 10
 HEART_BUMP_AMOUNT = 100
 
 BUMP_RP = re.compile(
-    f'<@!?(\d{{7,21}})>, \n'
-    f' {{6}}Bump done :thumbsup:\n' # This is really not an emoji!
-    f' {{6}}Check it on DISBOARD: https://disboard\.org/'
+    '<@!?(\d{7,21})>, \n'
+    ' {6}Bump done :thumbsup:\n' # This is really not an emoji!
+    ' {6}Check it on DISBOARD: https://disboard\.org/'
         )
 
 
