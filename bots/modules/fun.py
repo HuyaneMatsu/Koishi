@@ -8,6 +8,7 @@ from hata.ext.commands import wait_for_reaction
 from hata.ext.slash import abort
 
 from bot_utils.tools import Cell
+from bot_utils.shared import GUILD__NEKO_DUNGEON
 
 SLASH_CLIENT : Client
 
@@ -555,7 +556,7 @@ async def minesweeper(client, message,
 EMOJI_1 = Emoji.precreate(814618830106132511, name='T90Salute')
 EMOJI_2 = Emoji.precreate(588052578214871053, name='tatohaHola')
 
-@SLASH_CLIENT.interactions(guild=388267636661682178, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
 async def crywolf_(client, event):
     """Crywolf is a bot"""
     yield 'crywolf is a sus'
@@ -576,3 +577,8 @@ async def crywolf_(client, event):
         name=crywolf.name, avatar_url=crywolf.avatar_url)
     await client.webhook_message_create(executor_webhook, f'{EMOJI_1:e} {EMOJI_2:e}',
         name=crywolf.name, avatar_url=crywolf.avatar_url)
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def sex(client, event):
+    """You horny?"""
+    return Embed().add_image('https://media1.tenor.com/images/f85aafba0c5f18c9496068250777dfd0/tenor.gif?itemid=19617482')

@@ -700,8 +700,11 @@ async def zeref_pagination(client, event):
     await ZerefPagination(client, event, ['hi', 'hello'], event.user)
 
 
+@UserMenuFactory
+class ClickCounter:
+
+
+
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def some_embed(client, event):
-    """Some embed for testing."""
-    await client.interaction_response_message_create(event)
-    await client.interaction_followup_message_create(event, embed=Embed('cake'))
+async def chooser(client, event):
+    pass

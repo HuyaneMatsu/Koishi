@@ -288,7 +288,7 @@ class Interpreter:
             
             else:
                 pages=[Embed('No output')]
-            await Pagination(client,message.channel,pages,240.)
+            await Pagination(client, message.channel, pages, timeout=240.)
 
 
 del re

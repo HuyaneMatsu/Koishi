@@ -220,7 +220,7 @@ class ds_game:
             'GUI_STATE_SWITCHING_CTX',
                 )[task_flag]
         
-        result.append(._task_flag_name)
+        result.append(task_flag_name)
         result.append(')')
         
         result.append(', call =')
