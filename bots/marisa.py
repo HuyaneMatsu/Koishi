@@ -701,10 +701,67 @@ async def zeref_pagination(client, event):
 
 
 @UserMenuFactory
-class ClickCounter:
-
+class CatFeeder:
+    
+    cat = BUILTIN_EMOJIS['cat']
+    eggplant = BUILTIN_EMOJIS['eggplant']
+    
+    emojis = (cat, )
+    timeout = 300.0
+    
+    allow_third_party_emojis = True
+    
+    def __init__(self, menu):
+        self.menu = menu
+        self.reacted = set()
+    
+    
+    async def initial_invoke(self):
+        return f'Please react with {self.cat:e} to feed her!\n' \
+               f'If no new person reacts for 5 minutes the cat will be sad.'
+    
+    
+    async def invoke(self, event):
+        emoji = event.emoji
+        user = event.user
+        reacted = self.reacted
+        if emoji is self.cat:
+            
+            if user in reacted:
+                return None
+            
+            reacted.add(user)
+            
+            return f'Please react with {self.cat:e} to feed her!\n' \
+                   f'If no no new unique person reacts for 5 minutes the cat will be sad.\n' \
+                   f'\n' \
+                   f'{len(reacted)} people gave the cat a slice of cake!'
+        
+        if emoji is self.eggplant:
+            return f'Please react with {self.cat:e} to feed her!\n' \
+                   f'If no no new unique person reacts for 5 minutes the cat will be sad.\n' \
+                   f'\n' \
+                   f'{len(reacted)} people gave the cat a slice of cake!\n' \
+                   f'\n' \
+                   f'{user:m} you wot mate?'
+    
+        return None
+    
+    async def close(self, exception):
+        if exception is None:
+            return
+        
+        if isinstance(exception, TimeoutError):
+            menu = self.menu
+            
+            content = f'The {self.cat:e}has been fed by {len(self.reacted)} people.'
+            await menu.client.message_edit(menu.message, content)
+            
+            if menu.channel.cached_permissions_for(menu.client).can_manage_messages:
+                await menu.client.reaction_clear(menu.message)
 
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def chooser(client, event):
-    pass
+async def cat_feeder(client, event):
+    """Feed the cat!"""
+    return await CatFeeder(client, event)
