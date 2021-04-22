@@ -152,7 +152,7 @@ class InterpreterInputter:
             pages=[Embed('Waiting for input (timeout 5 min):')]
         
         with client.loop.enter():
-            task = Task(Pagination(client, channel, pages, 300.), client.loop)
+            task = Task(Pagination(client, channel, pages, timeout=300.), client.loop)
             future = wait_for_message(client, channel, self.check_is_owner, 300.)
         
         task.sync_wrap().wait()

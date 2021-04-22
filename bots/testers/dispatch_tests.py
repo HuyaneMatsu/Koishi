@@ -84,7 +84,7 @@ class dispatch_tester:
         text = pretty_print(message)
         text.insert(0, f'Message {message.id} got deleted')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def message_edit(self,client, message, old):
@@ -189,7 +189,7 @@ class dispatch_tester:
 
         text = cchunkify(result)
         pages = [Embed(description=chunk) for chunk in text]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def embed_update(self,client, message, flag):
@@ -245,7 +245,7 @@ class dispatch_tester:
 
         text=cchunkify(result)
         pages=[Embed(description=chunk) for chunk in text]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     
     @classmethod
@@ -260,7 +260,7 @@ class dispatch_tester:
             text = pretty_print(old)
         text.insert(0, f'Reactions got cleared from message {message.id}:')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def reaction_delete_emoji(self,client, message, emoji, users):
@@ -274,7 +274,7 @@ class dispatch_tester:
             text = pretty_print(users)
         text.insert(0, f'{emoji:e} were removed from message {message.id}:')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
         
     @classmethod
     async def user_presence_update(self,client, user, old):
@@ -322,7 +322,7 @@ class dispatch_tester:
                     result.extend(pretty_print(activity))
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def user_edit(self,client, user, old):
@@ -335,7 +335,7 @@ class dispatch_tester:
             result.append(f'{key} : {value} -> {getattr(user, key)}')
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def user_profile_edit(self,client, user, guild, old):
@@ -366,7 +366,7 @@ class dispatch_tester:
             raise RuntimeError(key)
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def channel_delete(self,client,channel, guild):
@@ -376,7 +376,7 @@ class dispatch_tester:
         
         text=f'```\nA channel was deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[Embed(description=text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def channel_edit(self, client, channel, old):
@@ -411,7 +411,7 @@ class dispatch_tester:
             result.append(f'{key} changed: {value!r} -> {getattr(channel, key)!r}')
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def channel_create(self,client,channel):
@@ -422,7 +422,7 @@ class dispatch_tester:
         result=pretty_print(channel)
         result.insert(0, f'A channel was created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def channel_pin_update(self,client,channel):
@@ -432,7 +432,7 @@ class dispatch_tester:
         
         text=f'```\nA channel\'s pins changed: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
         pages=[Embed(description=text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def emoji_create(self,client, emoji):
@@ -443,7 +443,7 @@ class dispatch_tester:
         result=pretty_print(emoji)
         result.insert(0, f'Emoji created: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def emoji_delete(self,client, emoji, guild):
@@ -454,7 +454,7 @@ class dispatch_tester:
         result=pretty_print(emoji)
         result.insert(0, f'Emoji deleted: {emoji.name} {emoji.id} at guild {guild!r}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
         
     @classmethod
     async def emoji_edit(self,client, emoji, old):
@@ -484,7 +484,7 @@ class dispatch_tester:
             continue
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def guild_user_add(self,client, guild, user):
@@ -521,7 +521,7 @@ class dispatch_tester:
         result = pretty_print(guild)
         result.insert(0, f'Guild created: {guild.id}')
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     #Unknown:
     #guild_sync
@@ -597,7 +597,7 @@ class dispatch_tester:
             raise RuntimeError(key)
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
         
     @classmethod
     async def guild_delete(self,client, guild, profile):
@@ -611,7 +611,7 @@ class dispatch_tester:
         result.insert(2, 'At least i did not boost' if (profile.boosts_since is None) else 'Rip by boost ahhhh...')
 
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
 
     @classmethod
@@ -622,7 +622,7 @@ class dispatch_tester:
         
         text=f'```\nUser {user:f} {user.id} got banned at {guild.name} {guild.id}.```'
         pages=[Embed(description=text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def guild_ban_delete(self,client, guild, user):
@@ -632,7 +632,7 @@ class dispatch_tester:
         
         text=f'```\nUser {user:f} {user.id} got UNbanned at {guild.name} {guild.id}.```'
         pages=[Embed(description=text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     #Auto dispatched:
     #guild_user_chunk
@@ -648,7 +648,7 @@ class dispatch_tester:
         result=pretty_print(role)
         result.insert(0, f'A role got created at {role.guild.name} {role.guild.id}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def role_delete(self,client,role, guild):
@@ -658,7 +658,7 @@ class dispatch_tester:
         
         text=f'```\nA role got deleted at {role.guild.name} {role.guild.id}\nRole: {role.name} {role.id}```'
         pages=[Embed(description=text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
     async def role_edit(self, client, role, old):
@@ -685,7 +685,7 @@ class dispatch_tester:
                 continue
         
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def webhook_update(self,client,channel):
@@ -695,7 +695,7 @@ class dispatch_tester:
         
         text = f'```\nwebhooks got updated at guild: {channel.name} {channel.id}```'
         pages = [Embed(description=text)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def user_voice_update(self, client, voice_state, old_attributes):
@@ -725,7 +725,7 @@ class dispatch_tester:
             result.append(f'{key} : {value} -> {getattr(voice_state, key)}')
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def user_voice_join(self, client, voice_state):
@@ -738,7 +738,7 @@ class dispatch_tester:
         result.extend(pretty_print(voice_state))
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def user_voice_leave(self, client, voice_state):
@@ -751,7 +751,7 @@ class dispatch_tester:
         result.extend(pretty_print(voice_state))
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
             
     @classmethod
     async def typing(self,client,channel, user,timestamp):
@@ -768,7 +768,7 @@ class dispatch_tester:
         result.append(f'timestamp : {timestamp:%Y.%m.%d-%H:%M:%S}')
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def client_edit_settings(self,client, old):
@@ -791,7 +791,7 @@ class dispatch_tester:
         text = pretty_print(invite)
         text.insert(0, f'Invite created:')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def invite_delete(self,client,invite):
@@ -802,7 +802,7 @@ class dispatch_tester:
         text = pretty_print(invite)
         text.insert(0, f'Invite deleted:')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages,120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def integration_create(self, client, guild, integration):
@@ -814,7 +814,7 @@ class dispatch_tester:
         text.insert(0, f'integration_create at {guild.name} ({guild.id}):')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def integration_delete(self, client, guild, integration_id, application_id):
@@ -829,7 +829,7 @@ class dispatch_tester:
                 ]
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def integration_edit(self, client, guild, integration):
@@ -841,7 +841,7 @@ class dispatch_tester:
         text.insert(0, f'integration_edit at {guild.name} ({guild.id}):')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def integration_update(self, client, guild):
@@ -854,7 +854,7 @@ class dispatch_tester:
                 ]
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
     async def application_command_permission_update(self, client, permission):
@@ -876,7 +876,7 @@ class dispatch_tester:
                 text.append(f'- {overwrite.target!r}; allow: {overwrite.allow!r}')
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     
     @classmethod
@@ -884,7 +884,7 @@ class dispatch_tester:
         Task(self.old_events['stage_create'](client, stage), KOKORO)
         
         pages = [Embed(description=f'Stage create: {stage!r}')]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
 
     @classmethod
@@ -892,7 +892,7 @@ class dispatch_tester:
         Task(self.old_events['stage_delete'](client, stage), KOKORO)
         
         pages = [Embed(description=f'Stage delete: {stage!r}')]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
     
     
     @classmethod
@@ -900,7 +900,7 @@ class dispatch_tester:
         Task(self.old_events['stage_edit'](client, stage), KOKORO)
         
         pages = [Embed(description=f'Stage edit: {stage!r}')]
-        await Pagination(client, self.channel, pages, 120.)
+        await Pagination(client, self.channel, pages, timeout=120.)
 
 
 

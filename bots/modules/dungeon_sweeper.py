@@ -109,7 +109,7 @@ class ds_game:
     emojis_menu = (UP, DOWN, UP2, DOWN2, LEFT, RIGHT, SELECT)
     
     __slots__ = ('cache', 'call', 'channel', 'client', 'data', 'last', 'message', 'position', 'position_ori', 'stage',
-        'task_flag', 'user', )
+        '_task_flag', 'user', )
     
     async def __new__(cls, client, event):
         self = object.__new__(cls)
@@ -118,7 +118,7 @@ class ds_game:
         self.channel = event.channel
         self.message = None
         self.stage = None
-        self.task_flag = GUI_STATE_READY
+        self._task_flag = GUI_STATE_READY
         self.call = type(self).call_menu
         self.cache = [None for _ in range(len(CHARS))]
         self.last = LOOP_TIME()
@@ -140,7 +140,7 @@ class ds_game:
         try:
             message = yield SlashResponse(embed=self.render_menu(), force_new_message=True)
         except BaseException as err:
-            self.task_flag = GUI_STATE_CANCELLED
+            self._task_flag = GUI_STATE_CANCELLED
             del DS_GAMES[self.user.id]
             
             if isinstance(err, ConnectionError):
@@ -171,7 +171,7 @@ class ds_game:
             for task in tasks:
                 task.cancel()
             
-            self.task_flag = GUI_STATE_CANCELLED
+            self._task_flag = GUI_STATE_CANCELLED
             del DS_GAMES[self.user.id]
             
             if isinstance(err, ConnectionError):
@@ -207,7 +207,8 @@ class ds_game:
             ', task_flag=',
         ]
         
-        task_flag = self.task_flag
+        task_flag = self._task_flag
+        
         result.append(repr(task_flag))
         result.append(' (')
         
@@ -219,7 +220,7 @@ class ds_game:
             'GUI_STATE_SWITCHING_CTX',
                 )[task_flag]
         
-        result.append(task_flag_name)
+        result.append(._task_flag_name)
         result.append(')')
         
         result.append(', call =')
@@ -230,7 +231,7 @@ class ds_game:
         
     async def start_menu(self):
         self.stage = None
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         
         client = self.client
         message = self.message
@@ -251,7 +252,7 @@ class ds_game:
             for task in tasks:
                 task.cancel()
             
-            self.task_flag = GUI_STATE_CANCELLING
+            self._task_flag = GUI_STATE_CANCELLING
             Task(self.cancel(), KOKORO)
             
             if isinstance(err, ConnectionError):
@@ -273,10 +274,10 @@ class ds_game:
         
         self.last = LOOP_TIME()
         self.call = type(self).call_menu
-        self.task_flag = GUI_STATE_READY
+        self._task_flag = GUI_STATE_READY
 
     async def start_game(self):
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         
         i1, rest = divmod(self.position, 33)
         if rest < 3:
@@ -314,7 +315,7 @@ class ds_game:
             for task in tasks:
                 task.cancel()
             
-            self.task_flag = GUI_STATE_CANCELLING
+            self._task_flag = GUI_STATE_CANCELLING
             Task(self.cancel(), KOKORO)
             
             if isinstance(err, ConnectionError):
@@ -337,11 +338,11 @@ class ds_game:
         self.last = LOOP_TIME()
         self.call = type(self).call_game
         
-        if self.task_flag != GUI_STATE_SWITCHING_CTX:
-            self.task_flag = GUI_STATE_READY
+        if self._task_flag != GUI_STATE_SWITCHING_CTX:
+            self._task_flag = GUI_STATE_READY
 
     async def start_done(self):
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         
         client=self.client
         
@@ -364,7 +365,7 @@ class ds_game:
             for task in tasks:
                 task.cancel()
             
-            self.task_flag = GUI_STATE_CANCELLING
+            self._task_flag = GUI_STATE_CANCELLING
             Task(self.cancel(), KOKORO)
             
             if isinstance(err, ConnectionError):
@@ -390,8 +391,8 @@ class ds_game:
         self.last = LOOP_TIME()
         self.call = type(self).call_done
         
-        if self.task_flag != GUI_STATE_SWITCHING_CTX:
-            self.task_flag = GUI_STATE_READY
+        if self._task_flag != GUI_STATE_SWITCHING_CTX:
+            self._task_flag = GUI_STATE_READY
     
     @staticmethod
     async def default_coro():
@@ -407,7 +408,7 @@ class ds_game:
         if (emoji not in self.emojis_menu):
             return
         
-        if self.task_flag!=GUI_STATE_READY:
+        if self._task_flag!=GUI_STATE_READY:
             Task(self.reaction_delete(emoji), KOKORO)
             return
         
@@ -501,14 +502,14 @@ class ds_game:
         
         self.position = new_position
         
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         
         client = self.client
         try:
             await client.message_edit(self.message, embed=self.render_menu())
         except BaseException as err:
             
-            self.task_flag = GUI_STATE_CANCELLING
+            self._task_flag = GUI_STATE_CANCELLING
             Task(self.cancel(), KOKORO)
             
             if isinstance(err, ConnectionError):
@@ -522,12 +523,12 @@ class ds_game:
                             ):
                     return
             
-            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
             await client.events.error(client, f'{self!r}.call_menu', err)
             return
         
-        if self.task_flag != GUI_STATE_SWITCHING_CTX:
-            self.task_flag = GUI_STATE_READY
+        if self._task_flag != GUI_STATE_SWITCHING_CTX:
+            self._task_flag = GUI_STATE_READY
     
     async def call_game(self, emoji):
         stage = self.stage
@@ -537,7 +538,7 @@ class ds_game:
         if (emoji not in self.emojis_game_p1) and (emoji is not stage.source.emoji) and (emoji not in self.emojis_game_p2):
             return
         
-        if self.task_flag!=GUI_STATE_READY:
+        if self._task_flag!=GUI_STATE_READY:
             Task(self.reaction_delete(emoji), KOKORO)
             return
         
@@ -587,13 +588,13 @@ class ds_game:
         
         Task(self.reaction_delete(emoji), KOKORO)
         
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         
         try:
             await self.client.message_edit(self.message, embed=self.render_game())
         except BaseException as err:
             
-            self.task_flag = GUI_STATE_CANCELLING
+            self._task_flag = GUI_STATE_CANCELLING
             Task(self.cancel(), KOKORO)
             
             if isinstance(err, ConnectionError):
@@ -607,14 +608,14 @@ class ds_game:
                             ):
                     return
             
-            # We definitedly do not want to silence `ERROR_CODES.invalid_form_body`
+            # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
             await client.events.error(client, f'{self!r}.call_game', err)
             return
         
-        self.last=LOOP_TIME()
+        self.last = LOOP_TIME()
         
-        if self.task_flag!=GUI_STATE_SWITCHING_CTX:
-            self.task_flag = GUI_STATE_READY
+        if self._task_flag != GUI_STATE_SWITCHING_CTX:
+            self._task_flag = GUI_STATE_READY
 
     async def call_done(self, emoji):
         if (emoji is not self.RESET) and (emoji is not self.CANCEL):
@@ -622,7 +623,7 @@ class ds_game:
         
         Task(self.reaction_delete(emoji), KOKORO)
         
-        if self.task_flag != GUI_STATE_READY:
+        if self._task_flag != GUI_STATE_READY:
             return 
         
         if emoji is self.RESET:
@@ -632,11 +633,11 @@ class ds_game:
             await self.start_menu()
         
     async def cancel(self):
-        if self.task_flag == GUI_STATE_CANCELLING:
+        if self._task_flag == GUI_STATE_CANCELLING:
             await self.save_position()
             return
         
-        self.task_flag = GUI_STATE_CANCELLED
+        self._task_flag = GUI_STATE_CANCELLED
         
         try:
             del DS_GAMES[self.user.id]
@@ -678,7 +679,7 @@ class ds_game:
                 i3 = rest
             else:
                 i2, i3 = divmod(rest+7, 10)
-                
+            
             difficulities = STAGES[i1]
             if difficulities:
                 levels = difficulities[i2]
@@ -709,10 +710,10 @@ class ds_game:
         self.position_ori = self.position
       
     async def renew(self, channel):
-        if self.task_flag in (GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX):
+        if self._task_flag in (GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX):
             return
         
-        self.task_flag = GUI_STATE_SWITCHING_CTX
+        self._task_flag = GUI_STATE_SWITCHING_CTX
         
         client = self.client
         
@@ -727,8 +728,8 @@ class ds_game:
             message = yield SlashResponse(embed=embed, force_new_message=True)
         except BaseException as err:
             
-            if self.task_flag == GUI_STATE_SWITCHING_CTX:
-                self.task_flag = GUI_STATE_READY
+            if self._task_flag == GUI_STATE_SWITCHING_CTX:
+                self._task_flag = GUI_STATE_READY
             
             if isinstance(err, ConnectionError):
                 # no internet
@@ -774,8 +775,8 @@ class ds_game:
             for task in tasks:
                 task.cancel()
             
-            if self.task_flag == GUI_STATE_SWITCHING_CTX:
-                self.task_flag = GUI_STATE_READY
+            if self._task_flag == GUI_STATE_SWITCHING_CTX:
+                self._task_flag = GUI_STATE_READY
             
             if isinstance(err, ConnectionError):
                 # no internet
@@ -822,8 +823,8 @@ class ds_game:
         
         self.last = LOOP_TIME()
         
-        if self.task_flag == GUI_STATE_SWITCHING_CTX:
-            self.task_flag = GUI_STATE_READY
+        if self._task_flag == GUI_STATE_SWITCHING_CTX:
+            self._task_flag = GUI_STATE_READY
         
     def render_done(self):
         stage = self.stage

@@ -17,13 +17,14 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper
-from hata.ext.commands import setup_ext_commands, checks, Pagination, wait_for_reaction
+from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
+from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination
 
 from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, COLOR__MARISA_HELP, \
     command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
@@ -669,3 +670,38 @@ async def roll(client, event,
         value += randint(1, 6)
     
     return str(value)
+
+
+@UserMenuFactory
+class ZerefPagination(UserPagination):
+    cake = BUILTIN_EMOJIS['cake']
+    emojis = (*UserPagination.emojis[:-1], cake, *UserPagination.emojis[-1:])
+    
+    __slots__ = ('user',)
+    
+    def __init__(self, menu, pages, user):
+        UserPagination.__init__(self, menu, pages)
+        self.user = user
+    
+    def check(self, event):
+        return (self.user is event.user)
+    
+    async def invoke(self, event):
+        if event.emoji is self.cake:
+            menu = self.menu
+            await menu.client.message_create(menu.channel, menu.message.content)
+            return None
+        
+        return await UserPagination.invoke(self, event)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def zeref_pagination(client, event):
+    """Zeref's cake paginator."""
+    await ZerefPagination(client, event, ['hi', 'hello'], event.user)
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def some_embed(client, event):
+    """Some embed for testing."""
+    await client.interaction_response_message_create(event)
+    await client.interaction_followup_message_create(event, embed=Embed('cake'))

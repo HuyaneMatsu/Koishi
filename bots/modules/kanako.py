@@ -880,7 +880,7 @@ class KanakoPagination:
     RESET   = BUILTIN_EMOJIS['arrows_counterclockwise']
     EMOJIS  = (LEFT2, LEFT, RIGHT, RIGHT2, RESET)
     
-    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', 'task_flag', 'timeouter')
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', '_task_flag', '_timeouter')
     
     async def __new__(cls, client, event_or_channel, pages):
         if isinstance(event_or_channel, InteractionEvent):
@@ -896,8 +896,8 @@ class KanakoPagination:
         self.pages = pages
         self.page = 0
         self.canceller = cls._canceller
-        self.task_flag = GUI_STATE_READY
-        self.timeouter = None
+        self._task_flag = GUI_STATE_READY
+        self._timeouter = None
         self.message = None
         
         
@@ -922,7 +922,7 @@ class KanakoPagination:
         
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
-        self.timeouter = Timeouter(self, timeout=150)
+        self._timeouter = Timeouter(self, timeout=150)
         return self
     
     async def __call__(self, client, event):
@@ -934,7 +934,7 @@ class KanakoPagination:
         if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
             return
         
-        task_flag = self.task_flag
+        task_flag = self._task_flag
         if task_flag != GUI_STATE_READY:
             # ignore GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
             return
@@ -972,11 +972,11 @@ class KanakoPagination:
             return
 
         self.page = page
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(message, embed=self.pages[page])
         except BaseException as err:
-            self.task_flag = GUI_STATE_CANCELLED
+            self._task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
             if isinstance(err, ConnectionError):
@@ -994,9 +994,9 @@ class KanakoPagination:
             await client.events.error(client, f'{self!r}.__call__', err)
             return
         
-        self.task_flag=GUI_STATE_READY
+        self._task_flag=GUI_STATE_READY
         
-        self.timeouter.set_timeout(10)
+        self._timeouter.set_timeout(10)
     
     async def _canceller(self, exception):
         client = self.client
@@ -1005,11 +1005,11 @@ class KanakoPagination:
         client.events.reaction_add.remove(message, self)
         client.events.reaction_delete.remove(message, self)
         
-        if self.task_flag == GUI_STATE_SWITCHING_CTX:
+        if self._task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
 
-        self.task_flag = GUI_STATE_CANCELLED
+        self._task_flag = GUI_STATE_CANCELLED
         
         if exception is None:
             return
@@ -1036,9 +1036,9 @@ class KanakoPagination:
                     return
             return
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if timeouter is not None:
-            self.timeouter = None
+            self._timeouter = None
             timeouter.cancel()
         #we do nothing
     
@@ -1049,9 +1049,9 @@ class KanakoPagination:
         
         self.canceller = None
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if timeouter is not None:
-            self.timeouter = None
+            self._timeouter = None
             timeouter.cancel()
         
         return Task(canceller(self, None), KOKORO)

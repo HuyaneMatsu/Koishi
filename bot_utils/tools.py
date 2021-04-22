@@ -170,7 +170,7 @@ class PAGINATION_5PN:
     CANCEL = BUILTIN_EMOJIS['x']
     EMOJIS = (LEFT2, LEFT, RIGHT, RIGHT2, RESET, CANCEL)
     
-    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', 'task_flag', 'timeouter')
+    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', '_task_flag', '_timeouter')
     
     async def __new__(cls, client, channel, pages):
         if isinstance(channel, InteractionEvent):
@@ -186,8 +186,8 @@ class PAGINATION_5PN:
         self.pages = pages
         self.page = 0
         self.canceller = cls._canceller
-        self.task_flag = GUI_STATE_READY
-        self.timeouter = None
+        self._task_flag = GUI_STATE_READY
+        self._timeouter = None
         
         try:
             if received_interaction:
@@ -245,7 +245,7 @@ class PAGINATION_5PN:
             
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
-        self.timeouter = Timeouter(self, timeout=300.)
+        self._timeouter = Timeouter(self, timeout=300.)
         return self
     
     async def __call__(self, client, event):
@@ -256,11 +256,11 @@ class PAGINATION_5PN:
             return
         
         emoji = event.emoji
-        task_flag = self.task_flag
+        task_flag = self._task_flag
         if task_flag != GUI_STATE_READY:
             if task_flag == GUI_STATE_SWITCHING_PAGE:
                 if emoji is self.CANCEL:
-                    self.task_flag = GUI_STATE_CANCELLING
+                    self._task_flag = GUI_STATE_CANCELLING
                 return
             
             # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
@@ -280,7 +280,7 @@ class PAGINATION_5PN:
                 break
                 
             if emoji is self.CANCEL:
-                self.task_flag = GUI_STATE_CANCELLED
+                self._task_flag = GUI_STATE_CANCELLED
                 try:
                     await client.message_delete(self.message)
                 except BaseException as err:
@@ -323,11 +323,11 @@ class PAGINATION_5PN:
             return
         
         self.page = page
-        self.task_flag=GUI_STATE_SWITCHING_PAGE
+        self._task_flag=GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(self.message, embed=self.pages[page])
         except BaseException as err:
-            self.task_flag = GUI_STATE_CANCELLED
+            self._task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
             if isinstance(err, ConnectionError):
@@ -346,8 +346,8 @@ class PAGINATION_5PN:
             await client.events.error(client, f'{self!r}.__call__',err)
             return
         
-        if self.task_flag == GUI_STATE_CANCELLING:
-            self.task_flag = GUI_STATE_CANCELLED
+        if self._task_flag == GUI_STATE_CANCELLING:
+            self._task_flag = GUI_STATE_CANCELLED
             try:
                 await client.message_delete(self.message)
             except BaseException as err:
@@ -365,9 +365,9 @@ class PAGINATION_5PN:
             
             return
         
-        self.task_flag = GUI_STATE_READY
+        self._task_flag = GUI_STATE_READY
         
-        self.timeouter.set_timeout(150.0)
+        self._timeouter.set_timeout(150.0)
         
     @staticmethod
     async def _canceller(self,exception,):
@@ -377,11 +377,11 @@ class PAGINATION_5PN:
         client.events.reaction_add.remove(message, self)
         client.events.reaction_delete.remove(message, self)
 
-        if self.task_flag == GUI_STATE_SWITCHING_CTX:
+        if self._task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
         
-        self.task_flag = GUI_STATE_CANCELLED
+        self._task_flag = GUI_STATE_CANCELLED
         
         if exception is None:
             return
@@ -409,7 +409,7 @@ class PAGINATION_5PN:
                     return
             return
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.cancel()
         #we do nothing
@@ -421,7 +421,7 @@ class PAGINATION_5PN:
         
         self.canceller = None
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.cancel()
         

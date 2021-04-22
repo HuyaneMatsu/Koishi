@@ -145,8 +145,8 @@ class ShuffledShelter:
     BACK   = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
     EMOJIS = (CYCLE, BACK)
     
-    __slots__ = ('canceller', 'channel', 'client', 'history', 'history_step', 'message', 'pop', 'task_flag',
-        'timeouter', 'title', 'urls')
+    __slots__ = ('canceller', 'channel', 'client', 'history', 'history_step', 'message', 'pop', '_task_flag',
+        '_timeouter', 'title', 'urls')
     
     async def __new__(cls, client, event, urls, pop, title=DEFAULT_TITLE):
         if not urls:
@@ -157,11 +157,11 @@ class ShuffledShelter:
         self.client = client
         self.channel = event.channel
         self.canceller = cls._canceller
-        self.task_flag = GUI_STATE_READY
+        self._task_flag = GUI_STATE_READY
         self.urls = urls
         self.pop = pop
         self.title = title
-        self.timeouter = None
+        self._timeouter = None
         history = deque(maxlen=100)
         self.history = history
         self.history_step = 1
@@ -181,7 +181,7 @@ class ShuffledShelter:
         for emoji in self.EMOJIS:
             await client.reaction_add(message, emoji)
         
-        self.timeouter = Timeouter(self, timeout=300.)
+        self._timeouter = Timeouter(self, timeout=300.)
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
         
@@ -197,7 +197,7 @@ class ShuffledShelter:
         if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
             return
         
-        if self.task_flag:
+        if self._task_flag:
             return
         
         while True:
@@ -229,11 +229,11 @@ class ShuffledShelter:
         
         embed = Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
         
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         try:
             await client.message_edit(self.message, embed=embed)
         except BaseException as err:
-            self.task_flag = GUI_STATE_CANCELLED
+            self._task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
             if isinstance(err, ConnectionError):
@@ -252,13 +252,13 @@ class ShuffledShelter:
             return
             
         if not self.urls:
-            self.task_flag = GUI_STATE_CANCELLED
+            self._task_flag = GUI_STATE_CANCELLED
             self.cancel()
             return
         
-        self.task_flag = GUI_STATE_READY
+        self._task_flag = GUI_STATE_READY
         
-        self.timeouter.set_timeout(300.0)
+        self._timeouter.set_timeout(300.0)
 
     async def _canceller(self, exception):
         client = self.client
@@ -267,11 +267,11 @@ class ShuffledShelter:
         client.events.reaction_add.remove(message, self)
         client.events.reaction_delete.remove(message, self)
         
-        if self.task_flag == GUI_STATE_SWITCHING_CTX:
+        if self._task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
         
-        self.task_flag = GUI_STATE_CANCELLED
+        self._task_flag = GUI_STATE_CANCELLED
         
         if exception is None:
             return
@@ -298,7 +298,7 @@ class ShuffledShelter:
                     return
             return
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if timeouter is not None:
             timeouter.cancel()
         #we do nothing
@@ -310,7 +310,7 @@ class ShuffledShelter:
         
         self.canceller = None
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if timeouter is not None:
             timeouter.cancel()
         

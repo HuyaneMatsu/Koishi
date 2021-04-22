@@ -280,7 +280,7 @@ async def invites_(client, event,
     else:
         check = check_channel_invites_pagination_permissions
     
-    await Pagination(client, event, pages, 120., check=check)
+    await Pagination(client, event, pages, timeout=120., check=check)
 
 
 

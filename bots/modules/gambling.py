@@ -1163,7 +1163,7 @@ GAME_21_TIMEOUT = 300.0
 GAME_21_CANCELLATION_TIMEOUT = 5.0
 
 class Game21PlayerRunner:
-    __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', 'timeouter', 'canceller', 'task_flag',
+    __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', '_timeouter', 'canceller', '_task_flag',
         'render_after', )
     
     async def __new__(cls, client, base, user, channel, amount, render_after, event=None):
@@ -1212,13 +1212,13 @@ class Game21PlayerRunner:
         self.render_after = render_after
         
         if message is None:
-            self.timeouter = None
+            self._timeouter = None
             self.canceller = None
-            self.task_flag = GUI_STATE_SWITCHING_CTX
+            self._task_flag = GUI_STATE_SWITCHING_CTX
         else:
-            self.timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
+            self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
             self.canceller = cls._canceller
-            self.task_flag = GUI_STATE_READY
+            self._task_flag = GUI_STATE_READY
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
         
@@ -1232,11 +1232,11 @@ class Game21PlayerRunner:
             return
         
         emoji = event.emoji
-        task_flag = self.task_flag
+        task_flag = self._task_flag
         if task_flag != GUI_STATE_READY:
             if task_flag == GUI_STATE_SWITCHING_PAGE:
                 if emoji is GAME_21_STEP_STOP:
-                    self.task_flag = GUI_STATE_CANCELLING
+                    self._task_flag = GUI_STATE_CANCELLING
                 return
             
             # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
@@ -1255,7 +1255,7 @@ class Game21PlayerRunner:
             return
         
         if game_ended:
-            self.task_flag = GUI_STATE_SWITCHING_CTX
+            self._task_flag = GUI_STATE_SWITCHING_CTX
             self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
             
             if self.render_after:
@@ -1264,14 +1264,14 @@ class Game21PlayerRunner:
             self.cancel()
             return
         
-        self.task_flag = GUI_STATE_SWITCHING_PAGE
+        self._task_flag = GUI_STATE_SWITCHING_PAGE
         
         embed = self.player.create_gamble_embed(self.amount)
         
         try:
             await client.message_edit(self.message, embed)
         except BaseException as err:
-            self.task_flag = GUI_STATE_CANCELLED
+            self._task_flag = GUI_STATE_CANCELLED
             self.cancel()
             
             if should_render_exception(err):
@@ -1279,13 +1279,13 @@ class Game21PlayerRunner:
             
             self.waiter.set_result_if_pending(GAME_21_RESULT_IN_GAME_ERROR)
         
-        if self.task_flag == GUI_STATE_CANCELLING:
-            self.task_flag = GUI_STATE_CANCELLED
+        if self._task_flag == GUI_STATE_CANCELLING:
+            self._task_flag = GUI_STATE_CANCELLED
             self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
             self.cancel()
         else:
-            self.task_flag = GUI_STATE_READY
-            self.timeouter.set_timeout(GAME_21_TIMEOUT)
+            self._task_flag = GUI_STATE_READY
+            self._timeouter.set_timeout(GAME_21_TIMEOUT)
     
     async def _canceller(self, exception):
         client = self.client
@@ -1294,11 +1294,11 @@ class Game21PlayerRunner:
         client.events.reaction_add.remove(message, self)
         client.events.reaction_delete.remove(message, self)
         
-        if self.task_flag == GUI_STATE_SWITCHING_CTX:
+        if self._task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
         
-        self.task_flag = GUI_STATE_CANCELLED
+        self._task_flag = GUI_STATE_CANCELLED
         
         if exception is None:
             if self.render_after:
@@ -1319,7 +1319,7 @@ class Game21PlayerRunner:
             return
         
         self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.cancel()
         
@@ -1332,7 +1332,7 @@ class Game21PlayerRunner:
         
         self.canceller = None
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.cancel()
         
@@ -1678,7 +1678,7 @@ GAME_21_MP_MAX_USERS = 10
 GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'
 
 class Game21JoinGUI:
-    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_pairs', 'timeouter', 'task_flag',
+    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_pairs', 'timeouter', '_task_flag',
         'canceller', 'user_locks', 'joined_user_ids', 'workers', 'guild', 'message_sync_last_state',
         'message_sync_in_progress', 'message_sync_handle')
     
@@ -1721,13 +1721,13 @@ class Game21JoinGUI:
         self.message_sync_handle = None
         
         if message is None:
-            self.timeouter = None
+            self._timeouter = None
             self.canceller = None
-            self.task_flag = GUI_STATE_SWITCHING_CTX
+            self._task_flag = GUI_STATE_SWITCHING_CTX
         else:
-            self.timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
+            self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
             self.canceller = cls._canceller
-            self.task_flag = GUI_STATE_READY
+            self._task_flag = GUI_STATE_READY
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
         
@@ -1746,10 +1746,10 @@ class Game21JoinGUI:
             if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
                 return
         
-        task_flag = self.task_flag
+        task_flag = self._task_flag
         if task_flag != GUI_STATE_READY:
             if emoji is GAME_21_JOIN_CANCEL:
-                self.task_flag = GUI_STATE_CANCELLING
+                self._task_flag = GUI_STATE_CANCELLING
             return
             
             # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
@@ -1812,7 +1812,7 @@ class Game21JoinGUI:
             return
         
         if emoji is GAME_21_JOIN_START:
-            self.task_flag = GUI_STATE_SWITCHING_CTX
+            self._task_flag = GUI_STATE_SWITCHING_CTX
             
             # Wait for all worker to finish
             await self._wait_for_cancellation()
@@ -1822,7 +1822,7 @@ class Game21JoinGUI:
             return
         
         if emoji is GAME_21_JOIN_CANCEL:
-            self.task_flag = GUI_STATE_CANCELLING
+            self._task_flag = GUI_STATE_CANCELLING
             
             # Wait for all workers to finish
             await self._wait_for_cancellation()
@@ -1843,11 +1843,11 @@ class Game21JoinGUI:
             self.message_sync_handle = None
             message_sync_handle.cancel()
         
-        if self.task_flag == GUI_STATE_SWITCHING_CTX:
+        if self._task_flag == GUI_STATE_SWITCHING_CTX:
             # the message is not our, we should not do anything with it.
             return
         
-        self.task_flag = GUI_STATE_CANCELLED
+        self._task_flag = GUI_STATE_CANCELLED
         
         if exception is None:
             return
@@ -1867,7 +1867,7 @@ class Game21JoinGUI:
             return
         
         self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.cancel()
         
@@ -1878,7 +1878,7 @@ class Game21JoinGUI:
         
         self.canceller = None
         
-        timeouter = self.timeouter
+        timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.cancel()
         
@@ -1905,7 +1905,7 @@ class Game21JoinGUI:
     async def do_message_sync(self):
         self.message_sync_handle = None
         
-        if (self.task_flag != GUI_STATE_READY) or (self.joined_pairs == self.message_sync_last_state):
+        if (self._task_flag != GUI_STATE_READY) or (self.joined_pairs == self.message_sync_last_state):
             self.message_sync_in_progress = False
             return
         
@@ -1926,7 +1926,7 @@ class Game21JoinGUI:
         finally:
             self.workers.discard(task)
         
-        if (self.task_flag != GUI_STATE_READY) or (self.joined_pairs == self.message_sync_last_state):
+        if (self._task_flag != GUI_STATE_READY) or (self.joined_pairs == self.message_sync_last_state):
             self.message_sync_in_progress = False
             return
         

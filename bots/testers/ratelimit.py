@@ -1458,6 +1458,11 @@ async def webhook_message_delete(client, webhook, message):
         f'{webhook.url}/messages/{message.id}',
         headers={},)
 
+async def webhook_message_get(client, webhook, message_id):
+    return await bypass_request(client, METHOD_GET,
+        f'{webhook.url}/messages/{message_id}',
+        headers={},)
+
 async def guild_user_get_chunk(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
@@ -1853,6 +1858,14 @@ async def interaction_response_message_delete(client, interaction):
     interaction_token = interaction.token
     
     await bypass_request(client, METHOD_DELETE,
+        f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/@original',
+            )
+
+async def interaction_response_message_get(client, interaction):
+    application_id = client.application.id
+    interaction_token = interaction.token
+    
+    await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/@original',
             )
 
@@ -4889,3 +4902,67 @@ async def rate_limit_test0126(client, message, stage_channel:'channel'=None):
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await stage_delete(client, stage_channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0127(client, message):
+    """
+    Creates a message with a webhook, then gets it. Ayyy.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0127') as RLT:
+        guild = message.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_manage_webhooks:
+            await RLT.send('I need manage webhooks permission to complete this command.')
+        
+        channel = message.channel
+        webhooks = await client.webhook_get_all_channel(channel)
+        for webhook in webhooks:
+            if webhook.type is WebhookType.bot:
+                executor_webhook = webhook
+                break
+        
+        else:
+            executor_webhook = await client.webhook_create(channel, 'testing')
+        
+        new_message = await webhook_execute(client, executor_webhook, 'ayaya')
+        await webhook_message_get(client, executor_webhook, new_message.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0128(client, message):
+    """
+    Adds a new interaction command to the guild, what u should use, then creates and gets the message.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0128') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        application_command_schema = ApplicationCommand(
+            'test_command',
+            'ayaya',
+        )
+        
+        # Command
+        application_command = await client.application_command_guild_create(guild, application_command_schema)
+        
+        await client.message_create(channel, 'Please use `/test_command`')
+        
+        # Wait
+        try:
+            interaction = await client.wait_for('interaction_create',
+                check_interacter(channel, message.author, application_command), timeout=300.0)
+        except TimeoutError:
+            await RLT.send('timeout occurred.')
+        else:
+            await client.interaction_response_message_create(interaction, 'Ayaya')
+            await interaction_response_message_edit(client, interaction, 'Nayaya?')
+            await interaction_response_message_get(client, interaction)
+        finally:
+            await client.application_command_guild_delete(guild, application_command)
+
