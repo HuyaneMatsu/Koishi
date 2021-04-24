@@ -186,7 +186,23 @@ class dispatch_tester:
                             result.append(f'- {name}')
                         
                     continue
-
+                
+                # for the new stuff
+                
+                result.append(f'{key} changed:')
+                if value is None:
+                    result.append('From None')
+                else:
+                    result.extend(repr(value))
+                
+                value = getattr(message, key)
+                if value is None:
+                    result.append('To None')
+                else:
+                    result.extend(repr(value))
+                
+                continue
+                
         text = cchunkify(result)
         pages = [Embed(description=chunk) for chunk in text]
         await Pagination(client, self.channel, pages, timeout=120.)

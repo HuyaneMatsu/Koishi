@@ -1042,7 +1042,7 @@ class KanakoPagination:
             timeouter.cancel()
         #we do nothing
     
-    def cancel(self):
+    def cancel(self, exception=None):
         canceller = self.canceller
         if canceller is None:
             return
@@ -1054,7 +1054,7 @@ class KanakoPagination:
             self._timeouter = None
             timeouter.cancel()
         
-        return Task(canceller(self, None), KOKORO)
+        return Task(canceller(self, exception), KOKORO)
 
 
 del BUILTIN_EMOJIS

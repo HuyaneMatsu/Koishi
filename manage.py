@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, sys
-os.environ['HATA_API_VERSION'] = '8'
+os.environ['HATA_API_VERSION'] = '9'
 
 # Load config
 config_path = os.path.split(__file__)[0]

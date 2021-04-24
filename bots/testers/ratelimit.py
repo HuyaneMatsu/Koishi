@@ -13,7 +13,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
     ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, StagePrivacyLevel, ChannelStage, \
-    ERROR_CODES
+    ERROR_CODES, ComponentType
 
 from hata.backend.utils import change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -2096,6 +2096,103 @@ async def stage_delete(client, channel):
         f'{API_ENDPOINT}/stage-instances/{channel_id}',
         )
 
+async def thread_create(client, channel, type_, name):
+    channel_id = channel.id
+    data = {
+        'name': name,
+        'type': type_,
+    }
+    await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/channels/{channel_id}/threads',
+        data,
+        )
+
+async def thread_join(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
+        )
+
+async def application_button_create(client, data):
+    application_id = client.application.id
+
+    return await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/applications/{application_id}/message-components',
+        data,
+        )
+
+async def thread_leave(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_DELETE,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
+        )
+
+async def thread_get_self(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
+        )
+
+
+async def thread_user_get(client, channel, user):
+    channel_id = channel.id
+    user_id = user.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
+        )
+
+async def thread_user_add(client, channel, user):
+    channel_id = channel.id
+    user_id = user.id
+    
+    await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
+        )
+
+async def thread_user_delete(client, channel, user):
+    channel_id = channel.id
+    user_id = user.id
+    
+    await bypass_request(client, METHOD_DELETE,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
+        )
+
+async def thread_settings_edit(client, channel, data):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me/settings',
+        data,
+        )
+
+async def thread_get_all_archived(client, channel, public):
+    channel_id = channel.id
+    
+    if public:
+        thread_type = 'public'
+    else:
+        thread_type = 'private'
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/{thread_type}'
+        )
+
+async def thread_get_all_self_archived(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/users/@me/threads/archived/private'
+        )
+
+async def servers_get(client):
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/servers'
+        )
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0000(client, message):
@@ -2341,7 +2438,7 @@ async def rate_limit_test0009(client,message):
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
     
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0010(client,message):
+async def rate_limit_test0010(client, message):
     """
     Updates an achievement of the client's owner. But now one, what has `secure=False`
     """
@@ -4965,4 +5062,193 @@ async def rate_limit_test0128(client, message):
             await interaction_response_message_get(client, interaction)
         finally:
             await client.application_command_guild_delete(guild, application_command)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0129(client, message):
+    """
+    Creates a thread channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0129') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_create(client, channel, 9, 'ayaya')
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0130(client, message):
+    """
+    Joins thread??
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0130') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_join(client, channel)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0131(client, message):
+    """
+    hata superiority test.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0131') as RLT:
+        await application_button_create(client, {'type': ComponentType.button.value})
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0132(client, message):
+    """
+    Leaves from a guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0132') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_leave(client, channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0133(client, message):
+    """
+    Leaves from a guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0133') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_get_self(client, channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0134(client, message):
+    """
+    Gets at thread's user.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0134') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_user_get(client, channel, message.author)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0135(client, message):
+    """
+    Adds a user to a thread.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0135') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_user_add(client, channel, message.author)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0136(client, message):
+    """
+    Deletes a thread's user.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0136') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_user_delete(client, channel, message.author)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0137(client, message):
+    """
+    Edits thread settings.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0137') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_settings_edit(client, channel, {'type': 11})
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0137(client, message):
+    """
+    Gets the threads.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0137') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_get_all_archived(client, channel, True)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0138(client, message):
+    """
+    Gets the threads from my archive?
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0138') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_get_all_self_archived(client, channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0139(client, message):
+    """
+    Gets the guilds?
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0139') as RLT:
+        await servers_get(client)
+
+
 
