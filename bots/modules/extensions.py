@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS
-from hata import chunkify, Embed, Client
+from hata import chunkify, Embed, Client, CLIENTS
 from hata.ext.commands import checks, Pagination
 
 COMMAND_CLIENT : Client
@@ -131,3 +131,27 @@ async def unload(client, message, name:str=None):
         return result
         
     return 'Extension successfully unloaded.'
+
+
+@COMMAND_CLIENT.commands(category='EXTENSIONS')
+async def debug_extensions(client, message):
+    """
+    Lists extensions / client.
+    """
+    result_parts = []
+    
+    for client in CLIENTS.values():
+        result_parts.append(client.mention)
+        result_parts.append(' :')
+        result_parts.append('\n')
+        extensions = client.extensions
+        for extension in extensions:
+            result_parts.append('`')
+            result_parts.append(extension.name)
+            result_parts.append('`')
+            result_parts.append('\n')
+        result_parts.append('\n')
+    
+    del result_parts[-2:]
+    
+    return ''.join(result_parts)

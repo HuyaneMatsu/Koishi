@@ -21,10 +21,8 @@ if MARISA_MODE:
     
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
-    EXTENSION_LOADER.add('bots.testers.test_commands', MAIN_CLIENT=Marisa)
-    EXTENSION_LOADER.add('bots.testers.ratelimit', MAIN_CLIENT=Marisa)
-    EXTENSION_LOADER.add('bots.testers.dispatch_tests', MAIN_CLIENT=Marisa)
-    
+    EXTENSION_LOADER.add('bots.testers', MAIN_CLIENT=Marisa)
+
 else:
     Koishi = Client(config.KOISHI_TOKEN,
         secret = config.KOISHI_SECRET,

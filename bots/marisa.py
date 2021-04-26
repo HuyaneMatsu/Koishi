@@ -21,7 +21,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
-    Button, Row, iter_component_interaction
+    Button, Row, iter_component_interactions
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
@@ -809,7 +809,7 @@ async def we_gucci(client, event):
     yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component)
     
     try:
-        async for component_interaction in iter_component_interaction(event, timeout=30.0, count=3):
+        async for component_interaction in iter_component_interactions(event, timeout=30.0, count=3):
             emoji = BUILTIN_EMOJIS[component_interaction.interaction.custom_id]
             await client.message_create(event.channel, emoji.as_emoji)
     except TimeoutError:

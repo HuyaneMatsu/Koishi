@@ -29,9 +29,12 @@ MEM_MAX = 52428800
 MAX_TIMEOUT = 13
 
 NSJAIL_EXECUTABLE = os.getenv('NSJAIL_PATH', '/usr/sbin/nsjail')
-NSJAIL_CONFIG = os.getenv('NSJAIL_CFG', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail.cfg'))
+NSJAIL_CONFIG_3_8 = os.getenv('NSJAIL_CFG_3_8', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_Cpython_3_8.cfg'))
+NSJAIL_CONFIG_3_10 = os.getenv('NSJAIL_CFG_3_10', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_Cpython_3_10.cfg'))
 
-PATH__PYTHON_EXECUTABLE = '/usr/bin/python3.8'
+PATH__PYTHON_EXECUTABLE_3_8 = '/usr/bin/python3.8'
+PATH__PYTHON_EXECUTABLE_3_10 = '/usr/bin/python3.10'
+
 PATH__SNEKBOX = Path('/snekbox')
 
 IS_UNIX = (sys.platform != 'win32')
@@ -201,8 +204,7 @@ if IS_UNIX:
                 ), color=SNEKBOX_COLOR).add_footer(
                 f'{GUILD__NEKO_DUNGEON} only!')
     
-    @COMMAND_CLIENT.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
-    async def eval_(client, message, content):
+    async def snake_box(client, message, content, executable, config):
         code, is_exception = parse_code_content(content)
         if is_exception and (code is None):
             await eval_description(client, message)
@@ -221,14 +223,14 @@ if IS_UNIX:
         with client.keep_typing(message.channel), EvalUserLock(user_id) as user_lock:
             async with EVAL_LOCK:
                 process = await KOKORO.subprocess_exec(NSJAIL_EXECUTABLE,
-                        '--config', NSJAIL_CONFIG,
+                        '--config', config,
                         f'--cgroup_mem_max={MEM_MAX}',
                         '--cgroup_mem_mount', str(CGROUP_MEMORY_PARENT.parent),
                         '--cgroup_mem_parent', CGROUP_MEMORY_PARENT.name,
                         '--cgroup_pids_max=1',
                         '--cgroup_pids_mount', str(CGROUP_PIDS_PARENT.parent),
                         '--cgroup_pids_parent', CGROUP_PIDS_PARENT.name,
-                        '--', PATH__PYTHON_EXECUTABLE, '-Iqu', '-c', code,
+                        '--', executable, '-Iqu', '-c', code,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                         )
@@ -256,3 +258,11 @@ if IS_UNIX:
         author = message.author
         embed = Embed(title, description, color=SNEKBOX_COLOR).add_author(author.avatar_url, author.full_name)
         await Closer(client, message.channel, embed, check=partial_func(check_reactor, author))
+    
+    @COMMAND_CLIENT.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
+    async def eval_3_8(client, message, content):
+        await snake_box(client, message, content, PATH__PYTHON_EXECUTABLE_3_8, NSJAIL_CONFIG_3_8)
+
+    @COMMAND_CLIENT.commands(name='eval_3.10', aliases='e10', description=eval_description, category='SNEKBOX')
+    async def eval_3_10(client, message, content):
+        await snake_box(client, message, content, PATH__PYTHON_EXECUTABLE_3_10, NSJAIL_CONFIG_3_10)
