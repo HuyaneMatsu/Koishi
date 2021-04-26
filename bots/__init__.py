@@ -14,7 +14,7 @@ EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 if MARISA_MODE:
     Marisa = Client(config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
-        application_id = config.MARISA_ID,
+        #application_id = config.MARISA_ID,
             )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)

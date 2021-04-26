@@ -17,10 +17,11 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
-    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED, ButtonStyle
+    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED, ButtonStyle, Component
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction
+from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
+    Button, Row, iter_component_interaction
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
@@ -768,50 +769,50 @@ async def cat_feeder(client, event):
     return await CatFeeder(client, event)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def dunno_what_iam_doing(client, event):
-    """Feed the cat!"""
-    data = {
-        'type': InteractionResponseTypes.message_and_source,
-        'data': {
-            'content': 'Getting there boiz',
-            'components': [
-                {
-                    'type': ComponentType.action_row.value,
-                    'components': [
-                        {
-                            'type': ComponentType.button.value,
-                            'emoji': {
-                                'name': 'YukariSmug',
-                                'id': 701404390925271110,
-                            },
-                            'style': ButtonStyle.primary.value,
-                            'custom_id': 1,
-                        },
-                        {
-                            'url': 'https://www.youtube.com/watch?v=KGNU6yG3L_A&t=368s&ab_channel=Runixzan',
-                            'type': ComponentType.button.value,
-                            'emoji': {
-                                'name': 'YukariSmug',
-                                'id': 701404390925271110,
-                            },
-                            'style': ButtonStyle.link.value,
-                        },
-                    ]
-                },
-            ],
-        }
-    }
-    
-    await client.http.interaction_response_message_create(event.id, event.token, data)
-    event._response_state = INTERACTION_EVENT_RESPONSE_STATE_RESPONDED
-    
-    
-    while True:
-        try:
-            component_interaction = await wait_for_component_interaction(event, timeout=4500.0)
-        except TimeoutError:
-            return
-        
-        await client.message_create(event.channel, f'smuggers {component_interaction.user}')
+def check_user(user, event):
+    return user is event.user
 
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def getting_good(client, event):
+    """Getting there."""
+    main_component = Row(
+        Button('cake', custom_id='cake', style=ButtonStyle.primary),
+        Button('cat', custom_id='cat', style=ButtonStyle.secondary),
+        Button('snake', custom_id='snake', style=ButtonStyle.success),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive, enabled=False),
+    )
+    
+    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component)
+    
+    try:
+        component_interaction = await wait_for_component_interaction(event,
+            timeout=4500., check=partial_func(check_user, event.user))
+    except TimeoutError:
+        await client.message_edit(event.message, components=None)
+    else:
+        emoji = BUILTIN_EMOJIS[component_interaction.interaction.custom_id]
+        await client.message_edit(event.message, emoji.as_emoji, embed=None, components=None)
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def we_gucci(client, event):
+    """Getting there."""
+    main_component = Row(
+        Button('cake', custom_id='cake', style=ButtonStyle.primary),
+        Button('cat', custom_id='cat', style=ButtonStyle.secondary),
+        Button('snake', custom_id='snake', style=ButtonStyle.success),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
+    )
+    
+    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component)
+    
+    try:
+        async for component_interaction in iter_component_interaction(event, timeout=30.0, count=3):
+            emoji = BUILTIN_EMOJIS[component_interaction.interaction.custom_id]
+            await client.message_create(event.channel, emoji.as_emoji)
+    except TimeoutError:
+        pass
+    
+    await client.message_edit(event.message, components=None)

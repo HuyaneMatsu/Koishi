@@ -93,7 +93,7 @@ PATTERN_ROLE_RELATION = [
     (re.compile('[il] *meow+', re.I), ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, None, True, False),
     (re.compile('[il] *not? *meow+', re.I), ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, None, False, False),
     (re.compile('nekogirl', re.I), ROLE__NEKO_DUNGEON__ELEVATED, timedelta(days=183), True, True),
-    (re.compile('(?:i(?: *\'? *am|mma)?|me)? *horny *(?:desu)?', re.I), ROLE__NEKO_DUNGEON__NSFW_ACCESS, None, True, True),
+    (re.compile('(?:i(?: *\'? *a?m|mma)?|me)? *horny *(?:desu)?', re.I), ROLE__NEKO_DUNGEON__NSFW_ACCESS, None, True, True),
     (re.compile('no *sex', re.I), ROLE__NEKO_DUNGEON__NSFW_ACCESS, None, False, True),
         ]
 
