@@ -1678,7 +1678,7 @@ GAME_21_MP_MAX_USERS = 10
 GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'
 
 class Game21JoinGUI:
-    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_pairs', 'timeouter', '_task_flag',
+    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_pairs', '_timeouter', '_task_flag',
         'canceller', 'user_locks', 'joined_user_ids', 'workers', 'guild', 'message_sync_last_state',
         'message_sync_in_progress', 'message_sync_handle')
     

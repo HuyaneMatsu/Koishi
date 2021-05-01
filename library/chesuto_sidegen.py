@@ -32,7 +32,7 @@ class methodsimulator:
     def __init__(self,klass):
         self.klass=klass
         
-    def __get__(self,obj,objtype=None):
+    def __get__(self,obj,objtype):
         if obj is None:
             return self.klass
         return ms_cache(self,obj)

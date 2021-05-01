@@ -816,3 +816,12 @@ async def we_gucci(client, event):
         pass
     
     await client.message_edit(event.message, components=None)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def slash_edit(client, event):
+    """Editing slashes, bakana!"""
+    yield SlashResponse(embed=Embed('Choose your poison.'))
+    await sleep(2.0, KOKORO)
+    yield SlashResponse(embed=Embed('Choose your cake.'), edit=None)
+    await sleep(2.0, KOKORO)
+    yield SlashResponse(embed=Embed('Choose your neko.'), edit=None)

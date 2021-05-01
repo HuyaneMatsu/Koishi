@@ -35,9 +35,8 @@ async def load(client, message, name:str=None):
     if name is None:
         return 'Please define an extension to load.'
     
-    try:
-        extension = EXTENSION_LOADER.extensions[name]
-    except KeyError:
+    extension = EXTENSION_LOADER.get_extension(name)
+    if (extension is None):
         return 'There is no extension with the specified name.'
     
     if extension.locked:
@@ -85,9 +84,8 @@ async def reload(client, message, name:str=None):
     if name is None:
         return 'Please define an extension to reload.'
     
-    try:
-        extension = EXTENSION_LOADER.extensions[name]
-    except KeyError:
+    extension = EXTENSION_LOADER.get_extension(name)
+    if (extension is None):
         return 'There is no extension with the specified name.'
     
     if extension.locked:
@@ -113,9 +111,8 @@ async def unload(client, message, name:str=None):
     if name is None:
         return 'Please define an extension to unload.'
     
-    try:
-        extension = EXTENSION_LOADER.extensions[name]
-    except KeyError:
+    extension = EXTENSION_LOADER.get_extension(name)
+    if (extension is None):
         return 'There is no extension with the specified name'
     
     if extension.locked:

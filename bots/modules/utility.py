@@ -1084,10 +1084,25 @@ async def guild_icon(client, event,
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
 
 
+def add_user_field(embed, index, joined_at, user):
+    created_at = user.created_at
+    embed.add_field(
+        f'{index}. {user.full_name}',
+        f'Id: {user.id}\n'
+        f'Mention: {user.mention}\n'
+        '\n'
+        f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
+        f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+        f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
+            )
+
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, True)
 async def latest_users(client, event,):
     """Shows the new users of the guild."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__MODERATOR):
+        abort('Hacker trying to hack Discord.')
+    
     date_limit = datetime.now() - timedelta(days=7)
     
     users = []
@@ -1104,18 +1119,38 @@ async def latest_users(client, event,):
     embed = Embed('Recently joined users')
     if users:
         for index, (joined_at, user) in enumerate(users, 1):
-            created_at = user.created_at
-            embed.add_field(
-                f'{index}. {user.full_name}',
-                f'Id: {user.id}\n'
-                f'Mention: {user.mention}\n'
-                '\n'
-                f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
-                f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-                f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
-                    )
+            add_user_field(embed, index, joined_at, user)
     
     else:
         embed.description = '*none*'
     
     return SlashResponse(embed=embed, allowed_mentions=None)
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, True)
+async def all_users(client, event,):
+    """Shows the new users of the guild."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__MODERATOR):
+        abort('Hacker trying to hack Discord.')
+    
+    users = []
+    guild = event.guild
+    for user in guild.users.values():
+        joined_at = user.guild_profiles[guild].joined_at
+        if (joined_at is not None):
+            users.append((joined_at, user))
+    
+    users.sort(reverse=True)
+    
+    embeds = []
+    
+    for index, (joined_at, user) in enumerate(users, 1):
+        if index%10==1:
+            embed = Embed('Joined users')
+            embeds.append(embed)
+        
+        add_user_field(embed, index, joined_at, user)
+    
+    
+    await Pagination(client, event, embeds)

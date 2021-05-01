@@ -581,4 +581,8 @@ async def crywolf_(client, event):
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def sex(client, event):
     """You horny?"""
-    return Embed().add_image('https://media1.tenor.com/images/f85aafba0c5f18c9496068250777dfd0/tenor.gif?itemid=19617482')
+    if random() > .1:
+        image_url = 'https://media1.tenor.com/images/f85aafba0c5f18c9496068250777dfd0/tenor.gif?itemid=19617482'
+    else:
+        image_url = 'https://cdn.discordapp.com/attachments/568837922288173058/837747879497433158/yes-sex.gif'
+    return Embed().add_image(image_url)

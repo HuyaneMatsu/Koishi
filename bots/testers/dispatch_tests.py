@@ -117,7 +117,7 @@ class dispatch_tester:
                 if key in ('pinned', 'activity_party_id', 'everyone_mention'):
                     result.append(f'{key} changed: {value!r} -> {getattr(message, key)!r}')
                     continue
-                if key in ('edited',):
+                if key in ('edited_at',):
                     if value is None:
                         result.append(f'{key} changed: None -> {getattr(message, key):%Y.%m.%d-%H:%M:%S}')
                     else:

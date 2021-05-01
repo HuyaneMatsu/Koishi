@@ -104,9 +104,10 @@ async def image_(client, event,
         type_ : ([
             ('Any', IMAGE_ANY),
             ('static', IMAGE_STATIC),
-            ('animated', IMAGE_ANIMATED)
+            ('animated', IMAGE_ANIMATED),
                 ], 'Specific image type?') = IMAGE_ANY,
         count : ('bool', 'Do you want to get the amount of images instead?') = False,
+        index : ('number', 'Do you want to get a specific indexed image?') = None,
             ):
     """Gets an image from my local storage!"""
     # Check for permissions!
@@ -163,7 +164,14 @@ async def image_(client, event,
     if not image_details:
         return 'Sowwy, no result.'
     
-    image_detail = choose(image_details)
+    if index is None:
+        image_detail = choose(image_details)
+    else:
+        image_details_length = len(image_details)
+        if (index < 0) or (index >= image_details_length):
+            abort('Index: `{index!r}` out of the expected range `[0:{image_details_length}]`.')
+        
+        image_detail = image_details[index]
     
     image = await ReuAsyncIO(join(IMAGE_PATH, image_detail.path))
     return SlashResponse(file=image)
