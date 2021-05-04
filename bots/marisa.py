@@ -474,11 +474,11 @@ async def raffle(client, event,
                 abort('The referenced message is already yeeted.')
                 return
             
-            if err.code == ERROR_CODES.invalid_access: # client removed
+            if err.code == ERROR_CODES.missing_access: # client removed
                 # This is not nice.
                 return
             
-            if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+            if err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
                 abort('I have no permission to get that message.')
                 return
             

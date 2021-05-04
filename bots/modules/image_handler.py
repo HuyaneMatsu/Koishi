@@ -260,11 +260,11 @@ async def upload(client, event,
                 yield Embed('OOf', 'The referenced message is already yeeted.', color=IMAGE_COLOR)
                 return
             
-            if err.code == ERROR_CODES.invalid_access: # client removed
+            if err.code == ERROR_CODES.missing_access: # client removed
                 # This is not nice.
                 return
             
-            if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+            if err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
                 yield Embed('Ohoho', 'I have no permission to get that message.', color=IMAGE_COLOR)
                 return
             

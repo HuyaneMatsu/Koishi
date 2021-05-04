@@ -103,7 +103,7 @@ class CooldownHandler:
                         if err.code in (
                                 ERROR_CODES.unknown_message, # message deleted
                                 ERROR_CODES.unknown_channel, # channel deleted
-                                ERROR_CODES.invalid_access, # client removed
+                                ERROR_CODES.missing_access, # client removed
                                     ):
                             return
                     
@@ -124,8 +124,8 @@ class CooldownHandler:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.cannot_message_user, # user has dm-s disallowed
                             ):
                     return
@@ -154,7 +154,7 @@ class CooldownHandler:
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     return
             
@@ -207,8 +207,8 @@ class PAGINATION_5PN:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.cannot_message_user, # user has dm-s disallowed
                             ):
                     return
@@ -235,8 +235,8 @@ class PAGINATION_5PN:
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return self
             
@@ -292,7 +292,7 @@ class PAGINATION_5PN:
                     
                     if isinstance(err,DiscordException):
                         if err.code in (
-                                ERROR_CODES.invalid_access, # client removed
+                                ERROR_CODES.missing_access, # client removed
                                 ERROR_CODES.unknown_channel, # message's channel deleted
                                     ):
                             return
@@ -337,7 +337,7 @@ class PAGINATION_5PN:
             if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
                             ):
                     return
@@ -357,7 +357,7 @@ class PAGINATION_5PN:
                     return
                 
                 if isinstance(err,DiscordException):
-                    if err.code == ERROR_CODES.invalid_access: # client removed
+                    if err.code == ERROR_CODES.missing_access: # client removed
                         return
                 
                 await client.events.error(client,f'{self!r}.__call__',err)
@@ -399,9 +399,9 @@ class PAGINATION_5PN:
                     if isinstance(err, DiscordException):
                         if err.code in (
                                 ERROR_CODES.unknown_channel, # message's channel deleted
-                                ERROR_CODES.invalid_access, # client removed
+                                ERROR_CODES.missing_access, # client removed
                                 ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                     ):
                             return
                     

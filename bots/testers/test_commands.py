@@ -18,7 +18,7 @@ from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed,
 
 from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer, \
     FlaggedAnnotation
-from hata.discord.parsers import PARSERS
+from hata.discord.events.core import PARSERS
 from hata.ext.prettyprint import pchunkify
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
 

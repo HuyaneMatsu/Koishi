@@ -511,10 +511,10 @@ async def emoji_role(client, event,
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             

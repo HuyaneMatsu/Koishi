@@ -6,8 +6,8 @@ from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, Scarlet
 
 from hata.ext.commands import ContentParser, Converter, ChooseMenu, Pagination, ConverterFlag, Closer
 from hata.ext.slash import abort
-from hata.discord.parsers import INTERACTION_EVENT_RESPONSE_STATE_NONE, INTERACTION_EVENT_RESPONSE_STATE_DEFERRED, \
-    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED
+from hata.discord.events.event_types import INTERACTION_EVENT_RESPONSE_STATE_NONE, \
+    INTERACTION_EVENT_RESPONSE_STATE_DEFERRED, INTERACTION_EVENT_RESPONSE_STATE_RESPONDED
 
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
 
@@ -110,11 +110,11 @@ async def create_auto_react_role(client, event,
                 # The message is already deleted.
                 abort('The referenced message is already yeeted.')
             
-            if err.code == ERROR_CODES.invalid_access: # client removed
+            if err.code == ERROR_CODES.missing_access: # client removed
                 # This is not nice.
                 return
             
-            if err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+            if err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
                 abort('I have no permission to get that message.')
             
             raise
@@ -582,8 +582,8 @@ class AutoReactRoleGUI:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -676,11 +676,11 @@ class AutoReactRoleGUI:
                     if err.code in (
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         break
                     
-                    if err.code == ERROR_CODES.invalid_access: # client removed
+                    if err.code == ERROR_CODES.missing_access: # client removed
                         return
                 
                 await client.events.error(client,f'{self!r}.apply',err)
@@ -717,8 +717,8 @@ class AutoReactRoleGUI:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     return
             
@@ -823,8 +823,8 @@ class AutoReactRoleGUI:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -836,7 +836,7 @@ class AutoReactRoleGUI:
         try:
             await client.message_delete(message)
         except BaseException as err:
-            if isinstance(err, DiscordException) and err.code == ERROR_CODES.invalid_permissions: # permissions changed meanwhile
+            if isinstance(err, DiscordException) and err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
                 return
             
             client.command_processer.remove(self.message.channel, self)
@@ -848,7 +848,7 @@ class AutoReactRoleGUI:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     return
             
@@ -873,8 +873,8 @@ class AutoReactRoleManager:
                     if err.code in (
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         return
                 
@@ -894,8 +894,8 @@ class AutoReactRoleManager:
                             ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         return
                 
@@ -976,7 +976,7 @@ class AutoReactRoleManager:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     await connector.execute(AUTO_REACT_ROLE_TABLE.delete().where(
                         auto_react_role_model.id == query.id))
@@ -1083,8 +1083,8 @@ class AutoReactRoleManager:
                         ERROR_CODES.unknown_user, #user deleted
                         ERROR_CODES.unknown_role, # role deleted
                         ERROR_CODES.unknown_guild, # guild deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     #handled by other methods
                     return
@@ -1122,8 +1122,8 @@ class AutoReactRoleManager:
                         ERROR_CODES.unknown_user, #user deleted
                         ERROR_CODES.unknown_role, # role deleted
                         ERROR_CODES.unknown_guild, # guild deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     #handled by other events
                     return
@@ -1183,8 +1183,8 @@ class AutoReactRoleManager:
                 if err.code in (
                         ERROR_CODES.unknown_role, # role deleted
                         ERROR_CODES.unknown_guild, # guild deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     return
             
@@ -1226,8 +1226,8 @@ class AutoReactRoleManager:
                 if err.code in (
                         ERROR_CODES.unknown_emoji, # emoji deleted
                         ERROR_CODES.unknown_guild, # guild deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     return
             
@@ -1286,8 +1286,8 @@ class AutoReactRoleManager:
                     if err.code in (
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         await self.destroy()
                         return
@@ -1316,8 +1316,8 @@ class AutoReactRoleManager:
                             ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         
                         await self.destroy()

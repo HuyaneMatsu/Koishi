@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
     list_difference, ActivityChange, KOKORO, Client
-from hata.discord.parsers import EVENTS, DEFAULT_EVENT_HANDLER
+from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
 from hata.ext.prettyprint import pretty_print
 from hata.ext.commands import Pagination, Command
 from hata.backend.utils import MethodType
@@ -41,7 +41,7 @@ class dispatch_tester:
             await switch_description(client, message)
             return
         
-        if content not in EVENTS.defaults:
+        if content not in EVENT_HANDLER_NAME_TO_PARSER_NAMES:
             await client.message_create(message.channel, f'Invalid dispatcher: {content}')
             return
         
@@ -354,8 +354,8 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def user_profile_edit(self,client, user, guild, old):
-        Task(self.old_events['user_profile_edit'](client, user, old, guild), KOKORO)
+    async def guild_user_edit(self,client, user, guild, old):
+        Task(self.old_events['guild_user_edit'](client, user, old, guild), KOKORO)
         if self.channel is None:
             return
         
@@ -700,7 +700,7 @@ class dispatch_tester:
                         result.append(f'{name} : {bool(old_value)} -> {bool(new_value)}')
                 continue
         
-        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
@@ -723,7 +723,7 @@ class dispatch_tester:
         result.append('Voice state update')
         user = voice_state.user
         if user.partial:
-            result.append(f'user : Parital user {user.id}')
+            result.append(f'user : Partial user {user.id}')
         else:
             result.append(f'user : {user.full_name} ({user.id})')
         guild = voice_state.channel.guild
@@ -968,7 +968,7 @@ async def switch_description(client, message):
         '- `typing`\n'
         '- `user_edit`\n'
         '- `user_presence_update`\n'
-        '- `user_profile_edit`\n'
+        '- `guild_user_edit`\n'
         '- `user_voice_join`\n'
         '- `user_voice_leave`\n'
         '- `user_voice_update`\n'

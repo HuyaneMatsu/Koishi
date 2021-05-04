@@ -309,8 +309,8 @@ class KanakoJoinWaiter:
                 if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         return
                 
@@ -525,8 +525,8 @@ class KanakoRunner:
                 if isinstance(err, DiscordException):
                     if err.code in (
                             ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         return
                 
@@ -580,8 +580,8 @@ class KanakoRunner:
                         if isinstance(err, DiscordException):
                             if err.code in (
                                     ERROR_CODES.unknown_channel, # channel deleted
-                                    ERROR_CODES.invalid_access, # client removed
-                                    ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                    ERROR_CODES.missing_access, # client removed
+                                    ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                         ):
                                 return
                         
@@ -617,8 +617,8 @@ class KanakoRunner:
             if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -690,8 +690,8 @@ class KanakoRunner:
                 if err.code in (
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -715,8 +715,8 @@ class KanakoRunner:
             if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -985,7 +985,7 @@ class KanakoPagination:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
                             ):
                     return
@@ -1026,9 +1026,9 @@ class KanakoPagination:
                     
                     if isinstance(err,DiscordException):
                         if err.code in (
-                                ERROR_CODES.invalid_access, # client removed
+                                ERROR_CODES.missing_access, # client removed
                                 ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                     ):
                             return
                     

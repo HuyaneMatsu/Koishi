@@ -7,7 +7,7 @@ from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, Wa
 from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
     GUI_STATE_SWITCHING_CTX, checks
 
-from hata.discord.client_core import GC_CYCLER
+from hata.discord.core import GC_CYCLER
 from hata.ext.slash import SlashResponse, abort
 
 from bot_utils.models import DB_ENGINE, DS_TABLE, ds_model
@@ -149,8 +149,8 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -180,9 +180,9 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.unknown_emoji, # no permission to use external emoji
                         ERROR_CODES.max_reactions, # maximal amount of reactions reached
                             ):
@@ -261,9 +261,9 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.unknown_emoji, # no permission to use external emoji
                         ERROR_CODES.max_reactions, # maximal amount of reactions reached
                             ):
@@ -324,9 +324,9 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.unknown_emoji, # no permission to use external emoji
                         ERROR_CODES.max_reactions, # maximal amount of reactions reached
                             ):
@@ -374,9 +374,9 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.unknown_emoji, # no permission to use external emoji
                         ERROR_CODES.max_reactions, # maximal amount of reactions reached
                             ):
@@ -518,7 +518,7 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
                             ):
                     return
@@ -603,7 +603,7 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message already deleted
                             ):
                     return
@@ -737,8 +737,8 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -784,9 +784,9 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                         ERROR_CODES.unknown_emoji, # no permission to use external emoji
                         ERROR_CODES.max_reactions, # maximal amount of reactions reached
                             ):
@@ -805,9 +805,9 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -965,9 +965,9 @@ class ds_game:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             

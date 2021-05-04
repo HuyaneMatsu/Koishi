@@ -446,8 +446,8 @@ class HeartEventGUI:
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -468,8 +468,8 @@ class HeartEventGUI:
                     if err.code in (
                             ERROR_CODES.unknown_channel, # message's channel deleted
                             ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         return
                 
@@ -497,8 +497,8 @@ class HeartEventGUI:
             if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -592,8 +592,8 @@ class HeartEventGUI:
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # message's channel deleted
                             ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         break
                 
@@ -612,7 +612,7 @@ class HeartEventGUI:
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     return
             
@@ -721,8 +721,8 @@ class DailyEventGUI:
                         ERROR_CODES.unknown_message, # message deleted
                         ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -743,8 +743,8 @@ class DailyEventGUI:
                     if err.code in (
                             ERROR_CODES.unknown_channel, # message's channel deleted
                             ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         return
                 
@@ -772,8 +772,8 @@ class DailyEventGUI:
             if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.invalid_access, # client removed
-                        ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
                             ):
                     return
             
@@ -878,8 +878,8 @@ class DailyEventGUI:
                             ERROR_CODES.unknown_message, # message deleted
                             ERROR_CODES.unknown_channel, # message's channel deleted
                             ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                            ERROR_CODES.invalid_access, # client removed
-                            ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
                                 ):
                         break
                 
@@ -898,7 +898,7 @@ class DailyEventGUI:
                 if err.code in (
                         ERROR_CODES.unknown_channel, # message's channel deleted
                         ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.invalid_access, # client removed
+                        ERROR_CODES.missing_access, # client removed
                             ):
                     return
             
@@ -954,8 +954,8 @@ def should_render_exception(exception):
     if isinstance(exception, DiscordException) and exception.code in (
                 ERROR_CODES.unknown_message, # message deleted
                 ERROR_CODES.unknown_channel, # message's channel deleted
-                ERROR_CODES.invalid_access, # client removed
-                ERROR_CODES.invalid_permissions, # permissions changed meanwhile
+                ERROR_CODES.missing_access, # client removed
+                ERROR_CODES.missing_permissions, # permissions changed meanwhile
                 ERROR_CODES.cannot_message_user, # user dm-s disabled or bot blocked.
                 ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
             ):
