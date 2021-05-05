@@ -582,9 +582,9 @@ async def crywolf_(client, event):
 async def sex(client, event):
     """You horny?"""
     value = random()
-    if random > .1:
+    if value > .1:
         image_url = 'https://media1.tenor.com/images/f85aafba0c5f18c9496068250777dfd0/tenor.gif?itemid=19617482'
-    elif random > .01:
+    elif value > .01:
         image_url = 'https://cdn.discordapp.com/attachments/568837922288173058/837747879497433158/yes-sex.gif'
     else:
         image_url = 'https://cdn.discordapp.com/attachments/568837922288173058/838503584328056852/yes-sex-hyper.gif'
