@@ -61,7 +61,7 @@ MODULE_NAMES = set()
 
 path = None
 for path in os.listdir(os.path.join(PATH__KOISHI, 'bots', 'modules')):
-    if not path.endswith('intent.py'):
+    if not path.endswith('.py'):
         continue
     
     MODULE_NAMES.add(path[:-3])
