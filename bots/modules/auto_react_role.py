@@ -2,12 +2,12 @@
 import re
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, ClientWrapper, MESSAGES, \
-    Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference, ChannelBase
+    Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference, \
+    ChannelBase, INTERACTION_EVENT_RESPONSE_STATE_NONE, INTERACTION_EVENT_RESPONSE_STATE_DEFERRED, \
+    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED
 
 from hata.ext.commands import ContentParser, Converter, ChooseMenu, Pagination, ConverterFlag, Closer
 from hata.ext.slash import abort
-from hata.discord.events.event_types import INTERACTION_EVENT_RESPONSE_STATE_NONE, \
-    INTERACTION_EVENT_RESPONSE_STATE_DEFERRED, INTERACTION_EVENT_RESPONSE_STATE_RESPONDED
 
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
 
@@ -26,9 +26,9 @@ async def teardown(lib):
 AUTO_REACT_ROLE_COLOR = Color.from_rgb(219, 31, 87)
 
 BEHAVIOUR_FLAG_KEYS = {
-    'remove_emoji_if_role' : 0,
-    'remove_role_if_emoji' : 1,
-        }
+    'remove_emoji_if_role': 0,
+    'remove_role_if_emoji': 1,
+}
 
 class BehaviourFlag(int):
     @property

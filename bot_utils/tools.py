@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
 from random import random
-from functools import partial as partial_func
-from collections import deque
 
 from hata import CancelledError, sleep, Task, DiscordException, methodize, ERROR_CODES, BUILTIN_EMOJIS, \
     EventWaitforBase, KOKORO, ERROR_CODES, is_coroutine_function, InteractionEvent

@@ -574,9 +574,9 @@ async def crywolf_(client, event):
     
     crywolf = await client.user_get(151446521311789057)
     await client.webhook_message_create(executor_webhook, 'Good morning, how are yous?',
-        name=crywolf.name, avatar_url=crywolf.avatar_url)
+        name=crywolf.name, avatar_url=crywolf.avatar_url, wait=True)
     await client.webhook_message_create(executor_webhook, f'{EMOJI_1:e} {EMOJI_2:e}',
-        name=crywolf.name, avatar_url=crywolf.avatar_url)
+        name=crywolf.name, avatar_url=crywolf.avatar_url, wait=True)
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def sex(client, event):
@@ -587,6 +587,6 @@ async def sex(client, event):
     elif value > .01:
         image_url = 'https://cdn.discordapp.com/attachments/568837922288173058/837747879497433158/yes-sex.gif'
     else:
-        image_url = 'https://cdn.discordapp.com/attachments/568837922288173058/838503584328056852/yes-sex-hyper.gif'
+        image_url = 'https://cdn.discordapp.com/attachments/568837922288173058/840676567180771348/yes-sex-hyper-opti.gif'
     
     return Embed().add_image(image_url)

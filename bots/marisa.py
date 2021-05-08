@@ -17,7 +17,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
-    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED, ButtonStyle, Component
+    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED, ButtonStyle
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
@@ -825,3 +825,17 @@ async def slash_edit(client, event):
     yield SlashResponse(embed=Embed('Choose your cake.'), edit=None)
     await sleep(2.0, KOKORO)
     yield SlashResponse(embed=Embed('Choose your neko.'), edit=None)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def embed_abort(client, event):
+    """embed abortion."""
+    abort(embed=Embed('cake'))
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def mentionable_check(client, event,
+        entity: ('mentionable', 'New field hype!'),
+            ):
+    """embed abortion."""
+    yield repr(entity)
+
+

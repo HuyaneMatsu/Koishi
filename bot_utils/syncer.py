@@ -25,7 +25,7 @@ RELATIONS = {
 DATETIME_FORMAT_CODE = '%Y.%m.%d-%H:%M:%S'
 DATETIME_RP = re.compile('(\d{4})\.(\d{2})\.(\d{2})\-(\d{2})\:(\d{2})\:(\d{2})')
 
-IGNORED_NAMES = {
+IGNORED_NAMES = frozenset((
     '__pycache__',
     '.idea',
     '_sqlite.db',
@@ -34,7 +34,7 @@ IGNORED_NAMES = {
     'chesuto_data',
     'channel_names.csv',
     '.git',
-        }
+))
 
 def flatten_directory(path, name, access_path):
     access_path.append(name)
@@ -179,17 +179,15 @@ async def receive_sync(client, partner):
                         make_dir(source_path)
                 
                 attachments = message.attachments
-                if attachments is None:
-                    continue
-                
-                attachment = attachments[0]
-                binary = await client.download_attachment(attachment)
-                
-                source_path = join(source_path, file_name)
-                
-                with (await AsyncIO(source_path, 'wb')) as file:
-                    if (binary is not None):
-                        await file.write(binary)
+                if (attachments is not None):
+                    attachment = attachments[0]
+                    binary = await client.download_attachment(attachment)
+                    
+                    source_path = join(source_path, file_name)
+                    
+                    with (await AsyncIO(source_path, 'wb')) as file:
+                        if (binary is not None):
+                            await file.write(binary)
                 
                 # Wait some. It can happen that we send this message, before the other side gets it's answer.
                 await sleep(0.4, KOKORO)
