@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-from hata import Client, Embed
+from hata import Client
 from hata.backend.headers import CONTENT_TYPE
 from hata import imultidict
 
@@ -7,7 +6,7 @@ from hata.ext.slash import abort
 
 SLASH_CLIENT : Client
 
-WAIFU_API_BASE_URL = 'https://waifu.pics/api'
+WAIFU_API_BASE_URL = 'https://api.waifu.pics'
 
 HEADERS = imultidict()
 HEADERS[CONTENT_TYPE] = 'application/json'

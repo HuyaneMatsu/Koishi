@@ -36,7 +36,6 @@ import hata
 if __name__ == '__main__':
     import bots
     hata.start_clients()
-    
     if config.RUN_WEBAPP_AS_MAIN:
         from web import WEBAPP
         WEBAPP.run()

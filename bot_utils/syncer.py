@@ -137,7 +137,7 @@ async def request_sync(client, days_allowed):
             try:
                 await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_received, 60.)
             except TimeoutError:
-                sys.stderr.write('Sync request failed, timeout\.n')
+                sys.stderr.write('Sync request failed, timeout.\n')
                 return
         
         await client.message_create(CHANNEL__SYSTEM__SYNC, SYNC_DONE)

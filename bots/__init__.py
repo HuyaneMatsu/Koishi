@@ -8,7 +8,6 @@ from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.shared import PATH__KOISHI
 
 MARISA_MODE = config.MARISA_MODE
-
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 
 if MARISA_MODE:

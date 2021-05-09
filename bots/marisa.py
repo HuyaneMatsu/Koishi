@@ -21,7 +21,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
 from hata.ext.commands import setup_ext_commands, checks
 from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
-    Button, Row, iter_component_interactions
+    Button, Row, iter_component_interactions, configure_parameter
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
@@ -839,3 +839,15 @@ async def mentionable_check(client, event,
     yield repr(entity)
 
 
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@configure_parameter('emoji', str, 'Yes?')
+async def configured_show_emoji(client, event, emoji):
+    """Shows the given custom emoji."""
+    emoji = parse_emoji(emoji)
+    if emoji is None:
+        return 'That\'s not an emoji.'
+    
+    if emoji.is_unicode_emoji():
+        return 'That\' an unicode emoji, cannot link it.'
+    
+    return f'**Name:** {emoji:e} **Link:** {emoji.url}'
