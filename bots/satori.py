@@ -143,7 +143,7 @@ class auto_pyramid:
     checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('auto-pyramid', (
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid <emoji> <size>`'
@@ -218,7 +218,7 @@ class auto_pyramid_u:
     checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('auto-pyramid-u', (
             'Creates a pyramid!\n'
             f'Usage: `{prefix}auto-pyramid-u <emoji> <size>`'
@@ -236,7 +236,7 @@ class reverse:
             await client.message_create(message, content[::-1], allowed_mentions=None)
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('reverse', (
             'Reverses your message\n'
             f'Usage: `{prefix}reverse <content>`'
@@ -259,7 +259,7 @@ class shutdown:
     checks = checks.owner_only()
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('shutdown', (
             'Shuts the clients down, then stops the process.'
             f'Usage  `{prefix}shutdown`'
@@ -267,7 +267,7 @@ class shutdown:
                 'Owner only!')
 
 async def execute_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('execute', (
         'Use an interpreter trough me :3\n'
         'Usages:\n'

@@ -226,7 +226,7 @@ def cycle_rename():
 NAME_CYCLER_HANDLER = Cell()
 
 COMMAND_CLIENT: Client
-COMMAND_CLIENT.command_processer.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__NEKO_DUNGEON__MODERATOR)])
+COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__NEKO_DUNGEON__MODERATOR)])
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(

@@ -283,7 +283,7 @@ async def channeling_start(client, message, channel_id:int):
     await client.message_create(channel_1, text)
 
 async def channeling_start_description(client,message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('channeling_start', (
         'I can connect more channels with my youkai powers.\n'
         f'Usage: `{prefix}channeling_start *channel_id*`\n'
@@ -312,7 +312,7 @@ async def channeling_stop(client, message, content):
     await client.message_create(channel, text)
 
 async def channeling_stop_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('channeling_stop', (
         'Cancels the channelling of this channel.\n'
         f'Usage: `{prefix}channeling_stop`\n'

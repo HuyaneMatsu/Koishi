@@ -7,7 +7,7 @@ from hata.ext.prettyprint import pchunkify
 OAUTH2_COLOR = Color.from_rgb(148, 0, 211)
 
 COMMAND_CLIENT: Client
-COMMAND_CLIENT.command_processer.create_category('OAUTH2', checks=checks.owner_only())
+COMMAND_CLIENT.command_processor.create_category('OAUTH2', checks=checks.owner_only())
 
 VALUABLE_SCOPES = [
     'identify',
@@ -50,7 +50,7 @@ class oauth2_link:
     category = 'OAUTH2'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('oauth2_link',(
             'I ll give you a nice authorization link for some oauth 2 scopes.\n'
             f'Usage: `{prefix}oauth2_link`\n'
@@ -100,7 +100,7 @@ class oauth2_feed:
     category = 'OAUTH2'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('oauth2_feed',(
             'Feeds your oauth 2 authorized redirect url.\n'
             f'Usage: `{prefix}oauth2_feed *link*`\n'
@@ -128,7 +128,7 @@ class oauth2_user:
     category = 'OAUTH2'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('oauth2_user', (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'Using this command, I ll show the extra user information , I '
@@ -157,7 +157,7 @@ class oauth2_connections:
     category = 'OAUTH2'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('oauth2_connections',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'You might ask what are your connections. '
@@ -186,7 +186,7 @@ class oauth2_guilds:
     category = 'OAUTH2'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('oauth2_guilds', (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'By using this command, I ll show your guilds. '
@@ -232,7 +232,7 @@ class oauth2_my_guild:
     category = 'OAUTH2'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('oauth2_my_guild',(
             'After you authorized yourself, I can create a guild for you, '
             'so just sit back!\n'
@@ -266,7 +266,7 @@ class oauth2_renew:
     category = 'OAUTH2'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('oauth2_renew',(
             'Your oauth2 authorization might expire; with this command you can '
             'renew it.\n'

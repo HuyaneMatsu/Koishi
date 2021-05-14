@@ -3,8 +3,9 @@ from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed,
     list_difference, ActivityChange, KOKORO, Client
 from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
 from hata.ext.prettyprint import pretty_print
-from hata.ext.commands import Pagination, Command
+from hata.ext.command_utils import Pagination
 from hata.backend.utils import MethodType
+from hata.ext.commands_v2 import Command
 
 DISPATCH_TESTS = eventlist(type_=Command)
 DISPATCH_COLOR = Color.from_rgb(120, 108, 128)
@@ -921,7 +922,7 @@ class dispatch_tester:
 
 
 async def here_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('here', (
         'I set the dispatch tester commands\' output to this channel.\n'
         f'Usage: `{prefix}here`\n'
@@ -934,7 +935,7 @@ async def here_description(client, message):
             'Owner only!')
 
 async def switch_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('here', (
         'I can turn on a dispatch tester for you.\n'
         f'`{prefix}switch *event_name*`\n'

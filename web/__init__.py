@@ -17,6 +17,7 @@ if SECRET_KEY is not None:
 def hello_world():
     return 'Nothing to see here.'
 
+
 path = None
 full_path = None
 base_path = os.path.join(PATH__KOISHI, *ROUTE)
@@ -24,7 +25,7 @@ base_path = os.path.join(PATH__KOISHI, *ROUTE)
 for path in os.listdir(base_path):
     full_path = os.path.join(base_path, path)
     if os.path.isfile(full_path):
-        if not path.endswith('intent.py'):
+        if not path.endswith('.py'):
             continue
         path = path[:-3]
     elif os.path.isdir(full_path):

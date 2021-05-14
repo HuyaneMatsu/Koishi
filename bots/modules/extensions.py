@@ -1,10 +1,16 @@
-# -*- coding: utf-8 -*-
 from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS
 from hata import chunkify, Embed, Client, CLIENTS
-from hata.ext.commands import checks, Pagination
+from hata.ext.command_utils import Pagination
+
+from config import MARISA_MODE
+
+if MARISA_MODE:
+    from hata.ext.commands_v2 import checks
+else:
+    from hata.ext.commands import checks
 
 COMMAND_CLIENT : Client
-COMMAND_CLIENT.command_processer.create_category('EXTENSIONS', checks=checks.owner_only())
+COMMAND_CLIENT.command_processor.create_category('EXTENSIONS', checks=checks.owner_only())
 
 @COMMAND_CLIENT.commands(category='EXTENSIONS')
 async def list_extensions(client, message):

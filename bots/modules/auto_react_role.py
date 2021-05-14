@@ -592,7 +592,7 @@ class AutoReactRoleGUI:
         
         self.message = message
         
-        client.command_processer.append(message.channel, self)
+        client.command_processor.append(message.channel, self)
         AUTO_REACT_ROLE_GUIS[target_message] = self
         return self
     
@@ -663,7 +663,7 @@ class AutoReactRoleGUI:
             pass
         
         client = self.client
-        client.command_processer.remove(self.message.channel, self)
+        client.command_processor.remove(self.message.channel, self)
         
         while True:
             try:
@@ -705,7 +705,7 @@ class AutoReactRoleGUI:
             pass
         
         client = self.client
-        client.command_processer.remove(self.message.channel, self)
+        client.command_processor.remove(self.message.channel, self)
         
         try:
             await client.message_delete(self.message)
@@ -814,7 +814,7 @@ class AutoReactRoleGUI:
         try:
             await client.message_edit(self.message, embed=self.render())
         except BaseException as err:
-            client.command_processer.remove(self.message.channel, self)
+            client.command_processor.remove(self.message.channel, self)
             
             if isinstance(err,ConnectionError):
                 return
@@ -839,7 +839,7 @@ class AutoReactRoleGUI:
             if isinstance(err, DiscordException) and err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
                 return
             
-            client.command_processer.remove(self.message.channel, self)
+            client.command_processor.remove(self.message.channel, self)
             
             if isinstance(err,ConnectionError):
                 return
@@ -1383,7 +1383,7 @@ class load_auto_react_roles:
 ClientWrapper().events(load_auto_react_roles, name='ready')
 
 async def auto_react_roles_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('show-auto-react-roles', (
         'Starts an auto react role GUI on the specified message.\n'
         'If the message has active auto react role on it, will display that, and if it has active GUI too, will cancel '

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 import config
@@ -7,14 +6,19 @@ from hata import Client, ActivityRich, ActivityTypes
 from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.shared import PATH__KOISHI
 
+from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA
+
 MARISA_MODE = config.MARISA_MODE
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 
 if MARISA_MODE:
     Marisa = Client(config.MARISA_TOKEN,
-        client_id = config.MARISA_ID,
-        #application_id = config.MARISA_ID,
-            )
+        client_id=config.MARISA_ID,
+        extensions=('command_utils', 'slash', 'commands_v2'),
+        prefix=PREFIX__MARISA,
+        default_category_name=DEFAULT_CATEGORY_NAME,
+        category_name_rule=category_name_rule
+    )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
     

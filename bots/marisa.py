@@ -7,6 +7,7 @@ from collections import deque, OrderedDict
 from html import unescape as html_unescape
 from functools import partial as partial_func
 from datetime import datetime, timedelta
+from io import StringIO
 from hata.discord.rate_limit import parse_date_to_datetime
 
 from dateutil.relativedelta import relativedelta
@@ -18,15 +19,15 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
     INTERACTION_EVENT_RESPONSE_STATE_RESPONDED, ButtonStyle
-from hata.ext.commands import setup_ext_commands, checks
-from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
     Button, Row, iter_component_interactions, configure_parameter
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
-from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue
+from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue, \
+    setup_ext_command_utils
+from hata.ext.commands_v2 import setup_ext_commands_v2 as setup_ext_commands_v2, checks
 
 from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, COLOR__MARISA_HELP, \
     command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
@@ -36,15 +37,95 @@ from bot_utils.tools import choose, Cell
 
 Marisa : Client
 
-setup_ext_commands(Marisa, PREFIX__MARISA, default_category_name=DEFAULT_CATEGORY_NAME,
-    category_name_rule=category_name_rule)
+Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
+Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())
 
-setup_ext_slash(Marisa)
+#Marisa.commands(SubterraneanHelpCommand(COLOR__MARISA_HELP), 'help', category='HELP')
 
-Marisa.command_processer.create_category('TEST COMMANDS', checks=checks.owner_only())
-Marisa.command_processer.create_category('VOICE', checks=checks.guild_only())
+@Marisa.command_processor.error
+async def command_error_handler(ctx, exception):
+    if ctx.guild is not GUILD__NEKO_DUNGEON:
+        return False
+    
+    with StringIO() as buffer:
+        await KOKORO.render_exc_async(exception,[
+            ctx.client.full_name,
+            ' ignores an occurred exception at command ',
+            repr(ctx.command),
+            '\n\nMessage details:\nGuild: ',
+            repr(ctx.guild),
+            '\nChannel: ',
+            repr(ctx.channel),
+            '\nAuthor: ',
+            ctx.author.full_name,
+            ' (',
+            repr(ctx.author.id),
+            ')\nContent: ',
+            repr(ctx.content),
+            '\n```py\n'], '```', file=buffer)
+        
+        buffer.seek(0)
+        lines = buffer.readlines()
+    
+    pages = []
+    
+    page_length = 0
+    page_contents = []
+    
+    index = 0
+    limit = len(lines)
+    
+    while True:
+        if index == limit:
+            embed = Embed(description=''.join(page_contents))
+            pages.append(embed)
+            page_contents = None
+            break
+        
+        line = lines[index]
+        index = index+1
+        
+        line_length = len(line)
+        # long line check, should not happen
+        if line_length > 500:
+            line = line[:500]+'...\n'
+            line_length = 504
+        
+        if page_length+line_length > 1997:
+            if index == limit:
+                # If we are at the last element, we don\'t need to shard up,
+                # because the last element is always '```'
+                page_contents.append(line)
+                embed = Embed(description=''.join(page_contents))
+                pages.append(embed)
+                page_contents = None
+                break
+            
+            page_contents.append('```')
+            embed = Embed(description=''.join(page_contents))
+            pages.append(embed)
+            
+            page_contents.clear()
+            page_contents.append('```py\n')
+            page_contents.append(line)
+            
+            page_length = 6+line_length
+            continue
+        
+        page_contents.append(line)
+        page_length += line_length
+        continue
+    
+    limit = len(pages)
+    index = 0
+    while index < limit:
+        embed = pages[index]
+        index += 1
+        embed.add_footer(f'page {index}/{limit}')
+    
+    await Pagination(ctx.client, ctx.channel, pages)
+    return True
 
-Marisa.commands(SubterraneanHelpCommand(COLOR__MARISA_HELP), 'help', category='HELP')
 
 Marisa.commands(command_error, checks=[checks.is_guild(GUILD__NEKO_DUNGEON)])
 
@@ -56,7 +137,7 @@ async def ready(client):
 
 
 async def execute_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('execute', (
         'Use an interpreter trough me :3\n'
         'Usages:\n'
@@ -88,7 +169,7 @@ async def error(client, name, err):
         ' ignores occurred exception at ',
         name,
         '\n',
-            ]
+    ]
     
     if isinstance(err, BaseException):
         await KOKORO.run_in_executor(alchemy_incendiary(render_exc_to_list, (err, extracted)))
@@ -128,7 +209,7 @@ DO_THINGS_CHOICES = [
     'Saw once Yukari\'s animal abuse, still having wet dreams about it.',
     'Reimu\'s armpits, yeeaaa...',
     'Have you heard of Izaoyi love-shop?',
-        ]
+]
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def do_things(client, event):
@@ -835,7 +916,7 @@ async def embed_abort(client, event):
 async def mentionable_check(client, event,
         entity: ('mentionable', 'New field hype!'),
             ):
-    """embed abortion."""
+    """Roles and users."""
     yield repr(entity)
 
 

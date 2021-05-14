@@ -140,7 +140,7 @@ Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
 
 Flan.commands(SubterraneanHelpCommand(COLOR__FLAN_HELP), 'help')
-Flan.command_processer.create_category('VOICE', checks=checks.guild_only())
+Flan.command_processor.create_category('VOICE', checks=checks.guild_only())
 
 @Flan.events
 async def guild_user_add(client, guild, user):
@@ -160,7 +160,7 @@ async def guild_user_add(client, guild, user):
 
 @Flan.commands
 async def invalid_command(client, message, command, content):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     embed = Embed(
         f'Invalid command `{command}`',
         f'try using: `{prefix}help`',
@@ -180,7 +180,7 @@ class ping:
     aliases = 'pong'
     
     async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('ping',(
             'Ping - Pong?\n'
             f'Usage: `{prefix}ping`'
@@ -202,7 +202,7 @@ class sync_avatar:
     checks= checks.owner_only()
     
     async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('sync_avatar',(
             'Hello there Esuto!\n'
             'This is a specific command for You, to sync the bot\'s avatar with '
@@ -326,7 +326,7 @@ class massadd:
     checks = [checks.owner_or_has_role(CARDS_ROLE)]
     
     async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('massadd',(
             'Loads the last 100 message at the channel, and check each of them '
             'searching for card definitions. If it finds one, then updates it, if '
@@ -405,7 +405,7 @@ class showcards:
         await Pagination(client,message.channel,pages)
     
     async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('showcards',(
             'Searches all the cards, which contain the specified string.\n'
             f'Usage: `{prefix}showcards *name*`'
@@ -589,7 +589,7 @@ class add_image:
     checks = checks.has_role(CARDS_ROLE)
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('add_image',(
             'Adds or updates an image of a card.\n'
             f'Usage: `{prefix}add_image <card name>`\n'
@@ -759,7 +759,7 @@ class checklist:
     checks = checks.has_role(CARDS_ROLE)
     
     async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('checklist',(
             'Lists the cards of the given rarity, which have images added to them.\n'
             'If no rarity is provided, I will list all the cards with images.\n'
@@ -805,7 +805,7 @@ class dump_all_card:
     checks = checks.has_role(CARDS_ROLE)
     
     async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('dump-all-card',(
             'Lists all the cards to this channel.\n'
             f'Usage: `{prefix}dump-all-card`\n'
@@ -857,7 +857,7 @@ class remove_card:
     checks = checks.has_role(CARDS_ROLE)
     
     async def description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('remove-card',(
             'Removes the specific card\n'
             f'Usage: `{prefix}remove-card <name>`\n'
@@ -878,7 +878,7 @@ async def bgm_message_delete(client, message):
 async def bgm_message_edit(client, message, old):
     Track.edit(message)
 
-Flan.command_processer.append(CHESUTO_BGM_CHANNEL, bgm_message_create)
+Flan.command_processor.append(CHESUTO_BGM_CHANNEL, bgm_message_create)
 Flan.events.message_delete.append(CHESUTO_BGM_CHANNEL, bgm_message_delete)
 Flan.events.message_edit.append(CHESUTO_BGM_CHANNEL, bgm_message_edit)
 
@@ -1069,7 +1069,7 @@ def get_random_bgm():
     return selected
 
 async def bgminfo_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('bgminfo', (
         'Shows up the given bgm\'s description..\n'
         f'Usage: `{prefix}bgminfo <name>`\n'
@@ -1145,7 +1145,7 @@ class bgms:
     category = 'VOICE'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('bgms', (
             'Lists the chesuto bgms.\n'
             f'Usage: `{prefix}bgms`'
@@ -1180,7 +1180,7 @@ def check_reaction_cards_role(event):
     return False
 
 async def set_bgm_name_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('set-bgm-name', (
         'Changes a bgm\'s name\n'
         f'Usage: `{prefix}set-bgm-name <bgm name>`\n'

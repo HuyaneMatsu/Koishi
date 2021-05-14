@@ -21,7 +21,7 @@ from bot_utils.models import DB_ENGINE
 STAT_COLOR = Color.from_rgb(61, 255, 249)
 
 COMMAND_CLIENT: Client
-COMMAND_CLIENT.command_processer.create_category('STATS', checks=checks.owner_only())
+COMMAND_CLIENT.command_processor.create_category('STATS', checks=checks.owner_only())
 
 @COMMAND_CLIENT.commands.from_class
 class threads:
@@ -153,7 +153,7 @@ class threads:
     category = 'STATS'
     
     async def description(client, message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         
         return Embed('threads',(
             'Just shows how my threads are doing.\n'
@@ -195,7 +195,7 @@ if IS_PYPY:
         category = 'STATS'
         
         async def description(client, message):
-            prefix = client.command_processer.get_prefix_for(message)
+            prefix = client.command_processor.get_prefix_for(message)
             
             return Embed('gc-stats',(
                 'Garbage collector info to check memory usage.\n'
@@ -396,7 +396,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
             category = 'STATS'
             
             async def description(client, message):
-                prefix = client.command_processer.get_prefix_for(message)
+                prefix = client.command_processor.get_prefix_for(message)
                 
                 return Embed('system-stats',(
                     'Shows my system\s and processe\'s stats.\n'

@@ -29,18 +29,18 @@ from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
 from hata.discord.urls import API_ENDPOINT
 
-from hata.ext.commands import wait_for_message, Pagination, wait_for_reaction, Command, checks, Converter, \
-    ConverterFlag
+from hata.ext.command_utils import wait_for_message, Pagination, wait_for_reaction
+from hata.ext.commands_v2 import Command, checks, configure_converter
 
 MAIN_CLIENT : Client
 RATE_LIMIT_COMMANDS = eventlist(type_=Command, category='RATE_LIMIT TESTS')
 
 def setup(lib):
-    MAIN_CLIENT.command_processer.create_category('RATE_LIMIT TESTS', checks=[checks.owner_only()])
+    MAIN_CLIENT.command_processor.create_category('RATE_LIMIT TESTS', checks=[checks.owner_only()])
     MAIN_CLIENT.commands.extend(RATE_LIMIT_COMMANDS)
     
 def teardown(lib):
-    MAIN_CLIENT.command_processer.delete_category('RATE_LIMIT TESTS')
+    MAIN_CLIENT.command_processor.delete_category('RATE_LIMIT TESTS')
 
 def parse_date_to_datetime(data):
     *date_tuple, tz = _parsedate_tz(data)
@@ -1502,7 +1502,7 @@ async def guild_user_search(client, guild, query, limit=1):
     elif limit < 1000 and limit > 0:
         data['limit'] = limit
     else:
-        raise ValueError('`limit` can be betwwen 1 and 1000, got `{limit}`')
+        raise ValueError('`limit` can be between 1 and 1000, got `{limit}`')
     
     guild_id=guild.id
     return await bypass_request(client, METHOD_GET,
@@ -2096,7 +2096,7 @@ async def stage_delete(client, channel):
         f'{API_ENDPOINT}/stage-instances/{channel_id}',
         )
 
-async def thread_create(client, channel, type_, name):
+async def thread_create_private(client, channel, type_, name):
     channel_id = channel.id
     data = {
         'name': name,
@@ -3134,7 +3134,8 @@ async def rate_limit_test0035(client, message):
             target_channel = None
         
         if target_channel is None:
-            await RLT.send('The guild should have at least 1 non server webhooked channel, what is not the same as the first found announcements channel.')
+            await RLT.send('The guild should have at least 1 non server webhooked channel, what is not the same as '
+                'the first found announcements channel.')
         
         webhook = await channel_follow(client, source_channel, target_channel)
         await client.webhook_delete(webhook)
@@ -3385,7 +3386,8 @@ async def rate_limit_test0047(client, message):
         await guild_ban_get_all(client, guild)
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0048(client, message, user:Converter('user',flags=ConverterFlag.user_default.update_by_keys(everywhere=True),default=None)):
+@configure_converter('user', everywhere=True)
+async def rate_limit_test0048(client, message, user:'user'=None):
     """
     Bans gets the ban and un-bans the given user.
     
@@ -5077,7 +5079,7 @@ async def rate_limit_test0129(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_create(client, channel, 9, 'ayaya')
+        await thread_create_private(client, channel, 9, 'ayaya')
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0130(client, message):
@@ -5208,12 +5210,12 @@ async def rate_limit_test0137(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0137(client, message):
+async def rate_limit_test0138(client, message):
     """
     Gets the threads.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'rate_limit_test0137') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0138') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -5225,12 +5227,12 @@ async def rate_limit_test0137(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0138(client, message):
+async def rate_limit_test0139(client, message):
     """
     Gets the threads from my archive?
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'rate_limit_test0138') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0139') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
@@ -5242,12 +5244,12 @@ async def rate_limit_test0138(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0139(client, message):
+async def rate_limit_test0140(client, message):
     """
     Gets the guilds?
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'rate_limit_test0139') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0140') as RLT:
         await servers_get(client)
 
 

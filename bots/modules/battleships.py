@@ -835,7 +835,7 @@ class battleships_game:
         self.player2.cancel()
 
 async def bs_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('bs', (
         'Requests a battleship game with the given user.\n'
         f'Usage: `{prefix}bs *user*`'

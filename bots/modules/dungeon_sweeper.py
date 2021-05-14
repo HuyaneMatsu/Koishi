@@ -1752,7 +1752,7 @@ async def ds_modify_best(client, message, content):
     await client.message_create(message.channel, f'modified : {count}')
     
 async def ds_modify_best_description(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('ds_modify_best', (
         f'A helper command for `{prefix}ds`, to modify the best results of a stage.\n'
         'Before calling this command, make sure you edited the source code and restarted me.\n'

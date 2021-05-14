@@ -16,8 +16,8 @@ from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed,
     ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, \
     StagePrivacyLevel
 
-from hata.ext.commands import Command, ChooseMenu, checks, Pagination, Converter, ConverterFlag, Closer, \
-    FlaggedAnnotation
+from hata.ext.command_utils import ChooseMenu, Pagination, Closer
+from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag
 from hata.discord.events.core import PARSERS
 from hata.ext.prettyprint import pchunkify
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
@@ -539,15 +539,15 @@ async def test_multytype_annotation(client, message, value:('channel', 'role') =
     await client.message_create(message.channel, repr(value))
 
 @TEST_COMMANDS
-async def test_message_converter(client, message, value:Converter('message',
-        flags=ConverterFlag.message_default.update_by_keys(everywhere=True), default=None)):
+@configure_converter('message', everywhere=True)
+async def test_message_converter(client, message, value:'message'=True):
     """
     Tries to parse the message from the content of the message.
     """
     await client.message_create(message.channel, repr(value))
 
 @TEST_COMMANDS
-async def test_invite_converter(client, message, value:Converter('invite', default=None)):
+async def test_invite_converter(client, message, value:'invite'):
     """
     Tries to parse an invite from the content of the message.
     """
@@ -609,7 +609,7 @@ async def set_upper_category_names(client, message):
     """
     Sets the category names of the client to upper case.
     """
-    client.command_processer.category_name_rule = rule_upper
+    client.command_processor.category_name_rule = rule_upper
     await client.message_create(message.channel, 'nya!')
 
 @TEST_COMMANDS
@@ -617,7 +617,7 @@ async def set_upper_command_names(client, message):
     """
     Sets the command names of the client to upper case.
     """
-    client.command_processer.command_name_rule = rule_upper
+    client.command_processor.command_name_rule = rule_upper
     await client.message_create(message.channel, 'nya!')
 
 @TEST_COMMANDS
@@ -625,7 +625,7 @@ async def set_capu_category_names(client, message):
     """
     Sets the category names of the client to capitalized form.
     """
-    client.command_processer.category_name_rule = rule_capu
+    client.command_processor.category_name_rule = rule_capu
     await client.message_create(message.channel, 'nya!')
 
 @TEST_COMMANDS
@@ -633,7 +633,7 @@ async def set_capu_command_names(client, message):
     """
     Sets the command names of the client to capitalized form.
     """
-    client.command_processer.command_name_rule = rule_capu
+    client.command_processor.command_name_rule = rule_capu
     await client.message_create(message.channel, 'nya!')
 
 @TEST_COMMANDS
@@ -641,7 +641,7 @@ async def set_lower_category_names(client, message):
     """
     Sets the category names of the client to lower case.
     """
-    client.command_processer.category_name_rule = rule_lower
+    client.command_processor.category_name_rule = rule_lower
     await client.message_create(message.channel, 'nya!')
 
 @TEST_COMMANDS
@@ -649,7 +649,7 @@ async def set_lower_command_names(client, message):
     """
     Sets the command names of the client to lower case.
     """
-    client.command_processer.command_name_rule = rule_lower
+    client.command_processor.command_name_rule = rule_lower
     await client.message_create(message.channel, 'nya!')
 
 @TEST_COMMANDS(checks=[checks.guild_only()])
@@ -707,7 +707,7 @@ async def test_start_channel_thread(client, message):
     """
     Does a post request to the channel's threads.
     """
-    data = await client.http.thread_create(message.channel.id, None)
+    data = await client.http.thread_create_private(message.channel.id, None)
     pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
@@ -846,7 +846,7 @@ async def autohelp_defaulted(client, message, name:str=None, channel:ChannelText
     pass
 
 @TEST_COMMANDS(separator=('[', ']'))
-async def autohelp_multy(client, message, value:(int, str), user:(User, 'invite'), *cakes:(ChannelText, 'tdelta')):
+async def autohelp_multy(client, message, value:{int, str}, user:{User, 'invite'}, *cakes:{ChannelText, 'tdelta'}):
     pass
 
 @TEST_COMMANDS
@@ -887,7 +887,8 @@ async def test_message_reaction_delete_emoji(client, message, channel_id: int, m
     await client.message_create(message.channel, 'nya')
 
 @TEST_COMMANDS
-async def avatar_1(client, message, user: FlaggedAnnotation('user', ConverterFlag.user_all) = None):
+@configure_converter('user', ConverterFlag.user_all)
+async def avatar_1(client, message, user: 'user' = None):
     if user is None:
         user = message.author
     
@@ -903,7 +904,7 @@ async def avatar_1(client, message, user: FlaggedAnnotation('user', ConverterFla
     await client.message_create(message.channel, embed=embed)
 
 @TEST_COMMANDS
-async def what_is_it_1(client, message, entity: ('user', 'channel', 'role') = None):
+async def what_is_it_1(client, message, entity: {'user', 'channel', 'role'} = None):
     if entity is None:
         result = 'Nothing is recognized.'
     elif isinstance(entity, UserBase):
@@ -916,7 +917,8 @@ async def what_is_it_1(client, message, entity: ('user', 'channel', 'role') = No
     await client.message_create(message.channel, result)
 
 @TEST_COMMANDS
-async def avatar_2(client, message, user: Converter('user', ConverterFlag.user_all, default=None)):
+@configure_converter('user', ConverterFlag.user_all)
+async def avatar_2(client, message, user: 'user'=None):
     if user is None:
         user = message.author
     
@@ -932,7 +934,11 @@ async def avatar_2(client, message, user: Converter('user', ConverterFlag.user_a
     await client.message_create(message.channel, embed=embed)
 
 @TEST_COMMANDS
-async def avatar_3(client, message, user: Converter('user', ConverterFlag.user_all, default_code='message.author')):
+@configure_converter('user', ConverterFlag.user_all)
+async def avatar_3(client, message, user: 'user'=None):
+    if user is None:
+        user = message.author
+    
     if user.avatar:
         color = user.avatar_hash&0xffffff
     else:
@@ -944,16 +950,12 @@ async def avatar_3(client, message, user: Converter('user', ConverterFlag.user_a
     
     await client.message_create(message.channel, embed=embed)
 
-async def what_is_it_parser_failure_handler(client, message, command, content, args):
-    await client.message_create(message.channel, f'Please give the name of a user, role or of a channel.')
 
-@TEST_COMMANDS(parser_failure_handler=what_is_it_parser_failure_handler)
-async def what_is_it_2(client, message, entity: (
-        FlaggedAnnotation('user', ConverterFlag().update_by_keys(name=True)),
-        FlaggedAnnotation('channel', ConverterFlag().update_by_keys(name=True)),
-        FlaggedAnnotation('role', ConverterFlag().update_by_keys(name=True)),
-            )):
-    
+@TEST_COMMANDS
+@configure_converter('user', 0, name=True)
+@configure_converter('channel', 0, name=True)
+@configure_converter('role', 0, name=True)
+async def what_is_it_2(client, message, entity: {'user', 'channel', 'role'}):
     if isinstance(entity, UserBase):
         result = 'user'
     elif isinstance(entity, ChannelBase):
@@ -967,11 +969,7 @@ async def what_is_it_2(client, message, entity: (
 async def owner_1(client, message):
     await client.message_create(message.channel, f'My masuta is {client.owner:f} !')
 
-# Note, this will be never called, because the category has a check already.
-async def owner_only_handler(client, message, command, check):
-    await client.message_create(message.channel, f'You must be the owner of the bot to use the `{command}` command.')
-
-@TEST_COMMANDS(checks=[checks.owner_only(handler=owner_only_handler)])
+@TEST_COMMANDS(checks=[checks.owner_only()])
 async def owner_2(client, message):
     await client.message_create(message.channel, f'My masuta is {client.owner:f} !')
 
@@ -1797,7 +1795,7 @@ async def test_application_command_normal_edit(client, message):
 
 
 async def voice_state(client, message):
-    prefix = client.command_processer.get_prefix_for(message)
+    prefix = client.command_processor.get_prefix_for(message)
     return Embed('voice-state', (
         'Gets the voice state of the respective voice client.\n'
         f'Usage: `{prefix}voice-state`\n'
@@ -1924,8 +1922,9 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
         
         await client.message_create(message.channel, text)
 
-    @Marisa.commands(separator='|', checks=checks.owner_only(), category='VOICE')
-    async def play_from(client, message, voice_channel: FlaggedAnnotation(ChannelVoice, ConverterFlag.channel_all)):
+    @TEST_COMMANDS(separator='|', checks=checks.owner_only(), category='VOICE')
+    @configure_converter(ChannelVoice, ConverterFlag.channel_all)
+    async def play_from(client, message, voice_channel):
         
         while True:
             self_guild = message.guild

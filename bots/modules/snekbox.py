@@ -4,7 +4,7 @@ from functools import partial as partial_func
 from pathlib import Path
 from subprocess import TimeoutExpired
 from hata import Color, KOKORO, Embed, ScarletLock, Client, sanitize_mentions
-from hata.ext.commands import checks
+from hata.ext.commands_v2 import checks
 from hata.ext.command_utils import Closer
 from bot_utils.interpreter import parse_code_content
 from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
@@ -60,7 +60,7 @@ if IS_UNIX:
             pass
 
 
-COMMAND_CLIENT.command_processer.create_category('SNEKBOX', checks=checks.is_guild(GUILD__NEKO_DUNGEON))
+COMMAND_CLIENT.command_processor.create_category('SNEKBOX', checks=checks.is_guild(GUILD__NEKO_DUNGEON))
 
 
 def build_output(output, return_code):
@@ -164,7 +164,7 @@ class EvalUserLock:
         self.channel = channel
         self.process = process
         
-        client.command_processer.append(channel, self)
+        client.command_processor.append(channel, self)
     
     async def __call__(self, client, message):
         if message.author.id != self.user_id:
@@ -181,11 +181,11 @@ class EvalUserLock:
     def __exit__(self, exc_type, exc_val, exc_tb):
         ACTIVE_EXECUTORS.discard(self.user_id)
         
-        self.client.command_processer.remove(self.channel, self)
+        self.client.command_processor.remove(self.channel, self)
 
 if IS_UNIX:
     async def eval_description(client,message):
-        prefix = client.command_processer.get_prefix_for(message)
+        prefix = client.command_processor.get_prefix_for(message)
         return Embed('eval', (
             'Executes the given code in an isolated environment.\n'
             'Usages:\n'

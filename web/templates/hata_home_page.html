@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_home_page_20210510.css') }}">
+
+</head>
+<body>
+    <nav class="header_menu">
+    </nav>
+    <section class="intro">
+        <div class="intro_background"></div>
+        <div class="intro_box">
+            <h1>Hata</h1>
+            {% for description in description_parts %}
+                <p>{{ description }}</p>
+            {% endfor %}
+        </div>
+    </section>
+    <section class="feature_list">
+        <div class="content">
+            <div class="column_0001">
+                <div class="card">
+                    <h4>Why use Hata?</h4>
+                    <p>{{ major_sellout }}</p>
+                </div>
+            </div>
+            <div class="column_0002">
+                {% for feature_title, feature_description, svg in features %}
+                    <div class="item">
+                        <div class="icon">
+                            <svg viewBox="0 -64 1024 1024">
+                                <path d="{{ svg|safe }}" transform="scale(1, -1) translate(0, -908)"/>
+                            </svg>
+                        </div>
+                        <div class="text">
+                            <h5>{{ feature_title }}</h5>
+                            <p>{{ feature_description }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    <section class="additional_features">
+        <div class="content">
+            <div class="row">
+                <div class="section_title">
+                    <h3>Additional features</h3>
+                </div>
+            </div>
+            <div class="row">
+                {% for feature_title, feature_description, svg in additional_features %}
+                    <div class="card">
+                        <div class="icon">
+                            <svg viewBox="0 -64 1024 1024">
+                                <path d="{{ svg|safe }}" transform="scale(1, -1) translate(0, -908)"/>
+                            </svg>
+                        </div>
+                        <div class="text">
+                            <h5>{{ feature_title }}</h5>
+                            <p>{{ feature_description }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</body>
+</html>
