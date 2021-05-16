@@ -649,7 +649,7 @@ async def party_is_over_description(client, message):
 @VOICE_COMMAND_CLIENT.commands(
     name = 'party-is-over',
     description = party_is_over_description,
-    checks = checks.owner_or_has_guild_permissions(administrator=True),
+    checks = checks.owner_or_has_guild_permissions(administrator=True) if MARISA_MODE else checks.owner_or_has_guild_permissions(8),
     aliases = 'partyisover',
     category = 'VOICE',
         )
