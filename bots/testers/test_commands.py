@@ -849,6 +849,14 @@ async def autohelp_defaulted(client, message, name:str=None, channel:ChannelText
 async def autohelp_multy(client, message, value:{int, str}, user:{User, 'invite'}, *cakes:{ChannelText, 'tdelta'}):
     pass
 
+@TEST_COMMANDS(separator=('[', ']'))
+async def auto_sub_help(client, message, cake:str):
+    pass
+
+@auto_sub_help.commands
+async def sugoi_dekai(ayaya:str):
+    pass
+
 @TEST_COMMANDS
 async def detect_custom_emojis(client, message):
     """

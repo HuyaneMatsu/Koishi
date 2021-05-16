@@ -184,16 +184,15 @@ class EvalUserLock:
         self.client.command_processor.remove(self.channel, self)
 
 if IS_UNIX:
-    async def eval_description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def eval_description(ctx):
         return Embed('eval', (
             'Executes the given code in an isolated environment.\n'
             'Usages:\n'
-            f'{prefix}eval # code goes here\n'
+            f'{ctx.prefix}eval # code goes here\n'
             '# code goes here\n'
             '# code goes here\n'
             '\n'
-            f'{prefix}eval\n'
+            f'{ctx.prefix}eval\n'
             '```\n'
             '# code goes here\n'
             '# code goes here\n'
@@ -204,23 +203,22 @@ if IS_UNIX:
                 ), color=SNEKBOX_COLOR).add_footer(
                 f'{GUILD__NEKO_DUNGEON} only!')
     
-    async def snake_box(client, message, content, executable, config):
+    async def snake_box(ctx, content, executable, config):
         code, is_exception = parse_code_content(content)
         if is_exception and (code is None):
-            await eval_description(client, message)
+            await eval_description(ctx)
             return
         
-        user_id = message.author.id
+        user_id = ctx.author.id
         if user_id in ACTIVE_EXECUTORS:
-            await client.message_create(message.channel,
-                embed=Embed('You have an eval job queued up', 'Please be patient.', color=SNEKBOX_COLOR))
+            await ctx.send(embed=Embed('You have an eval job queued up', 'Please be patient.', color=SNEKBOX_COLOR))
             return
         
         if is_exception:
-            await client.message_create(message.channel, embed=Embed('Parsing error', code, color=SNEKBOX_COLOR))
+            await ctx.send(embed=Embed('Parsing error', code, color=SNEKBOX_COLOR))
             return
         
-        with client.keep_typing(message.channel), EvalUserLock(user_id) as user_lock:
+        with ctx.keep_typing(), EvalUserLock(user_id) as user_lock:
             async with EVAL_LOCK:
                 process = await KOKORO.subprocess_exec(NSJAIL_EXECUTABLE,
                         '--config', config,
@@ -235,7 +233,7 @@ if IS_UNIX:
                     stderr=subprocess.STDOUT,
                         )
                 
-                user_lock.register_input_source(client, message.channel, process)
+                user_lock.register_input_source(ctx.client, ctx.message.channel, process)
                 
                 try:
                     await process.wait(timeout=MAX_TIMEOUT)
@@ -255,14 +253,14 @@ if IS_UNIX:
                     output = await process.stdout.read()
                     description = build_output(output, return_code)
         
-        author = message.author
+        author = ctx.message.author
         embed = Embed(title, description, color=SNEKBOX_COLOR).add_author(author.avatar_url, author.full_name)
-        await Closer(client, message.channel, embed, check=partial_func(check_reactor, author))
+        await Closer(ctx.client, ctx.message.channel, embed, check=partial_func(check_reactor, author))
     
     @COMMAND_CLIENT.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
-    async def eval_3_8(client, message, content):
-        await snake_box(client, message, content, PATH__PYTHON_EXECUTABLE_3_8, NSJAIL_CONFIG_3_8)
+    async def eval_3_8(ctx, content):
+        await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_3_8, NSJAIL_CONFIG_3_8)
 
     @COMMAND_CLIENT.commands(name='eval_3.10', aliases='e10', description=eval_description, category='SNEKBOX')
-    async def eval_3_10(client, message, content):
-        await snake_box(client, message, content, PATH__PYTHON_EXECUTABLE_3_10, NSJAIL_CONFIG_3_10)
+    async def eval_3_10(ctx, content):
+        await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_3_10, NSJAIL_CONFIG_3_10)

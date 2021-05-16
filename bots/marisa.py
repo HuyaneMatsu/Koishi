@@ -27,9 +27,10 @@ from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
 from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue, \
     setup_ext_command_utils
-from hata.ext.commands_v2 import setup_ext_commands_v2 as setup_ext_commands_v2, checks
+from hata.ext.commands_v2 import checks
+from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, COLOR__MARISA_HELP, \
+from bot_utils.shared import COLOR__MARISA_HELP, \
     command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
 from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter import Interpreter
@@ -40,7 +41,15 @@ Marisa : Client
 Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())
 
-#Marisa.commands(SubterraneanHelpCommand(COLOR__MARISA_HELP), 'help', category='HELP')
+
+def marisa_help_embed_postprocessor(command_context, embed):
+    if embed.color is None:
+        embed.color = COLOR__MARISA_HELP
+    
+    embed.add_thumbnail(command_context.client.avatar_url)
+
+
+Marisa.commands(SubterraneanHelpCommand(embed_postprocessor=marisa_help_embed_postprocessor), name='help', category='HELP')
 
 @Marisa.command_processor.error
 async def command_error_handler(ctx, exception):
