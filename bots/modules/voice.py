@@ -789,99 +789,99 @@ async def command_skip(client, message, index:int=0):
 
 if SLASH_CLIENT is not None:
     @SLASH_CLIENT.interactions(name='join', guild=GUILD__NEKO_DUNGEON)
-    async def slash_join(client, event,
+    async def slash_join(client, interaction_event,
             volume : ('int', 'Any preset volume?')=None,
                 ):
         """Joins the voice channel."""
-        return join(client, event.user, event.guild, volume)
+        return join(client, interaction_event.user, interaction_event.guild, volume)
     
     @SLASH_CLIENT.interactions(name='pause', guild=GUILD__NEKO_DUNGEON)
-    async def slash_pause(client, event):
+    async def slash_pause(client, interaction_event):
         """Pauses the currently playing audio."""
-        return await pause(client, event)
+        return await pause(client, interaction_event)
     
     @SLASH_CLIENT.interactions(name='resume', guild=GUILD__NEKO_DUNGEON)
-    async def slash_resume(client, event):
+    async def slash_resume(client, interaction_event):
         """Resumes the currently playing audio."""
-        return await resume(client, event)
+        return await resume(client, interaction_event)
     
     @SLASH_CLIENT.interactions(name='leave', guild=GUILD__NEKO_DUNGEON)
-    async def slash_leave(client, message):
+    async def slash_leave(client, interaction_event):
         """Leaves me from the voice channel."""
-        return leave(client, message)
+        return leave(client, interaction_event)
     
     
     if AUDIO_PLAY_POSSIBLE:
         @SLASH_CLIENT.interactions(name='play', guild=GUILD__NEKO_DUNGEON)
-        async def slash_yt_play(client, message,
+        async def slash_yt_play(client, interaction_event,
                 name:('str', 'The name of the audio to play.') = '',
                     ):
             """Plays the chosen audio or shows what is playing right now."""
-            return yt_play(client, message, name)
+            return yt_play(client, interaction_event, name)
     
     @SLASH_CLIENT.interactions(name='move', guild=GUILD__NEKO_DUNGEON)
-    async def slash_move(client, message,
+    async def slash_move(client, interaction_event,
             voice_channel: ('channel', 'To which channel should I move to?') = None
                 ):
         """Moves to the selected channel or next to You, my Love?"""
         if (voice_channel is not None) and (not isinstance(voice_channel, ChannelVoice)):
             return 'Please select a voice channel.'
         
-        return move(client, message, message.author, voice_channel)
+        return move(client, interaction_event, interaction_event.user, voice_channel)
     
     @SLASH_CLIENT.interactions(name='party-is-over', guild=GUILD__NEKO_DUNGEON)
-    async def slash_party_is_over(client, event):
+    async def slash_party_is_over(client, interaction_event):
         """I mark the talking party as done?"""
         if not event.user_permissions.can_administrator:
             return 'You must have administrator permission to invoke this command.'
         
-        return party_is_over(client, event)
+        return party_is_over(client, interaction_event)
     
     if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
         @SLASH_CLIENT.interactions(name='local', guild=GUILD__NEKO_DUNGEON)
-        async def slash_local(client, event,
+        async def slash_local(client, interaction_event,
                 name : ('str', 'The audio\'s name') = '',
                     ):
             """Plays a local audio file from my own collection UwU."""
-            return local_play(client, event, name)
+            return local_play(client, interaction_event, name)
     
     @SLASH_CLIENT.interactions(name='loop', guild=GUILD__NEKO_DUNGEON)
-    async def slash_loop(client, event,
+    async def slash_loop(client, interaction_event,
             behaviour : (VOICE_LOOPER_BEHAVIOURS_PAIRS, 'Set looping as?') = None,
                 ):
         """Sets the voice client's looping behaviour or returns the current one."""
-        return await loop(client, event, behaviour)
+        return await loop(client, interaction_event, behaviour)
     
     @SLASH_CLIENT.interactions(name='queue', guild=GUILD__NEKO_DUNGEON)
-    async def slash_queue(client, event):
+    async def slash_queue(client, interaction_event):
         """Shows the voice client\'s queue of the guild."""
-        return queue(client, event, event.channel, GUILD__NEKO_DUNGEON)
+        return queue(client, interaction_event, interaction_event.channel, GUILD__NEKO_DUNGEON)
     
     @SLASH_CLIENT.interactions(name='volume', guild=GUILD__NEKO_DUNGEON)
-    async def slash_volume(client, event,
+    async def slash_volume(client, interaction_event,
             volume: ('number', 'Percentage?') = None,
                 ):
         """Sets my volume to the given percentage."""
-        return await volume_(client, event, volume)
+        return await volume_(client, interaction_event, volume)
     
     @SLASH_CLIENT.interactions(name='stop', guild=GUILD__NEKO_DUNGEON)
-    async def slash_stop(client, event):
+    async def slash_stop(client, interaction_event):
         """Nyahh, if you really want I can stop playing audio."""
-        return await stop(client, event)
+        return await stop(client, interaction_event)
     
     @SLASH_CLIENT.interactions(name='skip', guild=GUILD__NEKO_DUNGEON)
-    async def slash_skip(client, event,
+    async def slash_skip(client, interaction_event,
             index: ('int', 'Which audio to skip?') = 0,
                 ):
         """I skip the audio at the given index."""
-        return await skip(client, event, index)
+        return await skip(client, interaction_event, index)
     
     @SLASH_CLIENT.interactions(name='join-speakers', guild=GUILD__NEKO_DUNGEON)
-    async def slash_join_speakers(client, event):
+    async def slash_join_speakers(client, interaction_event):
         """Joins the speakers in a stage channel."""
-        return join_speakers(client, event)
+        return join_speakers(client, interaction_event)
     
     @SLASH_CLIENT.interactions(name='join-audience', guild=GUILD__NEKO_DUNGEON)
-    async def slash_join_audience(client, event):
+    async def slash_join_audience(client, interaction_event):
         """Joins the audience in a stage channel."""
-        return join_audience(client, event)
+        return join_audience(client, interaction_event)

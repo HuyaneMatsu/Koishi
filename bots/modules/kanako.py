@@ -3,8 +3,7 @@ import os
 from random import randint
 
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
-    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future, InteractionEvent, \
-    INTERACTION_EVENT_RESPONSE_STATE_NONE
+    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future, InteractionEvent
 
 from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
     GUI_STATE_SWITCHING_CTX, Timeouter, checks
@@ -902,7 +901,7 @@ class KanakoPagination:
         
         
         if is_interaction:
-            if event_or_channel._response_state == INTERACTION_EVENT_RESPONSE_STATE_NONE:
+            if event_or_channel.is_unanswered():
                 await client.interaction_response_message_create(event_or_channel)
             
             message = await client.interaction_followup_message_create(event_or_channel, embed=pages[0])

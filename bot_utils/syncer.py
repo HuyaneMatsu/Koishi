@@ -182,12 +182,14 @@ async def receive_sync(client, partner):
                 if (attachments is not None):
                     attachment = attachments[0]
                     binary = await client.download_attachment(attachment)
+                    if binary is None:
+                        sys.stdout.write(f'{attachment!r} yielded empty binary.\n')
+                        continue
                     
                     source_path = join(source_path, file_name)
                     
                     with (await AsyncIO(source_path, 'wb')) as file:
-                        if (binary is not None):
-                            await file.write(binary)
+                        await file.write(binary)
                 
                 # Wait some. It can happen that we send this message, before the other side gets it's answer.
                 await sleep(0.4, KOKORO)

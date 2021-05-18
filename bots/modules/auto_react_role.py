@@ -3,8 +3,7 @@ import re
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, ClientWrapper, MESSAGES, \
     Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference, \
-    ChannelBase, INTERACTION_EVENT_RESPONSE_STATE_NONE, INTERACTION_EVENT_RESPONSE_STATE_DEFERRED, \
-    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED
+    ChannelBase
 
 from hata.ext.commands import ContentParser, Converter, ChooseMenu, Pagination, ConverterFlag, Closer
 from hata.ext.slash import abort
@@ -568,7 +567,7 @@ class AutoReactRoleGUI:
                 if isinstance(channel_or_event, ChannelBase):
                     message = await client.message_create(channel_or_event, embed=embed)
                 else:
-                    if channel_or_event._response_state == INTERACTION_EVENT_RESPONSE_STATE_NONE:
+                    if channel_or_event.is_unanswered():
                         await client.interaction_response_message_create(channel_or_event)
                     
                     message = await client.interaction_followup_message_create(channel_or_event, embed=embed)
@@ -1433,11 +1432,9 @@ async def select_auto_react_role_gui(client, channel_or_event, message, title, m
         if isinstance(channel_or_event, ChannelBase):
             await client.message_create(channel_or_event, embed=embed)
         else:
-            response_state = channel_or_event._response_state
-            
-            if response_state == INTERACTION_EVENT_RESPONSE_STATE_NONE:
+            if channel_or_event.is_unanswered():
                 await client.interaction_response_message_create(channel_or_event, embed=embed)
-            elif response_state == INTERACTION_EVENT_RESPONSE_STATE_DEFERRED:
+            elif channel_or_event.is_deffered():
                 await client.interaction_response_message_edit(channel_or_event, embed=embed)
             else:
                 await client.interaction_followup_message_create(channel_or_event, embed=embed)

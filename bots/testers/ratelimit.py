@@ -776,7 +776,12 @@ async def guild_ban_get(client,guild,user_id,):
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         )
 
-async def channel_move(client, channel, visual_position, category=..., lock_permissions=False, reason=None):
+async def channel_move(client, channel, visual_position, category=..., parent= ..., lock_permissions=False,
+        reason=None):
+    
+    if parent is not ...:
+        category = parent
+    
     guild = channel.guild
     if guild is None:
         return
@@ -797,7 +802,7 @@ async def channel_move(client, channel, visual_position, category=..., lock_perm
     if type(channel) is type(category):
         raise ValueError('Cant move category under category!')
     
-    if channel.category is category and category.channels.index(channel)==visual_position:
+    if channel.parent is category and category.channels.index(channel)==visual_position:
         return #saved 1 request
     
     #making sure
@@ -2826,12 +2831,12 @@ async def rate_limit_test0025(client,message):
         if not channel_1.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        category = channel_1.category
-        if category is None:
+        parent = channel_1.parent
+        if parent is None:
             await RLT.send('The channel should be at a category')
         
         channel_2=None
-        for channel in category.channels:
+        for channel in parent.channels:
             if channel is channel_1:
                 continue
             
@@ -2997,11 +3002,11 @@ async def rate_limit_test0031(client, message):
         if channel.type != 5:
             await RLT.send('Pls perform this action at a news channel.')
         
-        category = channel.category
-        if category is None:
+        parent = channel.parent
+        if parent is None:
             await RLT.send('Pls perform this action at a channel within a category.')
         
-        for channel_ in category.channels:
+        for channel_ in parent.channels:
             if channel_ is channel:
                 continue
             
@@ -3439,7 +3444,7 @@ async def rate_limit_test0050(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        target_channel = await client.channel_create(guild, name='tesuto_next:gen', category=channel.category, type_=0)
+        target_channel = await client.channel_create(guild, name='tesuto_next:gen', parent=channel.parent, type_=0)
         if channel.position == 0:
             position = 1
         else:

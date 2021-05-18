@@ -254,7 +254,7 @@ async def big_bro_channel_delete_waiter(client, channel, guild):
 
 
 async def big_bro_channel_create_waiter(client, channel):
-    if channel.category is not CATEGORY__NEKO_DUNGEON__BIG_BRO:
+    if channel.parent is not CATEGORY__NEKO_DUNGEON__BIG_BRO:
         return
     
     try:
@@ -291,7 +291,7 @@ async def big_bro_channel_edit_waiter(client, channel, old_attributes):
             return
         
         # Moved in
-        if channel.category is CATEGORY__NEKO_DUNGEON__BIG_BRO:
+        if channel.parent is CATEGORY__NEKO_DUNGEON__BIG_BRO:
             try:
                 user_id = int(channel.name)
             except ValueError:
@@ -301,7 +301,7 @@ async def big_bro_channel_edit_waiter(client, channel, old_attributes):
             
             return
     
-    if channel.category is not CATEGORY__NEKO_DUNGEON__BIG_BRO:
+    if channel.parent is not CATEGORY__NEKO_DUNGEON__BIG_BRO:
         return
     
     try:

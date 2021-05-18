@@ -18,7 +18,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
-    INTERACTION_EVENT_RESPONSE_STATE_RESPONDED, ButtonStyle
+    ButtonStyle
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
     Button, Row, iter_component_interactions, configure_parameter
 from hata.backend.futures import render_exc_to_list
@@ -874,7 +874,7 @@ async def getting_good(client, event):
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive, enabled=False),
     )
     
-    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component)
+    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
     
     try:
         component_interaction = await wait_for_component_interaction(event,
@@ -896,7 +896,7 @@ async def we_gucci(client, event):
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
     )
     
-    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component)
+    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
     
     try:
         async for component_interaction in iter_component_interactions(event, timeout=30.0, count=3):
@@ -941,3 +941,12 @@ async def configured_show_emoji(client, event, emoji):
         return 'That\' an unicode emoji, cannot link it.'
     
     return f'**Name:** {emoji:e} **Link:** {emoji.url}'
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def invoking_user_only_back_request(client, event):
+    """Requests an invoking user only message"""
+    await client.interaction_response_message_create(event, 'ayaya', show_for_invoking_user_only=True)
+    message = await client.interaction_response_message_get(event)
+    await client.message_create(event.channel, repr(message))
+

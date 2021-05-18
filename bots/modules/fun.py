@@ -485,7 +485,7 @@ MINE_Y_SIZE = 9
 MINE_SIZE = MINE_X_SIZE*MINE_Y_SIZE
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def minesweeper(client, message,
+async def minesweeper(
         bomb_count: ([(str(x), x) for x in range(7, 15)], 'How much bombs should be on the field?') = 10,
         raw : ('bool', 'Raw text?') = False,
             ):

@@ -1,9 +1,9 @@
 :root {
     --color-body-font: rgb(255 255 255);
-    --color-body-background: rgb(57 60 63);
+    --color-body-background: rgb(34 45 45);
 
     --color-header-menu: rgb(205 174 161 / 0.20);
-    --color-content-background: rgb(255 255 255);
+    --color-content-background: var(--color-body-background);
     --color-content-item-icon: rgb(108 230 101);
     --color-content-item-icon-svg: rgb(110 75 230);
     --color-content-card-icon: rgb(108 230 101);

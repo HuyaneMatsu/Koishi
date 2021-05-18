@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, sys
+os.environ['HATA_DOCS_ENABLED'] = 'True'
 os.environ['HATA_API_VERSION'] = '9'
 
 # Load config

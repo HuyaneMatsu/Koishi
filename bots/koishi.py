@@ -153,7 +153,7 @@ async def error(client, name, err):
         ' ignores occurred exception at ',
         name,
         '\n',
-            ]
+    ]
     
     if isinstance(err, BaseException):
         await KOKORO.run_in_executor(alchemy_incendiary(render_exc_to_list, (err, extracted)))

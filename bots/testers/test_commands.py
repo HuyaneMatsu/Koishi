@@ -2078,3 +2078,10 @@ async def test_stage_delete(client, message):
     pages = [Embed(description=chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
+
+@TEST_COMMANDS
+async def test_kwargs(ctx, **kwargs):
+    """
+    Kwargs?
+    """
+    await ctx.reply(repr(kwargs))
