@@ -2094,6 +2094,14 @@ async def stage_edit(client, channel, topic):
         data)
 
 
+async def stage_get(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/stage-instances/{channel_id}',
+    )
+
+
 async def stage_delete(client, channel):
     channel_id = channel.id
     
@@ -5258,4 +5266,24 @@ async def rate_limit_test0140(client, message):
         await servers_get(client)
 
 
-
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0141(client, message, stage_channel:'channel'=None):
+    """
+    Gets a stage channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0141') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if stage_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not isinstance(stage_channel, ChannelStage):
+            await RLT.send('Stage channel only.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await stage_get(client, stage_channel)

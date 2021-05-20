@@ -913,10 +913,18 @@ class dispatch_tester:
     
     
     @classmethod
-    async def stage_edit(self, client, stage):
+    async def stage_edit(self, client, stage, old_attributes):
         Task(self.old_events['stage_edit'](client, stage), KOKORO)
         
-        pages = [Embed(description=f'Stage edit: {stage!r}')]
+        text = [
+            f'Stage: {stage.id}'
+            f'At: {stage.channel.name}'
+            'Was edited:'
+        ]
+        for attribute_name, attribute_value in old_attributes.items():
+            text.append(f'`{attribute_name}` : {attribute_value!r} -> {getattr(stage, attribute_name)}')
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout=120.)
 
 

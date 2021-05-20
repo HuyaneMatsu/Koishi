@@ -20,7 +20,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
     ButtonStyle
 from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
-    Button, Row, iter_component_interactions, configure_parameter
+    Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
@@ -944,9 +944,30 @@ async def configured_show_emoji(client, event, emoji):
 
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def invoking_user_only_back_request(client, event):
-    """Requests an invoking user only message"""
-    await client.interaction_response_message_create(event, 'ayaya', show_for_invoking_user_only=True)
-    message = await client.interaction_response_message_get(event)
-    await client.message_create(event.channel, repr(message))
+async def select_test(client, event):
+    main_component = Row(
+        Select([
+            Option('cake', 'cake', emoji=BUILTIN_EMOJIS['flan']
+        )]),
+    )
+    
+    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def invoking_only_test(client, event):
+    await client.interaction_response_message_create(event, show_for_invoking_user_only=True)
+    message = await client.interaction_followup_message_create(event, 'owo', show_for_invoking_user_only=True)
+    yield repr(message)
+    message = await client.interaction_followup_message_create(event, 'owo', show_for_invoking_user_only=False)
+    yield repr(message)
+    
+    main_component = Row(
+        Button('cake', custom_id='cake', style=ButtonStyle.primary),
+        Button('cat', custom_id='cat', style=ButtonStyle.secondary),
+        Button('snake', custom_id='snake', style=ButtonStyle.success),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
+    )
+    
+    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=False)
 

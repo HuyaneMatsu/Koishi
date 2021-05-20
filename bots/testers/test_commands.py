@@ -2085,3 +2085,12 @@ async def test_kwargs(ctx, **kwargs):
     Kwargs?
     """
     await ctx.reply(repr(kwargs))
+
+
+@TEST_COMMANDS
+async def test_message_interaction(ctx, message:'message'):
+    """
+    Gets message interaction?
+    """
+    data = await ctx.client.http.message_interaction(message.channel.id, message.id)
+    return str(data)

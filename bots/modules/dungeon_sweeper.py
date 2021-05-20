@@ -218,7 +218,7 @@ class ds_game:
             'GUI_STATE_CANCELLING',
             'GUI_STATE_CANCELLED',
             'GUI_STATE_SWITCHING_CTX',
-                )[task_flag]
+        )[task_flag]
         
         result.append(task_flag_name)
         result.append(')')
