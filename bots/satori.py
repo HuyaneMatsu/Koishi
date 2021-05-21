@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
 import signal
 from random import randint
 from itertools import cycle, chain
 from threading import main_thread
 
-from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, CLIENTS, \
-    Permission
-from hata.ext.commands import setup_ext_commands, checks, Closer
-from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.slash import setup_ext_slash
+from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, CLIENTS
+from hata.ext.commands_v2 import checks
+from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import PREFIX__SATORI, COLOR__SATORI_HELP, category_name_rule, DEFAULT_CATEGORY_NAME
+from bot_utils.shared import COLOR__SATORI_HELP
 from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor
 from bot_utils.interpreter import Interpreter
 
@@ -19,11 +16,11 @@ Satori : Client
 Satori.events(MessageDeleteWaitfor)
 Satori.events(MessageEditWaitfor)
 
-setup_ext_commands(Satori, PREFIX__SATORI, default_category_name=DEFAULT_CATEGORY_NAME,
-    category_name_rule=category_name_rule)
-setup_ext_slash(Satori)
+def satori_help_embed_postprocessor(command_context, embed):
+    if embed.color is None:
+        embed.color = COLOR__SATORI_HELP
 
-Satori.commands(SubterraneanHelpCommand(COLOR__SATORI_HELP), 'help')
+Satori.commands(SubterraneanHelpCommand(embed_postprocessor=satori_help_embed_postprocessor), 'help')
 
 @Satori.commands
 async def invalid_command(client, message, command, content):
@@ -65,7 +62,7 @@ TRANSFORMATIONS = {
     '7': BUILTIN_EMOJIS['seven'].as_emoji,
     '8': BUILTIN_EMOJIS['eight'].as_emoji,
     '9': BUILTIN_EMOJIS['nine'].as_emoji,
-        }
+}
     
 for char in range(b'a'[0], b'z'[0]+1):
     emoji = BUILTIN_EMOJIS['regional_indicator_'+chr(char)].as_emoji
@@ -140,19 +137,14 @@ class auto_pyramid:
         for client_, count in zip(cycle(available_clients), chain(range(1,size),range(size,0,-1))):
             await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
     
-    checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
+    checks = checks.has_guild_permissions(manage_messages=True)
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('auto-pyramid', (
             'Creates a pyramid!\n'
-            f'Usage: `{prefix}auto-pyramid <emoji> <size>`'
+            f'Usage: `{command_context.prefix}auto-pyramid <emoji> <size>`'
                 ), color=COLOR__SATORI_HELP).add_footer(
                 'Guild only! You must have manage messages permission to use it.')
-    
-    async def parser_failure_handler(client, message, command, content, args):
-        embed = await command.description(client, message)
-        await Closer(client, message.channel, embed)
 
 @Satori.commands.from_class
 class auto_pyramid_u:
@@ -215,19 +207,15 @@ class auto_pyramid_u:
             await client.webhook_message_create(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)),
                 name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
     
-    checks = [checks.has_guild_permissions(Permission().update_by_keys(manage_messages=True))]
+    checks = checks.has_guild_permissions(manage_messages=True)
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('auto-pyramid-u', (
             'Creates a pyramid!\n'
-            f'Usage: `{prefix}auto-pyramid-u <emoji> <size>`'
+            f'Usage: `{command_context.prefix}auto-pyramid-u <emoji> <size>`'
                 ), color=COLOR__SATORI_HELP).add_footer(
                 'Guild only! You must have manage messages permission to use it.')
-    
-    async def parser_failure_handler(client, message, command, content, args):
-        embed = await command.description(client, message)
-        await Closer(client, message.channel, embed)
+
 
 @Satori.commands.from_class
 class reverse:
@@ -235,11 +223,10 @@ class reverse:
         if content:
             await client.message_create(message, content[::-1], allowed_mentions=None)
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('reverse', (
             'Reverses your message\n'
-            f'Usage: `{prefix}reverse <content>`'
+            f'Usage: `{command_context.prefix}reverse <content>`'
                 ), color=COLOR__SATORI_HELP)
 
 
@@ -258,24 +245,22 @@ class shutdown:
     category = 'UTILITY'
     checks = checks.owner_only()
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('shutdown', (
             'Shuts the clients down, then stops the process.'
-            f'Usage  `{prefix}shutdown`'
+            f'Usage  `{command_context.prefix}shutdown`'
             ), color=COLOR__SATORI_HELP).add_footer(
                 'Owner only!')
 
-async def execute_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def execute_description(command_context):
     return Embed('execute', (
         'Use an interpreter trough me :3\n'
         'Usages:\n'
-        f'{prefix}execute # code goes here\n'
+        f'{command_context.prefix}execute # code goes here\n'
         '# code goes here\n'
         '# code goes here\n'
         '\n'
-        f'{prefix}execute\n'
+        f'{command_context.prefix}execute\n'
         '```\n'
         '# code goes here\n'
         '# code goes here\n'

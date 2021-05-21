@@ -6,18 +6,18 @@ from hata import Client, ActivityRich, ActivityTypes
 from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.shared import PATH__KOISHI
 
-from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA
+from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, PREFIX__FLAN, PREFIX__SATORI
 
 MARISA_MODE = config.MARISA_MODE
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 
 if MARISA_MODE:
     Marisa = Client(config.MARISA_TOKEN,
-        client_id=config.MARISA_ID,
-        extensions=('command_utils', 'slash', 'commands_v2'),
-        prefix=PREFIX__MARISA,
-        default_category_name=DEFAULT_CATEGORY_NAME,
-        category_name_rule=category_name_rule
+        client_id = config.MARISA_ID,
+        extensions = ('command_utils', 'slash', 'commands_v2'),
+        prefix = PREFIX__MARISA,
+        default_category_name = DEFAULT_CATEGORY_NAME,
+        category_name_rule = category_name_rule
     )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
@@ -33,7 +33,8 @@ else:
         activity = ActivityRich('with Satori'),
         shard_count = 2,
         application_id = config.KOISHI_ID,
-            )
+        extensions = ('command_utils', 'slash'),
+    )
     
     EXTENSION_LOADER.add_default_variables(Koishi=Koishi, SLASH_CLIENT=Koishi)
     
@@ -43,7 +44,11 @@ else:
         activity = ActivityRich('with Koishi'),
         status = 'dnd',
         application_id = config.SATORI_ID,
-            )
+        extensions = ('command_utils', 'commands_v2',),
+        prefix = PREFIX__SATORI,
+        category_name_rule = category_name_rule,
+        default_category_name = DEFAULT_CATEGORY_NAME,
+    )
     
     EXTENSION_LOADER.add_default_variables(Satori=Satori, COMMAND_CLIENT=Satori)
     
@@ -52,7 +57,11 @@ else:
         activity = ActivityRich('Chesuto development', type_=ActivityTypes.watching),
         status = 'idle',
         application_id = config.FLAN_ID,
-            )
+        extensions=('command_utils', 'commands_v2',),
+        default_category_name='GENERAL COMMANDS',
+        category_name_rule=category_name_rule,
+        prefix=PREFIX__FLAN,
+    )
     
     EXTENSION_LOADER.add_default_variables(Flan=Flan)
     

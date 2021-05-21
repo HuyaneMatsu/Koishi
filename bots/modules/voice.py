@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re, os
 
 from hata import Client, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
@@ -8,12 +7,10 @@ from hata.ext.command_utils import Pagination
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON
+from hata.ext.commands_v2 import checks
 
-if MARISA_MODE:
-    from hata.ext.commands_v2 import checks
-else:
+if not MARISA_MODE:
     from bots.flan import COLOR__FLAN_HELP, CHESUTO_FOLDER, get_bgm, get_random_bgm
-    from hata.ext.commands import checks
 
 
 VOICE_COLORS = {}
@@ -549,13 +546,12 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
     
 #### #### #### #### Add as normal commands #### #### #### ####
 
-async def command_join_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_join_description(command_context):
     return Embed('join', (
         'Joins me to your voice channel.\n'
-        f'Usage: `{prefix}join *n*`\n'
+        f'Usage: `{command_context.prefix}join *n*`\n'
         'You can also tell me how loud I should sing for you.'
-        ), color=VOICE_COLORS.get(client, None))
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='join', description=command_join_description, category='VOICE')
@@ -565,12 +561,11 @@ async def command_join(client, message, volume:int=None):
             yield content
 
 
-async def command_pause_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_pause_description(command_context):
     return Embed('pause',(
         'Pauses the currently playing audio.\n'
-        f'Usage: `{prefix}pause`\n'
-        ), color=VOICE_COLORS.get(client, None))
+        f'Usage: `{command_context.prefix}pause`\n'
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='pause', description=command_pause_description, category='VOICE')
@@ -578,24 +573,22 @@ async def command_resume(client, message):
     return await pause(client, message)
 
 
-async def command_resume_description(client, event_or_message):
-    prefix = client.command_processor.get_prefix_for(event_or_message)
+async def command_resume_description(command_context):
     return Embed('resume', (
         'Resumes the currently playing audio.\n'
-        f'Usage: `{prefix}resume`\n'
-        ), color=VOICE_COLORS.get(client, None))
+        f'Usage: `{command_context.prefix}resume`\n'
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='resume', description=command_resume_description, category='VOICE')
 async def command_resume(client, message):
     return await resume(client, message)
 
 
-async def command_leave_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_leave_description(command_context):
     return Embed('leave', (
         'Leaves me from the voice channel.\n'
-        f'Usage: `{prefix}leave`'
-        ), color=VOICE_COLORS.get(client, None))
+        f'Usage: `{command_context.prefix}leave`'
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='leave', description=command_leave_description, category='VOICE')
 async def command_leave(client, message):
@@ -604,11 +597,10 @@ async def command_leave(client, message):
             yield content
 
 if AUDIO_PLAY_POSSIBLE and MARISA_MODE:
-    async def command_yt_play_description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def command_yt_play_description(command_context):
         return Embed('play', (
             'Do you want me to search me some audio to listen to?.\n'
-            f'Usage: `{prefix}play <name>`\n'
+            f'Usage: `{command_context.prefix}play <name>`\n'
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
             ), color=MAIN_VOICE_COLOR)
     
@@ -617,19 +609,18 @@ if AUDIO_PLAY_POSSIBLE and MARISA_MODE:
         description = command_yt_play_description,
         checks = checks.is_guild(GUILD__NEKO_DUNGEON),
         category = 'VOICE',
-            )
+    )
     async def command_yt_play(client, message, name):
         async for content in yt_play(client, message, name):
             if (content is not None):
                 yield content
 
 
-async def command_move_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_move_description(command_context):
     return Embed('move', (
         'Should I move to an other channel, or next to You, my Love??\n'
-        f'Usage: `{prefix}move <channel>`'
-        ), color=VOICE_COLORS.get(client, None))
+        f'Usage: `{command_context.prefix}move <channel>`'
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='move', description=command_move_description, category='VOICE')
 async def command_move(client, message, voice_channel: ChannelVoice=None):
@@ -638,32 +629,31 @@ async def command_move(client, message, voice_channel: ChannelVoice=None):
             yield content
 
 
-async def party_is_over_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def party_is_over_description(command_context):
+    
     return Embed('party-is-over', (
         'Should I mark the talking party as done?\n'
-        f'Usage: `{prefix}party-is-over`'
+        f'Usage: `{command_context.prefix}party-is-over`'
         ), color=MAIN_VOICE_COLOR).add_footer(
             'Administrator only!')
 
 @VOICE_COMMAND_CLIENT.commands(
     name = 'party-is-over',
     description = party_is_over_description,
-    checks = checks.owner_or_has_guild_permissions(administrator=True) if MARISA_MODE else checks.owner_or_has_guild_permissions(8),
+    checks = checks.owner_or_has_guild_permissions(administrator=True),
     aliases = 'partyisover',
     category = 'VOICE',
-        )
+)
 async def command_party_is_over(client, message):
     async for content in party_is_over(client, message):
         if (content is not None):
             yield content
 
 if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
-    async def command_local_description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def command_local_description(command_context):
         return Embed('local',(
             'Plays a local audio from my collection.\n'
-            f'Usage: `{prefix}local <name>`\n'
+            f'Usage: `{command_context.prefix}local <name>`\n'
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
             ), color=MAIN_VOICE_COLOR)
     
@@ -672,37 +662,37 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
         description = command_local_description,
         checks = checks.is_guild(GUILD__NEKO_DUNGEON),
         category = 'VOICE',
-            )
+    )
     async def command_local(client, message, name):
         async for content in local_play(client, message, name):
             if (content is not None):
                 yield content
 
 if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
-    async def command_chesuto_chesuto_play_by_name_description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def command_chesuto_chesuto_play_by_name_description(command_context):
+        
         return Embed('play', (
             'Plays the given chesuto bgm.\n'
-            f'Usage: `{prefix}play <name>`\n'
+            f'Usage: `{command_context.prefix}play <name>`\n'
             '\n'
             'Note that the given name can be also given as the position of the track.'
                 ), color=COLOR__FLAN_HELP)
     
     @Flan.commands(name='play', description=command_chesuto_chesuto_play_by_name_description, category='VOICE')
-    async def command_chesuto_play(client, message, name):
+    async def command_chesuto_play(command_context, name):
         if not name:
-            yield await command_chesuto_chesuto_play_by_name_description(client, message)
+            yield await command_chesuto_chesuto_play_by_name_description(command_context)
             return
         
-        async for content in chesuto_play_by_name(client, message, name):
+        async for content in chesuto_play_by_name(command_context.client, command_context.message, name):
             if (content is not None):
                 yield content
     
-    async def command_chesuto_play_random_description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def command_chesuto_play_random_description(command_context):
+        
         return Embed('play', (
             'Plays a random chesuto bgm.\n'
-            f'Usage: `{prefix}random`\n'
+            f'Usage: `{command_context.prefix}random`\n'
                 ), color=COLOR__FLAN_HELP)
     
     @Flan.commands(name='random', description=command_chesuto_play_random_description, category='VOICE')
@@ -711,12 +701,11 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
             if (content is not None):
                 yield content
 
-async def command_loop_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_loop_description(command_context):
     return Embed('loop', (
         'Sets the voice client\'s looping behaviour or returns the current one.\n'
-        f'Usage: `{prefix}loop <queue|actual|stop>`\n'
-        ), color=VOICE_COLORS.get(client, None))
+        f'Usage: `{command_context.prefix}loop <queue|actual|stop>`\n'
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='loop', description=command_loop_description, category='VOICE')
 async def command_loop(client, message, behaviour:'str' = None):
@@ -728,12 +717,11 @@ async def command_loop(client, message, behaviour:'str' = None):
     return await loop(client, message, behaviour)
 
 
-async def command_queue_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_queue_description(command_context):
     return Embed('queue', (
         'Shows the voice client\'s queue of the guild.\n'
-        f'Usage: `{prefix}queue`'
-        ), color=VOICE_COLORS.get(client, None))
+        f'Usage: `{command_context.prefix}queue`'
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='queue', description=command_queue_description, category='VOICE')
@@ -748,38 +736,35 @@ async def command_queue(client, message):
             yield content
 
 
-async def command_volume_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_volume_description(command_context):
     return Embed('volume', (
         'Sets my volume to the given percentage.\n'
-        f'Usage: `{prefix}volume *n*`\n'
+        f'Usage: `{command_context.prefix}volume *n*`\n'
         'If no volume is passed, then I will tell my current volume.'
-        ), color=VOICE_COLORS.get(client, None))
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='volume', description=command_volume_description, category='VOICE')
 async def command_volume(client, message, volume:int=None):
     return await volume_(client, message, volume)
 
 
-async def command_stop_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_stop_description(command_context):
     return Embed('stop', (
         'Well, if you really want I can stop playing audio.\n'
-        f'Usage: `{prefix}stop`'
-        ), color=VOICE_COLORS.get(client, None))
+        f'Usage: `{command_context.prefix}stop`'
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 
 @VOICE_COMMAND_CLIENT.commands(name='stop', description=command_stop_description, category='VOICE')
 async def command_stop(client, message):
     return await stop(client, message)
 
-async def command_skip_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def command_skip_description(command_context):
     return Embed('skip', (
         'Skips the audio at the given index.\n'
-        f'Usage: `{prefix}skip *index*`\n'
+        f'Usage: `{command_context.prefix}skip *index*`\n'
         'If not giving any index or giving it as `0`, will skip the currently playing audio.'
-        ), color=VOICE_COLORS.get(client, None))
+        ), color=VOICE_COLORS.get(command_context.client, None))
 
 @VOICE_COMMAND_CLIENT.commands(name='skip', description=command_skip_description, category='VOICE')
 async def command_skip(client, message, index:int=0):
@@ -832,7 +817,7 @@ if SLASH_CLIENT is not None:
     @SLASH_CLIENT.interactions(name='party-is-over', guild=GUILD__NEKO_DUNGEON)
     async def slash_party_is_over(client, interaction_event):
         """I mark the talking party as done?"""
-        if not event.user_permissions.can_administrator:
+        if not interaction_event.user_permissions.can_administrator:
             return 'You must have administrator permission to invoke this command.'
         
         return party_is_over(client, interaction_event)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os, sys
 IS_PYPY = (sys.implementation.name == 'pypy')
 
@@ -14,7 +13,7 @@ from datetime import datetime
 from threading import enumerate as list_threads, _MainThread as MainThreadType
 
 from hata import EventThread, KOKORO, ExecutorThread, Client, Embed, Color, elapsed_time, Future, sleep
-from hata.ext.commands import checks
+from hata.ext.commands_v2 import checks
 
 from bot_utils.models import DB_ENGINE
 
@@ -152,12 +151,10 @@ class threads:
     
     category = 'STATS'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
-        
+    async def description(command_context):
         return Embed('threads',(
             'Just shows how my threads are doing.\n'
-            f'Usage: `{prefix}threads`'
+            f'Usage: `{command_context.prefix}threads`'
             ), color=STAT_COLOR).add_footer(
                 'Owner only!')
 
@@ -194,12 +191,10 @@ if IS_PYPY:
         aliases = ['gc', 'gc-info',]
         category = 'STATS'
         
-        async def description(client, message):
-            prefix = client.command_processor.get_prefix_for(message)
-            
+        async def description(command_context):
             return Embed('gc-stats',(
                 'Garbage collector info to check memory usage.\n'
-                f'Usage: `{prefix}gc-stats`'
+                f'Usage: `{command_context}gc-stats`'
                 ), color=STAT_COLOR).add_footer(
                     'Owner only!')
 
@@ -212,11 +207,11 @@ if (psutil is not None) and (sys.platform == 'linux'):
     except (AttributeError, psutil.NoSuchProcess):
         pass
     else:
-        def get_cpu_frquence_range():
+        def get_cpu_frequency_range():
             
-            cpu_frequence = psutil.cpu_freq()
-            CPU_MIN_FREQUENCE = cpu_frequence.min
-            CPU_MAX_FREQUENCE = cpu_frequence.max
+            cpu_frequency = psutil.cpu_freq()
+            CPU_MIN_FREQUENCY = cpu_frequency.min
+            CPU_MAX_FREQUENCY = cpu_frequency.max
             
             import subprocess
             
@@ -227,38 +222,38 @@ if (psutil is not None) and (sys.platform == 'linux'):
             else:
                 for line in lscpu_output.splitlines():
                     if line.startswith(b'CPU min MHz:'):
-                        CPU_MIN_FREQUENCE = float(line[len(b'CPU min MHz:'):].strip())
+                        CPU_MIN_FREQUENCY = float(line[len(b'CPU min MHz:'):].strip())
                         continue
                     
                     if line.startswith(b'CPU max MHz:'):
-                        CPU_MAX_FREQUENCE = float(line[len(b'CPU max MHz:'):].strip())
+                        CPU_MAX_FREQUENCY = float(line[len(b'CPU max MHz:'):].strip())
                         continue
             
-            return CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE
+            return CPU_MIN_FREQUENCY, CPU_MAX_FREQUENCY
         
-        CPU_MIN_FREQUENCE, CPU_MAX_FREQUENCE = get_cpu_frquence_range()
-        del get_cpu_frquence_range
+        CPU_MIN_FREQUENCY, CPU_MAX_FREQUENCY = get_cpu_frequency_range()
+        del get_cpu_frequency_range
         
         class CpuUsage:
             
-            __slots__ = ('average_cpu_frequence', 'cpu_percent',)
+            __slots__ = ('average_cpu_frequency', 'cpu_percent',)
             
             waiter = None
             
             async def __new__(cls):
                 waiter = cls.waiter
                 if waiter is None:
-                    average_cpu_frequence = psutil.cpu_freq().current
+                    average_cpu_frequency = psutil.cpu_freq().current
                     PROCESS.cpu_percent()
                     cls.waiter = waiter = Future(KOKORO)
                     await sleep(1.0, KOKORO)
                     cpu_percent = PROCESS.cpu_percent()
-                    cpu_frequence = psutil.cpu_freq()
-                    average_cpu_frequence = (average_cpu_frequence + cpu_frequence.current) / 2.0
+                    cpu_frequency = psutil.cpu_freq()
+                    average_cpu_frequency = (average_cpu_frequency + cpu_frequency.current) / 2.0
                     
                     result = object.__new__(cls)
                     result.cpu_percent = cpu_percent
-                    result.average_cpu_frequence = average_cpu_frequence
+                    result.average_cpu_frequency = average_cpu_frequency
                     waiter.set_result(result)
                     cls.waiter = None
                 else:
@@ -267,12 +262,12 @@ if (psutil is not None) and (sys.platform == 'linux'):
                 return result
             
             @property
-            def cpu_percent_with_max_frequence(self):
-                return (self.average_cpu_frequence / CPU_MAX_FREQUENCE * self.cpu_percent)
+            def cpu_percent_with_max_frequency(self):
+                return (self.average_cpu_frequency / CPU_MAX_FREQUENCY * self.cpu_percent)
             
             @property
             def cpu_percent_total(self):
-                return self.cpu_percent_with_max_frequence / psutil.cpu_count(logical=False)
+                return self.cpu_percent_with_max_frequency / psutil.cpu_count(logical=False)
         
         @COMMAND_CLIENT.commands.from_class
         class system_stats:
@@ -295,8 +290,8 @@ if (psutil is not None) and (sys.platform == 'linux'):
                                    'Threads: ')
                 description.append(repr(psutil.cpu_count(logical=True)))
                 description.append('\n' \
-                                   'Max CPU frequence: ')
-                description.append(CPU_MAX_FREQUENCE.__format__('.2f'))
+                                   'Max CPU frequency: ')
+                description.append(CPU_MAX_FREQUENCY.__format__('.2f'))
                 description.append('MHz\n\n' \
                                    '**Memory and swap**:\n' \
                                    'Memory total: ')
@@ -361,9 +356,9 @@ if (psutil is not None) and (sys.platform == 'linux'):
                 description.append(cpu_time_children_system.__format__('.2f'))
                 description.append('\n' \
                                    'IO wait: ')
-                cputime_io_wait = cpu_times.iowait
-                cpu_time_total +=cputime_io_wait
-                description.append(cputime_io_wait.__format__('.2f'))
+                cpu_time_io_wait = cpu_times.iowait
+                cpu_time_total += cpu_time_io_wait
+                description.append(cpu_time_io_wait.__format__('.2f'))
                 description.append('\n' \
                                    '--------------------\n' \
                                    'Total: ')
@@ -375,7 +370,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
                 description.append(process_cpu_usage.cpu_percent.__format__('.2f'))
                 description.append('%\n' \
                                    'CPU usage with max frequency: ')
-                description.append(process_cpu_usage.cpu_percent_with_max_frequence.__format__('.2f'))
+                description.append(process_cpu_usage.cpu_percent_with_max_frequency.__format__('.2f'))
                 description.append('%\n' \
                                    'CPU usage over all cores: ')
                 description.append(process_cpu_usage.cpu_percent_total.__format__('.2f'))
@@ -395,12 +390,10 @@ if (psutil is not None) and (sys.platform == 'linux'):
             
             category = 'STATS'
             
-            async def description(client, message):
-                prefix = client.command_processor.get_prefix_for(message)
-                
+            async def description(command_context):
                 return Embed('system-stats',(
                     'Shows my system\s and processe\'s stats.\n'
-                    f'Usage: `{prefix}system-stats`'
+                    f'Usage: `{command_context.prefix}system-stats`'
                     ), color=STAT_COLOR).add_footer(
                         'Owner only!')
 

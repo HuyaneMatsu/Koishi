@@ -1,13 +1,15 @@
-# -*- coding: utf-8 -*-
 import sys
 from functools import partial as partial_func
 
 from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__
-from hata.ext.commands import Pagination, Closer
+from hata.ext.command_utils import Pagination, Closer
 
 from bot_utils.shared import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNGEON, GUILD__NEKO_DUNGEON, \
     LINK__HATA_DOCS, LINK__PASTE, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__NEKO_DUNGEON__ELEVATED, \
-    ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH
+    ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH, ROLE__NEKO_DUNGEON__NSFW_ACCESS, \
+    ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT
+
+from hata.ext.slash import SlashResponse
 
 SLASH_CLIENT: Client
 
@@ -17,57 +19,53 @@ HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def rules(client, event):
     """Neko Dungeon\'s rules!"""
-    embed = Embed(f'Rules of {GUILD__NEKO_DUNGEON}:', color = COLOR__KOISHI_HELP,
+    embed = Embed(f'Rules of {GUILD__NEKO_DUNGEON}:', color=COLOR__KOISHI_HELP,
         ).add_field(
-            'Guidelines',
+            '0. Guidelines',
             'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
         ).add_field(
-            'Behaviour',
+            '1. Behaviour',
             'Listen to staff and follow their instructions.',
         ).add_field(
-            'Language',
+            '3. Language',
             f'{GUILD__NEKO_DUNGEON} is an english speaking server, please try to stick yourself to it.',
         ).add_field(
-            'Channels',
+            '4. Channels',
             'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
         ).add_field(
-            'Usernames',
+            '5. Usernames',
             'Invisible, offensive or noise unicode names are not allowed.'
         ).add_field(
-            'Spamming',
+            '6. Spamming',
             'Forbidden in any form. Spamming server members in DM-s counts as well.',
         ).add_field(
-            'NSFW',
+            '7. NSFW',
             'Keep explicit content in nsfw channels.',
         ).add_field(
-            'Roles',
+            '8. Roles',
             f'Do not beg for roles. You can claim {ROLE__NEKO_DUNGEON__VERIFIED.mention} role, what gives you access to '
             f'additional channels by typing `nya` at {CHANNEL__NEKO_DUNGEON__SYSTEM.mention}.\n'
             f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
             f'as well.*'
-            '\n\n'
-            f'Additionally you can also claim (or un-claim) {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.mention} by typing '
-            f'`i meow` (or `i not meow`), or if you are the member of the server for at least half year, you can '
-            f'claim the superior {ROLE__NEKO_DUNGEON__ELEVATED.mention} role by typing `nekogirl`!'
         ).add_field(
-            'Advertisements',
+            '9. Advertisements',
             'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
         ).add_field(
-            'No political or religious topics.',
+            '10. No political or religious topics.',
             'I do not say either that aliens exists, even tho they do.',
         ).add_field(
-            'Alternative accounts',
+            '11. Alternative accounts',
             'Instant ban.'
         )
     
-    await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
+    return SlashResponse(embed=embed, allowed_mentions=None)
 
 
 ABOUT = SLASH_CLIENT.interactions(None,
     name = 'about',
     description = 'My loli secret. Simpers only!',
     is_global = True,
-        )
+)
 
 @ABOUT.interactions(is_default=True)
 async def description_(client, event):
@@ -88,31 +86,31 @@ async def description_(client, event):
 
 
 @ABOUT.interactions
-async def invite_(client, event):
+async def invite_():
     """Invite to our beloved Neko Dungeon."""
     return INVITE__NEKO_DUNGEON.url
 
 
 @ABOUT.interactions
-async def git(client, event):
+async def git():
     """Link to my git repository."""
     return Embed(description=f'[Koishi repository]({LINK__KOISHI_GIT})', color=COLOR__KOISHI_HELP)
 
 
 @ABOUT.interactions
-async def hata(client, event):
+async def hata():
     """Link to my wrapper's git repository."""
     return Embed(description=f'[hata repository]({LINK__HATA_GIT})', color=COLOR__KOISHI_HELP)
 
 
 @ABOUT.interactions
-async def slash(client, event):
+async def slash():
     """Link to my wrapper's git repository."""
     return Embed(description=f'[slash]({LINK__HATA_SLASH})', color=COLOR__KOISHI_HELP)
 
 
 @ABOUT.interactions
-async def docs(client, event):
+async def docs():
     """Sends a link to hata's documentation."""
     return Embed(description=f'[hata docs]({LINK__HATA_DOCS})', color=COLOR__KOISHI_HELP)
 
@@ -232,7 +230,7 @@ async def docs_search(client, event,
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
-async def ask(client, event):
+async def ask():
     """How to ask!"""
     return Embed('How to ask?',
         'Don\'t ask to ask just ask.\n'
@@ -246,7 +244,7 @@ async def ask(client, event):
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
-async def markdown(client, event):
+async def markdown():
     """How to use markdown."""
     return Embed('Markdown',
         'You can format your code by using markdown like this:\n'
@@ -265,7 +263,61 @@ async def markdown(client, event):
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
-async def paste(client, event):
+async def paste():
     """A link to our paste service."""
     return Embed(description=f'[Paste link]({LINK__PASTE})', color=COLOR__KOISHI_HELP)
 
+
+
+ROLES = SLASH_CLIENT.interactions(None,
+    name = 'roles',
+    description = 'Role information!',
+    guild=GUILD__NEKO_DUNGEON,
+)
+
+
+@ROLES.interactions
+async def claimable():
+    """A list of claimable roles in ND."""
+    embed = Embed('Claimable roles:',
+        f'Claim roles by typing a specific text at {CHANNEL__NEKO_DUNGEON__SYSTEM.mention}!',
+        color=COLOR__KOISHI_HELP,
+        ).add_field(
+            ROLE__NEKO_DUNGEON__VERIFIED.name,
+            f'Claim {ROLE__NEKO_DUNGEON__VERIFIED.mention} by typing `nya`!',
+        ).add_field(
+            ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.name,
+            f'Claim {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.mention} by typing `i meow`, or un-claim by `i not meow`!',
+        ).add_field(
+            ROLE__NEKO_DUNGEON__ELEVATED.name,
+            f'Claim {ROLE__NEKO_DUNGEON__ELEVATED.mention} by typing `nekogirl`!'
+            f'\n'
+            f'*You must be in the guild for at least half year + have {ROLE__NEKO_DUNGEON__VERIFIED.mention} role*.',
+        ).add_field(
+            ROLE__NEKO_DUNGEON__NSFW_ACCESS.name,
+            f'Claim {ROLE__NEKO_DUNGEON__NSFW_ACCESS.mention} by typing `i am horny`, or un-claim by `no sex`!'
+            f'\n'
+            f'*You must have {ROLE__NEKO_DUNGEON__VERIFIED.mention} role*.',
+        )
+    
+    return SlashResponse(embed=embed, allowed_mentions=None)
+
+
+@ROLES.interactions
+async def events():
+    """Event related role information."""
+    embed = Embed('Event roles', color=COLOR__KOISHI_HELP,
+        ).add_field(
+            ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.name,
+            f'{ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.mention} are participant of the actual event.'
+        ).add_field(
+            ROLE__NEKO_DUNGEON__EVENT_WINNER.name,
+            f'{ROLE__NEKO_DUNGEON__EVENT_WINNER.mention} won already an event. It is set in stone, only a couple of '
+            f'chads may achieve this level of power.'
+        ).add_field(
+            ROLE__NEKO_DUNGEON__EVENT_MANAGER.name,
+            f'{ROLE__NEKO_DUNGEON__EVENT_MANAGER.mention} are managing the actual event. Hoping our god ZUN will '
+            f'notice them one day.'
+        )
+    
+    return SlashResponse(embed=embed, allowed_mentions=None)

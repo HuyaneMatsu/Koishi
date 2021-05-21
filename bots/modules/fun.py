@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 from random import random, randint, choice
 from html import unescape as html_unescape
 from functools import partial as partial_func
 
 from hata import Client, Embed, BUILTIN_EMOJIS, Lock, KOKORO, DiscordException, ERROR_CODES, WebhookType, Emoji
-from hata.ext.commands import wait_for_reaction
+from hata.ext.command_utils import wait_for_reaction
 from hata.ext.slash import abort
 
 from bot_utils.tools import Cell

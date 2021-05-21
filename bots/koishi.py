@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
 import re
 from datetime import datetime, timedelta
 
 from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary
-from hata.ext.command_utils import setup_ext_command_utils
-from hata.ext.slash import setup_ext_slash
 from hata.backend.futures import render_exc_to_list
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
@@ -21,9 +18,6 @@ _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
 _KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
 
 Koishi: Client
-
-setup_ext_command_utils(Koishi)
-setup_ext_slash(Koishi)
 
 Koishi.events.message_create.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
 
@@ -62,7 +56,7 @@ async def message_create(client, message):
             re.escape(m2) : m1,
             re.escape(m3) : m4,
             re.escape(m4) : m3,
-                }
+        }
         pattern = re.compile('|'.join(replace.keys()))
         result = pattern.sub(lambda x: replace[re.escape(x.group(0))], message.content)
         await client.message_create(message.channel, result, allowed_mentions=[author])
@@ -95,7 +89,7 @@ PATTERN_ROLE_RELATION = [
     (re.compile('nekogirl', re.I), ROLE__NEKO_DUNGEON__ELEVATED, timedelta(days=183), True, True),
     (re.compile('(?:i(?: *\'? *a?m|mma)?|me)? *horny *(?:desu)?', re.I), ROLE__NEKO_DUNGEON__NSFW_ACCESS, None, True, True),
     (re.compile('no *sex', re.I), ROLE__NEKO_DUNGEON__NSFW_ACCESS, None, False, True),
-        ]
+]
 
 async def role_giver(client, message):
     for pattern, role, delta, add, requires_verify in PATTERN_ROLE_RELATION:

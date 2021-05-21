@@ -5,7 +5,7 @@ from functools import partial as partial_func
 
 from hata import BUILTIN_EMOJIS, Client, Lock, KOKORO, alchemy_incendiary, Embed
 from hata.backend.utils import to_json, from_json
-from hata.ext.commands import wait_for_reaction
+from hata.ext.command_utils import wait_for_reaction
 from hata.ext.slash import abort
 
 from sqlalchemy.sql import select, update

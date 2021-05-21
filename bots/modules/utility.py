@@ -12,7 +12,7 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
     parse_message_reference, MESSAGES, CHANNELS
 
-from hata.ext.commands import Pagination
+from hata.ext.command_utils import Pagination
 from hata.ext.prettyprint import pchunkify
 from hata.ext.slash import abort, SlashResponse, set_permission
 

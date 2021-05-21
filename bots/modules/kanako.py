@@ -5,8 +5,8 @@ from random import randint
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
     Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future, InteractionEvent
 
-from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
-    GUI_STATE_SWITCHING_CTX, Timeouter, checks
+from hata.ext.command_utils import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
+    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, Timeouter
 from hata.ext.slash import abort, SlashResponse
 
 from bot_utils.shared import PATH__KOISHI
@@ -33,7 +33,7 @@ KANAKO = SLASH_CLIENT.interactions(None,
     name='kanako',
     description='Start a hiragana or a katakana quiz!',
     is_global=True,
-        )
+)
 
 @KANAKO.interactions
 async def create_(client, event,

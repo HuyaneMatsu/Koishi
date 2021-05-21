@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os, re, sys
 from os.path import join, isdir, isfile, getmtime, exists
 from os import mkdir as make_dir
@@ -8,7 +7,7 @@ from io import StringIO
 from config import HATA_PATH
 
 from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep, Embed
-from hata.ext.commands import wait_for_message, Pagination
+from hata.ext.command_utils import wait_for_message, Pagination
 
 from .shared import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
 
@@ -20,7 +19,7 @@ KOISHI_HEAD_NAME = 'koishi'
 RELATIONS = {
     HATA_HEAD_NAME: HATA_PATH,
     KOISHI_HEAD_NAME: PATH__KOISHI,
-        }
+}
 
 DATETIME_FORMAT_CODE = '%Y.%m.%d-%H:%M:%S'
 DATETIME_RP = re.compile('(\d{4})\.(\d{2})\.(\d{2})\-(\d{2})\:(\d{2})\:(\d{2})')

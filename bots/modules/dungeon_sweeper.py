@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import re, os
 
-from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, eventlist, \
-    KOKORO, LOOP_TIME, Client
+from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, Client, \
+    KOKORO, LOOP_TIME
 
-from hata.ext.commands import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, \
-    GUI_STATE_SWITCHING_CTX, checks
+from hata.ext.command_utils import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
+    GUI_STATE_SWITCHING_CTX, GUI_STATE_CANCELLED
+from hata.ext.commands_v2 import checks
 
 from hata.discord.core import GC_CYCLER
 from hata.ext.slash import SlashResponse, abort
@@ -56,7 +57,7 @@ DUNGEON_SWEEPER = SLASH_CLIENT.interactions(None,
     name='ds',
     description='Touhou themed puzzle game.',
     is_global=True,
-        )
+)
 
 @DUNGEON_SWEEPER.interactions
 async def rules(client, event):
@@ -680,9 +681,9 @@ class ds_game:
             else:
                 i2, i3 = divmod(rest+7, 10)
             
-            difficulities = STAGES[i1]
-            if difficulities:
-                levels = difficulities[i2]
+            difficulties = STAGES[i1]
+            if difficulties:
+                levels = difficulties[i2]
                 if i3 < len(levels):
                     self.position=relative_position
         
@@ -1458,7 +1459,7 @@ YUKARI_STYLE = {
     CHAR_E|OBJECT_P             : NOTHING_EMOJI.as_emoji,
     CHAR_S|OBJECT_P             : NOTHING_EMOJI.as_emoji,
     CHAR_W|OBJECT_P             : NOTHING_EMOJI.as_emoji,
-        }
+}
 YUKARI_STYLE.update(DEFAULT_STYLE_PARTS)
 
 def YUKARI_SKILL_ACTIVATE(self):
@@ -1575,16 +1576,15 @@ RULES_HELP = Embed('Rules of Dungeon sweeper',
     f'{REIMU_STYLE[FLOOR]}{REIMU_STYLE[CHAR_E|FLOOR]}{REIMU_STYLE[BOX_TARGET]}\n'
     'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
     'play with.',
-    COLORS[0])
-RULES_HELP.add_field(f'Chapter 1 {REIMU_EMOJI:e}',
+    color=COLORS[0],
+).add_field(f'Chapter 1 {REIMU_EMOJI:e}',
     'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
     'Reimu can jump over a box or hole.\n'
     f'{REIMU_STYLE[CHAR_E|FLOOR]}{REIMU_STYLE[BOX]}{REIMU_STYLE[FLOOR]}{BUILTIN_EMOJIS["arrow_right"]:e}'
     f'{REIMU_STYLE[FLOOR]}{REIMU_STYLE[BOX]}{REIMU_STYLE[CHAR_E|FLOOR]}\n'
     f'{REIMU_STYLE[CHAR_E|FLOOR]:}{REIMU_STYLE[HOLE_U]}{REIMU_STYLE[FLOOR]}{BUILTIN_EMOJIS["arrow_right"]:e}'
     f'{REIMU_STYLE[FLOOR]}{REIMU_STYLE[HOLE_U]}{REIMU_STYLE[CHAR_E|FLOOR]}'
-        )
-RULES_HELP.add_field(f'Chapter 2 {FURANDOORU_EMOJI:e}',
+).add_field(f'Chapter 2 {FURANDOORU_EMOJI:e}',
     'Your character is Scarlet Flandre (スカーレット・フランドール Sukaaretto Furandooru), who want to put her *bookshelves*'
     f'on their desired place.\n'
     'Flandre can destroy absolutely anything and everything, and she will get rid of the pillars for you.\n'
@@ -1594,8 +1594,7 @@ RULES_HELP.add_field(f'Chapter 2 {FURANDOORU_EMOJI:e}',
     f'{FURANDOORU_STYLE[CHAR_E|FLOOR]}{FURANDOORU_STYLE[BOX]}{FURANDOORU_STYLE[OBJECT_P]}'
     f'{BUILTIN_EMOJIS["arrow_right"]:e}{FURANDOORU_STYLE[FLOOR]}{FURANDOORU_STYLE[CHAR_E|FLOOR]}'
     f'{FURANDOORU_STYLE[BOX_OBJECT]}'
-        )
-RULES_HELP.add_field(f'Chapter 3 {YUKARI_EMOJI:e}',
+).add_field(f'Chapter 3 {YUKARI_EMOJI:e}',
     'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some replacing at her home.\n'
     'Yukari can create gaps and travel trough them. She will open gap to the closest place straightforward, which is '
     f'separated by a bedding or with wall from her.\n'
@@ -1605,7 +1604,7 @@ RULES_HELP.add_field(f'Chapter 3 {YUKARI_EMOJI:e}',
     f'{YUKARI_STYLE[CHAR_E|FLOOR]}{YUKARI_STYLE[BOX]}{YUKARI_STYLE[BOX]}{YUKARI_STYLE[FLOOR]}'
     f'{BUILTIN_EMOJIS["arrow_right"]:e}{YUKARI_STYLE[FLOOR]}{YUKARI_STYLE[BOX]}{YUKARI_STYLE[BOX]}'
     f'{YUKARI_STYLE[CHAR_E|FLOOR]}'
-        )
+)
 
 def loader(filename):
 
@@ -1647,7 +1646,7 @@ def loader(filename):
         'WALL_V'    : WALL_E|WALL_W,
         'WALL_NV'   : WALL_E|WALL_S|WALL_W,
         'WALL_SV'   : WALL_N|WALL_E|WALL_W,
-            }
+    }
 
     STATE = 0
     map_ = []
@@ -1751,12 +1750,11 @@ async def ds_modify_best(client, message, content):
 
     await client.message_create(message.channel, f'modified : {count}')
     
-async def ds_modify_best_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def ds_modify_best_description(command_context):
     return Embed('ds_modify_best', (
-        f'A helper command for `{prefix}ds`, to modify the best results of a stage.\n'
+        f'A helper command for `{command_context.prefix}ds`, to modify the best results of a stage.\n'
         'Before calling this command, make sure you edited the source code and restarted me.\n'
-        f'Usage : `{prefix}ds_modify_best *position*`\n'
+        f'Usage : `{command_context.prefix}ds_modify_best *position*`\n'
         'The `position` is the position of the stage.'
             ), color=DS_COLOR).add_footer(
             'Owner only!')
@@ -1766,4 +1764,4 @@ COMMAND_CLIENT.commands(ds_modify_best,
     checks = checks.owner_only(),
     category = 'GAMES',
     description = ds_modify_best_description,
-        )
+)

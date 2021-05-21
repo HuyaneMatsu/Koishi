@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 from hata import Color, Embed, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
     cr_pg_channel_object, ChannelText, Client
-from hata.ext.commands import checks, Pagination
+from hata.ext.commands_v2 import checks
+from hata.ext.command_utils import Pagination
 from hata.ext.prettyprint import pchunkify
 
 OAUTH2_COLOR = Color.from_rgb(148, 0, 211)
@@ -19,7 +19,7 @@ VALUABLE_SCOPES = [
     'applications.builds.upload',
     'applications.entitlements',
     'applications.store.update',
-        ]
+]
 
 OA2_accesses = {}
 
@@ -40,7 +40,7 @@ def _oauth2_query(message, content):
 
 @COMMAND_CLIENT.commands.from_class
 class oauth2_link:
-    async def command(client,message,): #just a test link
+    async def command(client, message,): #just a test link
         await client.message_create(message.channel,(
             'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
             '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
@@ -49,8 +49,8 @@ class oauth2_link:
     
     category = 'OAUTH2'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
+        prefix = command_context.prefix
         return Embed('oauth2_link',(
             'I ll give you a nice authorization link for some oauth 2 scopes.\n'
             f'Usage: `{prefix}oauth2_link`\n'
@@ -99,8 +99,8 @@ class oauth2_feed:
     
     category = 'OAUTH2'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
+        prefix = command_context.prefix
         return Embed('oauth2_feed',(
             'Feeds your oauth 2 authorized redirect url.\n'
             f'Usage: `{prefix}oauth2_feed *link*`\n'
@@ -127,17 +127,16 @@ class oauth2_user:
     
     category = 'OAUTH2'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('oauth2_user', (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'Using this command, I ll show the extra user information , I '
             'received.\n'
-            f'Usage: `{prefix}oauth2_user <user_id>`\n'
+            f'Usage: `{command_context.prefix}oauth2_user <user_id>`\n'
             'Well, every other owner will know it too, by passing your id, '
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
-            f'`{prefix}help oauth2_link`'
+            f'`{command_context.prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
@@ -156,17 +155,16 @@ class oauth2_connections:
     
     category = 'OAUTH2'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('oauth2_connections',(
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'You might ask what are your connections. '
             'Those are your connected apps and sites.\n'
-            f'Usage: `{prefix}oauth2_connections <user_id>`\n'
+            f'Usage: `{command_context.prefix}oauth2_connections <user_id>`\n'
             'Well, every other owner will know it too, by passing your id, '
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
-            f'`{prefix}help oauth2_link`'
+            f'`{command_context.prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
@@ -185,17 +183,16 @@ class oauth2_guilds:
     
     category = 'OAUTH2'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('oauth2_guilds', (
             'After you authorized yourself, I will know your deepest secrets :3\n'
             'By using this command, I ll show your guilds. '
             '*And everything, what I know about them.*\n'
-            f'Usage: `{prefix}oauth2_guilds <user_id>`\n'
+            f'Usage: `{command_context.prefix}oauth2_guilds <user_id>`\n'
             'Well, every other owner will know it too, by passing your id, '
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
-            f'`{prefix}help oauth2_link`'
+            f'`{command_context.prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
@@ -231,16 +228,15 @@ class oauth2_my_guild:
     
     category = 'OAUTH2'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('oauth2_my_guild',(
             'After you authorized yourself, I can create a guild for you, '
             'so just sit back!\n'
-            f'Usage: `{prefix}oauth2_my_guild <user_id>`\n'
+            f'Usage: `{command_context.prefix}oauth2_my_guild <user_id>`\n'
             'Other owners can create a guild for you, after you authorized, '
             'take care!\n'
             'If you don\'t know how to authorize yourself, use : '
-            f'`{prefix}help oauth2_link`'
+            f'`{command_context.prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
@@ -265,14 +261,13 @@ class oauth2_renew:
     
     category = 'OAUTH2'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('oauth2_renew',(
             'Your oauth2 authorization might expire; with this command you can '
             'renew it.\n'
-            f'Usage: `{prefix}oauth2_renew <user_id>`\n'
+            f'Usage: `{command_context.prefix}oauth2_renew <user_id>`\n'
             'Other owners can renew it for you as well!\n'
             'If you don\'t know how to authorize yourself;\n'
-            f'Use : `{prefix}help oauth2_link`'
+            f'Use : `{command_context.prefix}help oauth2_link`'
                 ), color=OAUTH2_COLOR).add_footer(
                 'Owner only!')

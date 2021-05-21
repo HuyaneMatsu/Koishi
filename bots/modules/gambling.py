@@ -8,7 +8,7 @@ from itertools import chain
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
     ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta
-from hata.ext.commands import wait_for_reaction, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
+from hata.ext.command_utils import wait_for_reaction, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
 from hata.ext.slash import abort, SlashResponse
 

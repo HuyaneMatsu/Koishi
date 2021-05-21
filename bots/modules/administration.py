@@ -4,7 +4,7 @@ from functools import partial as partial_func
 
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
     parse_rdelta, time_to_id, ChannelCategory
-from hata.ext.commands import Pagination, wait_for_reaction
+from hata.ext.command_utils import Pagination, wait_for_reaction
 from hata.ext.slash import abort, SlashResponse
 from hata.ext.prettyprint import pchunkify
 

@@ -5,7 +5,7 @@ from threading import Lock as SyncLock
 from collections import deque
 
 from hata import Embed, Lock, Task, alchemy_incendiary, KOKORO
-from hata.ext.commands import Pagination, wait_for_message
+from hata.ext.command_utils import Pagination, wait_for_message
 from hata.backend.futures import _ignore_frame
 
 _ignore_frame(__spec__.origin, '__call__',

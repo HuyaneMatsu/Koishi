@@ -6,11 +6,11 @@ from random import choice
 from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO, Client, \
     Lock, alchemy_incendiary, DiscordException, ERROR_CODES
 from hata.backend.utils import sortedlist
-from hata.ext.commands import setup_ext_commands, Cooldown, Pagination, checks, wait_for_reaction, wait_for_message
-from hata.ext.commands.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.slash import setup_ext_slash
+from hata.ext.command_utils import Pagination, wait_for_reaction, wait_for_message
+from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
+from hata.ext.commands_v2 import checks
 
-from bot_utils.shared import PREFIX__FLAN, COLOR__FLAN_HELP, category_name_rule, PATH__KOISHI
+from bot_utils.shared import PREFIX__FLAN, COLOR__FLAN_HELP, PATH__KOISHI
 from bot_utils.tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
 from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, \
     get_card
@@ -130,16 +130,14 @@ def get_auto_bgm_name(name):
 
 Flan: Client
 
-setup_ext_commands(Flan, PREFIX__FLAN,
-    default_category_name='GENERAL COMMANDS',
-    category_name_rule=category_name_rule,
-        )
-setup_ext_slash(Flan)
-
 Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
 
-Flan.commands(SubterraneanHelpCommand(COLOR__FLAN_HELP), 'help')
+def flan_help_embed_postprocessor(command_context, embed):
+    if embed.color is None:
+        embed.color = COLOR__FLAN_HELP
+
+Flan.commands(SubterraneanHelpCommand(embed_postprocessor=flan_help_embed_postprocessor), 'help')
 Flan.command_processor.create_category('VOICE', checks=checks.guild_only())
 
 @Flan.events
@@ -158,32 +156,18 @@ async def guild_user_add(client, guild, user):
     
     await client.message_create(channel, f'Welcome to the Che-su-to~ server {user:m} ! Please introduce yourself !')
 
-@Flan.commands
-async def invalid_command(client, message, command, content):
-    prefix = client.command_processor.get_prefix_for(message)
-    embed = Embed(
-        f'Invalid command `{command}`',
-        f'try using: `{prefix}help`',
-        color=COLOR__FLAN_HELP,
-            )
-    
-    message = await client.message_create(message.channel, embed=embed)
-    await sleep(30., KOKORO)
-    await client.message_delete(message)
 
 @Flan.commands.from_class
 class ping:
-    @Cooldown('user', 30., handler=CooldownHandler())
     async def ping(client, message):
         await client.message_create(message.channel, f'{client.gateway.latency*1000.:.0f} ms')
     
     aliases = 'pong'
     
-    async def description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('ping',(
             'Ping - Pong?\n'
-            f'Usage: `{prefix}ping`'
+            f'Usage: `{command_context.prefix}ping`'
             ), color=COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
@@ -201,20 +185,19 @@ class sync_avatar:
     
     checks= checks.owner_only()
     
-    async def description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('sync_avatar',(
             'Hello there Esuto!\n'
             'This is a specific command for You, to sync the bot\'s avatar with '
             'the application\'s. I know, You might struggle with updating the '
             'bot\'s avatar the other way, so I made a command for it.\n'
             'Have a nice day!\n'
-            f'Usage: `{prefix}sync_avatar`'
+            f'Usage: `{command_context.prefix}sync_avatar`'
             ), color=COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
 class massadd:
-    async def command(client,message):
+    async def command(client, message):
         try:
             await client.message_at_index(message.channel,1000)
         except IndexError:
@@ -323,15 +306,14 @@ class massadd:
         await client.message_delete(message)
         return
     
-    checks = [checks.owner_or_has_role(CARDS_ROLE)]
+    checks = checks.owner_or_has_role(CARDS_ROLE)
     
-    async def description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
-        return Embed('massadd',(
+    async def description(command_context):
+        return Embed('massadd', (
             'Loads the last 100 message at the channel, and check each of them '
             'searching for card definitions. If it finds one, then updates it, if '
             'already added, or creates a new one.\n'
-            f'Usage: `{prefix}massadd`'
+            f'Usage: `{command_context.prefix}massadd`'
             ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
@@ -357,10 +339,10 @@ class showcard:
             with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
                 await client.message_create(message.channel,embed=embed,file=file)
     
-    async def description(client,message):
-        return Embed('showcard',(
+    async def description(command_context):
+        return Embed('showcard', (
             'Shows the specified card by it\'s name.\n'
-            f'Usage: `{PREFIX__FLAN}showcard *name*`'
+            f'Usage: `{command_context.prefix}showcard *name*`'
             ), color=COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
@@ -404,11 +386,10 @@ class showcards:
         
         await Pagination(client,message.channel,pages)
     
-    async def description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('showcards',(
             'Searches all the cards, which contain the specified string.\n'
-            f'Usage: `{prefix}showcards *name*`'
+            f'Usage: `{command_context.prefix}showcards *name*`'
             ), color=COLOR__FLAN_HELP)
 
 class CardPaginator:
@@ -505,8 +486,9 @@ class add_image:
                 content = 'The message has no attachment provided.'
                 break
             
-            if len(attachments)>1:
-                content = 'The message has more attachmemnts.'
+            if len(attachments) > 1:
+                content = 'The message has more attachments.'
+                break
             
             attachment = attachments[0]
             name=attachment.name
@@ -544,7 +526,7 @@ class add_image:
                         should_dump = False
                     else:
                         content = 'A file with that name already exists.\nIf you overwrite this card\'s image like that, ' \
-                                  'you will endup with more cards with the same image. Are you sure?'
+                                  'you will end up with more cards with the same image. Are you sure?'
                 else:
                     content = 'The card has an image named differently. Are you sure like this?'
             
@@ -588,11 +570,10 @@ class add_image:
     
     checks = checks.has_role(CARDS_ROLE)
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('add_image',(
             'Adds or updates an image of a card.\n'
-            f'Usage: `{prefix}add_image <card name>`\n'
+            f'Usage: `{command_context.prefix}add_image <card name>`\n'
             'Also include an image as attachment.'
             ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
@@ -758,12 +739,11 @@ class checklist:
     
     checks = checks.has_role(CARDS_ROLE)
     
-    async def description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('checklist',(
             'Lists the cards of the given rarity, which have images added to them.\n'
             'If no rarity is provided, I will list all the cards with images.\n'
-            f'Usage: `{prefix}checklist *rarity*`\n'
+            f'Usage: `{command_context.prefix}checklist *rarity*`\n'
             ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
     
@@ -804,11 +784,10 @@ class dump_all_card:
     
     checks = checks.has_role(CARDS_ROLE)
     
-    async def description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('dump-all-card',(
             'Lists all the cards to this channel.\n'
-            f'Usage: `{prefix}dump-all-card`\n'
+            f'Usage: `{command_context.prefix}dump-all-card`\n'
             ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
@@ -856,11 +835,10 @@ class remove_card:
     
     checks = checks.has_role(CARDS_ROLE)
     
-    async def description(client,message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('remove-card',(
             'Removes the specific card\n'
-            f'Usage: `{prefix}remove-card <name>`\n'
+            f'Usage: `{command_context.prefix}remove-card <name>`\n'
             ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
@@ -1068,18 +1046,17 @@ def get_random_bgm():
     
     return selected
 
-async def bgminfo_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def bgminfo_description(command_context):
     return Embed('bgminfo', (
         'Shows up the given bgm\'s description..\n'
-        f'Usage: `{prefix}bgminfo <name>`\n'
+        f'Usage: `{command_context.prefix}bgminfo <name>`\n'
         '\n'
         'Note that the given name can be also given as the position of the track.'
             ), color=COLOR__FLAN_HELP)
 
-async def bgminfo_command(client, message, content):
+async def bgminfo_command(command_context, content):
     if not content:
-        await bgminfo_description(client, message)
+        await bgminfo_description(command_context)
         return
     
     bgm = get_bgm(content)
@@ -1092,7 +1069,7 @@ async def bgminfo_command(client, message, content):
         description = bgm.description
     
     embed = Embed(title, description, color=CHESUTO_COLOR)
-    await client.message_create(message.channel, embed=embed)
+    await command_context.client.message_create(command_context.message.channel, embed=embed)
 
 Flan.commands(bgminfo_command, name='bgminfo', description=bgminfo_description, category='VOICE')
 
@@ -1144,11 +1121,10 @@ class bgms:
     
     category = 'VOICE'
     
-    async def description(client, message):
-        prefix = client.command_processor.get_prefix_for(message)
+    async def description(command_context):
         return Embed('bgms', (
             'Lists the chesuto bgms.\n'
-            f'Usage: `{prefix}bgms`'
+            f'Usage: `{command_context.prefix}bgms`'
             ), color=COLOR__FLAN_HELP)
 
 
@@ -1179,11 +1155,10 @@ def check_reaction_cards_role(event):
     
     return False
 
-async def set_bgm_name_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def set_bgm_name_description(command_context):
     return Embed('set-bgm-name', (
         'Changes a bgm\'s name\n'
-        f'Usage: `{prefix}set-bgm-name <bgm name>`\n'
+        f'Usage: `{command_context.prefix}set-bgm-name <bgm name>`\n'
         'After it please define the new name and react with the OK emoji.'
         ), color=COLOR__FLAN_HELP).add_footer(
             f'You must have `{CARDS_ROLE}` role to use this command.')

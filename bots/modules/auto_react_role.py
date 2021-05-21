@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
 import re
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, ClientWrapper, MESSAGES, \
     Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference, \
-    ChannelBase
+    ChannelBase, parse_role, parse_emoji
 
-from hata.ext.commands import ContentParser, Converter, ChooseMenu, Pagination, ConverterFlag, Closer
+from hata.ext.command_utils import ChooseMenu, Closer
 from hata.ext.slash import abort
 
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
-
-ROLE_CONVERTER = Converter('role', flags=ConverterFlag.role_default.update_by_keys(everywhere=True))
-MESSAGE_CONVERTER = Converter('message', flags=ConverterFlag.message_default.update_by_keys(everywhere=True))
 
 SLASH_CLIENT: Client
 
@@ -648,7 +644,7 @@ class AutoReactRoleGUI:
             return
         
         if name == 'del':
-            await self.sub_del(client, message, content)
+            await self.sub_del(message, content)
             return
         
         if name == 'behaviour':
@@ -732,8 +728,19 @@ class AutoReactRoleGUI:
         
         await manager.destroy()
     
-    @ContentParser(is_method=True)
-    async def sub_add(self, client, message, emoji: Emoji, role: ROLE_CONVERTER):
+    async def sub_add(self, client, message, content):
+        split = content.split()
+        if len(split) < 2:
+            return
+        
+        emoji = parse_emoji(split[0])
+        if (emoji is None):
+            return
+        
+        role = parse_role(split[1], message=message)
+        if (role is None):
+            return
+        
         if not client.can_use_emoji(emoji):
             return
         
@@ -757,18 +764,18 @@ class AutoReactRoleGUI:
         await self.update()
         await self.delete_message(message)
     
-    @ContentParser(is_method=True)
-    async def sub_del(self, client, message, emoji: Emoji = None, role: ROLE_CONVERTER = None):
-        if emoji is None:
-            if role is None:
-                return
-            else:
-                object_ = role
-        else:
-            if role is None:
-                object_ = emoji
-            else:
-                return
+    async def sub_del(self, message, content):
+        split = content.split()
+        if len(split) < 1:
+            return
+        
+        object_ = parse_emoji(split[0])
+        if (object_ is None):
+            return
+        
+        object_ = parse_role(split[0], message=message)
+        if (object_ is None):
+            return
         
         if not self.changes.remove(object_):
             return

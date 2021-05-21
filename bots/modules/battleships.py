@@ -4,7 +4,8 @@ from random import randint
 
 from hata import Color, filter_content, is_user_mention, Future, FutureWM, future_or_timeout, sleep, Task, \
     DiscordException, BUILTIN_EMOJIS, Embed, KOKORO, ERROR_CODES, Client
-from hata.ext.commands import WaitAndContinue, Converter, ConverterFlag, checks, Closer
+from hata.ext.command_utils import WaitAndContinue, Closer
+from hata.ext.commands_v2 import checks, configure_converter
 
 BS_COLOR = Color.from_rgb(71, 130, 255)
 
@@ -129,7 +130,8 @@ BS_GAMES = {}
 BS_REQUESTERS = set()
 BS_REQUESTS = {}
 
-async def battle_manager(client, message, target:Converter('user', flags=ConverterFlag.user_default.update_by_keys(everywhere=True), default=None)):
+@configure_converter('user', everywhere=True)
+async def battle_manager(client, message, target:'user'=None):
     text = None
     while True:
         if target is None:
@@ -834,11 +836,10 @@ class battleships_game:
         self.player1.cancel()
         self.player2.cancel()
 
-async def bs_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def bs_description(command_context):
     return Embed('bs', (
         'Requests a battleship game with the given user.\n'
-        f'Usage: `{prefix}bs *user*`'
+        f'Usage: `{command_context.prefix}bs *user*`'
         ), color=BS_COLOR).add_footer(
             'Guild only!')
 

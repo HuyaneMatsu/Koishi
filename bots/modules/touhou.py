@@ -5,7 +5,7 @@ from collections import deque
 from difflib import get_close_matches
 
 from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO, Client
-from hata.ext.commands import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, ChooseMenu, Pagination, \
+from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, ChooseMenu, Pagination, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 from hata.backend.utils import from_json
 from hata.ext.slash import SlashResponse, abort

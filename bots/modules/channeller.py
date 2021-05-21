@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from hata import Task, User, CHANNELS, Embed, Client, Color, WebhookType, KOKORO
 
-from hata.ext.commands import checks
+from hata.ext.commands_v2 import checks
 
 CHANNELLER_COLOR = Color.from_rgb(129, 158, 0)
     
@@ -282,16 +281,15 @@ async def channeling_start(client, message, channel_id:int):
     
     await client.message_create(channel_1, text)
 
-async def channeling_start_description(client,message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def channeling_start_description(command_context):
     return Embed('channeling_start', (
         'I can connect more channels with my youkai powers.\n'
-        f'Usage: `{prefix}channeling_start *channel_id*`\n'
+        f'Usage: `{command_context.prefix}channeling_start *channel_id*`\n'
         '`channel_id` must be an id of a channel, what I have access too.\n'
         'By connecting two channels, I manipulate them to cross send each '
         'message. I always connect the source channel, with the target '
         'channel to be clean. *More channels can be connected too.*\n'
-        f'To cancel channelling use: `{prefix}channeling_stop`'
+        f'To cancel channelling use: `{command_context.prefix}channeling_stop`'
         ), color=CHANNELLER_COLOR).add_footer(
             'Owner only!')
 
@@ -311,11 +309,10 @@ async def channeling_stop(client, message, content):
 
     await client.message_create(channel, text)
 
-async def channeling_stop_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+async def channeling_stop_description(command_context):
     return Embed('channeling_stop', (
         'Cancels the channelling of this channel.\n'
-        f'Usage: `{prefix}channeling_stop`\n'
+        f'Usage: `{command_context.prefix}channeling_stop`\n'
         'If more channels are connected, you need to call this command, '
         'from every of them, to cancel all.\n'
         'If only one channel is left alone, it will be cancelled automatically.'
@@ -326,9 +323,11 @@ COMMAND_CLIENT: Client
 COMMAND_CLIENT.commands(channeling_start,
     description = channeling_start_description,
     checks = [checks.guild_only(), checks.owner_only()],
-    category = 'UTILITY')
+    category = 'UTILITY',
+)
 
 COMMAND_CLIENT.commands(channeling_stop,
     description = channeling_stop_description,
     checks = [checks.owner_only()],
-    category = 'UTILITY')
+    category = 'UTILITY',
+)

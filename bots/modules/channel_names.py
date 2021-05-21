@@ -11,7 +11,8 @@ from bot_utils.tools import Cell
 
 from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \
     BUILTIN_EMOJIS
-from hata.ext.commands import checks, Pagination, Closer, wait_for_reaction
+from hata.ext.commands_v2 import checks
+from hata.ext.command_utils import Pagination, Closer, wait_for_reaction
 
 FILE_NAME = 'channel_names.csv'
 
@@ -279,7 +280,7 @@ ADD_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 ADD_EMOJI_EMOJIS = (ADD_EMOJI_OK, ADD_EMOJI_CANCEL)
 
-@COMMAND_CLIENT.commands( category='CHANNEL NAMES', separator='|')
+@COMMAND_CLIENT.commands(category='CHANNEL NAMES', separator='|')
 async def add_bot_channel_name(client, message, weight:int, name):
     """
     Adds the given channel name to the bot channel names.

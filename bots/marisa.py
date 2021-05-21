@@ -889,14 +889,15 @@ async def getting_good(client, event):
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def we_gucci(client, event):
     """Getting there."""
-    main_component = Row(
+    main_component = [
         Button('cake', custom_id='cake', style=ButtonStyle.primary),
         Button('cat', custom_id='cat', style=ButtonStyle.secondary),
         Button('snake', custom_id='snake', style=ButtonStyle.success),
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
-    )
+    ]
     
-    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
+    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component,
+        force_new_message=True, show_for_invoking_user_only=True)
     
     try:
         async for component_interaction in iter_component_interactions(event, timeout=30.0, count=3):
@@ -905,7 +906,7 @@ async def we_gucci(client, event):
     except TimeoutError:
         pass
     
-    await client.message_edit(event.message, components=None)
+    abort('Interaction exhausted or timeout occurred.')
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def slash_edit(client, event):
@@ -931,7 +932,7 @@ async def mentionable_check(client, event,
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 @configure_parameter('emoji', str, 'Yes?')
-async def configured_show_emoji(client, event, emoji):
+async def configured_show_emoji(emoji):
     """Shows the given custom emoji."""
     emoji = parse_emoji(emoji)
     if emoji is None:
@@ -944,30 +945,30 @@ async def configured_show_emoji(client, event, emoji):
 
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def select_test(client, event):
-    main_component = Row(
+async def select_test():
+    main_component = [
         Select([
-            Option('cake', 'cake', emoji=BUILTIN_EMOJIS['flan']
-        )]),
-    )
+                Option('cake', 'cake', default=True),
+                Option('cat', 'cat'),
+                Option('sugoi', 'sugoi'),
+            ],
+            placeholder='dunno',
+            min_values=2,
+            max_values=3,
+        ),
+    ]
     
     yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
 
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def invoking_only_test(client, event):
-    await client.interaction_response_message_create(event, show_for_invoking_user_only=True)
-    message = await client.interaction_followup_message_create(event, 'owo', show_for_invoking_user_only=True)
-    yield repr(message)
-    message = await client.interaction_followup_message_create(event, 'owo', show_for_invoking_user_only=False)
-    yield repr(message)
-    
-    main_component = Row(
+async def nested_components():
+    components = [[
         Button('cake', custom_id='cake', style=ButtonStyle.primary),
         Button('cat', custom_id='cat', style=ButtonStyle.secondary),
         Button('snake', custom_id='snake', style=ButtonStyle.success),
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
-    )
+    ]]
     
-    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=False)
+    return SlashResponse(embed=Embed('Nesting with lists.'), components=components, show_for_invoking_user_only=True)
 
