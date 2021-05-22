@@ -25,9 +25,8 @@ from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
-from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue, \
-    setup_ext_command_utils
-from hata.ext.commands_v2 import checks
+from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue
+from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
 from bot_utils.shared import COLOR__MARISA_HELP, \
@@ -972,3 +971,15 @@ async def nested_components():
     
     return SlashResponse(embed=Embed('Nesting with lists.'), components=components, show_for_invoking_user_only=True)
 
+@Marisa.commands
+@cooldown('user', 30.0)
+async def test_cooldown():
+    return 'cake'
+
+@test_cooldown.error
+async def handle_cooldown_error(command_context, exception):
+    if isinstance(exception, CommandCooldownError):
+        await command_context.send(f'You are on cooldown. Try again after {exception.expires_after:.2f} seconds.')
+        return True
+    
+    return False
