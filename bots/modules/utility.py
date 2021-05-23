@@ -995,7 +995,7 @@ async def in_role(client, event,
 
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def ping(client, event):
+async def ping():
     """HTTP ping-pong."""
     start = perf_counter()
     yield

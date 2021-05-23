@@ -1,19 +1,19 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime
 from functools import partial as partial_func
 
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
-    parse_rdelta, time_to_id, ChannelCategory
+    parse_rdelta, time_to_id, ChannelCategory, Emoji
 from hata.ext.command_utils import Pagination, wait_for_reaction
-from hata.ext.slash import abort, SlashResponse
+from hata.ext.slash import abort, SlashResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
-
 
 from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
 
 SLASH_CLIENT: Client
+
+EMOJI__REIMU_HAMMER = Emoji.precreate(690550890045898812)
 
 def match_message_author(user, message):
     return (message.author is user)
@@ -314,7 +314,26 @@ async def yeet(client, event,
     if (reason is not None) and (not reason):
         reason = None
     
-    yield
+    embed = Embed('Confirmation', f'Are you sure to yeet {user.mention} from {guild.name}?'). \
+        add_field('Delete message day', str(delete_message_days), inline=True). \
+        add_field('Notify user', 'true' if notify_user else 'false', inline=True). \
+        add_field('Reason', '*No reason provided.*' if reason is None else reason)
+    
+    button_confirm = Button('Yes', EMOJI__REIMU_HAMMER, style=ButtonStyle.red)
+    button_cancel = Button('No', style=ButtonStyle.gray)
+    
+    components = Row(button_confirm, button_cancel)
+    
+    yield SlashResponse(embed=embed, components=components, allowed_mentions=None, show_for_invoking_user_only=True,
+        force_new_message=True)
+    
+    try:
+        component_interaction = await wait_for_component_interaction(event, timeout=300.0)
+    except TimeoutError:
+        abort('Timeout occurred.')
+    
+    if component_interaction.interaction == button_cancel:
+        abort(f'Yeeting {user.mention} cancelled', allowed_mentions=None)
     
     if notify_user:
         if user.is_bot:

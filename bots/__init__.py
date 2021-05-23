@@ -86,6 +86,7 @@ if MARISA_MODE:
     
     MARISA_ALLOWED_MODULES.add('voice')
     MARISA_ALLOWED_MODULES.add('extensions')
+    MARISA_ALLOWED_MODULES.add('google')
     
     for path in list(MODULE_NAMES):
         if path not in MARISA_ALLOWED_MODULES:

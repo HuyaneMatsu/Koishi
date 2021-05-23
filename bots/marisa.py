@@ -240,7 +240,7 @@ async def perms(client, event):
 
 
 @Marisa.interactions
-async def ping(client, event):
+async def ping():
     """HTTP ping-pong."""
     start = perf_counter()
     yield
@@ -709,7 +709,7 @@ async def debug_command(client, event,
         'Id : `', repr(application_command.id), '`\n'
         'Allow by default : `', repr(application_command.allow_by_default), '`\n'
         '**Permission overwrites**:\n'
-            ]
+    ]
     
     if permission is None:
         overwrites = None
@@ -866,11 +866,11 @@ def check_user(user, event):
 async def getting_good(client, event):
     """Getting there."""
     main_component = Row(
-        Button('cake', custom_id='cake', style=ButtonStyle.primary),
-        Button('cat', custom_id='cat', style=ButtonStyle.secondary),
-        Button('snake', custom_id='snake', style=ButtonStyle.success),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive, enabled=False),
+        Button('cake', custom_id='cake', style=ButtonStyle.violet),
+        Button('cat', custom_id='cat', style=ButtonStyle.gray),
+        Button('snake', custom_id='snake', style=ButtonStyle.green),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red, enabled=False),
     )
     
     yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
@@ -889,10 +889,10 @@ async def getting_good(client, event):
 async def we_gucci(client, event):
     """Getting there."""
     main_component = [
-        Button('cake', custom_id='cake', style=ButtonStyle.primary),
-        Button('cat', custom_id='cat', style=ButtonStyle.secondary),
-        Button('snake', custom_id='snake', style=ButtonStyle.success),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
+        Button('cake', custom_id='cake', style=ButtonStyle.violet),
+        Button('cat', custom_id='cat', style=ButtonStyle.gray),
+        Button('snake', custom_id='snake', style=ButtonStyle.green),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
     ]
     
     yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component,
@@ -906,6 +906,20 @@ async def we_gucci(client, event):
         pass
     
     abort('Interaction exhausted or timeout occurred.')
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def link():
+    """Melo Melo!"""
+    component = Button(
+        'melo melo',
+        url='https://www.youtube.com/watch?v=gYGqcORGqIw&ab_channel=ShoopTouhouEurobeatShoopTouhouEurobeat',
+    )
+    
+    return SlashResponse('_ _',
+        components = component,
+        show_for_invoking_user_only = True,
+    )
+
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def slash_edit(client, event):
@@ -963,10 +977,10 @@ async def select_test():
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def nested_components():
     components = [[
-        Button('cake', custom_id='cake', style=ButtonStyle.primary),
-        Button('cat', custom_id='cat', style=ButtonStyle.secondary),
-        Button('snake', custom_id='snake', style=ButtonStyle.success),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.destructive),
+        Button('cake', custom_id='cake', style=ButtonStyle.violet),
+        Button('cat', custom_id='cat', style=ButtonStyle.gray),
+        Button('snake', custom_id='snake', style=ButtonStyle.green),
+        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
     ]]
     
     return SlashResponse(embed=Embed('Nesting with lists.'), components=components, show_for_invoking_user_only=True)

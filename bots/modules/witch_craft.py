@@ -243,42 +243,42 @@ class Item:
 ITEM_DUCK = Item(1, 'Duck', BUILTIN_EMOJIS['duck'],
     cooking=CookingFactor(flavor=100, meat=100, monster=20),
     edibility=EdibilityFactor(hunger=40, sanity=-20),
-        )
+)
 
 ITEM_SALT = Item(2, 'Flavor crystal', BUILTIN_EMOJIS['salt'],
     cooking=CookingFactor(flavor=100),
     edibility=EdibilityFactor(health=-20, hunger=0, sanity=-20),
-        )
+)
 
 ITEM_ONION = Item(3, 'Organic tear gas', BUILTIN_EMOJIS['onion'],
     cooking=CookingFactor(flavor=50, vegetable=40),
     edibility=EdibilityFactor(health=5, hunger=5, sanity=-10),
-        )
+)
 
 ITEM_EGG = Item(4, 'Next generation (capsule)', BUILTIN_EMOJIS['egg'],
     cooking=CookingFactor(flavor=50, meat=50),
     edibility=EdibilityFactor(health=5, hunger=10),
-        )
+)
 
 ITEM_RED_MUSHROOM = Item(5, 'Witch hallucinogen', BUILTIN_EMOJIS['mushroom'],
     cooking=CookingFactor(flavor=50, mushroom=100),
     edibility=EdibilityFactor(health=-20, hunger=10, sanity=-5),
-        )
+)
 
 ITEM_GARLIC = Item(6, 'Anti-vampire grenade', BUILTIN_EMOJIS['garlic'],
     cooking=CookingFactor(flavor=100, vegetable=30),
     edibility=EdibilityFactor(health=10, hunger=5, sanity=-10),
-        )
+)
 
 ITEM_OIL = Item(7, 'Pan slipper', BUILTIN_EMOJIS['oil'],
     cooking=CookingFactor(flavor=30, vegetable=20, fruit=20),
     edibility=EdibilityFactor(hunger=5, sanity=-10),
-        )
+)
 
 ITEM_OLIVE = Item(8, 'Slipper fruit', BUILTIN_EMOJIS['olive'],
     cooking=CookingFactor(flavor=30, fruit=30),
     edibility=EdibilityFactor(health=10, hunger=10),
-        )
+)
 
 BUYABLE = [
     ITEM_SALT,
@@ -286,7 +286,7 @@ BUYABLE = [
     ITEM_RED_MUSHROOM,
     ITEM_GARLIC,
     ITEM_OLIVE,
-        ]
+]
 
 BUYABLE.sort(key=lambda item:item.name)
 
@@ -343,11 +343,22 @@ async def load_data():
 def calculate_buy_cost(market_cost, n):
     return floor((n*((market_cost<<1)+n+1)>>1)*(1.0+MARKET_COST_FEE))
 
+# ((x+1)*x)/2
+# Optimize!
+# ((x+1)*x)>>1
+
 def calculate_sell_price(market_cost, n):
-    market_cost_min = market_cost-n
-    if market_cost_min < MARKET_COST_MIN:
-        pass
-        # TODO
+    price = n*MARKET_COST_MIN
+    
+    over_price = -MARKET_COST_MIN+market_cost
+    if over_price > n:
+        over_price = n
+    
+    if over_price > 0:
+        price += ((over_price+1)*over_price)>>1
+    
+    return price
+
 
 def calculate_buyable_and_cost(market_cost, n, usable):
     if usable < market_cost:
@@ -434,7 +445,7 @@ async def buy(client, event,
         f'\n'
         f'Price: {calculate_buy_cost(item.market_cost, amount)} {EMOJI__HEART_CURRENCY:e}\n'
         f'Budget: {total_love} {EMOJI__HEART_CURRENCY:e}'
-            )
+    )
     
     embed.add_author(user.avaar_url, user.full_name)
     embed.add_footer('The prices of context of demand and supply.')
@@ -492,7 +503,7 @@ async def buy(client, event,
                         user_id = user.id,
                         amount  = amount,
                         type    = item.id
-                            )
+                    )
                 
                 await connector.execute(to_execute)
         
@@ -502,7 +513,7 @@ async def buy(client, event,
             f'Bought mount: **{amount}**\n'
             f'\n'
             f'Hearts: {total_love} {EMOJI__HEART_CURRENCY:e} -> {new_love} {EMOJI__HEART_CURRENCY:e}'
-                )
+        )
     
     await client.message_edit(message, embed=embed)
 

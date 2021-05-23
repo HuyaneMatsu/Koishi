@@ -36,6 +36,8 @@ ALLOW_MARISA_SNEKBOX = True     # (bool) Whether Marisa can load the snekbox mod
 RUN_WEBAPP_AS_MAIN = True       # (bool) Whether web app should be started if manage.py is the local file.
                                 # Have this as `False` if not self-hosting.
 WEBAPP_SECRET_KEY = None        # (str) Secret key for webapp.
+
+GOOGLE_API_KEYS = None          # (None or list of str) A list of google api keys.
 ```
 
 #### Koishi requirements
