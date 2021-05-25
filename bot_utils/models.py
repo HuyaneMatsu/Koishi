@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from config import DATABASE_NAME
 
 if DATABASE_NAME is None:
@@ -10,6 +9,9 @@ if DATABASE_NAME is None:
     
     auto_react_role_model = None
     AUTO_REACT_ROLE_TABLE = None
+    
+    emoji_counter_model = None
+    EMOJI_COUNTER_TABLE = None
     
     DB_ENGINE = None
     
@@ -59,8 +61,17 @@ else:
         amount          = Column(BIGINT, default=0)
         type            = Column(Integer, default=0)
     
-    
     ITEM_TABLE = item_model.__table__
+    
+    class emoji_counter_model(BASE):
+        __tablename__   = 'EMOJI_COUNTER'
+        id              = Column(BIGINT, primary_key=True)
+        user_id         = Column(BIGINT)
+        emoji_id        = Column(BIGINT)
+        timestamp       = Column(DateTime)
+        action_type     = Column(Integer)
+    
+    EMOJI_COUNTER_TABLE = emoji_counter_model.__table__
     
     # Creating tables
     DB_ENGINE = create_engine(DATABASE_NAME)

@@ -5287,3 +5287,22 @@ async def rate_limit_test0141(client, message, stage_channel:'channel'=None):
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await stage_get(client, stage_channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0142(client, message):
+    """
+    Edits my avatar.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0142') as RLT:
+        attachment = message.attachment
+        if attachment is None:
+            await RLT.send('attachment is required.')
+        
+        content_type = attachment.content_type
+        if (content_type is None) or (not content_type.startswith(content_type)):
+            await RLT.send('Image is required')
+        
+        avatar = await client.download_attachment(attachment)
+        await client_edit(client, avatar=avatar)

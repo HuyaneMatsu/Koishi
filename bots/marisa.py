@@ -39,7 +39,7 @@ Marisa : Client
 
 Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())
-
+Marisa.command_processor.get_default_category().checks = checks.owner_only()
 
 def marisa_help_embed_postprocessor(command_context, embed):
     if embed.color is None:

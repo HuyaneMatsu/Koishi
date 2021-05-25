@@ -273,3 +273,4 @@ async def execute_description(command_context):
 
 Satori.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
     checks=[checks.owner_only()])
+

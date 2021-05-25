@@ -17,10 +17,11 @@ from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed,
     StagePrivacyLevel
 
 from hata.ext.command_utils import ChooseMenu, Pagination, Closer
-from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag
+from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag, CommandContext
 from hata.discord.events.core import PARSERS
 from hata.ext.prettyprint import pchunkify
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS
+
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
@@ -2094,3 +2095,15 @@ async def test_message_interaction(ctx, message:'message'):
     """
     data = await ctx.client.http.message_interaction(message.channel.id, message.id)
     return str(data)
+
+
+@TEST_COMMANDS
+async def show_help_for(ctx, user:'user', content):
+    """
+    Shows help for teh given user.
+    """
+    client = ctx.client
+    message = ctx.message.custom(author=user)
+    command = client.command_processor.command_name_to_command['help']
+    context = CommandContext(client, message, ctx.prefix, content, command)
+    await context.invoke()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from io import StringIO
 from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory, Emoji, User
@@ -34,6 +33,7 @@ ROLE__NEKO_DUNGEON__NSFW_ACCESS = Role.precreate(828576094776590377)
 ROLE__NEKO_DUNGEON__EVENT_MANAGER = Role.precreate(798913709019103284)
 ROLE__NEKO_DUNGEON__EVENT_WINNER = Role.precreate(771989284231053323)
 ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT = Role.precreate(801608590720106496)
+ROLE__NEKO_DUNGEON__HEART_BOOST = Role.precreate(846320725580709908)
 
 INVITE__NEKO_DUNGEON = Invite.precreate('3cH2r5d')
 

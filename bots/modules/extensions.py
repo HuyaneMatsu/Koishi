@@ -29,7 +29,7 @@ async def list_extensions(client, message):
 
 
 @COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def load(client, message, name:str=None):
+async def load(name:str=None):
     """
     Loads the specified extension by it's name.
     """
@@ -44,7 +44,7 @@ async def load(client, message, name:str=None):
         return 'The extension is locked, probably for reason.'
     
     try:
-        await EXTENSION_LOADER.load(name)
+        await EXTENSION_LOADER.load(extension.name)
     except BaseException as err:
         result = repr(err)
         if len(result) > 2000:
@@ -55,7 +55,7 @@ async def load(client, message, name:str=None):
 
 
 @COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def register_extension(client, message, name:str=None):
+async def register_extension(name:str=None):
     """
     Registers the specified extension by it's name.
     """
@@ -73,12 +73,12 @@ async def register_extension(client, message, name:str=None):
             result = result[-2000:]
         
         return result
-        
+    
     return 'Extension successfully loaded.'
 
 
 @COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def reload(client, message, name:str=None):
+async def reload(name:str=None):
     """
     Reloads the specified extension by it's name.
     """
@@ -93,7 +93,7 @@ async def reload(client, message, name:str=None):
         return 'The extension is locked, probably for reason.'
     
     try:
-        await EXTENSION_LOADER.reload(name)
+        await EXTENSION_LOADER.reload(extension.name)
     except BaseException as err:
         result = repr(err)
         if len(result) > 2000:
@@ -105,7 +105,7 @@ async def reload(client, message, name:str=None):
 
 
 @COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def unload(client, message, name:str=None):
+async def unload(name:str=None):
     """
     Unloads the specified extension by it's name.
     """
@@ -120,7 +120,7 @@ async def unload(client, message, name:str=None):
         return 'The extension is locked, probably for reason.'
     
     try:
-        await EXTENSION_LOADER.unload(name)
+        await EXTENSION_LOADER.unload(extension.name)
     except BaseException as err:
         result = repr(err)
         if len(result) > 2000:
@@ -132,9 +132,9 @@ async def unload(client, message, name:str=None):
 
 
 @COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def debug_extensions(client, message):
+async def debug_extensions():
     """
-    Lists extensions / client.
+    Lists extensions for each client.
     """
     result_parts = []
     

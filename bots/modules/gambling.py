@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 from functools import partial as partial_func
 from datetime import datetime, timedelta
@@ -16,7 +15,7 @@ from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from bot_utils.shared import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
-    EMOJI__HEART_CURRENCY, USER__DISBOARD
+    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST
 
 SLASH_CLIENT: Client
 def setup(lib):
@@ -30,17 +29,27 @@ GAMBLING_COLOR          = Color.from_rgb(254, 254, 164)
 DAILY_INTERVAL          = timedelta(hours=22)
 DAILY_STREAK_BREAK      = timedelta(hours=26)
 DAILY_STREAK_LOSE       = timedelta(hours=12)
-DAILY_REWARD            = 100
-DAILY_STREAK_BONUS      = 5
-DAILY_REWARD_BONUS_W_W  = 10
-DAILY_REWARD_LIMIT      = 300
-DAILY_REWARD_LIMIT_W_P  = 600
+
+DAILY_BASE              = 100
+DAILY_PER_DAY           = 5
+DAILY_LIMIT             = 300
+
+DAILY_LIMIT_BONUS_W_E   = 300
+
+DAILY_PER_DAY_BONUS_W_B = 5
+DAILY_LIMIT_BONUS_W_B   = 300
+
+DAILY_BASE_BONUS_W_HE   = 514
+DAILY_LIMIT_BONUS_W_HE  = 5140
+
+ELEVATED_COST           = 10000
+HEART_BOOST_COST        = 514000
 
 
 EVENT_MAX_DURATION      = timedelta(hours=24)
 EVENT_MIN_DURATION      = timedelta(minutes=30)
-EVENT_HEART_MIN_AMOUNT  = DAILY_REWARD//2               # half day of min
-EVENT_HEART_MAX_AMOUNT  = 7*DAILY_REWARD_LIMIT_W_P      # 1 week of max
+EVENT_HEART_MIN_AMOUNT  = 50
+EVENT_HEART_MAX_AMOUNT  = 3000
 EVENT_OK_EMOJI          = BUILTIN_EMOJIS['ok_hand']
 EVENT_ABORT_EMOJI       = BUILTIN_EMOJIS['x']
 EVENT_DAILY_MIN_AMOUNT  = 1
@@ -51,7 +60,7 @@ CARD_TYPES = (
     BUILTIN_EMOJIS['clubs'].as_emoji,
     BUILTIN_EMOJIS['hearts'].as_emoji,
     BUILTIN_EMOJIS['diamonds'].as_emoji,
-        )
+)
 
 CARD_NUMBERS = (
     BUILTIN_EMOJIS['two'].as_emoji,
@@ -67,7 +76,7 @@ CARD_NUMBERS = (
     BUILTIN_EMOJIS['regional_indicator_q'].as_emoji,
     BUILTIN_EMOJIS['regional_indicator_k'].as_emoji,
     BUILTIN_EMOJIS['a'].as_emoji,
-        )
+)
 
 DECK_SIZE   = len(CARD_TYPES) * len(CARD_NUMBERS)
 ACE_INDEX   = len(CARD_NUMBERS)-1
@@ -90,23 +99,97 @@ def calculate_daily_for(user, daily_streak):
     -------
     received : `int`
     """
+    daily_base = DAILY_BASE
+    daily_per_day = DAILY_PER_DAY
+    daily_limit = DAILY_LIMIT
+    
+    
     if user.has_role(ROLE__NEKO_DUNGEON__ELEVATED):
-        daily_streak_bonus = DAILY_REWARD_BONUS_W_W
-    else:
-        daily_streak_bonus = DAILY_STREAK_BONUS
+        daily_limit += DAILY_LIMIT_BONUS_W_E
     
     if user.has_role(ROLE__NEKO_DUNGEON__BOOSTER):
-        daily_bonus_limit = DAILY_REWARD_LIMIT_W_P
-    else:
-        daily_bonus_limit = DAILY_REWARD_LIMIT
+        daily_per_day += DAILY_PER_DAY_BONUS_W_B
+        daily_limit += DAILY_LIMIT_BONUS_W_B
     
-    received = DAILY_REWARD+daily_streak*daily_streak_bonus
-    if received > daily_bonus_limit:
-        received = daily_bonus_limit
+    if user.has_role(ROLE__NEKO_DUNGEON__HEART_BOOST):
+        daily_base += DAILY_BASE_BONUS_W_HE
+        daily_limit += DAILY_LIMIT_BONUS_W_HE
     
-    received += daily_streak
+    
+    daily_extra = daily_streak*daily_per_day
+    if (daily_extra > daily_limit):
+        daily_extra = daily_limit
+    
+    received = daily_base+daily_extra+daily_streak
     
     return received
+
+def calculate_daily_new_only(daily_streak, daily_next, now):
+    """
+    Calculates daily streak loss and the new next claim time.
+    
+    Parameters
+    ----------
+    daily_streak : `int`
+        The user's actual daily streak.
+    daily_next : `datetime`
+        The time when the user can claim it's next daily reward.
+    now : `datetime`
+        The current utc time.
+    
+    Returns
+    -------
+    daily_streak_new : `int`
+        The new daily streak value of teh user.
+    """
+    daily_next_with_break = daily_next+DAILY_STREAK_BREAK
+    if daily_next_with_break < now:
+        daily_streak_new = daily_streak-((now-daily_next_with_break)//DAILY_STREAK_LOSE)-1
+        
+        if daily_streak_new < 0:
+            daily_streak_new = 0
+    
+    else:
+        daily_streak_new = daily_streak
+    
+    return daily_streak_new
+
+
+def calculate_daily_new(daily_streak, daily_next, now):
+    """
+    Calculates daily streak loss and the new next claim time.
+    
+    Parameters
+    ----------
+    daily_streak : `int`
+        The user's actual daily streak.
+    daily_next : `datetime`
+        The time when the user can claim it's next daily reward.
+    now : `datetime`
+        The current utc time.
+    
+    Returns
+    -------
+    daily_streak_new : `int`
+        The new daily streak value of teh user.
+    daily_next_new : `datetime`
+        The new daily next value of the user.
+    """
+    daily_next_with_break = daily_next+DAILY_STREAK_BREAK
+    if daily_next_with_break < now:
+        daily_streak_new = daily_streak-((now-daily_next_with_break)//DAILY_STREAK_LOSE)-1
+        
+        if daily_streak_new < 0:
+            daily_streak_new = 0
+            daily_next_new = now
+        else:
+            daily_next_new = daily_next+(DAILY_STREAK_LOSE*daily_streak_new)
+    
+    else:
+        daily_streak_new = daily_streak
+        daily_next_new = daily_next
+    
+    return daily_streak_new, daily_next_new
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -130,18 +213,12 @@ async def daily(client, event,
                     return Embed(
                         'You already claimed your daily love for today~',
                         f'Come back in {elapsed_time(daily_next)}.',
-                        GAMBLING_COLOR)
+                        color=GAMBLING_COLOR,
+                    )
                 
-                daily_streak = source_result.daily_streak
-                daily_next = daily_next+DAILY_STREAK_BREAK
-                if daily_next < now:
-                    daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
+                daily_streak = calculate_daily_new_only(source_result.daily_streak, daily_next, now)
                 
-                # Security
-                if daily_streak < 0:
-                    daily_streak = 0
-                
-                if daily_next < now:
+                if daily_next+DAILY_STREAK_BREAK < now:
                     streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
                 else:
                     streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
@@ -160,19 +237,21 @@ async def daily(client, event,
                     'Here, some love for you~\nCome back tomorrow !',
                     f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} {EMOJI__HEART_CURRENCY:e}\n'
                     f'{streak_text}',
-                    GAMBLING_COLOR)
+                    color=GAMBLING_COLOR,
+                )
             
+            received = calculate_daily_for(source_user, 0)
             await connector.execute(CURRENCY_TABLE.insert().values(
                 user_id         = source_user.id,
-                total_love      = DAILY_REWARD,
+                total_love      = received,
                 daily_next      = now+DAILY_INTERVAL,
                 daily_streak    = 1,
                 total_allocated = 0,
-                    ))
+            ))
             
             return Embed(
                 'Here, some love for you~\nCome back tomorrow !',
-                f'You received {DAILY_REWARD} {EMOJI__HEART_CURRENCY:e} and now have {DAILY_REWARD} {EMOJI__HEART_CURRENCY:e}',
+                f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {received} {EMOJI__HEART_CURRENCY:e}',
                 color = GAMBLING_COLOR)
         
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,])))
@@ -242,7 +321,7 @@ async def daily(client, event,
                 daily_next      = now,
                 daily_streak    = 0,
                 total_allocated = 0,
-                    ))
+            ))
             
             total_love = received
         else:
@@ -270,36 +349,33 @@ async def hearts(client, event,
         response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==target_user.id))
         results = await response.fetchall()
     
-    if results:
-        result = results[0]
-        total_love = result.total_love
-        daily_next = result.daily_next
-        daily_streak = result.daily_streak
-        total_allocated = result.total_allocated
-        now = datetime.utcnow()
-        if daily_next > now:
-            ready_to_claim = False
+        if results:
+            result = results[0]
+            total_love = result.total_love
+            daily_next = result.daily_next
+            daily_streak = result.daily_streak
+            total_allocated = result.total_allocated
+            now = datetime.utcnow()
+            if daily_next > now:
+                ready_to_claim = False
+            else:
+                ready_to_claim = True
+                
+                daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
+        
         else:
+            total_love = 0
+            daily_streak = 0
+            total_allocated = 0
             ready_to_claim = True
-            
-            daily_next = daily_next+DAILY_STREAK_BREAK
-            if daily_next < now:
-                daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                if daily_streak < 0:
-                    daily_streak = 0
-    
-    else:
-        total_love = 0
-        daily_streak = 0
-        total_allocated = 0
-        ready_to_claim = True
-    
-    if total_allocated and (target_user.id not in IN_GAME_IDS):
-        async with DB_ENGINE.connect() as connector:
+        
+        if total_allocated and (target_user.id not in IN_GAME_IDS):
             await connector.execute(CURRENCY_TABLE. \
                 update(currency_model.user_id == target_user.id). \
-                values(total_allocated = 0)
-                    )
+                values(
+                    total_allocated = 0
+                )
+            )
     
     is_own = (event.user is target_user)
     
@@ -543,13 +619,18 @@ class HeartEventGUI:
         connector = self.connector
         
         try:
-            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
+            response = await connector.execute(
+                select([currency_model.total_love, currency_model.total_allocated]). \
+                where(currency_model.user_id==user.id)
+            )
+            
             results = await response.fetchall()
             if results:
-                result = results[0]
-                to_execute = CURRENCY_TABLE.update().values(
-                    total_love  = result.total_love+self.amount,
-                        ).where(currency_model.user_id==user_id)
+                total_love = results[0][0]
+                to_execute = CURRENCY_TABLE. \
+                    update(currency_model.user_id==user_id). \
+                    values(total_love=total_love+self.amount)
+            
             else:
                 to_execute = CURRENCY_TABLE.insert().values(
                     user_id         = user_id,
@@ -557,7 +638,8 @@ class HeartEventGUI:
                     daily_next      = datetime.utcnow(),
                     daily_streak    = 0,
                     total_allocated = 0,
-                        )
+                )
+            
             await connector.execute(to_execute)
         except BaseException as err:
             await client.events.error(client, f'{self!r}.__call__', err)
@@ -816,28 +898,29 @@ class DailyEventGUI:
         
         connector = self.connector
         
-        response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==user_id))
+        response = await connector.execute(
+            select([
+                currency_model.daily_streak,
+                currency_model.daily_next
+            ]). \
+            where(currency_model.user_id==user_id)
+        )
+        
         results = await response.fetchall()
         if results:
-            result = results[0]
+            daily_streak, daily_next = results[0]
             now = datetime.utcnow()
-            daily_next = result.daily_next+DAILY_STREAK_BREAK
-            if daily_next > now:
-                to_execute=CURRENCY_TABLE.update().values(
-                    daily_streak  = result.daily_streak+self.amount,
-                        ).where(currency_model.user_id==user_id)
-            else:
-                daily_streak=result.daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
-                if daily_streak < 0:
-                    daily_streak = self.amount
-                else:
-                    daily_streak = daily_streak+self.amount
-
-                to_execute = CURRENCY_TABLE.update().values(
+            
+            daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
+            daily_streak = daily_streak+self.amount
+            
+            to_execute = CURRENCY_TABLE. \
+                update(currency_model.user_id==user_id). \
+                values(
                     daily_streak= daily_streak,
-                    daily_next  = now,
-                        ).where(currency_model.user_id==user_id)
-
+                    daily_next  = daily_next,
+                )
+        
         else:
             to_execute = CURRENCY_TABLE.insert().values(
                 user_id         = user_id,
@@ -845,7 +928,8 @@ class DailyEventGUI:
                 daily_next      = datetime.utcnow(),
                 daily_streak    = self.amount,
                 total_allocated = 0,
-                    )
+            )
+        
         await connector.execute(to_execute)
     
     async def countdown(self, client, message):
@@ -1381,7 +1465,8 @@ async def game_21_postcheck(client, user, channel, amount):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select([currency_model.total_love, currency_model.total_allocated]). \
-                where(currency_model.user_id==user.id))
+            where(currency_model.user_id==user.id)
+        )
         
         results = await response.fetchall()
         if results:
@@ -1504,22 +1589,26 @@ async def game_21_single_player(client, event, amount):
             async with DB_ENGINE.connect() as connector:
                 expression = CURRENCY_TABLE. \
                     update(currency_model.user_id == user.id). \
-                    values(total_love=currency_model.total_love-amount)
+                    values(
+                    total_love=currency_model.total_love-amount
+                )
                 
                 if unallocate:
-                    expression = expression.values(total_allocated = currency_model.total_allocated-amount)
+                    expression = expression.values(
+                        total_allocated = currency_model.total_allocated-amount
+                    )
                 
                 await connector.execute(expression)
             
             embed = Embed(f'Timeout occurred, you lost your {amount} {EMOJI__HEART_CURRENCY.as_emoji} forever.')
             
             if player_runner.message is None:
-                coro = client.message_create(channel, embed=embed)
+                coroutine = client.interaction_followup_message_create(event, embed=embed)
             else:
-                coro = client.message_edit(player_runner.message, embed=embed)
+                coroutine = client.message_edit(player_runner.message, embed=embed)
             
             try:
-                await coro
+                await coroutine
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_single_player', err)
@@ -1544,7 +1633,7 @@ def create_join_embed(users, amount):
     description_parts = [
         'Bet amount: ', str(amount), ' ', EMOJI__HEART_CURRENCY.as_emoji, '\n'
         'Creator: ', users[0].mention, '\n',
-            ]
+    ]
     
     if len(users) > 1:
         description_parts.append('\nJoined users:\n')
@@ -2268,6 +2357,9 @@ async def gift(client, event,
                 f'{target_user_total_love} -> {target_user_new_love}',
             )
     
+    if target_user.is_bot:
+        return
+    
     try:
         target_user_channel = await client.channel_private_create(target_user)
     except ConnectionError:
@@ -2341,6 +2433,9 @@ async def award(client, event,
         f'Now they are up from {target_user_total_love} to {target_user_new_love} {EMOJI__HEART_CURRENCY.as_emoji}',
         color=GAMBLING_COLOR)
     
+    if target_user.is_bot:
+        return
+
     try:
         target_user_channel = await client.channel_private_create(target_user)
     except ConnectionError:
@@ -2402,6 +2497,7 @@ async def take(client, event,
         f'They got down from {target_user_total_love} to {target_user_new_love} {EMOJI__HEART_CURRENCY.as_emoji}',
         color=GAMBLING_COLOR)
     return
+
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def top_list(client, event,
@@ -2484,6 +2580,202 @@ async def top_list(client, event,
     return
 
 
+HEART_SHOP = SLASH_CLIENT.interactions(None,
+    name = 'heart-shop',
+    description = 'Trade your love!',
+    is_global = True,
+)
+
+
+ELEVATED_IDENTIFIER = '1'
+HEART_BOOST_IDENTIFIER = '2'
+
+BUYABLE_ROLES = {
+    ELEVATED_IDENTIFIER: (ROLE__NEKO_DUNGEON__ELEVATED, ELEVATED_COST),
+    HEART_BOOST_IDENTIFIER: (ROLE__NEKO_DUNGEON__HEART_BOOST, HEART_BOOST_COST),
+}
+
+ROLE_CHOICES = [
+    (f'Nekogirl Worshipper ({ELEVATED_COST})', ELEVATED_IDENTIFIER),
+    (f'Koishi enjoyer ({HEART_BOOST_COST})', HEART_BOOST_IDENTIFIER),
+]
+
+
+@HEART_SHOP.interactions
+async def roles(client, event,
+        role_: (ROLE_CHOICES, 'Choose a role to buy!')
+            ):
+    """Buy roles to enhance your love!"""
+    role, cost = BUYABLE_ROLES[role_]
+    
+    user = event.user
+    guild = role.guild
+    if guild not in user.guild_profiles:
+        abort(f'You must be in {guild.name} to buy any role.')
+    
+    if user.has_role(role):
+        abort(f'You already have {role.name} role.')
+    
+    user_id = user.id
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select([currency_model.total_love, currency_model.total_allocated]). \
+            where(currency_model.user_id==user_id)
+        )
+        results = await response.fetchall()
+        
+        if results:
+            total_love, total_allocated = results[0]
+            available_love = total_love-total_allocated
+        else:
+            total_love = 0
+            available_love = 0
+        
+        if available_love > cost:
+            bought = True
+        else:
+            bought = False
+        
+        
+        if bought:
+            yield
+            
+            await client.user_role_add(user, role)
+            
+            await connector.execute(CURRENCY_TABLE. \
+                update(currency_model.user_id == user_id). \
+                values(
+                    total_love = currency_model.total_love-cost,
+                )
+            )
+    
+    embed = Embed(f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY:e}'). \
+        add_thumbnail(client.avatar_url)
+    
+    if bought:
+        embed.description = 'Was successful.'
+        embed.add_field(
+            f'Your {EMOJI__HEART_CURRENCY:e}',
+            f'{total_love} -> {total_love-cost}',
+        )
+    else:
+        embed.description = 'You have insufficient amount of hearts.'
+        embed.add_field(
+            f'Your {EMOJI__HEART_CURRENCY:e}',
+            str(total_love),
+        )
+    
+    yield embed
+
+
+# ((d+1)*d)>>1 - (((d-a)+1)*(d-a))>>1
+# (((d+1)*d) - (((d-a)+1)*(d-a)))>>1
+# (d*d+d - (((d-a)+1)*(d-a)))>>1
+# (d*d+d - ((d-a+1)*(d-a)))>>1
+# (d*d+d - (d*d-d*a+d-d*a+a*a-a))>>1
+# (d*d+d - (d*d - d*a + d - d*a + a*a - a))>>1
+# (d*d+d + (-d*d + d*a - d + d*a - a*a + a))>>1
+# (d*d + d - d*d + d*a - d + d*a - a*a + a)>>1
+# (d + d*a - d + d*a - a*a + a)>>1
+# (d*a + d*a - a*a + a)>>1
+# (d*a + d*a - a*a + a)>>1
+# (2*d*a - a*a + a)>>1
+# (a*(2*d - a + 1))>>1
+# (a*((d<<1) - a + 1))>>1
+# (a*((d<<1)-a+1))>>1
+
+DAILY_REFUND_MIN = 124
+
+def calculate_sell_price(daily_count, daily_refund):
+
+    under_price = DAILY_REFUND_MIN-daily_count+daily_refund
+    if under_price < 0:
+        under_price = 0
+        over_price = daily_refund
+    else:
+        if under_price > daily_refund:
+            under_price = daily_refund
+            over_price = 0
+        else:
+            over_price = daily_refund-under_price
+    
+    price = 0
+    
+    if over_price:
+        price += (over_price*((daily_count<<1)-over_price+1))>>1
+    
+    if under_price:
+        price += (under_price*DAILY_REFUND_MIN)
+    
+    return price
+
+
+
+@HEART_SHOP.interactions
+async def sell_daily(client, event,
+        amount: ('number', 'How much?')
+            ):
+    """Sell excess daily streak for extra hearts."""
+    if amount < 1:
+        abort('`amount` must be non-negative!')
+    
+    user_id = event.user.id
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select([currency_model.total_love, currency_model.daily_streak, currency_model.daily_next]). \
+            where(currency_model.user_id==user_id)
+        )
+        
+        results = await response.fetchall()
+        if results:
+            now = datetime.utcnow()
+            total_love, daily_streak, daily_next = results[0]
+            if daily_next < now:
+                daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
+        
+        else:
+            total_love = 0
+            daily_streak = 0
+        
+        if amount <= daily_streak:
+            sell_price = calculate_sell_price(daily_streak, amount)
+            
+            await connector.execute(CURRENCY_TABLE. \
+                update(currency_model.user_id == user_id). \
+                values(
+                    total_love = currency_model.total_love+sell_price,
+                    daily_next = daily_next,
+                    daily_streak = daily_streak-amount,
+                )
+            )
+            
+            sold = True
+        else:
+            sold = False
+    
+    embed = Embed(f'Selling {amount} daily for {EMOJI__HEART_CURRENCY:e}'). \
+        add_thumbnail(client.avatar_url)
+    
+    if sold:
+        embed.description = 'Great success!'
+        embed.add_field(
+            f'Your daily streak',
+            f'{daily_streak} -> {daily_streak-amount}',
+        )
+        embed.add_field(
+            f'Your {EMOJI__HEART_CURRENCY:e}',
+            f'{total_love} -> {total_love+sell_price}',
+        )
+    else:
+        embed.description = 'You have insufficient amount of daily streak.'
+        embed.add_field(
+            f'Your daily streak',
+            str(daily_streak),
+        )
+    
+    return embed
+
+
 HEART_GENERATOR_COOLDOWNS = set()
 HEART_GENERATOR_COOLDOWN = 3600.0
 HEART_GENERATION_AMOUNT = 10
@@ -2493,7 +2785,7 @@ BUMP_RP = re.compile(
     '<@!?(\d{7,21})>, \n'
     ' {6}Bump done :thumbsup:\n' # This is really not an emoji!
     ' {6}Check it on DISBOARD: https://disboard\.org/'
-        )
+)
 
 
 async def increase_user_total_love(user_id, increase):

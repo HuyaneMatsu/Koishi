@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from math import floor
+from math import floor, sqrt
 from functools import partial as partial_func
 
 from hata import BUILTIN_EMOJIS, Client, Lock, KOKORO, alchemy_incendiary, Embed
@@ -301,7 +301,7 @@ def load_file():
 
 def save_file(data):
     with open(COST_FILE_PATH, 'w') as file:
-        data = file.write(data)
+        file.write(data)
 
 
 async def save_data():
@@ -334,54 +334,61 @@ async def load_data():
         
         KOKORO.run_in_executor(alchemy_incendiary(save_file, (data,)))
 
-# ((x+n+1)*(x+n))/2 - ((x+1)*x)/2)
-# Optimize!
-# n*(2*x+n+1)/2
-# Upgrade!
-# n*(x<<1+n+1)>>1
+# ((((x-1)+n)+1)*((x-1)+n))/2 - (((x-1)+1)*(x-1))/2
+# (((x-1+n)+1)*((x-1)+n))/2 - (x*(x-1))/2
+# ((x+n)*(x-1+n))/2 - (x*(x-1))/2
+# (((x+n)*(x-1+n)) - (x*(x-1)))/2
+# ((x*x+n*x-x-n+x*n+n*n) - (x*(x-1)))/2
+# ((x*x+n*x-x-n+x*n+n*n) - (x*x-x))/2
+# (x*x+n*x-x-n+x*n+n*n - x*x+x)/2
+# (x*x + n*x - x - n + x*n + n*n - x*x + x)/2
+# (n*x - n + x*n + n*n)/2
+# (2*n*x - n + n*n)/2
+# (n*n + 2*n*x - n)/2
+# (n*(n+2*x-1))/2
+# (n*(n+(x<<1)-1))/2
+
 
 def calculate_buy_cost(market_cost, n):
-    return floor((n*((market_cost<<1)+n+1)>>1)*(1.0+MARKET_COST_FEE))
+    return floor((n*(n+(market_cost<<1)-1))/2*(1.0+MARKET_COST_FEE))
 
-# ((x+1)*x)/2
-# Optimize!
-# ((x+1)*x)>>1
 
 def calculate_sell_price(market_cost, n):
-    price = n*MARKET_COST_MIN
-    
-    over_price = -MARKET_COST_MIN+market_cost
-    if over_price > n:
+
+    under_price = MARKET_COST_MIN-market_cost+n
+    if under_price < 0:
+        under_price = 0
         over_price = n
+    else:
+        if under_price > n:
+            under_price = n
+            over_price = 0
+        else:
+            over_price = n-under_price
     
-    if over_price > 0:
-        price += ((over_price+1)*over_price)>>1
+    price = 0
+    
+    if over_price:
+        price += (over_price*((market_cost<<1)-over_price+1))>>1
+    
+    if under_price:
+        price += (under_price*MARKET_COST_MIN)
     
     return price
 
 
+def calculate_max_buyable(market_cost, usable):
+    f = 1.0+MARKET_COST_FEE
+    b = sqrt(f*((usable<<3)+f*((1-(market_cost<<1))**2)))
+    return floor(((b)-2*market_cost*f+f)/(2*f))
+
 def calculate_buyable_and_cost(market_cost, n, usable):
-    if usable < market_cost:
-        return 0, 0
-    
     cost = calculate_buy_cost(market_cost, n)
-    if cost <= usable:
-        return n, cost
+    if cost > usable:
+        n = calculate_max_buyable(market_cost, usable)
+        cost = calculate_buy_cost(market_cost, n)
     
-    bot = 0
-    top = n
-    
-    while bot < top:
-        half = (bot+top)>>1
-        cost = calculate_buy_cost(market_cost, half)
-        if cost > usable:
-            top = half
-        else:
-            bot = half+1
-    
-    bot -= 1
-    
-    return bot, calculate_buy_cost(market_cost, bot)
+    return n, cost
 
 
 SHOP = SLASH_CLIENT.interactions(None, 'shop', 'Witch shop ~ Nya!', guild=GUILD__NEKO_DUNGEON)
