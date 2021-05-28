@@ -24,7 +24,7 @@ from hata.backend.quote import quote
 from hata.backend.utils import to_json, from_json
 from hata.discord.utils import image_to_base64
 from hata.discord.utils.DISCORD_HEADERS import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
-from hata.discord.guild import create_partial_guild, GuildDiscovery
+from hata.discord.guild import create_partial_guild_from_data, GuildDiscovery
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
 from hata.discord.urls import API_ENDPOINT
@@ -720,7 +720,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
         f'{API_ENDPOINT}/guilds',
         data,)
     #we can create only partial, because the guild data is not completed usually
-    return create_partial_guild(data)
+    return create_partial_guild_from_data(data)
 
 async def guild_get(client, guild_id,):
     return await bypass_request(client,METHOD_GET,
@@ -2182,24 +2182,19 @@ async def thread_settings_edit(client, channel, data):
         data,
         )
 
-async def thread_get_all_archived(client, channel, public):
+async def thread_get_chunk_archived_public(client, channel):
     channel_id = channel.id
     
-    if public:
-        thread_type = 'public'
-    else:
-        thread_type = 'private'
-    
     await bypass_request(client, METHOD_GET,
-        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/{thread_type}'
-        )
+        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/public'
+    )
 
-async def thread_get_all_self_archived(client, channel):
+async def thread_get_chunk_self_archived(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/users/@me/threads/archived/private'
-        )
+    )
 
 async def servers_get(client):
     await bypass_request(client, METHOD_GET,
@@ -3958,7 +3953,9 @@ async def rate_limit_test0082(client, message, name:str, emoji:'Emoji'):
             else:
                 guild2 = guild
         
-        emoji_data = await client.download_url(emoji.url)
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
         emoji1 = await client.emoji_create(guild1, name, emoji_data)
         emoji2 = await client.emoji_create(guild2, name, emoji_data)
         
@@ -3983,7 +3980,9 @@ async def rate_limit_test0083(client, message, name:str, emoji:'Emoji'):
             else:
                 guild2 = guild
         
-        emoji_data = await client.download_url(emoji.url)
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
         emoji1 = await emoji_create(client, guild1, name, emoji_data)
         emoji2 = await emoji_create(client, guild2, name, emoji_data)
         
@@ -4003,7 +4002,9 @@ async def rate_limit_test0084(client, message, name:str, emoji:'Emoji'):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        emoji_data = await client.download_url(emoji.url)
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
         emoji1 = await emoji_create(client, guild, name, emoji_data)
         await client.emoji_delete(emoji1)
         
@@ -4023,7 +4024,9 @@ async def rate_limit_test0085(client, message, name:str, emoji:'Emoji'):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        emoji_data = await client.download_url(emoji.url)
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
         emoji = await client.emoji_create( guild, name, emoji_data)
         await emoji_edit(client, emoji, name='cake_hater')
         await client.emoji_delete(emoji)
@@ -5236,7 +5239,7 @@ async def rate_limit_test0138(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_get_all_archived(client, channel, True)
+        await thread_get_chunk_archived_public(client, channel)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5253,7 +5256,7 @@ async def rate_limit_test0139(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_get_all_self_archived(client, channel)
+        await thread_get_chunk_self_archived(client, channel)
 
 
 @RATE_LIMIT_COMMANDS

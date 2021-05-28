@@ -98,7 +98,7 @@ class ds_game:
     CANCEL = BUILTIN_EMOJIS['x']
     
     emojis_game_p2 = (BACK, RESET, CANCEL)
-
+    
     UP     = BUILTIN_EMOJIS['arrow_up_small']
     DOWN   = BUILTIN_EMOJIS['arrow_down_small']
     UP2    = BUILTIN_EMOJIS['arrow_double_up']

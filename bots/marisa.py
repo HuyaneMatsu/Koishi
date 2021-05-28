@@ -193,97 +193,6 @@ async def error(client, name, err):
         await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, chunk)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def cookie(client, event,
-        user : ('user', 'To who?') = None,
-            ):
-    """Gifts a cookie!"""
-    if user is None:
-        source_user = client
-        target_user = event.user
-    else:
-        source_user = event.user
-        target_user = user
-    
-    return Embed(description=f'{source_user:f} just gifted a cookie to {target_user:f} !')
-
-
-DO_THINGS_CHOICES = [
-    'I adopted Reimu.',
-    'I did not steal anyone\'s dress!',
-    'I have some mushrooms under my skirt, do you want some?',
-    'Suwako\'s secret family technique is lovely.',
-    'Suwako used her family technique on Sanae, who shared it with Reimu.',
-    'Saw once Yukari\'s animal abuse, still having wet dreams about it.',
-    'Reimu\'s armpits, yeeaaa...',
-    'Have you heard of Izaoyi love-shop?',
-]
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def do_things(client, event):
-    """I will do things!"""
-    yield '*Doing things*'
-    await sleep(1.0+random()*4.0, KOKORO)
-    yield choose(DO_THINGS_CHOICES)
-
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
-async def perms(client, event):
-    """Shows your permissions."""
-    user_permissions = event.user_permissions
-    if user_permissions:
-        content = '\n'.join(permission_name.replace('_', '-') for permission_name in user_permissions)
-    else:
-        content = '*none*'
-    
-    return content
-
-
-@Marisa.interactions
-async def ping():
-    """HTTP ping-pong."""
-    start = perf_counter()
-    yield
-    delay = (perf_counter()-start)*1000.0
-    
-    yield f'{delay:.0f} ms'
-
-
-@Marisa.interactions(is_global=True)
-async def enable_ping(client, event,
-        allow: ('bool', 'Enable?')=True,
-            ):
-    """Enables the ping command in your guild."""
-    guild = event.guild
-    if guild is None:
-        return Embed('Error', 'Guild only command.')
-    
-    if not event.user_permissions.can_administrator:
-        return Embed('Permission denied', 'You must have administrator permission to use this command.')
-    
-    application_commands = await client.application_command_guild_get_all(guild)
-    for application_command in application_commands:
-        # If you are not working with overlapping names, a name check should be enough.
-        if application_command.name == ping.name:
-            command_present = True
-            break
-    else:
-        command_present = False
-    
-    if allow:
-        if command_present:
-            content = 'The command is already present.'
-        else:
-            await client.application_command_guild_create(guild, ping.get_schema())
-            content = 'The command has been added.'
-    else:
-        if command_present:
-            await client.application_command_guild_delete(guild, application_command)
-            content = 'The command has been disabled.'
-        else:
-            content = 'The command is not present.'
-    
-    return Embed('Success', content)
 
 # You might wanna add `-tag`-s to surely avoid nsfw pictures
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
@@ -291,117 +200,6 @@ SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 # Use a cache to avoid repeated requests.
 # Booru also might ban ban you for a time if you do too much requests.
 IMAGE_URL_CACHE = {}
-
-async def get_image_embed(client, tags, name, color):
-    image_urls = IMAGE_URL_CACHE.get(tags, None)
-    if image_urls is None:
-        # Yield to acknowledge the event.
-        yield
-        
-        # Request image information
-        async with client.http.get(SAFE_BOORU+tags) as response:
-            if response.status != 200:
-                abort('Safe-booru unavailable')
-            
-            result = await response.read()
-        
-        # Read response and get image urls.
-        soup = BeautifulSoup(result, 'lxml')
-        image_urls = [post['file_url'] for post in soup.find_all('post')]
-        
-        if not image_urls:
-            abort('No images found.\nPlease try again later.')
-        
-        # If we received image urls, cache them
-        IMAGE_URL_CACHE[tags] = image_urls
-    
-    image_url = choice(image_urls)
-    yield SlashResponse(Embed(name, color=color, url=image_url).add_image(image_url), show_for_invoking_user_only=False)
-    return
-
-SCARLET = Marisa.interactions(None, name='scarlet', description='Scarlet?', guild=GUILD__NEKO_DUNGEON)
-
-@SCARLET.interactions(show_for_invoking_user_only=True)
-async def flandre(client, event):
-    """Flandre!"""
-    return get_image_embed(client, 'flandre_scarlet', 'Scarlet Flandre', 0xdc143c)
-
-@SCARLET.interactions(show_for_invoking_user_only=True)
-async def remilia(client, event):
-    """Remilia!"""
-    return get_image_embed(client, 'remilia_scarlet', 'Scarlet Remilia', 0x9400d3)
-
-@SCARLET.interactions(is_default=True, show_for_invoking_user_only=True)
-async def devil(client, event):
-    """Flandre & Remilia!"""
-    return get_image_embed(client, 'flandre_scarlet+remilia_scarlet', 'Scarlet Flandre & Remilia', 0xa12a2a)
-
-'''
-class Action:
-    __slots__ = ('action_name', 'embed_color', )
-    def __init__(self, action_name, embed_color):
-        self.action_name = action_name
-        self.embed_color = embed_color
-    
-    async def __call__(self, client, event,
-            user : ('user', 'Who?') = None,
-                ):
-        if user is None:
-            source_user = client
-            target_user = event.user
-        else:
-            source_user = event.user
-            target_user = user
-        
-        return Embed(description=f'{source_user:f} {self.action_name}s {target_user:f} !', color=self.embed_color)
-
-for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 0x7840c3), ('slap', 0xdff1dc),):
-    Marisa.interactions(Action(action_name, embed_color),
-        name = action_name,
-        description = f'Do you want some {action_name}s, or to {action_name} someone?',
-        guild = GUILD__NEKO_DUNGEON,
-            )
-
-# Cleanup
-del action_name, embed_color
-'''
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def kaboom(client, event):
-    """Kabooom!!"""
-    await client.interaction_response_message_create(event)
-    
-    messages = []
-    for x in reversed(range(1, 4)):
-        message = await client.interaction_followup_message_create(event, x)
-        messages.append(message)
-        await sleep(1.0)
-    
-    await client.interaction_followup_message_create(event, 'KABOOM!!')
-    
-    for message in messages:
-        await sleep(1.0)
-        await client.interaction_followup_message_delete(event, message)
-
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def kaboom_mixed(client, event):
-    """Kabooom!!"""
-    yield
-    
-    messages = []
-    for x in reversed(range(1, 4)):
-        message = yield str(x)
-        messages.append(message)
-        await sleep(1.0)
-    
-    yield 'KABOOM!!'
-    
-    for message in messages:
-        await sleep(1.0)
-        await client.interaction_followup_message_delete(event, message)
-
-
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def retardify(client, event,
@@ -439,7 +237,8 @@ async def retardify(client, event,
     embed.add_author(user.avatar_url, user.full_name)
     
     await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
-    
+
+
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def test_channel_and_role(client, event,
         user : ('user', 'Please input a user') = None,
@@ -474,43 +273,6 @@ async def yield_async_gen(client, event):
 async def return_async_gen(client, event):
     """Returns an async gen."""
     return async_gen()
-
-
-NEKO_LIFE = 'https://nekos.life/api/v2'
-
-async def get_neko_life(client, keyword):
-    yield
-    url = f'{NEKO_LIFE}/{keyword}'
-    
-    async with client.http.get(url) as response:
-        if response.status == 200:
-            data = await response.json()
-            content = data[keyword]
-        else:
-            content = 'Couldn\'t contact the API right now... OwO'
-    
-    yield content
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def text_cat(client, event):
-    """I will send text cats :3"""
-    return get_neko_life(client, 'cat')
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def why(client, event):
-    """why are you using this commands?"""
-    yield get_neko_life(client, 'why')
-
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def repeat(client, event,
-        text : ('str', 'The content to repeat')
-            ):
-    """Repeats nya!"""
-    if not text:
-        text = 'nothing to repeat'
-    
-    return SlashResponse(text, allowed_mentions=None)
 
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)

@@ -140,7 +140,7 @@ def calculate_daily_new_only(daily_streak, daily_next, now):
     Returns
     -------
     daily_streak_new : `int`
-        The new daily streak value of teh user.
+        The new daily streak value of the user.
     """
     daily_next_with_break = daily_next+DAILY_STREAK_BREAK
     if daily_next_with_break < now:
@@ -171,7 +171,7 @@ def calculate_daily_new(daily_streak, daily_next, now):
     Returns
     -------
     daily_streak_new : `int`
-        The new daily streak value of teh user.
+        The new daily streak value of the user.
     daily_next_new : `datetime`
         The new daily next value of the user.
     """

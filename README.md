@@ -23,6 +23,9 @@ MARISA_TOKEN = ''               # bot token (str) for third bot.
 MARISA_ID = 0                   # bot id (int) for 4th bot, can be 0.
 MARISA_PREFIX  = '$'            # default prefix (str)
 
+NITORI_TOKEN = ''               # bot token (str) for Nitori
+NITORI_ID = 0                   # bot id (int) for Nitori
+
 AUDIO_PLAY_POSSIBLE = False     # Whether FFmpeg and other voice requirement as satisfied
 AUDIO_PATH = None               # path for local audio files, can be None
 HATA_PATH = None                # path to Hata if Any (str or None)

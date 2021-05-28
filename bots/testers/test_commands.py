@@ -197,7 +197,9 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
         executor_webhook = await client.webhook_create(channel, 'tester')
     
     if not use_user_avatar:
-        webhook_avatar_data = await client.download_url(user.avatar_url)
+        async with client.http.get(user.avatar_url) as response:
+            webhook_avatar_data = await response.read()
+        
         await client.webhook_edit(executor_webhook, avatar = webhook_avatar_data)
     
     source_MESSAGE_CREATE = PARSERS['MESSAGE_CREATE']
@@ -2100,7 +2102,7 @@ async def test_message_interaction(ctx, message:'message'):
 @TEST_COMMANDS
 async def show_help_for(ctx, user:'user', content):
     """
-    Shows help for teh given user.
+    Shows help for the given user.
     """
     client = ctx.client
     message = ctx.message.custom(author=user)

@@ -178,7 +178,9 @@ class sync_avatar:
             await client.message_create(message.channel, 'The application has no avatar set.')
             return
         
-        avatar = await client.download_url(avatar_url)
+        async with client.http.get(avatar_url) as response:
+            avatar = await response.read()
+        
         await client.client_edit(avatar=avatar)
         
         await client.message_create(message.channel,'Avatar synced.')

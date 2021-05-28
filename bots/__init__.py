@@ -24,6 +24,15 @@ if MARISA_MODE:
     
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
+    Nitori = Client(config.NITORI_TOKEN,
+        client_id = config.NITORI_ID,
+        application_id = config.NITORI_ID,
+        extensions = 'slash',
+    )
+    
+    EXTENSION_LOADER.add_default_variables(Nitori=Nitori)
+    EXTENSION_LOADER.load_extension('bots.nitori', locked=True)
+    
     EXTENSION_LOADER.add('bots.testers', MAIN_CLIENT=Marisa)
 
 else:
@@ -57,17 +66,26 @@ else:
         activity = ActivityRich('Chesuto development', type_=ActivityTypes.watching),
         status = 'idle',
         application_id = config.FLAN_ID,
-        extensions=('command_utils', 'commands_v2',),
-        default_category_name='GENERAL COMMANDS',
-        category_name_rule=category_name_rule,
-        prefix=PREFIX__FLAN,
+        extensions = ('command_utils', 'commands_v2',),
+        default_category_name = 'GENERAL COMMANDS',
+        category_name_rule = category_name_rule,
+        prefix = PREFIX__FLAN,
     )
     
     EXTENSION_LOADER.add_default_variables(Flan=Flan)
     
+    Nitori = Client(config.NITORI_TOKEN,
+        client_id = config.NITORI_ID,
+        application_id = config.NITORI_ID,
+        extensions = 'slash',
+    )
+    
+    EXTENSION_LOADER.add_default_variables(Nitori=Nitori)
+    
     EXTENSION_LOADER.load_extension('bots.koishi', locked=True)
     EXTENSION_LOADER.load_extension('bots.satori', locked=True)
     EXTENSION_LOADER.load_extension('bots.flan'  , locked=True)
+    EXTENSION_LOADER.load_extension('bots.nitori', locked=True)
 
 MODULE_NAMES = set()
 

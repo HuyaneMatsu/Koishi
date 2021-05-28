@@ -496,7 +496,8 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
     async def chesuto_play(client, voice_client, bgm):
         path = os.path.join(os.path.abspath(''), CHESUTO_FOLDER, bgm.source_name)
         if not os.path.exists(path):
-            data = await client.download_url(bgm.url)
+            async with client.http.get(bgm.url) as response:
+                data = await response.read()
             with await AsyncIO(path, 'wb') as file:
                 await file.write(data)
         
