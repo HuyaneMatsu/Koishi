@@ -24,15 +24,6 @@ if MARISA_MODE:
     
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
-    Nitori = Client(config.NITORI_TOKEN,
-        client_id = config.NITORI_ID,
-        application_id = config.NITORI_ID,
-        extensions = 'slash',
-    )
-    
-    EXTENSION_LOADER.add_default_variables(Nitori=Nitori)
-    EXTENSION_LOADER.load_extension('bots.nitori', locked=True)
-    
     EXTENSION_LOADER.add('bots.testers', MAIN_CLIENT=Marisa)
 
 else:

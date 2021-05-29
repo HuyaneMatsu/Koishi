@@ -62,7 +62,7 @@ async def register_extension(name:str=None):
     if name is None:
         return 'Please define an extension to register.'
     
-    if name in EXTENSION_LOADER.extensions:
+    if (EXTENSION_LOADER.get_extension(name) is not None):
         return 'There is already an extension added with the given name.'
     
     try:

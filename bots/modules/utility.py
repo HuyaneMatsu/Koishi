@@ -36,11 +36,14 @@ async def rawr(client, event):
     tasks = []
     
     for client_ in channel.clients:
-        if client_ is not client:
+        if client_ is client:
+            coroutine = client.interaction_response_message_create(event, 'Rawrr !')
+        else:
             if not channel.cached_permissions_for(client_).can_send_messages:
                 continue
-        task = KOKORO.create_task(client_.message_create(channel, 'Rawrr !'))
-        tasks.append(task)
+            
+            coroutine = client_.message_create(channel, 'Rawrr !')
+        tasks.append(KOKORO.create_task(coroutine))
     
     try:
         await WaitTillExc(tasks, KOKORO)

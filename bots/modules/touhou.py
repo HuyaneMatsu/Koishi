@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re, sys
 
 from collections import deque
@@ -9,12 +8,14 @@ from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHI
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 from hata.backend.utils import from_json
 from hata.ext.slash import SlashResponse, abort
+from hata.discord.http import LIB_USER_AGENT
+from hata.backend.headers import USER_AGENT, CONTENT_TYPE
 
 from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_notsame
 
-
 WORD_MATCH_RP = re.compile('[^a-zA-z0-9]+')
 
+HEADERS = {USER_AGENT: LIB_USER_AGENT}
 
 BOORU_COLOR = Color.from_html('#138a50')
 
@@ -484,7 +485,7 @@ del cache
 TOUHOU = SLASH_CLIENT.interactions(None,
     name = 'touhou',
     description = 'Some touhou commands.',
-    is_global=True,
+    is_global = True,
 )
 
 @TOUHOU.interactions
@@ -551,28 +552,27 @@ async def wiki_(client, event,
     
     async with client.http.get(
             'https://en.touhouwiki.net/api.php?action=opensearch&search='
-            f'{search_for}&limit=25&redirects=resolve&format=json&utf8',) as response:
-        response_data = await response.text()
-    
-    while True:
-        if len(response_data) < 30:
-            results = None
-            break
+            f'{search_for}&limit=25&redirects=resolve&format=json&utf8',
+            headers=HEADERS) as response:
         
+        response_data = await response.read()
+        response_headers = response.headers
+    
+    content_type_headers = response_headers.get(CONTENT_TYPE, None)
+    if (content_type_headers is not None) and (content_type_headers == 'application/json'):
         json_data = from_json(response_data)
-        if len(json_data) != 4:
-            results = None
-            break
         
         results = list(zip(json_data[1], json_data[3]))
         results.sort(key=lambda item: len(item[0]))
-        break
+    
+    else:
+        results = None
     
     if (results is None) or (not results):
-        await client.message_create(event.channel, embed=Embed(
+        yield Embed(
             'No result',
             f'No search result for: `{search_for}`',
-            color=BOORU_COLOR))
+            color=BOORU_COLOR)
         return
     
     embed = Embed(title=f'Search results for `{search_for}`', color=BOORU_COLOR)
@@ -583,9 +583,10 @@ async def wiki_page_selected(client, channel, message, title, url):
     await Pagination(client, channel, pages, timeout=600.0, message=message)
 
 async def download_wiki_page(client, title_, url):
-    async with client.http.get(url) as response:
+    async with client.http.get(url, headers=HEADERS) as response:
         response_data = await response.text()
     soup = BeautifulSoup(response_data, 'html.parser')
+    
     block = soup.find_all('div', class_='mw-parser-output')[2]
     
     last = []
