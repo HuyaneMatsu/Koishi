@@ -429,7 +429,8 @@ SCARLET = Nitori.interactions(None, name='scarlet', description='Scarlet?', guil
 @SCARLET.interactions(is_default=True, show_for_invoking_user_only=True)
 async def devil(client, event):
     """Flandre & Remilia!"""
-    return get_image_embed(client, 'flandre_scarlet+remilia_scarlet', 'Scarlet Flandre & Remilia', 0xa12a2a)
+    yield
+    yield await get_image_embed(client, 'flandre_scarlet+remilia_scarlet', 'Scarlet Flandre & Remilia', 0xa12a2a)
 
 @SCARLET.interactions
 async def flandre(client):

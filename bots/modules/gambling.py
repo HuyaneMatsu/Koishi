@@ -9,13 +9,13 @@ from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordExce
     ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta
 from hata.ext.command_utils import wait_for_reaction, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
-from hata.ext.slash import abort, InteractionResponse
+from hata.ext.slash import abort, InteractionResponse, set_permission
 
 from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from bot_utils.shared import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
-    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST
+    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST, ROLE__NEKO_DUNGEON__ADMIN
 
 SLASH_CLIENT: Client
 def setup(lib):
@@ -183,7 +183,7 @@ def calculate_daily_new(daily_streak, daily_next, now):
             daily_streak_new = 0
             daily_next_new = now
         else:
-            daily_next_new = daily_next+(DAILY_STREAK_LOSE*daily_streak_new)
+            daily_next_new = daily_next+(DAILY_STREAK_LOSE*(daily_streak-daily_streak_new))
     
     else:
         daily_streak_new = daily_streak
@@ -427,7 +427,7 @@ def convert_tdelta(delta):
 
 
 def heart_event_start_checker(client, event):
-    if not client.is_owner(event.user):
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
         return False
     
     emoji = event.emoji
@@ -437,15 +437,16 @@ def heart_event_start_checker(client, event):
     return False
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
 async def heart_event(client, event,
         duration : ('str', 'The event\'s duration.'),
         amount : ('int', 'The hearst to earn.'),
         user_limit : ('int', 'The maximal amount fo claimers.') = 0,
             ):
-    """Starts a heart event at the channel. (Bot owner only)"""
-    if not client.is_owner(event.user):
-        abort('Owner only!')
+    """Starts a heart event at the channel."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
@@ -716,15 +717,16 @@ class HeartEventGUI:
         Task(connector.close(), KOKORO)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
 async def daily_event(client, event,
         duration : ('str', 'The event\'s duration.'),
         amount : ('int', 'The extra daily steaks to earn.'),
         user_limit : ('int', 'The maximal amount fo claimers.') = 0,
             ):
     """Starts a heart event at the channel. (Bot owner only)"""
-    if not client.is_owner(event.user):
-        abort('Owner only!')
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
@@ -2257,29 +2259,29 @@ async def game_21_multi_player(client, event, amount):
             IN_GAME_IDS.discard(user_id)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ELEVATED, True)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__BOOSTER, True)
 async def gift(client, event,
         target_user: ('user', 'Who is your heart\'s chosen one?'),
         amount : ('int', 'How much do u love them?'),
+        message : ('str', 'Optional message to send with the gift.') = None,
             ):
-    """
-    Gifts hearts to the chosen by your heart.
-    You must have Neko Lover or NekoGirl Worshipper role.
-    """
+    """Gifts hearts to the chosen by your heart."""
     source_user = event.user
     
     if not (source_user.has_role(ROLE__NEKO_DUNGEON__ELEVATED) or source_user.has_role(ROLE__NEKO_DUNGEON__BOOSTER)):
-        yield Embed('Ohoho', f'You must have either {ROLE__NEKO_DUNGEON__ELEVATED.name} or '
-            f'{ROLE__NEKO_DUNGEON__BOOSTER.name} role to invoke this command.', color=GAMBLING_COLOR)
-        return
+        abort(f'You must have either {ROLE__NEKO_DUNGEON__ELEVATED.mention} or '
+            f'{ROLE__NEKO_DUNGEON__BOOSTER.mention} role to invoke this command.', allowed_mentions=None)
     
     if source_user is target_user:
-        yield Embed('BAKA !!', 'You cannot give love to yourself..', color=GAMBLING_COLOR)
-        return
+        abort('You cannot give love to yourself..')
     
     if amount <= 0:
-        yield Embed('BAKA !!', 'You cannot gift non-positive amount of hearts..', color=GAMBLING_COLOR)
-        return
+        abort('You cannot gift non-positive amount of hearts..')
+    
+    if (message is not None) and len(message) > 1000:
+        message = message[:1000]+'...'
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -2305,7 +2307,7 @@ async def gift(client, event,
         response = await connector.execute(
             select([currency_model.total_love]). \
             where(currency_model.user_id==target_user.id)
-                )
+        )
         
         results = await response.fetchall()
         if results:
@@ -2323,12 +2325,12 @@ async def gift(client, event,
         else:
             source_user_new_love = source_user_total_love-amount
         
-        target_user_new_love = target_user_total_love+amount
+        target_user_new_total_love = target_user_total_love+amount
         
         await connector.execute(CURRENCY_TABLE. \
             update(currency_model.user_id==source_user.id). \
             values(total_love = currency_model.total_love-amount)
-                )
+        )
         
         if target_user_exists:
             to_execute = CURRENCY_TABLE. \
@@ -2338,24 +2340,29 @@ async def gift(client, event,
         else:
             to_execute = CURRENCY_TABLE.insert().values(
                 user_id         = target_user.id,
-                total_love      = target_user_new_love,
+                total_love      = target_user_new_total_love,
                 daily_next      = datetime.utcnow(),
                 daily_streak    = 0,
                 total_allocated = 0,
-                    )
+            )
         
         await connector.execute(to_execute)
         
-    yield Embed('Aww, so lovely',
+    embed = Embed('Aww, so lovely',
         f'You gifted {amount} {EMOJI__HEART_CURRENCY.as_emoji} to {target_user.full_name}',
         color=GAMBLING_COLOR,
-            ).add_field(
-                f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
-                f'{source_user_total_love} -> {source_user_new_love}',
-            ).add_field(
-                f'Their {EMOJI__HEART_CURRENCY.as_emoji}',
-                f'{target_user_total_love} -> {target_user_new_love}',
-            )
+    ).add_field(
+        f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'{source_user_total_love} -> {source_user_new_love}',
+    ).add_field(
+        f'Their {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'{target_user_total_love} -> {target_user_new_total_love}',
+    )
+    
+    if (message is not None):
+        embed.add_field('Message:', message)
+    
+    yield embed
     
     if target_user.is_bot:
         return
@@ -2368,10 +2375,13 @@ async def gift(client, event,
     embed = Embed('Aww, love is in the air',
         f'You have been gifted {amount} {EMOJI__HEART_CURRENCY.as_emoji} by {source_user.full_name}',
         color=GAMBLING_COLOR,
-            ).add_field(
-                f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
-                f'{target_user_total_love} -> {target_user_new_love}',
-            )
+    ).add_field(
+        f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'{target_user_total_love} -> {target_user_new_total_love}',
+    )
+    
+    if (message is not None):
+        embed.add_field('Message:', message)
     
     try:
         await client.message_create(target_user_channel, embed=embed)
@@ -2384,54 +2394,95 @@ async def gift(client, event,
         raise
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+AWARD_TYPES = [
+    ('hearts', 'hearts'),
+    ('daily-streak', 'daily-streak')
+]
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
 async def award(client, event,
         target_user: ('user', 'Who do you want to award?'),
         amount: ('int', 'With how much love do you wanna award them?'),
+        message : ('str', 'Optional message to send with the gift.') = None,
+        with_: (AWARD_TYPES, 'Select award type') = 'hearts',
             ):
-    """Awards the user with love. (Bot owner only)"""
-    if not client.is_owner(event.user):
-        yield Embed('Ohoho', 'You must be my Masuta to invoke this command.', color=GAMBLING_COLOR)
-        return
+    """Awards the user with love."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
     
     if amount <= 0:
         yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=GAMBLING_COLOR)
         return
     
+    if (message is not None) and len(message) > 1000:
+        message = message[:1000]+'...'
+    
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.total_love]). \
+            select([currency_model.total_love, currency_model.daily_streak, currency_model.daily_next]). \
             where(currency_model.user_id==target_user.id)
-                )
+        )
         
         results = await response.fetchall()
         if results:
             target_user_exists = True
-            target_user_total_love = results[0][0]
+            target_user_total_love, target_user_daily_streak, target_user_daily_next = results[0]
         else:
             target_user_exists = False
             target_user_total_love = 0
+            target_user_daily_streak = 0
+            target_user_daily_next = datetime.utcnow()
         
-        target_user_new_love = target_user_total_love+amount
         
+        if with_ == 'hearts':
+            target_user_new_total_love = target_user_total_love+amount
+            target_user_new_daily_streak = target_user_daily_streak
+        else:
+            now = datetime.utcnow()
+            target_user_new_total_love = target_user_total_love
+            if target_user_daily_next < now:
+                target_user_daily_streak, target_user_daily_next = calculate_daily_new(target_user_daily_streak, 
+                    target_user_daily_next, now)
+            
+            target_user_new_daily_streak = target_user_daily_streak+amount
+        
+        target_user_new_daily_next = target_user_daily_next
+            
         if target_user_exists:
             to_execute = CURRENCY_TABLE.update().values(
-                total_love  = target_user_new_love,
-                ).where(currency_model.user_id == target_user.id)
+                total_love  = target_user_new_total_love,
+                daily_streak = target_user_new_daily_streak,
+                daily_next = target_user_new_daily_next,
+            ).where(currency_model.user_id == target_user.id)
         else:
             to_execute = CURRENCY_TABLE.insert().values(
                 user_id         = target_user.id,
-                total_love      = target_user_new_love,
-                daily_next      = datetime.utcnow(),
-                daily_streak    = 0,
+                total_love      = target_user_new_total_love,
+                daily_next      = target_user_new_daily_next,
+                daily_streak    = target_user_new_daily_streak,
                 total_allocated = 0,
-                    )
+            )
         
         await connector.execute(to_execute)
     
-    yield Embed(f'You awarded {target_user.full_name} with {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
-        f'Now they are up from {target_user_total_love} to {target_user_new_love} {EMOJI__HEART_CURRENCY.as_emoji}',
+    if with_ == 'hearts':
+        awarded_with = EMOJI__HEART_CURRENCY.as_emoji
+        up_from = target_user_total_love
+        up_to = target_user_new_total_love
+    else:
+        awarded_with = 'daily streak(s)'
+        up_from = target_user_daily_streak
+        up_to = target_user_new_daily_streak
+    
+    embed = Embed(f'You awarded {target_user.full_name} with {amount} {awarded_with}',
+        f'Now they are up from {up_from} to {up_to} {awarded_with}',
         color=GAMBLING_COLOR)
+    
+    if (message is not None):
+        embed.add_field('Message:', message)
+    
+    yield embed
     
     if target_user.is_bot:
         return
@@ -2442,12 +2493,15 @@ async def award(client, event,
         return
     
     embed = Embed('Aww, love is in the air',
-        f'You have been awarded {amount} {EMOJI__HEART_CURRENCY.as_emoji} by {event.user.full_name}',
+        f'You have been awarded {amount} {awarded_with} by {event.user.full_name}',
         color=GAMBLING_COLOR,
-            ).add_field(
-                f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
-                f'{target_user_total_love} -> {target_user_new_love}',
-            )
+    ).add_field(
+        f'Your {awarded_with}',
+        f'{up_from} -> {up_to}',
+    )
+    
+    if (message is not None):
+        embed.add_field('Message:', message)
     
     try:
         await client.message_create(target_user_channel, embed=embed)
@@ -2460,15 +2514,15 @@ async def award(client, event,
         raise
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
 async def take(client, event,
         target_user: ('user', 'From who do you want to take love away?'),
         amount: ('int', 'How much love do you want to take away?'),
             ):
-    """Takes away hearts form the lucky user. (Bot owner only)"""
-    if not client.is_owner(event.user):
-        yield Embed('Ohoho', 'You must be my Masuta to invoke this command.', color=GAMBLING_COLOR)
-        return
+    """Takes away hearts form the lucky user."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
     
     if amount <= 0:
         yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=GAMBLING_COLOR)
@@ -2480,21 +2534,21 @@ async def take(client, event,
         if results:
             target_user_total_love = results[0][0]
             if target_user_total_love == 0:
-                target_user_new_love = 0
+                target_user_new_total_love = 0
             else:
-                target_user_new_love = target_user_total_love-amount
-                if target_user_new_love < 0:
-                    target_user_new_love = 0
+                target_user_new_total_love = target_user_total_love-amount
+                if target_user_new_total_love < 0:
+                    target_user_new_total_love = 0
                 
                 await connector.execute(CURRENCY_TABLE.update().values(
-                    total_love  = target_user_new_love,
+                    total_love  = target_user_new_total_love,
                     ).where(currency_model.user_id==target_user.id))
         else:
             target_user_total_love = 0
-            target_user_new_love = 0
+            target_user_new_total_love = 0
     
     yield Embed(f'You took {amount} {EMOJI__HEART_CURRENCY.as_emoji} away from {target_user.full_name}',
-        f'They got down from {target_user_total_love} to {target_user_new_love} {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'They got down from {target_user_total_love} to {target_user_new_total_love} {EMOJI__HEART_CURRENCY.as_emoji}',
         color=GAMBLING_COLOR)
     return
 
@@ -2713,7 +2767,7 @@ def calculate_sell_price(daily_count, daily_refund):
 
 @HEART_SHOP.interactions
 async def sell_daily(client, event,
-        amount: ('number', 'How much?')
+        amount: ('number', 'How much?'),
             ):
     """Sell excess daily streak for extra hearts."""
     if amount < 1:
@@ -2728,8 +2782,8 @@ async def sell_daily(client, event,
         
         results = await response.fetchall()
         if results:
-            now = datetime.utcnow()
             total_love, daily_streak, daily_next = results[0]
+            now = datetime.utcnow()
             if daily_next < now:
                 daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
         
