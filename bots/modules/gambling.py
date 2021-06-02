@@ -9,7 +9,7 @@ from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordExce
     ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta
 from hata.ext.command_utils import wait_for_reaction, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
-from hata.ext.slash import abort, SlashResponse
+from hata.ext.slash import abort, InteractionResponse
 
 from sqlalchemy.sql import select, desc
 
@@ -508,7 +508,7 @@ class HeartEventGUI:
         embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
         del result
         
-        to_check = yield SlashResponse(embed=embed, force_new_message=True)
+        to_check = yield InteractionResponse(embed=embed)
         
         try:
             await client.reaction_add(to_check, EVENT_OK_EMOJI)
@@ -789,7 +789,7 @@ class DailyEventGUI:
         embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
         del result
         
-        to_check = yield SlashResponse(embed=embed, force_new_message=True)
+        to_check = yield InteractionResponse(embed=embed)
         
         try:
             await client.reaction_add(to_check, EVENT_OK_EMOJI)

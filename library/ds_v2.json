@@ -1,0 +1,1724 @@
+[
+    {
+        "c": 0,
+        "d": 0,
+        "i": 0,
+        "s": 30,
+        "t": 1,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 0,
+        "i": 1,
+        "s": 22,
+        "t": 1,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "CE_FLOOR"  , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 0,
+        "i": 2,
+        "s": 36,
+        "t": 2,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "BOX"       , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 0,
+        "s": 55,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "NOTHING"   ,
+"NOTHING"   , "WALL_NW"   , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "WALL_NE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 1,
+        "s": 31,
+        "t": 3,
+        "x": 6,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "FLOOR"     , "WALL_HE"   , "WALL_H"    , "NOTHING"   ,
+"WALL_W"    , "TARGET"    , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_H"    , "WALL_HW"   , "FLOOR"     , "WALL_HE"   , "NOTHING"   ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "BOX"       , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 2,
+        "s": 25,
+        "t": 3,
+        "x": 6,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CS_TARGET" , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "NOTHING"   ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 3,
+        "s": 17,
+        "t": 3,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_V"    , "FLOOR"     , "BOX"       , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 4,
+        "s": 16,
+        "t": 1,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "CS_FLOOR"  , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_SE"   , "NOTHING"   ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 5,
+        "s": 15,
+        "t": 1,
+        "x": 12,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "CS_FLOOR"  , "HOLE_U"    , "BOX"       , "FLOOR"     , "BOX"       , "HOLE_U"    , "BOX"       , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 6,
+        "s": 38,
+        "t": 3,
+        "x": 7,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "WALL_W"    , "WALL_N"    , "TARGET"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "FLOOR"     , "BOX"       , "BOX"       , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "FLOOR"     , "CN_FLOOR"  , "FLOOR"     , "WALL_SE"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 7,
+        "s": 28,
+        "t": 3,
+        "x": 9,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "TARGET"    , "BOX"       , "FLOOR"     , "WALL_HE"   , "WALL_HW"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "WALL_S"    , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 8,
+        "s": 27,
+        "t": 1,
+        "x": 11,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "TARGET"    , "HOLE_U"    , "CN_FLOOR"  , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_HW"   , "BOX"       , "WALL_HV"   , "FLOOR"     , "WALL_HE"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 1,
+        "i": 9,
+        "s": 24,
+        "t": 2,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "FLOOR"     , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_H"    , "WALL_HW"   , "HOLE_U"    , "WALL_HE"   , "WALL_H"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 0,
+        "s": 47,
+        "t": 4,
+        "x": 9,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_W"    , "TARGET"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "CE_FLOOR"  , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_SE"   , "WALL_S"    , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_SW"   , "TARGET"    , "WALL_SE"   , "NOTHING"   , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 1,
+        "s": 40,
+        "t": 3,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "TARGET"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "TARGET"    , "CN_FLOOR"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 2,
+        "s": 38,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_NV"   , "WALL_N"    , "WALL_NV"   , "WALL_N"    , "WALL_NE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "WALL_N"    , "FLOOR"     , "WALL_N"    , "HOLE_U"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "WALL_HV"   , "HOLE_U"    , "WALL_HV"   , "HOLE_U"    , "WALL_HE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "BOX"       , "CW_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 3,
+        "s": 11,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_SE"   , "WALL_HW"   , "BOX"       , "WALL_HV"   , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_NV"   , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "TARGET"    , "WALL_NV"   , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 4,
+        "s": 20,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "HOLE_U"    , "FLOOR"     , "TARGET"    , "WALL_HV"   , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "CS_FLOOR"  , "BOX"       , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_NV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 5,
+        "s": 35,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "CS_FLOOR"  , "TARGET"    , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 6,
+        "s": 35,
+        "t": 3,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "CS_FLOOR"  , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "BOX"       , "WALL_HV"   , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 7,
+        "s": 28,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "WALL_W"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "TARGET"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"NOTHING"   , "WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "CW_FLOOR"  , "WALL_E"    ,
+"NOTHING"   , "WALL_NW"   , "FLOOR"     , "BOX"       , "WALL_HE"   , "WALL_SW"   , "FLOOR"     , "WALL_SE"   , "WALL_S"    , "NOTHING"   ,
+"NOTHING"   , "WALL_N"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "WALL_NV"   , "FLOOR"     , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_SE"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "WALL_E"    , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 8,
+        "s": 80,
+        "t": 1,
+        "x": 11,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "WALL_W"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_N"    , "WALL_N"    , "FLOOR"     , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "TARGET"    , "HOLE_U"    , "FLOOR"     , "WALL_SV"   , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_NV"   , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_HE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "WALL_SV"   , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "CN_FLOOR"  , "FLOOR"     , "FLOOR"     , "WALL_V"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 2,
+        "i": 9,
+        "s": 22,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "BOX"       , "BOX"       , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "BOX"       , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 0,
+        "s": 62,
+        "t": 3,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_NV"   , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_N"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "TARGET"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_H"    , "WALL_HW"   , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_SV"   , "BOX"       , "WALL_HE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_V"    , "TARGET"    , "CW_FLOOR"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 1,
+        "s": 24,
+        "t": 1,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "CS_FLOOR"  , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "TARGET"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 2,
+        "s": 56,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "TARGET"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "WALL_HE"   , "WALL_H"    , "WALL_H"    , "WALL_HW"   , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "WALL_SE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "CN_FLOOR"  , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_SE"   , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 3,
+        "s": 42,
+        "t": 1,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "WALL_HV"   , "HOLE_U"    , "WALL_HV"   , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "CE_FLOOR"  , "HOLE_U"    , "TARGET"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "WALL_HV"   , "HOLE_U"    , "WALL_HV"   , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 4,
+        "s": 11,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "CE_FLOOR"  , "BOX"       , "HOLE_U"    , "BOX"       , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "BOX"       , "BOX"       , "WALL_HV"   , "BOX"       , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "BOX"       , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "WALL_HV"   , "HOLE_U"    , "BOX"       , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "BOX"       , "BOX"       , "HOLE_U"    , "HOLE_U"    , "BOX"       , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 5,
+        "s": 34,
+        "t": 1,
+        "x": 11,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "WALL_HE"   , "WALL_HW"   , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "TARGET"    , "BOX"       , "BOX"       , "FLOOR"     , "BOX"       , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_HE"   , "WALL_HW"   , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 6,
+        "s": 55,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_HV"   , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_HE"   , "NOTHING"   ,
+"NOTHING"   , "WALL_HW"   , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "FLOOR"     , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "BOX"       , "TARGET"    , "HOLE_U"    , "FLOOR"     , "WALL_SE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "WALL_SW"   , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 7,
+        "s": 44,
+        "t": 4,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "TARGET"    , "FLOOR"     , "CW_FLOOR"  , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "BOX"       , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 8,
+        "s": 64,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE_U"    , "CN_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 0,
+        "d": 3,
+        "i": 9,
+        "s": 72,
+        "t": 1,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "CN_FLOOR"  , "BOX"       , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 0,
+        "i": 0,
+        "s": 15,
+        "t": 1,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "OBJECT_U"  , "BOX"       , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 0,
+        "s": 22,
+        "t": 1,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 1,
+        "s": 8,
+        "t": 1,
+        "x": 5,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "CS_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 2,
+        "s": 49,
+        "t": 2,
+        "x": 8,
+        "b": 999,
+        "m": [
+"NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "CN_FLOOR"  , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 3,
+        "s": 24,
+        "t": 2,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "OBJECT_U"  , "BOX"       , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "CS_FLOOR"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 4,
+        "s": 29,
+        "t": 3,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "BOX"       , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 5,
+        "s": 57,
+        "t": 2,
+        "x": 8,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "CN_FLOOR"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 6,
+        "s": 45,
+        "t": 2,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "OBJECT_U"  , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CN_FLOOR"  , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 7,
+        "s": 46,
+        "t": 3,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "HOLE_U"    , "FLOOR"     , "TARGET"    , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_SE"   , "NOTHING"   ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "WALL_SE"   , "NOTHING"   , "NOTHING"   ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 8,
+        "s": 38,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "CS_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "BOX"       , "HOLE_U"    , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 1,
+        "i": 9,
+        "s": 10,
+        "t": 2,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "CS_FLOOR"  , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 0,
+        "s": 9,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "OBJECT_U"  , "TARGET"    , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "OBJECT_U"  , "BOX"       , "HOLE_U"    , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 1,
+        "s": 40,
+        "t": 1,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CW_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 2,
+        "s": 9,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "HOLE_U"    , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "OBJECT_U"  , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 3,
+        "s": 34,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "TARGET"    , "BOX"       , "CS_FLOOR"  , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 4,
+        "s": 10,
+        "t": 4,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "CS_TARGET" , "TARGET"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX_TARGET" , "FLOOR"     , "OBJECT_U"  , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 5,
+        "s": 56,
+        "t": 2,
+        "x": 11,
+        "b": 999,
+        "m": [
+"NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "OBJECT_U"  , "TARGET"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "BOX"       , "TARGET"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 6,
+        "s": 73,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "OBJECT_U"  , "TARGET"    , "OBJECT_U"  , "TARGET"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "OBJECT_U"  , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "BOX"       , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "BOX"       , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "CE_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 7,
+        "s": 54,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "CN_FLOOR"  , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 8,
+        "s": 11,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 2,
+        "i": 9,
+        "s": 46,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "OBJECT_U"  , "FLOOR"     , "BOX_TARGET" , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "HOLE_P"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "TARGET"    , "HOLE_U"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 0,
+        "s": 65,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "OBJECT_U"  , "HOLE_U"    , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CN_TARGET" , "OBJECT_U"  , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 1,
+        "s": 60,
+        "t": 1,
+        "x": 11,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "BOX"       , "FLOOR"     , "FLOOR"     , "TARGET"    , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "OBJECT_U"  , "BOX"       , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "CW_FLOOR"  , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 2,
+        "s": 43,
+        "t": 3,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "OBJECT_U"  , "TARGET"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "OBJECT_U"  , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "OBJECT_U"  , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "CS_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 3,
+        "s": 10,
+        "t": 3,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "TARGET"    , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 4,
+        "s": 14,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CS_TARGET" , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 5,
+        "s": 74,
+        "t": 1,
+        "x": 12,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "BOX"       , "OBJECT_U"  , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "CE_FLOOR"  , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 6,
+        "s": 43,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CE_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 7,
+        "s": 86,
+        "t": 2,
+        "x": 11,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "BOX"       , "OBJECT_U"  , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "CW_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 8,
+        "s": 15,
+        "t": 1,
+        "x": 10,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "OBJECT_U"  , "FLOOR"     , "CS_FLOOR"  , "FLOOR"     , "OBJECT_U"  , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "OBJECT_U"  , "FLOOR"     , "BOX"       , "FLOOR"     , "OBJECT_U"  , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "OBJECT_U"  , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "BOX"       , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "OBJECT_U"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_SW"   , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "OBJECT_U"  , "WALL_SE"   , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "TARGET"    , "OBJECT_U"  , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 1,
+        "d": 3,
+        "i": 9,
+        "s": 77,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "OBJECT_U"  , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "TARGET"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "OBJECT_U"  , "BOX"       , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "OBJECT_U"  , "OBJECT_U"  , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "OBJECT_U"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "OBJECT_U"  , "HOLE_U"    , "BOX"       , "OBJECT_U"  , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "OBJECT_U"  , "FLOOR"     , "CN_FLOOR"  , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 0,
+        "i": 0,
+        "s": 9,
+        "t": 1,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_SE"   , "WALL_H"    , "WALL_SW"   , "HOLE_U"    , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_V"    , "BOX"       , "WALL_V"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "NOTHING"   , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 0,
+        "s": 7,
+        "t": 2,
+        "x": 6,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 1,
+        "s": 13,
+        "t": 2,
+        "x": 6,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "BOX"       , "BOX"       , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 2,
+        "s": 24,
+        "t": 4,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "CS_FLOOR"  , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 3,
+        "s": 36,
+        "t": 3,
+        "x": 7,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "WALL_HE"   , "WALL_HW"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CN_FLOOR"  , "BOX"       , "WALL_HV"   , "FLOOR"     , "WALL_SE"   , "NOTHING"   ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "BOX"       , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "WALL_S"    , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 4,
+        "s": 9,
+        "t": 4,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_NV"   , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "WALL_N"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "BOX"       , "BOX"       , "BOX"       , "BOX"       , "WALL_HE"   , "NOTHING"   ,
+"NOTHING"   , "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 5,
+        "s": 6,
+        "t": 1,
+        "x": 5,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "CS_TARGET" , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 6,
+        "s": 46,
+        "t": 2,
+        "x": 5,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "CN_FLOOR"  , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 7,
+        "s": 11,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_NV"   , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "WALL_N"    , "CS_FLOOR"  , "TARGET"    , "WALL_N"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "WALL_HV"   , "HOLE_U"    , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 8,
+        "s": 31,
+        "t": 2,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HE"   , "WALL_HW"   , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "CS_FLOOR"  , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "HOLE_U"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 1,
+        "i": 9,
+        "s": 8,
+        "t": 1,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_NV"   , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "WALL_N"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "HOLE_U"    , "WALL_HE"   , "WALL_H"    , "WALL_H"    , "NOTHING"   ,
+"NOTHING"   , "WALL_W"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_W"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 0,
+        "s": 28,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "CN_FLOOR"  , "WALL_HV"   , "FLOOR"     , "BOX"       , "BOX"       , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_SW"   , "HOLE_U"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 1,
+        "s": 49,
+        "t": 2,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "NOTHING"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_H"    , "WALL_HW"   , "BOX"       , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "HOLE_U"    , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CE_FLOOR"  , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 2,
+        "s": 10,
+        "t": 3,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_TARGET" , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "HOLE_U"    , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "WALL_SV"   , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_V"    , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "WALL_NV"   , "FLOOR"     , "WALL_NE"   , "WALL_HW"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 3,
+        "s": 21,
+        "t": 5,
+        "x": 8,
+        "b": 999,
+        "m": [
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "WALL_N"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CS_TARGET" , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "WALL_HV"   , "BOX"       , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "FLOOR"     , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "WALL_HV"   , "BOX"       , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "WALL_V"    , "BOX"       , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 4,
+        "s": 73,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_V"    , "FLOOR"     , "WALL_V"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "WALL_V"    , "FLOOR"     , "WALL_V"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "FLOOR"     , "WALL_SE"   , "WALL_W"    , "TARGET"    , "WALL_V"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_W"    , "FLOOR"     , "WALL_E"    , "WALL_W"    , "FLOOR"     , "WALL_V"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_NW"   , "FLOOR"     , "WALL_NE"   , "WALL_W"    , "FLOOR"     , "WALL_V"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "WALL_NV"   , "BOX"       , "WALL_NV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "CN_FLOOR"  , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 5,
+        "s": 21,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   , "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "WALL_N"    , "WALL_N"    , "TARGET"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "CS_FLOOR"  , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_SV"   , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "HOLE_U"    , "HOLE_U"    , "WALL_HE"   , "WALL_NW"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 6,
+        "s": 40,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_HV"   , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "CS_FLOOR"  , "WALL_HV"   , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_HV"   , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 7,
+        "s": 12,
+        "t": 2,
+        "x": 11,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "HOLE_U"    , "TARGET"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "WALL_HV"   , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_HE"   , "WALL_HW"   , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_SV"   , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_NV"   , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_NV"   , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 8,
+        "s": 67,
+        "t": 3,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "WALL_SV"   , "FLOOR"     , "WALL_SV"   , "FLOOR"     , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "WALL_V"    , "FLOOR"     , "WALL_V"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "FLOOR"     , "WALL_NV"   , "FLOOR"     , "WALL_NV"   , "HOLE_U"    , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "TARGET"    , "FLOOR"     , "TARGET"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "WALL_SV"   , "BOX"       , "WALL_SV"   , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_V"    , "CN_FLOOR"  , "WALL_V"    , "TARGET"    , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 2,
+        "i": 9,
+        "s": 20,
+        "t": 2,
+        "x": 11,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CS_FLOOR"  , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "WALL_SE"   , "WALL_HW"   , "BOX"       , "WALL_HE"   , "WALL_H"    , "WALL_SW"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_V"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_V"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_NE"   , "WALL_H"    , "WALL_HW"   , "FLOOR"     , "WALL_HE"   , "WALL_NW"   , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_SW"   , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "WALL_SW"   , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 0,
+        "s": 63,
+        "t": 1,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_V"    , "HOLE_U"    , "TARGET"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_N"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "BOX"       , "WALL_HE"   , "WALL_HW"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_SV"   , "CN_FLOOR"  , "WALL_SV"   , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "NOTHING"   , "WALL_S"    , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 1,
+        "s": 39,
+        "t": 1,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_H"    , "WALL_H"    , "WALL_H"    , "WALL_HW"   , "BOX"       , "WALL_HV"   , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "CS_FLOOR"  , "HOLE_U"    , "WALL_HV"   , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "TARGET"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "BOX"       , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "BOX"       , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_SV"   , "HOLE_U"    , "WALL_SE"   , "WALL_S"    , "WALL_S"    , "NOTHING"   ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 2,
+        "s": 28,
+        "t": 2,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "CE_FLOOR"  , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "BOX"       , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "HOLE_U"    , "HOLE_U"    , "BOX"       , "HOLE_U"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 3,
+        "s": 27,
+        "t": 2,
+        "x": 8,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_SV"   , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_NV"   , "CS_FLOOR"  , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_HV"   , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "FLOOR"     , "FLOOR"     , "WALL_HV"   , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_HE"   , "WALL_H"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "BOX"       , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 4,
+        "s": 44,
+        "t": 3,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "BOX"       , "WALL_HE"   , "WALL_HW"   , "BOX"       , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "CW_FLOOR"  , "TARGET"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "TARGET"    , "TARGET"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_SV"   , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "WALL_NE"   , "WALL_HW"   , "BOX"       , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 5,
+        "s": 82,
+        "t": 2,
+        "x": 12,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "TARGET"    , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "WALL_SE"   , "WALL_SW"   , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "FLOOR"     , "WALL_NE"   , "WALL_NW"   , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "FLOOR"     , "WALL_HE"   , "WALL_H"    , "WALL_HW"   , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "TARGET"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "CE_FLOOR"  , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 6,
+        "s": 30,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_N"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_N"    , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "BOX"       , "BOX"       , "HOLE_U"    , "HOLE_U"    , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "CS_FLOOR"  , "BOX"       , "WALL_HV"   , "FLOOR"     , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "BOX"       , "BOX"       , "WALL_HV"   , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "BOX"       , "WALL_SV"   , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_E"    , "WALL_SW"   , "BOX"       , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 7,
+        "s": 10,
+        "t": 1,
+        "x": 7,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_N"    , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "WALL_N"    , "CS_FLOOR"  , "FLOOR"     , "WALL_E"    , "NOTHING"   ,
+"WALL_W"    , "BOX"       , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "WALL_SV"   , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "WALL_NV"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "FLOOR"     , "BOX"       , "HOLE_U"    , "WALL_HE"   , "NOTHING"   ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "TARGET"    , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HE"   , "WALL_H"    , "WALL_HW"   , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 8,
+        "s": 10,
+        "t": 2,
+        "x": 9,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_V"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "CS_FLOOR"  , "FLOOR"     , "WALL_N"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "WALL_SV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "WALL_HV"   , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_NV"   , "BOX"       , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "WALL_SV"   , "BOX"       , "WALL_HV"   , "HOLE_U"    , "FLOOR"     , "HOLE_U"    , "WALL_E"    ,
+"NOTHING"   , "WALL_H"    , "WALL_NW"   , "FLOOR"     , "FLOOR"     , "BOX"       , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "TARGET"    , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }, {
+        "c": 2,
+        "d": 3,
+        "i": 9,
+        "s": 58,
+        "t": 2,
+        "x": 10,
+        "b": 999,
+        "m": [
+"WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "HOLE_U"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "TARGET"    , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "WALL_H"    , "WALL_SW"   , "FLOOR"     , "WALL_HE"   , "WALL_H"    , "NOTHING"   ,
+"NOTHING"   , "WALL_HW"   , "FLOOR"     , "WALL_V"    , "FLOOR"     , "WALL_V"    , "FLOOR"     , "BOX"       , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "BOX"       , "WALL_NV"   , "BOX"       , "WALL_NV"   , "HOLE_U"    , "WALL_HV"   , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "BOX"       , "TARGET"    , "FLOOR"     , "FLOOR"     , "FLOOR"     , "CW_FLOOR"  , "WALL_E"    ,
+"NOTHING"   , "WALL_HW"   , "HOLE_U"    , "WALL_HE"   , "WALL_H"    , "WALL_HW"   , "BOX"       , "WALL_HE"   , "WALL_H"    , "NOTHING"   ,
+"WALL_W"    , "HOLE_U"    , "FLOOR"     , "BOX"       , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"WALL_W"    , "FLOOR"     , "FLOOR"     , "WALL_SE"   , "WALL_S"    , "WALL_SW"   , "FLOOR"     , "FLOOR"     , "FLOOR"     , "WALL_E"    ,
+"NOTHING"   , "WALL_S"    , "WALL_S"    , "NOTHING"   , "NOTHING"   , "NOTHING"   , "WALL_S"    , "WALL_S"    , "WALL_S"    , "NOTHING"
+        ]
+    }
+]

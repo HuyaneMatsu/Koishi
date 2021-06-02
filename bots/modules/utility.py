@@ -14,7 +14,7 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
 
 from hata.ext.command_utils import Pagination
 from hata.ext.prettyprint import pchunkify
-from hata.ext.slash import abort, SlashResponse, set_permission
+from hata.ext.slash import abort, InteractionResponse, set_permission
 
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
@@ -1127,7 +1127,7 @@ async def latest_users(client, event,):
     else:
         embed.description = '*none*'
     
-    return SlashResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)

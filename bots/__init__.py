@@ -103,15 +103,11 @@ if MARISA_MODE:
     
 else:
     if not config.ALLOW_KOISHI_SNEKBOX:
-        try:
-            MODULE_NAMES.remove('snekbox')
-        except KeyError:
-            pass
-
-        try:
-            MODULE_NAMES.remove('witch_craft')
-        except KeyError:
-            pass
+        MODULE_NAMES.discard('snekbox')
+    
+    MODULE_NAMES.discard('dungeon_sweeper_v2')
+    MODULE_NAMES.discard('witch_craft')
+    MODULE_NAMES.discard('google')
 
 for path in MODULE_NAMES:
     EXTENSION_LOADER.add('bots.modules.'+path)

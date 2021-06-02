@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from random import randint
 
@@ -7,7 +6,7 @@ from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, Inval
 
 from hata.ext.command_utils import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
     GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, Timeouter
-from hata.ext.slash import abort, SlashResponse
+from hata.ext.slash import abort
 
 from bot_utils.shared import PATH__KOISHI
 from PIL import Image as PIL
@@ -30,9 +29,9 @@ KANAKO_COLOR = Color.from_tuple(FONT_COLOR)
 
 SLASH_CLIENT : Client
 KANAKO = SLASH_CLIENT.interactions(None,
-    name='kanako',
-    description='Start a hiragana or a katakana quiz!',
-    is_global=True,
+    name = 'kanako',
+    description = 'Start a hiragana or a katakana quiz!',
+    is_global = True,
 )
 
 @KANAKO.interactions

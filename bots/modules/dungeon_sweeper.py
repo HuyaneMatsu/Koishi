@@ -9,7 +9,7 @@ from hata.ext.command_utils import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GU
 from hata.ext.commands_v2 import checks
 
 from hata.discord.core import GC_CYCLER
-from hata.ext.slash import SlashResponse, abort
+from hata.ext.slash import InteractionResponse, abort
 
 from bot_utils.models import DB_ENGINE, DS_TABLE, ds_model
 from bot_utils.shared import PATH__KOISHI
@@ -124,7 +124,7 @@ class ds_game:
         self.cache = [None for _ in range(len(CHARS))]
         self.last = LOOP_TIME()
         
-        DS_GAMES[self.user.id]= self
+        DS_GAMES[self.user.id] = self
         
         async with DB_ENGINE.connect() as connector:
             result = await connector.execute(DS_TABLE.select(ds_model.user_id == self.user.id))
@@ -139,7 +139,7 @@ class ds_game:
             self.data = bytearray(800)
         
         try:
-            message = yield SlashResponse(embed=self.render_menu(), force_new_message=True)
+            message = yield InteractionResponse(embed=self.render_menu())
         except BaseException as err:
             self._task_flag = GUI_STATE_CANCELLED
             del DS_GAMES[self.user.id]
@@ -726,7 +726,7 @@ class ds_game:
             embed = self.render_done()
         
         try:
-            message = yield SlashResponse(embed=embed, force_new_message=True)
+            message = yield InteractionResponse(embed=embed)
         except BaseException as err:
             
             if self._task_flag == GUI_STATE_SWITCHING_CTX:
@@ -1072,15 +1072,15 @@ class stage_source:
     @property
     def style(self):
         return self.char[0]
-
+    
     @property
     def activate_skill(self):
         return self.char[1]
-
+    
     @property
     def use_skill(self):
         return self.char[2]
-
+    
     @property
     def emoji(self):
         return self.char[3]
@@ -1092,7 +1092,7 @@ class stage_source:
                 break
             best +=5
         return rating
-
+    
     @property
     def position(self):
         position = self.chapter*33+self.level
@@ -1283,7 +1283,7 @@ DEFAULT_STYLE_PARTS = {
     WALL_E|WALL_W               : Emoji.precreate(578674409968238613, name='0U').as_emoji,
     WALL_N|WALL_E|WALL_W        : Emoji.precreate(578676096829227027, name='0V').as_emoji,
     WALL_E|WALL_S|WALL_W        : Emoji.precreate(578676650389274646, name='0W').as_emoji,
-        }
+}
 
 REIMU_STYLE = {
     WALL_N                      : Emoji.precreate(580141387631165450, name='0O').as_emoji,
@@ -1607,13 +1607,13 @@ RULES_HELP = Embed('Rules of Dungeon sweeper',
 )
 
 def loader(filename):
-
+    
     for _ in range(len(CHARS)):
         STAGES.append(([], [], [], []),)
-            
+    
     PATTERN_HEADER = re.compile('[a-zA-Z0-9_]+')
     PATTERN_MAP = re.compile('[A-Z_]+')
-
+    
     PATTERNS = {
         'FLOOR'     : FLOOR,
         'TARGET'    : TARGET,

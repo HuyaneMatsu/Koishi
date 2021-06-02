@@ -7,7 +7,7 @@ from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Task, DiscordExcepti
 from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, ChooseMenu, Pagination, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 from hata.backend.utils import from_json
-from hata.ext.slash import SlashResponse, abort
+from hata.ext.slash import InteractionResponse, abort
 from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, CONTENT_TYPE
 
@@ -173,7 +173,7 @@ class ShuffledShelter:
         
         embed = Embed(title, color=BOORU_COLOR, url=image_url).add_image(image_url)
         
-        message = yield SlashResponse(embed=embed, force_new_message=True)
+        message = yield InteractionResponse(embed=embed)
         self.message = message
         
         if (len(urls) == (0 if pop else 1)) or (not event.channel.cached_permissions_for(client).can_add_reactions):

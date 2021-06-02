@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 from random import random, choice, shuffle, randint
 from time import perf_counter
@@ -19,7 +18,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
     ButtonStyle
-from hata.ext.slash import setup_ext_slash, SlashResponse, abort, set_permission, wait_for_component_interaction, \
+from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, wait_for_component_interaction, \
     Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
@@ -412,7 +411,7 @@ async def user_id(client, event,
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def collect_reactions(client, event):
     """Collects reactions"""
-    message = yield SlashResponse('Collecting reactions for 1 minute!', force_new_message=True)
+    message = yield InteractionResponse('Collecting reactions for 1 minute!')
     await sleep(60.0)
     
     reactions = message.reactions
@@ -635,7 +634,7 @@ async def getting_good(client, event):
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.red, enabled=False),
     )
     
-    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
+    yield InteractionResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
     
     try:
         component_interaction = await wait_for_component_interaction(event,
@@ -650,24 +649,26 @@ async def getting_good(client, event):
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def we_gucci(client, event):
     """Getting there."""
-    main_component = [
+    components = [
         Button('cake', custom_id='cake', style=ButtonStyle.violet),
         Button('cat', custom_id='cat', style=ButtonStyle.gray),
         Button('snake', custom_id='snake', style=ButtonStyle.green),
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
     ]
     
-    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component,
-        force_new_message=True, show_for_invoking_user_only=True)
+    yield InteractionResponse(embed=Embed('Choose your poison.'), components=components)
     
     try:
-        async for component_interaction in iter_component_interactions(event, timeout=30.0, count=3):
+        async for component_interaction in iter_component_interactions(event, timeout=10.0, count=3):
             emoji = BUILTIN_EMOJIS[component_interaction.interaction.custom_id]
-            await client.message_create(event.channel, emoji.as_emoji)
+            yield InteractionResponse(emoji.as_emoji, components=components, event=component_interaction)
     except TimeoutError:
-        pass
+        await client.interaction_response_message_edit(event, components=None)
+        return
     
-    abort('Interaction exhausted or timeout occurred.')
+    yield InteractionResponse(embed=Embed('Choose your poison.', 'Interaction exhausted.'),
+        components=None, message=event.message)
+
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def link():
@@ -677,7 +678,7 @@ async def link():
         url='https://www.youtube.com/watch?v=gYGqcORGqIw&ab_channel=ShoopTouhouEurobeatShoopTouhouEurobeat',
     )
     
-    return SlashResponse('_ _',
+    return InteractionResponse('_ _',
         components = component,
         show_for_invoking_user_only = True,
     )
@@ -686,11 +687,11 @@ async def link():
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def slash_edit(client, event):
     """Editing slashes, bakana!"""
-    yield SlashResponse(embed=Embed('Choose your poison.'))
+    yield InteractionResponse(embed=Embed('Choose your poison.'))
     await sleep(2.0, KOKORO)
-    yield SlashResponse(embed=Embed('Choose your cake.'), edit=None)
+    yield InteractionResponse(embed=Embed('Choose your cake.'), message=None)
     await sleep(2.0, KOKORO)
-    yield SlashResponse(embed=Embed('Choose your neko.'), edit=None)
+    yield InteractionResponse(embed=Embed('Choose your neko.'), message=None)
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def embed_abort(client, event):
@@ -733,7 +734,8 @@ async def select_test():
         ),
     ]
     
-    yield SlashResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
+    yield InteractionResponse(embed=Embed('Choose your poison.'), components=main_component,
+        show_for_invoking_user_only=True)
 
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
@@ -745,7 +747,8 @@ async def nested_components():
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
     ]]
     
-    return SlashResponse(embed=Embed('Nesting with lists.'), components=components, show_for_invoking_user_only=True)
+    return InteractionResponse(embed=Embed('Nesting with lists.'), components=components,
+        show_for_invoking_user_only=True)
 
 @Marisa.commands
 @cooldown('user', 30.0)

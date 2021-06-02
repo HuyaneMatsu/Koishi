@@ -4,7 +4,7 @@ from io import BytesIO
 
 from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, Color, KOKORO, Lock, Client, parse_message_reference, \
     MESSAGES, DiscordException, ERROR_CODES, CHANNELS, Attachment, sanitize_mentions
-from hata.ext.slash import SlashResponse, abort
+from hata.ext.slash import InteractionResponse, abort
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
@@ -174,7 +174,7 @@ async def image_(client, event,
         image_detail = image_details[index]
     
     image = await ReuAsyncIO(join(IMAGE_PATH, image_detail.path))
-    return SlashResponse(file=image)
+    return InteractionResponse(file=image)
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
@@ -466,7 +466,7 @@ class ImageWithTag:
             .add_image(f'attachment://{os.path.basename(image.path)}')
         
         file = await ReuAsyncIO(join(IMAGE_PATH, image.path))
-        return SlashResponse(embed=embed, file=file)
+        return InteractionResponse(embed=embed, file=file)
 
 for name, name_form__ing, name_form__s, description in (
         ('pat', 'patting', 'pats', 'Do you like pats as well?'),

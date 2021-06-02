@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from hata import Client, Embed, parse_emoji, sleep, id_to_time, DATETIME_FORMAT_CODE, elapsed_time, DiscordException, \
     ERROR_CODES, Role
-from hata.ext.slash import configure_parameter, SlashResponse, abort, set_permission
+from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON as TEST_GUILD, ROLE__NEKO_DUNGEON__MODERATOR
 MODERATOR_ROLE_ID = ROLE__NEKO_DUNGEON__MODERATOR.id
@@ -164,7 +164,7 @@ async def repeat(
     if not text:
         text = 'nothing to repeat'
     
-    return SlashResponse(text, allowed_mentions=None)
+    return InteractionResponse(text, allowed_mentions=None)
 
 # command end
 # command start improvise
@@ -194,7 +194,7 @@ async def improvise():
 @Nitori.interactions(guild=TEST_GUILD)
 async def collect_reactions():
     """Collects reactions"""
-    message = yield SlashResponse('Collecting reactions for 1 minute!', force_new_message=True)
+    message = yield InteractionResponse('Collecting reactions for 1 minute!')
     await sleep(60.0)
     
     reactions = message.reactions
@@ -335,7 +335,7 @@ async def latest_users(event):
     else:
         embed.description = '*none*'
     
-    return SlashResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed=embed, allowed_mentions=None)
 
 # command start ping
 

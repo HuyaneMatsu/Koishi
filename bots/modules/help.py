@@ -9,7 +9,7 @@ from bot_utils.shared import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNG
     ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH, ROLE__NEKO_DUNGEON__NSFW_ACCESS, \
     ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT
 
-from hata.ext.slash import SlashResponse
+from hata.ext.slash import InteractionResponse
 
 SLASH_CLIENT: Client
 
@@ -58,7 +58,7 @@ async def rules(client, event):
             'Instant ban.'
         )
     
-    return SlashResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
 ABOUT = SLASH_CLIENT.interactions(None,
@@ -300,7 +300,7 @@ async def claimable():
             f'*You must have {ROLE__NEKO_DUNGEON__VERIFIED.mention} role*.',
         )
     
-    return SlashResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
 @ROLES.interactions
@@ -320,4 +320,4 @@ async def events():
             f'notice them one day.'
         )
     
-    return SlashResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed=embed, allowed_mentions=None)

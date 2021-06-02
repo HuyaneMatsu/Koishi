@@ -73,6 +73,14 @@ else:
     
     EMOJI_COUNTER_TABLE = emoji_counter_model.__table__
     
+    class ds_v2_model(BASE):
+        __tablename__   = 'DS_V2_TABLE'
+        id              = Column(BIGINT, primary_key=True)
+        user_id         = Column(BIGINT, unique=True)
+        data            = Column(LargeBinary())
+    
+    DS_V2_TABLE = ds_v2_model.__table__
+    
     # Creating tables
     DB_ENGINE = create_engine(DATABASE_NAME)
     BASE.metadata.create_all(DB_ENGINE)

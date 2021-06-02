@@ -4,7 +4,7 @@ from functools import partial as partial_func
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
     parse_rdelta, time_to_id, ChannelCategory, Emoji
 from hata.ext.command_utils import Pagination, wait_for_reaction
-from hata.ext.slash import abort, SlashResponse, Row, Button, ButtonStyle, wait_for_component_interaction
+from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
 
 from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
@@ -324,8 +324,7 @@ async def yeet(client, event,
     
     components = Row(button_confirm, button_cancel)
     
-    yield SlashResponse(embed=embed, components=components, allowed_mentions=None, show_for_invoking_user_only=True,
-        force_new_message=True)
+    yield InteractionResponse(embed=embed, components=components, allowed_mentions=None, show_for_invoking_user_only=True)
     
     try:
         component_interaction = await wait_for_component_interaction(event, timeout=300.0)
@@ -508,7 +507,7 @@ async def emoji_role(client, event,
     
     embed.add_field('Roles after:', role_text)
     
-    message = yield SlashResponse(embed=embed, force_new_message=True)
+    message = yield InteractionResponse(embed=embed)
     
     for emoji_ in ROLE_EMOJI_EMOJIS:
         await client.reaction_add(message, emoji_)
