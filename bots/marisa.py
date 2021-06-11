@@ -7,7 +7,6 @@ from html import unescape as html_unescape
 from functools import partial as partial_func
 from datetime import datetime, timedelta
 from io import StringIO
-from hata.discord.rate_limit import parse_date_to_datetime
 
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
@@ -616,7 +615,7 @@ class CatFeeder:
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def cat_feeder(client, event):
     """Feed the cat!"""
-    return await CatFeeder(client, event)
+    await CatFeeder(client, event)
 
 
 def check_user(user, event):
@@ -737,19 +736,6 @@ async def select_test():
     yield InteractionResponse(embed=Embed('Choose your poison.'), components=main_component,
         show_for_invoking_user_only=True)
 
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def nested_components():
-    components = [[
-        Button('cake', custom_id='cake', style=ButtonStyle.violet),
-        Button('cat', custom_id='cat', style=ButtonStyle.gray),
-        Button('snake', custom_id='snake', style=ButtonStyle.green),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
-    ]]
-    
-    return InteractionResponse(embed=Embed('Nesting with lists.'), components=components,
-        show_for_invoking_user_only=True)
-
 @Marisa.commands
 @cooldown('user', 30.0)
 async def test_cooldown():
@@ -762,3 +748,44 @@ async def handle_cooldown_error(command_context, exception):
         return True
     
     return False
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def eval(value:('expression', 'expression to evaluate')):
+    return repr(value)
+
+EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+EMOJI_CAT = BUILTIN_EMOJIS['cat']
+EMOJI_SNAKE = BUILTIN_EMOJIS['snake']
+EMOJI_EGGPLANT = BUILTIN_EMOJIS['eggplant']
+
+CUSTOM_ID_CAKE = 'choose_your_poison.cake'
+CUSTOM_ID_CAT = 'choose_your_poison.cat'
+CUSTOM_ID_SNAKE = 'choose_your_poison.snake'
+CUSTOM_ID_EGGPLANT = 'choose_your_poison.eggplant'
+
+BUTTON_CAKE = Button('cake', custom_id=CUSTOM_ID_CAKE, style=ButtonStyle.violet)
+BUTTON_CAT = Button('cat', custom_id=CUSTOM_ID_CAT, style=ButtonStyle.gray)
+BUTTON_SNAKE = Button('snake', custom_id=CUSTOM_ID_SNAKE, style=ButtonStyle.green)
+BUTTON_EGGPLANT = Button('eggplant', custom_id=CUSTOM_ID_EGGPLANT, style=ButtonStyle.red)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def choose_your_poison():
+    components = Row(BUTTON_CAKE, BUTTON_CAT, BUTTON_SNAKE, BUTTON_EGGPLANT)
+    
+    return InteractionResponse(embed=Embed('Choose your poison'), components=components)
+
+@Marisa.interactions(custom_id=CUSTOM_ID_CAKE)
+async def poison_edit_cake():
+    return EMOJI_CAKE.as_emoji
+
+@Marisa.interactions(custom_id=CUSTOM_ID_CAT)
+async def poison_edit_cat():
+    return EMOJI_CAT.as_emoji
+
+@Marisa.interactions(custom_id=CUSTOM_ID_SNAKE)
+async def poison_edit_snake():
+    return EMOJI_SNAKE.as_emoji
+
+@Marisa.interactions(custom_id=CUSTOM_ID_EGGPLANT)
+async def poison_edit_eggplant():
+    return EMOJI_EGGPLANT.as_emoji

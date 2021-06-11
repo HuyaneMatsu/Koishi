@@ -104,52 +104,57 @@ if (GOOGLE_API_KEYS is not None):
     def create_search_results(data, image_search):
         results = []
         
-        for item in data['items']:
-            title = item.get('title', None)
-            description = item.get('snippet', None)
-            if (description is not None):
-                description = description.replace('\n', '')
-            
-            if image_search:
-                image_url = item['link']
-                try:
-                    url = item['image']['contextLink']
-                except KeyError:
-                    url = image_url
-            else:
-                url = item['link']
-                page_map = item.get('pagemap', None)
-                if (page_map is None):
-                    image_url = GOOGLE_FAVICON
+        try:
+            items = data['items']
+        except KeyError:
+            pass
+        else:
+            for item in items:
+                title = item.get('title', None)
+                description = item.get('snippet', None)
+                if (description is not None):
+                    description = description.replace('\n', '')
+                
+                if image_search:
+                    image_url = item['link']
+                    try:
+                        url = item['image']['contextLink']
+                    except KeyError:
+                        url = image_url
                 else:
-                    while True:
-                        image_datas = page_map.get('cse_image', None)
-                        
-                        if (image_datas is not None) and image_datas:
-                            image_data = image_datas[0]
-                            try:
-                                image_url = image_data['src']
-                            except KeyError:
-                                pass
-                            else:
-                                if not image_url.startswith('x-raw-image'):
-                                    break
-                        
-                        thumbnail_datas = page_map.get('cse_thumbnail', None)
-                        if (thumbnail_datas is not None) and thumbnail_datas:
-                            thumbnail_data = thumbnail_datas[0]
-                            try:
-                                image_url = thumbnail_data['src']
-                            except KeyError:
-                                pass
-                            else:
-                                break
-                        
+                    url = item['link']
+                    page_map = item.get('pagemap', None)
+                    if (page_map is None):
                         image_url = GOOGLE_FAVICON
-                        break
-            
-            result = SearchResult(title, description, url, image_url)
-            results.append(result)
+                    else:
+                        while True:
+                            image_datas = page_map.get('cse_image', None)
+                            
+                            if (image_datas is not None) and image_datas:
+                                image_data = image_datas[0]
+                                try:
+                                    image_url = image_data['src']
+                                except KeyError:
+                                    pass
+                                else:
+                                    if not image_url.startswith('x-raw-image'):
+                                        break
+                            
+                            thumbnail_datas = page_map.get('cse_thumbnail', None)
+                            if (thumbnail_datas is not None) and thumbnail_datas:
+                                thumbnail_data = thumbnail_datas[0]
+                                try:
+                                    image_url = thumbnail_data['src']
+                                except KeyError:
+                                    pass
+                                else:
+                                    break
+                            
+                            image_url = GOOGLE_FAVICON
+                            break
+                
+                result = SearchResult(title, description, url, image_url)
+                results.append(result)
         
         return results
     

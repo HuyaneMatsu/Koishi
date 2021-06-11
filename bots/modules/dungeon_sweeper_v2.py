@@ -11,7 +11,9 @@ from hata.ext.slash import InteractionResponse, abort, Row, Button, ButtonStyle
 
 from sqlalchemy.sql import select
 
-from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, currency_model, CURRENCY_TABLE
+from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, currency_model, CURRENCY_TABLE, ds_v2_result_model, \
+    DS_V2_RESULT_TABLE
+
 from bot_utils.shared import PATH__KOISHI
 
 DS_COLOR             = Color(0xa000c4)
@@ -833,19 +835,14 @@ TILE_NAME_TO_VALUE = {
 TILE_VALUE_TO_NAME = {value: key for key, value in TILE_NAME_TO_VALUE.items()}
 
 JSON_KEY_STAGE_SOURCE_BEST = 'b'
-JSON_KEY_STAGE_SOURCE_CHAPTER = 'c'
-JSON_KEY_STAGE_SOURCE_DIFFICULTY = 'd'
-JSON_KEY_STAGE_SOURCE_INDEX = 'i'
-JSON_KEY_STAGE_SOURCE_START = 's'
+JSON_KEY_STAGE_SOURCE_CHAPTER_INDEX = 'c'
+JSON_KEY_STAGE_SOURCE_DIFFICULTY_INDEX = 'd'
+JSON_KEY_STAGE_SOURCE_STAGE_INDEX = 's'
+JSON_KEY_STAGE_SOURCE_ID = 'i'
+JSON_KEY_STAGE_SOURCE_START = 'p'
 JSON_KEY_STAGE_SOURCE_TARGET_COUNT = 't'
 JSON_KEY_STAGE_SOURCE_MAP = 'm'
 JSON_KEY_STAGE_X_SIZE = 'x'
-
-JSON_KEY_USER_STATE_GAME_STATE = '0'
-JSON_KEY_USER_STATE_GAME_RESULTS = '1'
-JSON_KEY_USER_STATE_GAME_SELECTED_STAGE = '2'
-JSON_KEY_USER_STATE_GAME_SELECTED_CHAPTER = '3'
-JSON_KEY_USER_STATE_GAME_SELECTED_DIFFICULTY = '4'
 
 JSON_KEY_HISTORY_ELEMENT_POSITION = '0'
 JSON_KEY_HISTORY_ELEMENT_WAS_SKILL = '1'
@@ -858,20 +855,27 @@ JSON_KEY_GAME_STATE_HAS_SKILL = '3'
 JSON_KEY_GAME_STATE_NEXT_SKILL = '4'
 JSON_KEY_GAME_STATE_HISTORY = '5'
 
+STAGES_BY_ID = {}
+
 class StageSource:
-    __slots__ = ('best', 'chapter', 'difficulty', 'index', 'start', 'target_count', 'map', 'x_size')
+    __slots__ = ('best', 'chapter_index', 'difficulty_index', 'stage_index', 'id', 'start', 'target_count', 'map',
+        'x_size')
     
     @classmethod
     def from_json(cls, data):
         self = object.__new__(cls)
         self.best = data[JSON_KEY_STAGE_SOURCE_BEST]
-        self.chapter = data[JSON_KEY_STAGE_SOURCE_CHAPTER]
-        self.difficulty = data[JSON_KEY_STAGE_SOURCE_DIFFICULTY]
-        self.index = data[JSON_KEY_STAGE_SOURCE_INDEX]
+        self.chapter_index = data[JSON_KEY_STAGE_SOURCE_CHAPTER_INDEX]
+        self.difficulty_index = data[JSON_KEY_STAGE_SOURCE_DIFFICULTY_INDEX]
+        self.stage_index = data[JSON_KEY_STAGE_SOURCE_STAGE_INDEX]
+        identifier = data[JSON_KEY_STAGE_SOURCE_ID]
+        self.id = identifier
         self.start = data[JSON_KEY_STAGE_SOURCE_START]
         self.target_count = data[JSON_KEY_STAGE_SOURCE_TARGET_COUNT]
         self.map = [TILE_NAME_TO_VALUE[tile_name] for tile_name in data[JSON_KEY_STAGE_SOURCE_MAP]]
         self.x_size = data[JSON_KEY_STAGE_X_SIZE]
+        
+        STAGES_BY_ID[self.id] = self
         
         return self
 
@@ -896,21 +900,27 @@ def pretty_dump_stage_sources(stage_sources):
         
         json_parts.append(' '*8)
         json_parts.append('"')
-        json_parts.append(JSON_KEY_STAGE_SOURCE_CHAPTER)
+        json_parts.append(JSON_KEY_STAGE_SOURCE_CHAPTER_INDEX)
         json_parts.append('": ')
-        json_parts.append(stage_source.chapter)
+        json_parts.append(stage_source.chapter_index)
         json_parts.append(',\n')
         json_parts.append(' '*8)
         json_parts.append('"')
-        json_parts.append(JSON_KEY_STAGE_SOURCE_DIFFICULTY)
+        json_parts.append(JSON_KEY_STAGE_SOURCE_DIFFICULTY_INDEX)
         json_parts.append('": ')
-        json_parts.append(repr(stage_source.difficulty))
+        json_parts.append(repr(stage_source.difficulty_index))
         json_parts.append(',\n')
         json_parts.append(' '*8)
         json_parts.append('"')
-        json_parts.append(JSON_KEY_STAGE_SOURCE_INDEX)
+        json_parts.append(JSON_KEY_STAGE_SOURCE_STAGE_INDEX)
         json_parts.append('": ')
-        json_parts.append(repr(stage_source.index))
+        json_parts.append(repr(stage_source.stage_index))
+        json_parts.append(',\n')
+        json_parts.append(' '*8)
+        json_parts.append('"')
+        json_parts.append(JSON_KEY_STAGE_SOURCE_ID)
+        json_parts.append('": ')
+        json_parts.append(repr(stage_source.id))
         json_parts.append(',\n')
         json_parts.append(' '*8)
         json_parts.append('"')
@@ -996,11 +1006,13 @@ CHAPTERS = {}
 
 class Chapter:
     __slots__ = ('button_skill_disabled', 'button_skill_enabled', 'button_skill_used', 'difficulties', 'emoji',
-        'identifier', 'button_skill_activated', 'skill_can_active', 'skill_get_directories', 'skill_use', 'style',)
+        'identifier', 'button_skill_activated', 'skill_can_active', 'skill_get_directories', 'skill_use', 'style',
+        'stages_sorted',)
     def __init__(self, identifier, emoji, style, button_skill_enabled, button_skill_disabled, button_skill_used,
             button_skill_activated, skill_can_active, skill_get_directories, skill_use):
         self.identifier = identifier
         self.difficulties = None
+        self.stages_sorted = []
         self.emoji = emoji
         self.style = style
         self.button_skill_enabled = button_skill_enabled
@@ -1061,16 +1073,16 @@ def load_stages():
     chapters = {}
     for stage_source in stage_sources:
         try:
-            chapter = chapters[stage_source.chapter]
+            chapter = chapters[stage_source.chapter_index]
         except KeyError:
-            chapter = chapters[stage_source.chapter] = {}
+            chapter = chapters[stage_source.chapter_index] = {}
         
         try:
-            difficulty = chapter[stage_source.difficulty]
+            difficulty = chapter[stage_source.difficulty_index]
         except KeyError:
-            difficulty = chapter[stage_source.difficulty] = {}
+            difficulty = chapter[stage_source.difficulty_index] = {}
         
-        difficulty[stage_source.index] = stage_source
+        difficulty[stage_source.stage_index] = stage_source
     
     sorted_chapters = []
     for expected_chapter_index, (chapter_index, chapter) in enumerate(sorted(chapters.items())):
@@ -1108,97 +1120,143 @@ def load_stages():
                 sorted_stages.append(stage)
     
     for chapter_index, chapter in enumerate(sorted_chapters):
-        CHAPTERS[chapter_index].difficulties = chapter
+        chapter_object = CHAPTERS[chapter_index]
+        chapter_object.difficulties = chapters[chapter_index]
+        for difficulty in chapter:
+            chapter_object.stages_sorted.extend(difficulty)
 
 
 load_stages()
 
 
+class StageState:
+    __slots__ = ('id', 'stage_id', 'best')
+    
+    def __new__(cls, field):
+        self = object.__new__(cls)
+        self.id = field.id
+        self.stage_id = field.stage_id
+        self.best = field.best
+        return self
+
+
 class UserState:
-    __slots__ = ('game_state', 'results', 'selected_chapter', 'selected_stage', 'selected_difficulty')
+    __slots__ = ('game_state', 'stage_results', 'entry_id', 'field_exists', 'selected_chapter_index',
+        'selected_stage_index', 'selected_difficulty_index', 'user_id',)
     
-    def __init__(self):
-        self.game_state = None
-        self.results = {}
-        self.selected_chapter = 0
-        self.selected_stage = 0
-        self.selected_difficulty = 0
-    
-    @classmethod
-    def from_raw_data(cls, data):
-        json_data = decompress(data)
-        try:
-            game_state_data = json_data[JSON_KEY_USER_STATE_GAME_STATE]
-        except KeyError:
-            game_state = None
-        else:
-            game_state = GameState.from_json(game_state_data)
-        
-        try:
-            results_data = json_data[JSON_KEY_USER_STATE_GAME_STATE]
-        except KeyError:
-            results = {}
-        else:
-            results = {}
-            for chapter_identifier, difficulty_identifier, stage_identifier, best in results_data:
-                try:
-                    chapter = results[chapter_identifier]
-                except KeyError:
-                    chapter = results[chapter_identifier] = {}
+    async def __new__(cls, user_id):
+        async with DB_ENGINE.connect() as connector:
+            response = await connector.execute(
+                DS_V2_TABLE. \
+                    select(ds_v2_model.user_id==user_id)
+            )
+            results = await response.fetchall()
+            
+            if results:
+                result = results[0]
+                game_state_data = result.game_state
+                if (game_state_data is None):
+                    game_state = None
+                else:
+                    game_state_json_data = decompress(game_state_data)
+                    game_state = GameState.from_json(game_state_json_data)
                 
-                try:
-                    difficulty = chapter[difficulty_identifier]
-                except KeyError:
-                    difficulty = chapter[difficulty_identifier] = {}
+                selected_chapter_index = result.selected_chapter_index
+                selected_stage_index = result.selected_stage_index
+                selected_difficulty_index = result.selected_difficulty_index
+                field_exists = True
+                entry_id = result.id
                 
-                difficulty[stage_identifier] = best
-        
-        selected_stage = json_data.get(JSON_KEY_USER_STATE_GAME_SELECTED_STAGE, 0)
-        selected_chapter = json_data.get(JSON_KEY_USER_STATE_GAME_SELECTED_CHAPTER, 0)
-        selected_difficulty = json_data.get(JSON_KEY_USER_STATE_GAME_SELECTED_DIFFICULTY, 0)
+                response = await connector.execute(
+                    DS_V2_RESULT_TABLE. \
+                    select(ds_v2_result_model.ds_v2_entry_id==entry_id)
+                )
+                
+                results = await response.fetchall()
+                
+                stage_results = {}
+                for result in results:
+                    stage_state = StageState(result)
+                    stage_results[stage_state.stage_id] = stage_results
+            else:
+                game_state = None
+                stage_results = {}
+                selected_chapter_index = 0
+                selected_stage_index = 0
+                selected_difficulty_index = 0
+                field_exists = False
+                entry_id = 0
         
         self = object.__new__(cls)
         self.game_state = game_state
-        self.results = results
-        self.selected_stage = selected_stage
-        self.selected_chapter = selected_chapter
-        self.selected_difficulty = selected_difficulty
-        return self
+        self.selected_chapter_index = selected_chapter_index
+        self.selected_stage_index = selected_stage_index
+        self.selected_difficulty_index = selected_difficulty_index
+        self.field_exists = field_exists
+        self.entry_id = entry_id
+        self.stage_results = stage_results
     
-    def to_raw_data(self):
-        json_data = {}
-        
+    
+    def get_game_state_data(self):
         game_state = self.game_state
-        if (game_state is not None):
-            json_data[JSON_KEY_USER_STATE_GAME_STATE] = game_state.to_json()
+        if (game_state is None):
+            game_state_data = None
+        else:
+            game_state_json_data = game_state.to_json()
+            game_state_data = compress(game_state_json_data)
         
-        results = self.results
-        if results:
-            results_raw = []
-            for stage_identifier, difficulties in results.items():
-                for difficulty_identifier, stages in difficulties.items():
-                    for stage, best in stages.items():
-                        results_raw.append((stage_identifier, difficulty_identifier, stage, best))
+        return game_state_data
+    
+    async def upload(self):
+        game_state_data = self.get_game_state_data()
         
+        async with DB_ENGINE.connect() as connector:
+            if self.field_exists:
+                await connector.execute(
+                    DS_V2_TABLE.update(). \
+                    values(
+                        game_state                = game_state_data,
+                        selected_chapter_index    = self.selected_chapter_index,
+                        selected_stage_index      = self.selected_stage_index,
+                        selected_difficulty_index = self.selected_difficulty_index,
+                    ).where(ds_v2_model.id==self.entry_id)
+                )
+            else:
+                response = await connector.execute(
+                    DS_V2_TABLE.insert(). \
+                    values(
+                        user_id                   = self.user_id,
+                        game_state                = game_state_data,
+                        selected_chapter_index    = self.selected_chapter_index,
+                        selected_stage_index      = self.selected_stage_index,
+                        selected_difficulty_index = self.selected_difficulty_index,
+                    ). \
+                    returning(ds_v2_model.id)
+                )
+                result = await response.fetchone()
+                self.entry_id = result[0]
+                self.field_exists = True
+    
+    async def set_best(self, stage_id, best):
+        if not self.field_exists:
+            async with DB_ENGINE.connect() as connector:
+                game_state_data = self.get_game_state_data()
+                
+                await connector.execute(
+                    DS_V2_TABLE.insert(). \
+                    values(
+                        user_id                   = self.user_id,
+                        game_state                = game_state_data,
+                        selected_chapter_index    = self.selected_chapter_index,
+                        selected_stage_index      = self.selected_stage_index,
+                        selected_difficulty_index = self.selected_difficulty_index,
+                    )
+                )
+            
+            self.field_exists = True
         
-        selected_stage = self.selected_stage
-        if selected_stage:
-            json_data[JSON_KEY_USER_STATE_GAME_SELECTED_STAGE] = selected_stage
-        
-        selected_chapter = self.selected_chapter
-        if selected_chapter:
-            json_data[JSON_KEY_USER_STATE_GAME_SELECTED_CHAPTER] = selected_chapter
-        
-        selected_difficulty = self.selected_difficulty
-        if selected_difficulty:
-            json_data[JSON_KEY_USER_STATE_GAME_SELECTED_DIFFICULTY] = selected_difficulty
-        
-        data = compress(json_data)
-        return data
-
-
 class GameState:
-    __slots__ = ('best', 'chapter', 'has_skill', 'history', 'map', 'next_skill', 'position', 'source')
+    __slots__ = ('best', 'chapter', 'has_skill', 'history', 'map', 'next_skill', 'position', 'source',)
     
     def __init__(self, chapter, source, best):
         self.chapter = chapter
@@ -1255,7 +1313,7 @@ class GameState:
         data = {}
         source = self.source
         
-        data[JSON_KEY_GAME_STATE_SOURCE] = (source.chapter, source.difficulty, source.index, self.best)
+        data[JSON_KEY_GAME_STATE_SOURCE] = (source.chapter_index, source.difficulty_index, source.index, self.best)
         
         if not self.has_skill:
             data[JSON_KEY_GAME_STATE_SOURCE] = False
@@ -1299,7 +1357,7 @@ class GameState:
     
     def get_move_directories(self):
         if self.next_skill:
-            return self.chapter.skill_get_move_directories(self)
+            return self.chapter_index.skill_get_move_directories(self)
         else:
             return self.get_own_move_directories()
     
@@ -1376,7 +1434,7 @@ class GameState:
         if not self.has_skill:
             return False
         
-        if self.chapter.can_activate_skill(self):
+        if self.chapter_index.can_activate_skill(self):
             return True
         
         return False
@@ -1390,19 +1448,19 @@ class GameState:
             self.next_skill = False
             return True
         
-        if self.chapter.activate_skill(self):
+        if self.chapter_index.activate_skill(self):
             self.next_skill = True
             return True
         
         return False
     
     def get_button_skill(self):
-        chapter = self.chapter
+        chapter = self.chapter_index
         if self.next_skill:
             button = chapter.button_skill_activated
         elif self.has_skill:
             button = chapter.button_skill_used
-        elif self.chapter.can_activate_skill(self):
+        elif self.chapter_index.can_activate_skill(self):
             button = chapter.button_skill_enabled
         else:
             button = chapter.button_skill_disabled
@@ -1410,7 +1468,7 @@ class GameState:
         return button
     
     def render_description(self):
-        style = self.chapter.style
+        style = self.chapter_index.style
         result = []
         map_ = self.map
         limit = len(map_)
@@ -1451,10 +1509,10 @@ class GameState:
     
     def render(self):
         source = self.source
-        difficulty_name = DIFFICULTY_NAMES.get(source.difficulty, '???')
-        title = f'{source.chapter+1} {difficulty_name} {source.index} {self.chapter.emoji.as_emoji}'
+        difficulty_name = DIFFICULTY_NAMES.get(source.difficulty_index, '???')
+        title = f'{source.chapter_index+1} {difficulty_name} {source.index} {self.chapter_index.emoji.as_emoji}'
         description = self.render_description()
-        color = DIFFICULTY_COLORS.get(source.difficulty, DS_COLOR)
+        color = DIFFICULTY_COLORS.get(source.difficulty_index, DS_COLOR)
         
         embed = Embed(title, description, color=color)
         
@@ -1570,7 +1628,7 @@ async def play(client, event):
     
     game = DS_GAMES.get(event.user.id, None)
     if game is None:
-        yield DSRunner(client, event)
+        yield DungeonSweeperRunner(client, event)
     else:
         yield game.renew(event)
 
@@ -1606,7 +1664,7 @@ def can_play_selected_chapter(user_state):
 def get_selectable_stages(user_state):
     stages = []
     user_chapters = user_state.results.get(user_state.selected_chapter, None)
-    tutorial_done = True
+    
     for difficulty_index, difficulty in enumerate(CHAPTERS[user_state.selected_chapter].difficulties):
         if user_chapters is None:
             user_difficulty = None
@@ -1614,27 +1672,27 @@ def get_selectable_stages(user_state):
             user_difficulty = user_state.results.get(difficulty_index, None)
         
         if user_difficulty is None:
-            if difficulty_index == 0:
-                tutorial_done = False
-                stages.append((difficulty[0], -1))
-            else:
-                if tutorial_done:
-                    stages.append((difficulty[0], -1))
-                else:
-                    break
+            stages.append((difficulty[0], -1))
+            break
+        
+        for stage_index, stage in enumerate(difficulty):
+            user_best = user_difficulty.get(stage_index, None)
+            if user_best is None:
+                stages.append((stage, -1))
+                break
+            
+            stages.append((stage, user_best))
+            continue
         else:
-            for stage_index, stage in enumerate(difficulty):
-                user_best = user_difficulty.get(stage_index, None)
-                if user_best is None:
-                    stages.append((stage, -1))
-                else:
-                    stages.append((stage, user_best))
+            continue
+        
+        break
     
     selected_stage = user_state.selected_stage
     selected_difficulty = user_state.selected_difficulty
     
     for index, (stage, best) in enumerate(stages):
-        if stage.difficulty == selected_difficulty and stage.index == selected_stage:
+        if stage.difficulty_index == selected_difficulty and stage.index == selected_stage:
             selected_index = index
             break
     else:
@@ -1642,7 +1700,7 @@ def get_selectable_stages(user_state):
     
     stages_selected = []
     for (stage, best) in stages[max(selected_index-3, 0):selected_index+4]:
-        if stage.difficulty == selected_difficulty and stage.index == selected_stage:
+        if stage.difficulty_index == selected_difficulty and stage.index == selected_stage:
             is_selected = True
         else:
             is_selected = False
@@ -1659,7 +1717,7 @@ def render_menu(user_state):
     if can_play_selected_chapter(user_state):
         selected_stages = get_selectable_stages(user_state)
         for stage, best, is_selected in selected_stages:
-            difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty, '???')
+            difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
             field_name = f'{difficulty_name} level {stage.level+1}'
             if best == -1:
                 field_value = 'No results recorded yet!'
@@ -1670,7 +1728,7 @@ def render_menu(user_state):
             if is_selected:
                 field_name = f'**{field_name}**'
                 field_value = f'**{field_value}**'
-                color = DIFFICULTY_COLORS.get(stage.difficulty, DS_COLOR)
+                color = DIFFICULTY_COLORS.get(stage.difficulty_index, DS_COLOR)
             
             embed.add_field(field_name, field_value)
         
@@ -1729,50 +1787,6 @@ def render_menu(user_state):
     
     return embed, components
 
-
-async def dungeon_sweeper_handle_button_up(runner):
-    user_state = runner.user_state
-    game_state = user_state.game_state
-    if game_state is None:
-        # ayaya, confusion
-        """
-        
-        in_tutorial = is_in_tutorial(user_state)
-        if in_tutorial:
-            try:
-                user_difficulties = user_results[user_state.selected_chapter]
-            except KeyError:
-                return False
-            else:
-                try:
-                    user_stages = user_difficulties[user_state.selected_difficulty]
-                except KeyError:
-                    return False
-                else:
-                    user_state.selected_stage = max(user_stages.keys())+1
-                    return True
-        else:
-        
-        selected_stage = user_state.selected_stage
-        try:
-            user_difficulties = user_state.results[user_state.selected_chapter]
-        except KeyError:
-            return False
-        
-        user_results =
-        selected_difficulty = user_state.selected_difficulty+1
-        chapter = CHAPTERS[user_state.selected_chapter]
-        difficulties_length = len(chapter.difficulties)
-        if selected_difficulty >= len(difficulties_length):
-            selected_difficulty = len(chapter.difficulties)-1
-            
-            selected_stage = user_state.selected_stage
-            try:
-                user_difficulties = user_results[user_state.selected_chapter]
-            except KeyError:
-                return False
-        """
-    return False
 
 
 class DungeonSweeperRunner:

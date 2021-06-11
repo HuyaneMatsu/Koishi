@@ -205,26 +205,22 @@ def message_pagination_check(user, event):
     
     return False
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
 async def message_(client, event,
         message : ('str', 'Link to the message'),
         raw : ('bool', 'Should display json?') = True,
             ):
-    """Shows up the message's payload. (You must have Tester role in ND)"""
+    """Shows up the message's payload."""
     if not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER):
-        yield Embed('Ohoho', f'You must have {ROLE__NEKO_DUNGEON__TESTER.mention} to invoke this command.',
-            color=UTILITY_COLOR)
-        return
+        abort(f'You must have {ROLE__NEKO_DUNGEON__TESTER.mention} to invoke this command.')
     
     if not event.channel.cached_permissions_for(client).can_send_messages:
-        yield Embed('Permission denied', 'I need `send messages` permission to execute this command.',
-            color=UTILITY_COLOR)
-        return
+        abort('I need `send messages` permission to execute this command.')
     
     message_reference = parse_message_reference(message)
     if message_reference is None:
-        yield Embed('Error', 'Could not identify the message.', color=UTILITY_COLOR)
-        return
+        abort('Could not identify the message.')
     
     guild_id, channel_id, message_id = message_reference
     try:
@@ -832,10 +828,10 @@ GUILD_FIELDS = {
     'emojis'   : add_guild_emojis_field   ,
     'users'    : add_guild_users_field    ,
     'boosters' : add_guild_boosters_field ,
-        }
+}
 
 @SLASH_CLIENT.interactions(name='guild', is_global=True)
-async def guild_(client, event,
+async def guild_(event,
         field: ([(name, name) for name in GUILD_FIELDS], 'Which field of the info should I show?') = 'all',
             ):
     """Shows some information about the guild."""
@@ -894,6 +890,7 @@ class InRolePageGetter:
     def __getitem__(self, index):
         users = self.users
         length = len(users)
+        guild = self.guild
         if length:
             user_index = index*USER_PER_PAGE
             user_limit = user_index+USER_PER_PAGE
@@ -902,7 +899,6 @@ class InRolePageGetter:
                 user_limit = length
             
             description_parts = []
-            guild = self.guild
             while True:
                 user = users[user_index]
                 user_index += 1

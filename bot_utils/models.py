@@ -13,6 +13,12 @@ if DATABASE_NAME is None:
     emoji_counter_model = None
     EMOJI_COUNTER_TABLE = None
     
+    ds_v2_model = None
+    DS_V2_TABLE = None
+    
+    ds_v2_result_model = None
+    DS_V2_RESULT_TABLE = None
+    
     DB_ENGINE = None
     
 else:
@@ -74,12 +80,24 @@ else:
     EMOJI_COUNTER_TABLE = emoji_counter_model.__table__
     
     class ds_v2_model(BASE):
-        __tablename__   = 'DS_V2_TABLE'
+        __tablename__   = 'DS_V2'
         id              = Column(BIGINT, primary_key=True)
         user_id         = Column(BIGINT, unique=True)
-        data            = Column(LargeBinary())
+        game_state      = Column(LargeBinary(), nullable=True)
+        selected_chapter_index = Column(Integer)
+        selected_difficulty_index = Column(Integer)
+        selected_stage_index = Column(Integer)
     
     DS_V2_TABLE = ds_v2_model.__table__
+    
+    class ds_v2_result_model(BASE):
+        __tablename__   = 'DS_V2_RESULT'
+        id              = Column(BIGINT, primary_key=True)
+        ds_v2_entry_id  = Column(BIGINT)
+        stage_id        = Column(BIGINT)
+        best            = Column(Integer)
+    
+    DS_V2_RESULT_TABLE = ds_v2_result_model.__table__
     
     # Creating tables
     DB_ENGINE = create_engine(DATABASE_NAME)

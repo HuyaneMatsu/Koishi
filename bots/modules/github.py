@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 from collections import OrderedDict
 from datetime import datetime
 
 from hata import Client, LOOP_TIME, Lock, imultidict, KOKORO, istr, Future, Embed
 from hata.discord.http import LIB_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
-from hata.discord.rate_limit import parse_date_to_datetime
+from hata.discord.utils import parse_date_header_to_datetime
 from hata.backend.quote import quote
 from hata.ext.slash import abort
 
@@ -30,7 +29,7 @@ class GitHubQueryLimit:
     
     def set(self, headers):
         if headers.get(GITHUB_HEADER_RATE_LIMIT_REMAINING, '') == '0':
-            now = parse_date_to_datetime(headers[DATE]).timestamp()
+            now = parse_date_header_to_datetime(headers[DATE]).timestamp()
             reset = int(headers[GITHUB_HEADER_RATE_LIMIT_RESET_AT])
             self.rate_limit_reset_at = LOOP_TIME() + float(reset-now)
 

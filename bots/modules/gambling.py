@@ -2492,7 +2492,8 @@ async def award(client, event,
     except ConnectionError:
         return
     
-    embed = Embed('Aww, love is in the air',
+    embed = Embed(
+        'Aww, love is in the air',
         f'You have been awarded {amount} {awarded_with} by {event.user.full_name}',
         color=GAMBLING_COLOR,
     ).add_field(
@@ -2525,8 +2526,7 @@ async def take(client, event,
         abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
     
     if amount <= 0:
-        yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=GAMBLING_COLOR)
-        return
+        abort('You cannot award non-positive amount of hearts..')
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(select([currency_model.total_love]).where(currency_model.user_id==target_user.id))
@@ -2540,9 +2540,11 @@ async def take(client, event,
                 if target_user_new_total_love < 0:
                     target_user_new_total_love = 0
                 
-                await connector.execute(CURRENCY_TABLE.update().values(
-                    total_love  = target_user_new_total_love,
-                    ).where(currency_model.user_id==target_user.id))
+                await connector.execute(CURRENCY_TABLE.update(). \
+                    values(
+                        total_love = target_user_new_total_love,
+                    ).where(currency_model.user_id==target_user.id)
+                )
         else:
             target_user_total_love = 0
             target_user_new_total_love = 0
@@ -2551,6 +2553,177 @@ async def take(client, event,
         f'They got down from {target_user_total_love} to {target_user_new_total_love} {EMOJI__HEART_CURRENCY.as_emoji}',
         color=GAMBLING_COLOR)
     return
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+async def transfer(client, event,
+        source_user: ('user', 'Who\'s hearst do you want to transfer?'),
+        target_user: ('user', 'To who do you want transfer the taken heart?'),
+        message : ('str', 'Optional message to send with the transfer.') = None,
+            ):
+    """Transfers all of someone\'s hearts to an other person."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    
+    if (message is not None) and len(message) > 1000:
+        message = message[:1000]+'...'
+    
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select([currency_model.id, currency_model.user_id, currency_model.total_love]). \
+            where(currency_model.user_id.in_([source_user.id, target_user.id]))
+        )
+        
+        source_user_found = False
+        source_user_entry_id = 0
+        source_user_total_love = 0
+        
+        target_user_found = False
+        target_user_entry_id = 0
+        target_user_total_love = 0
+        
+        results = await response.fetchall()
+        for result in results:
+            entry_id, user_id, total_love = result
+            
+            if user_id == source_user.id:
+                source_user_found = True
+                source_user_entry_id = entry_id
+                source_user_total_love = total_love
+            else:
+                target_user_found = True
+                target_user_entry_id = entry_id
+                target_user_total_love = total_love
+        
+        if source_user_found:
+            await connector.execute(
+                CURRENCY_TABLE.delete(). \
+                where(currency_model.id==source_user_entry_id)
+            )
+        
+        if source_user_total_love:
+            if target_user_found:
+                to_execute = CURRENCY_TABLE. \
+                    update(currency_model.id == target_user_entry_id). \
+                    values(
+                        total_love = currency_model.total_love+source_user_total_love,
+                    )
+            else:
+                to_execute = CURRENCY_TABLE.insert(). \
+                values(
+                    user_id         = user_id,
+                    total_love      = source_user_total_love,
+                    daily_next      = datetime.utcnow(),
+                    daily_streak    = 0,
+                    total_allocated = 0,
+                )
+            
+            await connector.execute(to_execute)
+    
+    embed = Embed(
+        f'You transferred {source_user.full_name}\'s hearts to {target_user.full_name}',
+        color=GAMBLING_COLOR,
+    ).add_field(
+        f'Their {EMOJI__HEART_CURRENCY:e}',
+        f'{target_user_total_love} -> {target_user_total_love+source_user_total_love}',
+    )
+    
+    if (message is not None):
+        embed.add_field('Message:', message)
+    
+    yield embed
+    
+    if target_user.is_bot:
+        return
+    
+    try:
+        target_user_channel = await client.channel_private_create(target_user)
+    except ConnectionError:
+        return
+    
+    embed = Embed(
+        f'{source_user.full_name}\'s {EMOJI__HEART_CURRENCY:r} has been transferred to you.',
+        color=GAMBLING_COLOR,
+    ).add_field(
+        f'Your {EMOJI__HEART_CURRENCY:r}',
+        f'{target_user_total_love} -> {target_user_total_love+source_user_total_love}',
+    )
+    
+    if (message is not None):
+        embed.add_field('Message:', message)
+    
+    try:
+        await client.message_create(target_user_channel, embed=embed)
+    except ConnectionError:
+        return
+    except DiscordException as err:
+        if err.code == ERROR_CODES.cannot_message_user:
+            return
+        
+        raise
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+async def currency_insert(client, event,
+        target_user: ('user', 'To who do you want transfer the taken heart?'),
+        hearts : ('int', 'The amount to insert'),
+        dailies : ('int', 'The amount of daily streaks'),
+            ):
+    """Inserts a new field into the currency table"""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    
+    user_id = target_user.id
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select([currency_model.id]). \
+            where(currency_model.user_id == user_id)
+        )
+        
+        results = await response.fetchall()
+        if results:
+            entry_id = results[0][0]
+            entry_found = True
+        else:
+            entry_id = 0
+            entry_found = False
+        
+        if entry_found:
+            to_execute = CURRENCY_TABLE. \
+                update(currency_model.id == entry_id). \
+                values(
+                    total_love      = hearts,
+                    daily_next      = datetime.utcnow(),
+                    daily_streak    = dailies,
+                    total_allocated = 0,
+                )
+        else:
+            to_execute = CURRENCY_TABLE.insert(). \
+                values(
+                    user_id         = user_id,
+                    total_love      = hearts,
+                    daily_next      = datetime.utcnow(),
+                    daily_streak    = dailies,
+                    total_allocated = 0,
+                )
+        
+        await connector.execute(to_execute)
+    
+    yield Embed(
+        'Inserting into currency table',
+        color=GAMBLING_COLOR,
+    ).add_field(
+        'User',
+        target_user.full_name,
+    ).add_field(
+        'Hearts',
+        str(hearts),
+    ).add_field(
+        'Dailies',
+        str(dailies),
+    )
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -2851,7 +3024,7 @@ async def increase_user_total_love(user_id, increase):
                 update(currency_model.user_id == user_id). \
                 values(
                     total_love = currency_model.total_love+increase,
-                        )
+                )
         else:
             to_execute = CURRENCY_TABLE.insert().values(
                 user_id         = user_id,
@@ -2859,7 +3032,7 @@ async def increase_user_total_love(user_id, increase):
                 daily_next      = datetime.utcnow(),
                 daily_streak    = 0,
                 total_allocated = 0,
-                    )
+            )
         
         await connector.execute(to_execute)
 

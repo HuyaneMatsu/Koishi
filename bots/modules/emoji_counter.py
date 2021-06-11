@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 from hata import Client, parse_custom_emojis, Embed, EMOJIS
 
@@ -15,7 +16,7 @@ SLASH_CLIENT: Client
 EMOJI_ACTION_TYPE_MESSAGE_CREATE= 1
 EMOJI_ACTION_TYPE_REACTION = 2
 
-MOON_DAY = timedelta(days=28)
+MONTH = relativedelta(months=1)
 
 
 @Satori.events
@@ -93,7 +94,9 @@ async def reaction_add(client, event):
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def emoji_top_list(event,
-        user:('user', 'By who?', 'by')=None,
+        user: ('user', 'By who?')=None,
+        count: (range(10, 91, 10), 'The maximal amount of emojis to show')=30,
+        months: (range(1, 13), 'The months to get')=1,
             ):
     """List the most used emojis at ND by you or by the selected user."""
     if user is None:
@@ -107,9 +110,9 @@ async def emoji_top_list(event,
             ]). \
             where(and_(
                 emoji_counter_model.user_id == user.id,
-                emoji_counter_model.timestamp > datetime.utcnow()-MOON_DAY,
+                emoji_counter_model.timestamp > datetime.utcnow()-MONTH*months,
             )). \
-            limit(30). \
+            limit(count). \
             group_by(emoji_counter_model.emoji_id). \
             order_by(desc('total'))
         )
@@ -117,10 +120,9 @@ async def emoji_top_list(event,
         results = await response.fetchall()
     
     embed = Embed(
-            f'Most used emojis by {user.full_name}',
-            color = user.color_at(GUILD__NEKO_DUNGEON),
-        ). \
-        add_thumbnail(user.avatar_url)
+        f'Most used emojis by {user.full_name}',
+        color = user.color_at(GUILD__NEKO_DUNGEON),
+    ).add_thumbnail(user.avatar_url)
     
     if results:
         description_parts = []
@@ -151,6 +153,3 @@ async def emoji_top_list(event,
         embed.description = '*no recorded data*'
     
     return embed
-
-
-
