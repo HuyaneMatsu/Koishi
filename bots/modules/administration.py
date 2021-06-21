@@ -283,15 +283,25 @@ async def invites_(client, event,
     await Pagination(client, event, pages, timeout=120., check=check)
 
 
+def check_banner(user, event):
+    return user is event.user
+
+    
+BAN_BUTTON_CONFIRM = Button('Yes', EMOJI__REIMU_HAMMER, style=ButtonStyle.red)
+BAN_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
+
+BAN_COMPONENTS = Row(BAN_BUTTON_CONFIRM, BAN_BUTTON_CANCEL)
+
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def yeet(client, event,
-        user :('user', 'Select the user to yeet!'),
+        user : ('user', 'Select the user to yeet!'),
         reason : ('str', 'Any reason why you would want to yeet?') = None,
-        delete_message_days : ([(str(v), v) for v in range(8)], 'Delete previous messages?') = 0,
+        delete_message_days : (range(8), 'Delete previous messages?') = 0,
         notify_user : ('bool', 'Whether the user should get DM about the ban.') = True,
             ):
     """Yeets someone out of the guild. You must have ban users permission."""
+    # Check permissions
     guild = event.guild
     if guild is None:
         abort('Guild only command.')
@@ -311,6 +321,7 @@ async def yeet(client, event,
     if not client.has_higher_role_than_at(user, guild):
         abort('I must have higher role than the person to yeeted.')
     
+    # Ask, whether the user should be banned.
     if (reason is not None) and (not reason):
         reason = None
     
@@ -318,26 +329,41 @@ async def yeet(client, event,
         add_field('Delete message day', str(delete_message_days), inline=True). \
         add_field('Notify user', 'true' if notify_user else 'false', inline=True). \
         add_field('Reason', '*No reason provided.*' if reason is None else reason)
+
     
-    button_confirm = Button('Yes', EMOJI__REIMU_HAMMER, style=ButtonStyle.red)
-    button_cancel = Button('No', style=ButtonStyle.gray)
+    message = yield InteractionResponse(embed=embed, components=BAN_COMPONENTS, allowed_mentions=None)
     
-    components = Row(button_confirm, button_cancel)
-    
-    yield InteractionResponse(embed=embed, components=components, allowed_mentions=None, show_for_invoking_user_only=True)
+    # Wait for user input
     
     try:
-        component_interaction = await wait_for_component_interaction(event, timeout=300.0)
+        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
+            check=partial_func(check_banner, event.user))
+    
     except TimeoutError:
-        abort('Timeout occurred.')
+        embed.title = 'Timeout'
+        embed.description = f'{user.mention} was not yeeted from {guild.name}.'
+        
+        # Edit the source message with the source interaction
+        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, message=message)
+        return
     
-    if component_interaction.interaction == button_cancel:
-        abort(f'Yeeting {user.mention} cancelled', allowed_mentions=None)
+    if component_interaction.interaction == BAN_BUTTON_CANCEL:
+        embed.title = 'Cancelled'
+        embed.description = f'{user.mention} was not yeeted from {guild.name}.'
+        
+        # Edit the source message with the component interaction
+        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, event=component_interaction)
+        return
     
+    # Acknowledge the event
+    await client.interaction_component_acknowledge(component_interaction)
+    
+    # Try to notify the user. Ignore bot notifications.
     if notify_user:
         if user.is_bot:
             notify_note = None
         else:
+            
             try:
                 channel = await client.channel_private_create(user)
             except BaseException as err:
@@ -374,7 +400,8 @@ async def yeet(client, event,
     if (notify_note is not None):
         embed.add_footer(notify_note)
     
-    yield embed
+    # Edit the source message
+    yield InteractionResponse(embed=embed, message=message, components=None)
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -415,41 +442,37 @@ async def is_banned(client, event,
     yield embed
 
 
-ROLE_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
+ROLE_EMOJI_CONFIRM= BUILTIN_EMOJIS['ok_hand']
 ROLE_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
-ROLE_EMOJI_EMOJIS = (ROLE_EMOJI_OK, ROLE_EMOJI_CANCEL)
 
-class _role_emoji_emoji_checker:
-    __slots__ = ('guild',)
+EMOJI_ROLE_BUTTON_CONFIRM = Button(emoji=ROLE_EMOJI_CONFIRM, style=ButtonStyle.green)
+EMOJI_ROLE_BUTTON_CANCEL = Button(emoji=ROLE_EMOJI_CANCEL, style=ButtonStyle.violet)
+EMOJI_ROLE_COMPONENTS = Row(EMOJI_ROLE_BUTTON_CONFIRM, EMOJI_ROLE_BUTTON_CANCEL)
+
+
+def role_emoji_checker(event):
+    guild = event.guild
+    if guild is None:
+        return False
     
-    def __init__(self, guild):
-        self.guild = guild
-    
-    def __call__(self, event):
-        if event.emoji not in ROLE_EMOJI_EMOJIS:
-            return False
-        
-        user = event.user
-        if user.is_bot:
-            return False
-        
-        if not self.guild.permissions_for(user).can_administrator:
-            return False
-        
+    if guild.permissions_for(event.user).can_administrator:
         return True
+    
+    return False
+
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def emoji_role(client, event,
-        emoji : ('str', 'Select the emoji to bind to roles.'),
-        role_1 : ('role', 'Select a role.') = None,
-        role_2 : ('role', 'Double role!') = None,
-        role_3 : ('role', 'Triple role!') = None,
-        role_4 : ('role', 'Quadra role!') = None,
-        role_5 : ('role', 'Penta role!') = None,
-        role_6 : ('role', 'Epic!') = None,
-        role_7 : ('role', 'Legendary!') = None,
-        role_8 : ('role', 'Mythical!') = None,
-        role_9 : ('role', 'Lunatic!') = None,
+        emoji: ('str', 'Select the emoji to bind to roles.'),
+        role_1: ('role', 'Select a role.') = None,
+        role_2: ('role', 'Double role!') = None,
+        role_3: ('role', 'Triple role!') = None,
+        role_4: ('role', 'Quadra role!') = None,
+        role_5: ('role', 'Penta role!') = None,
+        role_6: ('role', 'Epic!') = None,
+        role_7: ('role', 'Legendary!') = None,
+        role_8: ('role', 'Mythical!') = None,
+        role_9: ('role', 'Lunatic!') = None,
             ):
     """Binds the given emoji to the selected roles. You must have administrator permission."""
     guild = event.guild
@@ -507,38 +530,23 @@ async def emoji_role(client, event,
     
     embed.add_field('Roles after:', role_text)
     
-    message = yield InteractionResponse(embed=embed)
-    
-    for emoji_ in ROLE_EMOJI_EMOJIS:
-        await client.reaction_add(message, emoji_)
+    message = yield InteractionResponse(embed=embed, components=EMOJI_ROLE_COMPONENTS)
     
     try:
-        reaction_event = await wait_for_reaction(client, message, _role_emoji_emoji_checker(message.guild), 300.)
+        component_interaction = await wait_for_component_interaction(message, timeout=300.0, check=role_emoji_checker)
+    
     except TimeoutError:
-        emoji_ = ROLE_EMOJI_CANCEL
+        component_interaction = None
+        cancelled = True
     else:
-        emoji_ = reaction_event.emoji
+        if component_interaction.interaction == EMOJI_ROLE_BUTTON_CANCEL:
+            cancelled = True
+        else:
+            cancelled = False
     
-    if message.channel.cached_permissions_for(client).can_manage_messages:
-        try:
-            await client.reaction_clear(message)
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # channel deleted
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            raise
-    
-    if emoji_ is ROLE_EMOJI_OK:
+    if cancelled:
+        content = 'Emoji edit cancelled.'
+    else:
         try:
             await client.emoji_edit(emoji, roles=roles)
         except DiscordException as err:
@@ -546,10 +554,5 @@ async def emoji_role(client, event,
         else:
             content = 'Emoji edited successfully.'
     
-    elif emoji_ is ROLE_EMOJI_CANCEL:
-        content = 'Emoji edit cancelled.'
-    
-    else: # should not happen
-        return
-    
-    yield Embed(None, content)
+    embed = Embed(None, content)
+    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)

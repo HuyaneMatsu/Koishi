@@ -84,9 +84,7 @@ else:
         id              = Column(BIGINT, primary_key=True)
         user_id         = Column(BIGINT, unique=True)
         game_state      = Column(LargeBinary(), nullable=True)
-        selected_chapter_index = Column(Integer)
-        selected_difficulty_index = Column(Integer)
-        selected_stage_index = Column(Integer)
+        selected_stage_id = Column(Integer)
     
     DS_V2_TABLE = ds_v2_model.__table__
     

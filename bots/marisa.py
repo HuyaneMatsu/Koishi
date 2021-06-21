@@ -1,4 +1,4 @@
-import sys
+import sys, re
 from random import random, choice, shuffle, randint
 from time import perf_counter
 from math import ceil
@@ -16,7 +16,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
-    ButtonStyle
+    ButtonStyle, Emoji
 from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, wait_for_component_interaction, \
     Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from hata.backend.futures import render_exc_to_list
@@ -789,3 +789,76 @@ async def poison_edit_snake():
 @Marisa.interactions(custom_id=CUSTOM_ID_EGGPLANT)
 async def poison_edit_eggplant():
     return EMOJI_EGGPLANT.as_emoji
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def nine():
+    components = [
+        [Button(f'{index_1}x{index_2}', custom_id=f'nine.{index_1}.{index_2}') for index_1 in range(1, 4)]
+            for index_2 in range(1, 4)
+    ]
+    
+    yield InteractionResponse('Select a nyan', components=components)
+
+@Marisa.interactions(custom_id=re.compile('nine\.(\d)\.(\d)'))
+async def poison_edit_cake(index_1, index_2):
+    return f'You selected: {index_1}x{index_2}'
+
+
+ADD_EMOJI_BUTTON_ADD = Button('Add!', style=ButtonStyle.green)
+ADD_EMOJI_BUTTON_CANCEL = Button('Nah.', style=ButtonStyle.red)
+ADD_EMOJI_COMPONENTS = Row(ADD_EMOJI_BUTTON_ADD, ADD_EMOJI_BUTTON_CANCEL)
+
+def check_user_is_same(user, event):
+    return (user is event.user)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def add_emoji(client, event,
+        emoji: ('str', 'The emoji to add.'),
+        name: ('str', 'Custom name to add the emoji with.') = None
+            ):
+    """Adds an emoji to the guild."""
+    if not client.is_owner(event.user):
+        abort('Owner only!')
+    
+    emoji = parse_emoji(emoji)
+    if emoji is None:
+        abort('That\'s not an emoji.')
+    
+    if emoji.is_unicode_emoji():
+        abort('Cannot add unicode emoji.')
+    
+    if name is None:
+        name = emoji.name
+    else:
+        if len(name) > 32:
+            abort('Name length can be max 32.')
+    
+    embed = Embed('Are you sure to add this emoji?').add_field('Name:', name).add_image(emoji.url)
+    
+    message = yield InteractionResponse(embed=embed, components=ADD_EMOJI_COMPONENTS)
+    
+    try:
+        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
+            check=partial_func(check_user_is_same, event.user))
+    
+    except TimeoutError:
+        component_interaction = None
+        cancelled = True
+    else:
+        if component_interaction.interaction == ADD_EMOJI_BUTTON_CANCEL:
+            cancelled = True
+        else:
+            cancelled = False
+    
+    if cancelled:
+        embed.title = 'Adding emoji has been cancelled.'
+    else:
+        embed.title = 'Emoji has been added!'
+        
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
+        await client.emoji_create(event.guild, name, emoji_data)
+    
+    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)

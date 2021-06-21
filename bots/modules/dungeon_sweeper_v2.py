@@ -4,26 +4,58 @@ import os
 from zlib import compress, decompress
 from json import load as from_json_file
 from math import ceil, floor
+from datetime import datetime
 
 from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, Client, \
-    KOKORO, LOOP_TIME, Lock
-from hata.ext.slash import InteractionResponse, abort, Row, Button, ButtonStyle
+    KOKORO, LOOP_TIME, Lock, AsyncIO, CancelledError
+from hata.ext.slash import abort, Row, Button, ButtonStyle, Timeouter
 
 from sqlalchemy.sql import select
 
 from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, currency_model, CURRENCY_TABLE, ds_v2_result_model, \
-    DS_V2_RESULT_TABLE
+    DS_V2_RESULT_TABLE, ds_model
 
-from bot_utils.shared import PATH__KOISHI
+from bot_utils.shared import PATH__KOISHI, GUILD__NEKO_DUNGEON
 
-DS_COLOR             = Color(0xa000c4)
-DS_GAMES             = {}
+DUNGEON_SWEEPER_COLOR= Color(0xa000c4)
+DUNGEON_SWEEPER_GAMES= {}
 COLOR_TUTORIAL       = Color(0xa000c4)
 DIFFICULTY_COLORS    = dict(enumerate((COLOR_TUTORIAL, Color(0x00cc03), Color(0xffe502), Color(0xe50016))))
 DIFFICULTY_NAMES     = dict(enumerate(('Tutorial', 'Easy', 'Normal', 'Hard',)))
 CHAPTER_UNLOCK_DIFFICULTY = 1
 CHAPTER_UNLOCK_STAGE = 10
 CHAPTER_UNLOCK_DIFFICULTY_NAME = DIFFICULTY_NAMES[CHAPTER_UNLOCK_DIFFICULTY]
+STAGE_STEP_MULTI_STEP_BUTTON = 10
+
+GUI_TIMEOUT          = 600.0
+
+GUI_STATE_READY      = 1
+GUI_STATE_EDITING    = 2
+GUI_STATE_CANCELLING = 3
+GUI_STATE_CANCELLED  = 4
+GUI_STATE_SWITCHING_CONTEXT = 5
+
+GUI_STATE_VALUE_TO_NAME = {
+    GUI_STATE_READY: 'ready',
+    GUI_STATE_EDITING: 'editing',
+    GUI_STATE_CANCELLING: 'cancelling',
+    GUI_STATE_CANCELLED: 'cancelled',
+    GUI_STATE_SWITCHING_CONTEXT: 'switching context'
+}
+
+RUNNER_STATE_MENU      = 1
+RUNNER_STATE_PLAYING   = 2
+RUNNER_STATE_END_SCREEN= 3
+RUNNER_STATE_CLOSED    = 4
+
+RUNNER_STATE_VALUE_TO_NAME = {
+    RUNNER_STATE_MENU: 'menu',
+    RUNNER_STATE_PLAYING: 'playing',
+    RUNNER_STATE_END_SCREEN: 'end screen',
+    RUNNER_STATE_CLOSED: 'closed',
+}
+
+
 FILE_LOCK            = Lock(KOKORO)
 FILE_NAME            = 'ds_v2.json'
 FILE_PATH            = os.path.join(PATH__KOISHI, 'library', FILE_NAME)
@@ -45,6 +77,10 @@ EMOJI_LEFT           = BUILTIN_EMOJIS['arrow_backward']
 EMOJI_RIGHT          = BUILTIN_EMOJIS['arrow_forward']
 EMOJI_SELECT         = BUILTIN_EMOJIS['ok']
 
+EMOJI_NEXT           = BUILTIN_EMOJIS['arrow_right']
+EMOJI_CLOSE          = BUILTIN_EMOJIS['x']
+EMOJI_RESTART        = BUILTIN_EMOJIS['arrows_counterclockwise']
+
 EMOJI_NOTHING        = Emoji.precreate(568838460434284574, name='0Q')
 
 EMOJI_REIMU          = Emoji.precreate(574307645347856384, name='REIMU')
@@ -55,20 +91,44 @@ IDENTIFIER_UP        = '1'
 IDENTIFIER_DOWN      = '2'
 IDENTIFIER_UP2       = '3'
 IDENTIFIER_DOWN2     = '4'
-IDENTIFIER_LEFT      = '5'
-IDENTIFIER_SELECT    = '6'
+IDENTIFIER_RIGHT     = '5'
+IDENTIFIER_LEFT      = '6'
+IDENTIFIER_SELECT    = '7'
 
-IDENTIFIER_WEST      = '7'
-IDENTIFIER_NORTH     = '8'
-IDENTIFIER_SOUTH     = '9'
-IDENTIFIER_EAST      = 'A'
+IDENTIFIER_WEST      = '8'
+IDENTIFIER_NORTH     = '9'
+IDENTIFIER_SOUTH     = 'A'
+IDENTIFIER_EAST      = 'B'
 
-IDENTIFIER_BACK      = 'B'
-IDENTIFIER_RESET     = 'C'
-IDENTIFIER_CANCEL    = 'D'
+IDENTIFIER_BACK      = 'C'
+IDENTIFIER_RESET     = 'D'
+IDENTIFIER_CANCEL    = 'E'
+
+IDENTIFIER_NEXT      = 'F'
+IDENTIFIER_CLOSE     = 'G'
+IDENTIFIER_RESTART   = 'H'
 
 IDENTIFIER_EMPTY     = '_'
 IDENTIFIER_SKILL     = '0'
+
+
+IDENTIFIERS = frozenset((
+    IDENTIFIER_UP,
+    IDENTIFIER_DOWN,
+    IDENTIFIER_UP2,
+    IDENTIFIER_DOWN2,
+    IDENTIFIER_LEFT,
+    IDENTIFIER_SELECT,
+    IDENTIFIER_WEST,
+    IDENTIFIER_NORTH,
+    IDENTIFIER_SOUTH,
+    IDENTIFIER_EAST,
+    IDENTIFIER_BACK,
+    IDENTIFIER_RESET,
+    IDENTIFIER_CANCEL,
+    IDENTIFIER_EMPTY,
+    IDENTIFIER_SKILL,
+))
 
 BIT_MASK_PASSABLE    = 0b0000000000000111
 
@@ -275,7 +335,7 @@ RULES_HELP = Embed('Rules of Dungeon sweeper',
     f'{STYLE_REIMU[BIT_MASK_BOX_TARGET]}\n'
     f'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
     f'play with.',
-    color=DS_COLOR,
+    color=DUNGEON_SWEEPER_COLOR,
 ).add_field(f'Chapter 1 {EMOJI_REIMU:e}',
     f'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
     f'Reimu can jump over a box or hole.\n'
@@ -354,7 +414,7 @@ BUTTON_LEFT_DISABLED.enabled = False
 
 BUTTON_RIGHT_ENABLED = Button(
     emoji = EMOJI_RIGHT,
-    custom_id = EMOJI_RIGHT,
+    custom_id = IDENTIFIER_RIGHT,
     style = ButtonStyle.violet,
 )
 
@@ -362,7 +422,6 @@ BUTTON_RIGHT_DISABLED = BUTTON_RIGHT_ENABLED.copy()
 BUTTON_RIGHT_DISABLED.enabled = False
 
 BUTTON_SELECT_ENABLED = Button(
-    label =  'Lets go!',
     emoji = EMOJI_SELECT,
     custom_id = IDENTIFIER_SELECT,
     style = ButtonStyle.green,
@@ -474,23 +533,201 @@ BUTTON_RESET_DISABLED.enabled = False
 BUTTON_CANCEL = Button(
     emoji = EMOJI_CANCEL,
     custom_id = IDENTIFIER_CANCEL,
-    style = ButtonStyle.red,
+    style = ButtonStyle.violet,
+)
+
+BUTTON_NEXT = Button(
+    emoji = EMOJI_NEXT,
+    custom_id = IDENTIFIER_NEXT,
+    style = ButtonStyle.violet,
+)
+
+BUTTON_NEXT_DISABLED = BUTTON_NEXT.copy()
+BUTTON_NEXT_DISABLED.enabled = False
+
+BUTTON_CLOSE = Button(
+    emoji = EMOJI_CLOSE,
+    custom_id = IDENTIFIER_CLOSE,
+    style = ButtonStyle.violet,
+)
+
+BUTTON_RESTART = Button(
+    emoji = EMOJI_RESTART,
+    custom_id = IDENTIFIER_RESTART,
+    style = ButtonStyle.violet,
 )
 
 
-def get_rating_for(stage, best):
+RATING_MAX = 5
+RATINGS = ('S', 'A', 'B', 'C', 'D', 'E')
+RATING_REWARDS = (750, 500, 400, 300, 200, 100)
+NEW_RECORD_REWARD = 1000
+
+
+def stage_source_sort_key(stage_source):
+    """
+    Sort key used when sorting stage sources based on their identifier.
+    
+    Parameters
+    ----------
+    stage_source : ``StageSource``
+        The stage source to get sort key of.
+    
+    Returns
+    -------
+    identifier : `int`
+        Sort key.
+    """
+    return stage_source.id
+
+
+async def save_stage_sources():
+    """
+    Saves stage sources.
+    
+    This function is a coroutine.
+    """
+    async with FILE_LOCK:
+        stage_sources = sorted(STAGES_BY_ID.keys(), key=stage_source_sort_key)
+        data = pretty_dump_stage_sources(stage_sources)
+        with await AsyncIO(FILE_PATH, 'w') as file:
+            await file.write(data)
+
+
+def set_new_best(stage, steps):
+    """
+    Sets a new best value to the given stage.
+    
+    Parameters
+    ----------
+    stage : ``StageSource``
+        The stage to modify it's best value.
+    steps : `int`
+        The stage's new best rating.
+    """
+    stage.best = steps
+    Task(save_stage_sources(), KOKORO)
+
+
+def get_rating_for(stage, steps):
+    """
+    Gets the rating for the given stage and step combination.
+    
+    Parameters
+    ----------
+    stage : ``StageSource``
+        The stage to get the rating of.
+    steps : `int`
+        The user's step count.
+    
+    Returns
+    -------
+    rating : `str`
+        The step's rating.
+    """
     stage_best = stage.best
-    rating_difference = floor(stage.best/20.0)+5.0
+    rating_factor = floor(stage_best/20.0)+5.0
     
-    for rating in ('S', 'A', 'B', 'C', 'D', 'E'):
-        if best <= stage_best:
-            break
+    rating_level = ceil((steps-stage_best)/rating_factor)
+    if rating_level > RATING_MAX:
+        rating_level = RATING_MAX
+    
+    return RATINGS[rating_level]
+
+
+def get_reward_for_steps(stage_id, steps):
+    """
+    Gets reward amount for the given amount of steps.
+    
+    Parameters
+    ----------
+    stage_id : `int`
+        The stage's identifier.
+    steps : `int`
+        The amount of steps.
+    
+    Returns
+    -------
+    reward : `str`
+        The user's rewards.
+    """
+    stage = STAGES_BY_ID[stage_id]
+    stage_best = stage.best
+    
+    if steps < stage_best:
+        set_new_best(stage, steps)
+        return NEW_RECORD_REWARD+RATING_REWARDS[0]
+    
+    rating_factor = floor(stage_best/20.0)+5.0
+    
+    rating_level = ceil((steps-stage_best)/rating_factor)
+    if rating_level > RATING_MAX:
+        rating_level = RATING_MAX
+    
+    return RATING_REWARDS[rating_level]
+
+
+def get_reward_difference(stage_id, steps_1, steps_2):
+    """
+    Gets additional reward if a user received better result.
+    
+    Parameters
+    ----------
+    stage_id : `int`
+        The stage's identifier.
+    steps_1 : `int`
+        The amount of steps.
+    steps_2 : `int`
+        The new amount of steps.
+    
+    Returns
+    -------
+    reward : `int`
+        Extra hearts, what the respective user should get.
+    """
+    stage = STAGES_BY_ID[stage_id]
+    stage_best = stage.best
+    rating_factor = floor(stage_best/20.0)+5.0
+    
+    rating_level = ceil((steps_1-stage_best)/rating_factor)
+    if rating_level > RATING_MAX:
+        rating_level = RATING_MAX
+    
+    reward_1 = RATING_REWARDS[rating_level]
+    
+    if steps_2 < stage_best:
+        set_new_best(stage, steps_2)
+        reward_2 = NEW_RECORD_REWARD+RATING_REWARDS[0]
+    else:
+        rating_level = ceil((steps_2-stage_best)/rating_factor)
+        if rating_level > RATING_MAX:
+            rating_level = RATING_MAX
         
-        stage_best += rating_difference
+        reward_2 = RATING_REWARDS[rating_level]
     
-    return rating
+    
+    reward = reward_2-reward_1
+    if reward < 0:
+        reward = 0
+    
+    return reward
+
 
 class MoveDirectories:
+    """
+    Container class to store to which positions a character can move or use skill.
+    
+    Attributes
+    ----------
+    north : `bool`
+        Whether the character can move or use skill in north directory.
+    east : `bool`
+        Whether the character can move or use skill in east directory.
+    south : `bool`
+        Whether the character can move or use skill in south directory.
+    west : `bool`
+        Whether the character can move or use skill in west directory.
+    """
     __slots__ = ('north', 'east', 'south', 'west')
 
 SKILL_DIRECTORY_DESCRIPTORS = (
@@ -501,10 +738,22 @@ SKILL_DIRECTORY_DESCRIPTORS = (
 )
 
 
-def REIMU_SKILL_CAN_ACTIVATE(self):
-    x_size = self.source.x_size
-    position = self.position
-    map_ = self.map
+def REIMU_SKILL_CAN_ACTIVATE(game_state):
+    """
+    Returns whether Reimu skill can be activated.
+    
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    
+    Returns
+    -------
+    can_active : `bool`
+    """
+    x_size = game_state.stage.x_size
+    position = game_state.position
+    map_ = game_state.map
     
     for step in (-x_size, 1, x_size, -1):
         target_tile=map_[position+step]
@@ -522,10 +771,22 @@ def REIMU_SKILL_CAN_ACTIVATE(self):
     return False
 
 
-def REIMU_SKILL_GET_DIRECTORIES(self):
-    x_size = self.source.x_size
-    position = self.position
-    map_ = self.map
+def REIMU_SKILL_GET_DIRECTORIES(game_state):
+    """
+    Returns to which directories Reimu's skill could be used.
+    
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    
+    Returns
+    -------
+    move_directories : ``MoveDirectories``
+    """
+    x_size = game_state.stage.x_size
+    position = game_state.position
+    map_ = game_state.map
     
     move_directories = MoveDirectories()
     
@@ -547,9 +808,26 @@ def REIMU_SKILL_GET_DIRECTORIES(self):
     return move_directories
 
 
-def REIMU_SKILL_USE(self, step, align):
-    map_ = self.map
-    position = self.position
+def REIMU_SKILL_ACTIVATE(game_state, step, align):
+    """
+    Uses Reimu's skill to the represented directory.
+    
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    step : `int`
+        Difference between 2 adjacent tile-s translated to 1 dimension based on the map's size.
+    align : `int`
+        The character's new align if the move is successful.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the move was completed successfully.
+    """
+    map_ = game_state.map
+    position = game_state.position
     
     target_tile = map_[position+step]
     
@@ -562,21 +840,33 @@ def REIMU_SKILL_USE(self, step, align):
         return False
     
     actual_tile = map_[position]
-    self.history.append(HistoryElement(position, True, ((position, actual_tile), (position+(step<<1), after_tile))))
+    game_state.history.append(HistoryElement(position, True, ((position, actual_tile), (position+(step<<1), after_tile))))
     
     map_[position] = actual_tile&BIT_MASK_PASSABLE
-    self.position = position = position+(step<<1)
+    game_state.position = position = position+(step<<1)
     
     map_[position] = after_tile|align
-    self.has_skill = False
+    game_state.has_skill = False
     
     return True
 
 
-def FLAN_SKILL_CAN_ACTIVATE(self):
-    x_size = self.source.x_size
-    position = self.position
-    map_ = self.map
+def FLAN_SKILL_CAN_ACTIVATE(game_state):
+    """
+    Returns whether Flandre skill can be activated.
+    
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    
+    Returns
+    -------
+    can_active : `bool`
+    """
+    x_size = game_state.stage.x_size
+    position = game_state.position
+    map_ = game_state.map
     
     for step in (-x_size, 1, x_size, -1):
         target_tile = map_[position+step]
@@ -587,10 +877,22 @@ def FLAN_SKILL_CAN_ACTIVATE(self):
     return False
 
 
-def FLAN_SKILL_GET_DIRECTORIES(self):
-    x_size = self.source.x_size
-    position = self.position
-    map_ = self.map
+def FLAN_SKILL_GET_DIRECTORIES(game_state):
+    """
+    Returns to which directories Flandre's skill could be used.
+    
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    
+    Returns
+    -------
+    move_directories : ``MoveDirectories``
+    """
+    x_size = game_state.stage.x_size
+    position = game_state.position
+    map_ = game_state.map
     
     move_directories = MoveDirectories()
     
@@ -606,9 +908,26 @@ def FLAN_SKILL_GET_DIRECTORIES(self):
     return move_directories
 
 
-def FLAN_SKILL_USE(self, step, align):
-    map_ = self.map
-    position = self.position
+def FLAN_SKILL_ACTIVATE(game_state, step, align):
+    """
+    Uses Flan's skill to the represented directory.
+    
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    step : `int`
+        Difference between 2 adjacent tile-s translated to 1 dimension based on the map's size.
+    align : `int`
+        The character's new align if the move is successful.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the move was completed successfully.
+    """
+    map_ = game_state.map
+    position = game_state.position
     
     target_tile = map_[position+step]
     
@@ -616,22 +935,34 @@ def FLAN_SKILL_USE(self, step, align):
         return False
     
     actual_tile = map_[position]
-    self.history.append(HistoryElement(position, True, ((position, actual_tile), (position+step, target_tile))))
+    game_state.history.append(HistoryElement(position, True, ((position, actual_tile), (position+step, target_tile))))
     
     map_[position] = actual_tile&BIT_MASK_PASSABLE|align
     map_[position+step] = BIT_MASK_OBJECT_P
-    self.has_skill = False
+    game_state.has_skill = False
     
     return True
 
 
-def YUKARI_SKILL_CAN_ACTIVATE(self):
-    map_ = self.map
+def YUKARI_SKILL_CAN_ACTIVATE(game_state):
+    """
+    Returns whether Yukari skill can be activated.
     
-    x_size = self.source.x_size
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    
+    Returns
+    -------
+    can_active : `bool`
+    """
+    map_ = game_state.map
+    
+    x_size = game_state.stage.x_size
     y_size = len(map_)//x_size
 
-    position = self.position
+    position = game_state.position
     y_position, x_position = divmod(position, x_size)
 
     # x_min = x_size*y_position
@@ -668,15 +999,28 @@ def YUKARI_SKILL_CAN_ACTIVATE(self):
     
     return False
 
-def YUKARI_SKILL_GET_DIRECTORIES(self):
-    map_ = self.map
+
+def YUKARI_SKILL_GET_DIRECTORIES(game_state):
+    """
+    Returns to which directories Yukari's skill could be used.
     
-    x_size = self.source.x_size
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    
+    Returns
+    -------
+    move_directories : ``MoveDirectories``
+    """
+    map_ = game_state.map
+    
+    x_size = game_state.stage.x_size
     y_size = len(map_)//x_size
     
     move_directories = MoveDirectories()
     
-    position = self.position
+    position = game_state.position
     y_position, x_position = divmod(position, x_size)
 
     # x_min = x_size*y_position
@@ -720,13 +1064,30 @@ def YUKARI_SKILL_GET_DIRECTORIES(self):
     return move_directories
 
 
-def YUKARI_SKILL_USE(self, step, align):
-    map_ = self.map
+def YUKARI_SKILL_ACTIVATE(game_state, step, align):
+    """
+    Uses Yukari's skill to the represented directory.
+    
+    Parameters
+    ----------
+    game_state : ``GameState``
+        The respective game state.
+    step : `int`
+        Difference between 2 adjacent tile-s translated to 1 dimension based on the map's size.
+    align : `int`
+        The character's new align if the move is successful.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the move was completed successfully.
+    """
+    map_ = game_state.map
 
-    x_size = self.source.x_size
+    x_size = game_state.stage.x_size
     y_size = len(map_)//x_size
     
-    position = self.position
+    position = game_state.position
     y_position, x_position = divmod(position, x_size)
 
     if step > 0:
@@ -763,27 +1124,63 @@ def YUKARI_SKILL_USE(self, step, align):
         return False
     
     actual_tile = map_[position]
-    self.history.append(HistoryElement(position, True, ((position, actual_tile), (target_position, target_tile))))
+    game_state.history.append(HistoryElement(position, True, ((position, actual_tile), (target_position, target_tile))))
     
     map_[position] = actual_tile&BIT_MASK_PASSABLE
-    self.position = target_position
+    game_state.position = target_position
     
     map_[target_position] = target_tile|align
-    self.has_skill = False
+    game_state.has_skill = False
     
     return True
 
 
 class HistoryElement:
+    """
+    An element of a ``GameState``'s history.
+    
+    Attributes
+    ----------
+    changes : `tuple` of (`tuple` (`int`, `int`), ...)
+        A tuple containing each changed tile inside of a `position - tile` value pair.
+    position : `int`
+        The character's old position.
+    was_skill : `bool`
+        Whether the step was skill usage.
+    """
     __slots__ = ('changes', 'position', 'was_skill')
     
     def __init__(self, position, was_skill, changes):
+        """
+        Creates a new ``HistoryElement`` from the given parameters.
+        
+        Parameters
+        ----------
+        position : `int`
+            The character's old position.
+        was_skill : `bool`
+            Whether the step was skill usage.
+        changes : `tuple` of (`tuple` (`int`, `int`), ...)
+            A tuple containing each changed tile inside of a `position - tile` value pair.
+        """
         self.position = position
         self.was_skill = was_skill
         self.changes = changes
     
     @classmethod
     def from_json(cls, data):
+        """
+        Creates a new history element from json data.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Decoded json data.
+        
+        Returns
+        -------
+        self : ``HistoryElement``
+        """
         self = object.__new__(cls)
         self.position = data[JSON_KEY_HISTORY_ELEMENT_POSITION]
         self.was_skill = data[JSON_KEY_HISTORY_ELEMENT_WAS_SKILL]
@@ -791,6 +1188,13 @@ class HistoryElement:
         return self
     
     def to_json(self):
+        """
+        Converts the history element to json serializable data.
+        
+        Returns
+        -------
+        data : `dict` of (`str`, `Any`) items
+        """
         return {
             JSON_KEY_HISTORY_ELEMENT_POSITION: self.position,
             JSON_KEY_HISTORY_ELEMENT_WAS_SKILL: self.was_skill,
@@ -848,39 +1252,120 @@ JSON_KEY_HISTORY_ELEMENT_POSITION = '0'
 JSON_KEY_HISTORY_ELEMENT_WAS_SKILL = '1'
 JSON_KEY_HISTORY_ELEMENT_CHANGES = '2'
 
-JSON_KEY_GAME_STATE_SOURCE = '0'
-JSON_KEY_GAME_STATE_MAP = '1'
-JSON_KEY_GAME_STATE_POSITION = '2'
-JSON_KEY_GAME_STATE_HAS_SKILL = '3'
-JSON_KEY_GAME_STATE_NEXT_SKILL = '4'
-JSON_KEY_GAME_STATE_HISTORY = '5'
+JSON_KEY_RUNNER_STATE_STAGE_ID = '0'
+JSON_KEY_RUNNER_STATE_MAP = '1'
+JSON_KEY_RUNNER_STATE_POSITION = '2'
+JSON_KEY_RUNNER_STATE_HAS_SKILL = '3'
+JSON_KEY_RUNNER_STATE_NEXT_SKILL = '4'
+JSON_KEY_RUNNER_STATE_HISTORY = '5'
+JSON_KEY_RUNNER_STATE_STAGE_BEST = '6'
 
 STAGES_BY_ID = {}
+STAGES_BY_ACCESS_ROUTE = {}
+
 
 class StageSource:
-    __slots__ = ('best', 'chapter_index', 'difficulty_index', 'stage_index', 'id', 'start', 'target_count', 'map',
-        'x_size')
+    """
+    A stage's source.
+    
+    Attributes
+    ----------
+    after_stage_source : `None` or ``StageSource``
+        The next stage source.
+    before_stage_source : `None` or ``StageSource``
+        The before stage source.
+    best : `int`
+        The lowest amount of steps needed to solve the stage.
+    chapter_index : `int`
+        The index of the stage's chapter.
+    difficulty_index : `int`
+        The index of the stage's difficulty inside of it's chapter.
+    id : `int`
+        The identifier of the stage.
+    index : `int`
+        The local index of the stage.
+    map : `list` of `int`
+        The stage's map.
+    stage_index : `int`
+        The stage's index inside of it's difficulty.
+    start : `int`
+        The position, where the character starts on the stage.
+    target_count : `int`
+        The amount of targets on the map to fulfill.
+    x_size : `int`
+        The map's size on the x axis.
+    """
+    __slots__ = ('after_stage_source', 'before_stage_source', 'best', 'chapter_index', 'difficulty_index', 'id',
+        'index', 'map', 'stage_index', 'start', 'target_count', 'x_size')
     
     @classmethod
     def from_json(cls, data):
-        self = object.__new__(cls)
-        self.best = data[JSON_KEY_STAGE_SOURCE_BEST]
-        self.chapter_index = data[JSON_KEY_STAGE_SOURCE_CHAPTER_INDEX]
-        self.difficulty_index = data[JSON_KEY_STAGE_SOURCE_DIFFICULTY_INDEX]
-        self.stage_index = data[JSON_KEY_STAGE_SOURCE_STAGE_INDEX]
+        """
+        Creates a new a ``StageSource`` instance from json data.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Decoded json data.
+        
+        Returns
+        -------
+        self : ``StageSource``
+        """
+        chapter_index = data[JSON_KEY_STAGE_SOURCE_CHAPTER_INDEX]
+        difficulty_index = data[JSON_KEY_STAGE_SOURCE_DIFFICULTY_INDEX]
+        stage_index = data[JSON_KEY_STAGE_SOURCE_STAGE_INDEX]
         identifier = data[JSON_KEY_STAGE_SOURCE_ID]
+        
+        self = object.__new__(cls)
+        
+        self.best = data[JSON_KEY_STAGE_SOURCE_BEST]
+        self.chapter_index = chapter_index
+        self.difficulty_index = difficulty_index
+        self.stage_index = stage_index
         self.id = identifier
         self.start = data[JSON_KEY_STAGE_SOURCE_START]
         self.target_count = data[JSON_KEY_STAGE_SOURCE_TARGET_COUNT]
         self.map = [TILE_NAME_TO_VALUE[tile_name] for tile_name in data[JSON_KEY_STAGE_SOURCE_MAP]]
         self.x_size = data[JSON_KEY_STAGE_X_SIZE]
+        self.index = 0
+        self.before_stage_source = None
+        self.after_stage_source = None
         
-        STAGES_BY_ID[self.id] = self
+        STAGES_BY_ID[identifier] = self
+        STAGES_BY_ACCESS_ROUTE[(chapter_index, difficulty_index, stage_index)] = self
         
         return self
+    
+    @property
+    def chapter(self):
+        """
+        Returns the stage source's chapter.
+        
+        Returns
+        -------
+        chapter : ``Chapter``
+        """
+        return CHAPTERS[self.chapter_index]
+    
+    def __repr__(self):
+        """Returns the stage source's representation."""
+        return f'<{self.__class__.__name__} id={self.id!r}>'
 
 
 def pretty_dump_stage_sources(stage_sources):
+    """
+    Dumps the given stages into pretty json format.
+    
+    Parameters
+    ----------
+    stage_sources : `list` of ``StageSource``
+        The stages to save.
+    
+    Returns
+    -------
+    json_data : `str`
+    """
     json_parts = []
     
     json_parts.append('[\n')
@@ -1005,13 +1490,128 @@ CHAPTER_NAME_TO_INDEX = {
 CHAPTERS = {}
 
 class Chapter:
-    __slots__ = ('button_skill_disabled', 'button_skill_enabled', 'button_skill_used', 'difficulties', 'emoji',
-        'identifier', 'button_skill_activated', 'skill_can_active', 'skill_get_directories', 'skill_use', 'style',
-        'stages_sorted',)
+    """
+    A chapter storing exact data about it's stages, skills and buttons.
+    
+    Attributes
+    ----------
+    button_skill_activated : ``ComponentButton``
+        The skill button when the next move is a skill.
+    button_skill_disabled : ``ComponentButton``
+        The skill button, when the skill cannot be used.
+    button_skill_enabled : ``ComponentButton``
+        The skill button, when the skill can be used.
+    button_skill_activated : ``ComponentButton``
+        The skill button, when it was already used.
+    difficulties : `dict` of (`int`, `dict` (`int`, ``StageSource``) items) items
+        The difficulties of the chapter.
+    emoji : ``Emoji``
+        The chapter's character's emoji.
+    id : `int`
+        The chapter's identifier.
+    skill_can_activate : `Function`
+        Checks whether the chapter's character's skill can be activated.
+        
+        Accepts the following parameters.
+        
+        +---------------+---------------+
+        | Name          | Type          |
+        +===============+===============+
+        | game_state    | ``GameState`` |
+        +---------------+---------------+
+        
+        Should returns the following values.
+        
+        +---------------+---------------+
+        | Name          | Type          |
+        +===============+===============+
+        | can_active    | `bool`        |
+        +---------------+---------------+
+    
+    skill_get_move_directories : `Function`
+        Checks whether the chapter's character's skill can be activated.
+        
+        Accepts the following parameters.
+        
+        +---------------+---------------+
+        | Name          | Type          |
+        +===============+===============+
+        | game_state    | ``GameState`` |
+        +---------------+---------------+
+        
+        Should returns the following values.
+        
+        +-------------------+-----------------------+
+        | Name              | Type                  |
+        +===================+=======================+
+        | move_directories  | ``MoveDirectories``   |
+        +-------------------+-----------------------+
+    
+    skill_activate : `Function`
+        Uses the skill of the chapter's character.
+        
+        Accepts the following parameters.
+        
+        +---------------+---------------+
+        | Name          | Type          |
+        +===============+===============+
+        | game_state    | ``GameState`` |
+        +---------------+---------------+
+        | step          | `int`         |
+        +---------------+---------------+
+        | align         | `int`         |
+        +---------------+---------------+
+        
+        Should returns the following values.
+        
+        +---------------+---------------+
+        | Name          | Type          |
+        +===============+===============+
+        | success       | `bool`        |
+        +---------------+---------------+
+    
+    stages_sorted : `list` of ``StageSource``
+        The stages of the chapter in order.
+    
+    style : `dict` of (`int`, `str`) items
+        The tiles of the stage based on the tile's value.
+    next_stage_unlock_id : `int`
+        The stage to complete for the next chapter.
+    """
+    __slots__ = ('button_skill_activated', 'button_skill_disabled', 'button_skill_enabled', 'button_skill_used',
+        'difficulties', 'emoji', 'id', 'skill_can_activate', 'skill_get_move_directories', 'skill_activate',
+        'stages_sorted', 'style', 'next_stage_unlock_id', )
+    
     def __init__(self, identifier, emoji, style, button_skill_enabled, button_skill_disabled, button_skill_used,
-            button_skill_activated, skill_can_active, skill_get_directories, skill_use):
-        self.identifier = identifier
-        self.difficulties = None
+            button_skill_activated, skill_can_activate, skill_get_move_directories, skill_activate):
+        """
+        Creates a new stage from the given parameters.
+        
+        Parameters
+        ----------
+        identifier : `int`
+            The chapter's identifier.
+        emoji : ``Emoji``
+            The chapter's character's emoji.
+        style : `dict` of (`int`, `str`) items
+            The tiles of the stage based on the tile's value.
+        button_skill_enabled : ``ComponentButton``
+            The skill button, when the skill can be used.
+        button_skill_disabled : ``ComponentButton``
+            The skill button, when the skill cannot be used.
+        button_skill_used : ``ComponentButton``
+            The skill button, when it was already used.
+        button_skill_activated : ``ComponentButton``
+            The skill button when the next move is a skill.
+        skill_can_activate : `Function`
+            Checks whether the chapter's character's skill can be activated.
+        skill_get_move_directories : `Function`
+            Checks whether the chapter's character's skill can be activated.
+        skill_activate : `Function`
+            Uses the skill of the chapter's character.
+        """
+        self.id = identifier
+        self.difficulties = {}
         self.stages_sorted = []
         self.emoji = emoji
         self.style = style
@@ -1019,9 +1619,11 @@ class Chapter:
         self.button_skill_disabled = button_skill_disabled
         self.button_skill_used = button_skill_used
         self.button_skill_activated = button_skill_activated
-        self.skill_can_active = skill_can_active
-        self.skill_get_directories = skill_get_directories
-        self.skill_use = skill_use
+        self.skill_can_activate = skill_can_activate
+        self.skill_get_move_directories = skill_get_move_directories
+        self.skill_activate = skill_activate
+        self.next_stage_unlock_id = 0
+
 
 CHAPTERS[CHAPTER_REIMU_INDEX] = Chapter(
     CHAPTER_REIMU_INDEX,
@@ -1033,7 +1635,7 @@ CHAPTERS[CHAPTER_REIMU_INDEX] = Chapter(
     BUTTON_SKILL_REIMU_ACTIVATED,
     REIMU_SKILL_CAN_ACTIVATE,
     REIMU_SKILL_GET_DIRECTORIES,
-    REIMU_SKILL_USE,
+    REIMU_SKILL_ACTIVATE,
 )
 
 CHAPTERS[CHAPTER_FLAN_INDEX] = Chapter(
@@ -1046,7 +1648,7 @@ CHAPTERS[CHAPTER_FLAN_INDEX] = Chapter(
     BUTTON_SKILL_FLAN_ACTIVATED,
     FLAN_SKILL_CAN_ACTIVATE,
     FLAN_SKILL_GET_DIRECTORIES,
-    FLAN_SKILL_USE,
+    FLAN_SKILL_ACTIVATE,
 )
 
 CHAPTERS[CHAPTER_YUKARI_INDEX] = Chapter(
@@ -1059,33 +1661,38 @@ CHAPTERS[CHAPTER_YUKARI_INDEX] = Chapter(
     BUTTON_SKILL_YUKARI_ACTIVATED,
     YUKARI_SKILL_CAN_ACTIVATE,
     YUKARI_SKILL_GET_DIRECTORIES,
-    YUKARI_SKILL_USE,
+    YUKARI_SKILL_ACTIVATE,
 )
 
 
 def load_stages():
-    stage_source_datas = from_json_file(FILE_PATH)
+    """
+    Loads the stages and fills the chapters with them up.
+    """
+    with open(FILE_PATH, 'r') as file:
+        stage_source_datas = from_json_file(file)
+    
     stage_sources = []
     for stage_source_data in stage_source_datas:
         stage_source = StageSource.from_json(stage_source_data)
         stage_sources.append(stage_source)
     
-    chapters = {}
+    chapter_dictionaries = {}
     for stage_source in stage_sources:
         try:
-            chapter = chapters[stage_source.chapter_index]
+            chapter_dictionary = chapter_dictionaries[stage_source.chapter_index]
         except KeyError:
-            chapter = chapters[stage_source.chapter_index] = {}
+            chapter_dictionary = chapter_dictionaries[stage_source.chapter_index] = {}
         
         try:
-            difficulty = chapter[stage_source.difficulty_index]
+            difficulty_dictionary = chapter_dictionary[stage_source.difficulty_index]
         except KeyError:
-            difficulty = chapter[stage_source.difficulty_index] = {}
+            difficulty_dictionary = chapter_dictionary[stage_source.difficulty_index] = {}
         
-        difficulty[stage_source.stage_index] = stage_source
+        difficulty_dictionary[stage_source.stage_index] = stage_source
     
     sorted_chapters = []
-    for expected_chapter_index, (chapter_index, chapter) in enumerate(sorted(chapters.items())):
+    for expected_chapter_index, (chapter_index, chapter_dictionary) in enumerate(sorted(chapter_dictionaries.items())):
         if expected_chapter_index != chapter_index:
             raise RuntimeError(
                 f'expected_chapter_index={expected_chapter_index!r} != '
@@ -1101,7 +1708,9 @@ def load_stages():
         sorted_difficulty = []
         sorted_chapters.append(sorted_difficulty)
         
-        for expected_difficulty_index, (difficulty_index, difficulty) in enumerate(sorted(chapter.items())):
+        for expected_difficulty_index, (difficulty_index, difficulty_dictionary) in \
+                enumerate(sorted(chapter_dictionary.items())):
+            
             if expected_difficulty_index != difficulty_index:
                 raise RuntimeError(
                     f'expected_difficulty_index={expected_difficulty_index!r} != '
@@ -1110,7 +1719,7 @@ def load_stages():
                 
             sorted_stages = []
             sorted_difficulty.append(sorted_stages)
-            for expected_stage_index, (stage_index, stage) in enumerate(sorted(difficulty.items())):
+            for expected_stage_index, (stage_index, stage) in enumerate(sorted(difficulty_dictionary.items())):
                 if expected_difficulty_index != difficulty_index:
                     raise RuntimeError(
                         f'expected_stage_index={expected_stage_index!r} != '
@@ -1119,36 +1728,141 @@ def load_stages():
                     
                 sorted_stages.append(stage)
     
-    for chapter_index, chapter in enumerate(sorted_chapters):
-        chapter_object = CHAPTERS[chapter_index]
-        chapter_object.difficulties = chapters[chapter_index]
-        for difficulty in chapter:
-            chapter_object.stages_sorted.extend(difficulty)
-
+    for chapter_index, sorted_chapter in enumerate(sorted_chapters):
+        chapter_dictionary = chapter_dictionaries[chapter_index]
+        chapter = CHAPTERS[chapter_index]
+        chapter.difficulties.update(chapter_dictionary)
+        
+        try:
+            difficulty_dictionary = chapter_dictionary[CHAPTER_UNLOCK_DIFFICULTY]
+        except KeyError:
+            pass
+        else:
+            try:
+                stage = difficulty_dictionary[CHAPTER_UNLOCK_STAGE]
+            except KeyError:
+                pass
+            else:
+                chapter.next_stage_unlock_id = stage.id
+        
+        chapter_stages_sorted = chapter.stages_sorted
+        for sorted_difficulty in sorted_chapter:
+            chapter_stages_sorted.extend(sorted_difficulty)
+        
+        chapter_stages_sorted_length = len(chapter_stages_sorted)
+        if chapter_stages_sorted_length > 1:
+            stage = chapter_stages_sorted[0]
+            stage.after_stage_source = chapter_stages_sorted[1]
+            stage.index = 0
+            
+            index = chapter_stages_sorted_length-1
+            stage = chapter_stages_sorted[index]
+            stage.before_stage_source = chapter_stages_sorted[chapter_stages_sorted_length-2]
+            
+            for index in range(1, chapter_stages_sorted_length-1):
+                stage = chapter_stages_sorted[index]
+                stage.after_stage_source = chapter_stages_sorted[index+1]
+                stage.before_stage_source = chapter_stages_sorted[index-1]
+                stage.index = index
 
 load_stages()
 
 
-class StageState:
-    __slots__ = ('id', 'stage_id', 'best')
+class StageResult:
+    """
+    Represents a user's state of a stage.
     
-    def __new__(cls, field):
+    Attributes
+    ----------
+    id : `int`
+        The entry's identifier in the database.
+    stage_id : `int`
+        The stage's identifier.
+    best : `int`
+        The user's best solution of the stage.
+    """
+    __slots__ = ('best', 'id', 'stage_id')
+    
+    
+    def __new__(cls, identifier, stage_id, best):
+        """
+        Creates a new stage state from the given parameters.
+        
+        Parameters
+        ----------
+        identifier : `int`
+            The entry's identifier in the database.
+        stage_id : `int`
+            The stage's identifier.
+        best : `int`
+            The user's best solution of the stage.
+        """
         self = object.__new__(cls)
-        self.id = field.id
-        self.stage_id = field.stage_id
-        self.best = field.best
+        self.id = identifier
+        self.stage_id = stage_id
+        self.best = best
         return self
+    
+    
+    @classmethod
+    def from_entry(cls, entry):
+        """
+        Creates a new ``StageResult`` instance from the given entry.
+        
+        Parameters
+        ----------
+        entry : `sqlalchemy.???`
+        
+        Returns
+        -------
+        self : ``StageResult``
+        """
+        self = object.__new__(cls)
+        self.id = entry.id
+        self.stage_id = entry.stage_id
+        self.best = entry.best
+        return self
+    
+    def __repr__(self):
+        """Returns the stage result's representation."""
+        return f'<{self.__class__.__name__} id={self.id!r}, stage_id={self.stage_id!r}, best={self.best!r}>'
 
 
 class UserState:
-    __slots__ = ('game_state', 'stage_results', 'entry_id', 'field_exists', 'selected_chapter_index',
-        'selected_stage_index', 'selected_difficulty_index', 'user_id',)
+    """
+    A user's state in dungeon sweeper.
+    
+    Attributes
+    ----------
+    entry_id : `int`
+        The field identifier in the database.
+    field_exists : `bool`
+        Whether the field is stored in the database.
+    game_state : `None` or ``GameState``
+        The state of the actual game.
+    selected_stage_id : `int`
+        The selected stage's identifier.
+    stage_results: `dict` of (`int`, ``StageResult``) items
+        Result of each completed stage by the user.
+    user_id : `int`
+        The respective user's identifier.
+    """
+    __slots__ = ('entry_id', 'field_exists', 'game_state', 'selected_stage_id', 'stage_results', 'user_id')
     
     async def __new__(cls, user_id):
+        """
+        Creates a new ``UserState`` instance based on he given `user_id`.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        user_id : `int`
+            The user' respective identifier.
+        """
         async with DB_ENGINE.connect() as connector:
             response = await connector.execute(
-                DS_V2_TABLE. \
-                    select(ds_v2_model.user_id==user_id)
+                DS_V2_TABLE.select(ds_v2_model.user_id==user_id)
             )
             results = await response.fetchall()
             
@@ -1161,9 +1875,7 @@ class UserState:
                     game_state_json_data = decompress(game_state_data)
                     game_state = GameState.from_json(game_state_json_data)
                 
-                selected_chapter_index = result.selected_chapter_index
-                selected_stage_index = result.selected_stage_index
-                selected_difficulty_index = result.selected_difficulty_index
+                selected_stage_id = result.selected_stage_id
                 field_exists = True
                 entry_id = result.id
                 
@@ -1176,30 +1888,45 @@ class UserState:
                 
                 stage_results = {}
                 for result in results:
-                    stage_state = StageState(result)
-                    stage_results[stage_state.stage_id] = stage_results
+                    stage_result = StageResult.from_entry(result)
+                    stage_results[stage_result.stage_id] = stage_result
+                
+                
+                if (entry_id is not None):
+                    await connector.execute(
+                        DS_V2_TABLE.update(). \
+                        values(
+                            game_state = None,
+                        ).where(ds_v2_model.id==entry_id)
+                    )
+            
             else:
                 game_state = None
                 stage_results = {}
-                selected_chapter_index = 0
-                selected_stage_index = 0
-                selected_difficulty_index = 0
+                selected_stage_id = 0
                 field_exists = False
                 entry_id = 0
         
         self = object.__new__(cls)
         self.game_state = game_state
-        self.selected_chapter_index = selected_chapter_index
-        self.selected_stage_index = selected_stage_index
-        self.selected_difficulty_index = selected_difficulty_index
+        self.selected_stage_id = selected_stage_id
         self.field_exists = field_exists
         self.entry_id = entry_id
         self.stage_results = stage_results
+        self.user_id = user_id
+        return self
     
     
     def get_game_state_data(self):
+        """
+        Gets the user state's game state's data in json serializable from.
+        
+        Returns
+        -------
+        game_state_data : `None` or `dict`
+        """
         game_state = self.game_state
-        if (game_state is None):
+        if (game_state is None) or (not game_state.history):
             game_state_data = None
         else:
             game_state_json_data = game_state.to_json()
@@ -1207,7 +1934,32 @@ class UserState:
         
         return game_state_data
     
+    
+    async def upload_game_state_on_init_failure(self):
+        """
+        Uploads only the game's state if applicable. Only called when exception occurs at initialization.
+        
+        This method is a coroutine.
+        """
+        if self.field_exists:
+            game_state_data = self.get_game_state_data()
+            if (game_state_data is not None):
+                async with DB_ENGINE.connect() as connector:
+                    await connector.execute(
+                        DS_V2_TABLE.update(). \
+                        values(
+                            game_state         = game_state_data,
+                        ).where(ds_v2_model.id==self.entry_id)
+                    )
+    
+    
+    
     async def upload(self):
+        """
+        Saves the current state of te game state.
+        
+        This method is a coroutine.
+        """
         game_state_data = self.get_game_state_data()
         
         async with DB_ENGINE.connect() as connector:
@@ -1215,21 +1967,18 @@ class UserState:
                 await connector.execute(
                     DS_V2_TABLE.update(). \
                     values(
-                        game_state                = game_state_data,
-                        selected_chapter_index    = self.selected_chapter_index,
-                        selected_stage_index      = self.selected_stage_index,
-                        selected_difficulty_index = self.selected_difficulty_index,
+                        game_state         = game_state_data,
+                        selected_stage_id  = self.selected_stage_id,
                     ).where(ds_v2_model.id==self.entry_id)
                 )
             else:
                 response = await connector.execute(
                     DS_V2_TABLE.insert(). \
                     values(
-                        user_id                   = self.user_id,
-                        game_state                = game_state_data,
-                        selected_chapter_index    = self.selected_chapter_index,
-                        selected_stage_index      = self.selected_stage_index,
-                        selected_difficulty_index = self.selected_difficulty_index,
+                        user_id           = self.user_id,
+                        game_state        = game_state_data,
+                        selected_stage_id = self.selected_stage_id,
+
                     ). \
                     returning(ds_v2_model.id)
                 )
@@ -1237,69 +1986,207 @@ class UserState:
                 self.entry_id = result[0]
                 self.field_exists = True
     
-    async def set_best(self, stage_id, best):
+    
+    async def set_best(self, stage_id, steps):
+        """
+        Updates the state of the given stage.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        stage_id : `int`
+            The respective stage's identifier.
+        steps : `int`
+            The step count of the user.
+        """
         if not self.field_exists:
             async with DB_ENGINE.connect() as connector:
                 game_state_data = self.get_game_state_data()
                 
-                await connector.execute(
+                response = await connector.execute(
                     DS_V2_TABLE.insert(). \
                     values(
-                        user_id                   = self.user_id,
-                        game_state                = game_state_data,
-                        selected_chapter_index    = self.selected_chapter_index,
-                        selected_stage_index      = self.selected_stage_index,
-                        selected_difficulty_index = self.selected_difficulty_index,
-                    )
+                        user_id           = self.user_id,
+                        game_state        = game_state_data,
+                        selected_stage_id = self.selected_stage_id,
+                    ). \
+                    returning(ds_v2_model.id)
                 )
-            
-            self.field_exists = True
+                
+                result = await response.fetchone()
+                self.entry_id = result[0]
+                self.field_exists = True
         
+        state_stage = self.stage_results.get(stage_id, None)
+        if state_stage is None:
+            self_best = -1
+        else:
+            self_best = state_stage.best
+        
+        if (state_stage is None) or (steps < self_best):
+            async with DB_ENGINE.connect() as connector:
+                if state_stage is None:
+                    response = await connector.execute(
+                        to_execute = DS_V2_RESULT_TABLE.insert(
+                            ds_v2_entry_id = self.entry_id,
+                            stage_id = stage_id,
+                            best = steps,
+                        ).returning(ds_v2_result_model.id)
+                    )
+                    
+                    result = await response.fetchone()
+                    entry_id = result[0]
+                    self.stage_results[stage_id] = StageResult(entry_id, stage_id, steps)
+                else:
+                    await connector.execute(
+                        DS_V2_TABLE.update(). \
+                        values(
+                            best = steps,
+                        ).where(ds_v2_result_model.id==state_stage.id)
+                    )
+                    
+                    state_stage.best = steps
+                
+                if state_stage is None:
+                    reward = get_reward_for_steps(stage_id, steps)
+                else:
+                    reward = get_reward_difference(stage_id, self_best, steps)
+                
+                if reward:
+                    response = await connector.execute(
+                        select([currency_model.id]). \
+                        where(currency_model.user_id==self.user_id)
+                    )
+                    
+                    results = await response.fetchall()
+                    if results:
+                        entry_id = results[0][0]
+                        
+                        to_execute = CURRENCY_TABLE. \
+                            update(currency_model.id==entry_id). \
+                            values(total_love=currency_model.total_love+reward)
+                    else:
+                        to_execute = CURRENCY_TABLE.insert().values(
+                            user_id         = self.user_id,
+                            total_love      = reward,
+                            daily_next      = datetime.utcnow(),
+                            daily_streak    = 0,
+                            total_allocated = 0,
+                        )
+                    
+                    await connector.execute(to_execute)
+
+
+
 class GameState:
-    __slots__ = ('best', 'chapter', 'has_skill', 'history', 'map', 'next_skill', 'position', 'source',)
+    """
+    A user's actual game's state.
     
-    def __init__(self, chapter, source, best):
-        self.chapter = chapter
-        self.source = source
-        self.map = source.map.copy()
-        self.position = source.start
+    Attributes
+    ----------
+    best : `int`
+        The user's best solution for the stage. Set as `-1` by default.
+    chapter : ``Chapter``
+        The stage's chapter.
+    has_skill : `bool`
+        Whether the character' skill in the game was not yet used.
+    history : `list` of ``HistoryElement``
+        The done steps in the game.
+    map : `list` of `int`
+        The game's actual map.
+    next_skill : `bool`
+        Whether the next step is a skill usage.
+    position : `int`
+        The position of the selected stage.
+    stage : ``StageSource``
+        The represented stage.
+    """
+    __slots__ = ('best', 'chapter', 'has_skill', 'history', 'map', 'next_skill', 'position', 'stage',)
+    
+    def __init__(self, stage, best):
+        """
+        Creates a new game state instance from the given parameters.
+        
+        Parameters
+        ----------
+        stage : ``StageSource``
+            The stage to execute by the game.
+        best : `int`
+            The user's best solution for the stage.
+        """
+        self.chapter = stage.chapter
+        self.stage = stage
+        self.map = stage.map.copy()
+        self.position = stage.start
         self.history = []
         self.has_skill = True
         self.next_skill = False
         self.best = best
     
     
+    def restart(self):
+        """
+        Restarts the game.
+        """
+        steps = len(self.history)
+        
+        best = self.best
+        if (best == -1) or (best < steps):
+            self.best = steps
+        
+        stage = self.stage
+        self.stage = stage
+        self.map = stage.map.copy()
+        self.position = stage.start
+        self.history.clear()
+        self.has_skill = True
+        self.next_skill = False
+    
+    
     @classmethod
     def from_json(cls, data):
+        """
+        Creates stage state from the given json data.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Json data.
+        
+        Returns
+        -------
+        self : ``GameState``
+        """
         self = object.__new__(cls)
         
-        chapter_identifier, difficulty_identifier, stage_identifier, best = data[JSON_KEY_GAME_STATE_SOURCE]
+        stage_id = data[JSON_KEY_RUNNER_STATE_STAGE_ID]
         
-        chapter = CHAPTERS[chapter_identifier]
-        self.chapter = chapter
-        source = chapter.difficulties[difficulty_identifier][stage_identifier]
-        self.source = source
-        self.best = best
+        stage = STAGES_BY_ID[stage_id]
+        self.chapter = stage.chapter
+        self.stage = stage
+        
+        self.best = data.get(JSON_KEY_RUNNER_STATE_STAGE_BEST, -1)
         
         try:
-            map_ = data[JSON_KEY_GAME_STATE_MAP]
+            map_ = data[JSON_KEY_RUNNER_STATE_MAP]
         except KeyError:
-            map_ = source.map.copy()
+            map_ = stage.map.copy()
         
         self.map = map_
         
         try:
-            position = data[JSON_KEY_GAME_STATE_POSITION]
+            position = data[JSON_KEY_RUNNER_STATE_POSITION]
         except KeyError:
-            position = source.start
+            position = stage.start
         
         self.position = position
         
-        self.has_skill = data.get(JSON_KEY_GAME_STATE_HAS_SKILL, True)
-        self.next_skill = data.get(JSON_KEY_GAME_STATE_NEXT_SKILL, True)
+        self.has_skill = data.get(JSON_KEY_RUNNER_STATE_HAS_SKILL, True)
+        self.next_skill = data.get(JSON_KEY_RUNNER_STATE_NEXT_SKILL, True)
         
         try:
-            history_datas = data[JSON_KEY_GAME_STATE_HISTORY]
+            history_datas = data[JSON_KEY_RUNNER_STATE_HISTORY]
         except KeyError:
             history = []
         else:
@@ -1310,60 +2197,129 @@ class GameState:
     
     
     def to_json(self):
-        data = {}
-        source = self.source
+        """
+        Converts the stage state to json serializable data.
         
-        data[JSON_KEY_GAME_STATE_SOURCE] = (source.chapter_index, source.difficulty_index, source.index, self.best)
+        Returns
+        -------
+        data : `dict` of (`str`, `Any`) items
+        """
+        data = {}
+        stage = self.stage
+        
+        data[JSON_KEY_RUNNER_STATE_STAGE_ID] = stage.id
+        
+        best = self.best
+        if best != -1:
+            data[JSON_KEY_RUNNER_STATE_STAGE_BEST] = best
         
         if not self.has_skill:
-            data[JSON_KEY_GAME_STATE_SOURCE] = False
+            data[JSON_KEY_RUNNER_STATE_STAGE_ID] = False
         
         if not self.next_skill:
-            data[JSON_KEY_GAME_STATE_NEXT_SKILL] = False
+            data[JSON_KEY_RUNNER_STATE_NEXT_SKILL] = False
         
         history = self.history
         if history:
-            data[JSON_KEY_GAME_STATE_HISTORY] = [history_element.to_json() for history_element in history]
-            data[JSON_KEY_GAME_STATE_POSITION] = self.position
-            data[JSON_KEY_GAME_STATE_MAP] = self.map.copy()
+            data[JSON_KEY_RUNNER_STATE_HISTORY] = [history_element.to_json() for history_element in history]
+            data[JSON_KEY_RUNNER_STATE_POSITION] = self.position
+            data[JSON_KEY_RUNNER_STATE_MAP] = self.map.copy()
         
         return data
     
     
     def done(self):
-        targets = self.source.targets
+        """
+        Returns whether all the targets on the stage are satisfied.
+        
+        Returns
+        -------
+        done : `bool`
+        """
+        stage_index = self.stage.stage_index
         for tile in self.map:
             if tile == BIT_MASK_BOX_TARGET:
-                targets -= 1
-                if targets == 0:
-                    if self.best == -1 or self.best > len(self.history):
+                stage_index -= 1
+                if not stage_index:
+                    if (self.best == -1) or (self.best > len(self.history)):
                         self.best = len(self.history)
                     
                     return True
         
         return False
     
+    
     def move_north(self):
-        return self.move(-self.source.x_size, BIT_MASK_CHAR_N)
+        """
+        Moves the character north.
+        
+        Returns
+        -------
+        moved : `bool`
+            Whether the character move successfully.
+        """
+        return self.move(-self.stage.x_size, BIT_MASK_CHAR_N)
+    
     
     def move_east(self):
+        """
+        Moves the character east.
+        
+        Returns
+        -------
+        moved : `bool`
+            Whether the character move successfully.
+        """
         return self.move(1, BIT_MASK_CHAR_E)
     
+    
     def move_south(self):
-        return self.move(self.source.x_size, BIT_MASK_CHAR_S)
+        """
+        Moves the character south.
+        
+        Returns
+        -------
+        moved : `bool`
+            Whether the character move successfully.
+        """
+        return self.move(self.stage.x_size, BIT_MASK_CHAR_S)
+    
     
     def move_west(self):
+        """
+        Moves the character west.
+        
+        Returns
+        -------
+        moved : `bool`
+            Whether the character move successfully.
+        """
         return self.move(-1, BIT_MASK_CHAR_W)
     
+    
     def get_move_directories(self):
+        """
+        Returns to which directories the character can move.
+        
+        Returns
+        -------
+        move_directories : ``MoveDirectories``
+        """
         if self.next_skill:
-            return self.chapter_index.skill_get_move_directories(self)
+            return self.chapter.skill_get_move_directories(self)
         else:
             return self.get_own_move_directories()
     
+    
     def get_own_move_directories(self):
+        """
+        Returns to which directories can the character move, excluding the skill of the character.
         
-        x_size = self.source.x_size
+        Returns
+        -------
+        move_directories : ``MoveDirectories``
+        """
+        x_size = self.stage.x_size
         position = self.position
         map_ = self.map
         
@@ -1387,11 +2343,28 @@ class GameState:
         
         return move_directories
     
+    
     def move(self, step, align):
+        """
+        Moves the character to the given directory.
+        
+        Parameters
+        ----------
+        step : `int`
+            Difference between 2 adjacent tile-s translated to 1 dimension based on the map's size.
+        align : `int`
+            The character's new align if the move is successful.
+        
+        Returns
+        -------
+        success : `bool`
+            Whether the move was completed successfully.
+        """
         if self.next_skill:
-            result = self.source.use_skill(self, step, align)
+            result = self.chapter.skill_activate(self, step, align)
             if result:
                 self.next_skill = False
+            
             return result
         
         map_ = self.map
@@ -1430,17 +2403,33 @@ class GameState:
         
         return False
     
-    def can_activate_skill(self):
+    def skill_can_activate(self):
+        """
+        Activates the character's skill if applicable.
+        
+        Returns
+        -------
+        success : `bool`
+            Whether the skill was activated.
+        """
         if not self.has_skill:
             return False
         
-        if self.chapter_index.can_activate_skill(self):
+        if self.chapter.skill_can_activate(self):
             return True
         
         return False
     
     
-    def activate_skill(self):
+    def skill_activate(self):
+        """
+        Activates (or deactivates) the character's skill.
+        
+        Returns
+        -------
+        success : `bool`
+            Whether the skill could be (de)activated.
+        """
         if not self.has_skill:
             return False
         
@@ -1448,31 +2437,47 @@ class GameState:
             self.next_skill = False
             return True
         
-        if self.chapter_index.activate_skill(self):
+        if self.chapter.skill_activate(self):
             self.next_skill = True
             return True
         
         return False
     
-    def get_button_skill(self):
-        chapter = self.chapter_index
+    
+    def button_skill_get(self):
+        """
+        Gets the actual button skill to show up.
+        
+        Returns
+        -------
+        button : `ComponentButton``
+        """
+        chapter = self.chapter
         if self.next_skill:
             button = chapter.button_skill_activated
-        elif self.has_skill:
+        elif not self.has_skill:
             button = chapter.button_skill_used
-        elif self.chapter_index.can_activate_skill(self):
+        elif chapter.skill_can_activate(self):
             button = chapter.button_skill_enabled
         else:
             button = chapter.button_skill_disabled
         
         return button
     
+    
     def render_description(self):
-        style = self.chapter_index.style
+        """
+        Renders the description of the game's embed.
+        
+        Returns
+        -------
+        description : `str`
+        """
+        style = self.chapter.style
         result = []
         map_ = self.map
         limit = len(map_)
-        step = self.source.x_size
+        step = self.stage.x_size
         
         if limit <= 75:
             start = 0
@@ -1507,16 +2512,38 @@ class GameState:
         
         return '\n'.join(result)
     
-    def render(self):
-        source = self.source
-        difficulty_name = DIFFICULTY_NAMES.get(source.difficulty_index, '???')
-        title = f'{source.chapter_index+1} {difficulty_name} {source.index} {self.chapter_index.emoji.as_emoji}'
+    
+    def render_playing(self):
+        """
+        Renders the game's embeds and components.
+        
+        Returns
+        -------
+        embed : ``Embed``
+            The game's embed.
+        components : `tuple` of ``Row`` of ``ComponentButton``
+            The components of the game.
+        """
+        stage = self.stage
+        difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
+        title = f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji}, {difficulty_name}: ' \
+                f'{stage.stage_index+1}'
+        
         description = self.render_description()
-        color = DIFFICULTY_COLORS.get(source.difficulty_index, DS_COLOR)
+        color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
         
         embed = Embed(title, description, color=color)
         
-        button_skill = self.get_button_skill()
+        steps = len(self.history)
+        best = self.best
+        if (best == -1):
+            footer = f'steps : {steps}'
+        else:
+            footer = f'steps : {steps}, best : {best}'
+        
+        embed.add_footer(footer)
+        
+        button_skill = self.button_skill_get()
         
         directories = self.get_move_directories()
         
@@ -1555,7 +2582,55 @@ class GameState:
         
         return embed, components
     
+    
+    def render_end_screen(self):
+        """
+        Renders the game's end-game screen and components.
+        
+        Returns
+        -------
+        embed : ``Embed``
+            The game's embed.
+        components : `tuple` of ``Row`` of ``ComponentButton``
+            The components of the game.
+        """
+        stage = self.stage
+        steps = len(self.history)
+        rating = get_rating_for(self.stage, steps)
+        
+        best = self.best
+        if (best == -1) or (best > steps):
+            best = steps
+        
+        difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
+        title = f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji}, {difficulty_name}: ' \
+                f'{stage.stage_index+1} finished with {steps} steps with {rating} rating!'
+        
+        description = self.render_description()
+        color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
+        
+        embed = Embed(title, description, color=color).add_footer(f'steps : {steps}, best : {best}')
+        
+        if self.stage.after_stage_source is None:
+            button_next = BUTTON_NEXT_DISABLED
+        else:
+            button_next = BUTTON_NEXT
+        
+        components = (
+            Row(BUTTON_CLOSE , BUTTON_RESTART , button_next ,),
+        )
+        
+        return embed, components
+    
+    
     def can_back_or_reset(self):
+        """
+        Returns whether the character can go back, or resetting the game is available.
+        
+        Returns
+        -------
+        can_back_or_reset : `bool`
+        """
         if self.next_skill:
             return True
         
@@ -1564,7 +2639,16 @@ class GameState:
         
         return False
     
+    
     def back(self):
+        """
+        Goes back one step.
+        
+        Returns
+        -------
+        success : `bool`
+            Whether the character could go back one step.
+        """
         if self.next_skill:
             self.next_skill = False
             return True
@@ -1585,26 +2669,1305 @@ class GameState:
         
         return True
     
+    
     def reset(self):
+        """
+        Resets the game.
+        
+        Returns
+        -------
+        success : `bool`
+            Whether the map was reset.
+        """
         history = self.history
         if not history:
             return False
         
         history.clear()
         
-        self.position = self.source.start
-        self.map = self.source.map.copy()
+        self.position = self.stage.start
+        self.map = self.stage.map.copy()
         self.has_skill = True
         
         return True
 
 
+def can_play_selected_stage(user_state):
+    """
+    Returns whether the user can play the selected chapter.
+    
+    Returns
+    -------
+    user_state : ``UserState``
+        The respective user state.
+    
+    Returns
+    -------
+    can_play_selected_stage : `bool`
+        Whether the selected chapter can be played.
+    """
+    selected_stage_id = user_state.selected_stage_id
+    stage = STAGES_BY_ID[selected_stage_id]
+    stage_results = user_state.stage_results
+    
+    if stage.id in stage_results:
+        return True
+    
+    stage_index = stage.stage_index
+    difficulty_index = stage.difficulty_index
+    chapter_index = stage.chapter_index
+    
+    if stage_index:
+        stage_index -= 1
+    
+    else:
+        if difficulty_index:
+            difficulty_index -= 1
+        else:
+            if chapter_index:
+                if CHAPTERS[chapter_index-1].next_stage_unlock_id in stage_results:
+                    return True
+                else:
+                    return False
+            else:
+                return True
+    
+    if stage.chapter.difficulties[difficulty_index][stage_index].id in stage_results:
+        return True
+    
+    return False
+
+
+def get_selectable_stages(user_state):
+    """
+    Parameters
+    ----------
+    user_state : ``UserState``
+        The respective user state.
+    
+    Returns
+    -------
+    selectable_stages : `list` of (``StageSource``, `int`, `bool`)
+        The selectable stages in a list of tuples. Contains 3 elements: `stage` , `best`, `is_selected`.
+    """
+    selected_stage = STAGES_BY_ID[user_state.selected_stage_id]
+    
+    stages = []
+    
+    stage_source = selected_stage
+    for times in range(3):
+        stage_source = stage_source.after_stage_source
+        if stage_source is None:
+            break
+        
+        stages.append(stage_source)
+        continue
+    
+    stages.reverse()
+    stages.append(selected_stage)
+    
+    stage_source = selected_stage
+    for times in range(3):
+        stage_source = stage_source.before_stage_source
+        if stage_source is None:
+            break
+        
+        stages.append(stage_source)
+        continue
+    
+    selectable_stages = []
+    stage_results = user_state.stage_results
+    
+    for stage in stages:
+        if stage is selected_stage:
+            is_selected = True
+        else:
+            is_selected = False
+        
+        stage_id = stage.id
+        
+        try:
+            stage_result = stage_results[stage_id]
+        except KeyError:
+            user_best = -1
+        else:
+            user_best = stage_result.best
+        
+        selectable_stages.append((stage, user_best, is_selected))
+        
+        if user_best == -1:
+            break
+    
+    return selectable_stages
+
+
+def render_menu(user_state):
+    """
+    Renders the user state's menu's embeds and components.
+    
+    Parameters
+    ----------
+    user_state : ``UserState``
+        The respective user state.
+    
+    Returns
+    -------
+    embed : ``Embed``
+        The menu's embed.
+    components : `tuple` of ``Row`` of ``ComponentButton``
+        The components of the menu.
+    """
+    chapter = STAGES_BY_ID[user_state.selected_stage_id].chapter
+    embed = Embed(f'Chapter {chapter.id+1}').add_thumbnail(chapter.emoji.url)
+    
+    if can_play_selected_stage(user_state):
+        get_selectable = get_selectable_stages(user_state)
+        for stage, best, is_selected in get_selectable:
+            difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
+            field_name = f'{difficulty_name} level {stage.stage_index+1}'
+            if best == -1:
+                field_value = 'No results recorded yet!'
+            else:
+                rating = get_rating_for(stage, best)
+                field_value = f'rating {rating}; steps : {best}'
+            
+            if is_selected:
+                field_name = f'**{field_name}**'
+                field_value = f'**{field_value}**'
+                color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
+            
+            embed.add_field(field_name, field_value)
+        
+        embed.color = color
+        
+        if chapter.id+1 in CHAPTERS:
+            button_chapter_next = BUTTON_RIGHT_ENABLED
+        else:
+            button_chapter_next = BUTTON_RIGHT_DISABLED
+        
+        if chapter.id == 0:
+            button_chapter_before = BUTTON_LEFT_DISABLED
+        else:
+            button_chapter_before = BUTTON_LEFT_ENABLED
+        
+        if get_selectable[0][2]:
+            button_stage_after = BUTTON_UP_DISABLED
+            button_stage_after2 = BUTTON_UP2_DISABLED
+        else:
+            button_stage_after = BUTTON_UP_ENABLED
+            button_stage_after2 = BUTTON_UP2_ENABLED
+        
+        if get_selectable[-1][2]:
+            button_stage_before = BUTTON_DOWN_DISABLED
+            button_stage_before2 = BUTTON_DOWN2_DISABLED
+        else:
+            button_stage_before = BUTTON_DOWN_ENABLED
+            button_stage_before2 = BUTTON_DOWN2_ENABLED
+        
+        button_select = BUTTON_SELECT_ENABLED
+    else:
+        embed.color = COLOR_TUTORIAL
+        embed.description = (
+            f'**You must finish chapter {chapter.id} {CHAPTER_UNLOCK_DIFFICULTY_NAME} '
+            f'{CHAPTER_UNLOCK_STAGE} first.**'
+        )
+        
+        if chapter.id+1 in CHAPTERS:
+            button_chapter_next = BUTTON_RIGHT_ENABLED
+        else:
+            button_chapter_next = BUTTON_RIGHT_DISABLED
+        
+        button_chapter_before = BUTTON_LEFT_DISABLED
+        
+        button_stage_before = BUTTON_DOWN_DISABLED
+        button_stage_before2 = BUTTON_DOWN2_DISABLED
+        
+        button_stage_after = BUTTON_UP_DISABLED
+        button_stage_after2 = BUTTON_UP2_DISABLED
+        
+        button_select = BUTTON_SELECT_DISABLED
+    
+    components = (
+        Row(BUTTON_EMPTY          , button_stage_after     , button_stage_after2   , BUTTON_EMPTY        ,),
+        Row(button_chapter_before , button_select          , BUTTON_CLOSE          , button_chapter_next ,),
+        Row(BUTTON_EMPTY          , button_stage_before    , button_stage_before2  , BUTTON_EMPTY        ,),
+    )
+    
+    return embed, components
+
+
+async def process_identifier_up(dungeon_sweeper_runner):
+    """
+    Processes `up` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `up` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_MENU:
+        user_state = dungeon_sweeper_runner.user_state
+        
+        selected_stage_id = user_state.selected_stage_id
+        if selected_stage_id not in user_state.stage_results:
+            return False
+        
+        selected_stage = STAGES_BY_ID[selected_stage_id]
+        selected_stage = selected_stage.after_stage_source
+        if selected_stage is None:
+            return False
+        
+        user_state.selected_stage_id = selected_stage.id
+        return True
+    
+    return False
+
+
+async def process_identifier_up2(dungeon_sweeper_runner):
+    """
+    Processes `up2` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `up2` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_MENU:
+        user_state = dungeon_sweeper_runner.user_state
+        
+        selected_stage_id = user_state.selected_stage_id
+        stage_results = user_state.stage_results
+        if selected_stage_id not in stage_results:
+            return False
+        
+        selected_stage = STAGES_BY_ID[selected_stage_id]
+        
+        for x in range(STAGE_STEP_MULTI_STEP_BUTTON):
+            next_stage = selected_stage.after_stage_source
+            if next_stage is None:
+                if x:
+                    break
+                
+                return False
+            
+            selected_stage = next_stage
+            
+            if selected_stage.id not in stage_results:
+                break
+        
+        user_state.selected_stage_id = selected_stage.id
+        return True
+    
+    return False
+
+
+async def process_identifier_down(dungeon_sweeper_runner):
+    """
+    Processes `down` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `down` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_MENU:
+        user_state = dungeon_sweeper_runner.user_state
+        
+        selected_stage_id = user_state.selected_stage_id
+        selected_stage = STAGES_BY_ID[selected_stage_id]
+        
+        selected_stage = selected_stage.before_stage_source
+        if selected_stage is None:
+            return False
+        
+        user_state.selected_stage_id = selected_stage.id
+        return True
+    
+    return False
+
+
+async def process_identifier_down2(dungeon_sweeper_runner):
+    """
+    Processes `down2` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `down` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_MENU:
+        user_state = dungeon_sweeper_runner.user_state
+        
+        selected_stage_id = user_state.selected_stage_id
+        selected_stage = STAGES_BY_ID[selected_stage_id]
+        
+        for x in range(STAGE_STEP_MULTI_STEP_BUTTON):
+            next_stage = selected_stage.before_stage_source
+            if next_stage is None:
+                if x:
+                    break
+                
+                return False
+            
+            selected_stage = next_stage
+        
+        user_state.selected_stage_id = selected_stage.id
+        return True
+    
+    return False
+
+
+async def process_identifier_left(dungeon_sweeper_runner):
+    """
+    Processes `left` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `left` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_MENU:
+        user_state = dungeon_sweeper_runner.user_state
+        
+        stage_source = STAGES_BY_ID[user_state.selected_stage_id]
+        
+        try:
+            chapter = CHAPTERS[stage_source.chapter.id-1]
+        except KeyError:
+            return False
+        
+        index = stage_source.index
+        
+        chapter_stages_sorted = chapter.stages_sorted
+        chapter_stages_sorted_length = len(chapter_stages_sorted)
+        if index >= chapter_stages_sorted_length:
+            index = chapter_stages_sorted_length-1
+        
+        user_state.selected_stage_id = chapter_stages_sorted[index].id
+        return True
+    
+    
+    return False
+
+
+async def process_identifier_right(dungeon_sweeper_runner):
+    """
+    Processes `right` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `right` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_MENU:
+        user_state = dungeon_sweeper_runner.user_state
+        
+        stage_source = STAGES_BY_ID[user_state.selected_stage_id]
+        
+        try:
+            chapter = CHAPTERS[stage_source.chapter.id+1]
+        except KeyError:
+            return False
+        
+        index = stage_source.index
+        
+        chapter_stages_sorted = chapter.stages_sorted
+        chapter_stages_sorted_length = len(chapter_stages_sorted)
+        if index >= chapter_stages_sorted_length:
+            index = chapter_stages_sorted_length-1
+        
+        user_state.selected_stage_id = chapter_stages_sorted[index].id
+        return True
+    
+    return False
+
+
+async def process_identifier_select(dungeon_sweeper_runner):
+    """
+    Processes `select` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `select` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_MENU:
+        user_state = dungeon_sweeper_runner.user_state
+        if not can_play_selected_stage(user_state):
+            return False
+        
+        selected_stage_id = user_state.selected_stage_id
+        selected_stage = STAGES_BY_ID[selected_stage_id]
+        
+        try:
+            stage_result = user_state.stage_results[selected_stage_id]
+        except KeyError:
+            best = -1
+        else:
+            best = stage_result.best
+        
+        user_state.game_state = GameState(selected_stage, best)
+        dungeon_sweeper_runner._runner_state = RUNNER_STATE_PLAYING
+        return True
+    
+    return False
+
+
+async def process_identifier_west(dungeon_sweeper_runner):
+    """
+    Processes `west` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        user_state = dungeon_sweeper_runner.user_state
+        game_state = user_state.game_state
+        
+        success = game_state.move_west()
+        if success and game_state.done():
+            await user_state.set_best(game_state.stage.id, len(game_state.history))
+            dungeon_sweeper_runner._runner_state = RUNNER_STATE_END_SCREEN
+        
+        return success
+    
+    return False
+
+
+async def process_identifier_north(dungeon_sweeper_runner):
+    """
+    Processes `north` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        user_state = dungeon_sweeper_runner.user_state
+        game_state = user_state.game_state
+        
+        success = game_state.move_north()
+        if success and game_state.done():
+            await user_state.set_best(game_state.stage.id, len(game_state.history))
+            dungeon_sweeper_runner._runner_state = RUNNER_STATE_END_SCREEN
+        
+        return success
+    
+    return False
+
+
+async def process_identifier_south(dungeon_sweeper_runner):
+    """
+    Processes `south` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `south` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        user_state = dungeon_sweeper_runner.user_state
+        game_state = user_state.game_state
+        
+        success = game_state.move_south()
+        if success and game_state.done():
+            await user_state.set_best(game_state.stage.id, len(game_state.history))
+            dungeon_sweeper_runner._runner_state = RUNNER_STATE_END_SCREEN
+        
+        return success
+    
+    return False
+
+
+async def process_identifier_east(dungeon_sweeper_runner):
+    """
+    Processes `east` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `east` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        user_state = dungeon_sweeper_runner.user_state
+        game_state = user_state.game_state
+        
+        success = game_state.move_east()
+        if success and game_state.done():
+            await user_state.set_best(game_state.stage.id, len(game_state.history))
+            dungeon_sweeper_runner._runner_state = RUNNER_STATE_END_SCREEN
+        
+        return success
+    
+    return False
+
+
+async def process_identifier_back(dungeon_sweeper_runner):
+    """
+    Processes `back` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `back` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        game_state = dungeon_sweeper_runner.user_state.game_state
+        
+        return game_state.back()
+    
+    return False
+
+
+async def process_identifier_reset(dungeon_sweeper_runner):
+    """
+    Processes `reset` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `reset` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        game_state = dungeon_sweeper_runner.user_state.game_state
+        
+        return game_state.reset()
+    
+    return False
+
+
+async def process_identifier_cancel(dungeon_sweeper_runner):
+    """
+    Processes `cancel` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `cancel` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        dungeon_sweeper_runner._runner_state = RUNNER_STATE_MENU
+        user_state = dungeon_sweeper_runner.user_state
+        user_state.game_state = None
+        return True
+    
+    return False
+
+
+async def process_identifier_skill(dungeon_sweeper_runner):
+    """
+    Processes `skill` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `skill` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_PLAYING:
+        game_state = dungeon_sweeper_runner.user_state.game_state
+        
+        return game_state.skill_activate()
+    
+    return False
+
+
+async def process_identifier_close(dungeon_sweeper_runner):
+    """
+    Processes `close` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `close` button could be pressed.
+    """
+    runner_state = dungeon_sweeper_runner._runner_state
+    if runner_state == RUNNER_STATE_END_SCREEN:
+        dungeon_sweeper_runner.user_state.game_state = None
+        
+        dungeon_sweeper_runner._runner_state = RUNNER_STATE_MENU
+        return True
+    
+    if runner_state == RUNNER_STATE_MENU:
+        dungeon_sweeper_runner._runner_state = RUNNER_STATE_CLOSED
+        return True
+    
+    return False
+
+
+async def process_identifier_next(dungeon_sweeper_runner):
+    """
+    Processes `next` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `next` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_END_SCREEN:
+        user_state = dungeon_sweeper_runner.user_state
+        game_state = user_state.game_state
+        stage_source = game_state.stage
+        selected_stage = stage_source.after_stage_source
+        if selected_stage is None:
+            return False
+        
+        
+        dungeon_sweeper_runner._runner_state = RUNNER_STATE_MENU
+        
+        selected_stage_id = selected_stage.id
+        user_state.selected_stage_id = selected_stage_id
+        
+        try:
+            stage_result = user_state.stage_results[selected_stage_id]
+        except KeyError:
+            best = -1
+        else:
+            best = stage_result.best
+        
+        user_state.game_state = GameState(selected_stage, best)
+        return True
+    
+    return False
+
+
+async def process_identifier_restart(dungeon_sweeper_runner):
+    """
+    Processes `restart` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `restart` button could be pressed.
+    """
+    if dungeon_sweeper_runner._runner_state == RUNNER_STATE_END_SCREEN:
+        dungeon_sweeper_runner.user_state.game_state.restart()
+        dungeon_sweeper_runner._runner_state = RUNNER_STATE_PLAYING
+        return True
+    
+    return False
+
+
+
+PROCESS_CUSTOM_ID = {
+    IDENTIFIER_UP: process_identifier_up,
+    IDENTIFIER_DOWN: process_identifier_down,
+    IDENTIFIER_UP2: process_identifier_up2,
+    IDENTIFIER_DOWN2: process_identifier_down2,
+    IDENTIFIER_RIGHT: process_identifier_right,
+    IDENTIFIER_LEFT: process_identifier_left,
+    IDENTIFIER_SELECT: process_identifier_select,
+    IDENTIFIER_WEST: process_identifier_west,
+    IDENTIFIER_NORTH: process_identifier_north,
+    IDENTIFIER_SOUTH: process_identifier_south,
+    IDENTIFIER_EAST: process_identifier_east,
+    IDENTIFIER_BACK: process_identifier_back,
+    IDENTIFIER_RESET: process_identifier_reset,
+    IDENTIFIER_CANCEL: process_identifier_cancel,
+    IDENTIFIER_SKILL: process_identifier_skill,
+    IDENTIFIER_CLOSE: process_identifier_close,
+    IDENTIFIER_NEXT: process_identifier_next,
+    IDENTIFIER_RESTART: process_identifier_restart,
+}
+
+
+class DungeonSweeperRunner:
+    """
+    Dungeon sweeper game runner.
+    
+    Attributes
+    ----------
+    _canceller : None` or `Function`
+        Canceller set as `._canceller_function``, meanwhile the gui is not cancelled.
+    
+    _gui_state : `int`
+        The gui's state.
+        
+        Can be any of the following:
+        
+        +-------------------------------+-------+
+        | Respective name               | Value |
+        +===============================+=======+
+        | GUI_STATE_READY               | 1     |
+        +-------------------------------+-------+
+        | GUI_STATE_EDITING             | 2     |
+        +-------------------------------+-------+
+        | GUI_STATE_CANCELLING          | 3     |
+        +-------------------------------+-------+
+        | GUI_STATE_CANCELLED           | 4     |
+        +-------------------------------+-------+
+        | GUI_STATE_SWITCHING_CONTEXT   | 5     |
+        +-------------------------------+-------+
+    
+    _runner_state : `int`
+        The state of the runner.
+        
+        Can be any of the following:
+        
+        +-------------------------------+-------+
+        | Respective name               | Value |
+        +===============================+=======+
+        | RUNNER_STATE_MENU             | 1     |
+        +-------------------------------+-------+
+        | RUNNER_STATE_PLAYING          | 2     |
+        +-------------------------------+-------+
+        | RUNNER_STATE_END_SCREEN       | 3     |
+        +-------------------------------+-------+
+    
+    _timeouter : `None` or ``Timeouter``
+        Timeouts the gui if no action is performed within the expected time.
+    
+    client : ``Client``
+        The client, who executes the requests.
+    
+    message : ``Message``
+        The message edited by the runner.
+    
+    user : ``ClientUserBase``
+        The user, who requested the game.
+    
+    user_state : ``UserState``
+        The user's user state.
+    """
+    __slots__ = ('_canceller', '_gui_state', '_runner_state', '_timeouter', 'client', 'message', 'user', 'user_state')
+    
+    async def __new__(cls, client, event):
+        """
+        Creates a new dungeon sweeper runner.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        client : ``Client``
+            The source client.
+        event : ``InteractionEvent``
+            The received client.
+        """
+        if not event.channel.cached_permissions_for(client).can_manage_messages:
+            await client.interaction_response_message_create(event,
+                'I need manage messages permission in the channel to execute this command.',
+                show_for_invoking_user_only=True,
+            )
+            return
+        
+        user_id = event.user.id
+        try:
+            existing_game = DUNGEON_SWEEPER_GAMES[user_id]
+        except KeyError:
+            pass
+        else:
+            if (existing_game is None):
+                await client.interaction_response_message_create(event,
+                    'A game is already starting somewhere else.',
+                    show_for_invoking_user_only=True,
+                )
+            else:
+                await existing_game.renew(event)
+            
+            return
+        
+        DUNGEON_SWEEPER_GAMES[user_id] = None
+        user_state = None
+        try:
+            task_user_state_create = Task(UserState(user_id), KOKORO)
+            task_interaction_acknowledge = Task(client.interaction_response_message_create(event), KOKORO)
+            await WaitTillAll([task_user_state_create, task_interaction_acknowledge], KOKORO)
+            
+            user_state = task_user_state_create.result()
+            
+            try:
+                task_interaction_acknowledge.result()
+            except BaseException as err:
+                if (
+                            isinstance(err, ConnectionError) or
+                            (
+                                isinstance(err, DiscordException) and
+                                err.code == ERROR_CODES.unknown_interaction
+                            )
+                        ):
+                    await user_state.upload_game_state_on_init_failure()
+                    return # Happens, I guess
+                
+                else:
+                    raise
+            
+            game_state = user_state.game_state
+            if game_state is None:
+                embed, components = render_menu(user_state)
+                
+                runner_state = RUNNER_STATE_MENU
+            else:
+                if game_state.done():
+                    embed, components = user_state.game_state.render_end_screen()
+                    runner_state = RUNNER_STATE_END_SCREEN
+                else:
+                    embed, components = user_state.game_state.render_playing()
+                    runner_state = RUNNER_STATE_PLAYING
+            
+            user = event.user
+            embed.add_author(user.avatar_url_as('png', 32), user.full_name)
+            
+            message = await client.interaction_followup_message_create(event, embed=embed, components=components)
+        except:
+            if (user_state is not None):
+                await user_state.upload_game_state_on_init_failure()
+            
+            del DUNGEON_SWEEPER_GAMES[user_id]
+            raise
+        
+        self = object.__new__(cls)
+        self._canceller = cls._canceller_function
+        self.client = client
+        self.user = event.user
+        self.message = message
+        self.user_state = user_state
+        self._timeouter = Timeouter(self, GUI_TIMEOUT)
+        self._gui_state = GUI_STATE_READY
+        self._runner_state = runner_state
+        
+        DUNGEON_SWEEPER_GAMES[user_id] = self
+        client.slasher.add_component_interaction_waiter(message, self)
+        
+        return self
+    
+    async def renew(self, event):
+        """
+        Renews the interaction gui creating a new message.
+        
+        This method is a generator.
+        
+        Parameters
+        ----------
+        event : ``InteractionEvent``
+            The received interaction event.
+        """
+        if self._gui_state in (GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CONTEXT):
+            return
+        
+        user_state = self.user_state
+        runner_state = self._runner_state
+        if runner_state == RUNNER_STATE_MENU:
+            embed, components = render_menu(user_state)
+        elif runner_state == RUNNER_STATE_PLAYING:
+            embed, components = user_state.game_state.render_playing()
+        elif runner_state == RUNNER_STATE_END_SCREEN:
+            embed, components = user_state.game_state.render_end_screen()
+        else:
+            # Hacker trying to hack Huyane
+            return
+        
+        self._gui_state = GUI_STATE_SWITCHING_CONTEXT
+        
+        client = self.client
+        try:
+            await client.interaction_response_message_create(event)
+            message = await client.interaction_followup_message_create(event, embed=embed, components=components)
+        
+        except BaseException as err:
+            
+            if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
+                self._gui_state = GUI_STATE_READY
+            
+            if (
+                        isinstance(err, ConnectionError) or
+                        (
+                            isinstance(err, DiscordException) and
+                            err.code == ERROR_CODES.unknown_interaction
+                        )
+                    ):
+                return
+            
+            raise
+        
+        
+        try:
+            await client.message_edit(self.message, components=None)
+        except BaseException as err:
+            if not (
+                        isinstance(err, ConnectionError) or
+                        (
+                            isinstance(err, DiscordException) and
+                            err.code in (
+                                ERROR_CODES.unknown_message, # message deleted
+                                ERROR_CODES.unknown_channel, # channel deleted
+                                ERROR_CODES.missing_access, # client removed
+                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                            )
+                        )
+                    ):
+                await client.events.error(client, f'{self!r}.renew', err)
+        
+        client.slasher.remove_component_interaction_waiter(self.message, self)
+        client.slasher.add_component_interaction_waiter(message, self)
+        
+        self.message = message
+        
+        if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
+            self._gui_state = GUI_STATE_READY
+        
+        timeouter = self._timeouter
+        if (timeouter is not None):
+            timeouter.set_timeout(GUI_TIMEOUT)
+    
+    async def __call__(self, event):
+        """
+        Calls the dungeon sweeper runner, processing a component event.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        client : ``Client``
+            The source client.
+        event : ``InteractionEvent``
+            The received client.
+        """
+        client = self.client
+        if event.user is not self.user:
+            await client.interaction_component_acknowledge(event)
+            return
+        
+        gui_state = self._gui_state
+        if gui_state != GUI_STATE_READY:
+            await client.interaction_component_acknowledge(event)
+            return
+        
+        custom_id = event.interaction.custom_id
+        
+        try:
+            custom_id_processor = PROCESS_CUSTOM_ID[custom_id]
+        except KeyError:
+            return
+        
+        user_state = self.user_state
+        if not await custom_id_processor(self):
+            return
+        
+        runner_state = self._runner_state
+        if runner_state == RUNNER_STATE_MENU:
+            embed, components = render_menu(user_state)
+        elif runner_state == RUNNER_STATE_PLAYING:
+            embed, components = user_state.game_state.render_playing()
+        elif runner_state == RUNNER_STATE_END_SCREEN:
+            embed, components = user_state.game_state.render_end_screen()
+        elif runner_state == RUNNER_STATE_CLOSED:
+            self.cancel(CancelledError())
+            return
+        else:
+            # Hacker trying to hack Huyane
+            return
+        
+        user = self.user
+        embed.add_author(user.avatar_url_as('png', 32), user.full_name)
+        
+        self._gui_state = GUI_STATE_EDITING
+        try:
+            await client.interaction_component_message_edit(event, embed=embed, components=components)
+        except BaseException as err:
+            self.cancel(err)
+            raise
+        
+        if self._gui_state == GUI_STATE_EDITING:
+            self._gui_state = GUI_STATE_READY
+        
+        timeouter = self._timeouter
+        if (timeouter is not None):
+            timeouter.set_timeout(GUI_TIMEOUT)
+        
+    def cancel(self, exception=None):
+        """
+        Cancels the dungeon sweeper gui with the given exception if applicable.
+        
+        Parameters
+        ----------
+        exception : `None` or ``BaseException`` instance, Optional
+            Exception to cancel the pagination with. Defaults to `None`
+        
+        Returns
+        -------
+        canceller_task : `None` or ``Task``
+        """
+        if self._gui_state in (GUI_STATE_READY, GUI_STATE_EDITING, GUI_STATE_CANCELLING):
+            self._gui_state = GUI_STATE_CANCELLED
+        
+        canceller = self._canceller
+        if canceller is None:
+            return
+        
+        self._canceller = None
+        
+        timeouter = self._timeouter
+        if (timeouter is not None):
+            timeouter.cancel()
+        
+        return Task(canceller(self, exception), KOKORO)
+    
+    
+    async def _canceller_function(self, exception):
+        """
+        Cancels the gui state, saving the current game if needed.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        exception : `None`, ``BaseException``
+        """
+        await self.user_state.upload()
+        
+        user_id = self.user.id
+        if DUNGEON_SWEEPER_GAMES.get(user_id, None) is self:
+            del DUNGEON_SWEEPER_GAMES[user_id]
+        
+        
+        client = self.client
+        message = self.message
+        
+        client.slasher.remove_component_interaction_waiter(message, self)
+        
+        
+        if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
+            # the message is not our, we should not do anything with it.
+            return
+        
+        self._gui_state = GUI_STATE_CANCELLED
+        
+        if not await self._handle_close_exception(exception):
+            await client.events.error(client, f'{self!r}._canceller_function', exception)
+    
+    
+    async def _handle_close_exception(self, exception):
+        """
+        Handles close exception if any.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        exception : `None` or `BaseException`
+            The close exception to handle.
+        
+        Returns
+        -------
+        exception_handled : `bool`
+            Whether the exception was handled.
+        """
+        if exception is None:
+            return True
+        
+        client = self.client
+        message = self.message
+        
+        if isinstance(exception, CancelledError):
+            try:
+                await client.message_delete(message)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    # no internet
+                    return True
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_channel, # channel deleted
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.missing_access, # client removed
+                                ):
+                        return True
+                
+                await client.events.error(client, f'{self!r}._handle_close_exception', err)
+            
+            return True
+        
+        if isinstance(exception, TimeoutError):
+            try:
+                await client.message_edit(message, embed=message.embed, components=None)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    # no internet
+                    return True
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.unknown_channel, # channel deleted
+                            ERROR_CODES.missing_access, # client removed
+                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                                ):
+                        return True
+                
+                await client.events.error(client, f'{self!r}._handle_close_exception', err)
+            
+            return True
+        
+        if isinstance(exception, PermissionError):
+            return True
+        
+        return False
+    
+    def __repr__(self):
+        """Returns the dungeon sweep runner's representation."""
+        repr_parts = [
+            '<', self.__class__.__name__,
+            ' client=', repr(self.client),
+            ', at channel=', repr(self.message.channnel),
+            ', gui_state='
+        ]
+        
+        gui_state = self._gui_state
+        
+        repr_parts.append(repr(gui_state))
+        repr_parts.append(' (')
+        gui_state_name = GUI_STATE_VALUE_TO_NAME[gui_state]
+        repr_parts.append(gui_state_name)
+        repr_parts.append('), ')
+        
+        runner_state = self._runner_state
+        repr_parts.append(repr(runner_state))
+        repr_parts.append(' (')
+        runner_state_name = RUNNER_STATE_VALUE_TO_NAME[runner_state]
+        repr_parts.append(runner_state_name)
+        repr_parts.append('), ')
+        
+        repr_parts.append('>')
+        return ''.join(repr_parts)
+
+
+
 SLASH_CLIENT : Client
 
 DUNGEON_SWEEPER = SLASH_CLIENT.interactions(None,
-    name = 'ds',
+    name = 'ds-v2',
     description = 'Touhou themed puzzle game.',
-    is_global = True,
+    guild = GUILD__NEKO_DUNGEON,
 )
 
 
@@ -1620,236 +3983,70 @@ async def rules(client, event):
 @DUNGEON_SWEEPER.interactions(is_default=True)
 async def play(client, event):
     """Starts the game"""
+    if not client.is_owner(event.user):
+        abort('Test command, owner only.')
+    
     permissions = event.channel.cached_permissions_for(client)
     if not (permissions.can_send_messages and permissions.can_add_reactions and permissions.can_use_external_emojis \
             and permissions.can_manage_messages):
         abort('I have not all permissions to start a game at this channel.')
         return
     
-    game = DS_GAMES.get(event.user.id, None)
+    game = DUNGEON_SWEEPER_GAMES.get(event.user.id, None)
     if game is None:
-        yield DungeonSweeperRunner(client, event)
+        await DungeonSweeperRunner(client, event)
     else:
-        yield game.renew(event)
+        await game.renew(event)
 
 
-def can_play_selected_chapter(user_state):
-    selected_chapter_identifier = user_state.selected_chapter
-    if selected_chapter_identifier == 0:
-        can_play_chapter = True
+def v1_position_to_v2(position):
+    if position < 34:
+        position += 1
+    elif position < 67:
+        position -= 1
     else:
-        user_chapters = user_state.results
-        if selected_chapter_identifier in user_chapters:
-            can_play_chapter = True
-        else:
-            before_chapter_identifier = selected_chapter_identifier-1
-            try:
-                before_chapter = before_chapter_identifier[before_chapter_identifier]
-            except KeyError:
-                can_play_chapter = False
-            else:
-                try:
-                    difficulty = before_chapter[CHAPTER_UNLOCK_DIFFICULTY]
-                except KeyError:
-                    can_play_chapter = False
-                else:
-                    if CHAPTER_UNLOCK_STAGE in difficulty:
-                        can_play_chapter = True
-                    else:
-                        can_play_chapter = False
+        position -= 3
     
-    return can_play_chapter
+    return position
 
-
-def get_selectable_stages(user_state):
-    stages = []
-    user_chapters = user_state.results.get(user_state.selected_chapter, None)
-    
-    for difficulty_index, difficulty in enumerate(CHAPTERS[user_state.selected_chapter].difficulties):
-        if user_chapters is None:
-            user_difficulty = None
-        else:
-            user_difficulty = user_state.results.get(difficulty_index, None)
+async def transfer_results_task():
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select([ds_model.user_id, ds_model.position, ds_model.data])
+        )
         
-        if user_difficulty is None:
-            stages.append((difficulty[0], -1))
-            break
-        
-        for stage_index, stage in enumerate(difficulty):
-            user_best = user_difficulty.get(stage_index, None)
-            if user_best is None:
-                stages.append((stage, -1))
-                break
+        results = await response.fetchall()
+        for result in results:
+            user_id, position, data = result
+            selected_stage_id = v1_position_to_v2(position)
             
-            stages.append((stage, user_best))
-            continue
-        else:
-            continue
-        
-        break
-    
-    selected_stage = user_state.selected_stage
-    selected_difficulty = user_state.selected_difficulty
-    
-    for index, (stage, best) in enumerate(stages):
-        if stage.difficulty_index == selected_difficulty and stage.index == selected_stage:
-            selected_index = index
-            break
-    else:
-        selected_index = 0
-    
-    stages_selected = []
-    for (stage, best) in stages[max(selected_index-3, 0):selected_index+4]:
-        if stage.difficulty_index == selected_difficulty and stage.index == selected_stage:
-            is_selected = True
-        else:
-            is_selected = False
-        
-        stages_selected.append((stage, best, is_selected))
-    
-    return stages_selected
+            response = await connector.execute(
+                DS_V2_TABLE.insert(). \
+                values(
+                    user_id           = user_id,
+                    game_state        = None,
+                    selected_stage_id = selected_stage_id,
 
-
-def render_menu(user_state):
-    chapter = CHAPTERS[user_state.selected_chapter]
-    embed = Embed(f'Chapter {chapter.identifier+1}').add_thumbnail(chapter.emoji.url)
-    
-    if can_play_selected_chapter(user_state):
-        selected_stages = get_selectable_stages(user_state)
-        for stage, best, is_selected in selected_stages:
-            difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
-            field_name = f'{difficulty_name} level {stage.level+1}'
-            if best == -1:
-                field_value = 'No results recorded yet!'
-            else:
-                rating = get_rating_for(stage, best)
-                field_value = f'rating {rating}; steps : {best}'
-            
-            if is_selected:
-                field_name = f'**{field_name}**'
-                field_value = f'**{field_value}**'
-                color = DIFFICULTY_COLORS.get(stage.difficulty_index, DS_COLOR)
-            
-            embed.add_field(field_name, field_value)
-        
-        embed.color = color
-        
-        if chapter.identifier+1 in CHAPTERS:
-            button_chapter_next = BUTTON_RIGHT_ENABLED
-        else:
-            button_chapter_next = BUTTON_RIGHT_DISABLED
-        
-        if chapter.identifier == 0:
-            button_chapter_before = BUTTON_LEFT_DISABLED
-        else:
-            button_chapter_before = BUTTON_LEFT_ENABLED
-        
-        if selected_stages[0][2]:
-            button_stage_before = BUTTON_DOWN_DISABLED
-            button_stage_before2 = BUTTON_DOWN2_DISABLED
-        else:
-            button_stage_before = BUTTON_DOWN_ENABLED
-            button_stage_before2 = BUTTON_DOWN2_ENABLED
-        
-        if selected_stages[-1][2]:
-            button_stage_after = BUTTON_UP_DISABLED
-            button_stage_after2 = BUTTON_UP2_DISABLED
-        else:
-            button_stage_after = BUTTON_UP_ENABLED
-            button_stage_after2 = BUTTON_UP2_ENABLED
-        
-    else:
-        chapter = CHAPTERS[user_state.selected_chapter]
-        embed.color = COLOR_TUTORIAL
-        embed.description = (
-            f'**You must finish chapter {user_state.selected_chapter} {CHAPTER_UNLOCK_DIFFICULTY_NAME} '
-            f'{CHAPTER_UNLOCK_STAGE} first.**',
+                ). \
+                returning(ds_v2_model.id)
             )
-        
-        if chapter.identifier+1 in CHAPTERS:
-            button_chapter_next = BUTTON_RIGHT_ENABLED
-        else:
-            button_chapter_next = BUTTON_RIGHT_DISABLED
-        
-        button_chapter_before = BUTTON_LEFT_DISABLED
-        
-        button_stage_before = BUTTON_DOWN_DISABLED
-        button_stage_before2 = BUTTON_DOWN2_DISABLED
-        
-        button_stage_after = BUTTON_UP_DISABLED
-        button_stage_after2 = BUTTON_UP2_DISABLED
-
-    components = (
-        Row(BUTTON_EMPTY          , button_stage_after     , button_stage_after2   , BUTTON_EMPTY        ,),
-        Row(button_chapter_before , BUTTON_SELECT_DISABLED , BUTTON_CANCEL         , button_chapter_next ,),
-        Row(BUTTON_EMPTY          , button_stage_before    , button_stage_before2  , BUTTON_EMPTY        ,),
-    )
-    
-    return embed, components
-
-
-
-class DungeonSweeperRunner:
-    __slots__ = ('client', 'user', 'message', 'user_state')
-    
-    async def __new__(cls, client, event):
-        if not event.channel.cached_permissions_for(client).can_manage_messages:
-            await client.interaction_response_message_create(event, 'I need manage messages permission in the channel '
-                'to execute this command.', show_for_invoking_user_only=True)
-            return
-        
-        user_id = event.user.id
-        try:
-            existing_game = DS_GAMES[user_id]
-        except KeyError:
-            pass
-        else:
-            if (existing_game is None):
-                await client.interaction_response_message_create(event, 'A game is already starting somewhere else.',
-                    show_for_invoking_user_only=True)
-            else:
-                await existing_game.renew(event)
-            return
-        
-        DS_GAMES[user_id] = None
-        try:
-            async with DB_ENGINE.connect() as connector:
-                response = await connector.execute(
-                    select([ds_v2_model.data]). \
-                    where(ds_v2_model.user_id==user_id)
-                )
-                
-                results = await response.read()
-                if results:
-                    raw_data = results[0][0]
-                    
-                    user_state = UserState.from_raw_data(raw_data)
-                else:
-                    user_state = UserState()
+            result = await response.fetchone()
             
-            game_state = user_state.game_state
-            if game_state is None:
-                embed, components = render_menu(user_state)
-            else:
-                embed, components = game_state.render(user_state)
+            entry_id = result[0]
             
-            user = event.user
-            embed.add_author(user.avatar_url_as('png', 32), user.full_name)
-            
-            await client.interaction_response_message_create(event, embed=embed, components=components)
-            message = await event.wait_for_response_message(timeout=10.0)
-        except:
-            del DS_GAMES[user_id]
-            raise
-        
-        self = object.__new__(cls)
-        self.client = client
-        self.user = event.user
-        self.message = message
-        self.user_state = user_state
-        DS_GAMES[user_id] = self
-        client.slasher.add_component_interaction_waiter(message, self)
-        return self
-    
-    async def __call__(self, event):
-    
+            for position in range(0, 400, 1):
+                steps = int.from_bytes(data[position<<1:(position+1)<<1], byteorder='big')
+                if steps:
+                    stage_id = v1_position_to_v2(position)
+                    await connector.execute(
+                        DS_V2_RESULT_TABLE.insert(). \
+                        values(
+                            ds_v2_entry_id = entry_id,
+                            stage_id = stage_id,
+                            best = steps,
+                        )
+                    )
+
+
+def transfer_results_():
+    KOKORO.run(transfer_results_task())

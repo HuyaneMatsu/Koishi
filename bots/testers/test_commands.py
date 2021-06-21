@@ -557,7 +557,7 @@ async def test_invite_converter(client, message, value:'invite'):
     await client.message_create(message.channel, repr(value))
 
 @TEST_COMMANDS(separator='|')
-async def test_command_argument_single(client, message, *words):
+async def test_command_parameter_single(client, message, *words):
     """
     Separates words by `|' character.
     """
@@ -568,7 +568,7 @@ async def test_command_argument_single(client, message, *words):
     await client.message_create(message.channel, result)
 
 @TEST_COMMANDS(separator=('[', ']'))
-async def test_command_argument_area(client, message, *words):
+async def test_command_parameter_area(client, message, *words):
     """
     Separates words by space, but between `[]` count as one.
     """
@@ -579,7 +579,7 @@ async def test_command_argument_area(client, message, *words):
     await client.message_create(message.channel, result)
 
 @TEST_COMMANDS(separator=('*', '*'))
-async def test_command_argument_inter(client, message, *words):
+async def test_command_parameter_inter(client, message, *words):
     """
     Separates words by space, but the ones between `*` character are one.
     """

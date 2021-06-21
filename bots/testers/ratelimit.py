@@ -13,7 +13,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
     ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, StagePrivacyLevel, ChannelStage, \
-    ERROR_CODES, ComponentType
+    ERROR_CODES, ComponentType, Sticker, StickerPack, Formdata
 
 from hata.backend.utils import change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -2142,6 +2142,7 @@ async def thread_leave(client, channel):
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
         )
 
+
 async def thread_get_self(client, channel):
     channel_id = channel.id
     
@@ -2158,6 +2159,7 @@ async def thread_user_get(client, channel, user):
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
         )
 
+
 async def thread_user_add(client, channel, user):
     channel_id = channel.id
     user_id = user.id
@@ -2165,6 +2167,7 @@ async def thread_user_add(client, channel, user):
     await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
         )
+
 
 async def thread_user_delete(client, channel, user):
     channel_id = channel.id
@@ -2174,6 +2177,7 @@ async def thread_user_delete(client, channel, user):
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
         )
 
+
 async def thread_settings_edit(client, channel, data):
     channel_id = channel.id
     
@@ -2182,12 +2186,14 @@ async def thread_settings_edit(client, channel, data):
         data,
         )
 
+
 async def thread_get_chunk_archived_public(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/public'
     )
+
 
 async def thread_get_chunk_self_archived(client, channel):
     channel_id = channel.id
@@ -2196,10 +2202,67 @@ async def thread_get_chunk_self_archived(client, channel):
         f'{API_ENDPOINT}/channels/{channel_id}/users/@me/threads/archived/private'
     )
 
+
 async def servers_get(client):
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/servers'
-        )
+    )
+
+
+async def sticker_guild_get_all(client, guild):
+    guild_id = guild.id
+    sticker_datas = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers'
+    )
+    
+    return [Sticker(sticker_data) for sticker_data in sticker_datas]
+
+
+async def sticker_pack_get_all(client):
+    data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/sticker-packs'
+    )
+    
+    sticker_pack_datas = data['sticker_packs']
+    
+    return [StickerPack(sticker_pack_data) for sticker_pack_data in sticker_pack_datas]
+
+
+async def sticker_guild_get(client, guild, sticker_id):
+    guild_id = guild.id
+    
+    sticker_data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}'
+    )
+    
+    return Sticker(sticker_data)
+
+async def sticker_guild_create(client, guild, name, description, file, tags):
+    form = Formdata()
+    form.add_field('name', name)
+    form.add_field('description', description)
+    form.add_field('tags', ', '.join(tags))
+    form.add_field('file', file, filename='file.png', content_type='application/octet-stream')
+    
+    guild_id = guild.id
+    
+    sticker_data = await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers',
+        form,
+    )
+    
+    return Sticker(sticker_data)
+
+
+async def sticker_guild_delete(client, guild, sticker_id):
+    guild_id = guild.id
+    
+    sticker_data = await bypass_request(client, METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}'
+    )
+    
+    return Sticker(sticker_data)
+
 
 
 @RATE_LIMIT_COMMANDS
@@ -2602,7 +2665,7 @@ async def rate_limit_test0013(client,message):
         
         result=['```\nday | own | other\n']
         for day,(message_own, message_other) in enumerate(messages):
-            result.append(f'{day:>3} | {("YES", " NO")[message_own is None]} | {("YES"," NO")[message_other is None]}\n')
+            result.append(f'{day:>3} | {("YES", "NO")[message_own is None]} | {("YES", "NO")[message_other is None]}\n')
         result.append('```\nShould we start?')
         embed=Embed('Found messages',''.join(result))
         
@@ -5309,3 +5372,87 @@ async def rate_limit_test0142(client, message):
         
         avatar = await client.download_attachment(attachment)
         await client_edit(client, avatar=avatar)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0143(client, message):
+    """
+    Requests the guild's stickers.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0143') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await sticker_guild_get_all(client, guild)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0144(client, message):
+    """
+    Requests the sticker packs.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0144') as RLT:
+        await sticker_pack_get_all(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0145(client, message):
+    """
+    Requests a sticker. Defaults to `0`.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0145') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await sticker_guild_get(client, guild, 0)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0146(client, message, emoji: 'emoji' = None):
+    """
+    Creates a sticker from an emoji.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0146') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if emoji is None:
+            await RLT.send('Please give an emoji to mimic.')
+        
+        async with client.http.get(emoji.url) as response:
+            file = await response.read()
+        
+        name = emoji.name
+        description = name
+        tags = name
+        
+        await sticker_guild_create(client, guild, name, description, file, tags)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0147(client, message):
+    """
+    Deletes a sticker.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0147') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await sticker_guild_delete(client, guild, 0)
+
+

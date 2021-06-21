@@ -17,7 +17,7 @@ if MARISA_MODE:
         extensions = ('command_utils', 'slash', 'commands_v2'),
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,
-        category_name_rule = category_name_rule
+        category_name_rule = category_name_rule,
     )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)

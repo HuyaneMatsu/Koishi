@@ -227,11 +227,13 @@ async def daily(client, event,
                 total_love = source_result.total_love+received
                 
                 daily_streak += 1
-                await connector.execute(CURRENCY_TABLE.update().values(
-                    total_love  = total_love,
-                    daily_next  = now+DAILY_INTERVAL,
-                    daily_streak= daily_streak,
-                        ).where(currency_model.user_id==source_user.id))
+                await connector.execute(
+                    CURRENCY_TABLE.update().values(
+                        total_love  = total_love,
+                        daily_next  = now+DAILY_INTERVAL,
+                        daily_streak= daily_streak,
+                    ).where(currency_model.id==source_result.id)
+                )
                 
                 return Embed(
                     'Here, some love for you~\nCome back tomorrow !',
@@ -241,20 +243,25 @@ async def daily(client, event,
                 )
             
             received = calculate_daily_for(source_user, 0)
-            await connector.execute(CURRENCY_TABLE.insert().values(
-                user_id         = source_user.id,
-                total_love      = received,
-                daily_next      = now+DAILY_INTERVAL,
-                daily_streak    = 1,
-                total_allocated = 0,
-            ))
+            await connector.execute(
+                CURRENCY_TABLE.insert().values(
+                    user_id         = source_user.id,
+                    total_love      = received,
+                    daily_next      = now+DAILY_INTERVAL,
+                    daily_streak    = 1,
+                    total_allocated = 0,
+                )
+            )
             
             return Embed(
                 'Here, some love for you~\nCome back tomorrow !',
                 f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {received} {EMOJI__HEART_CURRENCY:e}',
                 color = GAMBLING_COLOR)
         
-        response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,])))
+        response = await connector.execute(
+            CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,]))
+        )
+        
         results = await response.fetchall()
         if len(results) == 0:
             source_result = None
@@ -279,15 +286,17 @@ async def daily(client, event,
             daily_streak = 0
             streak_text = 'I am happy you joined the sect too.'
             
-            await connector.execute(CURRENCY_TABLE.insert().values(
-                user_id         = source_user.id,
-                total_love      = 0,
-                daily_next      = now+DAILY_INTERVAL,
-                daily_streak    = 1,
-                total_allocated = 0,
-                    ))
+            await connector.execute(
+                CURRENCY_TABLE.insert().values(
+                    user_id         = source_user.id,
+                    total_love      = 0,
+                    daily_next      = now+DAILY_INTERVAL,
+                    daily_streak    = 1,
+                    total_allocated = 0,
+                )
+            )
         else:
-            daily_next=source_result.daily_next
+            daily_next = source_result.daily_next
             if daily_next > now:
                 return Embed(
                     'You already claimed your daily love for today~',
@@ -307,21 +316,25 @@ async def daily(client, event,
             else:
                 streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
             
-            await connector.execute(CURRENCY_TABLE.update().values(
-                daily_next  = now+DAILY_INTERVAL,
-                daily_streak= daily_streak+1,
-                    ).where(currency_model.user_id==source_user.id))
+            await connector.execute(
+                CURRENCY_TABLE.update().values(
+                    daily_next  = now+DAILY_INTERVAL,
+                    daily_streak= daily_streak+1,
+                    ).where(currency_model.id==source_result.id)
+            )
         
         received = calculate_daily_for(source_user, daily_streak)
         
         if target_result is None:
-            await connector.execute(CURRENCY_TABLE.insert().values(
-                user_id         = target_user.id,
-                total_love      = received,
-                daily_next      = now,
-                daily_streak    = 0,
-                total_allocated = 0,
-            ))
+            await connector.execute(
+                    CURRENCY_TABLE.insert().values(
+                    user_id         = target_user.id,
+                    total_love      = received,
+                    daily_next      = now,
+                    daily_streak    = 0,
+                    total_allocated = 0,
+                )
+            )
             
             total_love = received
         else:
@@ -329,12 +342,14 @@ async def daily(client, event,
             
             await connector.execute(CURRENCY_TABLE.update().values(
                 total_love  = total_love,
-                    ).where(currency_model.user_id==target_user.id))
+                    ).where(currency_model.id==target_result.id))
     
     return Embed(
         f'Awww, you claimed your daily love for {target_user:f}, how sweet~',
-        f'You gifted {received} {EMOJI__HEART_CURRENCY:e} and they have {total_love} {EMOJI__HEART_CURRENCY:e}\n{streak_text}',
-        GAMBLING_COLOR)
+        f'You gifted {received} {EMOJI__HEART_CURRENCY:e} and they have {total_love} {EMOJI__HEART_CURRENCY:e}\n'
+        f'{streak_text}',
+        color = GAMBLING_COLOR,
+    )
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -371,9 +386,9 @@ async def hearts(client, event,
         
         if total_allocated and (target_user.id not in IN_GAME_IDS):
             await connector.execute(CURRENCY_TABLE. \
-                update(currency_model.user_id == target_user.id). \
+                update(currency_model.id == result.id). \
                 values(
-                    total_allocated = 0
+                    total_allocated = 0,
                 )
             )
     
@@ -621,16 +636,16 @@ class HeartEventGUI:
         
         try:
             response = await connector.execute(
-                select([currency_model.total_love, currency_model.total_allocated]). \
+                select([currency_model.id, currency_model.total_love]). \
                 where(currency_model.user_id==user.id)
             )
             
             results = await response.fetchall()
             if results:
-                total_love = results[0][0]
+                entry_id, total_love = results[0]
                 to_execute = CURRENCY_TABLE. \
-                    update(currency_model.user_id==user_id). \
-                    values(total_love=total_love+self.amount)
+                    update(currency_model.id==entry_id). \
+                    values(total_love=currency_model.total_love+self.amount)
             
             else:
                 to_execute = CURRENCY_TABLE.insert().values(
@@ -902,6 +917,7 @@ class DailyEventGUI:
         
         response = await connector.execute(
             select([
+                currency_model.id,
                 currency_model.daily_streak,
                 currency_model.daily_next
             ]). \
@@ -910,14 +926,14 @@ class DailyEventGUI:
         
         results = await response.fetchall()
         if results:
-            daily_streak, daily_next = results[0]
+            entry_id, daily_streak, daily_next = results[0]
             now = datetime.utcnow()
             
             daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
             daily_streak = daily_streak+self.amount
             
             to_execute = CURRENCY_TABLE. \
-                update(currency_model.user_id==user_id). \
+                update(currency_model.id==entry_id). \
                 values(
                     daily_streak= daily_streak,
                     daily_next  = daily_next,
