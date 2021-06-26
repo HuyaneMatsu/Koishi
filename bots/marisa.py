@@ -16,12 +16,12 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, \
     ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
-    ButtonStyle, Emoji
+    ButtonStyle, Emoji, Role
 from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, wait_for_component_interaction, \
     Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
-from hata.discord.http import LIB_USER_AGENT
+from hata.discord.http import LIBRARY_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
 from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
@@ -862,3 +862,40 @@ async def add_emoji(client, event,
         await client.emoji_create(event.guild, name, emoji_data)
     
     yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)
+
+
+
+ROLE_OWNER = Role.precreate(403581319139033090)
+
+ROLE_NSFW_ACCESS = Role.precreate(828576094776590377)
+ROLE_ANNOUNCEMENTS = Role.precreate(538397994421190657)
+
+BUTTON_NSFW_ACCESS = Button('Nsfw access', custom_id=f'role_claimer.{ROLE_NSFW_ACCESS.id}')
+BUTTON_ANNOUNCEMENTS = Button('Announcements', custom_id=f'role_claimer.{ROLE_ANNOUNCEMENTS.id}')
+
+ROLE_CLAIMER_COMPONENTS = Row(BUTTON_NSFW_ACCESS, BUTTON_ANNOUNCEMENTS)
+
+ROLE_CLAIMER_ROLES = {
+    ROLE_NSFW_ACCESS.id: ROLE_NSFW_ACCESS,
+    ROLE_ANNOUNCEMENTS.id: ROLE_ANNOUNCEMENTS,
+}
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE_OWNER, True)
+async def role_claimer(event):
+    """Role claimer message. (Owner only)"""
+    
+    # Double check.
+    if not event.user.has_role(ROLE_OWNER):
+        abort('Owner only')
+    
+    return InteractionResponse('Claim role by clicking on it', components=ROLE_CLAIMER_COMPONENTS)
+
+
+@Marisa.interactions(custom_id=re.compile('role_claimer\.(\d+)'))
+async def give_role(client, event, role_id):
+    role_id = int(role_id)
+    
+    role = ROLE_CLAIMER_ROLES.get(role_id, None)
+    if (role is not None) and (not event.user.has_role(role)):
+        await client.user_role_add(event.user, role)

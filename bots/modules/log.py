@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ActivityTypes
+from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTIVITY_TYPES
 from hata.discord.utils import DISCORD_EPOCH_START
 
 from bot_utils.shared import CHANNEL__NEKO_DUNGEON_LOG, GUILD__NEKO_DUNGEON, CATEGORY__NEKO_DUNGEON__BIG_BRO
@@ -468,7 +468,7 @@ def render_activity(render_to, activity):
     render_to.append(')')
     render_to.append('\n')
     
-    if activity_type != ActivityTypes.custom:
+    if activity_type != ACTIVITY_TYPES.custom:
         timestamps = activity.timestamps
         if (timestamps is not None):
             timestamp_start = activity.start

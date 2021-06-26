@@ -2,7 +2,7 @@ import os
 
 import config
 
-from hata import Client, ActivityRich, ActivityTypes
+from hata import Client, ActivityRich, ACTIVITY_TYPES
 from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.shared import PATH__KOISHI
 
@@ -54,7 +54,7 @@ else:
     
     Flan = Client(config.FLAN_TOKEN,
         client_id = config.FLAN_ID,
-        activity = ActivityRich('Chesuto development', type_=ActivityTypes.watching),
+        activity = ActivityRich('Chesuto development', type_=ACTIVITY_TYPES.watching),
         status = 'idle',
         application_id = config.FLAN_ID,
         extensions = ('command_utils', 'commands_v2',),

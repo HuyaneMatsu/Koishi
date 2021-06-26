@@ -94,7 +94,7 @@ def add_activity(text, activity):
     
     activity_type = activity.type
     text.append(f'**>>** type : {("game", "stream", "spotify", "watching", "custom", "competing")[activity_type]} ({activity_type})\n')
-    if activity_type == ActivityTypes.custom:
+    if activity_type == ACTIVITY_TYPES.custom:
         return
     
     timestamps = activity.timestamps

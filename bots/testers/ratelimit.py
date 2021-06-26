@@ -23,14 +23,15 @@ from hata.backend.http import RequestCM
 from hata.backend.quote import quote
 from hata.backend.utils import to_json, from_json
 from hata.discord.utils import image_to_base64
-from hata.discord.utils.DISCORD_HEADERS import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
 from hata.discord.guild import create_partial_guild_from_data, GuildDiscovery
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
-from hata.discord.urls import API_ENDPOINT
+from hata.discord.http import API_ENDPOINT
+from hata.discord.http.headers import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
 
 from hata.ext.command_utils import wait_for_message, Pagination, wait_for_reaction
 from hata.ext.commands_v2 import Command, checks, configure_converter
+
 
 MAIN_CLIENT : Client
 RATE_LIMIT_COMMANDS = eventlist(type_=Command, category='RATE_LIMIT TESTS')
@@ -2166,7 +2167,7 @@ async def thread_user_add(client, channel, user):
     
     await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
-        )
+    )
 
 
 async def thread_user_delete(client, channel, user):
@@ -2175,7 +2176,7 @@ async def thread_user_delete(client, channel, user):
     
     await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
-        )
+    )
 
 
 async def thread_settings_edit(client, channel, data):
@@ -2184,7 +2185,7 @@ async def thread_settings_edit(client, channel, data):
     await bypass_request(client, METHOD_PATCH,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me/settings',
         data,
-        )
+    )
 
 
 async def thread_get_chunk_archived_public(client, channel):
@@ -2263,6 +2264,13 @@ async def sticker_guild_delete(client, guild, sticker_id):
     
     return Sticker(sticker_data)
 
+
+async def sticker_get(client, sticker_id):
+    sticker_data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/stickers/{sticker_id}'
+    )
+    
+    return Sticker(sticker_data)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5456,3 +5464,14 @@ async def rate_limit_test0147(client, message):
         await sticker_guild_delete(client, guild, 0)
 
 
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0148(client, message):
+    """
+    Gets a sticker, nya.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0148') as RLT:
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        await sticker_get(client, 819131232642007062)

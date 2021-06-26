@@ -2,7 +2,7 @@
 
 import os
 from zlib import compress, decompress
-from json import load as from_json_file
+from json import load as from_json_file, dumps as to_json, loads as from_json
 from math import ceil, floor
 from datetime import datetime
 
@@ -23,7 +23,7 @@ COLOR_TUTORIAL       = Color(0xa000c4)
 DIFFICULTY_COLORS    = dict(enumerate((COLOR_TUTORIAL, Color(0x00cc03), Color(0xffe502), Color(0xe50016))))
 DIFFICULTY_NAMES     = dict(enumerate(('Tutorial', 'Easy', 'Normal', 'Hard',)))
 CHAPTER_UNLOCK_DIFFICULTY = 1
-CHAPTER_UNLOCK_STAGE = 10
+CHAPTER_UNLOCK_STAGE = 9
 CHAPTER_UNLOCK_DIFFICULTY_NAME = DIFFICULTY_NAMES[CHAPTER_UNLOCK_DIFFICULTY]
 STAGE_STEP_MULTI_STEP_BUTTON = 10
 
@@ -808,7 +808,7 @@ def REIMU_SKILL_GET_DIRECTORIES(game_state):
     return move_directories
 
 
-def REIMU_SKILL_ACTIVATE(game_state, step, align):
+def REIMU_SKILL_USE(game_state, step, align):
     """
     Uses Reimu's skill to the represented directory.
     
@@ -908,7 +908,7 @@ def FLAN_SKILL_GET_DIRECTORIES(game_state):
     return move_directories
 
 
-def FLAN_SKILL_ACTIVATE(game_state, step, align):
+def FLAN_SKILL_USE(game_state, step, align):
     """
     Uses Flan's skill to the represented directory.
     
@@ -1064,7 +1064,7 @@ def YUKARI_SKILL_GET_DIRECTORIES(game_state):
     return move_directories
 
 
-def YUKARI_SKILL_ACTIVATE(game_state, step, align):
+def YUKARI_SKILL_USE(game_state, step, align):
     """
     Uses Yukari's skill to the represented directory.
     
@@ -1547,7 +1547,7 @@ class Chapter:
         | move_directories  | ``MoveDirectories``   |
         +-------------------+-----------------------+
     
-    skill_activate : `Function`
+    skill_use : `Function`
         Uses the skill of the chapter's character.
         
         Accepts the following parameters.
@@ -1579,11 +1579,11 @@ class Chapter:
         The stage to complete for the next chapter.
     """
     __slots__ = ('button_skill_activated', 'button_skill_disabled', 'button_skill_enabled', 'button_skill_used',
-        'difficulties', 'emoji', 'id', 'skill_can_activate', 'skill_get_move_directories', 'skill_activate',
+        'difficulties', 'emoji', 'id', 'skill_can_activate', 'skill_get_move_directories', 'skill_use',
         'stages_sorted', 'style', 'next_stage_unlock_id', )
     
     def __init__(self, identifier, emoji, style, button_skill_enabled, button_skill_disabled, button_skill_used,
-            button_skill_activated, skill_can_activate, skill_get_move_directories, skill_activate):
+            button_skill_activated, skill_can_activate, skill_get_move_directories, skill_use):
         """
         Creates a new stage from the given parameters.
         
@@ -1607,7 +1607,7 @@ class Chapter:
             Checks whether the chapter's character's skill can be activated.
         skill_get_move_directories : `Function`
             Checks whether the chapter's character's skill can be activated.
-        skill_activate : `Function`
+        skill_use : `Function`
             Uses the skill of the chapter's character.
         """
         self.id = identifier
@@ -1621,7 +1621,7 @@ class Chapter:
         self.button_skill_activated = button_skill_activated
         self.skill_can_activate = skill_can_activate
         self.skill_get_move_directories = skill_get_move_directories
-        self.skill_activate = skill_activate
+        self.skill_use = skill_use
         self.next_stage_unlock_id = 0
 
 
@@ -1635,7 +1635,7 @@ CHAPTERS[CHAPTER_REIMU_INDEX] = Chapter(
     BUTTON_SKILL_REIMU_ACTIVATED,
     REIMU_SKILL_CAN_ACTIVATE,
     REIMU_SKILL_GET_DIRECTORIES,
-    REIMU_SKILL_ACTIVATE,
+    REIMU_SKILL_USE,
 )
 
 CHAPTERS[CHAPTER_FLAN_INDEX] = Chapter(
@@ -1648,7 +1648,7 @@ CHAPTERS[CHAPTER_FLAN_INDEX] = Chapter(
     BUTTON_SKILL_FLAN_ACTIVATED,
     FLAN_SKILL_CAN_ACTIVATE,
     FLAN_SKILL_GET_DIRECTORIES,
-    FLAN_SKILL_ACTIVATE,
+    FLAN_SKILL_USE,
 )
 
 CHAPTERS[CHAPTER_YUKARI_INDEX] = Chapter(
@@ -1661,7 +1661,7 @@ CHAPTERS[CHAPTER_YUKARI_INDEX] = Chapter(
     BUTTON_SKILL_YUKARI_ACTIVATED,
     YUKARI_SKILL_CAN_ACTIVATE,
     YUKARI_SKILL_GET_DIRECTORIES,
-    YUKARI_SKILL_ACTIVATE,
+    YUKARI_SKILL_USE,
 )
 
 
@@ -1872,7 +1872,7 @@ class UserState:
                 if (game_state_data is None):
                     game_state = None
                 else:
-                    game_state_json_data = decompress(game_state_data)
+                    game_state_json_data = from_json(decompress(game_state_data))
                     game_state = GameState.from_json(game_state_json_data)
                 
                 selected_stage_id = result.selected_stage_id
@@ -1903,7 +1903,7 @@ class UserState:
             else:
                 game_state = None
                 stage_results = {}
-                selected_stage_id = 0
+                selected_stage_id = CHAPTERS[0].difficulties[0][0].id
                 field_exists = False
                 entry_id = 0
         
@@ -1930,7 +1930,7 @@ class UserState:
             game_state_data = None
         else:
             game_state_json_data = game_state.to_json()
-            game_state_data = compress(game_state_json_data)
+            game_state_data = compress(to_json(game_state_json_data).encode())
         
         return game_state_data
     
@@ -2024,15 +2024,17 @@ class UserState:
         else:
             self_best = state_stage.best
         
-        if (state_stage is None) or (steps < self_best):
+        if (self_best == -1) or (steps < self_best):
             async with DB_ENGINE.connect() as connector:
                 if state_stage is None:
                     response = await connector.execute(
-                        to_execute = DS_V2_RESULT_TABLE.insert(
-                            ds_v2_entry_id = self.entry_id,
-                            stage_id = stage_id,
-                            best = steps,
-                        ).returning(ds_v2_result_model.id)
+                        DS_V2_RESULT_TABLE.insert(). \
+                            values(
+                                ds_v2_entry_id = self.entry_id,
+                                stage_id = stage_id,
+                                best = steps,
+                            ). \
+                            returning(ds_v2_result_model.id)
                     )
                     
                     result = await response.fetchone()
@@ -2040,10 +2042,10 @@ class UserState:
                     self.stage_results[stage_id] = StageResult(entry_id, stage_id, steps)
                 else:
                     await connector.execute(
-                        DS_V2_TABLE.update(). \
+                        DS_V2_RESULT_TABLE.update(ds_v2_result_model.id==state_stage.id). \
                         values(
                             best = steps,
-                        ).where(ds_v2_result_model.id==state_stage.id)
+                        )
                     )
                     
                     state_stage.best = steps
@@ -2067,13 +2069,14 @@ class UserState:
                             update(currency_model.id==entry_id). \
                             values(total_love=currency_model.total_love+reward)
                     else:
-                        to_execute = CURRENCY_TABLE.insert().values(
-                            user_id         = self.user_id,
-                            total_love      = reward,
-                            daily_next      = datetime.utcnow(),
-                            daily_streak    = 0,
-                            total_allocated = 0,
-                        )
+                        to_execute = CURRENCY_TABLE.insert(). \
+                            values(
+                                user_id         = self.user_id,
+                                total_love      = reward,
+                                daily_next      = datetime.utcnow(),
+                                daily_streak    = 0,
+                                total_allocated = 0,
+                            )
                     
                     await connector.execute(to_execute)
 
@@ -2236,11 +2239,12 @@ class GameState:
         -------
         done : `bool`
         """
-        stage_index = self.stage.stage_index
+        target_count = self.stage.target_count
         for tile in self.map:
             if tile == BIT_MASK_BOX_TARGET:
-                stage_index -= 1
-                if not stage_index:
+                target_count -= 1
+                
+                if not target_count:
                     if (self.best == -1) or (self.best > len(self.history)):
                         self.best = len(self.history)
                     
@@ -2361,7 +2365,7 @@ class GameState:
             Whether the move was completed successfully.
         """
         if self.next_skill:
-            result = self.chapter.skill_activate(self, step, align)
+            result = self.chapter.skill_use(self, step, align)
             if result:
                 self.next_skill = False
             
@@ -2437,7 +2441,7 @@ class GameState:
             self.next_skill = False
             return True
         
-        if self.chapter.skill_activate(self):
+        if self.chapter.skill_can_activate(self):
             self.next_skill = True
             return True
         
@@ -2603,7 +2607,7 @@ class GameState:
             best = steps
         
         difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
-        title = f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji}, {difficulty_name}: ' \
+        title = f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji} {difficulty_name} ' \
                 f'{stage.stage_index+1} finished with {steps} steps with {rating} rating!'
         
         description = self.render_description()
@@ -2756,7 +2760,7 @@ def get_selectable_stages(user_state):
     
     stage_source = selected_stage
     for times in range(3):
-        stage_source = stage_source.after_stage_source
+        stage_source = stage_source.before_stage_source
         if stage_source is None:
             break
         
@@ -2768,7 +2772,7 @@ def get_selectable_stages(user_state):
     
     stage_source = selected_stage
     for times in range(3):
-        stage_source = stage_source.before_stage_source
+        stage_source = stage_source.after_stage_source
         if stage_source is None:
             break
         
@@ -2797,6 +2801,8 @@ def get_selectable_stages(user_state):
         
         if user_best == -1:
             break
+    
+    selectable_stages.reverse()
     
     return selectable_stages
 
@@ -2840,16 +2846,6 @@ def render_menu(user_state):
         
         embed.color = color
         
-        if chapter.id+1 in CHAPTERS:
-            button_chapter_next = BUTTON_RIGHT_ENABLED
-        else:
-            button_chapter_next = BUTTON_RIGHT_DISABLED
-        
-        if chapter.id == 0:
-            button_chapter_before = BUTTON_LEFT_DISABLED
-        else:
-            button_chapter_before = BUTTON_LEFT_ENABLED
-        
         if get_selectable[0][2]:
             button_stage_after = BUTTON_UP_DISABLED
             button_stage_after2 = BUTTON_UP2_DISABLED
@@ -2869,15 +2865,8 @@ def render_menu(user_state):
         embed.color = COLOR_TUTORIAL
         embed.description = (
             f'**You must finish chapter {chapter.id} {CHAPTER_UNLOCK_DIFFICULTY_NAME} '
-            f'{CHAPTER_UNLOCK_STAGE} first.**'
+            f'{CHAPTER_UNLOCK_STAGE+1} first.**'
         )
-        
-        if chapter.id+1 in CHAPTERS:
-            button_chapter_next = BUTTON_RIGHT_ENABLED
-        else:
-            button_chapter_next = BUTTON_RIGHT_DISABLED
-        
-        button_chapter_before = BUTTON_LEFT_DISABLED
         
         button_stage_before = BUTTON_DOWN_DISABLED
         button_stage_before2 = BUTTON_DOWN2_DISABLED
@@ -2886,6 +2875,16 @@ def render_menu(user_state):
         button_stage_after2 = BUTTON_UP2_DISABLED
         
         button_select = BUTTON_SELECT_DISABLED
+    
+    if chapter.id+1 in CHAPTERS:
+        button_chapter_next = BUTTON_RIGHT_ENABLED
+    else:
+        button_chapter_next = BUTTON_RIGHT_DISABLED
+    
+    if chapter.id == 0:
+        button_chapter_before = BUTTON_LEFT_DISABLED
+    else:
+        button_chapter_before = BUTTON_LEFT_ENABLED
     
     components = (
         Row(BUTTON_EMPTY          , button_stage_after     , button_stage_after2   , BUTTON_EMPTY        ,),
@@ -3118,7 +3117,14 @@ async def process_identifier_right(dungeon_sweeper_runner):
         if index >= chapter_stages_sorted_length:
             index = chapter_stages_sorted_length-1
         
-        user_state.selected_stage_id = chapter_stages_sorted[index].id
+        
+        stage_source_id = chapter_stages_sorted[index].id
+        stage_results = user_state.stage_results
+        if (stage_source_id not in stage_results) and \
+                (chapter_stages_sorted[index-1].id not in stage_results):
+            stage_source_id = chapter.difficulties[0][0].id
+        
+        user_state.selected_stage_id = stage_source_id
         return True
     
     return False
@@ -3434,7 +3440,7 @@ async def process_identifier_next(dungeon_sweeper_runner):
             return False
         
         
-        dungeon_sweeper_runner._runner_state = RUNNER_STATE_MENU
+        dungeon_sweeper_runner._runner_state = RUNNER_STATE_PLAYING
         
         selected_stage_id = selected_stage.id
         user_state.selected_stage_id = selected_stage_id
@@ -3983,9 +3989,11 @@ async def rules(client, event):
 @DUNGEON_SWEEPER.interactions(is_default=True)
 async def play(client, event):
     """Starts the game"""
+    
+    """
     if not client.is_owner(event.user):
         abort('Test command, owner only.')
-    
+    """
     permissions = event.channel.cached_permissions_for(client)
     if not (permissions.can_send_messages and permissions.can_add_reactions and permissions.can_use_external_emojis \
             and permissions.can_manage_messages):

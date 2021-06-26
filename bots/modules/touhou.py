@@ -8,14 +8,14 @@ from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHI
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
 from hata.backend.utils import from_json
 from hata.ext.slash import InteractionResponse, abort
-from hata.discord.http import LIB_USER_AGENT
+from hata.discord.http import LIBRARY_USER_AGENT
 from hata.backend.headers import USER_AGENT, CONTENT_TYPE
 
 from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_notsame
 
 WORD_MATCH_RP = re.compile('[^a-zA-z0-9]+')
 
-HEADERS = {USER_AGENT: LIB_USER_AGENT}
+HEADERS = {USER_AGENT: LIBRARY_USER_AGENT}
 
 BOORU_COLOR = Color.from_html('#138a50')
 

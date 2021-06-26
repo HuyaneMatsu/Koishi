@@ -87,7 +87,7 @@ class oauth2_feed:
             await client.message_create(message.channel,'Bad link')
             return
     
-        access = await client.activate_authorization_code(*result,VALUABLE_SCOPES)
+        access = await client.activate_authorization_code(*result, VALUABLE_SCOPES)
     
         if access is None:
             await client.message_create(message.channel,'Too old link')

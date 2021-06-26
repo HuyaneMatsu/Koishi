@@ -514,21 +514,21 @@ async def emoji_role(client, event,
     roles = sorted(roles)
     roles_ = emoji.roles
     
-    embed = Embed().add_author(emoji.url, emoji.name)
+    embed = Embed(f'Edit {emoji.name}\'s roles').add_thumbnail(emoji.url)
     
     if (roles_ is None) or (not roles_):
         role_text = '*none*'
     else:
         role_text = ', '.join([role.mention for role in roles_])
     
-    embed.add_field('Roles before:', role_text)
+    embed.add_field('Before:', role_text)
     
     if (not roles):
         role_text = '*none*'
     else:
         role_text = ', '.join([role.mention for role in roles])
     
-    embed.add_field('Roles after:', role_text)
+    embed.add_field('After:', role_text)
     
     message = yield InteractionResponse(embed=embed, components=EMOJI_ROLE_COMPONENTS)
     
@@ -545,14 +545,14 @@ async def emoji_role(client, event,
             cancelled = False
     
     if cancelled:
-        content = 'Emoji edit cancelled.'
+        description = 'Emoji edit cancelled.'
     else:
         try:
             await client.emoji_edit(emoji, roles=roles)
         except DiscordException as err:
-            content = repr(err)
+            description = repr(err)
         else:
-            content = 'Emoji edited successfully.'
+            description = 'Emoji edited successfully.'
     
-    embed = Embed(None, content)
+    embed = Embed(f'Edit {emoji.name}\'s roles', description).add_thumbnail(emoji.url)
     yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)

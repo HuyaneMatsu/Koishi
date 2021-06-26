@@ -2,7 +2,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 from hata import Client, LOOP_TIME, Lock, imultidict, KOKORO, istr, Future, Embed
-from hata.discord.http import LIB_USER_AGENT
+from hata.discord.http import LIBRARY_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
 from hata.discord.utils import parse_date_header_to_datetime
 from hata.backend.quote import quote
@@ -13,7 +13,7 @@ from bot_utils.shared import GUILD__NEKO_DUNGEON
 SLASH_CLIENT : Client
 
 GITHUB_HEADERS = imultidict()
-GITHUB_HEADERS[USER_AGENT] = LIB_USER_AGENT
+GITHUB_HEADERS[USER_AGENT] = LIBRARY_USER_AGENT
 
 GITHUB_HEADER_RATE_LIMIT_REMAINING = istr('x-ratelimit-remaining')
 GITHUB_HEADER_RATE_LIMIT_RESET_AT = istr('x-ratelimit-reset')

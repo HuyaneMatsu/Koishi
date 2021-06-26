@@ -36,6 +36,52 @@ async def message_create(client, message):
     if not custom_emojis:
         return
     
+    await upload_emojis(custom_emojis, user.id, message.created_at)
+
+
+@Satori.events
+async def message_edit(client, message, old_attributes):
+    if message.channel.guild is not GUILD__NEKO_DUNGEON:
+        return
+    
+    user = message.author
+    if user.is_bot:
+        return
+    
+    try:
+        old_content = old_attributes['content']
+    except KeyError:
+        return
+    
+    new_content = message.content
+    if not new_content:
+        return
+    
+    new_custom_emojis = parse_custom_emojis(new_content)
+    if not new_custom_emojis:
+        return
+    
+    if old_content:
+        old_custom_emojis = parse_custom_emojis(old_content)
+        if not old_custom_emojis:
+            old_custom_emojis = None
+    else:
+        old_custom_emojis = None
+    
+    if (old_custom_emojis is None):
+        custom_emojis = new_custom_emojis
+    else:
+        custom_emojis = new_custom_emojis-old_custom_emojis
+    
+    timestamp = message.edited_at
+    if timestamp is None:
+        timestamp = message.created_at
+    
+    await upload_emojis(custom_emojis, user.id, timestamp)
+
+
+
+async def upload_emojis(custom_emojis, user_id, timestamp):
     emojis = []
     for emoji in custom_emojis:
         if emoji.guild is GUILD__NEKO_DUNGEON:
@@ -43,9 +89,6 @@ async def message_create(client, message):
     
     if not emojis:
         return
-    
-    user_id = user.id
-    timestamp = message.created_at
     
     data = []
     for emoji in custom_emojis:
@@ -58,7 +101,6 @@ async def message_create(client, message):
     
     async with DB_ENGINE.connect() as connector:
         await connector.execute(insert(EMOJI_COUNTER_TABLE, data))
-
 
 @Satori.events
 async def emoji_delete(client, emoji, guild):
