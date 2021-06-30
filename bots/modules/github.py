@@ -305,7 +305,7 @@ class Organization:
     def __new__(cls, data):
         name = data['login']
         description = data['description']
-        if len(description) > 100:
+        if (description is not None) and (len(description) > 100):
             description = description[:100] + ' ...'
         
         self = object.__new__(cls)

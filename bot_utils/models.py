@@ -1,9 +1,6 @@
 from config import DATABASE_NAME
 
 if DATABASE_NAME is None:
-    ds_model = None
-    DS_TABLE = None
-    
     currency_model = None
     CURRENCY_TABLE = None
     
@@ -28,15 +25,6 @@ else:
     from hata.ext.kokoro_sqlalchemy import KOKORO_STRATEGY
     
     BASE = declarative_base()
-    
-    class ds_model(BASE):
-        __tablename__   = 'DS_TABLE'
-        id              = Column(BIGINT, primary_key=True)
-        user_id         = Column(BIGINT, unique=True)
-        position        = Column(Integer)
-        data            = Column(LargeBinary(800))
-    
-    DS_TABLE = ds_model.__table__
     
     class currency_model(BASE):
         __tablename__   = 'CURRENCY'

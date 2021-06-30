@@ -105,7 +105,6 @@ else:
     if not config.ALLOW_KOISHI_SNEKBOX:
         MODULE_NAMES.discard('snekbox')
     
-    MODULE_NAMES.discard('dungeon_sweeper_v2')
     MODULE_NAMES.discard('witch_craft')
     MODULE_NAMES.discard('google')
 

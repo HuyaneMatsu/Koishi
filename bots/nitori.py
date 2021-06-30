@@ -1,3 +1,5 @@
+import re, functools
+from random import random
 from datetime import datetime, timedelta
 from random import random, choice
 from time import perf_counter
@@ -6,8 +8,9 @@ from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
 from hata import Client, Embed, parse_emoji, sleep, id_to_time, DATETIME_FORMAT_CODE, elapsed_time, DiscordException, \
-    ERROR_CODES, Role
-from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission
+    ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji
+from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
+    wait_for_component_interaction, iter_component_interactions
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON as TEST_GUILD, ROLE__NEKO_DUNGEON__MODERATOR
 MODERATOR_ROLE_ID = ROLE__NEKO_DUNGEON__MODERATOR.id
@@ -15,7 +18,7 @@ MODERATOR_ROLE_ID = ROLE__NEKO_DUNGEON__MODERATOR.id
 Nitori: Client
 
 
-# command start perms
+# command start slash perms
 
 @Nitori.interactions(guild=TEST_GUILD, show_for_invoking_user_only=True)
 async def perms(event):
@@ -29,7 +32,7 @@ async def perms(event):
     return content
 
 # command end
-# command start cookie
+# command start slash cookie
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def cookie(event,
@@ -39,7 +42,7 @@ async def cookie(event,
     return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !')
 
 # command end
-# command start show-emoji
+# command start slash show-emoji
 
 @Nitori.interactions(guild=TEST_GUILD)
 @configure_parameter('emoji', str, 'Yes?')
@@ -55,7 +58,7 @@ async def show_emoji(emoji):
     return f'**Name:** {emoji:e} **Link:** {emoji.url}'
 
 # command end
-# command start guild-icon
+# command start slash guild-icon
 
 GUILD_ICON_CHOICES = [
     ('Icon'             , 'icon'             ),
@@ -98,7 +101,7 @@ async def guild_icon(event,
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
 
 # command end
-# command start roll
+# command start slash roll
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def roll(
@@ -112,21 +115,21 @@ async def roll(
     return str(amount)
 
 # command end
-# command start id-to-time
+# command start slash id-to-time
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def id_to_time_(
         snowflake : ('int', 'Id please!'),
             ):
-    """Converts the given Discord snowflake id to time."""
+    """Converts the given Discord snowflake to time."""
     time = id_to_time(snowflake)
     return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
 
 # command end
-# command start pat
-# command start hug
-# command start lick
-# command start slap
+# command start slash pat
+# command start slash hug
+# command start slash lick
+# command start slash slap
 
 class Action:
     __slots__ = ('action_name', 'embed_color', )
@@ -154,7 +157,7 @@ for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 
     )
 
 # command end
-# command start repeat
+# command start slash repeat
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def repeat(
@@ -167,7 +170,7 @@ async def repeat(
     return InteractionResponse(text, allowed_mentions=None)
 
 # command end
-# command start improvise
+# command start slash improvise
 
 IMPROVISATION_CHOICES = [
     'Did Marisa really adopt Reimu?',
@@ -189,7 +192,7 @@ async def improvise():
     yield choice(IMPROVISATION_CHOICES)
 
 # command end
-# command start collect-reactions
+# command start slash collect-reactions
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def collect_reactions():
@@ -208,8 +211,8 @@ async def collect_reactions():
         yield 'No reactions were collected.'
 
 # command end
-# command start text-cat
-# command start why
+# command start slash text-cat
+# command start slash why
 
 NEKO_LIFE = 'https://nekos.life/api/v2'
 
@@ -227,7 +230,7 @@ async def get_neko_life(client, keyword):
     yield content
 
 # command end
-# command start text-cat
+# command start slash text-cat
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def text_cat(client):
@@ -235,7 +238,7 @@ async def text_cat(client):
     return get_neko_life(client, 'cat')
 
 # command end
-# command start why
+# command start slash why
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def why(client):
@@ -243,7 +246,7 @@ async def why(client):
     yield get_neko_life(client, 'why')
 
 # command end
-# command start is-banned
+# command start slash is-banned
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def is_banned(client, event,
@@ -283,7 +286,7 @@ async def is_banned(client, event,
     yield embed
 
 # command end
-# command start user
+# command start slash user
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def user_id(event,
@@ -296,7 +299,7 @@ async def user_id(event,
     return str(user_id)
 
 # command end
-# command start latest-users
+# command start slash latest-users
 
 MODERATOR_ROLE = Role.precreate(MODERATOR_ROLE_ID)
 
@@ -337,7 +340,7 @@ async def latest_users(event):
     
     return InteractionResponse(embed=embed, allowed_mentions=None)
 
-# command start ping
+# command start slash ping
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def ping():
@@ -349,7 +352,7 @@ async def ping():
     yield f'{delay:.0f} ms'
 
 # command end
-# command start enable-ping
+# command start slash enable-ping
 
 @Nitori.interactions(is_global=True)
 async def enable_ping(client, event,
@@ -388,7 +391,7 @@ async def enable_ping(client, event,
     return Embed('Success', content)
 
 # command end
-# command start scarlet
+# command start slash scarlet
 
 # `bs4` requires `lxml` library or you will get an error.
 
@@ -445,13 +448,397 @@ async def remilia(client):
     yield await get_image_embed(client, 'remilia_scarlet', 'Scarlet Remilia', 0x9400d3)
 
 # command end
-# command start about
+# command start slash about
 
 @Nitori.interactions(is_global=True)
 async def about(client):
     return Embed('about', client.application.description, color=0x508CB5).add_thumbnail(client.avatar_url)
 
 # command end
+# command start components ping-pong
+
+EMOJI_PING_PONG = BUILTIN_EMOJIS['ping_pong']
+
+CUSTOM_ID_PING = 'ping_pong.ping'
+CUSTOM_ID_PONG = 'ping_pong.pong'
+
+BUTTON_PING = Button('ping', EMOJI_PING_PONG, custom_id=CUSTOM_ID_PING, style=ButtonStyle.green)
+BUTTON_PONG = Button('pong', EMOJI_PING_PONG, custom_id=CUSTOM_ID_PONG, style=ButtonStyle.violet)
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def ping_pong():
+    if random() < 0.5:
+        button = BUTTON_PING
+    else:
+        button = BUTTON_PONG
+    
+    return InteractionResponse(f'**ping {EMOJI_PING_PONG:e} pong**', components=button)
+
+
+@Nitori.interactions(custom_id=CUSTOM_ID_PING)
+async def ping_pong_ping():
+    return InteractionResponse(components=BUTTON_PONG)
+
+@Nitori.interactions(custom_id=CUSTOM_ID_PONG)
+async def ping_pong_pong():
+    return InteractionResponse(components=BUTTON_PING)
+
+# command end
+# command start components cat-feeder
+
+# Static variables
+CAT_FEEDER_CAT_EMOJI = Emoji.precreate(853998730071638056)
+CAT_FEEDER_FOOD_EMOJI = BUILTIN_EMOJIS['fish']
+CAT_FEEDER_CUSTOM_ID = 'cat_feeder.click'
+
+
+# Command
+@Nitori.interactions(guild=TEST_GUILD)
+async def cat_feeder():
+    """Hungry cat feeder!"""
+    return InteractionResponse(
+        f'Please feed my cat {CAT_FEEDER_CAT_EMOJI:e}, she is hungry.',
+        components=Button('Feed cat', CAT_FEEDER_FOOD_EMOJI, custom_id=CAT_FEEDER_CUSTOM_ID, style=ButtonStyle.green)
+    )
+
+
+# Component interaction
+@Nitori.interactions(custom_id=CAT_FEEDER_CUSTOM_ID)
+async def cat_fed(event):
+    return (
+        f'Please feed my cat {CAT_FEEDER_CAT_EMOJI:e}, she is hungry.\n'
+        f'\n'
+        f'Thanks, {event.user:f} for feeding my cat.'
+    )
+
+# command end
+# command start components role-claimer
+
+ROLE_OWNER = Role.precreate(403581319139033090)
+
+ROLE_NSFW_ACCESS = Role.precreate(828576094776590377)
+ROLE_ANNOUNCEMENTS = Role.precreate(538397994421190657)
+
+BUTTON_NSFW_ACCESS = Button('Nsfw access', custom_id=f'role_claimer.{ROLE_NSFW_ACCESS.id}')
+BUTTON_ANNOUNCEMENTS = Button('Announcements', custom_id=f'role_claimer.{ROLE_ANNOUNCEMENTS.id}')
+
+ROLE_CLAIMER_COMPONENTS = Row(BUTTON_NSFW_ACCESS, BUTTON_ANNOUNCEMENTS)
+
+ROLE_CLAIMER_ROLES = {
+    ROLE_NSFW_ACCESS.id: ROLE_NSFW_ACCESS,
+    ROLE_ANNOUNCEMENTS.id: ROLE_ANNOUNCEMENTS,
+}
+
+
+@Nitori.interactions(guild=TEST_GUILD, allow_by_default=False)
+@set_permission(TEST_GUILD, ROLE_OWNER, True)
+async def role_claimer(event):
+    """Role claimer message. (Owner only)"""
+    
+    # Double check.
+    if not event.user.has_role(ROLE_OWNER):
+        abort('Owner only')
+    
+    return InteractionResponse('Claim role by clicking on it', components=ROLE_CLAIMER_COMPONENTS)
+
+
+@Nitori.interactions(custom_id=re.compile('role_claimer\.(\d+)'))
+async def give_role(client, event, role_id):
+    role_id = int(role_id)
+    
+    role = ROLE_CLAIMER_ROLES.get(role_id, None)
+    if (role is not None) and (not event.user.has_role(role)):
+        await client.user_role_add(event.user, role)
+
+# command end
+# command start components choose-your-poison
+
+CUSTOM_ID_CAKE = 'choose_your_poison.cake'
+CUSTOM_ID_CAT = 'choose_your_poison.cat'
+CUSTOM_ID_SNAKE = 'choose_your_poison.snake'
+CUSTOM_ID_EGGPLANT = 'choose_your_poison.eggplant'
+
+EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+EMOJI_CAT = BUILTIN_EMOJIS['cat']
+EMOJI_SNAKE = BUILTIN_EMOJIS['snake']
+EMOJI_EGGPLANT = BUILTIN_EMOJIS['eggplant']
+
+CHOOSE_YOUR_POISON_ROW = Row(
+    Button('cake', custom_id=CUSTOM_ID_CAKE, style=ButtonStyle.violet),
+    Button('cat', custom_id=CUSTOM_ID_CAT, style=ButtonStyle.gray),
+    Button('snake', custom_id=CUSTOM_ID_SNAKE, style=ButtonStyle.green),
+    Button('eggplant', custom_id=CUSTOM_ID_EGGPLANT, style=ButtonStyle.red),
+)
+
+CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI = {
+    CUSTOM_ID_CAKE: EMOJI_CAKE,
+    CUSTOM_ID_CAT: EMOJI_CAT,
+    CUSTOM_ID_SNAKE: EMOJI_SNAKE,
+    CUSTOM_ID_EGGPLANT: EMOJI_EGGPLANT,
+}
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def choose_your_poison():
+    """What is your weakness?"""
+    return InteractionResponse(embed=Embed('Choose your poison'), components=CHOOSE_YOUR_POISON_ROW)
+
+
+@Nitori.interactions(custom_id=[CUSTOM_ID_CAKE, CUSTOM_ID_CAT, CUSTOM_ID_SNAKE, CUSTOM_ID_EGGPLANT])
+async def poison_edit_cake(event):
+    emoji = CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI.get(event.interaction.custom_id, None)
+    if (emoji is not None):
+        return emoji.as_emoji
+
+# command end
+# command start components add-emoji
+
+ADD_EMOJI_BUTTON_ADD = Button('Add!', style=ButtonStyle.green)
+ADD_EMOJI_BUTTON_CANCEL = Button('Nah.', style=ButtonStyle.red)
+
+ADD_EMOJI_COMPONENTS = Row(ADD_EMOJI_BUTTON_ADD, ADD_EMOJI_BUTTON_CANCEL)
+
+def check_is_user_same(user, event):
+    return (user is event.user)
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def add_emoji(client, event,
+        emoji: ('str', 'The emoji to add.'),
+        name: ('str', 'Custom name to add the emoji with.') = None
+            ):
+    """Adds an emoji to the guild."""
+    if not client.is_owner(event.user):
+        abort('Owner only!')
+    
+    emoji = parse_emoji(emoji)
+    if emoji is None:
+        abort('That\'s not an emoji.')
+    
+    if emoji.is_unicode_emoji():
+        abort('Cannot add unicode emojis')
+    
+    if name is None:
+        name = emoji.name
+    else:
+        if len(name) > 32:
+            abort('Name length can be max 32.')
+    
+    embed = Embed('Are you sure to add this emoji?').add_field('Name:', name).add_image(emoji.url)
+    
+    message = yield InteractionResponse(embed=embed, components=ADD_EMOJI_COMPONENTS)
+    
+    try:
+        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
+            check=functools.partial(check_is_user_same, event.user))
+    
+    except TimeoutError:
+        component_interaction = None
+        cancelled = True
+    else:
+        if component_interaction.interaction == ADD_EMOJI_BUTTON_CANCEL:
+            cancelled = True
+        else:
+            cancelled = False
+    
+    if cancelled:
+        embed.title = 'Adding emoji has been cancelled.'
+    else:
+        embed.title = 'Emoji has been added!'
+        
+        async with client.http.get(emoji.url) as response:
+            emoji_data = await response.read()
+        
+        await client.emoji_create(event.guild, name, emoji_data)
+    
+    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)
+
+# command end
+# command start components pick
+
+BUTTON_ATTEND = Button('Attend', style=ButtonStyle.green)
+
+def check_is_user_unique(users, event):
+    return (event.user not in users)
+
+def render_joined_users(users):
+    content_parts = ['I will pick who I like the most from the attenders.\n\nAttenders:']
+    for user in users:
+        content_parts.append('\n')
+        content_parts.append(user.mention)
+    
+    return ''.join(content_parts)
+
+def get_liking(client_id, user_id):
+    if user_id > client_id:
+        liking = user_id-client_id
+    else:
+        liking = client_id-user_id
+    
+    return liking
+
+def pick_most_liked(client, users):
+    client_id = client.id
+    
+    most_liked = users[0]
+    most_liking = get_liking(client_id, most_liked.id)
+    
+    for user in users[1:]:
+        liking = get_liking(client_id, user.id)
+        if liking < most_liking:
+            most_liking = liking
+            most_liked = user
+    
+    return most_liked
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def pick(client, event):
+    """Picks who I like the most from the attenders."""
+    users = [event.user]
+    message = yield InteractionResponse(render_joined_users(users), allowed_mentions=None, components=BUTTON_ATTEND)
+    
+    try:
+        async for component_interaction in iter_component_interactions(message, timeout=60.0,
+                check=functools.partial(check_is_user_unique, users)):
+            users.append(component_interaction.user)
+            
+            # limit the amount of users to 10.
+            if len(users) == 10:
+                break
+            
+            yield InteractionResponse(render_joined_users(users), allowed_mentions=None,
+                event=component_interaction)
+    
+    except TimeoutError:
+        component_interaction = None
+    
+    most_liked = pick_most_liked(client, users)
+    
+    content_parts = ['From:']
+    for user in users:
+        content_parts.append('\n')
+        content_parts.append(user.mention)
+    
+    content_parts.append('\n\nI like ')
+    content_parts.append(most_liked.mention)
+    content_parts.append(' the most.')
+    
+    content = ''.join(content_parts)
+    
+    yield InteractionResponse(content, allowed_mentions=most_liked, components=None, message=message,
+        event=component_interaction)
+
+# command end
+
+
+
+#### >@<>@<>@<>@< Source command >@<>@<>@<>@<>@< ####
+
+COMMAND_START_RP = re.compile('# command start ([a-z\-]+) ([a-z\-]+)')
+COMMAND_END_RP = re.compile('# command end')
+
+
+def build_command_string(command_lines):
+    # Remove empty line from end
+    while command_lines:
+        if command_lines[-1]:
+            break
+        
+        del command_lines[-1]
+    
+    if not command_lines:
+        return None
+    
+    # Remove 2+ continuous empty lines.
+    continuous_empty = 0
+    
+    for index in reversed(range(1, len(command_lines)-1)):
+        if command_lines[index]:
+            continuous_empty = 0
+            continue
+        
+        continuous_empty += 1
+        if continuous_empty > 2:
+            del command_lines[index]
+    
+    
+    # Remove empty line from start
+    while command_lines:
+        if command_lines[0]:
+            break
+        
+        del command_lines[0]
+    
+    # collect chunks
+    chunks = []
+    
+    chunk_start_index = 0
+    
+    index = 1
+    limit = len(command_lines)-2
+    
+    while index < limit:
+        if command_lines[index]:
+            index += 1
+            continue
+        
+        if command_lines[index+1]:
+            index += 2
+            continue
+        
+        chunk = command_lines[chunk_start_index:index]
+        chunks.append(chunk)
+        
+        index += 2
+        chunk_start_index = index
+        continue
+    
+    chunk = command_lines[chunk_start_index:]
+    chunks.append(chunk)
+    
+    # Group chunks
+    chunks_with_length = []
+    for chunk in chunks:
+        chunk_length = 12+len(chunk)
+        for line in chunk:
+            chunk_length += len(line)
+        
+        if chunk_length > 2000:
+            raise RuntimeError(f'chunk_length over 2000 characters: {chunk_length!r}: {chunk_length!r}.')
+        
+        chunks_with_length.append((chunk_length, chunk))
+        continue
+    
+    connected_chunks = []
+    connected_chunk_lines = ['```py']
+    connected_chunk_length = 0
+    
+    for chunk_length, chunk in chunks_with_length:
+        connected_chunk_length += chunk_length
+        if connected_chunk_length > 1500:
+            if len(connected_chunk_lines) > 1:
+                connected_chunk_lines[-1] ='```'
+            
+            connected_chunk = '\n'.join(connected_chunk_lines)
+            connected_chunks.append(connected_chunk)
+            
+            connected_chunk_lines.clear()
+            connected_chunk_lines.append('```py')
+            connected_chunk_lines.extend(chunk)
+            connected_chunk_lines.append('')
+            connected_chunk_length = chunk_length
+        else:
+            connected_chunk_lines.extend(chunk)
+            connected_chunk_lines.append('')
+    
+    connected_chunk_lines[-1] ='```'
+    connected_chunk = '\n'.join(connected_chunk_lines)
+    connected_chunks.append(connected_chunk)
+    
+    return tuple(connected_chunks)
+
 
 def collect_commands():
     with open(__file__, 'r') as file:
@@ -461,54 +848,81 @@ def collect_commands():
     command_names = []
     
     for line in lines:
-        if line.startswith('# command '):
-            if line[len('# command '):] == 'end':
-                command_names.clear()
-                continue
-            
-            if line[len('# command '):len('# command ')+len('start ')] == 'start ':
-                command_name = line[len('# command ')+len('start '):]
-                command_names.append(command_name)
-                continue
-            
+        matched = COMMAND_START_RP.fullmatch(line)
+        if (matched is not None):
+            command_names.append(matched.groups())
+            continue
+        
+        matched = COMMAND_END_RP.fullmatch(line)
+        if (matched is not None):
+            command_names.clear()
             continue
         
         line = line.rstrip()
         
-        for command_name in command_names:
+        for key in command_names:
             try:
-                command_lines = collected_lines_per_command[command_name]
+                command_lines = collected_lines_per_command[key]
             except KeyError:
                 command_lines = []
-                collected_lines_per_command[command_name] = command_lines
+                collected_lines_per_command[key] = command_lines
             
             command_lines.append(line)
     
+    collected_commands = {}
     
-    for command_lines in collected_lines_per_command.values():
-        while command_lines:
-            if command_lines[-1]:
-                break
+    for (command_type, command_name), command_lines in collected_lines_per_command.items():
+        command_content = build_command_string(command_lines)
+        if (command_content is not None):
+            try:
+                command_type_commands = collected_commands[command_type]
+            except KeyError:
+                command_type_commands = collected_commands[command_type] = {}
             
-            del command_lines[-1]
+            command_type_commands[command_name] = command_content
+    
+    return collected_commands
+
+
+COLLECTED_COMMANDS = collect_commands()
+
+
+EMOJI_LEFT = BUILTIN_EMOJIS['arrow_left']
+EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_right']
+
+
+class InteractionCommandSource:
+    __slots__ = ('command_type', 'sources',)
+    
+    def __init__(self, command_type, sources):
+        self.command_type = command_type
+        self.sources = sources
+    
+    async def __call__(self, command_name):
+        command_source = self.sources.get(command_name, None)
+        if (command_source is None):
+            abort(f'Command not found: {command_name!r}')
         
-        while command_lines:
-            if command_lines[0]:
-                break
-            
-            del command_lines[0]
-    
-    collective_command_lines_per_command = {}
-    for command_name, command_lines in collected_lines_per_command.items():
-        if command_lines:
-            command_lines.insert(0, '```py')
-            command_lines.append('```')
-            collective_command_lines_per_command[command_name] = '\n'.join(command_lines)
-    
-    return collective_command_lines_per_command
-
-
-COMMAND_CONTENTS = collect_commands()
+        page = command_source[0]
+        
+        if len(command_source) > 1:
+            components = Row(
+                Button(
+                    emoji = EMOJI_LEFT,
+                    custom_id = f'source.{self.command_type}.{command_name}._',
+                    enabled = False,
+                ),
+                Button(
+                    emoji = EMOJI_RIGHT,
+                    custom_id = f'source.{self.command_type}.{command_name}.1',
+                    enabled = True,
+                ),
+            )
+        
+        else:
+            components = None
+        
+        yield InteractionResponse(page, components=components)
 
 
 SOURCE = Nitori.interactions(None,
@@ -517,16 +931,71 @@ SOURCE = Nitori.interactions(None,
     guild=TEST_GUILD,
 )
 
-@SOURCE.interactions
-async def slash_(
-        command: (sorted(COMMAND_CONTENTS), 'Select a slash command to show')
-            ):
+for command_type, command_type_commands in COLLECTED_COMMANDS.items():
     
-    return COMMAND_CONTENTS[command]
+    SOURCE.interactions(
+        configure_parameter(
+            'command_name',
+            sorted(command_type_commands),
+            f'Select a {command_type} command to show',
+        )(InteractionCommandSource(command_type, command_type_commands)),
+        name=command_type,
+    )
 
-
-
-
-
-
-
+@Nitori.interactions(custom_id=re.compile('source\.([a-z\-]+)\.([a-z\-]+)\.(_|[0-9]+)'))
+async def switch_page(event, command_type, command_name, page_index):
+    # Check for the same user
+    if event.message.interaction.user is not event.user:
+        return
+    
+    # Check whether page is really valid.
+    if not page_index.isdigit():
+        return
+    
+    # Lookup command source
+    command_type_commands = COLLECTED_COMMANDS.get(command_type, None)
+    if command_type_commands is None:
+        return
+    
+    command_source = command_type_commands.get(command_name, None)
+    if command_source is None:
+        return
+    
+    page_index = int(page_index)
+    if page_index == 0:
+        button_back_enabled = False
+        button_back_page_index = '_'
+        
+        button_next_enabled = True
+        button_next_page_index = str(page_index+1)
+    elif page_index > len(command_source)-2:
+        page_index = len(command_source)-1
+        
+        button_back_enabled = True
+        button_back_page_index = str(page_index-1)
+        
+        button_next_enabled = False
+        button_next_page_index = '_'
+    else:
+        button_back_enabled = True
+        button_back_page_index = str(page_index-1)
+        
+        button_next_enabled = True
+        button_next_page_index = str(page_index+1)
+    
+    page = command_source[page_index]
+    
+    components = Row(
+        Button(
+            emoji = EMOJI_LEFT,
+            custom_id = f'source.{command_type}.{command_name}.{button_back_page_index}',
+            enabled = button_back_enabled,
+        ),
+        Button(
+            emoji = EMOJI_RIGHT,
+            custom_id = f'source.{command_type}.{command_name}.{button_next_page_index}',
+            enabled = button_next_enabled,
+        ),
+    )
+    
+    return InteractionResponse(page, components=components)

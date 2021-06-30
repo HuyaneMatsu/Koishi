@@ -14,7 +14,7 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
 
 from hata.ext.command_utils import Pagination
 from hata.ext.prettyprint import pchunkify
-from hata.ext.slash import abort, InteractionResponse, set_permission
+from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row
 
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
@@ -652,7 +652,7 @@ def add_guild_info_field(guild, embed, even_if_empty):
     sections_parts = [
         '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]\n'
         '**Voice region**: ', guild.region.name,
-            ]
+    ]
     
     features = guild.features
     if features:
@@ -700,7 +700,7 @@ def add_guild_counts_field(guild, embed, even_if_empty):
     sections_parts = [
         '**Users: ', str(guild.user_count), '**\n'
         '**Roles: ', str(len(guild.role_list)), '**'
-            ]
+    ]
     
     if channel_text:
         sections_parts.append('\n**Text channels: ')
@@ -740,7 +740,7 @@ def add_guild_emojis_field(guild, embed, even_if_empty):
         sections_parts = [
             '**Total: ', str(emoji_count), '**\n'
             '**Static emojis: '
-                ]
+        ]
         
         normal_static, normal_animated, managed_static, managed_animated = guild.emoji_counts
         emoji_limit = guild.emoji_limit
@@ -1039,48 +1039,139 @@ async def show_emoji(client, event,
 async def id_to_time_(client, event,
         snowflake : ('int', 'Id please!'),
             ):
-    """Converts the given Discord snowflake id to time."""
+    """Converts the given Discord snowflake to time."""
     time = id_to_time(snowflake)
     return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
 
 
+
+GUILD_ICON_CUSTOM_ID_ICON = 'guild_icon.icon'
+GUILD_ICON_CUSTOM_ID_BANNER = 'guild_icon.banner'
+GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH = 'guild_icon.discovery_splash'
+GUILD_ICON_CUSTOM_ID_INVITE_SPLASH = 'guild_icon.invite_splash'
+
+
+BUTTON_ICON = Button('Icon', custom_id=GUILD_ICON_CUSTOM_ID_ICON)
+BUTTON_BANNER = Button('Banner', custom_id=GUILD_ICON_CUSTOM_ID_BANNER)
+BUTTON_DISCOVERY_SPLASH = Button('Discovery splash', custom_id=GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
+BUTTON_INVITE_SPLASH = Button('Invite splash', custom_id=GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
+
+
+GUILD_ICON_ICON_COMPONENTS = Row(
+    BUTTON_ICON.copy_with(enabled=False),
+    BUTTON_BANNER,
+    BUTTON_DISCOVERY_SPLASH,
+    BUTTON_INVITE_SPLASH,
+)
+
+GUILD_ICON_BANNER_COMPONENTS = Row(
+    BUTTON_ICON,
+    BUTTON_BANNER.copy_with(enabled=False),
+    BUTTON_DISCOVERY_SPLASH,
+    BUTTON_INVITE_SPLASH,
+)
+
+GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS = Row(
+    BUTTON_ICON,
+    BUTTON_BANNER,
+    BUTTON_DISCOVERY_SPLASH.copy_with(enabled=False),
+    BUTTON_INVITE_SPLASH,
+)
+
+GUILD_ICON_INVITE_SPLASH_COMPONENTS = Row(
+    BUTTON_ICON,
+    BUTTON_BANNER,
+    BUTTON_DISCOVERY_SPLASH,
+    BUTTON_INVITE_SPLASH.copy_with(enabled=False),
+)
+
+
+def create_embed(guild, name, url, hash_value):
+    if url is None:
+        color = (guild.id>>22)&0xFFFFFF
+        embed = Embed(f'{guild.name} has no {name}', color=color)
+    else:
+        color = hash_value&0xFFFFFF
+        embed = Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
+    
+    return embed
+
+
+GUILD_ICON_CHOICES = [
+    ('Icon'             , 'icon'             ),
+    ('Banner'           , 'banner'           ),
+    ('Discovery-splash' , 'discovery_splash' ),
+    ('Invite-splash'    , 'invite_splash'    ),
+]
+
 @SLASH_CLIENT.interactions(is_global=True)
-async def guild_icon(client, event,
-        choice: ({
-            'Icon'             : 'icon'             ,
-            'Banner'           : 'banner'           ,
-            'Discovery-splash' : 'discovery_splash' ,
-            'Invite-splash'    : 'invite_splash'    ,
-                }, 'Which icon of the guild?' ) = 'icon',
+async def guild_icon(event,
+        choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
             ):
-    """Shows the guild's icon or it's selected splash."""
+    """Shows the guild's icon."""
     guild = event.guild
-    if (guild is None) or (guild not in client.guild_profiles):
-        return Embed('Error', 'The command unavailable in guilds, where the application\'s bot is not in.')
+    if (guild is None) or guild.partial:
+        abort('The command unavailable in guilds, where the application\'s bot is not in.')
     
     if choice == 'icon':
         name = 'icon'
         url = guild.icon_url_as(size=4096)
         hash_value = guild.icon_hash
+        components = GUILD_ICON_ICON_COMPONENTS
+    
     elif choice == 'banner':
         name = 'banner'
         url = guild.banner_url_as(size=4096)
         hash_value = guild.banner_hash
+        components = GUILD_ICON_BANNER_COMPONENTS
+    
     elif choice == 'discovery_splash':
         name = 'discovery splash'
         url = guild.discovery_splash_url_as(size=4096)
         hash_value = guild.discovery_splash_hash
+        components = GUILD_ICON_ICON_COMPONENTS
+    
     else:
         name = 'invite splash'
         url = guild.invite_splash_url_as(size=4096)
         hash_value = guild.invite_splash_hash
+        components = GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS
     
-    if url is None:
-        color = (event.id>>22)&0xFFFFFF
-        return Embed(f'{guild.name} has no {name}', color=color)
+    embed = create_embed(guild, name, url, hash_value)
+    return InteractionResponse(embed=embed, components=components)
+
+
+@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_ICON)
+async def handle_guild_icon(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'icon', guild.icon_url_as(size=4096), guild.icon_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_ICON_COMPONENTS)
+
+
+@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_BANNER)
+async def handle_guild_banner(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'banner', guild.banner_url_as(size=4096), guild.banner_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_BANNER_COMPONENTS)
+
+
+@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
+async def handle_guild_discovery_splash(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'discovery splash', guild.discovery_splash_url_as(size=4096),
+            guild.discovery_splash_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS)
     
-    color = hash_value&0xFFFFFF
-    return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
+
+@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
+async def handle_guild_invite_splash(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'invite splash', guild.invite_splash_url_as(size=4096), guild.invite_splash_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_INVITE_SPLASH_COMPONENTS)
 
 
 def add_user_field(embed, index, joined_at, user):
@@ -1093,7 +1184,7 @@ def add_user_field(embed, index, joined_at, user):
         f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
         f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
         f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
-            )
+    )
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, True)

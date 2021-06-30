@@ -753,43 +753,6 @@ async def handle_cooldown_error(command_context, exception):
 async def eval(value:('expression', 'expression to evaluate')):
     return repr(value)
 
-EMOJI_CAKE = BUILTIN_EMOJIS['cake']
-EMOJI_CAT = BUILTIN_EMOJIS['cat']
-EMOJI_SNAKE = BUILTIN_EMOJIS['snake']
-EMOJI_EGGPLANT = BUILTIN_EMOJIS['eggplant']
-
-CUSTOM_ID_CAKE = 'choose_your_poison.cake'
-CUSTOM_ID_CAT = 'choose_your_poison.cat'
-CUSTOM_ID_SNAKE = 'choose_your_poison.snake'
-CUSTOM_ID_EGGPLANT = 'choose_your_poison.eggplant'
-
-BUTTON_CAKE = Button('cake', custom_id=CUSTOM_ID_CAKE, style=ButtonStyle.violet)
-BUTTON_CAT = Button('cat', custom_id=CUSTOM_ID_CAT, style=ButtonStyle.gray)
-BUTTON_SNAKE = Button('snake', custom_id=CUSTOM_ID_SNAKE, style=ButtonStyle.green)
-BUTTON_EGGPLANT = Button('eggplant', custom_id=CUSTOM_ID_EGGPLANT, style=ButtonStyle.red)
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def choose_your_poison():
-    components = Row(BUTTON_CAKE, BUTTON_CAT, BUTTON_SNAKE, BUTTON_EGGPLANT)
-    
-    return InteractionResponse(embed=Embed('Choose your poison'), components=components)
-
-@Marisa.interactions(custom_id=CUSTOM_ID_CAKE)
-async def poison_edit_cake():
-    return EMOJI_CAKE.as_emoji
-
-@Marisa.interactions(custom_id=CUSTOM_ID_CAT)
-async def poison_edit_cat():
-    return EMOJI_CAT.as_emoji
-
-@Marisa.interactions(custom_id=CUSTOM_ID_SNAKE)
-async def poison_edit_snake():
-    return EMOJI_SNAKE.as_emoji
-
-@Marisa.interactions(custom_id=CUSTOM_ID_EGGPLANT)
-async def poison_edit_eggplant():
-    return EMOJI_EGGPLANT.as_emoji
-
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def nine():
@@ -899,3 +862,268 @@ async def give_role(client, event, role_id):
     role = ROLE_CLAIMER_ROLES.get(role_id, None)
     if (role is not None) and (not event.user.has_role(role)):
         await client.user_role_add(event.user, role)
+
+
+
+GUILD_ICON_CUSTOM_ID_ICON = 'guild_icon.icon'
+GUILD_ICON_CUSTOM_ID_BANNER = 'guild_icon.banner'
+GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH = 'guild_icon.discovery_splash'
+GUILD_ICON_CUSTOM_ID_INVITE_SPLASH = 'guild_icon.invite_splash'
+
+
+BUTTON_ICON = Button('Icon', custom_id=GUILD_ICON_CUSTOM_ID_ICON)
+BUTTON_BANNER = Button('Banner', custom_id=GUILD_ICON_CUSTOM_ID_BANNER)
+BUTTON_DISCOVERY_SPLASH = Button('Discovery splash', custom_id=GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
+BUTTON_INVITE_SPLASH = Button('Invite splash', custom_id=GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
+
+
+GUILD_ICON_ICON_COMPONENTS = Row(
+    BUTTON_ICON.copy_with(enabled=False),
+    BUTTON_BANNER,
+    BUTTON_DISCOVERY_SPLASH,
+    BUTTON_INVITE_SPLASH,
+)
+
+GUILD_ICON_BANNER_COMPONENTS = Row(
+    BUTTON_ICON,
+    BUTTON_BANNER.copy_with(enabled=False),
+    BUTTON_DISCOVERY_SPLASH,
+    BUTTON_INVITE_SPLASH,
+)
+
+GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS = Row(
+    BUTTON_ICON,
+    BUTTON_BANNER,
+    BUTTON_DISCOVERY_SPLASH.copy_with(enabled=False),
+    BUTTON_INVITE_SPLASH,
+)
+
+GUILD_ICON_INVITE_SPLASH_COMPONENTS = Row(
+    BUTTON_ICON,
+    BUTTON_BANNER,
+    BUTTON_DISCOVERY_SPLASH,
+    BUTTON_INVITE_SPLASH.copy_with(enabled=False),
+)
+
+
+def create_embed(guild, name, url, hash_value):
+    if url is None:
+        color = (guild.id>>22)&0xFFFFFF
+        embed = Embed(f'{guild.name} has no {name}', color=color)
+    else:
+        color = hash_value&0xFFFFFF
+        embed = Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
+    
+    return embed
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def guild_icon(event):
+    """Shows the guild's icon."""
+    guild = event.guild
+    if (guild is None) or guild.partial:
+        abort('The command unavailable in guilds, where the application\'s bot is not in.')
+    
+    embed = create_embed(guild, 'icon', guild.icon_url_as(size=4096), guild.icon_hash)
+    return InteractionResponse(embed=embed, components=GUILD_ICON_ICON_COMPONENTS)
+
+
+@Marisa.interactions(custom_id=GUILD_ICON_CUSTOM_ID_ICON)
+async def handle_guild_icon(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'icon', guild.icon_url_as(size=4096), guild.icon_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_ICON_COMPONENTS)
+    
+
+@Marisa.interactions(custom_id=GUILD_ICON_CUSTOM_ID_BANNER)
+async def handle_guild_banner(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'banner', guild.banner_url_as(size=4096), guild.banner_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_BANNER_COMPONENTS)
+
+
+@Marisa.interactions(custom_id=GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
+async def handle_guild_discovery_splash(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'discovery splash', guild.discovery_splash_url_as(size=4096),
+            guild.discovery_splash_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS)
+    
+
+@Marisa.interactions(custom_id=GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
+async def handle_guild_invite_splash(event):
+    guild = event.guild
+    if (guild is not None):
+        embed = create_embed(guild, 'invite splash', guild.invite_splash_url_as(size=4096), guild.invite_splash_hash)
+        return InteractionResponse(embed=embed, components=GUILD_ICON_INVITE_SPLASH_COMPONENTS)
+
+
+
+CAT_FEEDER_CAT_EMOJI = Emoji.precreate(853998730071638056)
+CAT_FEEDER_FOOD_EMOJI = BUILTIN_EMOJIS['fish']
+CAT_FEEDER_CUSTOM_ID = 'cat_feeder.click'
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def cat_feeder():
+    """Hungry cat feeder!"""
+    return InteractionResponse(
+        f'Please feed my cat {CAT_FEEDER_CAT_EMOJI:e}, she is hungry.',
+        components=Button('Feed cat', CAT_FEEDER_FOOD_EMOJI, custom_id=CAT_FEEDER_CUSTOM_ID, style=ButtonStyle.green)
+    )
+
+
+@Marisa.interactions(custom_id=CAT_FEEDER_CUSTOM_ID)
+async def cat_fed(event):
+    return (
+        f'Please feed my cat {CAT_FEEDER_CAT_EMOJI:e}, she is hungry.\n'
+        f'\n'
+        f'Thanks, {event.user:f} for feeding my cat.'
+    )
+
+
+CUSTOM_ID_CAKE = 'choose_your_poison.cake'
+CUSTOM_ID_CAT = 'choose_your_poison.cat'
+CUSTOM_ID_SNAKE = 'choose_your_poison.snake'
+CUSTOM_ID_EGGPLANT = 'choose_your_poison.eggplant'
+
+EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+EMOJI_CAT = BUILTIN_EMOJIS['cat']
+EMOJI_SNAKE = BUILTIN_EMOJIS['snake']
+EMOJI_EGGPLANT = BUILTIN_EMOJIS['eggplant']
+
+
+CHOOSE_YOUR_POISON_ROW = Row(
+    Button('cake', custom_id=CUSTOM_ID_CAKE, style=ButtonStyle.violet),
+    Button('cat', custom_id=CUSTOM_ID_CAT, style=ButtonStyle.gray),
+    Button('snake', custom_id=CUSTOM_ID_SNAKE, style=ButtonStyle.green),
+    Button('eggplant', custom_id=CUSTOM_ID_EGGPLANT, style=ButtonStyle.red),
+)
+
+
+CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI = {
+    CUSTOM_ID_CAKE: EMOJI_CAKE,
+    CUSTOM_ID_CAT: EMOJI_CAT,
+    CUSTOM_ID_SNAKE: EMOJI_SNAKE,
+    CUSTOM_ID_EGGPLANT: EMOJI_EGGPLANT,
+}
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def choose_your_poison():
+    """What is your weakness?"""
+    return InteractionResponse(embed=Embed('Choose your poison'), components=CHOOSE_YOUR_POISON_ROW)
+
+
+@Marisa.interactions(custom_id=[CUSTOM_ID_CAKE, CUSTOM_ID_CAT, CUSTOM_ID_SNAKE, CUSTOM_ID_EGGPLANT])
+async def poison_edit_cake(event):
+    emoji = CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI.get(event.interaction.custom_id, None)
+    if (emoji is not None):
+        return emoji.as_emoji
+
+
+
+BUTTON_ATTEND = Button('Attend', style=ButtonStyle.green)
+
+def check_is_user_unique(users, event):
+    return (event.user not in users)
+
+
+def render_joined_users(users):
+    content_parts = ['I will pick who I like the most from the attenders.\n\nAttenders:']
+    for user in users:
+        content_parts.append('\n')
+        content_parts.append(user.mention)
+    
+    return ''.join(content_parts)
+
+
+def get_liking(client_id, user_id):
+    if user_id > client_id:
+        liking = user_id-client_id
+    else:
+        liking = client_id-user_id
+    
+    return liking
+
+
+def pick_most_liked(client, users):
+    client_id = client.id
+    
+    most_liked = users[0]
+    most_liking = get_liking(client_id, most_liked.id)
+    
+    for user in users[1:]:
+        liking = get_liking(client_id, user.id)
+        if liking < most_liking:
+            most_liking = liking
+            most_liked = user
+    
+    return most_liked
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def pick(client, event):
+    """Picks who I like the most from the attenders."""
+    users = [event.user]
+    message = yield InteractionResponse(render_joined_users(users), allowed_mentions=None, components=BUTTON_ATTEND)
+    
+    try:
+        async for component_interaction in iter_component_interactions(message, timeout=60.0,
+                check=partial_func(check_is_user_unique, users)):
+            users.append(component_interaction.user)
+            
+            # limit the amount of users to 10.
+            if len(users) == 10:
+                break
+            
+            yield InteractionResponse(render_joined_users(users), allowed_mentions=None,
+                event=component_interaction)
+    
+    except TimeoutError:
+        component_interaction = None
+    
+    most_liked = pick_most_liked(client, users)
+    
+    content_parts = ['From:']
+    for user in users:
+        content_parts.append('\n')
+        content_parts.append(user.mention)
+    
+    content_parts.append('\n\nI like ')
+    content_parts.append(most_liked.mention)
+    content_parts.append(' the most.')
+    
+    content = ''.join(content_parts)
+    
+    yield InteractionResponse(content, allowed_mentions=most_liked, components=None, message=message,
+        event=component_interaction)
+
+
+
+EMOJI_PING_PONG = BUILTIN_EMOJIS['ping_pong']
+
+CUSTOM_ID_PING = 'ping_pong.ping'
+CUSTOM_ID_PONG = 'ping_pong.pong'
+
+BUTTON_PING = Button('ping', EMOJI_PING_PONG, custom_id=CUSTOM_ID_PING, style=ButtonStyle.green)
+BUTTON_PONG = Button('pong', EMOJI_PING_PONG, custom_id=CUSTOM_ID_PONG, style=ButtonStyle.violet)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def ping_pong():
+    if random() < 5.0:
+        button = BUTTON_PING
+    else:
+        button = BUTTON_PONG
+    
+    return InteractionResponse(f'**ping {EMOJI_PING_PONG:e} pong**', components=button)
+
+@Marisa.interactions(custom_id=CUSTOM_ID_PING)
+async def ping_pong_ping():
+    return InteractionResponse(components=BUTTON_PONG)
+
+@Marisa.interactions(custom_id=CUSTOM_ID_PONG)
+async def ping_pong_pong():
+    return InteractionResponse(components=BUTTON_PING)

@@ -486,7 +486,7 @@ async def emoji_role(client, event,
         abort('You must have ban users permission to use this command.')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_manage_emojis) or (not permissions.can_add_reactions):
+    if (not permissions.can_manage_emojis_and_stickers) or (not permissions.can_add_reactions):
         abort(f'{client.name_at(guild)} requires manage emojis and add reactions permissions for this command.')
     
     emoji = parse_emoji(emoji)

@@ -43,13 +43,7 @@ async def load(name:str=None):
     if extension.locked:
         return 'The extension is locked, probably for reason.'
     
-    try:
-        await EXTENSION_LOADER.load(extension.name)
-    except BaseException as err:
-        result = repr(err)
-        if len(result) > 2000:
-             result = result[-2000:]
-        return result
+    await EXTENSION_LOADER.load(extension.name)
     
     return 'Extension successfully loaded.'
 
@@ -65,14 +59,7 @@ async def register_extension(name:str=None):
     if (EXTENSION_LOADER.get_extension(name) is not None):
         return 'There is already an extension added with the given name.'
     
-    try:
-        EXTENSION_LOADER.add(name)
-    except BaseException as err:
-        result = repr(err)
-        if len(result) > 2000:
-            result = result[-2000:]
-        
-        return result
+    EXTENSION_LOADER.add(name)
     
     return 'Extension successfully loaded.'
 
@@ -92,14 +79,7 @@ async def reload(name:str=None):
     if extension.locked:
         return 'The extension is locked, probably for reason.'
     
-    try:
-        await EXTENSION_LOADER.reload(extension.name)
-    except BaseException as err:
-        result = repr(err)
-        if len(result) > 2000:
-            result = result[-2000:]
-        
-        return result
+    await EXTENSION_LOADER.reload(extension.name)
         
     return 'Extension successfully reloaded.'
 
@@ -119,14 +99,7 @@ async def unload(name:str=None):
     if extension.locked:
         return 'The extension is locked, probably for reason.'
     
-    try:
-        await EXTENSION_LOADER.unload(extension.name)
-    except BaseException as err:
-        result = repr(err)
-        if len(result) > 2000:
-            result = result[-2000:]
-        
-        return result
+    await EXTENSION_LOADER.unload(extension.name)
         
     return 'Extension successfully unloaded.'
 

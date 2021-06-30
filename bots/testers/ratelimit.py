@@ -539,10 +539,16 @@ async def client_connection_get_all(client,):
         f'{API_ENDPOINT}/users/@me/connections',
         )
 
-async def client_edit_nick(client,guild,nick,):
+async def client_guild_profile_nick_edit(client, guild, nick,):
     guild_id=guild.id
     return await bypass_request(client, METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/@me/nick',
+        {'nick':nick},)
+
+async def client_guild_profile_edit(client, guild, nick,):
+    guild_id=guild.id
+    return await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/members/@me',
         {'nick':nick},)
 
 async def client_gateway_bot(client,):
@@ -4107,7 +4113,7 @@ async def rate_limit_test0086(client, message, name:str,):
     """
     Edits my nick desu.
     
-    Please also give an mame.
+    Please also give a name.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test0086') as RLT:
@@ -4115,7 +4121,7 @@ async def rate_limit_test0086(client, message, name:str,):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await client_edit_nick(client, guild, name)
+        await client_guild_profile_nick_edit(client, guild, name)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0087(client, message, user:'user',):
@@ -5166,7 +5172,7 @@ async def rate_limit_test0129(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_create_private(client, channel, 9, 'ayaya')
+        await thread_create_private(client, channel, 11, 'ayaya')
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0130(client, message):
@@ -5475,3 +5481,38 @@ async def rate_limit_test0148(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         await sticker_get(client, 819131232642007062)
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0149(client, message, name:str,):
+    """
+    Edits my nick desu.
+    
+    Please also give a name.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0149') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await client_guild_profile_edit(client, guild, name)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0150(client, message, name:str, guild_id:str=''):
+    """
+    Edits my nick in 2 guilds. Please give a name and the second guild.
+    """
+    channel = message.channel
+    with RLTCTX(client,channel,'rate_limit_test0150') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        await client_guild_profile_edit(client, guild_1, name)
+        await client_guild_profile_edit(client, guild_2, name)

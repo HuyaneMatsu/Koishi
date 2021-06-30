@@ -13,7 +13,7 @@ from hata.ext.slash import abort, Row, Button, ButtonStyle, Timeouter
 from sqlalchemy.sql import select
 
 from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, currency_model, CURRENCY_TABLE, ds_v2_result_model, \
-    DS_V2_RESULT_TABLE, ds_model
+    DS_V2_RESULT_TABLE
 
 from bot_utils.shared import PATH__KOISHI, GUILD__NEKO_DUNGEON
 
@@ -2135,7 +2135,7 @@ class GameState:
         steps = len(self.history)
         
         best = self.best
-        if (best == -1) or (best < steps):
+        if (best == -1) or (steps < best):
             self.best = steps
         
         stage = self.stage
@@ -3971,7 +3971,7 @@ class DungeonSweeperRunner:
 SLASH_CLIENT : Client
 
 DUNGEON_SWEEPER = SLASH_CLIENT.interactions(None,
-    name = 'ds-v2',
+    name = 'ds',
     description = 'Touhou themed puzzle game.',
     guild = GUILD__NEKO_DUNGEON,
 )
@@ -3989,11 +3989,6 @@ async def rules(client, event):
 @DUNGEON_SWEEPER.interactions(is_default=True)
 async def play(client, event):
     """Starts the game"""
-    
-    """
-    if not client.is_owner(event.user):
-        abort('Test command, owner only.')
-    """
     permissions = event.channel.cached_permissions_for(client)
     if not (permissions.can_send_messages and permissions.can_add_reactions and permissions.can_use_external_emojis \
             and permissions.can_manage_messages):
@@ -4005,56 +4000,3 @@ async def play(client, event):
         await DungeonSweeperRunner(client, event)
     else:
         await game.renew(event)
-
-
-def v1_position_to_v2(position):
-    if position < 34:
-        position += 1
-    elif position < 67:
-        position -= 1
-    else:
-        position -= 3
-    
-    return position
-
-async def transfer_results_task():
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select([ds_model.user_id, ds_model.position, ds_model.data])
-        )
-        
-        results = await response.fetchall()
-        for result in results:
-            user_id, position, data = result
-            selected_stage_id = v1_position_to_v2(position)
-            
-            response = await connector.execute(
-                DS_V2_TABLE.insert(). \
-                values(
-                    user_id           = user_id,
-                    game_state        = None,
-                    selected_stage_id = selected_stage_id,
-
-                ). \
-                returning(ds_v2_model.id)
-            )
-            result = await response.fetchone()
-            
-            entry_id = result[0]
-            
-            for position in range(0, 400, 1):
-                steps = int.from_bytes(data[position<<1:(position+1)<<1], byteorder='big')
-                if steps:
-                    stage_id = v1_position_to_v2(position)
-                    await connector.execute(
-                        DS_V2_RESULT_TABLE.insert(). \
-                        values(
-                            ds_v2_entry_id = entry_id,
-                            stage_id = stage_id,
-                            best = steps,
-                        )
-                    )
-
-
-def transfer_results_():
-    KOKORO.run(transfer_results_task())

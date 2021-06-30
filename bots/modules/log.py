@@ -161,7 +161,7 @@ async def logger(client, message):
                 content_parts.append(nick)
                 content_parts.append('] ')
             content_parts.append('(')
-            content_parts.append(repr(author.id))
+            content_parts.append(repr(user.id))
             content_parts.append(')')
             
             if index == limit:
