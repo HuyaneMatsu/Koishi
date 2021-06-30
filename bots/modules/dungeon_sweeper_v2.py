@@ -2217,7 +2217,7 @@ class GameState:
             data[JSON_KEY_RUNNER_STATE_STAGE_BEST] = best
         
         if not self.has_skill:
-            data[JSON_KEY_RUNNER_STATE_STAGE_ID] = False
+            data[JSON_KEY_RUNNER_STATE_HAS_SKILL] = False
         
         if not self.next_skill:
             data[JSON_KEY_RUNNER_STATE_NEXT_SKILL] = False
