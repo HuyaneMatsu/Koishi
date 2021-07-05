@@ -564,7 +564,7 @@ class AutoReactRoleGUI:
                     message = await client.message_create(channel_or_event, embed=embed)
                 else:
                     if channel_or_event.is_unanswered():
-                        await client.interaction_response_message_create(channel_or_event)
+                        await client.interaction_application_command_acknowledge(channel_or_event)
                     
                     message = await client.interaction_followup_message_create(channel_or_event, embed=embed)
             else:

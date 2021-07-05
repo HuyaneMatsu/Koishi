@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
-    parse_message_reference, MESSAGES, CHANNELS
+    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER
 
 from hata.ext.command_utils import Pagination
 from hata.ext.prettyprint import pchunkify
@@ -230,14 +230,13 @@ async def message_(client, event,
             try:
                 channel = CHANNELS[channel_id]
             except KeyError:
-                yield Embed('Ohoho', 'I have no access to the channel.', color=UTILITY_COLOR)
+                abort('I have no access to the channel.')
                 return
         else:
             channel = event.channel
         
         if not channel.cached_permissions_for(client).can_read_message_history:
-            yield Embed('Ohoho', 'I have no permission to get that message.', color=UTILITY_COLOR)
-            return
+            abort('I have no permission to get that message.')
         
         # We only really need `channel_id` and `guild_id`, so we can ignore `guild_id`.
         
@@ -252,8 +251,6 @@ async def message_(client, event,
             getter_coroutine = None
     
     if (getter_coroutine is not None):
-        yield
-        
         try:
             response = await getter_coroutine
             if raw:
@@ -269,16 +266,13 @@ async def message_(client, event,
                     ERROR_CODES.unknown_message, # channel deleted
                         ):
                 # The message is already deleted.
-                yield Embed('OOf', 'The referenced message is already yeeted.', color=UTILITY_COLOR)
-                return
+                abort('The referenced message is already yeeted.')
             
             if err.code == ERROR_CODES.missing_access: # client removed
-                # This is not nice.
-                return
+                abort('The client is not in the guild / channel')
             
             if err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
-                yield Embed('Ohoho', 'I have no permission to get that message.', color=UTILITY_COLOR)
-                return
+                abort('I have no permission to get that message.')
             
             raise
     
@@ -639,12 +633,12 @@ RED_HEART = BUILTIN_EMOJIS['heart']
 BLACK_HEART = BUILTIN_EMOJIS['black_heart']
 GIFT_HEART = BUILTIN_EMOJIS['gift_heart']
 
-def add_guild_all_field(guild, embed, even_if_empty):
+def add_guild_generic_field(guild, embed, even_if_empty):
     add_guild_info_field(guild, embed, False)
     add_guild_counts_field(guild, embed, False)
-    add_guild_emojis_field(guild ,embed, False)
+    add_guild_emojis_field(guild, embed, False)
+    add_guild_stickers_field(guild, embed, False)
     add_guild_users_field(guild, embed, False)
-    add_guild_boosters_field(guild, embed, False)
 
 
 def add_guild_info_field(guild, embed, even_if_empty):
@@ -747,8 +741,10 @@ def add_guild_emojis_field(guild, embed, even_if_empty):
         sections_parts.append(str(normal_static))
         sections_parts.append('** [')
         sections_parts.append(str(emoji_limit-normal_static))
-        sections_parts.append(' free]\n')
-        sections_parts.append('**Animated emojis: ')
+        sections_parts.append(
+            ' free]\n'
+            '**Animated emojis: '
+        )
         sections_parts.append(str(normal_animated))
         sections_parts.append('** [')
         sections_parts.append(str(emoji_limit-normal_animated))
@@ -768,6 +764,35 @@ def add_guild_emojis_field(guild, embed, even_if_empty):
     
     elif even_if_empty:
         embed.add_field('Emojis', '*The guild has no emojis*')
+
+def add_guild_stickers_field(guild, embed, even_if_empty):
+    sticker_count = len(guild.stickers)
+    if sticker_count:
+        sections_parts = [
+            '**Total: ', str(sticker_count), '** [', str(guild.sticker_limit-sticker_count), ' free]\n'
+            '**Static stickers: '
+        ]
+        
+        static_count, animated_count, lottie_count = guild.sticker_count
+        
+        sections_parts.append(str(static_count))
+        sections_parts.append(
+            '**\n'
+            '**Animated stickers: '
+        )
+        sections_parts.append(str(animated_count))
+        sections_parts.append('**')
+        
+        if lottie_count:
+            sections_parts.append('\n**Lottie stickers:')
+            sections_parts.append(str(lottie_count))
+            sections_parts.append('**')
+
+        embed.add_field('Stickers', ''.join(sections_parts))
+    
+    elif even_if_empty:
+        embed.add_field('Stickers', '*The guild has no stickers*')
+
 
 def add_guild_users_field(guild, embed, even_if_empty):
     # most usual first
@@ -821,18 +846,21 @@ def add_guild_boosters_field(guild, embed, even_if_empty):
     elif even_if_empty:
         embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken nuggets.*')
 
+DEFAULT_GUILD_FILED = 'generic'
+
 GUILD_FIELDS = {
-    'all'      : add_guild_all_field      ,
-    'info'     : add_guild_info_field     ,
-    'counts'   : add_guild_counts_field   ,
-    'emojis'   : add_guild_emojis_field   ,
-    'users'    : add_guild_users_field    ,
-    'boosters' : add_guild_boosters_field ,
+    DEFAULT_GUILD_FILED : add_guild_generic_field  ,
+    'info'              : add_guild_info_field     ,
+    'counts'            : add_guild_counts_field   ,
+    'emojis'            : add_guild_emojis_field   ,
+    'stickers'          : add_guild_stickers_field ,
+    'users'             : add_guild_users_field    ,
+    'boosters'          : add_guild_boosters_field ,
 }
 
 @SLASH_CLIENT.interactions(name='guild', is_global=True)
 async def guild_(event,
-        field: ([(name, name) for name in GUILD_FIELDS], 'Which field of the info should I show?') = 'all',
+        field: ([(name, name) for name in GUILD_FIELDS], 'Which fields should I show?') = DEFAULT_GUILD_FILED,
             ):
     """Shows some information about the guild."""
     guild = event.guild
@@ -1244,3 +1272,156 @@ async def all_users(client, event,):
     
     
     await Pagination(client, event, embeds)
+
+
+def build_sticker_embed(sticker):
+
+    sticker_url = sticker.url_as(size=4096)
+    
+    description_parts = []
+    
+    sticker_description = sticker.description
+    if (sticker_description is not None):
+        description_parts.append(sticker_description)
+        description_parts.append('\n\n')
+    
+    
+    tags = sticker.tags
+    if (tags is not None):
+        description_parts.append('**Tags:**: ')
+        description_parts.append(', '.join(sorted(tags)))
+        description_parts.append('\n')
+    
+    
+    description_parts.append('**Id**: ')
+    description_parts.append(str(sticker.id))
+    description_parts.append('\n')
+    
+    created_at = sticker.created_at
+    description_parts.append('**Created at:** ')
+    description_parts.append(created_at.__format__(DATETIME_FORMAT_CODE))
+    description_parts.append(' *[')
+    description_parts.append(elapsed_time(created_at))
+    description_parts.append(']*\n')
+    
+    
+    sticker_type = sticker.type
+    description_parts.append('**Type:** ')
+    description_parts.append(sticker_type.name)
+    description_parts.append(' (')
+    description_parts.append(str(sticker_type.value))
+    description_parts.append(')\n')
+    
+    
+    sticker_format = sticker.format
+    description_parts.append('**Format:** ')
+    description_parts.append(sticker_format.name)
+    description_parts.append(' (')
+    description_parts.append(str(sticker_format.value))
+    description_parts.append(')')
+    
+    
+    sort_value = sticker.sort_value
+    if sort_value:
+        description_parts.append('\n**Sort value:** ')
+        description_parts.append(str(sort_value))
+    
+    
+    user = sticker.user
+    if (user is not ZEROUSER):
+        description_parts.append('\n**Creator:** ')
+        description_parts.append(user.full_name)
+        description_parts.append(' (')
+        description_parts.append(str(user.id))
+        description_parts.append(')')
+    
+    
+    guild_id = sticker.guild_id
+    if guild_id:
+        description_parts.append('\n**Guild id:** ')
+        description_parts.append(str(guild_id))
+    
+    
+    pack_id = sticker.pack_id
+    if pack_id:
+        description_parts.append('\n**pack id:** ')
+        description_parts.append(str(pack_id))
+    
+    
+    description = ''.join(description_parts)
+    
+    embed = Embed(sticker.name, description, url=sticker_url)
+    if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
+        embed.add_image(sticker_url)
+    
+    return embed
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
+async def sticker_(client, event,
+        message : ('str', 'Link to the message'),
+            ):
+    """Shows up the message's sticker."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER):
+        abort(f'You must have {ROLE__NEKO_DUNGEON__TESTER.mention} to invoke this command.')
+    
+    message_reference = parse_message_reference(message)
+    if message_reference is None:
+        abort('Could not identify the message.')
+    
+    guild_id, channel_id, message_id = message_reference
+    try:
+        message = MESSAGES[message_id]
+    except KeyError:
+        if channel_id:
+            try:
+                channel = CHANNELS[channel_id]
+            except KeyError:
+                abort('I have no access to the channel.')
+                return
+        else:
+            channel = event.channel
+        
+        if not channel.cached_permissions_for(client).can_read_message_history:
+            abort('I have no permission to get that message.')
+        
+        try:
+            message = await client.message_get(channel, message_id)
+        except BaseException as err:
+            if isinstance(err, ConnectionError):
+                return
+            
+            if isinstance(err, DiscordException):
+                if err.code in (
+                        ERROR_CODES.unknown_channel, # message deleted
+                        ERROR_CODES.unknown_message, # channel deleted
+                            ):
+                    # The message is already deleted.
+                    abort('The referenced message is already yeeted.')
+                
+                if err.code == ERROR_CODES.missing_access: # client removed
+                    abort('The client is not in the guild / channel')
+                
+                if err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
+                    abort('I have no permission to get that message.')
+            
+            raise
+    
+    sticker = message.sticker
+    if sticker is None:
+        abort('The message has no sticker.')
+    
+    try:
+        await client.sticker_get(sticker)
+    except BaseException as err:
+        if isinstance(err, ConnectionError):
+            return
+        
+        if isinstance(err, DiscordException):
+            if err.code == ERROR_CODES.unknown_sticker:
+                abort(f'Sticker: {sticker.id} is already deleted.')
+        
+        raise
+    
+    return build_sticker_embed(sticker)

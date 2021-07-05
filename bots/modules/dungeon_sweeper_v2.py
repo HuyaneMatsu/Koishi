@@ -29,10 +29,11 @@ STAGE_STEP_MULTI_STEP_BUTTON = 10
 
 GUI_TIMEOUT          = 600.0
 
-GUI_STATE_READY      = 1
-GUI_STATE_EDITING    = 2
+GUI_STATE_NONE = 0
+GUI_STATE_READY = 1
+GUI_STATE_EDITING = 2
 GUI_STATE_CANCELLING = 3
-GUI_STATE_CANCELLED  = 4
+GUI_STATE_CANCELLED = 4
 GUI_STATE_SWITCHING_CONTEXT = 5
 
 GUI_STATE_VALUE_TO_NAME = {
@@ -40,13 +41,13 @@ GUI_STATE_VALUE_TO_NAME = {
     GUI_STATE_EDITING: 'editing',
     GUI_STATE_CANCELLING: 'cancelling',
     GUI_STATE_CANCELLED: 'cancelled',
-    GUI_STATE_SWITCHING_CONTEXT: 'switching context'
+    GUI_STATE_SWITCHING_CONTEXT: 'switching context',
 }
 
-RUNNER_STATE_MENU      = 1
-RUNNER_STATE_PLAYING   = 2
-RUNNER_STATE_END_SCREEN= 3
-RUNNER_STATE_CLOSED    = 4
+RUNNER_STATE_MENU = 1
+RUNNER_STATE_PLAYING = 2
+RUNNER_STATE_END_SCREEN = 3
+RUNNER_STATE_CLOSED = 4
 
 RUNNER_STATE_VALUE_TO_NAME = {
     RUNNER_STATE_MENU: 'menu',
@@ -3511,7 +3512,7 @@ class DungeonSweeperRunner:
     
     Attributes
     ----------
-    _canceller : None` or `Function`
+    _canceller : None` or `CoroutineFunction`
         Canceller set as `._canceller_function``, meanwhile the gui is not cancelled.
     
     _gui_state : `int`
@@ -3521,6 +3522,8 @@ class DungeonSweeperRunner:
         
         +-------------------------------+-------+
         | Respective name               | Value |
+        +===============================+=======+
+        | GUI_STATE_NONE                | 0     |
         +===============================+=======+
         | GUI_STATE_READY               | 1     |
         +-------------------------------+-------+
@@ -3752,8 +3755,6 @@ class DungeonSweeperRunner:
         
         Parameters
         ----------
-        client : ``Client``
-            The source client.
         event : ``InteractionEvent``
             The received client.
         """
@@ -3869,7 +3870,7 @@ class DungeonSweeperRunner:
         
         if not await self._handle_close_exception(exception):
             await client.events.error(client, f'{self!r}._canceller_function', exception)
-    
+
     
     async def _handle_close_exception(self, exception):
         """
@@ -3915,7 +3916,7 @@ class DungeonSweeperRunner:
         
         if isinstance(exception, TimeoutError):
             try:
-                await client.message_edit(message, embed=message.embed, components=None)
+                await client.message_edit(message, components=None)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     # no internet

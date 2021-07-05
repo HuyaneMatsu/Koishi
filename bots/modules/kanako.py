@@ -901,7 +901,7 @@ class KanakoPagination:
         
         if is_interaction:
             if event_or_channel.is_unanswered():
-                await client.interaction_response_message_create(event_or_channel)
+                await client.interaction_application_command_acknowledge(event_or_channel)
             
             message = await client.interaction_followup_message_create(event_or_channel, embed=pages[0])
         

@@ -251,23 +251,18 @@ async def channeling_start(client, message, channel_id:int):
         
         pairs = []
         if channeling_1 is None:
-            webhooks = await client.webhook_get_all_channel(channel_1)
-            for webhook in webhooks:
-                if webhook.type is WebhookType.bot:
-                    break
-            else:
+            webhook = await client.webhook_get_own_channel(channel_1)
+            if (webhook is None):
                 webhook = await client.webhook_create(channel_1, 'Love You')
-            pairs.append((channel_1,webhook,),)
+            
+            pairs.append((channel_1, webhook,),)
         else:
             channeling_1.cancel(None)
             pairs.extend(channeling_1.pairs)
         
         if channeling_2 is None:
-            webhooks = await client.webhook_get_all_channel(channel_2)
-            for webhook in webhooks:
-                if webhook.type is WebhookType.bot:
-                    break
-            else:
+            webhook = await client.webhook_get_own_channel(channel_2)
+            if (webhook is None):
                 webhook = await client.webhook_create(channel_2, 'Love You')
             pairs.append((channel_2, webhook,),)
         else:

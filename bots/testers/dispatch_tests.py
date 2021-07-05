@@ -3,7 +3,7 @@ from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed,
     list_difference, ActivityChange, KOKORO, Client
 from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
 from hata.ext.prettyprint import pretty_print
-from hata.ext.command_utils import Pagination
+from hata.ext.command_utils import Pagination, Closer
 from hata.backend.utils import MethodType
 from hata.ext.commands_v2 import Command
 
@@ -482,7 +482,7 @@ class dispatch_tester:
         result=[]
         result.append(f'Emoji edited: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         for key, value in old.items():
-            if key=='roles':
+            if key == 'roles':
                 removed, added = list_difference(value, emoji.roles)
                 
                 if removed:
@@ -502,7 +502,41 @@ class dispatch_tester:
         
         pages = [Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout=120.)
-
+    
+    
+    @classmethod
+    async def sticker_create(self, client, sticker):
+        Task(self.old_events['sticker_create'](client, sticker), KOKORO)
+        if self.channel is None:
+            return
+        
+        embed = Embed(description=f'Sticker created: {sticker.name} {sticker.id} at guild {sticker.guild!r}')
+        await Closer(client, self.channel, embed, timeout=120.)
+    
+    @classmethod
+    async def sticker_delete(self,client, sticker, guild):
+        Task(self.old_events['sticker_delete'](client, sticker, guild), KOKORO)
+        if self.channel is None:
+            return
+        
+        embed = Embed(description=f'Sticker deleted: {sticker.name} {sticker.id} at guild {guild!r}')
+        await Closer(client, self.channel, embed, timeout=120.)
+    
+    @classmethod
+    async def sticker_edit(self,client, sticker, old):
+        Task(self.old_events['sticker_edit'](client, sticker, old), KOKORO)
+        if self.channel is None:
+            return
+        
+        result = []
+        result.append(f'Emoji edited: {sticker.name} {sticker.id} at guild {sticker.guild!r}')
+        for key, value in old.items():
+            result.append(f'{key}: {value} -> {getattr(sticker, key)}')
+            continue
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
+        await Pagination(client, self.channel, pages, timeout=120.)
+    
     @classmethod
     async def guild_user_add(self,client, guild, user):
         Task(self.old_events['guild_user_add'](client, guild, user), KOKORO)
@@ -990,6 +1024,9 @@ async def switch_description(client, message):
         '- `stage_create`\n'
         '- `stage_edit`\n'
         '- `stage_delete`\n'
+        '- `sticker_create`\n'
+        '- `sticker_delete`\n'
+        '- `sticker_edit`\n'
         f'For setting channel, use: `{prefix}here`'
             ), color=DISPATCH_COLOR).add_footer(
             'Owner only!')

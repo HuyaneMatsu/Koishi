@@ -1,5 +1,4 @@
 import re, functools
-from random import random
 from datetime import datetime, timedelta
 from random import random, choice
 from time import perf_counter

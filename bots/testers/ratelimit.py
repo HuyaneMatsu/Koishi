@@ -133,19 +133,19 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
     return None
 
 class RLTCTX: #rate limit tester context manager
-    active_ctx=None
+    active_ctx = None
     
     __slots__ = ('task', 'client', 'channel', 'title',)
     
     def __new__(cls,client,channel,title):
-        thread=current_thread()
+        thread = current_thread()
         if type(thread) is not EventThread:
             raise RuntimeError(f'{cls.__name__} can be created only at an {EventThread.__name__}')
-        current_task=thread.current_task
+        current_task = thread.current_task
         if current_task is None:
             raise RuntimeError(f'{cls.__name__} was created outside of a task')
             
-        self=object.__new__(cls)
+        self = object.__new__(cls)
         self.task=current_task
         self.client=client
         self.channel=channel
@@ -1173,7 +1173,7 @@ async def channel_create(client,guild, name, category=None, type_=0):
         data,)
     return CHANNEL_TYPES.get(data['type'], ChannelGuildUndefined)(data, client, guild)
 
-async def guild_emoji_get_all(client,guild,):
+async def emoji_guild_get_all(client,guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis',
@@ -2249,7 +2249,7 @@ async def sticker_guild_create(client, guild, name, description, file, tags):
     form.add_field('name', name)
     form.add_field('description', description)
     form.add_field('tags', ', '.join(tags))
-    form.add_field('file', file, filename='file.png', content_type='application/octet-stream')
+    form.add_field('file', file, filename='file.png', content_type='image/png')
     
     guild_id = guild.id
     
@@ -2267,8 +2267,6 @@ async def sticker_guild_delete(client, guild, sticker_id):
     sticker_data = await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}'
     )
-    
-    return Sticker(sticker_data)
 
 
 async def sticker_get(client, sticker_id):
@@ -2277,6 +2275,34 @@ async def sticker_get(client, sticker_id):
     )
     
     return Sticker(sticker_data)
+
+
+async def sticker_guild_edit(client, guild, sticker, name=None, description=None, tags=None):
+    if tags is None:
+        tags = ', '.join(sticker.tags)
+    else:
+        tags = ', '.join(tags)
+    
+    if name is None:
+        name = sticker.name
+    
+    if description is None:
+        description = sticker.description
+    
+    
+    data = {
+        'name': name,
+        'description': description,
+        'tags': tags,
+    }
+    
+    guild_id = guild.id
+    sticker_id = sticker.id
+    
+    sticker_data = await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}',
+        data
+    )
 
 
 @RATE_LIMIT_COMMANDS
@@ -3563,7 +3589,7 @@ async def rate_limit_test0052(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await guild_emoji_get_all(client, guild)
+        await emoji_guild_get_all(client, guild)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0053(client, message):
@@ -5413,7 +5439,7 @@ async def rate_limit_test0144(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0145(client, message):
+async def rate_limit_test0145(client, message, sticker_id:int=None):
     """
     Requests a sticker. Defaults to `0`.
     """
@@ -5423,11 +5449,14 @@ async def rate_limit_test0145(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await sticker_guild_get(client, guild, 0)
+        if sticker_id is None:
+            await RLT.send('`sticker_id` parameter not satisfied.')
+        
+        await sticker_guild_get(client, guild, sticker_id)
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0146(client, message, emoji: 'emoji' = None):
+async def rate_limit_test0146(client, message, emoji1: 'emoji' = None, emoji2: 'emoji'=None):
     """
     Creates a sticker from an emoji.
     """
@@ -5440,21 +5469,30 @@ async def rate_limit_test0146(client, message, emoji: 'emoji' = None):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        if emoji is None:
+        if emoji1 is None:
             await RLT.send('Please give an emoji to mimic.')
         
-        async with client.http.get(emoji.url) as response:
+        if (emoji1.is_unicode_emoji()):
+            await RLT.send('First emoji must be custom emoji.')
+        
+        if emoji2 is None:
+            await RLT.send('Please give a second emoji to use as tag.')
+        
+        if (emoji2.is_custom_emoji()):
+            await RLT.send('Second emoji must be unicode emoji.')
+        
+        async with client.http.get(emoji1.url) as response:
             file = await response.read()
         
-        name = emoji.name
+        name = emoji1.name
         description = name
-        tags = name
+        tags = [emoji2.name, 'egg']
         
         await sticker_guild_create(client, guild, name, description, file, tags)
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0147(client, message):
+async def rate_limit_test0147(client, message, sticker_id:int=None):
     """
     Deletes a sticker.
     """
@@ -5467,7 +5505,10 @@ async def rate_limit_test0147(client, message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        await sticker_guild_delete(client, guild, 0)
+        if sticker_id is None:
+            await RLT.send('`sticker_id` parameter not satisfied.')
+        
+        await sticker_guild_delete(client, guild, sticker_id)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5516,3 +5557,29 @@ async def rate_limit_test0150(client, message, name:str, guild_id:str=''):
         
         await client_guild_profile_edit(client, guild_1, name)
         await client_guild_profile_edit(client, guild_2, name)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0151(client, message, sticker_id:int=None, name:str=None):
+    """
+    Edits a sticker.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0151') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not channel.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission to complete this command.')
+        
+        if sticker_id is None:
+            await RLT.send('`sticker_id` parameter not satisfied.')
+        
+        if name is None:
+            await RLT.send('Please also pass a new name for teh sticker.')
+        
+        sticker = await client.sticker_get(sticker_id)
+        
+        await sticker_guild_edit(client, guild, sticker, name=name)
+

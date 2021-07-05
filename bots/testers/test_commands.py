@@ -181,18 +181,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     
     http_type.webhook_message_create = replace_webhook_message_create
     
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.avatar_type is ICON_TYPE_NONE:
-            continue
-        
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
-        executor_webhook = None
-    
+    executor_webhook = await client.webhook_get_own_channel(channel)
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'tester')
     
@@ -293,15 +282,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     http_type.webhook_message_create = replace_webhook_message_create
     
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
-        executor_webhook = None
-    
+    executor_webhook = await client.webhook_get_own_channel(channel)
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'tester')
     
@@ -336,15 +317,7 @@ async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
     
     content = str(random_id())
     
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
-        executor_webhook = None
-    
+    executor_webhook = await client.webhook_get_own_channel(channel)
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'tester')
     
@@ -1079,13 +1052,8 @@ async def test_webhook_message_edit_0(client, message):
     Creates a message with a webhook, then edits it's content out with `None`.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
@@ -1097,13 +1065,8 @@ async def test_webhook_message_edit_1(client, message):
     Creates a message with a webhook, then edits it's content with `'ayaya''`.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
@@ -1115,13 +1078,8 @@ async def test_webhook_message_edit_2(client, message):
     Creates a message with a webhook, then edits it's content out and changing sending it's embeds.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
@@ -1133,13 +1091,8 @@ async def test_webhook_message_edit_3(client, message):
     Creates a message with a webhook, then edits it's embeds out.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
@@ -1154,13 +1107,8 @@ async def test_webhook_message_edit_4(client, message):
     Note, that embed data is not included now.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', wait=True)
@@ -1172,13 +1120,8 @@ async def test_webhook_message_edit_5(client, message):
     Creates a message with a webhook, then edits it to empty.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-        
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
@@ -1190,13 +1133,8 @@ async def test_webhook_message_edit_6(client, message):
     Creates a message with a webhook, then removes it's embeds with `None`.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-    
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
@@ -1208,13 +1146,8 @@ async def test_webhook_message_delete(client, message):
     Creates a message with a webhook, then deletes it.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-    
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
@@ -1228,13 +1161,8 @@ async def test_webhook_message_edit_7(client, message):
     Note that this works only with the current implementation (2020.11.17 20:55).
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-    
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, message.author.mention, allowed_mentions=None, wait=True)
@@ -1246,13 +1174,8 @@ async def test_webhook_message_edit_8(client, message):
     Creates a message with a webhook, then edits it to the same value.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-    
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'ayaya', wait=True)
@@ -1264,13 +1187,8 @@ async def test_webhook_message_edit_9(client, message):
     Creates a message with a webhook, then edits it to the same value. (embed version)
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-    
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, embed=Embed('cake'), wait=True)
@@ -2013,13 +1931,8 @@ async def test_webhook_message_edit_10(client, message):
     Creates a message with a webhook, then adds attachments to it.
     """
     channel = message.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-    
-    else:
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
     new_message = await client.webhook_message_create(executor_webhook, 'testing', wait=True)
