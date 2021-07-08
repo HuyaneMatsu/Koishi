@@ -13,7 +13,7 @@ from hata.ext.slash import InteractionResponse
 
 SLASH_CLIENT: Client
 
-HATA_DOCS_BASE_URL = 'https://huyanematsu.pythonanywhere.com/docs/'
+HATA_DOCS_BASE_URL = 'https://www.astil.dev/project/hata/docs/'
 HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)

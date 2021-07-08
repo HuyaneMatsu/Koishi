@@ -25,14 +25,14 @@ UNIT_TYPE_ORDER_PRIORITY_TYPE_NAME_RELATION = {
     PropertyUnit : ('property', UNIT_TYPE_ORDER_PRIORITY_PROPERTY),
     InstanceAttributeUnit : ('attribute', UNIT_TYPE_ORDER_PRIORITY_INSTANCE_ATTRIBUTE),
     ClassAttributeUnit : ('class attribute', UNIT_TYPE_ORDER_PRIORITY_CLASS_ATTRIBUTE),
-        }
+}
 
 CLASS_ATTRIBUTE_SECTION_PRIORITIES = {
     'Class Attributes' : 0,
     'Type Attributes' : 1,
     'Attributes' : 2,
     'Instance Attributes' : 3,
-        }
+}
 
 CLASS_ATTRIBUTE_SECTION_DEFAULT = 4
 

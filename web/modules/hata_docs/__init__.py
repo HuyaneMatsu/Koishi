@@ -17,8 +17,8 @@ from .forms import SearchForm
 from .utils import get_back_path, get_searched_info, UNIT_TYPE_ORDER_PRIORITY_TYPE, build_js_structure, \
     build_html_structure
 
-URL_PREFIX = '/docs'
-ROUTES = Blueprint('docs', 'hata_docs', url_prefix=URL_PREFIX)
+URL_PREFIX = '/project/hata/docs'
+ROUTES = Blueprint('docs', '', url_prefix=URL_PREFIX)
 
 
 set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_OPERATOR, 'c_py_operator')
@@ -170,7 +170,7 @@ def api_search():
                 'name' : name,
                 'url' : url,
                 'type' : type_,
-                    }
+            }
             
             if (preview is not None):
                element['preview'] = preview

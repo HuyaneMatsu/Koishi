@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-import json
+import json, re
 from math import ceil
 from time import perf_counter
 from functools import partial as partial_func
@@ -7,20 +6,22 @@ from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
 
 
-from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, \
+from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, Task, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
-    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER
+    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout
 
 from hata.ext.command_utils import Pagination
 from hata.ext.prettyprint import pchunkify
-from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row
+from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, ButtonStyle, \
+    wait_for_component_interaction
 
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 
 from bot_utils.tools import PAGINATION_5PN
-from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR
+from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, \
+    ROLE__NEKO_DUNGEON__ADMIN
 
 UTILITY_COLOR = Color(0x5dc66f)
 
@@ -1357,7 +1358,7 @@ def build_sticker_embed(sticker):
     return embed
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@SLASH_CLIENT.interactions(is_global=True, allow_by_default=False)
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
 async def sticker_(client, event,
         message : ('str', 'Link to the message'),
@@ -1425,3 +1426,393 @@ async def sticker_(client, event,
         raise
     
     return build_sticker_embed(sticker)
+
+ip_middle_octet = '(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5]))'
+ip_last_octet = '(?:\.(?:0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5]))'
+
+
+URL_RP = re.compile(
+    # protocol identifier
+    '(?:(?:https?|ftp)://)'
+    # user:pass authentication
+    '(?:[-a-z\u00a1-\uffff0-9._~%!$&\'()*+,;=:]+'
+    '(?::[-a-z0-9._~%!$&\'()*+,;=:]*)?@)?'
+    '(?:'
+    '(?:'
+    # IP address exclusion
+    # private & local networks
+    '(?:(?:10|127)(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])))|'
+    '(?:(?:169\.254|192\.168)(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5]))(?:\.(?:0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])))|'
+    '(?:172\.(?:1[6-9]|2\d|3[0-1])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5]))(?:\.(?:0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5]))))'
+    '|'
+    # private & local hosts
+    '(?:localhost)'
+    '|'
+    # IP address dotted notation octets
+    # excludes loop back network 0.0.0.0
+    # excludes reserved space >= 224.0.0.0
+    # excludes network & broadcast addresses
+    # (first & last IP address of each class)
+    '(?:'
+    '(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])'
+    '(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}'
+    '(?:\.(?:0|[1-9]\d?|1\d\d|2[0-4]\d|25[0-5])))'
+    '|'
+    # IPv6 RegEx
+    '\[('
+    # 1:2:3:4:5:6:7:8
+    '([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|'
+    # 1::                              1:2:3:4:5:6:7::
+    '([0-9a-fA-F]{1,4}:){1,7}:|'
+    # 1::8             1:2:3:4:5:6::8  1:2:3:4:5:6::8
+    '([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|'
+    # 1::7:8           1:2:3:4:5::7:8  1:2:3:4:5::8
+    '([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|'
+    # 1::6:7:8         1:2:3:4::6:7:8  1:2:3:4::8
+    '([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|'
+    # 1::5:6:7:8       1:2:3::5:6:7:8  1:2:3::8
+    '([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|'
+    # 1::4:5:6:7:8     1:2::4:5:6:7:8  1:2::8
+    '([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|'
+    # 1::3:4:5:6:7:8   1::3:4:5:6:7:8  1::8
+    '[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|'
+    # ::2:3:4:5:6:7:8  ::2:3:4:5:6:7:8 ::8       ::
+    ':((:[0-9a-fA-F]{1,4}){1,7}|:)|'
+    # fe80::7:8%eth0   fe80::7:8%1
+    # (link-local IPv6 addresses with zone index)
+    'fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]?|::(ffff(:0{1,4})?:)?((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\.){3}'
+    # ::255.255.255.255   ::ffff:255.255.255.255  ::ffff:0:255.255.255.255
+    # (IPv4-mapped IPv6 addresses and IPv4-translated addresses)
+    '(25[0-5]|(2[0-4]|1?[0-9])?[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1?[0-9])?[0-9])\.){3}'
+    # 2001:db8:3:4::192.0.2.33  64:ff9b::192.0.2.33
+    # (IPv4-Embedded IPv6 Address)
+    '(25[0-5]|(2[0-4]|1?[0-9])?[0-9])'
+    ')\]|'
+    # host name
+    '(?:(?:(?:xn--)|[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]-?)*[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]+)'
+    # domain name
+    '(?:\.(?:(?:xn--)|[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]-?)*[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]+)*'
+    # TLD identifier
+    '(?:\.(?:(?:xn--[a-z\u00a1-\uffff\U00010000-\U0010ffff0-9]{2,})|[a-z\u00a1-\uffff\U00010000-\U0010ffff]{2,}))'
+    ')'
+    # port number
+    '(?::\d{2,5})?'
+    # resource path
+    '(?:/[-a-z\u00a1-\uffff\U00010000-\U0010ffff0-9._~%!$&\'()*+,;=:@/]*)?'
+    # query string
+    '(?:\?\S*)?'
+    # fragment
+    '(?:#\S*)?',
+    re.U|re.I
+)
+
+
+STICKER = SLASH_CLIENT.interactions(
+    set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)(None),
+    name = 'sticker',
+    description = 'Generic sticker methods. (Owner only)',
+    guild = GUILD__NEKO_DUNGEON,
+    allow_by_default = False,
+)
+
+@STICKER.interactions
+async def add_(client, event,
+        link: (str, 'Link to the sticker to add'),
+        name: (str, 'The sticker\'s name.'),
+        emoji_value: (str, 'Emoji representation of the sticker.', 'emoji'),
+        description: (str, 'Description for the sticker.')=None,
+                ):
+    """Adds a sticker to the guild."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'You must have {ROLE__NEKO_DUNGEON__ADMIN:m} role to invoke this command.')
+    
+    name_length = len(name)
+    if (name_length < 2) or (name_length > 32):
+        abort(f'Sticker name\'s length can be in range [2:32], got {name_length!r}, {name!r}.')
+    
+    emoji = parse_emoji(emoji_value)
+    
+    if emoji is None:
+        abort(f'{emoji_value} cannot be interpreted as an emoji.')
+    
+    if emoji.is_custom_emoji():
+        abort(f'Only unicode can be used, got {emoji:e}')
+
+    
+    if (description is not None):
+        description_length = len(description)
+        if (description_length > 100):
+            abort(f'Sticker description\'s length can be in range [0:100], got {description_length!r}, {description!r}.')
+    
+    if URL_RP.fullmatch(link) is None:
+        abort(f'The given link is invalid, got {link!r}.')
+    
+    yield
+    
+    while True:
+        try:
+            async with client.http.get(link) as response:
+                response_status = response.status
+                if response_status != 200:
+                    response_reason = response.reason
+                    if response_reason is None:
+                        error_message = f'Request failed: {response_status}'
+                    else:
+                        error_message = f'Request failed: {response_status} {response_reason}'
+                    
+                    break
+                
+                future = Task(response.read(), KOKORO)
+                future_or_timeout(future, 15.0)
+                image = await future
+        
+        except ConnectionError as err:
+            error_message = f'Getting image failed: {err.args[0]}'
+            break
+        
+        except TimeoutError as err:
+            error_message = 'Timeout (15s) occurred meanwhile trying to read the response.'
+            break
+        
+        except OSError as err:
+            error_message = f'Getting image failed: {err.strerror}'
+            break
+        
+        
+        try:
+            sticker = await client.sticker_guild_create(event.guild, name, image, emoji, description)
+        except ConnectionError as err:
+            return
+        
+        except DiscordException as err:
+            error_message = repr(err)
+            break
+        
+        except ValueError as err:
+            error_message = err.args[0]
+            break
+        
+        yield 'The sticker has been successfully created'
+        await client.message_create(event.channel, sticker=sticker)
+        return
+    
+    yield error_message
+
+
+def check_sticker_deleter(user, event):
+    return user is event.user
+
+STICKER_DELETE_BUTTON_CONFIRM = Button('Yes', style=ButtonStyle.red)
+STICKER_DELETE_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
+
+STICKER_DELETE_COMPONENTS = Row(STICKER_DELETE_BUTTON_CONFIRM, STICKER_DELETE_BUTTON_CANCEL)
+
+
+@STICKER.interactions
+async def delete_(client, event,
+        sticker_name: ('str', 'The sticker\'s name to delete', 'sticker'),
+            ):
+    """Deletes the given sticker."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'You must have {ROLE__NEKO_DUNGEON__ADMIN:m} role to invoke this command.')
+    
+    sticker = event.guild.get_sticker_like(sticker_name)
+    if (sticker is None):
+        abort(f'No sticker matched the given name: {sticker_name!r}.')
+    
+    embed = Embed('Confirmation', f'Are you sure to delete {sticker.name!r} ({sticker.id}) sticker forever?')
+    
+    message = yield InteractionResponse(embed=embed, components=STICKER_DELETE_COMPONENTS, allowed_mentions=None)
+    
+    try:
+        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
+            check=partial_func(check_sticker_deleter, event.user))
+    
+    except TimeoutError:
+        embed.title = 'Timeout'
+        embed.description = f'Sticker {sticker.name!r} was not deleted.'
+        
+        # Edit the source message with the source interaction
+        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, message=message)
+        return
+    
+    if component_interaction.interaction == STICKER_DELETE_BUTTON_CANCEL:
+        embed.title = 'Cancelled'
+        embed.description = f'Sticker {sticker.name!r} was not deleted.'
+        
+        # Edit the source message with the component interaction
+        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, event=component_interaction)
+        return
+    
+    # Acknowledge the event
+    await client.interaction_component_acknowledge(component_interaction)
+    
+    try:
+        await client.sticker_guild_delete(sticker)
+    except ConnectionError:
+        # No internet, let it be
+        return
+    
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_sticker:
+            failure = False
+        else:
+            failure = True
+            embed.title = 'Failure'
+            embed.description = repr(err)
+    else:
+        failure = False
+    
+    if not failure:
+        embed.title = 'Success'
+        embed.description = f'Sticker {sticker.name!r} has been deleted successfully.'
+    
+    # Edit the source message
+    yield InteractionResponse(embed=embed, message=message, components=None)
+
+
+def check_sticker_editor(user, event):
+    return user is event.user
+
+STICKER_EDIT_BUTTON_CONFIRM = Button('Yes', style=ButtonStyle.violet)
+STICKER_EDIT_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
+
+STICKER_EDIT_COMPONENTS = Row(STICKER_EDIT_BUTTON_CONFIRM, STICKER_EDIT_BUTTON_CANCEL)
+
+
+@STICKER.interactions
+async def edit_(client, event,
+        sticker_name: ('str', 'The sticker\'s name to delete', 'sticker'),
+        new_name: ('str', 'New name for the sticker',) = None,
+        new_emoji_value: (str, 'Emoji representation of the sticker.', 'new_emoji') = None,
+        new_description: (str, 'Description for the sticker.') = None,
+            ):
+    """Edits the given sticker."""
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'You must have {ROLE__NEKO_DUNGEON__ADMIN:m} role to invoke this command.')
+    
+    sticker = event.guild.get_sticker_like(sticker_name)
+    if (sticker is None):
+        abort(f'No sticker matched the given name: {sticker_name!r}.')
+    
+    anything_to_edit = False
+    
+    
+    if (new_name is not None):
+        if (sticker.name != new_name):
+            name_length = len(new_name)
+            if (name_length < 2) or (name_length > 32):
+                abort(f'Sticker name\'s length can be in range [2:32], got {name_length!r}, {new_name!r}.')
+            
+            anything_to_edit = True
+        else:
+            new_name = None
+    
+    
+    if (new_emoji_value is not None):
+        new_emoji = parse_emoji(new_emoji_value)
+        
+        if new_emoji is None:
+            abort(f'{new_emoji_value} cannot be interpreted as an emoji.')
+        
+        if new_emoji.is_custom_emoji():
+            abort(f'Only unicode can be used, got {new_emoji:e}')
+        
+        tags = sticker.tags
+        if (tags is None) or (len(tags) != 1) or (next(iter(tags)) != new_emoji.name):
+            anything_to_edit = True
+        else:
+            new_emoji = None
+    else:
+        new_emoji = None
+    
+    
+    if (new_description is not None):
+        description_length = len(new_description)
+        if (description_length > 100):
+            abort(
+                f'Sticker description\'s length can be in range [0:100], got {description_length!r}, '
+                f'{new_description!r}.'
+            )
+        
+        if (sticker.description != new_description):
+            anything_to_edit = True
+        else:
+            new_description = None
+    
+    if not anything_to_edit:
+        abort('No differences were provided.')
+    
+    
+    embed = Embed('Confirmation', f'Are you sure to edit {sticker.name!r} sticker?')
+    
+    if (new_name is not None):
+        embed.add_field('Name', f'{sticker.name} -> {new_name}')
+    
+    if (new_emoji is not None):
+        embed.add_field('Tags', f'{", ".join(sticker.tags)} -> {new_emoji.name}')
+    
+    if (new_description is not None):
+        embed.add_field('Description', f'{sticker.description} -> {new_description}')
+    
+    message = yield InteractionResponse(embed=embed, components=STICKER_EDIT_COMPONENTS, allowed_mentions=None)
+    
+    try:
+        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
+            check=partial_func(check_sticker_editor, event.user))
+    
+    except TimeoutError:
+        embed.title = 'Timeout'
+        embed.description = f'Sticker {sticker.name!r} was not edited.'
+        
+        # Edit the source message with the source interaction
+        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, message=message)
+        return
+    
+    if component_interaction.interaction == STICKER_EDIT_BUTTON_CANCEL:
+        embed.title = 'Cancelled'
+        embed.description = f'Sticker {sticker.name!r} was not edited.'
+        
+        # Edit the source message with the component interaction
+        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, event=component_interaction)
+        return
+    
+    # Acknowledge the event
+    await client.interaction_component_acknowledge(component_interaction)
+    
+    kwargs = {}
+    
+    if (new_name is not None):
+        kwargs['name'] = new_name
+    
+    if (new_emoji is not None):
+        kwargs['emoji_representation'] = new_emoji
+    
+    if (new_description is not None):
+        kwargs['description'] = new_description
+    
+    try:
+        await client.sticker_guild_edit(sticker, **kwargs)
+    except ConnectionError:
+        # No internet, let it be
+        return
+    
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_sticker:
+            failure = False
+        else:
+            failure = True
+            embed.title = 'Failure'
+            embed.description = repr(err)
+    else:
+        failure = False
+    
+    if not failure:
+        embed.title = 'Success'
+        embed.description = f'Sticker {sticker.name!r} has been successfully edited.'
+    
+    # Edit the source message
+    yield InteractionResponse(embed=embed, message=message, components=None)
+
+    
+    

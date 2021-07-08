@@ -1,9 +1,10 @@
 from .svg import SVG_GEAR, SVG_LIGHTING, SVG_CLOCK, SVG_CODE, SVG_DISCORD
 from flask import Blueprint, render_template, redirect, url_for
 
-ROUTES = Blueprint('main_page', 'main_page')
-
-
+URL_PREFIX = '/project/hata'
+ROUTES = Blueprint('index', '',
+    url_prefix=URL_PREFIX,
+)
 
 
 DESCRIPTION_PARTS = (
@@ -48,9 +49,9 @@ ADDITIONAL_FEATURES = (
 
 )
 
-@ROUTES.route('/home_testing')
+@ROUTES.route('/testing')
 def home():
-    return render_template('hata_home_page.html',
+    return render_template('hata_index_page.html',
         description_parts = DESCRIPTION_PARTS,
         features = FEATURES,
         major_sellout = MAJOR_SELLOUT,
