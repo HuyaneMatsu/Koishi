@@ -1,5 +1,7 @@
 from .svg import SVG_GEAR, SVG_LIGHTING, SVG_CLOCK, SVG_CODE, SVG_DISCORD
 from flask import Blueprint, render_template, redirect, url_for
+from bot_utils.http_builder import HttpText, HttpUrl, HttpContent
+from bot_utils.shared import INVITE__NEKO_DUNGEON
 
 URL_PREFIX = '/project/hata'
 ROUTES = Blueprint('index', '',
@@ -10,44 +12,68 @@ ROUTES = Blueprint('index', '',
 DESCRIPTION_PARTS = (
     'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro.',
     'It specializes in running multiple simultaneous clients, optimizing performance and getting all the newest '
-    'Discord API features before all the other similar wrappers.'
+    'Discord API features before all the other similar wrappers.',
 )
 
 FEATURES = (
     (
-        'Multiple simultaneous clients',
-        'Hata can run multiple clients from the same instance without sacrificing performance, all while being easy '
-        'to code.',
+        HttpText(
+            'Multiple simultaneous clients',
+        ).render(),
+        HttpText(
+            'Hata can run multiple clients from the same instance without sacrificing performance, all while being '
+            'easy to code.',
+        ).render(),
         SVG_GEAR,
     ), (
-        'Performant',
-        'Fast rate limit handling, optimized dispatch event parsers, fast concurrent code using async/await syntax, '
-        'cache control, PyPy optimizations and more!',
+        HttpText(
+            'Performant',
+        ).render(),
+        HttpText(
+            'Fast rate limit handling, optimized dispatch event parsers, fast concurrent code using async/await '
+            'syntax, cache control, PyPy optimizations and more!',
+        ).render(),
         SVG_LIGHTING,
     ), (
-        'Newest API features',
-        'Whatever Discord decides to release/update/break Hata will support it natively in no time!',
+        HttpText(
+            'Newest API features',
+        ).render(),
+        HttpText(
+            'Whatever Discord decides to release/update/break Hata will support it natively in no time!',
+        ).render(),
         SVG_CLOCK,
     ), (
-        '100% Python',
-        'Completely relies on Python! Easy to read, easy to understand, easy to code.',
+        HttpText(
+            '100% Python',
+        ).render(),
+        HttpText(
+            'Completely relies on Python! Easy to read, easy to understand, easy to code.',
+        ).render(),
         SVG_CODE,
     ),
 )
 
 MAJOR_SELLOUT = (
-    'Some of the major sellout reasons.'
+    HttpText(
+        'Some of the major sellout reasons.',
+    ).render()
 )
 
 
 ADDITIONAL_FEATURES = (
     (
-        'Comfy Discord support server',
-        'Great server for support and any questions! Also boosting a wide variety of good emojis.',
+        HttpUrl(
+            'Comfy Discord support server',
+            INVITE__NEKO_DUNGEON.url,
+        ).render(),
+        HttpText(
+            'Great server for support and any questions! Also boosting a wide variety of good emojis.',
+        ).render(),
         SVG_DISCORD,
     ),
 
 )
+
 
 @ROUTES.route('/testing')
 def home():

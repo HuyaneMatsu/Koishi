@@ -1,4 +1,5 @@
 import os
+from os.path import join as join_path, isdir as is_folder, isfile as is_file, exists
 
 import config
 
@@ -82,10 +83,20 @@ MODULE_NAMES = set()
 
 path = None
 for path in os.listdir(os.path.join(PATH__KOISHI, 'bots', 'modules')):
-    if not path.endswith('.py'):
+    full_path = os.path.join(PATH__KOISHI, 'bots', 'modules', path)
+    if is_file(full_path):
+        if not path.endswith('.py'):
+            continue
+        
+        path = path[:-3]
+    
+    elif is_folder(full_path):
+        if path.startswith('_'):
+            continue
+    else:
         continue
     
-    MODULE_NAMES.add(path[:-3])
+    MODULE_NAMES.add(path)
 
 if MARISA_MODE:
     MARISA_ALLOWED_MODULES = set()

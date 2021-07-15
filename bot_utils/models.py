@@ -16,6 +16,9 @@ if DATABASE_NAME is None:
     ds_v2_result_model = None
     DS_V2_RESULT_TABLE = None
     
+    sticker_counter_model = None
+    STICKER_COUNTER_TABLE = None
+    
     DB_ENGINE = None
     
 else:
@@ -84,6 +87,15 @@ else:
         best            = Column(Integer)
     
     DS_V2_RESULT_TABLE = ds_v2_result_model.__table__
+    
+    class sticker_counter_model(BASE):
+        __tablename__   = 'STICKER_COUNTER'
+        id              = Column(BIGINT, primary_key=True)
+        user_id         = Column(BIGINT)
+        sticker_id      = Column(BIGINT)
+        timestamp       = Column(DateTime)
+    
+    STICKER_COUNTER_TABLE = sticker_counter_model.__table__
     
     # Creating tables
     DB_ENGINE = create_engine(DATABASE_NAME)

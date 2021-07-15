@@ -294,7 +294,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
         
     @classmethod
-    async def user_presence_update(self,client, user, old):
+    async def user_presence_update(self, client, user, old):
         Task(self.old_events['user_presence_update'](client, user, old), KOKORO)
         if self.channel is None:
             return
@@ -463,13 +463,13 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def emoji_delete(self,client, emoji, guild):
-        Task(self.old_events['emoji_delete'](client, emoji, guild), KOKORO)
+    async def emoji_delete(self,client, emoji):
+        Task(self.old_events['emoji_delete'](client, emoji), KOKORO)
         if self.channel is None:
             return
         
         result=pretty_print(emoji)
-        result.insert(0, f'Emoji deleted: {emoji.name} {emoji.id} at guild {guild!r}')
+        result.insert(0, f'Emoji deleted: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         pages=[Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout=120.)
         
@@ -514,12 +514,12 @@ class dispatch_tester:
         await Closer(client, self.channel, embed, timeout=120.)
     
     @classmethod
-    async def sticker_delete(self,client, sticker, guild):
-        Task(self.old_events['sticker_delete'](client, sticker, guild), KOKORO)
+    async def sticker_delete(self, client, sticker):
+        Task(self.old_events['sticker_delete'](client, sticker), KOKORO)
         if self.channel is None:
             return
         
-        embed = Embed(description=f'Sticker deleted: {sticker.name} {sticker.id} at guild {guild!r}')
+        embed = Embed(description=f'Sticker deleted: {sticker.name} {sticker.id} at guild {sticker.guild!r}')
         await Closer(client, self.channel, embed, timeout=120.)
     
     @classmethod

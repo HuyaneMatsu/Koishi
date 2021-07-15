@@ -2305,6 +2305,14 @@ async def sticker_guild_edit(client, guild, sticker, name=None, description=None
     )
 
 
+async def vanity_invite_edit(client, guild, vanity_code=None):
+    guild_id = guild.id
+    await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/vanity-url',
+        {'code': vanity_code}
+    )
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0000(client, message):
     """
@@ -5582,4 +5590,20 @@ async def rate_limit_test0151(client, message, sticker_id:int=None, name:str=Non
         sticker = await client.sticker_get(sticker_id)
         
         await sticker_guild_edit(client, guild, sticker, name=name)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0152(client, message, name:str,):
+    """
+    Edits the guild's vanity invite.
+    
+    Please also give a name.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0151') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await vanity_invite_edit(client, guild, name)
 

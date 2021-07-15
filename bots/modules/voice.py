@@ -69,11 +69,14 @@ async def join(client, user, guild, volume):
     
     content = f'Joined to {state.channel.name}'
     if (volume is not None):
-        if volume < 0:
-            volume = 0
-        elif volume > 200:
-            volume = 200
-        voice_client.volume = volume/100.
+        if volume <= 0:
+            volume = 0.0
+        elif volume >= 200:
+            volume = 2.0
+        else:
+            volume /= 100.0
+        
+        voice_client.volume = volume
         content = f'{content}; Volume set to {volume}%'
     
     yield content
@@ -315,12 +318,14 @@ async def volume_(client, event_or_message, volume):
     if volume is None:
         return f'{voice_client.volume*100.:.0f}%'
     
-    if volume < 0:
-        volume = 0
-    elif volume > 200:
-        volume = 200
+    if volume <= 0:
+        volume = 0.0
+    elif volume >= 200:
+        volume = 2.0
+    else:
+        volume /= 100.0
     
-    voice_client.volume = volume/100.
+    voice_client.volume = volume
     return f'Volume set to {volume}%.'
 
 

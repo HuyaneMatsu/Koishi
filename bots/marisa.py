@@ -30,7 +30,7 @@ from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 from bot_utils.shared import COLOR__MARISA_HELP, \
     command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
 from bot_utils.syncer import sync_request_command
-from bot_utils.interpreter import Interpreter
+from bot_utils.interpreter_v2 import Interpreter
 from bot_utils.tools import choose, Cell
 
 Marisa : Client
@@ -766,3 +766,5 @@ async def nine():
 @Marisa.interactions(custom_id=re.compile('nine\.(\d)\.(\d)'))
 async def poison_edit_cake(index_1, index_2):
     return f'You selected: {index_1}x{index_2}'
+
+

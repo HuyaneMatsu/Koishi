@@ -1146,7 +1146,7 @@ class AutoReactRoleManager:
     async def action_on_channel_delete(self, client, channel, guild):
         await self.destroy()
     
-    async def action_on_emoji_delete(self, client, emoji, guild):
+    async def action_on_emoji_delete(self, client, emoji):
         relations = self.relations
         try:
             role = relations.pop(emoji)
@@ -1194,7 +1194,7 @@ class AutoReactRoleManager:
                             ):
                     return
             
-            await client.events.error(client,f'{self!r}.action_on_emoji_delete',err)
+            await client.events.error(client,f'{self!r}.action_on_emoji_delete', err)
             return
     
     async def action_on_role_delete(self, client, role, guild):

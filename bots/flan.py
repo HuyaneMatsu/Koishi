@@ -185,7 +185,7 @@ class sync_avatar:
         
         await client.message_create(message.channel,'Avatar synced.')
     
-    checks= checks.owner_only()
+    checks = checks.owner_only()
     
     async def description(command_context):
         return Embed('sync_avatar',(

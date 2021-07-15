@@ -1,224 +1,24 @@
-# -*- coding: utf-8 -*-
-
 from datetime import datetime
 
 from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTIVITY_TYPES
 from hata.discord.utils import DISCORD_EPOCH_START
 
-from bot_utils.shared import CHANNEL__NEKO_DUNGEON_LOG, GUILD__NEKO_DUNGEON, CATEGORY__NEKO_DUNGEON__BIG_BRO
+from bot_utils.shared import CHANNEL__NEKO_DUNGEON__LOG_MENTION, GUILD__NEKO_DUNGEON, CATEGORY__NEKO_DUNGEON__BIG_BRO
 
-Koishi: Client
+Satori: Client
+
 def setup(lib):
-    Koishi.events.message_create.append(GUILD__NEKO_DUNGEON, logger)
-    Koishi.events.channel_delete.append(GUILD__NEKO_DUNGEON, big_bro_channel_delete_waiter)
-    Koishi.events.channel_create.append(GUILD__NEKO_DUNGEON, big_bro_channel_create_waiter)
-    Koishi.events.channel_edit.append(GUILD__NEKO_DUNGEON, big_bro_channel_edit_waiter)
+    Satori.events.channel_delete.append(GUILD__NEKO_DUNGEON, big_bro_channel_delete_waiter)
+    Satori.events.channel_create.append(GUILD__NEKO_DUNGEON, big_bro_channel_create_waiter)
+    Satori.events.channel_edit.append(GUILD__NEKO_DUNGEON, big_bro_channel_edit_waiter)
     checkout_category()
 
 def teardown(lib):
-    Koishi.events.message_create.remove(GUILD__NEKO_DUNGEON, logger)
-    Koishi.events.channel_delete.remove(GUILD__NEKO_DUNGEON, big_bro_channel_delete_waiter)
-    Koishi.events.channel_create.remove(GUILD__NEKO_DUNGEON, big_bro_channel_create_waiter)
-    Koishi.events.channel_edit.remove(GUILD__NEKO_DUNGEON, big_bro_channel_edit_waiter)
+    Satori.events.channel_delete.remove(GUILD__NEKO_DUNGEON, big_bro_channel_delete_waiter)
+    Satori.events.channel_create.remove(GUILD__NEKO_DUNGEON, big_bro_channel_create_waiter)
+    Satori.events.channel_edit.remove(GUILD__NEKO_DUNGEON, big_bro_channel_edit_waiter)
     checkout_category()
 
-
-CLEAN_CONTENT_MAX_LENGTH = 1000
-USER_MENTION_MAX = 7
-ROLE_MENTION_MAX = 5
-SEPARATOR_LINE = '\\_'*30
-
-
-async def logger(client, message):
-    everyone_mention = message.everyone_mention
-    user_mentions = message.user_mentions
-    role_mentions = message.role_mentions
-    if (not everyone_mention) and (user_mentions is None) and (role_mentions is None):
-        return
-    
-    content_parts = []
-    
-    author = message.author
-    
-    guild = message.channel.guild
-    if guild is None:
-        nick = None
-    else:
-        try:
-            guild_profile = author.guild_profiles[guild]
-        except KeyError:
-            nick = None
-        else:
-            nick = guild_profile.nick
-    
-    content_parts.append('**Author:** ')
-    content_parts.append(author.full_name)
-    content_parts.append(' ')
-    if (nick is not None):
-        content_parts.append('[')
-        content_parts.append(nick)
-        content_parts.append('] ')
-    content_parts.append('(')
-    content_parts.append(repr(author.id))
-    content_parts.append(')\n')
-    
-    channel = message.channel
-    content_parts.append('**Channel:** ')
-    content_parts.append(channel.display_name)
-    content_parts.append(' (')
-    content_parts.append(repr(channel.id))
-    content_parts.append(')\n')
-    
-    message_id = message.id
-    content_parts.append('**Message id**: ')
-    content_parts.append(repr(message_id))
-    content_parts.append('\n')
-    
-    message_type = message.type
-    content_parts.append('**Message type**: ')
-    content_parts.append(message_type.name)
-    content_parts.append(' (')
-    content_parts.append(repr(message_type.value))
-    content_parts.append(')\n')
-    
-    created_at = message.created_at
-    content_parts.append('**Created at**: ')
-    content_parts.append(created_at.__format__(DATETIME_FORMAT_CODE))
-    content_parts.append('\n')
-    
-    content_length = len(message)
-    content_parts.append('**Message Length:** ')
-    content_parts.append(repr(content_length))
-    content_parts.append('\n')
-    
-    content_parts.append('\n**Content**:\n')
-    content_parts.append(SEPARATOR_LINE)
-    content_parts.append('\n')
-    
-    clean_content = message.clean_content
-    clean_content_length = len(clean_content)
-    if clean_content_length > CLEAN_CONTENT_MAX_LENGTH:
-        clean_content = clean_content[:CLEAN_CONTENT_MAX_LENGTH]
-        truncated = clean_content_length - CLEAN_CONTENT_MAX_LENGTH
-    else:
-        truncated = 0
-    
-    content_parts.append(clean_content)
-    if truncated:
-        content_parts.append('\n*<Truncated )')
-        content_parts.append(repr(truncated))
-        content_parts.append('>*')
-    
-    description = ''.join(content_parts)
-    embed = Embed('Ping Log!', description)
-    
-    if everyone_mention:
-        embed.add_field('Everyone mention', 'Hecatia Yeah!')
-    
-    if (user_mentions is not None):
-        content_parts = []
-        
-        mention_count = len(user_mentions)
-        if mention_count > USER_MENTION_MAX:
-            truncated = mention_count - USER_MENTION_MAX
-        else:
-            truncated = 0
-        
-        content_parts.append('**Total:** ')
-        content_parts.append(repr(mention_count))
-        if truncated:
-            content_parts.append(' (')
-            content_parts.append(repr(truncated))
-            content_parts.append(' truncated)')
-        content_parts.append('\n')
-        content_parts.append(SEPARATOR_LINE)
-        content_parts.append('\n')
-        
-        index = 0
-        limit = mention_count-truncated
-        
-        while True:
-            user = user_mentions[index]
-            index += 1
-            
-            if guild is None:
-                nick = None
-            else:
-                try:
-                    guild_profile = user.guild_profiles[guild]
-                except KeyError:
-                    nick = None
-                else:
-                    nick = guild_profile.nick
-            
-            content_parts.append('**')
-            content_parts.append(repr(index))
-            content_parts.append('.:** ')
-            content_parts.append(user.full_name)
-            content_parts.append(' ')
-            if (nick is not None):
-                content_parts.append('[')
-                content_parts.append(nick)
-                content_parts.append('] ')
-            content_parts.append('(')
-            content_parts.append(repr(user.id))
-            content_parts.append(')')
-            
-            if index == limit:
-                break
-            
-            content_parts.append('\n')
-            continue
-        
-        field_value = ''.join(content_parts)
-        
-        embed.add_field('User mentions', field_value)
-    
-    if (role_mentions is not None):
-        content_parts = []
-        
-        mention_count = len(role_mentions)
-        if mention_count > ROLE_MENTION_MAX:
-            truncated = mention_count - ROLE_MENTION_MAX
-        else:
-            truncated = 0
-        
-        content_parts.append('**Total:** ')
-        content_parts.append(repr(mention_count))
-        if truncated:
-            content_parts.append(' (')
-            content_parts.append(repr(truncated))
-            content_parts.append(' truncated)')
-        content_parts.append('\n')
-        content_parts.append(SEPARATOR_LINE)
-        content_parts.append('\n')
-        
-        index = 0
-        limit = mention_count-truncated
-        
-        while True:
-            role = role_mentions[index]
-            index += 1
-            
-            content_parts.append('**')
-            content_parts.append(repr(index))
-            content_parts.append('.:** ')
-            content_parts.append(role.name)
-            content_parts.append(' (')
-            content_parts.append(repr(role.id))
-            content_parts.append(')')
-            
-            if index == limit:
-                break
-            
-            content_parts.append('\n')
-            continue
-        
-        field_value = ''.join(content_parts)
-        
-        embed.add_field('Role mentions', field_value)
-    
-    await client.message_create(CHANNEL__NEKO_DUNGEON_LOG, embed=embed, allowed_mentions=None)
 
 # Hata best wrapper
 
@@ -226,7 +26,7 @@ OFFLINE = Status.offline.name
 
 BIG_BROS = {}
 
-@Koishi.events
+@Satori.events
 async def ready(client):
     checkout_category()
 
@@ -327,7 +127,7 @@ async def big_bro_channel_edit_waiter(client, channel, old_attributes):
         BIG_BROS[user_id] = channel
 
 
-@Koishi.events
+@Satori.events
 async def user_presence_update(client, user, old_attributes):
     try:
         channel = BIG_BROS[user.id]
@@ -445,7 +245,7 @@ ACTIVITY_TYPE_NAMES = {
     3: 'watching',
     4: 'custom',
     5: 'competing',
-        }
+}
 
 def render_datetime_to(render_to, datetime_value):
     render_to.append(datetime_value.__format__(DATETIME_FORMAT_CODE))
@@ -873,23 +673,23 @@ def render_id_difference(render_to, old_value, activity):
 
 
 ACTIVITY_DIFFERENCE_RENDERERS = {
-    'name' : render_name_difference,
-    'type' : render_type_difference,
-    'timestamps' : render_timestamps_difference,
-    'details' : render_details_difference,
-    'state' : render_state_difference,
-    'party' : render_party_difference,
-    'assets' : render_assets_difference,
-    'album_cover_url' : render_album_cover_url_difference,
-    'secrets' : render_secret_difference,
-    'url'  : render_url_difference,
-    'sync_id' : render_sync_id_difference,
-    'session_id' : render_session_id_difference,
-    'flags' : render_flags_difference,
-    'application_id' : render_application_id_difference,
-    'created' : render_created_at_difference,
-    'id' : render_id_difference,
-        }
+    'name': render_name_difference,
+    'type': render_type_difference,
+    'timestamps': render_timestamps_difference,
+    'details': render_details_difference,
+    'state': render_state_difference,
+    'party': render_party_difference,
+    'assets': render_assets_difference,
+    'album_cover_url': render_album_cover_url_difference,
+    'secrets': render_secret_difference,
+    'url': render_url_difference,
+    'sync_id': render_sync_id_difference,
+    'session_id': render_session_id_difference,
+    'flags': render_flags_difference,
+    'application_id': render_application_id_difference,
+    'created': render_created_at_difference,
+    'id': render_id_difference,
+}
 
 
 def add_chunk(chunks, chunk):
@@ -934,4 +734,3 @@ def make_chunks(parts):
     
     add_chunk(chunks, chunk)
     return chunks
-

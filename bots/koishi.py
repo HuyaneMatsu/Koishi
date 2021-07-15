@@ -24,11 +24,8 @@ Koishi.events.message_create.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
 Koishi.events(RoleDeleteWaitfor)
-Koishi.events(ChannelDeleteWaitfor)
 Koishi.events(EmojiDeleteWaitfor)
 Koishi.events(RoleEditWaitfor)
-Koishi.events(ChannelCreateWaitfor)
-Koishi.events(ChannelEditWaitfor)
 
 
 @Koishi.events

@@ -8,13 +8,17 @@ from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
 from bot_utils.shared import COLOR__SATORI_HELP
-from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor
+from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor, ChannelDeleteWaitfor, ChannelCreateWaitfor, \
+    ChannelEditWaitfor
 from bot_utils.interpreter import Interpreter
 
 Satori : Client
 
 Satori.events(MessageDeleteWaitfor)
 Satori.events(MessageEditWaitfor)
+Satori.events(ChannelDeleteWaitfor)
+Satori.events(ChannelCreateWaitfor)
+Satori.events(ChannelEditWaitfor)
 
 def satori_help_embed_postprocessor(command_context, embed):
     if embed.color is None:
@@ -27,8 +31,7 @@ async def invalid_command(client, message, command, content):
     guild = message.guild
     if guild is None:
         try:
-            await client.message_create(message.channel,
-                'Eeh, what should I do, what should I do?!?!')
+            await client.message_create(message.channel, 'Eeh, what should I do, what should I do?!?!')
         except BaseException as err:
             
             if isinstance(err, ConnectionError):
@@ -38,7 +41,7 @@ async def invalid_command(client, message, command, content):
             if isinstance(err, DiscordException):
                 if err.code in (
                         ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.cannot_send_message_to_user, # dm disabled
+                        ERROR_CODES.cannot_message_user, # dm disabled
                             ):
                     return
             

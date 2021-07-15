@@ -101,41 +101,41 @@ class Rarity:
     def __repr__(self):
         return f'{self.__class__.__name__}(name={self.name}, index={self.index})'
 
-    def __gt__(self,other):
+    def __gt__(self, other):
         if type(self) is not type(other):
             return NotImplemented
         
-        return self.index>other.index
+        return self.index > other.index
     
-    def __ge__(self,other):
+    def __ge__(self, other):
         if type(self) is not type(other):
             return NotImplemented
         
-        return self.index>=other.index
+        return self.index >= other.index
         
-    def __eq__(self,other):
+    def __eq__(self, other):
         if type(self) is not type(other):
             return NotImplemented
         
-        return self.index==other.index
+        return self.index == other.index
     
-    def __ne__(self,other):
+    def __ne__(self, other):
         if type(self) is not type(other):
             return NotImplemented
         
-        return self.index!=other.index
+        return self.index != other.index
         
-    def __le__(self,other):
+    def __le__(self, other):
         if type(self) is not type(other):
             return NotImplemented
         
-        return self.index<=other.index
+        return self.index <= other.index
         
-    def __lt__(self,other):
+    def __lt__(self, other):
         if type(self) is not type(other):
             return NotImplemented
         
-        return self.index<other.index
+        return self.index < other.index
     
     def __hash__(self):
         return self.index
