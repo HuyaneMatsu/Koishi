@@ -1,5 +1,5 @@
-import os
-from os.path import join as join_path, isdir as is_folder, isfile as is_file, exists
+from os.path import join as join_path, isdir as is_folder, isfile as is_file
+from os import listdir as list_directory
 
 import config
 
@@ -15,6 +15,7 @@ EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 if MARISA_MODE:
     Marisa = Client(config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
+        http_debug_options = 'canary',
         extensions = ('command_utils', 'slash', 'commands_v2'),
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,
@@ -82,8 +83,8 @@ else:
 MODULE_NAMES = set()
 
 path = None
-for path in os.listdir(os.path.join(PATH__KOISHI, 'bots', 'modules')):
-    full_path = os.path.join(PATH__KOISHI, 'bots', 'modules', path)
+for path in list_directory(join_path(PATH__KOISHI, 'bots', 'modules')):
+    full_path = join_path(PATH__KOISHI, 'bots', 'modules', path)
     if is_file(full_path):
         if not path.endswith('.py'):
             continue

@@ -386,6 +386,9 @@ async def sticker_edit(client, sticker, old_attributes):
     else:
         new_tags = sticker.tags
         
+        if description_parts:
+            description_parts.append('\n')
+        
         description_parts.append('**Tags:** ')
         
         if description_parts:
