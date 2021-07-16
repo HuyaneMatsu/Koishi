@@ -77,7 +77,7 @@ async def join(client, user, guild, volume):
             volume /= 100.0
         
         voice_client.volume = volume
-        content = f'{content}; Volume set to {volume}%'
+        content = f'{content}; Volume set to {volume*100.:.0f}%'
     
     yield content
     return
@@ -326,7 +326,7 @@ async def volume_(client, event_or_message, volume):
         volume /= 100.0
     
     voice_client.volume = volume
-    return f'Volume set to {volume}%.'
+    return f'Volume set to {volume*100.:.0f}%.'
 
 
 async def skip(client, message, index):
