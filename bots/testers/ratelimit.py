@@ -1617,7 +1617,7 @@ async def achievement_edit(client,achievement,name=None,description=None,secret=
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
         data=data,)
 
-    achievement._update_no_return(data)
+    achievement._update_attributes(data)
     return achievement
 
 async def achievement_get_all(client,):

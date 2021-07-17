@@ -6,7 +6,7 @@ from io import StringIO
 
 from config import HATA_PATH
 
-from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep, Embed
+from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep, Embed, WaitTillAll
 from hata.ext.command_utils import wait_for_message, Pagination
 
 from .shared import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
@@ -102,6 +102,26 @@ def get_modified_files(days_allowed):
     
     return should_send
 
+
+async def send_file(client, file):
+    with (await ReuAsyncIO(file.path)) as io:
+        file_name_parts = []
+        for part in file.access_path:
+            file_name_parts.append(part)
+            file_name_parts.append('.')
+        
+        if file_name_parts:
+            del file_name_parts[-1]
+        
+        
+        file_name_parts.append(':')
+        file_name_parts.append(file.name)
+        
+        file_name = ''.join(file_name_parts)
+        
+        await client.message_create(CHANNEL__SYSTEM__SYNC, file_name, file=io)
+
+
 async def request_sync(client, days_allowed):
     async with SYNC_LOCK:
         
@@ -116,27 +136,21 @@ async def request_sync(client, days_allowed):
         files = get_modified_files(days_allowed)
         
         for file in files:
-            with (await ReuAsyncIO(file.path)) as io:
-                file_name_parts = []
-                for part in file.access_path:
-                    file_name_parts.append(part)
-                    file_name_parts.append('.')
-                
-                if file_name_parts:
-                    del file_name_parts[-1]
-                
-                
-                file_name_parts.append(':')
-                file_name_parts.append(file.name)
-                
-                file_name = ''.join(file_name_parts)
-                
-                await client.message_create(CHANNEL__SYSTEM__SYNC, file_name, file=io)
+            sending_task = Task(send_file(client, file), KOKORO)
+            response_task = wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_received, 60.)
+            
+            await WaitTillAll([sending_task, response_task], KOKORO)
             
             try:
-                await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_received, 60.)
+                sending_task.result()
+            except BaseException as err:
+                sys.stderr.write(f'Sync failed, {err!r}.\n')
+                raise
+            
+            try:
+                response_task.result()
             except TimeoutError:
-                sys.stderr.write('Sync request failed, timeout.\n')
+                sys.stderr.write('Sync failed, timeout.\n')
                 return
         
         await client.message_create(CHANNEL__SYSTEM__SYNC, SYNC_DONE)
@@ -191,7 +205,6 @@ async def receive_sync(client, partner):
                         await file.write(binary)
                 
                 # Wait some. It can happen that we send this message, before the other side gets it's answer.
-                await sleep(0.4, KOKORO)
                 await client.message_create(CHANNEL__SYSTEM__SYNC, RECEIVED)
     except BaseException as err:
         with StringIO() as buffer:

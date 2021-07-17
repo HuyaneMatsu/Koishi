@@ -424,6 +424,7 @@ async def github_profile(client, event,
     description = ''.join(description_parts)
     
     title = ''.join(user_object.render_title_to([]))
-    yield Embed(title, description).add_thumbnail(user_object.avatar_url)
+    yield Embed(title, description, url=f'https://github.com/{quote(user_object.user_name)}'). \
+        add_thumbnail(user_object.avatar_url)
     
     return
