@@ -30,8 +30,7 @@ FEATURES = (
             'Performant',
         ).render(),
         HttpText(
-            'Fast rate limit handling, optimized dispatch event parsers, fast concurrent code using async/await '
-            'syntax, cache control, PyPy optimizations and more!',
+            'Fast concurrent code using async/await syntax, cache control, PyPy support and more!',
         ).render(),
         SVG_LIGHTING,
     ), (

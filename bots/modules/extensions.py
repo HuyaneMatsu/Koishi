@@ -1,170 +1,85 @@
-import re
-
-from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS
-from hata import chunkify, Embed, Client, CLIENTS
-from hata.ext.command_utils import Pagination
-from hata.ext.commands_v2 import checks
-from hata.ext.slash import Button, Row, set_permission, Select
+from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS, ExtensionError
+from hata import Embed, Client, CLIENTS
+from hata.ext.slash import set_permission, Select, Option, InteractionResponse, abort
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN
 
-COMMAND_CLIENT : Client
 SLASH_CLIENT : Client
-COMMAND_CLIENT.command_processor.create_category('EXTENSIONS', checks=checks.owner_only())
 
-@COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def list_extensions(client, message):
-    """
-    Lists the registered extensions.
-    """
-    lines = []
-    for extension in  EXTENSIONS.values():
-        lines.append(f'- `{extension.name}`{" (locked)" if extension.locked else ""}')
-    
-    pages = [Embed('Available extensions', chunk) for chunk in chunkify(lines)]
-    
-    limit = len(pages)
-    index = 0
-    while index < limit:
-        embed = pages[index]
-        index += 1
-        embed.add_footer(f'page {index}/{limit}')
-    
-    await Pagination(client, message.channel, pages)
+def check_permission(event):
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        abort(f'You must have {ROLE__NEKO_DUNGEON__ADMIN.mention} to invoke this command.')
 
-
-@COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def load(name:str=None):
-    """
-    Loads the specified extension by it's name.
-    """
-    if name is None:
-        return 'Please define an extension to load.'
-    
-    extension = EXTENSION_LOADER.get_extension(name)
-    if (extension is None):
-        return 'There is no extension with the specified name.'
-    
-    if extension.locked:
-        return 'The extension is locked, probably for reason.'
-    
-    await EXTENSION_LOADER.load(extension.name)
-    
-    return 'Extension successfully loaded.'
-
-
-@COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def register_extension(name:str=None):
-    """
-    Registers the specified extension by it's name.
-    """
-    if name is None:
-        return 'Please define an extension to register.'
-    
-    if (EXTENSION_LOADER.get_extension(name) is not None):
-        return 'There is already an extension added with the given name.'
-    
-    EXTENSION_LOADER.add(name)
-    
-    return 'Extension successfully loaded.'
-
-
-@COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def reload(name:str=None):
-    """
-    Reloads the specified extension by it's name.
-    """
-    if name is None:
-        return 'Please define an extension to reload.'
-    
-    extension = EXTENSION_LOADER.get_extension(name)
-    if (extension is None):
-        return 'There is no extension with the specified name.'
-    
-    if extension.locked:
-        return 'The extension is locked, probably for reason.'
-    
-    await EXTENSION_LOADER.reload(extension.name)
-        
-    return 'Extension successfully reloaded.'
-
-
-@COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def unload(name:str=None):
-    """
-    Unloads the specified extension by it's name.
-    """
-    if name is None:
-        return 'Please define an extension to unload.'
-    
-    extension = EXTENSION_LOADER.get_extension(name)
-    if (extension is None):
-        return 'There is no extension with the specified name'
-    
-    if extension.locked:
-        return 'The extension is locked, probably for reason.'
-    
-    await EXTENSION_LOADER.unload(extension.name)
-        
-    return 'Extension successfully unloaded.'
-
-
-@COMMAND_CLIENT.commands(category='EXTENSIONS')
-async def debug_extensions():
-    """
-    Lists extensions for each client.
-    """
-    result_parts = []
-    
-    for client in CLIENTS.values():
-        result_parts.append(client.mention)
-        result_parts.append(' :')
-        result_parts.append('\n')
-        extensions = client.extensions
-        for extension in extensions:
-            result_parts.append('`')
-            result_parts.append(extension.name)
-            result_parts.append('`')
-            result_parts.append('\n')
-        result_parts.append('\n')
-    
-    del result_parts[-2:]
-    
-    return ''.join(result_parts)
-
-# TODO
-"""
 EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
     set_permission(
         GUILD__NEKO_DUNGEON,
         ROLE__NEKO_DUNGEON__ADMIN,
-        True)
-    (None),
+        True,
+    )(None),
     name = 'extension',
     description = 'extension related commands',
     guild = GUILD__NEKO_DUNGEON,
-    enabled_by_default = False
+    allow_by_default = False
 )
 
+EXTENSION_LIS_PER_GUILD_CUSTOM_ID = 'extension.list_per_client'
+
 @EXTENSION_COMMANDS.interactions
-async def list_per_client():
-    pass
-
-# Use select maybe?
-async def get_client_extensions_components(selected_client):
-    clients = sorted(CLIENTS.values)[:5] # Limit the number of clients for now.
+async def list_per_client(event):
+    """Lists the extensions for each client."""
+    check_permission(event)
     
-    return Row(*(Button(
-            client.full_name,
-            custom_id = f'extension.list_per_client.{client.id}',
-            enabled = (client is not selected_client)
-        ) for client in clients))
+    clients = sorted(CLIENTS.values())
+    if len(clients) > 25:
+        del clients[25:]
+    
+    client = clients[0]
+    
+    return list_per_client_get_response(client, clients)
+    
 
 
-def get_client_extensions_embed(client):
+@SLASH_CLIENT.interactions(custom_id=EXTENSION_LIS_PER_GUILD_CUSTOM_ID)
+async def handle_list_per_client_component(event):
+    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+        return
+    
+    options = event.interaction.options
+    
+    client_detected = False
+    while True:
+        if options is None:
+            break
+        
+        option = options[0]
+    
+        try:
+            client_id = int(option)
+        except ValueError:
+            break
+        
+        try:
+            client = CLIENTS[client_id]
+        except KeyError:
+            break
+        
+        client_detected = True
+        break
+    
+    clients = sorted(CLIENTS.values())
+    if len(clients) > 25:
+        del clients[25:]
+    
+    if not client_detected:
+        client = clients[0]
+    
+    return list_per_client_get_response(client, clients)
+
+
+def list_per_client_get_response(selected_client, clients):
     description_parts = []
     
-    extensions = client.extensions
+    extensions = selected_client.extensions
     limit = len(extensions)
     if limit:
         index = 0
@@ -192,13 +107,179 @@ def get_client_extensions_embed(client):
     title_parts = []
     
     title_parts.append('Extensions of ')
-    title_parts.append(client.full_name)
+    title_parts.append(selected_client.full_name)
     title_parts.append(' (')
-    title_parts.append(client.id)
+    title_parts.append(str(selected_client.id))
     title_parts.append(')')
     
     title = ''.join(title_parts)
     
-    return Embed(title, description).add_thumbnail(client.avatar_url)
+    embed = Embed(title, description).add_thumbnail(selected_client.avatar_url)
 
-"""
+    components = Select(
+        [
+            Option(str(client.id), client.full_name, default=(client is selected_client))
+            for client in clients
+        ],
+        custom_id = EXTENSION_LIS_PER_GUILD_CUSTOM_ID,
+        placeholder = 'Select a client',
+    )
+    
+    return InteractionResponse(embed=embed, components=components)
+
+
+EXTENSION_LIMIT = 40
+
+def extension_item_sort_key(item):
+    return item[0]
+
+@EXTENSION_COMMANDS.interactions
+async def list_all(event):
+    """Lists all the available extensions."""
+    check_permission(event)
+    
+    items = sorted(
+        ((extension.name, extension.locked) for extension in EXTENSIONS.values()),
+        key = extension_item_sort_key,
+    )
+    
+    items_length = len(items)
+    if items_length:
+        index = 0
+        
+        if items_length > EXTENSION_LIMIT:
+            limit = EXTENSION_LIMIT
+        else:
+            limit = items_length
+        
+        description_parts = []
+        
+        while True:
+            extension_name, extension_locked = items[index]
+            index += 1
+            
+            description_parts.append('- `')
+            description_parts.append(extension_name)
+            description_parts.append('`')
+            
+            if extension_locked:
+                description_parts.append('*(locked)*')
+            
+            if index == limit:
+                break
+            
+            description_parts.append('\n')
+            continue
+        
+        if limit > EXTENSION_LIMIT:
+            description_parts.append('\n\n*')
+            description_parts.append(str(limit-EXTENSION_LIMIT))
+            description_parts.append(' truncated*')
+        
+        description = ''.join(description_parts)
+    else:
+        description = '*No extensions detected*'
+    
+    return Embed('Available extensions', description)
+
+
+def get_extension_by_name(name):
+    extension = EXTENSION_LOADER.get_extension(name)
+    if (extension is None):
+        abort('There is no extension with the specified name.')
+    
+    if extension.locked:
+        abort('The extension is locked, probably for reason.')
+    
+    return extension
+
+
+async def run_extension_coroutine(extension_name, action_name, coroutine):
+    try:
+        await coroutine
+    except ExtensionError as err:
+        title = f'{action_name.title()}ing {extension_name} failed.'
+        
+        description = err.message
+        if len(description) > 4000:
+            description = description[-4000:]
+    
+    else:
+        title = f'{action_name.title()}ing {extension_name} was successful!'
+        description = None
+    
+    return Embed(title, description)
+
+
+@EXTENSION_COMMANDS.interactions
+async def load(event,
+        name: ('str', 'Please provide a name to load.'),
+            ):
+    """Loads the specified extension by it's name."""
+    check_permission(event)
+    extension = get_extension_by_name(name)
+    
+    yield
+    name = extension.name
+    yield await run_extension_coroutine(
+        name,
+        'load',
+        EXTENSION_LOADER.load(name),
+    )
+
+
+@EXTENSION_COMMANDS.interactions
+async def reload(event,
+        name: ('str', 'Please provide a name to reload.'),
+            ):
+    """Reloads the specified extension by it's name."""
+    check_permission(event)
+    extension = get_extension_by_name(name)
+    
+    yield
+    name = extension.name
+    yield await run_extension_coroutine(
+        name,
+        'reload',
+        EXTENSION_LOADER.reload(name),
+    )
+
+
+@EXTENSION_COMMANDS.interactions
+async def unload(event,
+        name: ('str', 'Please provide a name to unload.'),
+            ):
+    """Unloads the specified extension by it's name."""
+    check_permission(event)
+    extension = get_extension_by_name(name)
+    
+    yield
+    name = extension.name
+    yield await run_extension_coroutine(
+        name,
+        'unload',
+        EXTENSION_LOADER.unload(name),
+    )
+
+
+@EXTENSION_COMMANDS.interactions
+async def register(event,
+        name: ('str', 'Please provide a name to register.'),
+            ):
+    """Registers the specified extension by it's name."""
+    check_permission(event)
+    
+    extension = EXTENSION_LOADER.get_extension(name)
+    if (extension is not None):
+        abort(f'There is already an extension added with the given name: `{extension.name}`.')
+    
+    try:
+        EXTENSION_LOADER.add(name)
+    except TypeError:
+        title = f'Registering {name!r} extension failed.'
+        description = 'There is no such extension.'
+    else:
+        title = f'Registering {name!r} was successful.'
+        description = None
+    
+    return Embed(title, description)
