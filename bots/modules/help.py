@@ -27,34 +27,34 @@ async def rules(client, event):
             '1. Behaviour',
             'Listen to staff and follow their instructions.',
         ).add_field(
-            '3. Language',
+            '2. Language',
             f'{GUILD__NEKO_DUNGEON} is an english speaking server, please try to stick yourself to it.',
         ).add_field(
-            '4. Channels',
+            '3. Channels',
             'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
         ).add_field(
-            '5. Usernames',
+            '4. Usernames',
             'Invisible, offensive or noise unicode names are not allowed.'
         ).add_field(
-            '6. Spamming',
+            '5. Spamming',
             'Forbidden in any form. Spamming server members in DM-s counts as well.',
         ).add_field(
-            '7. NSFW',
+            '6. NSFW',
             'Keep explicit content in nsfw channels.',
         ).add_field(
-            '8. Roles',
+            '7. Roles',
             f'Do not beg for roles. You can claim {ROLE__NEKO_DUNGEON__VERIFIED.mention} role, what gives you access to '
             f'additional channels by typing `nya` at {CHANNEL__NEKO_DUNGEON__SYSTEM.mention}.\n'
             f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
             f'as well.*'
         ).add_field(
-            '9. Advertisements',
+            '8. Advertisements',
             'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
         ).add_field(
-            '10. No political or religious topics.',
+            '9. No political or religious topics.',
             'I do not say either that aliens exists, even tho they do.',
         ).add_field(
-            '11. Alternative accounts',
+            '10. Alternative accounts',
             'Instant ban.'
         )
     
