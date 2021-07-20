@@ -727,9 +727,9 @@ async def select_test():
                 Option('cat', 'cat'),
                 Option('sugoi', 'sugoi'),
             ],
-            placeholder='dunno',
-            min_values=2,
-            max_values=3,
+            placeholder = 'dunno',
+            min_values = 2,
+            max_values = 3,
         ),
     ]
     

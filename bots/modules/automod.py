@@ -9,7 +9,8 @@ Satori : Client
 FILTER = re.compile(
     '(?:d(?:iscord)?[\.\_]?py)|'
     '(?:danny)|'
-    '(?:rapptz)',
+    '(?:rapptz)|'
+    '(?:discord\.ext)',
     re.I|re.M|re.S,
 )
 

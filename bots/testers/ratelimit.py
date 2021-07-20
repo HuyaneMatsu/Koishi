@@ -26,14 +26,14 @@ from hata.discord.utils import image_to_base64
 from hata.discord.guild import create_partial_guild_from_data, GuildDiscovery
 from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPES
-from hata.discord.http import API_ENDPOINT
+from hata.discord.http import API_ENDPOINT, STATUS_ENDPOINT
 from hata.discord.http.headers import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
 
 from hata.ext.command_utils import wait_for_message, Pagination, wait_for_reaction
 from hata.ext.commands_v2 import Command, checks, configure_converter
 
 
-MAIN_CLIENT : Client
+MAIN_CLIENT: Client
 RATE_LIMIT_COMMANDS = eventlist(type_=Command, category='RATE_LIMIT TESTS')
 
 def setup(lib):
@@ -1567,14 +1567,14 @@ async def achievement_create(client,name,description,icon,secret=False,secure=Fa
     data = {
         'name'          : {
             'default'   : name,
-                },
+        },
         'description'   : {
             'default'   : description,
-                },
+        },
         'secret'        : secret,
         'secure'        : secure,
         'icon'          : icon_data,
-            }
+    }
 
     application_id=client.application.id
         
@@ -1596,11 +1596,11 @@ async def achievement_edit(client,achievement,name=None,description=None,secret=
     if (name is not None):
         data['name'] = {
             'default': name,
-                }
+        }
     if (description is not None):
         data['description'] = {
             'default': description,
-                }
+        }
     if (secret is not None):
         data['secret'] = secret
         
@@ -1625,7 +1625,7 @@ async def achievement_get_all(client,):
     
     data = await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/achievements',
-        )
+    )
     
     return [Achievement(achievement_data) for achievement_data in data]
 
@@ -1718,23 +1718,23 @@ async def discovery_validate_term(client, term):
 async def applications_detectable(client):
     data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/applications/detectable',
-            )
+    )
 
 async def welcome_screen_get(client, guild_id):
     data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/welcome-screen',
-            )
+    )
 
 async def eula_get(client):
     eula_id = 542074049984200704
     data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/store/eulas/{eula_id}',
-            )
+    )
 
 async def voice_regions(client):
     data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/voice/regions',
-            )
+    )
     return data
 
 
@@ -1816,7 +1816,7 @@ async def application_command_guild_delete(client, guild, application_command):
     
     await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
-            )
+    )
 
 async def interaction_response_message_create(client, interaction, content=None, embed=None):
     message_data = {}
@@ -1879,7 +1879,7 @@ async def interaction_response_message_get(client, interaction):
     
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/@original',
-            )
+    )
 
 async def interaction_followup_message_create(client, interaction, content=None, embed=None):
     message_data = {}
@@ -1923,14 +1923,14 @@ async def interaction_followup_message_delete(client, interaction, message):
     
     await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/{message_id}',
-            )
+    )
 
 async def verification_screen_get(client, guild):
     guild_id = guild.id
     
     data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/member-verification',
-            )
+    )
     
     return VerificationScreen.from_data(data)
 
@@ -1959,7 +1959,7 @@ async def application_command_global_get(client, application_command_id):
     
     data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/commands/{application_command_id}',
-            )
+    )
     
     return ApplicationCommand.from_data(data)
 
@@ -1969,7 +1969,7 @@ async def application_command_guild_get(client, guild, application_command_id):
     
     data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
-            )
+    )
     
     return ApplicationCommand.from_data(data)
 
@@ -1980,7 +1980,7 @@ async def application_command_global_update_multiple(client, application_command
     application_command_datas = await bypass_request(client, METHOD_PUT,
         f'{API_ENDPOINT}/applications/{application_id}/commands',
         application_command_datas,
-            )
+    )
     
     return [ApplicationCommand.from_data(application_command_data) \
         for application_command_data in application_command_datas]
@@ -1993,7 +1993,7 @@ async def application_command_guild_update_multiple(client, guild, application_c
     application_command_datas = await bypass_request(client, METHOD_PUT,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands',
         application_command_datas,
-            )
+    )
     
     return [ApplicationCommand.from_data(application_command_data) \
         for application_command_data in application_command_datas]
@@ -2004,7 +2004,7 @@ async def application_command_permission_get_all_guild(client, guild):
     guild_id = guild.id
     permission_datas = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/permissions',
-            )
+    )
     
     return [ApplicationCommandPermission.from_data(permission_data) for permission_data in permission_datas]
 
@@ -2014,7 +2014,7 @@ async def application_command_permission_get(client, guild, application_command)
     application_command_id = application_command.id
     permission_data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}/permissions',
-            )
+    )
     
     return ApplicationCommandPermission.from_data(permission_data)
 
@@ -2042,7 +2042,7 @@ async def voice_state_client_edit(client, channel, suppress=False, request_to_sp
         'suppress': suppress,
         'request_to_speak_timestamp': request_to_speak_timestamp,
         'channel_id': channel_id,
-            }
+    }
     
     await bypass_request(client, METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/@me',
@@ -2056,7 +2056,7 @@ async def voice_state_user_edit(client, channel, user, suppress=False):
     data = {
         'suppress': suppress,
         'channel_id': channel_id,
-            }
+    }
     
     await bypass_request(client, METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/voice-states/{user_id}',
@@ -2066,17 +2066,17 @@ async def voice_state_user_edit(client, channel, user, suppress=False):
 async def stage_discovery_get(client):
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/discovery',
-        )
+    )
 
 async def guild_discovery_get_all(client):
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guild-discovery',
-        )
+    )
 
 async def stage_get_all(client):
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/stage-instances',
-        )
+    )
 
 async def stage_create(client, channel, topic):
     data = {
@@ -2125,14 +2125,14 @@ async def thread_create_private(client, channel, type_, name):
     await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/threads',
         data,
-        )
+    )
 
 async def thread_join(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
-        )
+    )
 
 async def application_button_create(client, data):
     application_id = client.application.id
@@ -2140,14 +2140,14 @@ async def application_button_create(client, data):
     return await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/applications/{application_id}/message-components',
         data,
-        )
+    )
 
 async def thread_leave(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
-        )
+    )
 
 
 async def thread_get_self(client, channel):
@@ -2155,7 +2155,7 @@ async def thread_get_self(client, channel):
     
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/@me',
-        )
+    )
 
 
 async def thread_user_get(client, channel, user):
@@ -2164,7 +2164,7 @@ async def thread_user_get(client, channel, user):
     
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/thread-members/{user_id}',
-        )
+    )
 
 
 async def thread_user_add(client, channel, user):
@@ -2264,7 +2264,7 @@ async def sticker_guild_create(client, guild, name, description, file, tags):
 async def sticker_guild_delete(client, guild, sticker_id):
     guild_id = guild.id
     
-    sticker_data = await bypass_request(client, METHOD_DELETE,
+    await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}'
     )
 
@@ -2312,6 +2312,23 @@ async def vanity_invite_edit(client, guild, vanity_code=None):
         {'code': vanity_code}
     )
 
+async def status_incident_unresolved(client):
+    await bypass_request(client, METHOD_GET,
+        f'{STATUS_ENDPOINT}/incidents/unresolved.json',
+        headers = imultidict(),
+    )
+
+async def status_maintenance_active(client):
+    await bypass_request(client, METHOD_GET,
+        f'{STATUS_ENDPOINT}/scheduled-maintenances/active.json',
+        headers = imultidict(),
+    )
+
+async def status_maintenance_upcoming(client):
+    await bypass_request(client, METHOD_GET,
+        f'{STATUS_ENDPOINT}/scheduled-maintenances/upcoming.json',
+        headers = imultidict(),
+    )
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test0000(client, message):
@@ -5585,7 +5602,7 @@ async def rate_limit_test0151(client, message, sticker_id:int=None, name:str=Non
             await RLT.send('`sticker_id` parameter not satisfied.')
         
         if name is None:
-            await RLT.send('Please also pass a new name for teh sticker.')
+            await RLT.send('Please also pass a new name for the sticker.')
         
         sticker = await client.sticker_get(sticker_id)
         
@@ -5593,17 +5610,46 @@ async def rate_limit_test0151(client, message, sticker_id:int=None, name:str=Non
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test0152(client, message, name:str,):
+async def rate_limit_test0152(client, message, name:str):
     """
     Edits the guild's vanity invite.
     
     Please also give a name.
     """
     channel = message.channel
-    with RLTCTX(client, channel, 'rate_limit_test0151') as RLT:
+    with RLTCTX(client, channel, 'rate_limit_test0152') as RLT:
         guild = channel.guild
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
         await vanity_invite_edit(client, guild, name)
 
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0153(client, message):
+    """
+    status_incident_unresolved
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0153') as RLT:
+        await status_incident_unresolved(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0154(client, message):
+    """
+    status_maintenance_active
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0154') as RLT:
+        await status_maintenance_active(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test0155(client, message):
+    """
+    status_maintenance_upcoming
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test0155') as RLT:
+        await status_maintenance_upcoming(client)

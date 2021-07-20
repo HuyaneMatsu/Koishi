@@ -1,17 +1,15 @@
 from hata import Client
 from hata.backend.headers import CONTENT_TYPE
-from hata import imultidict
+from hata import imultidict, un_map_pack
 
 from hata.ext.slash import abort
 
-SLASH_CLIENT : Client
+SLASH_CLIENT: Client
 
 WAIFU_API_BASE_URL = 'https://api.waifu.pics'
 
 HEADERS = imultidict()
 HEADERS[CONTENT_TYPE] = 'application/json'
-
-WAIFU_CACHE_BY_KEY = {}
 
 ACTIONS = [
     'pat',
@@ -53,6 +51,12 @@ NSFW_WAIFUS = [
     'trap',
 ]
 
+
+WAIFU_CACHE_BY_KEY = {
+    **un_map_pack(((waifu_type, True), []) for waifu_type in SFW_WAIFUS),
+    **un_map_pack(((waifu_type, False), []) for waifu_type in NSFW_WAIFUS),
+}
+
 async def get_waifu_image(client, event, endpoint, safe):
     guild = event.guild
     if guild is None:
@@ -65,14 +69,11 @@ async def get_waifu_image(client, event, endpoint, safe):
         abort('Nsfw channel only!')
     
     key = (endpoint, safe)
-    try:
-        cache = WAIFU_CACHE_BY_KEY[key]
-    except KeyError:
-        cache = WAIFU_CACHE_BY_KEY[key] = []
-    else:
-        if cache:
-            yield cache.pop()
-            return
+    
+    cache = WAIFU_CACHE_BY_KEY[key] = []
+    if cache:
+        yield cache.pop()
+        return
     
     yield
     

@@ -57,7 +57,7 @@ class File:
     
     def __init__(self, path, name, access_path):
         self.path = path
-        self.modified = datetime.fromtimestamp(getmtime(path))
+        self.modified = datetime.utcfromtimestamp(getmtime(path))
         self.name = name
         self.access_path = access_path
 

@@ -329,7 +329,7 @@ if (psutil is not None) and (sys.platform == 'linux'):
                 description.append(repr(PROCESS.num_threads()))
                 description.append('\n' \
                                    'Created: ')
-                description.append(elapsed_time(datetime.fromtimestamp(PROCESS.create_time())))
+                description.append(elapsed_time(datetime.utcfromtimestamp(PROCESS.create_time())))
                 description.append(' ago\n' \
                                    '\n' \
                                    '**CPU times:**\n' \
