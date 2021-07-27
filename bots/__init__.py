@@ -46,7 +46,7 @@ else:
         activity = ActivityRich('with Koishi'),
         status = 'dnd',
         application_id = config.SATORI_ID,
-        extensions = ('command_utils', 'commands_v2',),
+        extensions = ('command_utils', 'commands_v2', 'slash',),
         prefix = PREFIX__SATORI,
         category_name_rule = category_name_rule,
         default_category_name = DEFAULT_CATEGORY_NAME,

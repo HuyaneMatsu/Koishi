@@ -658,11 +658,6 @@ def render_application_id_difference(render_to, old_value, activity):
 
 
 def render_created_at_difference(render_to, old_value, activity):
-    if old_value == 0:
-        old_value = DISCORD_EPOCH_START
-    else:
-        old_value = datetime.utcfromtimestamp(old_value/1000.)
-
     render_to.append('**created at:** ')
     render_simple_datetime_difference(render_to, old_value, activity.created_at)
 
@@ -687,7 +682,7 @@ ACTIVITY_DIFFERENCE_RENDERERS = {
     'session_id': render_session_id_difference,
     'flags': render_flags_difference,
     'application_id': render_application_id_difference,
-    'created': render_created_at_difference,
+    'created_at': render_created_at_difference,
     'id': render_id_difference,
 }
 

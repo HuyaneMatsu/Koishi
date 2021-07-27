@@ -1247,7 +1247,7 @@ JSON_KEY_STAGE_SOURCE_ID = 'i'
 JSON_KEY_STAGE_SOURCE_START = 'p'
 JSON_KEY_STAGE_SOURCE_TARGET_COUNT = 't'
 JSON_KEY_STAGE_SOURCE_MAP = 'm'
-JSON_KEY_STAGE_X_SIZE = 'x'
+JSON_KEY_STAGE_SOURCE_X_SIZE = 'x'
 
 JSON_KEY_HISTORY_ELEMENT_POSITION = '0'
 JSON_KEY_HISTORY_ELEMENT_WAS_SKILL = '1'
@@ -1328,7 +1328,7 @@ class StageSource:
         self.start = data[JSON_KEY_STAGE_SOURCE_START]
         self.target_count = data[JSON_KEY_STAGE_SOURCE_TARGET_COUNT]
         self.map = [TILE_NAME_TO_VALUE[tile_name] for tile_name in data[JSON_KEY_STAGE_SOURCE_MAP]]
-        self.x_size = data[JSON_KEY_STAGE_X_SIZE]
+        self.x_size = data[JSON_KEY_STAGE_SOURCE_X_SIZE]
         self.index = 0
         self.before_stage_source = None
         self.after_stage_source = None
@@ -1422,7 +1422,7 @@ def pretty_dump_stage_sources(stage_sources):
         json_parts.append(',\n')
         json_parts.append(' '*8)
         json_parts.append('"')
-        json_parts.append(JSON_KEY_STAGE_X_SIZE)
+        json_parts.append(JSON_KEY_STAGE_SOURCE_X_SIZE)
         json_parts.append('": ')
         json_parts.append(repr(stage_source.x_size))
         json_parts.append(',\n')

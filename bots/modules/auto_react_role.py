@@ -53,8 +53,8 @@ class BehaviourFlag(int):
 AUTO_REACT_ROLE = SLASH_CLIENT.interactions(None,
     name = 'auto-react-role',
     description = 'Fire in my soul!',
-    is_global=True,
-        )
+    is_global = True,
+)
 
 AUTO_REACT_ROLE.interactions(name='create', show_for_invking_user_only=True)
 async def create_auto_react_role(client, event,

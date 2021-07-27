@@ -11,8 +11,9 @@ from bot_utils.tools import Cell
 
 from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \
     BUILTIN_EMOJIS
+from hata.ext.slash import Button, Row, wait_for_component_interaction
+from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.commands_v2 import checks
-from hata.ext.command_utils import Pagination, Closer, wait_for_reaction
 
 FILE_NAME = 'channel_names.csv'
 
@@ -29,9 +30,9 @@ SPACE_CHAR = '-'
 
 CHANNEL_CHAR_TABLE = {}
 for source, target in (
-        ('!', 'ǃ'),
-        ('?', '？'),
-            ):
+    ('!', 'ǃ'),
+    ('?', '？'),
+):
     CHANNEL_CHAR_TABLE[source] = target
     CHANNEL_CHAR_TABLE[target] = target
 
@@ -276,9 +277,13 @@ async def list_bot_channel_names(client, message):
 def check_staff_role(event):
     return event.user.has_role(ROLE__NEKO_DUNGEON__MODERATOR)
 
-ADD_EMOJI_OK     = BUILTIN_EMOJIS['ok_hand']
+ADD_EMOJI_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
-ADD_EMOJI_EMOJIS = (ADD_EMOJI_OK, ADD_EMOJI_CANCEL)
+
+ADD_BUTTON_OK = Button(emoji=ADD_EMOJI_OK)
+ADD_BUTTON_CANCEL = Button(emoji=ADD_EMOJI_CANCEL)
+
+ADD_COMPONENTS = Row(ADD_BUTTON_OK, ADD_BUTTON_CANCEL)
 
 @COMMAND_CLIENT.commands(category='CHANNEL NAMES', separator='|')
 async def add_bot_channel_name(client, message, weight:int, name):
@@ -317,36 +322,19 @@ async def add_bot_channel_name(client, message, weight:int, name):
                 f'{name}\n'
                 f'To weight of {weight}.')
         
-        message = await client.message_create(message.channel, embed=embed)
-        for emoji_ in ADD_EMOJI_EMOJIS:
-            await client.reaction_add(message, emoji_)
+        message = await client.message_create(message.channel, embed=embed, components=ADD_COMPONENTS)
         
         try:
-            event = await wait_for_reaction(client, message, check_staff_role, 300.)
+            event = await wait_for_component_interaction(message, timeout=300., check=check_staff_role)
         except TimeoutError:
-            emoji_ = ADD_EMOJI_CANCEL
+            event = None
+            cancelled = False
         else:
-            emoji_ = event.emoji
+            cancelled = (event.interaction == ADD_BUTTON_CANCEL)
         
-        if message.channel.cached_permissions_for(client).can_manage_messages:
-            try:
-                await client.reaction_clear(message)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    # no internet
-                    return
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
-                        return
-                
-                raise
-        
-        if emoji_ is ADD_EMOJI_OK:
+        if cancelled:
+            footer = 'Name adding cancelled.'
+        else:
             if overwrite:
                 for describer in names:
                     if describer.name == describer:
@@ -359,15 +347,12 @@ async def add_bot_channel_name(client, message, weight:int, name):
                 footer = 'Name added successfully.'
             await write_channels(names)
         
-        elif emoji_ is ADD_EMOJI_CANCEL:
-            footer = 'Name adding cancelled.'
-        
-        else: # should not happen
-            return
-        
         embed.add_footer(footer)
         
-        await client.message_edit(message, embed=embed)
+        if event is None:
+            await client.message_edit(message, embed=embed, components=None)
+        else:
+            await client.interaction_component_message_edit(event, embed=embed, components=None)
 
 
 @COMMAND_CLIENT.commands(category='CHANNEL NAMES')

@@ -23,7 +23,8 @@ from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIBRARY_USER_AGENT
 from hata.backend.headers import USER_AGENT, DATE
-from hata.ext.command_utils import Pagination, wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue
+from hata.ext.command_utils import wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue
+from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
@@ -768,3 +769,7 @@ async def poison_edit_cake(index_1, index_2):
     return f'You selected: {index_1}x{index_2}'
 
 
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def pagination_or_something(client, event):
+    """Pagination or something"""
+    await Pagination(client, event, ['cake', 'lewd'])

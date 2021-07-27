@@ -1,7 +1,7 @@
 from hata import Color, Embed, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
     cr_pg_channel_object, ChannelText, Client
 from hata.ext.commands_v2 import checks
-from hata.ext.command_utils import Pagination
+from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
 
 OAUTH2_COLOR = Color.from_rgb(148, 0, 211)

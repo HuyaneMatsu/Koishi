@@ -7,9 +7,9 @@ from itertools import chain
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
     ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta
-from hata.ext.command_utils import wait_for_reaction, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
+from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
-from hata.ext.slash import abort, InteractionResponse, set_permission
+from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, wait_for_component_interaction
 
 from sqlalchemy.sql import select, desc
 
@@ -54,6 +54,10 @@ EVENT_OK_EMOJI          = BUILTIN_EMOJIS['ok_hand']
 EVENT_ABORT_EMOJI       = BUILTIN_EMOJIS['x']
 EVENT_DAILY_MIN_AMOUNT  = 1
 EVENT_DAILY_MAX_AMOUNT  = 7
+EVENT_OK_BUTTON         = Button(emoji=EVENT_OK_EMOJI)
+EVENT_ABORT_BUTTON      = Button(emoji=EVENT_ABORT_EMOJI)
+EVENT_COMPONENTS        = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
+EVENT_CURRENCY_BUTTON   = Button(emoji=EMOJI__HEART_CURRENCY)
 
 CARD_TYPES = (
     BUILTIN_EMOJIS['spades'].as_emoji,
@@ -540,14 +544,10 @@ def convert_tdelta(delta):
 
 
 def heart_event_start_checker(client, event):
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        return False
-    
-    emoji = event.emoji
-    if (emoji is EVENT_OK_EMOJI) or (emoji is EVENT_ABORT_EMOJI):
+    if event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
         return True
     
-    return False
+    return True
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
@@ -558,60 +558,124 @@ async def heart_event(client, event,
         user_limit : ('int', 'The maximal amount fo claimers.') = 0,
             ):
     """Starts a heart event at the channel."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    while True:
+        if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+            response = f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!'
+            error = True
+            break
+        
+        permissions = event.channel.cached_permissions_for(client)
+        if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
+                (not permissions.can_use_external_emojis):
+            response = (
+                'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
+                'command.'
+            )
+            error = True
+            break
+        
+        guild = event.guild
+        if (guild is not None):
+            if guild not in client.guild_profiles:
+                response = 'Please add me to the guild before invoking the command.'
+                error = True
+                break
+        
+        duration = parse_tdelta(duration)
+        if (duration is None):
+            response = 'Could not interpret the given duration.'
+            error = True
+            break
+        
+        if duration > EVENT_MAX_DURATION:
+            response = (
+                f'**Duration passed the upper limit**\n'
+                f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
+                f'**>**  passed : {convert_tdelta(duration)}'
+            )
+            error = True
+            break
+        
+        if duration < EVENT_MIN_DURATION:
+            response = (
+                f'**Duration passed the lower limit**\n'
+                f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
+                f'**>**  passed : {convert_tdelta(duration)}'
+            )
+            error = True
+            break
+        
+        if amount > EVENT_HEART_MAX_AMOUNT:
+            response = (
+                f'**Amount passed the upper limit**\n'
+                f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n'
+                f'**>**  passed : {amount}'
+            )
+            error = True
+            break
+        
+        if amount < EVENT_HEART_MIN_AMOUNT:
+            response = (
+                f'**Amount passed the lower limit**\n'
+                f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n'
+                f'**>**  passed : {amount}'
+            )
+            error = True
+            break
+        
+        if user_limit < 0:
+            response = (
+                f'**User limit passed the lower limit**\n'
+                f'**>** lower limit : 0\n'
+                f'**>**  - passed : {user_limit}'
+            )
+            error = True
+            break
+        
+        response_parts = [
+            '**Is everything correct?**\n'
+            'Duration: '
+        ]
+        response_parts.append(convert_tdelta(duration))
+        response_parts.append('\n Amount : ')
+        response_parts.append(str(amount))
+        if user_limit:
+            response_parts.append('\n user limit : ')
+            response_parts.append(str(user_limit))
+        
+        response = ''.join(response_parts)
+        error = False
+        break
     
-    permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
-            (not permissions.can_use_external_emojis):
-        abort('I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
-           'command.')
+    if error:
+        await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
+        return
     
-    guild = event.guild
-    if (guild is not None):
-        if guild not in client.guild_profiles:
-            abort('Please add me to the guild before invoking the command.')
+    await client.interaction_application_command_acknowledge(event, show_for_invoking_user_only=True)
+    message = await client.interaction_followup_message_create(event, response)
     
-    duration = parse_tdelta(duration)
-    if (duration is None):
-        abort('Could not interpret the given duration.')
+    try:
+        component_event = await wait_for_component_interaction(message,
+            check=partial_func(heart_event_start_checker, client), timeout=300.)
+    except TimeoutError:
+        try:
+            await client.interaction_followup_message_edit(event, message, 'Heart event cancelled, timeout.',
+                components=None)
+        except ConnectionError:
+            pass
+        return
     
-    if duration > EVENT_MAX_DURATION:
-        abort(
-            f'**Duration passed the upper limit**\n'
-            f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
-            f'**>**  passed : {convert_tdelta(duration)}'
-        )
+    if component_event.interaction == EVENT_ABORT_BUTTON:
+        try:
+            await client.interaction_component_message_edit(component_event, 'Heart event cancelled.',
+                components=None)
+        except ConnectionError:
+            pass
+        return
     
-    if duration < EVENT_MIN_DURATION:
-        abort(
-            f'**Duration passed the lower limit**\n'
-            f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
-            f'**>**  passed : {convert_tdelta(duration)}'
-        )
-    
-    if amount > EVENT_HEART_MAX_AMOUNT:
-        abort(
-            f'**Amount passed the upper limit**\n'
-            f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n'
-            f'**>**  passed : {amount}'
-        )
-    
-    if amount < EVENT_HEART_MIN_AMOUNT:
-        abort(
-            f'**Amount passed the lower limit**\n'
-            f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n'
-            f'**>**  passed : {amount}'
-        )
-    
-    if user_limit < 0:
-        abort(
-            f'**User limit passed the lower limit**\n'
-            f'**>** lower limit : 0\n'
-            f'**>**  - passed : {user_limit}'
-        )
-    
-    return HeartEventGUI(client, event, duration, amount, user_limit)
+    await client.interaction_component_acknowledge(component_event)
+    await HeartEventGUI(client, event, duration, amount, user_limit)
+
 
 class HeartEventGUI:
     _update_time = 60.
@@ -619,65 +683,6 @@ class HeartEventGUI:
     
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     async def __new__(cls, client, event, duration, amount, user_limit):
-        
-        result = []
-        result.append('Duration: ')
-        result.append(convert_tdelta(duration))
-        result.append('\n Amount : ')
-        result.append(str(amount))
-        if user_limit:
-            result.append('\n user limit : ')
-            result.append(str(user_limit))
-        
-        embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
-        del result
-        
-        to_check = yield InteractionResponse(embed=embed)
-        
-        try:
-            await client.reaction_add(to_check, EVENT_OK_EMOJI)
-            await client.reaction_add(to_check, EVENT_ABORT_EMOJI)
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            raise
-        
-        try:
-            reaction_event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client), 1800.)
-        except TimeoutError:
-            return
-        finally:
-            try:
-                await client.message_delete(to_check)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
-                        return
-                
-                raise
-        
-        if reaction_event.emoji is EVENT_ABORT_EMOJI:
-            return
-        
         self = object.__new__(cls)
         self.connector = None
         self.user_ids = set()
@@ -688,33 +693,24 @@ class HeartEventGUI:
         self.waiter = Future(KOKORO)
         
         try:
-            message = await client.message_create(event.channel, embed=self.generate_embed())
+            message = await client.interaction_followup_message_create(event, embed=self.generate_embed(),
+                components=EVENT_CURRENCY_BUTTON)
         except BaseException as err:
             self.message = None
             if isinstance(err, ConnectionError):
                 return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
-                    return
             
             raise
         
         self.message = message
         
         self.connector = await DB_ENGINE.connect()
-        
-        client.events.reaction_add.append(message, self)
+        await client.slasher.add_component_interaction_waiter(message, self)
         Task(self.countdown(client, message), KOKORO)
-        await client.reaction_add(message, EMOJI__HEART_CURRENCY)
         return
     
     def generate_embed(self):
-        title = f'React with {EMOJI__HEART_CURRENCY:e} to receive {self.amount}'
+        title = f'Click on {EMOJI__HEART_CURRENCY:e} to receive {self.amount}'
         if self.user_limit:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
         else:
@@ -806,7 +802,7 @@ class HeartEventGUI:
                 await client.events.error(client, f'{self!r}.countdown', err)
                 break
         
-        client.events.reaction_add.remove(message, self)
+        client.slasher.remove_component_interaction_waiter(message, self)
         try:
             await client.message_delete(message)
         except BaseException as err:
@@ -848,129 +844,131 @@ async def daily_event(client, event,
         user_limit : ('int', 'The maximal amount fo claimers.') = 0,
             ):
     """Starts a heart event at the channel. (Bot owner only)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    while True:
+        if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+            response = f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!'
+            error = True
+            break
+        
+        permissions = event.channel.cached_permissions_for(client)
+        if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
+                (not permissions.can_use_external_emojis):
+            response = (
+                'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
+                'command.'
+            )
+            error = True
+            break
+        
+        guild = event.guild
+        if (guild is not None):
+            if guild not in client.guild_profiles:
+                response = 'Please add me to the guild before invoking the command.'
+                error = True
+                break
+        
+        duration = parse_tdelta(duration)
+        if (duration is None):
+            response = 'Could not interpret the given duration.'
+            error = True
+            break
+        
+        if duration > EVENT_MAX_DURATION:
+            response = (
+                f'Duration passed the upper limit\n'
+                f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
+                f'**>**  passed : {convert_tdelta(duration)}'
+            )
+            error = True
+            break
+        
+        if duration < EVENT_MIN_DURATION:
+            response = (
+                f'Duration passed the lower limit\n'
+                f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
+                f'**>**  passed : {convert_tdelta(duration)}'
+            )
+            error = True
+            break
+        
+        if amount > EVENT_DAILY_MAX_AMOUNT:
+            response = (
+                f'Amount passed the upper limit\n'
+                f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n'
+                f'**>**  passed : {amount}'
+            )
+            error = True
+            break
+        
+        if amount < EVENT_DAILY_MIN_AMOUNT:
+            response = (
+                f'Amount passed the lower limit\n'
+                f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n'
+                f'**>**  passed : {amount}'
+            )
+            error = True
+            break
+        
+        if user_limit < 0:
+            response = (
+                f'User limit passed the lower limit\n'
+                f'**>** lower limit : 0\n'
+                f'**>**  - passed : {user_limit}'
+            )
+            error = True
+            break
+        
+        response_parts = [
+            '**Is everything correct?**\n'
+            'Duration: '
+        ]
+        response_parts.append(convert_tdelta(duration))
+        response_parts.append('\n Amount : ')
+        response_parts.append(str(amount))
+        if user_limit:
+            response_parts.append('\n user limit : ')
+            response_parts.append(str(user_limit))
+        
+        response = ''.join(response_parts)
+        error = False
+        break
     
-    permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
-            (not permissions.can_use_external_emojis):
-        abort('I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
-            'command.')
+    if error:
+        await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
+        return
     
-    guild = event.guild
-    if (guild is not None):
-        if guild not in client.guild_profiles:
-            abort('Please add me to the guild before invoking the command.')
+    await client.interaction_application_command_acknowledge(event, show_for_invoking_user_only=True)
+    message = await client.interaction_followup_message_create(event, response)
     
+    try:
+        component_event = await wait_for_component_interaction(message,
+            check=partial_func(heart_event_start_checker, client), timeout=300.)
+    except TimeoutError:
+        try:
+            await client.interaction_followup_message_edit(event, message, 'Daily event cancelled, timeout.',
+                components=None)
+        except ConnectionError:
+            pass
+        return
     
-    duration = parse_tdelta(duration)
-    if (duration is None):
-        abort('Could not interpret the given duration.')
+    if component_event.interaction == EVENT_ABORT_BUTTON:
+        try:
+            await client.interaction_component_message_edit(component_event, 'Daily event cancelled.',
+                components=None)
+        except ConnectionError:
+            pass
+        return
     
-    if duration > EVENT_MAX_DURATION:
-        abort(
-            f'Duration passed the upper limit\n'
-            f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
-            f'**>**  passed : {convert_tdelta(duration)}'
-        )
-    
-    if duration < EVENT_MIN_DURATION:
-        abort(
-            f'Duration passed the lower limit\n'
-            f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
-            f'**>**  passed : {convert_tdelta(duration)}'
-        )
-    
-    if amount > EVENT_DAILY_MAX_AMOUNT:
-        abort(
-            f'Amount passed the upper limit\n'
-            f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n'
-            f'**>**  passed : {amount}'
-        )
-    
-    if amount < EVENT_DAILY_MIN_AMOUNT:
-        abort(
-            f'Amount passed the lower limit\n'
-            f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n'
-            f'**>**  passed : {amount}'
-        )
-    
-    if user_limit < 0:
-        abort(
-            f'User limit passed the lower limit\n'
-            f'**>** lower limit : 0\n'
-            f'**>**  - passed : {user_limit}'
-        )
-    
+    await client.interaction_component_acknowledge(component_event)
     return DailyEventGUI(client, event, duration, amount, user_limit)
 
 
 class DailyEventGUI:
     _update_time = 60.
     _update_delta = timedelta(seconds=_update_time)
-
+    
     __slots__=('amount', 'client', 'connector', 'duration', 'message', 'user_ids', 'user_limit', 'waiter',)
     async def __new__(cls, client, event, duration, amount, user_limit):
-        
-        result = []
-        result.append('Duration: ')
-        result.append(convert_tdelta(duration))
-        result.append('\n Amount : ')
-        result.append(str(amount))
-        if user_limit:
-            result.append('\n user limit : ')
-            result.append(str(user_limit))
-        
-        embed = Embed('Is everything correct?', ''.join(result), color=GAMBLING_COLOR)
-        del result
-        
-        to_check = yield InteractionResponse(embed=embed)
-        
-        try:
-            await client.reaction_add(to_check, EVENT_OK_EMOJI)
-            await client.reaction_add(to_check, EVENT_ABORT_EMOJI)
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
-                    return
-            
-            raise
-        
-        try:
-            reaction_event = await wait_for_reaction(client, to_check, partial_func(heart_event_start_checker, client),
-                1800.)
-        except TimeoutError:
-            return
-        finally:
-            try:
-                await client.message_delete(to_check)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return
-                
-                if isinstance(err, DiscordException):
-                    if err.code in (
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
-                        return
-                
-                raise
-        
-        if reaction_event.emoji is EVENT_ABORT_EMOJI:
-            return
-        
         self = object.__new__(cls)
         self.connector = None
         self.user_ids = set()
@@ -981,28 +979,21 @@ class DailyEventGUI:
         self.waiter = Future(KOKORO)
         
         try:
-            message = await client.message_create(event.channel, embed=self.generate_embed())
+            message = await client.interaction_followup_message_create(event, embed=self.generate_embed(),
+                components=EVENT_CURRENCY_BUTTON)
         except BaseException as err:
             self.message = None
             if isinstance(err, ConnectionError):
                 return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
-                    return
             
             raise
         
         self.message = message
         self.connector = await DB_ENGINE.connect()
         
-        client.events.reaction_add.append(message, self)
+        self.connector = await DB_ENGINE.connect()
+        await client.slasher.add_component_interaction_waiter(message, self)
         Task(self.countdown(client, message), KOKORO)
-        await client.reaction_add(message, EMOJI__HEART_CURRENCY)
         return
     
     def generate_embed(self):
@@ -1107,7 +1098,7 @@ class DailyEventGUI:
                 await client.events.error(client, f'{self!r}.countdown', err)
                 break
         
-        client.events.reaction_add.remove(message, self)
+        client.slasher.remove_component_interaction_waiter(message, self)
         try:
             await client.message_delete(message)
         except BaseException as err:

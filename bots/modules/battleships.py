@@ -23,7 +23,7 @@ LINE_X_LEAD = ''.join([
     BUILTIN_EMOJIS['eight'].as_emoji,
     BUILTIN_EMOJIS['nine'].as_emoji,
     BUILTIN_EMOJIS['keycap_ten'].as_emoji,
-        ])
+])
 
 LINE_Y_LEAD = (
     BUILTIN_EMOJIS['regional_indicator_a'].as_emoji,
@@ -36,7 +36,7 @@ LINE_Y_LEAD = (
     BUILTIN_EMOJIS['regional_indicator_h'].as_emoji,
     BUILTIN_EMOJIS['regional_indicator_i'].as_emoji,
     BUILTIN_EMOJIS['regional_indicator_j'].as_emoji,
-        )
+)
 
 SHIP_VALUES = (
     OCEAN,
@@ -47,7 +47,7 @@ SHIP_VALUES = (
     BUILTIN_EMOJIS['cyclone'].as_emoji,
     BUILTIN_EMOJIS['fireworks'].as_emoji,
     BUILTIN_EMOJIS['boom'].as_emoji,
-        )
+)
 
 HIDDEN_VALUES = (
     OCEAN,
@@ -58,7 +58,7 @@ HIDDEN_VALUES = (
     BUILTIN_EMOJIS['cyclone'].as_emoji,
     BUILTIN_EMOJIS['fireworks'].as_emoji,
     BUILTIN_EMOJIS['boom'].as_emoji,
-        )
+)
 
 SWITCH = BUILTIN_EMOJIS['arrows_counterclockwise']
 

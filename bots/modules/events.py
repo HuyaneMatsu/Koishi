@@ -13,7 +13,7 @@ EVENTS = SLASH_CLIENT.interactions(None,
     name = 'events',
     description = 'Neko Dungeon event information.',
     is_global = True,
-        )
+)
 
 HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', color=COLOR__EVENT). \
     add_field(

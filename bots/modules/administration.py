@@ -3,7 +3,7 @@ from functools import partial as partial_func
 
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
     parse_rdelta, time_to_id, ChannelCategory, Emoji
-from hata.ext.command_utils import Pagination, wait_for_reaction
+from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
 
@@ -202,7 +202,9 @@ async def bans(client, event):
         
         if index == embed_ln:
             break
+    
     await Pagination(client, event, result, check=bans_pagination_check)
+
 
 def check_channel_invites_pagination_permissions(event):
     permissions = event.message.channel.permissions_for(event.user)

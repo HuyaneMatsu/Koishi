@@ -11,7 +11,7 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
     parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout
 
-from hata.ext.command_utils import Pagination
+from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
 from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, ButtonStyle, \
     wait_for_component_interaction
@@ -196,15 +196,6 @@ def add_activity(text, activity):
         text.append(f'**>>** id : {id_}\n')
 """
 
-def message_pagination_check(user, event):
-    event_user = event.user
-    if user is event.user:
-        return True
-    
-    if event.message.channel.permissions_for(event_user).can_manage_messages:
-        return True
-    
-    return False
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
@@ -283,7 +274,7 @@ async def message_(client, event,
         chunks = pchunkify(message)
     
     pages = [Embed(description=chunk) for chunk in chunks]
-    await Pagination(client, event, pages, check=partial_func(message_pagination_check, event.user))
+    await Pagination(client, event, pages)
 
 
 class RoleCache:

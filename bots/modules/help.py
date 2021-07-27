@@ -2,14 +2,14 @@ import sys
 from functools import partial as partial_func
 
 from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__
-from hata.ext.command_utils import Pagination, Closer
+from hata.ext.slash.menus import Pagination, Closer
+from hata.ext.slash import InteractionResponse
 
 from bot_utils.shared import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNGEON, GUILD__NEKO_DUNGEON, \
     LINK__HATA_DOCS, LINK__PASTE, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__NEKO_DUNGEON__ELEVATED, \
     ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH, ROLE__NEKO_DUNGEON__NSFW_ACCESS, \
     ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT
 
-from hata.ext.slash import InteractionResponse
 
 SLASH_CLIENT: Client
 

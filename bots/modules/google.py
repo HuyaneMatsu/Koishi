@@ -4,7 +4,7 @@ from config import GOOGLE_API_KEYS
 from bot_utils.shared import GUILD__NEKO_DUNGEON
 
 from hata import Client, Lock, KOKORO, Embed, Color
-from hata.ext.command_utils import Pagination
+from hata.ext.slash.menus import Pagination
 
 
 SLASH_CLIENT : Client

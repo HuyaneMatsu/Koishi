@@ -3,11 +3,11 @@ import re, sys
 from collections import deque
 from difflib import get_close_matches
 
-from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Task, DiscordException, KOKORO, Client
-from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, ChooseMenu, Pagination, \
-    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
+from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Client
+from hata.ext.command_utils import ChooseMenu, Pagination
 from hata.backend.utils import from_json
-from hata.ext.slash import InteractionResponse, abort
+from hata.ext.slash import InteractionResponse, abort, Button, Row
+from hata.ext.slash.menus import Menu
 from hata.discord.http import LIBRARY_USER_AGENT
 from hata.backend.headers import USER_AGENT, CONTENT_TYPE
 
@@ -123,7 +123,11 @@ class CachedBooruCommand:
             yield Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
             return
         
-        yield ShuffledShelter(client, event, urls, False, self.title)
+        if not urls:
+            yield Embed('No result')
+            return
+        
+        await ShuffledShelter(client, event, urls, False, self.title)
         return
     
     async def _request_urls(self, client):
@@ -141,181 +145,81 @@ class CachedBooruCommand:
         return urls
 
 
-class ShuffledShelter:
-    CYCLE  = BUILTIN_EMOJIS['arrows_counterclockwise']
-    BACK   = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
-    EMOJIS = (CYCLE, BACK)
+EMOJI_CYCLE = BUILTIN_EMOJIS['arrows_counterclockwise']
+EMOJI_BACK = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
+
+class ShuffledShelter(Menu):
+    BUTTON_CYCLE = Button(emoji=EMOJI_CYCLE)
+    BUTTON_BACK = Button(emoji=EMOJI_BACK, enabled=False)
     
-    __slots__ = ('canceller', 'channel', 'client', 'history', 'history_step', 'message', 'pop', '_task_flag',
-        '_timeouter', 'title', 'urls')
+    BUTTONS = Row(BUTTON_CYCLE, BUTTON_BACK)
     
-    async def __new__(cls, client, event, urls, pop, title=DEFAULT_TITLE):
-        if not urls:
-            yield Embed('No result')
-            return
-        
-        self = object.__new__(cls)
-        self.client = client
-        self.channel = event.channel
-        self.canceller = cls._canceller
-        self._task_flag = GUI_STATE_READY
+    __slots__ = ('history', 'history_step', 'pop', 'title', 'urls')
+    
+    def __init__(self, client, event, urls, pop, title=DEFAULT_TITLE):
         self.urls = urls
         self.pop = pop
         self.title = title
-        self._timeouter = None
         history = deque(maxlen=100)
         self.history = history
         self.history_step = 1
-        
-        
-        image_url = pop_one(urls) if pop else choose(urls)
-        history.append(image_url)
-        
-        embed = Embed(title, color=BOORU_COLOR, url=image_url).add_image(image_url)
-        
-        message = yield InteractionResponse(embed=embed)
-        self.message = message
-        
-        if (len(urls) == (0 if pop else 1)) or (not event.channel.cached_permissions_for(client).can_add_reactions):
-            return
-        
-        for emoji in self.EMOJIS:
-            await client.reaction_add(message, emoji)
-        
-        self._timeouter = Timeouter(self, timeout=300.)
-        client.events.reaction_add.append(message, self)
-        client.events.reaction_delete.append(message, self)
-        
         return
     
-    async def __call__(self, client, event):
-        if event.user.is_bot:
-            return
-        
-        if (event.emoji not in self.EMOJIS):
-            return
-        
-        if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
-            return
-        
-        if self._task_flag:
-            return
-        
-        while True:
-            emoji = event.emoji
-            if emoji is self.CYCLE:
-                image_url = pop_one(self.urls) if self.pop else choose_notsame(self.urls,
-                    self.message.embeds[0].image.url)
-                
-                self.history.append(image_url)
-                self.history_step = 1
-                break
-            
-            if emoji is self.BACK:
-                history = self.history
-                history_ln = len(history)
-                if history_ln < 2:
-                    return
-                
-                history_step = self.history_step
-                if history_step == history_ln:
-                    history_step = 0
-                
-                history_step += 1
-                self.history_step = history_step
-                image_url = history[history_ln - history_step]
-                break
-            
-            return
-        
-        embed = Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
-        
-        self._task_flag = GUI_STATE_SWITCHING_PAGE
-        try:
-            await client.message_edit(self.message, embed=embed)
-        except BaseException as err:
-            self._task_flag = GUI_STATE_CANCELLED
+    async def initial_invoke(self):
+        urls = self.urls
+        if len(urls) == 1:
+            image_url = self.urls[0]
+            self.BUTTON_CYCLE.enabled = False
             self.cancel()
-            
-            if isinstance(err, ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.unknown_message, # message already deleted
-                            ):
-                    return
-            
-            # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
-            await client.events.error(client, f'{self!r}.__call__', err)
-            return
-            
-        if not self.urls:
-            self._task_flag = GUI_STATE_CANCELLED
-            self.cancel()
-            return
+        else:
+            if self.pop:
+                image_url = pop_one(urls)
+            else:
+                image_url = choose(urls)
+            self.history.append(image_url)
         
-        self._task_flag = GUI_STATE_READY
-        
-        self._timeouter.set_timeout(300.0)
-
-    async def _canceller(self, exception):
-        client = self.client
-        message = self.message
-        
-        client.events.reaction_add.remove(message, self)
-        client.events.reaction_delete.remove(message, self)
-        
-        if self._task_flag == GUI_STATE_SWITCHING_CTX:
-            # the message is not our, we should not do anything with it.
-            return
-        
-        self._task_flag = GUI_STATE_CANCELLED
-        
-        if exception is None:
-            return
-        
-        if isinstance(exception, TimeoutError):
-            if self.channel.cached_permissions_for(client).can_manage_messages:
-                try:
-                    await client.reaction_clear(message)
-                except BaseException as err:
-                    
-                    if isinstance(err, ConnectionError):
-                        # no internet
-                        return
-                    
-                    if isinstance(err,DiscordException):
-                        if err.code in (
-                                ERROR_CODES.missing_access, # client removed
-                                ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                    ):
-                            return
-                    
-                    await client.events.error(client, f'{self!r}._canceller', err)
-                    return
-            return
-        
-        timeouter = self._timeouter
-        if timeouter is not None:
-            timeouter.cancel()
-        #we do nothing
+        self.components = self.BUTTONS
+        self.embed = Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
     
-    def cancel(self, exception=None):
-        canceller = self.canceller
-        if canceller is None:
-            return
+    def get_timeout(self):
+        return 300.0
+    
+    async def invoke(self, event):
+        interaction = event.interaction
+        if interaction == self.BUTTON_CYCLE:
+            urls = self.urls
+            if self.pop:
+                image_url = pop_one(urls)
+            else:
+                image_url = choose_notsame(urls, self.message.embeds[0].image.url)
+            
+            self.history.append(image_url)
+            self.history_step = 1
+            self.BUTTON_BACK.enabled = True
+            
+            if not urls:
+                urls.extend(self.history)
         
-        self.canceller = None
+        elif interaction == self.BUTTON_BACK:
+            history = self.history
+            history_length = len(history)
+            if history_length == 1:
+                return False
+            
+            history_step = self.history_step
+            if history_step == history_length:
+                history_step = 0
+            
+            history_step += 1
+            self.history_step = history_step
+            image_url = history[history_length - history_step]
         
-        timeouter = self._timeouter
-        if timeouter is not None:
-            timeouter.cancel()
+        else:
+            return False
         
-        return Task(canceller(self, exception), KOKORO)
+        self.embed = Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
+        return True
+
 
 async def answer_booru(client, event, content, url_base, banned):
     yield
@@ -341,9 +245,13 @@ async def answer_booru(client, event, content, url_base, banned):
         yield Embed(DEFAULT_TITLE, color=BOORU_COLOR, url=image_url).add_image(image_url)
         return
     
-    yield ShuffledShelter(client, event, urls, True)
-    return
+    if not urls:
+        yield Embed('No result')
+        return
     
+    await ShuffledShelter(client, event, urls, True)
+    return
+
 
 TOUHOU_NAME_RELATIONS = {}
 TOUHOU_NAMES = []
@@ -551,10 +459,10 @@ async def wiki_(client, event,
     yield
     
     async with client.http.get(
-            'https://en.touhouwiki.net/api.php?action=opensearch&search='
-            f'{search_for}&limit=25&redirects=resolve&format=json&utf8',
-            headers=HEADERS) as response:
-        
+        'https://en.touhouwiki.net/api.php?action=opensearch&search='
+        f'{search_for}&limit=25&redirects=resolve&format=json&utf8',
+        headers=HEADERS
+    ) as response:
         response_data = await response.read()
         response_headers = response.headers
     
@@ -572,7 +480,8 @@ async def wiki_(client, event,
         yield Embed(
             'No result',
             f'No search result for: `{search_for}`',
-            color=BOORU_COLOR)
+            color=BOORU_COLOR,
+        )
         return
     
     embed = Embed(title=f'Search results for `{search_for}`', color=BOORU_COLOR)

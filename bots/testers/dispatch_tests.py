@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
     list_difference, ActivityChange, KOKORO, Client
 from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
 from hata.ext.prettyprint import pretty_print
-from hata.ext.command_utils import Pagination, Closer
+from hata.ext.slash.menus import Pagination, Closer
 from hata.backend.utils import MethodType
 from hata.ext.commands_v2 import Command
 
@@ -20,7 +19,7 @@ def teardown(lib):
 class dispatch_tester:
     channel = None
     old_events = {}
-
+    
     @classmethod
     async def here(self,client, message):
         if message.channel is self.channel:
@@ -35,6 +34,7 @@ class dispatch_tester:
             except DiscordException:
                 return
             self.channel = message.channel
+    
     
     @classmethod
     async def switch(self, client, message, content):
@@ -59,23 +59,25 @@ class dispatch_tester:
             self.old_events[content] = actual
             setattr(client.events, content, event)
             await client.message_create(message.channel, 'Event set')
-
+    
+    
     @classmethod
     async def client_edit(self,client, old):
         Task(self.old_events['client_edit'](client, old), KOKORO)
         if self.channel is None:
             return
         
-        result=[]
+        result = []
         result.append(f'Me, {client.full_name} was edited')
         for key, value in old.items():
             result.append(f'{key} changed: {value} -> {getattr(client, key)}')
-
+        
         try:
             await client.message_create(self.channel, '\n'.join(result))
         except DiscordException:
             self.channel = None
-
+    
+    
     @classmethod
     async def message_delete(self,client, message):
         Task(self.old_events['message_delete'](client, message), KOKORO)
@@ -86,7 +88,8 @@ class dispatch_tester:
         text.insert(0, f'Message {message.id} got deleted')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout=120.)
-
+    
+    
     @classmethod
     async def message_edit(self,client, message, old):
         Task(self.old_events['message_edit'](client, message, old), KOKORO)
