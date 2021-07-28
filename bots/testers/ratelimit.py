@@ -4544,7 +4544,7 @@ async def rate_limit_test_0102(client, message):
         application_command_schema = ApplicationCommand(
             'test_command',
             'ayaya',
-                )
+        )
         
         # Command
         application_command = await client.application_command_guild_create(guild, application_command_schema)

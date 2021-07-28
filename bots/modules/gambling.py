@@ -637,10 +637,10 @@ async def heart_event(client, event,
             'Duration: '
         ]
         response_parts.append(convert_tdelta(duration))
-        response_parts.append('\n Amount : ')
+        response_parts.append('\nAmount: ')
         response_parts.append(str(amount))
         if user_limit:
-            response_parts.append('\n user limit : ')
+            response_parts.append('\nUser limit: ')
             response_parts.append(str(user_limit))
         
         response = ''.join(response_parts)
@@ -651,15 +651,15 @@ async def heart_event(client, event,
         await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
         return
     
-    await client.interaction_application_command_acknowledge(event, show_for_invoking_user_only=True)
-    message = await client.interaction_followup_message_create(event, response)
+    await client.interaction_application_command_acknowledge(event)
+    message = await client.interaction_followup_message_create(event, response, components=EVENT_COMPONENTS)
     
     try:
         component_event = await wait_for_component_interaction(message,
             check=partial_func(heart_event_start_checker, client), timeout=300.)
     except TimeoutError:
         try:
-            await client.interaction_followup_message_edit(event, message, 'Heart event cancelled, timeout.',
+            await client.interaction_response_message_edit(event, 'Heart event cancelled, timeout.',
                 components=None)
         except ConnectionError:
             pass
@@ -692,20 +692,20 @@ class HeartEventGUI:
         self.amount = amount
         self.waiter = Future(KOKORO)
         
+        message = event.message
+        self.message = message
+        
         try:
-            message = await client.interaction_followup_message_create(event, embed=self.generate_embed(),
+            await client.interaction_response_message_edit(event, content='', embed=self.generate_embed(),
                 components=EVENT_CURRENCY_BUTTON)
         except BaseException as err:
-            self.message = None
             if isinstance(err, ConnectionError):
                 return
             
             raise
         
-        self.message = message
-        
         self.connector = await DB_ENGINE.connect()
-        await client.slasher.add_component_interaction_waiter(message, self)
+        client.slasher.add_component_interaction_waiter(message, self)
         Task(self.countdown(client, message), KOKORO)
         return
     
@@ -717,10 +717,11 @@ class HeartEventGUI:
             description = f'{convert_tdelta(self.duration)} left'
         return Embed(title, description, color=GAMBLING_COLOR)
 
-    async def __call__(self, client, event):
-        user = event.user
-        if user.is_bot or (event.emoji is not EMOJI__HEART_CURRENCY):
+    async def __call__(self, event):
+        if event.interaction != EVENT_CURRENCY_BUTTON:
             return
+        
+        user = event.user
         
         user_id = user.id
         user_ids = self.user_ids
@@ -738,32 +739,31 @@ class HeartEventGUI:
         
         connector = self.connector
         
-        try:
-            response = await connector.execute(
-                select([currency_model.id]). \
-                where(currency_model.user_id==user.id)
+        response = await connector.execute(
+            select([currency_model.id]). \
+            where(currency_model.user_id==user.id)
+        )
+        
+        results = await response.fetchall()
+        if results:
+            entry_id = results[0][0]
+            to_execute = CURRENCY_TABLE. \
+                update(currency_model.id==entry_id). \
+                values(total_love=currency_model.total_love+self.amount)
+        
+        else:
+            to_execute = CURRENCY_TABLE.insert().values(
+                user_id         = user_id,
+                total_love      = self.amount,
+                daily_next      = datetime.utcnow(),
+                daily_streak    = 0,
+                total_allocated = 0,
             )
-            
-            results = await response.fetchall()
-            if results:
-                entry_id = results[0][0]
-                to_execute = CURRENCY_TABLE. \
-                    update(currency_model.id==entry_id). \
-                    values(total_love=currency_model.total_love+self.amount)
-            
-            else:
-                to_execute = CURRENCY_TABLE.insert().values(
-                    user_id         = user_id,
-                    total_love      = self.amount,
-                    daily_next      = datetime.utcnow(),
-                    daily_streak    = 0,
-                    total_allocated = 0,
-                )
-            
-            await connector.execute(to_execute)
-        except BaseException as err:
-            await client.events.error(client, f'{self!r}.__call__', err)
-    
+        
+        await connector.execute(to_execute)
+        
+        await self.client.interaction_component_acknowledge(event)
+        
     async def countdown(self, client, message):
         update_delta = self._update_delta
         waiter = self.waiter
@@ -923,10 +923,10 @@ async def daily_event(client, event,
             'Duration: '
         ]
         response_parts.append(convert_tdelta(duration))
-        response_parts.append('\n Amount : ')
+        response_parts.append('\nAmount: ')
         response_parts.append(str(amount))
         if user_limit:
-            response_parts.append('\n user limit : ')
+            response_parts.append('\nUser limit: ')
             response_parts.append(str(user_limit))
         
         response = ''.join(response_parts)
@@ -937,15 +937,15 @@ async def daily_event(client, event,
         await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
         return
     
-    await client.interaction_application_command_acknowledge(event, show_for_invoking_user_only=True)
-    message = await client.interaction_followup_message_create(event, response)
+    await client.interaction_application_command_acknowledge(event)
+    message = await client.interaction_followup_message_create(event, response, components=EVENT_COMPONENTS)
     
     try:
         component_event = await wait_for_component_interaction(message,
             check=partial_func(heart_event_start_checker, client), timeout=300.)
     except TimeoutError:
         try:
-            await client.interaction_followup_message_edit(event, message, 'Daily event cancelled, timeout.',
+            await client.interaction_response_message_edit(event, message, 'Daily event cancelled, timeout.',
                 components=None)
         except ConnectionError:
             pass
@@ -960,7 +960,7 @@ async def daily_event(client, event,
         return
     
     await client.interaction_component_acknowledge(component_event)
-    return DailyEventGUI(client, event, duration, amount, user_limit)
+    await DailyEventGUI(client, event, duration, amount, user_limit)
 
 
 class DailyEventGUI:
@@ -978,21 +978,22 @@ class DailyEventGUI:
         self.amount = amount
         self.waiter = Future(KOKORO)
         
+        message = event.message
+        self.message = message
+        
         try:
-            message = await client.interaction_followup_message_create(event, embed=self.generate_embed(),
+            await client.interaction_response_message_edit(event, content='', embed=self.generate_embed(),
                 components=EVENT_CURRENCY_BUTTON)
         except BaseException as err:
-            self.message = None
             if isinstance(err, ConnectionError):
                 return
             
             raise
         
-        self.message = message
         self.connector = await DB_ENGINE.connect()
         
         self.connector = await DB_ENGINE.connect()
-        await client.slasher.add_component_interaction_waiter(message, self)
+        client.slasher.add_component_interaction_waiter(message, self)
         Task(self.countdown(client, message), KOKORO)
         return
     
@@ -1004,10 +1005,10 @@ class DailyEventGUI:
             description = f'{convert_tdelta(self.duration)} left'
         return Embed(title, description, color=GAMBLING_COLOR)
     
-    async def __call__(self, client, event):
-        user = event.user
-        if user.is_bot or (event.emoji is not EMOJI__HEART_CURRENCY):
+    async def __call__(self, event):
+        if event.interaction != EVENT_CURRENCY_BUTTON:
             return
+        user = event.user
         
         user_id = user.id
         user_ids = self.user_ids
@@ -1059,6 +1060,8 @@ class DailyEventGUI:
             )
         
         await connector.execute(to_execute)
+    
+        await self.client.interaction_component_acknowledge(event)
     
     async def countdown(self, client, message):
         update_delta = self._update_delta

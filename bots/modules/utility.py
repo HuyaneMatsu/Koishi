@@ -644,7 +644,7 @@ def add_guild_info_field(guild, embed, even_if_empty):
     if features:
         sections_parts.append('\n**Features**: ')
         for feature in features:
-            sections_parts.append(feature.name)
+            sections_parts.append(feature.name.replace('_', ' '))
             sections_parts.append(', ')
         
         del sections_parts[-1]

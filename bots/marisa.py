@@ -773,3 +773,10 @@ async def poison_edit_cake(index_1, index_2):
 async def pagination_or_something(client, event):
     """Pagination or something"""
     await Pagination(client, event, ['cake', 'lewd'])
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def test_response_message(client, event):
+    await client.interaction_application_command_acknowledge(event)
+    message = await client.interaction_followup_message_create(event, 'cake')
+    print(repr(message))
+    print(repr(event.message))
