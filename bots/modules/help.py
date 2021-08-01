@@ -56,6 +56,9 @@ async def rules(client, event):
         ).add_field(
             '10. Alternative accounts',
             'Instant ban.'
+        ).add_field(
+            '11. Deep frying fumos',
+            'Fumo frying is bannable offense.'
         )
     
     return InteractionResponse(embed=embed, allowed_mentions=None)

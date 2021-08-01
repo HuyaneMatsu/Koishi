@@ -11,8 +11,8 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
     ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
-    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, StagePrivacyLevel, ChannelStage, \
-    ERROR_CODES, ComponentType, Sticker, StickerPack, Formdata
+    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, ChannelStage, \
+    ERROR_CODES, ComponentType, Sticker, StickerPack, Formdata, ChannelDirectory
 
 from hata.backend.utils import change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -2093,7 +2093,7 @@ async def stage_create(client, channel, topic):
     data = {
         'channel_id': channel.id,
         'topic': topic,
-        'privacy_level': StagePrivacyLevel.guild_only.value
+        'privacy_level': PrivacyLevel.guild_only.value
     }
     
     await bypass_request(client, METHOD_POST,
@@ -2127,14 +2127,28 @@ async def stage_delete(client, channel):
         f'{API_ENDPOINT}/stage-instances/{channel_id}',
         )
 
-async def thread_create_private(client, channel, type_, name):
+async def thread_create(client, channel, type_, name):
     channel_id = channel.id
     data = {
         'name': name,
         'type': type_,
     }
+    
     await bypass_request(client, METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/threads',
+        data,
+    )
+
+async def thread_create_from_message(client, message, type_, name):
+    channel_id = message.channel.id
+    message_id = message.id
+    data = {
+        'name': name,
+        'type': type_,
+    }
+    
+    await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/threads',
         data,
     )
 
@@ -2196,7 +2210,7 @@ async def thread_user_delete(client, channel, user):
     )
 
 
-async def thread_settings_edit(client, channel, data):
+async def thread_self_settings_edit(client, channel, data):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_PATCH,
@@ -2213,11 +2227,35 @@ async def thread_get_chunk_archived_public(client, channel):
     )
 
 
+async def thread_get_chunk_archived_private(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/threads/archived/private'
+    )
+
+
 async def thread_get_chunk_self_archived(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/users/@me/threads/archived/private'
+    )
+
+
+async def thread_get_chunk_active(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/threads/active'
+    )
+
+
+async def thread_user_get_all(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/thread-members'
     )
 
 
@@ -2341,6 +2379,39 @@ async def status_maintenance_upcoming(client):
         headers = imultidict(),
     )
 
+
+async def greet(client, channel):
+    channel_id = channel.id
+    sticker_id = 749054660769218631
+    
+    await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/channels/{channel_id}/greet',
+        {'sticker_ids': [sticker_id]}
+    )
+    
+
+async def channel_directory_search(client, channel, query):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/directory-entries/search',
+        {'query': query}
+    )
+
+async def channel_directory_counts(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/directory-entries/counts',
+    )
+
+async def channel_directory_get_all(client, channel):
+    channel_id = channel.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/channels/{channel_id}/directory-entries/list',
+    )
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
     """
@@ -2432,8 +2503,8 @@ async def rate_limit_test_0003(client,message):
     """
     First creates 2 achievements with the client normally, then deletes them for testing.
     """
-    with RLTCTX(client,message.channel,'rate_limit_test_0003') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+    with RLTCTX(client,message.channel, 'rate_limit_test_0003') as RLT:
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -2460,7 +2531,7 @@ async def rate_limit_test_0004(client,message):
     """
     
     with RLTCTX(client,message.channel,'rate_limit_test_0004') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path = join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
@@ -5222,6 +5293,7 @@ async def rate_limit_test_0128(client, message):
         finally:
             await client.application_command_guild_delete(guild, application_command)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0129(client, message):
     """
@@ -5236,7 +5308,8 @@ async def rate_limit_test_0129(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_create_private(client, channel, 11, 'ayaya')
+        await thread_create(client, channel, 11, 'ayaya')
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0130(client, message):
@@ -5267,7 +5340,7 @@ async def rate_limit_test_0131(client, message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0132(client, message):
     """
-    Leaves from a guild.
+    Leaves from the thread.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0132') as RLT:
@@ -5285,6 +5358,8 @@ async def rate_limit_test_0132(client, message):
 async def rate_limit_test_0133(client, message):
     """
     Leaves from a guild.
+    
+    Method not allowed.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0133') as RLT:
@@ -5301,7 +5376,9 @@ async def rate_limit_test_0133(client, message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0134(client, message):
     """
-    Gets at thread's user.
+    Gets a thread's user.
+    
+    Method not allowed.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0134') as RLT:
@@ -5363,13 +5440,13 @@ async def rate_limit_test_0137(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_settings_edit(client, channel, {'type': 11})
+        await thread_self_settings_edit(client, channel, {'type': 11})
 
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0138(client, message):
     """
-    Gets the threads.
+    Gets the archived public threads of the channel.
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0138') as RLT:
@@ -5666,3 +5743,151 @@ async def rate_limit_test_0155(client, message):
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0155') as RLT:
         await status_maintenance_upcoming(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0156(client, message):
+    """
+    greet!
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0156') as RLT:
+        private_channel = await client.channel_private_create(message.author)
+        await greet(client, private_channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0157(client, message, directory_channel:'channel'=None, name:'str'=None):
+    """
+    Gets directory sub-channel by name?
+    
+    Please define channel and name.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0157') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if directory_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not isinstance(directory_channel, ChannelDirectory):
+            await RLT.send('Directory channel only.')
+        
+        if name is None:
+            await RLT.send('Please define a name to query.')
+        
+        await channel_directory_search(client, directory_channel, 'Ayaya')
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0158(client, message, directory_channel:'channel'=None):
+    """
+    Gets directory sub-channel count?
+    
+    Please define channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0158') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if directory_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not isinstance(directory_channel, ChannelDirectory):
+            await RLT.send('Directory channel only.')
+        
+        await channel_directory_counts(client, directory_channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0159(client, message, directory_channel:'channel'=None):
+    """
+    Gets directory sub-channels?
+    
+    Please define channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0159') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if directory_channel is None:
+            await RLT.send('Please define a channel.')
+        
+        if not isinstance(directory_channel, ChannelDirectory):
+            await RLT.send('Directory channel only.')
+        
+        await channel_directory_get_all(client, directory_channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0160(client, message):
+    """
+    Creates a thread channel from the sent message.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0160') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_create_from_message(client, message, 10, 'ayaya')
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0161(client, message):
+    """
+    Gets the archived private threads of the channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0161') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_get_chunk_archived_private(client, channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0162(client, message):
+    """
+    Gets the active threads of the channel.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0162') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_get_chunk_active(client, channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0163(client, message):
+    """
+    Gets the users of the thread.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0163') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await thread_user_get_all(client, channel)

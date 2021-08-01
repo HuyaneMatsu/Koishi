@@ -590,8 +590,8 @@ async def heart_event(client, event,
         if duration > EVENT_MAX_DURATION:
             response = (
                 f'**Duration passed the upper limit**\n'
-                f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
-                f'**>**  passed : {convert_tdelta(duration)}'
+                f'**>** upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
+                f'**>** passed : {convert_tdelta(duration)}'
             )
             error = True
             break
@@ -599,8 +599,8 @@ async def heart_event(client, event,
         if duration < EVENT_MIN_DURATION:
             response = (
                 f'**Duration passed the lower limit**\n'
-                f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
-                f'**>**  passed : {convert_tdelta(duration)}'
+                f'**>** lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
+                f'**>** passed : {convert_tdelta(duration)}'
             )
             error = True
             break
@@ -608,8 +608,8 @@ async def heart_event(client, event,
         if amount > EVENT_HEART_MAX_AMOUNT:
             response = (
                 f'**Amount passed the upper limit**\n'
-                f'**>**  upper limit : {EVENT_HEART_MAX_AMOUNT}\n'
-                f'**>**  passed : {amount}'
+                f'**>** upper limit : {EVENT_HEART_MAX_AMOUNT}\n'
+                f'**>** passed : {amount}'
             )
             error = True
             break
@@ -617,8 +617,8 @@ async def heart_event(client, event,
         if amount < EVENT_HEART_MIN_AMOUNT:
             response = (
                 f'**Amount passed the lower limit**\n'
-                f'**>**  lower limit : {EVENT_HEART_MIN_AMOUNT}\n'
-                f'**>**  passed : {amount}'
+                f'**>** lower limit : {EVENT_HEART_MIN_AMOUNT}\n'
+                f'**>** passed : {amount}'
             )
             error = True
             break
@@ -627,7 +627,7 @@ async def heart_event(client, event,
             response = (
                 f'**User limit passed the lower limit**\n'
                 f'**>** lower limit : 0\n'
-                f'**>**  - passed : {user_limit}'
+                f'**>** - passed : {user_limit}'
             )
             error = True
             break
@@ -876,8 +876,8 @@ async def daily_event(client, event,
         if duration > EVENT_MAX_DURATION:
             response = (
                 f'Duration passed the upper limit\n'
-                f'**>**  upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
-                f'**>**  passed : {convert_tdelta(duration)}'
+                f'**>** upper limit : {convert_tdelta(EVENT_MAX_DURATION)}\n'
+                f'**>** passed : {convert_tdelta(duration)}'
             )
             error = True
             break
@@ -885,8 +885,8 @@ async def daily_event(client, event,
         if duration < EVENT_MIN_DURATION:
             response = (
                 f'Duration passed the lower limit\n'
-                f'**>**  lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
-                f'**>**  passed : {convert_tdelta(duration)}'
+                f'**>** lower limit : {convert_tdelta(EVENT_MIN_DURATION)}\n'
+                f'**>** passed : {convert_tdelta(duration)}'
             )
             error = True
             break
@@ -894,8 +894,8 @@ async def daily_event(client, event,
         if amount > EVENT_DAILY_MAX_AMOUNT:
             response = (
                 f'Amount passed the upper limit\n'
-                f'**>**  upper limit : {EVENT_DAILY_MAX_AMOUNT}\n'
-                f'**>**  passed : {amount}'
+                f'**>** upper limit : {EVENT_DAILY_MAX_AMOUNT}\n'
+                f'**>** passed : {amount}'
             )
             error = True
             break
@@ -903,8 +903,8 @@ async def daily_event(client, event,
         if amount < EVENT_DAILY_MIN_AMOUNT:
             response = (
                 f'Amount passed the lower limit\n'
-                f'**>**  lower limit : {EVENT_DAILY_MIN_AMOUNT}\n'
-                f'**>**  passed : {amount}'
+                f'**>** lower limit : {EVENT_DAILY_MIN_AMOUNT}\n'
+                f'**>** passed : {amount}'
             )
             error = True
             break
@@ -913,7 +913,7 @@ async def daily_event(client, event,
             response = (
                 f'User limit passed the lower limit\n'
                 f'**>** lower limit : 0\n'
-                f'**>**  - passed : {user_limit}'
+                f'**>** passed : {user_limit}'
             )
             error = True
             break

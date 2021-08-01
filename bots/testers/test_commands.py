@@ -14,7 +14,7 @@ from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed,
     IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
     ReuAsyncIO, enter_executor, ApplicationCommand, InteractionResponseTypes, ApplicationCommandOption, ChannelVoice, \
     ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, \
-    StagePrivacyLevel
+    PrivacyLevel
 
 from hata.ext.command_utils import ChooseMenu, Pagination, Closer
 from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag, CommandContext
@@ -1977,7 +1977,7 @@ async def test_stage_create(client, message):
     """
     Edits stage.
     """
-    data = {'channel_id':826912003452436510, 'topic':'Ayaya', 'privacy_level': StagePrivacyLevel.guild_only.value}
+    data = {'channel_id':826912003452436510, 'topic':'Ayaya', 'privacy_level': PrivacyLevel.guild_only.value}
     data = await client.http.stage_create(data)
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
     pages = [Embed(description=chunk) for chunk in chunks]

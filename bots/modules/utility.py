@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, Task, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
-    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout
+    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout, ChannelDirectory
 
 from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
@@ -658,6 +658,7 @@ def add_guild_counts_field(guild, embed, even_if_empty):
     channel_voice = 0
     channel_thread = 0
     channel_store = 0
+    channel_directory = 0
     
     for channel in guild.channels.values():
         channel_type = channel.__class__
@@ -681,6 +682,10 @@ def add_guild_counts_field(guild, embed, even_if_empty):
         
         if channel_type is ChannelStore:
             channel_store += 1
+            continue
+        
+        if channel_type is ChannelDirectory:
+            channel_directory += 1
             continue
     
     sections_parts = [
@@ -718,7 +723,13 @@ def add_guild_counts_field(guild, embed, even_if_empty):
         sections_parts.append(str(channel_store))
         sections_parts.append('**')
     
+    if channel_directory:
+        sections_parts.append('\n**Directory channels: ')
+        sections_parts.append(str(channel_directory))
+        sections_parts.append('**')
+    
     embed.add_field('Counts', ''.join(sections_parts))
+
 
 def add_guild_emojis_field(guild, embed, even_if_empty):
     emoji_count = len(guild.emojis)

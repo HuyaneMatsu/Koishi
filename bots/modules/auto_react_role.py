@@ -466,65 +466,65 @@ class AutoReactRoleChange:
         return None
     
     def __repr__(self):
-        result =[
+        repr_parts =[
             '<',
             self.__class__.__name__,
             ' added='
-                ]
+        ]
         
         added = self.added
         if added:
-            result.append('{')
+            repr_parts.append('{')
             for emoji, role in added:
-                result.append(repr(emoji))
-                result.append(': ')
-                result.append(repr(role))
-                result.append(', ')
-            result[-1] = '}'
+                repr_parts.append(repr(emoji))
+                repr_parts.append(': ')
+                repr_parts.append(repr(role))
+                repr_parts.append(', ')
+            repr_parts[-1] = '}'
         else:
-            result.append('{}')
+            repr_parts.append('{}')
         
-        result.append(', actual=')
+        repr_parts.append(', actual=')
         actual = self.actual
         if (actual is not None) and actual:
             result.append('{')
             for emoji, role in actual:
-                result.append(repr(emoji))
-                result.append(': ')
-                result.append(repr(role))
-                result.append(', ')
-            result[-1] = '}'
+                repr_parts.append(repr(emoji))
+                repr_parts.append(': ')
+                repr_parts.append(repr(role))
+                repr_parts.append(', ')
+            repr_parts[-1] = '}'
         else:
-            result.append('{}')
+            repr_parts.append('{}')
         
-        result.append(', removed=')
+        repr_parts.append(', removed=')
         removed = self.removed
         if removed:
-            result.append('{')
+            repr_parts.append('{')
             for emoji, role in removed:
-                result.append(repr(emoji))
-                result.append(': ')
-                result.append(repr(role))
-                result.append(', ')
-            result[-1] = '}'
+                repr_parts.append(repr(emoji))
+                repr_parts.append(': ')
+                repr_parts.append(repr(role))
+                repr_parts.append(', ')
+            repr_parts[-1] = '}'
         else:
-            result.append('{}')
+            repr_parts.append('{}')
         
         old_behaviour = self.old_behaviour
         new_behaviour = self.new_behaviour
         
         if old_behaviour == new_behaviour:
-            result.append(', behaviour=')
-            result.append(repr(old_behaviour))
+            repr_parts.append(', behaviour=')
+            repr_parts.append(repr(old_behaviour))
         else:
-            result.append(', old_behaviour=')
-            result.append(repr(old_behaviour))
-            result.append(', new_behaviour=')
-            result.append(repr(new_behaviour))
+            repr_parts.append(', old_behaviour=')
+            repr_parts.append(repr(old_behaviour))
+            repr_parts.append(', new_behaviour=')
+            repr_parts.append(repr(new_behaviour))
         
-        result.append('>')
+        repr_parts.append('>')
         
-        return ''.join(result)
+        return ''.join(repr_parts)
 
 AUTO_REACT_ROLE_GUIS = WeakKeyDictionary()
 
