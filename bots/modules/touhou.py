@@ -446,7 +446,7 @@ async def wiki_(client, event,
     if guild is None:
         abort('Guild only command')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command.')
     
     permissions = event.channel.cached_permissions_for(client)
@@ -459,9 +459,9 @@ async def wiki_(client, event,
     yield
     
     async with client.http.get(
-        'https://en.touhouwiki.net/api.php?action=opensearch&search='
-        f'{search_for}&limit=25&redirects=resolve&format=json&utf8',
-        headers=HEADERS
+        f'https://en.touhouwiki.net/api.php?action=opensearch&search={search_for}&limit=25&redirects=resolve&'
+        f'format=json&utf8',
+        headers = HEADERS
     ) as response:
         response_data = await response.read()
         response_headers = response.headers

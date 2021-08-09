@@ -27,7 +27,7 @@ MOST_USED_PER_PAGE = 30
 
 @Satori.events
 async def message_create(client, message):
-    if message.channel.guild is not GUILD__NEKO_DUNGEON:
+    if message.guild is not GUILD__NEKO_DUNGEON:
         return
     
     user = message.author
@@ -47,7 +47,7 @@ async def message_create(client, message):
 
 @Satori.events
 async def message_edit(client, message, old_attributes):
-    if message.channel.guild is not GUILD__NEKO_DUNGEON:
+    if message.guild is not GUILD__NEKO_DUNGEON:
         return
     
     user = message.author
@@ -332,9 +332,8 @@ async def emoji_top(
             except KeyError:
                 continue
             
-            try:
-                guild_profile = user.guild_profiles[GUILD__NEKO_DUNGEON]
-            except KeyError:
+            guild_profile = user.get_guild_profile_for(GUILD__NEKO_DUNGEON)
+            if (guild_profile is None):
                 nick = None
             else:
                 nick = guild_profile.nick

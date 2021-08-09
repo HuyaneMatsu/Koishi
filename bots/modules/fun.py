@@ -63,7 +63,7 @@ async def meme_(client, event):
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to do this.')
     
     yield
@@ -136,7 +136,7 @@ async def trivia_(client, event):
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if client.get_guild_profile_for(guild) is None:
         abort('I must be in the guild to execute this command.')
     
     if not event.channel.cached_permissions_for(client).can_add_reactions:

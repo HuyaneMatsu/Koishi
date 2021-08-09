@@ -62,7 +62,7 @@ async def get_waifu_image(client, event, endpoint, safe):
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild execute this command.')
     
     if (not safe) and (not event.channel.nsfw):

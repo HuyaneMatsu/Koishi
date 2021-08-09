@@ -65,7 +65,7 @@ async def create_auto_react_role(client, event,
     if guild is None:
         abort('Guild only command!')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command.')
     
     message_reference = parse_message_reference(message)
@@ -752,7 +752,7 @@ class AutoReactRoleGUI:
                                           (not guild.cached_permissions_for(client).can_manage_roles)):
             return
         
-        if self.guild not in client.guild_profiles:
+        if (client.get_guild_profile_for(self.guild) is None):
             return
         
         if not client.has_higher_role_than(role):
@@ -1070,7 +1070,7 @@ class AutoReactRoleManager:
             return
         
         try:
-            user_profile = event.user.guild_profiles[guild]
+            user_profile = event.user.guild_profiles[guild.id]
         except KeyError:
             return
         
@@ -1109,7 +1109,7 @@ class AutoReactRoleManager:
             return
         
         try:
-            user_profile = event.user.guild_profiles[guild]
+            user_profile = event.user.guild_profiles[guild.id]
         except KeyError:
             return
         
@@ -1164,9 +1164,7 @@ class AutoReactRoleManager:
         
         guild = self.guild
         
-        try:
-            profile = client.guild_profiles[guild]
-        except KeyError:
+        if (client.get_guild_profile_for(guild) is None):
             await self.destroy()
             return
         
@@ -1406,7 +1404,7 @@ async def show_auto_react_roles(client, event):
     if guild is None:
         abort('Guild only command!')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command.')
     
     if not guild.permissions_for(event.user).can_administrator:
@@ -1433,7 +1431,7 @@ async def show_auto_react_roles(client, event):
     await ChooseMenu(client, event, results, select_auto_react_role_gui, embed=embed, prefix='¤')
 
 async def select_auto_react_role_gui(client, channel_or_event, message, title, manager):
-    guild = manager.message.channel.guild
+    guild = manager.message.guild
     if manager.destroy_called or (guild is None):
         embed = Embed('The selected entity was already destroyed', color=AUTO_REACT_ROLE_COLOR)
         if isinstance(channel_or_event, ChannelBase):

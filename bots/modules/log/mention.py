@@ -29,16 +29,12 @@ async def mention_logger(client, message):
     
     author = message.author
     
-    guild = message.channel.guild
-    if guild is None:
+    guild = message.guild
+    guild_profile = author.get_guild_profile_for(guild)
+    if guild_profile is None:
         nick = None
     else:
-        try:
-            guild_profile = author.guild_profiles[guild]
-        except KeyError:
-            nick = None
-        else:
-            nick = guild_profile.nick
+        nick = guild_profile.nick
     
     content_parts.append('**Author:** ')
     content_parts.append(author.full_name)
@@ -130,15 +126,11 @@ async def mention_logger(client, message):
             user = user_mentions[index]
             index += 1
             
-            if guild is None:
+            guild_profile = user.get_guild_profile_for(guild)
+            if guild_profile is None:
                 nick = None
             else:
-                try:
-                    guild_profile = user.guild_profiles[guild]
-                except KeyError:
-                    nick = None
-                else:
-                    nick = guild_profile.nick
+                nick = guild_profile.nick
             
             content_parts.append('**')
             content_parts.append(repr(index))

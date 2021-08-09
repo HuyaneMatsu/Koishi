@@ -209,12 +209,11 @@ class massadd:
         
         messages = []
         for message_ in message.channel.messages:
-            try:
-                profile = message_.author.guild_profiles[CARDS_ROLE.guild]
-            except KeyError:
+            guild_profile = message_.author.get_guild_profile_for(CARDS_ROLE.guild)
+            if guild_profile is None:
                 continue
             
-            profile_roles = profile.roles
+            profile_roles = guild_profile.roles
             if (profile_roles is None) or (CARDS_ROLE not in profile_roles):
                 continue
             

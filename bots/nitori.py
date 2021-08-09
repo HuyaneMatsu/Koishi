@@ -6,7 +6,7 @@ from time import perf_counter
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
-from hata import Client, Embed, parse_emoji, sleep, id_to_time, DATETIME_FORMAT_CODE, elapsed_time, DiscordException, \
+from hata import Client, Embed, parse_emoji, sleep, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, DiscordException, \
     ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
     wait_for_component_interaction, iter_component_interactions, Select, Option
@@ -117,11 +117,11 @@ async def roll(
 # command start slash id-to-time
 
 @Nitori.interactions(guild=TEST_GUILD)
-async def id_to_time_(
+async def id_to_datetime_(
         snowflake : ('int', 'Id please!'),
             ):
     """Converts the given Discord snowflake to time."""
-    time = id_to_time(snowflake)
+    time = id_to_datetime(snowflake)
     return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
 
 # command end
@@ -313,7 +313,7 @@ async def latest_users(event):
     for user in guild.users.values():
         # `joined_at` might be set as `None` if the user is a lurker.
         # We can ignore lurkers, so use `created_at` which defaults to Discord epoch.
-        created_at = user.guild_profiles[guild].created_at
+        created_at = user.get_guild_profile_for(guild).created_at
         if created_at > date_limit:
             users.append((created_at, user))
     
@@ -339,6 +339,7 @@ async def latest_users(event):
     
     return InteractionResponse(embed=embed, allowed_mentions=None)
 
+# command end
 # command start slash ping
 
 @Nitori.interactions(guild=TEST_GUILD)

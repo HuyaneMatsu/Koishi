@@ -11,12 +11,12 @@ from io import StringIO
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
-from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_time, sleep, KOKORO, \
+from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_datetime, sleep, KOKORO, \
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, cchunkify, \
-    ApplicationCommandPermissionOverwriteType, ClientWrapper, InteractionResponseTypes, ComponentType, \
-    ButtonStyle, Emoji, Role, StickerType, StickerFormat, ZEROUSER
+    ApplicationCommandPermissionOverwriteTargetType, ClientWrapper, INTERACTION_RESPONSE_TYPES, ComponentType, \
+    ButtonStyle, Emoji, Role, StickerType, StickerFormat, ZEROUSER, GUILDS
 from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, wait_for_component_interaction, \
     Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from hata.backend.futures import render_exc_to_list
@@ -141,7 +141,10 @@ ALL = ClientWrapper()
 @ALL.events
 async def ready(client):
     sys.stdout.write(f'{client:f} logged in.\n')
-
+    sys.stdout.write(
+        f'guild count: {len(GUILDS)}\n'
+        f'channel count: {len(CHANNELS)}\n'
+    )
 
 async def execute_description(client, message):
     prefix = client.command_processor.get_prefix_for(message)
@@ -167,7 +170,6 @@ Marisa.commands(Interpreter(locals().copy()), name='execute', description=execut
     checks=[checks.owner_only()])
 
 Marisa.commands(sync_request_command, name='sync', category='UTILITY', checks=[checks.owner_only()])
-
 
 @ALL.events(overwrite=True)
 async def error(client, name, err):
@@ -281,7 +283,7 @@ async def raffle(client, event,
             ):
     """Raffles an user out who reacted on a message."""
     guild = event.guild
-    if (guild is None) or (guild not in client.guild_profiles):
+    if (client.get_guild_profile_for(guild) is None):
         abort('The command unavailable in guilds, where the application\'s bot is not in.')
     
     emoji = parse_emoji(emoji)
@@ -473,27 +475,27 @@ async def debug_command(client, event,
     ]
     
     if permission is None:
-        overwrites = None
+        permission_overwrites = None
     else:
-        overwrites = permission.overwrites
+        permission_overwrites = permission.permission_overwrites
     
-    if overwrites is None:
+    if permission_overwrites is None:
         text_parts.append('*none*')
     else:
-        for index, overwrite in enumerate(overwrites):
+        for index, permission_overwrite in enumerate(permission_overwrites):
             text_parts.append(repr(index))
             text_parts.append('.: type: `')
-            text_parts.append(overwrite.type.name)
+            text_parts.append(permission_overwrite.target_type.name)
             text_parts.append('`; id: `')
-            text_parts.append(repr(overwrite.target_id))
+            text_parts.append(repr(permission_overwrite.target_id))
             
-            target_name = overwrite.target.name
+            target_name = permission_overwrite.target.name
             if target_name:
                 text_parts.append('`; name: `')
                 text_parts.append(target_name)
             
             text_parts.append('`; allowed: `')
-            text_parts.append(repr(overwrite.allow))
+            text_parts.append(repr(permission_overwrite.allow))
             text_parts.append('`\n')
     
     return ''.join(text_parts)
@@ -780,3 +782,12 @@ async def test_response_message(client, event):
     message = await client.interaction_followup_message_create(event, 'cake')
     print(repr(message))
     print(repr(event.message))
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, target='message')
+async def peek_at_message(target):
+    return repr(target)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, target='user')
+async def peek_at_user(target):
+    return repr(target)

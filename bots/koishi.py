@@ -101,7 +101,7 @@ async def role_giver(client, message):
         if add == user.has_role(role):
             break
         
-        guild_profile = user.guild_profiles.get(GUILD__NEKO_DUNGEON, None)
+        guild_profile = client.get_guild_profile_for(GUILD__NEKO_DUNGEON)
         if guild_profile is None:
             break
         

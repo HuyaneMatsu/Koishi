@@ -154,9 +154,8 @@ def render_contents(user, old_attributes):
     content_parts.append('User: ')
     content_parts.append(user.full_name)
     
-    try:
-        guild_profile = user.guild_profiles[CATEGORY__NEKO_DUNGEON__BIG_BRO]
-    except KeyError:
+    guild_profile = user.get_guild_profile_for(GUILD__NEKO_DUNGEON)
+    if (guild_profile is None):
         nick = None
     else:
         nick = guild_profile.nick

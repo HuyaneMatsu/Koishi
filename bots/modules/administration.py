@@ -32,7 +32,7 @@ async def clear(client, event,
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to do this.')
     
     if where is None:
@@ -93,7 +93,7 @@ async def invite_create(client, event,
     if guild is None:
         abort('Guild only command')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute the command.')
     
     if not event.user_permissions.can_create_instant_invite:
@@ -126,7 +126,7 @@ async def invite_create(client, event,
     yield content
 
 def bans_pagination_check(event):
-    guild = event.message.channel.guild
+    guild = event.message.guild
     if guild is None:
         return False
     
@@ -142,7 +142,7 @@ async def bans(client, event):
     if guild is None:
         abort('Guild only command')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute the command.')
     
     if not event.user_permissions.can_ban_users:
@@ -217,7 +217,7 @@ def check_channel_invites_pagination_permissions(event):
     return True
 
 def check_guild_invites_pagination_permissions(event):
-    guild = event.message.channel.guild
+    guild = event.message.guild
     if guild is None:
         return False
     
@@ -240,7 +240,7 @@ async def invites_(client, event,
     if guild is None:
         abort('Guild only command')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute the command.')
     
     if (channel is not None) and isinstance(channel, ChannelCategory):
@@ -308,7 +308,7 @@ async def yeet(client, event,
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to do this.')
     
     if not event.user_permissions.can_ban_users:
@@ -481,7 +481,7 @@ async def emoji_role(client, event,
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to do this.')
     
     if not event.user_permissions.can_ban_users:

@@ -45,7 +45,7 @@ async def create_(client, event,
     if guild is None:
         abort('Guild only command')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command.')
     
     permissions = event.channel.cached_permissions_for(client)

@@ -384,7 +384,7 @@ async def github_profile(client, event,
             ):
     """Gets the user's guild profile."""
     guild = event.guild
-    if (guild is None) or (guild not in client.guild_profiles):
+    if (client.get_guild_profile_for(guild) is None):
         abort('The command unavailable in guilds, where the application\'s bot is not in.')
     
     if not user:

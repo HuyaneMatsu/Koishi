@@ -115,7 +115,7 @@ async def image_(client, event,
     if guild is None:
         abort('Guild only command')
     
-    if guild not in client.guild_profiles:
+    if client.get_guild_profile_for(guild) is None:
         abort('I must be in the guild to execute this command.')
     
     hashes = None
@@ -193,7 +193,7 @@ async def upload(client, event,
         yield Embed('Error', 'Guild only command', color=IMAGE_COLOR)
         return
     
-    if guild not in client.guild_profiles:
+    if client.get_guild_profile_for(guild) is None:
         yield Embed('Error', 'I must be in the guild to execute this command.', color=IMAGE_COLOR)
         return
     
@@ -442,7 +442,7 @@ class ImageWithTag:
         if guild is None:
             abort('Guild only command')
         
-        if guild not in client.guild_profiles:
+        if client.get_guild_profile_for(guild) is None:
             abort('I must be in the guild to execute this command.')
         
         image = random_with_tag(self.tag_id)

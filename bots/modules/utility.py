@@ -7,9 +7,10 @@ from datetime import datetime, timedelta
 
 
 from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, Task, \
-    elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_time, RoleManagerType, ERROR_CODES, \
+    elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
-    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout, ChannelDirectory
+    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout, ChannelDirectory, \
+    GUILDS
 
 from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
@@ -197,81 +198,15 @@ def add_activity(text, activity):
 """
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False, target='message')
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
-async def message_(client, event,
-        message : ('str', 'Link to the message'),
-        raw : ('bool', 'Should display json?') = True,
-            ):
+async def raw(client, event):
     """Shows up the message's payload."""
     if not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER):
         abort(f'You must have {ROLE__NEKO_DUNGEON__TESTER.mention} to invoke this command.')
     
-    if not event.channel.cached_permissions_for(client).can_send_messages:
-        abort('I need `send messages` permission to execute this command.')
-    
-    message_reference = parse_message_reference(message)
-    if message_reference is None:
-        abort('Could not identify the message.')
-    
-    guild_id, channel_id, message_id = message_reference
-    try:
-        message = MESSAGES[message_id]
-    except KeyError:
-        if channel_id:
-            try:
-                channel = CHANNELS[channel_id]
-            except KeyError:
-                abort('I have no access to the channel.')
-                return
-        else:
-            channel = event.channel
-        
-        if not channel.cached_permissions_for(client).can_read_message_history:
-            abort('I have no permission to get that message.')
-        
-        # We only really need `channel_id` and `guild_id`, so we can ignore `guild_id`.
-        
-        if raw:
-            getter_coroutine = client.http.message_get(channel.id, message_id)
-        else:
-            getter_coroutine = client.message_get(channel, message_id)
-    else:
-        if raw:
-            getter_coroutine = client.http.message_get(message.channel.id, message_id)
-        else:
-            getter_coroutine = None
-    
-    if (getter_coroutine is not None):
-        try:
-            response = await getter_coroutine
-            if raw:
-                data = response
-            else:
-                message = response
-        except ConnectionError:
-            # No internet
-            return
-        except DiscordException as err:
-            if err.code in (
-                    ERROR_CODES.unknown_channel, # message deleted
-                    ERROR_CODES.unknown_message, # channel deleted
-                        ):
-                # The message is already deleted.
-                abort('The referenced message is already yeeted.')
-            
-            if err.code == ERROR_CODES.missing_access: # client removed
-                abort('The client is not in the guild / channel')
-            
-            if err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
-                abort('I have no permission to get that message.')
-            
-            raise
-    
-    if raw:
-        chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
-    else:
-        chunks = pchunkify(message)
+    data = await client.http.message_get(event.channel_id, event.interaction.target_id)
+    chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
     
     pages = [Embed(description=chunk) for chunk in chunks]
     await Pagination(client, event, pages)
@@ -335,7 +270,7 @@ async def roles_(client, event):
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command')
     
     permissions = event.channel.cached_permissions_for(client)
@@ -351,7 +286,7 @@ async def welcome_screen_(client, event):
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command')
     
     yield
@@ -473,7 +408,8 @@ async def shared_guilds(client, event):
     lines_count = 0
     
     user = event.user
-    for guild, guild_profile in user.guild_profiles.items():
+    for guild_id, guild_profile in user.guild_profiles.items():
+        guild = GUILDS[guild_id]
         nick = guild_profile.nick
         guild_name = guild.name
         if nick is None:
@@ -523,12 +459,9 @@ async def user_(client, event,
         f'Profile: {user:m}\n'
         f'ID: {user.id}')
     
-    if guild is None:
-        profile = None
-    else:
-        profile = user.guild_profiles.get(guild, None)
+    guild_profile = user.get_guild_profile_for(guild)
     
-    if profile is None:
+    if guild_profile is None:
         if user.avatar_type is ICON_TYPE_NONE:
             color = user.default_avatar.color
         else:
@@ -537,26 +470,25 @@ async def user_(client, event,
     
     else:
         embed.color = user.color_at(guild)
-        roles = profile.roles
+        roles = guild_profile.roles
         if roles is None:
             roles = '*none*'
         else:
-            roles.sort()
             roles = ', '.join(role.mention for role in reversed(roles))
         
         text = []
-        if profile.nick is not None:
-            text.append(f'Nick: {profile.nick}')
+        if guild_profile.nick is not None:
+            text.append(f'Nick: {guild_profile.nick}')
         
-        if profile.joined_at is None:
+        if guild_profile.joined_at is None:
             await client.guild_user_get(user.id)
         
         # Joined at can be `None` if the user is in lurking mode.
-        joined_at = profile.joined_at
+        joined_at = guild_profile.joined_at
         if joined_at is not None:
             text.append(f'Joined: {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]')
         
-        boosts_since = profile.boosts_since
+        boosts_since = guild_profile.boosts_since
         if (boosts_since is not None):
             text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
         
@@ -844,7 +776,7 @@ def add_guild_boosters_field(guild, embed, even_if_empty):
         
         for user in boosters[:21]:
             embed.add_field(user.full_name,
-                f'since: {elapsed_time(user.guild_profiles[guild].boosts_since)}')
+                f'since: {elapsed_time(user.get_guild_profile_for(guild).boosts_since)}')
     
     elif even_if_empty:
         embed.add_field(f'Most awesome people of the guild', '*The guild has no chicken nuggets.*')
@@ -934,11 +866,8 @@ class InRolePageGetter:
                 user = users[user_index]
                 user_index += 1
                 description_parts.append(user.full_name)
-                try:
-                    guild_profile = user.guild_profiles[guild]
-                except KeyError:
-                    pass
-                else:
+                guild_profile = user.get_guild_profile_for(guild)
+                if (guild_profile is not None):
                     nick = guild_profile.nick
                     if nick is not None:
                         description_parts.append(' *[')
@@ -988,7 +917,7 @@ async def in_role(client, event,
     if guild is None:
         abort('Guild only command.')
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to do this.')
     
     roles = set()
@@ -1004,9 +933,8 @@ async def in_role(client, event,
     
     users = []
     for user in guild.users.values():
-        try:
-            guild_profile = user.guild_profiles[guild]
-        except KeyError:
+        guild_profile = user.get_guild_profile_for(guild)
+        if guild_profile is None:
             continue
         
         guild_profile_roles = guild_profile.roles
@@ -1067,11 +995,11 @@ async def show_emoji(client, event,
 
 
 @SLASH_CLIENT.interactions(name='id-to-time', is_global=True)
-async def id_to_time_(client, event,
+async def id_to_datetime_(client, event,
         snowflake : ('int', 'Id please!'),
             ):
     """Converts the given Discord snowflake to time."""
-    time = id_to_time(snowflake)
+    time = id_to_datetime(snowflake)
     return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
 
 
@@ -1230,7 +1158,7 @@ async def latest_users(client, event,):
     guild = event.guild
     for user in guild.users.values():
         # Use created at and not `joined_at`, we can ignore lurkers.
-        created_at = user.guild_profiles[guild].created_at
+        created_at = user.get_guild_profile_for(guild).created_at
         if created_at > date_limit:
             users.append((created_at, user))
     
@@ -1258,7 +1186,7 @@ async def all_users(client, event,):
     users = []
     guild = event.guild
     for user in guild.users.values():
-        joined_at = user.guild_profiles[guild].joined_at
+        joined_at = user.get_guild_profile_for(guild).joined_at
         if (joined_at is not None):
             users.append((joined_at, user))
     

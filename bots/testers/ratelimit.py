@@ -10,7 +10,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
-    ApplicationCommand, InteractionResponseTypes, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
+    ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, ChannelStage, \
     ERROR_CODES, ComponentType, Sticker, StickerPack, Formdata, ChannelDirectory
 
@@ -24,7 +24,7 @@ from hata.backend.utils import to_json, from_json
 from hata.discord.utils import image_to_base64
 from hata.discord.guild import create_partial_guild_from_data, GuildDiscovery
 from hata.backend.helpers import BasicAuth
-from hata.discord.channel import CHANNEL_TYPES
+from hata.discord.channel import CHANNEL_TYPE_MAP
 from hata.discord.http import API_ENDPOINT, STATUS_ENDPOINT
 from hata.discord.http.headers import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
 
@@ -583,7 +583,7 @@ async def permission_overwrite_create(client,channel,target,allow,deny,):
         'allow':allow,
         'deny':deny,
         'type':type_,
-            }
+    }
     channel_id=channel.id
     overwrite_id=target.id
     await bypass_request(client,METHOD_PUT,
@@ -1170,7 +1170,7 @@ async def channel_create(client,guild, name, category=None, type_=0):
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         data,)
-    return CHANNEL_TYPES.get(data['type'], ChannelGuildUndefined)(data, client, guild)
+    return CHANNEL_TYPE_MAP.get(data['type'], ChannelGuildUndefined)(data, client, guild)
 
 async def emoji_guild_get_all(client,guild,):
     guild_id=guild.id
@@ -1547,7 +1547,7 @@ async def channel_follow(client,source_channel,target_channel,):
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/followers',
         data,)
-    webhook = await Webhook._from_follow_data(data,source_channel,target_channel,client)
+    webhook = await Webhook._from_follow_data(data, source_channel, target_channel, client)
     return webhook
 
 async def achievement_get(client,achievement_id,):
@@ -1833,9 +1833,9 @@ async def interaction_response_message_create(client, interaction, content=None,
     if contains_content:
         data['data'] = message_data
         
-        response_type = InteractionResponseTypes.message_and_source
+        response_type = INTERACTION_RESPONSE_TYPES.message_and_source
     else:
-        response_type = InteractionResponseTypes.source
+        response_type = INTERACTION_RESPONSE_TYPES.source
     
     data['type'] = response_type
     
@@ -3254,8 +3254,8 @@ async def rate_limit_test_0032(client, message):
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
             
-        for guild_2 in client.guild_profiles.keys():
-            if guild_2 is guild_1:
+        for guild_2_id in client.guild_profiles.keys():
+            if guild_2_id == guild_1.id:
                 continue
             
             break
@@ -3264,7 +3264,7 @@ async def rate_limit_test_0032(client, message):
             await RLT.send('I must have at least 2 guilds.')
         
         await guild_user_get(client, guild_1, client.id)
-        await guild_user_get(client, guild_2, client.id)
+        await guild_user_get(client, GUILDS[guild_2_id], client.id)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0033(client, message):
@@ -3277,8 +3277,8 @@ async def rate_limit_test_0033(client, message):
         if guild_1 is None:
             await RLT.send('Please use this command at a guild.')
             
-        for guild_2 in client.guild_profiles.keys():
-            if guild_2 is guild_1:
+        for guild_2_id in client.guild_profiles.keys():
+            if guild_2_id is guild_1.id:
                 continue
             
             break
@@ -3287,7 +3287,7 @@ async def rate_limit_test_0033(client, message):
             await RLT.send('I must have at least 2 guilds.')
         
         await guild_user_search(client, guild_1, 'nyan')
-        await guild_user_search(client, guild_2, 'nyan')
+        await guild_user_search(client, GUILDS[guild_2_id], 'nyan')
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0034(client, message):
@@ -3436,7 +3436,7 @@ async def rate_limit_test_0040(client, message):
             await RLT.send('There is no lower role than my own for the channel.')
         
         for channel_ in guild.channels.values():
-            for overwrite in channel_.overwrites:
+            for overwrite in channel_.permission_overwrites:
                 if overwrite.target is role:
                     break
             else:
@@ -3476,7 +3476,7 @@ async def rate_limit_test_0041(client, message):
             await RLT.send('There is no lower role than my own for the channel.')
         
         for channel_ in guild.channels.values():
-            for overwrite in channel_.overwrites:
+            for overwrite in channel_.permission_overwrites:
                 if overwrite.target is role:
                     break
             else:
@@ -4157,7 +4157,8 @@ async def rate_limit_test_0082(client, message, name:str, emoji:'Emoji'):
         if len(client.guild_profiles) < 2:
             await RLT.send('The client should be at least in 2 guilds.')
         
-        for index, guild in enumerate(client.guild_profiles):
+        for index, guild_id in enumerate(client.guild_profiles.keys()):
+            guild = GUILDS[guild_id]
             if index == 0:
                 guild1 = guild
             else:
@@ -4184,7 +4185,8 @@ async def rate_limit_test_0083(client, message, name:str, emoji:'Emoji'):
         if len(client.guild_profiles) < 2:
             await RLT.send('The client should be at least in 2 guilds.')
         
-        for index, guild in enumerate(client.guild_profiles):
+        for index, guild_id in enumerate(client.guild_profiles.keys()):
+            guild = GUILDS[guild_id]
             if index == 0:
                 guild1 = guild
             else:

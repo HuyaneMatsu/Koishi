@@ -155,9 +155,8 @@ async def sticker_top(
             except KeyError:
                 continue
             
-            try:
-                guild_profile = user.guild_profiles[GUILD__NEKO_DUNGEON]
-            except KeyError:
+            guild_profile = user.get_guild_profile_for(GUILD__NEKO_DUNGEON)
+            if guild_profile is None:
                 nick = None
             else:
                 nick = guild_profile.nick

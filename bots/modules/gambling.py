@@ -576,7 +576,7 @@ async def heart_event(client, event,
         
         guild = event.guild
         if (guild is not None):
-            if guild not in client.guild_profiles:
+            if (client.get_guild_profile_for(guild) is None):
                 response = 'Please add me to the guild before invoking the command.'
                 error = True
                 break
@@ -862,7 +862,7 @@ async def daily_event(client, event,
         
         guild = event.guild
         if (guild is not None):
-            if guild not in client.guild_profiles:
+            if (client.get_guild_profile_for(guild) is None):
                 response = 'Please add me to the guild before invoking the command.'
                 error = True
                 break
@@ -3011,7 +3011,7 @@ async def roles(client, event,
     
     user = event.user
     guild = role.guild
-    if guild not in user.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         abort(f'You must be in {guild.name} to buy any role.')
     
     if user.has_role(role):

@@ -143,7 +143,7 @@ async def docs_search(client, event,
         yield Embed('Error', 'Guild only command', color=COLOR__KOISHI_HELP)
         return
     
-    if guild not in client.guild_profiles:
+    if (client.get_guild_profile_for(guild) is None):
         yield Embed('Error', 'I must be in the guild to execute this command.', color=COLOR__KOISHI_HELP)
         return
     

@@ -363,15 +363,15 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'{user.full_name} {user.id} profile was edited at guild {guild.name!r} {guild.id}:']
-        profile=user.guild_profiles[guild]
+        result = [f'{user.full_name} {user.id} profile was edited at guild {guild.name!r} {guild.id}:']
+        guild_profile = user.guild_profiles[guild.id]
         for key, value in old.items():
             if key in ('nick', 'boosts_since'):
-                result.append(f'{key} changed: {value!r} -> {getattr(profile, key)!r}')
+                result.append(f'{key} changed: {value!r} -> {getattr(guild_profile, key)!r}')
                 continue
             
             if key=='roles':
-                removed, added = list_difference(value, profile.roles)
+                removed, added = list_difference(value, guild_profile.roles)
                 if removed:
                     result.append(f'Roles removed: ({len(removed)})')
                     for role in removed:
