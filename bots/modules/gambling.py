@@ -2,11 +2,11 @@ import re
 from functools import partial as partial_func
 from datetime import datetime, timedelta
 from random import random
-from math import log, ceil, floor
+from math import log10, ceil, floor
 from itertools import chain
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
-    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta
+    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta, Permission
 from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
     GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
 from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, wait_for_component_interaction
@@ -550,6 +550,12 @@ def heart_event_start_checker(client, event):
     return True
 
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
 async def heart_event(client, event,
@@ -565,8 +571,7 @@ async def heart_event(client, event,
             break
         
         permissions = event.channel.cached_permissions_for(client)
-        if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
-                (not permissions.can_use_external_emojis):
+        if not permissions&PERMISSION_MASK_MESSAGING:
             response = (
                 'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
                 'command.'
@@ -851,8 +856,7 @@ async def daily_event(client, event,
             break
         
         permissions = event.channel.cached_permissions_for(client)
-        if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
-                (not permissions.can_use_external_emojis):
+        if not permissions&PERMISSION_MASK_MESSAGING:
             response = (
                 'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
                 'command.'
@@ -1142,12 +1146,6 @@ async def game_21(client, event,
             ):
     """Starts a card game where you can bet your hearts."""
     is_multi_player = (mode == 'mp')
-    
-    permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions) or \
-            (not permissions.can_use_external_emojis):
-        abort('I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
-            'command.')
     
     embed = game_21_precheck(client, event.user, event.channel, amount, is_multi_player)
     yield embed
@@ -2962,8 +2960,8 @@ async def top_list(client, event,
     
     if max_hearts:
         result_parts.append('cs\n')
-        index_adjust = floor(log((page-1)*20+len(parts), 10.0))+1
-        hearts_adjust = floor(log(max_hearts, 10.0))+1
+        index_adjust = floor(log10((page-1)*20+len(parts)))+1
+        hearts_adjust = floor(log10(max_hearts))+1
         
         for index, total_hearts, full_name in parts:
             result_parts.append(str(index).rjust(index_adjust))

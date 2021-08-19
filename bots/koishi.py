@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timedelta
 
-from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary
+from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary, Permission
 from hata.backend.futures import render_exc_to_list
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
@@ -28,12 +28,18 @@ Koishi.events(EmojiDeleteWaitfor)
 Koishi.events(RoleEditWaitfor)
 
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+
 @Koishi.events
 async def message_create(client, message):
     if (message.referenced_message is not None):
         return
     
-    if not message.channel.cached_permissions_for(client).can_send_messages:
+    if not message.channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING:
         return
     
     if message.author.is_bot:
@@ -114,14 +120,14 @@ async def role_giver(client, message):
         
         permissions = message.channel.cached_permissions_for(client)
         if (not permissions.can_manage_roles) or (not client.has_higher_role_than(role)):
-            if permissions.can_send_messages:
+            if permissions&PERMISSION_MASK_MESSAGING:
                 content = 'My permissions are broken, cannot provide the specified role.'
             else:
                 break
         else:
             await (Client.user_role_add if add else Client.user_role_delete)(client, user, role)
             
-            if permissions.can_send_messages:
+            if permissions&PERMISSION_MASK_MESSAGING:
                 if add:
                     content = f'You now have {role.mention} role.'
                 else:

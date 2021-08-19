@@ -1,9 +1,9 @@
-from os.path import join as join_path, isdir as is_folder, isfile as is_file
+from os.path import join as join_paths, isdir as is_folder, isfile as is_file
 from os import listdir as list_directory
 
 import config
 
-from hata import Client, ActivityRich, ACTIVITY_TYPES
+from hata import Client, ActivityRich, ACTIVITY_TYPES, IntentFlag
 from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.shared import PATH__KOISHI
 
@@ -20,6 +20,7 @@ if MARISA_MODE:
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,
         category_name_rule = category_name_rule,
+        intents = IntentFlag(0).update_by_keys(guilds=True, guild_users=True, guild_messages=True, guild_reactions=True)
     )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
@@ -83,8 +84,8 @@ else:
 MODULE_NAMES = set()
 
 path = None
-for path in list_directory(join_path(PATH__KOISHI, 'bots', 'modules')):
-    full_path = join_path(PATH__KOISHI, 'bots', 'modules', path)
+for path in list_directory(join_paths(PATH__KOISHI, 'bots', 'modules')):
+    full_path = join_paths(PATH__KOISHI, 'bots', 'modules', path)
     if is_file(full_path):
         if not path.endswith('.py'):
             continue
@@ -108,6 +109,7 @@ if MARISA_MODE:
     MARISA_ALLOWED_MODULES.add('voice')
     MARISA_ALLOWED_MODULES.add('extensions')
     MARISA_ALLOWED_MODULES.add('google')
+    MARISA_ALLOWED_MODULES.add('log')
     
     for path in list(MODULE_NAMES):
         if path not in MARISA_ALLOWED_MODULES:

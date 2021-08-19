@@ -3,7 +3,7 @@ import os
 from math import floor, sqrt
 from functools import partial as partial_func
 
-from hata import BUILTIN_EMOJIS, Client, Lock, KOKORO, alchemy_incendiary, Embed
+from hata import BUILTIN_EMOJIS, Client, Lock, KOKORO, alchemy_incendiary, Embed, Permission
 from hata.backend.utils import to_json, from_json
 from hata.ext.command_utils import wait_for_reaction
 from hata.ext.slash import abort
@@ -416,6 +416,14 @@ def check_confirm_emoji(event, confirm_emoji):
     
     return False
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+PERMISSION_MASK_REACT = Permission().update_by_keys(
+    add_reactions = True,
+)
 
 @SHOP.interactions
 async def buy(client, event,
@@ -429,7 +437,7 @@ async def buy(client, event,
         abort('Item not available.')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
         abort('I need `send messages` and `add reactions` permissions to execute the command.')
     
     yield

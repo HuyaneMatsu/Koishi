@@ -560,21 +560,14 @@ async def crywolf_(client, event):
     """Crywolf is a bot"""
     yield 'crywolf is a sus'
     channel = event.channel
-    webhooks = await client.webhook_get_all_channel(channel)
-    for webhook in webhooks:
-        if webhook.type is WebhookType.bot:
-            executor_webhook = webhook
-            break
-    else:
-        executor_webhook = None
-    
-    if (executor_webhook is None):
-        executor_webhook = await client.webhook_create(channel, 'crywolf-bot')
+    webhook = await client.webhook_get_own_channel(channel)
+    if (webhook is None):
+        webhook = await client.webhook_create(channel, 'crywolf-bot')
     
     crywolf = await client.user_get(151446521311789057)
-    await client.webhook_message_create(executor_webhook, 'Good morning, how are yous?',
+    await client.webhook_message_create(webhook, 'Good morning, how are yous?',
         name=crywolf.name, avatar_url=crywolf.avatar_url, wait=True)
-    await client.webhook_message_create(executor_webhook, f'{EMOJI_1:e} {EMOJI_2:e}',
+    await client.webhook_message_create(webhook, f'{EMOJI_1:e} {EMOJI_2:e}',
         name=crywolf.name, avatar_url=crywolf.avatar_url, wait=True)
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)

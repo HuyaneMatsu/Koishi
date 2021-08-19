@@ -12,7 +12,7 @@ from hata import Future, sleep, Task, WaitTillAll, AsyncIO, CancelledError, imul
     Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild, WaitTillExc, DiscoveryCategory, Emoji, KOKORO, \
     ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, ChannelStage, \
-    ERROR_CODES, ComponentType, Sticker, StickerPack, Formdata, ChannelDirectory
+    ERROR_CODES, ComponentType, Sticker, StickerPack, Formdata, ChannelDirectory, Permission
 
 from hata.backend.utils import change_on_switch
 from hata.backend.futures import _EXCFrameType, render_frames_to_list, render_exc_to_list
@@ -2219,7 +2219,7 @@ async def thread_self_settings_edit(client, channel, data):
     )
 
 
-async def thread_get_chunk_archived_public(client, channel):
+async def channel_thread_get_chunk_archived_public(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
@@ -2227,7 +2227,7 @@ async def thread_get_chunk_archived_public(client, channel):
     )
 
 
-async def thread_get_chunk_archived_private(client, channel):
+async def channel_thread_get_chunk_archived_private(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
@@ -2235,7 +2235,7 @@ async def thread_get_chunk_archived_private(client, channel):
     )
 
 
-async def thread_get_chunk_self_archived(client, channel):
+async def channel_thread_get_chunk_self_archived(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
@@ -2243,7 +2243,7 @@ async def thread_get_chunk_self_archived(client, channel):
     )
 
 
-async def thread_get_chunk_active(client, channel):
+async def channel_thread_get_chunk_active(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
@@ -2411,6 +2411,15 @@ async def channel_directory_get_all(client, channel):
     await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/directory-entries/list',
     )
+
+
+async def guild_thread_get_all_active(client, guild):
+    guild_id = guild.id
+    
+    await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/threads/active',
+    )
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
@@ -4352,6 +4361,10 @@ async def rate_limit_test_0091(client, message):
         for message in messages:
             await message_delete(client, message)
 
+PERMISSION_MASK_MESSAGING= Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0092(client, message, channel2:ChannelText=None):
@@ -4363,7 +4376,7 @@ async def rate_limit_test_0092(client, message, channel2:ChannelText=None):
         if channel2 is None:
             await RLT.send('No second channel was given.')
         
-        if not channel2.cached_permissions_for(client).can_send_messages:
+        if not channel2.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING:
             await RLT.send('I have no permissions to send messages at the other channel.')
         
         messages = []
@@ -5459,7 +5472,7 @@ async def rate_limit_test_0138(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_get_chunk_archived_public(client, channel)
+        await channel_thread_get_chunk_archived_public(client, channel)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5476,7 +5489,7 @@ async def rate_limit_test_0139(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_get_chunk_self_archived(client, channel)
+        await channel_thread_get_chunk_self_archived(client, channel)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5858,7 +5871,7 @@ async def rate_limit_test_0161(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_get_chunk_archived_private(client, channel)
+        await channel_thread_get_chunk_archived_private(client, channel)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5875,7 +5888,7 @@ async def rate_limit_test_0162(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_get_chunk_active(client, channel)
+        await channel_thread_get_chunk_active(client, channel)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5893,3 +5906,20 @@ async def rate_limit_test_0163(client, message):
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await thread_user_get_all(client, channel)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0164(client, message):
+    """
+    Gets the active threads of a guild.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0164') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        if not guild.cached_permissions_for(client).can_administrator:
+            await RLT.send('I need admin permission in the second guild as well to complete this command.')
+        
+        await guild_thread_get_all_active(client, guild)

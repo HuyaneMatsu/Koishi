@@ -3,7 +3,8 @@ from random import randint
 from itertools import cycle, chain
 from threading import main_thread
 
-from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, CLIENTS
+from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, CLIENTS, \
+    Permission
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
@@ -99,6 +100,11 @@ async def emojify(client, message, content):
     await client.message_create(message, result, allowed_mentions=None)
     return
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
 @Satori.commands.from_class
 class auto_pyramid:
     async def command(client, message, emoji:Emoji, size:int):
@@ -120,7 +126,7 @@ class auto_pyramid:
         channel = message.channel
         for client_ in channel.clients:
             permissions = channel.cached_permissions_for(client_)
-            if not permissions.can_send_messages:
+            if not permissions&PERMISSION_MASK_MESSAGING:
                 continue
             
             if not client_.can_use_emoji(emoji):

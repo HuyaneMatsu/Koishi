@@ -10,7 +10,7 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
     parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout, ChannelDirectory, \
-    GUILDS
+    GUILDS, Permission
 
 from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
@@ -28,6 +28,10 @@ UTILITY_COLOR = Color(0x5dc66f)
 
 SLASH_CLIENT: Client
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def rawr(client, event):
@@ -41,7 +45,7 @@ async def rawr(client, event):
         if client_ is client:
             coroutine = client.interaction_response_message_create(event, 'Rawrr !')
         else:
-            if not channel.cached_permissions_for(client_).can_send_messages:
+            if not channel.cached_permissions_for(client_)&PERMISSION_MASK_MESSAGING:
                 continue
             
             coroutine = client_.message_create(channel, 'Rawrr !')
@@ -263,6 +267,10 @@ class RoleCache:
     def __len__(self):
         return len(self.roles)+1
 
+PERMISSION_MASK_REACT = Permission().update_by_keys(
+    add_reactions = True,
+)
+
 @SLASH_CLIENT.interactions(is_global=True)
 async def roles_(client, event):
     """Lists the roles of the guild for my cutie!"""
@@ -274,10 +282,11 @@ async def roles_(client, event):
         abort('I must be in the guild to execute this command')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
         abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
     await PAGINATION_5PN(client, event, RoleCache(guild))
+
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def welcome_screen_(client, event):
@@ -392,17 +401,6 @@ def shared_guilds_pagination_check(user, event):
 @SLASH_CLIENT.interactions(is_global=True)
 async def shared_guilds(client, event):
     """Returns the shared guilds between you and me."""
-    permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            'I require `send messages` and `add reactions` permissions to execute this command.',
-            color=UTILITY_COLOR,
-                )
-        return
-    
-    # Ack the event, hell yeah!
-    yield
-    
     pages = []
     lines = []
     lines_count = 0

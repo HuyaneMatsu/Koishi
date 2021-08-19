@@ -3,7 +3,7 @@ import re, os, functools
 from io import BytesIO
 
 from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, Color, KOKORO, Lock, Client, parse_message_reference, \
-    MESSAGES, DiscordException, ERROR_CODES, CHANNELS, Attachment, sanitize_mentions
+    MESSAGES, DiscordException, ERROR_CODES, CHANNELS, Attachment, sanitize_mentions, Permission
 from hata.ext.slash import InteractionResponse, abort
 
 try:
@@ -177,6 +177,12 @@ async def image_(client, event,
     return InteractionResponse(file=image)
 
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def upload(client, event,
         message : ('str', 'Link to the message'),
@@ -197,7 +203,7 @@ async def upload(client, event,
         yield Embed('Error', 'I must be in the guild to execute this command.', color=IMAGE_COLOR)
         return
     
-    if not event.channel.cached_permissions_for(client).can_send_messages:
+    if not event.channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING:
         yield Embed('Permission denied', 'I need `send messages` permission to execute this command.',
             color=IMAGE_COLOR)
         return

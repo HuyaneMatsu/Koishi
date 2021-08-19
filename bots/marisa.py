@@ -791,3 +791,11 @@ async def peek_at_message(target):
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON, target='user')
 async def peek_at_user(target):
     return repr(target)
+
+
+# Dunno, meow-master stuff
+now = perf_counter()
+
+@Marisa.events
+async def ready(client):
+    print(perf_counter()-now)

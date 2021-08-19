@@ -2,7 +2,7 @@ from datetime import datetime
 from functools import partial as partial_func
 
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
-    parse_rdelta, time_to_id, ChannelCategory, Emoji
+    parse_rdelta, time_to_id, ChannelCategory, Emoji, Permission
 from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
@@ -230,6 +230,10 @@ def check_guild_invites_pagination_permissions(event):
     
     return True
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def invites_(client, event,
@@ -246,7 +250,7 @@ async def invites_(client, event,
     if (channel is not None) and isinstance(channel, ChannelCategory):
         abort('Category channels have no invites.')
     
-    if not event.channel.cached_permissions_for(client).can_send_messages:
+    if not event.channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING:
         abort('I must have `send messages` permission to invoke this command correctly.')
     
     if channel is None:

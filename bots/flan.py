@@ -4,7 +4,7 @@ from itertools import cycle
 from random import choice
 
 from hata import Guild, Embed, Color, Role, sleep, ReuAsyncIO, BUILTIN_EMOJIS, AsyncIO, ChannelText, KOKORO, Client, \
-    Lock, alchemy_incendiary, DiscordException, ERROR_CODES
+    Lock, alchemy_incendiary, DiscordException, ERROR_CODES, Permission
 from hata.backend.utils import sortedlist
 from hata.ext.command_utils import Pagination, wait_for_reaction, wait_for_message
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
@@ -57,7 +57,7 @@ BMG_NAMES_W_S = {
     'firtrun',
     'radialt',
     'yshar',
-        }
+}
 
 FILE_NAME = 'bgm_names.csv'
 
@@ -747,7 +747,12 @@ class checklist:
             f'Usage: `{command_context.prefix}checklist *rarity*`\n'
             ), color=COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
-    
+
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
 @Flan.commands.from_class
 class dump_all_card:
     async def command(client, message):
@@ -762,7 +767,7 @@ class dump_all_card:
             if client is other_client:
                 continue
             
-            if channel.cached_permissions_for(other_client).can_send_messages:
+            if channel.cached_permissions_for(other_client).PERMISSION_MASK_MESSAGING:
                 break
         else:
             await client.message_create(channel.channel,

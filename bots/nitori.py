@@ -342,7 +342,7 @@ async def latest_users(event):
 # command end
 # command start slash ping
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions
 async def ping():
     """HTTP ping-pong."""
     start = perf_counter()
@@ -453,6 +453,21 @@ async def remilia(client):
 @Nitori.interactions(is_global=True)
 async def about(client):
     return Embed('about', client.application.description, color=0x508CB5).add_thumbnail(client.avatar_url)
+
+# command end
+# command start context avatar
+
+@Nitori.interactions(is_global=True, target='user')
+async def avatar(target):
+    avatar_url = target.avatar_url_as(size=4096)
+    return Embed(f'{target.full_name}\'s avatar', url=avatar_url).add_image(avatar_url)
+
+# command end
+# command start context length
+
+@Nitori.interactions(is_global=True, target='message')
+async def length(target):
+    return len(target)
 
 # command end
 # command start components ping-pong

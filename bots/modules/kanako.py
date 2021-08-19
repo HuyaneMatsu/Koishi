@@ -2,7 +2,8 @@ import os
 from random import randint
 
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
-    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future, InteractionEvent
+    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future, InteractionEvent, \
+    Permission
 
 from hata.ext.command_utils import GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, GUI_STATE_CANCELLING, \
     GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX, Timeouter
@@ -34,6 +35,15 @@ KANAKO = SLASH_CLIENT.interactions(None,
     is_global = True,
 )
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+PERMISSION_MASK_REACT = Permission().update_by_keys(
+    add_reactions = True,
+)
+
 @KANAKO.interactions
 async def create_(client, event,
         map_ : ([('hiragana', 'hiragana'), ('katakana', 'katakana')], 'Choose a map to play!') = 'hiragana',
@@ -49,7 +59,7 @@ async def create_(client, event,
         abort('I must be in the guild to execute this command.')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
         abort('I need `send messages` and `add reactions` permission to execute this command.')
     
     game = ACTIVE_GAMES.get(event.channel.id, None)
@@ -135,7 +145,7 @@ async def show_map(client, event,
             ):
     """Shows the selected map!"""
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+    if (not permissions&PERMISSION_MASK_MESSAGING) or (not permissions&PERMISSION_MASK_REACT):
         abort('I need `send messages` and `add reactions` permission to execute this command.')
     
     pages = MAP_SHOWCASES[map_]

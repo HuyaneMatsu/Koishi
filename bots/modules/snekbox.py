@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os, sys, subprocess, re
 from functools import partial as partial_func
 from pathlib import Path
@@ -8,6 +7,7 @@ from hata.ext.commands_v2 import checks
 from hata.ext.command_utils import Closer
 from bot_utils.interpreter import parse_code_content
 from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
+from hata.ext.extension_loader import require
 
 # installing nsjail:
 # make a folder for it somewhere
@@ -17,6 +17,7 @@ from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
 # $ cd nsjail && git checkout 3.0 # <- version number
 # $ make
 # $ sudo cp ".../nsjail/nsjail" "/usr/sbin/" # Copy it.
+
 
 COMMAND_CLIENT : Client
 
@@ -31,9 +32,11 @@ MAX_TIMEOUT = 13
 NSJAIL_EXECUTABLE = os.getenv('NSJAIL_PATH', '/usr/sbin/nsjail')
 NSJAIL_CONFIG_3_8 = os.getenv('NSJAIL_CFG_3_8', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_Cpython_3_8.cfg'))
 NSJAIL_CONFIG_3_10 = os.getenv('NSJAIL_CFG_3_10', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_Cpython_3_10.cfg'))
+NSJAIL_CONFIG_C_3_6 = os.getenv('NSJAIL_CFG_C_3_6', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_pypy_3_6.cfg'))
 
 PATH__PYTHON_EXECUTABLE_3_8 = '/usr/bin/python3.8'
 PATH__PYTHON_EXECUTABLE_3_10 = '/usr/bin/python3.10'
+PATH__PYTHON_EXECUTABLE_C_3_6 = '/usr/bin/pypy3'
 
 PATH__SNEKBOX = Path('/snekbox')
 
@@ -264,3 +267,7 @@ if IS_UNIX:
     @COMMAND_CLIENT.commands(name='eval_3.10', aliases='e10', description=eval_description, category='SNEKBOX')
     async def eval_3_10(ctx, content):
         await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_3_10, NSJAIL_CONFIG_3_10)
+
+    @COMMAND_CLIENT.commands(name='c_eval_3.6', aliases='chad', description=eval_description, category='SNEKBOX')
+    async def c_eval_3_6(ctx, content):
+        await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_C_3_6, NSJAIL_CONFIG_C_3_6)

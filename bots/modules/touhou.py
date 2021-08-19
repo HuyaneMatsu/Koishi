@@ -3,7 +3,7 @@ import re, sys
 from collections import deque
 from difflib import get_close_matches
 
-from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Client
+from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Client, Permission
 from hata.ext.command_utils import ChooseMenu, Pagination
 from hata.backend.utils import from_json
 from hata.ext.slash import InteractionResponse, abort, Button, Row
@@ -437,6 +437,15 @@ async def character(client, event,
         return embed
 
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+PERMISSION_MASK_REACT = Permission().update_by_keys(
+    add_reactions = True,
+)
+
 @TOUHOU.interactions
 async def wiki_(client, event,
         search_for : ('str', 'Search term'),
@@ -450,7 +459,7 @@ async def wiki_(client, event,
         abort('I must be in the guild to execute this command.')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
         abort('I need `send messages` and `add reactions` permission to execute this command.')
     
     words = WORD_MATCH_RP.split(search_for)

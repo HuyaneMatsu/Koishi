@@ -147,13 +147,6 @@ async def docs_search(client, event,
         yield Embed('Error', 'I must be in the guild to execute this command.', color=COLOR__KOISHI_HELP)
         return
     
-    permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
-        yield Embed('Permission denied',
-            'I need `send messages` and `add reactions` permission to execute this command.',
-            color=COLOR__KOISHI_HELP)
-        return
-    
     if len(search_for) < 4:
         yield Embed('Ohoho', 'Please give a longer query', color=COLOR__KOISHI_HELP)
         return

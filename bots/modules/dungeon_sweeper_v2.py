@@ -109,7 +109,10 @@ IDENTIFIER_NEXT      = 'F'
 IDENTIFIER_CLOSE     = 'G'
 IDENTIFIER_RESTART   = 'H'
 
-IDENTIFIER_EMPTY     = '_'
+IDENTIFIER_EMPTY_1   = 'I'
+IDENTIFIER_EMPTY_2   = 'J'
+IDENTIFIER_EMPTY_3   = 'K'
+IDENTIFIER_EMPTY_4   = 'L'
 IDENTIFIER_SKILL     = '0'
 
 
@@ -127,7 +130,10 @@ IDENTIFIERS = frozenset((
     IDENTIFIER_BACK,
     IDENTIFIER_RESET,
     IDENTIFIER_CANCEL,
-    IDENTIFIER_EMPTY,
+    IDENTIFIER_EMPTY_1,
+    IDENTIFIER_EMPTY_2,
+    IDENTIFIER_EMPTY_3,
+    IDENTIFIER_EMPTY_4,
     IDENTIFIER_SKILL,
 ))
 
@@ -431,12 +437,16 @@ BUTTON_SELECT_ENABLED = Button(
 BUTTON_SELECT_DISABLED = BUTTON_SELECT_ENABLED.copy()
 BUTTON_SELECT_DISABLED.enabled = False
 
-BUTTON_EMPTY = Button(
+BUTTON_EMPTY_1 = Button(
     emoji = EMOJI_NOTHING,
-    custom_id = IDENTIFIER_EMPTY,
+    custom_id = IDENTIFIER_EMPTY_1,
     style = ButtonStyle.gray,
     enabled = False,
 )
+
+BUTTON_EMPTY_2 = BUTTON_EMPTY_1.copy_with(custom_id=IDENTIFIER_EMPTY_2)
+BUTTON_EMPTY_3 = BUTTON_EMPTY_1.copy_with(custom_id=IDENTIFIER_EMPTY_3)
+BUTTON_EMPTY_4 = BUTTON_EMPTY_1.copy_with(custom_id=IDENTIFIER_EMPTY_4)
 
 BUTTON_SKILL_REIMU_ENABLED = Button(
     emoji = EMOJI_REIMU,
@@ -2580,9 +2590,9 @@ class GameState:
             button_reset = BUTTON_RESET_DISABLED
         
         components = (
-            Row(BUTTON_EMPTY , button_north , BUTTON_EMPTY , button_back   ,),
-            Row(button_west  , button_skill , button_east  , button_reset  ,),
-            Row(BUTTON_EMPTY , button_south , BUTTON_EMPTY , BUTTON_CANCEL ,),
+            Row(BUTTON_EMPTY_1 , button_north , BUTTON_EMPTY_2 , button_back   ,),
+            Row(button_west    , button_skill , button_east    , button_reset  ,),
+            Row(BUTTON_EMPTY_3 , button_south , BUTTON_EMPTY_4 , BUTTON_CANCEL ,),
         )
         
         return embed, components
@@ -2888,9 +2898,9 @@ def render_menu(user_state):
         button_chapter_before = BUTTON_LEFT_ENABLED
     
     components = (
-        Row(BUTTON_EMPTY          , button_stage_after     , button_stage_after2   , BUTTON_EMPTY        ,),
+        Row(BUTTON_EMPTY_1        , button_stage_after     , button_stage_after2   , BUTTON_EMPTY_2      ,),
         Row(button_chapter_before , button_select          , BUTTON_CLOSE          , button_chapter_next ,),
-        Row(BUTTON_EMPTY          , button_stage_before    , button_stage_before2  , BUTTON_EMPTY        ,),
+        Row(BUTTON_EMPTY_3        , button_stage_before    , button_stage_before2  , BUTTON_EMPTY_4      ,),
     )
     
     return embed, components
@@ -3990,12 +4000,6 @@ async def rules(client, event):
 @DUNGEON_SWEEPER.interactions(is_default=True)
 async def play(client, event):
     """Starts the game"""
-    permissions = event.channel.cached_permissions_for(client)
-    if not (permissions.can_send_messages and permissions.can_add_reactions and permissions.can_use_external_emojis \
-            and permissions.can_manage_messages):
-        abort('I have not all permissions to start a game at this channel.')
-        return
-    
     game = DUNGEON_SWEEPER_GAMES.get(event.user.id, None)
     if game is None:
         await DungeonSweeperRunner(client, event)

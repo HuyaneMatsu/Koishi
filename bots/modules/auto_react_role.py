@@ -2,7 +2,7 @@ import re
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, ClientWrapper, MESSAGES, \
     Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference, \
-    ChannelBase, parse_role, parse_emoji
+    ChannelBase, parse_role, parse_emoji, Permission
 
 from hata.ext.command_utils import ChooseMenu, Closer
 from hata.ext.slash import abort
@@ -1396,6 +1396,14 @@ async def auto_react_roles_description(client, message):
             ), color=AUTO_REACT_ROLE_COLOR).add_footer(
                 'Guild only! You must have administrator permission to use this command.')
 
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+PERMISSION_MASK_REACT = Permission().update_by_keys(
+    add_reactions = True,
+)
 
 AUTO_REACT_ROLE.interactions(name='show')
 async def show_auto_react_roles(client, event):
@@ -1411,7 +1419,7 @@ async def show_auto_react_roles(client, event):
         abort('You must have `administrator` permission to invoke this command.')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions.can_send_messages) or (not permissions.can_add_reactions):
+    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
         abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
     managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type=True, is_method=True)
