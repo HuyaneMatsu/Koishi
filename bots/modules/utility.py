@@ -33,6 +33,28 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
+STATUS_ONLINE = Status.online
+STATUS_IDLE = Status.idle
+STATUS_DND = Status.dnd
+STATUS_OFFLINE = Status.offline
+
+STATUS_VALUE_OFFLINE = STATUS_OFFLINE.value
+
+EMOJI_HEART_GREEN = BUILTIN_EMOJIS['green_heart']
+EMOJI_HEART_YELLOW = BUILTIN_EMOJIS['yellow_heart']
+EMOJI_HEART_RED = BUILTIN_EMOJIS['heart']
+EMOJI_HEART_BLACK = BUILTIN_EMOJIS['black_heart']
+EMOJI_HEART_GIFT = BUILTIN_EMOJIS['gift_heart']
+
+STATUS_VALUE_TO_HEART_EMOJI = {
+    STATUS_ONLINE.value: EMOJI_HEART_GREEN,
+    STATUS_IDLE.value: EMOJI_HEART_YELLOW,
+    STATUS_DND.value: EMOJI_HEART_RED,
+    STATUS_OFFLINE.value: EMOJI_HEART_BLACK,
+}
+
+PLATFORMS = ('desktop', 'mobile', 'web')
+
 @SLASH_CLIENT.interactions(is_global=True)
 async def rawr(client, event):
     """Sends a message with everyone from my universe."""
@@ -331,7 +353,7 @@ ID = SLASH_CLIENT.interactions(None,
     name = 'id',
     description = 'Shows the id of the selected entity',
     is_global = True,
-        )
+)
 
 @ID.interactions
 async def user_(client, event,
@@ -549,12 +571,6 @@ async def role_(client, event,
     return embed
 
 
-GREEN_HEART = BUILTIN_EMOJIS['green_heart']
-YELLOW_HEART = BUILTIN_EMOJIS['yellow_heart']
-RED_HEART = BUILTIN_EMOJIS['heart']
-BLACK_HEART = BUILTIN_EMOJIS['black_heart']
-GIFT_HEART = BUILTIN_EMOJIS['gift_heart']
-
 def add_guild_generic_field(guild, embed, even_if_empty):
     add_guild_info_field(guild, embed, False)
     add_guild_counts_field(guild, embed, False)
@@ -574,7 +590,7 @@ def add_guild_info_field(guild, embed, even_if_empty):
     if features:
         sections_parts.append('\n**Features**: ')
         for feature in features:
-            sections_parts.append(feature.name.replace('_', ' '))
+            sections_parts.append(feature.name)
             sections_parts.append(', ')
         
         del sections_parts[-1]
@@ -728,40 +744,33 @@ def add_guild_stickers_field(guild, embed, even_if_empty):
 
 
 def add_guild_users_field(guild, embed, even_if_empty):
-    # most usual first
-    s_grey = Status.offline
-    s_green = Status.online
-    s_yellow = Status.idle
-    s_red = Status.dnd
+    value_grey = 0
+    value_green = 0
+    value_yellow = 0
+    value_red = 0
     
-    v_grey = 0
-    v_green = 0
-    v_yellow = 0
-    v_red = 0
-
     for user in guild.users.values():
         status = user.status
-        if   status is s_grey:
-            v_grey += 1
-        elif status is s_green:
-            v_green += 1
-        elif status is s_yellow:
-            v_yellow += 1
-        elif status is s_red:
-            v_red += 1
+        if   status is STATUS_OFFLINE:
+            value_grey += 1
+        
+        elif status is Status.online:
+            value_green += 1
+        
+        elif status is STATUS_IDLE:
+            value_yellow += 1
+        
+        elif status is STATUS_DND:
+            value_red += 1
+        
         else:
-            v_grey += 1
-    
-    del s_grey
-    del s_green
-    del s_yellow
-    del s_red
+            value_grey += 1
     
     embed.add_field('Users',
-        f'{GREEN_HEART:e} **{v_green}**\n'
-        f'{YELLOW_HEART:e} **{v_yellow}**\n'
-        f'{RED_HEART:e} **{v_red}**\n'
-        f'{BLACK_HEART:e} **{v_grey}**')
+        f'{EMOJI_HEART_GREEN:e} **{value_green}**\n'
+        f'{EMOJI_HEART_YELLOW:e} **{value_yellow}**\n'
+        f'{EMOJI_HEART_RED:e} **{value_red}**\n'
+        f'{EMOJI_HEART_BLACK:e} **{value_grey}**')
 
 def add_guild_boosters_field(guild, embed, even_if_empty):
     boosters = guild.boosters
@@ -770,7 +779,7 @@ def add_guild_boosters_field(guild, embed, even_if_empty):
         to_render = count if count < 21 else 21
         
         embed.add_field(f'Most awesome people of the guild',
-            f'{to_render} {GIFT_HEART:e} out of {count} {GIFT_HEART:e}')
+            f'{to_render} {EMOJI_HEART_GIFT:e} out of {count} {EMOJI_HEART_GIFT:e}')
         
         for user in boosters[:21]:
             embed.add_field(user.full_name,
@@ -975,6 +984,38 @@ async def avatar(client, event,
     
     url = user.avatar_url_as(size=4096)
     return Embed(f'{user:f}\'s avatar', color=color, url=url).add_image(url)
+
+
+@SLASH_CLIENT.interactions(is_global=True, target='user')
+async def status_(user):
+    status = user.status
+    emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status.value, EMOJI_HEART_BLACK)
+    
+    embed = Embed(f'{user.full_name}\'s status', f'{emoji:e} {status.name}').add_thumbnail(user.avatar_url)
+    
+    statuses = user.statuses
+    if (statuses is not None) and statuses:
+        field_value_parts = []
+        
+        for platform in PLATFORMS:
+            status_value = statuses.get(platform, STATUS_VALUE_OFFLINE)
+            emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status_value, EMOJI_HEART_BLACK)
+            
+            if field_value_parts:
+                field_value_parts.append('\n')
+            
+            field_value_parts.append(platform)
+            field_value_parts.append(': ')
+            field_value_parts.append(emoji.as_emoji)
+            field_value_parts.append(' ')
+            field_value_parts.append(status_value)
+        
+        field_value = ''.join(field_value_parts)
+        
+        embed.add_field('Per platform', field_value)
+    
+    
+    return embed
 
 
 @SLASH_CLIENT.interactions(is_global=True)

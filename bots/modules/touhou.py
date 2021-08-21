@@ -22,11 +22,11 @@ BOORU_COLOR = Color.from_html('#138a50')
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 NSFW_BOORU = 'http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags='
 
-TOUHOU_REQUIRED = {
+TOUHOU_REQUIRED = frozenset((
     'solo',
-}
+))
 
-TOUHOU_BANNED = {
+TOUHOU_BANNED = frozenset((
     'underwear',
     'sideboob',
     'pov_feet',
@@ -41,9 +41,9 @@ TOUHOU_BANNED = {
     'bdsm',
     'huge_filesize',
     'lovestruck',
-}
+))
 
-SAFE_BANNED = {
+SAFE_BANNED = frozenset((
     'bdsm',
     'huge_filesize',
     'underwear',
@@ -54,15 +54,15 @@ SAFE_BANNED = {
     'sexually_suggestive',
     'ass',
     'bikini',
-}
+))
 
-NSFW_BANNED = {
+NSFW_BANNED = frozenset((
     'loli',
     'lolicon',
     'shota',
     'shotacon',
     'huge_filesize',
-}
+))
 
 
 DEFAULT_TITLE = 'Link'
