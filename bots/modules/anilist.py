@@ -340,7 +340,7 @@ def build_character_description(character_data):
     description = ''.join(description_parts)
     
     if len(description) > 4000:
-        description = description[:4000]
+        description = description[:4000]+'...'
     
     return description
 
