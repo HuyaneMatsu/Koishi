@@ -14,75 +14,118 @@ RATE_LIMIT_LOCK = ScarletLock(KOKORO, RATE_LIMIT_SIZE)
 
 RETRY_AFTER = istr('Retry-After')
 
-KEY_SITE_URL = 'siteUrl'
+CHARACTER_PER_PAGE = 25
+
 KEY_CHARACTER = 'Character'
-KEY_NAME = 'name'
-KEY_NAME_FIRST = 'last'
-KEY_NAME_MIDDLE = 'middle'
-KEY_NAME_LAST = 'first'
-KEY_NAME_NATIVE = 'native'
-KEY_NAME_ALTERNATIVE = 'alternative'
-KEY_NAME_ALTERNATIVE_SPOILER = 'alternativeSpoiler'
-KEY_NAME_USER_PREFERRED = 'userPreferred'
-KEY_NAME_FULL = 'full'
-KEY_DESCRIPTION = 'description'
-KEY_IMAGE = 'image'
-KEY_IMAGE_LARGE = 'large'
-KEY_ID = 'id'
-KEY_FAVOURITES = 'favourites'
-KEY_BIRTH_DATE = 'dateOfBirth'
+KEY_CHARACTER_ARRAY = 'characters'
+KEY_PAGE = 'Page'
+KEY_PAGE_INFO = 'pageInfo'
+KEY_PAGE_INFO_TOTAL_ENTRIES = 'total'
+KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER = 'currentPage'
+KEY_PAGE_INFO_TOTAL_PAGES = 'lastPage'
+
+KEY_CHARACTER_SITE_URL = 'siteUrl'
+KEY_CHARACTER_NAME = 'name'
+KEY_CHARACTER_NAME_FIRST = 'last'
+KEY_CHARACTER_NAME_MIDDLE = 'middle'
+KEY_CHARACTER_NAME_LAST = 'first'
+KEY_CHARACTER_NAME_NATIVE = 'native'
+KEY_CHARACTER_NAME_ALTERNATIVE = 'alternative'
+KEY_CHARACTER_NAME_ALTERNATIVE_SPOILER = 'alternativeSpoiler'
+KEY_CHARACTER_NAME_USER_PREFERRED = 'userPreferred'
+KEY_CHARACTER_NAME_FULL = 'full'
+KEY_CHARACTER_DESCRIPTION = 'description'
+KEY_CHARACTER_IMAGE = 'image'
+KEY_CHARACTER_IMAGE_LARGE = 'large'
+KEY_CHARACTER_ID = 'id'
+KEY_CHARACTER_FAVOURITES = 'favourites'
+KEY_CHARACTER_BIRTH_DATE = 'dateOfBirth'
+KEY_CHARACTER_GENDER = 'gender'
+KEY_CHARACTER_BLOOD_TYPE = 'bloodType'
+KEY_CHARACTER_AGE = 'age'
+
 KEY_FUZZY_DATE_YEAR = 'year'
 KEY_FUZZY_DATE_MONTH = 'month'
 KEY_FUZZY_DATE_DAY = 'day'
-KEY_GENDER = 'gender'
-KEY_BLOOD_TYPE = 'bloodType'
-KEY_AGE = 'age'
 
 KEY_QUERY = 'query'
 KEY_VARIABLES = 'variables'
+KEY_PER_PAGE = 'perPage'
+KEY_PAGE_IDENTIFIER = 'page'
+KEY_SEARCH = 'search'
 
-KEY_VARIABLE_QUERY = 'query'
-KEY_VARIABLE_ID = 'id'
+KEY_VARIABLE_CHARACTER_QUERY = 'query'
+KEY_VARIABLE_CHARACTER_ID = 'id'
+
+KEY_VARIABLE_PER_PAGE = 'per_page'
+KEY_VARIABLE_PAGE_IDENTIFIER = 'page'
 
 REQUIRED_CHARACTER_FIELDS = (
-    # f'{KEY_ID}'
-    f'{KEY_NAME}{{'
-        f'{KEY_NAME_FIRST} '
-        f'{KEY_NAME_MIDDLE} '
-        f'{KEY_NAME_LAST} '
-        f'{KEY_NAME_NATIVE}'
+    # f'{KEY_CHARACTER_ID}'
+    f'{KEY_CHARACTER_NAME}{{'
+        f'{KEY_CHARACTER_NAME_FIRST} '
+        f'{KEY_CHARACTER_NAME_MIDDLE} '
+        f'{KEY_CHARACTER_NAME_LAST} '
+        f'{KEY_CHARACTER_NAME_NATIVE}'
     f'}}'
-    f'{KEY_IMAGE}{{'
-        f'{KEY_IMAGE_LARGE}'
+    f'{KEY_CHARACTER_IMAGE}{{'
+        f'{KEY_CHARACTER_IMAGE_LARGE}'
     f'}}'
-    f'{KEY_BIRTH_DATE}{{'
+    f'{KEY_CHARACTER_BIRTH_DATE}{{'
         f'{KEY_FUZZY_DATE_YEAR} '
         f'{KEY_FUZZY_DATE_MONTH} '
         f'{KEY_FUZZY_DATE_DAY} '
     f'}}'
-    f'{KEY_DESCRIPTION} '
-    f'{KEY_GENDER} '
-    f'{KEY_BLOOD_TYPE} '
-    f'{KEY_AGE} '
-    f'{KEY_SITE_URL}'
-    # f'{KEY_FAVOURITES}'
+    f'{KEY_CHARACTER_DESCRIPTION} '
+    f'{KEY_CHARACTER_GENDER} '
+    f'{KEY_CHARACTER_BLOOD_TYPE} '
+    f'{KEY_CHARACTER_AGE} '
+    f'{KEY_CHARACTER_SITE_URL}'
+    # f'{KEY_CHARACTER_FAVOURITES}'
 )
 
+
 CHARACTER_QUERY = (
-    f'query (${KEY_VARIABLE_QUERY}: String){{'
-        f'{KEY_CHARACTER} (search: ${KEY_VARIABLE_QUERY}){{'
+    f'{KEY_QUERY}(${KEY_VARIABLE_CHARACTER_QUERY}:String){{'
+        f'{KEY_CHARACTER} ({KEY_SEARCH}:${KEY_VARIABLE_CHARACTER_QUERY}){{'
             f'{REQUIRED_CHARACTER_FIELDS}'
         f'}}'
     f'}}'
 )
 
 CHARACTER_QUERY_BY_ID = (
-    f'query (${KEY_VARIABLE_ID}: Int){{'
-        f'{KEY_CHARACTER} ({KEY_ID}: ${KEY_VARIABLE_ID}){{'
+    f'{KEY_QUERY}(${KEY_VARIABLE_CHARACTER_ID}:Int){{'
+        f'{KEY_CHARACTER} ({KEY_CHARACTER_ID}: ${KEY_VARIABLE_CHARACTER_ID}){{'
             f'{REQUIRED_CHARACTER_FIELDS}'
         f'}}'
     f'}}'
 )
+
+CHARACTER_ARRAY_QUERY = (
+    f'{KEY_QUERY}('
+        f'${KEY_VARIABLE_PAGE_IDENTIFIER}:Int,'
+        f'${KEY_VARIABLE_PER_PAGE}:Int,'
+        f'${KEY_VARIABLE_CHARACTER_QUERY}:String'
+    f'){{'
+        f'{KEY_PAGE}({KEY_PAGE_IDENTIFIER}:${KEY_VARIABLE_PAGE_IDENTIFIER},{KEY_PER_PAGE}:${KEY_VARIABLE_PER_PAGE}){{'
+            f'{KEY_PAGE_INFO}{{'
+                f'{KEY_PAGE_INFO_TOTAL_ENTRIES} '
+                f'{KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER} '
+                f'{KEY_PAGE_INFO_TOTAL_PAGES}'
+            f'}}'
+            f'{KEY_CHARACTER_ARRAY}({KEY_SEARCH}:${KEY_VARIABLE_CHARACTER_QUERY}){{'
+                f'{KEY_CHARACTER_ID} '
+                f'{KEY_CHARACTER_NAME}{{'
+                    f'{KEY_CHARACTER_NAME_FIRST} '
+                    f'{KEY_CHARACTER_NAME_MIDDLE} '
+                    f'{KEY_CHARACTER_NAME_LAST} '
+                    f'{KEY_CHARACTER_NAME_NATIVE}'
+                f'}}'
+            f'}}'
+        f'}}'
+    f'}}'
+)
+
 
 MONTH_NAMES_SHORT = {
     1: 'Jan',
@@ -167,11 +210,11 @@ def build_fuzzy_date(date_data):
 
 
 def build_character_name(character_data):
-    name_data = character_data[KEY_NAME]
-    name_first = name_data[KEY_NAME_FIRST]
-    name_middle = name_data[KEY_NAME_MIDDLE]
-    name_last = name_data[KEY_NAME_LAST]
-    name_native = name_data[KEY_NAME_NATIVE]
+    name_data = character_data[KEY_CHARACTER_NAME]
+    name_first = name_data[KEY_CHARACTER_NAME_FIRST]
+    name_middle = name_data[KEY_CHARACTER_NAME_MIDDLE]
+    name_last = name_data[KEY_CHARACTER_NAME_LAST]
+    name_native = name_data[KEY_CHARACTER_NAME_NATIVE]
     
     name_parts = []
     
@@ -230,13 +273,20 @@ def DESCRIPTION_REPLACER(match):
     return DESCRIPTION_RELATION.get(match.group(0), '')
 
 
-def build_character_description(character_data):
-    description = character_data[KEY_DESCRIPTION]
-    gender = character_data[KEY_GENDER]
-    blood_type = character_data[KEY_BLOOD_TYPE]
-    age = character_data[KEY_AGE]
+def validate_parameter(parameter):
+    if len(parameter) > 200:
+        parameter = parameter[:200]
     
-    birth_date_data = character_data[KEY_BIRTH_DATE]
+    return parameter
+
+
+def build_character_description(character_data):
+    description = character_data[KEY_CHARACTER_DESCRIPTION]
+    gender = character_data[KEY_CHARACTER_GENDER]
+    blood_type = character_data[KEY_CHARACTER_BLOOD_TYPE]
+    age = character_data[KEY_CHARACTER_AGE]
+    
+    birth_date_data = character_data[KEY_CHARACTER_BIRTH_DATE]
     
     description_parts = []
     
@@ -295,7 +345,47 @@ def build_character_description(character_data):
     return description
 
 
-async def search(client, json_query, response_builder):
+def build_character_array_description(character_array):
+    character_array_length = len(character_array)
+    if character_array_length:
+        description_parts = []
+        character_array_index = 0
+        
+        while True:
+            character_data = character_array[character_array_index]
+            character_array_index += 1
+            
+            character_name = build_character_name(character_data)
+            character_id = character_data[KEY_CHARACTER_ID]
+            
+            description_parts.append('`')
+            description_parts.append(str(character_id))
+            description_parts.append('`: ')
+            description_parts.append(character_name)
+            
+            if character_array_index == character_array_length:
+                break
+            
+            description_parts.append('\n')
+            continue
+        
+        description = ''.join(description_parts)
+    
+    else:
+        description = 'No result.'
+    
+    return description
+
+
+def build_page_info(page_info):
+    total_entries = page_info[KEY_PAGE_INFO_TOTAL_ENTRIES]
+    current_page_identifier = page_info[KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER]
+    total_pages = page_info[KEY_PAGE_INFO_TOTAL_PAGES]
+    
+    return f'Page: {current_page_identifier} / {total_pages} | Total entries: {total_entries}'
+
+
+async def search(client, json_query, response_builder, extra):
     if RATE_LIMIT_LOCK.locked():
         yield
     
@@ -351,17 +441,17 @@ async def search(client, json_query, response_builder):
         KOKORO.call_later(RATE_LIMIT_RESET_AFTER, RATE_LIMIT_LOCK.release)
     
     
-    yield response_builder(data)
+    yield response_builder(data, extra)
 
 
-def character_response_builder(data):
+def character_response_builder(data, extra):
     if data is None:
         return Embed(description='No result.')
     
     character_data = data['data'][KEY_CHARACTER]
     
-    image_url = character_data[KEY_IMAGE][KEY_IMAGE_LARGE]
-    url = character_data[KEY_SITE_URL]
+    image_url = character_data[KEY_CHARACTER_IMAGE][KEY_CHARACTER_IMAGE_LARGE]
+    url = character_data[KEY_CHARACTER_SITE_URL]
     
     return Embed(
         build_character_name(character_data),
@@ -372,23 +462,37 @@ def character_response_builder(data):
     )
 
 
+def character_array_response_builder(data, extra):
+    page_data = data['data'][KEY_PAGE]
+    character_array = page_data[KEY_CHARACTER_ARRAY]
+    page_info = page_data[KEY_PAGE_INFO]
+    
+    return Embed(
+        f'Search result for: {extra}',
+        build_character_array_description(character_array),
+    ).add_footer(
+        build_page_info(page_info)
+    )
+
+
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def character(client, event,
         name_or_id: ('str', 'The character\'s name or it\'s id.')
             ):
+    name_or_id = validate_parameter(name_or_id)
     
     if name_or_id.isdecimal():
         json_query = {
             KEY_QUERY: CHARACTER_QUERY_BY_ID,
             KEY_VARIABLES: {
-                KEY_VARIABLE_ID : int(name_or_id),
+                KEY_VARIABLE_CHARACTER_ID: int(name_or_id),
             },
         }
     else:
         json_query = {
             KEY_QUERY: CHARACTER_QUERY,
             KEY_VARIABLES: {
-                KEY_VARIABLE_QUERY: name_or_id,
+                KEY_VARIABLE_CHARACTER_QUERY: name_or_id,
             },
         }
     
@@ -396,4 +500,26 @@ async def character(client, event,
         client,
         json_query,
         character_response_builder,
+        None,
+    )
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def find_character(client, event,
+        name: ('str', 'The character\'s name to try to find.')
+            ):
+    name = validate_parameter(name)
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: CHARACTER_ARRAY_QUERY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: 1,
+                KEY_VARIABLE_PER_PAGE: CHARACTER_PER_PAGE,
+                KEY_VARIABLE_CHARACTER_QUERY: name,
+            },
+        },
+        character_array_response_builder,
+        name,
     )
