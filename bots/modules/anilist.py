@@ -1,7 +1,7 @@
 from re import compile as re_compile, U as re_unicode, M as re_multi_line, S as re_dotall
 from hata import Client, to_json, Embed, istr, KOKORO, sleep, ScarletLock, BUILTIN_EMOJIS
 from hata.backend.headers import CONTENT_TYPE
-from hata.ext.slash import abort, Row, Button, InteractionResponse
+from hata.ext.slash import abort, Row, Button, InteractionResponse, Select, Option
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON
 
@@ -14,7 +14,22 @@ RATE_LIMIT_LOCK = ScarletLock(KOKORO, RATE_LIMIT_SIZE)
 
 RETRY_AFTER = istr('Retry-After')
 
+CUSTOM_ID_FIND_CHARACTER_LEFT = 'anilist.find_character.l'
+CUSTOM_ID_FIND_CHARACTER_RIGHT = 'anilist.find_character.r'
+CUSTOM_ID_FIND_CHARACTER_SELECT = 'anilist.find_character.s'
+CUSTOM_ID_FIND_CHARACTER_EMPTY_0 = 'anilist.find_character._.0'
+CUSTOM_ID_FIND_CHARACTER_EMPTY_1 = 'anilist.find_character._.1'
+CUSTOM_ID_FIND_CHARACTER_EMPTY_2 = 'anilist.find_character._.2'
+
 CHARACTER_PER_PAGE = 25
+CHARACTER_URL_BASE = 'https://anilist.co/character/'
+
+SELECT_FIND_CHARACTER_NO_RESULT = Select(
+    [Option('_', 'No result', default=True)],
+    CUSTOM_ID_FIND_CHARACTER_EMPTY_2,
+    placeholder = 'No result',
+)
+
 
 EMOJI_LEFT = BUILTIN_EMOJIS['arrow_backward']
 EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_forward']
@@ -66,7 +81,7 @@ KEY_VARIABLE_PER_PAGE = 'per_page'
 KEY_VARIABLE_PAGE_IDENTIFIER = 'page'
 
 REQUIRED_CHARACTER_FIELDS = (
-    # f'{KEY_CHARACTER_ID}'
+    f'{KEY_CHARACTER_ID} '
     f'{KEY_CHARACTER_NAME}{{'
         f'{KEY_CHARACTER_NAME_FIRST} '
         f'{KEY_CHARACTER_NAME_MIDDLE} '
@@ -84,8 +99,8 @@ REQUIRED_CHARACTER_FIELDS = (
     f'{KEY_CHARACTER_DESCRIPTION} '
     f'{KEY_CHARACTER_GENDER} '
     f'{KEY_CHARACTER_BLOOD_TYPE} '
-    f'{KEY_CHARACTER_AGE} '
-    f'{KEY_CHARACTER_SITE_URL}'
+    f'{KEY_CHARACTER_AGE}'
+    # f'{KEY_CHARACTER_SITE_URL}'
     # f'{KEY_CHARACTER_FAVOURITES}'
 )
 
@@ -350,10 +365,12 @@ def build_character_description(character_data):
     return description
 
 
-def build_character_array_description(character_array):
+def build_character_array_description_and_select_row(character_array):
     character_array_length = len(character_array)
     if character_array_length:
         description_parts = []
+        options = []
+        
         character_array_index = 0
         
         while True:
@@ -362,12 +379,18 @@ def build_character_array_description(character_array):
             
             character_name = build_character_name(character_data)
             character_id = character_data[KEY_CHARACTER_ID]
+            character_id_str = str(character_id)
             
             description_parts.append('`')
-            description_parts.append(str(character_id))
-            description_parts.append('`: ')
+            description_parts.append(character_id_str)
+            description_parts.append('`: [')
             description_parts.append(character_name)
+            description_parts.append('](')
+            description_parts.append(CHARACTER_URL_BASE)
+            description_parts.append(character_id_str)
+            description_parts.append(')')
             
+            options.append(Option(character_id_str, character_name))
             if character_array_index == character_array_length:
                 break
             
@@ -375,11 +398,19 @@ def build_character_array_description(character_array):
             continue
         
         description = ''.join(description_parts)
+        select_row = Row(
+            Select(
+                options,
+                CUSTOM_ID_FIND_CHARACTER_SELECT,
+                placeholder = 'Select a character!'
+            ),
+        )
     
     else:
         description = 'No result.'
+        select_row = SELECT_FIND_CHARACTER_NO_RESULT
     
-    return description
+    return description, select_row
 
 
 async def search(client, json_query, response_builder, extra):
@@ -448,7 +479,7 @@ def character_response_builder(data, extra):
     character_data = data['data'][KEY_CHARACTER]
     
     image_url = character_data[KEY_CHARACTER_IMAGE][KEY_CHARACTER_IMAGE_LARGE]
-    url = character_data[KEY_CHARACTER_SITE_URL]
+    url = f'{CHARACTER_URL_BASE}{character_data[KEY_CHARACTER_ID]}'
     
     return Embed(
         build_character_name(character_data),
@@ -458,6 +489,9 @@ def character_response_builder(data, extra):
         image_url,
     )
 
+def character_response_builder_no_components(data, extra):
+    embed = character_response_builder(data, extra)
+    return InteractionResponse(embed=embed, components=None)
 
 
 def character_array_response_builder(data, extra):
@@ -465,9 +499,10 @@ def character_array_response_builder(data, extra):
     character_array = page_data[KEY_CHARACTER_ARRAY]
     page_info = page_data[KEY_PAGE_INFO]
     
+    description, select_row = build_character_array_description_and_select_row(character_array)
     embed = Embed(
         f'Search result for: {extra}',
-        build_character_array_description(character_array),
+        description,
     )
     
     total_entries = page_info[KEY_PAGE_INFO_TOTAL_ENTRIES]
@@ -479,28 +514,34 @@ def character_array_response_builder(data, extra):
     if current_page_identifier <= 1:
         button_left = Button(
             emoji = EMOJI_LEFT,
-            custom_id = 'anilist.find_character._.0',
+            custom_id = CUSTOM_ID_FIND_CHARACTER_EMPTY_0,
             enabled = False,
         )
     else:
         button_left = Button(
             emoji = EMOJI_LEFT,
-            custom_id = f'anilist.find_character.l',
+            custom_id = CUSTOM_ID_FIND_CHARACTER_LEFT,
         )
     
     if current_page_identifier >= total_pages:
         button_right = Button(
             emoji = EMOJI_RIGHT,
-            custom_id = 'anilist.find_character._.1',
+            custom_id = CUSTOM_ID_FIND_CHARACTER_EMPTY_1,
             enabled = False,
         )
     else:
         button_right = Button(
             emoji = EMOJI_RIGHT,
-            custom_id = f'anilist.find_character.r',
+            custom_id = CUSTOM_ID_FIND_CHARACTER_RIGHT,
         )
     
-    return InteractionResponse(embed=embed, components=Row(button_left, button_right))
+    return InteractionResponse(
+        embed = embed,
+        components = [
+            select_row,
+            Row(button_left, button_right),
+        ],
+    )
 
 
 
@@ -554,7 +595,13 @@ async def find_character(client, event,
     )
 
  
-@SLASH_CLIENT.interactions(custom_id=('anilist.find_character._.0', 'anilist.find_character._.1'))
+@SLASH_CLIENT.interactions(
+    custom_id = (
+            CUSTOM_ID_FIND_CHARACTER_EMPTY_0,
+            CUSTOM_ID_FIND_CHARACTER_EMPTY_1,
+            CUSTOM_ID_FIND_CHARACTER_EMPTY_2,
+    ),
+)
 async def handle_disabled_component_interaction():
     pass
 
@@ -585,8 +632,8 @@ def get_name_and_page_from_embed(embed):
     return name, page_identifier
     
     
-@SLASH_CLIENT.interactions(custom_id='anilist.find_character.l')
-async def find_character_select_page(client, event):
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_CHARACTER_LEFT)
+async def find_character_page_left(client, event):
     message = event.message
     if message.interaction.user is not event.user:
         return
@@ -611,8 +658,8 @@ async def find_character_select_page(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id='anilist.find_character.r')
-async def find_character_select_page(client, event):
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_CHARACTER_RIGHT)
+async def find_character_page_right(client, event):
     message = event.message
     if message.interaction.user is not event.user:
         return
@@ -636,4 +683,34 @@ async def find_character_select_page(client, event):
         },
         character_array_response_builder,
         name,
+    )
+
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_CHARACTER_SELECT)
+async def find_character_select(client, event):
+    interaction = event.interaction
+    if event.message.interaction.user is not event.user:
+        return
+    
+    options = interaction.options
+    if options is None:
+        return
+    
+    option = options[0]
+    try:
+        character_id = int(option)
+    except ValueError:
+        return
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: CHARACTER_QUERY_BY_ID,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_CHARACTER_ID: character_id,
+            },
+        },
+        character_response_builder_no_components,
+        None,
     )
