@@ -1,7 +1,7 @@
 from re import compile as re_compile, U as re_unicode, M as re_multi_line, S as re_dotall
-from hata import Client, to_json, Embed, istr, KOKORO, sleep, ScarletLock
+from hata import Client, to_json, Embed, istr, KOKORO, sleep, ScarletLock, BUILTIN_EMOJIS
 from hata.backend.headers import CONTENT_TYPE
-from hata.ext.slash import abort
+from hata.ext.slash import abort, Row, Button, InteractionResponse
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON
 
@@ -15,6 +15,11 @@ RATE_LIMIT_LOCK = ScarletLock(KOKORO, RATE_LIMIT_SIZE)
 RETRY_AFTER = istr('Retry-After')
 
 CHARACTER_PER_PAGE = 25
+
+EMOJI_LEFT = BUILTIN_EMOJIS['arrow_backward']
+EMOJI_RIGHT = BUILTIN_EMOJIS['arrow_forward']
+
+DECIMAL_RP = re_compile('\d+')
 
 KEY_CHARACTER = 'Character'
 KEY_CHARACTER_ARRAY = 'characters'
@@ -377,14 +382,6 @@ def build_character_array_description(character_array):
     return description
 
 
-def build_page_info(page_info):
-    total_entries = page_info[KEY_PAGE_INFO_TOTAL_ENTRIES]
-    current_page_identifier = page_info[KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER]
-    total_pages = page_info[KEY_PAGE_INFO_TOTAL_PAGES]
-    
-    return f'Page: {current_page_identifier} / {total_pages} | Total entries: {total_entries}'
-
-
 async def search(client, json_query, response_builder, extra):
     if RATE_LIMIT_LOCK.locked():
         yield
@@ -462,17 +459,49 @@ def character_response_builder(data, extra):
     )
 
 
+
 def character_array_response_builder(data, extra):
     page_data = data['data'][KEY_PAGE]
     character_array = page_data[KEY_CHARACTER_ARRAY]
     page_info = page_data[KEY_PAGE_INFO]
     
-    return Embed(
+    embed = Embed(
         f'Search result for: {extra}',
         build_character_array_description(character_array),
-    ).add_footer(
-        build_page_info(page_info)
     )
+    
+    total_entries = page_info[KEY_PAGE_INFO_TOTAL_ENTRIES]
+    current_page_identifier = page_info[KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER]
+    total_pages = page_info[KEY_PAGE_INFO_TOTAL_PAGES]
+    
+    embed.add_footer(f'Page: {current_page_identifier} / {total_pages} | Total entries: {total_entries}')
+    
+    if current_page_identifier <= 1:
+        button_left = Button(
+            emoji = EMOJI_LEFT,
+            custom_id = 'anilist.find_character._.0',
+            enabled = False,
+        )
+    else:
+        button_left = Button(
+            emoji = EMOJI_LEFT,
+            custom_id = f'anilist.find_character.l',
+        )
+    
+    if current_page_identifier >= total_pages:
+        button_right = Button(
+            emoji = EMOJI_RIGHT,
+            custom_id = 'anilist.find_character._.1',
+            enabled = False,
+        )
+    else:
+        button_right = Button(
+            emoji = EMOJI_RIGHT,
+            custom_id = f'anilist.find_character.r',
+        )
+    
+    return InteractionResponse(embed=embed, components=Row(button_left, button_right))
+
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
@@ -516,6 +545,91 @@ async def find_character(client, event,
             KEY_QUERY: CHARACTER_ARRAY_QUERY,
             KEY_VARIABLES: {
                 KEY_VARIABLE_PAGE_IDENTIFIER: 1,
+                KEY_VARIABLE_PER_PAGE: CHARACTER_PER_PAGE,
+                KEY_VARIABLE_CHARACTER_QUERY: name,
+            },
+        },
+        character_array_response_builder,
+        name,
+    )
+
+ 
+@SLASH_CLIENT.interactions(custom_id=('anilist.find_character._.0', 'anilist.find_character._.1'))
+async def handle_disabled_component_interaction():
+    pass
+
+
+def get_name_and_page_from_embed(embed):
+    if embed is None:
+        return
+    
+    embed_title = embed.title
+    if embed_title is None:
+        return
+    
+    embed_footer = embed.footer
+    if embed_footer is None:
+        return
+    
+    embed_footer_text = embed_footer.text
+    if embed_footer_text is None:
+        return
+    
+    matched = DECIMAL_RP.match(embed_footer_text, len('Page: '))
+    if matched is None:
+        return
+    
+    page_identifier = int(matched.group(0))
+    name = embed_title[len('Search result for: '):]
+    
+    return name, page_identifier
+    
+    
+@SLASH_CLIENT.interactions(custom_id='anilist.find_character.l')
+async def find_character_select_page(client, event):
+    message = event.message
+    if message.interaction.user is not event.user:
+        return
+    
+    name_and_page = get_name_and_page_from_embed(message.embed)
+    
+    name, page_identifier = name_and_page
+    page_identifier -= 1
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: CHARACTER_ARRAY_QUERY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
+                KEY_VARIABLE_PER_PAGE: CHARACTER_PER_PAGE,
+                KEY_VARIABLE_CHARACTER_QUERY: name,
+            },
+        },
+        character_array_response_builder,
+        name,
+    )
+
+
+@SLASH_CLIENT.interactions(custom_id='anilist.find_character.r')
+async def find_character_select_page(client, event):
+    message = event.message
+    if message.interaction.user is not event.user:
+        return
+    
+    name_and_page = get_name_and_page_from_embed(message.embed)
+    if name_and_page is None:
+        return
+    
+    name, page_identifier = name_and_page
+    page_identifier += 1
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: CHARACTER_ARRAY_QUERY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
                 KEY_VARIABLE_PER_PAGE: CHARACTER_PER_PAGE,
                 KEY_VARIABLE_CHARACTER_QUERY: name,
             },

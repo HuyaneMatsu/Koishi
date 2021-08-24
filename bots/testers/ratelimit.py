@@ -1170,7 +1170,7 @@ async def channel_create(client,guild, name, category=None, type_=0):
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         data,)
-    return CHANNEL_TYPE_MAP.get(data['type'], ChannelGuildUndefined)(data, client, guild)
+    return CHANNEL_TYPE_MAP.get(data['type'], ChannelGuildUndefined)(data, client, guild_id)
 
 async def emoji_guild_get_all(client,guild,):
     guild_id=guild.id
