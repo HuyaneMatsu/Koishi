@@ -784,15 +784,6 @@ async def test_response_message(client, event):
     print(repr(event.message))
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, target='message')
-async def peek_at_message(target):
-    return repr(target)
-
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, target='user')
-async def peek_at_user(target):
-    return repr(target)
-
-
 # Dunno, meow-master stuff
 now = perf_counter()
 

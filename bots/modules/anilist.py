@@ -388,9 +388,12 @@ def build_media_name(media_data):
     name_native = name_data[KEY_MEDIA_NAME_NATIVE]
     
     if (name_romaji is None):
-        name = name_native
+        if (name_native is None):
+            name = '???'
+        else:
+            name = name_native
     else:
-        if name_romaji == name_native:
+        if (name_native is None) or (name_romaji == name_native):
             name = name_romaji
         else:
             name = f'{name_romaji} ({name_native})'

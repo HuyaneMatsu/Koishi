@@ -1327,57 +1327,9 @@ def build_sticker_embed(sticker):
     return embed
 
 
-@SLASH_CLIENT.interactions(is_global=True, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
-async def sticker_(client, event,
-        message : ('str', 'Link to the message'),
-            ):
+@SLASH_CLIENT.interactions(is_global=True, target='message')
+async def sticker_(client, message):
     """Shows up the message's sticker."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__TESTER.mention} to invoke this command.')
-    
-    message_reference = parse_message_reference(message)
-    if message_reference is None:
-        abort('Could not identify the message.')
-    
-    guild_id, channel_id, message_id = message_reference
-    try:
-        message = MESSAGES[message_id]
-    except KeyError:
-        if channel_id:
-            try:
-                channel = CHANNELS[channel_id]
-            except KeyError:
-                abort('I have no access to the channel.')
-                return
-        else:
-            channel = event.channel
-        
-        if not channel.cached_permissions_for(client).can_read_message_history:
-            abort('I have no permission to get that message.')
-        
-        try:
-            message = await client.message_get(channel, message_id)
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_channel, # message deleted
-                        ERROR_CODES.unknown_message, # channel deleted
-                            ):
-                    # The message is already deleted.
-                    abort('The referenced message is already yeeted.')
-                
-                if err.code == ERROR_CODES.missing_access: # client removed
-                    abort('The client is not in the guild / channel')
-                
-                if err.code == ERROR_CODES.missing_permissions: # permissions changed meanwhile
-                    abort('I have no permission to get that message.')
-            
-            raise
-    
     sticker = message.sticker
     if sticker is None:
         abort('The message has no sticker.')
@@ -1395,4 +1347,3 @@ async def sticker_(client, event,
         raise
     
     return build_sticker_embed(sticker)
-
