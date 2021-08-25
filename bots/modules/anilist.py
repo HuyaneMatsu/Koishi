@@ -2,6 +2,7 @@ from re import compile as re_compile, U as re_unicode, M as re_multi_line, S as 
 from hata import Client, to_json, Embed, istr, KOKORO, sleep, ScarletLock, BUILTIN_EMOJIS
 from hata.backend.headers import CONTENT_TYPE
 from hata.ext.slash import abort, Row, Button, InteractionResponse, Select, Option
+from collections import namedtuple as NamedTupleType
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON
 
@@ -17,16 +18,30 @@ RETRY_AFTER = istr('Retry-After')
 CUSTOM_ID_FIND_CHARACTER_LEFT = 'anilist.find_character.l'
 CUSTOM_ID_FIND_CHARACTER_RIGHT = 'anilist.find_character.r'
 CUSTOM_ID_FIND_CHARACTER_SELECT = 'anilist.find_character.s'
-CUSTOM_ID_FIND_CHARACTER_EMPTY_0 = 'anilist.find_character._.0'
-CUSTOM_ID_FIND_CHARACTER_EMPTY_1 = 'anilist.find_character._.1'
-CUSTOM_ID_FIND_CHARACTER_EMPTY_2 = 'anilist.find_character._.2'
+CUSTOM_ID_FIND_CHARACTER_LEFT_DISABLED = 'anilist.find_character._.0'
+CUSTOM_ID_FIND_CHARACTER_RIGHT_DISABLED = 'anilist.find_character._.1'
+CUSTOM_ID_FIND_CHARACTER_SELECT_DISABLED = 'anilist.find_character._.2'
+CUSTOM_ID_FIND_ANIME_LEFT = 'anilist.find_anime.l'
+CUSTOM_ID_FIND_ANIME_RIGHT = 'anilist.find_anime.r'
+CUSTOM_ID_FIND_ANIME_SELECT = 'anilist.find_anime.s'
+CUSTOM_ID_FIND_ANIME_LEFT_DISABLED = 'anilist.find_anime._.0'
+CUSTOM_ID_FIND_ANIME_RIGHT_DISABLED = 'anilist.find_anime._.1'
+CUSTOM_ID_FIND_ANIME_SELECT_DISABLED = 'anilist.find_anime._.2'
+CUSTOM_ID_FIND_MANGA_LEFT = 'anilist.find_manga.l'
+CUSTOM_ID_FIND_MANGA_RIGHT = 'anilist.find_manga.r'
+CUSTOM_ID_FIND_MANGA_SELECT = 'anilist.find_manga.s'
+CUSTOM_ID_FIND_MANGA_LEFT_DISABLED = 'anilist.find_manga._.0'
+CUSTOM_ID_FIND_MANGA_RIGHT_DISABLED = 'anilist.find_manga._.1'
+CUSTOM_ID_FIND_MANGA_SELECT_DISABLED = 'anilist.find_manga._.2'
 
-CHARACTER_PER_PAGE = 25
-CHARACTER_URL_BASE = 'https://anilist.co/character/'
+ENTRY_PER_PAGE = 25
+URL_BASE_CHARACTER = 'https://anilist.co/character/'
+URL_BASE_ANIME = 'https://anilist.co/anime/'
+URL_BASE_MANGA = 'https://anilist.co/manga/'
 
 SELECT_FIND_CHARACTER_NO_RESULT = Select(
     [Option('_', 'No result', default=True)],
-    CUSTOM_ID_FIND_CHARACTER_EMPTY_2,
+    CUSTOM_ID_FIND_CHARACTER_SELECT_DISABLED,
     placeholder = 'No result',
 )
 
@@ -38,6 +53,9 @@ DECIMAL_RP = re_compile('\d+')
 
 KEY_CHARACTER = 'Character'
 KEY_CHARACTER_ARRAY = 'characters'
+KEY_MEDIA = 'Media'
+KEY_MEDIA_ARRAY = 'media'
+
 KEY_PAGE = 'Page'
 KEY_PAGE_INFO = 'pageInfo'
 KEY_PAGE_INFO_TOTAL_ENTRIES = 'total'
@@ -64,6 +82,35 @@ KEY_CHARACTER_GENDER = 'gender'
 KEY_CHARACTER_BLOOD_TYPE = 'bloodType'
 KEY_CHARACTER_AGE = 'age'
 
+
+KEY_MEDIA_TYPE = 'type'
+KEY_MEDIA_TYPE_ANIME = 'ANIME'
+KEY_MEDIA_TYPE_MANGA = 'MANGA'
+KEY_MEDIA_ID = 'id'
+KEY_MEDIA_NAME = 'title'
+KEY_MEDIA_NAME_ROMAJI = 'romaji'
+KEY_MEDIA_NAME_ROMAJI_MODIFIER = '(stylised:false)'
+KEY_MEDIA_NAME_NATIVE = 'native'
+KEY_MEDIA_NAME_NATIVE_MODIFIER = '(stylised:false)'
+KEY_MEDIA_DESCRIPTION = 'description'
+KEY_MEDIA_DESCRIPTION_MODIFIER = '(asHtml:false)'
+KEY_MEDIA_EPISODE_COUNT = 'episodes'
+KEY_MEDIA_FORMAT = 'format'
+KEY_MEDIA_RELEASE_SEASON = 'season'
+KEY_MEDIA_STATUS = 'status'
+KEY_MEDIA_STATUS_MODIFIER = '(version:2)'
+KEY_MEDIA_EPISODE_LENGTH = 'duration'
+KEY_MEDIA_SITE_URL = 'siteUrl'
+KEY_MEDIA_START_DATE = 'startDate'
+KEY_MEDIA_END_DATE = 'endDate'
+KEY_MEDIA_BANNER_IMAGE = 'bannerImage'
+KEY_MEDIA_GENRES = 'genres'
+KEY_MEDIA_AVERAGE_SCORE = 'averageScore'
+KEY_MEDIA_IMAGE = 'coverImage'
+KEY_MEDIA_IMAGE_LARGE = 'large'
+KEY_MEDIA_CHAPTER_COUNT = 'chapters'
+KEY_MEDIA_VOLUME_COUNT = 'volumes'
+
 KEY_FUZZY_DATE_YEAR = 'year'
 KEY_FUZZY_DATE_MONTH = 'month'
 KEY_FUZZY_DATE_DAY = 'day'
@@ -77,8 +124,12 @@ KEY_SEARCH = 'search'
 KEY_VARIABLE_CHARACTER_QUERY = 'query'
 KEY_VARIABLE_CHARACTER_ID = 'id'
 
+KEY_VARIABLE_MEDIA_QUERY = 'query'
+KEY_VARIABLE_MEDIA_ID = 'id'
+
 KEY_VARIABLE_PER_PAGE = 'per_page'
 KEY_VARIABLE_PAGE_IDENTIFIER = 'page'
+
 
 REQUIRED_CHARACTER_FIELDS = (
     f'{KEY_CHARACTER_ID} '
@@ -100,34 +151,31 @@ REQUIRED_CHARACTER_FIELDS = (
     f'{KEY_CHARACTER_GENDER} '
     f'{KEY_CHARACTER_BLOOD_TYPE} '
     f'{KEY_CHARACTER_AGE}'
-    # f'{KEY_CHARACTER_SITE_URL}'
-    # f'{KEY_CHARACTER_FAVOURITES}'
 )
 
 
-CHARACTER_QUERY = (
+QUERY_CHARACTER = (
     f'{KEY_QUERY}(${KEY_VARIABLE_CHARACTER_QUERY}:String){{'
-        f'{KEY_CHARACTER} ({KEY_SEARCH}:${KEY_VARIABLE_CHARACTER_QUERY}){{'
+        f'{KEY_CHARACTER}({KEY_SEARCH}:${KEY_VARIABLE_CHARACTER_QUERY}){{'
             f'{REQUIRED_CHARACTER_FIELDS}'
         f'}}'
     f'}}'
 )
 
-CHARACTER_QUERY_BY_ID = (
+QUERY_CHARACTER_BY_ID = (
     f'{KEY_QUERY}(${KEY_VARIABLE_CHARACTER_ID}:Int){{'
-        f'{KEY_CHARACTER} ({KEY_CHARACTER_ID}: ${KEY_VARIABLE_CHARACTER_ID}){{'
+        f'{KEY_CHARACTER}({KEY_CHARACTER_ID}: ${KEY_VARIABLE_CHARACTER_ID}){{'
             f'{REQUIRED_CHARACTER_FIELDS}'
         f'}}'
     f'}}'
 )
 
-CHARACTER_ARRAY_QUERY = (
+QUERY_CHARACTER_ARRAY = (
     f'{KEY_QUERY}('
         f'${KEY_VARIABLE_PAGE_IDENTIFIER}:Int,'
-        f'${KEY_VARIABLE_PER_PAGE}:Int,'
         f'${KEY_VARIABLE_CHARACTER_QUERY}:String'
     f'){{'
-        f'{KEY_PAGE}({KEY_PAGE_IDENTIFIER}:${KEY_VARIABLE_PAGE_IDENTIFIER},{KEY_PER_PAGE}:${KEY_VARIABLE_PER_PAGE}){{'
+        f'{KEY_PAGE}({KEY_PAGE_IDENTIFIER}:${KEY_VARIABLE_PAGE_IDENTIFIER},{KEY_PER_PAGE}:{ENTRY_PER_PAGE}){{'
             f'{KEY_PAGE_INFO}{{'
                 f'{KEY_PAGE_INFO_TOTAL_ENTRIES} '
                 f'{KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER} '
@@ -144,6 +192,364 @@ CHARACTER_ARRAY_QUERY = (
             f'}}'
         f'}}'
     f'}}'
+)
+
+
+REQUIRED_ANIME_FIELDS = (
+    f'{KEY_MEDIA_ID} '
+    f'{KEY_MEDIA_NAME}{{'
+        f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
+        f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+    f'}}'
+    f'{KEY_MEDIA_DESCRIPTION}{KEY_MEDIA_DESCRIPTION_MODIFIER}'
+    f'{KEY_MEDIA_EPISODE_COUNT} '
+    f'{KEY_MEDIA_FORMAT} '
+    f'{KEY_MEDIA_STATUS}{KEY_MEDIA_STATUS_MODIFIER}'
+    f'{KEY_MEDIA_EPISODE_LENGTH} '
+    f'{KEY_MEDIA_START_DATE}{{'
+        f'{KEY_FUZZY_DATE_YEAR} '
+        f'{KEY_FUZZY_DATE_MONTH} '
+        f'{KEY_FUZZY_DATE_DAY} '
+    f'}}'
+    f'{KEY_MEDIA_END_DATE}{{'
+        f'{KEY_FUZZY_DATE_YEAR} '
+        f'{KEY_FUZZY_DATE_MONTH} '
+        f'{KEY_FUZZY_DATE_DAY} '
+    f'}}'
+    f'{KEY_MEDIA_IMAGE}{{'
+        f'{KEY_MEDIA_IMAGE_LARGE}'
+    f'}}'
+    f'{KEY_MEDIA_GENRES} '
+    f'{KEY_MEDIA_AVERAGE_SCORE}'
+)
+
+
+QUERY_ANIME = (
+    f'{KEY_QUERY}(${KEY_VARIABLE_MEDIA_QUERY}:String){{'
+        f'{KEY_MEDIA}({KEY_MEDIA_TYPE}:{KEY_MEDIA_TYPE_ANIME},{KEY_SEARCH}:${KEY_VARIABLE_MEDIA_QUERY}){{'
+            f'{REQUIRED_ANIME_FIELDS}'
+        f'}}'
+    f'}}'
+)
+
+QUERY_ANIME_BY_ID = (
+    f'{KEY_QUERY}(${KEY_VARIABLE_MEDIA_ID}:Int){{'
+        f'{KEY_MEDIA}({KEY_MEDIA_TYPE}:{KEY_MEDIA_TYPE_ANIME},{KEY_MEDIA_ID}:${KEY_VARIABLE_MEDIA_ID}){{'
+            f'{REQUIRED_ANIME_FIELDS}'
+        f'}}'
+    f'}}'
+)
+
+
+QUERY_ANIME_ARRAY = (
+    f'{KEY_QUERY}('
+        f'${KEY_VARIABLE_PAGE_IDENTIFIER}:Int,'
+        f'${KEY_VARIABLE_CHARACTER_QUERY}:String'
+    f'){{'
+        f'{KEY_PAGE}({KEY_PAGE_IDENTIFIER}:${KEY_VARIABLE_PAGE_IDENTIFIER},{KEY_PER_PAGE}:{ENTRY_PER_PAGE}){{'
+            f'{KEY_PAGE_INFO}{{'
+                f'{KEY_PAGE_INFO_TOTAL_ENTRIES} '
+                f'{KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER} '
+                f'{KEY_PAGE_INFO_TOTAL_PAGES}'
+            f'}}'
+            f'{KEY_MEDIA_ARRAY}('
+                f'{KEY_MEDIA_TYPE}:{KEY_MEDIA_TYPE_ANIME},'
+                f'{KEY_SEARCH}:${KEY_VARIABLE_CHARACTER_QUERY}'
+            f'){{'
+                f'{KEY_MEDIA_ID} '
+                f'{KEY_MEDIA_NAME}{{'
+                    f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
+                    f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+                f'}}'
+            f'}}'
+        f'}}'
+    f'}}'
+)
+
+
+REQUIRED_MANGA_FIELDS = (
+    f'{KEY_MEDIA_ID} '
+    f'{KEY_MEDIA_NAME}{{'
+        f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
+        f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+    f'}}'
+    f'{KEY_MEDIA_DESCRIPTION}{KEY_MEDIA_DESCRIPTION_MODIFIER}'
+    f'{KEY_MEDIA_VOLUME_COUNT} '
+    f'{KEY_MEDIA_FORMAT} '
+    f'{KEY_MEDIA_STATUS}{KEY_MEDIA_STATUS_MODIFIER}'
+    f'{KEY_MEDIA_CHAPTER_COUNT} '
+    f'{KEY_MEDIA_START_DATE}{{'
+        f'{KEY_FUZZY_DATE_YEAR} '
+        f'{KEY_FUZZY_DATE_MONTH} '
+        f'{KEY_FUZZY_DATE_DAY} '
+    f'}}'
+    f'{KEY_MEDIA_END_DATE}{{'
+        f'{KEY_FUZZY_DATE_YEAR} '
+        f'{KEY_FUZZY_DATE_MONTH} '
+        f'{KEY_FUZZY_DATE_DAY} '
+    f'}}'
+    f'{KEY_MEDIA_IMAGE}{{'
+        f'{KEY_MEDIA_IMAGE_LARGE}'
+    f'}}'
+    f'{KEY_MEDIA_GENRES} '
+    f'{KEY_MEDIA_AVERAGE_SCORE}'
+)
+
+
+QUERY_MANGA = (
+    f'{KEY_QUERY}(${KEY_VARIABLE_MEDIA_QUERY}:String){{'
+        f'{KEY_MEDIA}({KEY_MEDIA_TYPE}:{KEY_MEDIA_TYPE_MANGA},{KEY_SEARCH}:${KEY_VARIABLE_MEDIA_QUERY}){{'
+            f'{REQUIRED_MANGA_FIELDS}'
+        f'}}'
+    f'}}'
+)
+
+QUERY_MANGA_BY_ID = (
+    f'{KEY_QUERY}(${KEY_VARIABLE_MEDIA_ID}:Int){{'
+        f'{KEY_MEDIA}({KEY_MEDIA_TYPE}:{KEY_MEDIA_TYPE_MANGA},{KEY_MEDIA_ID}:${KEY_VARIABLE_MEDIA_ID}){{'
+            f'{REQUIRED_MANGA_FIELDS}'
+        f'}}'
+    f'}}'
+)
+
+
+QUERY_MANGA_ARRAY = (
+    f'{KEY_QUERY}('
+        f'${KEY_VARIABLE_PAGE_IDENTIFIER}:Int,'
+        f'${KEY_VARIABLE_CHARACTER_QUERY}:String'
+    f'){{'
+        f'{KEY_PAGE}({KEY_PAGE_IDENTIFIER}:${KEY_VARIABLE_PAGE_IDENTIFIER},{KEY_PER_PAGE}:{ENTRY_PER_PAGE}){{'
+            f'{KEY_PAGE_INFO}{{'
+                f'{KEY_PAGE_INFO_TOTAL_ENTRIES} '
+                f'{KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER} '
+                f'{KEY_PAGE_INFO_TOTAL_PAGES}'
+            f'}}'
+            f'{KEY_MEDIA_ARRAY}('
+                f'{KEY_MEDIA_TYPE}:{KEY_MEDIA_TYPE_MANGA},'
+                f'{KEY_SEARCH}:${KEY_VARIABLE_CHARACTER_QUERY}'
+            f'){{'
+                f'{KEY_MEDIA_ID} '
+                f'{KEY_MEDIA_NAME}{{'
+                    f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
+                    f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+                f'}}'
+            f'}}'
+        f'}}'
+    f'}}'
+)
+
+
+MEDIA_FORMAT_MAP = {
+    'TV': 'tv',
+    'TV_SHORT': 'tv short',
+    'MOVIE': 'movie',
+    'SPECIAL': 'special',
+    'OVA': 'ova',
+    'ONA': 'ona',
+    'MUSIC': 'music',
+    'MANGA': 'manga',
+    'NOVEL': 'novel',
+    'ONE_SHOT': 'one shot'
+}
+
+
+def convert_media_format(media_format):
+    try:
+        converted_media_format = MEDIA_FORMAT_MAP[media_format]
+    except KeyError:
+        converted_media_format = media_format.lower().replace('_', ' ')
+        MEDIA_FORMAT_MAP[media_format] = converted_media_format
+    
+    return converted_media_format
+
+
+MEDIA_STATUS_MAP = {
+    'FINISHED': 'finished',
+    'RELEASING': 'releasing',
+    'NOT_YET_RELEASED': 'not yet released',
+    'CANCELLED': 'cancelled',
+    'HIATUS': 'hiatus',
+}
+
+
+def convert_media_status(media_status):
+    try:
+        converted_media_status = MEDIA_STATUS_MAP[media_status]
+    except KeyError:
+        converted_media_status = media_status.lower().replace('_', ' ')
+        MEDIA_STATUS_MAP[media_status] = converted_media_status
+    
+    return converted_media_status
+
+
+def build_media_name(media_data):
+    name_data = media_data[KEY_MEDIA_NAME]
+    name_romaji = name_data[KEY_MEDIA_NAME_ROMAJI]
+    name_native = name_data[KEY_MEDIA_NAME_NATIVE]
+    
+    if (name_romaji is None):
+        name = name_native
+    else:
+        if name_romaji == name_native:
+            name = name_romaji
+        else:
+            name = f'{name_romaji} ({name_native})'
+    
+    return name
+
+
+def build_character_name(character_data):
+    name_data = character_data[KEY_CHARACTER_NAME]
+    name_first = name_data[KEY_CHARACTER_NAME_FIRST]
+    name_middle = name_data[KEY_CHARACTER_NAME_MIDDLE]
+    name_last = name_data[KEY_CHARACTER_NAME_LAST]
+    name_native = name_data[KEY_CHARACTER_NAME_NATIVE]
+    
+    name_parts = []
+    
+    if (name_first is not None):
+        name_parts.append(name_first)
+        
+        field_added = True
+    else:
+        field_added = False
+    
+    if (name_middle is not None):
+        if field_added:
+            name_parts.append(' ')
+        else:
+            field_added = True
+        
+        name_parts.append(name_middle)
+    
+    if (name_last is not None):
+        if field_added:
+            name_parts.append(' ')
+        else:
+            field_added = True
+        
+        name_parts.append(name_last)
+    
+    if (name_native is not None):
+        if field_added:
+            name_parts.append(' (')
+        
+        name_parts.append(name_native)
+        
+        if field_added:
+            name_parts.append(')')
+    
+    return ''.join(name_parts)
+
+
+ArrayResponseBuilderWorkSetType = NamedTupleType(
+    'ComponentWorkSetType',
+    (
+        'button_left',
+        'button_left_disabled',
+        'button_right',
+        'button_right_disabled',
+        'select_disabled',
+        'select_custom_id',
+        'select_placeholder',
+        'name_builder',
+        'key_id',
+        'key_array',
+    )
+)
+
+ARRAY_WORK_SET_CHARACTER = ArrayResponseBuilderWorkSetType(
+    Button(
+        emoji = EMOJI_LEFT,
+        custom_id = CUSTOM_ID_FIND_CHARACTER_LEFT,
+    ),
+    Button(
+        emoji = EMOJI_LEFT,
+        custom_id = CUSTOM_ID_FIND_CHARACTER_LEFT_DISABLED,
+        enabled = False,
+    ),
+    Button(
+        emoji = EMOJI_RIGHT,
+        custom_id = CUSTOM_ID_FIND_CHARACTER_RIGHT,
+    ),
+    Button(
+        emoji = EMOJI_RIGHT,
+        custom_id = CUSTOM_ID_FIND_CHARACTER_RIGHT_DISABLED,
+        enabled = False,
+    ),
+    Select(
+        [Option('_', 'No result', default=True)],
+        CUSTOM_ID_FIND_CHARACTER_SELECT_DISABLED,
+        placeholder = 'No result',
+    ),
+    CUSTOM_ID_FIND_CHARACTER_SELECT,
+    'Select a character!',
+    build_character_name,
+    KEY_CHARACTER_ID,
+    KEY_CHARACTER_ARRAY,
+)
+
+ARRAY_WORK_SET_ANIME = ArrayResponseBuilderWorkSetType(
+    Button(
+        emoji = EMOJI_LEFT,
+        custom_id = CUSTOM_ID_FIND_ANIME_LEFT,
+    ),
+    Button(
+        emoji = EMOJI_LEFT,
+        custom_id = CUSTOM_ID_FIND_ANIME_LEFT_DISABLED,
+        enabled = False,
+    ),
+    Button(
+        emoji = EMOJI_RIGHT,
+        custom_id = CUSTOM_ID_FIND_ANIME_RIGHT,
+    ),
+    Button(
+        emoji = EMOJI_RIGHT,
+        custom_id = CUSTOM_ID_FIND_ANIME_RIGHT_DISABLED,
+        enabled = False,
+    ),
+
+    Select(
+        [Option('_', 'No result', default=True)],
+        CUSTOM_ID_FIND_ANIME_SELECT_DISABLED,
+        placeholder = 'No result',
+    ),
+    CUSTOM_ID_FIND_ANIME_SELECT,
+    'Select an anime!',
+    build_media_name,
+    KEY_MEDIA_ID,
+    KEY_MEDIA_ARRAY,
+)
+
+ARRAY_WORK_SET_MANGA = ArrayResponseBuilderWorkSetType(
+    Button(
+        emoji = EMOJI_LEFT,
+        custom_id = CUSTOM_ID_FIND_MANGA_LEFT,
+    ),
+    Button(
+        emoji = EMOJI_LEFT,
+        custom_id = CUSTOM_ID_FIND_MANGA_LEFT,
+        enabled = False,
+    ),
+    Button(
+        emoji = EMOJI_RIGHT,
+        custom_id = CUSTOM_ID_FIND_MANGA_RIGHT,
+    ),
+    Button(
+        emoji = EMOJI_RIGHT,
+        custom_id = CUSTOM_ID_FIND_MANGA_RIGHT_DISABLED,
+        enabled = False,
+    ),
+    Select(
+        [Option('_', 'No result', default=True)],
+        CUSTOM_ID_FIND_MANGA_SELECT_DISABLED,
+        placeholder = 'No result',
+    ),
+    CUSTOM_ID_FIND_MANGA_SELECT,
+    'Select a manga!',
+    build_media_name,
+    KEY_MEDIA_ID,
+    KEY_MEDIA_ARRAY,
 )
 
 
@@ -176,6 +582,7 @@ MONTH_NAMES_FULL = {
     11: 'November',
     12: 'December',
 }
+
 
 def build_fuzzy_date(date_data):
     fuzzy_date_year = date_data[KEY_FUZZY_DATE_YEAR]
@@ -229,56 +636,15 @@ def build_fuzzy_date(date_data):
     return date_value
 
 
-def build_character_name(character_data):
-    name_data = character_data[KEY_CHARACTER_NAME]
-    name_first = name_data[KEY_CHARACTER_NAME_FIRST]
-    name_middle = name_data[KEY_CHARACTER_NAME_MIDDLE]
-    name_last = name_data[KEY_CHARACTER_NAME_LAST]
-    name_native = name_data[KEY_CHARACTER_NAME_NATIVE]
-    
-    name_parts = []
-    
-    if (name_first is not None):
-        name_parts.append(name_first)
-        
-        field_added = True
-    else:
-        field_added = False
-    
-    if (name_middle is not None):
-        if field_added:
-            name_parts.append(' ')
-        else:
-            field_added = True
-        
-        name_parts.append(name_middle)
-    
-    if (name_last is not None):
-        if field_added:
-            name_parts.append(' ')
-        else:
-            field_added = True
-        
-        name_parts.append(name_last)
-    
-    if (name_native is not None):
-        if field_added:
-            name_parts.append(' (')
-        
-        name_parts.append(name_native)
-        
-        if field_added:
-            name_parts.append(')')
-    
-    return ''.join(name_parts)
-
-
 DESCRIPTION_RP = re_compile(
     (
         '~!|' # Spoiler tag
         '!~|' # Spoiler tag ending
         '__|' # bold
-        ' \(\d+\'(?:\d+\")?\)' # US shit
+        ' \(\d+\'(?:\d+\")?\)|' # US shit
+        '<br><br>|' # They don't know what not html format means
+        '<br>|' # They don't know what not html format means
+        '&#039' # They don't know what not html format means
     ),
     re_multi_line|re_unicode|re_dotall,
 )
@@ -287,6 +653,9 @@ DESCRIPTION_RELATION = {
     '~!': '||',
     '!~': '||',
     '__': '**',
+    '<br><br>': '\n',
+    '<br>': '\n',
+    '&#039': '\'',
 }
 
 def DESCRIPTION_REPLACER(match):
@@ -306,11 +675,9 @@ def build_character_description(character_data):
     blood_type = character_data[KEY_CHARACTER_BLOOD_TYPE]
     age = character_data[KEY_CHARACTER_AGE]
     
-    birth_date_data = character_data[KEY_CHARACTER_BIRTH_DATE]
-    
     description_parts = []
     
-    birth_date_value = build_fuzzy_date(birth_date_data)
+    birth_date_value = build_fuzzy_date(character_data[KEY_CHARACTER_BIRTH_DATE])
     if (birth_date_value is not None):
         description_parts.append('**Birthday:** ')
         description_parts.append(birth_date_value)
@@ -346,7 +713,7 @@ def build_character_description(character_data):
         description_parts.append('**Blood type:** ')
         description_parts.append(blood_type)
     
-    if (description is not None):
+    if (description is not None) and description:
         description = DESCRIPTION_RP.sub(DESCRIPTION_REPLACER, description)
         
         if field_added:
@@ -365,33 +732,43 @@ def build_character_description(character_data):
     return description
 
 
-def build_character_array_description_and_select_row(character_array):
-    character_array_length = len(character_array)
-    if character_array_length:
+def array_response_builder(data, extra, work_set):
+    page_data = data['data'][KEY_PAGE]
+    array = page_data[work_set.key_array]
+    page_info = page_data[KEY_PAGE_INFO]
+    
+    array_length = len(array)
+    if array_length:
         description_parts = []
         options = []
         
-        character_array_index = 0
+        name_builder = work_set.name_builder
+        key_id = work_set.key_id
+        
+        array_index = 0
         
         while True:
-            character_data = character_array[character_array_index]
-            character_array_index += 1
+            character_data = array[array_index]
+            array_index += 1
             
-            character_name = build_character_name(character_data)
-            character_id = character_data[KEY_CHARACTER_ID]
-            character_id_str = str(character_id)
+            name = name_builder(character_data)
+            entity_id = character_data[key_id]
+            entity_id_str = str(entity_id)
             
             description_parts.append('`')
-            description_parts.append(character_id_str)
+            description_parts.append(entity_id_str)
             description_parts.append('`: [')
-            description_parts.append(character_name)
+            description_parts.append(name)
             description_parts.append('](')
-            description_parts.append(CHARACTER_URL_BASE)
-            description_parts.append(character_id_str)
+            description_parts.append(URL_BASE_CHARACTER)
+            description_parts.append(entity_id_str)
             description_parts.append(')')
             
-            options.append(Option(character_id_str, character_name))
-            if character_array_index == character_array_length:
+            if len(name) > 80:
+                name = name[:77]+'...'
+            
+            options.append(Option(entity_id_str, name))
+            if array_index == array_length:
                 break
             
             description_parts.append('\n')
@@ -401,16 +778,43 @@ def build_character_array_description_and_select_row(character_array):
         select_row = Row(
             Select(
                 options,
-                CUSTOM_ID_FIND_CHARACTER_SELECT,
-                placeholder = 'Select a character!'
+                work_set.select_custom_id,
+                placeholder = work_set.select_placeholder
             ),
         )
     
     else:
         description = 'No result.'
-        select_row = SELECT_FIND_CHARACTER_NO_RESULT
+        select_row = work_set.select_disbaled
     
-    return description, select_row
+    embed = Embed(
+        f'Search result for: {extra}',
+        description,
+    )
+    
+    total_entries = page_info[KEY_PAGE_INFO_TOTAL_ENTRIES]
+    current_page_identifier = page_info[KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER]
+    total_pages = page_info[KEY_PAGE_INFO_TOTAL_PAGES]
+    
+    embed.add_footer(f'Page: {current_page_identifier} / {total_pages} | Total entries: {total_entries}')
+    
+    if current_page_identifier <= 1:
+        button_left = work_set.button_left_disabled
+    else:
+        button_left = work_set.button_left
+    
+    if current_page_identifier >= total_pages:
+        button_right = work_set.button_right_disabled
+    else:
+        button_right = work_set.button_right
+    
+    return InteractionResponse(
+        embed = embed,
+        components = [
+            select_row,
+            Row(button_left, button_right),
+        ],
+    )
 
 
 async def search(client, json_query, response_builder, extra):
@@ -479,7 +883,7 @@ def character_response_builder(data, extra):
     character_data = data['data'][KEY_CHARACTER]
     
     image_url = character_data[KEY_CHARACTER_IMAGE][KEY_CHARACTER_IMAGE_LARGE]
-    url = f'{CHARACTER_URL_BASE}{character_data[KEY_CHARACTER_ID]}'
+    url = f'{URL_BASE_CHARACTER}{character_data[KEY_CHARACTER_ID]}'
     
     return Embed(
         build_character_name(character_data),
@@ -494,116 +898,193 @@ def character_response_builder_no_components(data, extra):
     return InteractionResponse(embed=embed, components=None)
 
 
-def character_array_response_builder(data, extra):
-    page_data = data['data'][KEY_PAGE]
-    character_array = page_data[KEY_CHARACTER_ARRAY]
-    page_info = page_data[KEY_PAGE_INFO]
+def build_media_description(anime_data):
+    description_parts = []
     
-    description, select_row = build_character_array_description_and_select_row(character_array)
+    genres = anime_data[KEY_MEDIA_GENRES]
+    if (genres is not None) and genres:
+        description_parts.append('**Genres**: ')
+        genre_index = 0
+        genre_limit = len(genres)
+        
+        while True:
+            genre = genres[genre_index]
+            genre_index += 1
+            
+            description_parts.append(genre)
+            if genre_index == genre_limit:
+                break
+            
+            description_parts.append(', ')
+            continue
+        
+        field_added = True
+    
+    else:
+        field_added = False
+    
+    
+    description = anime_data[KEY_MEDIA_DESCRIPTION]
+    
+    if (description is not None) and description:
+        if field_added:
+            description_parts.append('\n\n')
+        else:
+            field_added = False
+        
+        description = DESCRIPTION_RP.sub(DESCRIPTION_REPLACER, description)
+        description_parts.append(description)
+    
+    if field_added:
+        description = ''.join(description_parts)
+        
+        if len(description) > 4000:
+            description = description[:4000]+'...'
+    else:
+        description = None
+    
+    return description
+
+
+def add_generic_media_fields(embed, media_data):
+    media_status = convert_media_status(media_data[KEY_MEDIA_STATUS])
+    embed.add_field('Status', media_status, inline=True)
+    
+    # line 2
+    
+    media_format = convert_media_format(media_data[KEY_MEDIA_FORMAT])
+    embed.add_field('Format', media_format, inline=True)
+    
+    start_date_value = build_fuzzy_date(media_data[KEY_MEDIA_START_DATE])
+    end_date_value = build_fuzzy_date(media_data[KEY_MEDIA_END_DATE])
+    
+    if (start_date_value is None):
+        if (end_date_value is not None):
+            field_name = None
+            field_value = None
+        else:
+            field_name = 'Ended'
+            field_value = end_date_value
+    else:
+        if (end_date_value is None):
+            field_name = 'Started'
+            field_value = start_date_value
+        else:
+            if (start_date_value == end_date_value):
+                field_name = 'Aired'
+                field_value = start_date_value
+            else:
+                field_name = 'Released'
+                field_value = f'Between {start_date_value} and {end_date_value}'
+    
+    if (field_name is not None):
+        embed.add_field(field_name, field_value, inline=True)
+    
+    average_score = media_data[KEY_MEDIA_AVERAGE_SCORE]
+    if (average_score is not None):
+        embed.add_field('Average score', f'{average_score} / 100', inline=True)
+
+
+def build_anime_stat_fields(embed, anime_data):
+    
+    # Line 1
+    
+    episode_count = anime_data[KEY_MEDIA_EPISODE_COUNT]
+    if (episode_count is not None) and (episode_count != 1):
+        embed.add_field('Episodes', str(episode_count), inline=True)
+    
+    
+    episode_length = anime_data[KEY_MEDIA_EPISODE_LENGTH]
+    if (episode_length is not None):
+        if (episode_count is not None) and (episode_count == 1):
+            field_name = 'Length'
+        else:
+            field_name = 'Episode length'
+        
+        embed.add_field(field_name, f'{episode_length} minute', inline=True)
+    
+    add_generic_media_fields(embed, anime_data)
+
+
+def build_manga_stat_fields(embed, manga_data):
+    
+    # Line 1
+    
+    volume_count = manga_data[KEY_MEDIA_VOLUME_COUNT]
+    if (volume_count is not None):
+        embed.add_field('Volumes', str(volume_count), inline=True)
+    
+    
+    chapter_count = manga_data[KEY_MEDIA_CHAPTER_COUNT]
+    if (chapter_count is not None):
+        embed.add_field('Chapters', chapter_count, inline=True)
+    
+    add_generic_media_fields(embed, manga_data)
+
+
+def anime_response_builder(data, extra):
+    if data is None:
+        return Embed(description='No result.')
+    
+    anime_data = data['data'][KEY_MEDIA]
+    
+    image_url = anime_data[KEY_MEDIA_IMAGE][KEY_MEDIA_IMAGE_LARGE]
+    url = f'{URL_BASE_ANIME}{anime_data[KEY_MEDIA_ID]}'
+    
     embed = Embed(
-        f'Search result for: {extra}',
-        description,
+        build_media_name(anime_data),
+        build_media_description(anime_data),
+        url = url,
+    ).add_thumbnail(
+        image_url,
     )
     
-    total_entries = page_info[KEY_PAGE_INFO_TOTAL_ENTRIES]
-    current_page_identifier = page_info[KEY_PAGE_INFO_CURRENT_PAGE_IDENTIFIER]
-    total_pages = page_info[KEY_PAGE_INFO_TOTAL_PAGES]
+    build_anime_stat_fields(embed, anime_data)
     
-    embed.add_footer(f'Page: {current_page_identifier} / {total_pages} | Total entries: {total_entries}')
+    return embed
+
+
+def anime_response_builder_no_components(data, extra):
+    embed = anime_response_builder(data, extra)
+    return InteractionResponse(embed=embed, components=None)
+
+def manga_response_builder(data, extra):
+    if data is None:
+        return Embed(description='No result.')
     
-    if current_page_identifier <= 1:
-        button_left = Button(
-            emoji = EMOJI_LEFT,
-            custom_id = CUSTOM_ID_FIND_CHARACTER_EMPTY_0,
-            enabled = False,
-        )
-    else:
-        button_left = Button(
-            emoji = EMOJI_LEFT,
-            custom_id = CUSTOM_ID_FIND_CHARACTER_LEFT,
-        )
+    manga_data = data['data'][KEY_MEDIA]
     
-    if current_page_identifier >= total_pages:
-        button_right = Button(
-            emoji = EMOJI_RIGHT,
-            custom_id = CUSTOM_ID_FIND_CHARACTER_EMPTY_1,
-            enabled = False,
-        )
-    else:
-        button_right = Button(
-            emoji = EMOJI_RIGHT,
-            custom_id = CUSTOM_ID_FIND_CHARACTER_RIGHT,
-        )
+    image_url = manga_data[KEY_MEDIA_IMAGE][KEY_MEDIA_IMAGE_LARGE]
+    url = f'{URL_BASE_MANGA}{manga_data[KEY_MEDIA_ID]}'
     
-    return InteractionResponse(
-        embed = embed,
-        components = [
-            select_row,
-            Row(button_left, button_right),
-        ],
+    embed = Embed(
+        build_media_name(manga_data),
+        build_media_description(manga_data),
+        url = url,
+    ).add_thumbnail(
+        image_url,
     )
-
-
-
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
-async def character(client, event,
-        name_or_id: ('str', 'The character\'s name or it\'s id.')
-            ):
-    name_or_id = validate_parameter(name_or_id)
     
-    if name_or_id.isdecimal():
-        json_query = {
-            KEY_QUERY: CHARACTER_QUERY_BY_ID,
-            KEY_VARIABLES: {
-                KEY_VARIABLE_CHARACTER_ID: int(name_or_id),
-            },
-        }
-    else:
-        json_query = {
-            KEY_QUERY: CHARACTER_QUERY,
-            KEY_VARIABLES: {
-                KEY_VARIABLE_CHARACTER_QUERY: name_or_id,
-            },
-        }
+    build_manga_stat_fields(embed, manga_data)
     
-    return search(
-        client,
-        json_query,
-        character_response_builder,
-        None,
-    )
+    return embed
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
-async def find_character(client, event,
-        name: ('str', 'The character\'s name to try to find.')
-            ):
-    name = validate_parameter(name)
-    
-    return search(
-        client,
-        {
-            KEY_QUERY: CHARACTER_ARRAY_QUERY,
-            KEY_VARIABLES: {
-                KEY_VARIABLE_PAGE_IDENTIFIER: 1,
-                KEY_VARIABLE_PER_PAGE: CHARACTER_PER_PAGE,
-                KEY_VARIABLE_CHARACTER_QUERY: name,
-            },
-        },
-        character_array_response_builder,
-        name,
-    )
+def manga_response_builder_no_components(data, extra):
+    embed = manga_response_builder(data, extra)
+    return InteractionResponse(embed=embed, components=None)
 
- 
-@SLASH_CLIENT.interactions(
-    custom_id = (
-            CUSTOM_ID_FIND_CHARACTER_EMPTY_0,
-            CUSTOM_ID_FIND_CHARACTER_EMPTY_1,
-            CUSTOM_ID_FIND_CHARACTER_EMPTY_2,
-    ),
-)
-async def handle_disabled_component_interaction():
-    pass
+
+def array_response_builder_character(data, extra):
+    return array_response_builder(data, extra, ARRAY_WORK_SET_CHARACTER)
+
+
+def array_response_builder_anime(data, extra):
+    return array_response_builder(data, extra, ARRAY_WORK_SET_ANIME)
+
+
+def array_response_builder_manga(data, extra):
+    return array_response_builder(data, extra, ARRAY_WORK_SET_MANGA)
 
 
 def get_name_and_page_from_embed(embed):
@@ -630,8 +1111,75 @@ def get_name_and_page_from_embed(embed):
     name = embed_title[len('Search result for: '):]
     
     return name, page_identifier
+
+
+
+@SLASH_CLIENT.interactions(
+    custom_id = (
+        CUSTOM_ID_FIND_CHARACTER_LEFT_DISABLED,
+        CUSTOM_ID_FIND_CHARACTER_RIGHT_DISABLED,
+        CUSTOM_ID_FIND_CHARACTER_SELECT_DISABLED,
+        CUSTOM_ID_FIND_ANIME_LEFT_DISABLED,
+        CUSTOM_ID_FIND_ANIME_RIGHT_DISABLED,
+        CUSTOM_ID_FIND_ANIME_SELECT_DISABLED,
+        CUSTOM_ID_FIND_MANGA_LEFT_DISABLED,
+        CUSTOM_ID_FIND_MANGA_RIGHT_DISABLED,
+        CUSTOM_ID_FIND_MANGA_SELECT_DISABLED,
+    ),
+)
+async def handle_disabled_component_interaction():
+    pass
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def character(client, event,
+        name_or_id: ('str', 'The character\'s name or it\'s id.')
+            ):
+    name_or_id = validate_parameter(name_or_id)
     
+    if name_or_id.isdecimal():
+        json_query = {
+            KEY_QUERY: QUERY_CHARACTER_BY_ID,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_CHARACTER_ID: int(name_or_id),
+            },
+        }
+    else:
+        json_query = {
+            KEY_QUERY: QUERY_CHARACTER,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_CHARACTER_QUERY: name_or_id,
+            },
+        }
     
+    return search(
+        client,
+        json_query,
+        character_response_builder,
+        None,
+    )
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def find_character(client, event,
+        name: ('str', 'The character\'s name to try to find.')
+            ):
+    name = validate_parameter(name)
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_CHARACTER_ARRAY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: 1,
+                KEY_VARIABLE_CHARACTER_QUERY: name,
+            },
+        },
+        array_response_builder_character,
+        name,
+    )
+
+
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_CHARACTER_LEFT)
 async def find_character_page_left(client, event):
     message = event.message
@@ -646,14 +1194,13 @@ async def find_character_page_left(client, event):
     return search(
         client,
         {
-            KEY_QUERY: CHARACTER_ARRAY_QUERY,
+            KEY_QUERY: QUERY_CHARACTER_ARRAY,
             KEY_VARIABLES: {
                 KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
-                KEY_VARIABLE_PER_PAGE: CHARACTER_PER_PAGE,
                 KEY_VARIABLE_CHARACTER_QUERY: name,
             },
         },
-        character_array_response_builder,
+        array_response_builder_character,
         name,
     )
 
@@ -674,14 +1221,13 @@ async def find_character_page_right(client, event):
     return search(
         client,
         {
-            KEY_QUERY: CHARACTER_ARRAY_QUERY,
+            KEY_QUERY: QUERY_CHARACTER_ARRAY,
             KEY_VARIABLES: {
                 KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
-                KEY_VARIABLE_PER_PAGE: CHARACTER_PER_PAGE,
                 KEY_VARIABLE_CHARACTER_QUERY: name,
             },
         },
-        character_array_response_builder,
+        array_response_builder_character,
         name,
     )
 
@@ -706,11 +1252,274 @@ async def find_character_select(client, event):
     return search(
         client,
         {
-            KEY_QUERY: CHARACTER_QUERY_BY_ID,
+            KEY_QUERY: QUERY_CHARACTER_BY_ID,
             KEY_VARIABLES: {
                 KEY_VARIABLE_CHARACTER_ID: character_id,
             },
         },
         character_response_builder_no_components,
+        None,
+    )
+
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def anime_(client, event,
+        name_or_id: ('str', 'The anime\'s name or it\'s id.')
+            ):
+    name_or_id = validate_parameter(name_or_id)
+    
+    if name_or_id.isdecimal():
+        json_query = {
+            KEY_QUERY: QUERY_ANIME_BY_ID,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_MEDIA_ID: int(name_or_id),
+            },
+        }
+    else:
+        json_query = {
+            KEY_QUERY: QUERY_ANIME,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_MEDIA_QUERY: name_or_id,
+            },
+        }
+    
+    return search(
+        client,
+        json_query,
+        anime_response_builder,
+        None,
+    )
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def find_anime(client, event,
+        name: ('str', 'The anime\'s name to try to find.')
+            ):
+    name = validate_parameter(name)
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_ANIME_ARRAY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: 1,
+                KEY_VARIABLE_MEDIA_QUERY: name,
+            },
+        },
+        array_response_builder_anime,
+        name,
+    )
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_ANIME_LEFT)
+async def find_anime_page_left(client, event):
+    message = event.message
+    if message.interaction.user is not event.user:
+        return
+    
+    name_and_page = get_name_and_page_from_embed(message.embed)
+    
+    name, page_identifier = name_and_page
+    page_identifier -= 1
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_ANIME_ARRAY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
+                KEY_VARIABLE_MEDIA_QUERY: name,
+            },
+        },
+        array_response_builder_anime,
+        name,
+    )
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_ANIME_RIGHT)
+async def find_anime_page_right(client, event):
+    message = event.message
+    if message.interaction.user is not event.user:
+        return
+    
+    name_and_page = get_name_and_page_from_embed(message.embed)
+    if name_and_page is None:
+        return
+    
+    name, page_identifier = name_and_page
+    page_identifier += 1
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_ANIME_ARRAY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
+                KEY_VARIABLE_MEDIA_QUERY: name,
+            },
+        },
+        array_response_builder_anime,
+        name,
+    )
+
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_ANIME_SELECT)
+async def find_anime_select(client, event):
+    interaction = event.interaction
+    if event.message.interaction.user is not event.user:
+        return
+    
+    options = interaction.options
+    if options is None:
+        return
+    
+    option = options[0]
+    try:
+        anime_id = int(option)
+    except ValueError:
+        return
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_ANIME_BY_ID,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_MEDIA_ID: anime_id,
+            },
+        },
+        anime_response_builder_no_components,
+        None,
+    )
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def manga_(client, event,
+        name_or_id: ('str', 'The manga\'s name or it\'s id.')
+            ):
+    name_or_id = validate_parameter(name_or_id)
+    
+    if name_or_id.isdecimal():
+        json_query = {
+            KEY_QUERY: QUERY_MANGA_BY_ID,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_MEDIA_ID: int(name_or_id),
+            },
+        }
+    else:
+        json_query = {
+            KEY_QUERY: QUERY_MANGA,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_MEDIA_QUERY: name_or_id,
+            },
+        }
+    
+    return search(
+        client,
+        json_query,
+        manga_response_builder,
+        None,
+    )
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def find_manga(client, event,
+        name: ('str', 'The manga\'s name to try to find.')
+            ):
+    name = validate_parameter(name)
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_MANGA_ARRAY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: 1,
+                KEY_VARIABLE_MEDIA_QUERY: name,
+            },
+        },
+        array_response_builder_manga,
+        name,
+    )
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_MANGA_LEFT)
+async def find_manga_page_left(client, event):
+    message = event.message
+    if message.interaction.user is not event.user:
+        return
+    
+    name_and_page = get_name_and_page_from_embed(message.embed)
+    
+    name, page_identifier = name_and_page
+    page_identifier -= 1
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_MANGA_ARRAY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
+                KEY_VARIABLE_MEDIA_QUERY: name,
+            },
+        },
+        array_response_builder_manga,
+        name,
+    )
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_MANGA_RIGHT)
+async def find_manga_page_right(client, event):
+    message = event.message
+    if message.interaction.user is not event.user:
+        return
+    
+    name_and_page = get_name_and_page_from_embed(message.embed)
+    if name_and_page is None:
+        return
+    
+    name, page_identifier = name_and_page
+    page_identifier += 1
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_MANGA_ARRAY,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_PAGE_IDENTIFIER: page_identifier,
+                KEY_VARIABLE_MEDIA_QUERY: name,
+            },
+        },
+        array_response_builder_manga,
+        name,
+    )
+
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_MANGA_SELECT)
+async def find_manga_select(client, event):
+    interaction = event.interaction
+    if event.message.interaction.user is not event.user:
+        return
+    
+    options = interaction.options
+    if options is None:
+        return
+    
+    option = options[0]
+    try:
+        manga_id = int(option)
+    except ValueError:
+        return
+    
+    return search(
+        client,
+        {
+            KEY_QUERY: QUERY_MANGA_BY_ID,
+            KEY_VARIABLES: {
+                KEY_VARIABLE_MEDIA_ID: manga_id,
+            },
+        },
+        manga_response_builder_no_components,
         None,
     )
