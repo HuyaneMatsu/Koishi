@@ -35,6 +35,7 @@ CUSTOM_ID_FIND_MANGA_RIGHT_DISABLED = 'anilist.find_manga._.1'
 CUSTOM_ID_FIND_MANGA_SELECT_DISABLED = 'anilist.find_manga._.2'
 
 ENTRY_PER_PAGE = 25
+SUB_ENTRY_PER_PAGE = 5
 URL_BASE_CHARACTER = 'https://anilist.co/character/'
 URL_BASE_ANIME = 'https://anilist.co/anime/'
 URL_BASE_MANGA = 'https://anilist.co/manga/'
@@ -81,7 +82,8 @@ KEY_CHARACTER_BIRTH_DATE = 'dateOfBirth'
 KEY_CHARACTER_GENDER = 'gender'
 KEY_CHARACTER_BLOOD_TYPE = 'bloodType'
 KEY_CHARACTER_AGE = 'age'
-
+KEY_CHARACTER_MEDIA_CONNECTIONS = 'media'
+KEY_CHARACTER_MEDIA_CONNECTIONS_MEDIA_ARRAY = 'nodes'
 
 KEY_MEDIA_TYPE = 'type'
 KEY_MEDIA_TYPE_ANIME = 'ANIME'
@@ -89,16 +91,16 @@ KEY_MEDIA_TYPE_MANGA = 'MANGA'
 KEY_MEDIA_ID = 'id'
 KEY_MEDIA_NAME = 'title'
 KEY_MEDIA_NAME_ROMAJI = 'romaji'
-KEY_MEDIA_NAME_ROMAJI_MODIFIER = '(stylised:false)'
+KEY_MEDIA_NAME_ROMAJI_MODIFIER = 'stylised:false'
 KEY_MEDIA_NAME_NATIVE = 'native'
-KEY_MEDIA_NAME_NATIVE_MODIFIER = '(stylised:false)'
+KEY_MEDIA_NAME_NATIVE_MODIFIER = 'stylised:false'
 KEY_MEDIA_DESCRIPTION = 'description'
-KEY_MEDIA_DESCRIPTION_MODIFIER = '(asHtml:false)'
+KEY_MEDIA_DESCRIPTION_MODIFIER = 'asHtml:false'
 KEY_MEDIA_EPISODE_COUNT = 'episodes'
 KEY_MEDIA_FORMAT = 'format'
 KEY_MEDIA_RELEASE_SEASON = 'season'
 KEY_MEDIA_STATUS = 'status'
-KEY_MEDIA_STATUS_MODIFIER = '(version:2)'
+KEY_MEDIA_STATUS_MODIFIER = 'version:2'
 KEY_MEDIA_EPISODE_LENGTH = 'duration'
 KEY_MEDIA_SITE_URL = 'siteUrl'
 KEY_MEDIA_START_DATE = 'startDate'
@@ -150,7 +152,20 @@ REQUIRED_CHARACTER_FIELDS = (
     f'{KEY_CHARACTER_DESCRIPTION} '
     f'{KEY_CHARACTER_GENDER} '
     f'{KEY_CHARACTER_BLOOD_TYPE} '
-    f'{KEY_CHARACTER_AGE}'
+    f'{KEY_CHARACTER_AGE} '
+    f'{KEY_CHARACTER_MEDIA_CONNECTIONS}('
+        f'sort:[POPULARITY_DESC],'
+        f'{KEY_PER_PAGE}:{SUB_ENTRY_PER_PAGE}'
+    f'){{'
+        f'{KEY_CHARACTER_MEDIA_CONNECTIONS_MEDIA_ARRAY}{{'
+            f'{KEY_MEDIA_ID} '
+            f'{KEY_MEDIA_TYPE} '
+            f'{KEY_MEDIA_NAME}{{'
+                f'{KEY_MEDIA_NAME_ROMAJI}({KEY_MEDIA_NAME_ROMAJI_MODIFIER})'
+                f'{KEY_MEDIA_NAME_NATIVE}({KEY_MEDIA_NAME_NATIVE_MODIFIER})'
+            f'}}'
+        f'}}'
+    f'}}'
 )
 
 
@@ -198,13 +213,13 @@ QUERY_CHARACTER_ARRAY = (
 REQUIRED_ANIME_FIELDS = (
     f'{KEY_MEDIA_ID} '
     f'{KEY_MEDIA_NAME}{{'
-        f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
-        f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+        f'{KEY_MEDIA_NAME_ROMAJI}({KEY_MEDIA_NAME_ROMAJI_MODIFIER})'
+        f'{KEY_MEDIA_NAME_NATIVE}({KEY_MEDIA_NAME_NATIVE_MODIFIER})'
     f'}}'
-    f'{KEY_MEDIA_DESCRIPTION}{KEY_MEDIA_DESCRIPTION_MODIFIER}'
+    f'{KEY_MEDIA_DESCRIPTION}({KEY_MEDIA_DESCRIPTION_MODIFIER})'
     f'{KEY_MEDIA_EPISODE_COUNT} '
     f'{KEY_MEDIA_FORMAT} '
-    f'{KEY_MEDIA_STATUS}{KEY_MEDIA_STATUS_MODIFIER}'
+    f'{KEY_MEDIA_STATUS}({KEY_MEDIA_STATUS_MODIFIER})'
     f'{KEY_MEDIA_EPISODE_LENGTH} '
     f'{KEY_MEDIA_START_DATE}{{'
         f'{KEY_FUZZY_DATE_YEAR} '
@@ -258,8 +273,8 @@ QUERY_ANIME_ARRAY = (
             f'){{'
                 f'{KEY_MEDIA_ID} '
                 f'{KEY_MEDIA_NAME}{{'
-                    f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
-                    f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+                    f'{KEY_MEDIA_NAME_ROMAJI}({KEY_MEDIA_NAME_ROMAJI_MODIFIER})'
+                    f'{KEY_MEDIA_NAME_NATIVE}({KEY_MEDIA_NAME_NATIVE_MODIFIER})'
                 f'}}'
             f'}}'
         f'}}'
@@ -270,13 +285,13 @@ QUERY_ANIME_ARRAY = (
 REQUIRED_MANGA_FIELDS = (
     f'{KEY_MEDIA_ID} '
     f'{KEY_MEDIA_NAME}{{'
-        f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
-        f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+        f'{KEY_MEDIA_NAME_ROMAJI}({KEY_MEDIA_NAME_ROMAJI_MODIFIER})'
+        f'{KEY_MEDIA_NAME_NATIVE}({KEY_MEDIA_NAME_NATIVE_MODIFIER})'
     f'}}'
-    f'{KEY_MEDIA_DESCRIPTION}{KEY_MEDIA_DESCRIPTION_MODIFIER}'
+    f'{KEY_MEDIA_DESCRIPTION}({KEY_MEDIA_DESCRIPTION_MODIFIER})'
     f'{KEY_MEDIA_VOLUME_COUNT} '
     f'{KEY_MEDIA_FORMAT} '
-    f'{KEY_MEDIA_STATUS}{KEY_MEDIA_STATUS_MODIFIER}'
+    f'{KEY_MEDIA_STATUS}({KEY_MEDIA_STATUS_MODIFIER})'
     f'{KEY_MEDIA_CHAPTER_COUNT} '
     f'{KEY_MEDIA_START_DATE}{{'
         f'{KEY_FUZZY_DATE_YEAR} '
@@ -330,8 +345,8 @@ QUERY_MANGA_ARRAY = (
             f'){{'
                 f'{KEY_MEDIA_ID} '
                 f'{KEY_MEDIA_NAME}{{'
-                    f'{KEY_MEDIA_NAME_ROMAJI}{KEY_MEDIA_NAME_ROMAJI_MODIFIER}'
-                    f'{KEY_MEDIA_NAME_NATIVE}{KEY_MEDIA_NAME_NATIVE_MODIFIER}'
+                    f'{KEY_MEDIA_NAME_ROMAJI}({KEY_MEDIA_NAME_ROMAJI_MODIFIER})'
+                    f'{KEY_MEDIA_NAME_NATIVE}({KEY_MEDIA_NAME_NATIVE_MODIFIER})'
                 f'}}'
             f'}}'
         f'}}'
@@ -722,6 +737,8 @@ def build_character_description(character_data):
         if field_added:
             if description.startswith('**'):
                 description_parts.append('\n')
+            elif description.startswith('\n**'):
+                pass
             else:
                 description_parts.append('\n\n')
         
@@ -733,6 +750,60 @@ def build_character_description(character_data):
         description = description[:4000]+'...'
     
     return description
+
+TEXT_RELATED_MEDIAS = 'Related medias'
+TEXT_RELATED_MEDIAS_TOP_N = f'Related medias (top {SUB_ENTRY_PER_PAGE})'
+
+def add_media_connection_field(embed, character_data):
+    media_array = character_data[KEY_CHARACTER_MEDIA_CONNECTIONS][KEY_CHARACTER_MEDIA_CONNECTIONS_MEDIA_ARRAY]
+    
+    if (media_array is None) or (not media_array):
+        return
+        
+    description_parts = []
+    
+    array_index = 0
+    array_limit = len(media_array)
+    
+    while True:
+        media_data = media_array[array_index]
+        array_index += 1
+        
+        media_name = build_media_name(media_data)
+        media_id = media_data[KEY_MEDIA_ID]
+        
+        media_type = media_data[KEY_MEDIA_TYPE]
+        if media_type == KEY_MEDIA_TYPE_ANIME:
+            url_base = URL_BASE_ANIME
+        elif media_type == KEY_MEDIA_TYPE_MANGA:
+            url_base = URL_BASE_MANGA
+        else:
+            url_base = None
+        
+        if url_base is None:
+            description_parts.append(media_name)
+        else:
+            description_parts.append('[')
+            description_parts.append(media_name)
+            description_parts.append('](')
+            description_parts.append(url_base)
+            description_parts.append(str(media_id))
+            description_parts.append(')')
+        
+        if array_index == array_limit:
+            break
+        
+        description_parts.append('\n')
+        continue
+    
+    description = ''.join(description_parts)
+    
+    if array_limit >= SUB_ENTRY_PER_PAGE:
+        title = TEXT_RELATED_MEDIAS_TOP_N
+    else:
+        title = TEXT_RELATED_MEDIAS
+    
+    embed.add_field(title, description)
 
 
 def array_response_builder(data, extra, work_set):
@@ -888,13 +959,21 @@ def character_response_builder(data, extra):
     image_url = character_data[KEY_CHARACTER_IMAGE][KEY_CHARACTER_IMAGE_LARGE]
     url = f'{URL_BASE_CHARACTER}{character_data[KEY_CHARACTER_ID]}'
     
-    return Embed(
+    embed = Embed(
         build_character_name(character_data),
         build_character_description(character_data),
         url = url,
     ).add_thumbnail(
         image_url,
     )
+    
+    add_media_connection_field(
+        embed,
+        character_data,
+    )
+    
+    return embed
+
 
 def character_response_builder_no_components(data, extra):
     embed = character_response_builder(data, extra)
