@@ -5,8 +5,7 @@ from functools import partial as partial_func
 
 from hata import BUILTIN_EMOJIS, Client, Lock, KOKORO, alchemy_incendiary, Embed, Permission
 from hata.backend.utils import to_json, from_json
-from hata.ext.command_utils import wait_for_reaction
-from hata.ext.slash import abort
+from hata.ext.slash import abort, wait_for_component_interaction, Row, Button, InteractionResponse
 
 from sqlalchemy.sql import select, update
 
@@ -25,8 +24,79 @@ COST_FILE_LOCK = Lock(KOKORO)
 COST_FILE_PATH = os.path.join(PATH__KOISHI, 'library', 'witch_craft_costs.json')
 
 class CookingFactor:
+    """
+    Represents an item's cooking factor.
+    
+    Attributes
+    ----------
+    flavor : `int`
+        The flavor factor of the item.
+        
+        Defaults to `0`.
+    
+    fruit : `int`
+        The fruit factor of the item.
+        
+        Defaults to `0`.
+    
+    meat : `int`
+        The meat factor of the item.
+        
+        Defaults to `0`.
+    
+    monster : `int`
+        The monster factor of the item.
+        
+        Defaults to `0`.
+    
+    mushroom : `int`
+        The mushroom factor of the item.
+        
+        Defaults to `0`.
+    
+    vegetable : `int`
+        The vegetable factor of the item.
+        
+        Defaults to `0`.
+    """
     __slots__ = ('flavor', 'fruit', 'meat', 'monster', 'mushroom', 'vegetable')
+    
     def __new__(cls, *, flavor=0, fruit=0, meat=0, monster=0, mushroom=0, vegetable=0):
+        """
+        Creates a new cooking factor instance.
+        
+        Parameters
+        ----------
+        flavor : `int`, Optional (Keyword only)
+            The flavor factor of the item.
+        
+        Defaults to `0`.
+        
+        fruit : `int`, Optional (Keyword only)
+            The fruit factor of the item.
+        
+        Defaults to `0`.
+        
+        meat : `int`, Optional (Keyword only)
+            The meat factor of the item.
+        
+        Defaults to `0`.
+        
+        monster : `int`, Optional (Keyword only)
+            The monster factor of the item.
+        
+        Defaults to `0`.
+        
+        mushroom : `int`, Optional (Keyword only)
+            The mushroom factor of the item.
+        
+        Defaults to `0`.
+        
+        vegetable : `int`, Optional (Keyword only)
+            The vegetable factor of the item.
+        
+        Defaults to `0`.
+        """
         self = object.__new__(cls)
         
         self.flavor = flavor
@@ -39,6 +109,7 @@ class CookingFactor:
         return self
     
     def __repr__(self):
+        """Returns the cooking factor's representation."""
         result = ['<', self.__class__.__name__]
         
         flavor = self.flavor
@@ -103,6 +174,13 @@ class CookingFactor:
         return ''.join(result)
     
     def get_raw_cost(self):
+        """
+        Gets the raw cost of the cooking factor.
+        
+        Returns
+        -------
+        raw_cost : `float`
+        """
         cost = 0.0
         
         flavor = self.flavor
@@ -127,8 +205,49 @@ class CookingFactor:
 
 
 class EdibilityFactor:
+    """
+    Represents an item's edibility.
+    
+    Attributes
+    ----------
+    health : `int`
+        The health factor of the item.
+        
+        Defaults to `0`.
+    
+    hunger : `int`
+        The hunger factor of the item.
+        
+        Defaults to `0`.
+    
+    sanity : `int`
+        The sanity factor of the item.
+        
+        Defaults to `0`.
+    """
     __slots__ = ('health', 'hunger', 'sanity')
+    
     def __new__(cls, *, health=0, hunger=0, sanity=0):
+        """
+        Creates a new edibility factor instance.
+        
+        Parameters
+        ----------
+        health : `int`, Optional (Keyword only)
+            The health factor of the item.
+            
+            Defaults to `0`.
+        
+        hunger : `int`, Optional (Keyword only)
+            The hunger factor of the item.
+            
+            Defaults to `0`.
+        
+        sanity : `int`, Optional (Keyword only)
+            The sanity factor of the item.
+            
+            Defaults to `0`.
+        """
         self = object.__new__(cls)
         self.health = health
         self.hunger = hunger
@@ -136,6 +255,7 @@ class EdibilityFactor:
         return self
     
     def __repr__(self):
+        """Returns the representation of the edibility factor."""
         result = ['<', self.__class__.__name__]
         
         health = self.health
@@ -170,6 +290,13 @@ class EdibilityFactor:
         return ''.join(result)
     
     def get_raw_cost(self):
+        """
+        Gets the raw cost of the edibility factor.
+        
+        Returns
+        -------
+        raw_cost : `float`
+        """
         cost = 0.0
         health = self.health
         cost += health*health
@@ -184,8 +311,56 @@ class EdibilityFactor:
 
 
 class Item:
+    """
+    An witch craftable item.
+    
+    Attributes
+    ----------
+    cost : `int`
+        The cost of the item.
+        
+        Defaults to `None`.
+    
+    cooking : `None` or ``CookingFactor``
+        Cooking factor of the item, if has any.
+        
+        Defaults to `None`.
+    
+    edibility : `None` or ``EdibilityFactor``
+        Edibility factor of the item.
+    emoji : ``Emoji``
+        Emoji representing the item.
+    id : `int`
+        The identifier of the item.
+    market_cost : `int`
+        The cost of the item in market.
+    name : `str`
+        The item's name.
+    """
     __slots__ = ('cost', 'cooking', 'edibility', 'emoji', 'id', 'market_cost', 'name',)
-    def __new__(cls, id_, name, emoji, *, cooking=None, edibility=None):
+    
+    def __new__(cls, item_id, name, emoji, *, cooking=None, edibility=None):
+        """
+        Creates a new item instance.
+        
+        Parameters
+        ----------
+        item_id : `int`
+            The item's identifier.
+        name : `str`
+            The name of the item.
+        emoji : ``Emoji``
+            The emoji representation of the item.
+        cooking : `None` or ``CookingFactor``, Optional (Keyword only)
+            Cooking factor of the item, if has any.
+            
+            Defaults to `None`.
+        
+        edibility : `None` or ``EdibilityFactor``, Optional (Keyword only)
+            Edibility factor of the item.
+            
+            Defaults to `None`.
+        """
         cost = 0
         if (cooking is not None):
             cost += cooking.get_raw_cost()
@@ -196,7 +371,7 @@ class Item:
         cost = int(cost**0.5)
         
         self = object.__new__(cls)
-        self.id = id_
+        self.id = item_id
         self.name = name
         self.emoji = emoji
         self.cost = cost
@@ -206,10 +381,11 @@ class Item:
         
         self.market_cost = cost
         
-        ITEMS[id_] = self
+        ITEMS[item_id] = self
         return self
     
     def __repr__(self):
+        """Returns the item's representation."""
         result = ['<', self.__class__.__name__]
         
         result.append(' id=')
@@ -241,43 +417,48 @@ class Item:
 
 
 ITEM_DUCK = Item(1, 'Duck', BUILTIN_EMOJIS['duck'],
-    cooking=CookingFactor(flavor=100, meat=100, monster=20),
-    edibility=EdibilityFactor(hunger=40, sanity=-20),
+    cooking = CookingFactor(flavor=100, meat=100, monster=20),
+    edibility = EdibilityFactor(hunger=40, sanity=-20),
 )
 
 ITEM_SALT = Item(2, 'Flavor crystal', BUILTIN_EMOJIS['salt'],
-    cooking=CookingFactor(flavor=100),
-    edibility=EdibilityFactor(health=-20, hunger=0, sanity=-20),
+    cooking = CookingFactor(flavor=100),
+    edibility = EdibilityFactor(health=-20, hunger=0, sanity=-20),
 )
 
 ITEM_ONION = Item(3, 'Organic tear gas', BUILTIN_EMOJIS['onion'],
-    cooking=CookingFactor(flavor=50, vegetable=40),
-    edibility=EdibilityFactor(health=5, hunger=5, sanity=-10),
+    cooking = CookingFactor(flavor=50, vegetable=40),
+    edibility = EdibilityFactor(health=5, hunger=5, sanity=-10),
 )
 
 ITEM_EGG = Item(4, 'Next generation (capsule)', BUILTIN_EMOJIS['egg'],
-    cooking=CookingFactor(flavor=50, meat=50),
-    edibility=EdibilityFactor(health=5, hunger=10),
+    cooking = CookingFactor(flavor=50, meat=50),
+    edibility = EdibilityFactor(health=5, hunger=10),
 )
 
 ITEM_RED_MUSHROOM = Item(5, 'Witch hallucinogen', BUILTIN_EMOJIS['mushroom'],
-    cooking=CookingFactor(flavor=50, mushroom=100),
-    edibility=EdibilityFactor(health=-20, hunger=10, sanity=-5),
+    cooking = CookingFactor(flavor=50, mushroom=100),
+    edibility = EdibilityFactor(health=-20, hunger=10, sanity=-5),
 )
 
 ITEM_GARLIC = Item(6, 'Anti-vampire grenade', BUILTIN_EMOJIS['garlic'],
-    cooking=CookingFactor(flavor=100, vegetable=30),
-    edibility=EdibilityFactor(health=10, hunger=5, sanity=-10),
+    cooking = CookingFactor(flavor=100, vegetable=30),
+    edibility = EdibilityFactor(health=10, hunger=5, sanity=-10),
 )
 
 ITEM_OIL = Item(7, 'Pan slipper', BUILTIN_EMOJIS['oil'],
-    cooking=CookingFactor(flavor=30, vegetable=20, fruit=20),
-    edibility=EdibilityFactor(hunger=5, sanity=-10),
+    cooking = CookingFactor(flavor=30, vegetable=20, fruit=20),
+    edibility = EdibilityFactor(hunger=5, sanity=-10),
 )
 
 ITEM_OLIVE = Item(8, 'Slipper fruit', BUILTIN_EMOJIS['olive'],
-    cooking=CookingFactor(flavor=30, fruit=30),
-    edibility=EdibilityFactor(health=10, hunger=10),
+    cooking = CookingFactor(flavor=30, fruit=30),
+    edibility = EdibilityFactor(health=10, hunger=10),
+)
+
+ITEM_ROSE = Item(9, 'Blood thorn', BUILTIN_EMOJIS['rose'],
+    cooking = CookingFactor(vegetable=10),
+    edibility = EdibilityFactor(sanity=5),
 )
 
 BUYABLE = [
@@ -286,6 +467,7 @@ BUYABLE = [
     ITEM_RED_MUSHROOM,
     ITEM_GARLIC,
     ITEM_OLIVE,
+    ITEM_ROSE,
 ]
 
 BUYABLE.sort(key=lambda item:item.name)
@@ -409,12 +591,8 @@ async def prices(client, event):
 
 CONFIRM_NAH = BUILTIN_EMOJIS['person_gesturing_no']
 
-def check_confirm_emoji(event, confirm_emoji):
-    emoji = event.emoji
-    if (emoji is CONFIRM_NAH) or (emoji is confirm_emoji):
-        return True
-    
-    return False
+def check_is_user_same(user, event):
+    return (user is event.user)
 
 PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages = True,
@@ -423,6 +601,12 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 PERMISSION_MASK_REACT = Permission().update_by_keys(
     add_reactions = True,
+)
+
+BUTTON_CANCEL = Button(
+    emoji = CONFIRM_NAH,
+    label = 'Nah'
+    
 )
 
 @SHOP.interactions
@@ -465,16 +649,29 @@ async def buy(client, event,
     embed.add_author(user.avaar_url, user.full_name)
     embed.add_footer('The prices of context of demand and supply.')
     
-    message = await client.message_create(event.channel, embed=embed)
-    await client.reaction_add(message, item.emoji)
-    await client.reaction_add(message, CONFIRM_NAH)
+    components = Row(
+        Button(
+            emoji = item.emoji,
+            label = 'Lets go!'
+        ),
+        BUTTON_CANCEL,
+    )
+    
+    message = yield InteractionResponse(embed=embed, components=components)
     
     try:
-        event = await wait_for_reaction(client, message, partial_func(check_confirm_emoji, item.emoji), 300.0)
+        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
+            check=partial_func(check_is_user_same, event.user))
     except TimeoutError:
-        return
+        component_interaction = None
+        cancelled = True
+    else:
+        if component_interaction.interaction == BUTTON_CANCEL:
+            cancelled = True
+        else:
+            cancelled = False
     
-    if event.emoji is CONFIRM_NAH:
+    if cancelled:
         embed.title = 'Buying cancelled'
     else:
         user = event.user
@@ -511,7 +708,7 @@ async def buy(client, event,
                     row_id, actual_amount = results[0]
                     new_amount = actual_amount+amount
                     to_execute = ITEM_TABLE.update().values(
-                        amount=new_amount
+                        amount = new_amount
                             ).where(item_model.id==row_id)
                 else:
                     to_execute = ITEM_TABLE.insert().values(
@@ -530,7 +727,7 @@ async def buy(client, event,
             f'Hearts: {total_love} {EMOJI__HEART_CURRENCY:e} -> {new_love} {EMOJI__HEART_CURRENCY:e}'
         )
     
-    await client.message_edit(message, embed=embed)
+    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)
 
 
 

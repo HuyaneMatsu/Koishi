@@ -316,92 +316,92 @@ class OJCard(OJEntityBase):
 
 ORIGIN_QP_SHOOTING = OJOrigin(1,
     'QP Shooting',
-        )
+)
 
 ORIGIN_SUGURI = OJOrigin(2,
     'Suguri',
-        )
+)
 
 ORIGIN_FLYING_RED_BARREL = OJOrigin(3,
     'Flying Red Barrel',
-        )
+)
 
 ORIGIN_100_ORANGE_JUICE = OJOrigin(4,
     '100% Orange Juice',
-        )
+)
 
 ORIGIN_CHRISTMAS_SHOOTING = OJOrigin(5,
     'Christmas Shooting',
-        )
+)
 
 ORIGIN_SORA = OJOrigin(6,
     'Sora',
-        )
+)
 
 ORIGIN_QP_SHOOTING_DANGEROUS = OJOrigin(7,
     'QP Shooting - Dangerous!!',
-        )
+)
 
 ORIGIN_QP_KISS = OJOrigin(8,
     'QP Kiss',
-        )
+)
 
 ORIGIN_XMAS_SHOOTING_SCRAMBLE = OJOrigin(9,
     'Xmas Shooting - Scramble!!',
-        )
+)
 
 ORIGIN_ACCELERATION_OF_SUGURI = OJOrigin(10,
     'Acceleration of Suguri',
-        )
+)
 
 ORIGIN_ALICIANRONE = OJOrigin(11,
     'Alicianrone',
-        )
+)
 
 ORIGIN_200_MIXED_JUICE = OJOrigin(12,
     '200% Mixed Juice!',
-        )
+)
 
 ORIGIN_ACCELERATION_OF_SUGURI_2 = OJOrigin(13,
     'Acceleration of SUGURI 2',
-        )
+)
 
 #### #### #### #### CARD PACKS #### #### #### ####
 
 CARD_PACK_ACCELERATION_PACK = OJCardPack(1,
     'Acceleration Pack',
     320,
-        )
+)
 
 CARD_PACK_EXPANSION_PACK = OJCardPack(2,
     'Expansion Pack',
     240,
-        )
+)
 
 CARD_PACK_COMMUNITY_PACK = OJCardPack(3,
     'Community Pack',
     540,
-        )
+)
 
 CARD_PACK_COMMUNITY_PACK_2 = OJCardPack(4,
     'Community Pack 2',
     1080,
-        )
+)
 
 CARD_PACK_BASE_PACK = OJCardPack(5,
     'Base Pack',
     180,
-        )
+)
 
 CARD_PACK_PUDDING_PACK = OJCardPack(6,
     'Pudding Pack',
     320,
-        )
+)
 
 CARD_PACK_MIXED_BOOSTER_PACK = OJCardPack(7,
     'Mixed Booster Pack',
     280,
-        )
+)
 
 #### #### #### #### CARD COSTS #### #### #### ####
 
@@ -443,7 +443,7 @@ CARD_ACCEL_HYPER = OJCard(1,
     '"Unlimited Charge!" —Sora',
     None,
     'Accel_Hyper.png',
-        )
+)
 
 CARD_BIG_MAGNUM = OJCard(2,
     'Big Magnum',
@@ -453,7 +453,7 @@ CARD_BIG_MAGNUM = OJCard(2,
     '"Go! Big Magnum!" —Captain Tequila',
     None,
     'Big_Magnum.png',
-        )
+)
 
 CARD_DARK_SIDE_OF_BUSINESS = OJCard(3,
     'Dark Side of Business',
@@ -463,7 +463,7 @@ CARD_DARK_SIDE_OF_BUSINESS = OJCard(3,
     '"Go! Big Magnum!" —Captain Tequila',
     None,
     'Dark_Side_of_Business.png',
-        )
+)
 
 CARD_DESPERATE_MODIFICATION = OJCard(4,
     'Desperate Modification',
@@ -472,7 +472,7 @@ CARD_DESPERATE_MODIFICATION = OJCard(4,
     '"Poor Blue Crow. You loaded him with all that heavy stuff!" —Marc',
     None,
     'Desperate_Modification.png',
-        )
+)
 
 CARD_EXTENSION = OJCard(5,
     'Extension',
@@ -481,7 +481,7 @@ CARD_EXTENSION = OJCard(5,
     '"It\'s my job to kill you." —Nath',
     None,
     'Extension.png',
-        )
+)
 
 CARD_FINAL_BATTLE = OJCard(6,
     'Final Battle',
@@ -490,7 +490,7 @@ CARD_FINAL_BATTLE = OJCard(6,
     '"To protect everyone!" —Suguri & Hime',
     None,
     'Final_Battle.png',
-        )
+)
 
 CARD_IM_ON_FIRE = OJCard(7,
     'I\'m on Fire!',
@@ -499,7 +499,7 @@ CARD_IM_ON_FIRE = OJCard(7,
     '"Let\'s play our lives away!" —Kae',
     None,
     'I\'m_on_Fire!.png',
-        )
+)
 
 CARD_PORTABLE_PUDDING = OJCard(8,
     'Portable Pudding',
@@ -508,7 +508,7 @@ CARD_PORTABLE_PUDDING = OJCard(8,
     '"I\'ve got pudding for lunch today!" ―QP',
     None,
     'Portable_Pudding.png',
-        )
+)
 
 CARD_QUICK_RESTORATION = OJCard(9,
     'Quick Restoration',
@@ -517,7 +517,7 @@ CARD_QUICK_RESTORATION = OJCard(9,
     '"I\'m not going to die." —Suguri',
     None,
     'Quick_Restoration.png',
-        )
+)
 
 CARD_RAINBOW_COLORED_CIRCLE = OJCard(10,
     2, CARD_COST_5, 3, CARD_TYPE_BATTLE, CARD_PACK_BASE_PACK, CARD_RARITY_COMMON,
@@ -526,7 +526,7 @@ CARD_RAINBOW_COLORED_CIRCLE = OJCard(10,
     '"Like drawing a rainbow-colored circle."',
     None,
     'Rainbow-Colored_Circle.png',
-        )
+)
 
 CARD_RBITS = OJCard(11,
     'Rbits',
@@ -535,7 +535,7 @@ CARD_RBITS = OJCard(11,
     '"Formation Orbit!" —QP',
     None,
     'Rbits.png',
-        )
+)
 
 CARD_REVERSE_ATTRIBUTE_FIELDS = OJCard(12,
     'Reverse Attribute Field',
@@ -544,7 +544,7 @@ CARD_REVERSE_ATTRIBUTE_FIELDS = OJCard(12,
     '"Aren\'t you too serious about this game? You\'re so da... I mean, far too immature!" —Mei',
     None,
     'Reverse_Attribute_Field.png',
-        )
+)
 
 CARD_SERIOUS_BATTLE = OJCard(13,
     'Serious Battle',
@@ -553,7 +553,7 @@ CARD_SERIOUS_BATTLE = OJCard(13,
     '"This battle will be a true test of strength!" ―Tomomo',
     None,
     'Serious_Battle.png',
-        )
+)
 
 CARD_SHIELD = OJCard(14,
     'Shield',
@@ -562,7 +562,7 @@ CARD_SHIELD = OJCard(14,
     'second.',
     '"The most important thing is: make it back here alive." —Sham',
     None,
-        )
+)
 
 CARD_SHIELD_COUNTER = OJCard(15,
     'Shield Counter',
@@ -571,7 +571,7 @@ CARD_SHIELD_COUNTER = OJCard(15,
     'played by the defender.',
     '"Shield, invert!" —Sora',
     None,
-        )
+)
 
 CARD_SINK_OR_SWIM = OJCard(16,
     'Sink or Swim',
@@ -579,7 +579,7 @@ CARD_SINK_OR_SWIM = OJCard(16,
     'Gain -1 ATK, -1 DEF and -1 EVD. If you win this battle, take 50% more of your opponent\'s stars.',
     '"Alright, it\'s time to play the long odds!" ―Yuki',
     None,
-        )
+)
 
 CARD_TACTICAL_RETREAT = OJCard(17,
     'Tactical Retreat',
@@ -588,7 +588,7 @@ CARD_TACTICAL_RETREAT = OJCard(17,
     'card, this effect is void.',
     '"Farewell!" —Tomato',
     None,
-        )
+)
 
 CARD_AMBUSH = OJCard(18,
     'Ambush',
@@ -596,7 +596,7 @@ CARD_AMBUSH = OJCard(18,
     'Engage in battle with another player or players on your panel. Once these battles are over, your turn is over.',
     '"Owwwww!" —Sham',
     None,
-        )
+)
 
 CARD_BACKDOOR_TRADE = OJCard(19,
     'Backdoor Trade',
@@ -606,7 +606,7 @@ CARD_BACKDOOR_TRADE = OJCard(19,
     '"Here\'s what you asked for." ―Captain Tequila\n'
     '"Great work! I knew I could count on a real villain like you!" ―Mimyuu',
     None,
-        )
+)
 
 CARD_COMPLETION_REWARD = OJCard(20,
     'Completion Reward',
@@ -615,7 +615,7 @@ CARD_COMPLETION_REWARD = OJCard(20,
     '"Yay, I\'ve got my pay!" —Chris\n'
     '"Don\'t waste it, okay?" —Manager',
     None
-        )
+)
 
 CARD_DASH = OJCard(21,
     'Dash!',
@@ -623,7 +623,7 @@ CARD_DASH = OJCard(21,
     'For this turn, roll two dice for movement.',
     '"Faster!" —Suguri',
     None,
-        )
+)
 
 CARD_EXTEND = OJCard(22,
     'Extend',
@@ -631,7 +631,7 @@ CARD_EXTEND = OJCard(22,
     'Stock Effect After suffering KO, you will revive on the following turn.',
     '"All good for now!" —Marc',
     None,
-        )
+)
 
 CARD_FLIP_OUT = OJCard(23,
     'Flip Out',
@@ -640,7 +640,7 @@ CARD_FLIP_OUT = OJCard(23,
     'same number of stars as you.',
     '"......!" —Mei',
     None,
-        )
+)
 
 CARD_GENTLEMANS_BATTLE = OJCard(24,
     'Gentleman\'s Battle',
@@ -648,7 +648,7 @@ CARD_GENTLEMANS_BATTLE = OJCard(24,
     'Choose a player with full HP and battle them. Your turn ends after the battle.',
     '"Take this!" —Guildmaster',
     None,
-        )
+)
 
 CARD_LONELY_CHARIOT = OJCard(25,
     'Lonely Chariot',
@@ -658,7 +658,7 @@ CARD_LONELY_CHARIOT = OJCard(25,
     '"You guys? You\'re mistaken...\n'
     'I ride alone!" —Lone Rider',
     None,
-        )
+)
 
 CARD_LONG_DISTANCE_SHOT = OJCard(26,
     'Long-Distance Shot',
@@ -666,7 +666,7 @@ CARD_LONG_DISTANCE_SHOT = OJCard(26,
     'Deals 1 damage to the selected enemy unit.',
     '"I can hit you from anywhere." —Iru',
     None,
-        )
+)
 
 CARD_MIMIC = OJCard(27,
     'Mimic',
@@ -674,7 +674,7 @@ CARD_MIMIC = OJCard(27,
     'Choose a player. All hyper cards in your hand become the type that that player uses.',
     'Marie Poppo is trying to become something else.',
     None,
-        )
+)
 
 CARD_NICE_JINGLE = OJCard(28,
     'Nice Jingle',
@@ -682,7 +682,7 @@ CARD_NICE_JINGLE = OJCard(28,
     'Stock Effect. The next bonus panel gives you twice as many stars.',
     '"We\'ve got a bunch." —Aru',
     None,
-        )
+)
 
 CARD_NICE_PRESENT = OJCard(29,
     'Nice Present',
@@ -690,7 +690,7 @@ CARD_NICE_PRESENT = OJCard(29,
     'Draw 2 cards.',
     '"You\'re going to help me deliver the presents." —Aru',
     None,
-        )
+)
 
 CARD_PASSIONATE_RESEARCH = OJCard(30,
     'Passionate Research',
@@ -699,7 +699,7 @@ CARD_PASSIONATE_RESEARCH = OJCard(30,
     'the deck in the same order.',
     '"Well, this sort of thing happens all the time. It was quite fun, anyway!" —Scholar',
     None,
-        )
+)
 
 CARD_PATH_BLOCKERS = OJCard(31,
     'Path Blockers',
@@ -707,7 +707,7 @@ CARD_PATH_BLOCKERS = OJCard(31,
     'Stock Effect (1). Choose a unit. If that unit moves onto a panel with a set Trap, they must stop on that panel.',
     '"Nobody will get past Waruda!" —Tomato',
     None,
-        )
+)
 
 CARD_PRESIDENTS_PRIVILEGE = OJCard(32,
     'President\'s Privilege',
@@ -716,7 +716,7 @@ CARD_PRESIDENTS_PRIVILEGE = OJCard(32,
     'turn.',
     '"There you guys are... Come to the Student Council Office after school, will you?" —Himeji',
     None,
-        )
+)
 
 CARD_PRINCESSS_PRIVILEGE = OJCard(33,
     'Princess\'s Privilege',
@@ -724,7 +724,7 @@ CARD_PRINCESSS_PRIVILEGE = OJCard(33,
     'Discard all cards in your hand. Draw 3 new cards. Can only be used when you have at least 3 cards in your hand.',
     '"You may come and visit my house some day." —Fernet',
     None,
-        )
+)
 
 CARD_PUDDING = OJCard(34,
     'Pudding',
@@ -732,7 +732,7 @@ CARD_PUDDING = OJCard(34,
     'Fully restore HP.',
     '"Hooray!" —QP',
     None,
-        )
+)
 
 CARD_SAKIS_COOKIE = OJCard(35,
     'Saki\'s Cookie',
@@ -740,7 +740,7 @@ CARD_SAKIS_COOKIE = OJCard(35,
     'Heals 1 HP.',
     '"Have a cookie!" —Saki',
     None,
-        )
+)
 
 CARD_STIFF_CRYSTAL = OJCard(36,
     'Stiff Crystal',
@@ -748,7 +748,7 @@ CARD_STIFF_CRYSTAL = OJCard(36,
     'Stock Effect This card negates the effect of a trap card. Gain 5 stars per level of cancelled trap.',
     '"Such a pain in the neck." —Kyoko',
     None,
-        )
+)
 
 CARD_SWEET_DESTROYER = OJCard(37,
     'Sweet Destroyer',
@@ -757,7 +757,7 @@ CARD_SWEET_DESTROYER = OJCard(37,
     'turn, discard as many cards as you gained.',
     '"The sweets that bring harm to the world... I will destroy them all!" ―Sweet Breaker',
     None,
-        )
+)
 
 CARD_TREASURE_THIEF = OJCard(38,
     'Treasure Thief',
@@ -765,7 +765,7 @@ CARD_TREASURE_THIEF = OJCard(38,
     'Steal a random card from all players on the same tile as you.',
     '"Pokya Po! (Treasure, get!)" ―Marie Poppo',
     None,
-        )
+)
 
 CARD_ACCELERATING_SKY = OJCard(39,
     'Accelerating Sky',
@@ -773,7 +773,7 @@ CARD_ACCELERATING_SKY = OJCard(39,
     'Effect Duration: 3 chapters. All players gain +1 EVD and -1 DEF.',
     '"Girls are leaping through the sky...?"',
     None,
-        )
+)
 
 CARD_CLOUD_OF_SEAGULL = OJCard(40,
     ' Cloud of Seagulls',
@@ -781,7 +781,7 @@ CARD_CLOUD_OF_SEAGULL = OJCard(40,
     'A randomly chosen unit will receive 2 damage.',
     '"Squaawk!" —Seagull',
     None,
-        )
+)
 
 CARD_DINNER = OJCard(41,
     'Dinner',
@@ -789,7 +789,7 @@ CARD_DINNER = OJCard(41,
     'Heals all units for 3 HP.',
     '"Let\'s have supper together." —Natsumi',
     None,
-        )
+)
 
 CARD_FORCED_REVIVAL = OJCard(42,
     'Forced Revival',
@@ -797,7 +797,7 @@ CARD_FORCED_REVIVAL = OJCard(42,
     'All units suffering KO are revived with 1 HP.',
     '"You\'ll all be up in a jiffy." —Kiriko',
     None,
-        )
+)
 
 CARD_GIFT_EXCHANGE = OJCard(43,
     'Gift Exchange',
@@ -806,7 +806,7 @@ CARD_GIFT_EXCHANGE = OJCard(43,
     'unchanged.',
     '"A gift exchange? Let\'s do it!" —Rbit, Red, and Blue',
     None,
-        )
+)
 
 CARD_HERE_AND_THERE = OJCard(44,
     'Here and There',
@@ -814,7 +814,7 @@ CARD_HERE_AND_THERE = OJCard(44,
     'All players are moved to randomly chosen panels.',
     '"To the next world!" —Marie Poppo',
     None,
-        )
+)
 
 CARD_HOLY_NIGHT = OJCard(45,
     'Holy Night',
@@ -822,7 +822,7 @@ CARD_HOLY_NIGHT = OJCard(45,
     'Permanent Effect. Start-of-chapter bonus stars are increased by one.',
     '"Aha, that\'s why it\'s a party night." —Hime',
     None,
-        )
+)
 
 CARD_INDISCRIMINATE_FIRE_SUPPORT = OJCard(46,
     'Indiscriminate Fire Support',
@@ -831,7 +831,7 @@ CARD_INDISCRIMINATE_FIRE_SUPPORT = OJCard(46,
     'effect ends when a unit suffers KO.',
     '"......" ―Sora',
     None,
-        )
+)
 
 CARD_LITTLE_WAR = OJCard(47,
     'Little War',
@@ -839,7 +839,7 @@ CARD_LITTLE_WAR = OJCard(47,
     'Effect Duration: 3 chapters Offense and defense will happen twice in all battles.',
     '"I believe... I have the power to stop this..." —Suguri',
     None,
-        )
+)
 
 CARD_MIX_PHENOMENON = OJCard(48,
     'Mix Phenomenon',
@@ -848,7 +848,7 @@ CARD_MIX_PHENOMENON = OJCard(48,
     '"A hole in a wall-like force between dimensions...It would appear that this phenomenon is mixing the worlds '
     'themselves together." —Yukito',
     None,
-        )
+)
 
 CARD_OH_MY_FRIEND = OJCard(49,
     'Oh My Friend',
@@ -856,7 +856,7 @@ CARD_OH_MY_FRIEND = OJCard(49,
     'A boss will show up.',
     '"Machines have friends too." —NoName',
     None,
-        )
+)
 
 CARD_OUT_OF_AMMO = OJCard(50,
     'Out of Ammo',
@@ -872,7 +872,7 @@ CARD_PARTY_TIME = OJCard(51,
     'All units are randomly warped onto the same panel. End your turn.',
     '"At tonight\'s banquet, the Beasts of Darkness shall dance wildly." ―Krilalaris',
     None,
-        )
+)
 
 CARD_PLAY_OF_GODS = OJCard(52,
     'Play of the Gods',
@@ -881,7 +881,7 @@ CARD_PLAY_OF_GODS = OJCard(52,
     '"We will get golden eggs!" —QP\n'
     '"And make the best pudding out of them!" —Saki',
     None,
-        )
+)
 
 CARD_SCARY_SOLICITATION = OJCard(53,
     'Scary Solicitation',
@@ -890,7 +890,7 @@ CARD_SCARY_SOLICITATION = OJCard(53,
     'maximum.',
     '"You\'ll buy it, of course. You\'ll buy it, won\'t you?" —Merchant',
     None,
-        )
+)
 
 CARD_SCRAMBLE_EVE = OJCard(54,
     'Scrambled Eve',
@@ -898,7 +898,7 @@ CARD_SCRAMBLE_EVE = OJCard(54,
     'All players return their hand to the deck, and the deck is shuffled. Players gain 5 stars for each returned card.',
     '"Wait! Give me back the presents!" —Aru',
     None,
-        )
+)
 
 CARD_SEALED_GUARDIAN = OJCard(55,
     'Sealed Guardian',
@@ -906,7 +906,7 @@ CARD_SEALED_GUARDIAN = OJCard(55,
     'Every unit\'s HP becomes 1.',
     '"Meet the guardian angel of this vessel." —Shifu',
     None,
-        )
+)
 
 CARD_SERENE_HUSH = OJCard(56,
     'Serene Hush',
@@ -915,7 +915,7 @@ CARD_SERENE_HUSH = OJCard(56,
     '"We have nothing to do..." ―Sumika\n'
     '"Let\'s enjoy the peace and quiet." ―Suguri',
     None,
-        )
+)
 
 CARD_STAR_BLASTING_LIGHT = OJCard(57,
     'Star-Blasting Light',
@@ -924,7 +924,7 @@ CARD_STAR_BLASTING_LIGHT = OJCard(57,
     '"A light capable of burning down the city... even the planet... I can tell its source is up there in the sky." '
     '—Sora',
     None,
-        )
+)
 
 CARD_SUPER_ALL_OUT_MODE = OJCard(58,
     'Super All-Out Mode',
@@ -932,7 +932,7 @@ CARD_SUPER_ALL_OUT_MODE = OJCard(58,
     'Stock Effect All units gain +2 ATK during their next battle.',
     '"This is gonna hurt even if you know it\'s coming!!" —Tomomo',
     None,
-        )
+)
 
 CARD_UNPAID_WORK = OJCard(59,
     'Unpaid Work',
@@ -940,7 +940,7 @@ CARD_UNPAID_WORK = OJCard(59,
     'Effect Duration: 1 Chapter. No units will gain stars from any sources.',
     '"Where\'s my payment!" ―Chris',
     None,
-        )
+)
 
 CARD_WE_ARE_WARUDA = OJCard(60,
     'We Are Waruda',
@@ -948,7 +948,7 @@ CARD_WE_ARE_WARUDA = OJCard(60,
     'Move all trap cards onto randomly chosen panels.',
     '"Useless. No one can beat Tomato." —Tomato',
     None,
-        )
+)
 
 CARD_BLOODLUST = OJCard(61,
     'Bloodlust',
@@ -957,7 +957,7 @@ CARD_BLOODLUST = OJCard(61,
     'This card is discarded upon KO or use.',
     '"The true power of my beast... I wonder if it\'s like this." —Krila',
     None,
-        )
+)
 
 CARD_LOST_CHILD = OJCard(62,
     'Lost Child',
@@ -966,7 +966,7 @@ CARD_LOST_CHILD = OJCard(62,
     'use.',
     '"Where am I?" ―Tsih',
     None,
-        )
+)
 
 CARD_LUCKY_CHARM = OJCard(63,
     'Lucky Charm',
@@ -975,7 +975,7 @@ CARD_LUCKY_CHARM = OJCard(63,
     'defeat, give Lvl x 3 more stars.',
     '"Woo-hoo, so many stars! Today\'s my day!!" ―Tomomo',
     None,
-        )
+)
 
 CARD_METALLIC_MONOCOQUE = OJCard(64,
     'Metallic Monocoque',
@@ -983,7 +983,7 @@ CARD_METALLIC_MONOCOQUE = OJCard(64,
     'When a non-battle effect deals any damage to you, that damage is reduced by 1, and you lose Lvl x 2 stars.',
     '"What a timid generation we live in." ―Sherry',
     None,
-        )
+)
 
 CARD_POPPO_THE_SNATCHER = OJCard(65,
     'Poppo the Snatcher',
@@ -992,7 +992,7 @@ CARD_POPPO_THE_SNATCHER = OJCard(65,
     'holding this card. This card is discarded upon KO or use.',
     '"Pokyakya!!" —Poppo',
     None,
-        )
+)
 
 CARD_PRICE_OF_POWER = OJCard(66,
     'Price of Power',
@@ -1001,7 +1001,7 @@ CARD_PRICE_OF_POWER = OJCard(66,
     'discarded on use.',
     '"Even if I survive the war... With this body, there\'s nothing I can do." ―Nath',
     None,
-        )
+)
 
 CARD_UNLUCKY_CHARM = OJCard(67,
     'Unlucky Charm',
@@ -1010,7 +1010,7 @@ CARD_UNLUCKY_CHARM = OJCard(67,
     'your star count, you may use this card for free.',
     '"Pitch black darkness disrupts my slumber, hence I yearn for light..." —Krilalaris',
     None,
-        )
+)
 
 CARD_WINDY_ENCHANTMENT = OJCard(68,
     'Windy Enchantment',
@@ -1018,7 +1018,7 @@ CARD_WINDY_ENCHANTMENT = OJCard(68,
     'Gain +1 MOV. Cannot Norma while holding this card. Discard upon use.',
     'People call her Barefoot Alicianrone.',
     None,
-        )
+)
 
 CARD_ASSAULT = OJCard(69,
     'Assault',
@@ -1026,7 +1026,7 @@ CARD_ASSAULT = OJCard(69,
     'Battle the player who set this card, starting with their attack.',
     '"I\'ll make you leave the guild today for sure!" —Peat',
     None,
-        )
+)
 
 CARD_BAD_PUDDING = OJCard(70,
     'Bad Pudding',
@@ -1034,7 +1034,7 @@ CARD_BAD_PUDDING = OJCard(70,
     'Discard a random card.',
     '"Pudding with soy sauce, tastes like sea urchin!" —Yuki',
     None,
-        )
+)
 
 CARD_BRUTAL_PRANK = OJCard(71,
     3, CARD_COST_0, 3, CARD_TYPE_TRAP, CARD_PACK_ACCELERATION_PACK, CARD_RARITY_COMMON,
@@ -1043,7 +1043,7 @@ CARD_BRUTAL_PRANK = OJCard(71,
     '"Noooo, Mr. Cow! Mr. Frog!" —Yuuki\n'
     '"Hahahaha! Wail and weep!!" —Yuki',
     None,
-        )
+)
 
 CARD_DANGEROUS_PUDDING = OJCard(72,
     'Dangerous Pudding',
@@ -1051,7 +1051,7 @@ CARD_DANGEROUS_PUDDING = OJCard(72,
     'Stock Effect Your next turn will be skipped.',
     '"One glance is all it took for that pudding to steal my heart."',
     None,
-        )
+)
 
 CARD_ENCORE = OJCard(73,
     'Encore',
@@ -1059,7 +1059,7 @@ CARD_ENCORE = OJCard(73,
     'When this card is activated either on Bonus, Drop, Draw or Encounter, that panel\'s effect takes place twice.',
     '"Encore! Encore!"',
     None,
-        )
+)
 
 CARD_EXCHANGE = OJCard(74,
     'Exchange',
@@ -1069,7 +1069,7 @@ CARD_EXCHANGE = OJCard(74,
     '"Heavy..." —Suguri\n'
     '"So drafty without my cap..." —Marc',
     None,
-        )
+)
 
 CARD_FLAMETHROWER = OJCard(75,
     'Flamethrower',
@@ -1077,7 +1077,7 @@ CARD_FLAMETHROWER = OJCard(75,
     'KO\'s a player. If the player has any cards in their hand, they will lose all of them instead of suffering KO.',
     '"Heeehaaaaah!" —Punk',
     None,
-        )
+)
 
 CARD_FOR_THE_FUTURE_OF_THE_TOY_STORE = OJCard(76,
     ' For the Future of the Toy Store',
@@ -1086,7 +1086,7 @@ CARD_FOR_THE_FUTURE_OF_THE_TOY_STORE = OJCard(76,
     'less than 50 stars.',
     '"If only! If only there was no Santa!!" —Arthur',
     None,
-        )
+)
 
 CARD_GO_AWAY = OJCard(77,
     'Go Away',
@@ -1094,7 +1094,7 @@ CARD_GO_AWAY = OJCard(77,
     'You are moved to a randomly chosen panel.',
     '"Ahaha, I like this." —Nanako',
     None,
-        )
+)
 
 CARD_HEAT_300 = OJCard(78,
     'Heat 300%',
@@ -1102,7 +1102,7 @@ CARD_HEAT_300 = OJCard(78,
     'Effect Duration: 3 chapters In battle, gain -2 DEF.',
     '"All I need to do is dodge every attack!" —Suguri',
     None,
-        )
+)
 
 CARD_INVASION = OJCard(79,
     'Invasion',
@@ -1110,7 +1110,7 @@ CARD_INVASION = OJCard(79,
     'You will have an encounter. The enemy will attack first.',
     '"What, I was attacked...?" —Suguri',
     None,
-        )
+)
 
 CARD_I_WANNA_SEE_YOU = OJCard(80,
     'I Wanna See You',
@@ -1119,7 +1119,7 @@ CARD_I_WANNA_SEE_YOU = OJCard(80,
     'trap then gains this card instead of it being discarded.',
     '"Kyupita... I want to see you." ―Kyousuke',
     None,
-        )
+)
 
 CARD_MIMYUUS_HAMMER = OJCard(81,
     'Mimyuu\'s Hammer',
@@ -1127,7 +1127,7 @@ CARD_MIMYUUS_HAMMER = OJCard(81,
     'Deals 1 damage.',
     '"Thank you for dying!" —Mimyuu',
     None,
-        )
+)
 
 CARD_PIGGY_BANK = OJCard(82,
     'Piggy Bank',
@@ -1135,7 +1135,7 @@ CARD_PIGGY_BANK = OJCard(82,
     'Gain stars equal to five times the number of chapters passed since this card was set.',
     '"Dad, can\'t I break the piggy yet?" —Mescal',
     None,
-        )
+)
 
 CARD_PIYOPIYO_PROCESSION = OJCard(83,
     'Piyopiyo Procession',
@@ -1143,7 +1143,7 @@ CARD_PIYOPIYO_PROCESSION = OJCard(83,
     'Player suffers 3 random encounters (the player attacks first).',
     '"Piyopiyopiyopiyopiyopiyopiyopiyopiyooo!" —Colored Piyo Army',
     None,
-        )
+)
 
 CARD_POPPOFORMATION = OJCard(84,
     'Poppoformation',
@@ -1151,7 +1151,7 @@ CARD_POPPOFORMATION = OJCard(84,
     'Stock Effect (1). ATK, DEF, and EVD become -1 in your next battle.',
     '"Poppo! Poppopopo!!!" —Everyone',
     None,
-        )
+)
 
 CARD_PRESENT_THIEF = OJCard(85,
     'Present Thief',
@@ -1160,7 +1160,7 @@ CARD_PRESENT_THIEF = OJCard(85,
     'to step on the trap.',
     '"These do no good!" —Niko',
     None,
-        )
+)
 
 CARD_SEALED_MEMORIES = OJCard(86,
     'Sealed Memories',
@@ -1168,7 +1168,7 @@ CARD_SEALED_MEMORIES = OJCard(86,
     'For 3 turns, target sees all cards face down, and other players can see their cards.',
     '"Order within the world...? What the heck does pudding have to do with that!?" —QP',
     None,
-        )
+)
 
 CARD_SKY_RESTAURANT_PURES = OJCard(87,
     ' Sky Restaurant \'Pures\'',
@@ -1176,7 +1176,7 @@ CARD_SKY_RESTAURANT_PURES = OJCard(87,
     'Lose half your stars and fully restore HP.',
     '"We have a guest to treat!" —Chris',
     None,
-        )
+)
 
 CARD_TRAGEDY_IN_THE_DEAD_OF_NIGHT = OJCard(88,
     'Tragedy in the Dead of Night',
@@ -1184,7 +1184,7 @@ CARD_TRAGEDY_IN_THE_DEAD_OF_NIGHT = OJCard(88,
     'Discard a random card. That card will go to the player who has set this card.',
     '"Such happiness will be snatched away just like that."',
     None,
-        )
+)
 
 CARD_WANTED = OJCard(89,
     'Wanted',
@@ -1192,7 +1192,7 @@ CARD_WANTED = OJCard(89,
     'Stock Effect You give double wins on KO from battle. Effect expires on KO.',
     '"Over here! My nose is never wrong!" ―QP',
     None,
-        )
+)
 
 #### #### #### #### HYPER #### #### #### ####
 
@@ -1202,7 +1202,7 @@ CARD_ANOTHER_ULTIMATE_WEAPON = OJCard(90,
     'Gain +1 ATK and DEF and an additional +1 ATK and DEF for every 20 stars spent on this card.',
     '"With you gone, I am their ultimate weapon now." - Nath',
     None,
-        )
+)
 
 CARD_BEYOND_HELL = OJCard(91,
     'Beyond Hell',
@@ -1210,7 +1210,7 @@ CARD_BEYOND_HELL = OJCard(91,
     'During this battle, gain +1 to ATK, DEF and EVD for every HP you are missing.',
     '"Syura\'s powers go beyond Hell itself! Allow me to demonstrate!" ―Syura',
     None,
-        )
+)
 
 CARD_BLUE_CROW_THE_SECOND = OJCard(92,
     'Blue Crow the Second',
@@ -1218,7 +1218,7 @@ CARD_BLUE_CROW_THE_SECOND = OJCard(92,
     'During this battle, gain ATK and DEF but lose EVD equal to the number of cards in your hand.',
     '"I\'m gonna settle this!" - Peat',
     None,
-        )
+)
 
 CARD_DEPLOY_BITS = OJCard(93,
     'Deploy Bits',
@@ -1226,7 +1226,7 @@ CARD_DEPLOY_BITS = OJCard(93,
     'During this battle, gain a total of +7 points to ATK, DEF, and/or EVD, distributed randomly.',
     '"No matter what, you can\'t escape my Bits." - Nanako',
     None,
-        )
+)
 
 CARD_HYPER_MODE = OJCard(94,
     'Hyper Mode',
@@ -1235,7 +1235,7 @@ CARD_HYPER_MODE = OJCard(94,
     'unit will revive next turn.',
     '"HYPER MODE!" - QP',
     None,
-        )
+)
 
 CARD_INTELLIGENCE_OFFICER = OJCard(95,
     'Intelligence Officer',
@@ -1246,7 +1246,7 @@ CARD_INTELLIGENCE_OFFICER = OJCard(95,
     'Others +3 EVD',
     '"I can see through everything!" - Arnelle',
     None,
-        )
+)
 
 CARD_REFLECTIVE_SHELL = OJCard(96,
     'Reflective Shell',
@@ -1255,7 +1255,7 @@ CARD_REFLECTIVE_SHELL = OJCard(96,
     'Can only be used when defending.',
     '"Enemy detected. Destroying." ―Robo Ball',
     None,
-        )
+)
 
 CARD_SELF_DESTRUCT = OJCard(97,
     'Self-Destruct',
@@ -1263,7 +1263,7 @@ CARD_SELF_DESTRUCT = OJCard(97,
     'On KO, also KO the opponent. Enemy gains no stars or wins, and loses half their stars.',
     '"I\'m sorry...I can\'t make it back..." - Alte',
     None,
-        )
+)
 
 CARD_WARUDA_MACHINE_BLAST_OFF = OJCard(98,
     'Waruda Machine, Blast Off!',
@@ -1271,7 +1271,7 @@ CARD_WARUDA_MACHINE_BLAST_OFF = OJCard(98,
     'During this battle, gain ATK and DEF but lose EVD equal to the number of cards in your opponent\'s hand.',
     '"Revenge!" -Tomato',
     None,
-        )
+)
 
 CARD_ACCELERATOR = OJCard(99,
     'Accelerator',
@@ -1279,7 +1279,7 @@ CARD_ACCELERATOR = OJCard(99,
     'Effect Duration: 1 chapter Roll two dice for movement, battle, bonus and drop.',
     '"I\'m accelerating." ―Suguri',
     None,
-        )
+)
 
 CARD_ANGEL_HAND = OJCard(100,
     'Angel Hand',
@@ -1288,7 +1288,7 @@ CARD_ANGEL_HAND = OJCard(100,
     'Devil Hand.',
     '"This is the power of mercy." ―Yuuki',
     None,
-        )
+)
 
 CARD_AWAKENING_OF_TALENT = OJCard(101,
     'Awakening of Talent',
@@ -1296,7 +1296,7 @@ CARD_AWAKENING_OF_TALENT = OJCard(101,
     'Until end of turn, roll 5 for move, battle, bonus or drop. This card can also be used as a Battle Card.',
     '"I\'ll commence... my operation now." -Sora',
     None,
-        )
+)
 
 CARD_BIG_ROCKET_CANNON = OJCard(102,
     'Big Rocket Cannon',
@@ -1305,7 +1305,7 @@ CARD_BIG_ROCKET_CANNON = OJCard(102,
     '"Rocket Cannon" when you use another card or you suffer KO.',
     '"Go!" ―Marc',
     None,
-        )
+)
 
 CARD_BLAZING = OJCard(103,
     'Blazing!',
@@ -1314,7 +1314,7 @@ CARD_BLAZING = OJCard(103,
     'Chapters. ATK +1, DEF -1. Effect expires on KO.',
     '"Good! Good! This feeling really is the best!" ―Kae',
     None,
-        )
+)
 
 CARD_BRANCH_EXPANSION_STRATEGY = OJCard(104,
     'Branch Expansion Strategy',
@@ -1322,7 +1322,7 @@ CARD_BRANCH_EXPANSION_STRATEGY = OJCard(104,
     'Turn all your cards, including this one, into "Rbit Hobby Shop." You may play one more card in this turn.',
     '"Phaaw..." ―Arthur',
     None,
-        )
+)
 
 CARD_CAST_OFF = OJCard(105,
     'Cast Off',
@@ -1330,7 +1330,7 @@ CARD_CAST_OFF = OJCard(105,
     'Stock Effect Swap unit\'s base ATK and DEF. Lasts until KO, or Cast Off is used again.',
     '"This calls for a good distraction..." ―Kyousuke',
     None,
-        )
+)
 
 CARD_CHEF_I_COULD_USE_SOME_HELP = OJCard(106,
     'Chef, I Could Use Some Help!',
@@ -1340,7 +1340,7 @@ CARD_CHEF_I_COULD_USE_SOME_HELP = OJCard(106,
     'Store Manager Counters and your Lvl is 4 or higher.',
     '"Chef! I\'m going to need your help!" ―Chris',
     None,
-        )
+    )
 
 CARD_CRYSTAL_BARRIER = OJCard(107,
     'Crystal Barrier',
@@ -1348,7 +1348,7 @@ CARD_CRYSTAL_BARRIER = OJCard(107,
     'Stock Effect (3) Cancel a trap, a battle, or drop panel. Take 1 damage. Consumes 1 stack. Effect expires on KO.',
     '"What a piece of junk, huh..." - Kyoko',
     None,
-        )
+)
 
 CARD_ELLIES_MIRACLE = OJCard(108,
     'Ellie\'s Miracle',
@@ -1357,7 +1357,7 @@ CARD_ELLIES_MIRACLE = OJCard(108,
     'completed, Y = your number of Wins Norma completed, and Z = your number of Stars Norma completed.',
     '"Receive my miracle!" - Ellie',
     None,
-        )
+)
 
 CARD_EXTENDED_PHOTON_RIFLE = OJCard(109,
     'Extended Photon Rifle',
@@ -1365,15 +1365,15 @@ CARD_EXTENDED_PHOTON_RIFLE = OJCard(109,
     'Deal 1 damage to another random unit. If KO\'d, gain 1 win. Repeat as many times as your current level.',
     '"I\'ll shoot you all down." ―Iru',
     None,
-        )
+)
 
 CARD_EXTRAORDINARY_SPECS = OJCard(110,
     'Extraordinary Specs',
     3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Effect Duration: 1 chapter Roll 6 for movement, battle, bonus and drop.',
     '"I\'d appreciate it if you dropped your weapons." -Sora',
-    None
-        )
+    None,
+)
 
 CARD_FULL_SPEED_ALICIANRONE = OJCard(111,
     'Full Speed Alicianrone',
@@ -1382,7 +1382,7 @@ CARD_FULL_SPEED_ALICIANRONE = OJCard(111,
     'they are KO\'d by the damage, gain Wins as though from a normal battle. After this effect, your turn ends.',
     '"I\'ll go fast and cut my way through!" - Alicianrone',
     None,
-        )
+)
 
 CARD_IMMOVABLE_OBJECT = OJCard(112,
     'Immovable Object',
@@ -1399,7 +1399,7 @@ CARD_JONATHAN_RUSH = OJCard(113,
     'Move to an enemy and attack them. Target gains -1 DEF. After the battle, your turn ends.',
     '"Squaawk!" ―Seagull',
     None,
-        )
+)
 
 CARD_LEAP_THROUGH_SPACE = OJCard(114,
     'Leap Through Space',
@@ -1408,7 +1408,7 @@ CARD_LEAP_THROUGH_SPACE = OJCard(114,
     'exist, this card becomes "Leap through Space (Marking)."',
     '"Poof." ―Mira',
     None,
-        )
+)
 
 CARD_LEAP_THROUGH_SPACE_MARKING = OJCard(115,
     'Leap Through Space (Marking)',
@@ -1417,7 +1417,7 @@ CARD_LEAP_THROUGH_SPACE_MARKING = OJCard(115,
     'is not discarded upon use.',
     '"Poof." ―Mira',
     None,
-        )
+)
 
 CARD_LULUS_LUCKY_EGG = OJCard(116,
     'Lulu\'s Lucky Egg',
@@ -1427,7 +1427,7 @@ CARD_LULUS_LUCKY_EGG = OJCard(116,
     'can only trigger once.',
     '"Ugh... Lulu\'s about to lay an egg..." - Lulu',
     None,
-        )
+)
 
 CARD_MANAGER_I_COULD_USE_SOME_HELP = OJCard(117,
     'Manager, I Could Use Some Help!',
@@ -1437,7 +1437,7 @@ CARD_MANAGER_I_COULD_USE_SOME_HELP = OJCard(117,
     '"Chef, I Could Use Some Help!" if you have less than 4 Store Manager Counters.',
     '"Manager, help me!" ―Chris',
     None,
-        )
+)
 
 CARD_MIRACLE_WALKER = OJCard(118,
     'Miracle Walker',
@@ -1445,7 +1445,7 @@ CARD_MIRACLE_WALKER = OJCard(118,
     'Turn all your cards, including this one, into random Hyper cards. You may play one more card this turn.',
     '"Hooray! Nico will try her best!" ―Nico',
     None,
-        )
+)
 
 CARD_OBSERVER_OF_ETERNITY = OJCard(119,
     'Observer of Eternity',
@@ -1453,7 +1453,7 @@ CARD_OBSERVER_OF_ETERNITY = OJCard(119,
     'Add 2 random Boost/Event cards that deal damage to your hand.',
     '"Now then, let\'s see how this will turn out." - Suguri',
     None,
-        )
+)
 
 CARD_PROTAGONISTS_PRIVILEGE = OJCard(120,
     'Protagonist\'s Privilege',
@@ -1462,7 +1462,7 @@ CARD_PROTAGONISTS_PRIVILEGE = OJCard(120,
     'combat).',
     '"This is the privilege of the main character!" - Kai',
     None,
-        )
+)
 
 CARD_RAGING_MADNESS = OJCard(121,
     'Raging Madness',
@@ -1472,7 +1472,7 @@ CARD_RAGING_MADNESS = OJCard(121,
     'KO target in battle, and -50% Stars and Wins if you KO any other unit.',
     '"Gyaoooh!" - Maynie',
     None,
-        )
+)
 
 CARD_REPRODUCTION_OF_RECORDS = OJCard(122,
     'Reproduction of Records',
@@ -1481,7 +1481,7 @@ CARD_REPRODUCTION_OF_RECORDS = OJCard(122,
     'Those cards will be treated as being Level 1 and having no base cost while in your hand.',
     '"Sumika\'s sweet memory!" - Sumika',
     None,
-        )
+)
 
 CARD_RIVAL = OJCard(123,
     'Rival',
@@ -1489,7 +1489,7 @@ CARD_RIVAL = OJCard(123,
     'Challenge target player. You attack first. During battle, gain +1 ATK.',
     '"Just like you... I have my battles to fight." - Islay',
     None,
-        )
+)
 
 CARD_ROCKET_CANNON = OJCard(124,
     'Rocket Cannon',
@@ -1498,7 +1498,7 @@ CARD_ROCKET_CANNON = OJCard(124,
     'to target enemy. If KO\'d, you gain wins as though KO\'d in battle.',
     '"Red Barrel... It\'s time to use that!" ―Marc',
     None,
-        )
+)
 
 CARD_SAINT_EYES = OJCard(125,
     'Saint Eyes',
@@ -1515,7 +1515,7 @@ CARD_SOLID_WITCH = OJCard(126,
     'Effect Duration: 1 chapter. Take no damage.',
     '"No flimsy attacks can hurt me!" ―Miusaki',
     None,
-        )
+)
 
 CARD_SPECIAL_STAGE = OJCard(127,
     'Special Stage',
@@ -1525,7 +1525,7 @@ CARD_SPECIAL_STAGE = OJCard(127,
     '(your Lvl) x5 stars from them. Ends on KO.',
     '"We are the strongest idols!" ―Sora & Sham',
     None,
-        )
+)
 
 CARD_STEALTH_ON = OJCard(128,
     'Stealth On',
@@ -1534,7 +1534,7 @@ CARD_STEALTH_ON = OJCard(128,
     'expires on entering battle. Gain +2 ATK when entering battle.',
     '"Look at me vanish!" ―Tsih',
     None,
-        )
+)
 
 CARD_SWEET_GUARDIAN = OJCard(129,
     'Sweet Guardian',
@@ -1542,7 +1542,7 @@ CARD_SWEET_GUARDIAN = OJCard(129,
     'Draw 2 cards with "Pudding" in their name from the center deck.',
     '"My little... pudding..." ―QP',
     None,
-        )
+)
 
 CARD_TURBO_CHARGED = OJCard(130,
     'Turbo Charged',
@@ -1551,7 +1551,7 @@ CARD_TURBO_CHARGED = OJCard(130,
     'duration. Effect expires on KO.',
     '"Rumble rumble rumble." -Shifu Robot',
     None,
-        )
+)
 
 CARD_UBIQUITOUS = OJCard(131,
     'Ubiquitous',
@@ -1559,7 +1559,7 @@ CARD_UBIQUITOUS = OJCard(131,
     'Move to target unit\'s panel. In addition, steal stars equal to 10x their level.',
     '"Poppo! Poppopopopopo!" ―Marie Poppo',
     None,
-        )
+)
 
 CARD_WITCHS_HAIR_LOCK = OJCard(132,
     'Witch\'s Hair Lock',
@@ -1567,7 +1567,7 @@ CARD_WITCHS_HAIR_LOCK = OJCard(132,
     'Stop target unit\'s next move action.',
     '"No one can get out of Repa\'s hair." ―Ceoreparque',
     None,
-        )
+)
 
 CARD_X16_BIG_ROCKET = OJCard(133,
     'x16 Big Rocket',
@@ -1575,7 +1575,7 @@ CARD_X16_BIG_ROCKET = OJCard(133,
     'Deal damage equal to your level to target unit. A KO from this effect gives you 2 Wins.',
     '"Charged! Go!" - Marc',
     None,
-        )
+)
 
 CARD_AIR_STRIKE = OJCard(134,
     'Air Strike',
@@ -1583,7 +1583,7 @@ CARD_AIR_STRIKE = OJCard(134,
     'Every unit except your own receives 1 to 3 damage. Gain 15 stars on every KO',
     '"Hmph, go down, all of you." - Fernet',
     None,
-        )
+)
 
 CARD_BINDING_CHAINS = OJCard(135,
     'Binding Chains',
@@ -1592,7 +1592,7 @@ CARD_BINDING_CHAINS = OJCard(135,
     'Duration: 2 Chapters. Gain -2 EVD and -1 MOV.',
     '"I don\'t like this sort of thing." -Hime',
     None,
-        )
+)
 
 CARD_COOKING_TIME = OJCard(136,
     'Cooking Time',
@@ -1600,7 +1600,7 @@ CARD_COOKING_TIME = OJCard(136,
     'All players recover your Lvl x HP. Gain 5 stars for each HP recovered.',
     '"It\'s meal time!" ―Natsumi',
     None,
-        )
+)
 
 CARD_DELTA_FIELD = OJCard(137,
     'Delta Field',
@@ -1608,7 +1608,7 @@ CARD_DELTA_FIELD = OJCard(137,
     'All other units receive the following effect until your next turn: All dice rolls will be 1.',
     '"If you insist on staying here, I\'ll take you back no matter how!" ―Sham',
     None,
-        )
+)
 
 CARD_DEVIL_HAND = OJCard(138,
     'Devil Hand',
@@ -1617,7 +1617,7 @@ CARD_DEVIL_HAND = OJCard(138,
     'into Angel Hand.',
     '"Eat the power of the devil!" ―Yuuki',
     None,
-        )
+)
 
 CARD_DO_PIRATES_FLY_IN_THE_SKY = OJCard(139,
     'Do Pirates Fly in the Sky?',
@@ -1625,7 +1625,7 @@ CARD_DO_PIRATES_FLY_IN_THE_SKY = OJCard(139,
     'Set "Flying Pirate" on 2-3 random panels.',
     '"There ain\'t no law against pirates flying in the sky." ―Tequila',
     None,
-        )
+)
 
 CARD_EVIL_MASTERMIND = OJCard(140,
     'Evil Mastermind',
@@ -1634,7 +1634,7 @@ CARD_EVIL_MASTERMIND = OJCard(140,
     '3 from the deck and set a random one on your current panel.',
     '"Fear my powers!" -Yuki',
     None,
-        )
+)
 
 CARD_EVIL_SPY_WORK_PREPARATION = OJCard(141,
     'Evil Spy Work - Preparation',
@@ -1642,7 +1642,7 @@ CARD_EVIL_SPY_WORK_PREPARATION = OJCard(141,
     'Place 4 "Evil Spy Work - Execution" cards at random positions in the Center Deck.',
     '"Fear Mimyuu\'s pranks." -Mimyuu',
     None,
-        )
+)
 
 CARD_FINAL_SURGERY = OJCard(142,
     'Final Surgery',
@@ -1650,7 +1650,7 @@ CARD_FINAL_SURGERY = OJCard(142,
     'KO all units with 1 HP and gain stars equal to 25x the number of KO\'d units.',
     '"Just hold still, I\'ll fix you up real quick." - Kiriko',
     None,
-        )
+)
 
 CARD_GAMBLE = OJCard(143,
     'Gamble!',
@@ -1658,7 +1658,7 @@ CARD_GAMBLE = OJCard(143,
     'A randomly chosen unit is KO\'d.',
     '"Why not use this to decide whose turn it is?" - Yuki',
     None,
-        )
+)
 
 CARD_MAGICAL_INFERNO = OJCard(144,
     'Magical Inferno',
@@ -1667,7 +1667,7 @@ CARD_MAGICAL_INFERNO = OJCard(144,
     'stars from each KO\'d unit as though KO\'d in battle. Then end your turn.',
     '"Inferno!" ―Mio',
     None,
-        )
+)
 
 CARD_MAGICAL_MASSACRE = OJCard(145,
     'Magical Massacre',
@@ -1675,7 +1675,7 @@ CARD_MAGICAL_MASSACRE = OJCard(145,
     'All units whose HP is full or higher will suffer KO. Gain -1 REC on next Revive roll for each enemy KO\'d.',
     '"Disappear." -Tomomo',
     None,
-        )
+)
 
 CARD_MAGICAL_REVENGE = OJCard(146,
     'Magical Revenge',
@@ -1683,8 +1683,8 @@ CARD_MAGICAL_REVENGE = OJCard(146,
     'For each missing HP, random enemy takes 1 damage. If a unit is KO\'d, you gain 1 Win. When not held by Tomomo '
     '(Sweet Eater), this card becomes Miracle Red Bean Ice Cream.',
     '"It\'s Magical Revenge time!" ―Tomomo',
-    None
-        )
+    None,
+)
 
 CARD_MELTING_MEMORIES = OJCard(147,
     'Melting Memories',
@@ -1692,7 +1692,7 @@ CARD_MELTING_MEMORIES = OJCard(147,
     'All other players discard and replace a card from their hand. Reverse all enemy cards.',
     '"How foolish you are to have challenged a God. Prepare to taste your bitter defeat!" - Sweet Breaker',
     None,
-        )
+)
 
 CARD_OVERSEER = OJCard(148,
     'Overseer',
@@ -1701,7 +1701,7 @@ CARD_OVERSEER = OJCard(148,
     'fights the boss instead. Can only use against players.',
     '"Hahaha! Here comes my friend!" ―NoName',
     None,
-        )
+)
 
 CARD_PLUSHIE_MASTER = OJCard(149,
     'Plushie Master',
@@ -1709,7 +1709,7 @@ CARD_PLUSHIE_MASTER = OJCard(149,
     'Set "Dance, Long-Eared Beasts!" trap on 3-5 random panels.',
     '"Dance, long-eared beasts!" -Krilalaris',
     None,
-        )
+)
 
 CARD_PRESENT_FOR_YOU = OJCard(150,
     'Present for You',
@@ -1718,7 +1718,7 @@ CARD_PRESENT_FOR_YOU = OJCard(150,
     'to 10x the number of all cards drawn.',
     '"Presents for good boys and girls." -Aru',
     None,
-        )
+)
 
 CARD_REVIVAL_OF_STARS = OJCard(151,
     'Revival of Stars',
@@ -1727,7 +1727,7 @@ CARD_REVIVAL_OF_STARS = OJCard(151,
     'Panels. -1 ATK when on a marked panel.',
     '"The dream you protected has spread across the whole planet." ―Suguri',
     None,
-        )
+)
 
 CARD_STAR_BLASTING_FUSE = OJCard(152,
     'Star Blasting Fuse',
@@ -1735,7 +1735,7 @@ CARD_STAR_BLASTING_FUSE = OJCard(152,
     'Set "Invisible Bomb" on 3-5 random panels',
     '"Because I am Star Breaker, the blasting fuse to the world\'s end." -Star Breaker',
     None,
-        )
+)
 
 CARD_SUBSPACE_TUNNEL = OJCard(153,
     'Subspace Tunnel',
@@ -1743,7 +1743,7 @@ CARD_SUBSPACE_TUNNEL = OJCard(153,
     'Effect Duration: Player level Turn 4-6 panels into Warp Move panels and then warp to one of them.',
     '"Po! Po! Po! Popoppo!!" ―Marie Poppo',
     None,
-        )
+)
 
 CARD_TRUE_WHITE_CHRISTSMASHER = OJCard(154,
     'True White Christsmasher',
@@ -1752,7 +1752,7 @@ CARD_TRUE_WHITE_CHRISTSMASHER = OJCard(154,
     'stars. When not carrying "Red & Blue", this card becomes "White Christsmasher".',
     '"White Christsmasher!" ―Mei, Red & Blue',
     None,
-        )
+)
 
 CARD_WHIMSICAL_WINDMILL = OJCard(155,
     'Whimsical Windmill',
@@ -1760,7 +1760,7 @@ CARD_WHIMSICAL_WINDMILL = OJCard(155,
     'Fight all other players in order. The enemy goes first. During battle, gain +1 EVD.',
     '"We just want to fly around freely." - Sherry',
     None,
-        )
+)
 
 CARD_WHITE_CHRISTSMASHER = OJCard(156,
     'White Christsmasher',
@@ -1769,7 +1769,7 @@ CARD_WHITE_CHRISTSMASHER = OJCard(156,
     'stars. When carrying "Red & Blue", this card becomes "True White Christsmasher".',
     '"White Christsmasher!" ―Mei',
     None,
-        )
+)
 
 CARD_BANNER_FOR_LIFE = OJCard(157,
     'Banned for Life',
@@ -1777,7 +1777,7 @@ CARD_BANNER_FOR_LIFE = OJCard(157,
     'Can only play Gift cards. Using this card sends it to another player. Discards entire hand upon discard.',
     '"Manager, it\'s your turn!!" -Chris',
     None,
-        )
+)
 
 CARD_BEAST_WITCH = OJCard(158,
     'Beast Witch',
@@ -1787,7 +1787,7 @@ CARD_BEAST_WITCH = OJCard(158,
     'several players carry Beast Witch, the stars are split between them.',
     '"All beasts! Obey me!" - Teotoratta',
     None,
-        )
+)
 
 CARD_EVIL_SPY_WORK_EXECUTION = OJCard(159,
     'Evil Spy Work - Execution',
@@ -1796,7 +1796,7 @@ CARD_EVIL_SPY_WORK_EXECUTION = OJCard(159,
     'from the game.',
     '"You fell for it! Eat it!!" -Mimyuu',
     None,
-        )
+)
 
 CARD_MIRACLE_RED_BEAN_ICE_CREAM = OJCard(160,
     ' Miracle Red Bean Ice Cream',
@@ -1805,7 +1805,7 @@ CARD_MIRACLE_RED_BEAN_ICE_CREAM = OJCard(160,
     'HP. Tomomo (Sweet Eater): When held, this card becomes Magical Revenge. Discard upon use or KO in battle.',
     '"Miracle red bean ice cream!" ―Tomomo',
     None,
-        )
+)
 
 CARD_SANTAS_JOB = OJCard(161,
     'Santa\'s Job',
@@ -1814,7 +1814,7 @@ CARD_SANTAS_JOB = OJCard(161,
     'Target cannot challenge players to a battle until your next turn. This card is discarded upon KO or use',
     '"Children of the world, we are coming for you!" ―Aru',
     None,
-        )
+)
 
 CARD_BIG_BANG_BELL = OJCard(162,
     'Big Bang Bell',
@@ -1823,7 +1823,7 @@ CARD_BIG_BANG_BELL = OJCard(162,
     'half of their stars go to the player who set this trap.',
     '"Mauuuuuryaaaaaaahh!" ―Saki',
     None,
-        )
+)
 
 CARD_DANCE_LONG_EARED_BEASTS = OJCard(163,
     'Dance, Long-Eared Beasts!',
@@ -1831,7 +1831,7 @@ CARD_DANCE_LONG_EARED_BEASTS = OJCard(163,
     'Set "Dance, Long-Eared Beasts!" trap on 3-5 random panels.',
     '"Dance, long-eared beasts!" -Krilalaris',
     None,
-        )
+)
 
 CARD_FLYING_PIRATE = OJCard(164,
     'Flying Pirate',
@@ -1840,7 +1840,7 @@ CARD_FLYING_PIRATE = OJCard(164,
     'the player who set this card.',
     '"Captain～!" - Pirate Minion',
     None,
-        )
+)
 
 CARD_GOLDEN_EGG = OJCard(165,
     'Golden Egg',
@@ -1849,7 +1849,7 @@ CARD_GOLDEN_EGG = OJCard(165,
     'Bonus Panels will act as Drop Panels.',
     '"Cluuuuck!" ―Chicken',
     None,
-        )
+)
 
 CARD_INVISIBLE_BOMB = OJCard(166,
     'Invisible Bomb',
@@ -1857,7 +1857,7 @@ CARD_INVISIBLE_BOMB = OJCard(166,
     'Reduces HP to 1. Does not affect the player who set the trap. Only visible to the player who used this card.',
     '"Because I am Star Breaker, the blasting fuse to the world\'s end." -Star Breaker',
     None,
-        )
+)
 
 CARD_RBIT_HOBBY_SHOP = OJCard(167,
     'Rbit Hobby Shop',
@@ -1867,7 +1867,7 @@ CARD_RBIT_HOBBY_SHOP = OJCard(167,
     'who set this trap.',
     '"All right, it\'s time to open the shop." ―Arthur',
     None,
-        )
+)
 
 #### #### #### #### EVENT CARDS #### #### ####
 
@@ -1878,7 +1878,7 @@ CARD_SWEET_BATTLE = OJCard(168,
     'discarded upon KO or use.',
     '"Here comes another cute and sweet battle!" ―QP',
     (EVENT_CHOCOLATE_FOR_THE_SWEET_GODS, EVENT_RETURN,),
-        )
+)
 
 CARD_SNOWBALL_REFLECTOR = OJCard(169,
     'Snowball Reflector',
@@ -1887,7 +1887,7 @@ CARD_SNOWBALL_REFLECTOR = OJCard(169,
     'effects that would prevent this card from being played.',
     '"A-and it comes right back at you!" ―Aru',
     (EVENT_SANTA_SCRAMBLE, EVENT_RETURN),
-        )
+)
 
 CARD_GROWN_UP_SNOWBALL_FIGHT = OJCard(170,
     'Grown-up Snowball Fight',
@@ -1896,7 +1896,7 @@ CARD_GROWN_UP_SNOWBALL_FIGHT = OJCard(170,
     'from being played.',
     '"Are you prepared for this?" ―Arthur',
     (EVENT_SANTA_SCRAMBLE, EVENT_RETURN),
-        )
+)
 
 CARD_LEGENDARY_MUSHROOM = OJCard(171,
     'Legendary Mushroom',
@@ -1904,7 +1904,7 @@ CARD_LEGENDARY_MUSHROOM = OJCard(171,
     'Smells notoriously funky. / Smells eerily funky.',
     None,
     (EVENT_SHROOM_ZOOM,),
-        )
+)
 
 #### #### #### #### EVENT CARDS DEPRECATED #### #### ####
 
@@ -1914,7 +1914,7 @@ CARD_ULTIMATE_WEAPON_IN_THE_SUN = OJCard(172,
     'During this battle, gain 2 ATK.',
     'I\'ll commence... my vacation now." ―Sora',
     (EVENT_BEACH_PARTY,),
-        )
+)
 
 CARD_LIFEGUARD_ON_THE_WHITE_BEACH = OJCard(173,
     'Lifeguard on the White Beach',
@@ -1922,7 +1922,7 @@ CARD_LIFEGUARD_ON_THE_WHITE_BEACH = OJCard(173,
     'All allies gain a damage reduction of 2 during their next battle.',
     '"Geez, you\'re going overboard." ―Suguri',
     (EVENT_BEACH_PARTY,),
-        )
+)
 
 CARD_GUARDIAN_OF_BLOOMING_FLOWERS = OJCard(174,
     'Guardian of Blooming Flowers',
@@ -1930,7 +1930,7 @@ CARD_GUARDIAN_OF_BLOOMING_FLOWERS = OJCard(174,
     'Revive one KO\'d ally with full HP',
     '"You\'re fine now. The pain\'s gone." ―Hime',
     (EVENT_BEACH_PARTY,),
-        )
+)
 
 CARD_UNFORGIVING_AVENGER = OJCard(175,
     'Unforgiving Avenger',
@@ -1938,7 +1938,7 @@ CARD_UNFORGIVING_AVENGER = OJCard(175,
     'During this battle, damage taken by both sides is doubled.',
     '"Mimyuu! Who did this to you..." ―Tomato',
     (EVENT_BEACH_PARTY,),
-        )
+)
 
 #### #### #### #### OTHER CARDS #### #### ####
 
@@ -1948,14 +1948,14 @@ CARD_RED_AND_BLUE = OJCard(176,
     'When holding this card, gain +1 ATK, DEF and EVD in battle. On Discard or KO, this card is removed from the game.',
     '"We can\'t do this anymore!" ―Red & Blue',
     None,
-        )
+)
 
 CARD_MUSHROOM_BOOST = OJCard(177,
     'Mushroom',
     1, CARD_COST_0, -1, CARD_TYPE_BOOST|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Smells funky.',
     None,
-    None,
+None,
         )
 
 
@@ -1966,7 +1966,7 @@ CHARACTER_QP = OJCharacter(1,
     None,
     (CARD_HYPER_MODE,),
     'QP_(unit).png',
-        )
+)
 
 CHARACTER_SUGURI = OJCharacter(2,
     'Suguri',
@@ -1975,7 +1975,7 @@ CHARACTER_SUGURI = OJCharacter(2,
     None,
     (CARD_ACCELERATOR,),
     'Suguri_(unit).png',
-        )
+)
 
 CHARACTER_MARC = OJCharacter(3,
     'Marc',
@@ -1984,7 +1984,7 @@ CHARACTER_MARC = OJCharacter(3,
     None,
     (CARD_X16_BIG_ROCKET,),
     'Marc_(unit).png',
-        )
+)
 
 CHARACTER_KAI = OJCharacter(4,
     'Kai',
@@ -1993,7 +1993,7 @@ CHARACTER_KAI = OJCharacter(4,
     None,
     (CARD_PROTAGONISTS_PRIVILEGE,),
     'Kai_(unit).png',
-        )
+)
 
 CHARACTER_YUKI = OJCharacter(5,
     'Yuki',
@@ -2002,7 +2002,7 @@ CHARACTER_YUKI = OJCharacter(5,
     None,
     (CARD_GAMBLE,),
     'Yuki_(unit).png',
-        )
+)
 
 CHARACTER_ARU = OJCharacter(6,
     'Aru',
@@ -2011,7 +2011,7 @@ CHARACTER_ARU = OJCharacter(6,
     'Can hold 4 cards.',
     (CARD_PRESENT_FOR_YOU,),
     'Aru_(unit).png',
-        )
+)
 
 CHARACTER_HIME = OJCharacter(7,
     'Hime',
@@ -2020,7 +2020,7 @@ CHARACTER_HIME = OJCharacter(7,
     None,
     (CARD_BINDING_CHAINS,),
     'Hime_(unit).png',
-        )
+)
 
 CHARACTER_SORA = OJCharacter(8,
     'Sora',
@@ -2029,7 +2029,7 @@ CHARACTER_SORA = OJCharacter(8,
     None,
     (CARD_EXTRAORDINARY_SPECS,),
     'Sora_(unit).png',
-        )
+)
 
 CHARACTER_FERNET = OJCharacter(9,
     'Fernet',
@@ -2038,7 +2038,7 @@ CHARACTER_FERNET = OJCharacter(9,
     None,
     (CARD_AIR_STRIKE,),
     'Fernet_(unit).png',
-        )
+)
 
 CHARACTER_PEAT = OJCharacter(10,
     'Peat',
@@ -2047,7 +2047,7 @@ CHARACTER_PEAT = OJCharacter(10,
     None,
     (CARD_BLUE_CROW_THE_SECOND,),
     'Peat_(unit).png',
-        )
+)
 
 CHARACTER_MARIE_POPPO = OJCharacter(11,
     'Marie Poppo',
@@ -2056,7 +2056,7 @@ CHARACTER_MARIE_POPPO = OJCharacter(11,
     None,
     (CARD_UBIQUITOUS,),
     'Marie_Poppo_(unit).png',
-        )
+)
 
 CHARACTER_TOMOMO_UNSOFTENED = OJCharacter(12,
     'Tomomo (Unsoftened)',
@@ -2065,7 +2065,7 @@ CHARACTER_TOMOMO_UNSOFTENED = OJCharacter(12,
     None,
     (CARD_MAGICAL_MASSACRE,),
     'Tomomo_(Softened)_(unit).png',
-        )
+)
 
 CHARACTER_TOMOMO_SOFTENED = OJCharacter(13,
     'Tomomo (Softened)',
@@ -2074,7 +2074,7 @@ CHARACTER_TOMOMO_SOFTENED = OJCharacter(13,
     'Softened: Tomomo is playing with friends, and has lowered her attributes.',
     (CARD_MAGICAL_MASSACRE,),
     'Tomomo_(Softened)_(unit).png',
-        )
+)
 
 CHARACTER_MIO = OJCharacter(14,
     'Mio',
@@ -2083,7 +2083,7 @@ CHARACTER_MIO = OJCharacter(14,
     None,
     (CARD_MAGICAL_INFERNO,),
     'Mio_(unit).png',
-        )
+)
 
 CHARACTER_SYURA = OJCharacter(15,
     'Syura',
@@ -2092,7 +2092,7 @@ CHARACTER_SYURA = OJCharacter(15,
     'When at 1 HP at the start of a battle, gain +1 ATK and +1 EVD until the end of the battle.',
     (CARD_BEYOND_HELL,),
     'Syura_(unit).png',
-        )
+)
 
 CHARACTER_NANAKO = OJCharacter(16,
     'Nanako',
@@ -2101,7 +2101,7 @@ CHARACTER_NANAKO = OJCharacter(16,
     None,
     (CARD_DEPLOY_BITS,),
     'Nanako_(unit).png',
-        )
+)
 
 CHARACTER_SAKI = OJCharacter(17,
     'Saki',
@@ -2110,7 +2110,7 @@ CHARACTER_SAKI = OJCharacter(17,
     None,
     (CARD_BIG_BANG_BELL,),
     'Saki_(unit).png',
-        )
+)
 
 CHARACTER_KYOUSUKE = OJCharacter(18,
     'Kyousuke',
@@ -2119,7 +2119,7 @@ CHARACTER_KYOUSUKE = OJCharacter(18,
     None,
     (CARD_CAST_OFF,),
     'Kyousuke_(unit).png',
-        )
+)
 
 CHARACTER_KRILA = OJCharacter(19,
     'Krila',
@@ -2128,7 +2128,7 @@ CHARACTER_KRILA = OJCharacter(19,
     None,
     (CARD_PLUSHIE_MASTER, CARD_DANCE_LONG_EARED_BEASTS),
     'Krila_(unit).png',
-        )
+)
 
 CHARACTER_KAE = OJCharacter(20,
     'Kae',
@@ -2137,7 +2137,7 @@ CHARACTER_KAE = OJCharacter(20,
     'Add reverse value of DEF to ATK. Gain -1 DEF when attacking.',
     (CARD_BLAZING,),
     'Kae_(unit).png',
-        )
+)
 
 CHARACTER_ALTE = OJCharacter(21,
     'Alte',
@@ -2146,7 +2146,7 @@ CHARACTER_ALTE = OJCharacter(21,
     'In battle, see a random card from the opponent\'s hand. On Self-destruct, gain +1 ATK (up to +3).',
     (CARD_SELF_DESTRUCT,),
     'Alte_(unit).png',
-        )
+)
 
 CHARACTER_KYOKO = OJCharacter(22,
     'Kyoko',
@@ -2155,7 +2155,7 @@ CHARACTER_KYOKO = OJCharacter(22,
     'Cannot use the Evade command in battle.',
     (CARD_CRYSTAL_BARRIER,),
     'Kyoko_(unit).png',
-        )
+)
 
 CHARACTER_SHAM = OJCharacter(23,
     'Sham',
@@ -2164,7 +2164,7 @@ CHARACTER_SHAM = OJCharacter(23,
     None,
     (CARD_DELTA_FIELD,),
     'Sham_(unit).png',
-        )
+)
 
 CHARACTER_SHERRY = OJCharacter(24,
     'Sherry',
@@ -2173,7 +2173,7 @@ CHARACTER_SHERRY = OJCharacter(24,
     'Enemy always goes first. If the enemy is Sherry, ignore this effect.',
     (CARD_WHIMSICAL_WINDMILL,),
     'Sherry_(unit).png',
-        )
+)
 
 CHARACTER_STAR_BREAKER = OJCharacter(25,
     'Star Breaker',
@@ -2182,7 +2182,7 @@ CHARACTER_STAR_BREAKER = OJCharacter(25,
     'can only choose Wins norma.',
     (CARD_STAR_BLASTING_FUSE, CARD_INVISIBLE_BOMB),
     'Star_Breaker_(unit).png',
-        )
+)
 
 CHARACTER_SWEET_BREAKER = OJCharacter(26,
     'Sweet breaker',
@@ -2191,7 +2191,7 @@ CHARACTER_SWEET_BREAKER = OJCharacter(26,
     'When battling a player with reversed cards, gain +1 to ATK, DEF and EVD for each.',
     (CARD_MELTING_MEMORIES,),
     'Sweet_Breaker_(unit).png',
-        )
+)
 
 CHARACTER_NATH = OJCharacter(27,
     'Nath',
@@ -2201,7 +2201,7 @@ CHARACTER_NATH = OJCharacter(27,
     'Stock Effect: gain +1 ATK, +1 DEF, and -1 EVD.',
     (CARD_ANOTHER_ULTIMATE_WEAPON,),
     'Nath_(unit).png',
-        )
+)
 
 CHARACTER_MIMYUU = OJCharacter(28,
     'Mimyuu',
@@ -2210,7 +2210,7 @@ CHARACTER_MIMYUU = OJCharacter(28,
     'Revive as Tomato and act on revival. Lose 1/4 stars and given 1 WIN when KO\'d in battle.',
     (CARD_EVIL_SPY_WORK_EXECUTION,),
     'Mimyuu_(unit).png',
-        )
+)
 
 CHARACTER_TOMATO = OJCharacter(29,
     'Tomato',
@@ -2219,7 +2219,7 @@ CHARACTER_TOMATO = OJCharacter(29,
     'Revive as Mimyuu and act on revival. Draw Evil Spy Work - Execution cards as Waruda Machine, Blast Off!',
     (CARD_WARUDA_MACHINE_BLAST_OFF,),
     'Tomato_(unit).png',
-        )
+)
 
 CHARACTER_KIRIKO = OJCharacter(30,
     'Kiriko',
@@ -2229,7 +2229,7 @@ CHARACTER_KIRIKO = OJCharacter(30,
     '(To a minimum of 2).',
     (CARD_FINAL_SURGERY,),
     'Kiriko_(unit).png',
-        )
+)
 
 CHARACTER_NONAME = OJCharacter(31,
     'NoName',
@@ -2238,7 +2238,7 @@ CHARACTER_NONAME = OJCharacter(31,
     'If KO\'d, turn into NoName (Head) instead. Give no stars or Wins if KO\'d in battle.',
     (CARD_OVERSEER,),
     'NoName_(unit).png',
-        )
+)
 
 CHARACTER_NONAME_HEAD = OJCharacter(32,
     'NoName (Head)',
@@ -2247,7 +2247,7 @@ CHARACTER_NONAME_HEAD = OJCharacter(32,
     'Change into NoName after reaching a home or getting KO\'d. Gain -1 MOV.',
     (CARD_OVERSEER,),
     'NoName_(Head)_(unit).png',
-        )
+)
 
 CHARACTER_MIUSAKI = OJCharacter(33,
     'Miusaki',
@@ -2256,7 +2256,7 @@ CHARACTER_MIUSAKI = OJCharacter(33,
     'When using Defend in battle, never take more than 2 damage at once.',
     (CARD_SOLID_WITCH,),
     'Miusaki_(unit).png',
-        )
+)
 
 CHARACTER_CEOREPARQUE = OJCharacter(34,
     'Ceoreparque',
@@ -2265,7 +2265,7 @@ CHARACTER_CEOREPARQUE = OJCharacter(34,
     'On successful Evasion, deal 1 damage to opponent.',
     (CARD_WITCHS_HAIR_LOCK,),
     'Ceoreparque_(unit).png',
-        )
+)
 
 CHARACTER_YUKI_DANGEROUS = OJCharacter(35,
     'Yuki (Dangerous)',
@@ -2275,7 +2275,7 @@ CHARACTER_YUKI_DANGEROUS = OJCharacter(35,
     'When someone else triggers your trap, gain 1 Win. Gain no wins from fighting neutral enemies.',
     (CARD_EVIL_MASTERMIND,),
     'Yuki_(Dangerous)_(unit).png',
-        )
+)
 
 CHARACTER_TOMOMO_CASUAL = OJCharacter(36,
     'Tomomo (Casual)',
@@ -2284,7 +2284,7 @@ CHARACTER_TOMOMO_CASUAL = OJCharacter(36,
     None,
     (CARD_MIRACLE_RED_BEAN_ICE_CREAM,),
     'Tomomo_(Casual)_(unit).png',
-        )
+)
 
 CHARACTER_TOMOMO_SWEET_EATER = OJCharacter(37,
     'Tomomo (Sweet Eater)',
@@ -2293,7 +2293,7 @@ CHARACTER_TOMOMO_SWEET_EATER = OJCharacter(37,
     'When KO\'d, discard your hand and turn back to Tomomo (Casual).',
     (CARD_MAGICAL_REVENGE,),
     'Tomomo_(Sweet_Eater)_(unit).png',
-        )
+)
 
 CHARACTER_TEQUILA = OJCharacter(38,
     'Tequila',
@@ -2302,7 +2302,7 @@ CHARACTER_TEQUILA = OJCharacter(38,
     'A Pirate Crew Member appears as enemy unit. Gain +1 ATK for every HP lost during a battle.',
     (CARD_DO_PIRATES_FLY_IN_THE_SKY, CARD_FLYING_PIRATE),
     'Tequila_(unit).png',
-        )
+)
 
 CHARACTER_TSIH = OJCharacter(39,
     'Tsih',
@@ -2311,7 +2311,7 @@ CHARACTER_TSIH = OJCharacter(39,
     'Gain +2ATK if holding a Gift card.',
     (CARD_STEALTH_ON,),
     'Tsih_(unit).png',
-        )
+)
 
 CHARACTER_MEI = OJCharacter(40,
     'Mei',
@@ -2320,7 +2320,7 @@ CHARACTER_MEI = OJCharacter(40,
     'Gain "Red & Blue" when holding no cards at the end of turn.',
     (CARD_TRUE_WHITE_CHRISTSMASHER, CARD_WHITE_CHRISTSMASHER),
     'Mei_(unit).png',
-        )
+)
 
 CHARACTER_NATSUMI = OJCharacter(41,
     'Natsumi',
@@ -2330,7 +2330,7 @@ CHARACTER_NATSUMI = OJCharacter(41,
     'recovers 1 HP. For each other players you heal, gain 5 stars.',
     (CARD_COOKING_TIME,),
     'Natsumi_(unit).png',
-        )
+)
 
 CHARACTER_NICO = OJCharacter(42,
     'Nico',
@@ -2340,7 +2340,7 @@ CHARACTER_NICO = OJCharacter(42,
     'Can hold 4 cards.',
     (CARD_MIRACLE_WALKER,),
     'Nico_(unit).png',
-        )
+)
 
 CHARACTER_ARTHUR = OJCharacter(43,
     'Arthur',
@@ -2349,7 +2349,7 @@ CHARACTER_ARTHUR = OJCharacter(43,
     'Gain X additional stars from all sources, where X is the number of Shops in play, up to current Lvl.',
     (CARD_BRANCH_EXPANSION_STRATEGY, CARD_RBIT_HOBBY_SHOP),
     'Arthur_(unit).png',
-        )
+)
 
 CHARACTER_IRU = OJCharacter(44,
     'Iru',
@@ -2359,7 +2359,7 @@ CHARACTER_IRU = OJCharacter(44,
     'effect counts as battle KO.',
     (CARD_EXTENDED_PHOTON_RIFLE,),
     'Iru_(unit).png',
-        )
+)
 
 CHARACTER_MIRA = OJCharacter(45,
     'Mira',
@@ -2369,7 +2369,7 @@ CHARACTER_MIRA = OJCharacter(45,
     'are limited to 1, 2, or 3).',
     (CARD_LEAP_THROUGH_SPACE, CARD_LEAP_THROUGH_SPACE_MARKING),
     'Mira_(unit).png',
-        )
+)
 
 CHARACTER_CUTIES = OJCharacter(46,
     'Cuties',
@@ -2379,7 +2379,7 @@ CHARACTER_CUTIES = OJCharacter(46,
     'cards you played. In battle, randomly gain +1 ATK or DEF.',
     (CARD_SPECIAL_STAGE,),
     'Sora_&_Sham_(Cuties)_(unit).png',
-        )
+)
 
 CHARACTER_YUUKI = OJCharacter(47,
     'Yuuki',
@@ -2388,7 +2388,7 @@ CHARACTER_YUUKI = OJCharacter(47,
     'In odd-numbered chapters, gain -1 ATK and +2 in DEF. In even-numbered chapters, gain +2 ATK and -1 DEF.',
     (CARD_ANGEL_HAND, CARD_DEVIL_HAND),
     'Yuuki_(unit).png',
-        )
+)
 
 CHARACTER_ISLAY = OJCharacter(48,
     'Islay',
@@ -2397,7 +2397,7 @@ CHARACTER_ISLAY = OJCharacter(48,
     'cannot challenge other players when meeting them on the field.',
     (CARD_RIVAL,),
     'Islay_(unit).png',
-        )
+)
 
 CHARACTER_SUGURI_46_BILLION_YEARS = OJCharacter(49,
     'Suguri (46 Billion Years)',
@@ -2407,7 +2407,7 @@ CHARACTER_SUGURI_46_BILLION_YEARS = OJCharacter(49,
     'If you do, gain +1 die to your next movement roll.',
     (CARD_OBSERVER_OF_ETERNITY,),
     'Suguri_(46_Billion_Years)_(unit).png',
-        )
+)
 
 CHARACTER_SUMIKA = OJCharacter(50,
     'Sumika',
@@ -2416,7 +2416,7 @@ CHARACTER_SUMIKA = OJCharacter(50,
     None,
     (CARD_REPRODUCTION_OF_RECORDS,),
     'Sumika_(unit).png',
-        )
+)
 
 CHARACTER_ELLIE = OJCharacter(51,
     'Ellie',
@@ -2425,7 +2425,7 @@ CHARACTER_ELLIE = OJCharacter(51,
     None,
     (CARD_ELLIES_MIRACLE,),
     'Ellie_(unit).png',
-        )
+)
 
 CHARACTER_LULU = OJCharacter(52,
     'Lulu',
@@ -2434,7 +2434,7 @@ CHARACTER_LULU = OJCharacter(52,
     None,
     (CARD_LULUS_LUCKY_EGG,),
     'Lulu_(unit).png',
-        )
+)
 
 CHARACTER_ALICIANRONE = OJCharacter(53,
     'Alicianrone',
@@ -2444,7 +2444,7 @@ CHARACTER_ALICIANRONE = OJCharacter(53,
     'gain an additional +1 EVD.',
     (CARD_FULL_SPEED_ALICIANRONE,),
     'Alicianrone_(unit).png',
-        )
+)
 
 CHARACTER_TEOTORATTA = OJCharacter(54,
     'Teotoratta',
@@ -2453,7 +2453,7 @@ CHARACTER_TEOTORATTA = OJCharacter(54,
     'Do not trigger Encounter panels.',
     (CARD_BEAST_WITCH,),
     'Teotoratta_(unit).png',
-        )
+)
 
 CHARACTER_ARNELLE = OJCharacter(55,
     'Arnelle',
@@ -2462,7 +2462,7 @@ CHARACTER_ARNELLE = OJCharacter(55,
     'Can see the card on the top of the deck when holding Intelligence Officer in hand.',
     (CARD_INTELLIGENCE_OFFICER,),
     'Arnelle_(unit).png',
-        )
+)
 
 CHARACTER_MAYNIE = OJCharacter(56,
     'Maynie',
@@ -2471,7 +2471,7 @@ CHARACTER_MAYNIE = OJCharacter(56,
     'When not in Raging Mode, gain a rage Counter upon taking damage and lose a rage Counter upon healing.',
     (CARD_RAGING_MADNESS,),
     'Maynie_(unit).png',
-        )
+)
 
 CHARACTER_CHRIS = OJCharacter(57,
     'Chris',
@@ -2481,7 +2481,7 @@ CHARACTER_CHRIS = OJCharacter(57,
     'upon using a Max 1 copy limit non-Gift card.',
     (CARD_CHEF_I_COULD_USE_SOME_HELP, CARD_MANAGER_I_COULD_USE_SOME_HELP),
     'Chris_(unit).png',
-        )
+)
 
 CHARACTER_KYUPITA = OJCharacter(58,
     'Kyupita',
@@ -2490,7 +2490,7 @@ CHARACTER_KYUPITA = OJCharacter(58,
     None,
     (CARD_SAINT_EYES,),
     'Kyupita_(unit).png',
-        )
+)
 
 CHARACTER_QP_DANGEROUS = OJCharacter(59,
     'QP (Dangerous)',
@@ -2503,7 +2503,7 @@ CHARACTER_QP_DANGEROUS = OJCharacter(59,
     'Portable Pudding (+1MAXHP).',
     (CARD_SWEET_GUARDIAN,),
     'QP_(Dangerous)_(unit).png',
-        )
+)
 
 CHARACTER_MARIE_POPPO_MIXED = OJCharacter(60,
     'Marie Poppo (Mixed)',
@@ -2512,7 +2512,7 @@ CHARACTER_MARIE_POPPO_MIXED = OJCharacter(60,
     'When warping from any effect: If player level is odd, gain Lvl x3 in stars. If player level is even, draw a card.',
     (CARD_SUBSPACE_TUNNEL,),
     'Marie_Poppo_(Mixed)_(unit).png',
-        )
+)
 
 CHARACTER_SORA_MILITARY = OJCharacter(61,
     'Sora (Military)',
@@ -2521,7 +2521,7 @@ CHARACTER_SORA_MILITARY = OJCharacter(61,
     'When KO\'d in battle, revive with 2 HP on the next turn.',
     (CARD_AWAKENING_OF_TALENT,),
     'Sora_(Military)_(unit).png',
-        )
+)
 
 CHARACTER_ARU_SCRAMBLE = OJCharacter(62,
     'Aru (Scramble)',
@@ -2530,7 +2530,7 @@ CHARACTER_ARU_SCRAMBLE = OJCharacter(62,
     'Can hold 4 cards.',
     (CARD_SANTAS_JOB,),
     'Aru_(Scramble)_(unit).png',
-        )
+)
         
 CHARACTER_SUGURI_VER_2 = OJCharacter(63,
     'Suguri (Ver.2)',
@@ -2539,7 +2539,7 @@ CHARACTER_SUGURI_VER_2 = OJCharacter(63,
     'Can hold 2 cards. Restore 1 HP at the start of every turn.',
     (CARD_REVIVAL_OF_STARS,),
     'Suguri_(Ver.2)_(unit).png',
-        )
+)
         
 CHARACTER_MARC_PILOT = OJCharacter(64,
     'Marc (Pilot)',
@@ -2548,7 +2548,7 @@ CHARACTER_MARC_PILOT = OJCharacter(64,
     None,
     (CARD_BIG_ROCKET_CANNON, CARD_ROCKET_CANNON),
     'Marc_(Pilot)_(unit).png',
-        )
+)
         
 CHARACTER_CHICKEN = OJCharacter(65,
     'Chicken',
@@ -2557,7 +2557,7 @@ CHARACTER_CHICKEN = OJCharacter(65,
     'Lose 1/4 stars and given 1 WIn when KO\'d in battle.',
     (CARD_GOLDEN_EGG,),
     'Chicken_(unit).png',
-        )
+)
         
 CHARACTER_ROBO_BALL = OJCharacter(66,
     'Robo Ball',
@@ -2566,7 +2566,7 @@ CHARACTER_ROBO_BALL = OJCharacter(66,
     'Lose 1/4 stars and given 1 WIn when KO\'d in battle.',
     (CARD_REFLECTIVE_SHELL,),
     'Robo_Ball_(unit).png',
-        )
+)
         
 CHARACTER_SEAGULL = OJCharacter(67,
     'SeaGull',
@@ -2575,7 +2575,7 @@ CHARACTER_SEAGULL = OJCharacter(67,
     'Lose 1/4 stars and given 1 WIn when KO\'d in battle.',
     (CARD_JONATHAN_RUSH,),
     'Seagull_(unit).png',
-        )
+)
         
 CHARACTER_STORE_MANAGER = OJCharacter(68,
     'Store Manager',
@@ -2584,7 +2584,7 @@ CHARACTER_STORE_MANAGER = OJCharacter(68,
     'No stars from bonus panel. Can only use Gift type cards. Takes 1 damage on card discard.',
     (CARD_BANNER_FOR_LIFE,),
     'Store_Manager_(unit).png',
-        )
+)
         
 CHARACTER_SHIFU_ROBOT = OJCharacter(69,
     'Shifu Robot',
@@ -2593,7 +2593,7 @@ CHARACTER_SHIFU_ROBOT = OJCharacter(69,
     'Starts and Revives with 1 HP Auto-repair (Recover 1 HP every 3 chapters or after being KO\'d.',
     (CARD_TURBO_CHARGED,),
     'Shifu_Robot_(unit).png',
-        )
+)
 
 CHARACTER_FLYING_CASTLE = OJCharacter(70,
     'Flying Castle',
@@ -2602,7 +2602,7 @@ CHARACTER_FLYING_CASTLE = OJCharacter(70,
     'Immune to Battle Cards when defending Cannot Counterattack.',
     (CARD_IMMOVABLE_OBJECT,),
     'Flying_Castle_(unit).png',
-        )
+)
 
 
 class CharacterDescription:

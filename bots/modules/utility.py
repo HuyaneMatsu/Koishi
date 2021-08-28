@@ -10,7 +10,7 @@ from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
     parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout, ChannelDirectory, \
-    GUILDS, Permission
+    GUILDS, Permission, escape_markdown
 
 from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
@@ -1347,3 +1347,16 @@ async def sticker_(client, message):
         raise
     
     return build_sticker_embed(sticker)
+
+
+@SLASH_CLIENT.interactions(is_global=True, target='message')
+async def escape(message):
+    content = message.content
+    if content is None:
+        abort('The message has no content to escape')
+    
+    content = escape_markdown(content)
+    if len(content) > 2000:
+        content = content[:1997]+'...'
+    
+    return InteractionResponse(content, allowed_mentions=None)

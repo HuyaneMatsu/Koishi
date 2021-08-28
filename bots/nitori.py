@@ -891,7 +891,6 @@ ZOO_SELECT = Select(
         Option(LABEL_ELEPHANT, LABEL_ELEPHANT, emoji=EMOJI_ELEPHANT),
         Option(LABEL_LION, LABEL_LION, emoji=EMOJI_LION),
         Option(LABEL_ZEBRA, LABEL_ZEBRA, emoji=EMOJI_ZEBRA),
-        
     ],
     placeholder = 'Select animals!',
     min_values = 0,

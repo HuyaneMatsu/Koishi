@@ -1,10 +1,12 @@
-# -*- coding: utf-8 -*-
 import re, os, functools
 from io import BytesIO
 
 from hata import is_mention, ReuAsyncIO, AsyncIO, Embed, Color, KOKORO, Lock, Client, parse_message_reference, \
     MESSAGES, DiscordException, ERROR_CODES, CHANNELS, Attachment, sanitize_mentions, Permission
 from hata.ext.slash import InteractionResponse, abort
+from hata.ext.extension_loader import require
+
+require('ayaya') # We just disable it for now.
 
 try:
     from PIL.BmpImagePlugin import BmpImageFile as image_type_BMP
