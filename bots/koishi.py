@@ -4,11 +4,9 @@ from datetime import datetime, timedelta
 from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary, Permission
 from hata.backend.futures import render_exc_to_list
 
-from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, ChannelDeleteWaitfor, \
-    EmojiDeleteWaitfor, RoleEditWaitfor, ChannelCreateWaitfor, ChannelEditWaitfor
-from bot_utils.shared import CHANNEL__NEKO_DUNGEON__SYSTEM, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, \
-    ROLE__NEKO_DUNGEON__ELEVATED, CHANNEL__SYSTEM__SYNC, ROLE__NEKO_DUNGEON__VERIFIED, \
-    CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__NSFW_ACCESS
+from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, EmojiDeleteWaitfor, \
+    RoleEditWaitfor
+from bot_utils.shared import CHANNEL__SYSTEM__SYNC, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
 
 
 from bot_utils.syncer import sync_request_waiter
@@ -84,64 +82,6 @@ async def message_create(client, message):
     
     await client.message_create(message.channel, text)
 
-
-PATTERN_ROLE_RELATION = [
-    (re.compile('nya+', re.I), ROLE__NEKO_DUNGEON__VERIFIED, timedelta(minutes=10), True, False),
-    (re.compile('[il] *meow+', re.I), ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, None, True, False),
-    (re.compile('[il] *not? *meow+', re.I), ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, None, False, False),
-    (re.compile('nekogirl', re.I), ROLE__NEKO_DUNGEON__ELEVATED, timedelta(days=183), True, True),
-    (re.compile('(?:i(?: *\'? *a?m|mma)?|me)? *horny *(?:desu)?', re.I), ROLE__NEKO_DUNGEON__NSFW_ACCESS, None, True, True),
-    (re.compile('no *sex', re.I), ROLE__NEKO_DUNGEON__NSFW_ACCESS, None, False, True),
-]
-
-async def role_giver(client, message):
-    for pattern, role, delta, add, requires_verify in PATTERN_ROLE_RELATION:
-        
-        if (pattern.fullmatch(message.content) is None):
-            continue
-        
-        user = message.author
-        if requires_verify and (not user.has_role(ROLE__NEKO_DUNGEON__VERIFIED)):
-            break
-        
-        if add == user.has_role(role):
-            break
-        
-        guild_profile = client.get_guild_profile_for(GUILD__NEKO_DUNGEON)
-        if guild_profile is None:
-            break
-        
-        joined_at = guild_profile.joined_at
-        if joined_at is None:
-            break
-        
-        if (delta is not None) and (datetime.utcnow() - joined_at < delta):
-            break
-        
-        permissions = message.channel.cached_permissions_for(client)
-        if (not permissions.can_manage_roles) or (not client.has_higher_role_than(role)):
-            if permissions&PERMISSION_MASK_MESSAGING:
-                content = 'My permissions are broken, cannot provide the specified role.'
-            else:
-                break
-        else:
-            await (Client.user_role_add if add else Client.user_role_delete)(client, user, role)
-            
-            if permissions&PERMISSION_MASK_MESSAGING:
-                if add:
-                    content = f'You now have {role.mention} role.'
-                else:
-                    content = f'You have {role.mention} removed.'
-            
-            else:
-                break
-        
-        message = await client.message_create(message.channel, content, allowed_mentions=None)
-        await sleep(30.0, KOKORO)
-        await client.message_delete(message)
-        break
-
-Koishi.events.message_create.append(CHANNEL__NEKO_DUNGEON__SYSTEM, role_giver)
 
 @Koishi.events(overwrite=True)
 async def error(client, name, err):

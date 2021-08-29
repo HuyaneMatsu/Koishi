@@ -7,11 +7,15 @@ from bot_utils.shared import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR
 Satori : Client
 
 FILTER = re.compile(
-    '(?:d(?:iscord)?[\.\_]?py)|'
-    '(?:danny)|'
-    '(?:rapptz)|'
-    '(?:discord\.ext)',
-    re.I|re.M|re.S,
+    (
+        'd(?:iscord)?[\.\_]?[pр]y|'
+        'danny|'
+        'rapptz|'
+        'discord\.ext|'
+        '[pр]y\.discord|'
+        'D¡\$€0rd\.[pр]¥'
+    ),
+    re.I|re.M|re.S|re.U,
 )
 
 

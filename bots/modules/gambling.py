@@ -15,7 +15,8 @@ from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
 from bot_utils.shared import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
-    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST, ROLE__NEKO_DUNGEON__ADMIN
+    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST, ROLE__NEKO_DUNGEON__ADMIN, \
+    ROLE__NEKO_DUNGEON__NSFW_ACCESS
 
 SLASH_CLIENT: Client
 def setup(lib):
@@ -42,6 +43,7 @@ DAILY_LIMIT_BONUS_W_B   = 300
 DAILY_BASE_BONUS_W_HE   = 514
 DAILY_LIMIT_BONUS_W_HE  = 5140
 
+NSFW_ACCESS_COST        = 666
 ELEVATED_COST           = 10000
 HEART_BOOST_COST        = 514000
 
@@ -2887,7 +2889,7 @@ async def currency_insert(client, event,
     
     yield Embed(
         'Inserting into currency table',
-        color=GAMBLING_COLOR,
+        color = GAMBLING_COLOR,
     ).add_field(
         'User',
         target_user.full_name,
@@ -2986,15 +2988,18 @@ HEART_SHOP = SLASH_CLIENT.interactions(None,
 )
 
 
+NSFW_ACCESS_IDENTIFIER = '0'
 ELEVATED_IDENTIFIER = '1'
 HEART_BOOST_IDENTIFIER = '2'
 
 BUYABLE_ROLES = {
+    NSFW_ACCESS_IDENTIFIER: (ROLE__NEKO_DUNGEON__NSFW_ACCESS, NSFW_ACCESS_COST),
     ELEVATED_IDENTIFIER: (ROLE__NEKO_DUNGEON__ELEVATED, ELEVATED_COST),
     HEART_BOOST_IDENTIFIER: (ROLE__NEKO_DUNGEON__HEART_BOOST, HEART_BOOST_COST),
 }
 
 ROLE_CHOICES = [
+    (f'Horny ({NSFW_ACCESS_COST})', NSFW_ACCESS_IDENTIFIER),
     (f'Nekogirl Worshipper ({ELEVATED_COST})', ELEVATED_IDENTIFIER),
     (f'Koishi enjoyer ({HEART_BOOST_COST})', HEART_BOOST_IDENTIFIER),
 ]

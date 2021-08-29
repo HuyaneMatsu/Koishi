@@ -1,20 +1,40 @@
 import sys
 from functools import partial as partial_func
 
-from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__
+from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji
 from hata.ext.slash.menus import Pagination, Closer
-from hata.ext.slash import InteractionResponse
+from hata.ext.slash import InteractionResponse, Button, Row
 
 from bot_utils.shared import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNGEON, GUILD__NEKO_DUNGEON, \
     LINK__HATA_DOCS, LINK__PASTE, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__NEKO_DUNGEON__ELEVATED, \
     ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH, ROLE__NEKO_DUNGEON__NSFW_ACCESS, \
-    ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT
+    ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT, \
+    EMOJI__HEART_CURRENCY, ROLE__NEKO_DUNGEON__HEART_BOOST
 
 
 SLASH_CLIENT: Client
 
 HATA_DOCS_BASE_URL = 'https://www.astil.dev/project/hata/docs/'
 HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
+
+CLAIM_ROLE_VERIFIED_EMOJI = Emoji.precreate(690550890045898812)
+CLAIM_ROLE_VERIFIED_CUSTOM_ID = 'rules.claim_role.verified'
+
+CLAIM_ROLE_ANNOUNCEMENTS_EMOJi = Emoji.precreate(717841004383961221)
+CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID = 'rules.claim_role.announcements'
+
+RULES_COMPONENTS = Row(
+    Button(
+        'Accept rules (I wont fry fumos)',
+        CLAIM_ROLE_VERIFIED_EMOJI,
+        custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID,
+    ),
+    Button(
+        'Claim announcements role',
+        CLAIM_ROLE_ANNOUNCEMENTS_EMOJi,
+        custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID,
+    ),
+)
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def rules(client, event):
@@ -42,98 +62,124 @@ async def rules(client, event):
             '6. NSFW',
             'Keep explicit content in nsfw channels.',
         ).add_field(
-            '7. Roles',
-            f'Do not beg for roles. You can claim {ROLE__NEKO_DUNGEON__VERIFIED.mention} role, what gives you access to '
-            f'additional channels by typing `nya` at {CHANNEL__NEKO_DUNGEON__SYSTEM.mention}.\n'
-            f'*You must be the member of the guild for at least 10 minutes and {client.mention} must be online '
-            f'as well.*'
-        ).add_field(
-            '8. Advertisements',
+            '7. Advertisements',
             'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
         ).add_field(
-            '9. No political or religious topics.',
+            '8. No political or religious topics.',
             'I do not say either that aliens exists, even tho they do.',
         ).add_field(
-            '10. Alternative accounts',
+            '9. Alternative accounts',
             'Instant ban.'
         ).add_field(
-            '11. Deep frying fumos',
+            '10. Deep frying fumos',
             'Fumo frying is bannable offense.'
         )
     
-    return InteractionResponse(embed=embed, allowed_mentions=None)
+    if client.is_owner(event.user):
+        components = RULES_COMPONENTS
+    else:
+        components = None
+    
+    return InteractionResponse(embed=embed, components=components, allowed_mentions=None)
 
 
-ABOUT = SLASH_CLIENT.interactions(None,
-    name = 'about',
-    description = 'My loli secret. Simpers only!',
-    is_global = True,
-)
+@SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_VERIFIED_CUSTOM_ID)
+async def claim_verified_role(client, event):
+    user = event.user
+    if not user.has_role(ROLE__NEKO_DUNGEON__VERIFIED):
+        await client.user_role_add(user, ROLE__NEKO_DUNGEON__VERIFIED)
 
-@ABOUT.interactions(is_default=True)
-async def description_(client, event):
-    """What you should know about me, you perv!"""
+
+@SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID)
+async def claim_announcements_role(client, event):
+    user = event.user
+    if user.has_role(ROLE__NEKO_DUNGEON__ANNOUNCEMENTS):
+        await client.user_role_delete(user, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS)
+    else:
+        await client.user_role_add(user, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS)
+
+
+def create_interpreter_info():
     implementation = sys.implementation
-    return Embed('About', f'Hello, I am {client.full_name} as you expected. What did you think, who am I?',
-            color=COLOR__KOISHI_HELP) \
-        .add_field('Library', f'[hata {__version__}]({LINK__HATA_GIT})', inline=True) \
-        .add_field('Interpreter', (
-            f'Python{implementation.version[0]}.{implementation.version[1]}'
-            f'{"" if implementation.version[3]=="final" else " "+implementation.version[3]} {implementation.name}'
-                ), inline=True) \
-        .add_field('Support server', f'[{GUILD__NEKO_DUNGEON.name}]({INVITE__NEKO_DUNGEON.url})', inline=True) \
-        .add_field('Clients', repr(len(CLIENTS)), inline=True) \
-        .add_field('Guilds', repr(len(GUILDS)), inline=True) \
-        .add_field('Users', repr(len(USERS)), inline=True) \
-        .add_thumbnail(client.application.icon_url_as(size=128))
+    version = implementation.version
+    main_version_number = version[0]
+    sub_version_number = version[1]
+    release = version[3]
+    
+    interpreter_info_parts = []
+    
+    interpreter_info_parts.append('Python')
+    interpreter_info_parts.append(repr(main_version_number))
+    interpreter_info_parts.append('.')
+    interpreter_info_parts.append(repr(sub_version_number))
+    
+    if release != 'final':
+        interpreter_info_parts.append(' ')
+        interpreter_info_parts.append(release)
+    
+    interpreter_info_parts.append(' ')
+    interpreter_info_parts.append(implementation.name)
+    
+    return ''.join(interpreter_info_parts)
 
+INTERPRETER_INFO = create_interpreter_info()
 
-@ABOUT.interactions
-async def invite_():
-    """Invite to our beloved Neko Dungeon."""
-    return INVITE__NEKO_DUNGEON.url
+def create_library_info():
+    return (
+        f'[hata {__version__}]({LINK__HATA_GIT})\n'
+        f'[Slash commands]({LINK__HATA_SLASH})\n'
+        f'[Technical documentation]({LINK__HATA_DOCS})'
+    )
 
+LIBRARY_INFO = create_library_info()
 
-@ABOUT.interactions
-async def git():
-    """Link to my git repository."""
-    return Embed(description=f'[Koishi repository]({LINK__KOISHI_GIT})', color=COLOR__KOISHI_HELP)
+@SLASH_CLIENT.interactions(is_global=True)
+async def about(client):
+    """My loli secret. Simpers only!"""
+    return Embed(
+        'About',
+        f'Hello, I am {client.full_name} as you expected. It was a great success to meat you!',
+        color=COLOR__KOISHI_HELP,
+        ).add_field(
+            'Library',
+            LIBRARY_INFO,
+            inline = True,
+        ).add_field(
+            'Git',
+            f'[Koishi repository]({LINK__KOISHI_GIT})',
+            inline = True,
+        ).add_field(
+            'Support server',
+            f'[{GUILD__NEKO_DUNGEON.name}]({INVITE__NEKO_DUNGEON.url})',
+            inline = True,
+        ).add_field('Interpreter',
+            INTERPRETER_INFO,
+            inline = True,
+        ).add_field(
+            'Client info',
+            (
+                f'Clients: {len(CLIENTS)}\n'
+                f'Guilds: {len(GUILDS)}\n'
+                f'Users: {len(USERS)}'
+            ),
+            inline = True,
+        ).add_thumbnail(
+            client.application.icon_url_as(size=128)
+        )
 
-
-@ABOUT.interactions
-async def hata():
-    """Link to my wrapper's git repository."""
-    return Embed(description=f'[hata repository]({LINK__HATA_GIT})', color=COLOR__KOISHI_HELP)
-
-
-@ABOUT.interactions
-async def slash():
-    """Link to my wrapper's git repository."""
-    return Embed(description=f'[slash]({LINK__HATA_SLASH})', color=COLOR__KOISHI_HELP)
-
-
-@ABOUT.interactions
-async def docs():
-    """Sends a link to hata's documentation."""
-    return Embed(description=f'[hata docs]({LINK__HATA_DOCS})', color=COLOR__KOISHI_HELP)
 
 
 def docs_search_pagination_check(user, event):
-    event_user = event.user
     if user is event.user:
         return True
     
-    guild = event.channel.guild
-    if guild is None:
-        return False
-    
-    if guild.permissions_for(event_user).can_manage_messages:
+    if event.user_permissions.can_manage_messages:
         return True
     
     return False
 
 
-@ABOUT.interactions
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def docs_search(client, event,
         search_for: ('str', 'Search term'),
             ):
@@ -273,28 +319,21 @@ ROLES = SLASH_CLIENT.interactions(None,
 
 
 @ROLES.interactions
-async def claimable():
-    """A list of claimable roles in ND."""
-    embed = Embed('Claimable roles:',
-        f'Claim roles by typing a specific text at {CHANNEL__NEKO_DUNGEON__SYSTEM.mention}!',
-        color=COLOR__KOISHI_HELP,
-        ).add_field(
-            ROLE__NEKO_DUNGEON__VERIFIED.name,
-            f'Claim {ROLE__NEKO_DUNGEON__VERIFIED.mention} by typing `nya`!',
-        ).add_field(
-            ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.name,
-            f'Claim {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.mention} by typing `i meow`, or un-claim by `i not meow`!',
-        ).add_field(
-            ROLE__NEKO_DUNGEON__ELEVATED.name,
-            f'Claim {ROLE__NEKO_DUNGEON__ELEVATED.mention} by typing `nekogirl`!'
-            f'\n'
-            f'*You must be in the guild for at least half year + have {ROLE__NEKO_DUNGEON__VERIFIED.mention} role*.',
-        ).add_field(
-            ROLE__NEKO_DUNGEON__NSFW_ACCESS.name,
-            f'Claim {ROLE__NEKO_DUNGEON__NSFW_ACCESS.mention} by typing `i am horny`, or un-claim by `no sex`!'
-            f'\n'
-            f'*You must have {ROLE__NEKO_DUNGEON__VERIFIED.mention} role*.',
-        )
+async def Collectible():
+    """A list of collectible roles in ND."""
+    embed = Embed('Collectible roles:',
+        f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY:e} using the `heart-shop roles` command.',
+        color = COLOR__KOISHI_HELP,
+    ).add_field(
+        ROLE__NEKO_DUNGEON__NSFW_ACCESS.name,
+        f'Gives access to nsfw channels.',
+    ).add_field(
+        ROLE__NEKO_DUNGEON__ELEVATED.name,
+        f'Unlocks secret nekogirl only content.',
+    ).add_field(
+        ROLE__NEKO_DUNGEON__HEART_BOOST.name,
+        f'Become favored by Koishi receiving more hearts from her each day.',
+    )
     
     return InteractionResponse(embed=embed, allowed_mentions=None)
 
@@ -302,18 +341,20 @@ async def claimable():
 @ROLES.interactions
 async def events():
     """Event related role information."""
-    embed = Embed('Event roles', color=COLOR__KOISHI_HELP,
-        ).add_field(
-            ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.name,
-            f'{ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.mention} are participant of the actual event.'
-        ).add_field(
-            ROLE__NEKO_DUNGEON__EVENT_WINNER.name,
-            f'{ROLE__NEKO_DUNGEON__EVENT_WINNER.mention} won already an event. It is set in stone, only a couple of '
-            f'chads may achieve this level of power.'
-        ).add_field(
-            ROLE__NEKO_DUNGEON__EVENT_MANAGER.name,
-            f'{ROLE__NEKO_DUNGEON__EVENT_MANAGER.mention} are managing the actual event. Hoping our god ZUN will '
-            f'notice them one day.'
-        )
+    embed = Embed(
+        'Event roles',
+        color = COLOR__KOISHI_HELP,
+    ).add_field(
+        ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.name,
+        f'{ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.mention} are participant of the actual event.'
+    ).add_field(
+        ROLE__NEKO_DUNGEON__EVENT_WINNER.name,
+        f'{ROLE__NEKO_DUNGEON__EVENT_WINNER.mention} won already an event. It is set in stone, only a couple of '
+        f'chads may achieve this level of power.'
+    ).add_field(
+        ROLE__NEKO_DUNGEON__EVENT_MANAGER.name,
+        f'{ROLE__NEKO_DUNGEON__EVENT_MANAGER.mention} are managing the actual event. Hoping our god ZUN will '
+        f'notice them one day.'
+    )
     
     return InteractionResponse(embed=embed, allowed_mentions=None)

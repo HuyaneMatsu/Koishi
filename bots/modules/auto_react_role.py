@@ -864,7 +864,11 @@ class AutoReactRoleGUI:
 class AutoReactRoleManager:
     __slots__ = ('message', 'relations', 'behaviour', 'guild', 'client', 'destroy_called')
     async def __new__(cls, client, message, guild, changes):
-        unused_emojis = set(message.reactions.keys())
+        unused_emojis = set()
+        reactions = message.reactions
+        if (reactions is not None):
+            unused_emojis.update(reactions.keys())
+        
         used_emojis = {item[0] for item in changes.added}
         unused_emojis -= used_emojis
         
@@ -1266,7 +1270,11 @@ class AutoReactRoleManager:
             del relations[emoji]
             del relations[role]
         
-        unused_emojis = set(message.reactions.keys())
+        unused_emojis = set()
+        reactions = message.reactions
+        if (reactions is not None):
+            unused_emojis.update(reactions.keys())
+        
         for item in changes.actual:
             try:
                 unused_emojis.remove(item[0])

@@ -1360,3 +1360,10 @@ async def escape(message):
         content = content[:1997]+'...'
     
     return InteractionResponse(content, allowed_mentions=None)
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def calc(
+        expression: ('expression', 'Mathematical expression to evaluate')
+    ):
+    return repr(expression)

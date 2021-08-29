@@ -11,7 +11,7 @@ from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 from bot_utils.shared import COLOR__SATORI_HELP
 from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor, ChannelDeleteWaitfor, ChannelCreateWaitfor, \
     ChannelEditWaitfor
-from bot_utils.interpreter import Interpreter
+from bot_utils.interpreter_v2 import Interpreter
 
 Satori : Client
 

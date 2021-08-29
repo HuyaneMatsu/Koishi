@@ -417,7 +417,7 @@ async def collect_reactions(client, event):
     await sleep(60.0)
     
     reactions = message.reactions
-    if reactions:
+    if (reactions is not None) and reactions:
         emojis = list(reactions)
         # Limit reactions to 16 to avoid error from Discord
         del emojis[16:]
@@ -752,10 +752,6 @@ async def handle_cooldown_error(command_context, exception):
     
     return False
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-async def eval(value:('expression', 'expression to evaluate')):
-    return repr(value)
-
 
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def nine():
@@ -790,3 +786,199 @@ now = perf_counter()
 @Marisa.events
 async def ready(client):
     print(perf_counter()-now)
+
+@Marisa.commands
+@checks.owner_only()
+async def count_message_fields(client, message):
+    
+    message_count = 0
+    
+    field_count_activity = 0
+    field_count_application = 0
+    field_count_application_id = 0
+    field_count_attachments = 0
+    field_count_components = 0
+    field_count_content = 0
+    field_count_cross_mentions = 0
+    field_count_referenced_message = 0
+    field_count_deleted = 0
+    field_count_edited_at = 0
+    field_count_embeds = 0
+    field_count_everyone_mention = 0
+    field_count_interaction = 0
+    field_count_nonce = 0
+    field_count_pinned = 0
+    field_count_reactions = 0
+    field_count_role_mention_ids = 0
+    field_count_stickers = 0
+    field_count_thread = 0
+    field_count_tts = 0
+    field_count_user_mentions = 0
+    
+    total_fields_by_count = {}
+    
+    async for message in await client.message_iterator(message.channel):
+        message_count += 1
+        total_fields = 0
+        
+        if message.has_activity():
+            field_count_activity += 1
+            total_fields += 1
+        
+        if message.has_application():
+            field_count_application += 1
+            total_fields += 1
+        
+        if message.has_application_id():
+            field_count_application_id += 1
+            total_fields += 1
+        
+        if message.has_attachments():
+            field_count_attachments += 1
+            total_fields += 1
+        
+        if message.has_components():
+            field_count_components += 1
+            total_fields += 1
+        
+        if message.has_content():
+            field_count_content += 1
+            total_fields += 1
+        
+        if message.has_cross_mentions():
+            field_count_cross_mentions += 1
+            total_fields += 1
+        
+        if message.has_referenced_message():
+            field_count_referenced_message += 1
+            total_fields += 1
+        
+        if message.has_deleted():
+            field_count_deleted += 1
+            total_fields += 1
+        
+        if message.has_edited_at():
+            field_count_edited_at += 1
+            total_fields += 1
+        
+        if message.has_embeds():
+            field_count_embeds += 1
+            total_fields += 1
+        
+        if message.has_everyone_mention():
+            field_count_everyone_mention += 1
+            total_fields += 1
+        
+        if message.has_interaction():
+            field_count_interaction += 1
+            total_fields += 1
+        
+        if message.has_nonce():
+            field_count_nonce += 1
+            total_fields += 1
+        
+        if message.has_pinned():
+            field_count_pinned += 1
+            total_fields += 1
+        
+        if message.has_reactions():
+            field_count_reactions += 1
+            total_fields += 1
+        
+        if message.has_role_mention_ids():
+            field_count_role_mention_ids += 1
+            total_fields += 1
+        
+        if message.has_stickers():
+            field_count_stickers += 1
+            total_fields += 1
+        
+        if message.has_thread():
+            field_count_thread += 1
+            total_fields += 1
+        
+        if message.has_tts():
+            field_count_tts += 1
+            total_fields += 1
+        
+        if message.has_user_mentions():
+            field_count_user_mentions += 1
+            total_fields += 1
+        
+        try:
+            by_count = total_fields_by_count[total_fields]
+        except KeyError:
+            by_count = 1
+        else:
+            by_count += 1
+        
+        total_fields_by_count[total_fields] = by_count
+        
+        if message_count == 1000:
+            break
+    
+    description_parts = []
+    
+    fields_array = [
+        (field_count_activity, 'activity'),
+        (field_count_application, 'application'),
+        (field_count_application_id, 'application_id'),
+        (field_count_attachments, 'attachments'),
+        (field_count_components, 'components'),
+        (field_count_content, 'content'),
+        (field_count_cross_mentions, 'cross_mentions'),
+        (field_count_referenced_message, 'referenced_message'),
+        (field_count_deleted, 'deleted'),
+        (field_count_edited_at, 'edited_at'),
+        (field_count_embeds, 'embeds'),
+        (field_count_everyone_mention, 'everyone_mention'),
+        (field_count_interaction, 'interaction'),
+        (field_count_nonce, 'nonce'),
+        (field_count_pinned, 'pinned'),
+        (field_count_reactions, 'reactions'),
+        (field_count_role_mention_ids, 'role_mention_ids'),
+        (field_count_stickers, 'stickers'),
+        (field_count_thread, 'thread'),
+        (field_count_tts, 'tts'),
+        (field_count_user_mentions, 'user_mentions'),
+    ]
+    
+    fields_array.sort(reverse=True)
+    
+    for field_count, field_name in fields_array:
+        description_parts.append('**')
+        description_parts.append(field_name)
+        description_parts.append('**: ')
+        description_parts.append(repr(field_count))
+        description_parts.append('\n')
+    
+    description_parts.append('\n')
+    
+    total_fields_array = list(total_fields_by_count.items())
+    total_fields_array.sort(reverse=True)
+    
+    for total_fields, message_amount in total_fields_array:
+        description_parts.append('**')
+        description_parts.append(repr(total_fields))
+        description_parts.append(' fields**: ')
+        description_parts.append(repr(message_amount))
+        description_parts.append('\n')
+    
+    description_parts.append('\n')
+    
+    if message_count:
+        total_total_fields = 0
+        for total_fields, message_amount in total_fields_array:
+            total_total_fields += total_fields*message_amount
+        
+        average_fields = total_total_fields/message_count
+    else:
+        average_fields = 0.0
+    
+    description_parts.append('**Total messages**: ')
+    description_parts.append(repr(message_count))
+    description_parts.append('\n**Average fields**:' )
+    description_parts.append(average_fields.__format__('.02f'))
+    description_parts.append('\n**Total fields**: 22 (including cache)')
+    
+    return ''.join(description_parts)

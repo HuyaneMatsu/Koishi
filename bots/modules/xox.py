@@ -80,6 +80,7 @@ def click(array, custom_id, identifier):
     return False
 
 def get_game_state(array, identifier_p1):
+    # Check same lines
     for index_1, index_2, index_3 in LINES:
         
         element = array[index_1]
@@ -97,10 +98,11 @@ def get_game_state(array, identifier_p1):
         else:
             return GAME_STATE_P2_WIN
     
+    # Check 3/2 occupied places
     for element in array:
         if element == ARRAY_IDENTIFIER_EMPTY:
             return GAME_STATE_NONE
-   
+    
     return GAME_STATE_DRAW
 
 LINES = (

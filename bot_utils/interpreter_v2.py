@@ -4,7 +4,7 @@ import re
 from io import StringIO
 from functools import partial as partial_func
 from types import FunctionType
-from hata.ext.command_utils import Pagination
+from hata.ext.slash.menus import Pagination
 
 try:
     from ast import PyCF_ALLOW_TOP_LEVEL_AWAIT
