@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from bs4 import BeautifulSoup
 
 from hata import Client
@@ -297,7 +296,7 @@ class OJCardPack(OJEntityBase):
 class OJCard(OJEntityBase):
     __slots__ = ('name', 'cost', 'description', 'level', 'type', 'events', 'quote', 'limit', 'card_name')
     def __new__(cls, identifier, name, level, cost, limit, type_, pack, rarity, description, quote, events,
-            card_name=None):
+            card_name):
         self = object.__new__(cls)
         self.id = identifier
         self.name = name
@@ -2188,6 +2187,62 @@ CARD_BANA_NANA = OJCard(183,
     'BanaNana.png',
 )
 
+#### #### #### #### DLC 30 #### #### #### ####
+
+CARD_SAFE_JOURNEY = OJCard(184,
+    'Safe Journey',
+    3, CARD_COST_5, -1, CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    'Lose 5 stars at the start of each turn. Ignore Drop panels, traps, and card effect damage. This effect ends when '
+    'you stop on your own Home panel or have less than 5 stars.',
+    '"Now, let\'s get going." ―Halena',
+    None,
+    'Safe_Journey.png',
+)
+
+CARD_GUIDANCE_OF_THE_WEATHERCOCK = OJCard(185,
+    'Guidance of the Weathercock',
+    3, CARD_COST_30, -1, CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    'Roll 2 dice for everything except for battle. This effect ends when you stop on your own Home panel. Can only '
+    f'check Norma on own Home panel.',
+    '"*Cheep cheep*! Cook wants to go this way." ―Cook',
+    None,
+    'Guidance_of_the_Weathercock.png',
+)
+
+#### #### #### #### DLC 31 #### #### #### ####
+
+CARD_UPSHIFT = OJCard(186,
+    'Upshift',
+    2, CARD_COST_30, -1, CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    'Stock Effect (2).\n'
+    'Gain +1 MOV. This effect can be stacked (max 6).\n'
+    'If you end your turn without moving to the end of your final move roll, lose a stack of Upshift.',
+    '"...Don\'t follow me." ―Lone Rider',
+    None,
+    'Upshift.png',
+)
+
+CARD_ZEALOUS_SALESMAN = OJCard(187,
+    'Zealous Salesman',
+    1, CARD_COST_30, -1, CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    'Gain Freight cards equal to your level. With Freight cards in your hand, this card can be played as a Battle '
+    'card: During this battle, gain +1 ATK for every Freight card in your hand.',
+    '"Breaking the load regulations, you say? I have a permit right here!" ―Merchant',
+    None,
+    'Zealous_Salesman.png',
+)
+
+CARD_FREIGHT = OJCard(188,
+    'Freight',
+    1, CARD_COST_0, -1, CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    'If the opponent has not played a Battle card, give them this card and cancel the battle. May only be used by '
+    'the defender.\n'
+    'When stopping on your Home panel, discard this card and gain 5 Stars.',
+    '"You may keep all that freight, yes you may." ―Merchant',
+    None,
+    'Freight.png',
+)
+
 #### #### #### #### CHARACTERS #### #### #### ####
 
 CHARACTER_QP = OJCharacter(1,
@@ -2835,6 +2890,49 @@ CHARACTER_FLYING_CASTLE = OJCharacter(70,
     'Flying_Castle_(unit).png',
 )
 
+#### #### #### #### DLC 30 #### #### #### ####
+
+CHARACTER_HALENA = OJCharacter(71,
+    'Halena',
+    5, -1, +1, +1, 5,
+    ORIGIN_100_ORANGE_JUICE,
+    'Gain Lvl x3 stars after landing on your own home.',
+    (CARD_SAFE_JOURNEY,),
+    'Halena_(unit).png',
+)
+
+CHARACTER_COOK = OJCharacter(72,
+    'Cook',
+    4, 0, -1, +3, 5,
+    ORIGIN_100_ORANGE_JUICE,
+    'Gain a stack of Hungry when using Evade (max 3). With 3 Hungry, gain -1 EVD. Lose all Hungry when landing on '
+    'your own home.',
+    (CARD_GUIDANCE_OF_THE_WEATHERCOCK,),
+    'Halena_(unit).png',
+)
+
+#### #### #### #### DLC 31 #### #### #### ####
+
+CHARACTER_LONE_RIDER = OJCharacter(73,
+    'Lone Rider',
+    5, 0, +1, -1, 5,
+    ORIGIN_FLYING_RED_BARREL,
+    'If your Move roll result is 6 or higher, gain +1 ATK and +2 EVD until the start of your next turn.',
+    (CARD_UPSHIFT,),
+    'Lone_Rider_(unit).png',
+)
+
+CHARACTER_MERCHANT = OJCharacter(74,
+    'Merchant',
+    5, 0, 0, 0, 6,
+    ORIGIN_FLYING_RED_BARREL,
+    'Can hold 4 cards.\n'
+    'Gain a Freight card when stopping on another player\'s Home panel.',
+    (CARD_ZEALOUS_SALESMAN,),
+    'Merchant_(unit).png',
+)
+
+#### #### #### #### WIKI #### #### #### ####
 
 class CharacterDescription:
     __slots__ = ('title', 'description_parts', 'sub_parts')
