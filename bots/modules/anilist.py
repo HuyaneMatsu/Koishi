@@ -859,7 +859,7 @@ def array_response_builder(data, extra, work_set):
     
     else:
         description = 'No result.'
-        select_row = work_set.select_disbaled
+        select_row = work_set.select_disabled
     
     embed = Embed(
         f'Search result for: {extra}',
