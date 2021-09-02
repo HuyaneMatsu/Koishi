@@ -8,6 +8,9 @@ if DATABASE_NAME is None:
     waifu_list_model = None
     WAIFU_LIST_TABLE = None
     
+    waifu_proposal_model = None
+    WAIFU_PROPOSAL_TABLE = None
+    
     auto_react_role_model = None
     AUTO_REACT_ROLE_TABLE = None
     
@@ -59,6 +62,15 @@ else:
         waifu_id        = Column(Int64)
     
     WAIFU_LIST_TABLE = waifu_list_model.__table__
+    
+    class waifu_proposal_model(BASE):
+        __tablename__   = 'WAIFU_PROPOSAL'
+        id              = Column(Int64, primary_key=True)
+        source_id       = Column(Int64)
+        target_id       = Column(Int64)
+        investment      = Column(Int64)
+    
+    WAIFU_PROPOSAL_TABLE = waifu_proposal_model.__table__
     
     class auto_react_role_model(BASE):
         __tablename__   = 'AUTO_REACT_ROLE'

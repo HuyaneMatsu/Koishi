@@ -210,17 +210,23 @@ async def user_top(event,
     
     async with DB_ENGINE.connect() as connector:
         statement = (
-            select([
+            select(
+                [
+                    emoji_counter_model.emoji_id,
+                    alchemy_function.count(emoji_counter_model.emoji_id).label('total'),
+                ]
+            ).where(
+                and_(
+                    emoji_counter_model.user_id == user.id,
+                    emoji_counter_model.timestamp > datetime.utcnow()-RELATIVE_MONTH*months,
+                )
+            ).limit(
+                count,
+            ).group_by(
                 emoji_counter_model.emoji_id,
-                alchemy_function.count(emoji_counter_model.emoji_id).label('total'),
-            ]). \
-            where(and_(
-                emoji_counter_model.user_id == user.id,
-                emoji_counter_model.timestamp > datetime.utcnow()-RELATIVE_MONTH*months,
-            )). \
-            limit(count). \
-            group_by(emoji_counter_model.emoji_id). \
-            order_by(desc('total'))
+            ).order_by(
+                desc('total'),
+            )
         )
         
         if (action_type != EMOJI_COMMAND_ACTION_TYPE_ALL):

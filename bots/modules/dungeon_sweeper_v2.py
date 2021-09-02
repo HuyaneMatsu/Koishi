@@ -13,7 +13,7 @@ from hata.ext.slash import abort, Row, Button, ButtonStyle, Timeouter
 from sqlalchemy.sql import select
 
 from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, user_common_model, USER_COMMON_TABLE, ds_v2_result_model, \
-    DS_V2_RESULT_TABLE
+    DS_V2_RESULT_TABLE, get_create_common_user_expression
 
 from bot_utils.shared import PATH__KOISHI, GUILD__NEKO_DUNGEON
 
@@ -2083,14 +2083,10 @@ class UserState:
                             update(user_common_model.id==entry_id). \
                             values(total_love=user_common_model.total_love+reward)
                     else:
-                        to_execute = USER_COMMON_TABLE.insert(). \
-                            values(
-                                user_id         = self.user_id,
-                                total_love      = reward,
-                                daily_next      = datetime.utcnow(),
-                                daily_streak    = 0,
-                                total_allocated = 0,
-                            )
+                        to_execute = get_create_common_user_expression(
+                            self.user_id,
+                            total_love = reward,
+                        )
                     
                     await connector.execute(to_execute)
 
@@ -3630,12 +3626,12 @@ class DungeonSweeperRunner:
                 task_interaction_acknowledge.result()
             except BaseException as err:
                 if (
-                            isinstance(err, ConnectionError) or
-                            (
-                                isinstance(err, DiscordException) and
-                                err.code == ERROR_CODES.unknown_interaction
-                            )
-                        ):
+                    isinstance(err, ConnectionError) or
+                    (
+                        isinstance(err, DiscordException) and
+                        err.code == ERROR_CODES.unknown_interaction
+                    )
+                ):
                     await user_state.upload_game_state_on_init_failure()
                     return # Happens, I guess
                 

@@ -2783,9 +2783,10 @@ async def take(client, event,
                 
                 target_user_new_total_love += target_user_total_allocated
                 
-                await connector.execute(USER_COMMON_TABLE. \
-                    update(user_common_model.id==target_user_entry_id). \
-                    values(
+                await connector.execute(
+                    USER_COMMON_TABLE.update(
+                        user_common_model.id == target_user_entry_id,
+                    ).values(
                         total_love = target_user_new_total_love,
                     )
                 )
@@ -2951,14 +2952,14 @@ async def currency_insert(client, event,
             entry_found = False
         
         if entry_found:
-            to_execute = USER_COMMON_TABLE. \
-                update(user_common_model.id == entry_id). \
-                values(
-                    total_love      = hearts,
-                    daily_next      = datetime.utcnow(),
-                    daily_streak    = dailies,
-                    total_allocated = 0,
-                )
+            to_execute = USER_COMMON_TABLE.update(
+                user_common_model.id == entry_id,
+            ).values(
+                total_love      = hearts,
+                daily_next      = datetime.utcnow(),
+                daily_streak    = dailies,
+                total_allocated = 0,
+            )
         else:
             to_execute = get_create_common_user_expression(
                 user_id,
