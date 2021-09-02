@@ -12,7 +12,7 @@ from hata.ext.slash import abort, Row, Button, ButtonStyle, Timeouter
 
 from sqlalchemy.sql import select
 
-from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, currency_model, CURRENCY_TABLE, ds_v2_result_model, \
+from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, user_common_model, USER_COMMON_TABLE, ds_v2_result_model, \
     DS_V2_RESULT_TABLE
 
 from bot_utils.shared import PATH__KOISHI, GUILD__NEKO_DUNGEON
@@ -1905,10 +1905,11 @@ class UserState:
                 
                 if (entry_id is not None):
                     await connector.execute(
-                        DS_V2_TABLE.update(). \
-                        values(
+                        DS_V2_TABLE.update(
+                            ds_v2_model.id == entry_id,
+                        ).values(
                             game_state = None,
-                        ).where(ds_v2_model.id==entry_id)
+                        )
                     )
             
             else:
@@ -1957,10 +1958,11 @@ class UserState:
             if (game_state_data is not None):
                 async with DB_ENGINE.connect() as connector:
                     await connector.execute(
-                        DS_V2_TABLE.update(). \
-                        values(
-                            game_state         = game_state_data,
-                        ).where(ds_v2_model.id==self.entry_id)
+                        DS_V2_TABLE.update(
+                            ds_v2_model.id == self.entry_id
+                        ).values(
+                            game_state = game_state_data,
+                        )
                     )
     
     
@@ -1976,11 +1978,12 @@ class UserState:
         async with DB_ENGINE.connect() as connector:
             if self.field_exists:
                 await connector.execute(
-                    DS_V2_TABLE.update(). \
-                    values(
-                        game_state         = game_state_data,
-                        selected_stage_id  = self.selected_stage_id,
-                    ).where(ds_v2_model.id==self.entry_id)
+                    DS_V2_TABLE.update(
+                        ds_v2_model.id == self.entry_id,
+                    ).values(
+                        game_state = game_state_data,
+                        selected_stage_id = self.selected_stage_id,
+                    )
                 )
             else:
                 response = await connector.execute(
@@ -2068,19 +2071,19 @@ class UserState:
                 
                 if reward:
                     response = await connector.execute(
-                        select([currency_model.id]). \
-                        where(currency_model.user_id==self.user_id)
+                        select([user_common_model.id]). \
+                        where(user_common_model.user_id==self.user_id)
                     )
                     
                     results = await response.fetchall()
                     if results:
                         entry_id = results[0][0]
                         
-                        to_execute = CURRENCY_TABLE. \
-                            update(currency_model.id==entry_id). \
-                            values(total_love=currency_model.total_love+reward)
+                        to_execute = USER_COMMON_TABLE. \
+                            update(user_common_model.id==entry_id). \
+                            values(total_love=user_common_model.total_love+reward)
                     else:
-                        to_execute = CURRENCY_TABLE.insert(). \
+                        to_execute = USER_COMMON_TABLE.insert(). \
                             values(
                                 user_id         = self.user_id,
                                 total_love      = reward,

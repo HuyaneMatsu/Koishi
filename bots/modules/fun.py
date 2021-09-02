@@ -12,72 +12,6 @@ from bot_utils.shared import GUILD__NEKO_DUNGEON
 SLASH_CLIENT : Client
 
 
-LAST_MEME_AFTER = Cell()
-MEME_QUEUE = []
-MEME_URL = 'https://www.reddit.com/r/goodanimemes.json'
-MEME_REQUEST_LOCK = Lock(KOKORO)
-
-async def get_memes():
-    if MEME_REQUEST_LOCK.locked():
-        await MEME_REQUEST_LOCK
-        return
-    
-    async with MEME_REQUEST_LOCK:
-        after = LAST_MEME_AFTER.value
-        if after is None:
-            after = ''
-        
-        async with SLASH_CLIENT.http.get(MEME_URL, params={'limit': 100, 'after': after}) as response:
-            json = await response.json()
-        
-        for meme_children in json['data']['children']:
-            meme_children_data = meme_children['data']
-            if meme_children_data.get('is_self', False) or \
-                    meme_children_data.get('is_video', False) or \
-                    meme_children_data.get('over_18', False):
-                continue
-            
-            url = meme_children_data['url']
-            if url.startswith('https://www.reddit.com/gallery/'):
-                continue
-            
-            MEME_QUEUE.append((meme_children_data['title'], url))
-        
-        LAST_MEME_AFTER.value = json['data'].get(after, None)
-
-async def get_meme():
-    if MEME_QUEUE:
-        return MEME_QUEUE.pop()
-    
-    await get_memes()
-    
-    if MEME_QUEUE:
-        return MEME_QUEUE.pop()
-    
-    return None
-
-@SLASH_CLIENT.interactions(is_global=True, name='meme')
-async def meme_(client, event):
-    """Shows a meme."""
-    guild = event.guild
-    if guild is None:
-        abort('Guild only command.')
-    
-    if (client.get_guild_profile_for(guild) is None):
-        abort('I must be in the guild to do this.')
-    
-    yield
-    
-    meme = await get_meme()
-    if meme is None:
-        abort('No memes for now.')
-    
-    title, url = meme
-    embed = Embed(title, url=url).add_image(url)
-    
-    yield embed
-    return
-
 TRIVIA_QUEUE = []
 TRIVIA_URL = 'https://opentdb.com/api.php'
 TRIVIA_REQUEST_LOCK = Lock(KOKORO)
@@ -97,7 +31,7 @@ async def get_trivias():
                 html_unescape(trivia_data['question']),
                 html_unescape(trivia_data['correct_answer']),
                 [html_unescape(element) for element in trivia_data['incorrect_answers']],
-                    )
+            )
             
             TRIVIA_QUEUE.append(trivia)
 
@@ -117,7 +51,7 @@ TRIVIA_OPTIONS = (
     BUILTIN_EMOJIS['regional_indicator_b'],
     BUILTIN_EMOJIS['regional_indicator_c'],
     BUILTIN_EMOJIS['regional_indicator_d'],
-        )
+)
 
 def check_for_trivia_emoji(user, event):
     if event.user is not user:

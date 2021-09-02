@@ -13,7 +13,8 @@ FILTER = re.compile(
         'rapptz|'
         'discord\.ext|'
         '[pр]y\.discord|'
-        'D¡\$€0rd\.[pр]¥'
+        'D¡\$€0rd\.[pр]¥|'
+        '[pр]ycord'
     ),
     re.I|re.M|re.S|re.U,
 )

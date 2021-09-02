@@ -10,7 +10,7 @@ from hata.ext.slash import abort, wait_for_component_interaction, Row, Button, I
 from sqlalchemy.sql import select, update
 
 from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI, EMOJI__HEART_CURRENCY
-from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE, item_model, ITEM_TABLE
+from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, item_model, ITEM_TABLE
 
 SLASH_CLIENT: Client
 
@@ -629,8 +629,8 @@ async def buy(client, event,
     user = event.user
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.total_love]). \
-                where(currency_model.user_id==user.id))
+            select([user_common_model.total_love]). \
+                where(user_common_model.user_id==user.id))
         
         results = await response.fetchall()
         if results:
@@ -677,8 +677,8 @@ async def buy(client, event,
         user = event.user
         async with DB_ENGINE.connect() as connector:
             response = await connector.execute(
-                select([currency_model.total_love, currency_model.total_allocated]). \
-                    where(currency_model.user_id==user.id))
+                select([user_common_model.total_love, user_common_model.total_allocated]). \
+                    where(user_common_model.user_id==user.id))
             
             results = await response.fetchall()
             if results:
@@ -697,7 +697,7 @@ async def buy(client, event,
                 new_love = total_love
             else:
                 new_love = total_love-cost
-                await connector.execute(update(currency_model.user_id==user.id). \
+                await connector.execute(update(user_common_model.user_id==user.id). \
                     values(total_love = new_love))
                 
                 response = await connector.execute(select([item_model.id, item_model.amount]). \
@@ -707,14 +707,16 @@ async def buy(client, event,
                 if results:
                     row_id, actual_amount = results[0]
                     new_amount = actual_amount+amount
-                    to_execute = ITEM_TABLE.update().values(
-                        amount = new_amount
-                            ).where(item_model.id==row_id)
+                    to_execute = ITEM_TABLE.update(
+                        item_model.id == row_id,
+                    ).values(
+                        amount = new_amount,
+                    )
                 else:
                     to_execute = ITEM_TABLE.insert().values(
                         user_id = user.id,
-                        amount  = amount,
-                        type    = item.id
+                        amount = amount,
+                        type = item.id,
                     )
                 
                 await connector.execute(to_execute)

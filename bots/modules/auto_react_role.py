@@ -1350,10 +1350,14 @@ class AutoReactRoleManager:
             position +=8
         
         async with DB_ENGINE.connect() as connector:
-            await connector.execute(AUTO_REACT_ROLE_TABLE.update().values(
-                data = data,
-                behaviour = self.behaviour,
-                    ).where(auto_react_role_model.message_id==self.message.id))
+            await connector.execute(
+                AUTO_REACT_ROLE_TABLE.update(
+                    auto_react_role_model.message_id == self.message.id,
+                ).values(
+                    data = data,
+                    behaviour = self.behaviour,
+                )
+            )
     
     async def destroy(self):
         if self.destroy_called:
@@ -1361,7 +1365,7 @@ class AutoReactRoleManager:
         
         self.destroy_called = True
         
-        client=self.client
+        client = self.client
         message = self.message
         client.events.reaction_add.remove(message, self.action_on_reaction_add)
         client.events.reaction_delete.remove(message, self.action_on_reaction_delete)

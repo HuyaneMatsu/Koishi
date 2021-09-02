@@ -13,7 +13,7 @@ from hata.ext.slash import abort, InteractionResponse, set_permission, Button, R
 
 from sqlalchemy.sql import select, desc
 
-from bot_utils.models import DB_ENGINE, currency_model, CURRENCY_TABLE
+from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression
 from bot_utils.shared import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
     EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST, ROLE__NEKO_DUNGEON__ADMIN, \
     ROLE__NEKO_DUNGEON__NSFW_ACCESS
@@ -210,19 +210,31 @@ async def daily(client, event,
     now = datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
         if source_user is target_user:
-            response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==source_user.id))
+            response = await connector.execute(
+                select(
+                    [
+                        user_common_model.id,
+                        user_common_model.total_love,
+                        user_common_model.daily_streak,
+                        user_common_model.daily_next,
+                    ]
+                ).where(
+                    user_common_model.user_id == target_user.id,
+                )
+            )
+            
             results = await response.fetchall()
             if results:
                 source_result = results[0]
-                daily_next = source_result.daily_next
+                daily_next = source_result[3]
                 if daily_next > now:
                     return Embed(
                         'You already claimed your daily love for today~',
                         f'Come back in {elapsed_time(daily_next)}.',
-                        color=GAMBLING_COLOR,
+                        color = GAMBLING_COLOR,
                     )
                 
-                daily_streak = calculate_daily_new_only(source_result.daily_streak, daily_next, now)
+                daily_streak = calculate_daily_new_only(source_result[2], daily_next, now)
                 
                 if daily_next+DAILY_STREAK_BREAK < now:
                     streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
@@ -230,15 +242,15 @@ async def daily(client, event,
                     streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
                 
                 received = calculate_daily_for(source_user, daily_streak)
-                total_love = source_result.total_love+received
+                total_love = source_result[1]+received
                 
                 daily_streak += 1
-                await connector.execute(CURRENCY_TABLE. \
-                    update(currency_model.id==source_result.id). \
-                    values(
-                        total_love  = total_love,
-                        daily_next  = now+DAILY_INTERVAL,
-                        daily_streak= daily_streak,
+                await connector.execute(USER_COMMON_TABLE.update(
+                        user_common_model.id == source_result[0]
+                    ).values(
+                        total_love = total_love,
+                        daily_next = now+DAILY_INTERVAL,
+                        daily_streak = daily_streak,
                     )
                 )
                 
@@ -246,17 +258,16 @@ async def daily(client, event,
                     'Here, some love for you~\nCome back tomorrow !',
                     f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} {EMOJI__HEART_CURRENCY:e}\n'
                     f'{streak_text}',
-                    color=GAMBLING_COLOR,
+                    color = GAMBLING_COLOR,
                 )
             
             received = calculate_daily_for(source_user, 0)
             await connector.execute(
-                CURRENCY_TABLE.insert().values(
-                    user_id         = source_user.id,
-                    total_love      = received,
-                    daily_next      = now+DAILY_INTERVAL,
-                    daily_streak    = 1,
-                    total_allocated = 0,
+                get_create_common_user_expression(
+                    source_user.id,
+                    total_love = received,
+                    daily_next = now+DAILY_INTERVAL,
+                    daily_streak = 1,
                 )
             )
             
@@ -266,7 +277,21 @@ async def daily(client, event,
                 color = GAMBLING_COLOR)
         
         response = await connector.execute(
-            CURRENCY_TABLE.select(currency_model.user_id.in_([source_user.id, target_user.id,]))
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                    user_common_model.daily_streak,
+                    user_common_model.daily_next,
+                ]
+            ).where(
+                user_common_model.user_id.in_(
+                    [
+                        source_user.id,
+                        target_user.id,
+                    ]
+                )
+            )
         )
         
         results = await response.fetchall()
@@ -294,23 +319,22 @@ async def daily(client, event,
             streak_text = 'I am happy you joined the sect too.'
             
             await connector.execute(
-                CURRENCY_TABLE.insert().values(
-                    user_id         = source_user.id,
-                    total_love      = 0,
-                    daily_next      = now+DAILY_INTERVAL,
-                    daily_streak    = 1,
-                    total_allocated = 0,
+                get_create_common_user_expression(
+                    source_user.id,
+                    daily_next = now+DAILY_INTERVAL,
+                    daily_streak = 1,
                 )
             )
         else:
-            daily_next = source_result.daily_next
+            daily_next = source_result[3]
             if daily_next > now:
                 return Embed(
                     'You already claimed your daily love for today~',
                     f'Come back in {elapsed_time(daily_next)}.',
-                    color = GAMBLING_COLOR)
+                    color = GAMBLING_COLOR,
+                )
             
-            daily_streak = source_result.daily_streak
+            daily_streak = source_result[2]
             daily_next = daily_next+DAILY_STREAK_BREAK
             if daily_next < now:
                 daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
@@ -323,10 +347,11 @@ async def daily(client, event,
             else:
                 streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
             
-            await connector.execute(CURRENCY_TABLE.update(
-                currency_model.id==source_result.id).values(
-                    daily_next  = now+DAILY_INTERVAL,
-                    daily_streak= daily_streak+1,
+            await connector.execute(USER_COMMON_TABLE.update(
+                    user_common_model.id == source_result[0]
+                ).values(
+                    daily_next = now+DAILY_INTERVAL,
+                    daily_streak = daily_streak+1,
                 )
             )
         
@@ -334,23 +359,22 @@ async def daily(client, event,
         
         if target_result is None:
             await connector.execute(
-                    CURRENCY_TABLE.insert().values(
-                    user_id         = target_user.id,
-                    total_love      = received,
-                    daily_next      = now,
-                    daily_streak    = 0,
-                    total_allocated = 0,
+                get_create_common_user_expression(
+                    target_user.id,
+                    total_love = received,
+                    daily_next = now,
                 )
             )
             
             total_love = received
         else:
-            total_love = target_result.total_love+received
+            total_love = target_result[1]+received
             
-            await connector.execute(CURRENCY_TABLE. \
-                update(currency_model.id==target_result.id). \
-                values(
-                    total_love  = total_love,
+            await connector.execute(
+                USER_COMMON_TABLE.update(
+                    user_common_model.id == target_result[0],
+                ).values(
+                    total_love = total_love,
                 )
             )
     
@@ -372,15 +396,25 @@ async def hearts(client, event,
         target_user = event.user
     
     async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(CURRENCY_TABLE.select(currency_model.user_id==target_user.id))
+        response = await connector.execute(
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                    user_common_model.daily_streak,
+                    user_common_model.daily_next,
+                    user_common_model.total_allocated,
+                ]
+            ).where(
+                user_common_model.user_id == target_user.id,
+            )
+        )
+        
         results = await response.fetchall()
     
         if results:
-            result = results[0]
-            total_love = result.total_love
-            daily_next = result.daily_next
-            daily_streak = result.daily_streak
-            total_allocated = result.total_allocated
+            entry_id, total_love, daily_streak, daily_next, total_allocated = results[0]
+            
             now = datetime.utcnow()
             if daily_next > now:
                 ready_to_claim = False
@@ -396,9 +430,10 @@ async def hearts(client, event,
             ready_to_claim = True
         
         if total_allocated and (target_user.id not in IN_GAME_IDS):
-            await connector.execute(CURRENCY_TABLE. \
-                update(currency_model.id == result.id). \
-                values(
+            await connector.execute(
+                USER_COMMON_TABLE.update(
+                    user_common_model.id == entry_id,
+                ).values(
                     total_allocated = 0,
                 )
             )
@@ -747,24 +782,26 @@ class HeartEventGUI:
         connector = self.connector
         
         response = await connector.execute(
-            select([currency_model.id]). \
-            where(currency_model.user_id==user.id)
+            select(
+                [
+                    user_common_model.id,
+                ]
+            ).where(
+                user_common_model.user_id == user.id,
+            )
         )
         
         results = await response.fetchall()
         if results:
             entry_id = results[0][0]
-            to_execute = CURRENCY_TABLE. \
-                update(currency_model.id==entry_id). \
-                values(total_love=currency_model.total_love+self.amount)
+            to_execute = USER_COMMON_TABLE. \
+                update(user_common_model.id==entry_id). \
+                values(total_love=user_common_model.total_love+self.amount)
         
         else:
-            to_execute = CURRENCY_TABLE.insert().values(
-                user_id         = user_id,
-                total_love      = self.amount,
-                daily_next      = datetime.utcnow(),
-                daily_streak    = 0,
-                total_allocated = 0,
+            to_execute = get_create_common_user_expression(
+                user_id,
+                total_love = self.amount,
             )
         
         await connector.execute(to_execute)
@@ -1033,12 +1070,15 @@ class DailyEventGUI:
         connector = self.connector
         
         response = await connector.execute(
-            select([
-                currency_model.id,
-                currency_model.daily_streak,
-                currency_model.daily_next
-            ]). \
-            where(currency_model.user_id==user_id)
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.daily_streak,
+                    user_common_model.daily_next,
+                ]
+            ).where(
+                user_common_model.user_id == user_id,
+            )
         )
         
         results = await response.fetchall()
@@ -1049,20 +1089,17 @@ class DailyEventGUI:
             daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
             daily_streak = daily_streak+self.amount
             
-            to_execute = CURRENCY_TABLE. \
-                update(currency_model.id==entry_id). \
-                values(
-                    daily_streak= daily_streak,
-                    daily_next  = daily_next,
-                )
+            to_execute = USER_COMMON_TABLE.update(
+                user_common_model.id == entry_id,
+            ).values(
+                daily_streak = daily_streak,
+                daily_next = daily_next,
+            )
         
         else:
-            to_execute = CURRENCY_TABLE.insert().values(
-                user_id         = user_id,
-                total_love      = 0,
-                daily_next      = datetime.utcnow(),
-                daily_streak    = self.amount,
-                total_allocated = 0,
+            to_execute = get_create_common_user_expression(
+                user_id,
+                daily_streak = self.amount,
             )
         
         await connector.execute(to_execute)
@@ -1595,8 +1632,15 @@ def game_21_precheck(client, user, channel, amount, require_guild):
 async def game_21_postcheck(client, user, channel, amount):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.id, currency_model.total_love, currency_model.total_allocated]). \
-            where(currency_model.user_id==user.id)
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                    user_common_model.total_allocated,
+                ]
+            ).where(
+                user_common_model.user_id == user.id,
+            )
         )
         
         results = await response.fetchall()
@@ -1641,9 +1685,9 @@ async def game_21_single_player(client, event, amount):
         else:
             unallocate = True
             async with DB_ENGINE.connect() as connector:
-                await connector.execute(CURRENCY_TABLE. \
-                    update(currency_model.id == entry_id). \
-                    values(total_allocated = currency_model.total_allocated-amount)
+                await connector.execute(USER_COMMON_TABLE. \
+                    update(user_common_model.id == entry_id). \
+                    values(total_allocated = user_common_model.total_allocated-amount)
                 )
         
         game_state = await player_user_waiter
@@ -1675,13 +1719,13 @@ async def game_21_single_player(client, event, amount):
                 bonus = amount
             
             async with DB_ENGINE.connect() as connector:
-                expression = CURRENCY_TABLE.update(currency_model.user_id == user.id)
+                expression = USER_COMMON_TABLE.update(user_common_model.user_id == user.id)
                 
                 if amount:
-                    expression = expression.values(total_love=currency_model.total_love+bonus)
+                    expression = expression.values(total_love=user_common_model.total_love+bonus)
                 
                 if unallocate:
-                    expression = expression.values(total_allocated=currency_model.total_allocated-amount)
+                    expression = expression.values(total_allocated=user_common_model.total_allocated-amount)
                 
                 await connector.execute(expression)
             
@@ -1719,15 +1763,15 @@ async def game_21_single_player(client, event, amount):
         if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
             if entry_id != -1:
                 async with DB_ENGINE.connect() as connector:
-                    expression = CURRENCY_TABLE. \
-                        update(currency_model.id == entry_id). \
-                        values(
-                        total_love=currency_model.total_love-amount
+                    expression = USER_COMMON_TABLE.update(
+                        user_common_model.id == entry_id
+                    ).values(
+                        total_love = user_common_model.total_love-amount
                     )
                     
                     if unallocate:
                         expression = expression.values(
-                            total_allocated = currency_model.total_allocated-amount
+                            total_allocated = user_common_model.total_allocated-amount
                         )
                     
                     await connector.execute(expression)
@@ -1751,9 +1795,9 @@ async def game_21_single_player(client, event, amount):
         # Error occurred
         if unallocate:
             async with DB_ENGINE.connect() as connector:
-                expression = CURRENCY_TABLE. \
-                    update(currency_model.id == entry_id). \
-                    values(total_allocated = currency_model.total_allocated-amount)
+                expression = USER_COMMON_TABLE. \
+                    update(user_common_model.id == entry_id). \
+                    values(total_allocated = user_common_model.total_allocated-amount)
                 
                 await connector.execute(expression)
     
@@ -1829,9 +1873,9 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
         if result:
             if (entry_id != -1):
                 async with DB_ENGINE.connect() as connector:
-                    await connector.execute(CURRENCY_TABLE. \
-                        update(currency_model.id == entry_id). \
-                        values(total_allocated = currency_model.total_allocated+amount)
+                    await connector.execute(USER_COMMON_TABLE. \
+                        update(user_common_model.id == entry_id). \
+                        values(total_allocated = user_common_model.total_allocated+amount)
                     )
             
             joined_tuple = user, private_channel, entry_id
@@ -1847,9 +1891,9 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
 
 async def game_21_refund(entry_id, amount):
     async with DB_ENGINE.connect() as connector:
-        await connector.execute(CURRENCY_TABLE. \
-            update(currency_model.id == entry_id). \
-            values(total_allocated = currency_model.total_allocated-amount)
+        await connector.execute(USER_COMMON_TABLE. \
+            update(user_common_model.id == entry_id). \
+            values(total_allocated = user_common_model.total_allocated-amount)
         )
 
 async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, joined_user_ids, private_channel,
@@ -1877,9 +1921,9 @@ async def game_21_mp_cancelled(client, user, guild, source_channel, amount, priv
     joined_user_ids.discard(user.id)
     
     async with DB_ENGINE.connect() as connector:
-        await connector.execute(CURRENCY_TABLE. \
-            update(currency_model.id == entry_id). \
-            values(total_allocated = currency_model.total_allocated-amount)
+        await connector.execute(USER_COMMON_TABLE. \
+            update(user_common_model.id == entry_id). \
+            values(total_allocated = user_common_model.total_allocated-amount)
         )
     
     embed = Embed('21 multiplayer game was cancelled.',
@@ -2360,31 +2404,31 @@ async def game_21_multi_player(client, event, amount):
         
         async with DB_ENGINE.connect() as connector:
             if (loser_entry_ids is not None):
-                await connector.execute(CURRENCY_TABLE. \
-                    update(currency_model.id.in_(loser_entry_ids)). \
+                await connector.execute(USER_COMMON_TABLE. \
+                    update(user_common_model.id.in_(loser_entry_ids)). \
                     values(
-                        total_allocated = currency_model.total_allocated-amount,
-                        total_love = currency_model.total_love-amount,
+                        total_allocated = user_common_model.total_allocated-amount,
+                        total_love = user_common_model.total_love-amount,
                     )
                 )
                 
                 if (winner_entry_ids is not None):
                     won_per_user = int(len(losers)*amount//len(winners))
                     
-                    await connector.execute(CURRENCY_TABLE. \
-                        update(currency_model.id.in_(winner_entry_ids)). \
+                    await connector.execute(USER_COMMON_TABLE. \
+                        update(user_common_model.id.in_(winner_entry_ids)). \
                         values(
-                            total_allocated = currency_model.total_allocated-amount,
-                            total_love = currency_model.total_love+won_per_user,
+                            total_allocated = user_common_model.total_allocated-amount,
+                            total_love = user_common_model.total_love+won_per_user,
                         )
                     )
                 
             else:
                 if (winner_entry_ids is not None):
-                    await connector.execute(CURRENCY_TABLE. \
-                        update(currency_model.id.in_(winner_entry_ids)). \
+                    await connector.execute(USER_COMMON_TABLE. \
+                        update(user_common_model.id.in_(winner_entry_ids)). \
                         values(
-                            total_allocated = currency_model.total_allocated-amount,
+                            total_allocated = user_common_model.total_allocated-amount,
                         )
                     )
         
@@ -2451,8 +2495,15 @@ async def gift(client, event,
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.id, currency_model.total_love, currency_model.total_allocated]). \
-            where(currency_model.user_id==source_user.id)
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                    user_common_model.total_allocated
+                ]
+            ).where(
+                user_common_model.user_id == source_user.id,
+            )
         )
         
         results = await response.fetchall()
@@ -2472,8 +2523,14 @@ async def gift(client, event,
             return
         
         response = await connector.execute(
-            select([currency_model.id, currency_model.total_love]). \
-            where(currency_model.user_id==target_user.id)
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                ]
+            ).where(
+                user_common_model.user_id == target_user.id,
+            )
         )
         
         results = await response.fetchall()
@@ -2493,23 +2550,20 @@ async def gift(client, event,
         
         target_user_new_total_love = target_user_total_love+amount
         
-        await connector.execute(CURRENCY_TABLE. \
-            update(currency_model.id==source_user_entry_id). \
-            values(total_love = currency_model.total_love-amount)
+        await connector.execute(USER_COMMON_TABLE. \
+            update(user_common_model.id==source_user_entry_id). \
+            values(total_love = user_common_model.total_love-amount)
         )
         
         if target_user_entry_id != -1:
-            to_execute = CURRENCY_TABLE. \
-                update(currency_model.id==target_user_entry_id). \
-                values(total_love = currency_model.total_love+amount)
+            to_execute = USER_COMMON_TABLE. \
+                update(user_common_model.id==target_user_entry_id). \
+                values(total_love = user_common_model.total_love+amount)
         
         else:
-            to_execute = CURRENCY_TABLE.insert().values(
-                user_id         = target_user.id,
-                total_love      = target_user_new_total_love,
-                daily_next      = datetime.utcnow(),
-                daily_streak    = 0,
-                total_allocated = 0,
+            to_execute = get_create_common_user_expression(
+                target_user.id,
+                total_love = target_user_new_total_love,
             )
         
         await connector.execute(to_execute)
@@ -2540,7 +2594,7 @@ async def gift(client, event,
     
     embed = Embed('Aww, love is in the air',
         f'You have been gifted {amount} {EMOJI__HEART_CURRENCY.as_emoji} by {source_user.full_name}',
-        color=GAMBLING_COLOR,
+        color = GAMBLING_COLOR,
     ).add_field(
         f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
         f'{target_user_total_love} -> {target_user_new_total_love}',
@@ -2586,9 +2640,16 @@ async def award(client, event,
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.id, currency_model.total_love, currency_model.daily_streak,
-                currency_model.daily_next]). \
-            where(currency_model.user_id==target_user.id)
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                    user_common_model.daily_streak,
+                    user_common_model.daily_next,
+                ]
+            ).where(
+                user_common_model.user_id == target_user.id
+            )
         )
         
         results = await response.fetchall()
@@ -2616,20 +2677,19 @@ async def award(client, event,
         target_user_new_daily_next = target_user_daily_next
             
         if (target_user_entry_id != -1):
-            to_execute = CURRENCY_TABLE. \
-                update(currency_model.id == target_user_entry_id). \
+            to_execute = USER_COMMON_TABLE. \
+                update(user_common_model.id == target_user_entry_id). \
                 values(
                     total_love  = target_user_new_total_love,
                     daily_streak = target_user_new_daily_streak,
                     daily_next = target_user_new_daily_next,
                 )
         else:
-            to_execute = CURRENCY_TABLE.insert().values(
-                user_id         = target_user.id,
-                total_love      = target_user_new_total_love,
-                daily_next      = target_user_new_daily_next,
-                daily_streak    = target_user_new_daily_streak,
-                total_allocated = 0,
+            to_execute = get_create_common_user_expression(
+                target_user.id,
+                total_love = target_user_new_total_love,
+                daily_next = target_user_new_daily_next,
+                daily_streak = target_user_new_daily_streak,
             )
         
         await connector.execute(to_execute)
@@ -2643,9 +2703,11 @@ async def award(client, event,
         up_from = target_user_daily_streak
         up_to = target_user_new_daily_streak
     
-    embed = Embed(f'You awarded {target_user.full_name} with {amount} {awarded_with}',
+    embed = Embed(
+        f'You awarded {target_user.full_name} with {amount} {awarded_with}',
         f'Now they are up from {up_from} to {up_to} {awarded_with}',
-        color=GAMBLING_COLOR)
+        color = GAMBLING_COLOR,
+    )
     
     if (message is not None):
         embed.add_field('Message:', message)
@@ -2663,7 +2725,7 @@ async def award(client, event,
     embed = Embed(
         'Aww, love is in the air',
         f'You have been awarded {amount} {awarded_with} by {event.user.full_name}',
-        color=GAMBLING_COLOR,
+        color = GAMBLING_COLOR,
     ).add_field(
         f'Your {awarded_with}',
         f'{up_from} -> {up_to}',
@@ -2698,8 +2760,15 @@ async def take(client, event,
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.id, currency_model.total_love, currency_model.total_allocated]). \
-                where(currency_model.user_id==target_user.id)
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                    user_common_model.total_allocated,
+                ]
+            ).where(
+                user_common_model.user_id == target_user.id
+            )
         )
         results = await response.fetchall()
         if results:
@@ -2714,8 +2783,8 @@ async def take(client, event,
                 
                 target_user_new_total_love += target_user_total_allocated
                 
-                await connector.execute(CURRENCY_TABLE. \
-                    update(currency_model.id==target_user_entry_id). \
+                await connector.execute(USER_COMMON_TABLE. \
+                    update(user_common_model.id==target_user_entry_id). \
                     values(
                         total_love = target_user_new_total_love,
                     )
@@ -2724,9 +2793,11 @@ async def take(client, event,
             target_user_total_love = 0
             target_user_new_total_love = 0
     
-    yield Embed(f'You took {amount} {EMOJI__HEART_CURRENCY.as_emoji} away from {target_user.full_name}',
+    yield Embed(
+        f'You took {amount} {EMOJI__HEART_CURRENCY.as_emoji} away from {target_user.full_name}',
         f'They got down from {target_user_total_love} to {target_user_new_total_love} {EMOJI__HEART_CURRENCY.as_emoji}',
-        color=GAMBLING_COLOR)
+        color = GAMBLING_COLOR,
+    )
     
     return
 
@@ -2747,8 +2818,20 @@ async def transfer(client, event,
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.id, currency_model.user_id, currency_model.total_love]). \
-            where(currency_model.user_id.in_([source_user.id, target_user.id]))
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.user_id,
+                    user_common_model.total_love,
+                ]
+            ).where(
+                user_common_model.user_id.in_(
+                    [
+                        source_user.id,
+                        target_user.id,
+                    ]
+                )
+            )
         )
         
         source_user_found = False
@@ -2774,32 +2857,28 @@ async def transfer(client, event,
         
         if source_user_found:
             await connector.execute(
-                CURRENCY_TABLE.delete(). \
-                where(currency_model.id==source_user_entry_id)
+                USER_COMMON_TABLE.delete(). \
+                where(user_common_model.id==source_user_entry_id)
             )
         
         if source_user_total_love:
             if target_user_found:
-                to_execute = CURRENCY_TABLE. \
-                    update(currency_model.id == target_user_entry_id). \
+                to_execute = USER_COMMON_TABLE. \
+                    update(user_common_model.id == target_user_entry_id). \
                     values(
-                        total_love = currency_model.total_love+source_user_total_love,
+                        total_love = user_common_model.total_love+source_user_total_love,
                     )
             else:
-                to_execute = CURRENCY_TABLE.insert(). \
-                values(
-                    user_id         = user_id,
-                    total_love      = source_user_total_love,
-                    daily_next      = datetime.utcnow(),
-                    daily_streak    = 0,
-                    total_allocated = 0,
+                to_execute = get_create_common_user_expression(
+                    user_id,
+                    total_love = source_user_total_love,
                 )
             
             await connector.execute(to_execute)
     
     embed = Embed(
         f'You transferred {source_user.full_name}\'s hearts to {target_user.full_name}',
-        color=GAMBLING_COLOR,
+        color = GAMBLING_COLOR,
     ).add_field(
         f'Their {EMOJI__HEART_CURRENCY:e}',
         f'{target_user_total_love} -> {target_user_total_love+source_user_total_love}',
@@ -2820,7 +2899,7 @@ async def transfer(client, event,
     
     embed = Embed(
         f'{source_user.full_name}\'s {EMOJI__HEART_CURRENCY:r} has been transferred to you.',
-        color=GAMBLING_COLOR,
+        color = GAMBLING_COLOR,
     ).add_field(
         f'Your {EMOJI__HEART_CURRENCY:r}',
         f'{target_user_total_love} -> {target_user_total_love+source_user_total_love}',
@@ -2854,8 +2933,13 @@ async def currency_insert(client, event,
     user_id = target_user.id
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.id]). \
-            where(currency_model.user_id == user_id)
+            select(
+                [
+                    user_common_model.id,
+                ]
+            ).where(
+                user_common_model.user_id == user_id,
+            )
         )
         
         results = await response.fetchall()
@@ -2867,8 +2951,8 @@ async def currency_insert(client, event,
             entry_found = False
         
         if entry_found:
-            to_execute = CURRENCY_TABLE. \
-                update(currency_model.id == entry_id). \
+            to_execute = USER_COMMON_TABLE. \
+                update(user_common_model.id == entry_id). \
                 values(
                     total_love      = hearts,
                     daily_next      = datetime.utcnow(),
@@ -2876,14 +2960,11 @@ async def currency_insert(client, event,
                     total_allocated = 0,
                 )
         else:
-            to_execute = CURRENCY_TABLE.insert(). \
-                values(
-                    user_id         = user_id,
-                    total_love      = hearts,
-                    daily_next      = datetime.utcnow(),
-                    daily_streak    = dailies,
-                    total_allocated = 0,
-                )
+            to_execute = get_create_common_user_expression(
+                user_id,
+                total_love = hearts,
+                daily_streak = dailies,
+            )
         
         await connector.execute(to_execute)
     
@@ -2912,12 +2993,21 @@ async def top_list(client, event,
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.user_id, currency_model.total_love])
-                .where(currency_model.total_love != 0)
-                .order_by(desc(currency_model.total_love))
-                .limit(20)
-                .offset(20*(page-1))
+            select(
+                [
+                    user_common_model.user_id,
+                    user_common_model.total_love,
+                ]
+            ).where(
+                user_common_model.total_love != 0,
+            ).order_by(
+                desc(user_common_model.total_love),
+            ).limit(
+                20,
+            ).offset(
+                20*(page-1),
             )
+        )
         
         results = await response.fetchall()
         
@@ -3023,8 +3113,14 @@ async def roles(client, event,
     user_id = user.id
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.total_love, currency_model.total_allocated]). \
-            where(currency_model.user_id==user_id)
+            select(
+                [
+                    user_common_model.total_love,
+                    user_common_model.total_allocated,
+                ]
+            ).where(
+                user_common_model.user_id == user_id,
+            )
         )
         results = await response.fetchall()
         
@@ -3046,10 +3142,10 @@ async def roles(client, event,
             
             await client.user_role_add(user, role)
             
-            await connector.execute(CURRENCY_TABLE. \
-                update(currency_model.user_id == user_id). \
+            await connector.execute(USER_COMMON_TABLE. \
+                update(user_common_model.user_id == user_id). \
                 values(
-                    total_love = currency_model.total_love-cost,
+                    total_love = user_common_model.total_love-cost,
                 )
             )
     
@@ -3126,8 +3222,16 @@ async def sell_daily(client, event,
     user_id = event.user.id
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([currency_model.id, currency_model.total_love, currency_model.daily_streak, currency_model.daily_next]). \
-            where(currency_model.user_id==user_id)
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.total_love,
+                    user_common_model.daily_streak,
+                    user_common_model.daily_next,
+                ]
+            ).where(
+                user_common_model.user_id == user_id,
+            )
         )
         
         results = await response.fetchall()
@@ -3145,10 +3249,10 @@ async def sell_daily(client, event,
         if amount <= daily_streak:
             sell_price = calculate_sell_price(daily_streak, amount)
             
-            await connector.execute(CURRENCY_TABLE. \
-                update(currency_model.id == entry_id). \
+            await connector.execute(USER_COMMON_TABLE. \
+                update(user_common_model.id == entry_id). \
                 values(
-                    total_love = currency_model.total_love+sell_price,
+                    total_love = user_common_model.total_love+sell_price,
                     daily_next = daily_next,
                     daily_streak = daily_streak-amount,
                 )
@@ -3195,22 +3299,27 @@ BUMP_RP = re.compile(
 
 async def increase_user_total_love(user_id, increase):
     async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(select([currency_model.id]).where(currency_model.user_id==user_id))
+        response = await connector.execute(
+            select(
+                [
+                    user_common_model.id,
+                ]
+            ).where(
+                user_common_model.user_id == user_id,
+            )
+        )
         results = await response.fetchall()
         if results:
             entry_id = results[0][0]
-            to_execute = CURRENCY_TABLE. \
-                update(currency_model.id == entry_id). \
+            to_execute = USER_COMMON_TABLE. \
+                update(user_common_model.id == entry_id). \
                 values(
-                    total_love = currency_model.total_love+increase,
+                    total_love = user_common_model.total_love+increase,
                 )
         else:
-            to_execute = CURRENCY_TABLE.insert().values(
-                user_id         = user_id,
-                total_love      = increase,
-                daily_next      = datetime.utcnow(),
-                daily_streak    = 0,
-                total_allocated = 0,
+            to_execute = get_create_common_user_expression(
+                user_id,
+                total_love = increase,
             )
         
         await connector.execute(to_execute)
