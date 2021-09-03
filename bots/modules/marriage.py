@@ -1,7 +1,7 @@
 from math import floor
 
-from hata import Client, Embed, mention_user_by_id
-from hata.ext.slash import InteractionResponse
+from hata import Client, Embed, mention_user_by_id, DiscordException, ERROR_CODES
+from hata.ext.slash import InteractionResponse, abort
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
@@ -227,14 +227,17 @@ async def waifu_info(event,
 
 # Work in progress
 
-#@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
-async def marry(event,
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def propose(client, event,
         user: ('user', 'The user to propose to.'),
         amount: ('int', 'The amount of love to propose with.'),
             ):
-    
+    """Propose marriage to a user."""
     source_user_id = event.user.id
     target_user_id = user.id
+    
+    if source_user_id == target_user_id:
+        abort('You cannot propose to yourself.')
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -246,9 +249,10 @@ async def marry(event,
                     user_common_model.total_love,
                     user_common_model.total_allocated,
                     user_common_model.waifu_cost,
+                    user_common_model.waifu_owner_id,
                 ]
             ).where(
-                user_common_model.source_id.in_(
+                user_common_model.user_id.in_(
                     [
                         source_user_id,
                         target_user_id,
@@ -279,7 +283,7 @@ async def marry(event,
             source_total_allocated = 0
             
             source_waifu_count = 0
-            source_proposed_user_ids = None
+            proposed_user_ids = None
         else:
             source_entry_id = source_entry[0]
             source_waifu_slots = source_entry[2]
@@ -296,7 +300,7 @@ async def marry(event,
                 )
             )
             
-            waifu_count = (await response.fetchone())[0]
+            source_waifu_count = (await response.fetchone())[0]
             
             response = await connector.execute(
                 select(
@@ -306,7 +310,7 @@ async def marry(event,
                         waifu_proposal_model.investment,
                     ]
                 ).where(
-                    waifu_proposal_model.user_id == source_user_id
+                    waifu_proposal_model.source_id == source_user_id
                 )
             )
             
@@ -318,8 +322,13 @@ async def marry(event,
         
         
         if target_entry is None:
+            target_entry_id = -1
             target_waifu_cost = WAIFU_COST_DEFAULT
+            target_waifu_owner_id = 0
         else:
+            target_entry_id = target_entry[0]
+            target_waifu_owner_id = target_entry[6]
+            
             target_waifu_cost = target_entry[5]
             if not target_waifu_cost:
                 target_waifu_cost = WAIFU_COST_DEFAULT
@@ -329,11 +338,12 @@ async def marry(event,
         
         # Case 1: the user has not enough money
         if amount < required_love:
-            return Embed(
+            yield Embed(
                 None,
                 f'You need to propose with at least {required_love} {EMOJI__HEART_CURRENCY.as_emoji} to '
                 f'{user.full_name}.'
             )
+            return
         
         # Case 2-4: The user already proposing
         if (proposed_user_ids is not None):
@@ -344,11 +354,12 @@ async def marry(event,
             else:
                 # Case 2: Both amount and investment are the same. No change is needed.
                 if amount == investment:
-                    return Embed(
+                    yield Embed(
                         None,
                         f'You are already proposing to {user.full_name} with {amount} '
                         f'{EMOJI__HEART_CURRENCY.as_emoji}.'
                     )
+                    return
                 
                 available_love = source_total_love-source_total_allocated+investment
                 
@@ -386,10 +397,11 @@ async def marry(event,
                     embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
                     embed_description_parts.append(' already proposed.')
                     
-                    return Embed(
+                    yield Embed(
                         None,
                         ''.join(embed_description_parts)
                     )
+                    return
                 
                 # Case 4: The user can modify it's actual proposition
                 await connector.execute(
@@ -408,5 +420,384 @@ async def marry(event,
                     )
                 )
                 
+                yield Embed(
+                    None,
+                    f'You changed your proposition towards {user.full_name} from {investment} '
+                    f'{EMOJI__HEART_CURRENCY.as_emoji} to {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                )
+                
+                try:
+                    target_user_channel = await client.channel_private_create(user)
+                except ConnectionError:
+                    return
+                
+                try:
+                    await client.message_create(
+                        target_user_channel,
+                        embed = Embed(
+                            None,
+                            f'{event.user.full_name} changed their proposition towards you from {investment} '
+                            f'{EMOJI__HEART_CURRENCY.as_emoji} to {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                        )
+                    )
+                except ConnectionError:
+                    return
+                
+                except DiscordException as err:
+                    if err.code == ERROR_CODES.cannot_message_user:
+                        return
+                    
+                    raise
+                
+                return
+        
+        # case 5: The user can not propose more.
+        if proposed_user_ids is None:
+            proposed_user_count = 0
+        else:
+            proposed_user_count = len(proposed_user_ids)
+        
+        if source_waifu_slots-source_waifu_count-proposed_user_count <= 0:
+            yield Embed(
+                None,
+                f'You can not propose to more users.\n'
+                f'Waifu slots: {source_waifu_slots}\n'
+                f'Waifus: {source_waifu_count}\n'
+                f'Propositions: {proposed_user_count}'
+            )
+            
+            return
+        
+        # case 6: The proposition amount is under required amount
+        available_love = source_total_love-source_total_allocated
+        if amount > available_love:
+            embed_description_parts = []
+            
+            embed_description_parts.append('You do not have ')
+            embed_description_parts.append(repr(amount))
+            embed_description_parts.append(' ')
+            embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
+            embed_description_parts.append(' to propose to ')
+            embed_description_parts.append(user.full_name)
+            embed_description_parts.append(
+                '.\n'
+                '\n'
+                'You have '
+            )
+            embed_description_parts.append(repr(source_total_love))
+            embed_description_parts.append(' ')
+            embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
+            embed_description_parts.append(' love')
+            
+            if source_total_allocated:
+                embed_description_parts.append('(')
+                embed_description_parts.append(repr(source_total_allocated))
+                embed_description_parts.append(' in use).')
+            
+            yield Embed(
+                None,
+                ''.join(embed_description_parts)
+            )
+            return
+        
+        # case 7: Proposing to a bot
+        if user.is_bot:
+            love_increase = (amount>>1)
+            if target_entry_id == -1:
+                to_execute = get_create_common_user_expression(
+                    target_user_id,
+                    total_love = love_increase,
+                    waifu_owner_id = source_user_id,
+                )
+            else:
+                to_execute = USER_COMMON_TABLE.update(
+                    user_common_model.id == target_entry_id,
+                ).values(
+                    total_love = user_common_model.total_love+love_increase,
+                    waifu_owner_id = source_user_id,
+                )
+                
+                if target_waifu_owner_id:
+                    to_execute.values(
+                        waifu_divorces = user_common_model.waifu_divorces + 1,
+                    )
+            
+            await connector.execute(to_execute)
+            
+            if target_waifu_owner_id:
+                to_execute = WAIFU_LIST_TABLE.update(
+                    waifu_list_model.waifu_id == target_user_id,
+                ).values(
+                    user_id = source_user_id,
+                )
+            else:
+                to_execute = WAIFU_LIST_TABLE.insert().values(
+                    user_id = source_user_id,
+                    waifu_id = target_user_id,
+                )
+            
+            await connector.execute(to_execute)
+            
+            yield Embed(
+                None,
+                f'You married {user.full_name} with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+            )
+            return
+        
+        # Case 8: Proposing to a user account
+        await connector.execute(
+            WAIFU_PROPOSAL_TABLE.insert().values(
+                source_id = source_user_id,
+                target_id = target_user_id,
+                investment = amount,
+            )
+        
+        )
+        
+        await connector.execute(
+            USER_COMMON_TABLE.update(
+                user_common_model.id == source_entry_id,
+            ).values(
+                total_love = user_common_model.total_love-amount,
+            )
+        )
+        
+        yield Embed(
+            None,
+            f'You proposed towards {user.full_name} with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+        )
+        
+        try:
+            target_user_channel = await client.channel_private_create(user)
+        except ConnectionError:
+            return
+        
+        try:
+            await client.message_create(
+                target_user_channel,
+                embed = Embed(
+                    None,
+                    f'{event.user.full_name} proposed to you with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                )
+            )
+        except ConnectionError:
+            return
+        
+        except DiscordException as err:
+            if err.code == ERROR_CODES.cannot_message_user:
+                return
+            
+            raise
+        
+        return
+
+
+PROPOSITIONS = SLASH_CLIENT.interactions(
+    None,
+    name = 'propositions',
+    description = 'Lists propositions',
+    guild = GUILD__NEKO_DUNGEON
+)
+
+@PROPOSITIONS.interactions
+async def outgoing(event,
+        user: ('user', 'The user to list propositions of.') = None,
+            ):
+    """Lists outgoing propositions."""
+    return await list_propositions(event, user, True)
+
+@PROPOSITIONS.interactions
+async def incoming(event,
+        user: ('user', 'The user to list proposals of.') = None,
+            ):
+    """Lists incoming propositions."""
+    return await list_propositions(event, user, False)
+
+async def list_propositions(event, user, outgoing):
+    if user is None:
+        user = event.user
+    
+    user_id = user.id
+    
+    async with DB_ENGINE.connect() as connector:
+        if outgoing:
+            to_execute = select(
+                [
+                    waifu_proposal_model.target_id,
+                    waifu_proposal_model.investment,
+                ]
+            ).where(
+                waifu_proposal_model.source_id == user_id
+            )
+        else:
+            to_execute = select(
+                [
+                    waifu_proposal_model.source_id,
+                    waifu_proposal_model.investment,
+                ]
+            ).where(
+                waifu_proposal_model.target_id == user_id
+            )
+        
+        response = await connector.execute(to_execute)
+        
+        results = await response.fetchall()
+    
+    embed_description_parts = []
+    
+    length = len(results)
+    if length:
+        index = 0
+        while True:
+            target_id, investment = results[index]
+            index += 1
+            embed_description_parts.append(mention_user_by_id(target_id))
+            embed_description_parts.append(' ')
+            embed_description_parts.append(repr(investment))
+            embed_description_parts.append(' ')
+            embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
+            
+            if index == length:
+                break
+            
+            embed_description_parts.append('\n')
+    
+    else:
+        embed_description_parts.append('*no result*')
+    
+    description = ''.join(embed_description_parts)
+    
+    if outgoing:
+        title = f'Outgoing propositions of {user.full_name}'
+    else:
+        title = f'Incoming propositions to {user.full_name}'
+    
+    embed = Embed(
+        title,
+        description,
+    ).add_thumbnail(
+        user.avatar_url,
+    )
+    
+    return InteractionResponse(embed=embed, allowed_mentions=None)
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+async def accept_proposition(client, event,
+        user: ('user', 'Who\'s proposition to accept?'),
+            ):
+    target_user_id = event.user.id
+    source_user_id = user.id
+    
+    if target_user_id == source_user_id:
+        abort('Select someone else.')
+    
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            WAIFU_PROPOSAL_TABLE.delete().where(
+                and_(
+                    waifu_proposal_model.source_id == source_user_id,
+                    waifu_proposal_model.target_id == target_user_id,
+                )
+            ).returning(
+                waifu_proposal_model.investment,
+            )
+        )
+        
+        results = await response.fetchall()
+        if not results:
+            yield Embed(
+                None,
+                f'{user.full_name} is not proposing to you.'
+            )
+            return
+        
+        investment = results[0][0]
+        
+        response = await connector.execute(
+            select(
+                [
+                    user_common_model.id,
+                    user_common_model.waifu_owner_id,
+                ]
+            ).where(
+                user_common_model.user_id == target_user_id,
+            )
+        )
+        
+        results = await response.fetchall()
+        if response:
+            entry_id, waifu_owner_id = results[0]
+        else:
+            entry_id = -1
+            waifu_owner_id = 0
+        
+        love_increase = (investment>>1)
+        if entry_id == -1:
+            to_execute = get_create_common_user_expression(
+                target_user_id,
+                total_love = love_increase,
+                waifu_owner_id = source_user_id,
+            )
+        else:
+            to_execute = USER_COMMON_TABLE.update(
+                user_common_model.id == entry_id,
+            ).values(
+                total_love = user_common_model.total_love+love_increase,
+                waifu_owner_id = source_user_id,
+            )
+            
+            if waifu_owner_id:
+                to_execute.values(
+                    waifu_divorces = user_common_model.waifu_divorces + 1,
+                )
+        
+        await connector.execute(to_execute)
+        
+        if waifu_owner_id:
+            to_execute = WAIFU_LIST_TABLE.update(
+                waifu_list_model.waifu_id == target_user_id,
+            ).values(
+                user_id = source_user_id,
+            )
+        else:
+            to_execute = WAIFU_LIST_TABLE.insert().values(
+                user_id = source_user_id,
+                waifu_id = target_user_id,
+            )
+        
+        await connector.execute(to_execute)
+        
+        
+        yield Embed(
+            None,
+            f'You accepted the proposal from {user.full_name}.\n'
+            f'\n'
+            f'You received {love_increase} {EMOJI__HEART_CURRENCY.as_emoji}.'
+        )
+        
+        try:
+            target_user_channel = await client.channel_private_create(user)
+        except ConnectionError:
+            return
+        
+        try:
+            await client.message_create(
+                target_user_channel,
+                embed = Embed(
+                    None,
+                    f'{event.user.full_name} accepted your proposal.'
+                )
+            )
+        except ConnectionError:
+            return
+        
+        except DiscordException as err:
+            if err.code == ERROR_CODES.cannot_message_user:
+                return
+            
+            raise
+        
+        return
 
 

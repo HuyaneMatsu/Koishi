@@ -317,10 +317,12 @@ RULES_HELP = Embed('Rules of Dungeon sweeper',
     f'places are marked with an {BUILTIN_EMOJIS["x"]:e} on the floor. Because our characters are lazy, the less steps '
     f'required to sort their stuffs, makes them give you a better rating.\n'
     f'\n'
-    f'You can move with the reactions under the embed, to activate your characters\' skill, or go back, reset the map '
+    f'You can move with the buttons under the embed, to activate your characters\' skill, or go back, reset the map '
     f'or cancel the game:\n'
-    f'{EMOJI_WEST:e}{EMOJI_NORTH:e}{EMOJI_SOUTH:e}{EMOJI_EAST:e}{EMOJI_REIMU:e}{EMOJI_BACK:e}'
-    f'{EMOJI_RESET:e}{EMOJI_CANCEL:e}\n'
+    f'{EMOJI_NOTHING:e}{EMOJI_NORTH:e}{EMOJI_NOTHING:e}{EMOJI_BACK:e}\n'
+    f'{EMOJI_WEST:e}{EMOJI_REIMU:e}{EMOJI_EAST:e}{EMOJI_RESET:e}\n'
+    f'{EMOJI_NOTHING:e}{EMOJI_SOUTH:e}{EMOJI_NOTHING:e}{EMOJI_CANCEL:e}\n'
+    f'\n'
     f'You can show push boxes by moving towards them, but you cannot push more at the same time time or push into the '
     f'wall:\n'
     f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
@@ -342,7 +344,7 @@ RULES_HELP = Embed('Rules of Dungeon sweeper',
     f'{STYLE_REIMU[BIT_MASK_BOX_TARGET]}\n'
     f'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
     f'play with.',
-    color=DUNGEON_SWEEPER_COLOR,
+    color = DUNGEON_SWEEPER_COLOR,
 ).add_field(f'Chapter 1 {EMOJI_REIMU:e}',
     f'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
     f'Reimu can jump over a box or hole.\n'

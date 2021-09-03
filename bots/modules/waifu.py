@@ -117,7 +117,7 @@ class Action:
         self.cache = []
     
     async def __call__(self, client, event,
-            message : ('str', 'Additional message to send?') = None,
+            user : ('user', 'Who to hug?') = None,
                 ):
         guild_id = event.guild_id
         if not guild_id:
@@ -127,40 +127,14 @@ class Action:
         if url is None:
             abort('*Could not get any images, please try again later.*')
         
-        user = event.user
-        try:
-            guild_profile = user.guild_profiles[guild_id]
-        except KeyError:
-            user_name = user.name
+        if user is None:
+            hugger = client
+            hugged = event.user
         else:
-            user_name = guild_profile.nick
-            if (user_name is None):
-                user_name = user.name
+            hugger = event.user
+            hugged = user
         
-        
-        if message is None:
-            try:
-                guild_profile = client.guild_profiles[guild_id]
-            except KeyError:
-                client_name = client.name
-            else:
-                client_name = guild_profile.nick
-                if (client_name is None):
-                    client_name = client.name
-            
-            first_word = client_name
-            last_word = user_name
-        
-        else:
-            message = sanitize_mentions(message, event.guild)
-            # Security goes brrr
-            if len(message) > 200:
-                message = message[:200] + '...'
-            
-            first_word = user_name
-            last_word = message
-        
-        title = f'{first_word} {self.verb} {last_word}.'
+        title = f'{hugger:f} {self.verb} {hugged:f}.'
         
         return Embed(title, color=(event.id>>22)&0xffffff).add_image(url)
 

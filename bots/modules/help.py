@@ -139,7 +139,7 @@ async def about(client):
     return Embed(
         'About',
         f'Hello, I am {client.full_name} as you expected. It was a great success to meat you!',
-        color=COLOR__KOISHI_HELP,
+        color = COLOR__KOISHI_HELP,
         ).add_field(
             'Library',
             LIBRARY_INFO,
@@ -151,6 +151,13 @@ async def about(client):
         ).add_field(
             'Support server',
             f'[{GUILD__NEKO_DUNGEON.name}]({INVITE__NEKO_DUNGEON.url})',
+            inline = True,
+        ).add_field(
+            'Invite',
+            (
+                f'[here](https://discord.com/oauth2/authorize?client_id={client.application.id}&scope=bot%20'
+                f'applications.commands)'
+            ),
             inline = True,
         ).add_field('Interpreter',
             INTERPRETER_INFO,

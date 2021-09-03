@@ -80,7 +80,7 @@ async def get_meme(meme_lock):
 @SLASH_CLIENT.interactions(is_global=True, name='meme')
 async def meme_(client, event):
     """Shows a meme."""
-    if not event.guild_id is None:
+    if not event.guild_id:
         abort('Guild only command.')
     
     meme = await get_meme(MEME_LOCK_GOOD_ANIME_MEMES)
