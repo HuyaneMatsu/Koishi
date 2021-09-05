@@ -310,6 +310,8 @@ async def waifu_info(event,
     
     embed = Embed(
         f'{user.full_name}\'s waifu info'
+    ).add_thumbnail(
+        user.avatar_url
     )
     
     if waifu_owner_id:
@@ -338,19 +340,15 @@ async def waifu_info(event,
         inline = True,
     )
     
-    embed.add_field(
-        'Waifu slots',
-        str(waifu_slots),
-        inline = True,
-    )
-    
     if waifu_ids is None:
         field_value = '*none*'
+        waifu_count_value = '0'
     else:
         field_value = '\n'.join(mention_user_by_id(waifu_id) for waifu_id in waifu_ids)
+        waifu_count_value = repr(len(waifu_ids))
     
     embed.add_field(
-        'Waifus',
+        f'Waifus ({waifu_count_value} / {waifu_slots})',
         field_value,
         inline = True,
     )

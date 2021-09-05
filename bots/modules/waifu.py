@@ -173,13 +173,13 @@ class Action:
         self.cache = []
     
     async def __call__(self, client, event,
-            user : ('user', 'Who to hug?') = None,
+            user : ('user', 'Select someone.') = None,
                 ):
         guild_id = event.guild_id
         if not guild_id:
             abort('Guild only command')
         
-        url = await get_waifu_image(client, event, self.name, True, self.cache)
+        url = await get_waifu_image(client, event, self.name, True, self.cache, False)
         if url is None:
             abort('*Could not get any images, please try again later.*')
         
