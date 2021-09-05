@@ -1,3 +1,5 @@
+from itertools import chain
+
 from hata import Client
 from hata.backend.headers import CONTENT_TYPE
 from hata import imultidict, un_map_pack, Task, KOKORO, WaitTillAll, sanitize_mentions, Embed
@@ -26,8 +28,10 @@ NSFW_WAIFUS = [
 
 
 WAIFU_CACHE_BY_KEY = {
-    **un_map_pack(((waifu_type, True), []) for waifu_type in SFW_WAIFUS),
-    **un_map_pack(((waifu_type, False), []) for waifu_type in NSFW_WAIFUS),
+    key: [] for key in chain(
+        ((waifu_type, True) for waifu_type in SFW_WAIFUS),
+        ((waifu_type, False) for waifu_type in NSFW_WAIFUS),
+    )
 }
 
 
