@@ -3985,7 +3985,7 @@ SLASH_CLIENT : Client
 DUNGEON_SWEEPER = SLASH_CLIENT.interactions(None,
     name = 'ds',
     description = 'Touhou themed puzzle game.',
-    guild = GUILD__NEKO_DUNGEON,
+    is_global = True,
 )
 
 

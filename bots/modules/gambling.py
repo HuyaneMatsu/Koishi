@@ -283,6 +283,7 @@ async def daily(client, event,
                     user_common_model.total_love,
                     user_common_model.daily_streak,
                     user_common_model.daily_next,
+                    user_common_model.user_id,
                 ]
             ).where(
                 user_common_model.user_id.in_(
@@ -299,14 +300,14 @@ async def daily(client, event,
             source_result = None
             target_result = None
         elif len(results) == 1:
-            if results[0].user_id == source_user.id:
+            if results[0][4] == source_user.id:
                 source_result = results[0]
                 target_result = None
             else:
                 source_result = None
                 target_result = results[0]
         else:
-            if results[0].user_id == source_user.id:
+            if results[0][4] == source_user.id:
                 source_result = results[0]
                 target_result = results[1]
             else:
