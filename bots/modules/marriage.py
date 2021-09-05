@@ -1308,7 +1308,7 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
             (
                 f'You divorced {mention_user_by_id(target_user_id)} successfully.\n'
                 f'\n'
-                f'You payed {refund} {EMOJI__HEART_CURRENCY.as_emoji} refund.'
+                f'You paid {refund} {EMOJI__HEART_CURRENCY.as_emoji} as refund.'
             ),
         ),
         allowed_mentions = None,
@@ -1504,7 +1504,7 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
             (
                 f'You divorced {mention_user_by_id(target_user_id)} successfully.\n'
                 f'\n'
-                f'You payed {refund} {EMOJI__HEART_CURRENCY.as_emoji} refund.'
+                f'You paid {refund} {EMOJI__HEART_CURRENCY.as_emoji} as refund.'
             ),
         ),
         allowed_mentions = None,
