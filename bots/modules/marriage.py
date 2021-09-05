@@ -1103,7 +1103,7 @@ async def divorce(client, event,
             
             if available_love < waifu_cost:
                 embed_description_parts = []
-                embed_description_parts.append('You have sufficient amount of ')
+                embed_description_parts.append('You doesn\'t have enough ')
                 embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
                 embed_description_parts.append(f' to divorce ')
                 embed_description_parts.append(user.full_name)
@@ -1138,7 +1138,7 @@ async def divorce(client, event,
             return InteractionResponse(
                 embed = Embed(
                     None,
-                    f'Are you sure to divorce {user.full_name}?\n'
+                    f'Are you sure you want to divorce {user.full_name}?\n'
                     f'\n'
                     f'This action requires {waifu_cost} {EMOJI__HEART_CURRENCY.as_emoji}'
                 ),
@@ -1245,7 +1245,7 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
                 embed = Embed(
                     None,
                     (
-                        f'{mention_user_by_id(target_user_id)} not claims you anymore.'
+                        f'You are not claimed by {mention_user_by_id(target_user_id)} anymore.'
                     ),
                 ),
                 allowed_mentions = None,
@@ -1419,7 +1419,7 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
                 embed = Embed(
                     None,
                     (
-                        f'You are not circularly married to {mention_user_by_id(target_user_id)} anymore.'
+                        f'You are not mutually married to {mention_user_by_id(target_user_id)} anymore.'
                     ),
                 ),
                 allowed_mentions = None,
