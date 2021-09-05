@@ -160,7 +160,10 @@ class NewWaifu:
         return embed
 
 for key, cache in WAIFU_CACHE_BY_KEY.items():
-    SLASH_CLIENT.interactions(custom_id=f'waifu.{"" if key[1] else "n"}sfw.{key[0]}')(NewWaifu(key, cache))
+    SLASH_CLIENT.interactions(
+        NewWaifu(key, cache),
+        custom_id = f'waifu.{"" if key[1] else "n"}sfw.{key[0]}',
+    )
 
 del key, cache
 

@@ -155,7 +155,7 @@ async def buy_waifu_slot(event):
                     embed = Embed(
                         None,
                         (
-                            f'Are you sure to buy your {new_waifu_slot_count}'
+                            f'Are you sure you want to buy your {new_waifu_slot_count}'
                             f'{GET_NUMBER_TH_ENDING.get(new_waifu_slot_count, DEFAULT_TH_ENDING)} waifu slot for '
                             f'{required_love} {EMOJI__HEART_CURRENCY.as_emoji}?'
                         ),
