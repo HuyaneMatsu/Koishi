@@ -1,10 +1,10 @@
 from itertools import chain
 
-from hata import Client
+from hata import Client, BUILTIN_EMOJIS
 from hata.backend.headers import CONTENT_TYPE
 from hata import imultidict, un_map_pack, Task, KOKORO, WaitTillAll, sanitize_mentions, Embed
 
-from hata.ext.slash import abort
+from hata.ext.slash import abort, InteractionResponse, Button, Row
 
 SLASH_CLIENT: Client
 
@@ -34,6 +34,12 @@ WAIFU_CACHE_BY_KEY = {
     )
 }
 
+EMOJI_NEW = BUILTIN_EMOJIS['arrows_counterclockwise']
+
+ACKNOWLEDGE_APPLICATION_COMMAND_INTERACTION_FUNCTION = Client.interaction_application_command_acknowledge
+ACKNOWLEDGE_COMPONENT_INTERACTION_FUNCTION = Client.interaction_component_acknowledge
+
+ERROR_MESSAGE_NO_WAIFU = '*Could not get any images, please try again later.*'
 
 async def request_image(client, endpoint, safe, cache):
     url = f'{WAIFU_API_BASE_URL}/many/{"" if safe else "n"}sfw/{endpoint}'
@@ -54,12 +60,16 @@ async def request_image(client, endpoint, safe, cache):
             if cache:
                 return cache.pop()
 
-
-async def get_waifu_image(client, event, endpoint, safe, cache):
+async def get_waifu_image(client, event, endpoint, safe, cache, is_component):
     if cache:
         return cache.pop()
     
-    acknowledge_task = Task(client.interaction_application_command_acknowledge(event), KOKORO)
+    if is_component:
+        acknowledge_function = ACKNOWLEDGE_COMPONENT_INTERACTION_FUNCTION
+    else:
+        acknowledge_function = ACKNOWLEDGE_APPLICATION_COMMAND_INTERACTION_FUNCTION
+    
+    acknowledge_task = Task(acknowledge_function(client, event), KOKORO)
     request_task = Task(request_image(client, endpoint, safe, cache), KOKORO)
     
     await WaitTillAll([acknowledge_task, request_task], KOKORO)
@@ -87,11 +97,17 @@ async def sfw(client, event,
     if not guild_id:
         abort('Guild only command')
     
-    url = await get_waifu_image(client, event, type_, True, WAIFU_CACHE_BY_KEY[(type_, True)])
+    url = await get_waifu_image(client, event, type_, True, WAIFU_CACHE_BY_KEY[(type_, True)], False)
     if url is None:
-        abort('*Could not get any images, please try again later.*')
+        abort(ERROR_MESSAGE_NO_WAIFU)
     
-    return url
+    return InteractionResponse(
+        embed = Embed('link', url=url).add_image(url),
+        components = Button(
+            emoji = EMOJI_NEW,
+            custom_id = f'waifu.sfw.{type_}',
+        )
+    )
 
 
 @WAIFU.interactions
@@ -106,11 +122,47 @@ async def nsfw(client, event,
     if not event.channel.nsfw:
         abort('Nsfw channel only!')
     
-    url = await get_waifu_image(client, event, type_, False, WAIFU_CACHE_BY_KEY[(type_, False)])
+    url = await get_waifu_image(client, event, type_, False, WAIFU_CACHE_BY_KEY[(type_, False)], False)
     if url is None:
-        abort('*Could not get any images, please try again later.*')
+        abort(ERROR_MESSAGE_NO_WAIFU)
     
-    return url
+    return InteractionResponse(
+        embed = Embed('link', url=url).add_image(url),
+        components = Button(
+            emoji = EMOJI_NEW,
+            custom_id = f'waifu.nsfw.{type_}',
+        )
+    )
+
+
+class NewWaifu:
+    __slots__ = ('get_waifu_parameters', )
+    
+    def __init__(self, key, cache):
+        self.get_waifu_parameters = (*key, cache, True)
+    
+    async def __call__(self, client, event):
+        if event.user is not event.message.interaction.user:
+            return
+        
+        url = await get_waifu_image(client, event, *self.get_waifu_parameters)
+        if url is None:
+            embed = event.message.embed
+            if embed is None:
+                # Should not happen
+                embed = Embed(None, ERROR_MESSAGE_NO_WAIFU)
+            else:
+                embed.description = ERROR_MESSAGE_NO_WAIFU
+                
+        else:
+            embed = Embed('link', url=url).add_image(url)
+        
+        return embed
+
+for key, cache in WAIFU_CACHE_BY_KEY.items():
+    SLASH_CLIENT.interactions(custom_id=f'waifu.{"" if key[1] else "n"}sfw.{key[0]}')(NewWaifu(key, cache))
+
+del key, cache
 
 
 class Action:
