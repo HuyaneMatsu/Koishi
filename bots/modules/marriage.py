@@ -1103,7 +1103,7 @@ async def divorce(client, event,
             
             if available_love < waifu_cost:
                 embed_description_parts = []
-                embed_description_parts.append('You doesn\'t have enough ')
+                embed_description_parts.append('You don\'t have enough ')
                 embed_description_parts.append(EMOJI__HEART_CURRENCY.as_emoji)
                 embed_description_parts.append(f' to divorce ')
                 embed_description_parts.append(user.full_name)
