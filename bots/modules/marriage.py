@@ -144,7 +144,7 @@ async def buy_waifu_slot(event):
             if waifu_slots >= MAX_WAIFU_SLOTS:
                 return Embed(
                     None,
-                    'You reached the maximal amount of waifu slots.',
+                    'You reached the maximum amount of waifu slots.',
                 )
             
             available_love = total_love-total_allocated
@@ -185,7 +185,7 @@ async def buy_marriage_slot_cancel(event):
     return InteractionResponse(
         Embed(
             None,
-            'Buying waifu slot has been cancelled.',
+            'The waifu slot purchase has been cancelled.',
         ),
         components = None,
     )
@@ -221,7 +221,7 @@ async def buy_marriage_slot_confirm(event):
         if waifu_slots >= MAX_WAIFU_SLOTS:
             return Embed(
                 None,
-                'You reached the maximal amount of waifu slots meanwhile.',
+                'You reached the maximum amount of waifu slots meanwhile.',
             )
         
         available_love = total_love-total_allocated
