@@ -119,7 +119,7 @@ BUY_WAIFU_SLOT_COMPONENTS = Row(
     ),
 )
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def buy_waifu_slot(event):
     user_id = event.user.id
     async with DB_ENGINE.connect() as connector:
@@ -258,7 +258,7 @@ async def buy_marriage_slot_confirm(event):
         )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def waifu_info(event,
         user: ('user', 'The user to get') = None,
             ):
@@ -309,7 +309,8 @@ async def waifu_info(event,
             waifu_ids = None
     
     embed = Embed(
-        f'{user.full_name}\'s waifu info'
+        f'{user.full_name}\'s waifu info',
+        timestamp = event.created_at,
     ).add_thumbnail(
         user.avatar_url
     )
@@ -329,8 +330,8 @@ async def waifu_info(event,
         waifu_cost = WAIFU_COST_DEFAULT
     
     embed.add_field(
-        f'Cost:',
-        f'{waifu_cost} {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'Minimal cost:',
+        f'{floor(waifu_cost*1.1)} - {floor(waifu_cost*2.1)} {EMOJI__HEART_CURRENCY.as_emoji}',
         inline = True,
     )
     
@@ -353,10 +354,26 @@ async def waifu_info(event,
         inline = True,
     )
     
+    event_user = event.user
+    event_user_id = event_user.id
+    if (user_id != event_user_id) and (waifu_owner_id != event_user_id):
+        footer_text = (
+            f'To buy {user.full_name} you need at least {floor(get_multiplier(event_user_id, user_id)*waifu_cost)} '
+            f'love.\n'
+            f'Requested by {event_user.full_name}'
+        )
+    else:
+        footer_text = f'Requested by {event_user.full_name}'
+    
+    embed.add_footer(
+        footer_text,
+        icon_url = event_user.avatar_url,
+    )
+    
     return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def propose(client, event,
         user: ('user', 'The user to propose to.'),
         amount: ('int', 'The amount of love to propose with.'),
@@ -713,7 +730,7 @@ PROPOSAL = SLASH_CLIENT.interactions(
     None,
     name = 'proposal',
     description = 'Commands to handle proposals.',
-    guild = GUILD__NEKO_DUNGEON
+    is_global = True,
 )
 
 @PROPOSAL.interactions
@@ -1035,7 +1052,7 @@ async def cancel(client, event,
         )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def divorce(client, event,
         user : ('user', 'Who do you want to divorce?'),
             ):

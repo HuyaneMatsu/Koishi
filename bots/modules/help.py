@@ -191,30 +191,34 @@ LINE_COUNT_FIELD_VALUE = (
     f'```'
 )
 
+KOISHI_HEADER = (
+    '```\n'
+    ' _   __      _     _     _ \n'
+    '| | / /     (_)   | |   (_)\n'
+    '| |/ /  ___  _ ___| |__  _ \n'
+    '|    \ / _ \| / __| \'_ \| |\n'
+    '| |\  \ (_) | \__ \ | | | |\n'
+    '\_| \_/\___/|_|___/_| |_|_|\n'
+    '```'
+)
+
+def add_user_footer(embed, user):
+    return embed.add_footer(
+        f'Requested by {user.full_name}',
+        icon_url = user.avatar_url,
+    )
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def about(client, event):
     """My loli secret. Simpers only!"""
     embed = Embed(
         None,
-        (
-            '```\n'
-            ' _   __      _     _     _ \n'
-            '| | / /     (_)   | |   (_)\n'
-            '| |/ /  ___  _ ___| |__  _ \n'
-            '|    \ / _ \| / __| \'_ \| |\n'
-            '| |\  \ (_) | \__ \ | | | |\n'
-            '\_| \_/\___/|_|___/_| |_|_|\n'
-            '```'
-        ),
+        KOISHI_HEADER,
         color = COLOR__KOISHI_HELP,
         timestamp = event.created_at,
     ).add_author(
         client.avatar_url,
         client.full_name,
-    ).add_footer(
-        f'Requested by {event.user.full_name}',
-        icon_url = event.user.avatar_url,
     ).add_field(
         UPTIME_TITLE,
         (
@@ -326,6 +330,8 @@ async def about(client, event):
         inline = True,
     )
     
+    add_user_footer(embed, event.user)
+    
     return InteractionResponse(
         embed = embed,
         components = ABOUT_COMPONENTS,
@@ -341,62 +347,123 @@ def docs_search_pagination_check(user, event):
     
     return False
 
-COMMAND_LIST_EMBED = Embed(
-    'Help',
-    color = COLOR__KOISHI_HELP,
-).add_field(
-    'Administration',
-    '`clear`, `ban`, `bans`, `emoji-role`, `invite-create`, `invites`, `is-banned`',
-    inline = True,
-).add_field(
-    'Anime',
-    '`anime`, `character`, `fine-anime`, `find-character`, `find-manga`, `manga`',
-    inline = True,
-).add_field(
-    'Actions',
+
+EMOJI_TOOLS = BUILTIN_EMOJIS['tools']
+EMOJI_RING = BUILTIN_EMOJIS['ring']
+EMOJI_SPEECH_BUBBLE = BUILTIN_EMOJIS['speech_balloon']
+EMOJI_VIDEO_GAME = BUILTIN_EMOJIS['video_game']
+EMOJI_WAIFU = BUILTIN_EMOJIS['woman_with_veil']
+EMOJI_PAPER_DRAGON = BUILTIN_EMOJIS['kite']
+EMOJI_MAGIC_WAND = BUILTIN_EMOJIS['magic_wand']
+EMOJI_PILL = BUILTIN_EMOJIS['pill']
+EMOJI_MASKS = BUILTIN_EMOJIS['performing_arts']
+
+CATEGORIES = (
     (
-        '`bite`, `blush`, `bully`, `cringe`, `cry`, `dance`, `glomp`, `handhold`, `happy`, `highfive`, `hug`, `kill`, '
-        '`kiss`, `lick`, `nom`, `pat`, `poke`, `slap`, `smile`, `smug`, `wave`, `wink`, `yeet`'
+        'Administration',
+        EMOJI_TOOLS,
+        ('clear', 'ban', 'bans', 'emoji-role', 'invite-create', 'invites', 'is-banned',),
+    ), (
+        'Anime',
+        EMOJI_PILL,
+        ('anime', 'character', 'fine-anime', 'find-character', 'find-manga', 'manga',),
+    ), (
+        'Actions',
+        EMOJI_MASKS,
+        ('bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'glomp', 'handhold', 'happy', 'highfive', 'hug', 'kill',
+        'kiss', 'lick', 'nom', 'pat', 'poke', 'slap', 'smile', 'smug', 'wave', 'wink', 'yeet',),
+    ), (
+        'Economy',
+        EMOJI__HEART_CURRENCY,
+        ('daily', 'heart-shop', 'hearts', 'top-list',),
+    ), (
+        'Fun',
+        EMOJI_PAPER_DRAGON,
+        ('meme', 'message-me', 'minesweeper', 'paranoia', 'random', 'rate', 'roll', 'sex', 'trivia', 'yuno',)
+    ), (
+        'Games',
+        EMOJI_VIDEO_GAME,
+        ('21', 'ds', 'xox',),
+    ), (
+        'Help',
+        EMOJI_SPEECH_BUBBLE,
+        ('about', 'help',),
+    ), (
+        'Marriage',
+        EMOJI_RING,
+        ('buy-waifu-slot', 'divorce', 'love', 'propose', 'proposals', 'waifu-info',)
+    ), (
+        'Utility',
+        EMOJI_MAGIC_WAND,
+        ('avatar', 'calc', 'color', 'guild', 'guild-icon', 'id', 'id-to-datetime', 'now-as-id', 'ping', 'rawr',
+        'role', 'roles', 'show-emoji', 'user', 'welcome-screen',),
+    ), (
+        'Waifus',
+        EMOJI_WAIFU,
+        ('nsfw-booru', 'safe-booru', 'touhou-character', 'waifu',)
     ),
-    inline = True,
-).add_field(
-    'Economy',
-    '`daily`, `heart-shop`, `hearts`, `top-list`',
-    inline = True,
-).add_field(
-    'Fun',
-    '`meme`, `message-me`, `minesweeper`, `paranoia`, `random`, `rate`, `roll`, `sex`, `trivia`, `yuno`',
-    inline = True,
-).add_field(
-    'Games',
-    '`21`, `ds`, `xox`',
-    inline = True,
-).add_field(
-    'Help',
-    '`about`, `help`',
-    inline = True,
-).add_field(
-    'Marriage',
-    (
-        '`love`\n\n'
-        'Coming soon:\n'
-        '```\n'
-        'buy-waifu-slot, divorce, propose, proposals, waifu-info\n'
-        '```'
-    ),
-    inline = True,
-).add_field(
-    'Utility',
-    (
-        '`avatar`, `calc`, `color`, `guild`, `guild-icon`, `id`, `is-to-datetime`, `now-as-id`, `ping`, `rawr`, '
-        '`role`, `roles`, `show-emoji`, `user`, `welcome-screen`'
-    ),
-    inline = True,
-).add_field(
-    'Waifus',
-    '`nsfw-booru`, `safe-booru`, `touhou-character`, `waifu`',
-    inline = True,
 )
+
+def build_category_into(extend, category_name, emoji, command_names):
+    extend.append(emoji.as_emoji)
+    extend.append(' **')
+    extend.append(category_name)
+    extend.append('**\n')
+    
+    length = len(command_names)
+    if length:
+        index = 0
+        while True:
+            command_name = command_names[index]
+            index += 1
+            
+            extend.append('`')
+            extend.append(command_name)
+            extend.append('`')
+            
+            if index == length:
+                break
+            
+            extend.append(' **•** ')
+            continue
+    else:
+        extend.append('*none*')
+    
+    return extend
+
+def build_command_list_embed():
+    length = len(CATEGORIES)
+    
+    description_parts = []
+    description_parts.append(KOISHI_HEADER)
+    
+    if length:
+        description_parts.append('\n')
+        
+        index = 0
+        
+        while True:
+            category = CATEGORIES[index]
+            index += 1
+            
+            build_category_into(description_parts, *category)
+            
+            if index == length:
+                break
+            
+            description_parts.append('\n\n')
+            continue
+        
+    description = ''.join(description_parts)
+    
+    return Embed(
+        'Help',
+        description,
+        color = COLOR__KOISHI_HELP,
+    )
+
+
+COMMAND_LIST_EMBED = build_command_list_embed()
 
 # `status`,
 # `escape`,
@@ -404,7 +471,9 @@ COMMAND_LIST_EMBED = Embed(
 @SLASH_CLIENT.interactions(is_global=True)
 async def help_(client, event):
     """Lists my commands."""
-    return COMMAND_LIST_EMBED
+    embed = COMMAND_LIST_EMBED.copy()
+    add_user_footer(embed, event.user)
+    return embed
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
@@ -539,10 +608,11 @@ async def paste():
 
 
 
-ROLES = SLASH_CLIENT.interactions(None,
+ROLES = SLASH_CLIENT.interactions(
+    None,
     name = 'roles',
     description = 'Role information!',
-    guild=GUILD__NEKO_DUNGEON,
+    guild = GUILD__NEKO_DUNGEON,
 )
 
 
