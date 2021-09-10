@@ -3073,7 +3073,8 @@ async def top_list(client, event,
     return
 
 
-HEART_SHOP = SLASH_CLIENT.interactions(None,
+HEART_SHOP = SLASH_CLIENT.interactions(
+    None,
     name = 'heart-shop',
     description = 'Trade your love!',
     is_global = True,

@@ -144,6 +144,8 @@ async def request_sync(client, days_allowed):
             try:
                 sending_task.result()
             except BaseException as err:
+                # Cancel it, so no double exception will be dropped.
+                response_task.cancel()
                 sys.stderr.write(f'Sync failed, {err!r}.\n')
                 raise
             
@@ -159,7 +161,6 @@ async def receive_sync(client, partner):
     try:
         async with SYNC_LOCK:
             # some delay is needed or Koishi might answer too fast.
-            await sleep(0.4, KOKORO)
             await client.message_create(CHANNEL__SYSTEM__SYNC, REQUEST_APPROVED)
             
             while True:

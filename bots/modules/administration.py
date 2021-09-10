@@ -300,7 +300,7 @@ BAN_COMPONENTS = Row(BAN_BUTTON_CONFIRM, BAN_BUTTON_CANCEL)
 
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def yeet(client, event,
+async def ban(client, event,
         user : ('user', 'Select the user to yeet!'),
         reason : ('str', 'Any reason why you would want to yeet?') = None,
         delete_message_days : (range(8), 'Delete previous messages?') = 0,

@@ -1,11 +1,14 @@
-# -*- coding: utf-8 -*-
 import re
 from random import random
 
 from hata import CancelledError, sleep, Task, DiscordException, methodize, ERROR_CODES, BUILTIN_EMOJIS, \
-    EventWaitforBase, KOKORO, ERROR_CODES, is_coroutine_function, InteractionEvent
+    EventWaitforBase, KOKORO, ERROR_CODES, is_coroutine_function, InteractionEvent, ComponentButton, ComponentRow
 from hata.ext.commands import CommandProcesser, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
     GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
+from hata.ext.slash.menus.menu import Menu
+from hata.ext.slash.menus.helpers import EMOJI_LEFT_2, EMOJI_LEFT, EMOJI_RIGHT, EMOJI_RIGHT_2, EMOJI_CANCEL, \
+    get_auto_check, CUSTOM_ID_CANCEL, top_level_check, top_level_get_timeout
+
 
 try:
     from bs4 import BeautifulSoup
@@ -23,7 +26,7 @@ del ImageDraw, truetype, methodize
 def choose(list_):
     return list_[int((random()*len(list_)))]
 
-def choose_notsame(list_,last):
+def choose_not_same(list_,last):
     index = int(random()*len(list_))
     value = list_[index]
     if value == last:
@@ -158,279 +161,102 @@ class CooldownHandler:
             
             await client.events.error(client, f'{self!r}.__call__', err)
 
+EMOJI_LEFT_2_10 = BUILTIN_EMOJIS['rewind']
+EMOJI_RIGHT_2_10 = BUILTIN_EMOJIS['fast_forward']
+EMOJI_RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
 
-class PAGINATION_5PN:
-    LEFT2 = BUILTIN_EMOJIS['rewind']
-    LEFT  = BUILTIN_EMOJIS['arrow_backward']
-    RIGHT = BUILTIN_EMOJIS['arrow_forward']
-    RIGHT2 = BUILTIN_EMOJIS['fast_forward']
-    RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
-    CANCEL = BUILTIN_EMOJIS['x']
-    EMOJIS = (LEFT2, LEFT, RIGHT, RIGHT2, RESET, CANCEL)
+class Pagination10step(Menu):
+    BUTTON_LEFT_2 = ComponentButton(emoji=EMOJI_LEFT_2_10)
+    BUTTON_LEFT = ComponentButton(emoji=EMOJI_LEFT)
+    BUTTON_RIGHT = ComponentButton(emoji=EMOJI_RIGHT)
+    BUTTON_RIGHT_2 = ComponentButton(emoji=EMOJI_RIGHT_2_10)
+    BUTTON_RESET = ComponentButton(emoji=EMOJI_RESET)
+    BUTTON_CANCEL = ComponentButton(emoji=EMOJI_CANCEL, custom_id=CUSTOM_ID_CANCEL)
     
-    __slots__ = ('canceller', 'channel', 'client', 'message', 'page', 'pages', '_task_flag', '_timeouter')
+    BUTTONS = [
+        ComponentRow(BUTTON_LEFT_2, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_RIGHT_2, BUTTON_RESET,),
+        ComponentRow(BUTTON_CANCEL),
+    ]
     
-    async def __new__(cls, client, channel, pages):
-        if isinstance(channel, InteractionEvent):
-            target_channel = channel.channel
-            received_interaction = True
-        else:
-            target_channel = channel
-            received_interaction = False
+    __slots__ = ('page_index', 'pages', 'timeout', 'user_check')
+    
+    def __init__(self, client, event, pages, *, check=..., timeout=300.0):
+        if check is ...:
+            check = get_auto_check(event)
         
-        self = object.__new__(cls)
-        self.client = client
-        self.channel = target_channel
         self.pages = pages
-        self.page = 0
-        self.canceller = cls._canceller
-        self._task_flag = GUI_STATE_READY
-        self._timeouter = None
-        
-        try:
-            if received_interaction:
-                if not channel.is_acknowledged():
-                    await client.interaction_response_message_create(channel)
-                
-                message = await client.interaction_followup_message_create(channel, embed=pages[0])
-            else:
-                message = await client.message_create(channel, embed=pages[0])
-        except BaseException as err:
-            self.message = None
-            
-            if isinstance(err, ConnectionError):
-                return None
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                        ERROR_CODES.cannot_message_user, # user has dm-s disallowed
-                            ):
-                    return
-            
-            raise
-        
-        self.message = message
-        
-        if not target_channel.cached_permissions_for(client).can_add_reactions:
-            return self
-        
-        try:
-            if len(self.pages) > 1:
-                for emoji in self.EMOJIS:
-                    await client.reaction_add(message, emoji)
-            else:
-                await client.reaction_add(message, self.CANCEL)
-        except BaseException as err:
-            if isinstance(err, ConnectionError):
-                return self
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            ):
-                    return self
-            
-            raise
-            
-            
-        client.events.reaction_add.append(message, self)
-        client.events.reaction_delete.append(message, self)
-        self._timeouter = Timeouter(self, timeout=300.)
-        return self
+        self.page_index = 0
+        self.timeout = timeout
+        self.user_check = check
     
-    async def __call__(self, client, event):
-        if event.user.is_bot or (event.emoji not in self.EMOJIS):
-            return
-        
-        if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
-            return
-        
-        emoji = event.emoji
-        task_flag = self._task_flag
-        if task_flag != GUI_STATE_READY:
-            if task_flag == GUI_STATE_SWITCHING_PAGE:
-                if emoji is self.CANCEL:
-                    self._task_flag = GUI_STATE_CANCELLING
-                return
-            
-            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
-            return
-        
-        while True:
-            if emoji is self.LEFT:
-                page = self.page-1
-                break
-                
-            if emoji is self.RIGHT:
-                page = self.page+1
-                break
-                
-            if emoji is self.RESET:
-                page = 0
-                break
-                
-            if emoji is self.CANCEL:
-                self._task_flag = GUI_STATE_CANCELLED
-                try:
-                    await client.message_delete(self.message)
-                except BaseException as err:
-                    self.cancel()
-                    
-                    if isinstance(err,ConnectionError):
-                        # no internet
-                        return
-                    
-                    if isinstance(err,DiscordException):
-                        if err.code in (
-                                ERROR_CODES.missing_access, # client removed
-                                ERROR_CODES.unknown_channel, # message's channel deleted
-                                    ):
-                            return
-                    
-                    await client.events.error(client,f'{self!r}.__call__',err)
-                    return
-                
-                else:
-                    self.cancel()
-                    return
-            
-            if emoji is self.LEFT2:
-                page = self.page-10
-                break
-            
-            if emoji is self.RIGHT2:
-                page = self.page+10
-                break
-            
-            return
-        
-        if page < 0:
-            page = 0
-        elif page >= len(self.pages):
-            page = len(self.pages)-1
-        
-        if self.page == page:
-            return
-        
-        self.page = page
-        self._task_flag=GUI_STATE_SWITCHING_PAGE
-        try:
-            await client.message_edit(self.message, embed=self.pages[page])
-        except BaseException as err:
-            self._task_flag = GUI_STATE_CANCELLED
-            self.cancel()
-            
-            if isinstance(err, ConnectionError):
-                # no internet
-                return
-            
-            if isinstance(err, DiscordException):
-                if err.code in (
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.unknown_message, # message already deleted
-                            ):
-                    return
-            
-            # We definitely do not want to silence `ERROR_CODES.invalid_form_body`
-            await client.events.error(client, f'{self!r}.__call__',err)
-            return
-        
-        if self._task_flag == GUI_STATE_CANCELLING:
-            self._task_flag = GUI_STATE_CANCELLED
-            try:
-                await client.message_delete(self.message)
-            except BaseException as err:
-                
-                if isinstance(err,ConnectionError):
-                    # no internet
-                    return
-                
-                if isinstance(err,DiscordException):
-                    if err.code == ERROR_CODES.missing_access: # client removed
-                        return
-                
-                await client.events.error(client,f'{self!r}.__call__',err)
-                return
-            
-            return
-        
-        self._task_flag = GUI_STATE_READY
-        
-        self._timeouter.set_timeout(150.0)
-        
-    @staticmethod
-    async def _canceller(self,exception,):
-        client = self.client
-        message = self.message
-        
-        client.events.reaction_add.remove(message, self)
-        client.events.reaction_delete.remove(message, self)
-
-        if self._task_flag == GUI_STATE_SWITCHING_CTX:
-            # the message is not our, we should not do anything with it.
-            return
-        
-        self._task_flag = GUI_STATE_CANCELLED
-        
-        if exception is None:
-            return
-        
-        if isinstance(exception, TimeoutError):
-            if self.channel.cached_permissions_for(client).can_manage_messages:
-                try:
-                    await client.reaction_clear(message)
-                except BaseException as err:
-                    
-                    if isinstance(err, ConnectionError):
-                        # no internet
-                        return
-                    
-                    if isinstance(err, DiscordException):
-                        if err.code in (
-                                ERROR_CODES.unknown_channel, # message's channel deleted
-                                ERROR_CODES.missing_access, # client removed
-                                ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                    ):
-                            return
-                    
-                    await client.events.error(client,f'{self!r}._canceller', err)
-                    return
-            return
-        
-        timeouter = self._timeouter
-        if (timeouter is not None):
-            timeouter.cancel()
-        #we do nothing
     
-    def cancel(self,exception=None):
-        canceller = self.canceller
-        if canceller is None:
-            return
+    check = top_level_check
+    get_timeout = top_level_get_timeout
+    
+    async def initial_invoke(self):
+        self.components = self.BUTTONS
+        self.allowed_mentions = None
+        self.BUTTON_LEFT_2.enabled = False
+        self.BUTTON_LEFT.enabled = False
         
-        self.canceller = None
+        pages = self.pages
+        self.content = pages[0]
+        if len(pages) == 1:
+            self.BUTTON_RIGHT_2.enabled = False
+            self.BUTTON_RIGHT.enabled = False
+            self.BUTTON_RESET.enabled = False
+    
+    
+    async def invoke(self, event):
+        interaction = event.interaction
+        if interaction == self.BUTTON_CANCEL:
+            self.cancel(CancelledError())
+            return False
         
-        timeouter = self._timeouter
-        if (timeouter is not None):
-            timeouter.cancel()
+        pages_index_limit = len(self.pages)-1
         
-        return Task(canceller(self,exception), KOKORO)
+        if interaction == self.BUTTON_LEFT:
+            page_index = self.page_index-1
+        elif interaction == self.BUTTON_RIGHT:
+            page_index = self.page_index+1
+        elif interaction == self.BUTTON_LEFT_2:
+            page_index = self.page_index-10
+        elif interaction == self.BUTTON_RIGHT_2:
+            page_index = self.page_index+10
+        elif interaction == self.BUTTON_RESET:
+            page_index = 0
+        else:
+             return False
+        
+        if page_index < 0:
+            page_index = 0
+        elif page_index > pages_index_limit:
+            page_index = pages_index_limit
+        
+        if self.page_index == page_index:
+            return False
+        
+        if page_index == 0:
+            self.BUTTON_LEFT_2.enabled = False
+            self.BUTTON_LEFT.enabled = False
+            self.BUTTON_RESET.enabled = False
+        else:
+            self.BUTTON_LEFT_2.enabled = True
+            self.BUTTON_LEFT.enabled = True
+        
+        if page_index == pages_index_limit:
+            self.BUTTON_RIGHT_2.enabled = False
+            self.BUTTON_RIGHT.enabled = False
+        else:
+            self.BUTTON_RIGHT_2.enabled = True
+            self.BUTTON_RIGHT.enabled = True
+        
+        self.page_index = page_index
+        self.content = self.pages[page_index]
+        return True
 
 
 class Cell:
     __slots__ = ('value', )
     def __init__(self, value=None):
         self.value = value
-
-
-del CommandProcesser
-del re

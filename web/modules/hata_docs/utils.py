@@ -203,6 +203,10 @@ def get_searched_info(path, order_priority_base=0):
     return order_priority_base+order_priority, name, url, type_, preview
 
 
+def search_info_sort_key(search_info):
+    return search_info[0]
+
+
 def build_js_structure(structure):
     parts = ['[']
     children = structure.children

@@ -39,13 +39,17 @@ def setup(lib):
 def teardown(lib):
     MAIN_CLIENT.commands.unextend(TEST_COMMANDS)
 
+def test_choose_menu_repr_choose_menu_selector(*args):
+    return Future(KOKORO)
+
+
 @TEST_COMMANDS
 async def test_choose_menu_repr(client, message):
     """
     Creates a ChooseMenu and returns it's repr.
     """
     choices = ['nice', 'cat']
-    choose_menu = await ChooseMenu(client, message.channel, choices, lambda *args: Future(KOKORO))
+    choose_menu = await ChooseMenu(client, message.channel, choices, test_choose_menu_repr_choose_menu_selector)
     await client.message_create(message.channel, repr(choose_menu))
 
 @TEST_COMMANDS(checks=[checks.guild_only()])

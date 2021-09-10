@@ -15,7 +15,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 
 from .forms import SearchForm
 from .utils import get_back_path, get_searched_info, UNIT_TYPE_ORDER_PRIORITY_TYPE, build_js_structure, \
-    build_html_structure
+    build_html_structure, search_info_sort_key
 
 URL_PREFIX = '/project/hata/docs'
 ROUTES = Blueprint('docs', '', url_prefix=URL_PREFIX)
@@ -124,7 +124,7 @@ def search():
             found = []
             for index, path in enumerate(results):
                 found.append(get_searched_info(path, index))
-            found.sort(key=lambda x: x[0])
+            found.sort(key=search_info_sort_key)
             
             first = found[0]
             if first[3] == 'class' and first[1] == search_for:
@@ -163,13 +163,13 @@ def api_search():
         found = []
         for index, path in  enumerate(search_paths(search_for, limit=limit)):
             found.append(get_searched_info(path, index))
-        found.sort(key=lambda x: x[0])
+        found.sort(key=search_info_sort_key)
         
         for order_priority, name, url, type_, preview in found:
             element = {
-                'name' : name,
-                'url' : url,
-                'type' : type_,
+                'name': name,
+                'url': url,
+                'type': type_,
             }
             
             if (preview is not None):

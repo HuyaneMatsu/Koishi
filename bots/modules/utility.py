@@ -20,7 +20,7 @@ from hata.ext.slash import abort, InteractionResponse, set_permission, Button, R
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 
-from bot_utils.tools import PAGINATION_5PN
+from bot_utils.tools import Pagination10step
 from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, \
     ROLE__NEKO_DUNGEON__ADMIN
 
@@ -113,117 +113,6 @@ async def color_(client, event,
         await client.interaction_followup_message_create(event, embed=embed, file=('color.png', buffer))
 
 
-# We don't need it rn.
-"""
-def add_activity(text, activity):
-    
-    text.append(activity.name)
-    text.append('\n')
-    
-    activity_type = activity.type
-    text.append(f'**>>** type : {("game", "stream", "spotify", "watching", "custom", "competing")[activity_type]} ({activity_type})\n')
-    if activity_type == ACTIVITY_TYPES.custom:
-        return
-    
-    timestamps = activity.timestamps
-    if (timestamps is not None):
-        start = activity.start
-        if (start is not None):
-            text.append(f'**>>** started : {elapsed_time(start)} ago\n')
-        
-        end = activity.end
-        if (end is not None):
-            text.append(f'**>>** ends after : {elapsed_time(end)}\n')
-    
-    details = activity.details
-    if (details is not None):
-        text.append(f'**>>** details : {details}\n')
-    
-    state = activity.state
-    if (state is not None):
-        text.append(f'**>>** state : {state}\n')
-    
-    party = activity.party
-    if (party is not None):
-        id_ = activity.id
-        if (id_ is not None):
-            text.append(f'**>>** party id : {id_}\n')
-        
-        size = party.size
-        max_ = party.max
-        if size or max_:
-            if size:
-                text.append(f'**>>** party size : {size}\n')
-            
-            if max_:
-                text.append(f'**>>** party max : {max_}\n')
-    
-    assets = activity.assets
-    if (assets is not None):
-        image_large_url = activity.image_large_url
-        if (image_large_url is not None):
-            text.append(f'**>>** asset image large url : {image_large_url}\n')
-        
-        text_large = assets.text_large
-        if (text_large is not None):
-            text.append(f'**>>** asset text large : {text_large}\n')
-        
-        image_small_url = activity.image_small_url
-        if (image_small_url is not None):
-            text.append(f'**>>** asset image small url : {image_small_url}\n')
-        
-        text_small = assets.text_small
-        if text_small:
-            text.append(f'**>>** asset text small : {text_small}\n')
-    
-    album_cover_url = activity.album_cover_url
-    if album_cover_url is not None:
-        text.append(f'**>>** album cover : {album_cover_url}\n')
-    
-    secrets = activity.secrets
-    if (secrets is not None):
-        join = secrets.secret
-        if (join is not None):
-            text.append(f'**>>** secret join : {join}\n')
-        
-        spectate = secrets.spectate
-        if (spectate is not None):
-            text.append(f'**>>** secret spectate : {spectate}\n')
-        
-        match = secrets.match
-        if (match is not None):
-            text.append(f'**>>** secret match : {match}\n')
-    
-    url = activity.url
-    if (url is not None):
-        text.append(f'**>>** url : {url}\n')
-    
-    sync_id = activity.sync_id
-    if (sync_id is not None):
-        text.append(f'**>>** sync id : {sync_id}\n')
-    
-    session_id = activity.session_id
-    if (session_id is not None):
-        text.append(f'**>>** session id : {session_id}\n')
-    
-    flags = activity.flags
-    if flags:
-        text.append(f'**>>** flags : {activity.flags} ({", ".join(list(flags))})\n')
-    
-    application_id = activity.application_id
-    if activity.application_id:
-        text.append(f'**>>** application id : {application_id}\n')
-    
-    created_at = activity.created_at
-    if created_at > DISCORD_EPOCH_START:
-        text.append(f'**>>** created at : {elapsed_time(created_at)} ago\n')
-    
-    id_ = activity.id
-    if id_:
-        text.append(f'**>>** id : {id_}\n')
-"""
-
-
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False, target='message')
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
 async def raw(client, event):
@@ -307,7 +196,7 @@ async def roles_(client, event):
     if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
         abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
-    await PAGINATION_5PN(client, event, RoleCache(guild))
+    await Pagination10step(client, event, RoleCache(guild))
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -349,7 +238,8 @@ async def welcome_screen_(client, event):
     
     yield embed
 
-ID = SLASH_CLIENT.interactions(None,
+ID = SLASH_CLIENT.interactions(
+    None,
     name = 'id',
     description = 'Shows the id of the selected entity',
     is_global = True,
@@ -410,6 +300,8 @@ async def now_as_id_(client, event):
     return str(now_as_id())
 
 
+# Koishi user caching will be disabled, so this command would not work.
+'''
 def shared_guilds_pagination_check(user, event):
     event_user = event.user
     if user is event.user:
@@ -419,6 +311,7 @@ def shared_guilds_pagination_check(user, event):
         return True
     
     return False
+
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def shared_guilds(client, event):
@@ -459,7 +352,7 @@ async def shared_guilds(client, event):
         embeds.append(embed)
     
     await Pagination(client, event, embeds, check=partial_func(shared_guilds_pagination_check, user))
-
+'''
 
 @SLASH_CLIENT.interactions(name='user', is_global=True)
 async def user_(client, event,
@@ -576,8 +469,6 @@ def add_guild_generic_field(guild, embed, even_if_empty):
     add_guild_counts_field(guild, embed, False)
     add_guild_emojis_field(guild, embed, False)
     add_guild_stickers_field(guild, embed, False)
-    add_guild_users_field(guild, embed, False)
-
 
 def add_guild_info_field(guild, embed, even_if_empty):
     created_at = guild.created_at
@@ -635,8 +526,8 @@ def add_guild_counts_field(guild, embed, even_if_empty):
             continue
     
     sections_parts = [
-        '**Users: ', str(guild.user_count), '**\n'
-        '**Roles: ', str(len(guild.role_list)), '**'
+        '**Users: ', str(guild.approximate_user_count), '**\n'
+        '**Roles: ', str(len(guild.roles)), '**'
     ]
     
     if channel_text:
@@ -743,35 +634,6 @@ def add_guild_stickers_field(guild, embed, even_if_empty):
         embed.add_field('Stickers', '*The guild has no stickers*')
 
 
-def add_guild_users_field(guild, embed, even_if_empty):
-    value_grey = 0
-    value_green = 0
-    value_yellow = 0
-    value_red = 0
-    
-    for user in guild.users.values():
-        status = user.status
-        if   status is STATUS_OFFLINE:
-            value_grey += 1
-        
-        elif status is Status.online:
-            value_green += 1
-        
-        elif status is STATUS_IDLE:
-            value_yellow += 1
-        
-        elif status is STATUS_DND:
-            value_red += 1
-        
-        else:
-            value_grey += 1
-    
-    embed.add_field('Users',
-        f'{EMOJI_HEART_GREEN:e} **{value_green}**\n'
-        f'{EMOJI_HEART_YELLOW:e} **{value_yellow}**\n'
-        f'{EMOJI_HEART_RED:e} **{value_red}**\n'
-        f'{EMOJI_HEART_BLACK:e} **{value_grey}**')
-
 def add_guild_boosters_field(guild, embed, even_if_empty):
     boosters = guild.boosters
     if boosters:
@@ -796,7 +658,6 @@ GUILD_FIELDS = {
     'counts'            : add_guild_counts_field   ,
     'emojis'            : add_guild_emojis_field   ,
     'stickers'          : add_guild_stickers_field ,
-    'users'             : add_guild_users_field    ,
     'boosters'          : add_guild_boosters_field ,
 }
 
@@ -907,7 +768,7 @@ def in_role_pagination_check(user, event):
     
     return False
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
 async def in_role(client, event,
         role_1 : ('role', 'Select a role.'),
         role_2 : ('role', 'Double role!') = None,
@@ -923,9 +784,6 @@ async def in_role(client, event,
     guild = event.guild
     if guild is None:
         abort('Guild only command.')
-    
-    if (client.get_guild_profile_for(guild) is None):
-        abort('I must be in the guild to do this.')
     
     roles = set()
     for role in role_1, role_2, role_3, role_4, role_5, role_6, role_7, role_8, role_9:

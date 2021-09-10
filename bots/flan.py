@@ -341,10 +341,18 @@ class showcard:
                 await client.message_create(message.channel,embed=embed,file=file)
     
     async def description(command_context):
-        return Embed('showcard', (
-            'Shows the specified card by it\'s name.\n'
-            f'Usage: `{command_context.prefix}showcard *name*`'
-            ), color=COLOR__FLAN_HELP)
+        return Embed(
+            'showcard',
+            (
+                'Shows the specified card by it\'s name.\n'
+                f'Usage: `{command_context.prefix}showcard *name*`'
+            ),
+            color = COLOR__FLAN_HELP,
+        )
+
+def card_sort_key(card):
+    return card.name
+
 
 @Flan.commands.from_class
 class showcards:
@@ -367,17 +375,17 @@ class showcards:
                         if card.rarity is rarity:
                             filtered.append(card)
                 
-                title=f'Search results for : `{content}`'
+                title = f'Search results for : `{content}`'
             else:
-                filtered=list(CARDS_BY_NAME.values())
-                title='All cards'
+                filtered = list(CARDS_BY_NAME.values())
+                title = 'All cards'
             
             if not filtered:
-                result=None
+                result = None
                 break
             
-            filtered.sort(key=lambda card:card.name)
-            result=filtered
+            filtered.sort(key=card_sort_key)
+            result = filtered
             break
         
         if result is None:
@@ -781,7 +789,7 @@ class dump_all_card:
                 break
         
         cards = list(CARDS_BY_NAME.values())
-        cards.sort(key=lambda card:card.name)
+        cards.sort(key=card_sort_key)
         
         for card, client in zip(cards,cycle(clients),):
             embed = card.render_to_embed()

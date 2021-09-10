@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 from io import StringIO
 from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory, Emoji, User
@@ -15,6 +16,7 @@ PREFIX__FLAN = config.FLAN_PREFIX
 PREFIX__MARISA = config.MARISA_PREFIX
 
 GUILD__NEKO_DUNGEON = Guild.precreate(388267636661682178)
+GUILD__STORAGE  = Guild.precreate(568837922288173056)
 
 CHANNEL__NEKO_DUNGEON__SYSTEM = ChannelText.precreate(445191707491958784)
 CHANNEL__NEKO_DUNGEON__EVENT = ChannelText.precreate(798911148292309002)
@@ -61,6 +63,8 @@ LINK__HATA_SLASH = 'https://github.com/HuyaneMatsu/hata/blob/master/docs/topics/
 USER__DISBOARD = User.precreate(302050872383242240, is_bot=True)
 
 DEFAULT_CATEGORY_NAME = 'Uncategorized'
+
+STARTUP = datetime.utcnow()
 
 def category_name_rule(name):
     if name is None:

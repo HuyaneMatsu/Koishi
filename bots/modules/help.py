@@ -1,7 +1,10 @@
 import sys
 from functools import partial as partial_func
+from platform import platform as get_platform
+from os.path import join as join_paths, isdir as is_folder, isfile as is_file
+from os import listdir as list_directory
 
-from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji
+from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elapsed_time, BUILTIN_EMOJIS, __package__
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.slash import InteractionResponse, Button, Row
 
@@ -9,8 +12,8 @@ from bot_utils.shared import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNG
     LINK__HATA_DOCS, LINK__PASTE, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__NEKO_DUNGEON__ELEVATED, \
     ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH, ROLE__NEKO_DUNGEON__NSFW_ACCESS, \
     ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT, \
-    EMOJI__HEART_CURRENCY, ROLE__NEKO_DUNGEON__HEART_BOOST
-
+    EMOJI__HEART_CURRENCY, ROLE__NEKO_DUNGEON__HEART_BOOST, STARTUP, PATH__KOISHI
+from bot_utils. cpu_info import CpuUsage, PROCESS
 
 SLASH_CLIENT: Client
 
@@ -106,7 +109,7 @@ def create_interpreter_info():
     sub_version_number = version[1]
     release = version[3]
     
-    interpreter_info_parts = []
+    interpreter_info_parts = ['```\n']
     
     interpreter_info_parts.append('Python')
     interpreter_info_parts.append(repr(main_version_number))
@@ -120,60 +123,213 @@ def create_interpreter_info():
     interpreter_info_parts.append(' ')
     interpreter_info_parts.append(implementation.name)
     
+    interpreter_info_parts.append('\n```')
+    
     return ''.join(interpreter_info_parts)
 
-INTERPRETER_INFO = create_interpreter_info()
 
-def create_library_info():
-    return (
-        f'[hata {__version__}]({LINK__HATA_GIT})\n'
-        f'[Slash commands]({LINK__HATA_SLASH})\n'
-        f'[Technical documentation]({LINK__HATA_DOCS})'
-    )
+PYTHON_VERSION_FIELD_VALUE = create_interpreter_info()
+LIBRARY_VERSION_FIELD_VALUE = (
+    f'```\n'
+    f'{__package__} {__version__}\n'
+    f'```'
+)
 
-LIBRARY_INFO = create_library_info()
+UPTIME_TITLE = f'{BUILTIN_EMOJIS["green_circle"].as_emoji} Uptime'
+
+PLATFORM_FIELD_VALUE = (
+    f'```\n'
+    f'{get_platform()}\n'
+    f'```'
+)
+
+ABOUT_COMPONENTS = Row(
+    Button(
+        'Library',
+        url = LINK__HATA_GIT,
+    ),
+    Button(
+        'Source code',
+        url = LINK__KOISHI_GIT,
+    ),
+    Button(
+        'Invite me!',
+        url = (
+            f'https://discord.com/oauth2/authorize?client_id={SLASH_CLIENT.application.id}&scope=bot%20'
+            f'applications.commands'
+        ),
+    ),
+    Button(
+        'Support server',
+        url = INVITE__NEKO_DUNGEON.url,
+    ),
+)
+
+
+def count_lines_of(directory_path):
+    line_break_count = 0
+    
+    for name in list_directory(directory_path):
+        path = join_paths(directory_path, name)
+        if is_file(path):
+            if name.endswith(('.py', '.txt', '.json', '.md')): # Which files should we count?
+                with open(path, 'r') as file:
+                    line_break_count += file.read().count('\n')
+            
+            continue
+        
+        if is_folder(path):
+            line_break_count += count_lines_of(path)
+            continue
+    
+    return line_break_count
+
+
+LINE_COUNT_FIELD_VALUE = (
+    f'```\n'
+    f'{count_lines_of(PATH__KOISHI):,}\n'
+    f'```'
+)
+
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def about(client):
+async def about(client, event):
     """My loli secret. Simpers only!"""
-    return Embed(
-        'About',
-        f'Hello, I am {client.full_name} as you expected. It was a great success to meat you!',
+    embed = Embed(
+        None,
+        (
+            '```\n'
+            ' _   __      _     _     _ \n'
+            '| | / /     (_)   | |   (_)\n'
+            '| |/ /  ___  _ ___| |__  _ \n'
+            '|    \ / _ \| / __| \'_ \| |\n'
+            '| |\  \ (_) | \__ \ | | | |\n'
+            '\_| \_/\___/|_|___/_| |_|_|\n'
+            '```'
+        ),
         color = COLOR__KOISHI_HELP,
-        ).add_field(
-            'Library',
-            LIBRARY_INFO,
-            inline = True,
-        ).add_field(
-            'Git',
-            f'[Koishi repository]({LINK__KOISHI_GIT})',
-            inline = True,
-        ).add_field(
-            'Support server',
-            f'[{GUILD__NEKO_DUNGEON.name}]({INVITE__NEKO_DUNGEON.url})',
-            inline = True,
-        ).add_field(
-            'Invite',
-            (
-                f'[here](https://discord.com/oauth2/authorize?client_id={client.application.id}&scope=bot%20'
-                f'applications.commands)'
-            ),
-            inline = True,
-        ).add_field('Interpreter',
-            INTERPRETER_INFO,
-            inline = True,
-        ).add_field(
-            'Client info',
-            (
-                f'Clients: {len(CLIENTS)}\n'
-                f'Guilds: {len(GUILDS)}\n'
-                f'Users: {len(USERS)}'
-            ),
-            inline = True,
-        ).add_thumbnail(
-            client.application.icon_url_as(size=128)
+        timestamp = event.created_at,
+    ).add_author(
+        client.avatar_url,
+        client.full_name,
+    ).add_footer(
+        f'Requested by {event.user.full_name}',
+        icon_url = event.user.avatar_url,
+    ).add_field(
+        UPTIME_TITLE,
+        (
+            f'```\n'
+            f'{elapsed_time(STARTUP)}\n'
+            f'```'
         )
-
+    ).add_field(
+        'Hosting',
+        PLATFORM_FIELD_VALUE,
+    )
+    
+    if (CpuUsage is not None):
+        cpu_usage = await CpuUsage()
+        embed.add_field(
+            'CPU usage',
+            (
+                f'```\n'
+                f'{cpu_usage.cpu_percent:.2f}%\n'
+                '```'
+            ),
+            inline = True,
+        ).add_field(
+            'CPU frequency',
+            (
+                f'```\n'
+                f'{cpu_usage.average_cpu_frequency:.2f} MHz\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Memory usage',
+            (
+                f'```\n'
+                f'{(PROCESS.memory_info().rss / (1 << 20)):.2f} MB\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    embed.add_field(
+        'Interpreter',
+        PYTHON_VERSION_FIELD_VALUE,
+        inline = True,
+    ).add_field(
+        'Library',
+        LIBRARY_VERSION_FIELD_VALUE,
+        inline = True,
+    ).add_field(
+        'Line count',
+        LINE_COUNT_FIELD_VALUE,
+    )
+    
+    embed.add_field(
+        'Global command count',
+        (
+            f'```\n'
+            f'{client.slasher.get_global_command_count()}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Including sub commands',
+        (
+            f'```\n'
+            f'{client.slasher.get_global_command_count_with_sub_commands()}\n'
+            f'```'
+        ),
+        inline = True
+    )
+    
+    guild_id = event.guild_id
+    if guild_id:
+        guild_command_count = client.slasher.get_guild_command_count(guild_id)
+        
+        if guild_command_count:
+            embed.add_field(
+                'Guild specific commands',
+                (
+                    f'```\n'
+                    f'{guild_command_count}\n'
+                    f'```'
+                ),
+                inline = True
+            )
+    
+    embed.add_field(
+        'Shrimps',
+        (
+            '```\n'
+            'fried\n'
+            '```'
+        ),
+    ).add_field(
+        'Guild count',
+        (
+            f'```\n'
+            f'{len(GUILDS)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Client count',
+        (
+            f'```\n'
+            f'{len(CLIENTS)}\n'
+            f'```'
+        ),
+        inline = True,
+    )
+    
+    return InteractionResponse(
+        embed = embed,
+        components = ABOUT_COMPONENTS,
+    )
 
 
 def docs_search_pagination_check(user, event):
@@ -184,6 +340,71 @@ def docs_search_pagination_check(user, event):
         return True
     
     return False
+
+COMMAND_LIST_EMBED = Embed(
+    'Help',
+    color = COLOR__KOISHI_HELP,
+).add_field(
+    'Administration',
+    '`clear`, `ban`, `bans`, `emoji-role`, `invite-create`, `invites`, `is-banned`',
+    inline = True,
+).add_field(
+    'Anime',
+    '`anime`, `character`, `fine-anime`, `find-character`, `find-manga`, `manga`',
+    inline = True,
+).add_field(
+    'Actions',
+    (
+        '`bite`, `blush`, `bully`, `cringe`, `cry`, `dance`, `glomp`, `handhold`, `happy`, `highfive`, `hug`, `kill`, '
+        '`kiss`, `lick`, `nom`, `pat`, `poke`, `slap`, `smile`, `smug`, `wave`, `wink`, `yeet`'
+    ),
+    inline = True,
+).add_field(
+    'Economy',
+    '`daily`, `heart-shop`, `hearts`, `top-list`',
+    inline = True,
+).add_field(
+    'Fun',
+    '`meme`, `message-me`, `minesweeper`, `paranoia`, `random`, `rate`, `roll`, `sex`, `trivia`, `yuno`',
+    inline = True,
+).add_field(
+    'Games',
+    '`21`, `ds`, `xox`',
+    inline = True,
+).add_field(
+    'Help',
+    '`about`, `help`',
+    inline = True,
+).add_field(
+    'Marriage',
+    (
+        '`love`\n\n'
+        'Coming soon:\n'
+        '```\n'
+        'buy-waifu-slot, divorce, propose, proposals, waifu-info\n'
+        '```'
+    ),
+    inline = True,
+).add_field(
+    'Utility',
+    (
+        '`avatar`, `calc`, `color`, `guild`, `guild-icon`, `id`, `is-to-datetime`, `now-as-id`, `ping`, `rawr`, '
+        '`role`, `roles`, `show-emoji`, `user`, `welcome-screen`'
+    ),
+    inline = True,
+).add_field(
+    'Waifus',
+    '`nsfw-booru`, `safe-booru`, `touhou-character`, `waifu`',
+    inline = True,
+)
+
+# `status`,
+# `escape`,
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def help_(client, event):
+    """Lists my commands."""
+    return COMMAND_LIST_EMBED
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)

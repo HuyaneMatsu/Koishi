@@ -14,7 +14,8 @@ FILTER = re.compile(
         'discord\.ext|'
         '[pр]y\.discord|'
         'D¡\$€0rd\.[pр]¥|'
-        '[pр]ycord'
+        '[pр]ycord|'
+        'migrat'
     ),
     re.I|re.M|re.S|re.U,
 )

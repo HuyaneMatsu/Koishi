@@ -470,7 +470,11 @@ BUYABLE = [
     ITEM_ROSE,
 ]
 
-BUYABLE.sort(key=lambda item:item.name)
+def item_name_sort_key(item):
+    return item.name
+
+    
+BUYABLE.sort(key=item_name_sort_key)
 
 def load_file():
     if not os.exists(COST_FILE_PATH):

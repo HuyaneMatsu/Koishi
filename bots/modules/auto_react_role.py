@@ -56,7 +56,7 @@ AUTO_REACT_ROLE = SLASH_CLIENT.interactions(None,
     is_global = True,
 )
 
-AUTO_REACT_ROLE.interactions(name='create', show_for_invking_user_only=True)
+@AUTO_REACT_ROLE.interactions(name='create', show_for_invoking_user_only=True)
 async def create_auto_react_role(client, event,
         message: ('str', 'Please reference a message!'),
             ):
@@ -1417,7 +1417,7 @@ PERMISSION_MASK_REACT = Permission().update_by_keys(
     add_reactions = True,
 )
 
-AUTO_REACT_ROLE.interactions(name='show')
+@AUTO_REACT_ROLE.interactions(name='show')
 async def show_auto_react_roles(client, event):
     """Lists the currently active `auto-react-roles` in the guild. (Admin only)"""
     guild = event.guild

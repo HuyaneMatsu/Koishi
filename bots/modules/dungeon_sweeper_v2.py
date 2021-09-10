@@ -17,17 +17,17 @@ from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, user_common_mo
 
 from bot_utils.shared import PATH__KOISHI, GUILD__NEKO_DUNGEON
 
-DUNGEON_SWEEPER_COLOR= Color(0xa000c4)
-DUNGEON_SWEEPER_GAMES= {}
-COLOR_TUTORIAL       = Color(0xa000c4)
-DIFFICULTY_COLORS    = dict(enumerate((COLOR_TUTORIAL, Color(0x00cc03), Color(0xffe502), Color(0xe50016))))
-DIFFICULTY_NAMES     = dict(enumerate(('Tutorial', 'Easy', 'Normal', 'Hard',)))
+DUNGEON_SWEEPER_COLOR = Color(0xa000c4)
+DUNGEON_SWEEPER_GAMES = {}
+COLOR_TUTORIAL = Color(0xa000c4)
+DIFFICULTY_COLORS = dict(enumerate((COLOR_TUTORIAL, Color(0x00cc03), Color(0xffe502), Color(0xe50016))))
+DIFFICULTY_NAMES = dict(enumerate(('Tutorial', 'Easy', 'Normal', 'Hard',)))
 CHAPTER_UNLOCK_DIFFICULTY = 1
 CHAPTER_UNLOCK_STAGE = 9
 CHAPTER_UNLOCK_DIFFICULTY_NAME = DIFFICULTY_NAMES[CHAPTER_UNLOCK_DIFFICULTY]
 STAGE_STEP_MULTI_STEP_BUTTON = 10
 
-GUI_TIMEOUT          = 600.0
+GUI_TIMEOUT = 600.0
 
 GUI_STATE_NONE = 0
 GUI_STATE_READY = 1

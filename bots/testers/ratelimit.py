@@ -27,6 +27,7 @@ from hata.backend.helpers import BasicAuth
 from hata.discord.channel import CHANNEL_TYPE_MAP
 from hata.discord.http import API_ENDPOINT, STATUS_ENDPOINT
 from hata.discord.http.headers import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
+from hata.discord.client.functionality_helpers import role_move_key
 
 from hata.ext.command_utils import wait_for_message, wait_for_reaction
 from hata.ext.commands_v2 import Command, checks, configure_converter
@@ -1305,7 +1306,7 @@ async def role_create(client,guild,name=None,permissions=None,color=None,
 
 async def role_move(client,role,new_position,):
     guild = role.guild
-    data= change_on_switch(guild.role_list, role,new_position,key=lambda role,pos:{'id':role.id,'position':pos})
+    data= change_on_switch(guild.role_list, role, new_position, key=role_move_key)
     guild_id=role.guild.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',

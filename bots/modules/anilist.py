@@ -1213,7 +1213,7 @@ async def handle_disabled_component_interaction():
     pass
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def character(client, event,
         name_or_id: ('str', 'The character\'s name or it\'s id.')
             ):
@@ -1242,7 +1242,7 @@ async def character(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def find_character(client, event,
         name: ('str', 'The character\'s name to try to find.')
             ):
@@ -1345,7 +1345,7 @@ async def find_character_select(client, event):
 
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def anime_(client, event,
         name_or_id: ('str', 'The anime\'s name or it\'s id.')
             ):
@@ -1374,7 +1374,7 @@ async def anime_(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def find_anime(client, event,
         name: ('str', 'The anime\'s name to try to find.')
             ):
@@ -1476,7 +1476,7 @@ async def find_anime_select(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def manga_(client, event,
         name_or_id: ('str', 'The manga\'s name or it\'s id.')
             ):
@@ -1505,7 +1505,7 @@ async def manga_(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def find_manga(client, event,
         name: ('str', 'The manga\'s name to try to find.')
             ):

@@ -11,7 +11,7 @@ from hata.ext.slash.menus import Menu
 from hata.discord.http import LIBRARY_USER_AGENT
 from hata.backend.headers import USER_AGENT, CONTENT_TYPE
 
-from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_notsame
+from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_not_same
 
 WORD_MATCH_RP = re.compile('[^a-zA-z0-9]+')
 
@@ -191,7 +191,7 @@ class ShuffledShelter(Menu):
             if self.pop:
                 image_url = pop_one(urls)
             else:
-                image_url = choose_notsame(urls, self.message.embeds[0].image.url)
+                image_url = choose_not_same(urls, self.message.embeds[0].image.url)
             
             self.history.append(image_url)
             self.history_step = 1
@@ -271,7 +271,7 @@ for name, tag_name, *alternative_names in (
         ('Hearn Maribel'        , 'maribel_hearn'        , 'マエリベリー ハーン', 'Maribel', 'Maeriberii', 'Haan Maeriberii', 'Maribel Hearn'),
         ('Haniyasushin Keiki'   , 'haniyasushin_keiki'   , '埴安神 袿姫', 'Keiki', 'Keiki Haniyasushin',),
         ('Hakurei Reimu'        , 'hakurei_reimu'        , '博麗 霊夢', 'Reimu', 'Reimu Hakurei'),
-        ('Hata no Kokoro'       , 'hata_no_kokoro'       , '秦 こころ', 'Kokoro',),
+        ('Hata no Kokoro'       , 'hata_no_kokoro'       , '秦 こころ', 'Kokoro', 'こころ'),
         ('Hei Meiling'          , 'hei_meiling'          , 'Hei Meirin', 'Meiling Hei'),
         ('Hieda no Akyuu'       , 'hieda_no_akyuu'       , '稗田 阿求', 'Akyuu',),
         ('Hijiri Byakuren'      , 'hijiri_byakuren'      , '聖 白蓮', 'Byakuren', 'Hijiri Byakuren'),
@@ -390,14 +390,17 @@ del alternative_name
 del alternative_names
 del cache
 
-TOUHOU = SLASH_CLIENT.interactions(None,
+"""
+TOUHOU = SLASH_CLIENT.interactions(
+    None,
     name = 'touhou',
     description = 'Some touhou commands.',
     is_global = True,
 )
+"""
 
-@TOUHOU.interactions
-async def character(client, event,
+@SLASH_CLIENT.interactions(is_global = True)
+async def touhou_character(client, event,
         name: ('str', 'Who\'s?'),
             ):
     """Shows you the given Touhou character's portrait."""
@@ -446,7 +449,10 @@ PERMISSION_MASK_REACT = Permission().update_by_keys(
     add_reactions = True,
 )
 
-@TOUHOU.interactions
+def touhou_wiki_result_sort_key(item):
+    return len(item[0])
+
+# @TOUHOU.interactions
 async def wiki_(client, event,
         search_for : ('str', 'Search term'),
             ):
@@ -480,7 +486,7 @@ async def wiki_(client, event,
         json_data = from_json(response_data)
         
         results = list(zip(json_data[1], json_data[3]))
-        results.sort(key=lambda item: len(item[0]))
+        results.sort(key=touhou_wiki_result_sort_key)
     
     else:
         results = None
@@ -489,11 +495,11 @@ async def wiki_(client, event,
         yield Embed(
             'No result',
             f'No search result for: `{search_for}`',
-            color=BOORU_COLOR,
+            color = BOORU_COLOR,
         )
         return
     
-    embed = Embed(title=f'Search results for `{search_for}`', color=BOORU_COLOR)
+    embed = Embed(f'Search results for `{search_for}`', color=BOORU_COLOR)
     await ChooseMenu(client, event, results, wiki_page_selected, embed=embed, prefix='>>')
 
 async def wiki_page_selected(client, channel, message, title, url):

@@ -785,9 +785,9 @@ async def list_proposals(event, user, outgoing):
     description = ''.join(embed_description_parts)
     
     if outgoing:
-        title = f'Outgoing proposals of {user.full_name}'
+        title = f'Proposals from {user.full_name}'
     else:
-        title = f'Incoming proposals to {user.full_name}'
+        title = f'Proposals to {user.full_name}'
     
     embed = Embed(
         title,

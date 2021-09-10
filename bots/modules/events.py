@@ -4,89 +4,85 @@ from dateutil.relativedelta import relativedelta
 
 from hata import elapsed_time, Embed, Client
 from bot_utils.shared import ROLE__NEKO_DUNGEON__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
-    CHANNEL__NEKO_DUNGEON__EVENT, ROLE__NEKO_DUNGEON__EVENT_MANAGER, LINK__HATA_GIT
+    CHANNEL__NEKO_DUNGEON__EVENT, ROLE__NEKO_DUNGEON__EVENT_MANAGER, LINK__HATA_GIT, GUILD__NEKO_DUNGEON
 
 EVENT_TEST_CHECK = None # checks.has_any_role((ROLE__NEKO_DUNGEON__MODERATOR, ROLE__NEKO_DUNGEON__EVENT_MANAGER))
 
 SLASH_CLIENT: Client
-EVENTS = SLASH_CLIENT.interactions(None,
+EVENTS = SLASH_CLIENT.interactions(
+    None,
     name = 'events',
     description = 'Neko Dungeon event information.',
-    is_global = True,
+    guild = GUILD__NEKO_DUNGEON,
 )
 
-HATA_JAM_2_DESCRIPTION = Embed('Hata jam 2', 'Slashy jammy slash commands', color=COLOR__EVENT). \
-    add_field(
-        'Event theme: Cats & Nekogirls',
-        'Make cat or nekogirl related slash commands.'
-            ). \
-    add_field(
-        'Event technology',
-        '**Language**: Python3\n'
-        f'**Library**: [Hata]({LINK__HATA_GIT})\n'
-        '**Implementations**: Pypy, Cpython\n'
-        '**Python version**: >=3.6'
-            ). \
-    add_field(
-        'Prize pool',
-        f'1st place: 6 month of Discord Nitro + 24k {EMOJI__HEART_CURRENCY:e} + NEKOPARA Vol. 4 on Steam\n'
-        f'2nd place: 4 month of Discord Nitro + 16k {EMOJI__HEART_CURRENCY:e} \n'
-        f'3rd place: 2 month of Discord Nitro + 8k {EMOJI__HEART_CURRENCY:e}'
-            ). \
-    add_field(
-        'Event organizers',
-        'HuyaneMatsu#2016\n'
-        '\n'
-        f'If you have any questions ping us specifically or by pinging the role {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}, '
-        'although try not to spam.'
-            ). \
-    add_field(
-        'Timeline',
-        'Times are in UTC-0 24h hour format, start date means 00:01am while end date means by 23:59pm that day.\n'
-        '\n'
-        'Qualifier: January 14 - 26\n'
-        'Codejam duration: January 29 - February 11\n'
-        'Deciding winners: February 12 - 14'
-            ). \
-    add_field(
-        'Qualifier',
-        'You need to complete the qualifier test shown by Koishi\'s `k!qualifier` command and submit it in '
-        f'DM with the `k!submit` one. (You must have {ROLE__NEKO_DUNGEON__VERIFIED:m} role to submit your solution.)'
-            ). \
-    add_field(
-        'Teams',
-        'No teams now.'
-            ). \
-    add_field(
-        'Advertising',
-        f'If you want to advertise you can should not. Really, ask {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m} and the '
-        f'owner(s) of the other guild as well, whether they allow it.'
-            ). \
-    add_field(
-        'Codejam rating rules',
-        'To get you approximate idea on what we rate on how will your submissions be scored we\'ve made the following '
-        'table:\n'
-        '\n'
-        
-        'Clean code: (25%)\n'
-        'Idea: (40%)\n'
-        'Functionality: (35%)'
-            ). \
-    add_field(
-        'Codejam submissions',
-        f'Please open a git repo for your submission and send the link to an {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}.\n'
-        '\n'
-        'Your project has to include documentation. At the very least, it should include instructions on how to set-up '
-        'and run your projects, but keep in mind that a README is the first thing people typically see when they look '
-        'at a project on GitHub. A good README includes a short description of the project, installation instructions, '
-        'and often documents common usage of the application.\n'
-        '\n'
-        'Also use English or Engrish at least.'
-            )
+HATA_JAM_2_DESCRIPTION = Embed(
+    'Hata jam 2',
+    'Slashy jammy slash commands',
+    color = COLOR__EVENT
+).add_field(
+    'Event theme: Cats & Nekogirls',
+    'Make cat or nekogirl related slash commands.'
+).add_field(
+    'Event technology',
+    '**Language**: Python3\n'
+    f'**Library**: [Hata]({LINK__HATA_GIT})\n'
+    '**Implementations**: Pypy, Cpython\n'
+    '**Python version**: >=3.6'
+).add_field(
+    'Prize pool',
+    f'1st place: 6 month of Discord Nitro + 24k {EMOJI__HEART_CURRENCY:e} + NEKOPARA Vol. 4 on Steam\n'
+    f'2nd place: 4 month of Discord Nitro + 16k {EMOJI__HEART_CURRENCY:e} \n'
+    f'3rd place: 2 month of Discord Nitro + 8k {EMOJI__HEART_CURRENCY:e}'
+).add_field(
+    'Event organizers',
+    'HuyaneMatsu#2016\n'
+    '\n'
+    f'If you have any questions ping us specifically or by pinging the role {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}, '
+    'although try not to spam.'
+).add_field(
+    'Timeline',
+    'Times are in UTC-0 24h hour format, start date means 00:01am while end date means by 23:59pm that day.\n'
+    '\n'
+    'Qualifier: January 14 - 26\n'
+    'Codejam duration: January 29 - February 11\n'
+    'Deciding winners: February 12 - 14'
+).add_field(
+    'Qualifier',
+    'You need to complete the qualifier test shown by Koishi\'s `k!qualifier` command and submit it in '
+    f'DM with the `k!submit` one. (You must have {ROLE__NEKO_DUNGEON__VERIFIED:m} role to submit your solution.)'
+).add_field(
+    'Teams',
+    'No teams now.'
+).add_field(
+    'Advertising',
+    f'If you want to advertise you can should not. Really, ask {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m} and the '
+    f'owner(s) of the other guild as well, whether they allow it.'
+).add_field(
+    'Codejam rating rules',
+    'To get you approximate idea on what we rate on how will your submissions be scored we\'ve made the following '
+    'table:\n'
+    '\n'
+    
+    'Clean code: (25%)\n'
+    'Idea: (40%)\n'
+    'Functionality: (35%)'
+).add_field(
+    'Codejam submissions',
+    f'Please open a git repo for your submission and send the link to an {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}.\n'
+    '\n'
+    'Your project has to include documentation. At the very least, it should include instructions on how to set-up '
+    'and run your projects, but keep in mind that a README is the first thing people typically see when they look '
+    'at a project on GitHub. A good README includes a short description of the project, installation instructions, '
+    'and often documents common usage of the application.\n'
+    '\n'
+    'Also use English or Engrish at least.'
+)
 
 
 HATA_JAM_2_QUALIFIER = (
-    Embed('Hata jam 2 qualifier',
+    Embed(
+        'Hata jam 2 qualifier',
         'Hata code jam 2 qualifier\n'
         'You have `n` amount of love between nekogirls. What are the most expensive nekogirls you can get?\n'
         '\n'
@@ -125,10 +121,12 @@ HATA_JAM_2_QUALIFIER = (
         '- Each line should contain the nekogirl\'s cost, type and extra traits in this order.\n'
         '- Cost and type should be separated by a ` ` character.\n'
         '- Type and each extra trait should be separated by `, ` characters.\n'
-        '- Extra traits should be sorted by name.'
-        , color=COLOR__EVENT),
+        '- Extra traits should be sorted by name.',
+        color = COLOR__EVENT
+    ),
     
-    Embed(None,
+    Embed(
+        None,
         'The following code:\n'
         '```py\n'
         'get_nekogirls(20000, 10)\n'
@@ -154,8 +152,9 @@ HATA_JAM_2_QUALIFIER = (
         '59780 Horny Scottish Fold nekogirl, Heterochromia, Hime-cut, Lunatic, OwO ear tufts, Red eye(s), Thick '
         'tail(s)\n'
         '59755 Horny Maine Coon nekogirl, Boing-Boing, Heterochromia, Lunatic, Red eye(s)\n'
-        '```'
-        , color=COLOR__EVENT)
+        '```',
+        color = COLOR__EVENT
+        )
         
     )
 

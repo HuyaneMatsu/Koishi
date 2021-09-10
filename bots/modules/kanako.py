@@ -12,6 +12,8 @@ from hata.ext.slash import abort
 from bot_utils.shared import PATH__KOISHI
 from PIL import Image as PIL
 
+SLASH_CLIENT : Client
+
 FONT = PIL.font(os.path.join(PATH__KOISHI, 'library', 'Kozuka.otf'), 90)
 FONT_COLOR = (162, 61, 229)
 
@@ -25,10 +27,11 @@ def draw(buffer, text):
     return buffer
 
 ACTIVE_GAMES = {}
-CIRCLE_TIME = 60.
+CIRCLE_TIME = 60.0
 KANAKO_COLOR = Color.from_tuple(FONT_COLOR)
 
-SLASH_CLIENT : Client
+
+
 KANAKO = SLASH_CLIENT.interactions(None,
     name = 'kanako',
     description = 'Start a hiragana or a katakana quiz!',
@@ -650,7 +653,7 @@ class KanakoRunner:
         
         waiter = self.waiter
         if (waiter is not None):
-            waiter.set_result_if_pending()
+            waiter.set_result_if_pending(None)
     
     async def __call__(self, client, message):
         if message.author not in self.users:
@@ -773,7 +776,7 @@ class GameStatistics:
         self.source = source
         self.cache = [None for _ in range((len(self.source.history)+9)//10+1)]
         self.create_page_0()
-        #we return a coro, so it is valid ^.^
+        # we return a coro, so it is valid ^.^
         return KanakoPagination(source.client, source.channel, self)
 
     def create_page_0(self):
@@ -813,7 +816,7 @@ class GameStatistics:
                     win_firsts[first_index] += 1
                 else:
                     lose_firsts[first_index] += 1
-
+        
         win_medians = [value[len(value)//2] if value else CIRCLE_TIME for value in win_times]
         lose_medians = [value[len(value)//2] if value else CIRCLE_TIME for value in lose_times]
         
@@ -826,7 +829,7 @@ class GameStatistics:
             lose_median = lose_medians[index]
             win_first = win_firsts[index]
             lose_first = lose_firsts[index]
-
+            
             total = float(win_count)
             total += (((2**.5)-1.)-((((CIRCLE_TIME+win_median)/CIRCLE_TIME)**.5)-1.))*win_count
             total += win_first/5.
@@ -840,18 +843,18 @@ class GameStatistics:
                 f'Bad answer time median : {lose_median:.2f} s\n'
                 f'Answered first: {win_first} GOOD / {lose_first} BAD\n'
                 f'Rated : {total:.2f}'
-                    )
+            )
         
-        embed.add_footer(f'Page 1 /  {len(self.cache)}')
+        embed.add_footer(f'Page 1 / {len(self.cache)}')
         
         self.cache[0] = embed
-
+    
     def __getitem__(self,index):
         page = self.cache[index]
         if page is None:
             return self.create_page(index)
         return page
-
+    
     def create_page(self,index):
         end = index*10
         start = end-9
@@ -879,6 +882,7 @@ class GameStatistics:
         
         self.cache[index] = embed
         return embed
+
 
 class KanakoPagination:
     LEFT2   = BUILTIN_EMOJIS['rewind']

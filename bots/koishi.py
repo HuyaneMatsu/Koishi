@@ -1,8 +1,10 @@
 import re
 from datetime import datetime, timedelta
+from functools import partial as partial_func
 
 from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary, Permission
 from hata.backend.futures import render_exc_to_list
+from hata.discord.utils import sanitise_mention_escaper
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, EmojiDeleteWaitfor, \
     RoleEditWaitfor
@@ -31,7 +33,6 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
-
 @Koishi.events
 async def message_create(client, message):
     if (message.referenced_message is not None):
@@ -44,7 +45,7 @@ async def message_create(client, message):
         return
     
     user_mentions = message.user_mentions
-    if  (user_mentions is not None) and (client in user_mentions):
+    if (user_mentions is not None) and (client in user_mentions):
         author = message.author
         m1 = author.mention
         m2 = client.mention
@@ -59,7 +60,7 @@ async def message_create(client, message):
             re.escape(m4) : m3,
         }
         pattern = re.compile('|'.join(replace.keys()))
-        result = pattern.sub(lambda x: replace[re.escape(x.group(0))], message.content)
+        result = pattern.sub(partial_func(sanitise_mention_escaper, replace))
         await client.message_create(message.channel, result, allowed_mentions=[author])
         return
         

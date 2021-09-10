@@ -504,7 +504,7 @@ async def crywolf_(client, event):
     await client.webhook_message_create(webhook, f'{EMOJI_1:e} {EMOJI_2:e}',
         name=crywolf.name, avatar_url=crywolf.avatar_url, wait=True)
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def sex(client, event):
     """You horny?"""
     value = random()
