@@ -1,5 +1,5 @@
 import os, re
-from random import randint
+from random import randint, choice
 from itertools import chain
 
 from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
@@ -16,7 +16,7 @@ SLASH_CLIENT : Client
 
 FONT = PIL.font(os.path.join(PATH__KOISHI, 'library', 'Kozuka.otf'), 90)
 FONT_COLOR = (162, 61, 229)
-
+TIMEOUT = 300.0
 
 PAIRS_K = ('k', 'g', 's', 'z', 'c', 't', 'd', 'f', 'h', 'b', 'p', 'n', 'm', 'y', 'r', 'w', 'j',)
 
@@ -103,13 +103,6 @@ NAME_KATAKANA = 'katakana'
 
 MAPS = {NAME_HIRAGANA:HIRAGANA, NAME_KATAKANA:KATAKANA}
 
-GAME_DETAIL_RP = re.compile(
-    (
-        f'Map\: ({NAME_HIRAGANA}|{NAME_KATAKANA})\n'
-        f'Game length\: (\d+)'
-    ),
-    re.M,
-)
 
 CIRCLE_TIME = 60.0
 MODIFY_BEFORE = 10.0
@@ -424,14 +417,14 @@ MAP_SHOWCASES = {name: render_showcase(name, map_) for name, map_ in MAPS.items(
 
 KANAKO = SLASH_CLIENT.interactions(
     None,
-    name = 'kanako_v2',
+    name = 'kanako',
     description = 'Start a hiragana or a katakana quiz!',
     guild = GUILD__NEKO_DUNGEON,
 )
 
 
 @KANAKO.interactions
-async def create_(event,
+async def create_(client, event,
         map_ : ([NAME_HIRAGANA, NAME_KATAKANA], 'Choose a map to play!') = NAME_HIRAGANA,
         length : ('int', 'The amount of questions.') = 20,
             ):
@@ -439,6 +432,7 @@ async def create_(event,
     if not event.guild_id:
         abort('Guild only command')
     
+    KanakoJoinGroup(client, event, map_, length)
     return create_kanako_join_message(event, map_, length)
 
 
@@ -614,6 +608,50 @@ class GameStatistics:
         self.cache[index] = embed
         return embed
 
+KANAKO_JOIN_GROUPS = {}
+
+class KanakoJoinGroup:
+    __slots__ = ('users', 'event', 'handler', 'client', 'map_name', 'length')
+    
+    def __new__(cls, client, event, map_name, length):
+        self = object.__new__(cls)
+        self.client = client
+        self.event = event
+        self.users = {event.user}
+        self.handler = KOKORO.call_later(TIMEOUT, self)
+        self.map_name = map_name
+        self.length = length
+        
+        KANAKO_JOIN_GROUPS[event.id] = self
+        return self
+    
+    def __call__(self):
+        Task(self.close(), KOKORO)
+    
+    async def close(self):
+        self.cancel()
+        
+        await self.client.interaction_response_message_edit(
+            self.event,
+            embed = Embed(
+                None,
+                'Game cancelled, timeout',
+            ),
+            components = None,
+        )
+    
+    def cancel(self):
+        try:
+            del KANAKO_JOIN_GROUPS[self.event.id]
+        except KeyError:
+            pass
+        
+        handler = self.handler
+        if (handler is not None):
+            self.handler = None
+            handler.cancel()
+
+
 CUSTOM_ID_KANAKO_JOIN_OR_LEAVE = 'kanako.join_or_leave'
 CUSTOM_ID_KANAKO_START = 'kanako.start'
 CUSTOM_ID_KANAKO_CANCEL = 'kanako.cancel'
@@ -665,62 +703,65 @@ def create_kanako_join_message(event, map_name, length):
             color = KANAKO_COLOR,
         ).add_field(
             'Joined users',
-            event.user.mention,
+            event.user.full_name,
         ),
         allowed_mentions = event.user,
         components = COMPONENTS_KANAKO,
     )
 
+
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_KANAKO_JOIN_OR_LEAVE)
 async def handle_join_or_leave(event):
-    message = event.message
-    # Check for exception cases
-    embed = message.embed
-    if embed is None:
-        return
-    
-    if embed.fields is None:
-        return
-    
-    user_mentions = message.user_mentions
-    if user_mentions is None:
+    try:
+        join_group = KANAKO_JOIN_GROUPS[event.message.interaction.id]
+    except KeyError:
         return
     
     user = event.user
-    if message.intearction.user is user:
+    if user is join_group.event.user:
         return
     
+    users = join_group.users
     try:
-        index = user_mentions.index(user)
-    except ValueError:
-        user_mentions = (*user_mentions, user)
-    else:
-        user_mentions = tuple(*user_mentions[:index], *user_mentions[index+1:])
+        users.remove(user)
+    except KeyError:
+        users.add(user)
     
-    if len(user_mentions) >= 10:
+    if len(users) >= 10:
         components = COMPONENTS_KANAKO_FULL
     else:
         components = COMPONENTS_KANAKO
     
     embed = Embed(
         'Join a kanako game.',
-        embed.description,
+        (
+            f'Map: {join_group.map_name}\n'
+            f'Game length: {join_group.length}'
+        ),
+        color = KANAKO_COLOR,
     ).add_field(
         'Joined users',
-        '\n'.join(user.mention for user in user_mentions),
+        '\n'.join(user.full_name for user in sorted(users)),
     )
     
     return InteractionResponse(
         embed = embed,
-        allowed_mentions = user_mentions,
         components = components,
     )
 
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_KANAKO_CANCEL)
 async def handle_cancel(client, event):
-    if event.user is not event.message.interaction.user:
+    interaction = event.message.interaction
+    if event.user is not interaction.user:
         return
+    
+    try:
+        join_group = KANAKO_JOIN_GROUPS[interaction.id]
+    except KeyError:
+        pass
+    else:
+        join_group.cancel()
     
     await client.interaction_component_acknowledge(event)
     await client.interaction_response_message_delete(event)
@@ -728,31 +769,18 @@ async def handle_cancel(client, event):
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_KANAKO_START)
 async def handle_start(client, event):
-    message = event.message
-    if event.user is not message.interaction.user:
+    interaction = event.message.interaction
+    if event.user is not interaction.user:
         return
     
-    # Hack proofing
-    embed = message.embed
-    if embed is None:
+    try:
+        join_group = KANAKO_JOIN_GROUPS[interaction.id]
+    except KeyError:
         return
     
-    user_mentions = message.user_mentions
-    if user_mentions is None:
-        return
+    join_group.cancel()
     
-    description = embed.description
-    if description is None:
-        return
-    
-    matched = GAME_DETAIL_RP.fullmatch(description)
-    if matched is None:
-        return
-    
-    map_name, length = matched.groups()
-    length = int(length)
-    
-    KanakoRunner(client, event, list(user_mentions), map_name, length)
+    await KanakoRunner(client, event, join_group.users, join_group.map_name, join_group.length)
 
 
 CUSTOM_ID_OPTION_0 = 'kanako.solution.0'
@@ -771,7 +799,7 @@ CUSTOM_ID_TO_INDEX = {
 
 class KanakoRunner:
     __slots__ = ('client', 'event', 'users', 'map_name', 'length', 'history', 'answers', 'map', 'romajis', 'options',
-        'waiter', 'message', 'cancelled')
+        'waiter', 'message', 'cancelled', 'embed')
     
     def __new__(cls, client, event, users, map_name, length):
         self = object.__new__(cls)
@@ -781,7 +809,7 @@ class KanakoRunner:
         self.message = event.message
         self.map_name = map_name
         self.length = length
-
+        
         self.cancelled = False
         self.waiter = None
         
@@ -794,12 +822,14 @@ class KanakoRunner:
         self.map = map_ = [full_map.pop(randint(0, limit)) for limit in range(limit, limit-length, -1)]
         self.romajis = {element[1] for element in map_}
         self.options = None
+        self.embed = Embed(color=KANAKO_COLOR)
         
         client.slasher.add_component_interaction_waiter(event.message, self)
         
-        Task(self.runner(), KOKORO)
-        return self
-    
+        waiter = Future(KOKORO)
+        Task(self.runner(waiter), KOKORO)
+        return waiter
+        
     def generate_options(self, answer):
         result = [answer]
         target = answer
@@ -851,18 +881,21 @@ class KanakoRunner:
                             chances[key] += 1
             
             goods = []
-            maximal = 1
+            maximal = 0
             for key, value in chances.items():
                 if value < maximal:
                     continue
+                
                 if value > maximal:
                     goods.clear()
                     maximal = value
+                
                 goods.append(key)
             
-            target = goods[randint(0, len(goods)-1)]
+            target = choice(goods)
+            
             result.append(target)
-
+            
             counter += 1
             if counter == 5:
                 break
@@ -870,18 +903,18 @@ class KanakoRunner:
             del chances[target]
             
             for key in chances:
-                chances[key] = randint(0,2)
-            
+                chances[key] = randint(0, 2)
+        
         return [result.pop(randint(0, limit)) for limit in range(4, -1, -1)]
     
-    async def runner(self):
+    async def runner(self, waiter):
         try:
             client = self.client
             answers = self.answers
-            embed = Embed(color=KANAKO_COLOR).add_footer('')
-            
+            embed = self.embed
             for index, (question, answer) in enumerate(self.map, 1):
-                embed.footer.text = f'{index} / {len(self.map)}'
+                embed.add_footer(f'{index} / {len(self.map)}').add_image(RELATIONS[question])
+                self.build_base_leftover_description()
                 
                 self.options = options = self.generate_options(answer)
                 
@@ -914,60 +947,59 @@ class KanakoRunner:
                     self.cancel()
                     if isinstance(err, ConnectionError):
                         return
+                    
+                    raise
+                finally:
+                    if (waiter is not None):
+                        waiter.set_result_if_pending(None)
+                        waiter = None
                 
                 circle_start = LOOP_TIME()
                 self.waiter = waiter = Future(KOKORO)
-                future_or_timeout(waiter, NOTIFY_AFTER)
+                future_or_timeout(waiter, CIRCLE_TIME)
                 
                 try:
                     await waiter
                 except TimeoutError:
-                    Task(self.notify_late_users(), KOKORO)
+                    leavers = []
                     
-                    self.waiter = waiter = Future(KOKORO)
-                    future_or_timeout(waiter, MODIFY_BEFORE)
+                    users = self.users
+                    
+                    for index in reversed(range(len(users))):
+                        user = users[index]
+                        if user in answers:
+                            continue
+                        
+                        leavers.append(user)
+                        del users[index]
+                        
+                        for element in self.history:
+                            del element.answers[index]
+                    
+                    if users:
+                        continue
+                    
+                    self.cancel()
+                    
+                    embed = Embed(
+                        None,
+                        'No-one gave answer in time, cancelling the game.',
+                        color = KANAKO_COLOR,
+                    )
                     
                     try:
-                        await waiter
-                    except TimeoutError:
-                        leavers = []
-                        
-                        users = self.users
-                        
-                        for index in reversed(range(len(users))):
-                            user = users[index]
-                            if user in answers:
-                                continue
-                            
-                            leavers.append(user)
-                            del users[index]
-                            
-                            for element in self.history:
-                                del element.answers[index]
-                        
-                        if len(self.users) == 0:
-                            self.cancel()
-                            embed_description = 'No-one gave answer in time, cancelling the game.'
-                        else:
-                            embed_description = build_leaver_embed(leavers)
-                            
-                        embed = Embed(
-                            None,
-                            embed_description,
-                            color = KANAKO_COLOR,
+                        await client.interaction_response_message_edit(
+                            self.event,
+                            embed = embed,
+                            components = None,
                         )
+                    except BaseException as err:
+                        self.cancel()
                         
-                        try:
-                            await client.interaction_response_message_edit(
-                                self.event,
-                                embed = embed,
-                                components = None,
-                            )
-                        except BaseException as err:
-                            self.cancel()
-                            
-                            if isinstance(err, ConnectionError):
-                                return
+                        if isinstance(err, ConnectionError):
+                            return
+                        
+                        raise
                 
                 if self.cancelled:
                     return
@@ -976,7 +1008,7 @@ class KanakoRunner:
                 
                 self.history.append(HistoryElement(
                     answer,
-                    [(value[0], value[1]-circle_start) for value in (answers[user.id] for user in self.users)],
+                    [(value[0], value[1]-circle_start) for value in (answers[user] for user in self.users)],
                     self.options,
                     question,
                 ))
@@ -984,14 +1016,6 @@ class KanakoRunner:
                 answers.clear()
                 
                 embed.title = f'Last answer: {answer}'
-            
-            embed = Embed(embed.title, color=KANAKO_COLOR)
-            try:
-                await client.interaction_component_message_edit(self.event, embed=embed, components=None)
-            except BaseException as err:
-                if isinstance(err, ConnectionError):
-                    return
-            
             
             await Pagination10step(client, self.event, GameStatistics(self))
         finally:
@@ -1022,7 +1046,7 @@ class KanakoRunner:
         if waiter.done():
             return
         
-        if user.id in self.answers:
+        if user in self.answers:
             return
         
         try:
@@ -1032,33 +1056,40 @@ class KanakoRunner:
         
         content = self.options[custom_id_index]
         
-        self.answers[user.id] = (content, LOOP_TIME())
+        self.answers[user] = (content, LOOP_TIME())
         self.event = event
         
         if len(self.answers) == len(self.users):
             self.waiter.set_result_if_pending(None)
         else:
-            await self.client.interaction_component_acknowledge(event)
+            self.build_unanswered_leftover_description()
+            await self.client.interaction_component_message_edit(event, embed=self.embed)
     
-    async def notify_late_users(self):
-        embed = Embed('Hurry! Only 10 seconds left!',
-            '\n'.join([user.full_name for user in self.users if user.id not in self.answers]),
-            color = KANAKO_COLOR,
-        )
-        
-        try:
-            await self.client.interaction_response_message_edit(self.event, embed=embed)
-        except BaseException as err:
-            self.cancel()
+    
+    def build_base_leftover_description(self):
+        users = self.users
+        if len(users) == 1:
+            description = None
+        else:
+            description_parts = ['Waiting for:']
+            for user in sorted(users):
+                description_parts.append('\n')
+                description_parts.append(user.full_name)
             
-            if isinstance(err, ConnectionError):
-                return
-
-
-def build_leaver_embed(users):
-    description_parts = ['Users timed out:']
-    for user in users:
-        description_parts.append('\n')
-        description_parts.append(user.full_name)
+            description = ''.join(description_parts)
+        
+        self.embed.description = description
     
-    return ''.join(description_parts)
+    
+    def build_unanswered_leftover_description(self):
+        unanswered = set(self.users)
+        unanswered.difference_update(self.answers.keys())
+        
+        description_parts = ['Waiting for:']
+        for user in sorted(unanswered):
+            description_parts.append('\n')
+            description_parts.append(user.full_name)
+        
+        description = ''.join(description_parts)
+        
+        self.embed.description = description

@@ -8,6 +8,10 @@ from hata.ext.command_utils import ChooseMenu, Closer
 from hata.ext.slash import abort
 
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
+from hata.ext.extension_loader import require
+
+# This will be never satisfied. easy disabling.
+require('cake')
 
 SLASH_CLIENT: Client
 

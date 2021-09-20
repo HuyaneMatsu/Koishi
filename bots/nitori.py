@@ -6,8 +6,8 @@ from time import perf_counter
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
-from hata import Client, Embed, parse_emoji, sleep, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, DiscordException, \
-    ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji
+from hata import Client, Embed, parse_emoji, sleep, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, \
+    DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
     wait_for_component_interaction, iter_component_interactions, Select, Option
 
@@ -457,7 +457,7 @@ async def about(client):
 # command end
 # command start context avatar
 
-@Nitori.interactions(is_global=True, target='user')
+@Nitori.interactions(guild=TEST_GUILD, target='user')
 async def avatar(target):
     avatar_url = target.avatar_url_as(size=4096)
     return Embed(f'{target.full_name}\'s avatar', url=avatar_url).add_image(avatar_url)
@@ -465,9 +465,45 @@ async def avatar(target):
 # command end
 # command start context length
 
-@Nitori.interactions(is_global=True, target='message')
+@Nitori.interactions(guild=TEST_GUILD, target='message')
 async def length(target):
     return len(target)
+
+# command end
+# command start slash command-count
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def command_count(client, event):
+    global_command_count = client.slasher.get_global_command_count()
+    
+    guild_id = event.guild_id
+    if guild_id:
+        guild_command_count = client.slasher.get_guild_command_count(guild_id)
+    else:
+        guild_command_count = 0
+    
+    return Embed(
+        f'{client.full_name}\'s command count'
+    ).add_field(
+        'Global',
+        (
+            f'```\n'
+            f'{global_command_count}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Guild',
+        (
+            f'```\n'
+            f'{guild_command_count}\n'
+            f'```'
+        ),
+        inline = True,
+    )
+
+# command end
+# command start components ping-pong
 
 # command end
 # command start components ping-pong
@@ -931,14 +967,116 @@ async def zoo(event):
     yield InteractionResponse(content, components=None, message=message, event=component_interaction)
 
 # command end
+# command start components user-info
 
 
+CUSTOM_ID_USER_INFO_CLOSE = 'user_info.close'
+EMOJI_X = BUILTIN_EMOJIS['x']
+
+BUTTON_USER_INFO_CLOSE = Button(
+    emoji = EMOJI_X,
+    custom_id = CUSTOM_ID_USER_INFO_CLOSE,
+)
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def user_info(client, event,
+        user: ('user', 'Check out someone other user?') = None,
+            ):
+    if user is None:
+        user = event.user
+    
+    embed = Embed(
+        user.full_name,
+    ).add_thumbnail(
+        user.avatar_url,
+    )
+    
+    created_at = user.created_at
+    embed.add_field(
+        'User Information',
+        (
+            f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+            f'Profile: {user:m}\n'
+            f'ID: {user.id}'
+        ),
+    )
+    
+    # We ignore guild specific information to keep it short.
+    
+    return InteractionResponse(
+        embed = embed,
+        components = BUTTON_USER_INFO_CLOSE,
+    )
+
+@Nitori.interactions(custom_id=CUSTOM_ID_USER_INFO_CLOSE)
+async def close_user_info(client, event):
+    # Allow closing for the source user
+    if event.user is not event.message.interaction.user:
+        return
+    
+    # We can use `yield` as well for acknowledging it.
+    await client.interaction_component_acknowledge(event)
+    await client.interaction_response_message_delete(event)
+
+# command end
+# command start components orindance
+
+ORIN_DANCE_IMAGES = [
+    'https://cdn.discordapp.com/attachments/850843243695439892/850843328127959060/5e672f97dc555.gif',
+    'https://cdn.discordapp.com/attachments/850843243695439892/850843331516039218/1559518453_Ringood.gif',
+    'https://cdn.discordapp.com/attachments/850843243695439892/850843831967547402/orin.gif',
+    'https://cdn.discordapp.com/attachments/850843243695439892/850843849642606612/orinpok.gif',
+    'https://cdn.discordapp.com/attachments/753424871760855122/884417334427660348/what-the-orin.gif',
+    'https://cdn.discordapp.com/attachments/753424871760855122/886549772457095198/orin-dance-0000.gif',
+]
+
+CUSTOM_ID_ORIN_DANCE = 'orin_dance_please'
+EMOJI_ORIN_DANCE = Emoji.precreate(704392145330634812)
+
+BUTTON_ORIN_DANCE = Button(
+    emoji = EMOJI_ORIN_DANCE,
+    custom_id = CUSTOM_ID_ORIN_DANCE,
+    style = ButtonStyle.green,
+)
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def orindance():
+    return InteractionResponse(
+        embed = Embed('Party!', url='https://orindance.party/').add_image(choice(ORIN_DANCE_IMAGES)),
+        components = BUTTON_ORIN_DANCE,
+    )
+
+@Nitori.interactions(custom_id=CUSTOM_ID_ORIN_DANCE)
+async def party(client, event):
+    if event.user is event.message.interaction.user:
+        
+        old_url = event.message.embed.image.url
+        orin_dance_images = ORIN_DANCE_IMAGES.copy()
+        try:
+            orin_dance_images.remove(old_url)
+        except ValueError:
+            pass
+        
+        return Embed('Party!', url='https://orindance.party/').add_image(choice(orin_dance_images))
+    
+    # Notify the user
+    await client.interaction_component_acknowledge(event)
+    await client.interaction_followup_message_create(
+        event,
+        'Please start your own party to dance!',
+        show_for_invoking_user_only = True,
+    )
+
+# command end
 
 #### >@<>@<>@<>@< Source command >@<>@<>@<>@<>@< ####
 
 COMMAND_START_RP = re.compile('# command start ([a-z\-]+) ([a-z\-]+)')
 COMMAND_END_RP = re.compile('# command end')
 
+EMPTY_UNICODE = '\u200b'
+CODE_BLOCK_MARKER = '```'
+ESCAPED_CODE_BLOCK_MARKER = f'{EMPTY_UNICODE}`{EMPTY_UNICODE}`{EMPTY_UNICODE}`'
 
 def build_command_string(command_lines):
     # Remove empty line from end
@@ -1002,6 +1140,7 @@ def build_command_string(command_lines):
     chunks_with_length = []
     for chunk in chunks:
         chunk_length = 12+len(chunk)
+        
         for line in chunk:
             chunk_length += len(line)
         
@@ -1059,6 +1198,7 @@ def collect_commands():
             continue
         
         line = line.rstrip()
+        line = line.replace(CODE_BLOCK_MARKER, ESCAPED_CODE_BLOCK_MARKER)
         
         for key in command_names:
             try:

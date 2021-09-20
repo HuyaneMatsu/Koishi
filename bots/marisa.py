@@ -28,8 +28,8 @@ from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import COLOR__MARISA_HELP, \
-    command_error, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
+from bot_utils.shared import COLOR__MARISA_HELP, command_error, GUILD__NEKO_DUNGEON, \
+    CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
 from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter_v2 import Interpreter
 from bot_utils.tools import choose, Cell
@@ -982,3 +982,25 @@ async def count_message_fields(client, message):
     description_parts.append('\n**Total fields**: 22 (including cache)')
     
     return ''.join(description_parts)
+
+
+@Marisa.events
+async def shutdown(client):
+    await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, 'dead')
+
+
+@Marisa.commands
+async def shutdown():
+    await Marisa.stop()
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def thread_only(
+    thread: ('channel_group_thread', 'Please define a thread channel.')
+        ):
+    return repr(thread)
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@configure_parameter('channel', 'channel', 'channel', channel_types=[0, 4])
+async def some_channel(channel):
+    return repr(channel)

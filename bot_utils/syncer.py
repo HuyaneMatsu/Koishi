@@ -274,7 +274,7 @@ async def receive_sync(client, partner):
 
 async def sync_request_command(client, message, days: int = 7):
     if days < 1 or days > 30:
-        await client.message_create(message.channel, f'lease enter a valid day between 1 and 30 days, got {days}')
+        await client.message_create(message.channel, f'please enter a valid day between 1 and 30 days, got {days}.')
         return
     
     if SYNC_LOCK.locked():

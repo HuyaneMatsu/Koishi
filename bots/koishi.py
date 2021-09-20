@@ -8,18 +8,16 @@ from hata.discord.utils import sanitise_mention_escaper
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, EmojiDeleteWaitfor, \
     RoleEditWaitfor
-from bot_utils.shared import CHANNEL__SYSTEM__SYNC, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
+from bot_utils.shared import GUILD__NEKO_DUNGEON, CHANNEL__SYSTEM__SYNC, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
 
 
-from bot_utils.syncer import sync_request_waiter
 
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
 _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
 _KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
 
 Koishi: Client
-
-Koishi.events.message_create.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
+Satori: Client
 
 Koishi.events(MessageDeleteWaitfor)
 Koishi.events(GuildDeleteWaitfor)
@@ -33,24 +31,31 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
-@Koishi.events
+@Satori.events
 async def message_create(client, message):
+    if (message.guild_id != GUILD__NEKO_DUNGEON):
+        return
+    
     if (message.referenced_message is not None):
         return
     
-    if not message.channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING:
+    if not message.channel.cached_permissions_for(Koishi)&PERMISSION_MASK_MESSAGING:
         return
     
     if message.author.is_bot:
         return
     
+    content = message.content
+    if content is None:
+        return
+    
     user_mentions = message.user_mentions
-    if (user_mentions is not None) and (client in user_mentions):
+    if (user_mentions is not None) and (Koishi in user_mentions):
         author = message.author
         m1 = author.mention
-        m2 = client.mention
+        m2 = Koishi.mention
         m3 = author.mention_nick
-        m4 = client.mention_nick
+        m4 = Koishi.mention_nick
         replace = {
             '@everyone'   : '@\u200beveryone',
             '@here'       : '@\u200bhere',
@@ -60,15 +65,14 @@ async def message_create(client, message):
             re.escape(m4) : m3,
         }
         pattern = re.compile('|'.join(replace.keys()))
-        result = pattern.sub(partial_func(sanitise_mention_escaper, replace))
-        await client.message_create(message.channel, result, allowed_mentions=[author])
+        result = pattern.sub(partial_func(sanitise_mention_escaper, replace), content)
+        await Koishi.message_create(message.channel, result, allowed_mentions=[author])
         return
         
-    content = message.content
-    if message.channel.cached_permissions_for(client).can_add_reactions and (_KOISHI_NOU_RP.match(content) is not None):
+    if message.channel.cached_permissions_for(Koishi).can_add_reactions and (_KOISHI_NOU_RP.match(content) is not None):
         for value in 'nou':
             emoji = BUILTIN_EMOJIS[f'regional_indicator_{value}']
-            await client.reaction_add(message, emoji)
+            await Koishi.reaction_add(message, emoji)
         return
     
     matched = _KOISHI_OWO_RP.fullmatch(content,)
@@ -81,7 +85,7 @@ async def message_create(client, message):
     else:
         return
     
-    await client.message_create(message.channel, text)
+    await Koishi.message_create(message.channel, text)
 
 
 @Koishi.events(overwrite=True)
@@ -105,4 +109,3 @@ async def error(client, name, err):
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang='py'):
         await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, chunk)
-

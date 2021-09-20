@@ -1,4 +1,4 @@
-import signal
+import signal, sys
 from random import randint
 from itertools import cycle, chain
 from threading import main_thread
@@ -8,12 +8,15 @@ from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, We
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import COLOR__SATORI_HELP
+from bot_utils.shared import COLOR__SATORI_HELP, CHANNEL__SYSTEM__SYNC
 from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor, ChannelDeleteWaitfor, ChannelCreateWaitfor, \
     ChannelEditWaitfor
 from bot_utils.interpreter_v2 import Interpreter
+from bot_utils.syncer import sync_request_waiter
 
 Satori : Client
+
+Satori.events.message_create.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
 
 Satori.events(MessageDeleteWaitfor)
 Satori.events(MessageEditWaitfor)
@@ -255,24 +258,32 @@ class shutdown:
                 'Owner only!')
 
 async def execute_description(command_context):
-    return Embed('execute', (
-        'Use an interpreter trough me :3\n'
-        'Usages:\n'
-        f'{command_context.prefix}execute # code goes here\n'
-        '# code goes here\n'
-        '# code goes here\n'
-        '\n'
-        f'{command_context.prefix}execute\n'
-        '```\n'
-        '# code goes here\n'
-        '# code goes here\n'
-        '```\n'
-        '*not code*\n'
-        '\n'
-        '... and many more ways.'
-            ), color=COLOR__SATORI_HELP).add_footer(
-            'Owner only!')
+    return Embed(
+        'execute',
+        (
+            'Use an interpreter trough me :3\n'
+            'Usages:\n'
+            f'{command_context.prefix}execute # code goes here\n'
+            '# code goes here\n'
+            '# code goes here\n'
+            '\n'
+            f'{command_context.prefix}execute\n'
+            '```\n'
+            '# code goes here\n'
+            '# code goes here\n'
+            '```\n'
+            '*not code*\n'
+            '\n'
+            '... and many more ways.'
+        ),
+        color = COLOR__SATORI_HELP
+    ).add_footer(
+        'Owner only!',
+    )
 
 Satori.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
     checks=[checks.owner_only()])
 
+@Satori.events
+async def shutdown(client):
+    sys.stderr.flush()

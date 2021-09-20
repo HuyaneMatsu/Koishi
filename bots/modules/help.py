@@ -88,18 +88,29 @@ async def rules(client, event):
 
 @SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_VERIFIED_CUSTOM_ID)
 async def claim_verified_role(client, event):
+    await client.interaction_component_acknowledge(event)
     user = event.user
-    if not user.has_role(ROLE__NEKO_DUNGEON__VERIFIED):
+    if user.has_role(ROLE__NEKO_DUNGEON__VERIFIED):
+        response = f'You already have {ROLE__NEKO_DUNGEON__VERIFIED.name} role claimed.'
+    else:
         await client.user_role_add(user, ROLE__NEKO_DUNGEON__VERIFIED)
+        response = f'You claimed {ROLE__NEKO_DUNGEON__VERIFIED.name} role.'
+    
+    await client.interaction_followup_message_create(event, response, show_for_invoking_user_only=True)
 
 
 @SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID)
 async def claim_announcements_role(client, event):
+    await client.interaction_component_acknowledge(event)
     user = event.user
     if user.has_role(ROLE__NEKO_DUNGEON__ANNOUNCEMENTS):
         await client.user_role_delete(user, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS)
+        response = f'Your {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.name} role was removed.'
     else:
         await client.user_role_add(user, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS)
+        response = f'You claimed {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.name} role.'
+    
+    await client.interaction_followup_message_create(event, response, show_for_invoking_user_only=True)
 
 
 def create_interpreter_info():
@@ -383,7 +394,7 @@ CATEGORIES = (
     ), (
         'Games',
         EMOJI_VIDEO_GAME,
-        ('21', 'ds', 'xox',),
+        ('21', 'ds', 'kanako', 'xox',),
     ), (
         'Help',
         EMOJI_SPEECH_BUBBLE,

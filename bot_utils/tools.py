@@ -173,10 +173,8 @@ class Pagination10step(Menu):
     BUTTON_RESET = ComponentButton(emoji=EMOJI_RESET)
     BUTTON_CANCEL = ComponentButton(emoji=EMOJI_CANCEL, custom_id=CUSTOM_ID_CANCEL)
     
-    BUTTONS = [
-        ComponentRow(BUTTON_LEFT_2, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_RIGHT_2, BUTTON_RESET,),
-        ComponentRow(BUTTON_CANCEL),
-    ]
+    BUTTON_ROW_1 = ComponentRow(BUTTON_LEFT_2, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_RIGHT_2, BUTTON_RESET,)
+    BUTTON_ROW_2 = ComponentRow(BUTTON_CANCEL)
     
     __slots__ = ('page_index', 'pages', 'timeout', 'user_check')
     
@@ -194,17 +192,17 @@ class Pagination10step(Menu):
     get_timeout = top_level_get_timeout
     
     async def initial_invoke(self):
-        self.components = self.BUTTONS
+        self.components = [self.BUTTON_ROW_1, self.BUTTON_ROW_2]
         self.allowed_mentions = None
         self.BUTTON_LEFT_2.enabled = False
         self.BUTTON_LEFT.enabled = False
+        self.BUTTON_RESET.enabled = False
         
         pages = self.pages
         self.content = pages[0]
         if len(pages) == 1:
             self.BUTTON_RIGHT_2.enabled = False
             self.BUTTON_RIGHT.enabled = False
-            self.BUTTON_RESET.enabled = False
     
     
     async def invoke(self, event):
@@ -243,6 +241,7 @@ class Pagination10step(Menu):
         else:
             self.BUTTON_LEFT_2.enabled = True
             self.BUTTON_LEFT.enabled = True
+            self.BUTTON_RESET.enabled = True
         
         if page_index == pages_index_limit:
             self.BUTTON_RIGHT_2.enabled = False

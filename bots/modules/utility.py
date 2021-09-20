@@ -356,21 +356,29 @@ async def shared_guilds(client, event):
 
 @SLASH_CLIENT.interactions(name='user', is_global=True)
 async def user_(client, event,
-        user :('user', '*spy?*') = None,
-            ):
+        user: ('user', 'Check out someone other user?') = None,
+    ):
     """Shows some information about your or about the selected user."""
-    
     if user is None:
         user = event.user
     
     guild = event.guild
     
-    embed = Embed(user.full_name)
+    embed = Embed(
+        user.full_name,
+    ).add_thumbnail(
+        user.avatar_url,
+    )
+    
     created_at = user.created_at
-    embed.add_field('User Information',
-        f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-        f'Profile: {user:m}\n'
-        f'ID: {user.id}')
+    embed.add_field(
+        'User Information',
+        (
+            f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+            f'Profile: {user:m}\n'
+            f'ID: {user.id}'
+        ),
+    )
     
     guild_profile = user.get_guild_profile_for(guild)
     
@@ -393,9 +401,6 @@ async def user_(client, event,
         if guild_profile.nick is not None:
             text.append(f'Nick: {guild_profile.nick}')
         
-        if guild_profile.joined_at is None:
-            await client.guild_user_get(user.id)
-        
         # Joined at can be `None` if the user is in lurking mode.
         joined_at = guild_profile.joined_at
         if joined_at is not None:
@@ -408,9 +413,8 @@ async def user_(client, event,
         text.append(f'Roles: {roles}')
         embed.add_field('In guild profile','\n'.join(text))
     
-    embed.add_thumbnail(user.avatar_url_as(size=128))
-    
     return embed
+
 
 @SLASH_CLIENT.interactions(name='role', is_global=True)
 async def role_(client, event,
@@ -464,13 +468,13 @@ async def role_(client, event,
     return embed
 
 
-def add_guild_generic_field(guild, embed, even_if_empty):
-    add_guild_info_field(guild, embed, False)
-    add_guild_counts_field(guild, embed, False)
-    add_guild_emojis_field(guild, embed, False)
-    add_guild_stickers_field(guild, embed, False)
+async def add_guild_generic_field(client, guild, embed, even_if_empty):
+    await add_guild_info_field(client, guild, embed, False)
+    await add_guild_counts_field(client, guild, embed, False)
+    await add_guild_emojis_field(client, guild, embed, False)
+    await add_guild_stickers_field(client, guild, embed, False)
 
-def add_guild_info_field(guild, embed, even_if_empty):
+async def add_guild_info_field(client, guild, embed, even_if_empty):
     created_at = guild.created_at
     sections_parts = [
         '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]\n'
@@ -488,7 +492,12 @@ def add_guild_info_field(guild, embed, even_if_empty):
     
     embed.add_field('Guild information', ''.join(sections_parts))
 
-def add_guild_counts_field(guild, embed, even_if_empty):
+async def add_guild_counts_field(client, guild, embed, even_if_empty):
+    approximate_user_count = guild.approximate_user_count
+    if approximate_user_count == 0:
+        await client.guild_get(guild)
+        approximate_user_count = guild.approximate_user_count
+    
     channel_text = 0
     channel_announcements = 0
     channel_category = 0
@@ -526,7 +535,7 @@ def add_guild_counts_field(guild, embed, even_if_empty):
             continue
     
     sections_parts = [
-        '**Users: ', str(guild.approximate_user_count), '**\n'
+        '**Users: ', str(approximate_user_count), '**\n'
         '**Roles: ', str(len(guild.roles)), '**'
     ]
     
@@ -568,7 +577,7 @@ def add_guild_counts_field(guild, embed, even_if_empty):
     embed.add_field('Counts', ''.join(sections_parts))
 
 
-def add_guild_emojis_field(guild, embed, even_if_empty):
+async def add_guild_emojis_field(client, guild, embed, even_if_empty):
     emoji_count = len(guild.emojis)
     if emoji_count:
         sections_parts = [
@@ -605,7 +614,7 @@ def add_guild_emojis_field(guild, embed, even_if_empty):
     elif even_if_empty:
         embed.add_field('Emojis', '*The guild has no emojis*')
 
-def add_guild_stickers_field(guild, embed, even_if_empty):
+async def add_guild_stickers_field(client, guild, embed, even_if_empty):
     sticker_count = len(guild.stickers)
     if sticker_count:
         sections_parts = [
@@ -634,7 +643,7 @@ def add_guild_stickers_field(guild, embed, even_if_empty):
         embed.add_field('Stickers', '*The guild has no stickers*')
 
 
-def add_guild_boosters_field(guild, embed, even_if_empty):
+async def add_guild_boosters_field(client, guild, embed, even_if_empty):
     boosters = guild.boosters
     if boosters:
         count = len(boosters)
@@ -662,19 +671,22 @@ GUILD_FIELDS = {
 }
 
 @SLASH_CLIENT.interactions(name='guild', is_global=True)
-async def guild_(event,
-        field: ([(name, name) for name in GUILD_FIELDS], 'Which fields should I show?') = DEFAULT_GUILD_FILED,
+async def guild_(client, event,
+        field: (list(GUILD_FIELDS.keys()), 'Which fields should I show?') = DEFAULT_GUILD_FILED,
             ):
     """Shows some information about the guild."""
     guild = event.guild
     if guild.partial:
         abort('I must be in the guild to execute this command.')
     
-    embed = Embed(guild.name, color=(
-        guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF)
-            ).add_thumbnail(guild.icon_url_as(size=128))
+    embed = Embed(
+        guild.name,
+        color = (guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF),
+    ).add_thumbnail(
+        guild.icon_url_as(size=128),
+    )
     
-    GUILD_FIELDS[field](guild, embed, True)
+    await GUILD_FIELDS[field](client, guild, embed, True)
     
     return embed
 

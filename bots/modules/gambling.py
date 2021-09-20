@@ -6,10 +6,11 @@ from math import log10, ceil, floor
 from itertools import chain
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
-    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta, Permission
-from hata.ext.command_utils import Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_CTX, \
-    GUI_STATE_CANCELLED, GUI_STATE_CANCELLING, GUI_STATE_SWITCHING_PAGE
+    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta, Permission, \
+    InteractionType
 from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, wait_for_component_interaction
+from hata.ext.slash.menus.menu import GUI_STATE_NONE, GUI_STATE_READY, GUI_STATE_EDITING, GUI_STATE_CANCELLING, \
+    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CONTEXT, Timeouter
 
 from sqlalchemy.sql import select, desc
 
@@ -1188,8 +1189,10 @@ async def game_21(client, event,
     is_multi_player = (mode == 'mp')
     
     embed = game_21_precheck(client, event.user, event.channel, amount, is_multi_player)
-    yield embed
-    if (embed is not None):
+    if (embed is None):
+        await client.interaction_application_command_acknowledge(event)
+    else:
+        await client.interaction_response_message_create(event, embed=embed)
         return
     
     if is_multi_player:
@@ -1198,6 +1201,7 @@ async def game_21(client, event,
         coroutine_function = game_21_single_player
     
     await coroutine_function(client, event, amount)
+
 
 def should_render_exception(exception):
     if isinstance(exception, ConnectionError):
@@ -1396,14 +1400,93 @@ class Game21Player:
         
         return embed
 
-GAME_21_STEP_NEW = BUILTIN_EMOJIS['new']
-GAME_21_STEP_STOP = BUILTIN_EMOJIS['octagonal_sign']
-GAME_21_STEP_EMOJIS = (GAME_21_STEP_NEW, GAME_21_STEP_STOP)
+GAME_21_EMOJI_NEW = BUILTIN_EMOJIS['new']
+GAME_21_EMOJI_STOP = BUILTIN_EMOJIS['octagonal_sign']
 
-GAME_21_JOIN_ENTER = BUILTIN_EMOJIS['hand_splayed']
-GAME_21_JOIN_START = BUILTIN_EMOJIS['ok_hand']
-GAME_21_JOIN_CANCEL = BUILTIN_EMOJIS['x']
-GAME_21_JOIN_EMOJIS = (GAME_21_JOIN_ENTER, GAME_21_JOIN_START, GAME_21_JOIN_CANCEL)
+GAME_21_CUSTOM_ID_NEW = '21.new'
+GAME_21_CUSTOM_ID_STOP = '21.stop'
+
+GAME_21_BUTTON_NEW_ENABLED = Button(
+    emoji = GAME_21_EMOJI_NEW,
+    custom_id = GAME_21_CUSTOM_ID_NEW,
+)
+
+GAME_21_BUTTON_NEW_DISABLED = GAME_21_BUTTON_NEW_ENABLED.copy_with(
+    enabled = False,
+)
+
+GAME_21_BUTTON_STOP_ENABLED = Button(
+    emoji = GAME_21_EMOJI_STOP,
+    custom_id = GAME_21_CUSTOM_ID_STOP,
+)
+
+GAME_21_BUTTON_STOP_DISABLED = GAME_21_BUTTON_STOP_ENABLED.copy_with(
+    enabled = False,
+)
+
+GAME_21_ROW_ENABLED = Row(
+    GAME_21_BUTTON_NEW_ENABLED,
+    GAME_21_BUTTON_STOP_ENABLED,
+)
+
+GAME_21_ROW_DISABLED = Row(
+    GAME_21_BUTTON_NEW_DISABLED,
+    GAME_21_BUTTON_STOP_DISABLED,
+)
+
+
+GAME_21_EMOJI_ENTER = BUILTIN_EMOJIS['hand_splayed']
+GAME_21_EMOJI_START = BUILTIN_EMOJIS['ok_hand']
+GAME_21_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
+
+GAME_21_CUSTOM_ID_ENTER = '21.enter'
+GAME_21_CUSTOM_ID_START = '21.start'
+GAME_21_CUSTOM_ID_CANCEL = '21.cancel'
+
+GAME_21_BUTTON_ENTER_ENABLED = Button(
+    emoji = GAME_21_EMOJI_ENTER,
+    custom_id = GAME_21_CUSTOM_ID_ENTER,
+)
+
+GAME_21_BUTTON_ENTER_DISABLED = GAME_21_BUTTON_ENTER_ENABLED.copy_with(
+    enabled = False,
+)
+
+GAME_21_BUTTON_START_ENABLED = Button(
+    emoji = GAME_21_EMOJI_START,
+    custom_id = GAME_21_CUSTOM_ID_START,
+)
+
+GAME_21_BUTTON_START_DISABLED = GAME_21_BUTTON_START_ENABLED.copy_with(
+    enabled = False,
+)
+
+GAME_21_BUTTON_CANCEL_ENABLED = Button(
+    emoji = GAME_21_EMOJI_CANCEL,
+    custom_id = GAME_21_CUSTOM_ID_CANCEL,
+)
+
+GAME_21_BUTTON_CANCEL_DISABLED = GAME_21_BUTTON_CANCEL_ENABLED.copy_with(
+    enabled = False,
+)
+
+GAME_21_JOIN_ROW_ENABLED = Row(
+    GAME_21_BUTTON_ENTER_ENABLED,
+    GAME_21_BUTTON_START_ENABLED,
+    GAME_21_BUTTON_CANCEL_ENABLED,
+)
+
+GAME_21_JOIN_ROW_FULL = Row(
+    GAME_21_BUTTON_ENTER_DISABLED,
+    GAME_21_BUTTON_START_ENABLED,
+    GAME_21_BUTTON_CANCEL_ENABLED,
+)
+
+GAME_21_JOIN_ROW_DISABLED = Row(
+    GAME_21_BUTTON_ENTER_DISABLED,
+    GAME_21_BUTTON_START_DISABLED,
+    GAME_21_BUTTON_CANCEL_DISABLED,
+)
 
 GAME_21_RESULT_FINISH = 0
 GAME_21_RESULT_INITIALIZATION_ERROR = 1
@@ -1416,8 +1499,8 @@ GAME_21_TIMEOUT = 300.0
 GAME_21_CANCELLATION_TIMEOUT = 5.0
 
 class Game21PlayerRunner:
-    __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', '_timeouter', 'canceller', '_task_flag',
-        'render_after', )
+    __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', '_timeouter', 'canceller', '_gui_state',
+        'render_after', 'event',)
     
     async def __new__(cls, client, base, user, channel, amount, render_after, event=None):
         player = base.create_user_player(user)
@@ -1427,10 +1510,28 @@ class Game21PlayerRunner:
             if render_after:
                 embed = player.create_after_embed(amount)
                 try:
-                    message = await client.message_create(channel, embed=embed)
+                    if event is None:
+                        message = await client.message_create(
+                            channel,
+                            embed = embed,
+                            components = GAME_21_ROW_DISABLED,
+                        )
+                    else:
+                        if not event.is_acknowledged():
+                            await client.interaction_application_command_acknowledge(event)
+                        
+                        message = await client.interaction_followup_message_create(
+                            event,
+                            embed = embed,
+                            components = GAME_21_ROW_DISABLED,
+                        )
+                except GeneratorExit:
+                    raise
+                
                 except BaseException as err:
                     if should_render_exception(err):
                         await client.events.error(client, f'{cls.__name__}.__new__', err)
+                    
                     message = None
             else:
                 message = None
@@ -1441,13 +1542,23 @@ class Game21PlayerRunner:
             
             try:
                 if event is None:
-                    message = await client.message_create(channel, embed=embed)
+                    message = await client.message_create(
+                        channel,
+                        embed = embed,
+                        components = GAME_21_ROW_ENABLED,
+                    )
                 else:
                     if not event.is_acknowledged():
-                        await client.interaction_response_message_create(event)
-                    message = await client.interaction_followup_message_create(event, embed=embed)
-                for emoji in GAME_21_STEP_EMOJIS:
-                    await client.reaction_add(message, emoji)
+                        await client.interaction_application_command_acknowledge(event)
+                    
+                    message = await client.interaction_followup_message_create(
+                        event,
+                        embed = embed,
+                        components = GAME_21_ROW_ENABLED,
+                    )
+            except GeneratorExit:
+                raise
+            
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, f'{cls.__name__}.__new__', err)
@@ -1463,44 +1574,40 @@ class Game21PlayerRunner:
         self.amount = amount
         self.client = client
         self.render_after = render_after
+        self.event = event
         
         if message is None:
             self._timeouter = None
             self.canceller = None
-            self._task_flag = GUI_STATE_SWITCHING_CTX
+            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
         else:
             self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
             self.canceller = cls._canceller
-            self._task_flag = GUI_STATE_READY
-            client.events.reaction_add.append(message, self)
-            client.events.reaction_delete.append(message, self)
+            self._gui_state = GUI_STATE_READY
+            
+            client.slasher.add_component_interaction_waiter(message, self)
         
         return self
     
-    async def __call__(self, client, event):
-        if (event.user is not self.player.user) or (event.emoji not in GAME_21_STEP_EMOJIS):
+    
+    async def __call__(self, interaction_event):
+        client = self.client
+        if (interaction_event.user is not self.player.user):
+            await client.interaction_component_acknowledge(interaction_event)
             return
         
-        if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
+        self.event = interaction_event
+        
+        if self._gui_state != GUI_STATE_READY:
+            await client.interaction_component_acknowledge(interaction_event)
             return
         
-        emoji = event.emoji
-        task_flag = self._task_flag
-        if task_flag != GUI_STATE_READY:
-            if task_flag == GUI_STATE_SWITCHING_PAGE:
-                if emoji is GAME_21_STEP_STOP:
-                    self._task_flag = GUI_STATE_CANCELLING
-                return
-            
-            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
-            return
+        custom_id = interaction_event.interaction.custom_id
         
-        if emoji is GAME_21_STEP_NEW:
-            # It is enough to delete the reaction at this ase if needed,
-            # because after the other cases we will delete them anyways.
+        if (custom_id == GAME_21_CUSTOM_ID_NEW):
             game_ended = self.player.pull_card()
             
-        elif emoji is GAME_21_STEP_STOP:
+        elif (custom_id == GAME_21_CUSTOM_ID_STOP):
             game_ended = True
         
         else:
@@ -1508,50 +1615,52 @@ class Game21PlayerRunner:
             return
         
         if game_ended:
-            self._task_flag = GUI_STATE_SWITCHING_CTX
+            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
             self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
             
+            self.cancel()
             if self.render_after:
                 await self._canceller_render_after()
-            
-            self.cancel()
             return
         
-        self._task_flag = GUI_STATE_SWITCHING_PAGE
+        self._gui_state = GUI_STATE_EDITING
         
         embed = self.player.create_gamble_embed(self.amount)
         
         try:
-            await client.message_edit(self.message, embed)
+            await client.interaction_component_message_edit(
+                interaction_event,
+                embed = embed,
+            )
+        except GeneratorExit as err:
+            self._gui_state = GUI_STATE_CANCELLING
+            self.cancel(err)
+            self.waiter.set_result_if_pending(GAME_21_RESULT_IN_GAME_ERROR)
+            raise
+        
         except BaseException as err:
-            self._task_flag = GUI_STATE_CANCELLED
+            self._gui_state = GUI_STATE_CANCELLED
             self.cancel()
             
             if should_render_exception(err):
                 await client.events.error(client, f'{self.__class__.__name__}.__new__', err)
             
             self.waiter.set_result_if_pending(GAME_21_RESULT_IN_GAME_ERROR)
-        
-        if self._task_flag == GUI_STATE_CANCELLING:
-            self._task_flag = GUI_STATE_CANCELLED
-            self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
-            self.cancel()
         else:
-            self._task_flag = GUI_STATE_READY
-            self._timeouter.set_timeout(GAME_21_TIMEOUT)
+            self._gui_state = GUI_STATE_READY
+    
     
     async def _canceller(self, exception):
         client = self.client
         message = self.message
         
-        client.events.reaction_add.remove(message, self)
-        client.events.reaction_delete.remove(message, self)
+        client.slasher.remove_component_interaction_waiter(message, self)
         
-        if self._task_flag == GUI_STATE_SWITCHING_CTX:
+        if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
             # the message is not our, we should not do anything with it.
             return
         
-        self._task_flag = GUI_STATE_CANCELLED
+        self._gui_state = GUI_STATE_CANCELLED
         
         if exception is None:
             if self.render_after:
@@ -1563,12 +1672,41 @@ class Game21PlayerRunner:
             if self.render_after:
                 await self._canceller_render_after()
             else:
-                if self.channel.cached_permissions_for(client).can_manage_messages:
-                    try:
-                        await client.reaction_clear(message)
-                    except BaseException as err:
-                        if should_render_exception(err):
-                            await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
+                interaction_event = self.event
+                if interaction_event is None:
+                    coroutine = client.message_edit(
+                        self.message,
+                        components = GAME_21_ROW_DISABLED,
+                    )
+                
+                else:
+                    if interaction_event.type is InteractionType.application_command:
+                        coroutine = client.interaction_response_message_edit(
+                            interaction_event,
+                            components = GAME_21_ROW_DISABLED,
+                        )
+                    elif interaction_event.type is InteractionType.message_component:
+                        if interaction_event.is_unanswered():
+                            coroutine = client.interaction_component_message_edit(
+                                interaction_event,
+                                components = GAME_21_ROW_DISABLED,
+                            )
+                        else:
+                            coroutine = client.interaction_response_message_edit(
+                                interaction_event,
+                                components = GAME_21_ROW_DISABLED,
+                            )
+                    
+                    else:
+                        return
+                
+                try:
+                    await coroutine
+                except GeneratorExit:
+                    raise
+                except BaseException as err:
+                    if should_render_exception(err):
+                        await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
             return
         
         self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
@@ -1587,48 +1725,73 @@ class Game21PlayerRunner:
         
         timeouter = self._timeouter
         if (timeouter is not None):
+            self._timeouter = None
             timeouter.cancel()
         
         return Task(canceller(self, exception), KOKORO)
     
+    
     async def _canceller_render_after(self):
+        # Do not edit twice
+        self.render_after = False
+        
         client = self.client
-        message = self.message
         embed = self.player.create_after_embed(self.amount)
+        
+        interaction_event = self.event
+        
+        if interaction_event is None:
+            coroutine = client.message_edit(
+                self.message,
+                embed = embed,
+                components = GAME_21_ROW_DISABLED,
+            )
+        
+        else:
+            if interaction_event.type is InteractionType.application_command:
+                coroutine = client.interaction_response_message_edit(
+                    interaction_event,
+                    embed = embed,
+                    components = GAME_21_ROW_DISABLED,
+                )
+            elif interaction_event.type is InteractionType.message_component:
+                if interaction_event.is_unanswered():
+                    coroutine = client.interaction_component_message_edit(
+                        interaction_event,
+                        embed = embed,
+                        components = GAME_21_ROW_DISABLED,
+                    )
+                else:
+                    coroutine = client.interaction_response_message_edit(
+                        interaction_event,
+                        embed = embed,
+                        components = GAME_21_ROW_DISABLED,
+                    )
+            
+            else:
+                return
+        
         try:
-            await client.message_edit(message, embed)
+            await coroutine
+        except GeneratorExit:
+            raise
         except BaseException as err:
             if should_render_exception(err):
                 await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
-        
-        if self.channel.cached_permissions_for(client).can_manage_messages:
-            try:
-                await client.reaction_clear(message)
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
-        else:
-            for emoji in GAME_21_STEP_EMOJIS:
-                try:
-                    await client.reaction_delete_own(message, emoji)
-                except BaseException as err:
-                    if should_render_exception(err):
-                        await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
-                    break
+
 
 def game_21_precheck(client, user, channel, amount, require_guild):
     if user.id in IN_GAME_IDS:
         error_message = 'You are already at a game.'
     elif amount < BET_MIN:
         error_message = f'You must bet at least {BET_MIN} {EMOJI__HEART_CURRENCY.as_emoji}'
-    elif not channel.cached_permissions_for(client).can_add_reactions:
-        error_message = 'I need to have `add reactions` permissions to execute this command.'
     elif require_guild and (not isinstance(channel, ChannelGuildBase)):
         error_message = 'Guild only command.'
     else:
         return
     
     return Embed('Ohoho', error_message, color=GAMBLING_COLOR)
+
 
 async def game_21_postcheck(client, user, channel, amount):
     async with DB_ENGINE.connect() as connector:
@@ -1670,6 +1833,8 @@ async def game_21_single_player(client, event, amount):
         if (embed is not None):
             try:
                 await client.interaction_followup_message_create(event, embed=embed)
+            except GeneratorExit:
+                raise
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_single_player', err)
@@ -1741,13 +1906,46 @@ async def game_21_single_player(client, event, amount):
             player_runner.player.add_done_embed_field(embed)
             player_client.add_done_embed_field(embed)
             
-            if player_runner.message is None:
-                coro = client.message_create(channel, embed=embed)
+            interaction_event = player_runner.event
+            if (interaction_event is None):
+                if player_runner.message is None:
+                    coroutine = client.message_create(
+                        channel,
+                        embed = embed,
+                    )
+                else:
+                    coroutine = client.message_edit(
+                        channel,
+                        embed = embed,
+                        components = GAME_21_ROW_DISABLED,
+                    )
             else:
-                coro = client.message_edit(player_runner.message, embed=embed)
+                if interaction_event.type is InteractionType.application_command:
+                    coroutine = client.interaction_response_message_edit(
+                        interaction_event,
+                        embed = embed,
+                        components = GAME_21_ROW_DISABLED,
+                    )
+                elif interaction_event.type is InteractionType.message_component:
+                    if interaction_event.is_unanswered():
+                        coroutine = client.interaction_component_message_edit(
+                            interaction_event,
+                            embed = embed,
+                            components = GAME_21_ROW_DISABLED,
+                        )
+                    else:
+                        coroutine = client.interaction_response_message_edit(
+                            interaction_event,
+                            embed = embed,
+                            components = GAME_21_ROW_DISABLED,
+                        )
+                else:
+                    return
             
             try:
-                await coro
+                await coroutine
+            except GeneratorExit:
+                raise
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_single_player', err)
@@ -1755,6 +1953,8 @@ async def game_21_single_player(client, event, amount):
             if (player_runner.message is not None) and channel.cached_permissions_for(client).can_manage_messages:
                 try:
                     await client.reaction_clear(player_runner.message)
+                except GeneratorExit:
+                    raise
                 except BaseException as err:
                     if should_render_exception(err):
                         await client.events.error(client, 'game_21_single_player', err)
@@ -1786,6 +1986,8 @@ async def game_21_single_player(client, event, amount):
             
             try:
                 await coroutine
+            except GeneratorExit:
+                raise
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_single_player', err)
@@ -1809,17 +2011,17 @@ async def game_21_single_player(client, event, amount):
 def create_join_embed(users, amount):
     description_parts = [
         'Bet amount: ', str(amount), ' ', EMOJI__HEART_CURRENCY.as_emoji, '\n'
-        'Creator: ', users[0].mention, '\n',
+        'Creator: ', users[0].full_name, '\n',
     ]
     
     if len(users) > 1:
         description_parts.append('\nJoined users:\n')
         for user in users[1:]:
-            description_parts.append(user.mention)
+            description_parts.append(user.full_name)
             description_parts.append('\n')
     
     description_parts.append('\nReact with ')
-    description_parts.append(GAME_21_JOIN_ENTER.as_emoji)
+    description_parts.append(GAME_21_EMOJI_ENTER.as_emoji)
     description_parts.append(' to join.')
     
     description = ''.join(description_parts)
@@ -1831,6 +2033,8 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
         entry_id):
     try:
         private_channel = await client.channel_private_create(user)
+    except GeneratorExit:
+        raise
     except BaseException as err:
         if not isinstance(err, ConnectionError):
             await client.events.error(client, 'game_21_mp_user_joiner', err)
@@ -1841,6 +2045,8 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
         embed = Embed('Ohoho', 'You are already at a game.', color=GAMBLING_COLOR)
         try:
             await client.message_create(private_channel, embed=embed)
+        except GeneratorExit:
+            raise
         except BaseException as err:
             if should_render_exception(err):
                 await client.events.error(client, 'game_21_mp_user_joiner', err)
@@ -1864,6 +2070,8 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
             
             try:
                 await client.message_create(private_channel, embed)
+            except GeneratorExit:
+                raise
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_mp_user_joiner', err)
@@ -1912,6 +2120,8 @@ async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, jo
     
     try:
         await client.message_create(private_channel, embed=embed)
+    except GeneratorExit:
+        raise
     except BaseException as err:
         if should_render_exception(err):
             await client.events.error(client, 'game_21_mp_user_leaver', err)
@@ -1928,13 +2138,18 @@ async def game_21_mp_cancelled(client, user, guild, source_channel, amount, priv
         )
     
     embed = Embed('21 multiplayer game was cancelled.',
-        f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
-        f'Guild: {guild.name}\n'
-        f'Channel: {source_channel.mention}',
-            color=GAMBLING_COLOR)
+        (
+            f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
+            f'Guild: {guild.name}\n'
+            f'Channel: {source_channel.mention}'
+        ),
+        color = GAMBLING_COLOR,
+    )
     
     try:
         await client.message_create(private_channel, embed)
+    except GeneratorExit:
+        raise
     except BaseException as err:
         if should_render_exception(err):
             await client.events.error(client, 'game_21_mp_cancelled', err)
@@ -1950,26 +2165,30 @@ GAME_21_MP_MAX_USERS = 10
 GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'
 
 class Game21JoinGUI:
-    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_tuples', '_timeouter', '_task_flag',
+    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_tuples', '_timeouter', '_gui_state',
         'canceller', 'user_locks', 'joined_user_ids', 'workers', 'guild', 'message_sync_last_state',
-        'message_sync_in_progress', 'message_sync_handle')
+        'message_sync_in_progress', 'message_sync_handle', 'event')
     
-    async def __new__(cls, client, channel, joined_user_tuple, amount, joined_user_ids, guild, event=None):
+    async def __new__(cls, client, channel, joined_user_tuple, amount, joined_user_ids, guild, event):
         waiter = Future(KOKORO)
         
         embed = create_join_embed([joined_user_tuple[0]], amount)
         embed.add_footer(GAME_21_MP_FOOTER)
         
         try:
-            if event is None:
-                message = await client.message_create(channel, embed=embed)
-            else:
-                if not event.is_acknowledged():
-                    await client.interaction_response_message_create(event)
-                message = await client.interaction_followup_message_create(event, embed=embed)
-            for emoji in GAME_21_JOIN_EMOJIS:
-                await client.reaction_add(message, emoji)
+            if not event.is_acknowledged():
+                await client.interaction_application_command_acknowledge(event)
             
+            message = await client.interaction_followup_message_create(
+                event,
+                embed = embed,
+                components = GAME_21_JOIN_ROW_ENABLED,
+            )
+        
+        except GeneratorExit:
+            waiter.set_result_if_pending(GAME_21_RESULT_INITIALIZATION_ERROR)
+            raise
+        
         except BaseException as err:
             if should_render_exception(err):
                 await client.events.error(client, f'{cls.__name__}.__new__', err)
@@ -1991,51 +2210,40 @@ class Game21JoinGUI:
         self.message_sync_last_state = self.joined_tuples.copy()
         self.message_sync_in_progress = False
         self.message_sync_handle = None
+        self.event = event
         
         if message is None:
             self._timeouter = None
             self.canceller = None
-            self._task_flag = GUI_STATE_SWITCHING_CTX
+            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
         else:
             self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
             self.canceller = cls._canceller
-            self._task_flag = GUI_STATE_READY
-            client.events.reaction_add.append(message, self)
-            client.events.reaction_delete.append(message, self)
+            self._gui_state = GUI_STATE_READY
+            
+            client.slasher.add_component_interaction_waiter(message, self)
         
         return self
     
-    async def __call__(self, client, event):
-        if event.user.is_bot:
-            return
+    
+    async def __call__(self, interaction_event):
+        custom_id = interaction_event.interaction.custom_id
         
-        emoji = event.emoji
-        if (emoji not in GAME_21_JOIN_EMOJIS):
-            return
+        client = self.client
+        self.event = interaction_event
         
-        # Do not remove emoji enter emoji if the user is the source one, instead leave.
-        if event.user is not self.joined_tuples[0][0]:
-            if (event.delete_reaction_with(client) == event.DELETE_REACTION_NOT_ADDED):
-                return
-        
-        task_flag = self._task_flag
-        if task_flag != GUI_STATE_READY:
-            if emoji is GAME_21_JOIN_CANCEL:
-                self._task_flag = GUI_STATE_CANCELLING
-            return
-            
-            # ignore GUI_STATE_CANCELLED and GUI_STATE_SWITCHING_CTX
-            return
-        
-        if emoji is GAME_21_JOIN_ENTER:
-            user = event.user
+        if custom_id == GAME_21_CUSTOM_ID_ENTER:
+            user = interaction_event.user
             
             if user.id in self.user_locks:
                 # already doing something.
+                await client.interaction_component_acknowledge(interaction_event)
                 return
             
             joined_tuples = self.joined_tuples
             if user is joined_tuples[0][0]:
+                # Source user cannot join / leave
+                await client.interaction_component_acknowledge(interaction_event)
                 return
             
             for maybe_user, private_channel, entry_id in joined_tuples[1:]:
@@ -2048,6 +2256,7 @@ class Game21JoinGUI:
                 entry_id = -1
             
             if join and (len(joined_tuples) == GAME_21_MP_MAX_USERS):
+                await client.interaction_component_acknowledge(interaction_event)
                 return
             
             self.user_locks.add(user.id)
@@ -2059,6 +2268,8 @@ class Game21JoinGUI:
                 
                 task = Task(coroutine_function(client, user, self.guild, self.channel, self.amount,
                     self.joined_user_ids, private_channel, entry_id), KOKORO)
+                
+                Task(self.do_acknowledge(interaction_event), KOKORO)
                 
                 self.workers.add(task)
                 try:
@@ -2078,14 +2289,15 @@ class Game21JoinGUI:
             finally:
                 self.user_locks.discard(user.id)
             
-            self.maybe_message_sync()
+            self.maybe_message_sync(interaction_event)
             return
         
-        if (event.user is not self.joined_tuples[0][0]):
-            return
-        
-        if emoji is GAME_21_JOIN_START:
-            self._task_flag = GUI_STATE_SWITCHING_CTX
+        if custom_id == GAME_21_CUSTOM_ID_START:
+            if (interaction_event.user is not self.joined_tuples[0][0]):
+                await client.interaction_component_acknowledge(interaction_event)
+                return
+            
+            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
             
             # Wait for all worker to finish
             await self._wait_for_cancellation()
@@ -2094,8 +2306,12 @@ class Game21JoinGUI:
             self.cancel()
             return
         
-        if emoji is GAME_21_JOIN_CANCEL:
-            self._task_flag = GUI_STATE_CANCELLING
+        if custom_id == GAME_21_CUSTOM_ID_CANCEL:
+            if (interaction_event.user is not self.joined_tuples[0][0]):
+                await client.interaction_component_acknowledge(interaction_event)
+                return
+            
+            self._gui_state = GUI_STATE_CANCELLING
             
             # Wait for all workers to finish
             await self._wait_for_cancellation()
@@ -2108,19 +2324,18 @@ class Game21JoinGUI:
         client = self.client
         message = self.message
         
-        client.events.reaction_add.remove(message, self)
-        client.events.reaction_delete.remove(message, self)
+        client.slasher.remove_component_interaction_waiter(message, self)
         
         message_sync_handle = self.message_sync_handle
         if (message_sync_handle is not None):
             self.message_sync_handle = None
             message_sync_handle.cancel()
         
-        if self._task_flag == GUI_STATE_SWITCHING_CTX:
+        if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
             # the message is not our, we should not do anything with it.
             return
         
-        self._task_flag = GUI_STATE_CANCELLED
+        self._gui_state = GUI_STATE_CANCELLED
         
         if exception is None:
             return
@@ -2131,19 +2346,50 @@ class Game21JoinGUI:
         
         if isinstance(exception, TimeoutError):
             self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_TIMEOUT)
-            if self.channel.cached_permissions_for(client).can_manage_messages:
-                try:
-                    await client.reaction_clear(message)
-                except BaseException as err:
-                    if should_render_exception(err):
-                        await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
-            return
+            
+            interaction_event = self.event
+            if interaction_event is None:
+                coroutine = client.message_edit(
+                    self.message,
+                    components = GAME_21_JOIN_ROW_DISABLED,
+                )
+            
+            else:
+                if interaction_event.type is InteractionType.application_command:
+                    coroutine = client.interaction_response_message_edit(
+                        interaction_event,
+                        components = GAME_21_JOIN_ROW_DISABLED,
+                    )
+                elif interaction_event.type is InteractionType.message_component:
+                    if interaction_event.is_unanswered():
+                        coroutine = client.interaction_component_message_edit(
+                            interaction_event,
+                            components = GAME_21_JOIN_ROW_DISABLED,
+                        )
+                    else:
+                        coroutine = client.interaction_response_message_edit(
+                            interaction_event,
+                            components = GAME_21_JOIN_ROW_DISABLED,
+                        )
+                
+                else:
+                    return
+            
+            try:
+                await coroutine
+            except GeneratorExit:
+                raise
+            except BaseException as err:
+                if should_render_exception(err):
+                    await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
+        
         
         self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
         timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.cancel()
-        
+    
+    
     def cancel(self, exception=None):
         canceller = self.canceller
         if canceller is None:
@@ -2156,7 +2402,7 @@ class Game21JoinGUI:
             timeouter.cancel()
         
         return Task(canceller(self, exception), KOKORO)
-
+    
     
     async def _wait_for_cancellation(self):
         workers = self.workers
@@ -2167,43 +2413,85 @@ class Game21JoinGUI:
             for future in chain(done, pending):
                 future.cancel()
     
-    def maybe_message_sync(self):
-        if not self.message_sync_in_progress:
+    def maybe_message_sync(self, interaction_event):
+        if self.message_sync_in_progress:
+            if interaction_event.is_unanswered():
+                Task(self.do_acknowledge(interaction_event), KOKORO)
+        
+        else:
             self.message_sync_in_progress = True
             Task(self.do_message_sync(), KOKORO)
     
-    def call_message_sync(self):
-        Task(self.do_message_sync(), KOKORO)
+    async def do_acknowledge(self, interaction_event):
+        client = self.client
+        try:
+            await client.interaction_component_acknowledge(interaction_event)
+        except GeneratorExit:
+            raise
+        
+        except BaseException as err:
+            if should_render_exception(err):
+                await client.events.error(client, f'{self.__class__.__name__}.do_acknowledge', err)
     
     async def do_message_sync(self):
-        self.message_sync_handle = None
-        
-        if (self._task_flag != GUI_STATE_READY) or (self.joined_tuples == self.message_sync_last_state):
-            self.message_sync_in_progress = False
-            return
-        
-        self.message_sync_last_state = self.joined_tuples.copy()
-        
-        embed = create_join_embed([item[0] for item in self.joined_tuples], self.amount)
-        embed.add_footer(GAME_21_MP_FOOTER)
-        
-        task = Task(self.client.message_edit(self.message, embed=embed), KOKORO)
-        self.workers.add(task)
-        try:
+        while True:
+            if (self._gui_state != GUI_STATE_READY) or (self.joined_tuples == self.message_sync_last_state):
+                self.message_sync_in_progress = False
+                return
+            
+            self.message_sync_last_state = self.joined_tuples.copy()
+            
+            embed = create_join_embed([item[0] for item in self.joined_tuples], self.amount)
+            embed.add_footer(GAME_21_MP_FOOTER)
+            
+            if len(self.joined_tuples) >= GAME_21_MP_MAX_USERS:
+                components = GAME_21_JOIN_ROW_FULL
+            else:
+                components = GAME_21_JOIN_ROW_ENABLED
+                
+            client = self.client
+            interaction_event = self.event
+            if interaction_event is None:
+                coroutine = client.message_edit(
+                    self.message,
+                    embed = embed,
+                    components = components,
+                )
+            else:
+                if interaction_event.type is InteractionType.application_command:
+                    coroutine = client.interaction_response_message_edit(
+                        interaction_event,
+                        embed = embed,
+                        components = components,
+                    )
+                elif interaction_event.type is InteractionType.message_component:
+                    if interaction_event.is_unanswered():
+                        coroutine = client.interaction_component_message_edit(
+                            interaction_event,
+                            embed = embed,
+                            components = components,
+                        )
+                    else:
+                        coroutine = client.interaction_response_message_edit(
+                            interaction_event,
+                            embed = embed,
+                            components = components,
+                        )
+                else:
+                    return
+            
+            task = Task(coroutine, KOKORO)
+            self.workers.add(task)
             try:
-                await task
-            except BaseException as err:
-                if should_render_exception(err):
-                    client = self.client
-                    await client.events.error(client, f'{self.__class__.__name__}.__new__', err)
-        finally:
-            self.workers.discard(task)
-        
-        if (self._task_flag != GUI_STATE_READY) or (self.joined_tuples == self.message_sync_last_state):
-            self.message_sync_in_progress = False
-            return
-        
-        self.message_sync_handle = KOKORO.call_later(1.0, self.__class__.call_message_sync, self)
+                try:
+                    await task
+                except GeneratorExit:
+                    raise
+                except BaseException as err:
+                    if should_render_exception(err):
+                        await client.events.error(client, f'{self.__class__.__name__}.do_message_sync', err)
+            finally:
+                self.workers.discard(task)
 
 
 async def game_21_multi_player(client, event, amount):
@@ -2222,24 +2510,34 @@ async def game_21_multi_player(client, event, amount):
         
         try:
             private_channel = await client.channel_private_create(user)
+        except GeneratorExit:
+            raise
+        
         except BaseException as err:
             if not isinstance(err, ConnectionError):
                 await client.events.error(client, 'game_21_multi_player', err)
             
             return
         
-        embed = Embed('21 multiplayer game created.',
-            f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
-            f'Guild: {guild.name}\n'
-            f'Channel: {channel.mention}',
-                color=GAMBLING_COLOR)
+        embed = Embed(
+            '21 multiplayer game created.',
+            (
+                f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
+                f'Guild: {guild.name}\n'
+                f'Channel: {channel.mention}'
+            ),
+            color = GAMBLING_COLOR
+        )
         
         try:
             await client.message_create(private_channel, embed)
+        except GeneratorExit:
+            raise
+        
+        except ConnectionError:
+            return
+        
         except BaseException as err:
-            if isinstance(err, ConnectionError):
-                return
-            
             if (not isinstance(err, DiscordException)) or (err.code != ERROR_CODES.cannot_message_user):
                 await client.events.error(client, 'game_21_multi_player', err)
                 return
@@ -2252,22 +2550,27 @@ async def game_21_multi_player(client, event, amount):
             embed = Embed('Error', 'I cannot send private message to you.', color=GAMBLING_COLOR)
             
             try:
-                await client.interaction_followup_message_create(event, embed=embed)
+                await client.interaction_response_message_edit(event, embed=embed)
+            except GeneratorExit:
+                raise
+            
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_multi_player', err)
             return
         
-        join_gui = await Game21JoinGUI(client, channel, (user, private_channel, entry_id), amount, joined_user_ids, guild,
-            event=event)
+        join_gui = await Game21JoinGUI(client, channel, (user, private_channel, entry_id), amount, joined_user_ids,
+            guild, event)
+        
         game_state = await join_gui.waiter
         message = join_gui.message
+        event = join_gui.event
         
         if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
             embed = Embed('Timeout', 'Timeout occurred, the hearts were refund', color=GAMBLING_COLOR)
             
             try:
-                await client.message_edit(message, embed=embed)
+                await client.interaction_response_message_edit(event, embed=embed)
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_multi_player', err)
@@ -2287,9 +2590,39 @@ async def game_21_multi_player(client, event, amount):
         if game_state == GAME_21_RESULT_CANCELLED_BY_USER:
             game_21_mp_notify_cancellation(client, join_gui.joined_tuples, amount, channel, guild, joined_user_ids)
             
-            embed = Embed('Cancelled', 'The game has been cancelled, the hearts are refund.', color=GAMBLING_COLOR)
+            embed = Embed(
+                'Cancelled',
+                'The game has been cancelled, the hearts are refund.',
+                color = GAMBLING_COLOR,
+            )
+            
+            if event.type is InteractionType.application_command:
+                coroutine = client.interaction_response_message_edit(
+                    event,
+                    embed = embed,
+                    components = GAME_21_JOIN_ROW_DISABLED,
+                )
+            elif event.type is InteractionType.message_component:
+                if event.is_unanswered():
+                    coroutine = client.interaction_component_message_edit(
+                        event,
+                        embed = embed,
+                        components = GAME_21_JOIN_ROW_DISABLED,
+                    )
+                else:
+                    coroutine = client.interaction_response_message_edit(
+                        event,
+                        embed = embed,
+                        components = GAME_21_JOIN_ROW_DISABLED,
+                    )
+            
+            else:
+                return
+            
             try:
-                await client.message_edit(message, embed=embed)
+                await coroutine
+            except GeneratorExit:
+                raise
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_multi_player', err)
@@ -2299,10 +2632,38 @@ async def game_21_multi_player(client, event, amount):
         if len(joined_tuples) == 1:
             await game_21_refund(joined_tuples[0][2], amount)
             
-            embed = Embed('RIP', 'Starting the game alone, is just sad.', color=GAMBLING_COLOR)
+            embed = Embed(
+                'RIP',
+                'Starting the game alone, is just sad.',
+                color = GAMBLING_COLOR,
+            )
+            
+            if event.type is InteractionType.application_command:
+                coroutine = client.interaction_response_message_edit(
+                    event,
+                    embed = embed,
+                    components = GAME_21_JOIN_ROW_DISABLED,
+                )
+            elif event.type is InteractionType.message_component:
+                if event.is_unanswered():
+                    coroutine = client.interaction_component_message_edit(
+                        event,
+                        embed = embed,
+                        components = GAME_21_JOIN_ROW_DISABLED,
+                    )
+                else:
+                    coroutine = client.interaction_response_message_edit(
+                        event,
+                        embed = embed,
+                        components = GAME_21_JOIN_ROW_DISABLED,
+                    )
+            else:
+                return
             
             try:
-                await client.message_edit(message, embed=embed)
+                await coroutine
+            except GeneratorExit:
+                raise
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_multi_player', err)
@@ -2310,19 +2671,52 @@ async def game_21_multi_player(client, event, amount):
         
         total_bet_amount = len(joined_tuples)*amount
         # Update message
-        description_parts = ['Total bet amount: ', str(total_bet_amount), EMOJI__HEART_CURRENCY.as_emoji,
-            '\n\nPlayers:\n',]
+        description_parts = [
+            'Total bet amount: ',
+            str(total_bet_amount),
+            EMOJI__HEART_CURRENCY.as_emoji,
+            '\n\nPlayers:\n',
+        ]
         
         for tuple_user, tuple_channel, entry_id in joined_tuples:
-            description_parts.append(tuple_user.mention)
+            description_parts.append(tuple_user.full_name)
             description_parts.append('\n')
         
         del description_parts[-1]
         
         description = ''.join(description_parts)
-        embed = Embed('Game 21 in progress', description, color=GAMBLING_COLOR)
+        embed = Embed(
+            'Game 21 in progress',
+            description,
+            color = GAMBLING_COLOR
+        )
+        
+        if event.type is InteractionType.application_command:
+            coroutine = client.interaction_response_message_edit(
+                event,
+                embed = embed,
+                components = GAME_21_JOIN_ROW_DISABLED,
+            )
+        elif event.type is InteractionType.message_component:
+            if event.is_unanswered():
+                coroutine = client.interaction_component_message_edit(
+                    event,
+                    embed = embed,
+                    components = GAME_21_JOIN_ROW_DISABLED,
+                )
+            else:
+                coroutine = client.interaction_response_message_edit(
+                    event,
+                    embed = embed,
+                    components = GAME_21_JOIN_ROW_DISABLED,
+                )
+        else:
+            return
+    
         try:
-            await client.message_edit(message, embed=embed)
+            await coroutine
+        except GeneratorExit:
+            raise
         except BaseException as err:
             game_21_mp_notify_cancellation(client, joined_tuples, amount, channel, guild, joined_user_ids)
             if should_render_exception(err):
@@ -2433,12 +2827,17 @@ async def game_21_multi_player(client, event, amount):
                         )
                     )
         
-        description_parts = ['Total bet amount: ', str(total_bet_amount), EMOJI__HEART_CURRENCY.as_emoji, '\n\n']
+        description_parts = [
+            'Total bet amount: ',
+            str(total_bet_amount),
+            EMOJI__HEART_CURRENCY.as_emoji,
+            '\n\n',
+        ]
         
         if winners:
             description_parts.append('Winners:\n')
             for user in winners:
-                description_parts.append(user.mention)
+                description_parts.append(user.full_name)
                 description_parts.append('\n')
             
             description_parts.append('\n')
@@ -2446,7 +2845,7 @@ async def game_21_multi_player(client, event, amount):
         if losers:
             description_parts.append('Losers:\n')
             for user in losers:
-                description_parts.append(user.mention)
+                description_parts.append(user.full_name)
                 description_parts.append('\n')
         
         if description_parts[-1] == '\n':
@@ -2458,11 +2857,37 @@ async def game_21_multi_player(client, event, amount):
         for runner in waiters_to_runners.values():
             runner.player.add_done_embed_field(embed)
         
+
+        if event.type is InteractionType.application_command:
+            coroutine = client.interaction_response_message_edit(
+                event,
+                embed = embed,
+                components = GAME_21_JOIN_ROW_DISABLED,
+            )
+        elif event.type is InteractionType.message_component:
+            if event.is_unanswered():
+                coroutine = client.interaction_component_message_edit(
+                    event,
+                    embed = embed,
+                    components = GAME_21_JOIN_ROW_DISABLED,
+                )
+            else:
+                coroutine = client.interaction_response_message_edit(
+                    event,
+                    embed = embed,
+                    components = GAME_21_JOIN_ROW_DISABLED,
+                )
+        else:
+            return
+        
         try:
-            await client.message_edit(message, embed=embed)
+            await coroutine
+        except GeneratorExit:
+            raise
         except BaseException as err:
             if should_render_exception(err):
                 await client.events.error(client, 'game_21_multi_player', err)
+        
         return
     
     finally:

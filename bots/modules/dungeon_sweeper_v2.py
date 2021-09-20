@@ -323,7 +323,7 @@ RULES_HELP = Embed('Rules of Dungeon sweeper',
     f'{EMOJI_WEST:e}{EMOJI_REIMU:e}{EMOJI_EAST:e}{EMOJI_RESET:e}\n'
     f'{EMOJI_NOTHING:e}{EMOJI_SOUTH:e}{EMOJI_NOTHING:e}{EMOJI_CANCEL:e}\n'
     f'\n'
-    f'You can show push boxes by moving towards them, but you cannot push more at the same time time or push into the '
+    f'You can push boxes by moving towards them, but you cannot push more at the same time or push into the '
     f'wall:\n'
     f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
     f'{EMOJI_EAST:e}'

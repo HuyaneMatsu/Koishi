@@ -20,7 +20,6 @@ if MARISA_MODE:
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,
         category_name_rule = category_name_rule,
-        intents = IntentFlag(0).update_by_keys(guilds=True, guild_users=True, guild_messages=True, guild_reactions=True)
     )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
