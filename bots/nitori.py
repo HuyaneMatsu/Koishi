@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
 from hata import Client, Embed, parse_emoji, sleep, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, \
-    DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji
+    DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji, CHANNEL_TYPES
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
     wait_for_component_interaction, iter_component_interactions, Select, Option
 
@@ -98,6 +98,28 @@ async def guild_icon(event,
     
     color = hash_value&0xFFFFFF
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
+
+# command end
+# command start slash cake-love
+
+EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def cake_love(
+    cake_type: ('str', 'Please define a cake type to pick from.')
+):
+    return f'Hmmm, yes, I love {cake_type} {EMOJI_CAKE:e} as well.'
+
+CAKE_NAMES = ['butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless',
+    'unbaked flourless', 'carrot', 'red velvet', ]
+
+@cake_love.autocomplete('cake_type') # Define which parameter we want to auto-complete.
+async def autocomplete_cake_type(value):
+    if value is None:
+        return CAKE_NAMES
+    
+    value = value.lower()
+    return [cake_name for cake_name in CAKE_NAMES if cake_name.startswith(value)]
 
 # command end
 # command start slash roll
@@ -453,6 +475,25 @@ async def remilia(client):
 @Nitori.interactions(is_global=True)
 async def about(client):
     return Embed('about', client.application.description, color=0x508CB5).add_thumbnail(client.avatar_url)
+
+# command end
+# command start slash thread-channel-name-length
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def thread_channel_name_length(
+    channel: ('channel_group_thread', 'Select a thread channel.')
+):
+    """Returns the selected thread channel's name's length."""
+    return len(channel.name)
+
+# command end
+# command start slash text-channel-name-length
+
+@Nitori.interactions(guild=TEST_GUILD)
+@configure_parameter('channel', 'channel', 'Select a text channel', channel_types=[CHANNEL_TYPES.guild_text])
+async def text_channel_name_length(channel):
+    """Returns the selected text channel's name's length."""
+    return len(channel.name)
 
 # command end
 # command start context avatar
@@ -1264,6 +1305,18 @@ class InteractionCommandSource:
         
         yield InteractionResponse(page, components=components)
 
+class AutoCompleteInteractionCommandSource:
+    __slots__ = ('command_names', )
+    def __init__(self, command_type_commands):
+        self.command_names = sorted(command_type_commands)
+    
+    async def __call__(self, value):
+        if value is None:
+            return self.command_names[:20]
+        
+        value = value.lower()
+        return [command_name for command_name in self.command_names if command_name.startswith(value)]
+
 
 SOURCE = Nitori.interactions(None,
     name = 'source',
@@ -1274,12 +1327,13 @@ SOURCE = Nitori.interactions(None,
 for command_type, command_type_commands in COLLECTED_COMMANDS.items():
     
     SOURCE.interactions(
-        configure_parameter(
-            'command_name',
-            sorted(command_type_commands),
-            f'Select a {command_type} command to show',
-        )(InteractionCommandSource(command_type, command_type_commands)),
-        name=command_type,
+        configure_parameter('command_name', 'str', f'Select a {command_type} command to show')(
+            InteractionCommandSource(command_type, command_type_commands)
+        ),
+        name = command_type,
+    ).autocomplete(
+        'command_name',
+        AutoCompleteInteractionCommandSource(command_type_commands)
     )
 
 @Nitori.interactions(custom_id=re.compile('source\.([a-z\-]+)\.([a-z\-]+)\.(_|[0-9]+)'))

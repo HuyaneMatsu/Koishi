@@ -1014,23 +1014,6 @@ async def some_channel(channel):
     return repr(channel)
 
 
-CAKE_EMOJI = BUILTIN_EMOJIS['cake']
-
-@Marisa.interactions(guild = GUILD__NEKO_DUNGEON,)
-async def value_autocomplete(
-    value : ('mentionable', 'select a role'),
-):
-    return repr(number)
-
-@value_autocomplete.autocomplete('value')
-async def auto_complete_role(event, value):
-    return {
-        role.name: role.id
-        for role in event.guild.role_list
-        if (value is None) or role.name.startswith(value)
-    }
-
-
 @Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
 async def register_autocomplete(client, event):
     if not client.is_owner(event.user):
@@ -1048,7 +1031,7 @@ async def register_autocomplete(client, event):
                     ApplicationCommandOption(
                         'autocomplete',
                         'Wont be complete',
-                        ApplicationCommandOptionType.string,
+                        ApplicationCommandOptionType.role,
                         autocomplete = True,
                     ),
                 ),
@@ -1059,3 +1042,23 @@ async def register_autocomplete(client, event):
     await client.application_command_guild_create(GUILD__NEKO_DUNGEON, application_command)
 
 
+AUTO_SUB = Marisa.interactions(
+    None,
+    name = 'auto-sub',
+    description = 'auto everything.',
+    guild = GUILD__NEKO_DUNGEON,
+)
+
+@AUTO_SUB.interactions
+async def auto_sub(
+    value: ('str', 'some value')
+):
+    """Auto-sub"""
+    return value
+
+@auto_sub.autocomplete('value')
+async def try_auto_complete(value):
+    if value is None:
+        value = 'none'
+    
+    return [value, 'try']
