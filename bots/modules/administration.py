@@ -7,7 +7,7 @@ from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
 
-from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER
+from bot_utils.constants import ROLE__NEKO_DUNGEON__TESTER
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
 

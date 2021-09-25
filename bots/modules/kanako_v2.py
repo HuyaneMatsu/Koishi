@@ -8,7 +8,7 @@ from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, Inval
 
 from hata.ext.slash import abort, Row, Button, ButtonStyle, InteractionResponse
 
-from bot_utils.shared import PATH__KOISHI, GUILD__STORAGE, GUILD__NEKO_DUNGEON
+from bot_utils.constants import PATH__KOISHI, GUILD__STORAGE, GUILD__NEKO_DUNGEON
 from bot_utils.tools import Pagination10step
 from PIL import Image as PIL
 

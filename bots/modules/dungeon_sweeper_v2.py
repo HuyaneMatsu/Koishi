@@ -15,7 +15,7 @@ from sqlalchemy.sql import select
 from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, user_common_model, USER_COMMON_TABLE, ds_v2_result_model, \
     DS_V2_RESULT_TABLE, get_create_common_user_expression
 
-from bot_utils.shared import PATH__KOISHI, GUILD__NEKO_DUNGEON
+from bot_utils.constants import PATH__KOISHI, GUILD__NEKO_DUNGEON
 
 DUNGEON_SWEEPER_COLOR = Color(0xa000c4)
 DUNGEON_SWEEPER_GAMES = {}

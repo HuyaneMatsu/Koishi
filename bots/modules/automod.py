@@ -3,60 +3,45 @@ from re import escape as re_escape
 
 from hata import Client, BUILTIN_EMOJIS, ChannelThread, Task, KOKORO, WaitTillAll
 
-from bot_utils.shared import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR
+from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR
 
 Satori : Client
 
-DEFAULT_REPLACE_VALUE = BUILTIN_EMOJIS['plunger'].as_emoji
-
 FILTERS = (
-    (
-        'dpy',
-        'd.py',
-        'd py',
-        'd_py',
-        'd!py',
-        'discordpy',
-        'discord.py',
-        'discord py',
-        'discord_py',
-        'discord!py',
-        'discord.ext',
-        'discordr.py',
-        'discord\'s py',
-        'dp.y',
-        'py.discord',
-        'D¡\$€0rd.p¥',
-        'discord-py',
-        'd-py',
-    ),
-    BUILTIN_EMOJIS['poop'].as_emoji,
-), (
-    (
-        'danny',
-        'raptz',
-        'rapptz',
-        'raprz',
-    ),
-    BUILTIN_EMOJIS['rat'].as_emoji,
-), (
-    (
-        'pycord',
-        'py!cord',
-        'py cord',
-        'nextcord',
-        'pycord-development',
-        'discord-interactions',
-        'pycord development',
-        'discord interactions',
-    ),
-    BUILTIN_EMOJIS['eggplant'].as_emoji,
-), (
-    (
-        'migrate',
-        'migration',
-    ),
-    BUILTIN_EMOJIS['service_dog'].as_emoji,
+    'dpy',
+    'd.py',
+    'd py',
+    'd_py',
+    'd!py',
+    'discordpy',
+    'discord.py',
+    'discord py',
+    'discord_py',
+    'discord!py',
+    'discord.ext',
+    'discordr.py',
+    'discord\'s py',
+    'dp.y',
+    'py.discord',
+    'D¡\$€0rd.p¥',
+    'discord-py',
+    'd-py',
+    'danny',
+    'raptz',
+    'rapptz',
+    'raprz',
+    'pycord',
+    'py!cord',
+    'py cord',
+    'nextcord',
+    'pycord-development',
+    'discord-interactions',
+    'pycord development',
+    'discord interactions',
+    'discord-ext-views',
+    'ditto',
+    'migrate',
+    'migration',
 )
 
 def trie_node_sort_key(node):
@@ -148,21 +133,15 @@ class TrieNode:
 
 
 def build_auto_mod():
-    transformations = {}
-    for words, translation in FILTERS:
-        for word in words:
-            transformations[word.lower()] = translation
-    
     node = TrieNode(None)
-    for words, translation in FILTERS:
-        for word in words:
-            node.add(word)
+    for word in FILTERS:
+        node.add(word)
     
     regex_pattern = re.compile(node.build(), re.I|re.M|re.S|re.U,)
     
-    return transformations, regex_pattern
+    return regex_pattern
 
-TRANSFORMATIONS, FILTER = build_auto_mod()
+FILTER = build_auto_mod()
 
 class Replacer:
     __slots__ = ('called', )
@@ -172,9 +151,7 @@ class Replacer:
     
     def __call__(self, regex_match):
         self.called = True
-        content = regex_match.group(0)
-        content = content.lower()
-        return TRANSFORMATIONS.get(content, DEFAULT_REPLACE_VALUE)
+        return 'meow'
 
 
 @Satori.events

@@ -9,7 +9,7 @@ from config import HATA_PATH
 from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep, Embed, WaitTillAll
 from hata.ext.command_utils import wait_for_message, Pagination
 
-from .shared import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
+from .constants import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
 
 CHUNK_SIZE = 128*1024 # 128 KB
 
@@ -79,10 +79,11 @@ class check_any:
         self.partner = partner
     
     def __call__(self, message):
-        if message.author == self.partner:
+        if message.author is self.partner:
             return True
         
         return False
+
 
 INITIAL_MESSAGE = 'message_initial'
 REQUEST_APPROVED = 'message_approved'
@@ -171,10 +172,25 @@ async def receive_sync(client, partner):
                     return
                 
                 content = message.content
+                if content is None:
+                    continue
+                
                 if content == SYNC_DONE:
                     break
                 
-                path_full, file_name = content.split(':')
+                if content == INITIAL_MESSAGE:
+                    continue
+                
+                split = content.split(':')
+                if len(split) != 2:
+                    await client.message_create(
+                        CHANNEL__SYSTEM__SYNC,
+                        f'Could not split content: {content!r}',
+                    )
+                    continue
+                
+                path_full, file_name = split
+                
                 path_parts = path_full.split('.')
                 if not path_parts:
                     sys.stderr.write('Empty content received, aborting sync.\n')

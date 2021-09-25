@@ -164,14 +164,14 @@ class Channeller:
         elif len(pairs) < 3:
             for pair in pairs:
                 channel = pair[0]
-                channel.message_keep_limit = channel.MESSAGE_KEEP_LIMIT
+                channel.message_keep_limit = 10
                 del CHANNELINGS[channel.id]
         else:
             for index, pair in enumerate(pairs):
                 if pair[0] is channel:
                     del pairs[index]
                     break
-            channel.message_keep_limit = channel.MESSAGE_KEEP_LIMIT
+            channel.message_keep_limit = 10
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
             event_3.remove(channel, editer)
@@ -180,7 +180,7 @@ class Channeller:
 
         for pair in pairs:
             channel = pair[0]
-            channel.message_keep_limit = channel.MESSAGE_KEEP_LIMIT
+            channel.message_keep_limit = 10
             event_1.remove(channel, self)
             event_2.remove(channel, deleter)
             event_3.remove(channel, editer)

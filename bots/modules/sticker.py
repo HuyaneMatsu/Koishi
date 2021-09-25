@@ -5,7 +5,7 @@ from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STIC
     future_or_timeout, Task, is_url
 from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row
 from bot_utils.models import DB_ENGINE, sticker_counter_model, STICKER_COUNTER_TABLE
-from bot_utils.shared import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__EMOJI_MANAGER
+from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__EMOJI_MANAGER
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import func as alchemy_function, and_, distinct

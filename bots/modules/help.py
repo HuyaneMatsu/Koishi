@@ -3,12 +3,14 @@ from functools import partial as partial_func
 from platform import platform as get_platform
 from os.path import join as join_paths, isdir as is_folder, isfile as is_file
 from os import listdir as list_directory
+from time import perf_counter
+from random import choice, random
 
 from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elapsed_time, BUILTIN_EMOJIS, __package__
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.slash import InteractionResponse, Button, Row
 
-from bot_utils.shared import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNGEON, GUILD__NEKO_DUNGEON, \
+from bot_utils.constants import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNGEON, GUILD__NEKO_DUNGEON, \
     LINK__HATA_DOCS, LINK__PASTE, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__NEKO_DUNGEON__ELEVATED, \
     ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH, ROLE__NEKO_DUNGEON__NSFW_ACCESS, \
     ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT, \
@@ -213,18 +215,48 @@ KOISHI_HEADER = (
     '```'
 )
 
+
+KOISHI_HEADER_EASTER_EGG = (
+    '```\n'
+    ' _____ __    ___ \n'
+    '|  ___/  |  /   |\n'
+    '|___ \`| | / /| |\n'
+    '    \ \| |/ /_| |\n'
+    '/\__/ /| |\___  |\n'
+    '\____/\___/   |_/\n'
+    '```'
+)
+
+def get_koishi_header():
+    if random() < 0.01:
+        header = KOISHI_HEADER
+    else:
+        header = KOISHI_HEADER_EASTER_EGG
+    
+    return header
+
+
 def add_user_footer(embed, user):
     return embed.add_footer(
         f'Requested by {user.full_name}',
         icon_url = user.avatar_url,
     )
 
+KOISHI_JOKES = (
+    ('Shrimps', 'fried'),
+    ('Apples', 'peeled'),
+    ('Okuu', 'beatboxing'),
+    ('Fishing rods', 'stolen'),
+    ('Orin', 'dancing'),
+    ('Satori', 'why.mp4'),
+)
+
 @SLASH_CLIENT.interactions(is_global=True)
 async def about(client, event):
     """My loli secret. Simpers only!"""
     embed = Embed(
         None,
-        KOISHI_HEADER,
+        get_koishi_header(),
         color = COLOR__KOISHI_HELP,
         timestamp = event.created_at,
     ).add_author(
@@ -316,12 +348,14 @@ async def about(client, event):
                 inline = True
             )
     
+    field_title, field_value = choice(KOISHI_JOKES)
+    
     embed.add_field(
-        'Shrimps',
+        field_title,
         (
-            '```\n'
-            'fried\n'
-            '```'
+            f'```\n'
+            f'{field_value}\n'
+            f'```'
         ),
     ).add_field(
         'Guild count',
@@ -377,7 +411,7 @@ CATEGORIES = (
     ), (
         'Anime',
         EMOJI_PILL,
-        ('anime', 'character', 'fine-anime', 'find-character', 'find-manga', 'manga',),
+        ('anime', 'character', 'find-anime', 'find-character', 'find-manga', 'manga',),
     ), (
         'Actions',
         EMOJI_MASKS,
@@ -442,6 +476,7 @@ def build_category_into(extend, category_name, emoji, command_names):
     
     return extend
 
+
 def build_command_list_embed():
     length = len(CATEGORIES)
     
@@ -485,6 +520,37 @@ async def help_(client, event):
     embed = COMMAND_LIST_EMBED.copy()
     add_user_footer(embed, event.user)
     return embed
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def ping(client, event):
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    delay = (perf_counter()-start)*1000.0
+    
+    yield add_user_footer(
+        Embed(
+            'Ping',
+        ).add_field(
+            'Acknowledge latency',
+            (
+                f'```\n'
+                f'{delay:.0f} ms\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Gateway latency',
+            (
+                f'```\n'
+                f'{client.gateway.latency*1000.:.0f} ms\n'
+                f'```'
+            ),
+            inline = True,
+        ),
+        event.user,
+    )
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)

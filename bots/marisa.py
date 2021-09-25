@@ -16,9 +16,10 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
     MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, cchunkify, \
     ApplicationCommandPermissionOverwriteTargetType, ClientWrapper, INTERACTION_RESPONSE_TYPES, ComponentType, \
-    ButtonStyle, Emoji, Role, StickerType, StickerFormat, ZEROUSER, GUILDS
-from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, wait_for_component_interaction, \
-    Button, Row, iter_component_interactions, configure_parameter, Select, Option
+    ButtonStyle, Emoji, Role, StickerType, StickerFormat, ZEROUSER, GUILDS, ApplicationCommandOptionType, \
+    ApplicationCommandOption, ApplicationCommand
+from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, \
+    wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIBRARY_USER_AGENT
@@ -28,8 +29,9 @@ from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import COLOR__MARISA_HELP, command_error, GUILD__NEKO_DUNGEON, \
-    CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, ROLE__NEKO_DUNGEON__TESTER
+from bot_utils.constants import COLOR__MARISA_HELP, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, \
+    ROLE__NEKO_DUNGEON__TESTER
+from bot_utils.utils import command_error
 from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter_v2 import Interpreter
 from bot_utils.tools import choose, Cell
@@ -47,7 +49,13 @@ def marisa_help_embed_postprocessor(command_context, embed):
     embed.add_thumbnail(command_context.client.avatar_url)
 
 
-Marisa.commands(SubterraneanHelpCommand(embed_postprocessor=marisa_help_embed_postprocessor), name='help', category='HELP')
+Marisa.commands(
+    SubterraneanHelpCommand(
+        embed_postprocessor = marisa_help_embed_postprocessor,
+    ),
+    name = 'help',
+    category = 'HELP',
+)
 
 @Marisa.command_processor.error
 async def command_error_handler(ctx, exception):
@@ -1004,3 +1012,50 @@ async def thread_only(
 @configure_parameter('channel', 'channel', 'channel', channel_types=[0, 4])
 async def some_channel(channel):
     return repr(channel)
+
+
+CAKE_EMOJI = BUILTIN_EMOJIS['cake']
+
+@Marisa.interactions(guild = GUILD__NEKO_DUNGEON,)
+async def value_autocomplete(
+    value : ('mentionable', 'select a role'),
+):
+    return repr(number)
+
+@value_autocomplete.autocomplete('value')
+async def auto_complete_role(event, value):
+    return {
+        role.name: role.id
+        for role in event.guild.role_list
+        if (value is None) or role.name.startswith(value)
+    }
+
+
+@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+async def register_autocomplete(client, event):
+    if not client.is_owner(event.user):
+        abort('owner only')
+    
+    application_command = ApplicationCommand(
+        'auto-sub-command',
+        'Auto everything.',
+        options = [
+            ApplicationCommandOption(
+                'sub-command',
+                'Some sub command.',
+                ApplicationCommandOptionType.sub_command,
+                options = (
+                    ApplicationCommandOption(
+                        'autocomplete',
+                        'Wont be complete',
+                        ApplicationCommandOptionType.string,
+                        autocomplete = True,
+                    ),
+                ),
+            ),
+        ]
+    )
+    
+    await client.application_command_guild_create(GUILD__NEKO_DUNGEON, application_command)
+
+

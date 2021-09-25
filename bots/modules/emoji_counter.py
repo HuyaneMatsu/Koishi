@@ -11,7 +11,7 @@ from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, emoji_counter_model, EMOJI_COUNTER_TABLE, sticker_counter_model, \
     STICKER_COUNTER_TABLE
-from bot_utils.shared import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__EMOJI_MANAGER
+from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__EMOJI_MANAGER
 
 Satori: Client
 SLASH_CLIENT: Client

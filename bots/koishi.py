@@ -8,7 +8,7 @@ from hata.discord.utils import sanitise_mention_escaper
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, EmojiDeleteWaitfor, \
     RoleEditWaitfor
-from bot_utils.shared import GUILD__NEKO_DUNGEON, CHANNEL__SYSTEM__SYNC, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
+from bot_utils.constants import GUILD__NEKO_DUNGEON, CHANNEL__SYSTEM__SYNC, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
 
 
 

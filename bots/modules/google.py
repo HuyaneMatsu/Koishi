@@ -1,7 +1,7 @@
 from time import monotonic
 
 from config import GOOGLE_API_KEYS
-from bot_utils.shared import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__NEKO_DUNGEON
 
 from hata import Client, Lock, KOKORO, Embed, Color
 from hata.ext.slash.menus import Pagination

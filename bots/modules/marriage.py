@@ -6,7 +6,8 @@ from hata.ext.slash import InteractionResponse, abort, Button, Row
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
-from bot_utils.shared import EMOJI__HEART_CURRENCY, GUILD__NEKO_DUNGEON
+from bot_utils.constants import EMOJI__HEART_CURRENCY, GUILD__NEKO_DUNGEON
+from bot_utils.utils import send_embed_to
 
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import func as alchemy_function, and_, distinct, or_
@@ -77,30 +78,6 @@ BUTTON_DIVORCE_CANCEL = Button(
 
 def get_multiplier(user_id_1, user_id_2):
     return 2.1-(((user_id_1&0x1111111111111111111111)+(user_id_2&0x1111111111111111111111))%101*0.01)
-
-
-async def send_embed_to(client, user_id, embed):
-    try:
-        user_channel = await client.channel_private_create(user_id)
-    except ConnectionError:
-        return
-    
-    try:
-        await client.message_create(
-            user_channel,
-            embed = embed,
-            allowed_mentions = None,
-        )
-    except ConnectionError:
-        return
-    
-    except DiscordException as err:
-        if err.code == ERROR_CODES.cannot_message_user:
-            return
-        
-        raise
-    
-    return
 
 
 CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM = 'marriage.buy_waifu_slot.confirm'
@@ -396,6 +373,7 @@ async def propose(client, event,
                     user_common_model.total_allocated,
                     user_common_model.waifu_cost,
                     user_common_model.waifu_owner_id,
+                    user_common_model.notify_proposal,
                 ]
             ).where(
                 user_common_model.user_id.in_(
@@ -473,9 +451,11 @@ async def propose(client, event,
             target_entry_id = -1
             target_waifu_cost = WAIFU_COST_DEFAULT
             target_waifu_owner_id = 0
+            target_waifu_notify_proposal = True
         else:
             target_entry_id = target_entry[0]
             target_waifu_owner_id = target_entry[6]
+            target_waifu_notify_proposal = target_entry[7]
             
             target_waifu_cost = target_entry[5]
             if not target_waifu_cost:
@@ -573,15 +553,16 @@ async def propose(client, event,
                     f'{EMOJI__HEART_CURRENCY.as_emoji} to {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
                 )
                 
-                await send_embed_to(
-                    client,
-                    target_user_id,
-                    Embed(
-                        None,
-                        f'{event.user.full_name} changed their proposal towards you from {investment} '
-                        f'{EMOJI__HEART_CURRENCY.as_emoji} to {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                if target_waifu_notify_proposal:
+                    await send_embed_to(
+                        client,
+                        target_user_id,
+                        Embed(
+                            None,
+                            f'{event.user.full_name} changed their proposal towards you from {investment} '
+                            f'{EMOJI__HEART_CURRENCY.as_emoji} to {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                        )
                     )
-                )
                 
                 return
         
@@ -716,14 +697,16 @@ async def propose(client, event,
             f'You proposed towards {user.full_name} with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
         )
         
-        await send_embed_to(
-            client,
-            target_user_id,
-            Embed(
-                None,
-                f'{event.user.full_name} proposed to you with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+        
+        if target_waifu_notify_proposal:
+            await send_embed_to(
+                client,
+                target_user_id,
+                Embed(
+                    None,
+                    f'{event.user.full_name} proposed to you with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                )
             )
-        )
 
 
 PROPOSAL = SLASH_CLIENT.interactions(
@@ -739,6 +722,7 @@ async def list_outgoing(event,
             ):
     """Lists outgoing proposals."""
     return await list_proposals(event, user, True)
+
 
 @PROPOSAL.interactions
 async def list_incoming(event,
@@ -1031,7 +1015,22 @@ async def cancel(client, event,
                 total_love = user_common_model.total_love + investment,
             )
         )
-    
+        
+        response = await connector.execute(
+            select(
+                [
+                    user_common_model.notify_proposal,
+                ]
+            ).where(
+                user_common_model.user_id == target_user_id,
+            )
+        )
+        
+        results = await response.fetchall()
+        if results:
+            target_waifu_notify_proposal = results[0][0]
+        else:
+            target_waifu_notify_proposal = True
     
     yield Embed(
         None,
@@ -1041,7 +1040,7 @@ async def cancel(client, event,
     )
     
     
-    if not user.is_bot:
+    if (not user.is_bot) and target_waifu_notify_proposal:
         await send_embed_to(
             client,
             target_user_id,
@@ -1403,7 +1402,7 @@ async def divorce_outgoing(client, event, source_user_id, target_user_id, is_bot
             target_user_id,
             Embed(
                 None,
-                f'YOu have been divorced by {event.user.full_name}.'
+                f'You have been divorced by {event.user.full_name}.'
             )
         )
 

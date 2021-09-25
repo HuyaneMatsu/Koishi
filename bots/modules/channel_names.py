@@ -6,7 +6,7 @@ from random import random
 from datetime import datetime
 from difflib import get_close_matches
 
-from bot_utils.shared import CATEGORY__NEKO_DUNGEON__BOTS, PATH__KOISHI, ROLE__NEKO_DUNGEON__MODERATOR
+from bot_utils.constants import CATEGORY__NEKO_DUNGEON__BOTS, PATH__KOISHI, ROLE__NEKO_DUNGEON__MODERATOR
 from bot_utils.tools import Cell
 
 from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \

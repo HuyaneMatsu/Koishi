@@ -1,7 +1,7 @@
 from hata import Client, Embed, StickerFormat
 from hata.ext.extension_loader import require
 
-from bot_utils.shared import CHANNEL__NEKO_DUNGEON__LOG_EMOJI, GUILD__NEKO_DUNGEON
+from bot_utils.constants import CHANNEL__NEKO_DUNGEON__LOG_EMOJI, GUILD__NEKO_DUNGEON
 
 require('Satori')
 

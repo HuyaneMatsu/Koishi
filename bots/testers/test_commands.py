@@ -25,7 +25,7 @@ from hata.ext.patchouli import map_module, MAPPED_OBJECTS
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
-from bot_utils.shared import PATH__KOISHI
+from bot_utils.constants import PATH__KOISHI
 
 TEST_COMMANDS = eventlist(type_=Command, category='TEST COMMANDS',)
 

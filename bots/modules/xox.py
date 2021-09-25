@@ -4,7 +4,7 @@ from random import random, choice
 from hata import Emoji, BUILTIN_EMOJIS, Client
 
 from hata.ext.slash import iter_component_interactions, Button, ButtonStyle
-from bot_utils.shared import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__NEKO_DUNGEON
 
 EMOJI_P2 = Emoji.precreate(704393708467912875)
 EMOJI_P1 = Emoji.precreate(812069466069663765)

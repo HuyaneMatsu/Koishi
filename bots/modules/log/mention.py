@@ -1,7 +1,7 @@
 from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTIVITY_TYPES
 from hata.ext.extension_loader import require
 
-from bot_utils.shared import CHANNEL__NEKO_DUNGEON__LOG_MENTION, GUILD__NEKO_DUNGEON, CATEGORY__NEKO_DUNGEON__BIG_BRO
+from bot_utils.constants import CHANNEL__NEKO_DUNGEON__LOG_MENTION, GUILD__NEKO_DUNGEON, CATEGORY__NEKO_DUNGEON__BIG_BRO
 
 require(Satori=Client)
 

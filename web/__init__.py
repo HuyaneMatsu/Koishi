@@ -1,6 +1,6 @@
 import os
 from flask import Flask
-from bot_utils.shared import PATH__KOISHI
+from bot_utils.constants import PATH__KOISHI
 
 ROUTE = ('web', 'modules')
 

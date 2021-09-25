@@ -9,7 +9,7 @@ from hata.ext.slash import abort, wait_for_component_interaction, Row, Button, I
 
 from sqlalchemy.sql import select, update
 
-from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI, EMOJI__HEART_CURRENCY
+from bot_utils.constants import GUILD__NEKO_DUNGEON, PATH__KOISHI, EMOJI__HEART_CURRENCY
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, item_model, ITEM_TABLE
 
 SLASH_CLIENT: Client

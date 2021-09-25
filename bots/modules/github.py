@@ -8,7 +8,7 @@ from hata.discord.utils import parse_date_header_to_datetime
 from hata.backend.quote import quote
 from hata.ext.slash import abort
 
-from bot_utils.shared import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__NEKO_DUNGEON
 
 SLASH_CLIENT : Client
 

@@ -7,7 +7,7 @@ from hata.ext.command_utils import wait_for_reaction
 from hata.ext.slash import abort
 
 from bot_utils.tools import Cell
-from bot_utils.shared import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__NEKO_DUNGEON
 
 SLASH_CLIENT : Client
 
@@ -378,24 +378,39 @@ del generate_love_level
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def love(client, event,
-    user : ('user', 'Select your heart\'s chosen one!') = None,
-        ):
+    user_1: ('user', 'Select your heart\'s chosen one!', 'user') = None,
+    user_2: ('user', 'Check some else\'s love life?', 'with') = None,
+):
     """How much you two fit together?"""
-    source_user = event.user
+    if user_2 is None:
+        source_user = event.user
+        
+        if user_1 is None:
+            target_user = client
+        else:
+            target_user = user_1
+    else:
+        target_user = user_2
+        
+        if user_1 is None:
+            source_user = event.user
+        else:
+            source_user = user_1
     
-    if user is None:
-        user = client
-    elif user is source_user:
-        return 'huh?'
+    if source_user is target_user:
+        abort('huh?')
     
-    percent = ((source_user.id&0x1111111111111111111111)+(user.id&0x1111111111111111111111))%101
+    percent = ((source_user.id&0x1111111111111111111111)+(target_user.id&0x1111111111111111111111))%101
     element = LOVE_VALUES[percent]
     
     return Embed(
         choice(element['titles']),
-        f'{source_user:f} {BUILTIN_EMOJIS["heart"]:e} {user:f} scored {percent}%!',
+        f'{source_user:f} {BUILTIN_EMOJIS["heart"]:e} {target_user:f} scored {percent}%!',
         0xad1457,
-            ).add_field('My advice:', element['text'])
+    ).add_field(
+        'My advice:',
+        element['text'],
+    )
 
 
 MINE_MINE_CLEAR = (
@@ -409,7 +424,7 @@ MINE_MINE_CLEAR = (
     BUILTIN_EMOJIS['seven'].as_emoji,
     BUILTIN_EMOJIS['eight'].as_emoji,
     BUILTIN_EMOJIS['bomb'].as_emoji,
-        )
+)
 
 MINE_MINE = tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
 

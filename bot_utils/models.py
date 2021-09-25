@@ -33,7 +33,7 @@ if DATABASE_NAME is None:
 else:
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
-        String
+        String, Boolean
     from sqlalchemy.sql.expression import func
     from hata.ext.kokoro_sqlalchemy import KOKORO_STRATEGY
     
@@ -52,6 +52,9 @@ else:
         waifu_cost      = Column(Int64, default=0)
         waifu_divorces  = Column(Int32, default=0)
         waifu_slots     = Column(Int32, default=1)
+        
+        notify_proposal = Column(Boolean, default=True)
+        notify_daily = Column(Boolean, default=True)
     
     USER_COMMON_TABLE = user_common_model.__table__
     
@@ -140,16 +143,19 @@ else:
     DB_ENGINE = create_engine(DATABASE_NAME, strategy=KOKORO_STRATEGY, single_worker=True)
     
     def get_create_common_user_expression(
-            user_id,
-            total_love = 0,
-            daily_next = None,
-            daily_streak = 0,
-            total_allocated = 0,
-            waifu_owner_id = 0,
-            waifu_cost = 0,
-            waifu_divorces = 0,
-            waifu_slots = 1,
-                ):
+        user_id,
+        total_love = 0,
+        daily_next = None,
+        daily_streak = 0,
+        total_allocated = 0,
+        waifu_owner_id = 0,
+        waifu_cost = 0,
+        waifu_divorces = 0,
+        waifu_slots = 1,
+        notify_proposal = True,
+        notify_daily = True,
+        
+    ):
         if daily_next is None:
             daily_next = datetime.utcnow()
         
@@ -163,4 +169,7 @@ else:
             waifu_cost      = waifu_cost,
             waifu_divorces  = waifu_divorces,
             waifu_slots     = waifu_slots,
+            notify_proposal = notify_proposal,
+            notify_daily = notify_daily,
+            
         )

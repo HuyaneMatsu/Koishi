@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from hata import elapsed_time, Embed, Client
-from bot_utils.shared import ROLE__NEKO_DUNGEON__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
+from bot_utils.constants import ROLE__NEKO_DUNGEON__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
     CHANNEL__NEKO_DUNGEON__EVENT, ROLE__NEKO_DUNGEON__EVENT_MANAGER, LINK__HATA_GIT, GUILD__NEKO_DUNGEON
 
 EVENT_TEST_CHECK = None # checks.has_any_role((ROLE__NEKO_DUNGEON__MODERATOR, ROLE__NEKO_DUNGEON__EVENT_MANAGER))

@@ -1,5 +1,5 @@
-import re, sys
-
+import sys
+from re import compile as re_compile, I as re_ignore_case, U as re_unicode, escape as re_escape
 from collections import deque
 from difflib import get_close_matches
 
@@ -13,7 +13,7 @@ from hata.backend.headers import USER_AGENT, CONTENT_TYPE
 
 from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_not_same
 
-WORD_MATCH_RP = re.compile('[^a-zA-z0-9]+')
+WORD_MATCH_RP = re_compile('[^a-zA-z0-9]+')
 
 HEADERS = {USER_AGENT: LIBRARY_USER_AGENT}
 
@@ -255,6 +255,7 @@ async def answer_booru(client, event, content, url_base, banned):
 
 TOUHOU_NAME_RELATIONS = {}
 TOUHOU_NAMES = []
+TOUHOU_ALTERNATIVE_NAMES = {}
 
 for name, tag_name, *alternative_names in (
         ('Aki Minoriko'         , 'aki_minoriko'         , '秋 穣子', 'Minoriko',),
@@ -382,13 +383,36 @@ for name, tag_name, *alternative_names in (
     TOUHOU_NAMES.extend(alternative_names)
     for alternative_name in alternative_names:
         TOUHOU_NAME_RELATIONS[alternative_name] = cache
-        
+        TOUHOU_ALTERNATIVE_NAMES[alternative_name] = name
 
 del name
 del tag_name
 del alternative_name
 del alternative_names
 del cache
+
+MOST_POPULAR_TOUHOU_CHARACTERS = [
+    'Konpaku Youmu',
+    'Hakurei Reimu',
+    'Komeiji Koishi',
+    'Kirisame Marisa',
+    'Scarlet Flandre',
+    'Scarlet Remilia',
+    'Izayoi Sakuya',
+    'Komeiji Satori',
+    'Fujiwara no Mokou',
+    'Shameimaru Aya',
+    'Margatroid Alice',
+    'Kochiya Sanae',
+    'Saigyouji Yuyuko',
+    'Reisen Udongein Inaba',
+    'Yakumo Yukari',
+    'Hinanawi Tenshi',
+    'Hata no Kokoro',
+    'Patchouli Knowledge',
+    'Shiki Eiki Yamaxanadu',
+    'Tatara Kogasa',
+]
 
 """
 TOUHOU = SLASH_CLIENT.interactions(
@@ -399,7 +423,7 @@ TOUHOU = SLASH_CLIENT.interactions(
 )
 """
 
-@SLASH_CLIENT.interactions(is_global = True)
+@SLASH_CLIENT.interactions(is_global=True)
 async def touhou_character(client, event,
         name: ('str', 'Who\'s?'),
             ):
@@ -440,17 +464,49 @@ async def touhou_character(client, event,
         return embed
 
 
-PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
-    send_messages = True,
-    send_messages_in_threads = True,
-)
+@touhou_character.autocomplete('name')
+async def autocomplete_touhou_character_name(client, value):
+    if value is None:
+        return MOST_POPULAR_TOUHOU_CHARACTERS
+    
+    matcher = re_compile(re_escape(value), re_ignore_case|re_unicode)
+    
+    matched_names = []
+    
+    for name in TOUHOU_NAMES:
+        if (matcher.match(name) is not None):
+            matched_names.append(name)
+    
+    value_length = len(value)
+    if value_length >= 3:
+        if len(value) > 10:
+            value_length = 10
+        
+        diversity = 0.2+(10-value_length)*0.02
+        
+        matched_names.extend(get_close_matches(value, TOUHOU_NAMES, n=20, cutoff=1.0-diversity))
+    
+    unique = []
+    system_names = set()
+    
+    for name in matched_names:
+        system_name = TOUHOU_NAME_RELATIONS[name]
+        if system_name in system_names:
+            continue
+        
+        system_names.add(system_name)
+        unique.append(name)
+        continue
+    
+    del unique[20:]
+    
+    return [TOUHOU_ALTERNATIVE_NAMES.get(name, name) for name in unique]
 
-PERMISSION_MASK_REACT = Permission().update_by_keys(
-    add_reactions = True,
-)
+
 
 def touhou_wiki_result_sort_key(item):
     return len(item[0])
+
 
 # @TOUHOU.interactions
 async def wiki_(client, event,
@@ -463,10 +519,6 @@ async def wiki_(client, event,
     
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command.')
-    
-    permissions = event.channel.cached_permissions_for(client)
-    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
-        abort('I need `send messages` and `add reactions` permission to execute this command.')
     
     words = WORD_MATCH_RP.split(search_for)
     search_for = ' '.join(words)

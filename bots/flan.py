@@ -10,7 +10,7 @@ from hata.ext.command_utils import Pagination, wait_for_reaction, wait_for_messa
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.commands_v2 import checks
 
-from bot_utils.shared import PREFIX__FLAN, COLOR__FLAN_HELP, PATH__KOISHI
+from bot_utils.constants import PREFIX__FLAN, COLOR__FLAN_HELP, PATH__KOISHI
 from bot_utils.tools import CooldownHandler, MessageDeleteWaitfor, MessageEditWaitfor
 from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, \
     get_card

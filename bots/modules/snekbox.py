@@ -6,7 +6,7 @@ from hata import Color, KOKORO, Embed, ScarletLock, Client, sanitize_mentions
 from hata.ext.commands_v2 import checks
 from hata.ext.slash.menus import Closer
 from bot_utils.interpreter_v2 import parse_code_content
-from bot_utils.shared import GUILD__NEKO_DUNGEON, PATH__KOISHI
+from bot_utils.constants import GUILD__NEKO_DUNGEON, PATH__KOISHI
 from hata.ext.extension_loader import require
 
 # installing nsjail:

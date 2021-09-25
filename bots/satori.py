@@ -8,7 +8,7 @@ from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, We
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.shared import COLOR__SATORI_HELP, CHANNEL__SYSTEM__SYNC
+from bot_utils.constants import COLOR__SATORI_HELP, CHANNEL__SYSTEM__SYNC
 from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor, ChannelDeleteWaitfor, ChannelCreateWaitfor, \
     ChannelEditWaitfor
 from bot_utils.interpreter_v2 import Interpreter

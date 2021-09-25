@@ -5,9 +5,8 @@ import config
 
 from hata import Client, ActivityRich, ACTIVITY_TYPES, IntentFlag
 from hata.ext.extension_loader import EXTENSION_LOADER
-from bot_utils.shared import PATH__KOISHI
-
-from bot_utils.shared import category_name_rule, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, PREFIX__FLAN, PREFIX__SATORI
+from bot_utils.constants import PATH__KOISHI, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, PREFIX__FLAN, PREFIX__SATORI
+from bot_utils.utils import random_error_message_getter, category_name_rule
 
 MARISA_MODE = config.MARISA_MODE
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
@@ -71,6 +70,7 @@ else:
         client_id = config.NITORI_ID,
         application_id = config.NITORI_ID,
         extensions = 'slash',
+        random_error_message_getter = random_error_message_getter,
     )
     
     EXTENSION_LOADER.add_default_variables(Nitori=Nitori)

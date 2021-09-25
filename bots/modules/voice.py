@@ -6,7 +6,7 @@ from hata.ext.command_utils import Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
-from bot_utils.shared import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__NEKO_DUNGEON
 from hata.ext.commands_v2 import checks
 
 if not MARISA_MODE:

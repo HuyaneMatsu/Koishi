@@ -2,7 +2,7 @@ from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS, ExtensionErr
 from hata import Embed, Client, CLIENTS
 from hata.ext.slash import set_permission, Select, Option, InteractionResponse, abort
 
-from bot_utils.shared import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN
+from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN
 
 SLASH_CLIENT : Client
 

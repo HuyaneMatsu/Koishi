@@ -213,7 +213,7 @@ for action_name, action_verb, action_description in (
         ('blush', 'blushes at', 'Oh.'),
         ('smile', 'smiles at', 'Oh, really?'),
         ('wave', 'waves at', 'Flap flap'),
-        ('highfive', 'gives highfive for', 'Lets go boiz!'),
+        ('highfive', 'highfives', 'Lets go boiz!'),
         ('handhold', 'holds hands of', 'Lewd!!'),
         ('nom', 'noms', 'Feed your loli, or else'),
         ('bite', 'bites', 'Vampy.'),

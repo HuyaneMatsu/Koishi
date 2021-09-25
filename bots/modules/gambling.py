@@ -3,31 +3,30 @@ from functools import partial as partial_func
 from datetime import datetime, timedelta
 from random import random
 from math import log10, ceil, floor
-from itertools import chain
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
-    ERROR_CODES, USERS, ZEROUSER, ChannelGuildBase, WaitTillAll, future_or_timeout, parse_tdelta, Permission, \
-    InteractionType
+    ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission
 from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, wait_for_component_interaction
-from hata.ext.slash.menus.menu import GUI_STATE_NONE, GUI_STATE_READY, GUI_STATE_EDITING, GUI_STATE_CANCELLING, \
-    GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CONTEXT, Timeouter
-
 from sqlalchemy.sql import select, desc
 
-from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression
-from bot_utils.shared import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
+from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
+    waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
+
+from bot_utils.constants import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
     EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST, ROLE__NEKO_DUNGEON__ADMIN, \
-    ROLE__NEKO_DUNGEON__NSFW_ACCESS
+    ROLE__NEKO_DUNGEON__NSFW_ACCESS, IN_GAME_IDS, COLOR__GAMBLING
+from bot_utils.utils import send_embed_to
 
 SLASH_CLIENT: Client
+Satori: Client
+
 def setup(lib):
-    SLASH_CLIENT.events.message_create.append(GUILD__NEKO_DUNGEON, heart_generator)
+    Satori.events.message_create.append(GUILD__NEKO_DUNGEON, heart_generator)
 
 def teardown(lib):
-    SLASH_CLIENT.events.message_create.remove(GUILD__NEKO_DUNGEON, heart_generator)
+    Satori.events.message_create.remove(GUILD__NEKO_DUNGEON, heart_generator)
 
 
-GAMBLING_COLOR          = Color.from_rgb(254, 254, 164)
 DAILY_INTERVAL          = timedelta(hours=22)
 DAILY_STREAK_BREAK      = timedelta(hours=26)
 DAILY_STREAK_LOSE       = timedelta(hours=12)
@@ -62,34 +61,6 @@ EVENT_ABORT_BUTTON      = Button(emoji=EVENT_ABORT_EMOJI)
 EVENT_COMPONENTS        = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
 EVENT_CURRENCY_BUTTON   = Button(emoji=EMOJI__HEART_CURRENCY)
 
-CARD_TYPES = (
-    BUILTIN_EMOJIS['spades'].as_emoji,
-    BUILTIN_EMOJIS['clubs'].as_emoji,
-    BUILTIN_EMOJIS['hearts'].as_emoji,
-    BUILTIN_EMOJIS['diamonds'].as_emoji,
-)
-
-CARD_NUMBERS = (
-    BUILTIN_EMOJIS['two'].as_emoji,
-    BUILTIN_EMOJIS['three'].as_emoji,
-    BUILTIN_EMOJIS['four'].as_emoji,
-    BUILTIN_EMOJIS['five'].as_emoji,
-    BUILTIN_EMOJIS['six'].as_emoji,
-    BUILTIN_EMOJIS['seven'].as_emoji,
-    BUILTIN_EMOJIS['eight'].as_emoji,
-    BUILTIN_EMOJIS['nine'].as_emoji,
-    BUILTIN_EMOJIS['keycap_ten'].as_emoji,
-    BUILTIN_EMOJIS['regional_indicator_j'].as_emoji,
-    BUILTIN_EMOJIS['regional_indicator_q'].as_emoji,
-    BUILTIN_EMOJIS['regional_indicator_k'].as_emoji,
-    BUILTIN_EMOJIS['a'].as_emoji,
-)
-
-DECK_SIZE   = len(CARD_TYPES) * len(CARD_NUMBERS)
-ACE_INDEX   = len(CARD_NUMBERS)-1
-BET_MIN     = 10
-
-IN_GAME_IDS = set()
 
 def calculate_daily_for(user, daily_streak):
     """
@@ -199,84 +170,10 @@ def calculate_daily_new(daily_streak, daily_next, now):
     return daily_streak_new, daily_next_new
 
 
-@SLASH_CLIENT.interactions(is_global=True)
-async def daily(client, event,
-        target_user : ('user', 'Anyone to gift your daily love?') = None,
-             ):
-    """Claim a share of my love every day or gift it to your imouto nya!"""
-    source_user = event.user
-    if target_user is None:
-        target_user = source_user
+async def claim_daily_for_yourself(event):
+    user = event.user
     
-    now = datetime.utcnow()
     async with DB_ENGINE.connect() as connector:
-        if source_user is target_user:
-            response = await connector.execute(
-                select(
-                    [
-                        user_common_model.id,
-                        user_common_model.total_love,
-                        user_common_model.daily_streak,
-                        user_common_model.daily_next,
-                    ]
-                ).where(
-                    user_common_model.user_id == target_user.id,
-                )
-            )
-            
-            results = await response.fetchall()
-            if results:
-                source_result = results[0]
-                daily_next = source_result[3]
-                if daily_next > now:
-                    return Embed(
-                        'You already claimed your daily love for today~',
-                        f'Come back in {elapsed_time(daily_next)}.',
-                        color = GAMBLING_COLOR,
-                    )
-                
-                daily_streak = calculate_daily_new_only(source_result[2], daily_next, now)
-                
-                if daily_next+DAILY_STREAK_BREAK < now:
-                    streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
-                else:
-                    streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
-                
-                received = calculate_daily_for(source_user, daily_streak)
-                total_love = source_result[1]+received
-                
-                daily_streak += 1
-                await connector.execute(USER_COMMON_TABLE.update(
-                        user_common_model.id == source_result[0]
-                    ).values(
-                        total_love = total_love,
-                        daily_next = now+DAILY_INTERVAL,
-                        daily_streak = daily_streak,
-                    )
-                )
-                
-                return Embed(
-                    'Here, some love for you~\nCome back tomorrow !',
-                    f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} {EMOJI__HEART_CURRENCY:e}\n'
-                    f'{streak_text}',
-                    color = GAMBLING_COLOR,
-                )
-            
-            received = calculate_daily_for(source_user, 0)
-            await connector.execute(
-                get_create_common_user_expression(
-                    source_user.id,
-                    total_love = received,
-                    daily_next = now+DAILY_INTERVAL,
-                    daily_streak = 1,
-                )
-            )
-            
-            return Embed(
-                'Here, some love for you~\nCome back tomorrow !',
-                f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {received} {EMOJI__HEART_CURRENCY:e}',
-                color = GAMBLING_COLOR)
-        
         response = await connector.execute(
             select(
                 [
@@ -284,108 +181,215 @@ async def daily(client, event,
                     user_common_model.total_love,
                     user_common_model.daily_streak,
                     user_common_model.daily_next,
-                    user_common_model.user_id,
                 ]
             ).where(
-                user_common_model.user_id.in_(
-                    [
-                        source_user.id,
-                        target_user.id,
-                    ]
-                )
+                user_common_model.user_id == user.id,
             )
         )
         
-        results = await response.fetchall()
-        if len(results) == 0:
-            source_result = None
-            target_result = None
-        elif len(results) == 1:
-            if results[0][4] == source_user.id:
-                source_result = results[0]
-                target_result = None
-            else:
-                source_result = None
-                target_result = results[0]
-        else:
-            if results[0][4] == source_user.id:
-                source_result = results[0]
-                target_result = results[1]
-            else:
-                source_result = results[1]
-                target_result = results[0]
-        
         now = datetime.utcnow()
-        if source_result is None:
-            daily_streak = 0
-            streak_text = 'I am happy you joined the sect too.'
+        
+        results = await response.fetchall()
+        if results:
+            entry_id, total_love, daily_streak, daily_next = results[0]
             
-            await connector.execute(
-                get_create_common_user_expression(
-                    source_user.id,
-                    daily_next = now+DAILY_INTERVAL,
-                    daily_streak = 1,
-                )
-            )
-        else:
-            daily_next = source_result[3]
             if daily_next > now:
                 return Embed(
                     'You already claimed your daily love for today~',
                     f'Come back in {elapsed_time(daily_next)}.',
-                    color = GAMBLING_COLOR,
+                    color = COLOR__GAMBLING,
                 )
             
-            daily_streak = source_result[2]
-            daily_next = daily_next+DAILY_STREAK_BREAK
-            if daily_next < now:
-                daily_streak = daily_streak-((now-daily_next)//DAILY_STREAK_LOSE)-1
+            daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
             
-            if daily_streak < 0:
-                daily_streak = 0
-            
-            if daily_next < now:
+            if daily_next+DAILY_STREAK_BREAK < now:
                 streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
             else:
                 streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
             
-            await connector.execute(USER_COMMON_TABLE.update(
-                    user_common_model.id == source_result[0]
-                ).values(
-                    daily_next = now+DAILY_INTERVAL,
-                    daily_streak = daily_streak+1,
-                )
-            )
-        
-        received = calculate_daily_for(source_user, daily_streak)
-        
-        if target_result is None:
-            await connector.execute(
-                get_create_common_user_expression(
-                    target_user.id,
-                    total_love = received,
-                    daily_next = now,
-                )
-            )
+            received = calculate_daily_for(user, daily_streak)
+            total_love = total_love+received
             
-            total_love = received
-        else:
-            total_love = target_result[1]+received
+            daily_streak += 1
             
             await connector.execute(
                 USER_COMMON_TABLE.update(
-                    user_common_model.id == target_result[0],
+                    user_common_model.id == entry_id,
                 ).values(
                     total_love = total_love,
+                    daily_next = now+DAILY_INTERVAL,
+                    daily_streak = daily_streak,
                 )
             )
+            
+            return Embed(
+                'Here, some love for you~\nCome back tomorrow !',
+                (
+                    f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} '
+                    f'{EMOJI__HEART_CURRENCY:e}\n'
+                    f'{streak_text}'
+                ),
+                color = COLOR__GAMBLING,
+            )
+        
+        received = calculate_daily_for(user, 0)
+        await connector.execute(
+            get_create_common_user_expression(
+                user.id,
+                total_love = received,
+                daily_next = now+DAILY_INTERVAL,
+                daily_streak = 1,
+            )
+        )
+        
+        return Embed(
+            'Here, some love for you~\nCome back tomorrow !',
+            (
+                f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {received} {EMOJI__HEART_CURRENCY:e}'
+            ),
+            color = COLOR__GAMBLING,
+        )
+
+
+async def claim_daily_for_waifu(client, event, target_user):
+    source_user = event.user
+    
+    while True:
+        async with DB_ENGINE.connect() as connector:
+            # To be someone your waifu, you both need to be in the database, so simple.
+            response = await connector.execute(
+                select(
+                    [
+                        user_common_model.id,
+                        user_common_model.user_id,
+                        user_common_model.waifu_owner_id,
+                        user_common_model.total_love,
+                        user_common_model.daily_streak,
+                        user_common_model.daily_next,
+                        user_common_model.notify_daily,
+                    ]
+                ).where(
+                    user_common_model.user_id.in_(
+                        [
+                            source_user.id,
+                            target_user.id,
+                        ]
+                    )
+                )
+            )
+            
+            if response.rowcount != 2:
+                break
+            
+            results = await response.fetchall()
+            if results[0][1] == source_user.id:
+                source_entry, target_entry = results
+                
+            else:
+                target_entry, source_entry = results
+            
+            source_waifu_owner_id = source_entry[2]
+            target_waifu_owner_id = target_entry[2]
+            
+            if (source_waifu_owner_id != target_user.id) and (target_waifu_owner_id != source_user.id):
+                break
+            
+            now = datetime.utcnow()
+            
+            target_daily_next = target_entry[5]
+            if target_daily_next > now:
+                return Embed(
+                    'They already claimed your daily love for today~',
+                    f'Come back in {elapsed_time(target_daily_next)}.',
+                    color = COLOR__GAMBLING,
+                )
+            
+            target_daily_streak = target_entry[4]
+            target_daily_streak = calculate_daily_new_only(target_daily_streak, target_daily_next, now)
+            
+            if target_daily_next+DAILY_STREAK_BREAK < now:
+                streak_text = f'They did not claim daily for more than 1 day, they got down to {target_daily_streak}.'
+            else:
+                streak_text = f'They are in a {target_daily_streak+1} day streak! Keep up the good work for them!'
+            
+            received = calculate_daily_for(target_user, target_daily_streak)
+            
+            target_total_love = target_entry[3]
+            target_total_love = target_total_love+received
+            
+            target_daily_streak += 1
+            
+            waifu_cost_increase = 1+floor(received*0.01)
+            
+            await connector.execute(
+                USER_COMMON_TABLE.update(
+                    user_common_model.id == source_entry[0],
+                ).values(
+                    waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
+                )
+            )
+            
+            await connector.execute(
+                USER_COMMON_TABLE.update(
+                    user_common_model.id == target_entry[0],
+                ).values(
+                    total_love = target_total_love,
+                    daily_next = now+DAILY_INTERVAL,
+                    daily_streak = target_daily_streak,
+                    waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
+                )
+            )
+            
+            await client.interaction_response_message_create(
+                event,
+                embed = Embed(
+                    'How sweet, you claimed my love for your chosen one !',
+                    (
+                        f'They received {received} {EMOJI__HEART_CURRENCY:e} and they have {target_total_love} '
+                        f'{EMOJI__HEART_CURRENCY:e}\n'
+                        f'{streak_text}'
+                    ),
+                    color = COLOR__GAMBLING,
+                )
+            )
+            
+            if (not target_user.is_bot) and target_entry[6]:
+                await send_embed_to(
+                    client,
+                    target_user.id,
+                    Embed(
+                        f'{source_user.full_name} claimed daily love for you.',
+                        (
+                            f'You received {received} {EMOJI__HEART_CURRENCY.as_emoji} and now you have '
+                            f'{target_total_love} {EMOJI__HEART_CURRENCY.as_emoji}\n'
+                            f'You are on a {target_daily_streak} day streak.'
+                        ),
+                        color = COLOR__GAMBLING,
+                    )
+                )
+            
+            return
     
     return Embed(
-        f'Awww, you claimed your daily love for {target_user:f}, how sweet~',
-        f'You gifted {received} {EMOJI__HEART_CURRENCY:e} and they have {total_love} {EMOJI__HEART_CURRENCY:e}\n'
-        f'{streak_text}',
-        color = GAMBLING_COLOR,
+        'Savage',
+        f'{target_user.full_name} is not your waifu.',
+        color = COLOR__GAMBLING,
     )
+
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def daily(client, event,
+    target_user: ('user', 'Anyone to gift your daily love?', 'waifu') = None,
+):
+    """Claim a share of my love every day for yourself or for your waifu."""
+    if target_user is None:
+        coroutine = claim_daily_for_yourself(event)
+    else:
+        coroutine = claim_daily_for_waifu(client, event, target_user)
+    
+    return await coroutine
+
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -467,7 +471,7 @@ async def hearts(client, event,
     else:
         description = None
     
-    embed = Embed(title, description, color=GAMBLING_COLOR)
+    embed = Embed(title, description, color=COLOR__GAMBLING)
     
     if extended:
         field_value_parts = [
@@ -759,7 +763,7 @@ class HeartEventGUI:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
         else:
             description = f'{convert_tdelta(self.duration)} left'
-        return Embed(title, description, color=GAMBLING_COLOR)
+        return Embed(title, description, color=COLOR__GAMBLING)
 
     async def __call__(self, event):
         if event.interaction != EVENT_CURRENCY_BUTTON:
@@ -1048,7 +1052,7 @@ class DailyEventGUI:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
         else:
             description = f'{convert_tdelta(self.duration)} left'
-        return Embed(title, description, color=GAMBLING_COLOR)
+        return Embed(title, description, color=COLOR__GAMBLING)
     
     async def __call__(self, event):
         if event.interaction != EVENT_CURRENCY_BUTTON:
@@ -1180,1720 +1184,6 @@ class DailyEventGUI:
         Task(connector.close(), KOKORO)
 
 
-@SLASH_CLIENT.interactions(name='21', is_global=True)
-async def game_21(client, event,
-        amount : ('int', 'The amount of hearts to bet'),
-        mode : ([('single-player', 'sg'), ('multi-player', 'mp')], 'Game mode, yayyy') = 'sg',
-            ):
-    """Starts a card game where you can bet your hearts."""
-    is_multi_player = (mode == 'mp')
-    
-    embed = game_21_precheck(client, event.user, event.channel, amount, is_multi_player)
-    if (embed is None):
-        await client.interaction_application_command_acknowledge(event)
-    else:
-        await client.interaction_response_message_create(event, embed=embed)
-        return
-    
-    if is_multi_player:
-        coroutine_function = game_21_multi_player
-    else:
-        coroutine_function = game_21_single_player
-    
-    await coroutine_function(client, event, amount)
-
-
-def should_render_exception(exception):
-    if isinstance(exception, ConnectionError):
-        # no internet
-        return False
-    
-    if isinstance(exception, DiscordException) and exception.code in (
-                ERROR_CODES.unknown_message, # message deleted
-                ERROR_CODES.unknown_channel, # message's channel deleted
-                ERROR_CODES.missing_access, # client removed
-                ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                ERROR_CODES.cannot_message_user, # user dm-s disabled or bot blocked.
-                ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-            ):
-         return False
-    
-    return True
-
-
-
-class Game21Base:
-    __slots__ = ('guild', 'all_pulled')
-    def __new__(cls, guild):
-        self = object.__new__(cls)
-        self.guild = guild
-        self.all_pulled = []
-        return self
-    
-    def create_user_player(self, user):
-        return Game21Player(self, user)
-    
-    def create_bot_player(self, user):
-        player = Game21Player(self, user)
-        player.auto_finish()
-        return player
-    
-    def pull_card(self):
-        all_pulled = self.all_pulled
-        card = int((DECK_SIZE-len(all_pulled))*random())
-        for pulled in all_pulled:
-            if pulled > card:
-                break
-            
-            card += 1
-            continue
-        
-        all_pulled.append(card)
-        all_pulled.sort()
-        
-        return card
-
-class Game21Player:
-    __slots__ = ('parent', 'user', 'hand', 'total', 'ace')
-    def __new__(cls, parent, user):
-        hand = []
-        total = 0
-        ace = 0
-        
-        while True:
-            card = parent.pull_card()
-            
-            hand.append(card)
-            
-            number_index = card%len(CARD_NUMBERS)
-            if number_index == ACE_INDEX:
-                ace += 1
-                card_weight = 11
-            elif number_index > 7:
-                card_weight = 10
-            else:
-                card_weight = number_index+2
-            
-            total += card_weight
-            
-            if total > 10 and len(hand) >= 2:
-                break
-        
-        # We might draw 2 ace, at that case we hit 22.
-        if total > 21:
-            ace -= 1
-            total -= 10
-        
-        self = object.__new__(cls)
-        self.parent = parent
-        self.user = user
-        self.hand = hand
-        self.total = total
-        self.ace = ace
-        return self
-    
-    def auto_finish(self):
-        hand = self.hand
-        total = self.total
-        ace = self.ace
-        
-        while True:
-            if total > (17 if ace else 15):
-                break
-            
-            card = self.parent.pull_card()
-            
-            hand.append(card)
-            
-            number_index = card%len(CARD_NUMBERS)
-            if number_index == ACE_INDEX:
-                ace += 1
-                card_weight = 11
-            elif number_index > 7:
-                card_weight = 10
-            else:
-                card_weight = number_index+2
-            
-            total += card_weight
-            
-            while total>21 and ace:
-                total -= 10
-                ace -= 1
-            
-            continue
-        
-        self.total = total
-        self.ace = ace
-    
-    def pull_card(self):
-        hand = self.hand
-        total = self.total
-        ace = self.ace
-        
-        card = self.parent.pull_card()
-        
-        hand.append(card)
-        
-        number_index = card%len(CARD_NUMBERS)
-        if number_index == ACE_INDEX:
-            ace += 1
-            card_weight = 11
-        elif number_index > 7:
-            card_weight = 10
-        else:
-            card_weight = number_index+2
-        
-        total += card_weight
-        
-        while total>21 and ace:
-            total -= 10
-            ace -= 1
-            
-        self.total = total
-        self.ace = ace
-        
-        # Return whether the user is done.
-        if total >= 21:
-            return True
-        
-        return False
-    
-    def add_done_embed_field(self, embed):
-        field_content = []
-        
-        for round_, card in enumerate(self.hand, 1):
-            type_index, number_index = divmod(card, len(CARD_NUMBERS))
-            field_content.append('Round ')
-            field_content.append(str(round_))
-            field_content.append(': ')
-            field_content.append(CARD_TYPES[type_index])
-            field_content.append(' ')
-            field_content.append(CARD_NUMBERS[number_index])
-            field_content.append('\n')
-        
-        embed.add_field(f'{self.user.name_at(self.parent.guild)}\'s cards\'\nWeight: {self.total}',
-            ''.join(field_content), inline=True)
-    
-    def add_hand(self, embed):
-        for round_, card in enumerate(self.hand, 1):
-            type_index, number_index = divmod(card, len(CARD_NUMBERS))
-            embed.add_field(f'Round {round_}',
-                f'You pulled {CARD_TYPES[type_index]} {CARD_NUMBERS[number_index]}')
-        
-    def create_gamble_embed(self, amount):
-        embed = Embed(f'How to gamble {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
-            f'You have cards equal to {self.total} weight at your hand.',
-            color=GAMBLING_COLOR)
-        
-        self.add_hand(embed)
-        
-        return embed
-    
-    def create_after_embed(self, amount):
-        embed = Embed(f'Gambled {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
-            f'You have cards equal to {self.total} weight at your hand.\n'
-            'Go back to the other channel and wait till all the player finishes the game and the winner will be '
-            'announced!',
-            color=GAMBLING_COLOR)
-        
-        self.add_hand(embed)
-        
-        return embed
-
-GAME_21_EMOJI_NEW = BUILTIN_EMOJIS['new']
-GAME_21_EMOJI_STOP = BUILTIN_EMOJIS['octagonal_sign']
-
-GAME_21_CUSTOM_ID_NEW = '21.new'
-GAME_21_CUSTOM_ID_STOP = '21.stop'
-
-GAME_21_BUTTON_NEW_ENABLED = Button(
-    emoji = GAME_21_EMOJI_NEW,
-    custom_id = GAME_21_CUSTOM_ID_NEW,
-)
-
-GAME_21_BUTTON_NEW_DISABLED = GAME_21_BUTTON_NEW_ENABLED.copy_with(
-    enabled = False,
-)
-
-GAME_21_BUTTON_STOP_ENABLED = Button(
-    emoji = GAME_21_EMOJI_STOP,
-    custom_id = GAME_21_CUSTOM_ID_STOP,
-)
-
-GAME_21_BUTTON_STOP_DISABLED = GAME_21_BUTTON_STOP_ENABLED.copy_with(
-    enabled = False,
-)
-
-GAME_21_ROW_ENABLED = Row(
-    GAME_21_BUTTON_NEW_ENABLED,
-    GAME_21_BUTTON_STOP_ENABLED,
-)
-
-GAME_21_ROW_DISABLED = Row(
-    GAME_21_BUTTON_NEW_DISABLED,
-    GAME_21_BUTTON_STOP_DISABLED,
-)
-
-
-GAME_21_EMOJI_ENTER = BUILTIN_EMOJIS['hand_splayed']
-GAME_21_EMOJI_START = BUILTIN_EMOJIS['ok_hand']
-GAME_21_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
-
-GAME_21_CUSTOM_ID_ENTER = '21.enter'
-GAME_21_CUSTOM_ID_START = '21.start'
-GAME_21_CUSTOM_ID_CANCEL = '21.cancel'
-
-GAME_21_BUTTON_ENTER_ENABLED = Button(
-    emoji = GAME_21_EMOJI_ENTER,
-    custom_id = GAME_21_CUSTOM_ID_ENTER,
-)
-
-GAME_21_BUTTON_ENTER_DISABLED = GAME_21_BUTTON_ENTER_ENABLED.copy_with(
-    enabled = False,
-)
-
-GAME_21_BUTTON_START_ENABLED = Button(
-    emoji = GAME_21_EMOJI_START,
-    custom_id = GAME_21_CUSTOM_ID_START,
-)
-
-GAME_21_BUTTON_START_DISABLED = GAME_21_BUTTON_START_ENABLED.copy_with(
-    enabled = False,
-)
-
-GAME_21_BUTTON_CANCEL_ENABLED = Button(
-    emoji = GAME_21_EMOJI_CANCEL,
-    custom_id = GAME_21_CUSTOM_ID_CANCEL,
-)
-
-GAME_21_BUTTON_CANCEL_DISABLED = GAME_21_BUTTON_CANCEL_ENABLED.copy_with(
-    enabled = False,
-)
-
-GAME_21_JOIN_ROW_ENABLED = Row(
-    GAME_21_BUTTON_ENTER_ENABLED,
-    GAME_21_BUTTON_START_ENABLED,
-    GAME_21_BUTTON_CANCEL_ENABLED,
-)
-
-GAME_21_JOIN_ROW_FULL = Row(
-    GAME_21_BUTTON_ENTER_DISABLED,
-    GAME_21_BUTTON_START_ENABLED,
-    GAME_21_BUTTON_CANCEL_ENABLED,
-)
-
-GAME_21_JOIN_ROW_DISABLED = Row(
-    GAME_21_BUTTON_ENTER_DISABLED,
-    GAME_21_BUTTON_START_DISABLED,
-    GAME_21_BUTTON_CANCEL_DISABLED,
-)
-
-GAME_21_RESULT_FINISH = 0
-GAME_21_RESULT_INITIALIZATION_ERROR = 1
-GAME_21_RESULT_IN_GAME_ERROR = 2
-GAME_21_RESULT_CANCELLED_TIMEOUT = 3
-GAME_21_RESULT_CANCELLED_UNKNOWN = 4
-GAME_21_RESULT_CANCELLED_BY_USER = 5
-
-GAME_21_TIMEOUT = 300.0
-GAME_21_CANCELLATION_TIMEOUT = 5.0
-
-class Game21PlayerRunner:
-    __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', '_timeouter', 'canceller', '_gui_state',
-        'render_after', 'event',)
-    
-    async def __new__(cls, client, base, user, channel, amount, render_after, event=None):
-        player = base.create_user_player(user)
-        
-        waiter = Future(KOKORO)
-        if player.total >= 21:
-            if render_after:
-                embed = player.create_after_embed(amount)
-                try:
-                    if event is None:
-                        message = await client.message_create(
-                            channel,
-                            embed = embed,
-                            components = GAME_21_ROW_DISABLED,
-                        )
-                    else:
-                        if not event.is_acknowledged():
-                            await client.interaction_application_command_acknowledge(event)
-                        
-                        message = await client.interaction_followup_message_create(
-                            event,
-                            embed = embed,
-                            components = GAME_21_ROW_DISABLED,
-                        )
-                except GeneratorExit:
-                    raise
-                
-                except BaseException as err:
-                    if should_render_exception(err):
-                        await client.events.error(client, f'{cls.__name__}.__new__', err)
-                    
-                    message = None
-            else:
-                message = None
-            
-            waiter.set_result(GAME_21_RESULT_FINISH)
-        else:
-            embed = player.create_gamble_embed(amount)
-            
-            try:
-                if event is None:
-                    message = await client.message_create(
-                        channel,
-                        embed = embed,
-                        components = GAME_21_ROW_ENABLED,
-                    )
-                else:
-                    if not event.is_acknowledged():
-                        await client.interaction_application_command_acknowledge(event)
-                    
-                    message = await client.interaction_followup_message_create(
-                        event,
-                        embed = embed,
-                        components = GAME_21_ROW_ENABLED,
-                    )
-            except GeneratorExit:
-                raise
-            
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, f'{cls.__name__}.__new__', err)
-                
-                waiter.set_result_if_pending(GAME_21_RESULT_INITIALIZATION_ERROR)
-                message = None
-        
-        self = object.__new__(cls)
-        self.player = player
-        self.waiter = waiter
-        self.message = message
-        self.channel = channel
-        self.amount = amount
-        self.client = client
-        self.render_after = render_after
-        self.event = event
-        
-        if message is None:
-            self._timeouter = None
-            self.canceller = None
-            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
-        else:
-            self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
-            self.canceller = cls._canceller
-            self._gui_state = GUI_STATE_READY
-            
-            client.slasher.add_component_interaction_waiter(message, self)
-        
-        return self
-    
-    
-    async def __call__(self, interaction_event):
-        client = self.client
-        if (interaction_event.user is not self.player.user):
-            await client.interaction_component_acknowledge(interaction_event)
-            return
-        
-        self.event = interaction_event
-        
-        if self._gui_state != GUI_STATE_READY:
-            await client.interaction_component_acknowledge(interaction_event)
-            return
-        
-        custom_id = interaction_event.interaction.custom_id
-        
-        if (custom_id == GAME_21_CUSTOM_ID_NEW):
-            game_ended = self.player.pull_card()
-            
-        elif (custom_id == GAME_21_CUSTOM_ID_STOP):
-            game_ended = True
-        
-        else:
-            # should not happen
-            return
-        
-        if game_ended:
-            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
-            self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
-            
-            self.cancel()
-            if self.render_after:
-                await self._canceller_render_after()
-            return
-        
-        self._gui_state = GUI_STATE_EDITING
-        
-        embed = self.player.create_gamble_embed(self.amount)
-        
-        try:
-            await client.interaction_component_message_edit(
-                interaction_event,
-                embed = embed,
-            )
-        except GeneratorExit as err:
-            self._gui_state = GUI_STATE_CANCELLING
-            self.cancel(err)
-            self.waiter.set_result_if_pending(GAME_21_RESULT_IN_GAME_ERROR)
-            raise
-        
-        except BaseException as err:
-            self._gui_state = GUI_STATE_CANCELLED
-            self.cancel()
-            
-            if should_render_exception(err):
-                await client.events.error(client, f'{self.__class__.__name__}.__new__', err)
-            
-            self.waiter.set_result_if_pending(GAME_21_RESULT_IN_GAME_ERROR)
-        else:
-            self._gui_state = GUI_STATE_READY
-    
-    
-    async def _canceller(self, exception):
-        client = self.client
-        message = self.message
-        
-        client.slasher.remove_component_interaction_waiter(message, self)
-        
-        if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
-            # the message is not our, we should not do anything with it.
-            return
-        
-        self._gui_state = GUI_STATE_CANCELLED
-        
-        if exception is None:
-            if self.render_after:
-                await self._canceller_render_after()
-            return
-        
-        if isinstance(exception, TimeoutError):
-            self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_TIMEOUT)
-            if self.render_after:
-                await self._canceller_render_after()
-            else:
-                interaction_event = self.event
-                if interaction_event is None:
-                    coroutine = client.message_edit(
-                        self.message,
-                        components = GAME_21_ROW_DISABLED,
-                    )
-                
-                else:
-                    if interaction_event.type is InteractionType.application_command:
-                        coroutine = client.interaction_response_message_edit(
-                            interaction_event,
-                            components = GAME_21_ROW_DISABLED,
-                        )
-                    elif interaction_event.type is InteractionType.message_component:
-                        if interaction_event.is_unanswered():
-                            coroutine = client.interaction_component_message_edit(
-                                interaction_event,
-                                components = GAME_21_ROW_DISABLED,
-                            )
-                        else:
-                            coroutine = client.interaction_response_message_edit(
-                                interaction_event,
-                                components = GAME_21_ROW_DISABLED,
-                            )
-                    
-                    else:
-                        return
-                
-                try:
-                    await coroutine
-                except GeneratorExit:
-                    raise
-                except BaseException as err:
-                    if should_render_exception(err):
-                        await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
-            return
-        
-        self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
-        timeouter = self._timeouter
-        if (timeouter is not None):
-            timeouter.cancel()
-        
-        # We do nothing.
-    
-    def cancel(self, exception=None):
-        canceller = self.canceller
-        if canceller is None:
-            return
-        
-        self.canceller = None
-        
-        timeouter = self._timeouter
-        if (timeouter is not None):
-            self._timeouter = None
-            timeouter.cancel()
-        
-        return Task(canceller(self, exception), KOKORO)
-    
-    
-    async def _canceller_render_after(self):
-        # Do not edit twice
-        self.render_after = False
-        
-        client = self.client
-        embed = self.player.create_after_embed(self.amount)
-        
-        interaction_event = self.event
-        
-        if interaction_event is None:
-            coroutine = client.message_edit(
-                self.message,
-                embed = embed,
-                components = GAME_21_ROW_DISABLED,
-            )
-        
-        else:
-            if interaction_event.type is InteractionType.application_command:
-                coroutine = client.interaction_response_message_edit(
-                    interaction_event,
-                    embed = embed,
-                    components = GAME_21_ROW_DISABLED,
-                )
-            elif interaction_event.type is InteractionType.message_component:
-                if interaction_event.is_unanswered():
-                    coroutine = client.interaction_component_message_edit(
-                        interaction_event,
-                        embed = embed,
-                        components = GAME_21_ROW_DISABLED,
-                    )
-                else:
-                    coroutine = client.interaction_response_message_edit(
-                        interaction_event,
-                        embed = embed,
-                        components = GAME_21_ROW_DISABLED,
-                    )
-            
-            else:
-                return
-        
-        try:
-            await coroutine
-        except GeneratorExit:
-            raise
-        except BaseException as err:
-            if should_render_exception(err):
-                await client.events.error(client, f'{self.__class__.__name__}._canceller_render_after', err)
-
-
-def game_21_precheck(client, user, channel, amount, require_guild):
-    if user.id in IN_GAME_IDS:
-        error_message = 'You are already at a game.'
-    elif amount < BET_MIN:
-        error_message = f'You must bet at least {BET_MIN} {EMOJI__HEART_CURRENCY.as_emoji}'
-    elif require_guild and (not isinstance(channel, ChannelGuildBase)):
-        error_message = 'Guild only command.'
-    else:
-        return
-    
-    return Embed('Ohoho', error_message, color=GAMBLING_COLOR)
-
-
-async def game_21_postcheck(client, user, channel, amount):
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                ]
-            ).where(
-                user_common_model.user_id == user.id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            entry_id, total_love, total_allocated = results[0]
-        else:
-            total_love = 0
-            total_allocated = 0
-            entry_id = -1
-        
-        if total_love-total_allocated < amount:
-            error_message = f'You have just {total_love} {EMOJI__HEART_CURRENCY.as_emoji}'
-        else:
-            return entry_id, None
-    
-    return entry_id, Embed('Ohoho', error_message, color=GAMBLING_COLOR)
-
-
-async def game_21_single_player(client, event, amount):
-    user = event.user
-    channel = event.channel
-    
-    IN_GAME_IDS.add(event.user.id)
-    try:
-        entry_id, embed = await game_21_postcheck(client, event.user, event.channel, amount)
-        if (embed is not None):
-            try:
-                await client.interaction_followup_message_create(event, embed=embed)
-            except GeneratorExit:
-                raise
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_single_player', err)
-            return
-        
-        base = Game21Base(channel.guild)
-        
-        player_client = base.create_bot_player(client)
-        
-        player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False, event=event)
-        player_user_waiter = player_runner.waiter
-        if player_user_waiter.done() or (entry_id == -1):
-            unallocate = False
-        else:
-            unallocate = True
-            async with DB_ENGINE.connect() as connector:
-                await connector.execute(USER_COMMON_TABLE. \
-                    update(user_common_model.id == entry_id). \
-                    values(total_allocated = user_common_model.total_allocated-amount)
-                )
-        
-        game_state = await player_user_waiter
-        
-        if game_state == GAME_21_RESULT_FINISH:
-            client_total = player_client.total
-            user_total = player_runner.player.total
-            if client_total > 21:
-                if user_total > 21:
-                    winner = None
-                else:
-                    winner = user
-            else:
-                if user_total > 21:
-                    winner = client
-                else:
-                    if client_total > user_total:
-                        winner = client
-                    elif client_total < user_total:
-                        winner = user
-                    else:
-                        winner = None
-            
-            if winner is client:
-                bonus = -amount
-            elif winner is None:
-                bonus = 0
-            else:
-                bonus = amount
-            
-            async with DB_ENGINE.connect() as connector:
-                expression = USER_COMMON_TABLE.update(user_common_model.user_id == user.id)
-                
-                if amount:
-                    expression = expression.values(total_love=user_common_model.total_love+bonus)
-                
-                if unallocate:
-                    expression = expression.values(total_allocated=user_common_model.total_allocated-amount)
-                
-                await connector.execute(expression)
-            
-            if winner is None:
-                title = f'How to draw.'
-            elif winner is client:
-                title = f'How to lose {amount} {EMOJI__HEART_CURRENCY.as_emoji}'
-            else:
-                title = f'How to win {amount} {EMOJI__HEART_CURRENCY.as_emoji}'
-            
-            embed = Embed(title, color=GAMBLING_COLOR)
-            player_runner.player.add_done_embed_field(embed)
-            player_client.add_done_embed_field(embed)
-            
-            interaction_event = player_runner.event
-            if (interaction_event is None):
-                if player_runner.message is None:
-                    coroutine = client.message_create(
-                        channel,
-                        embed = embed,
-                    )
-                else:
-                    coroutine = client.message_edit(
-                        channel,
-                        embed = embed,
-                        components = GAME_21_ROW_DISABLED,
-                    )
-            else:
-                if interaction_event.type is InteractionType.application_command:
-                    coroutine = client.interaction_response_message_edit(
-                        interaction_event,
-                        embed = embed,
-                        components = GAME_21_ROW_DISABLED,
-                    )
-                elif interaction_event.type is InteractionType.message_component:
-                    if interaction_event.is_unanswered():
-                        coroutine = client.interaction_component_message_edit(
-                            interaction_event,
-                            embed = embed,
-                            components = GAME_21_ROW_DISABLED,
-                        )
-                    else:
-                        coroutine = client.interaction_response_message_edit(
-                            interaction_event,
-                            embed = embed,
-                            components = GAME_21_ROW_DISABLED,
-                        )
-                else:
-                    return
-            
-            try:
-                await coroutine
-            except GeneratorExit:
-                raise
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_single_player', err)
-            
-            if (player_runner.message is not None) and channel.cached_permissions_for(client).can_manage_messages:
-                try:
-                    await client.reaction_clear(player_runner.message)
-                except GeneratorExit:
-                    raise
-                except BaseException as err:
-                    if should_render_exception(err):
-                        await client.events.error(client, 'game_21_single_player', err)
-            
-            return
-        
-        if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
-            if entry_id != -1:
-                async with DB_ENGINE.connect() as connector:
-                    expression = USER_COMMON_TABLE.update(
-                        user_common_model.id == entry_id
-                    ).values(
-                        total_love = user_common_model.total_love-amount
-                    )
-                    
-                    if unallocate:
-                        expression = expression.values(
-                            total_allocated = user_common_model.total_allocated-amount
-                        )
-                    
-                    await connector.execute(expression)
-            
-            embed = Embed(f'Timeout occurred, you lost your {amount} {EMOJI__HEART_CURRENCY.as_emoji} forever.')
-            
-            if player_runner.message is None:
-                coroutine = client.interaction_followup_message_create(event, embed=embed)
-            else:
-                coroutine = client.message_edit(player_runner.message, embed=embed)
-            
-            try:
-                await coroutine
-            except GeneratorExit:
-                raise
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_single_player', err)
-                return
-            
-            return
-        
-        # Error occurred
-        if unallocate:
-            async with DB_ENGINE.connect() as connector:
-                expression = USER_COMMON_TABLE. \
-                    update(user_common_model.id == entry_id). \
-                    values(total_allocated = user_common_model.total_allocated-amount)
-                
-                await connector.execute(expression)
-    
-    finally:
-        IN_GAME_IDS.discard(user.id)
-
-
-def create_join_embed(users, amount):
-    description_parts = [
-        'Bet amount: ', str(amount), ' ', EMOJI__HEART_CURRENCY.as_emoji, '\n'
-        'Creator: ', users[0].full_name, '\n',
-    ]
-    
-    if len(users) > 1:
-        description_parts.append('\nJoined users:\n')
-        for user in users[1:]:
-            description_parts.append(user.full_name)
-            description_parts.append('\n')
-    
-    description_parts.append('\nReact with ')
-    description_parts.append(GAME_21_EMOJI_ENTER.as_emoji)
-    description_parts.append(' to join.')
-    
-    description = ''.join(description_parts)
-    
-    return Embed('Game 21 multiplayer', description, color=GAMBLING_COLOR)
-
-
-async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, joined_user_ids, private_channel,
-        entry_id):
-    try:
-        private_channel = await client.channel_private_create(user)
-    except GeneratorExit:
-        raise
-    except BaseException as err:
-        if not isinstance(err, ConnectionError):
-            await client.events.error(client, 'game_21_mp_user_joiner', err)
-        
-        return
-    
-    if user.id in IN_GAME_IDS:
-        embed = Embed('Ohoho', 'You are already at a game.', color=GAMBLING_COLOR)
-        try:
-            await client.message_create(private_channel, embed=embed)
-        except GeneratorExit:
-            raise
-        except BaseException as err:
-            if should_render_exception(err):
-                await client.events.error(client, 'game_21_mp_user_joiner', err)
-        
-        return
-    
-    result = False
-    IN_GAME_IDS.add(user.id)
-    joined_user_ids.add(user.id)
-    
-    entry_id = -1
-    
-    try:
-        entry_id, embed = await game_21_postcheck(client, user, private_channel, amount)
-        if (embed is None):
-            embed = Embed('21 multiplayer game joined.',
-                f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
-                f'Guild: {guild.name}\n'
-                f'Channel: {source_channel.mention}',
-                    color=GAMBLING_COLOR)
-            
-            try:
-                await client.message_create(private_channel, embed)
-            except GeneratorExit:
-                raise
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_mp_user_joiner', err)
-                
-            else:
-                result = True
-    finally:
-        if result:
-            if (entry_id != -1):
-                async with DB_ENGINE.connect() as connector:
-                    await connector.execute(USER_COMMON_TABLE. \
-                        update(user_common_model.id == entry_id). \
-                        values(total_allocated = user_common_model.total_allocated+amount)
-                    )
-            
-            joined_tuple = user, private_channel, entry_id
-        
-        else:
-            IN_GAME_IDS.discard(user.id)
-            joined_user_ids.discard(user.id)
-            joined_tuple = None
-    
-    return joined_tuple
-
-
-
-async def game_21_refund(entry_id, amount):
-    async with DB_ENGINE.connect() as connector:
-        await connector.execute(USER_COMMON_TABLE. \
-            update(user_common_model.id == entry_id). \
-            values(total_allocated = user_common_model.total_allocated-amount)
-        )
-
-async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, joined_user_ids, private_channel,
-        entry_id):
-    IN_GAME_IDS.discard(user.id)
-    joined_user_ids.discard(user.id)
-    
-    await game_21_refund(entry_id, amount)
-    
-    embed = Embed('21 multiplayer game left.',
-        f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
-        f'Guild: {guild.name}\n'
-        f'Channel: {source_channel.mention}',
-            color=GAMBLING_COLOR)
-    
-    try:
-        await client.message_create(private_channel, embed=embed)
-    except GeneratorExit:
-        raise
-    except BaseException as err:
-        if should_render_exception(err):
-            await client.events.error(client, 'game_21_mp_user_leaver', err)
-
-
-async def game_21_mp_cancelled(client, user, guild, source_channel, amount, private_channel, joined_user_ids, entry_id):
-    IN_GAME_IDS.discard(user.id)
-    joined_user_ids.discard(user.id)
-    
-    async with DB_ENGINE.connect() as connector:
-        await connector.execute(USER_COMMON_TABLE. \
-            update(user_common_model.id == entry_id). \
-            values(total_allocated = user_common_model.total_allocated-amount)
-        )
-    
-    embed = Embed('21 multiplayer game was cancelled.',
-        (
-            f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
-            f'Guild: {guild.name}\n'
-            f'Channel: {source_channel.mention}'
-        ),
-        color = GAMBLING_COLOR,
-    )
-    
-    try:
-        await client.message_create(private_channel, embed)
-    except GeneratorExit:
-        raise
-    except BaseException as err:
-        if should_render_exception(err):
-            await client.events.error(client, 'game_21_mp_cancelled', err)
-
-
-def game_21_mp_notify_cancellation(client, joined_tuples, amount, channel, guild, joined_user_ids):
-    Task(game_21_refund(joined_tuples[0][2], amount), KOKORO)
-    for notify_user, private_channel, entry_id in joined_tuples[1:]:
-        Task(game_21_mp_cancelled(client, notify_user, guild, channel, amount, private_channel,
-            joined_user_ids, entry_id), KOKORO)
-
-GAME_21_MP_MAX_USERS = 10
-GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'
-
-class Game21JoinGUI:
-    __slots__ = ('client', 'channel', 'message', 'waiter', 'amount', 'joined_tuples', '_timeouter', '_gui_state',
-        'canceller', 'user_locks', 'joined_user_ids', 'workers', 'guild', 'message_sync_last_state',
-        'message_sync_in_progress', 'message_sync_handle', 'event')
-    
-    async def __new__(cls, client, channel, joined_user_tuple, amount, joined_user_ids, guild, event):
-        waiter = Future(KOKORO)
-        
-        embed = create_join_embed([joined_user_tuple[0]], amount)
-        embed.add_footer(GAME_21_MP_FOOTER)
-        
-        try:
-            if not event.is_acknowledged():
-                await client.interaction_application_command_acknowledge(event)
-            
-            message = await client.interaction_followup_message_create(
-                event,
-                embed = embed,
-                components = GAME_21_JOIN_ROW_ENABLED,
-            )
-        
-        except GeneratorExit:
-            waiter.set_result_if_pending(GAME_21_RESULT_INITIALIZATION_ERROR)
-            raise
-        
-        except BaseException as err:
-            if should_render_exception(err):
-                await client.events.error(client, f'{cls.__name__}.__new__', err)
-            
-            waiter.set_result_if_pending(GAME_21_RESULT_INITIALIZATION_ERROR)
-            message = None
-        
-        self = object.__new__(cls)
-        self.client = client
-        self.channel = channel
-        self.message = message
-        self.waiter = waiter
-        self.amount = amount
-        self.joined_tuples = [joined_user_tuple]
-        self.user_locks = set()
-        self.joined_user_ids = joined_user_ids
-        self.workers = set()
-        self.guild = guild
-        self.message_sync_last_state = self.joined_tuples.copy()
-        self.message_sync_in_progress = False
-        self.message_sync_handle = None
-        self.event = event
-        
-        if message is None:
-            self._timeouter = None
-            self.canceller = None
-            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
-        else:
-            self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
-            self.canceller = cls._canceller
-            self._gui_state = GUI_STATE_READY
-            
-            client.slasher.add_component_interaction_waiter(message, self)
-        
-        return self
-    
-    
-    async def __call__(self, interaction_event):
-        custom_id = interaction_event.interaction.custom_id
-        
-        client = self.client
-        self.event = interaction_event
-        
-        if custom_id == GAME_21_CUSTOM_ID_ENTER:
-            user = interaction_event.user
-            
-            if user.id in self.user_locks:
-                # already doing something.
-                await client.interaction_component_acknowledge(interaction_event)
-                return
-            
-            joined_tuples = self.joined_tuples
-            if user is joined_tuples[0][0]:
-                # Source user cannot join / leave
-                await client.interaction_component_acknowledge(interaction_event)
-                return
-            
-            for maybe_user, private_channel, entry_id in joined_tuples[1:]:
-                if maybe_user is user:
-                    join = False
-                    break
-            else:
-                private_channel = None
-                join = True
-                entry_id = -1
-            
-            if join and (len(joined_tuples) == GAME_21_MP_MAX_USERS):
-                await client.interaction_component_acknowledge(interaction_event)
-                return
-            
-            self.user_locks.add(user.id)
-            try:
-                if join:
-                    coroutine_function = game_21_mp_user_joiner
-                else:
-                    coroutine_function = game_21_mp_user_leaver
-                
-                task = Task(coroutine_function(client, user, self.guild, self.channel, self.amount,
-                    self.joined_user_ids, private_channel, entry_id), KOKORO)
-                
-                Task(self.do_acknowledge(interaction_event), KOKORO)
-                
-                self.workers.add(task)
-                try:
-                    result = await task
-                    if join:
-                        if (result is not None):
-                            self.joined_tuples.append(result)
-                    else:
-                        for index in range(1, len(joined_tuples)):
-                            maybe_user = joined_tuples[index][0]
-                            if maybe_user is user:
-                                del joined_tuples[index]
-                                break
-                finally:
-                    self.workers.discard(task)
-            
-            finally:
-                self.user_locks.discard(user.id)
-            
-            self.maybe_message_sync(interaction_event)
-            return
-        
-        if custom_id == GAME_21_CUSTOM_ID_START:
-            if (interaction_event.user is not self.joined_tuples[0][0]):
-                await client.interaction_component_acknowledge(interaction_event)
-                return
-            
-            self._gui_state = GUI_STATE_SWITCHING_CONTEXT
-            
-            # Wait for all worker to finish
-            await self._wait_for_cancellation()
-            
-            self.waiter.set_result_if_pending(GAME_21_RESULT_FINISH)
-            self.cancel()
-            return
-        
-        if custom_id == GAME_21_CUSTOM_ID_CANCEL:
-            if (interaction_event.user is not self.joined_tuples[0][0]):
-                await client.interaction_component_acknowledge(interaction_event)
-                return
-            
-            self._gui_state = GUI_STATE_CANCELLING
-            
-            # Wait for all workers to finish
-            await self._wait_for_cancellation()
-            
-            self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_BY_USER)
-            self.cancel()
-            return
-    
-    async def _canceller(self, exception):
-        client = self.client
-        message = self.message
-        
-        client.slasher.remove_component_interaction_waiter(message, self)
-        
-        message_sync_handle = self.message_sync_handle
-        if (message_sync_handle is not None):
-            self.message_sync_handle = None
-            message_sync_handle.cancel()
-        
-        if self._gui_state == GUI_STATE_SWITCHING_CONTEXT:
-            # the message is not our, we should not do anything with it.
-            return
-        
-        self._gui_state = GUI_STATE_CANCELLED
-        
-        if exception is None:
-            return
-        
-        await self._wait_for_cancellation()
-        game_21_mp_notify_cancellation(client, self.joined_tuples, self.amount, self.channel, self.guild,
-            self.joined_user_ids)
-        
-        if isinstance(exception, TimeoutError):
-            self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_TIMEOUT)
-            
-            interaction_event = self.event
-            if interaction_event is None:
-                coroutine = client.message_edit(
-                    self.message,
-                    components = GAME_21_JOIN_ROW_DISABLED,
-                )
-            
-            else:
-                if interaction_event.type is InteractionType.application_command:
-                    coroutine = client.interaction_response_message_edit(
-                        interaction_event,
-                        components = GAME_21_JOIN_ROW_DISABLED,
-                    )
-                elif interaction_event.type is InteractionType.message_component:
-                    if interaction_event.is_unanswered():
-                        coroutine = client.interaction_component_message_edit(
-                            interaction_event,
-                            components = GAME_21_JOIN_ROW_DISABLED,
-                        )
-                    else:
-                        coroutine = client.interaction_response_message_edit(
-                            interaction_event,
-                            components = GAME_21_JOIN_ROW_DISABLED,
-                        )
-                
-                else:
-                    return
-            
-            try:
-                await coroutine
-            except GeneratorExit:
-                raise
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, f'{self.__class__.__name__}._canceller', err)
-        
-        
-        self.waiter.set_result_if_pending(GAME_21_RESULT_CANCELLED_UNKNOWN)
-        timeouter = self._timeouter
-        if (timeouter is not None):
-            timeouter.cancel()
-    
-    
-    def cancel(self, exception=None):
-        canceller = self.canceller
-        if canceller is None:
-            return
-        
-        self.canceller = None
-        
-        timeouter = self._timeouter
-        if (timeouter is not None):
-            timeouter.cancel()
-        
-        return Task(canceller(self, exception), KOKORO)
-    
-    
-    async def _wait_for_cancellation(self):
-        workers = self.workers
-        if workers:
-            future = WaitTillAll(workers, KOKORO)
-            future_or_timeout(future, GAME_21_CANCELLATION_TIMEOUT)
-            done, pending = await future
-            for future in chain(done, pending):
-                future.cancel()
-    
-    def maybe_message_sync(self, interaction_event):
-        if self.message_sync_in_progress:
-            if interaction_event.is_unanswered():
-                Task(self.do_acknowledge(interaction_event), KOKORO)
-        
-        else:
-            self.message_sync_in_progress = True
-            Task(self.do_message_sync(), KOKORO)
-    
-    async def do_acknowledge(self, interaction_event):
-        client = self.client
-        try:
-            await client.interaction_component_acknowledge(interaction_event)
-        except GeneratorExit:
-            raise
-        
-        except BaseException as err:
-            if should_render_exception(err):
-                await client.events.error(client, f'{self.__class__.__name__}.do_acknowledge', err)
-    
-    async def do_message_sync(self):
-        while True:
-            if (self._gui_state != GUI_STATE_READY) or (self.joined_tuples == self.message_sync_last_state):
-                self.message_sync_in_progress = False
-                return
-            
-            self.message_sync_last_state = self.joined_tuples.copy()
-            
-            embed = create_join_embed([item[0] for item in self.joined_tuples], self.amount)
-            embed.add_footer(GAME_21_MP_FOOTER)
-            
-            if len(self.joined_tuples) >= GAME_21_MP_MAX_USERS:
-                components = GAME_21_JOIN_ROW_FULL
-            else:
-                components = GAME_21_JOIN_ROW_ENABLED
-                
-            client = self.client
-            interaction_event = self.event
-            if interaction_event is None:
-                coroutine = client.message_edit(
-                    self.message,
-                    embed = embed,
-                    components = components,
-                )
-            else:
-                if interaction_event.type is InteractionType.application_command:
-                    coroutine = client.interaction_response_message_edit(
-                        interaction_event,
-                        embed = embed,
-                        components = components,
-                    )
-                elif interaction_event.type is InteractionType.message_component:
-                    if interaction_event.is_unanswered():
-                        coroutine = client.interaction_component_message_edit(
-                            interaction_event,
-                            embed = embed,
-                            components = components,
-                        )
-                    else:
-                        coroutine = client.interaction_response_message_edit(
-                            interaction_event,
-                            embed = embed,
-                            components = components,
-                        )
-                else:
-                    return
-            
-            task = Task(coroutine, KOKORO)
-            self.workers.add(task)
-            try:
-                try:
-                    await task
-                except GeneratorExit:
-                    raise
-                except BaseException as err:
-                    if should_render_exception(err):
-                        await client.events.error(client, f'{self.__class__.__name__}.do_message_sync', err)
-            finally:
-                self.workers.discard(task)
-
-
-async def game_21_multi_player(client, event, amount):
-    user = event.user
-    channel = event.channel
-    
-    guild = channel.guild
-    
-    IN_GAME_IDS.add(user.id)
-    joined_user_ids = set()
-    joined_user_ids.add(user.id)
-    try:
-        entry_id, embed = await game_21_postcheck(client, user, channel, amount)
-        if (embed is not None):
-            return embed
-        
-        try:
-            private_channel = await client.channel_private_create(user)
-        except GeneratorExit:
-            raise
-        
-        except BaseException as err:
-            if not isinstance(err, ConnectionError):
-                await client.events.error(client, 'game_21_multi_player', err)
-            
-            return
-        
-        embed = Embed(
-            '21 multiplayer game created.',
-            (
-                f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
-                f'Guild: {guild.name}\n'
-                f'Channel: {channel.mention}'
-            ),
-            color = GAMBLING_COLOR
-        )
-        
-        try:
-            await client.message_create(private_channel, embed)
-        except GeneratorExit:
-            raise
-        
-        except ConnectionError:
-            return
-        
-        except BaseException as err:
-            if (not isinstance(err, DiscordException)) or (err.code != ERROR_CODES.cannot_message_user):
-                await client.events.error(client, 'game_21_multi_player', err)
-                return
-            
-            private_open = False
-        else:
-            private_open = True
-        
-        if (not private_open):
-            embed = Embed('Error', 'I cannot send private message to you.', color=GAMBLING_COLOR)
-            
-            try:
-                await client.interaction_response_message_edit(event, embed=embed)
-            except GeneratorExit:
-                raise
-            
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_multi_player', err)
-            return
-        
-        join_gui = await Game21JoinGUI(client, channel, (user, private_channel, entry_id), amount, joined_user_ids,
-            guild, event)
-        
-        game_state = await join_gui.waiter
-        message = join_gui.message
-        event = join_gui.event
-        
-        if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
-            embed = Embed('Timeout', 'Timeout occurred, the hearts were refund', color=GAMBLING_COLOR)
-            
-            try:
-                await client.interaction_response_message_edit(event, embed=embed)
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_multi_player', err)
-            return
-        
-        if not (game_state == GAME_21_RESULT_FINISH or game_state == GAME_21_RESULT_CANCELLED_BY_USER):
-            return
-        
-        if channel.cached_permissions_for(client).can_manage_messages:
-            try:
-                await client.reaction_clear(message)
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_multi_player', err)
-                return
-        
-        if game_state == GAME_21_RESULT_CANCELLED_BY_USER:
-            game_21_mp_notify_cancellation(client, join_gui.joined_tuples, amount, channel, guild, joined_user_ids)
-            
-            embed = Embed(
-                'Cancelled',
-                'The game has been cancelled, the hearts are refund.',
-                color = GAMBLING_COLOR,
-            )
-            
-            if event.type is InteractionType.application_command:
-                coroutine = client.interaction_response_message_edit(
-                    event,
-                    embed = embed,
-                    components = GAME_21_JOIN_ROW_DISABLED,
-                )
-            elif event.type is InteractionType.message_component:
-                if event.is_unanswered():
-                    coroutine = client.interaction_component_message_edit(
-                        event,
-                        embed = embed,
-                        components = GAME_21_JOIN_ROW_DISABLED,
-                    )
-                else:
-                    coroutine = client.interaction_response_message_edit(
-                        event,
-                        embed = embed,
-                        components = GAME_21_JOIN_ROW_DISABLED,
-                    )
-            
-            else:
-                return
-            
-            try:
-                await coroutine
-            except GeneratorExit:
-                raise
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_multi_player', err)
-            return
-        
-        joined_tuples = join_gui.joined_tuples
-        if len(joined_tuples) == 1:
-            await game_21_refund(joined_tuples[0][2], amount)
-            
-            embed = Embed(
-                'RIP',
-                'Starting the game alone, is just sad.',
-                color = GAMBLING_COLOR,
-            )
-            
-            if event.type is InteractionType.application_command:
-                coroutine = client.interaction_response_message_edit(
-                    event,
-                    embed = embed,
-                    components = GAME_21_JOIN_ROW_DISABLED,
-                )
-            elif event.type is InteractionType.message_component:
-                if event.is_unanswered():
-                    coroutine = client.interaction_component_message_edit(
-                        event,
-                        embed = embed,
-                        components = GAME_21_JOIN_ROW_DISABLED,
-                    )
-                else:
-                    coroutine = client.interaction_response_message_edit(
-                        event,
-                        embed = embed,
-                        components = GAME_21_JOIN_ROW_DISABLED,
-                    )
-            else:
-                return
-            
-            try:
-                await coroutine
-            except GeneratorExit:
-                raise
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_multi_player', err)
-            return
-        
-        total_bet_amount = len(joined_tuples)*amount
-        # Update message
-        description_parts = [
-            'Total bet amount: ',
-            str(total_bet_amount),
-            EMOJI__HEART_CURRENCY.as_emoji,
-            '\n\nPlayers:\n',
-        ]
-        
-        for tuple_user, tuple_channel, entry_id in joined_tuples:
-            description_parts.append(tuple_user.full_name)
-            description_parts.append('\n')
-        
-        del description_parts[-1]
-        
-        description = ''.join(description_parts)
-        embed = Embed(
-            'Game 21 in progress',
-            description,
-            color = GAMBLING_COLOR
-        )
-        
-        if event.type is InteractionType.application_command:
-            coroutine = client.interaction_response_message_edit(
-                event,
-                embed = embed,
-                components = GAME_21_JOIN_ROW_DISABLED,
-            )
-        elif event.type is InteractionType.message_component:
-            if event.is_unanswered():
-                coroutine = client.interaction_component_message_edit(
-                    event,
-                    embed = embed,
-                    components = GAME_21_JOIN_ROW_DISABLED,
-                )
-            else:
-                coroutine = client.interaction_response_message_edit(
-                    event,
-                    embed = embed,
-                    components = GAME_21_JOIN_ROW_DISABLED,
-                )
-        else:
-            return
-    
-        try:
-            await coroutine
-        except GeneratorExit:
-            raise
-        except BaseException as err:
-            game_21_mp_notify_cancellation(client, joined_tuples, amount, channel, guild, joined_user_ids)
-            if should_render_exception(err):
-                await client.events.error(client, 'game_21_multi_player', err)
-            return
-        
-        # Start game
-        base = Game21Base(guild)
-        tasks = []
-        for tuple_user, tuple_channel, entry_id in joined_tuples:
-            task = Task(Game21PlayerRunner(client, base, tuple_user, tuple_channel, amount, True), KOKORO)
-            tasks.append(task)
-        
-        done, pending = await WaitTillAll(tasks, KOKORO)
-        
-        waiters_to_runners = {}
-        
-        for task in done:
-            runner = await task
-            waiter = runner.waiter
-            waiters_to_runners[waiter] = runner
-        
-        done, pending = await WaitTillAll(waiters_to_runners, KOKORO)
-        
-        max_point = 0
-        losers = []
-        winners = []
-        for waiter in done:
-            game_state = waiter.result()
-            runner = waiters_to_runners[waiter]
-            if game_state != GAME_21_RESULT_FINISH:
-                losers.append(user)
-                continue
-            
-            user_total = runner.player.total
-            user = runner.player.user
-            if user_total > 21:
-                losers.append(user)
-                continue
-            
-            if user_total > max_point:
-                losers.extend(winners)
-                winners.clear()
-                winners.append(user)
-                max_point = user_total
-                continue
-            
-            if user_total == max_point:
-                winners.append(user)
-                continue
-            
-            losers.append(user)
-            continue
-        
-        user_entry_map = {}
-        for tuple_user, tuple_channel, entry_id in joined_tuples:
-            user_entry_map[tuple_user] = entry_id
-        
-        loser_entry_ids = None
-        if losers:
-            for user in losers:
-                entry_id = user_entry_map[user]
-                if entry_id == -1:
-                    continue
-                
-                if loser_entry_ids is None:
-                    loser_entry_ids = []
-                loser_entry_ids.append(entry_id)
-        
-        winner_entry_ids = None
-        if winners:
-            for user in winners:
-                entry_id = user_entry_map[user]
-                if entry_id == -1:
-                    continue
-                
-                if winner_entry_ids is None:
-                    winner_entry_ids = []
-                winner_entry_ids.append(entry_id)
-        
-        async with DB_ENGINE.connect() as connector:
-            if (loser_entry_ids is not None):
-                await connector.execute(USER_COMMON_TABLE. \
-                    update(user_common_model.id.in_(loser_entry_ids)). \
-                    values(
-                        total_allocated = user_common_model.total_allocated-amount,
-                        total_love = user_common_model.total_love-amount,
-                    )
-                )
-                
-                if (winner_entry_ids is not None):
-                    won_per_user = int(len(losers)*amount//len(winners))
-                    
-                    await connector.execute(USER_COMMON_TABLE. \
-                        update(user_common_model.id.in_(winner_entry_ids)). \
-                        values(
-                            total_allocated = user_common_model.total_allocated-amount,
-                            total_love = user_common_model.total_love+won_per_user,
-                        )
-                    )
-                
-            else:
-                if (winner_entry_ids is not None):
-                    await connector.execute(USER_COMMON_TABLE. \
-                        update(user_common_model.id.in_(winner_entry_ids)). \
-                        values(
-                            total_allocated = user_common_model.total_allocated-amount,
-                        )
-                    )
-        
-        description_parts = [
-            'Total bet amount: ',
-            str(total_bet_amount),
-            EMOJI__HEART_CURRENCY.as_emoji,
-            '\n\n',
-        ]
-        
-        if winners:
-            description_parts.append('Winners:\n')
-            for user in winners:
-                description_parts.append(user.full_name)
-                description_parts.append('\n')
-            
-            description_parts.append('\n')
-        
-        if losers:
-            description_parts.append('Losers:\n')
-            for user in losers:
-                description_parts.append(user.full_name)
-                description_parts.append('\n')
-        
-        if description_parts[-1] == '\n':
-            del description_parts[-1]
-        
-        description = ''.join(description_parts)
-        
-        embed = Embed('Game ended', description, color=GAMBLING_COLOR)
-        for runner in waiters_to_runners.values():
-            runner.player.add_done_embed_field(embed)
-        
-
-        if event.type is InteractionType.application_command:
-            coroutine = client.interaction_response_message_edit(
-                event,
-                embed = embed,
-                components = GAME_21_JOIN_ROW_DISABLED,
-            )
-        elif event.type is InteractionType.message_component:
-            if event.is_unanswered():
-                coroutine = client.interaction_component_message_edit(
-                    event,
-                    embed = embed,
-                    components = GAME_21_JOIN_ROW_DISABLED,
-                )
-            else:
-                coroutine = client.interaction_response_message_edit(
-                    event,
-                    embed = embed,
-                    components = GAME_21_JOIN_ROW_DISABLED,
-                )
-        else:
-            return
-        
-        try:
-            await coroutine
-        except GeneratorExit:
-            raise
-        except BaseException as err:
-            if should_render_exception(err):
-                await client.events.error(client, 'game_21_multi_player', err)
-        
-        return
-    
-    finally:
-        for user_id in joined_user_ids:
-            IN_GAME_IDS.discard(user_id)
-
 
 @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
 @set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ELEVATED, True)
@@ -2941,11 +1231,11 @@ async def gift(client, event,
             source_user_total_allocated = 0
         
         if source_user_total_love == 0:
-            yield Embed('So lonely...', 'You do not have any hearts to gift.', color=GAMBLING_COLOR)
+            yield Embed('So lonely...', 'You do not have any hearts to gift.', color=COLOR__GAMBLING)
             return
         
         if source_user_total_love == source_user_total_allocated:
-            yield Embed('Like a flower', 'Whithering to the dust.', color=GAMBLING_COLOR)
+            yield Embed('Like a flower', 'Whithering to the dust.', color=COLOR__GAMBLING)
             return
         
         response = await connector.execute(
@@ -2996,7 +1286,7 @@ async def gift(client, event,
         
     embed = Embed('Aww, so lovely',
         f'You gifted {amount} {EMOJI__HEART_CURRENCY.as_emoji} to {target_user.full_name}',
-        color=GAMBLING_COLOR,
+        color=COLOR__GAMBLING,
     ).add_field(
         f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
         f'{source_user_total_love} -> {source_user_new_love}',
@@ -3020,7 +1310,7 @@ async def gift(client, event,
     
     embed = Embed('Aww, love is in the air',
         f'You have been gifted {amount} {EMOJI__HEART_CURRENCY.as_emoji} by {source_user.full_name}',
-        color = GAMBLING_COLOR,
+        color = COLOR__GAMBLING,
     ).add_field(
         f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
         f'{target_user_total_love} -> {target_user_new_total_love}',
@@ -3058,7 +1348,7 @@ async def award(client, event,
         abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
     
     if amount <= 0:
-        yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=GAMBLING_COLOR)
+        yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=COLOR__GAMBLING)
         return
     
     if (message is not None) and len(message) > 1000:
@@ -3132,7 +1422,7 @@ async def award(client, event,
     embed = Embed(
         f'You awarded {target_user.full_name} with {amount} {awarded_with}',
         f'Now they are up from {up_from} to {up_to} {awarded_with}',
-        color = GAMBLING_COLOR,
+        color = COLOR__GAMBLING,
     )
     
     if (message is not None):
@@ -3151,7 +1441,7 @@ async def award(client, event,
     embed = Embed(
         'Aww, love is in the air',
         f'You have been awarded {amount} {awarded_with} by {event.user.full_name}',
-        color = GAMBLING_COLOR,
+        color = COLOR__GAMBLING,
     ).add_field(
         f'Your {awarded_with}',
         f'{up_from} -> {up_to}',
@@ -3223,7 +1513,7 @@ async def take(client, event,
     yield Embed(
         f'You took {amount} {EMOJI__HEART_CURRENCY.as_emoji} away from {target_user.full_name}',
         f'They got down from {target_user_total_love} to {target_user_new_total_love} {EMOJI__HEART_CURRENCY.as_emoji}',
-        color = GAMBLING_COLOR,
+        color = COLOR__GAMBLING,
     )
     
     return
@@ -3305,7 +1595,7 @@ async def transfer(client, event,
     
     embed = Embed(
         f'You transferred {source_user.full_name}\'s hearts to {target_user.full_name}',
-        color = GAMBLING_COLOR,
+        color = COLOR__GAMBLING,
     ).add_field(
         f'Their {EMOJI__HEART_CURRENCY:e}',
         f'{target_user_total_love} -> {target_user_total_love+source_user_total_love}',
@@ -3326,7 +1616,7 @@ async def transfer(client, event,
     
     embed = Embed(
         f'{source_user.full_name}\'s {EMOJI__HEART_CURRENCY:r} has been transferred to you.',
-        color = GAMBLING_COLOR,
+        color = COLOR__GAMBLING,
     ).add_field(
         f'Your {EMOJI__HEART_CURRENCY:r}',
         f'{target_user_total_love} -> {target_user_total_love+source_user_total_love}',
@@ -3397,7 +1687,7 @@ async def currency_insert(client, event,
     
     yield Embed(
         'Inserting into currency table',
-        color = GAMBLING_COLOR,
+        color = COLOR__GAMBLING,
     ).add_field(
         'User',
         target_user.full_name,

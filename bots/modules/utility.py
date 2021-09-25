@@ -1,6 +1,5 @@
 import json, re
 from math import ceil
-from time import perf_counter
 from functools import partial as partial_func
 from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
@@ -21,7 +20,7 @@ from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 
 from bot_utils.tools import Pagination10step
-from bot_utils.shared import ROLE__NEKO_DUNGEON__TESTER, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, \
+from bot_utils.constants import ROLE__NEKO_DUNGEON__TESTER, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, \
     ROLE__NEKO_DUNGEON__ADMIN
 
 UTILITY_COLOR = Color(0x5dc66f)
@@ -826,17 +825,6 @@ async def in_role(client, event,
     pages = InRolePageGetter(users, guild, roles)
     
     await Pagination(client, event, pages, check=partial_func(in_role_pagination_check, event.user))
-
-
-
-@SLASH_CLIENT.interactions(is_global=True)
-async def ping():
-    """HTTP ping-pong."""
-    start = perf_counter()
-    yield
-    delay = (perf_counter()-start)*1000.0
-    
-    yield f'{delay:.0f} ms'
 
 
 @SLASH_CLIENT.interactions(is_global=True)
