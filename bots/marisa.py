@@ -38,6 +38,12 @@ from bot_utils.tools import choose, Cell
 
 Marisa : Client
 
+try:
+    Marisa.solarlink.add_node('127.0.0.1', 2333, 'youshallnotpass', None)
+except BaseException as err:
+    sys.stderr.write(f'Failed to connect to lavalink server: {err!r}.\n')
+
+
 Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())
 Marisa.command_processor.get_default_category().checks = checks.owner_only()
@@ -47,6 +53,27 @@ def marisa_help_embed_postprocessor(command_context, embed):
         embed.color = COLOR__MARISA_HELP
     
     embed.add_thumbnail(command_context.client.avatar_url)
+
+
+@Marisa.events
+async def track_end(client, event):
+    print(repr(event))
+
+@Marisa.events
+async def track_exception(client, event):
+    print(repr(event))
+
+@Marisa.events
+async def track_start(client, event):
+    print(repr(event))
+
+@Marisa.events
+async def track_stuck(client, event):
+    print(repr(event))
+
+@Marisa.events
+async def player_websocket_closed(client, event):
+    print(repr(event))
 
 
 Marisa.commands(
@@ -1041,7 +1068,6 @@ async def register_autocomplete(client, event):
     
     await client.application_command_guild_create(GUILD__NEKO_DUNGEON, application_command)
 
-
 AUTO_SUB = Marisa.interactions(
     None,
     name = 'auto-sub',
@@ -1049,16 +1075,37 @@ AUTO_SUB = Marisa.interactions(
     guild = GUILD__NEKO_DUNGEON,
 )
 
-@AUTO_SUB.interactions
-async def auto_sub(
-    value: ('str', 'some value')
-):
-    """Auto-sub"""
-    return value
-
-@auto_sub.autocomplete('value')
+@AUTO_SUB.autocomplete('value')
 async def try_auto_complete(value):
     if value is None:
         value = 'none'
     
     return [value, 'try']
+
+
+@AUTO_SUB.interactions
+async def auto_sub(
+    value: ('str', 'some value')
+):
+    """Auto-sub"""
+    return InteractionResponse(value, allowed_mentions=None)
+
+@AUTO_SUB.interactions
+async def auto_sub_2(
+    value: ('str', 'some value')
+):
+    """Auto-sub"""
+    return InteractionResponse(value, allowed_mentions=None)
+
+
+@auto_sub_2.autocomplete('value')
+async def auto_everything(value):
+    if value is None:
+        value = '*none*'
+    
+    return [value, 'value', 'ayaya']
+
+
+@Marisa.interactions(guild=388267636661682178)
+async def late_complete(laty: ('str', 'cake')):
+    return InteractionResponse(laty, allowed_mentions=None)

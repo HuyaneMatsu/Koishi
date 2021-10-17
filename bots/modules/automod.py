@@ -7,9 +7,45 @@ from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERAT
 
 Satori : Client
 
+class RegexPart:
+    __slots__ = ('part', )
+    def __new__(cls, part):
+        part = f'(?:{part})'
+        self = object.__new__(cls)
+        self.part = part
+        return self
+
+class MixedPart:
+    __slots__ = ('parts', )
+    
+    def __new__(cls, *parts):
+        self = object.__new__(cls)
+        self.parts = parts
+        return self
+    
+    def lower(self):
+        new = object.__new__(type(self))
+        new.parts = tuple(part.lower() if isinstance(part, str) else part for part in self.parts)
+        return new
+    
+    def __iter__(self):
+        for part in self.parts:
+            if isinstance(part, str):
+                for character in part:
+                    yield re_escape(character)
+            else:
+                yield part.part
+
+def iter_escaped(value):
+    if isinstance(value, str):
+        for character in value:
+            yield re_escape(character)
+    else:
+        yield from value
+
 FILTERS = (
     'dpy',
-    'd.py',
+    MixedPart(RegexPart('^|\s'), 'd.py'),
     'd py',
     'd_py',
     'd!py',
@@ -42,6 +78,10 @@ FILTERS = (
     'ditto',
     'migrate',
     'migration',
+    'discord.py-message-components',
+    'disnake',
+    'enhanced-discord.py',
+    'novus',
 )
 
 def trie_node_sort_key(node):
@@ -62,8 +102,7 @@ class TrieNode:
     def add(self, word):
         node = self
         nodes = node.nodes
-        for character in word.lower():
-            character = re_escape(character)
+        for character in iter_escaped(word.lower()):
             if (nodes is None):
                 nodes = {}
                 node.nodes = nodes

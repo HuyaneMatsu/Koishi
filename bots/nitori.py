@@ -68,8 +68,8 @@ GUILD_ICON_CHOICES = [
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def guild_icon(event,
-        choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
-            ):
+    choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
+):
     """Shows the guild's icon."""
     guild = event.guild
     if (guild is None) or guild.partial:
@@ -126,8 +126,8 @@ async def autocomplete_cake_type(value):
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def roll(
-        dice_count: (range(1, 7), 'With how much dice do you wanna roll?') = 1,
-            ):
+    dice_count: (range(1, 7), 'With how much dice do you wanna roll?') = 1,
+):
     """Rolls with dices."""
     amount = 0
     for _ in range(dice_count):
@@ -140,8 +140,8 @@ async def roll(
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def id_to_datetime_(
-        snowflake : ('int', 'Id please!'),
-            ):
+    snowflake : ('int', 'Id please!'),
+):
     """Converts the given Discord snowflake to time."""
     time = id_to_datetime(snowflake)
     return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
@@ -182,8 +182,8 @@ for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def repeat(
-        text : ('str', 'The content to repeat')
-            ):
+    text : ('str', 'The content to repeat')
+):
     """What should I exactly repeat?"""
     if not text:
         text = 'nothing to repeat'
@@ -271,8 +271,8 @@ async def why(client):
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def is_banned(client, event,
-        user: ('user', 'Who should I check?')
-            ):
+    user: ('user', 'Who should I check?')
+):
     """Checks whether the user is banned."""
     if not event.user_permissions.can_ban_users:
         abort('You need to have `ban users` permissions to do this.')
@@ -311,8 +311,8 @@ async def is_banned(client, event,
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def user_id(event,
-        user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
-            ):
+    user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
+):
     """Shows your or the selected user's id."""
     if user_id is None:
         user_id = event.user.id
@@ -328,7 +328,7 @@ MODERATOR_ROLE = Role.precreate(MODERATOR_ROLE_ID)
 @set_permission(TEST_GUILD, MODERATOR_ROLE, True)
 async def latest_users(event):
     """Shows the new users of the guild."""
-    date_limit = datetime.now() - timedelta(days=7)
+    date_limit = datetime.utcnow() - timedelta(days=7)
     
     users = []
     guild = event.guild
@@ -378,8 +378,8 @@ async def ping():
 
 @Nitori.interactions(is_global=True)
 async def enable_ping(client, event,
-        allow: ('bool', 'Enable?')=True,
-            ):
+    allow: ('bool', 'Enable?')=True,
+):
     """Enables the ping command in your guild."""
     guild = event.guild
     if guild is None:
@@ -700,9 +700,9 @@ ADD_EMOJI_COMPONENTS = Row(ADD_EMOJI_BUTTON_ADD, ADD_EMOJI_BUTTON_CANCEL)
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def add_emoji(client, event,
-        emoji: ('str', 'The emoji to add.'),
-        name: ('str', 'Custom name to add the emoji with.') = None
-            ):
+    emoji: ('str', 'The emoji to add.'),
+    name: ('str', 'Custom name to add the emoji with.') = None
+):
     """Adds an emoji to the guild."""
     if not client.is_owner(event.user):
         abort('Owner only!')
@@ -1333,7 +1333,7 @@ for command_type, command_type_commands in COLLECTED_COMMANDS.items():
         name = command_type,
     ).autocomplete(
         'command_name',
-        AutoCompleteInteractionCommandSource(command_type_commands)
+        function = AutoCompleteInteractionCommandSource(command_type_commands)
     )
 
 @Nitori.interactions(custom_id=re.compile('source\.([a-z\-]+)\.([a-z\-]+)\.(_|[0-9]+)'))

@@ -345,7 +345,7 @@ class RLTPrinterUnit:
     def write(self,content):
         if self.start_new_block:
             buffer=[]
-            self.buffer.append((datetime.now(),buffer),)
+            self.buffer.append((datetime.utcnow(),buffer),)
             self.start_new_block=False
         else:
             buffer=self.buffer[-1][1]
@@ -2046,7 +2046,7 @@ async def voice_state_client_edit(client, channel, suppress=False, request_to_sp
     guild_id = channel.guild.id
     
     if request_to_speak:
-        request_to_speak_timestamp = datetime.now().isoformat()
+        request_to_speak_timestamp = datetime.utcnow().isoformat()
     else:
         request_to_speak_timestamp = None
     

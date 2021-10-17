@@ -68,7 +68,7 @@ def calculate_daily_for(user, daily_streak):
     
     Parameters
     ----------
-    user : ``User`` or ``Client``
+    user : ``ClientUserBase``
         The respective user.
     daily_streak : `int`
         The daily streak of the respective user.

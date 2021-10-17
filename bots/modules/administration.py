@@ -60,7 +60,7 @@ async def clear(client, event,
         if delta is None:
             abort('`before` could not be parsed.')
         
-        before = time_to_id(datetime.now()-delta)
+        before = time_to_id(datetime.utcnow()-delta)
     
     if (after is None) or (not after):
         after = 0
@@ -69,7 +69,7 @@ async def clear(client, event,
         if delta is None:
             yield Embed('Error', '`after` could not be parsed.')
         
-        before = time_to_id(datetime.now()-delta)
+        before = time_to_id(datetime.utcnow()-delta)
     
     yield 'Yeeting messages began'
     

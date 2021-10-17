@@ -15,7 +15,7 @@ if MARISA_MODE:
     Marisa = Client(config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
         http_debug_options = 'canary',
-        extensions = ('command_utils', 'slash', 'commands_v2'),
+        extensions = ('command_utils', 'slash', 'commands_v2', 'solarlink'),
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,
         category_name_rule = category_name_rule,

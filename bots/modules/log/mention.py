@@ -80,23 +80,24 @@ async def mention_logger(client, message):
     content_parts.append(repr(content_length))
     content_parts.append('\n')
     
-    content_parts.append('\n**Content**:\n')
-    content_parts.append(SEPARATOR_LINE)
-    content_parts.append('\n')
-    
     clean_content = message.clean_content
-    clean_content_length = len(clean_content)
-    if clean_content_length > CLEAN_CONTENT_MAX_LENGTH:
-        clean_content = clean_content[:CLEAN_CONTENT_MAX_LENGTH]
-        truncated = clean_content_length - CLEAN_CONTENT_MAX_LENGTH
-    else:
-        truncated = 0
-    
-    content_parts.append(clean_content)
-    if truncated:
-        content_parts.append('\n*<Truncated )')
-        content_parts.append(repr(truncated))
-        content_parts.append('>*')
+    if (clean_content is not None):
+        content_parts.append('\n**Content**:\n')
+        content_parts.append(SEPARATOR_LINE)
+        content_parts.append('\n')
+        
+        clean_content_length = len(clean_content)
+        if clean_content_length > CLEAN_CONTENT_MAX_LENGTH:
+            clean_content = clean_content[:CLEAN_CONTENT_MAX_LENGTH]
+            truncated = clean_content_length - CLEAN_CONTENT_MAX_LENGTH
+        else:
+            truncated = 0
+        
+        content_parts.append(clean_content)
+        if truncated:
+            content_parts.append('\n*<Truncated )')
+            content_parts.append(repr(truncated))
+            content_parts.append('>*')
     
     description = ''.join(content_parts)
     embed = Embed('Ping Log!', description)

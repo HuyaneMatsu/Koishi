@@ -173,7 +173,7 @@ def render_contents(user, old_attributes):
     content_parts.append(')\n')
     
     content_parts.append('At: ')
-    content_parts.append(datetime.now().__format__(DATETIME_FORMAT_CODE))
+    content_parts.append(datetime.utcnow().__format__(DATETIME_FORMAT_CODE))
     content_parts.append('\n')
     content_parts.append('\n')
     

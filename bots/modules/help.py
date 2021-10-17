@@ -228,7 +228,7 @@ KOISHI_HEADER_EASTER_EGG = (
 )
 
 def get_koishi_header():
-    if random() < 0.01:
+    if random() > 0.01:
         header = KOISHI_HEADER
     else:
         header = KOISHI_HEADER_EASTER_EGG
