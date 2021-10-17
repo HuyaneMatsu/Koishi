@@ -660,9 +660,9 @@ DESCRIPTION_RP = re_compile(
         '!~|' # Spoiler tag ending
         '__|' # bold
         ' \(\d+\'(?:\d+\")?\)|' # US shit
-        '<br><br>|' # They don't know what not html format means
-        '<br>|' # They don't know what not html format means
-        '&#039' # They don't know what not html format means
+        '<br>(?:<br>)?|' # They don't know what not html format means
+        '&#039|' # They don't know what not html format means
+        '</?i>' # They don't know what not html format means
     ),
     re_multi_line|re_unicode|re_dotall,
 )
@@ -674,6 +674,8 @@ DESCRIPTION_RELATION = {
     '<br><br>': '\n',
     '<br>': '\n',
     '&#039': '\'',
+    '<i>': '*',
+    '</i>': '*',
 }
 
 def DESCRIPTION_REPLACER(match):
