@@ -19,7 +19,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ButtonStyle, Emoji, Role, StickerType, StickerFormat, ZEROUSER, GUILDS, ApplicationCommandOptionType, \
     ApplicationCommandOption, ApplicationCommand
 from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, \
-    wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
+    wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option, P
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
 from hata.discord.http import LIBRARY_USER_AGENT
@@ -28,6 +28,7 @@ from hata.ext.command_utils import wait_for_reaction, UserMenuFactory, UserPagin
 from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
+from hata.ext.extension_loader import EXTENSION_LOADER
 
 from bot_utils.constants import COLOR__MARISA_HELP, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, \
     ROLE__NEKO_DUNGEON__TESTER
@@ -39,10 +40,12 @@ from bot_utils.tools import choose, Cell
 Marisa : Client
 
 try:
-    Marisa.solarlink.add_node('127.0.0.1', 2333, 'youshallnotpass', None)
+    SOLARLINK_VOICE = Marisa.solarlink.add_node('127.0.0.1', 2333, 'youshallnotpass', None)
 except BaseException as err:
     sys.stderr.write(f'Failed to connect to lavalink server: {err!r}.\n')
+    SOLARLINK_VOICE = False
 
+EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=SOLARLINK_VOICE)
 
 Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())
@@ -1109,3 +1112,7 @@ async def auto_everything(value):
 @Marisa.interactions(guild=388267636661682178)
 async def late_complete(laty: ('str', 'cake')):
     return InteractionResponse(laty, allowed_mentions=None)
+
+@Marisa.interactions(guild=388267636661682178)
+async def range_(value: P('float', min_value=10.0, max_value=20.0)):
+    return value

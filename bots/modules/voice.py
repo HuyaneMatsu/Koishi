@@ -1,7 +1,7 @@
 import re, os
 
 from hata import Client, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
-    KOKORO, ChannelVoice, AsyncIO, WaitTillAll, ChannelStage
+    KOKORO, ChannelVoice, AsyncIO, WaitTillAll, ChannelStage, is_url
 from hata.ext.command_utils import Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
@@ -12,6 +12,7 @@ from hata.ext.commands_v2 import checks
 if not MARISA_MODE:
     from bots.flan import COLOR__FLAN_HELP, CHESUTO_FOLDER, get_bgm, get_random_bgm
 
+SOLARLINK_VOICE: bool
 
 VOICE_COLORS = {}
 
@@ -44,6 +45,142 @@ if AUDIO_PATH is not None:
     
     collect_local_audio()
 
+if SOLARLINK_VOICE:
+    async def do_join_voice(client, channel):
+        return await client.solarlink.join_voice(channel)
+else:
+    async def do_join_voice(client, channel):
+        return await client.join_voice(channel)
+
+if SOLARLINK_VOICE:
+    async def do_set_volume(player, volume):
+        await player.set_volume(volume)
+else:
+    async def do_set_volume(voice_client, volume):
+        voice_client.volume = volume
+
+if SOLARLINK_VOICE:
+    async def do_pause(player):
+        await player.pause()
+else:
+    async def do_pause(voice_client):
+        voice_client.pause()
+
+if SOLARLINK_VOICE:
+    def get_voice_client(client, event_or_message):
+        return client.solarlink.get_player(event_or_message.guild_id)
+else:
+    def get_voice_client(client, event_or_message):
+        return client.voice_clients.get(event_or_message.guild_id, None)
+
+if SOLARLINK_VOICE:
+    async def do_resume(player):
+        await player.resume()
+else:
+    async def do_resume(voice_client):
+        await voice_client.resume()
+
+if SOLARLINK_VOICE:
+    async def do_disconnect(player):
+        await player.resume()
+else:
+    async def do_disconnect(voice_client):
+        await voice_client.resume()
+
+if SOLARLINK_VOICE:
+    async def get_from_youtube(client, name):
+        if not is_url(name):
+            name = f'ytsearch:{name}'
+        
+        tracks = await client.solarlink.get_tracks(name)
+        if tracks:
+            track = tracks[0]
+        else:
+            track = None
+        
+        return track
+else:
+    async def get_from_youtube(client, name):
+        return await YTAudio(name, stream=True)
+
+if SOLARLINK_VOICE:
+    async def do_skip(player, index):
+        await player.skip(index)
+else:
+    async def do_skip(voice_client, index):
+        voice_client.skip(index)
+
+if SOLARLINK_VOICE:
+    async def do_stop(player):
+        await player.stop()
+else:
+    async def do_stop(voice_client):
+        voice_client.stop()
+
+if SOLARLINK_VOICE:
+    async def do_add_on_queue(player, track):
+        return await player.append(track)
+else:
+    async def do_add_on_queue(voice_client, source):
+        return voice_client.append(source)
+
+if SOLARLINK_VOICE:
+    async def do_get_current(player):
+        return player.get_current()
+else:
+    async def do_get_current(player):
+        return player.source
+
+
+if SOLARLINK_VOICE:
+    async def do_get_looping_behavior(player):
+        if player.is_repeating_actual():
+            description = 'Looping over the actual audio.'
+        elif player.is_repeating():
+            description = 'Looping over the whole queue.'
+        else:
+            description = 'Not looping.'
+        
+        return description
+    
+    async def do_set_looping_behavior(player, behaviour):
+        if behaviour == 'queue':
+            player.set_repeat(True, False)
+            description = 'Started looping over the whole queue.'
+        elif behaviour == 'actual':
+            player.set_repeat(True, True)
+            description = 'Started looping over the actual audio.'
+        elif behaviour == 'stop':
+            player.set_repeat(False)
+            description = 'Stopped looping.'
+        else:
+            description = '*confused screaming*'
+        
+        return description
+
+else:
+    VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS = {
+        VoiceClient._loop_queue  : 'Looping over the whole queue.'  ,
+        VoiceClient._loop_actual : 'Looping over the actual audio.' ,
+        VoiceClient._play_next   : 'Not looping.'                   ,
+    }
+    
+    async def do_get_looping_behavior(voice_client):
+        return VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS.get(
+            voice_client.call_after,
+            'Error 404, Unknown looping behaviour.'
+        )
+    
+    VOICE_LOOPER_BEHAVIOUR_TO_FUNCTIONS_AND_JOIN_DESCRIPTIONS = {
+        'queue'  : (VoiceClient._loop_queue  , 'Started looping over the whole queue.'  ) ,
+        'actual' : (VoiceClient._loop_actual , 'Started looping over the actual audio.' ),
+        'stop'   : (VoiceClient._play_next   , 'Stopped looping.'                       ),
+    }
+    
+    async def do_set_looping_behavior(voice_client, behaviour):
+        function, description = VOICE_LOOPER_BEHAVIOUR_TO_FUNCTIONS_AND_JOIN_DESCRIPTIONS[behaviour]
+        voice_client.call_after = function
+        return description
 
 
 async def join(client, user, guild, volume):
@@ -59,7 +196,7 @@ async def join(client, user, guild, volume):
     
     yield
     try:
-        voice_client = await client.join_voice(channel)
+        voice_client = await do_join_voice(client, channel)
     except TimeoutError:
         yield 'Timed out meanwhile tried to connect.'
         return
@@ -68,6 +205,7 @@ async def join(client, user, guild, volume):
         return
     
     content = f'Joined to {state.channel.name}'
+    
     if (volume is not None):
         if volume <= 0:
             volume = 0.0
@@ -76,7 +214,7 @@ async def join(client, user, guild, volume):
         else:
             volume /= 100.0
         
-        voice_client.volume = volume
+        await do_set_volume(voice_client, volume)
         content = f'{content}; Volume set to {volume*100.:.0f}%'
     
     yield content
@@ -84,7 +222,7 @@ async def join(client, user, guild, volume):
 
 
 async def join_speakers(client, event_or_message):
-    voice_client = client.voice_client_for(event_or_message)
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         yield 'There is no voice client at your guild.'
         return
@@ -99,7 +237,7 @@ async def join_speakers(client, event_or_message):
 
 
 async def join_audience(client, event_or_message):
-    voice_client = client.voice_client_for(event_or_message)
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         yield 'There is no voice client at your guild.'
         return
@@ -114,50 +252,50 @@ async def join_audience(client, event_or_message):
 
 
 async def pause(client, event_or_message):
-    voice_client = client.voice_client_for(event_or_message)
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         content = 'There is no voice client at your guild.'
     else:
-        voice_client.pause()
+        await do_pause(voice_client)
         content = 'Voice paused.'
     
     return content
 
 
 async def resume(client, event_or_message):
-    voice_client = client.voice_client_for(event_or_message)
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         return 'There is no voice client at your guild.'
     
-    source = voice_client.source
+    source = await do_get_current(voice_client)
     if source is None:
         content = 'Nothing to resume.'
     else:
-        voice_client.resume()
+        await do_resume(voice_client)
         content = f'{source.title!r} resumed.'
     
     return content
 
 
-async def leave(client, message_or_event):
-    voice_client = client.voice_client_for(message_or_event)
+async def leave(client, event_or_message):
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         yield 'There is no voice client at your guild.'
         return
     
     yield
     await voice_client.disconnect()
-    yield f'{client.name_at(message_or_event.guild)} out.'
+    yield f'{client.name_at(event_or_message.guild)} out.'
     return
 
 
 if AUDIO_PLAY_POSSIBLE:
-    async def yt_play(client, message_or_event, name):
-        if YTAudio is None:
+    async def yt_play(client, event_or_message, name):
+        if (not SOLARLINK_VOICE) and (YTAudio is None):
             yield 'This option in unavailable :c'
             return
         
-        voice_client = client.voice_client_for(message_or_event)
+        voice_client = get_voice_client(client, event_or_message)
         
         if voice_client is None:
             yield 'There is no voice client at your guild'
@@ -169,7 +307,7 @@ if AUDIO_PLAY_POSSIBLE:
                 return
             
             if voice_client.is_paused():
-                voice_client.resume()
+                await do_resume(voice_client)
                 yield f'Resumed playing: {voice_client.player.source.title}'
                 return
             
@@ -178,12 +316,16 @@ if AUDIO_PLAY_POSSIBLE:
         
         yield
         try:
-            source = await YTAudio(name, stream=True)
+            source = await get_from_youtube(client, name)
         except DownloadError: # Raised by YTdl
             yield 'Error meanwhile downloading'
             return
         
-        if voice_client.append(source):
+        if source is None:
+            yield 'Nothing found.'
+            return
+        
+        if await do_add_on_queue(voice_client, source):
             content = 'Now playing'
         else:
             content = 'Added to queue'
@@ -192,9 +334,9 @@ if AUDIO_PLAY_POSSIBLE:
         return
 
 
-if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
-    async def local_play(client, message_or_event, content):
-        voice_client = client.voice_client_for(message_or_event)
+if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE and (not SOLARLINK_VOICE):
+    async def local_play(client, event_or_message, content):
+        voice_client = get_voice_client(client, event_or_message)
         if voice_client is None:
             yield 'There is no voice client at your guild'
             return
@@ -311,7 +453,7 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
 
 
 async def volume_(client, event_or_message, volume):
-    voice_client = client.voice_client_for(event_or_message)
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         return 'There is no voice client at your guild.'
     
@@ -325,32 +467,32 @@ async def volume_(client, event_or_message, volume):
     else:
         volume /= 100.0
     
-    voice_client.volume = volume
+    await do_set_volume(voice_client, volume)
     return f'Volume set to {volume*100.:.0f}%.'
 
 
-async def skip(client, message, index):
-    voice_client = client.voice_client_for(message)
+async def skip(client, event_or_message, index):
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         return 'There is no voice client at your guild.'
     
-    source = voice_client.skip(index)
+    source = await do_skip(voice_client, index)
     if source is None:
         return 'Nothing was skipped.'
     else:
         return f'Skipped {source.title!r}.'
 
 
-async def stop(client, message_or_event):
-    voice_client = client.voice_client_for(message_or_event)
+async def stop(client, event_or_message):
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         return 'There is no voice client at your guild'
     
-    voice_client.stop()
+    await do_stop(voice_client)
     return 'Stopped playing'
 
 
-async def move(client, message_or_event, user, voice_channel):
+async def move(client, event_or_message, user, voice_channel):
     if voice_channel is None:
         
         state = GUILD__NEKO_DUNGEON.voice_states.get(user.id, None)
@@ -364,11 +506,11 @@ async def move(client, message_or_event, user, voice_channel):
         yield 'I have no permissions to connect to that channel.'
         return
     
-    voice_client = client.voice_client_for(message_or_event)
+    voice_client = get_voice_client(client, event_or_message)
     
     yield
     if voice_client is None:
-        await client.join_voice(voice_channel)
+        await do_join_voice(client, voice_channel)
     else:
         # `client.join_voice` works too, if u wanna move, but this is an option as well
         await voice_client.move_to(voice_channel)
@@ -376,8 +518,8 @@ async def move(client, message_or_event, user, voice_channel):
     yield f'Joined to channel: {voice_channel.name}.'
 
 
-async def party_is_over(client, message_or_event):
-    voice_client = client.voice_client_for(message_or_event)
+async def party_is_over(client, event_or_message):
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         yield 'I don\'t see any parties around me.'
         return
@@ -413,10 +555,10 @@ async def party_is_over(client, message_or_event):
     return
 
 
-async def queue(client, message_or_event, channel, guild):
+async def queue(client, event_or_message, channel, guild):
     yield
     
-    voice_client = client.voice_client_for(message_or_event)
+    voice_client = get_voice_client(client, event_or_message)
     color = VOICE_COLORS.get(client, None)
     
     title = f'Playing queue for {guild}'
@@ -427,9 +569,10 @@ async def queue(client, message_or_event, channel, guild):
             page.description = '*none*'
             break
         
-        source = voice_client.source
+        source = await do_get_current(voice_client)
         if (source is not None):
             page.add_field('Actual:', source.title)
+        
         
         queue = voice_client.queue
         limit = len(queue)
@@ -453,20 +596,8 @@ async def queue(client, message_or_event, channel, guild):
         
         break
     
-    await Pagination(client, message_or_event, pages)
+    await Pagination(client, event_or_message, pages)
 
-
-VOICE_LOOPER_BEHAVIOUR_TO_FUNCTIONS_AND_JOIN_DESCRIPTIONS = {
-    'queue'  : (VoiceClient._loop_queue  , 'Started looping over the whole queue.'  ) ,
-    'actual' : (VoiceClient._loop_actual , 'Started looping over the actual audio.' ),
-    'stop'   : (VoiceClient._play_next   , 'Stopped looping.'                       ),
-}
-
-VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS = {
-    VoiceClient._loop_queue  : 'Looping over the whole queue.'  ,
-    VoiceClient._loop_actual : 'Looping over the actual audio.' ,
-    VoiceClient._play_next   : 'Not looping.'                   ,
-}
 
 VOICE_LOOPER_BEHAVIOURS = (
     'queue'  ,
@@ -480,24 +611,18 @@ VOICE_LOOPER_BEHAVIOURS_PAIRS = [
     ('Stop looping'         , 'stop'   ,),
 ]
 
-async def loop(client, message_or_event, behaviour):
-    voice_client = client.voice_client_for(message_or_event)
+async def loop(client, event_or_message, behaviour):
+    voice_client = get_voice_client(client, event_or_message)
     if voice_client is None:
         return 'There is no voice client at your guild.'
     
     if behaviour is None:
-        description = VOICE_LOOPER_FUNCTIONS_TO_DESCRIPTIONS.get(voice_client.call_after, None)
-        if description is None:
-            return 'Error 404, Unknown looping behaviour.'
-        
-        return description
+        return await do_get_looping_behavior(voice_client)
     
-    function, description = VOICE_LOOPER_BEHAVIOUR_TO_FUNCTIONS_AND_JOIN_DESCRIPTIONS[behaviour]
-    voice_client.call_after = function
-    return description
+    return await do_set_looping_behavior(voice_client, behaviour)
 
 
-if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
+if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE) and (not SOLARLINK_VOICE):
     async def chesuto_play(client, voice_client, bgm):
         path = os.path.join(os.path.abspath(''), CHESUTO_FOLDER, bgm.source_name)
         if not os.path.exists(path):
@@ -515,8 +640,8 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
         
         return f'{text} {bgm.display_name!r}!'
     
-    async def chesuto_play_by_name(client, message, name):
-        voice_client = client.voice_client_for(message)
+    async def chesuto_play_by_name(client, event_or_message, name):
+        voice_client = get_voice_client(client, event_or_message)
         
         if voice_client is None:
             yield 'There is no voice client at your guild.'
@@ -533,8 +658,8 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
         return
 
     
-    async def chesuto_play_random(client, message):
-        voice_client = client.voice_client_for(message)
+    async def chesuto_play_random(client, event_or_message):
+        voice_client = get_voice_client(client, event_or_message)
         
         if voice_client is None:
             yield 'There is no voice client at your guild.'

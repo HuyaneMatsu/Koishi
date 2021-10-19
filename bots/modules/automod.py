@@ -82,6 +82,7 @@ FILTERS = (
     'disnake',
     'enhanced-discord.py',
     'novus',
+    'fusion.py',
 )
 
 def trie_node_sort_key(node):

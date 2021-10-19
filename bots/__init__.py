@@ -28,6 +28,8 @@ if MARISA_MODE:
     EXTENSION_LOADER.add('bots.testers', MAIN_CLIENT=Marisa)
 
 else:
+    EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=False)
+    
     Koishi = Client(config.KOISHI_TOKEN,
         secret = config.KOISHI_SECRET,
         client_id = config.KOISHI_ID,
