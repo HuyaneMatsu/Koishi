@@ -2961,7 +2961,7 @@ CHARACTER_ISLAY = OJCharacter(48,
 
 CHARACTER_SUGURI_46_BILLION_YEARS = OJCharacter(49,
     'Suguri (46 Billion Years)',
-    4, 0, 2, 2, 5,
+    4, 0, 0, 2, 5,
     ORIGIN_200_MIXED_JUICE,
     'When choosing a damage dealing Boost/Event card to play, you may pay double its cost to double the damage on use. '
     'If you do, gain +1 die to your next movement roll.',
