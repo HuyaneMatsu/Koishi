@@ -3316,7 +3316,7 @@ RELATIONS = {
     'Sumika_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029484608778270/Sumika_unit.png',
     'Ellie_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029489163784232/Ellie_unit.png',
     'Lulu_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029494654132244/Lulu_unit.png',
-    'Alicianrone_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029499364327445/Alicianrone_unit.png',
+    'Alicianrone_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901547493467250738/Alicianrone_unit.png',
     'Teotoratta_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029504003244042/Teotoratta_unit.png',
     'Arnelle_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029508138823700/Arnelle_unit.png',
     'Maynie_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029512618344458/Maynie_unit.png',
