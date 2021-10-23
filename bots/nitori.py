@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from hata import Client, Embed, parse_emoji, sleep, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, \
     DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji, CHANNEL_TYPES
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
-    wait_for_component_interaction, iter_component_interactions, Select, Option
+    wait_for_component_interaction, iter_component_interactions, Select, Option, P
 
 from bot_utils.constants import GUILD__NEKO_DUNGEON as TEST_GUILD, ROLE__NEKO_DUNGEON__MODERATOR
 MODERATOR_ROLE_ID = ROLE__NEKO_DUNGEON__MODERATOR.id
@@ -36,9 +36,25 @@ async def perms(event):
 @Nitori.interactions(guild=TEST_GUILD)
 async def cookie(event,
         user : ('user', 'To who?'),
-            ):
+):
     """Gifts a cookie!"""
     return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !')
+
+# command end
+# command start slash cake
+
+CAKES = [
+    'https://tenor.com/view/chocolate-cake-candles-gif-15613028',
+    'https://tenor.com/view/cake-yummy-hungry-eating-birthday-cake-gif-18507935',
+    'https://tenor.com/view/cake-fat-slice-gif-4931308',
+]
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def cake(event,
+    user : P('user', 'To who?'),
+):
+    """Gifts a cake!"""
+    return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !').add_image(choice(CAKES))
 
 # command end
 # command start slash show-emoji
@@ -494,6 +510,52 @@ async def thread_channel_name_length(
 async def text_channel_name_length(channel):
     """Returns the selected text channel's name's length."""
     return len(channel.name)
+
+# command end
+# command start slash voice-channel-name-length
+
+from hata import CHANNEL_TYPES
+from hata.ext.slash import P
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def voice_channel_name_length(
+    channel: P('channel', 'Select a voice channel', channel_types=[CHANNEL_TYPES.guild_voice])
+):
+    """Returns the selected voice channel's name's length."""
+    return len(channel.name)
+
+# command end
+# command start slash character-popularity
+
+MOST_POPULAR_TOUHOU_CHARACTERS = [
+    'Konpaku Youmu',
+    'Kirisame Marisa',
+    'Hakurei Reimu',
+    'Komeiji Koishi',
+    'Scarlet Flandre',
+    'Izayoi Sakuya',
+    'Scarlet Remilia',
+    'Fujiwara no Mokou',
+    'Komeiji Satori',
+    'Saigyouji Yuyuko '
+    'Shameimaru Aya',
+    'Margatroid Alice',
+    'Kochiya Sanae',
+    'Reisen Udongein Inaba',
+    'Hinanawi Tenshi',
+    'Yakumo Yukari',
+    'Hata no Kokoro',
+    'Chiruno',
+    'Patchouli Knowledge',
+    'Tatara Kogasa',
+]
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def character_popularity(
+    position: P('number', 'Please select a number between 1 and 20', min_value=1, max_value=20)
+):
+    """Returns the name of the touhou character by it's popularity position."""
+    return MOST_POPULAR_TOUHOU_CHARACTERS[position-1]
 
 # command end
 # command start context avatar

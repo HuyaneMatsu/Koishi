@@ -393,24 +393,24 @@ del cache
 
 MOST_POPULAR_TOUHOU_CHARACTERS = [
     'Konpaku Youmu',
+    'Kirisame Marisa',
     'Hakurei Reimu',
     'Komeiji Koishi',
-    'Kirisame Marisa',
     'Scarlet Flandre',
-    'Scarlet Remilia',
     'Izayoi Sakuya',
-    'Komeiji Satori',
+    'Scarlet Remilia',
     'Fujiwara no Mokou',
+    'Komeiji Satori',
+    'Saigyouji Yuyuko '
     'Shameimaru Aya',
     'Margatroid Alice',
     'Kochiya Sanae',
-    'Saigyouji Yuyuko',
     'Reisen Udongein Inaba',
-    'Yakumo Yukari',
     'Hinanawi Tenshi',
+    'Yakumo Yukari',
     'Hata no Kokoro',
+    'Chiruno',
     'Patchouli Knowledge',
-    'Shiki Eiki Yamaxanadu',
     'Tatara Kogasa',
 ]
 

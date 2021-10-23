@@ -1,8 +1,8 @@
 import re, os
 
 from hata import Client, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
-    KOKORO, ChannelVoice, AsyncIO, WaitTillAll, ChannelStage, is_url
-from hata.ext.command_utils import Pagination
+    KOKORO, ChannelVoice, AsyncIO, WaitTillAll, ChannelStage, is_url, InteractionEvent
+from hata.ext.slash.menus import Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
@@ -105,10 +105,10 @@ else:
 
 if SOLARLINK_VOICE:
     async def do_skip(player, index):
-        await player.skip(index)
+        return await player.skip(index)
 else:
     async def do_skip(voice_client, index):
-        voice_client.skip(index)
+        return voice_client.skip(index)
 
 if SOLARLINK_VOICE:
     async def do_stop(player):
@@ -302,16 +302,17 @@ if AUDIO_PLAY_POSSIBLE:
             return
         
         if not name:
-            if voice_client.player is None:
+            current = await do_get_current(voice_client)
+            if (current is None):
                 yield 'Nothing is playing now Good Sir!'
                 return
             
             if voice_client.is_paused():
                 await do_resume(voice_client)
-                yield f'Resumed playing: {voice_client.player.source.title}'
+                yield f'Resumed playing: {current.title}'
                 return
             
-            yield f'Now playing: {voice_client.player.source.title}'
+            yield f'Now playing: {current.title}'
             return
         
         yield
@@ -342,16 +343,17 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE and (not SOLARLINK_VOICE):
             return
         
         if not content:
-            if voice_client.player is None:
+            current = await do_get_current(voice_client)
+            if (current is None):
                 yield 'Nothing is playing now Good Sir!'
                 return
             
             if voice_client.is_paused():
                 voice_client.resume()
-                yield f'Resumed playing: {voice_client.player.source.title}'
+                yield f'Resumed playing: {current.title}'
                 return
             
-            yield f'Now playing: {voice_client.player.source.title}'
+            yield f'Now playing: {current.title}'
             return
         
         content = content.split(' ')
@@ -555,7 +557,7 @@ async def party_is_over(client, event_or_message):
     return
 
 
-async def queue(client, event_or_message, channel, guild):
+async def queue(client, event_or_message, guild):
     yield
     
     voice_client = get_voice_client(client, event_or_message)
@@ -596,7 +598,12 @@ async def queue(client, event_or_message, channel, guild):
         
         break
     
-    await Pagination(client, event_or_message, pages)
+    if isinstance(event_or_message, InteractionEvent):
+        target = event_or_message
+    else:
+        target = event_or_message.channel
+    
+    await Pagination(client, target, pages)
 
 
 VOICE_LOOPER_BEHAVIOURS = (
@@ -857,12 +864,11 @@ async def command_queue_description(command_context):
 
 @VOICE_COMMAND_CLIENT.commands(name='queue', description=command_queue_description, category='VOICE')
 async def command_queue(client, message):
-    channel = message.channel
     guild = message.guild
     if guild is None:
         return
     
-    async for content in queue(client, message, channel, guild):
+    async for content in queue(client, message, guild):
         if (content is not None):
             yield content
 
@@ -978,7 +984,7 @@ if SLASH_CLIENT is not None:
     @VOICE_COMMANDS.interactions(name='queue')
     async def slash_queue(client, interaction_event):
         """Shows the voice client\'s queue of the guild."""
-        return queue(client, interaction_event, interaction_event.channel, GUILD__NEKO_DUNGEON)
+        return queue(client, interaction_event, GUILD__NEKO_DUNGEON)
     
     @VOICE_COMMANDS.interactions(name='volume')
     async def slash_volume(client, interaction_event,

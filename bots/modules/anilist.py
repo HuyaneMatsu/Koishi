@@ -1246,8 +1246,8 @@ async def character(client, event,
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def find_character(client, event,
-        name: ('str', 'The character\'s name to try to find.')
-            ):
+    name: ('str', 'The character\'s name to try to find.')
+):
     name = validate_parameter(name)
     
     return search(

@@ -1116,3 +1116,20 @@ async def late_complete(laty: ('str', 'cake')):
 @Marisa.interactions(guild=388267636661682178)
 async def range_(value: P('float', min_value=10.0, max_value=20.0)):
     return value
+
+TEST_A = Marisa.interactions(None, name='testa', description='testa', guild=388267636661682178)
+TEST_B = TEST_A.interactions(None, name='testb', description='testb')
+
+@TEST_B.interactions
+async def testc(
+    aa: ('str', 'aya') = None,
+    bb: ('str', 'baya') = None,
+    cc: ('str', 'caya') = None,
+    dd: ('str', 'daya') = None,
+):
+    """ayaya"""
+    return f'aa={aa!r}, bb={bb!r}, cc={cc!r}, dd={dd!r}'
+
+@testc.autocomplete('aa', 'bb', 'cc', 'dd')
+async def complete(value):
+    return ['value']

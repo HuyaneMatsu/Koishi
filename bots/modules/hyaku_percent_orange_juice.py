@@ -1,15 +1,23 @@
-from bs4 import BeautifulSoup
+from os.path import join as join_paths, exists
+from re import compile as re_compile, I as re_ignore_case, escape as re_escape
+from functools import partial as partial_func
 
-from hata import Client
-from hata import BUILTIN_EMOJIS
+from hata.backend.quote import quote
+from hata import Client, BUILTIN_EMOJIS, Embed, ReuAsyncIO
+from hata.ext.slash import abort, Select, Option, InteractionResponse
+
+from bot_utils.constants import GUILD__STORAGE, PATH__KOISHI
 
 EMOJI_STAR = BUILTIN_EMOJIS['star']
 
 Koishi: Client
 
 ORIGINS = {}
+EVENTS = {}
 CHARACTERS = {}
 CARD_PACKS = {}
+CARDS = {}
+CARD_COST_STRING_TO_ENTITY = {}
 
 CARD_PACK_ID_NONE = 0
 CARD_PACK_ID_ACCELERATION_PACK = 1
@@ -20,12 +28,31 @@ CARD_PACK_ID_BASE_PACK = 5
 CARD_PACK_ID_PUDDING_PACK = 6
 CARD_PACK_ID_MIXED_BOOSTER_PACK = 7
 
-CARDS = {}
 
 CARD_RARITY_NONE = 0
 CARD_RARITY_COMMON = 1
 CARD_RARITY_RARE = 2
 CARD_RARITY_UNCOMMON = 3
+
+CARD_RARITY_NAME_NONE = 'none'
+CARD_RARITY_NAME_COMMON = 'common'
+CARD_RARITY_NAME_RARE = 'rare'
+CARD_RARITY_NAME_UNCOMMON = 'uncommon'
+
+CARD_RARITY_VALUE_TO_NAME = {
+    CARD_RARITY_NONE: CARD_RARITY_NAME_NONE,
+    CARD_RARITY_COMMON: CARD_RARITY_NAME_COMMON,
+    CARD_RARITY_RARE: CARD_RARITY_NAME_RARE,
+    CARD_RARITY_UNCOMMON: CARD_RARITY_NAME_UNCOMMON,
+}
+
+CARD_RARITY_FILTERABLE_NAMES = [
+    CARD_RARITY_NAME_COMMON,
+    CARD_RARITY_NAME_RARE,
+    CARD_RARITY_NAME_UNCOMMON,
+]
+
+CARD_RARITY_NAME_TO_VALUE = {value:key for key, value in CARD_RARITY_VALUE_TO_NAME.items()}
 
 CARD_TYPE_BATTLE = 1<<0
 CARD_TYPE_BOOST = 1<<1
@@ -34,6 +61,38 @@ CARD_TYPE_GIFT = 1<<3
 CARD_TYPE_TRAP = 1<<4
 CARD_TYPE_HYPER = 1<<7
 
+CARD_TYPE_NAME_BATTLE = 'BATTLE'
+CARD_TYPE_NAME_BOOST = 'BOOST'
+CARD_TYPE_NAME_EVENT = 'EVENT'
+CARD_TYPE_NAME_GIFT = 'GIFT'
+CARD_TYPE_NAME_TRAP = 'TRAP'
+CARD_TYPE_NAME_HYPER = 'HYPER'
+
+CARD_TYPE_GENERIC_MASK_NAME_PAIRS = (
+    (CARD_TYPE_BATTLE, CARD_TYPE_NAME_BATTLE),
+    (CARD_TYPE_BOOST, CARD_TYPE_NAME_BOOST),
+    (CARD_TYPE_EVENT ,CARD_TYPE_NAME_EVENT),
+    (CARD_TYPE_GIFT, CARD_TYPE_NAME_GIFT),
+    (CARD_TYPE_TRAP, CARD_TYPE_NAME_TRAP),
+)
+
+CARD_TYPE_NAME_TO_MASK = {
+    CARD_TYPE_NAME_BATTLE: CARD_TYPE_BATTLE,
+    CARD_TYPE_NAME_BOOST: CARD_TYPE_BOOST,
+    CARD_TYPE_NAME_EVENT: CARD_TYPE_EVENT,
+    CARD_TYPE_NAME_GIFT: CARD_TYPE_GIFT,
+    CARD_TYPE_NAME_TRAP: CARD_TYPE_TRAP,
+    CARD_TYPE_NAME_HYPER: CARD_TYPE_HYPER,
+}
+
+CARD_TYPE_FILTERABLE_NAMES = [
+    CARD_TYPE_NAME_BATTLE,
+    CARD_TYPE_NAME_BOOST,
+    CARD_TYPE_NAME_EVENT,
+    CARD_TYPE_NAME_GIFT,
+    CARD_TYPE_NAME_TRAP,
+]
+
 CARD_COST_TYPE_STATIC = 0
 CARD_COST_TYPE_DIV_STARS = 1
 CARD_COST_TYPE_MUL_LEVEL = 2
@@ -41,13 +100,36 @@ CARD_COST_TYPE_MUL_CARDS = 3
 CARD_COST_TYPE_MUL_OTHERS_CARDS = 4
 CARD_COST_TYPE_ALL_STARS = 5
 
+CARD_LEVEL_FILTERABLE_STRINGS = ['0', '1', '2', '3', '4', '5']
+CARD_LIMIT_FILTERABLE_STRINGS = ['1', '3']
+
 class OJCardCost:
-    __slots__ = ('type', 'factor')
+    __slots__ = ('type', 'factor', 'string')
     def __new__(cls, type_, factor):
+        
+        if type_ == CARD_COST_TYPE_STATIC:
+            string = f'{factor} {EMOJI_STAR:e}'
+        elif type_ == CARD_COST_TYPE_DIV_STARS:
+            string = f'stars / {factor} {EMOJI_STAR:e}'
+        elif type_ == CARD_COST_TYPE_MUL_LEVEL:
+            string = f'level x {factor} {EMOJI_STAR:e}'
+        elif type_ == CARD_COST_TYPE_MUL_CARDS:
+            string = f'cards held x {factor} {EMOJI_STAR:e}'
+        elif type_ == CARD_COST_TYPE_MUL_OTHERS_CARDS:
+            string = f'cards held by others x {factor} {EMOJI_STAR:e}'
+        elif type_ == CARD_COST_TYPE_ALL_STARS:
+            string = f'all held {EMOJI_STAR:e}'
+        else:
+            string = 'undefined'
+        
         self = object.__new__(cls)
         self.type = type_
         self.factor = factor
+        self.string = string
+        
+        CARD_COST_STRING_TO_ENTITY[string] = self
         return self
+    
     
     def __gt__(self, other):
         if type(self) is not type(other):
@@ -238,10 +320,22 @@ class OJOrigin(OJEntityBase):
         ORIGINS[identifier] = self
         return self
 
+class OJEvent(OJEntityBase):
+    __slots__ = ()
+    
+    def __new__(cls, identifier, name):
+        self = object.__new__(cls)
+        self.id = identifier
+        self.name = name
+        
+        EVENTS[identifier] =self
+        return self
+
 class OJCharacter(OJEntityBase):
-    __slots__ = ('description', 'hyper_card_ids', 'origin', 'attack', 'defense', 'evasion', 'name', 'recovery', 'hp',
+    __slots__ = ('description', 'hyper_cards', 'origin', 'attack', 'defense', 'evasion', 'recovery', 'hp',
         'card_name',)
-    def __new__(cls, identifier, name, hp, attack, defense, evasion, recovery, origin, description, hyper_card_ids,
+    
+    def __new__(cls, identifier, name, hp, attack, defense, evasion, recovery, origin, description, hyper_cards,
             card_name=None):
         self = object.__new__(cls)
         self.id = identifier
@@ -253,34 +347,86 @@ class OJCharacter(OJEntityBase):
         self.recovery = recovery
         self.origin = origin
         self.description = description
-        self.hyper_card_ids = hyper_card_ids
+        self.hyper_cards = hyper_cards
         self.card_name = card_name
         CHARACTERS[identifier] = self
         
         return self
     
-    def get_sort_key(self, order):
-        return OJEntitySorter(self, tuple(self._generate_sort_key(order)))
+    @property
+    def url(self):
+        return f'https://100orangejuice.fandom.com/wiki/{quote(self.name)}'
+
+
+
+def match_attack(value, character):
+    return value == character.attack
     
-    def _generate_sort_key(self, order):
-        if (order is not None):
-            for name in order:
-                yield CHARACTER_ATTRIBUTE_GETTERS[name]
-        
-        yield self.id
+def match_defense(value, character):
+    return value == character.defense
 
-CHARACTER_ATTRIBUTE_GETTERS = {}
+def match_evasion(value, character):
+    return value == character.evasion
 
-for attribute_name in ('attack', 'defense', 'evasion', 'name', 'recovery', 'hp', 'origin'):
-    CHARACTER_ATTRIBUTE_GETTERS[attribute_name] = getattr(OJCharacter, attribute_name)
+def match_recovery(value, character):
+    return value == character.recovery
 
-del attribute_name
+def match_hp(value, character):
+    return value == character.hp
 
 
-def get_characters(order, reverse):
-    character_sorters = [character.get_sort_key(order) for character in CHARACTERS]
-    character_sorters.sort(reverse=reverse)
-    return [character_sorter.character for character_sorter in character_sorters]
+def get_character_filter_keys(attack, defense, evasion, recovery, hp):
+    filters = []
+    
+    if (attack is not None):
+        filters.append(partial_func(match_attack, attack))
+    
+    if (defense is not None):
+        filters.append(partial_func(match_defense, defense))
+    
+    if (evasion is not None):
+        filters.append(partial_func(match_evasion, evasion))
+    
+    if (recovery is not None):
+        filters.append(partial_func(match_recovery, recovery))
+    
+    if (hp is not None):
+        filters.append(partial_func(match_hp, hp))
+    
+    return filters
+
+def apply_filters(character, filters):
+    for filter in filters:
+        if not filter(character):
+            return False
+    
+    return True
+
+def create_string_filter_options(values):
+    return [(f'+{value}' if (value > 0) else str(value)) for value in sorted(values, reverse=True)]
+
+def create_character_filter_options():
+    attack_values = set()
+    defense_values = set()
+    evasion_values = set()
+    recovery_values = set()
+    hp_values = set()
+    
+    for character in CHARACTERS.values():
+        attack_values.add(character.attack)
+        defense_values.add(character.defense)
+        evasion_values.add(character.evasion)
+        recovery_values.add(character.recovery)
+        hp_values.add(character.hp)
+    
+    return (
+        create_string_filter_options(attack_values),
+        create_string_filter_options(defense_values),
+        create_string_filter_options(evasion_values),
+        create_string_filter_options(recovery_values),
+        create_string_filter_options(hp_values),
+    )
+
 
 class OJCardPack(OJEntityBase):
     __slots__ = ('cost', )
@@ -290,11 +436,11 @@ class OJCardPack(OJEntityBase):
         self.name = name
         self.cost = cost
         
-        ORIGINS[identifier] = self
+        CARD_PACKS[identifier] = self
         return self
 
 class OJCard(OJEntityBase):
-    __slots__ = ('name', 'cost', 'description', 'level', 'type', 'events', 'quote', 'limit', 'card_name')
+    __slots__ = ('cost', 'description', 'level', 'type', 'events', 'quote', 'limit', 'card_name', 'pack', 'rarity')
     def __new__(cls, identifier, name, level, cost, limit, type_, pack, rarity, description, quote, events,
             card_name):
         self = object.__new__(cls)
@@ -308,7 +454,109 @@ class OJCard(OJEntityBase):
         self.quote = quote
         self.limit = limit
         self.card_name = card_name
+        self.pack = pack
+        self.rarity = rarity
+        CARDS[identifier] = self
         return self
+    
+    @property
+    def url(self):
+        return f'https://100orangejuice.fandom.com/wiki/{quote(self.name)}'
+    
+    @property
+    def type_string(self):
+        string_parts = []
+        type_ = self.type
+        
+        is_hyper = type_ & CARD_TYPE_HYPER
+        if is_hyper:
+            string_parts.append(CARD_TYPE_NAME_HYPER)
+            string_parts.append('(')
+        
+        field_added = False
+        
+        for mask, name in CARD_TYPE_GENERIC_MASK_NAME_PAIRS:
+            if type_&mask:
+                if field_added:
+                    string_parts.append('/')
+                else:
+                    field_added = True
+                
+                string_parts.append(name)
+        
+        if is_hyper:
+            string_parts.append(')')
+        
+        return ''.join(string_parts)
+
+
+def match_level(value, card):
+    return value == card.level
+    
+def match_cost(value, card):
+    cost = card.cost
+    if cost.type != value.type:
+        return False
+    
+    if cost.factor != value.factor:
+        return False
+    
+    return True
+
+def match_limit(value, card):
+    return value == card.limit
+
+def match_type(value, card):
+    return value & card.type
+
+def match_pack(value, card):
+    return value is card.pack
+
+def match_rarity(value, card):
+    return value == card.rarity
+
+def get_card_filter_keys(level, cost, limit, type_, pack, rarity):
+    filters = []
+    
+    if (level is not None):
+        filters.append(partial_func(match_level, level))
+    
+    if (cost is not None):
+        try:
+            cost_entity = CARD_COST_STRING_TO_ENTITY[cost]
+        except KeyError:
+            pass
+        else:
+            filters.append(partial_func(match_cost, cost_entity))
+    
+    if (limit is not None):
+        filters.append(partial_func(match_limit, limit))
+    
+    if (type_ is not None):
+        try:
+            type_mask = CARD_TYPE_NAME_TO_MASK[type_]
+        except KeyError:
+            pass
+        else:
+            filters.append(partial_func(match_type, type_mask))
+    
+    if (pack is not None):
+        try:
+            pack_entity = CARD_PACK_BY_NAME[pack]
+        except KeyError:
+            pass
+        else:
+            filters.append(partial_func(match_pack, pack_entity))
+    
+    if (rarity is not None):
+        try:
+            rarity_value = CARD_RARITY_NAME_TO_VALUE[rarity]
+        except KeyError:
+            pass
+        else:
+            filters.append(partial_func(match_rarity, rarity_value))
+    
+    return filters
 
 
 #### #### #### #### ORIGINS #### #### #### ####
@@ -432,11 +680,35 @@ CARD_COST_StALL = OJCardCost(CARD_COST_TYPE_ALL_STARS, 0)
 
 #### #### #### #### EVENTS #### #### #### ####
 
-EVENT_CHOCOLATE_FOR_THE_SWEET_GODS = None
-EVENT_RETURN = None
-EVENT_SANTA_SCRAMBLE = None
-EVENT_SHROOM_ZOOM = None
-EVENT_BEACH_PARTY = None
+EVENT_CHOCOLATE_FOR_THE_SWEET_GODS = OJEvent(
+    1,
+    'Chocolate for the Sweet Gods',
+)
+
+EVENT_CHOCOLATE_FOR_THE_SWEET_GODS_RERUN = OJEvent(
+    2,
+    'Rerun',
+)
+
+EVENT_SANTA_SCRAMBLE = OJEvent(
+    3,
+    'Santa Scramble',
+)
+
+EVENT_SHROOM_ZOOM = OJEvent(
+    4,
+    'Shroom Zoom',
+)
+
+EVENT_BEACH_PARTY = OJEvent(
+    5,
+    'Beach Party',
+)
+
+EVENT_EVENT_SANTA_SCRAMBLE_RERUN = OJEvent(
+    6,
+    'Rerun',
+)
 
 #### #### #### #### NORMAL CARDS #### #### #### ####
 
@@ -524,8 +796,8 @@ CARD_QUICK_RESTORATION = OJCard(9,
 )
 
 CARD_RAINBOW_COLORED_CIRCLE = OJCard(10,
-    2, CARD_COST_5, 3, CARD_TYPE_BATTLE, CARD_PACK_BASE_PACK, CARD_RARITY_COMMON,
     'Rainbow-Colored Circle',
+    2, CARD_COST_5, 3, CARD_TYPE_BATTLE, CARD_PACK_BASE_PACK, CARD_RARITY_COMMON,
     'During this battle, gain +2 EVD and -1 DEF.',
     '"Like drawing a rainbow-colored circle."',
     None,
@@ -1099,8 +1371,8 @@ CARD_BAD_PUDDING = OJCard(70,
 )
 
 CARD_BRUTAL_PRANK = OJCard(71,
-    3, CARD_COST_0, 3, CARD_TYPE_TRAP, CARD_PACK_ACCELERATION_PACK, CARD_RARITY_COMMON,
     'Brutal Prank',
+    3, CARD_COST_0, 3, CARD_TYPE_TRAP, CARD_PACK_ACCELERATION_PACK, CARD_RARITY_COMMON,
     'Discard all Hyper cards in hand. Lose 10 stars and heal 1 HP for each discarded card.',
     '"Noooo, Mr. Cow! Mr. Frog!" —Yuuki\n'
     '"Hahahaha! Wail and weep!!" —Yuki',
@@ -1281,7 +1553,7 @@ CARD_ANOTHER_ULTIMATE_WEAPON = OJCard(90,
     'Another Ultimate Weapon',
     3, CARD_COST_StALL, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Gain +1 ATK and DEF and an additional +1 ATK and DEF for every 20 stars spent on this card.',
-    '"With you gone, I am their ultimate weapon now." - Nath',
+    '"With you gone, I am their ultimate weapon now." ―YNath',
     None,
     'Another_Ultimate_Weapon.png',
 )
@@ -1308,7 +1580,7 @@ CARD_DEPLOY_BITS = OJCard(93,
     'Deploy Bits',
     2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'During this battle, gain a total of +7 points to ATK, DEF, and/or EVD, distributed randomly.',
-    '"No matter what, you can\'t escape my Bits." - Nanako',
+    '"No matter what, you can\'t escape my Bits." ―YNanako',
     None,
     'Deploy_Bits.png',
 )
@@ -1318,7 +1590,7 @@ CARD_HYPER_MODE = OJCard(94,
     1, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Gain +2 ATK during this battle. If your unit suffers KO during this battle, you give no stars or Wins and the '
     'unit will revive next turn.',
-    '"HYPER MODE!" - QP',
+    '"HYPER MODE!" ―YQP',
     None,
     'Hyper_Mode.png',
 )
@@ -1330,7 +1602,7 @@ CARD_INTELLIGENCE_OFFICER = OJCard(95,
     'Event +3 ATK\n'
     'Boost +3 DEF\n'
     'Others +3 EVD',
-    '"I can see through everything!" - Arnelle',
+    '"I can see through everything!" ―YArnelle',
     None,
     'Intelligence_Officer.png',
 )
@@ -1349,7 +1621,7 @@ CARD_SELF_DESTRUCT = OJCard(97,
     'Self-Destruct',
     3, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'On KO, also KO the opponent. Enemy gains no stars or wins, and loses half their stars.',
-    '"I\'m sorry...I can\'t make it back..." - Alte',
+    '"I\'m sorry...I can\'t make it back..." ―Alte',
     None,
     'Self-Destruct.png',
 )
@@ -1950,7 +2222,7 @@ CARD_EVIL_SPY_WORK_EXECUTION = OJCard(159,
 )
 
 CARD_MIRACLE_RED_BEAN_ICE_CREAM = OJCard(160,
-    ' Miracle Red Bean Ice Cream',
+    'Miracle Red Bean Ice Cream',
     3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
     '+1 ATK while this card is held. Tomomo (Casual): When played, turn into Tomomo (Sweet Eater) and fully restore '
     'HP. Tomomo (Sweet Eater): When held, this card becomes Magical Revenge. Discard upon use or KO in battle.',
@@ -2036,7 +2308,7 @@ CARD_SWEET_BATTLE = OJCard(168,
     'When held: Pick up 2x chocolate. When played in battle: Steal 200 chocolate for each damage dealt. This card is '
     'discarded upon KO or use.',
     '"Here comes another cute and sweet battle!" ―QP',
-    (EVENT_CHOCOLATE_FOR_THE_SWEET_GODS, EVENT_RETURN,),
+    (EVENT_CHOCOLATE_FOR_THE_SWEET_GODS, EVENT_CHOCOLATE_FOR_THE_SWEET_GODS_RERUN,),
     'Sweet_Battle!.png',
 )
 
@@ -2046,7 +2318,7 @@ CARD_SNOWBALL_REFLECTOR = OJCard(169,
     'On this defense turn, any snowball that would hit you will hit the unit that threw them instead. Ignore unit '
     'effects that would prevent this card from being played.',
     '"A-and it comes right back at you!" ―Aru',
-    (EVENT_SANTA_SCRAMBLE, EVENT_RETURN),
+    (EVENT_SANTA_SCRAMBLE, EVENT_EVENT_SANTA_SCRAMBLE_RERUN),
     'Snowball_Reflector.png',
 )
 
@@ -2056,7 +2328,7 @@ CARD_GROWN_UP_SNOWBALL_FIGHT = OJCard(170,
     'On this attack turn, select two panels to target with snowballs. Ignore unit effects that would prevent this card '
     'from being played.',
     '"Are you prepared for this?" ―Arthur',
-    (EVENT_SANTA_SCRAMBLE, EVENT_RETURN),
+    (EVENT_SANTA_SCRAMBLE, EVENT_EVENT_SANTA_SCRAMBLE_RERUN),
     'Grown-up_Snowball_Fight.png',
 )
 
@@ -2465,7 +2737,7 @@ CHARACTER_STAR_BREAKER = OJCharacter(25,
     'Star Breaker',
     5, 2, 0, -1, 5,
     ORIGIN_SORA,
-    'can only choose Wins norma.',
+    'Can only choose Wins norma.',
     (CARD_STAR_BLASTING_FUSE, CARD_INVISIBLE_BOMB),
     'Star_Breaker_(unit).png',
 )
@@ -2908,7 +3180,7 @@ CHARACTER_COOK = OJCharacter(72,
     'Gain a stack of Hungry when using Evade (max 3). With 3 Hungry, gain -1 EVD. Lose all Hungry when landing on '
     'your own home.',
     (CARD_GUIDANCE_OF_THE_WEATHERCOCK,),
-    'Halena_(unit).png',
+    'Cook_(unit).png',
 )
 
 #### #### #### #### DLC 31 #### #### #### ####
@@ -2932,158 +3204,767 @@ CHARACTER_MERCHANT = OJCharacter(74,
     'Merchant_(unit).png',
 )
 
-#### #### #### #### WIKI #### #### #### ####
+#### #### #### #### COMMANDS #### #### #### ####
 
-class CharacterDescription:
-    __slots__ = ('title', 'description_parts', 'sub_parts')
-    def __new__(cls, title):
-        self = object.__new__(cls)
-        self.title = title
-        self.description_parts = None
-        self.sub_parts = None
-        return self
-    
-    def add_description_part(self, description_part):
-        description_parts = self.description_parts
-        if description_parts is None:
-            description_parts = self.description_parts = []
-        
-        description_parts.append(description_part)
-    
-    def add_1st_tier_sub_part(self, title):
-        sub_parts = self.sub_parts
-        if sub_parts is None:
-            sub_parts = self.sub_parts = []
-        
-        sub_part = CharacterDescription(title)
-        sub_parts.append(sub_part)
-        return sub_part
-    
-    def add_2nd_tier_sub_part(self, title):
-        sub_parts = self.sub_parts
-        if sub_parts is None:
-            sub_parts = self.sub_parts = []
-            sub_part = CharacterDescription(title)
-            sub_parts.append(sub_part)
-        else:
-            sub_part = sub_parts[-1]
-        
-        return sub_part.add_1st_tier_sub_part(title)
-    
-    def add_3rd_tier_sub_part(self, title):
-        sub_parts = self.sub_parts
-        if sub_parts is None:
-            sub_parts = self.sub_parts = []
-            sub_part = CharacterDescription(title)
-            sub_parts.append(sub_part)
-        else:
-            sub_part = sub_parts[-1]
-        
-        return sub_part.add_2nd_tier_sub_part(title)
-    
-    def get_bottom_part(self):
-        sub_parts = self.sub_parts
-        if sub_parts is None:
-            return self
-        
-        return sub_parts[-1].get_bottom_part()
-    
-    def __repr__(self):
-        repr_parts = ['<', self.__class__.__name__, ' title=', repr(self.title)]
-        
-        description_parts = self.description_parts
-        if description_parts is not None:
-            description_part_count = len(description_parts)
-            repr_parts.append(', description_part_count=')
-            repr_parts.append(repr(description_part_count))
-            
-            description_total_length = 0
-            for description_part in description_parts:
-                description_total_length += len(description_part)
-            
-            repr_parts.append(', description_total_length=')
-            repr_parts.append(repr(description_total_length))
-        
-        sub_parts = self.sub_parts
-        if sub_parts is not None:
-            repr_parts.append('sub_parts=')
-            repr_parts.append(repr(sub_parts))
-        
-        repr_parts.append('>')
-        return ''.join(repr_parts)
 
-def parse_character_page(character_name, response_data):
-    soup = BeautifulSoup(response_data, 'html.parser')
-    main_block = soup.find_all('div', class_='tabber')
-    tabs = main_block.find_all('div', {'class': 'tabbertab'})
+SLASH_CLIENT: Client
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__STORAGE)
+async def create_images(client, event):
+    await client.interaction_response_message_create(event, 'Starting to create images.\nIt may take some time.')
     
-    character_description = CharacterDescription(character_name)
+    relation = []
     
-    for tab in tabs:
-        title = tab.title
-        character_description.add_1st_tier_sub_part(title)
+    for entity in (*CHARACTERS.values(), *CARDS.values()):
+        card_name = entity.card_name
         
-        for element in main_block.contents:
-            element_name = element.name
-            if element_name is None:
-                continue # linebreak
-            
-            if element_name == 'h2':
-                title = element.text
-                character_description.add_2nd_tier_sub_part(title)
+        image_path = join_paths(PATH__KOISHI, 'oj_data', card_name)
+        
+        if not exists(image_path):
+            raise abort(f'{image_path!r} do not exists.')
+        
+        with (await ReuAsyncIO(image_path)) as io:
+            message = await client.interaction_followup_message_create(event, file=io)
+        
+        relation.append((card_name, message.attachment.url))
+    
+    file_parts = []
+    file_parts.append('RELATIONS = {\n')
+    
+    for question, url in relation:
+        file_parts.append('    ')
+        file_parts.append(repr(question))
+        file_parts.append(': ')
+        file_parts.append(repr(url))
+        file_parts.append(',\n')
+    
+    file_parts.append('}\n')
+    
+    file = ''.join(file_parts)
+    
+    await client.interaction_followup_message_create(
+        event,
+        'Please copy the file\'s content',
+        file = ('relations.py', file),
+    )
+
+
+CHARACTERS_BY_NAME = {character.name: character for character in CHARACTERS.values()}
+CARDS_BY_NAME = {card.name: card for card in CARDS.values()}
+CARD_PACK_BY_NAME = {card_pack.name: card_pack for card_pack in CARD_PACKS.values()}
+
+CARD_COSTS_NAMES_SORTED = [card_cost.string for card_cost in sorted(CARD_COST_STRING_TO_ENTITY.values())]
+
+CARD_PACK_NAMES_SORTED_BY_COST = [
+    card_pack.name for card_pack in
+    sorted(
+        CARD_PACKS.values(),
+        key = lambda card_pack: card_pack.cost,
+    )
+]
+
+RELATIONS = {
+    'QP_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029146434605116/QP_unit.png',
+    'Suguri_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029153330044948/Suguri_unit.png',
+    'Marc_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029157021048862/Marc_unit.png',
+    'Kai_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029160275824640/Kai_unit.png',
+    'Yuki_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029164272975902/Yuki_unit.png',
+    'Aru_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029167590674432/Aru_unit.png',
+    'Hime_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029174851031050/Hime_unit.png',
+    'Sora_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029178294558791/Sora_unit.png',
+    'Fernet_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029182350426172/Fernet_unit.png',
+    'Peat_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029186683150356/Peat_unit.png',
+    'Marie_Poppo_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029190005063690/Marie_Poppo_unit.png',
+    'Tomomo_(Softened)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029197420593192/Tomomo_Softened_unit.png',
+    'Mio_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029206220238858/Mio_unit.png',
+    'Syura_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029210393542656/Syura_unit.png',
+    'Nanako_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029214034210826/Nanako_unit.png',
+    'Saki_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029220606677042/Saki_unit.png',
+    'Kyousuke_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029224167653376/Kyousuke_unit.png',
+    'Krila_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029227745398814/Krila_unit.png',
+    'Kae_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029231285383168/Kae_unit.png',
+    'Alte_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029235215466546/Alte_unit.png',
+    'Kyoko_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029245969629194/Kyoko_unit.png',
+    'Sham_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029249891307530/Sham_unit.png',
+    'Sherry_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029253490040862/Sherry_unit.png',
+    'Star_Breaker_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029257059401728/Star_Breaker_unit.png',
+    'Sweet_Breaker_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029260750381106/Sweet_Breaker_unit.png',
+    'Nath_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029266932760576/Nath_unit.png',
+    'Mimyuu_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029270799929384/Mimyuu_unit.png',
+    'Tomato_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029274474143784/Tomato_unit.png',
+    'Kiriko_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029278232248330/Kiriko_unit.png',
+    'NoName_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029400097746944/NoName_unit.png',
+    'NoName_(Head)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029403855826994/NoName_Head_unit.png',
+    'Miusaki_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029407840407552/Miusaki_unit.png',
+    'Ceoreparque_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029411179073576/Ceoreparque_unit.png',
+    'Yuki_(Dangerous)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029416082223114/Yuki_Dangerous_unit.png',
+    'Tomomo_(Casual)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029420343635988/Tomomo_Casual_unit.png',
+    'Tomomo_(Sweet_Eater)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029427188756480/Tomomo_Sweet_Eater_unit.png',
+    'Tequila_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029431005552660/Tequila_unit.png',
+    'Tsih_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029434264551454/Tsih_unit.png',
+    'Mei_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029438278471680/Mei_unit.png',
+    'Natsumi_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029441956900884/Natsumi_unit.png',
+    'Nico_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029449544392714/Nico_unit.png',
+    'Arthur_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029453755473920/Arthur_unit.png',
+    'Iru_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029458021077002/Iru_unit.png',
+    'Mira_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029461816901642/Mira_unit.png',
+    'Sora_&_Sham_(Cuties)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029465910550548/Sora__Sham_Cuties_unit.png',
+    'Yuuki_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029471962935296/Yuuki_unit.png',
+    'Islay_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029475251265536/Islay_unit.png',
+    'Suguri_(46_Billion_Years)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029480167014400/Suguri_46_Billion_Years_unit.png',
+    'Sumika_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029484608778270/Sumika_unit.png',
+    'Ellie_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029489163784232/Ellie_unit.png',
+    'Lulu_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029494654132244/Lulu_unit.png',
+    'Alicianrone_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029499364327445/Alicianrone_unit.png',
+    'Teotoratta_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029504003244042/Teotoratta_unit.png',
+    'Arnelle_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029508138823700/Arnelle_unit.png',
+    'Maynie_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029512618344458/Maynie_unit.png',
+    'Chris_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029516883931187/Chris_unit.png',
+    'Kyupita_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029521032085504/Kyupita_unit.png',
+    'QP_(Dangerous)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029524207194152/QP_Dangerous_unit.png',
+    'Marie_Poppo_(Mixed)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029527352930304/Marie_Poppo_Mixed_unit.png',
+    'Sora_(Military)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029653844754492/Sora_Military_unit.png',
+    'Aru_(Scramble)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029658378776586/Aru_Scramble_unit.png',
+    'Suguri_(Ver.2)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029662191403058/Suguri_Ver.2_unit.png',
+    'Marc_(Pilot)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029665504903258/Marc_Pilot_unit.png',
+    'Chicken_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029669514674176/Chicken_unit.png',
+    'Robo_Ball_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029673650241576/Robo_Ball_unit.png',
+    'Seagull_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029681049002034/Seagull_unit.png',
+    'Store_Manager_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029684714827806/Store_Manager_unit.png',
+    'Shifu_Robot_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029688821022760/Shifu_Robot_unit.png',
+    'Flying_Castle_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029692210053140/Flying_Castle_unit.png',
+    'Halena_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029696081362974/Halena_unit.png',
+    'Cook_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901032911460003850/Cook_unit.png',
+    'Lone_Rider_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029708244844544/Lone_Rider_unit.png',
+    'Merchant_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029711759675402/Merchant_unit.png',
+    'Accel_Hyper.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029715480039424/Accel_Hyper.png',
+    'Big_Magnum.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029719775014962/Big_Magnum.png',
+    'Dark_Side_of_Business.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029726993391656/Dark_Side_of_Business.png',
+    'Desperate_Modification.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029730273357844/Desperate_Modification.png',
+    'Extension.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029734912245790/Extension.png',
+    'Final_Battle.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029738770989096/Final_Battle.png',
+    "I'm_on_Fire!.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901029742810103818/Im_on_Fire.png',
+    'Portable_Pudding.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029750456340480/Portable_Pudding.png',
+    'Quick_Restoration.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029754017308702/Quick_Restoration.png',
+    'Rainbow-Colored_Circle.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029757418897408/Rainbow-Colored_Circle.png',
+    'Rbits.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029763982950451/Rbits.png',
+    'Reverse_Attribute_Field.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029767992721408/Reverse_Attribute_Field.png',
+    'Serious_Battle.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029773361430558/Serious_Battle.png',
+    'Shield.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029777002078248/Shield.png',
+    'Shield_Counter.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029780441403452/Shield_Counter.png',
+    'Sink_or_Swim.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029783847194644/Sink_or_Swim.png',
+    'Tactical_Retreat.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029907210068048/Tactical_Retreat.png',
+    'Ambush.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029910829740072/Ambush.png',
+    'Backdoor_Trade.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029914348765204/Backdoor_Trade.png',
+    'Completion_Reward.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029917997809694/Completion_Reward.png',
+    'Dash!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029921449730058/Dash.png',
+    'Extend.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029927216885770/Extend.png',
+    'Flip_Out.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029934435295262/Flip_Out.png',
+    "Gentleman's_Battle.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901029941594951691/Gentlemans_Battle.png',
+    'Lonely_Chariot.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029945273376799/Lonely_Chariot.png',
+    'Long-Distance_Shot.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029949115359232/Long-Distance_Shot.png',
+    'Mimic.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029952466595841/Mimic.png',
+    'Nice_Jingle.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029956870635540/Nice_Jingle.png',
+    'Nice_Present.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029960939089970/Nice_Present.png',
+    'Passionate_Research.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029965846417418/Passionate_Research.png',
+    'Path_Blockers.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029969629675520/Path_Blockers.png',
+    "President's_Privilege.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901029972972539954/Presidents_Privilege.png',
+    "Princess's_Privilege.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901029981361160202/Princesss_Privilege.png',
+    'Pudding.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029985186365460/Pudding.png',
+    "Saki's_Cookie.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901029988495671316/Sakis_Cookie.png',
+    'Stiff_Crystal.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029991901437972/Stiff_Crystal.png',
+    'Sweet_Destroyer.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029996359987200/Sweet_Destroyer.png',
+    'Treasure_Thief.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030002047451146/Treasure_Thief.png',
+    'Accelerating_Sky.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030006338224138/Accelerating_Sky.png',
+    'Cloud_of_Seagulls.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030010066989066/Cloud_of_Seagulls.png',
+    'Dinner.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030014018019348/Dinner.png',
+    'Forced_Revival.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030017709010944/Forced_Revival.png',
+    'Gift_Exchange.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030025615274015/Gift_Exchange.png',
+    'Here_and_There.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030029390151680/Here_and_There.png',
+    'Holy_Night.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030033395691540/Holy_Night.png',
+    'Indiscriminate_Fire_Support.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030037896196096/Indiscriminate_Fire_Support.png',
+    'Little_War.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030160885776434/Little_War.png',
+    'Mix_Phenomenon.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030164501233675/Mix_Phenomenon.png',
+    'Oh_My_Friend.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030169727365171/Oh_My_Friend.png',
+    'Out_of_Ammo.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030174198493184/Out_of_Ammo.png',
+    'Party_Time.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030177486815242/Party_Time.png',
+    'Play_of_the_Gods.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030180838055956/Play_of_the_Gods.png',
+    'Scary_Solicitation.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030188488458240/Scary_Solicitation.png',
+    'Scrambled_Eve.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030192087191552/Scrambled_Eve.png',
+    'Sealed_Guardian.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030195622969375/Sealed_Guardian.png',
+    'Serene_Hush.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030199435595796/Serene_Hush.png',
+    'Star-Blasting_Light.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030203722203176/Star-Blasting_Light.png',
+    'Super_All-Out_Mode.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030210542116894/Super_All-Out_Mode.png',
+    'Unpaid_Work.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030213872410624/Unpaid_Work.png',
+    'We_Are_Waruda.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030217102020618/We_Are_Waruda.png',
+    'Bloodlust.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030221153701888/Bloodlust.png',
+    'Lost_Child.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030224689500160/Lost_Child.png',
+    'Lucky_Charm.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030233195565067/Lucky_Charm.png',
+    'Metallic_Monocoque.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030238107074570/Metallic_Monocoque.png',
+    'Poppo_the_Snatcher.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030243249311754/Poppo_the_Snatcher.png',
+    'Price_of_Power.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030246856392746/Price_of_Power.png',
+    'Unlucky_Charm.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030251981840394/Unlucky_Charm.png',
+    'Windy_Enchantment.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030256754982912/Windy_Enchantment.png',
+    'Assault.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030261137997884/Assault.png',
+    'Bad_Pudding.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030265340719164/Bad_Pudding.png',
+    'Brutal_Prank.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030268146679858/Brutal_Prank.png',
+    'Dangerous_Pudding.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030273385394236/Dangerous_Pudding.png',
+    'Encore.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030279605530645/Encore.png',
+    'Exchange.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030283879518238/Exchange.png',
+    'Flamethrower.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030288988184596/Flamethrower.png',
+    'For_the_Future_of_the_Toy_Store.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030293018935356/For_the_Future_of_the_Toy_Store.png',
+    'Go_Away.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030414318198794/Go_Away.png',
+    'Heat_300%.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030419661742120/Heat_300.png',
+    'Invasion.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030423067500554/Invasion.png',
+    'I_Wanna_See_You.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030426796245063/I_Wanna_See_You.png',
+    "Mimyuu's_Hammer.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030430801809408/Mimyuus_Hammer.png',
+    'Piggy_Bank.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030434702524448/Piggy_Bank.png',
+    'Piyopiyo_Procession.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030440243195944/Piyopiyo_Procession.png',
+    'Poppoformation.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030444542328842/Poppoformation.png',
+    'Present_Thief.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030448048771092/Present_Thief.png',
+    'Sealed_Memories.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030452171796500/Sealed_Memories.png',
+    "Sky_Restaurant_'Pures'.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030455581765672/Sky_Restaurant_Pures.png',
+    'Tragedy_in_the_Dead_of_Night.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030463202816000/Tragedy_in_the_Dead_of_Night.png',
+    'Wanted.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030468353392650/Wanted.png',
+    'Another_Ultimate_Weapon.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030473759866890/Another_Ultimate_Weapon.png',
+    'Beyond_Hell.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030477534728212/Beyond_Hell.png',
+    'Blue_Crow_the_Second.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030481565483078/Blue_Crow_the_Second.png',
+    'Deploy_Bits.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030485659123722/Deploy_Bits.png',
+    'Hyper_Mode.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030489765347358/Hyper_Mode.png',
+    'Intelligence_Officer.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030493175308288/Intelligence_Officer.png',
+    'Reflective_Shell.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030497528983622/Reflective_Shell.png',
+    'Self-Destruct.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030503589769256/Self-Destruct.png',
+    'Waruda_Machine,_Blast_Off!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030508576792586/Waruda_Machine_Blast_Off.png',
+    'Accelerator.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030513018556476/Accelerator.png',
+    'Angel_Hand.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030516902469632/Angel_Hand.png',
+    'Awakening_of_Talent.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030522225061918/Awakening_of_Talent.png',
+    'Big_Rocket_Cannon.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030526125752340/Big_Rocket_Cannon.png',
+    'Blazing!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030532907946014/Blazing.png',
+    'Branch_Expansion_Strategy.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030538196967424/Branch_Expansion_Strategy.png',
+    'Cast_Off.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030542491918336/Cast_Off.png',
+    'Chef,_I_Could_Use_Some_Help!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030546459754516/Chef_I_Could_Use_Some_Help.png',
+    'Crystal_Barrier.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030668962758686/Crystal_Barrier.png',
+    "Ellie's_Miracle.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030673089974292/Ellies_Miracle.png',
+    'Extended_Photon_Rifle.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030677397532682/Extended_Photon_Rifle.png',
+    'Extraordinary_Specs.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030683709939772/Extraordinary_Specs.png',
+    'Full_Speed_Alicianrone.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030688004919316/Full_Speed_Alicianrone.png',
+    'Immovable_Object.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030692639637514/Immovable_Object.png',
+    'Jonathan_Rush.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030696322215966/Jonathan_Rush.png',
+    'Leap_Through_Space.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030700352933948/Leap_Through_Space.png',
+    'Leap_Through_Space_(Marking).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030705239322624/Leap_Through_Space_Marking.png',
+    "Lulu's_Lucky_Egg.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030709303578654/Lulus_Lucky_Egg.png',
+    'Manager,_I_Could_Use_Some_Help!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030714013810718/Manager_I_Could_Use_Some_Help.png',
+    'Miracle_Walker.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030719147626516/Miracle_Walker.png',
+    'Observer_of_Eternity.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030724902207498/Observer_of_Eternity.png',
+    "Protagonist's_Privilege.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030729142640680/Protagonists_Privilege.png',
+    'Raging_Madness.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030733479559168/Raging_Madness.png',
+    'Reproduction_of_Records.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030737174732800/Reproduction_of_Records.png',
+    'Rival.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030741578756146/Rival.png',
+    'Rocket_Cannon.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030746133782568/Rocket_Cannon.png',
+    'Saint_Eyes.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030749581500416/Saint_Eyes.png',
+    'Solid_Witch.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030753075347476/Solid_Witch.png',
+    'Special_Stage.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030757273862144/Special_Stage.png',
+    'Stealth_On.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030764278345728/Stealth_On.png',
+    'Sweet_Guardian.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030768774631444/Sweet_Guardian.png',
+    'Turbo_Charged.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030772817952818/Turbo_Charged.png',
+    'Ubiquitous.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030776034967612/Ubiquitous.png',
+    "Witch's_Hair_Lock.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030780413837323/Witchs_Hair_Lock.png',
+    'X16_Big_Rocket.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030787598659594/X16_Big_Rocket.png',
+    'Air_Strike.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030791600046080/Air_Strike.png',
+    'Binding_Chains.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030797325254696/Binding_Chains.png',
+    'Cooking_Time.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030802157076490/Cooking_Time.png',
+    'Delta_Field.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030922449743872/Delta_Field.png',
+    'Devil_Hand.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030927935889448/Devil_Hand.png',
+    'Do_Pirates_Fly_in_the_Sky_.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030932117606420/Do_Pirates_Fly_in_the_Sky_.png',
+    'Evil_Mastermind.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030935502413844/Evil_Mastermind.png',
+    'Evil_Spy_Work_―_Preparation.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030940262924308/Evil_Spy_Work__Preparation.png',
+    'Final_Surgery.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030945396760626/Final_Surgery.png',
+    'Gamble!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030951625306122/Gamble.png',
+    'Magical_Inferno.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030955907690506/Magical_Inferno.png',
+    'Magical_Massacre.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030960743718922/Magical_Massacre.png',
+    'Magical_Revenge.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030967198761021/Magical_Revenge.png',
+    'Melting_Memories.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030972148043796/Melting_Memories.png',
+    'Overseer.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030976371716117/Overseer.png',
+    'Plushie_Master.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030980008169502/Plushie_Master.png',
+    'Present_for_You.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030984424779796/Present_for_You.png',
+    'Revival_of_Stars.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030987889266698/Revival_of_Stars.png',
+    'Star_Blasting_Fuse.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030994403000340/Star_Blasting_Fuse.png',
+    'Subspace_Tunnel.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030998236622878/Subspace_Tunnel.png',
+    'True_White_Christsmasher.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031002657423430/True_White_Christsmasher.png',
+    'Whimsical_Windmill.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031007711543296/Whimsical_Windmill.png',
+    'White_Christsmasher.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031012107161600/White_Christsmasher.png',
+    'Banned_for_Life.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031017480089600/Banned_for_Life.png',
+    'Beast_Witch.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031021426933800/Beast_Witch.png',
+    'Evil_Spy_Work_―_Execution.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031024853647400/Evil_Spy_Work__Execution.png',
+    'Miracle_Red_Bean_Ice_Cream.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031029664518144/Miracle_Red_Bean_Ice_Cream.png',
+    "Santa's_Job.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901031034446045194/Santas_Job.png',
+    'Big_Bang_Bell.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031040641011732/Big_Bang_Bell.png',
+    'Dance,_Long-Eared_Beasts!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031044134879232/Dance_Long-Eared_Beasts.png',
+    'Flying_Pirate.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031048358539294/Flying_Pirate.png',
+    'Golden_Egg.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031052338954270/Golden_Egg.png',
+    'Invisible_Bomb.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031057091080202/Invisible_Bomb.png',
+    'Rbit_Hobby_Shop.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031176322580490/Rbit_Hobby_Shop.png',
+    'Sweet_Battle!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031180776902686/Sweet_Battle.png',
+    'Snowball_Reflector.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031185143201792/Snowball_Reflector.png',
+    'Grown-up_Snowball_Fight.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031188586696724/Grown-up_Snowball_Fight.png',
+    'Legendary_Red_Mushroom.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031193141706772/Legendary_Red_Mushroom.png',
+    'Ultimate_Weapon_in_the_Sun_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031197013057546/Ultimate_Weapon_in_the_Sun_Original.png',
+    'Lifeguard_on_the_White_Beach_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031205011587133/Lifeguard_on_the_White_Beach_Original.png',
+    'Guardian_of_Blooming_Flowers_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031209134604358/Guardian_of_Blooming_Flowers_Original.png',
+    'Unforgiving_Avenger_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031212880101386/Unforgiving_Avenger_Original.png',
+    'Red_&_Blue.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031216961163324/Red__Blue.png',
+    'Blue_Mushroom_(Boost).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031220035608586/Blue_Mushroom_Boost.png',
+    'Deceptive_Disarming.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031227753103380/Deceptive_Disarming.png',
+    'Overtime.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031231188250634/Overtime.png',
+    'Pet_Snacks.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031234577235978/Pet_Snacks.png',
+    'Home_Improvement.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031238276632586/Home_Improvement.png',
+    'Lucky_Sevens.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031242940702750/Lucky_Sevens.png',
+    'BanaNana.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031249852919838/BanaNana.png',
+    'Safe_Journey.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031253636186112/Safe_Journey.png',
+    'Guidance_of_the_Weathercock.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031257201340426/Guidance_of_the_Weathercock.png',
+    'Upshift.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031261106216980/Upshift.png',
+    'Zealous_Salesman.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031264444882974/Zealous_Salesman.png',
+    'Freight.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031272489578496/Freight.png',
+}
+
+
+def autocomplete_key(entity_factor_pair):
+    return entity_factor_pair[1]
+
+def get_auto_complete_results(value, container):
+    if value is None:
+        names = []
+        count = 0
+        for entity in container.values():
+            names.append(entity.name)
+            count += 1
+            if count == 20:
+                break
+    else:
+        name_matches = []
+        
+        pattern = re_compile(re_escape(value), re_ignore_case)
+        
+        for entity in container.values():
+            parsed = pattern.search(entity.name)
+            if parsed is None:
                 continue
             
-            if element_name == 'h3':
-                title =  element.text
-                character_description.add_3rd_tier_sub_part(title)
-                continue
-            
-            if element_name == 'p':
-                description = element.text
-                character_description.get_bottom_part().add_description_part(description)
-                continue
-            
-            if element_name == 'dl':
-                dl_parts = []
-                for dl_element in element.contents:
-                    dl_element_name = dl_element.name
-                    if dl_element_name == 'dt':
-                        part = dl_element.text
-                        dl_parts.append(f'**{part}**')
-                        continue
-                    
-                    if dl_element_name == 'dd':
-                        part = dl_element.text
-                        dl_parts.append(part)
-                        continue
-                
-                description = '\n'.join(dl_parts)
-                character_description.get_bottom_part().add_description_part(description)
-                continue
+            name_matches.append((entity, parsed.start()))
+        
+        name_matches.sort(key=autocomplete_key)
+        
+        names = []
+        
+        count = 0
+        for entity_factor_pair in name_matches:
+            names.append(entity_factor_pair[0].name)
+            count += 1
+            if count == 20:
+                break
     
-    return CharacterDescription
+    return names
+
+
+def get_simple_autocomplete_results(value, list_):
+    if value is None:
+        results = list_[:20]
+    else:
+        results = [result for result in list_ if value in result]
+    
+    return results
+
+
+def filter_entities_by(filters, container, select_custom_id_enabled, select_custom_id_disabled, entity_type_name):
+    if filters:
+        entities = [entity for entity in container.values() if apply_filters(entity, filters)]
+    else:
+        entities =  list(container.values())
+    
+    
+    if entities:
+        del entities[20:]
+        
+        description_parts = []
+        index = 0
+        limit = len(entities)
+        
+        while True:
+            entity = entities[index]
+            index += 1
+            description_parts.append(str(index))
+            description_parts.append('.: ')
+            description_parts.append(entity.name)
+            
+            if index == limit:
+                break
+            
+            description_parts.append('\n')
+            continue
+        
+        description = ''.join(description_parts)
+    else:
+        description = '*no matches*'
+    
+    embed = Embed(f'Matched {entity_type_name}s', description)
+    
+    if entities:
+        select = Select(
+            [Option(str(entity.id), entity.name) for entity in entities],
+            select_custom_id_enabled,
+            placeholder = f'Select a {entity_type_name}',
+        )
+    else:
+        select = Select(
+            [Option('_', 'No result', default=True)],
+            select_custom_id_disabled,
+            placeholder = 'No result',
+        )
+    
+    return InteractionResponse(embed=embed, components=select)
+
+
+OJ_COMMANDS = SLASH_CLIENT.interactions(
+    None,
+    name = 'OJ',
+    description = '100% Orange juice',
+    guild = 388267636661682178,
+)
+
+
+def render_character_embeds(character):
+    url = character.url
+    
+    return [
+        Embed(
+            character.name,
+            character.description,
+            url = url,
+        ).add_field(
+            'HP',
+            (
+                f'```\n'
+                f'{character.hp}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Attack',
+            (
+                f'```\n'
+                f'{character.attack}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Defense',
+            (
+                f'```\n'
+                f'{character.defense}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Evasion',
+            (
+                f'```\n'
+                f'{character.evasion}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Recovery',
+            (
+                f'```\n'
+                f'{character.recovery}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_footer(
+            f'Origin: {character.origin.name}',
+        ).add_image(
+            RELATIONS[character.card_name],
+        ),
+        *(
+            Embed(
+                url = url
+            ).add_image(
+                RELATIONS[card.card_name]
+            )
+            for card in character.hyper_cards
+        )
+    ]
+
+@OJ_COMMANDS.interactions
+async def character(
+    name: (str, 'The character\'s name.'),
+):
+    try:
+        character = CHARACTERS_BY_NAME[name]
+    except KeyError:
+        abort(f'There is no character named like: {name}.')
+    else:
+        return render_character_embeds(character)
 
 
 
+@character.autocomplete('name')
+async def autocomplete_character_name(value):
+    return get_auto_complete_results(value, CHARACTERS)
 
 
+CUSTOM_ID_SELECT_CHARACTER = 'hpoj.character.select'
+CUSTOM_ID_SELECT_CHARACTER_DISABLED = 'hpoj.character.select.disabled'
+
+@OJ_COMMANDS.interactions
+async def filter_characters(
+    attack: ('int', 'attack') = None,
+    defense: ('int', 'defense') = None,
+    evasion: ('int', 'evasion') = None,
+    recovery : ('int', 'recovery') = None,
+    hp: ('int', 'hp') = None,
+):
+    return filter_entities_by(
+        get_character_filter_keys(attack, defense, evasion, recovery, hp),
+        CHARACTERS,
+        CUSTOM_ID_SELECT_CHARACTER,
+        CUSTOM_ID_SELECT_CHARACTER_DISABLED,
+        'character',
+    )
 
 
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SELECT_CHARACTER)
+async def select_character(event):
+    if event.message.interaction.user is not event.user:
+        return
+    
+    selected_character_ids = event.interaction.options
+    if (selected_character_ids is None):
+        return
+    
+    try:
+        selected_character_id = int(selected_character_ids[0])
+    except ValueError:
+        return
+    
+    try:
+        character = CHARACTERS[selected_character_id]
+    except KeyError:
+        return
+    
+    return InteractionResponse(
+        embed = render_character_embeds(character),
+        components = None,
+    )
 
 
+ATTACK_VALUES, DEFENSE_VALUES, EVASION_VALUES, RECOVERY_VALUES, HP_VALUES = create_character_filter_options()
+
+@filter_characters.autocomplete('attack')
+async def autocomplete_character_attack(value):
+    return get_simple_autocomplete_results(value, ATTACK_VALUES)
+
+@filter_characters.autocomplete('defense')
+async def autocomplete_character_defense(value):
+    return get_simple_autocomplete_results(value, DEFENSE_VALUES)
+
+@filter_characters.autocomplete('evasion')
+async def autocomplete_character_evasion(value):
+    return get_simple_autocomplete_results(value, EVASION_VALUES)
+
+@filter_characters.autocomplete('recovery')
+async def autocomplete_character_recovery(value):
+    return get_simple_autocomplete_results(value, RECOVERY_VALUES)
+
+@filter_characters.autocomplete('hp')
+async def autocomplete_character_hp(value):
+    return get_simple_autocomplete_results(value, HP_VALUES)
+
+def render_card_embed(card):
+    embed = Embed(
+        card.name,
+        (
+            f'{card.description}\n'
+            f'\n'
+            f'*{card.quote}*'
+        ),
+        url = card.url,
+    ).add_field(
+        'level',
+        (
+            f'```\n'
+            f'{card.level}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'cost',
+        (
+            f'```\n'
+            f'{card.cost.string}\n'
+            f'```'
+        ),
+        inline = True,
+    )
+    
+    limit = card.limit
+    if limit != -1:
+        embed.add_field(
+            'limit',
+            (
+                f'```\n'
+                f'{card.limit}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    embed.add_field(
+        'type',
+        (
+            f'```\n'
+            f'{card.type_string}\n'
+            f'```'
+        ),
+    ).add_image(
+        RELATIONS[card.card_name],
+    )
+    
+    pack = card.pack
+    if (pack is not None):
+        embed.add_field(
+            'pack',
+            (
+                f'```\n'
+                f'{pack.name}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    rarity = card.rarity
+    if rarity != CARD_RARITY_NONE:
+        rarity_string = CARD_RARITY_VALUE_TO_NAME[rarity]
+        
+        embed.add_field(
+            'rarity',
+            (
+                f'```\n'
+                f'{rarity_string}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    events = card.events
+    if (events is not None):
+        embed.add_field(
+            'events',
+            (
+                f'```\n'
+                f'{" & ".join(event.name for event in events)}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    return embed
+
+@OJ_COMMANDS.interactions
+async def card(
+    name: (str, 'The card\'s name.'),
+):
+    try:
+        card = CARDS_BY_NAME[name]
+    except KeyError:
+        abort(f'There is no card named like: {name}.')
+    else:
+        return render_card_embed(card)
 
 
+@card.autocomplete('name')
+async def autocomplete_card_name(value):
+    return get_auto_complete_results(value, CARDS)
+
+CUSTOM_ID_SELECT_CARD = 'hpoj.card.select'
+CUSTOM_ID_SELECT_CARD_DISABLED = 'hpoj.card.select.disabled'
+
+@OJ_COMMANDS.interactions
+async def filter_cards(
+    level: ('int', 'The card\'s level.') = None,
+    cost: ('str', 'The card\'s cost.') = None,
+    limit: ('int', 'The card\'s limit per deck.') = None,
+    type_: ('str', 'The card\'s type.') = None,
+    pack: ('str', 'The card\'s pack.') = None,
+    rarity: ('str', 'The card\'s rarity.') = None,
+):
+    return filter_entities_by(
+        get_card_filter_keys(level, cost, limit, type_, pack, rarity),
+        CARDS,
+        CUSTOM_ID_SELECT_CARD,
+        CUSTOM_ID_SELECT_CARD_DISABLED,
+        'card',
+    )
+
+@filter_cards.autocomplete('level')
+async def autocomplete_card_level(value):
+    return get_simple_autocomplete_results(value, CARD_LEVEL_FILTERABLE_STRINGS)
+
+@filter_cards.autocomplete('cost')
+async def autocomplete_card_cost(value):
+    return get_simple_autocomplete_results(value, CARD_COSTS_NAMES_SORTED)
+
+@filter_cards.autocomplete('limit')
+async def autocomplete_card_limit(value):
+    return get_simple_autocomplete_results(value, CARD_LIMIT_FILTERABLE_STRINGS)
+
+@filter_cards.autocomplete('type_')
+async def autocomplete_card_type(value):
+    if (value is not None):
+        value = value.upper()
+    
+    return get_simple_autocomplete_results(value, CARD_TYPE_FILTERABLE_NAMES)
+
+@filter_cards.autocomplete('pack')
+async def autocomplete_card_pack(value):
+    return get_simple_autocomplete_results(value, CARD_PACK_NAMES_SORTED_BY_COST)
+
+@filter_cards.autocomplete('rarity')
+async def autocomplete_card_rarity(value):
+    return get_simple_autocomplete_results(value, CARD_RARITY_FILTERABLE_NAMES)
 
 
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SELECT_CARD)
+async def select_card(event):
+    if event.message.interaction.user is not event.user:
+        return
+    
+    selected_card_ids = event.interaction.options
+    if (selected_card_ids is None):
+        return
+    
+    try:
+        selected_card_id = int(selected_card_ids[0])
+    except ValueError:
+        return
+    
+    try:
+        card = CARDS[selected_card_id]
+    except KeyError:
+        return
+    
+    return InteractionResponse(
+        embed = render_card_embed(card),
+        components = None,
+    )
 
 
-
-
-
-
-
-
-
-
-
-
+@SLASH_CLIENT.interactions(
+    custom_id = (
+        CUSTOM_ID_SELECT_CHARACTER_DISABLED,
+        CUSTOM_ID_SELECT_CARD_DISABLED,
+    )
+)
+async def handle_disabled_components():
+    pass

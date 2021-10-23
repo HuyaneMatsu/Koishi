@@ -1,3 +1,5 @@
+from re import compile as re_compile, escape as re_escape, I as re_ignore_case
+
 from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS, ExtensionError
 from hata import Embed, Client, CLIENTS
 from hata.ext.slash import set_permission, Select, Option, InteractionResponse, abort
@@ -22,7 +24,7 @@ EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
     allow_by_default = False
 )
 
-EXTENSION_LIS_PER_GUILD_CUSTOM_ID = 'extension.list_per_client'
+EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'extension.list_per_client'
 
 @EXTENSION_COMMANDS.interactions
 async def list_per_client(event):
@@ -36,10 +38,10 @@ async def list_per_client(event):
     client = clients[0]
     
     return list_per_client_get_response(client, clients)
-    
 
 
-@SLASH_CLIENT.interactions(custom_id=EXTENSION_LIS_PER_GUILD_CUSTOM_ID)
+
+@SLASH_CLIENT.interactions(custom_id=EXTENSION_LIST_PER_GUILD_CUSTOM_ID)
 async def handle_list_per_client_component(event):
     if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
         return
@@ -121,7 +123,7 @@ def list_per_client_get_response(selected_client, clients):
             Option(str(client.id), client.full_name, default=(client is selected_client))
             for client in clients
         ],
-        custom_id = EXTENSION_LIS_PER_GUILD_CUSTOM_ID,
+        custom_id = EXTENSION_LIST_PER_GUILD_CUSTOM_ID,
         placeholder = 'Select a client',
     )
     
@@ -213,8 +215,8 @@ async def run_extension_coroutine(extension_name, action_name, coroutine):
 
 @EXTENSION_COMMANDS.interactions
 async def load(event,
-        name: ('str', 'Please provide a name to load.'),
-            ):
+    name: ('str', 'Please provide a name to load.'),
+):
     """Loads the specified extension by it's name."""
     check_permission(event)
     extension = get_extension_by_name(name)
@@ -230,8 +232,8 @@ async def load(event,
 
 @EXTENSION_COMMANDS.interactions
 async def reload(event,
-        name: ('str', 'Please provide a name to reload.'),
-            ):
+    name: ('str', 'Please provide a name to reload.'),
+):
     """Reloads the specified extension by it's name."""
     check_permission(event)
     extension = get_extension_by_name(name)
@@ -247,8 +249,8 @@ async def reload(event,
 
 @EXTENSION_COMMANDS.interactions
 async def unload(event,
-        name: ('str', 'Please provide a name to unload.'),
-            ):
+    name: ('str', 'Please provide a name to unload.'),
+):
     """Unloads the specified extension by it's name."""
     check_permission(event)
     extension = get_extension_by_name(name)
@@ -264,8 +266,8 @@ async def unload(event,
 
 @EXTENSION_COMMANDS.interactions
 async def register(event,
-        name: ('str', 'Please provide a name to register.'),
-            ):
+    name: ('str', 'Please provide a name to register.'),
+):
     """Registers the specified extension by it's name."""
     check_permission(event)
     
@@ -283,3 +285,25 @@ async def register(event,
         description = None
     
     return Embed(title, description)
+
+
+@load.autocomplete('name')
+@reload.autocomplete('name')
+@unload.autocomplete('name')
+async def autocomplete_extension_name(value):
+    if value is None:
+        extensions = list(EXTENSIONS.values())
+    else:
+        extensions = []
+        
+        pattern = re_compile(re_escape(value), re_ignore_case)
+        
+        for extension in EXTENSIONS.values():
+            if (not extension.locked) and (pattern.search(extension.name) is not None):
+                extensions.append(extension)
+    
+    if not extensions:
+        return None
+    
+    del extensions[20:]
+    return [extension.name for extension in extensions]
