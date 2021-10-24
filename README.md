@@ -1,4 +1,6 @@
-<img width="100px" src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/library/koishi_avatar_0000_by_ashy.png" align="center" alt="Koishi"/>
+<p align="center">
+    <img width="100px" src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/library/koishi_avatar_0000_by_ashy.png" align="center" alt="Koishi"/>
+</p>
 
 <h1 align="center">
     <b><a href="https://github.com/HuyaneMatsu/koishi">Koishi</a></b>
