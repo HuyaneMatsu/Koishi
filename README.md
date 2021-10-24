@@ -1,5 +1,5 @@
 <p align="center">
-    <img width="100px" src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/library/koishi_avatar_0000_by_ashy.png" align="center" alt="Koishi"/>
+    <img width="256px" height="256px" src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/library/koishi_avatar_0000_by_ashy.png" align="center" alt="Koishi"/>
 </p>
 
 <h1 align="center">
