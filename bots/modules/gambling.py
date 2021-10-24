@@ -1185,20 +1185,18 @@ class DailyEventGUI:
 
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ELEVATED, True)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__BOOSTER, True)
+@SLASH_CLIENT.interactions(is_global=True)
 async def gift(client, event,
-        target_user: ('user', 'Who is your heart\'s chosen one?'),
-        amount : ('int', 'How much do u love them?'),
-        message : ('str', 'Optional message to send with the gift.') = None,
-            ):
+    target_user: ('user', 'Who is your heart\'s chosen one?'),
+    amount : ('int', 'How much do u love them?'),
+    message : ('str', 'Optional message to send with the gift.') = None,
+):
     """Gifts hearts to the chosen by your heart."""
     source_user = event.user
     
     if not (source_user.has_role(ROLE__NEKO_DUNGEON__ELEVATED) or source_user.has_role(ROLE__NEKO_DUNGEON__BOOSTER)):
-        abort(f'You must have either {ROLE__NEKO_DUNGEON__ELEVATED.mention} or '
-            f'{ROLE__NEKO_DUNGEON__BOOSTER.mention} role to invoke this command.', allowed_mentions=None)
+        abort(f'You must have either {ROLE__NEKO_DUNGEON__ELEVATED.name} or '
+            f'{ROLE__NEKO_DUNGEON__BOOSTER.name} role to invoke this command.', allowed_mentions=None)
     
     if source_user is target_user:
         abort('You cannot give love to yourself..')

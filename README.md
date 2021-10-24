@@ -16,3 +16,53 @@
     <a href="http://discord.gg/3cH2r5d">Join our gang!</a>
     </p>
 </p>
+
+Koishi is a multi functional Discord Bot with a lot of fun, moderation and utility commands.
+
+#### Global commands
+
+- Administration
+    
+    `clear` • `ban` • `bans` • `emoji-role` • `invite-create` • `invites` • `is-banned`
+
+- Anime
+    
+    `anime` • `character` • `find-anime` • `find-character` • `find-manga` • `manga`
+
+- Actions
+    
+    `bite` • `blush` • `bully` • `cringe` • `cry` • `dance` • `glomp` • `handhold` • `happy` • `highfive` • `hug` •
+    `kill` • `kiss` • `lick` • `nom` • `pat` • `poke` • `slap` • `smile` • `smug` • `wave` • `wink` • `yeet`
+
+- Economy
+    
+    `daily` • `gift` • `heart-shop` • `hearts` • `top-list`
+
+- Fun
+    
+    `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • `sex` • `trivia` • `yuno`
+
+- Games
+    
+    `21` • `ds` • `kanako` • `xox`
+
+-  Help
+    
+    `about` • `help`
+
+-  Marriage
+    
+    `buy-waifu-slot` • `divorce` • `love` • `propose` • `proposals` • `waifu-info`
+
+- Utility
+
+    `avatar` • `calc` • `color` • `guild` • `guild-icon` • `id` • `id-to-datetime` • `now-as-id` • `ping` • `rawr` •
+    `sticker` • `role` • `show-emoji` • `user` • `welcome-screen`
+
+- Waifus
+
+    `nsfw-booru` • `safe-booru` • `touhou-character` • `waifu`
+
+#### Support server only commands
+
+`all-users` • `ask` • `award` • `crywolf` • `currency-insert` • `daily-event` • `docs-search` • `emoji` • `events` • `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules` • `sticker` • `take` • `transfer` • `voice`

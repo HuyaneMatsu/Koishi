@@ -35,6 +35,10 @@ else:
         client_id = config.KOISHI_ID,
         activity = ActivityRich('with Satori'),
         shard_count = 2,
+        intents = IntentFlag().update_by_keys(
+            guild_users = False,
+            guild_presences = False,
+        ),
         application_id = config.KOISHI_ID,
         extensions = ('command_utils', 'slash'),
     )

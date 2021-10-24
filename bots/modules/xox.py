@@ -246,7 +246,7 @@ def click_p2(array, identifier_p1, identifier_p2):
     array[should_click_at] = identifier_p2
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(is_global=True)
 async def xox(client, event):
     """The X-O-X game with buttons."""
     array = [0 for _ in range(9)]

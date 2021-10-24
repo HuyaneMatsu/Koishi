@@ -419,15 +419,15 @@ KANAKO = SLASH_CLIENT.interactions(
     None,
     name = 'kanako',
     description = 'Start a hiragana or a katakana quiz!',
-    guild = GUILD__NEKO_DUNGEON,
+    is_global = True,
 )
 
 
 @KANAKO.interactions
 async def create_(client, event,
-        map_ : ([NAME_HIRAGANA, NAME_KATAKANA], 'Choose a map to play!') = NAME_HIRAGANA,
-        length : ('int', 'The amount of questions.') = 20,
-            ):
+    map_ : ([NAME_HIRAGANA, NAME_KATAKANA], 'Choose a map to play!') = NAME_HIRAGANA,
+    length : ('int', 'The amount of questions.') = 20,
+):
     """Create a new game!"""
     if not event.guild_id:
         abort('Guild only command')

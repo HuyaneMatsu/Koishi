@@ -420,11 +420,11 @@ CATEGORIES = (
     ), (
         'Economy',
         EMOJI__HEART_CURRENCY,
-        ('daily', 'heart-shop', 'hearts', 'top-list',),
+        ('daily', 'gift', 'heart-shop', 'hearts', 'top-list',),
     ), (
         'Fun',
         EMOJI_PAPER_DRAGON,
-        ('meme', 'message-me', 'minesweeper', 'paranoia', 'random', 'rate', 'roll', 'sex', 'trivia', 'yuno',)
+        ('meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll', 'sex', 'trivia', 'yuno')
     ), (
         'Games',
         EMOJI_VIDEO_GAME,
@@ -441,7 +441,7 @@ CATEGORIES = (
         'Utility',
         EMOJI_MAGIC_WAND,
         ('avatar', 'calc', 'color', 'guild', 'guild-icon', 'id', 'id-to-datetime', 'now-as-id', 'ping', 'rawr',
-        'role', 'roles', 'show-emoji', 'user', 'welcome-screen',),
+        'sticker', 'role', 'show-emoji', 'user', 'welcome-screen',),
     ), (
         'Waifus',
         EMOJI_WAIFU,
@@ -510,9 +510,6 @@ def build_command_list_embed():
 
 
 COMMAND_LIST_EMBED = build_command_list_embed()
-
-# `status`,
-# `escape`,
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def help_(client, event):
