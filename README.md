@@ -1,5 +1,8 @@
 <p align="center">
-    <img width="256px" height="256px" src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/library/koishi_avatar_0000_by_ashy.png" align="center" alt="Koishi"/>
+    <img
+        width="256px" height="256px" align="center" alt="Koishi"
+        src="https://raw.githubusercontent.com/HuyaneMatsu/Koishi/master/library/koishi_avatar_0000_by_ashy.png"
+    />
 </p>
 
 <h1 align="center">
@@ -11,13 +14,17 @@
 </h5>
 
 <p align="center">
-    <a href="https://discord.com/oauth2/authorize?client_id=486565096164687885&scope=bot%20applications.commands">Invite me!</a>
+    <a href="https://discord.com/oauth2/authorize?client_id=486565096164687885&scope=bot%20applications.commands">
+        Invite me!
+    </a>
     ·
-    <a href="http://discord.gg/3cH2r5d">Join our gang!</a>
-    </p>
+    <a href="http://discord.gg/3cH2r5d">
+        Join our gang!
+    </a>
 </p>
 
-Koishi is a multi functional Discord Bot with a lot of fun, moderation and utility commands.
+Koishi is a multi functional waifu stuffed out with all the new Discord features. She got many fun and utility commands
+to get the people together.
 
 #### Global commands
 
@@ -65,4 +72,6 @@ Koishi is a multi functional Discord Bot with a lot of fun, moderation and utili
 
 #### Support server only commands
 
-`all-users` • `ask` • `award` • `crywolf` • `currency-insert` • `daily-event` • `docs-search` • `emoji` • `events` • `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules` • `sticker` • `take` • `transfer` • `voice`
+`all-users` • `ask` • `award` • `crywolf` • `currency-insert` • `daily-event` • `docs-search` • `emoji` • `events` •
+`extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles` •
+`rules` • `sticker` • `take` • `transfer` • `voice`
