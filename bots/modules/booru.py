@@ -1,26 +1,20 @@
-import sys
 from re import compile as re_compile, I as re_ignore_case, U as re_unicode, escape as re_escape
 from collections import deque
 from difflib import get_close_matches
 
-from hata import Embed, ERROR_CODES, Color, BUILTIN_EMOJIS, Client, Permission
-from hata.ext.command_utils import ChooseMenu, Pagination
-from hata.backend.utils import from_json
-from hata.ext.slash import InteractionResponse, abort, Button, Row
+from hata import Embed, Color, BUILTIN_EMOJIS, Client
+from hata.ext.slash import abort, Button, Row
 from hata.ext.slash.menus import Menu
-from hata.discord.http import LIBRARY_USER_AGENT
-from hata.backend.headers import USER_AGENT, CONTENT_TYPE
 
 from bot_utils.tools import BeautifulSoup, choose, pop_one, choose_not_same
-
-WORD_MATCH_RP = re_compile('[^a-zA-z0-9]+')
-
-HEADERS = {USER_AGENT: LIBRARY_USER_AGENT}
 
 BOORU_COLOR = Color.from_html('#138a50')
 
 SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 NSFW_BOORU = 'http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags='
+
+SAFE_BOORU_PROVIDER = 'safebooru'
+NSFW_BOORU_PROVIDER = 'gelbooru'
 
 TOUHOU_REQUIRED = frozenset((
     'solo',
@@ -64,9 +58,6 @@ NSFW_BANNED = frozenset((
     'huge_filesize',
 ))
 
-
-DEFAULT_TITLE = 'Link'
-
 def make_url(base, requested_tags, required_tags, banned_tags):
     url_parts = [base]
     is_tag_first = True
@@ -98,111 +89,132 @@ def make_url(base, requested_tags, required_tags, banned_tags):
     
     return ''.join(url_parts)
 
-SLASH_CLIENT: Client
+def parse_xml(xml):
+    soup = BeautifulSoup(xml, 'lxml')
+    return [
+        (post['file_url'], post['tags'])
+        for post in soup.find_all('post')
+    ]
 
-class CachedBooruCommand:
-    __slots__ = ('tag_name', 'title', 'urls',)
-    def __init__(self, title, tag_name):
-        self.tag_name = tag_name
-        self.title = title
-        self.urls = None
-    
-    async def __call__(self, client, event):
-        yield
-        
-        urls = self.urls
-        if urls is None:
-            urls = await self._request_urls(client)
-            if urls is None:
-                yield Embed('Error desu', 'Booru is unavailable', color=BOORU_COLOR)
-                return
-        
-        guild = event.guild
-        if (guild is None) or (client not in guild.clients):
-            image_url = choose(urls)
-            yield Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
-            return
-        
-        if not urls:
-            yield Embed('No result')
-            return
-        
-        await ShuffledShelter(client, event, urls, False, self.title)
-        return
-    
-    async def _request_urls(self, client):
-        url = make_url(SAFE_BOORU, {self.tag_name}, TOUHOU_REQUIRED, TOUHOU_BANNED)
-        
-        async with client.http.get(url) as response:
-            result = await response.read()
-        
-        if response.status != 200:
-            return
-        
-        soup = BeautifulSoup(result, 'lxml')
-        urls = [post['file_url'] for post in soup.find_all('post')]
-        self.urls = urls
-        return urls
+def make_bad_status_embed(response, provider):
+    return Embed(
+        'Yeet',
+        f'{provider} is unavailable\n{response.status: {response.reason}}',
+        color = BOORU_COLOR
+    )
 
+DEFAULT_TITLE = 'Link'
 
 EMOJI_CYCLE = BUILTIN_EMOJIS['arrows_counterclockwise']
 EMOJI_BACK = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
+EMOJI_TAGS = BUILTIN_EMOJIS['notepad_spiral']
 
-class ShuffledShelter(Menu):
+def add_footer(embed, provider):
+    return embed.add_footer(f'Images provided by {provider}')
+
+
+def make_embed(title, image_url, provider):
+    return add_footer(
+        Embed(title, color=BOORU_COLOR, url=image_url).add_image(image_url),
+        provider,
+    )
+
+class BooruCycler(Menu):
     BUTTON_CYCLE = Button(emoji=EMOJI_CYCLE)
     BUTTON_BACK = Button(emoji=EMOJI_BACK, enabled=False)
+    BUTTON_TAGS = Button(emoji=EMOJI_TAGS)
     
     BUTTONS = Row(BUTTON_CYCLE, BUTTON_BACK)
+    BUTTONS_DISPLAY_TAGS = Row(BUTTON_CYCLE, BUTTON_BACK, BUTTON_TAGS)
     
-    __slots__ = ('history', 'history_step', 'pop', 'title', 'urls')
+    __slots__ = ('history', 'history_step', 'pop', 'title', 'image_url_tag_pairs', 'provider', 'display_tags')
     
-    def __init__(self, client, event, urls, pop, title=DEFAULT_TITLE):
-        self.urls = urls
+    def __init__(self, client, event, image_url_tag_pairs, pop, title, provider, display_tags):
+        self.image_url_tag_pairs = image_url_tag_pairs
         self.pop = pop
         self.title = title
         history = deque(maxlen=100)
         self.history = history
         self.history_step = 1
+        self.provider = provider
+        self.display_tags = display_tags
         return
     
     async def initial_invoke(self):
-        urls = self.urls
-        if len(urls) == 1:
-            image_url = self.urls[0]
+        image_url_tag_pairs = self.image_url_tag_pairs
+        if len(image_url_tag_pairs) == 1:
+            image_url_tag_pair = image_url_tag_pairs[0]
             self.BUTTON_CYCLE.enabled = False
             self.cancel()
         else:
             if self.pop:
-                image_url = pop_one(urls)
+                image_url_tag_pair = pop_one(image_url_tag_pairs)
             else:
-                image_url = choose(urls)
-            self.history.append(image_url)
+                image_url_tag_pair = choose(image_url_tag_pairs)
+            self.history.append(image_url_tag_pair)
         
-        self.components = self.BUTTONS
-        self.embed = Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
+        if self.display_tags:
+            components = self.BUTTONS_DISPLAY_TAGS
+        else:
+            components = self.BUTTONS
+        self.components = components
+        
+        image_url = image_url_tag_pair[0]
+        self.embed = make_embed(self.title, image_url, self.provider)
     
+
     def get_timeout(self):
         return 300.0
     
     async def invoke(self, event):
         interaction = event.interaction
-        if interaction == self.BUTTON_CYCLE:
-            urls = self.urls
-            if self.pop:
-                image_url = pop_one(urls)
-            else:
-                image_url = choose_not_same(urls, self.message.embeds[0].image.url)
+        history = self.history
+        history_length = len(history)
+        
+        if interaction == self.BUTTON_TAGS:
+            history_step = self.history_step
+            if history_step == history_length:
+                history_step = 1
             
-            self.history.append(image_url)
+            image_url_tag_pair = history[history_length - history_step]
+            
+            client = self.client
+            await client.interaction_component_acknowledge(event)
+            await client.interaction_followup_message_create(
+                event,
+                embed = Embed(
+                    'Tags',
+                    ' | '.join(image_url_tag_pair[1].replace('_', '\_').split()),
+                    url = image_url_tag_pair[0],
+                ).add_thumbnail(
+                    image_url_tag_pair[0],
+                ),
+                show_for_invoking_user_only = True,
+            )
+            return False
+        
+        if event.user is not self.message.interaction.user:
+            return False
+        
+        if interaction == self.BUTTON_CYCLE:
+            image_url_tag_pairs = self.image_url_tag_pairs
+            if self.pop or (not history_length):
+                image_url_tag_pair = pop_one(image_url_tag_pairs)
+            else:
+                history_step = self.history_step
+                if history_step == history_length:
+                    history_step =1
+                
+                image_url_tag_pair = choose_not_same(image_url_tag_pairs, history[history_length-history_step])
+            
+            self.history.append(image_url_tag_pair)
             self.history_step = 1
             self.BUTTON_BACK.enabled = True
             
-            if not urls:
-                urls.extend(self.history)
+            if not image_url_tag_pairs:
+                image_url_tag_pairs.extend(self.history)
         
         elif interaction == self.BUTTON_BACK:
-            history = self.history
-            history_length = len(history)
             if history_length == 1:
                 return False
             
@@ -212,52 +224,121 @@ class ShuffledShelter(Menu):
             
             history_step += 1
             self.history_step = history_step
-            image_url = history[history_length - history_step]
+            image_url_tag_pair = history[history_length - history_step]
         
         else:
             return False
         
-        self.embed = Embed(self.title, color=BOORU_COLOR, url=image_url).add_image(image_url)
+        image_url = image_url_tag_pair[0]
+        self.embed = make_embed(self.title, image_url, self.provider)
         return True
 
 
-async def answer_booru(client, event, content, url_base, banned):
+async def answer_booru(client, event, content, url_base, banned, provider, display_tags):
     yield
     
-    url = make_url(url_base, set(content.split()), None, banned)
+    tags = set(content.split())
+    url = make_url(url_base, tags, None, banned)
     
     async with client.http.get(url) as response:
+        if response.status != 200:
+            yield make_bad_status_embed(response, provider)
+            return
+        
         result = await response.read()
     
-    if response.status != 200:
-        yield Embed('Error desu.', 'Booru is unavailable', color=BOORU_COLOR)
+    image_url_tag_pairs = parse_xml(result)
+    
+    if not image_url_tag_pairs:
+        yield add_footer(
+            Embed(
+                'Error desu.',
+                f'Could not find anything what matches these tags..',
+                color = BOORU_COLOR,
+            ),
+            provider,
+        )
         return
     
-    soup = BeautifulSoup(result, 'lxml')
-    urls = [post['file_url'] for post in soup.find_all('post')]
-    if not urls:
-        yield Embed('Error desu.', f'Could not find anything what matches these tags..', color=BOORU_COLOR)
-        return
-    
-    guild = event.guild
-    if (guild is None) or (client not in guild.clients):
-        image_url = choose(urls)
-        yield Embed(DEFAULT_TITLE, color=BOORU_COLOR, url=image_url).add_image(image_url)
-        return
-    
-    if not urls:
-        yield Embed('No result')
-        return
-    
-    await ShuffledShelter(client, event, urls, True)
+    await BooruCycler(client, event, image_url_tag_pairs, True, DEFAULT_TITLE, provider, display_tags)
     return
 
 
-TOUHOU_NAME_RELATIONS = {}
-TOUHOU_NAMES = []
-TOUHOU_ALTERNATIVE_NAMES = {}
+class CachedBooruCommand:
+    __slots__ = ('tag', 'title', 'urls',)
+    def __init__(self, title, tag):
+        self.tag = tag
+        self.title = title
+        self.urls = None
+    
+    async def __call__(self, client, event):
+        yield
+        
+        urls = self.urls
+        if urls is None:
+            url = make_url(SAFE_BOORU, {self.tag}, TOUHOU_REQUIRED, TOUHOU_BANNED)
+            async with client.http.get(url) as response:
+                if response.status != 200:
+                    yield make_bad_status_embed(response, SAFE_BOORU_PROVIDER)
+                    return
+                
+                result = await response.read()
+                image_url_tag_pairs = parse_xml(result)
+        
+        if not image_url_tag_pairs:
+            yield add_footer(
+                Embed(
+                    'No result',
+                    'Please try again later.',
+                    color = BOORU_COLOR,
+                ),
+                SAFE_BOORU_PROVIDER,
+            )
+            return
+        
+        await BooruCycler(client, event, image_url_tag_pairs, False, self.title, SAFE_BOORU_PROVIDER, False)
+        return
+    
 
-for name, tag_name, *alternative_names in (
+SLASH_CLIENT: Client
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def safe_booru(client, event,
+    tags: ('str', 'Some tags to spice it up?') = '',
+):
+    """Some safe images?"""
+    if not event.guild_id:
+        abort(f'Guild only command.')
+    
+    return answer_booru(client, event, tags, SAFE_BOORU, SAFE_BANNED, SAFE_BOORU_PROVIDER, True)
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def nsfw_booru(client, event,
+    tags: ('str', 'Some tags to spice it up?') = '',
+):
+    """Some not so safe images? You perv!"""
+    if not event.guild_id:
+        abort(f'Guild only command.')
+    
+    channel = event.channel
+    if (channel is None) or (not channel.nsfw):
+        if 'koishi' in tags.lower():
+            description = 'I love you too\~,\nbut this is not the right place to lewd.'
+        else:
+            description = 'Onii chaan\~,\nthis is not the right place to lewd.'
+        
+        abort(description)
+    
+    return answer_booru(client, event, tags, NSFW_BOORU, NSFW_BANNED, NSFW_BOORU_PROVIDER, True)
+
+
+def generate_touhou_relations():
+    touhou_name_relations = {}
+    touhou_names = []
+    touhou_alternative_names = {}
+    
+    for name, tag_name, *alternative_names in (
         ('Aki Minoriko'         , 'aki_minoriko'         , '秋 穣子', 'Minoriko',),
         ('Aki Shizuha'          , 'aki_shizuha'          , '秋 静葉', 'Shizuha',),
         ('Luna Child'           , 'luna_child'           , 'ルナチャイルド', 'Chairudo Runa', 'Luna', 'Runa',),
@@ -272,7 +353,7 @@ for name, tag_name, *alternative_names in (
         ('Hearn Maribel'        , 'maribel_hearn'        , 'マエリベリー ハーン', 'Maribel', 'Maeriberii', 'Haan Maeriberii', 'Maribel Hearn'),
         ('Haniyasushin Keiki'   , 'haniyasushin_keiki'   , '埴安神 袿姫', 'Keiki', 'Keiki Haniyasushin',),
         ('Hakurei Reimu'        , 'hakurei_reimu'        , '博麗 霊夢', 'Reimu', 'Reimu Hakurei'),
-        ('Hata no Kokoro'       , 'hata_no_kokoro'       , '秦 こころ', 'Kokoro', 'こころ'),
+        ('Hata no Kokoro'       , 'hata_no_kokoro'       , '秦 こころ', 'Kokoro', 'こころ', 'Hata'),
         ('Hei Meiling'          , 'hei_meiling'          , 'Hei Meirin', 'Meiling Hei'),
         ('Hieda no Akyuu'       , 'hieda_no_akyuu'       , '稗田 阿求', 'Akyuu',),
         ('Hijiri Byakuren'      , 'hijiri_byakuren'      , '聖 白蓮', 'Byakuren', 'Hijiri Byakuren'),
@@ -375,21 +456,20 @@ for name, tag_name, *alternative_names in (
         ('Yatadera Narumi'      , 'yatadera_narumi'      , '矢田寺 成美', 'Narumi', 'Narumi Yatadera'),
         ('Yorigami Joon'        , 'yorigami_jo\'on'      , '依神 女苑', 'Joon', 'Joon Yorigami',),
         ('Yorigami Shion'       , 'yorigami_shion'       , '依神 紫苑', 'Shion', 'Shion Yorigami'),
-            ):
+    ):
+        touhou_names.append(name)
+        cache = CachedBooruCommand(name, tag_name)
+        touhou_name_relations[name] = cache
+        touhou_names.extend(alternative_names)
+        for alternative_name in alternative_names:
+            touhou_name_relations[alternative_name] = cache
+            touhou_alternative_names[alternative_name] = name
     
-    TOUHOU_NAMES.append(name)
-    cache = CachedBooruCommand(name, tag_name)
-    TOUHOU_NAME_RELATIONS[name] = cache
-    TOUHOU_NAMES.extend(alternative_names)
-    for alternative_name in alternative_names:
-        TOUHOU_NAME_RELATIONS[alternative_name] = cache
-        TOUHOU_ALTERNATIVE_NAMES[alternative_name] = name
+    return touhou_name_relations, touhou_names, touhou_alternative_names
 
-del name
-del tag_name
-del alternative_name
-del alternative_names
-del cache
+
+TOUHOU_NAME_RELATIONS, TOUHOU_NAMES, TOUHOU_ALTERNATIVE_NAMES = generate_touhou_relations()
+
 
 MOST_POPULAR_TOUHOU_CHARACTERS = [
     'Konpaku Youmu',
@@ -414,19 +494,11 @@ MOST_POPULAR_TOUHOU_CHARACTERS = [
     'Tatara Kogasa',
 ]
 
-"""
-TOUHOU = SLASH_CLIENT.interactions(
-    None,
-    name = 'touhou',
-    description = 'Some touhou commands.',
-    is_global = True,
-)
-"""
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def touhou_character(client, event,
-        name: ('str', 'Who\'s?'),
-            ):
+    name: ('str', 'Who\'s?'),
+):
     """Shows you the given Touhou character's portrait."""
     name_length = len(name)
     if name_length == 0:
@@ -440,32 +512,33 @@ async def touhou_character(client, event,
     matcheds = get_close_matches(name, TOUHOU_NAMES, n=1, cutoff=1.0-diversity)
     if matcheds:
         return TOUHOU_NAME_RELATIONS[matcheds[0]](client, event)
-    else:
-        embed = Embed('No match', color=BOORU_COLOR)
-        matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.8-diversity)
-        if matcheds:
-            field_value_parts = []
-            for index, matched in enumerate(matcheds, 1):
-                field_value_parts.append(str(index))
-                field_value_parts.append('.: **')
-                field_value_parts.append(matched)
-                field_value_parts.append('**')
-                name = TOUHOU_NAME_RELATIONS[matched].title
-                if matched != name:
-                    field_value_parts.append(' [')
-                    field_value_parts.append(name)
-                    field_value_parts.append(']')
-                
-                field_value_parts.append('\n')
+    
+    embed = Embed('No match', color=BOORU_COLOR)
+    matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.8-diversity)
+    if matcheds:
+        field_value_parts = []
+        for index, matched in enumerate(matcheds, 1):
+            field_value_parts.append(str(index))
+            field_value_parts.append('.: **')
+            field_value_parts.append(matched)
+            field_value_parts.append('**')
+            name = TOUHOU_NAME_RELATIONS[matched].title
+            if matched != name:
+                field_value_parts.append(' [')
+                field_value_parts.append(name)
+                field_value_parts.append(']')
             
-            del field_value_parts[-1]
-            
-            embed.add_field('Close matches:', ''.join(field_value_parts))
-        return embed
+            field_value_parts.append('\n')
+        
+        del field_value_parts[-1]
+        
+        embed.add_field('Close matches:', ''.join(field_value_parts))
+    
+    return embed
 
 
 @touhou_character.autocomplete('name')
-async def autocomplete_touhou_character_name(client, value):
+async def autocomplete_touhou_character_name(value):
     if value is None:
         return MOST_POPULAR_TOUHOU_CHARACTERS
     
@@ -501,351 +574,3 @@ async def autocomplete_touhou_character_name(client, value):
     del unique[20:]
     
     return [TOUHOU_ALTERNATIVE_NAMES.get(name, name) for name in unique]
-
-
-
-def touhou_wiki_result_sort_key(item):
-    return len(item[0])
-
-
-# @TOUHOU.interactions
-async def wiki_(client, event,
-        search_for : ('str', 'Search term'),
-            ):
-    """Searches the given query in touhou wiki."""
-    guild = event.guild
-    if guild is None:
-        abort('Guild only command')
-    
-    if (client.get_guild_profile_for(guild) is None):
-        abort('I must be in the guild to execute this command.')
-    
-    words = WORD_MATCH_RP.split(search_for)
-    search_for = ' '.join(words)
-    
-    yield
-    
-    async with client.http.get(
-        f'https://en.touhouwiki.net/api.php?action=opensearch&search={search_for}&limit=25&redirects=resolve&'
-        f'format=json&utf8',
-        headers = HEADERS
-    ) as response:
-        response_data = await response.read()
-        response_headers = response.headers
-    
-    content_type_headers = response_headers.get(CONTENT_TYPE, None)
-    if (content_type_headers is not None) and (content_type_headers == 'application/json'):
-        json_data = from_json(response_data)
-        
-        results = list(zip(json_data[1], json_data[3]))
-        results.sort(key=touhou_wiki_result_sort_key)
-    
-    else:
-        results = None
-    
-    if (results is None) or (not results):
-        yield Embed(
-            'No result',
-            f'No search result for: `{search_for}`',
-            color = BOORU_COLOR,
-        )
-        return
-    
-    embed = Embed(f'Search results for `{search_for}`', color=BOORU_COLOR)
-    await ChooseMenu(client, event, results, wiki_page_selected, embed=embed, prefix='>>')
-
-async def wiki_page_selected(client, channel, message, title, url):
-    pages = await download_wiki_page(client, title, url)
-    await Pagination(client, channel, pages, timeout=600.0, message=message)
-
-async def download_wiki_page(client, title_, url):
-    async with client.http.get(url, headers=HEADERS) as response:
-        response_data = await response.text()
-    soup = BeautifulSoup(response_data, 'html.parser')
-    
-    block = soup.find_all('div', class_='mw-parser-output')[2]
-    
-    last = []
-    title_parts = [title_]
-    
-    contents = [(None, last),]
-    
-    for element in block.contents:
-        element_name = element.name
-        if element_name is None:
-            continue #linebreak
-        
-        if element_name == 'dl':
-            for element in element.contents:
-                element_name = element.name
-                if element_name == 'dt':
-                    # sub sub sub title
-                    last.append(f'**{element.text}**\n')
-                    continue
-                
-                if element_name == 'dd':
-                    # check links
-                    subs = element.findAll(recursive=False)
-                    # if len(1)==1, then it might be a div
-                    if len(subs) == 1:
-                        sub = subs[0]
-                        # is it div?
-                        if sub.name == 'div':
-                            classes = sub.attrs.get('class')
-                            # is it main article link?
-                            if (classes is not None) and ('mainarticle' in classes):
-                                sub = sub.find('a')
-                                url_ = sub.attrs['href']
-                                title = sub.attrs['title']
-                                text = f'*Main article: [{title}](https://en.touhouwiki.net{url_})*\n'
-                                last.append(text)
-                                continue
-                    
-                    text = element.text
-                    if text.startswith('"') and text.endswith('"'):
-                        text = f'*{text}*\n'
-                    else:
-                        text = text+'\n'
-                    
-                    last.append(text)
-                    continue
-                
-                # rest is just linebreak
-                continue
-                
-            continue
-        
-        if element_name == 'table':
-            continue # side info
-        
-        if element_name == 'p':
-            text = element.text
-            last.append(text)
-            continue
-        
-        if element_name == 'h2':
-            element = element.findChild('span')
-            text = element.text
-            del title_parts[1:]
-            title_parts.append(text)
-            last = []
-            contents.append((' / '.join(title_parts), last),)
-            continue
-        
-        if element_name == 'h3':
-            element = element.find('span', class_='mw-headline')
-            text = element.text
-            del title_parts[2:]
-            title_parts.append(text)
-            last = []
-            contents.append((' / '.join(title_parts), last),)
-            continue
-        
-        if element_name == 'div':
-            
-            if title_parts[-1] == 'References': #keep reference
-                for index, element in enumerate(element.findAll('span', class_='reference-text'), 1):
-                
-                    # check for error message from the wiki
-                    subs = element.findAll(recursive=False)
-                    for index_ in range(len(subs)):
-                        sub = subs[index_]
-                        classes = sub.attrs.get('class')
-                        if (classes is not None) and ('error' in classes):
-                            errored = True
-                            break
-                    else:
-                        errored = False
-                    
-                    if errored:
-                        if index_ == 0:
-                            continue
-                        
-                        # `[n]`-s are missing, lets put them back
-                        parts=['[', str(index), ']']
-                        for index_ in range(index_):
-                            parts.append(' ')
-                            parts.append(subs[index_].text)
-                        
-                        parts.append('\n')
-                        text=''.join(parts)
-                        # unallocate
-                        del parts
-                    else:
-                        # `[n]`-s are missing, lets put them back
-                        text = f'[{index}] {element.text}\n'
-                    
-                    last.append(text)
-                
-                continue
-            
-            #keep main article
-            
-            classes = element.attrs.get('class')
-            if (classes is not None) and ('mainarticle' in classes):
-                sub = element.find('a')
-                url_ = sub.attrs['href']
-                title = sub.attrs['title']
-                text = f'*Main article: [{title}](https://en.touhouwiki.net{url_})*\n'
-                last.append(text)
-                
-                continue
-            
-            continue
-        
-        if element_name == 'ul':
-            continue # spell card table?
-        
-        sys.stderr.write('Unhandled element at `TouhouWikiPage.__new__` : ')
-        sys.stderr.write(repr(element))
-        sys.stderr.write('\n')
-        
-    del last
-    
-    title = title_
-    pages = []
-    
-    sections = []
-    collected = []
-    for name, blocks in contents:
-        limit = len(blocks)
-        if limit == 0:
-            continue
-        section_ln = 0
-        index = 0
-        
-        while True:
-            block = blocks[index]
-            
-            if (block.startswith('**') and block.endswith('**\n')):
-                if section_ln > 900:
-                    sections.append('\n'.join(collected))
-                    collected.clear()
-                    collected.append(block)
-                    section_ln = len(block)
-                else:
-                    section_ln=section_ln+len(block)
-                    collected.append(block)
-                
-                index +=1
-                if index == limit:
-                    if collected:
-                        sections.append('\n'.join(collected))
-                        collected.clear()
-                    break
-                
-                continue
-            
-            if section_ln+len(block)>1980:
-            
-                if section_ln > 1400:
-                    collected.append('...')
-                    sections.append('\n'.join(collected))
-                    collected.clear()
-                    collected.append('...')
-                    collected.append(block)
-                    section_ln = len(block)
-                
-                else:
-                    max_ln = 1900-section_ln
-                    break_point = block.find(' ', max_ln)
-                    if break_point == -1 or break_point+80 > max_ln:
-                        # too long word (lol category)
-                        pre_part = block[:max_ln]+' ...'
-                        post_part = '... '+block[max_ln:]
-                    else:
-                        # space found, brake next to it
-                        pre_part = block[:break_point]+' ...'
-                        post_part = '...'+block[break_point:]
-                    
-                    index += 1
-                    blocks.insert(index, post_part)
-                    limit += 1
-                    collected.append(pre_part)
-                    sections.append('\n'.join(collected))
-                    collected.clear()
-                    section_ln = 0
-                    continue
-            
-            else:
-                section_ln=section_ln+len(block)
-                collected.append(block)
-            
-            index += 1
-            if index == limit:
-                if collected:
-                    sections.append('\n'.join(collected))
-                    collected.clear()
-                break
-        
-        limit = len(sections)
-        if limit < 2:
-            if name is None:
-                embed_title = title
-            else:
-                embed_title = name
-            embed_content = sections[0]
-            pages.append(Embed(embed_title, embed_content, color=BOORU_COLOR))
-        else:
-            index = 0
-            while True:
-                embed_content = sections[index]
-                index += 1
-                if name is None:
-                    embed_title = f'{title} ({index} / {limit})'
-                else:
-                    embed_title = f'{name} ({index} / {limit})'
-                pages.append(Embed(embed_title, embed_content, color=BOORU_COLOR))
-                if index == limit:
-                    break
-        
-        sections.clear()
-    
-    index = 0
-    limit = len(pages)
-    while True:
-        embed = pages[index]
-        index += 1
-        embed.add_footer(f'Page: {index}/{limit}.')
-        
-        if index == limit:
-            break
-    
-    pages[0].url = url
-    return pages
-
-#### #### #### #### Extra commands #### #### #### ####
-
-@SLASH_CLIENT.interactions(is_global=True)
-async def safe_booru(client, event,
-        tags: ('str', 'Some tags to spice it up?') = '',
-            ):
-    """Some safe images?"""
-    guild = event.guild
-    if (guild is None) or guild.partial:
-        abort(f'Please invite me, {client:f} first!')
-    
-    return answer_booru(client, event, tags, SAFE_BOORU, SAFE_BANNED)
-
-
-@SLASH_CLIENT.interactions(is_global=True)
-async def nsfw_booru(client, event,
-        tags: ('str', 'Some tags to spice it up?') = '',
-            ):
-    """Some not so safe images? You perv!"""
-    guild = event.guild
-    if (guild is None) or guild.partial:
-        abort(f'Please invite me, {client:f} first!')
-    
-    channel = event.channel
-    if not channel.nsfw:
-        if 'koishi' in tags.lower():
-            description = 'I love you too\~,\nbut this is not the right place to lewd.'
-        else:
-            description = 'Onii chaan\~,\nthis is not the right place to lewd.'
-        
-        abort(description)
-    
-    return answer_booru(client, event, tags, NSFW_BOORU, NSFW_BANNED)
-
-

@@ -9,6 +9,7 @@ from hata.ext.slash import abort, InteractionResponse, Button, Row
 SLASH_CLIENT: Client
 
 WAIFU_API_BASE_URL = 'https://api.waifu.pics'
+PROVIDER_FOOTER = 'Images provided by waifu.pics'
 
 HEADERS = imultidict()
 HEADERS[CONTENT_TYPE] = 'application/json'
@@ -90,8 +91,8 @@ WAIFU = SLASH_CLIENT.interactions(None,
 
 @WAIFU.interactions(is_default=True)
 async def sfw(client, event,
-        type_ : (SFW_WAIFUS, 'Waifu type!') = SFW_WAIFUS[0],
-            ):
+    type_ : (SFW_WAIFUS, 'Waifu type!') = SFW_WAIFUS[0],
+):
     """Safe working waifu."""
     guild_id = event.guild_id
     if not guild_id:
@@ -102,7 +103,7 @@ async def sfw(client, event,
         abort(ERROR_MESSAGE_NO_WAIFU)
     
     return InteractionResponse(
-        embed = Embed('link', url=url).add_image(url),
+        embed = Embed('link', url=url).add_image(url).add_footer(PROVIDER_FOOTER),
         components = Button(
             emoji = EMOJI_NEW,
             custom_id = f'waifu.sfw.{type_}',
@@ -112,8 +113,8 @@ async def sfw(client, event,
 
 @WAIFU.interactions
 async def nsfw(client, event,
-        type_ : (NSFW_WAIFUS, 'Waifu type!') = NSFW_WAIFUS[0],
-            ):
+    type_ : (NSFW_WAIFUS, 'Waifu type!') = NSFW_WAIFUS[0],
+):
     """Waifu with extras!"""
     guild_id = event.guild_id
     if not guild_id:
@@ -127,7 +128,7 @@ async def nsfw(client, event,
         abort(ERROR_MESSAGE_NO_WAIFU)
     
     return InteractionResponse(
-        embed = Embed('link', url=url).add_image(url),
+        embed = Embed('link', url=url).add_image(url).add_footer(PROVIDER_FOOTER),
         components = Button(
             emoji = EMOJI_NEW,
             custom_id = f'waifu.nsfw.{type_}',
@@ -150,12 +151,12 @@ class NewWaifu:
             embed = event.message.embed
             if embed is None:
                 # Should not happen
-                embed = Embed(None, ERROR_MESSAGE_NO_WAIFU)
+                embed = Embed(None, ERROR_MESSAGE_NO_WAIFU).add_footer(PROVIDER_FOOTER)
             else:
                 embed.description = ERROR_MESSAGE_NO_WAIFU
                 
         else:
-            embed = Embed('link', url=url).add_image(url)
+            embed = Embed('link', url=url).add_image(url).add_footer(PROVIDER_FOOTER)
         
         return embed
 
@@ -176,8 +177,8 @@ class Action:
         self.cache = []
     
     async def __call__(self, client, event,
-            user : ('user', 'Select someone.') = None,
-                ):
+        user : ('user', 'Select someone.') = None,
+    ):
         guild_id = event.guild_id
         if not guild_id:
             abort('Guild only command')
@@ -195,35 +196,35 @@ class Action:
         
         title = f'{hugger:f} {self.verb} {hugged:f}.'
         
-        return Embed(title, color=(event.id>>22)&0xffffff).add_image(url)
+        return Embed(title, color=(event.id>>22)&0xffffff).add_image(url).add_footer(PROVIDER_FOOTER)
 
 
 for action_name, action_verb, action_description in (
-        ('pat', 'pats', 'Do you like pats as well?'),
-        ('kiss', 'kisses', 'If you really really like your onee, give her a kiss <3'),
-        ('hug', 'hugs', 'Huh.. Huggu? HUGG YOUUU!!!'),
-        ('cuddle', 'cuddles', 'Come here, you little qtie pie.'),
-        ('lick', 'licks', 'Licking is a favored activity of cat girls.'),
-        ('poke', 'pokes', 'It hurts!'),
-        ('slap', 'slaps', 'Slapping others is not nice.'),
-        ('smug', 'smugs at', 'SMug face.'),
-        ('bully', 'bullies', 'No Bully!'),
-        ('cry', 'cries because of', 'THe saddest.'),
-        ('yeet', 'yeets', 'Yeet!'),
-        ('blush', 'blushes at', 'Oh.'),
-        ('smile', 'smiles at', 'Oh, really?'),
-        ('wave', 'waves at', 'Flap flap'),
-        ('highfive', 'highfives', 'Lets go boiz!'),
-        ('handhold', 'holds hands of', 'Lewd!!'),
-        ('nom', 'noms', 'Feed your loli, or else'),
-        ('bite', 'bites', 'Vampy.'),
-        ('glomp', 'glomps', 'You can rn, but you cant hide!'),
-        ('kill', 'murders', 'Finally, some action.'),
-        ('happy', 'is happy for', 'If you are happy, clap your..'),
-        ('wink', 'winks at', 'Ara-ara'),
-        ('dance', 'dancing with', 'Dancy, dancy.'),
-        ('cringe', 'cringes at', 'Cringe, run!'),
-            ):
+    ('pat', 'pats', 'Do you like pats as well?'),
+    ('kiss', 'kisses', 'If you really really like your onee, give her a kiss <3'),
+    ('hug', 'hugs', 'Huh.. Huggu? HUGG YOUUU!!!'),
+    ('cuddle', 'cuddles', 'Come here, you little qtie pie.'),
+    ('lick', 'licks', 'Licking is a favored activity of cat girls.'),
+    ('poke', 'pokes', 'It hurts!'),
+    ('slap', 'slaps', 'Slapping others is not nice.'),
+    ('smug', 'smugs at', 'SMug face.'),
+    ('bully', 'bullies', 'No Bully!'),
+    ('cry', 'cries because of', 'THe saddest.'),
+    ('yeet', 'yeets', 'Yeet!'),
+    ('blush', 'blushes at', 'Oh.'),
+    ('smile', 'smiles at', 'Oh, really?'),
+    ('wave', 'waves at', 'Flap flap'),
+    ('highfive', 'highfives', 'Lets go boiz!'),
+    ('handhold', 'holds hands of', 'Lewd!!'),
+    ('nom', 'noms', 'Feed your loli, or else'),
+    ('bite', 'bites', 'Vampy.'),
+    ('glomp', 'glomps', 'You can rn, but you cant hide!'),
+    ('kill', 'murders', 'Finally, some action.'),
+    ('happy', 'is happy for', 'If you are happy, clap your..'),
+    ('wink', 'winks at', 'Ara-ara'),
+    ('dance', 'dancing with', 'Dancy, dancy.'),
+    ('cringe', 'cringes at', 'Cringe, run!'),
+):
     SLASH_CLIENT.interactions(
         Action(action_name, action_verb),
         name = action_name,

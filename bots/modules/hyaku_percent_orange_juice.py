@@ -3633,7 +3633,7 @@ OJ_COMMANDS = SLASH_CLIENT.interactions(
     None,
     name = 'OJ',
     description = '100% Orange juice',
-    guild = 388267636661682178,
+    is_global = True,
 )
 
 
@@ -3645,14 +3645,6 @@ def render_character_embeds(character):
             character.name,
             character.description,
             url = url,
-        ).add_field(
-            'HP',
-            (
-                f'```\n'
-                f'{character.hp}\n'
-                f'```'
-            ),
-            inline = True,
         ).add_field(
             'Attack',
             (
@@ -3674,6 +3666,14 @@ def render_character_embeds(character):
             (
                 f'```\n'
                 f'{character.evasion}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'HP',
+            (
+                f'```\n'
+                f'{character.hp}\n'
                 f'```'
             ),
             inline = True,
