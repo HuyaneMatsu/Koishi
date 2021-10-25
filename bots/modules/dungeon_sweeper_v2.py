@@ -5,7 +5,7 @@ from math import ceil, floor
 from datetime import datetime
 
 from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, Task, WaitTillAll, ERROR_CODES, Client, \
-    KOKORO, LOOP_TIME, Lock, AsyncIO, CancelledError
+    KOKORO, LOOP_TIME, Lock, AsyncIO, CancelledError, WaitTillAll, Task
 from hata.ext.slash import abort, Row, Button, ButtonStyle, Timeouter
 
 from sqlalchemy.sql import select
@@ -24,6 +24,8 @@ CHAPTER_UNLOCK_DIFFICULTY = 1
 CHAPTER_UNLOCK_STAGE = 9
 CHAPTER_UNLOCK_DIFFICULTY_NAME = DIFFICULTY_NAMES[CHAPTER_UNLOCK_DIFFICULTY]
 STAGE_STEP_MULTI_STEP_BUTTON = 10
+
+EMOJI_KOISHI_WAVE = Emoji.precreate(648173118392762449)
 
 GUI_TIMEOUT = 600.0
 
@@ -3991,6 +3993,43 @@ class DungeonSweeperRunner:
             
             return True
         
+        if isinstance(exception, SystemExit):
+            user = self.user
+            embed = Embed(
+                f'I am restarting',
+                (
+                    'Your progress has been saved, please try using the command again later.\n'
+                    '\n'
+                    'I am sorry for the inconvenience. See ya later qtie!'
+                ),
+            ).add_author(
+                user.avatar_url_as('png', 32),
+                user.full_name,
+            ).add_thumbnail(
+                EMOJI_KOISHI_WAVE.url,
+            )
+            
+            try:
+                await client.message_edit(message, embed=embed, components=None)
+            except BaseException as err:
+                if isinstance(err, ConnectionError):
+                    # no internet
+                    return True
+                
+                if isinstance(err, DiscordException):
+                    if err.code in (
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
+                        return True
+                
+                await client.events.error(client, f'{self!r}._handle_close_exception', err)
+            
+            return True
+        
+        
         if isinstance(exception, PermissionError):
             return True
         
@@ -4051,3 +4090,20 @@ async def play(client, event):
         await DungeonSweeperRunner(client, event)
     else:
         await game.renew(event)
+
+
+@SLASH_CLIENT.events
+async def shutdown(client):
+    tasks = []
+    exception = SystemExit()
+    
+    for game in DUNGEON_SWEEPER_GAMES.values():
+        task = game.cancel(exception)
+        if (task is not None):
+            tasks.append(task)
+    
+    task = None
+    game = None
+    
+    if tasks:
+        await WaitTillAll(tasks, KOKORO)
