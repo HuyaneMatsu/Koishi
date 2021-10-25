@@ -23,10 +23,27 @@
     </a>
 </p>
 
-Koishi is a multi functional waifu stuffed out with all the new Discord features. She got many fun and utility commands
-to get the people together.
+Koishi is a multi functional waifu stuffed out with all the new Discord features. She got over 80 fun and utility
+commands to get the people together.
 
-To get started with Koishi, use the `/help` command, which will list all the available global commands.
+To get started with Koishi, use the `/help` command, which lists all the available global commands.
+
+#### What she does?
+
+Koishi excels in a variety of areas, just to mention a few featured commands:
+
+`/emoji-role` - Enables you to lock emojis behind roles.
+`/find-anime` - Search for your long forgotten anime.
+`/hug` - Hug your best homies.
+`/meme` - Shows up a good anime meme.
+`/ds` - A box pushing cute puzzle game.
+`/propose` - Propose to your best homies to marry them.
+`/guild` - Get generic information of the guild.
+`/user` - Checkout anyone.
+`/waifu` - Get one from our curated list of waifus.
+
+And much more!
+
 
 #### Global commands
 
