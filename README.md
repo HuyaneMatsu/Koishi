@@ -26,6 +26,8 @@
 Koishi is a multi functional waifu stuffed out with all the new Discord features. She got many fun and utility commands
 to get the people together.
 
+To get started with Koishi, use the `/help` command, which will list all the available global commands.
+
 #### Global commands
 
 - Administration
@@ -62,12 +64,12 @@ to get the people together.
     `buy-waifu-slot` • `divorce` • `love` • `propose` • `proposals` • `waifu-info`
 
 - Utility
-
+    
     `avatar` • `calc` • `color` • `guild` • `guild-icon` • `id` • `id-to-datetime` • `now-as-id` • `ping` • `rawr` •
     `sticker` • `role` • `show-emoji` • `user` • `welcome-screen`
 
 - Waifus
-
+    
     `nsfw-booru` • `safe-booru` • `touhou-character` • `waifu`
 
 #### Support server only commands
