@@ -1,5 +1,3 @@
-# Work in progress
-
 import os
 from zlib import compress, decompress
 from json import load as from_json_file, dumps as to_json, loads as from_json
@@ -312,68 +310,82 @@ STYLE_YUKARI = {**STYLE_DEFAULT_PARTS,
     BIT_MASK_CHAR_W|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
 }
 
-RULES_HELP = Embed('Rules of Dungeon sweeper',
-    f'Your quest is to help our cute Touhou characters to put their stuffs on places, where they supposed be. These '
-    f'places are marked with an {BUILTIN_EMOJIS["x"]:e} on the floor. Because our characters are lazy, the less steps '
-    f'required to sort their stuffs, makes them give you a better rating.\n'
-    f'\n'
-    f'You can move with the buttons under the embed, to activate your characters\' skill, or go back, reset the map '
-    f'or cancel the game:\n'
-    f'{EMOJI_NOTHING:e}{EMOJI_NORTH:e}{EMOJI_NOTHING:e}{EMOJI_BACK:e}\n'
-    f'{EMOJI_WEST:e}{EMOJI_REIMU:e}{EMOJI_EAST:e}{EMOJI_RESET:e}\n'
-    f'{EMOJI_NOTHING:e}{EMOJI_SOUTH:e}{EMOJI_NOTHING:e}{EMOJI_CANCEL:e}\n'
-    f'\n'
-    f'You can push boxes by moving towards them, but you cannot push more at the same time or push into the '
-    f'wall:\n'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-    f'{EMOJI_EAST:e}'
-    f'{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
-    f'\n'
-    f'You can push the boxes into the holes to pass them, but be careful, you might lose too much boxes to finish the '
-    f'stages!\n'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
-    f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
-    f'{STYLE_REIMU[BIT_MASK_HOLE_P]}{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_HOLE_P]}\n'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_P]}'
-    f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
-    f'{STYLE_REIMU[BIT_MASK_BOX_HOLE]}\n'
-    f'If you get a box on the it\'s desired place it\'s color will change:\n'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_TARGET]}'
-    f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
-    f'{STYLE_REIMU[BIT_MASK_BOX_TARGET]}\n'
-    f'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
-    f'play with.',
+RULES_HELP = Embed(
+    'Rules of Dungeon sweeper',
+    (
+        f'Your quest is to help our cute Touhou characters to put their stuffs on places, where they supposed be. '
+        f'These places are marked with an {BUILTIN_EMOJIS["x"]:e} on the floor. Because our characters are lazy, the '
+        f'less steps required to sort their stuffs, makes them give you a better rating.\n'
+        f'\n'
+        f'You can move with the buttons under the embed, to activate your characters\' skill, or go back, reset the'
+        f'map or cancel the game:\n'
+        f'{EMOJI_NOTHING:e}{EMOJI_NORTH:e}{EMOJI_NOTHING:e}{EMOJI_BACK:e}\n'
+        f'{EMOJI_WEST:e}{EMOJI_REIMU:e}{EMOJI_EAST:e}{EMOJI_RESET:e}\n'
+        f'{EMOJI_NOTHING:e}{EMOJI_SOUTH:e}{EMOJI_NOTHING:e}{EMOJI_CANCEL:e}\n'
+        f'\n'
+        f'You can push boxes by moving towards them, but you cannot push more at the same time or push into the '
+        f'wall:\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{EMOJI_EAST:e}'
+        f'{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
+        f'\n'
+        f'You can push the boxes into the holes to pass them, but be careful, you might lose too much boxes to finish'
+        f'the stages!\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_HOLE_P]}{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_HOLE_P]}\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_P]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_BOX_HOLE]}\n'
+        f'If you get a box on the it\'s desired place it\'s color will change:\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_TARGET]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_BOX_TARGET]}\n'
+        f'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
+        f'play with.'
+    ),
     color = DUNGEON_SWEEPER_COLOR,
-).add_field(f'Chapter 1 {EMOJI_REIMU:e}',
-    f'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
-    f'Reimu can jump over a box or hole.\n'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-    f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}\n'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]:}{STYLE_REIMU[BIT_MASK_HOLE_U]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-    f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
-    f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
-).add_field(f'Chapter 2 {EMOJI_FLAN:e}',
-    f'Your character is Scarlet Flandre (スカーレット・フランドール Sukaaretto Furandooru), who want to put her '
-    f'*bookshelves* on their desired place.\n'
-    f'Flandre can destroy absolutely anything and everything, and she will get rid of the pillars for you.\n'
-    f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_U]}{EMOJI_EAST:e}'
-    f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}{EMOJI_EAST:e}'
-    f'{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_OBJECT_P]}\n'
-    f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_BOX]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}'
-    f'{EMOJI_EAST:e}{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
-    f'{STYLE_FLAN[BIT_MASK_BOX_OBJECT]}'
-).add_field(f'Chapter 3 {EMOJI_YUKARI:e}',
-    f'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some replacing at her home.\n'
-    f'Yukari can create gaps and travel trough them. She will open gap to the closest place straightforward, which is '
-    f'separated by a bedding or with wall from her.\n'
-    f'{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
-    f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
-    f'{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}\n'
-    f'{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_BOX]}'
-    f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}'
-    f'{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+).add_field(
+    f'Chapter 1 {EMOJI_REIMU:e}',
+    (
+        f'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
+        f'Reimu can jump over a box or hole.\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]:}{STYLE_REIMU[BIT_MASK_HOLE_U]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+    ),
+).add_field(
+    f'Chapter 2 {EMOJI_FLAN:e}',
+    (
+        f'Your character is Scarlet Flandre (スカーレット・フランドール Sukaaretto Furandooru), who want to put her '
+        f'*bookshelves* on their desired place.\n'
+        f'Flandre can destroy absolutely anything and everything, and she will get rid of the pillars for you.\n'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_U]}{EMOJI_EAST:e}'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}{EMOJI_EAST:e}'
+        f'{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_OBJECT_P]}\n'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_BOX]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}'
+        f'{EMOJI_EAST:e}{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_FLAN[BIT_MASK_BOX_OBJECT]}'
+    ),
+).add_field(
+    f'Chapter 3 {EMOJI_YUKARI:e}',
+    (
+        f'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some replacing at her home.\n'
+        f'Yukari can create gaps and travel trough them. She will open gap to the closest place straightforward, '
+        f'which is separated by a bedding or with wall from her.\n'
+        f'{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
+        f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
+        f'{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}\n'
+        f'{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_BOX]}'
+        f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}'
+        f'{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+    ),
+).add_footer(
+    'Game based on Sweeper of Suika.'
 )
 
 BUTTON_UP_ENABLED = Button(
@@ -1893,8 +1905,9 @@ class UserState:
                 entry_id = result.id
                 
                 response = await connector.execute(
-                    DS_V2_RESULT_TABLE. \
-                    select(ds_v2_result_model.ds_v2_entry_id==entry_id)
+                    DS_V2_RESULT_TABLE.select(
+                        ds_v2_result_model.ds_v2_entry_id == entry_id
+                    )
                 )
                 
                 results = await response.fetchall()
@@ -1989,14 +2002,13 @@ class UserState:
                 )
             else:
                 response = await connector.execute(
-                    DS_V2_TABLE.insert(). \
-                    values(
-                        user_id           = self.user_id,
-                        game_state        = game_state_data,
+                    DS_V2_TABLE.insert().values(
+                        user_id = self.user_id,
+                        game_state = game_state_data,
                         selected_stage_id = self.selected_stage_id,
-
-                    ). \
-                    returning(ds_v2_model.id)
+                    ).returning(
+                        ds_v2_model.id,
+                    )
                 )
                 result = await response.fetchone()
                 self.entry_id = result[0]
@@ -2021,13 +2033,13 @@ class UserState:
                 game_state_data = self.get_game_state_data()
                 
                 response = await connector.execute(
-                    DS_V2_TABLE.insert(). \
-                    values(
-                        user_id           = self.user_id,
-                        game_state        = game_state_data,
+                    DS_V2_TABLE.insert().values(
+                        user_id = self.user_id,
+                        game_state = game_state_data,
                         selected_stage_id = self.selected_stage_id,
-                    ). \
-                    returning(ds_v2_model.id)
+                    ).returning(
+                        ds_v2_model.id,
+                    )
                 )
                 
                 result = await response.fetchone()
@@ -2044,13 +2056,13 @@ class UserState:
             async with DB_ENGINE.connect() as connector:
                 if state_stage is None:
                     response = await connector.execute(
-                        DS_V2_RESULT_TABLE.insert(). \
-                            values(
-                                ds_v2_entry_id = self.entry_id,
-                                stage_id = stage_id,
-                                best = steps,
-                            ). \
-                            returning(ds_v2_result_model.id)
+                        DS_V2_RESULT_TABLE.insert().values(
+                            ds_v2_entry_id = self.entry_id,
+                            stage_id = stage_id,
+                            best = steps,
+                        ).returning(
+                            ds_v2_result_model.id,
+                        )
                     )
                     
                     result = await response.fetchone()
@@ -2058,8 +2070,9 @@ class UserState:
                     self.stage_results[stage_id] = StageResult(entry_id, stage_id, steps)
                 else:
                     await connector.execute(
-                        DS_V2_RESULT_TABLE.update(ds_v2_result_model.id==state_stage.id). \
-                        values(
+                        DS_V2_RESULT_TABLE.update(
+                            ds_v2_result_model.id == state_stage.id
+                        ).values(
                             best = steps,
                         )
                     )
@@ -2073,17 +2086,24 @@ class UserState:
                 
                 if reward:
                     response = await connector.execute(
-                        select([user_common_model.id]). \
-                        where(user_common_model.user_id==self.user_id)
+                        select(
+                            [
+                                user_common_model.id,
+                            ]
+                        ).where(
+                            user_common_model.user_id == self.user_id,
+                        )
                     )
                     
                     results = await response.fetchall()
                     if results:
                         entry_id = results[0][0]
                         
-                        to_execute = USER_COMMON_TABLE. \
-                            update(user_common_model.id==entry_id). \
-                            values(total_love=user_common_model.total_love+reward)
+                        to_execute = USER_COMMON_TABLE.update(
+                            user_common_model.id == entry_id
+                        ).values(
+                            total_love = user_common_model.total_love+reward
+                        )
                     else:
                         to_execute = get_create_common_user_expression(
                             self.user_id,
@@ -2393,8 +2413,16 @@ class GameState:
             return False
         
         if target_tile&BIT_MASK_PASSABLE:
-            self.history.append(HistoryElement(position, False, (
-                (position, actual_tile), (position+step, target_tile))))
+            self.history.append(
+                HistoryElement(
+                    position,
+                    False,
+                    (
+                        (position, actual_tile),
+                        (position+step, target_tile),
+                    ),
+                )
+            )
             
             map_[position] = actual_tile&BIT_MASK_PASSABLE
             self.position = position = position+step
@@ -2405,8 +2433,17 @@ class GameState:
         after_tile = map_[position+(step<<1)]
 
         if target_tile&BIT_MASK_PUSHABLE and after_tile&(BIT_MASK_PASSABLE|BIT_MASK_HOLE_U):
-            self.history.append(HistoryElement(position, False, (
-                (position, actual_tile), (position+step, target_tile), (position+(step<<1), after_tile))))
+            self.history.append(
+                HistoryElement(
+                    position,
+                    False,
+                    (
+                        (position, actual_tile),
+                        (position+step, target_tile),
+                        (position+(step<<1), after_tile),
+                    ),
+                )
+            )
             
             map_[position] = actual_tile&BIT_MASK_PASSABLE
             self.position = position = position+step
@@ -2542,8 +2579,10 @@ class GameState:
         """
         stage = self.stage
         difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
-        title = f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji}, {difficulty_name}: ' \
-                f'{stage.stage_index+1}'
+        title = (
+            f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji}, {difficulty_name}: '
+            f'{stage.stage_index+1}'
+        )
         
         description = self.render_description()
         color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
@@ -2619,8 +2658,10 @@ class GameState:
             best = steps
         
         difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
-        title = f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji} {difficulty_name} ' \
-                f'{stage.stage_index+1} finished with {steps} steps with {rating} rating!'
+        title = (
+            f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji} {difficulty_name} '
+            f'{stage.stage_index+1} finished with {steps} steps with {rating} rating!'
+        )
         
         description = self.render_description()
         color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
@@ -3132,8 +3173,10 @@ async def process_identifier_right(dungeon_sweeper_runner):
         
         stage_source_id = chapter_stages_sorted[index].id
         stage_results = user_state.stage_results
-        if (stage_source_id not in stage_results) and \
-                (chapter_stages_sorted[index-1].id not in stage_results):
+        if (
+            (stage_source_id not in stage_results) and
+            (chapter_stages_sorted[index-1].id not in stage_results)
+        ):
             stage_source_id = chapter.difficulties[0][0].id
         
         user_state.selected_stage_id = stage_source_id
@@ -3593,9 +3636,10 @@ class DungeonSweeperRunner:
             The received client.
         """
         if not event.channel.cached_permissions_for(client).can_manage_messages:
-            await client.interaction_response_message_create(event,
+            await client.interaction_response_message_create(
+                event,
                 'I need manage messages permission in the channel to execute this command.',
-                show_for_invoking_user_only=True,
+                show_for_invoking_user_only = True,
             )
             return
         
@@ -3606,9 +3650,10 @@ class DungeonSweeperRunner:
             pass
         else:
             if (existing_game is None):
-                await client.interaction_response_message_create(event,
+                await client.interaction_response_message_create(
+                    event,
                     'A game is already starting somewhere else.',
-                    show_for_invoking_user_only=True,
+                    show_for_invoking_user_only = True,
                 )
             else:
                 await existing_game.renew(event)
@@ -3718,12 +3763,12 @@ class DungeonSweeperRunner:
                 self._gui_state = GUI_STATE_READY
             
             if (
-                        isinstance(err, ConnectionError) or
-                        (
-                            isinstance(err, DiscordException) and
-                            err.code == ERROR_CODES.unknown_interaction
-                        )
-                    ):
+                isinstance(err, ConnectionError) or
+                (
+                    isinstance(err, DiscordException) and
+                    err.code == ERROR_CODES.unknown_interaction
+                )
+            ):
                 return
             
             raise
@@ -3733,17 +3778,17 @@ class DungeonSweeperRunner:
             await client.message_edit(self.message, components=None)
         except BaseException as err:
             if not (
-                        isinstance(err, ConnectionError) or
-                        (
-                            isinstance(err, DiscordException) and
-                            err.code in (
-                                ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.unknown_channel, # channel deleted
-                                ERROR_CODES.missing_access, # client removed
-                                ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                            )
-                        )
-                    ):
+                isinstance(err, ConnectionError) or
+                (
+                    isinstance(err, DiscordException) and
+                    err.code in (
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    )
+                )
+            ):
                 await client.events.error(client, f'{self!r}.renew', err)
         
         client.slasher.remove_component_interaction_waiter(self.message, self)
@@ -3915,10 +3960,10 @@ class DungeonSweeperRunner:
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
-                            ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.missing_access, # client removed
-                                ):
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.missing_access, # client removed
+                    ):
                         return True
                 
                 await client.events.error(client, f'{self!r}._handle_close_exception', err)
@@ -3935,11 +3980,11 @@ class DungeonSweeperRunner:
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
                         return True
                 
                 await client.events.error(client, f'{self!r}._handle_close_exception', err)
