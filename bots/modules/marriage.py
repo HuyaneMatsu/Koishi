@@ -6,7 +6,7 @@ from hata.ext.slash import InteractionResponse, abort, Button, Row
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
-from bot_utils.constants import EMOJI__HEART_CURRENCY, GUILD__NEKO_DUNGEON
+from bot_utils.constants import EMOJI__HEART_CURRENCY, GUILD__SUPPORT
 from bot_utils.utils import send_embed_to
 
 from sqlalchemy.dialects.postgresql import insert

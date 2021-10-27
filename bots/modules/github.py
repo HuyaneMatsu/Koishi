@@ -8,7 +8,7 @@ from hata.discord.utils import parse_date_header_to_datetime
 from hata.backend.quote import quote
 from hata.ext.slash import abort
 
-from bot_utils.constants import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT : Client
 
@@ -378,7 +378,7 @@ GET_ORGANIZATIONS = GitHubQuery(build_get_organizations_url, SLASH_CLIENT.http, 
     limit=GET_USER_AND_ORGANIZATIONS_LIMIT)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def github_profile(client, event,
         user: ('str', 'The user\'s name to get'),
             ):

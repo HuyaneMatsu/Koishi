@@ -1,7 +1,7 @@
 from hata import Client, Embed, StickerFormat
 from hata.ext.extension_loader import require
 
-from bot_utils.constants import CHANNEL__NEKO_DUNGEON__LOG_EMOJI, GUILD__NEKO_DUNGEON
+from bot_utils.constants import CHANNEL__SUPPORT__LOG_EMOJI, GUILD__SUPPORT
 
 require('Satori')
 
@@ -72,7 +72,7 @@ def render_all_emoji_field(emoji):
 
 @Satori.events
 async def emoji_create(client, emoji):
-    if emoji.guild is not GUILD__NEKO_DUNGEON:
+    if emoji.guild is not GUILD__SUPPORT:
         return
     
     description = render_all_emoji_field(emoji)
@@ -80,12 +80,12 @@ async def emoji_create(client, emoji):
     
     embed = Embed(f'Emoji created: {emoji.name} ({emoji.id})', description, url=emoji_url).add_thumbnail(emoji_url)
     
-    await client.message_create(CHANNEL__NEKO_DUNGEON__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
 @Satori.events
 async def emoji_edit(client, emoji, old_attributes):
-    if emoji.guild is not GUILD__NEKO_DUNGEON:
+    if emoji.guild is not GUILD__SUPPORT:
         return
     
     description_parts = []
@@ -225,18 +225,18 @@ async def emoji_edit(client, emoji, old_attributes):
     
     embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', description, url=emoji_url).add_thumbnail(emoji_url)
 
-    await client.message_create(CHANNEL__NEKO_DUNGEON__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
 @Satori.events
 async def emoji_delete(client, emoji):
-    if emoji.guild is not GUILD__NEKO_DUNGEON:
+    if emoji.guild is not GUILD__SUPPORT:
         return
     
     description = render_all_emoji_field(emoji)
     embed = Embed(f'Emoji deleted: {emoji.name} ({emoji.id})', description)
     
-    await client.message_create(CHANNEL__NEKO_DUNGEON__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
 def render_all_sticker_field(sticker):
@@ -306,7 +306,7 @@ def render_all_sticker_field(sticker):
 
 @Satori.events
 async def sticker_create(client, sticker):
-    if sticker.guild is not GUILD__NEKO_DUNGEON:
+    if sticker.guild is not GUILD__SUPPORT:
         return
     
     description = render_all_sticker_field(sticker)
@@ -318,12 +318,12 @@ async def sticker_create(client, sticker):
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
         embed.add_image(sticker_url)
     
-    await client.message_create(CHANNEL__NEKO_DUNGEON__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
 @Satori.events
 async def sticker_edit(client, sticker, old_attributes):
-    if sticker.guild is not GUILD__NEKO_DUNGEON:
+    if sticker.guild is not GUILD__SUPPORT:
         return
     
     description_parts = []
@@ -449,15 +449,15 @@ async def sticker_edit(client, sticker, old_attributes):
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
         embed.add_image(sticker_url)
     
-    await client.message_create(CHANNEL__NEKO_DUNGEON__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
 @Satori.events
 async def sticker_delete(client, sticker):
-    if sticker.guild is not GUILD__NEKO_DUNGEON:
+    if sticker.guild is not GUILD__SUPPORT:
         return
     
     description = render_all_sticker_field(sticker)
     embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})', description)
     
-    await client.message_create(CHANNEL__NEKO_DUNGEON__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)

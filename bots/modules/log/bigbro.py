@@ -4,22 +4,22 @@ from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTI
 from hata.discord.utils import DISCORD_EPOCH_START
 from hata.ext.extension_loader import require
 
-from bot_utils.constants import CHANNEL__NEKO_DUNGEON__LOG_MENTION, GUILD__NEKO_DUNGEON, CATEGORY__NEKO_DUNGEON__BIG_BRO
+from bot_utils.constants import CHANNEL__SUPPORT__LOG_MENTION, GUILD__SUPPORT, CATEGORY__SUPPORT__BIG_BRO
 
 require(Satori=Client)
 
 Satori: Client
 
 def setup(lib):
-    Satori.events.channel_delete.append(GUILD__NEKO_DUNGEON, big_bro_channel_delete_waiter)
-    Satori.events.channel_create.append(GUILD__NEKO_DUNGEON, big_bro_channel_create_waiter)
-    Satori.events.channel_edit.append(GUILD__NEKO_DUNGEON, big_bro_channel_edit_waiter)
+    Satori.events.channel_delete.append(GUILD__SUPPORT, big_bro_channel_delete_waiter)
+    Satori.events.channel_create.append(GUILD__SUPPORT, big_bro_channel_create_waiter)
+    Satori.events.channel_edit.append(GUILD__SUPPORT, big_bro_channel_edit_waiter)
     checkout_category()
 
 def teardown(lib):
-    Satori.events.channel_delete.remove(GUILD__NEKO_DUNGEON, big_bro_channel_delete_waiter)
-    Satori.events.channel_create.remove(GUILD__NEKO_DUNGEON, big_bro_channel_create_waiter)
-    Satori.events.channel_edit.remove(GUILD__NEKO_DUNGEON, big_bro_channel_edit_waiter)
+    Satori.events.channel_delete.remove(GUILD__SUPPORT, big_bro_channel_delete_waiter)
+    Satori.events.channel_create.remove(GUILD__SUPPORT, big_bro_channel_create_waiter)
+    Satori.events.channel_edit.remove(GUILD__SUPPORT, big_bro_channel_edit_waiter)
     checkout_category()
 
 
@@ -35,7 +35,7 @@ async def ready(client):
 
 def checkout_category():
     BIG_BROS.clear()
-    for channel in CATEGORY__NEKO_DUNGEON__BIG_BRO.channel_list:
+    for channel in CATEGORY__SUPPORT__BIG_BRO.channel_list:
         try:
             user_id = int(channel.name)
         except ValueError:
@@ -57,7 +57,7 @@ async def big_bro_channel_delete_waiter(client, channel, guild):
 
 
 async def big_bro_channel_create_waiter(client, channel):
-    if channel.parent is not CATEGORY__NEKO_DUNGEON__BIG_BRO:
+    if channel.parent is not CATEGORY__SUPPORT__BIG_BRO:
         return
     
     try:
@@ -75,7 +75,7 @@ async def big_bro_channel_edit_waiter(client, channel, old_attributes):
         pass
     else:
         # Moved out
-        if old_category is CATEGORY__NEKO_DUNGEON__BIG_BRO:
+        if old_category is CATEGORY__SUPPORT__BIG_BRO:
             try:
                 name = old_attributes['name']
             except ValueError:
@@ -94,7 +94,7 @@ async def big_bro_channel_edit_waiter(client, channel, old_attributes):
             return
         
         # Moved in
-        if channel.parent is CATEGORY__NEKO_DUNGEON__BIG_BRO:
+        if channel.parent is CATEGORY__SUPPORT__BIG_BRO:
             try:
                 user_id = int(channel.name)
             except ValueError:
@@ -104,7 +104,7 @@ async def big_bro_channel_edit_waiter(client, channel, old_attributes):
             
             return
     
-    if channel.parent is not CATEGORY__NEKO_DUNGEON__BIG_BRO:
+    if channel.parent is not CATEGORY__SUPPORT__BIG_BRO:
         return
     
     try:
@@ -157,7 +157,7 @@ def render_contents(user, old_attributes):
     content_parts.append('User: ')
     content_parts.append(user.full_name)
     
-    guild_profile = user.get_guild_profile_for(GUILD__NEKO_DUNGEON)
+    guild_profile = user.get_guild_profile_for(GUILD__SUPPORT)
     if (guild_profile is None):
         nick = None
     else:

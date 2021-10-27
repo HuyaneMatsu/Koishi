@@ -32,15 +32,15 @@ To get started with Koishi, use the `/help` command, which lists all the availab
 
 Koishi excels in a variety of areas, just to mention a few featured commands:
 
-`/emoji-role` - Enables you to lock emojis behind roles.
-`/find-anime` - Search for your long forgotten anime.
-`/hug` - Hug your best homies.
-`/meme` - Shows up a good anime meme.
-`/ds` - A box pushing cute puzzle game.
-`/propose` - Propose to your best homies to marry them.
-`/guild` - Get generic information of the guild.
-`/user` - Checkout anyone.
-`/waifu` - Get one from our curated list of waifus.
+- `/emoji-role` - Enables you to lock emojis behind roles.
+- `/find-anime` - Search for your long forgotten anime.
+- `/hug` - Hug your best homies.
+- `/meme` - Shows up a good anime meme.
+- `/ds` - A box pushing cute puzzle game.
+- `/propose` - Propose to your best homies to marry them.
+- `/guild` - Get generic information of the guild.
+- `/user` - Checkout anyone.
+- `/waifu` - Get one from our curated list of waifus.
 
 And much more!
 

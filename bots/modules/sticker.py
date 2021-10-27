@@ -5,7 +5,7 @@ from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STIC
     future_or_timeout, Task, is_url
 from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row
 from bot_utils.models import DB_ENGINE, sticker_counter_model, STICKER_COUNTER_TABLE
-from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__EMOJI_MANAGER
+from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy import func as alchemy_function, and_, distinct
@@ -21,7 +21,7 @@ STICKER_COMMANDS = SLASH_CLIENT.interactions(
     None,
     name = 'sticker',
     description = 'Sticker counter commands.',
-    guild = GUILD__NEKO_DUNGEON,
+    guild = GUILD__SUPPORT,
 )
 
 ORDER_DECREASING = 1
@@ -66,7 +66,7 @@ async def user_top(event,
     
     embed = Embed(
         f'Most used stickers by {user.full_name}',
-        color = user.color_at(GUILD__NEKO_DUNGEON),
+        color = user.color_at(GUILD__SUPPORT),
     ).add_thumbnail(user.avatar_url)
     
     
@@ -118,7 +118,7 @@ async def sticker_top(
         months: (range(1, 13), 'The months to get') = 1,
             ):
     """List the users using the given sticker the most."""
-    sticker = GUILD__NEKO_DUNGEON.get_sticker_like(raw_sticker)
+    sticker = GUILD__SUPPORT.get_sticker_like(raw_sticker)
     if sticker is None:
         abort(f'There is not sticker with name `{raw_sticker}` in the guild.')
     
@@ -155,7 +155,7 @@ async def sticker_top(
             except KeyError:
                 continue
             
-            guild_profile = user.get_guild_profile_for(GUILD__NEKO_DUNGEON)
+            guild_profile = user.get_guild_profile_for(GUILD__SUPPORT)
             if guild_profile is None:
                 nick = None
             else:
@@ -196,8 +196,8 @@ STICKER_SYNC_COMMANDS = STICKER_COMMANDS.interactions(None,
 @STICKER_SYNC_COMMANDS.interactions
 async def sync_stickers_(event):
     """Syncs sticker list stickers. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__EMOJI_MANAGER:m} role to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
+        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -207,7 +207,7 @@ async def sync_stickers_(event):
         results = await response.fetchall()
         
         sticker_ids = [result[0] for result in results]
-        guild_stickers = GUILD__NEKO_DUNGEON.stickers
+        guild_stickers = GUILD__SUPPORT.stickers
         
         sticker_ids_to_remove = [sticker_id for sticker_id in sticker_ids if (sticker_id not in guild_stickers)]
         
@@ -224,8 +224,8 @@ async def sync_stickers_(event):
 @STICKER_SYNC_COMMANDS.interactions
 async def sync_users_(event):
     """Syncs sticker list users. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__EMOJI_MANAGER:m} role to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
+        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -235,7 +235,7 @@ async def sync_users_(event):
         results = await response.fetchall()
         
         user_ids = [result[0] for result in results]
-        guild_users = GUILD__NEKO_DUNGEON.users
+        guild_users = GUILD__SUPPORT.users
         
         user_ids_to_remove = [user_id for user_id in user_ids if (user_id not in guild_users)]
         
@@ -280,7 +280,7 @@ async def most_used(
     
     items = []
     
-    guild_stickers = set(GUILD__NEKO_DUNGEON.stickers.values())
+    guild_stickers = set(GUILD__SUPPORT.stickers.values())
     
     for sticker_id, count in results:
         try:
@@ -342,8 +342,8 @@ async def add_(client, event,
         description: (str, 'Description for the sticker.')=None,
                 ):
     """Adds a sticker to the guild. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__EMOJI_MANAGER:m} role to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
+        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
     
     name_length = len(name)
     if (name_length < 2) or (name_length > 32):
@@ -433,8 +433,8 @@ async def delete_(client, event,
         sticker_name: ('str', 'The sticker\'s name to delete', 'sticker'),
             ):
     """Deletes the given sticker. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__EMOJI_MANAGER:m} role to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
+        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
     
     sticker = event.guild.get_sticker_like(sticker_name)
     if (sticker is None):
@@ -508,8 +508,8 @@ async def edit_(client, event,
         new_description: (str, 'Description for the sticker.') = None,
             ):
     """Edits the given sticker. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__EMOJI_MANAGER:m} role to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
+        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
     
     sticker = event.guild.get_sticker_like(sticker_name)
     if (sticker is None):

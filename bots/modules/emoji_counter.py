@@ -11,7 +11,7 @@ from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, emoji_counter_model, EMOJI_COUNTER_TABLE, sticker_counter_model, \
     STICKER_COUNTER_TABLE
-from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__EMOJI_MANAGER
+from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 
 Satori: Client
 SLASH_CLIENT: Client
@@ -27,7 +27,7 @@ MOST_USED_PER_PAGE = 30
 
 @Satori.events
 async def message_create(client, message):
-    if message.guild is not GUILD__NEKO_DUNGEON:
+    if message.guild is not GUILD__SUPPORT:
         return
     
     user = message.author
@@ -47,7 +47,7 @@ async def message_create(client, message):
 
 @Satori.events
 async def message_edit(client, message, old_attributes):
-    if message.guild is not GUILD__NEKO_DUNGEON:
+    if message.guild is not GUILD__SUPPORT:
         return
     
     user = message.author
@@ -91,7 +91,7 @@ async def upload_emojis(emojis, user_id, timestamp):
     data = None
     
     for emoji in emojis:
-        if emoji.guild is not GUILD__NEKO_DUNGEON:
+        if emoji.guild is not GUILD__SUPPORT:
             continue
         
         if data is None:
@@ -113,7 +113,7 @@ async def upload_stickers(stickers, user_id, timestamp):
     data = None
     
     for sticker in stickers:
-        if sticker.guild_id != GUILD__NEKO_DUNGEON.id:
+        if sticker.guild_id != GUILD__SUPPORT.id:
             continue
         
         if data is None:
@@ -131,7 +131,7 @@ async def upload_stickers(stickers, user_id, timestamp):
 
 @Satori.events
 async def emoji_delete(client, emoji):
-    if emoji.guild is not GUILD__NEKO_DUNGEON:
+    if emoji.guild is not GUILD__SUPPORT:
         return
     
     async with DB_ENGINE.connect() as connector:
@@ -141,7 +141,7 @@ async def emoji_delete(client, emoji):
 
 @Satori.events
 async def sticker_delete(client, sticker):
-    if sticker.guild is not GUILD__NEKO_DUNGEON:
+    if sticker.guild is not GUILD__SUPPORT:
         return
     
     async with DB_ENGINE.connect() as connector:
@@ -157,7 +157,7 @@ async def reaction_add(client, event):
         return
     
     emoji = event.emoji
-    if emoji.guild is not GUILD__NEKO_DUNGEON:
+    if emoji.guild is not GUILD__SUPPORT:
         return
     
     user_id = user.id
@@ -184,7 +184,7 @@ EMOJI_COMMANDS = SLASH_CLIENT.interactions(
     None,
     name = 'emoji',
     description = 'Emoji counter commands.',
-    guild = GUILD__NEKO_DUNGEON,
+    guild = GUILD__SUPPORT,
 )
 
 
@@ -237,7 +237,7 @@ async def user_top(event,
     
     embed = Embed(
         f'Most used emojis by {user.full_name}',
-        color = user.color_at(GUILD__NEKO_DUNGEON),
+        color = user.color_at(GUILD__SUPPORT),
     ).add_thumbnail(user.avatar_url)
     
     if results:
@@ -291,14 +291,14 @@ async def emoji_top(
     """List the users using the given emoji the most."""
     emoji = parse_emoji(raw_emoji)
     if emoji is None:
-        emoji = GUILD__NEKO_DUNGEON.get_emoji_like(raw_emoji)
+        emoji = GUILD__SUPPORT.get_emoji_like(raw_emoji)
         if emoji is None:
             abort(f'`{raw_emoji}` is not an emoji.')
     else:
         if emoji.is_unicode_emoji():
             abort(f'{emoji:e} is an unicode emoji. Please give custom.')
         
-        if emoji.guild is not GUILD__NEKO_DUNGEON:
+        if emoji.guild is not GUILD__SUPPORT:
             abort(f'{emoji:e} is bound to an other guild.')
     
     async with DB_ENGINE.connect() as connector:
@@ -338,7 +338,7 @@ async def emoji_top(
             except KeyError:
                 continue
             
-            guild_profile = user.get_guild_profile_for(GUILD__NEKO_DUNGEON)
+            guild_profile = user.get_guild_profile_for(GUILD__SUPPORT)
             if (guild_profile is None):
                 nick = None
             else:
@@ -380,8 +380,8 @@ EMOJI_SYNC_COMMANDS = EMOJI_COMMANDS.interactions(None,
 @EMOJI_SYNC_COMMANDS.interactions
 async def sync_emojis_(event):
     """Syncs emoji list emojis. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__EMOJI_MANAGER:m} role to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
+        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -391,7 +391,7 @@ async def sync_emojis_(event):
         results = await response.fetchall()
         
         emoji_ids = [result[0] for result in results]
-        guild_emojis = GUILD__NEKO_DUNGEON.emojis
+        guild_emojis = GUILD__SUPPORT.emojis
         
         emoji_ids_to_remove = [emoji_id for emoji_id in emoji_ids if (emoji_id not in guild_emojis)]
         
@@ -408,8 +408,8 @@ async def sync_emojis_(event):
 @EMOJI_SYNC_COMMANDS.interactions
 async def sync_users_(event):
     """Syncs emoji list users. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__EMOJI_MANAGER:m} role to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
+        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -419,7 +419,7 @@ async def sync_users_(event):
         results = await response.fetchall()
         
         user_ids = [result[0] for result in results]
-        guild_users = GUILD__NEKO_DUNGEON.users
+        guild_users = GUILD__SUPPORT.users
         
         user_ids_to_remove = [user_id for user_id in user_ids if (user_id not in guild_users)]
         
@@ -502,7 +502,7 @@ async def most_used(
     
     emoji_filter = EMOJI_MOST_USED_FILTERS[type_]
     
-    guild_emojis = set(emoji for emoji in GUILD__NEKO_DUNGEON.emojis.values() if emoji_filter(emoji))
+    guild_emojis = set(emoji for emoji in GUILD__SUPPORT.emojis.values() if emoji_filter(emoji))
     
     for emoji_id, count in results:
         try:
