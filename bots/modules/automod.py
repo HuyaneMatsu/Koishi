@@ -3,7 +3,7 @@ from re import escape as re_escape
 
 from hata import Client, BUILTIN_EMOJIS, ChannelThread, Task, KOKORO, WaitTillAll
 
-from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR
+from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR
 
 Satori : Client
 
@@ -229,11 +229,11 @@ async def replace_coroutine(client, message, content):
 
 
 async def filter(client, message):
-    if message.guild_id != GUILD__NEKO_DUNGEON.id:
+    if message.guild_id != GUILD__SUPPORT.id:
         return
     
     user = message.author
-    if user.is_bot or user.has_role(ROLE__NEKO_DUNGEON__MODERATOR):
+    if user.is_bot or user.has_role(ROLE__SUPPORT__MODERATOR):
         return
     
     content = message.content

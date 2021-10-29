@@ -3,17 +3,17 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from hata import elapsed_time, Embed, Client
-from bot_utils.constants import ROLE__NEKO_DUNGEON__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
-    CHANNEL__NEKO_DUNGEON__EVENT, ROLE__NEKO_DUNGEON__EVENT_MANAGER, LINK__HATA_GIT, GUILD__NEKO_DUNGEON
+from bot_utils.constants import ROLE__SUPPORT__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
+    CHANNEL__SUPPORT__EVENT, ROLE__SUPPORT__EVENT_MANAGER, LINK__HATA_GIT, GUILD__SUPPORT
 
-EVENT_TEST_CHECK = None # checks.has_any_role((ROLE__NEKO_DUNGEON__MODERATOR, ROLE__NEKO_DUNGEON__EVENT_MANAGER))
+EVENT_TEST_CHECK = None # checks.has_any_role((ROLE__SUPPORT__MODERATOR, ROLE__SUPPORT__EVENT_MANAGER))
 
 SLASH_CLIENT: Client
 EVENTS = SLASH_CLIENT.interactions(
     None,
     name = 'events',
     description = 'Neko Dungeon event information.',
-    guild = GUILD__NEKO_DUNGEON,
+    guild = GUILD__SUPPORT,
 )
 
 HATA_JAM_2_DESCRIPTION = Embed(
@@ -38,7 +38,7 @@ HATA_JAM_2_DESCRIPTION = Embed(
     'Event organizers',
     'HuyaneMatsu#2016\n'
     '\n'
-    f'If you have any questions ping us specifically or by pinging the role {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}, '
+    f'If you have any questions ping us specifically or by pinging the role {ROLE__SUPPORT__EVENT_MANAGER:m}, '
     'although try not to spam.'
 ).add_field(
     'Timeline',
@@ -50,13 +50,13 @@ HATA_JAM_2_DESCRIPTION = Embed(
 ).add_field(
     'Qualifier',
     'You need to complete the qualifier test shown by Koishi\'s `k!qualifier` command and submit it in '
-    f'DM with the `k!submit` one. (You must have {ROLE__NEKO_DUNGEON__VERIFIED:m} role to submit your solution.)'
+    f'DM with the `k!submit` one. (You must have {ROLE__SUPPORT__VERIFIED:m} role to submit your solution.)'
 ).add_field(
     'Teams',
     'No teams now.'
 ).add_field(
     'Advertising',
-    f'If you want to advertise you can should not. Really, ask {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m} and the '
+    f'If you want to advertise you can should not. Really, ask {ROLE__SUPPORT__EVENT_MANAGER:m} and the '
     f'owner(s) of the other guild as well, whether they allow it.'
 ).add_field(
     'Codejam rating rules',
@@ -69,7 +69,7 @@ HATA_JAM_2_DESCRIPTION = Embed(
     'Functionality: (35%)'
 ).add_field(
     'Codejam submissions',
-    f'Please open a git repo for your submission and send the link to an {ROLE__NEKO_DUNGEON__EVENT_MANAGER:m}.\n'
+    f'Please open a git repo for your submission and send the link to an {ROLE__SUPPORT__EVENT_MANAGER:m}.\n'
     '\n'
     'Your project has to include documentation. At the very least, it should include instructions on how to set-up '
     'and run your projects, but keep in mind that a README is the first thing people typically see when they look '
@@ -181,15 +181,15 @@ async def submit(client, event,
     if (event.guild is not None):
         return Embed('Error', 'Please use this channel in a private channel.')
     
-    if not event.user.has_roole(ROLE__NEKO_DUNGEON__VERIFIED):
-        return Embed('Permission denied', f'You must have {ROLE__NEKO_DUNGEON__VERIFIED.mention} role to invoke this '
+    if not event.user.has_roole(ROLE__SUPPORT__VERIFIED):
+        return Embed('Permission denied', f'You must have {ROLE__SUPPORT__VERIFIED.mention} role to invoke this '
             f'command.')
     
     if datetime.utcnow() >= QUALIFIER_DEADLINE:
         return Embed('Oh No!', 'Qualifier over', color=COLOR__EVENT)
     
     user = event.user
-    await client.message_create(CHANNEL__NEKO_DUNGEON__EVENT, f'{user:f}, [{user.id}] submitted:\n'
+    await client.message_create(CHANNEL__SUPPORT__EVENT, f'{user:f}, [{user.id}] submitted:\n'
         f'`{submission_reference_url}`')
     
     return Embed('Success', 'Noice', color=COLOR__EVENT)

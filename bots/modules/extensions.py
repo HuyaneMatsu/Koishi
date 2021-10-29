@@ -4,23 +4,23 @@ from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS, ExtensionErr
 from hata import Embed, Client, CLIENTS
 from hata.ext.slash import set_permission, Select, Option, InteractionResponse, abort
 
-from bot_utils.constants import GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN
+from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__ADMIN
 
 SLASH_CLIENT : Client
 
 def check_permission(event):
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__ADMIN.mention} to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+        abort(f'You must have {ROLE__SUPPORT__ADMIN.mention} to invoke this command.')
 
 EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
     set_permission(
-        GUILD__NEKO_DUNGEON,
-        ROLE__NEKO_DUNGEON__ADMIN,
+        GUILD__SUPPORT,
+        ROLE__SUPPORT__ADMIN,
         True,
     )(None),
     name = 'extension',
     description = 'extension related commands',
-    guild = GUILD__NEKO_DUNGEON,
+    guild = GUILD__SUPPORT,
     allow_by_default = False
 )
 
@@ -43,7 +43,7 @@ async def list_per_client(event):
 
 @SLASH_CLIENT.interactions(custom_id=EXTENSION_LIST_PER_GUILD_CUSTOM_ID)
 async def handle_list_per_client_component(event):
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         return
     
     options = event.interaction.options

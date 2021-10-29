@@ -1,7 +1,7 @@
 from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTIVITY_TYPES
 from hata.ext.extension_loader import require
 
-from bot_utils.constants import CHANNEL__NEKO_DUNGEON__LOG_MENTION, GUILD__NEKO_DUNGEON, CATEGORY__NEKO_DUNGEON__BIG_BRO
+from bot_utils.constants import CHANNEL__SUPPORT__LOG_MENTION, GUILD__SUPPORT, CATEGORY__SUPPORT__BIG_BRO
 
 require(Satori=Client)
 
@@ -15,11 +15,11 @@ SEPARATOR_LINE = '\\_'*30
 Satori: Client
 
 def setup(lib):
-    Satori.events.message_create.append(GUILD__NEKO_DUNGEON, mention_logger)
+    Satori.events.message_create.append(GUILD__SUPPORT, mention_logger)
 
 
 def teardown(lib):
-    Satori.events.message_create.remove(GUILD__NEKO_DUNGEON, mention_logger)
+    Satori.events.message_create.remove(GUILD__SUPPORT, mention_logger)
 
 
 async def mention_logger(client, message):
@@ -204,4 +204,4 @@ async def mention_logger(client, message):
         
         embed.add_field('Role mentions', field_value)
     
-    await client.message_create(CHANNEL__NEKO_DUNGEON__LOG_MENTION, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_MENTION, embed=embed, allowed_mentions=None)

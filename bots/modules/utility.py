@@ -20,8 +20,8 @@ from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 
 from bot_utils.tools import Pagination10step
-from bot_utils.constants import ROLE__NEKO_DUNGEON__TESTER, GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, \
-    ROLE__NEKO_DUNGEON__ADMIN
+from bot_utils.constants import ROLE__SUPPORT__TESTER, GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR, \
+    ROLE__SUPPORT__ADMIN
 
 UTILITY_COLOR = Color(0x5dc66f)
 
@@ -112,12 +112,12 @@ async def color_(client, event,
         await client.interaction_followup_message_create(event, embed=embed, file=('color.png', buffer))
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False, target='message')
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False, target='message')
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def raw(client, event):
     """Shows up the message's payload."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER):
-        abort(f'You must have {ROLE__NEKO_DUNGEON__TESTER.mention} to invoke this command.')
+    if not event.user.has_role(ROLE__SUPPORT__TESTER):
+        abort(f'You must have {ROLE__SUPPORT__TESTER.mention} to invoke this command.')
     
     data = await client.http.message_get(event.channel_id, event.interaction.target_id)
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
@@ -779,7 +779,7 @@ def in_role_pagination_check(user, event):
     
     return False
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def in_role(client, event,
         role_1 : ('role', 'Select a role.'),
         role_2 : ('role', 'Double role!') = None,
@@ -1042,11 +1042,11 @@ def add_user_field(embed, index, joined_at, user):
         f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
     )
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR, True)
 async def latest_users(client, event,):
     """Shows the new users of the guild."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__MODERATOR):
+    if not event.user.has_role(ROLE__SUPPORT__MODERATOR):
         abort('Hacker trying to hack Discord.')
     
     date_limit = datetime.now() - timedelta(days=7)
@@ -1073,11 +1073,11 @@ async def latest_users(client, event,):
     return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__MODERATOR, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR, True)
 async def all_users(client, event,):
     """Shows the new users of the guild."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__MODERATOR):
+    if not event.user.has_role(ROLE__SUPPORT__MODERATOR):
         abort('Hacker trying to hack Discord.')
     
     users = []
@@ -1222,6 +1222,6 @@ async def escape(message):
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def calc(
-        expression: ('expression', 'Mathematical expression to evaluate')
-    ):
+    expression: ('expression', 'Mathematical expression to evaluate')
+):
     return repr(expression)

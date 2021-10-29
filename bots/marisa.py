@@ -18,7 +18,7 @@ from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time,
     ApplicationCommandPermissionOverwriteTargetType, ClientWrapper, INTERACTION_RESPONSE_TYPES, ComponentType, \
     ButtonStyle, Emoji, Role, StickerType, StickerFormat, ZEROUSER, GUILDS, ApplicationCommandOptionType, \
     ApplicationCommandOption, ApplicationCommand
-from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, \
+from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, SlasherCommandError, \
     wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option, P
 from hata.backend.futures import render_exc_to_list
 from hata.backend.quote import quote
@@ -30,8 +30,8 @@ from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.extension_loader import EXTENSION_LOADER
 
-from bot_utils.constants import COLOR__MARISA_HELP, GUILD__NEKO_DUNGEON, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, \
-    ROLE__NEKO_DUNGEON__TESTER
+from bot_utils.constants import COLOR__MARISA_HELP, GUILD__SUPPORT, CHANNEL__SUPPORT__DEFAULT_TEST, \
+    ROLE__SUPPORT__TESTER
 from bot_utils.utils import command_error
 from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter_v2 import Interpreter
@@ -89,7 +89,7 @@ Marisa.commands(
 
 @Marisa.command_processor.error
 async def command_error_handler(ctx, exception):
-    if ctx.guild is not GUILD__NEKO_DUNGEON:
+    if ctx.guild is not GUILD__SUPPORT:
         return False
     
     with StringIO() as buffer:
@@ -172,7 +172,7 @@ async def command_error_handler(ctx, exception):
     return True
 
 
-Marisa.commands(command_error, checks=[checks.is_guild(GUILD__NEKO_DUNGEON)])
+Marisa.commands(command_error, checks=[checks.is_guild(GUILD__SUPPORT)])
 
 ALL = ClientWrapper()
 
@@ -229,7 +229,7 @@ async def error(client, name, err):
     
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang='py'):
-        await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, chunk)
+        await client.message_create(CHANNEL__SUPPORT__DEFAULT_TEST, chunk)
 
 
 
@@ -240,7 +240,7 @@ SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 # Booru also might ban ban you for a time if you do too much requests.
 IMAGE_URL_CACHE = {}
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def retardify(client, event,
         text : ('str', 'Some text to retardify.'),
             ):
@@ -278,7 +278,7 @@ async def retardify(client, event,
     await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_channel_and_role(client, event,
         user : ('user', 'Please input a user') = None,
         channel : ('channel', 'Please input a channel') = None,
@@ -294,7 +294,7 @@ async def test_channel_and_role(client, event,
         f'role = {role!r}'
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
+@Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def invoking_user_only(client, event):
     """SHows for the invoking user only, maybe?"""
     return 'Beep-boop'
@@ -303,18 +303,18 @@ async def async_gen():
     yield 'beep'
     yield 'boop'
     
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def yield_async_gen(client, event):
     """Yields an async gen."""
     yield async_gen()
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def return_async_gen(client, event):
     """Returns an async gen."""
     return async_gen()
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def raffle(client, event,
         message : ('str', 'The message to raffle from'),
         emoji : ('str', 'The reactor users to raffle from.'),
@@ -387,7 +387,7 @@ async def raffle(client, event,
     yield content
     return
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def loading(client, event):
     """Loading screen nya!"""
     if not client.is_owner(event.user):
@@ -397,7 +397,7 @@ async def loading(client, event):
     await sleep(0.5)
     await client.interaction_response_message_edit(event, content='loaded')
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def number(client, event, number:('number', 'number')):
     """Loading screen nya!"""
     return str(number)
@@ -407,12 +407,12 @@ async def async_gen_2():
     abort('beep')
     yield
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def abort_from_async_gen(client, event):
     """Aborts from an async gen."""
     return async_gen_2()
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def parse_time_delta(client, event,
         delta: (str, 'The delta to parse'),
             ):
@@ -425,7 +425,7 @@ async def parse_time_delta(client, event,
     
     return result
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def parse_relative_delta(client, event,
         delta: (str, 'The delta to parse'),
             ):
@@ -438,7 +438,7 @@ async def parse_relative_delta(client, event,
     
     return result
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def user_id(client, event,
         user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
             ):
@@ -448,7 +448,7 @@ async def user_id(client, event,
     
     return str(user_id)
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def collect_reactions(client, event):
     """Collects reactions"""
     message = yield InteractionResponse('Collecting reactions for 1 minute!')
@@ -464,21 +464,21 @@ async def collect_reactions(client, event):
     else:
         yield 'No reactions were collected.'
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def tester_only(client, event):
     """Tester only hopefully."""
     return 'Noice'
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def Late_abort(client, event):
     """Aborts after acknowledging."""
     yield
     abort('Nice?')
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def debug_command(client, event,
         command_name: (str, 'The command\'s name.')
             ):
@@ -489,7 +489,7 @@ async def debug_command(client, event,
     if not command_name:
         abort('Empty command name.')
     
-    application_commands = await client.application_command_guild_get_all(GUILD__NEKO_DUNGEON)
+    application_commands = await client.application_command_guild_get_all(GUILD__SUPPORT)
     for application_command in application_commands:
         if application_command.name == command_name:
             break
@@ -497,7 +497,7 @@ async def debug_command(client, event,
         abort('Command could not be found.')
     
     try:
-        permission = await client.application_command_permission_get(GUILD__NEKO_DUNGEON, application_command)
+        permission = await client.application_command_permission_get(GUILD__SUPPORT, application_command)
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_application_command_permissions:
             permission = None
@@ -538,21 +538,21 @@ async def debug_command(client, event,
     
     return ''.join(text_parts)
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ('user', 707113350785400884), True)
-@set_permission(GUILD__NEKO_DUNGEON, ('user', 385575610006765579), True)
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ('user', 707113350785400884), True)
+@set_permission(GUILD__SUPPORT, ('user', 385575610006765579), True)
 async def zeref_and_sleep_only(client, event):
     """Zeref and sleep only."""
     return 'LuL'
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
-@set_permission(GUILD__NEKO_DUNGEON, ('user', 707113350785400884), False)
+@Marisa.interactions(guild=GUILD__SUPPORT)
+@set_permission(GUILD__SUPPORT, ('user', 707113350785400884), False)
 async def only_zeref_not(client, event):
     """Loli Police"""
     return 'Lets go nekos.'
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def roll(client, event,
     dice_count: (set(range(1, 7)), 'With how much dice do you wanna roll with?') = 1,
         ):
@@ -586,7 +586,7 @@ class ZerefPagination(UserPagination):
         
         return await UserPagination.invoke(self, event)
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def zeref_pagination(client, event):
     """Zeref's cake paginator."""
     await ZerefPagination(client, event, ['hi', 'hello'], event.user)
@@ -653,7 +653,7 @@ class CatFeeder:
                 await menu.client.reaction_clear(menu.message)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def cat_feeder(client, event):
     """Feed the cat!"""
     await CatFeeder(client, event)
@@ -663,7 +663,7 @@ def check_user(user, event):
     return user is event.user
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def getting_good(client, event):
     """Getting there."""
     main_component = Row(
@@ -686,7 +686,7 @@ async def getting_good(client, event):
         await client.message_edit(event.message, emoji.as_emoji, embed=None, components=None)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def we_gucci(client, event):
     """Getting there."""
     components = [
@@ -710,7 +710,7 @@ async def we_gucci(client, event):
         components=None, message=event.message)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def link():
     """Melo Melo!"""
     component = Button(
@@ -724,7 +724,7 @@ async def link():
     )
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def slash_edit(client, event):
     """Editing slashes, bakana!"""
     yield InteractionResponse(embed=Embed('Choose your poison.'))
@@ -733,12 +733,12 @@ async def slash_edit(client, event):
     await sleep(2.0, KOKORO)
     yield InteractionResponse(embed=Embed('Choose your neko.'), message=None)
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def embed_abort(client, event):
     """embed abortion."""
     abort(embed=Embed('cake'))
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def mentionable_check(client, event,
         entity: ('mentionable', 'New field hype!'),
             ):
@@ -746,7 +746,7 @@ async def mentionable_check(client, event,
     yield repr(entity)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 @configure_parameter('emoji', str, 'Yes?')
 async def configured_show_emoji(emoji):
     """Shows the given custom emoji."""
@@ -760,7 +760,7 @@ async def configured_show_emoji(emoji):
     return f'**Name:** {emoji:e} **Link:** {emoji.url}'
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def select_test():
     main_component = [
         Select([
@@ -791,7 +791,7 @@ async def handle_cooldown_error(command_context, exception):
     return False
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def nine():
     components = [
         [Button(f'{index_1}x{index_2}', custom_id=f'nine.{index_1}.{index_2}') for index_1 in range(1, 4)]
@@ -805,12 +805,12 @@ async def poison_edit_cake(index_1, index_2):
     return f'You selected: {index_1}x{index_2}'
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def pagination_or_something(client, event):
     """Pagination or something"""
     await Pagination(client, event, ['cake', 'lewd'])
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_response_message(client, event):
     await client.interaction_application_command_acknowledge(event)
     message = await client.interaction_followup_message_create(event, 'cake')
@@ -1024,7 +1024,7 @@ async def count_message_fields(client, message):
 
 @Marisa.events
 async def shutdown(client):
-    await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, 'dead')
+    await client.message_create(CHANNEL__SUPPORT__DEFAULT_TEST, 'dead')
 
 
 @Marisa.commands
@@ -1032,19 +1032,19 @@ async def shutdown():
     await Marisa.stop()
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def thread_only(
     thread: ('channel_group_thread', 'Please define a thread channel.')
         ):
     return repr(thread)
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 @configure_parameter('channel', 'channel', 'channel', channel_types=[0, 4])
 async def some_channel(channel):
     return repr(channel)
 
 
-@Marisa.interactions(guild=GUILD__NEKO_DUNGEON)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def register_autocomplete(client, event):
     if not client.is_owner(event.user):
         abort('owner only')
@@ -1069,13 +1069,13 @@ async def register_autocomplete(client, event):
         ]
     )
     
-    await client.application_command_guild_create(GUILD__NEKO_DUNGEON, application_command)
+    await client.application_command_guild_create(GUILD__SUPPORT, application_command)
 
 AUTO_SUB = Marisa.interactions(
     None,
     name = 'auto-sub',
     description = 'auto everything.',
-    guild = GUILD__NEKO_DUNGEON,
+    guild = GUILD__SUPPORT,
 )
 
 @AUTO_SUB.autocomplete('value')
@@ -1133,3 +1133,14 @@ async def testc(
 @testc.autocomplete('aa', 'bb', 'cc', 'dd')
 async def complete(value):
     return ['value']
+
+@Marisa.interactions(guild=GUILD__SUPPORT)
+async def exp(
+    expression: ('expression', 'Mathematical expression to evaluate')
+):
+    return repr(expression)
+
+@exp.error
+async def forward_all_error(client, interaction_event, command, exception):
+    await client.events.error(client, f'{command.__class__.__name__}', exception)
+    return True

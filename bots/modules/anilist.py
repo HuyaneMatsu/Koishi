@@ -4,7 +4,7 @@ from hata.backend.headers import CONTENT_TYPE
 from hata.ext.slash import abort, Row, Button, InteractionResponse, Select, Option
 from collections import namedtuple as NamedTupleType
 
-from bot_utils.constants import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT: Client
 

@@ -1,7 +1,7 @@
 from time import monotonic
 
 from config import GOOGLE_API_KEYS
-from bot_utils.constants import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__SUPPORT
 
 from hata import Client, Lock, KOKORO, Embed, Color
 from hata.ext.slash.menus import Pagination
@@ -159,7 +159,7 @@ if (GOOGLE_API_KEYS is not None):
         return results
     
     
-    @SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+    @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
     async def google(client, event, query:(str, 'query')):
         yield
         

@@ -11,8 +11,8 @@ from hata import Client, Embed, parse_emoji, sleep, id_to_datetime, DATETIME_FOR
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
     wait_for_component_interaction, iter_component_interactions, Select, Option, P
 
-from bot_utils.constants import GUILD__NEKO_DUNGEON as TEST_GUILD, ROLE__NEKO_DUNGEON__MODERATOR
-MODERATOR_ROLE_ID = ROLE__NEKO_DUNGEON__MODERATOR.id
+from bot_utils.constants import GUILD__SUPPORT as TEST_GUILD, ROLE__SUPPORT__MODERATOR
+MODERATOR_ROLE_ID = ROLE__SUPPORT__MODERATOR.id
 
 Nitori: Client
 

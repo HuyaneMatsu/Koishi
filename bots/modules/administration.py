@@ -7,7 +7,7 @@ from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
 
-from bot_utils.constants import ROLE__NEKO_DUNGEON__TESTER
+from bot_utils.constants import ROLE__SUPPORT__TESTER
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
 
@@ -415,7 +415,7 @@ async def is_banned(client, event,
         user: ('user', 'Who should I check?')
             ):
     """Checks whether the user is banned."""
-    if (not event.user.has_role(ROLE__NEKO_DUNGEON__TESTER)) and (not event.user_permissions.can_ban_users):
+    if (not event.user.has_role(ROLE__SUPPORT__TESTER)) and (not event.user_permissions.can_ban_users):
         abort('You need to have `ban users` permissions to do this.')
     
     if not event.channel.cached_permissions_for(client).can_ban_users:

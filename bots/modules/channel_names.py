@@ -6,7 +6,7 @@ from random import random
 from datetime import datetime
 from difflib import get_close_matches
 
-from bot_utils.constants import CATEGORY__NEKO_DUNGEON__BOTS, PATH__KOISHI, ROLE__NEKO_DUNGEON__MODERATOR
+from bot_utils.constants import CATEGORY__SUPPORT__BOTS, PATH__KOISHI, ROLE__SUPPORT__MODERATOR
 from bot_utils.tools import Cell
 
 from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \
@@ -207,10 +207,10 @@ async def write_channels(names):
 
 async def do_rename():
     async with EDIT_LOCK:
-        if not CATEGORY__NEKO_DUNGEON__BOTS.guild.permissions_for(COMMAND_CLIENT).can_manage_channel:
+        if not CATEGORY__SUPPORT__BOTS.guild.permissions_for(COMMAND_CLIENT).can_manage_channel:
             return
         
-        channels = CATEGORY__NEKO_DUNGEON__BOTS.channel_list
+        channels = CATEGORY__SUPPORT__BOTS.channel_list
         count = len(channels)
         if not count:
             return
@@ -228,7 +228,7 @@ def cycle_rename():
 NAME_CYCLER_HANDLER = Cell()
 
 COMMAND_CLIENT: Client
-COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__NEKO_DUNGEON__MODERATOR)])
+COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__SUPPORT__MODERATOR)])
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(
@@ -275,7 +275,7 @@ async def list_bot_channel_names(client, message):
 
 
 def check_staff_role(event):
-    return event.user.has_role(ROLE__NEKO_DUNGEON__MODERATOR)
+    return event.user.has_role(ROLE__SUPPORT__MODERATOR)
 
 ADD_EMOJI_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']

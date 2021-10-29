@@ -12,19 +12,19 @@ from sqlalchemy.sql import select, desc
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
 
-from bot_utils.constants import ROLE__NEKO_DUNGEON__ELEVATED, ROLE__NEKO_DUNGEON__BOOSTER, GUILD__NEKO_DUNGEON, \
-    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__NEKO_DUNGEON__HEART_BOOST, ROLE__NEKO_DUNGEON__ADMIN, \
-    ROLE__NEKO_DUNGEON__NSFW_ACCESS, IN_GAME_IDS, COLOR__GAMBLING
+from bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, GUILD__SUPPORT, \
+    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__ADMIN, \
+    ROLE__SUPPORT__NSFW_ACCESS, IN_GAME_IDS, COLOR__GAMBLING
 from bot_utils.utils import send_embed_to
 
 SLASH_CLIENT: Client
 Satori: Client
 
 def setup(lib):
-    Satori.events.message_create.append(GUILD__NEKO_DUNGEON, heart_generator)
+    Satori.events.message_create.append(GUILD__SUPPORT, heart_generator)
 
 def teardown(lib):
-    Satori.events.message_create.remove(GUILD__NEKO_DUNGEON, heart_generator)
+    Satori.events.message_create.remove(GUILD__SUPPORT, heart_generator)
 
 
 DAILY_INTERVAL          = timedelta(hours=22)
@@ -82,14 +82,14 @@ def calculate_daily_for(user, daily_streak):
     daily_limit = DAILY_LIMIT
     
     
-    if user.has_role(ROLE__NEKO_DUNGEON__ELEVATED):
+    if user.has_role(ROLE__SUPPORT__ELEVATED):
         daily_limit += DAILY_LIMIT_BONUS_W_E
     
-    if user.has_role(ROLE__NEKO_DUNGEON__BOOSTER):
+    if user.has_role(ROLE__SUPPORT__BOOSTER):
         daily_per_day += DAILY_PER_DAY_BONUS_W_B
         daily_limit += DAILY_LIMIT_BONUS_W_B
     
-    if user.has_role(ROLE__NEKO_DUNGEON__HEART_BOOST):
+    if user.has_role(ROLE__SUPPORT__HEART_BOOST):
         daily_base += DAILY_BASE_BONUS_W_HE
         daily_limit += DAILY_LIMIT_BONUS_W_HE
     
@@ -486,11 +486,11 @@ async def hearts(client, event,
         daily_limit = DAILY_LIMIT
         has_extra_role = False
         
-        if target_user.has_role(ROLE__NEKO_DUNGEON__ELEVATED):
+        if target_user.has_role(ROLE__SUPPORT__ELEVATED):
             has_extra_role = True
             
             field_value_parts.append('\n\n**')
-            field_value_parts.append(ROLE__NEKO_DUNGEON__ELEVATED.mention)
+            field_value_parts.append(ROLE__SUPPORT__ELEVATED.mention)
             field_value_parts.append(':**\n')
             
             field_value_parts.append('+ ')
@@ -499,11 +499,11 @@ async def hearts(client, event,
             
             daily_limit += DAILY_LIMIT_BONUS_W_E
         
-        if target_user.has_role(ROLE__NEKO_DUNGEON__BOOSTER):
+        if target_user.has_role(ROLE__SUPPORT__BOOSTER):
             has_extra_role = True
             
             field_value_parts.append('\n\n**')
-            field_value_parts.append(ROLE__NEKO_DUNGEON__BOOSTER.mention)
+            field_value_parts.append(ROLE__SUPPORT__BOOSTER.mention)
             field_value_parts.append(':**\n')
             
             field_value_parts.append('+ ')
@@ -517,11 +517,11 @@ async def hearts(client, event,
             daily_per_day += DAILY_PER_DAY_BONUS_W_B
             daily_limit += DAILY_LIMIT_BONUS_W_B
         
-        if target_user.has_role(ROLE__NEKO_DUNGEON__HEART_BOOST):
+        if target_user.has_role(ROLE__SUPPORT__HEART_BOOST):
             has_extra_role = True
             
             field_value_parts.append('\n\n**')
-            field_value_parts.append(ROLE__NEKO_DUNGEON__HEART_BOOST.mention)
+            field_value_parts.append(ROLE__SUPPORT__HEART_BOOST.mention)
             field_value_parts.append(':**\n')
             
             field_value_parts.append('+ ')
@@ -587,7 +587,7 @@ def convert_tdelta(delta):
 
 
 def heart_event_start_checker(client, event):
-    if event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
+    if event.user.has_role(ROLE__SUPPORT__ADMIN):
         return True
     
     return True
@@ -599,8 +599,8 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def heart_event(client, event,
         duration : ('str', 'The event\'s duration.'),
         amount : ('int', 'The hearst to earn.'),
@@ -608,8 +608,8 @@ async def heart_event(client, event,
             ):
     """Starts a heart event at the channel."""
     while True:
-        if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-            response = f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!'
+        if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+            response = f'{ROLE__SUPPORT__ADMIN.mention} only!'
             error = True
             break
         
@@ -886,8 +886,8 @@ class HeartEventGUI:
         Task(connector.close(), KOKORO)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def daily_event(client, event,
         duration : ('str', 'The event\'s duration.'),
         amount : ('int', 'The extra daily steaks to earn.'),
@@ -895,8 +895,8 @@ async def daily_event(client, event,
             ):
     """Starts a heart event at the channel. (Bot owner only)"""
     while True:
-        if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-            response = f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!'
+        if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+            response = f'{ROLE__SUPPORT__ADMIN.mention} only!'
             error = True
             break
         
@@ -1194,9 +1194,9 @@ async def gift(client, event,
     """Gifts hearts to the chosen by your heart."""
     source_user = event.user
     
-    if not (source_user.has_role(ROLE__NEKO_DUNGEON__ELEVATED) or source_user.has_role(ROLE__NEKO_DUNGEON__BOOSTER)):
-        abort(f'You must have either {ROLE__NEKO_DUNGEON__ELEVATED.name} or '
-            f'{ROLE__NEKO_DUNGEON__BOOSTER.name} role to invoke this command.', allowed_mentions=None)
+    if not (source_user.has_role(ROLE__SUPPORT__ELEVATED) or source_user.has_role(ROLE__SUPPORT__BOOSTER)):
+        abort(f'You must have either {ROLE__SUPPORT__ELEVATED.name} or '
+            f'{ROLE__SUPPORT__BOOSTER.name} role to invoke this command.', allowed_mentions=None)
     
     if source_user is target_user:
         abort('You cannot give love to yourself..')
@@ -1333,8 +1333,8 @@ AWARD_TYPES = [
     ('daily-streak', 'daily-streak')
 ]
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def award(client, event,
         target_user: ('user', 'Who do you want to award?'),
         amount: ('int', 'With how much love do you wanna award them?'),
@@ -1342,8 +1342,8 @@ async def award(client, event,
         with_: (AWARD_TYPES, 'Select award type') = 'hearts',
             ):
     """Awards the user with love."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
     
     if amount <= 0:
         yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=COLOR__GAMBLING)
@@ -1459,15 +1459,15 @@ async def award(client, event,
         raise
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def take(client, event,
         target_user: ('user', 'From who do you want to take love away?'),
         amount: ('int', 'How much love do you want to take away?'),
             ):
     """Takes away hearts form the lucky user."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
     
     if amount <= 0:
         abort('You cannot award non-positive amount of hearts..')
@@ -1517,16 +1517,16 @@ async def take(client, event,
     return
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def transfer(client, event,
         source_user: ('user', 'Who\'s hearst do you want to transfer?'),
         target_user: ('user', 'To who do you want transfer the taken heart?'),
         message : ('str', 'Optional message to send with the transfer.') = None,
             ):
     """Transfers all of someone\'s hearts to an other person."""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
     
     if (message is not None) and len(message) > 1000:
         message = message[:1000]+'...'
@@ -1634,16 +1634,16 @@ async def transfer(client, event,
         raise
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, allow_by_default=False)
-@set_permission(GUILD__NEKO_DUNGEON, ROLE__NEKO_DUNGEON__ADMIN, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def currency_insert(client, event,
         target_user: ('user', 'To who do you want transfer the taken heart?'),
         hearts : ('int', 'The amount to insert'),
         dailies : ('int', 'The amount of daily streaks'),
             ):
     """Inserts a new field into the currency table"""
-    if not event.user.has_role(ROLE__NEKO_DUNGEON__ADMIN):
-        abort(f'{ROLE__NEKO_DUNGEON__ADMIN.mention} only!', allowed_mentions=None)
+    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
     
     user_id = target_user.id
     async with DB_ENGINE.connect() as connector:
@@ -1799,9 +1799,9 @@ ELEVATED_IDENTIFIER = '1'
 HEART_BOOST_IDENTIFIER = '2'
 
 BUYABLE_ROLES = {
-    NSFW_ACCESS_IDENTIFIER: (ROLE__NEKO_DUNGEON__NSFW_ACCESS, NSFW_ACCESS_COST),
-    ELEVATED_IDENTIFIER: (ROLE__NEKO_DUNGEON__ELEVATED, ELEVATED_COST),
-    HEART_BOOST_IDENTIFIER: (ROLE__NEKO_DUNGEON__HEART_BOOST, HEART_BOOST_COST),
+    NSFW_ACCESS_IDENTIFIER: (ROLE__SUPPORT__NSFW_ACCESS, NSFW_ACCESS_COST),
+    ELEVATED_IDENTIFIER: (ROLE__SUPPORT__ELEVATED, ELEVATED_COST),
+    HEART_BOOST_IDENTIFIER: (ROLE__SUPPORT__HEART_BOOST, HEART_BOOST_COST),
 }
 
 ROLE_CHOICES = [

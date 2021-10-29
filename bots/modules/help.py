@@ -10,11 +10,11 @@ from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elap
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.slash import InteractionResponse, Button, Row
 
-from bot_utils.constants import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__NEKO_DUNGEON, GUILD__NEKO_DUNGEON, \
-    LINK__HATA_DOCS, LINK__PASTE, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__NEKO_DUNGEON__ELEVATED, \
-    ROLE__NEKO_DUNGEON__VERIFIED, CHANNEL__NEKO_DUNGEON__SYSTEM, LINK__HATA_SLASH, ROLE__NEKO_DUNGEON__NSFW_ACCESS, \
-    ROLE__NEKO_DUNGEON__EVENT_MANAGER, ROLE__NEKO_DUNGEON__EVENT_WINNER, ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT, \
-    EMOJI__HEART_CURRENCY, ROLE__NEKO_DUNGEON__HEART_BOOST, STARTUP, PATH__KOISHI
+from bot_utils.constants import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__SUPPORT, GUILD__SUPPORT, \
+    LINK__HATA_DOCS, LINK__PASTE, ROLE__SUPPORT__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__SUPPORT__ELEVATED, \
+    ROLE__SUPPORT__VERIFIED, CHANNEL__SUPPORT__SYSTEM, LINK__HATA_SLASH, ROLE__SUPPORT__NSFW_ACCESS, \
+    ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_WINNER, ROLE__SUPPORT__EVENT_PARTICIPANT, \
+    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, STARTUP, PATH__KOISHI
 from bot_utils. cpu_info import CpuUsage, PROCESS
 
 SLASH_CLIENT: Client
@@ -41,10 +41,10 @@ RULES_COMPONENTS = Row(
     ),
 )
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def rules(client, event):
     """Neko Dungeon\'s rules!"""
-    embed = Embed(f'Rules of {GUILD__NEKO_DUNGEON}:', color=COLOR__KOISHI_HELP,
+    embed = Embed(f'Rules of {GUILD__SUPPORT}:', color=COLOR__KOISHI_HELP,
         ).add_field(
             '0. Guidelines',
             'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
@@ -53,7 +53,7 @@ async def rules(client, event):
             'Listen to staff and follow their instructions.',
         ).add_field(
             '2. Language',
-            f'{GUILD__NEKO_DUNGEON} is an english speaking server, please try to stick yourself to it.',
+            f'{GUILD__SUPPORT} is an english speaking server, please try to stick yourself to it.',
         ).add_field(
             '3. Channels',
             'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
@@ -92,11 +92,11 @@ async def rules(client, event):
 async def claim_verified_role(client, event):
     await client.interaction_component_acknowledge(event)
     user = event.user
-    if user.has_role(ROLE__NEKO_DUNGEON__VERIFIED):
-        response = f'You already have {ROLE__NEKO_DUNGEON__VERIFIED.name} role claimed.'
+    if user.has_role(ROLE__SUPPORT__VERIFIED):
+        response = f'You already have {ROLE__SUPPORT__VERIFIED.name} role claimed.'
     else:
-        await client.user_role_add(user, ROLE__NEKO_DUNGEON__VERIFIED)
-        response = f'You claimed {ROLE__NEKO_DUNGEON__VERIFIED.name} role.'
+        await client.user_role_add(user, ROLE__SUPPORT__VERIFIED)
+        response = f'You claimed {ROLE__SUPPORT__VERIFIED.name} role.'
     
     await client.interaction_followup_message_create(event, response, show_for_invoking_user_only=True)
 
@@ -105,12 +105,12 @@ async def claim_verified_role(client, event):
 async def claim_announcements_role(client, event):
     await client.interaction_component_acknowledge(event)
     user = event.user
-    if user.has_role(ROLE__NEKO_DUNGEON__ANNOUNCEMENTS):
-        await client.user_role_delete(user, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS)
-        response = f'Your {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.name} role was removed.'
+    if user.has_role(ROLE__SUPPORT__ANNOUNCEMENTS):
+        await client.user_role_delete(user, ROLE__SUPPORT__ANNOUNCEMENTS)
+        response = f'Your {ROLE__SUPPORT__ANNOUNCEMENTS.name} role was removed.'
     else:
-        await client.user_role_add(user, ROLE__NEKO_DUNGEON__ANNOUNCEMENTS)
-        response = f'You claimed {ROLE__NEKO_DUNGEON__ANNOUNCEMENTS.name} role.'
+        await client.user_role_add(user, ROLE__SUPPORT__ANNOUNCEMENTS)
+        response = f'You claimed {ROLE__SUPPORT__ANNOUNCEMENTS.name} role.'
     
     await client.interaction_followup_message_create(event, response, show_for_invoking_user_only=True)
 
@@ -174,7 +174,7 @@ ABOUT_COMPONENTS = Row(
     ),
     Button(
         'Support server',
-        url = INVITE__NEKO_DUNGEON.url,
+        url = INVITE__SUPPORT.url,
     ),
 )
 
@@ -550,7 +550,7 @@ async def ping(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def docs_search(client, event,
         search_for: ('str', 'Search term'),
             ):
@@ -642,7 +642,7 @@ async def docs_search(client, event,
     await Pagination(client, event, embeds, check=partial_func(docs_search_pagination_check, event.user))
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def ask():
     """How to ask!"""
     return Embed('How to ask?',
@@ -656,7 +656,7 @@ async def ask():
             color = COLOR__KOISHI_HELP)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def markdown():
     """How to use markdown."""
     return Embed('Markdown',
@@ -675,7 +675,7 @@ async def markdown():
             color = COLOR__KOISHI_HELP)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def paste():
     """A link to our paste service."""
     return Embed(description=f'[Paste link]({LINK__PASTE})', color=COLOR__KOISHI_HELP)
@@ -686,7 +686,7 @@ ROLES = SLASH_CLIENT.interactions(
     None,
     name = 'roles',
     description = 'Role information!',
-    guild = GUILD__NEKO_DUNGEON,
+    guild = GUILD__SUPPORT,
 )
 
 
@@ -697,13 +697,13 @@ async def Collectible():
         f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY:e} using the `heart-shop roles` command.',
         color = COLOR__KOISHI_HELP,
     ).add_field(
-        ROLE__NEKO_DUNGEON__NSFW_ACCESS.name,
+        ROLE__SUPPORT__NSFW_ACCESS.name,
         f'Gives access to nsfw channels.',
     ).add_field(
-        ROLE__NEKO_DUNGEON__ELEVATED.name,
+        ROLE__SUPPORT__ELEVATED.name,
         f'Unlocks secret nekogirl only content.',
     ).add_field(
-        ROLE__NEKO_DUNGEON__HEART_BOOST.name,
+        ROLE__SUPPORT__HEART_BOOST.name,
         f'Become favored by Koishi receiving more hearts from her each day.',
     )
     
@@ -717,15 +717,15 @@ async def events():
         'Event roles',
         color = COLOR__KOISHI_HELP,
     ).add_field(
-        ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.name,
-        f'{ROLE__NEKO_DUNGEON__EVENT_PARTICIPANT.mention} are participant of the actual event.'
+        ROLE__SUPPORT__EVENT_PARTICIPANT.name,
+        f'{ROLE__SUPPORT__EVENT_PARTICIPANT.mention} are participant of the actual event.'
     ).add_field(
-        ROLE__NEKO_DUNGEON__EVENT_WINNER.name,
-        f'{ROLE__NEKO_DUNGEON__EVENT_WINNER.mention} won already an event. It is set in stone, only a couple of '
+        ROLE__SUPPORT__EVENT_WINNER.name,
+        f'{ROLE__SUPPORT__EVENT_WINNER.mention} won already an event. It is set in stone, only a couple of '
         f'chads may achieve this level of power.'
     ).add_field(
-        ROLE__NEKO_DUNGEON__EVENT_MANAGER.name,
-        f'{ROLE__NEKO_DUNGEON__EVENT_MANAGER.mention} are managing the actual event. Hoping our god ZUN will '
+        ROLE__SUPPORT__EVENT_MANAGER.name,
+        f'{ROLE__SUPPORT__EVENT_MANAGER.mention} are managing the actual event. Hoping our god ZUN will '
         f'notice them one day.'
     )
     

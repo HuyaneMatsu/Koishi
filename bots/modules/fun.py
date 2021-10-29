@@ -7,7 +7,7 @@ from hata.ext.command_utils import wait_for_reaction
 from hata.ext.slash import abort
 
 from bot_utils.tools import Cell
-from bot_utils.constants import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT : Client
 
@@ -504,7 +504,7 @@ async def minesweeper(
 EMOJI_1 = Emoji.precreate(814618830106132511, name='T90Salute')
 EMOJI_2 = Emoji.precreate(588052578214871053, name='tatohaHola')
 
-@SLASH_CLIENT.interactions(guild=GUILD__NEKO_DUNGEON, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def crywolf_(client, event):
     """Crywolf is a bot"""
     yield 'crywolf is a sus'

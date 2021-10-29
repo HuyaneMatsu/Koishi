@@ -1,7 +1,7 @@
 from .svg import SVG_GEAR, SVG_LIGHTING, SVG_CLOCK, SVG_CODE, SVG_DISCORD
 from flask import Blueprint, render_template, redirect, url_for
 from bot_utils.http_builder import HttpText, HttpUrl, HttpContent
-from bot_utils.constants import INVITE__NEKO_DUNGEON
+from bot_utils.constants import INVITE__SUPPORT
 
 URL_PREFIX = '/project/hata'
 ROUTES = Blueprint('index', '',
@@ -63,7 +63,7 @@ ADDITIONAL_FEATURES = (
     (
         HttpUrl(
             'Comfy Discord support server',
-            INVITE__NEKO_DUNGEON.url,
+            INVITE__SUPPORT.url,
         ).render(),
         HttpText(
             'Great server for support and any questions! Also boosting a wide variety of good emojis.',

@@ -6,7 +6,7 @@ from hata.ext.slash.menus import Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
-from bot_utils.constants import GUILD__NEKO_DUNGEON
+from bot_utils.constants import GUILD__SUPPORT
 from hata.ext.commands_v2 import checks
 
 if not MARISA_MODE:
@@ -58,6 +58,14 @@ if SOLARLINK_VOICE:
 else:
     async def do_set_volume(voice_client, volume):
         voice_client.volume = volume
+
+if SOLARLINK_VOICE:
+    async def do_get_volume(player):
+        return player.get_volume()
+else:
+    async def do_get_volume(voice_client):
+        return voice_client.volume
+
 
 if SOLARLINK_VOICE:
     async def do_pause(player):
@@ -134,9 +142,9 @@ else:
 
 if SOLARLINK_VOICE:
     async def do_get_looping_behavior(player):
-        if player.is_repeating_actual():
+        if player.is_repeating_current():
             description = 'Looping over the actual audio.'
-        elif player.is_repeating():
+        elif player.is_repeating_queue():
             description = 'Looping over the whole queue.'
         else:
             description = 'Not looping.'
@@ -145,13 +153,14 @@ if SOLARLINK_VOICE:
     
     async def do_set_looping_behavior(player, behaviour):
         if behaviour == 'queue':
-            player.set_repeat(True, False)
+            player.set_repeat_queue(True)
             description = 'Started looping over the whole queue.'
         elif behaviour == 'actual':
-            player.set_repeat(True, True)
+            player.set_repeat_current(False)
             description = 'Started looping over the actual audio.'
         elif behaviour == 'stop':
-            player.set_repeat(False)
+            player.set_repeat_queue(False)
+            player._set_repeat_actual(False)
             description = 'Stopped looping.'
         else:
             description = '*confused screaming*'
@@ -460,7 +469,8 @@ async def volume_(client, event_or_message, volume):
         return 'There is no voice client at your guild.'
     
     if volume is None:
-        return f'{voice_client.volume*100.:.0f}%'
+        volume = await do_get_volume(voice_client)
+        return f'{volume*100.:.0f}%'
     
     if volume <= 0:
         volume = 0.0
@@ -497,7 +507,7 @@ async def stop(client, event_or_message):
 async def move(client, event_or_message, user, voice_channel):
     if voice_channel is None:
         
-        state = GUILD__NEKO_DUNGEON.voice_states.get(user.id, None)
+        state = GUILD__SUPPORT.voice_states.get(user.id, None)
         if state is None:
             yield 'You must be in voice channel, or you should pass a voice channel.'
             return
@@ -537,7 +547,7 @@ async def party_is_over(client, event_or_message):
     tasks.append(task)
     
     users = []
-    for state in GUILD__NEKO_DUNGEON.voice_states.values():
+    for state in GUILD__SUPPORT.voice_states.values():
         if (state.channel is not channel):
             continue
             
@@ -548,7 +558,7 @@ async def party_is_over(client, event_or_message):
         users.append(user)
     
     for user in users:
-        task = Task(client.user_voice_kick(user, GUILD__NEKO_DUNGEON), KOKORO)
+        task = Task(client.user_voice_kick(user, GUILD__SUPPORT), KOKORO)
         tasks.append(task)
     
     await WaitTillAll(tasks, KOKORO)
@@ -745,7 +755,7 @@ if AUDIO_PLAY_POSSIBLE and MARISA_MODE:
     @VOICE_COMMAND_CLIENT.commands(
         name = 'play',
         description = command_yt_play_description,
-        checks = checks.is_guild(GUILD__NEKO_DUNGEON),
+        checks = checks.is_guild(GUILD__SUPPORT),
         category = 'VOICE',
     )
     async def command_yt_play(client, message, name):
@@ -798,7 +808,7 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
     @VOICE_COMMAND_CLIENT.commands(
         name = 'local',
         description = command_local_description,
-        checks = checks.is_guild(GUILD__NEKO_DUNGEON),
+        checks = checks.is_guild(GUILD__SUPPORT),
         category = 'VOICE',
     )
     async def command_local(client, message, name):
@@ -914,7 +924,7 @@ if SLASH_CLIENT is not None:
         None,
         name = 'voice',
         description = 'Voice commands',
-        guild = GUILD__NEKO_DUNGEON,
+        guild = GUILD__SUPPORT,
     )
     
     @VOICE_COMMANDS.interactions(name='join')
@@ -984,7 +994,7 @@ if SLASH_CLIENT is not None:
     @VOICE_COMMANDS.interactions(name='queue')
     async def slash_queue(client, interaction_event):
         """Shows the voice client\'s queue of the guild."""
-        return queue(client, interaction_event, GUILD__NEKO_DUNGEON)
+        return queue(client, interaction_event, GUILD__SUPPORT)
     
     @VOICE_COMMANDS.interactions(name='volume')
     async def slash_volume(client, interaction_event,

@@ -8,7 +8,7 @@ from hata.discord.utils import sanitise_mention_escaper
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, EmojiDeleteWaitfor, \
     RoleEditWaitfor
-from bot_utils.constants import GUILD__NEKO_DUNGEON, CHANNEL__SYSTEM__SYNC, CHANNEL__NEKO_DUNGEON__DEFAULT_TEST
+from bot_utils.constants import GUILD__SUPPORT, CHANNEL__SYSTEM__SYNC, CHANNEL__SUPPORT__DEFAULT_TEST
 
 
 
@@ -33,7 +33,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 @Satori.events
 async def message_create(client, message):
-    if (message.guild_id != GUILD__NEKO_DUNGEON):
+    if (message.guild_id != GUILD__SUPPORT):
         return
     
     if (message.referenced_message is not None):
@@ -108,4 +108,4 @@ async def error(client, name, err):
     
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang='py'):
-        await client.message_create(CHANNEL__NEKO_DUNGEON__DEFAULT_TEST, chunk)
+        await client.message_create(CHANNEL__SUPPORT__DEFAULT_TEST, chunk)
