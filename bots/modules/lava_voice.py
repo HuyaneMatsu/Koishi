@@ -104,7 +104,7 @@ def add_song_selection_header(embed, user):
         'Song selection',
     )
 
-def create_added_music_embed(player, description):
+def create_added_music_embed(player, user, description):
     embed = Embed(
         None,
         description,
@@ -172,45 +172,6 @@ VOICE_COMMANDS = SLASH_CLIENT.interactions(
     description = 'Voice commands',
     guild = GUILD__SUPPORT,
 )
-
-@VOICE_COMMANDS.interactions
-async def join(client, event,
-    volume : ('int', 'Any preset volume?') = None,
-):
-    """Joins the voice channel."""
-    guild = event.guild
-    if guild is None:
-        abort('Guild only command.')
-    
-    state = guild.voice_states.get(user.id, None)
-    if state is None:
-        abort('You must be in a voice channel to invoke this command.')
-        return
-    
-    channel = state.channel
-    if not channel.cached_permissions_for(client).can_connect:
-        abort(f'I have no permissions to connect to {channel.mention}.')
-        return
-    
-    yield
-    
-    player = await client.solarlink.join_voice(channel)
-    
-    content = f'Joined to {state.channel.name}'
-    
-    if (volume is not None):
-        if volume <= 0:
-            volume = 0.0
-        elif volume >= 200:
-            volume = 2.0
-        else:
-            volume /= 100.0
-        
-        await player.set_volume(volume)
-        content = f'{content}; Volume set to {volume*100.:.0f}%'
-    
-    yield content
-    return
 
 
 @VOICE_COMMANDS.interactions
@@ -307,21 +268,9 @@ async def leave(client, event):
     return
 
 
-def create_track_embed(track, title, requester, requested_at):
-    return Embed(
-        title,
-        (
-            f'By: {track.author}\n'
-            f'Duration: {track.duration:.0f}s'
-        ),
-        timestamp = requested_at,
-    ).add_footer(
-        f'Track requested by {requester.full_name}',
-        icon_url = requester.avatar_url,
-    )
-
 def check_is_user_same(user, event):
     return (user is event.user)
+
 
 @VOICE_COMMANDS.interactions
 async def play(client, event,
@@ -330,9 +279,20 @@ async def play(client, event,
     """Plays an audio from youtube."""
     player = client.solarlink.get_player(event.guild_id)
     
+    user = event.user
+    
     if player is None:
-        abort('There is no player at the guild.')
-        return
+        guild = event.guild
+        if guild is None:
+            abort('Please use this command inside of a guild.')
+        
+        state = guild.voice_states.get(user.id, None)
+        if state is None:
+            abort(f'Please join a voice channel first, so I will know where to play.')
+        
+        channel = state.channel
+        if not channel.cached_permissions_for(client).can_connect:
+            abort(f'I have no permissions to connect to your channel: {channel.mention}.')
     
     yield
     
@@ -344,7 +304,6 @@ async def play(client, event,
     
     result = await client.solarlink.get_tracks(name)
     
-    user = event.user
     
     # Case 0, there are 0 tracks
     if result is None:
@@ -364,11 +323,14 @@ async def play(client, event,
     
     length = len(tracks)
     description_parts = []
-
+    
     # We are in a playlist
     if (playlist_name is not None):
         # All track selected -> add all
         if (selected_track_index == -1) or (selected_track_index >= length):
+            if player is None:
+                player = await client.solarlink.join_voice(channel)
+            
             for track in tracks:
                 await player.append(track, requester=user)
             
@@ -416,6 +378,9 @@ async def play(client, event,
         else:
             # 1 Track is selected, add only that one
             
+            if player is None:
+                player = await client.solarlink.join_voice(channel)
+            
             track = tracks[selected_track_index]
             await player.append(track, requester=user)
             
@@ -432,17 +397,20 @@ async def play(client, event,
             
             add_track_short_description_to(description_parts, track)
         
-        yield create_added_music_embed(player, ''.join(description_parts))
+        yield create_added_music_embed(player, user, ''.join(description_parts))
         return
     
     if is_name_an_url:
+        if player is None:
+            player = await client.solarlink.join_voice(channel)
+        
         track = tracks[0]
         await player.append(track, requester=user)
         
         description_parts.append('Track added to queue.\n\n')
         add_track_short_description_to(description_parts, track)
         
-        yield create_added_music_embed(player, ''.join(description_parts))
+        yield create_added_music_embed(player, user, ''.join(description_parts))
         return
     
     if length > 5:
@@ -458,8 +426,6 @@ async def play(client, event,
         description_parts.append('.** ')
         add_track_short_description_to(description_parts, track)
         
-        add_track_short_description_to(description_parts, track)
-        
         if index == length:
             break
         
@@ -467,7 +433,7 @@ async def play(client, event,
         continue
     
     description = ''.join(description_parts)
-    description_parts = None
+    description_parts = None # clear up reference
     
     embed = Embed(
         None,
@@ -497,17 +463,67 @@ async def play(client, event,
         cancelled = False
     
     if cancelled:
-        embed.title = 'Adding emoji has been cancelled.'
-    else:
-        embed.title = 'Emoji has been added!'
-        
-        async with client.http.get(emoji.url) as response:
-            emoji_data = await response.read()
-        
-        await client.emoji_create(event.guild, name, emoji_data)
+        embed = Embed(
+            None,
+            description,
+        ).add_author(
+            user.avatar_url,
+            'Song selection. Nothing was chosen.',
+        ).add_footer(
+            'Timeout occurred.',
+        )
     
-    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)
-
+    else:
+        options = component_interaction.interaction.options
+        
+        selected_tracks = []
+        for option in options:
+            selected_tracks.append(tracks[option])
+        
+        if player is None:
+            player = await client.solarlink.join_voice(channel)
+        
+        for track in tracks:
+            await player.append(track, requester=user)
+            
+        description_parts = []
+        
+        length = len(track)
+        
+        if length == 1:
+            description_parts.append('Track added to queue.\n\n')
+            add_track_short_description_to(description_parts, track)
+        else:
+            description_parts.append(str(length))
+            description_parts.append('track added to queue.\n\n')
+            
+            while True:
+                track = tracks[index]
+                index += 1
+                description_parts.append('**')
+                description_parts.append(str(index))
+                description_parts.append('.** ')
+                
+                add_track_short_description_to(description_parts, track)
+                
+                if index == length:
+                    break
+                
+                description_parts.append('\n')
+                continue
+            
+            description = ''.join(description_parts)
+            description_parts = None # clear reference
+            
+            embed = create_added_music_embed(player, user, description)
+    
+    yield InteractionResponse(
+        embed = embed,
+        components = None,
+        message = message,
+        event = component_interaction,
+    )
+    return
 
 
 @VOICE_COMMANDS.interactions
@@ -632,7 +648,7 @@ def generate_track_autocomplete_form(configured_track):
 async def skip(client, event,
     track : ('str', 'Which track to skip?') = None,
 ):
-    """Skips the track on the given index."""
+    """Skips the selected track."""
     player = client.solarlink.get_player(event.guild_id)
     
     if player is None:
@@ -648,15 +664,50 @@ async def skip(client, event,
         else:
             index = -1
     
-    configured_track = player.spip(index)
+    configured_track = await player.spip(index)
     if configured_track is None:
         return 'Nothing was skipped.'
-    else:
-        return create_track_embed(configured_track.track, 'Skipped', configured_track.requester, configured_track.requested_at)
+    
+    description_parts = ['Track skipped: ']
+    add_track_short_description_to(description_parts, configured_track.track)
+    description = ''.join(description_parts)
+    
+    return create_added_music_embed(player, event.user, description)
 
 
 @VOICE_COMMANDS.interactions
+async def remove(client, event,
+    track : ('str', 'Which track to skip?') = None,
+):
+    """Removes the selected track from the queue"""
+    player = client.solarlink.get_player(event.guild_id)
+    
+    if player is None:
+        abort('There is no player at the guild.')
+        return
+    
+    if track is None:
+        index = 0
+    else:
+        for index, configured_track in enumerate(player.iter_all_track()):
+            if generate_track_autocomplete_form(configured_track) == track:
+                break
+        else:
+            index = -1
+    
+    configured_track = await player.remove(index)
+    if configured_track is None:
+        return 'Nothing was removed.'
+    
+    description_parts = ['Track removed: ']
+    add_track_short_description_to(description_parts, configured_track.track)
+    description = ''.join(description_parts)
+    
+    return create_added_music_embed(player, event.user, description)
+
+
 @skip.autocomplete('track')
+@remove.autocomplete('track')
 async def autocomplete_skip_track(client, event, value):
     player = client.solarlink.get_player(event.guild_id)
     if player is None:
