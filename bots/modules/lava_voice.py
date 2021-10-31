@@ -104,14 +104,8 @@ def add_song_selection_header(embed, user):
         'Song selection',
     )
 
-def create_added_music_embed(player, user, description):
-    embed = Embed(
-        None,
-        description,
-    )
-    
-    add_song_selection_header(embed, user)
-    
+
+def add_current_track_field(embed, player):
     track = player.get_current()
     if (track is not None):
         if player.is_paused():
@@ -125,6 +119,19 @@ def create_added_music_embed(player, user, description):
         )
     
     return embed
+
+
+def create_added_music_embed(player, user, description):
+    embed = Embed(
+        None,
+        description,
+    )
+    
+    add_current_track_field(embed, player)
+    add_song_selection_header(embed, user)
+    
+    return embed
+
 
 LAVA_VOICE_TRACK_SELECT_CUSTOM_ID = 'lava_voice.select'
 
@@ -329,7 +336,7 @@ async def play(client, event,
         # All track selected -> add all
         if (selected_track_index == -1) or (selected_track_index >= length):
             if player is None:
-                player = await client.solarlink.join_voice(channel)
+                player = await client.solarlink.join_voice(channel, cls=Player)
             
             for track in tracks:
                 await player.append(track, requester=user)
@@ -379,7 +386,7 @@ async def play(client, event,
             # 1 Track is selected, add only that one
             
             if player is None:
-                player = await client.solarlink.join_voice(channel)
+                player = await client.solarlink.join_voice(channel, cls=Player)
             
             track = tracks[selected_track_index]
             await player.append(track, requester=user)
@@ -402,7 +409,7 @@ async def play(client, event,
     
     if is_name_an_url:
         if player is None:
-            player = await client.solarlink.join_voice(channel)
+            player = await client.solarlink.join_voice(channel, cls=Player)
         
         track = tracks[0]
         await player.append(track, requester=user)
@@ -580,7 +587,7 @@ BEHAVIOR_CHOICES = [
 ]
 
 @VOICE_COMMANDS.interactions
-async def behaviour(client, event,
+async def behaviour_(client, event,
     behaviour : (BEHAVIOR_CHOICES, 'Choose a behaviour') = BEHAVIOUR_VALUE_GET,
     value : (bool, 'Set value') = True,
 ):
@@ -736,3 +743,62 @@ async def autocomplete_skip_track(client, event, value):
                 break
     
     return track_names
+
+
+@VOICE_COMMANDS.interactions
+async def queue_(client, event,
+    page: (int, 'Which page to show?') = 0,
+):
+    """Shows the track queue for the current guild."""
+    player = client.solarlink.get_player(event.guild_id)
+    if player is None:
+        embed = Embed(
+            None,
+            '**Once there were heart throbbing adventures, but now, one can find only dust and decay.**'
+        )
+    else:
+
+        queue = player.queue
+        length = len(queue)
+        limit_low = page*5
+        limit_high = limit_low+5
+        if limit_high > length:
+            limit_high = length
+        
+        if limit_low < limit_high:
+            index = limit_low
+            description_parts = []
+            
+            while True:
+                track = queue[index]
+                index += 1
+                description_parts.append('**')
+                description_parts.append(str(index))
+                description_parts.append('.** ')
+                
+                add_track_short_description_to(description_parts, track)
+                
+                if index == limit_high:
+                    break
+                
+                description_parts.append('\n')
+                continue
+            
+            description = ''.join(description_parts)
+        else:
+            description = None
+        
+        embed = Embed(None, description)
+        
+        add_current_track_field(embed, player)
+        
+    guild = event.guild
+    if guild is None:
+        author_icon_url = None
+        author_name = 'Queue'
+    else:
+        author_icon_url = guild.icon_url_as(size=32)
+        author_name = f'Queue for {guild.name}'
+    
+    embed.add_author(author_icon_url, author_name)
+    return embed
