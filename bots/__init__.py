@@ -111,7 +111,6 @@ if MARISA_MODE:
     if config.ALLOW_MARISA_SNEKBOX:
         MARISA_ALLOWED_MODULES.add('snekbox')
     
-    MARISA_ALLOWED_MODULES.add('voice')
     MARISA_ALLOWED_MODULES.add('extensions')
     MARISA_ALLOWED_MODULES.add('google')
     MARISA_ALLOWED_MODULES.add('log')
