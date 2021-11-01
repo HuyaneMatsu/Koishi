@@ -6,6 +6,4 @@ __pycache__/
 .idea
 
 # Some data files
-/images/*
 /chesuto_data/*.mp3
-
