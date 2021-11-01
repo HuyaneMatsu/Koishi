@@ -4364,7 +4364,7 @@ async def rate_limit_test_0091(client, message):
         for message in messages:
             await message_delete(client, message)
 
-PERMISSION_MASK_MESSAGING= Permission().update_by_keys(
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages = True,
     send_messages_in_threads = True,
 )

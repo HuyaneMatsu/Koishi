@@ -4,20 +4,48 @@ require(SOLARLINK_VOICE=True)
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case
 from functools import partial as partial_func
 from math import ceil, floor
+from random import choice
 
-from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji
+from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji, escape_markdown, Permission
 
 from hata.ext.slash import abort, InteractionResponse, Select, Option, wait_for_component_interaction
-from hata.ext.solarlink import SolarPlayer
+from hata.ext.solarlink import SolarPlayer, TRACK_END_REASONS
 
 from bot_utils.constants import GUILD__SUPPORT
 
 EMOJI_CURRENT_TRACK = BUILTIN_EMOJIS['satellite']
+EMOJI_LAST_TRACK = BUILTIN_EMOJIS['closed_umbrella']
 EMOJI_QUEUE_TIME = BUILTIN_EMOJIS['clock1']
-EMOJI_QUEUE_LENGTH = Emoji.precreate(704392145330634812)
+EMOJI_QUEUE_LENGTH = BUILTIN_EMOJIS['dango']
 EMOJI_BEHAVIOR = BUILTIN_EMOJIS['control_knobs']
 EMOJI_CHANNEL = BUILTIN_EMOJIS['mega']
 EMOJI_VOLUME = BUILTIN_EMOJIS['level_slider']
+
+TRACK_PER_PAGE = 10
+
+TRACK_EMOJIS = [
+    Emoji.precreate(704393708467912875),
+    Emoji.precreate(748504187620294656),
+    Emoji.precreate(748506469694963713),
+    Emoji.precreate(748507069690282054),
+    Emoji.precreate(812069466069663765),
+    Emoji.precreate(825074491817852979),
+    Emoji.precreate(846320146342477834),
+    Emoji.precreate(852856910116945930),
+    Emoji.precreate(852857235067371521),
+    Emoji.precreate(853152183222272011),
+    Emoji.precreate(853152183629774848),
+    Emoji.precreate(853507411150897162),
+    Emoji.precreate(853507411293765642),
+    Emoji.precreate(853507411548831764),
+    Emoji.precreate(853507411674661014),
+    Emoji.precreate(853507411687112734),
+    Emoji.precreate(853507412064600084),
+    Emoji.precreate(853507412577484811),
+    Emoji.precreate(853685522303680512),
+    Emoji.precreate(855417900764626994),
+    Emoji.precreate(858609857568964618),
+]
 
 class Player(SolarPlayer):
     __slots__ = ('text_channel_id', )
@@ -39,7 +67,7 @@ class Player(SolarPlayer):
     def queue_duration(self):
         duration = 0.0
         
-        for configured_track in self.iter_all_track():
+        for configured_track in self.queue:
             duration += configured_track.track.duration
         
         return duration
@@ -50,6 +78,7 @@ def duration_to_string(duration):
     seconds = duration % 60
     minutes = duration // 60
     hours = minutes // 60
+    minutes %= 60
     
     and_index = bool(hours) + bool(minutes) + bool(seconds)
     
@@ -82,7 +111,7 @@ def duration_to_string(duration):
     return string
 
 
-def get_behaviour_string(player):
+def get_behavior_string(player):
     if player.is_repeating_queue():
         if player.is_shuffling():
             string = 'Repeating over the queue.'
@@ -104,9 +133,12 @@ def get_behaviour_string(player):
 def add_track_title_to(add_to, track):
     title = track.title
     if len(title) > 50:
-        add_to.append(title[:47])
+        title = title[:47]
+        title = escape_markdown(title)
+        add_to.append(title)
         add_to.append('...')
     else:
+        title = escape_markdown(title)
         add_to.append(title)
 
 def add_track_duration_to(add_to, track):
@@ -114,20 +146,20 @@ def add_track_duration_to(add_to, track):
     add_to.append('(')
     add_to.append(str(duration//60))
     add_to.append(':')
-    add_to.append(str(duration%60))
+    add_to.append(format(duration%60, '0>2'))
     add_to.append(')')
 
 def add_track_short_description_to(add_to, track):
     # Add title
     url = track.url
     
-    add_to.append('**')
     if (url is not None):
         add_to.append('[')
     
-    add_track_title_to(add_to, track)
-    
     add_to.append('**')
+    add_track_title_to(add_to, track)
+    add_to.append('**')
+    
     if (url is not None):
         add_to.append('](')
         add_to.append(url)
@@ -139,13 +171,18 @@ def add_track_short_description_to(add_to, track):
 
 
 
-def create_track_short_description(track):
+def create_track_short_description(configured_track):
     add_to = []
-    add_track_short_description_to(add_to, track)
+    add_to.append(configured_track.emoji.as_emoji)
+    add_to.append(' ')
+    add_track_short_description_to(add_to, configured_track.track)
     return ''.join(add_to)
 
 
 def add_track_short_field_description_to(add_to, configured_track):
+    add_to.append(configured_track.emoji.as_emoji)
+    add_to.append(' ')
+    
     add_track_short_description_to(add_to, configured_track.track)
     
     add_to.append('\n**Queued by:** ')
@@ -161,10 +198,10 @@ def create_track_short_field_description(configured_track):
     add_track_short_field_description_to(add_to, configured_track)
     return ''.join(add_to)
 
-def add_song_selection_header(embed, user):
+def add_song_selection_header(embed, title, user):
     return embed.add_author(
         user.avatar_url,
-        'Song selection',
+        title,
     )
 
 
@@ -177,21 +214,21 @@ def add_current_track_field(embed, player):
             title = 'playing'
         
         embed.add_field(
-            f'{EMOJI_CURRENT_TRACK} currently {title}',
+            f'{EMOJI_CURRENT_TRACK} Currently {title}',
             create_track_short_field_description(track),
         )
     
     return embed
 
 
-def create_added_music_embed(player, user, description):
+def create_added_music_embed(player, user, title, description):
     embed = Embed(
         None,
         description,
     )
     
     add_current_track_field(embed, player)
-    add_song_selection_header(embed, user)
+    add_song_selection_header(embed, title, user)
     
     return embed
 
@@ -212,7 +249,13 @@ def create_track_select(tracks, length):
         
         option_label_parts.append(str(index))
         option_label_parts.append('. ')
-        add_track_title_to(option_label_parts, track)
+        title = track.title
+        if len(title) > 50:
+            title = title[:47]
+            option_label_parts.append(title)
+            option_label_parts.append('...')
+        else:
+            option_label_parts.append(title)
         option_label_parts.append(' ')
         add_track_duration_to(option_label_parts, track)
         
@@ -263,12 +306,7 @@ async def pause(client, event):
         title,
     )
     
-    track = player.get_current()
-    if (track is not None):
-        embed.add_field(
-            f'{EMOJI_CURRENT_TRACK} Currently paused',
-            create_track_short_field_description(track),
-        )
+    add_current_track_field(embed, player)
     
     return embed
 
@@ -292,12 +330,7 @@ async def resume(client, event):
         title,
     )
     
-    track = player.get_current()
-    if (track is not None):
-        embed.add_field(
-            f'{EMOJI_CURRENT_TRACK} Currently playing',
-            create_track_short_field_description(track),
-        )
+    add_current_track_field(embed, player)
     
     return embed
 
@@ -327,7 +360,7 @@ async def leave(client, event):
             create_track_short_field_description(track),
         )
     
-    queue_length = player.queue_length
+    queue_length = len(player.queue)
     if queue_length:
         embed.add_field(
             'Queue cleared.',
@@ -382,7 +415,7 @@ async def play(client, event,
             '*no result*',
         )
         
-        add_song_selection_header(embed, user)
+        add_song_selection_header(embed, 'Track selection', user)
         
         yield embed
         return
@@ -397,31 +430,33 @@ async def play(client, event,
     # We are in a playlist
     if (playlist_name is not None):
         # All track selected -> add all
-        if (selected_track_index == -1) or (selected_track_index >= length):
+        title_parts = []
+        
+        if (selected_track_index <= 0) or (selected_track_index >= length):
             if player is None:
                 player = await client.solarlink.join_voice(channel, cls=Player)
             
             player.set_text_channel(event)
             
-            for track in tracks:
-                await player.append(track, requester=user)
+            emojis = [choice(TRACK_EMOJIS) for index in range(length)]
             
-            description_parts.append('Playlist ')
+            for (track, emoji) in zip(tracks, emojis):
+                await player.append(track, requester=user, emoji=emoji)
+            
+            title_parts.append(str(length))
+            title_parts.append(' track from playlist ')
             
             if len(playlist_name) > 60:
-                description_parts.append(playlist_name[:57])
-                description_parts.append('...')
+                title_parts.append(playlist_name[:57])
+                title_parts.append('...')
             else:
-                description_parts.append(playlist_name)
-            description_parts.append('\' ')
-            
-            description_parts.append(str(length))
-            description_parts.append(' tracks are added to the queue.\n\n')
+                title_parts.append(playlist_name)
+            title_parts.append(' added to the queue')
             
             if length:
-                if length > 5:
-                    length_truncated = -(5-length)
-                    length = 5
+                if length > TRACK_PER_PAGE:
+                    length_truncated = -(TRACK_PER_PAGE-length)
+                    length = TRACK_PER_PAGE
                 else:
                     length_truncated = 0
                 
@@ -429,8 +464,10 @@ async def play(client, event,
                 
                 while True:
                     track = tracks[index]
+                    emoji = emojis[index]
                     index += 1
-                    description_parts.append('**')
+                    description_parts.append(emoji.as_emoji)
+                    description_parts.append(' **')
                     description_parts.append(str(index))
                     description_parts.append('.** ')
                     
@@ -455,23 +492,26 @@ async def play(client, event,
             
             player.set_text_channel(event)
             
+            emoji = choice(TRACK_EMOJIS)
             track = tracks[selected_track_index]
-            await player.append(track, requester=user)
+            await player.append(track, requester=user, emoji=emoji)
             
-            description_parts.append('The selected track from ')
+            title_parts.append('Track from ')
             
             if len(playlist_name) > 60:
-                description_parts.append(playlist_name[:57])
-                description_parts.append('...')
+                title_parts.append(playlist_name[:57])
+                title_parts.append('...')
             else:
-                description_parts.append(playlist_name)
+                title_parts.append(playlist_name)
+            title_parts.append(' ')
+            
+            title_parts.append(' added to the queue.')
+            
+            description_parts.append(emoji.as_emoji)
             description_parts.append(' ')
-            
-            description_parts.append(' is added to the queue.\n\n')
-            
             add_track_short_description_to(description_parts, track)
         
-        yield create_added_music_embed(player, user, ''.join(description_parts))
+        yield create_added_music_embed(player, user, ''.join(title_parts), ''.join(description_parts))
         return
     
     if is_name_an_url:
@@ -481,23 +521,29 @@ async def play(client, event,
         player.set_text_channel(event)
         
         track = tracks[0]
-        await player.append(track, requester=user)
+        emoji = choice(TRACK_EMOJIS)
+        await player.append(track, requester=user, emoji=emoji)
         
-        description_parts.append('Track added to queue.\n\n')
+        description_parts.append(emoji.as_emoji)
+        description_parts.append(' ')
         add_track_short_description_to(description_parts, track)
         
-        yield create_added_music_embed(player, user, ''.join(description_parts))
+        yield create_added_music_embed(player, user, 'Track added to queue', ''.join(description_parts))
         return
     
-    if length > 5:
-        length = 5
+    if length > TRACK_PER_PAGE:
+        length = TRACK_PER_PAGE
+    
+    emojis = [choice(TRACK_EMOJIS) for index in range(length)]
     
     index = 0
     while True:
         track = tracks[index]
+        emoji = emojis[index]
         index += 1
         
-        description_parts.append('**')
+        description_parts.append(emoji.as_emoji)
+        description_parts.append(' **')
         description_parts.append(str(index))
         description_parts.append('.** ')
         add_track_short_description_to(description_parts, track)
@@ -516,9 +562,9 @@ async def play(client, event,
         description,
     ).add_author(
         user.avatar_url,
-        'Song selection. Please select the song to play.',
+        'Song selection | Please select the song(s) to play',
     ).add_footer(
-        'This timeouts in 30s.',
+        'This timeouts in 60 seconds.',
     )
     
     select = create_track_select(tracks, length)
@@ -528,7 +574,7 @@ async def play(client, event,
     try:
         component_interaction = await wait_for_component_interaction(
             message,
-            timeout = 30.0,
+            timeout = 60.0,
             check = partial_func(check_is_user_same, user)
         )
     
@@ -544,7 +590,7 @@ async def play(client, event,
             description,
         ).add_author(
             user.avatar_url,
-            'Song selection. Nothing was chosen.',
+            'Song selection | Nothing was chosen',
         ).add_footer(
             'Timeout occurred.',
         )
@@ -552,35 +598,47 @@ async def play(client, event,
     else:
         options = component_interaction.interaction.options
         
-        selected_tracks = []
+        selected_tracks_and_emojis = []
         for option in options:
-            selected_tracks.append(tracks[option])
+            try:
+                option = int(option)
+            except ValueError:
+                pass
+            else:
+                selected_tracks_and_emojis.append((
+                    tracks[option],
+                    emojis[option],
+                ))
         
         if player is None:
-            player = await client.solarlink.join_voice(channel)
+            player = await client.solarlink.join_voice(channel, cls=Player)
         
         player.set_text_channel(event)
         
-        for track in tracks:
-            await player.append(track, requester=user)
-            
+        for track, emoji in selected_tracks_and_emojis:
+            await player.append(track, requester=user, emoji=emoji)
+        
         description_parts = []
         
-        length = len(track)
+        length = len(selected_tracks_and_emojis)
         
         if length == 1:
-            description_parts.append('Track added to queue.\n\n')
+            title = 'Track added to queue.'
             add_track_short_description_to(description_parts, track)
         else:
-            description_parts.append(str(length))
-            description_parts.append('track added to queue.\n\n')
+            title = f'{length} track added to queue'
+            
+            index = 0
             
             while True:
-                track = tracks[index]
+                track, emoji = selected_tracks_and_emojis[index]
                 index += 1
+                
                 description_parts.append('**')
                 description_parts.append(str(index))
                 description_parts.append('.** ')
+                description_parts.append(emoji.as_emoji)
+                description_parts.append(' ')
                 
                 add_track_short_description_to(description_parts, track)
                 
@@ -589,11 +647,11 @@ async def play(client, event,
                 
                 description_parts.append('\n')
                 continue
-            
-            description = ''.join(description_parts)
-            description_parts = None # clear reference
-            
-            embed = create_added_music_embed(player, user, description)
+        
+        description = ''.join(description_parts)
+        description_parts = None # clear reference
+        
+        embed = create_added_music_embed(player, user, title, description)
     
     yield InteractionResponse(
         embed = embed,
@@ -658,35 +716,35 @@ BEHAVIOR_CHOICES = [
 ]
 
 @VOICE_COMMANDS.interactions
-async def behaviour_(client, event,
-    behaviour : (BEHAVIOR_CHOICES, 'Choose a behavior') = BEHAVIOR_VALUE_GET,
+async def behavior_(client, event,
+    behavior : (BEHAVIOR_CHOICES, 'Choose a behavior') = BEHAVIOR_VALUE_GET,
     value : (bool, 'Set value') = True,
 ):
-    """Get or set the player's behaviour."""
+    """Get or set the player's behavior."""
     player = client.solarlink.get_player(event.guild_id)
 
     if player is None:
         abort('There is no player at the guild.')
         return
     
-    if behaviour == BEHAVIOR_VALUE_GET:
-        content = get_behaviour_string(player)
+    if behavior == BEHAVIOR_VALUE_GET:
+        content = get_behavior_string(player)
     
-    elif behaviour == BEHAVIOR_VALUE_REPEAT_CURRENT:
+    elif behavior == BEHAVIOR_VALUE_REPEAT_CURRENT:
         player.set_repeat_current(value)
         if value:
             content = 'Started to repeat the current track.'
         else:
             content = 'Stopped to repeat the current track.'
     
-    elif behaviour == BEHAVIOR_VALUE_REPEAT_QUEUE:
+    elif behavior == BEHAVIOR_VALUE_REPEAT_QUEUE:
         player.set_repeat_queue(value)
         if value:
             content = 'Started to repeat the whole queue.'
         else:
             content = 'Stopped to repeat the whole queue.'
         
-    elif behaviour == BEHAVIOR_VALUE_SHUFFLE:
+    elif behavior == BEHAVIOR_VALUE_SHUFFLE:
         player.set_shuffle(value)
         if value:
             content = 'Started shuffling the queue.'
@@ -700,8 +758,7 @@ async def behaviour_(client, event,
 
 
 def generate_track_autocomplete_form(configured_track):
-    track = configured_track.track
-    result = f'{track.title} by {track.author}'
+    result = configured_track.track.title
     if len(result) > 69:
         result = result[:66] + '...'
     
@@ -728,15 +785,16 @@ async def skip(client, event,
         else:
             index = -1
     
-    configured_track = await player.spip(index)
+    configured_track = await player.skip(index)
     if configured_track is None:
         return 'Nothing was skipped.'
     
-    description_parts = ['Track skipped: ']
-    add_track_short_description_to(description_parts, configured_track.track)
-    description = ''.join(description_parts)
-    
-    return create_added_music_embed(player, event.user, description)
+    return create_added_music_embed(
+        player,
+        event.user,
+        'Track skipped',
+        create_track_short_description(configured_track),
+    )
 
 
 @VOICE_COMMANDS.interactions
@@ -763,11 +821,12 @@ async def remove(client, event,
     if configured_track is None:
         return 'Nothing was removed.'
     
-    description_parts = ['Track removed: ']
-    add_track_short_description_to(description_parts, configured_track.track)
-    description = ''.join(description_parts)
-    
-    return create_added_music_embed(player, event.user, description)
+    return create_added_music_embed(
+        player,
+        event.user,
+        'Track removed',
+        create_track_short_description(configured_track),
+    )
 
 
 @skip.autocomplete('track')
@@ -804,7 +863,7 @@ async def autocomplete_skip_track(client, event, value):
 
 @VOICE_COMMANDS.interactions
 async def queue_(client, event,
-    page: (int, 'Which page to show?') = 0,
+    page: (int, 'Which page to show?') = 1,
 ):
     """Shows the track queue for the current guild."""
     player = client.solarlink.get_player(event.guild_id)
@@ -817,8 +876,8 @@ async def queue_(client, event,
 
         queue = player.queue
         length = len(queue)
-        limit_low = page*5
-        limit_high = limit_low+5
+        limit_low = (page-1)*TRACK_PER_PAGE
+        limit_high = limit_low+TRACK_PER_PAGE
         if limit_high > length:
             limit_high = length
         
@@ -832,7 +891,8 @@ async def queue_(client, event,
                 description_parts.append('**')
                 description_parts.append(str(index))
                 description_parts.append('.** ')
-                
+                description_parts.append(track.emoji.as_emoji)
+                description_parts.append(' ')
                 add_track_short_description_to(description_parts, track)
                 
                 if index == limit_high:
@@ -847,20 +907,28 @@ async def queue_(client, event,
         
         embed = Embed(None, description)
         
-        page_count = ceil(length/5.0)
+        page_count = ceil(length/TRACK_PER_PAGE)
         embed.add_footer(f'Page {page} / {page_count}')
         
         add_current_track_field(embed, player)
         
         embed.add_field(
-            f'{EMOJI_QUEUE_LENGTH} queue length',
-            str(length),
+            f'{EMOJI_QUEUE_LENGTH} Queue length',
+            (
+                f'```\n'
+                f'{length}\n'
+                f'```'
+            ),
             inline = True,
         )
         
         embed.add_field(
-            f'{EMOJI_QUEUE_TIME} queue duration',
-            duration_to_string(player.queue_duration),
+            f'{EMOJI_QUEUE_TIME} Queue duration',
+            (
+                f'```\n'
+                f'{duration_to_string(player.queue_duration)}\n'
+                f'```'
+            ),
             inline = True,
         )
         
@@ -872,24 +940,31 @@ async def queue_(client, event,
             voice_channel_name = voice_channel.name
         
         embed.add_field(
-            f'{EMOJI_CHANNEL} playing in',
-            voice_channel_name,
-        )
-        
-        embed.add_field(
-            f'{EMOJI_CHANNEL} playing in',
-            voice_channel_name,
+            f'{EMOJI_CHANNEL} Playing in',
+            (
+                f'```\n'
+                f'{voice_channel_name}'
+                f'```'
+            )
         )
     
         embed.add_field(
-            f'{EMOJI_BEHAVIOR} behavior',
-            get_behaviour_string(player),
+            f'{EMOJI_BEHAVIOR} Behavior',
+            (
+                f'```\n'
+                f'{get_behavior_string(player)}\n'
+                f'```'
+            ),
             inline = True
         )
         
         embed.add_field(
-            f'{EMOJI_VOLUME} volume',
-            f'{player.get_volume()*100.:.0f}%',
+            f'{EMOJI_VOLUME} Volume',
+            (
+                f'```\n'
+                f'{player.get_volume()*100.:.0f}%\n'
+                f'```'
+            ),
             inline = True,
         )
     
@@ -904,3 +979,42 @@ async def queue_(client, event,
     
     embed.add_author(author_icon_url, author_name)
     return embed
+
+
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
+@SLASH_CLIENT.events
+async def track_end(client, event):
+    if event.reason != TRACK_END_REASONS.finished:
+        return
+    
+    player = event.player
+    new_track = player.get_current()
+    old_track = event.track
+    if new_track is old_track:
+        return
+    
+    text_channel = player.text_channel
+    if (text_channel is None) or (not text_channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING):
+        return
+    
+    embed = Embed()
+    
+    embed.add_field(
+        f'{EMOJI_LAST_TRACK} Finished playing',
+        create_track_short_field_description(old_track),
+    )
+    
+    if (new_track is not None):
+        embed.add_field(
+            f'{EMOJI_CURRENT_TRACK} Started playing',
+            create_track_short_field_description(new_track),
+        )
+    
+    await client.message_create(
+        text_channel,
+        embed = embed,
+    )
