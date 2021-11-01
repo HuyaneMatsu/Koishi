@@ -401,6 +401,8 @@ async def play(client, event,
             if player is None:
                 player = await client.solarlink.join_voice(channel, cls=Player)
             
+            player.set_text_channel(event)
+            
             for track in tracks:
                 await player.append(track, requester=user)
             
@@ -451,6 +453,8 @@ async def play(client, event,
             if player is None:
                 player = await client.solarlink.join_voice(channel, cls=Player)
             
+            player.set_text_channel(event)
+            
             track = tracks[selected_track_index]
             await player.append(track, requester=user)
             
@@ -473,6 +477,8 @@ async def play(client, event,
     if is_name_an_url:
         if player is None:
             player = await client.solarlink.join_voice(channel, cls=Player)
+        
+        player.set_text_channel(event)
         
         track = tracks[0]
         await player.append(track, requester=user)
@@ -552,6 +558,8 @@ async def play(client, event,
         
         if player is None:
             player = await client.solarlink.join_voice(channel)
+        
+        player.set_text_channel(event)
         
         for track in tracks:
             await player.append(track, requester=user)
