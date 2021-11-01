@@ -1,10 +1,11 @@
 from hata.ext.extension_loader import require
-require(LAVALINK_VOICE=True)
+require(SOLARLINK_VOICE=True)
 
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case
 from functools import partial as partial_func
+from math import ceil, floor
 
-from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS
+from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji
 
 from hata.ext.slash import abort, InteractionResponse, Select, Option, wait_for_component_interaction
 from hata.ext.solarlink import SolarPlayer
@@ -12,6 +13,11 @@ from hata.ext.solarlink import SolarPlayer
 from bot_utils.constants import GUILD__SUPPORT
 
 EMOJI_CURRENT_TRACK = BUILTIN_EMOJIS['satellite']
+EMOJI_QUEUE_TIME = BUILTIN_EMOJIS['clock1']
+EMOJI_QUEUE_LENGTH = Emoji.precreate(704392145330634812)
+EMOJI_BEHAVIOR = BUILTIN_EMOJIS['control_knobs']
+EMOJI_CHANNEL = BUILTIN_EMOJIS['mega']
+EMOJI_VOLUME = BUILTIN_EMOJIS['level_slider']
 
 class Player(SolarPlayer):
     __slots__ = ('text_channel_id', )
@@ -37,6 +43,63 @@ class Player(SolarPlayer):
             duration += configured_track.track.duration
         
         return duration
+
+
+def duration_to_string(duration):
+    duration = int(duration)
+    seconds = duration % 60
+    minutes = duration // 60
+    hours = minutes // 60
+    
+    and_index = bool(hours) + bool(minutes) + bool(seconds)
+    
+    if and_index == 0:
+        string = '0 seconds'
+    
+    else:
+        index = 0
+        string_parts = []
+        for value, unit in zip(
+            (hours, minutes, seconds),
+            ('hours', 'minutes', 'seconds'),
+        ):
+            if not value:
+                continue
+                
+            index += 1
+            if index > 1:
+                if index == and_index:
+                    string_parts.append(' and ')
+                else:
+                    string_parts.append(', ')
+            
+            string_parts.append(str(value))
+            string_parts.append(' ')
+            string_parts.append(unit)
+        
+        string = ''.join(string_parts)
+    
+    return string
+
+
+def get_behaviour_string(player):
+    if player.is_repeating_queue():
+        if player.is_shuffling():
+            string = 'Repeating over the queue.'
+        else:
+            string = 'Repeating and shuffling the queue.'
+    elif player.set_repeat_current():
+        if player.is_shuffling():
+            string = 'Repeating over the current track and shuffling????'
+        else:
+            string = 'Repeating over the current track.'
+    else:
+        if player.is_shuffling():
+            string = 'No repeat, but shuffle queue.'
+        else:
+            string = 'No repeat, no shuffle.'
+    
+    return string
 
 def add_track_title_to(add_to, track):
     title = track.title
@@ -546,7 +609,7 @@ async def volume_(client, event,
     
     if volume is None:
         volume = player.get_volume()
-        return f'{volume*100.:.0f}%'
+        return f'{EMOJI_VOLUME.as_emoji} Volume: {volume*100.:.0f}%'
     
     if volume <= 0:
         volume = 0.0
@@ -556,7 +619,7 @@ async def volume_(client, event,
         volume /= 100.0
     
     await player.set_volume(volume)
-    return f'Volume set to {volume*100.:.0f}%.'
+    return f'{EMOJI_VOLUME.as_emoji} Volume set to: {volume*100.:.0f}%.'
 
 
 @VOICE_COMMANDS.interactions
@@ -572,23 +635,23 @@ async def stop(client, event):
     return 'Stopped playing'
 
 BEHAVIOR_NAME_REPEAT_CURRENT = 'loop current'
-BEHAVIOUR_NAME_REPEAT_QUEUE = 'loop queue'
-BEHAVIOUR_NAME_SHUFFLE = 'shuffle'
+BEHAVIOR_NAME_REPEAT_QUEUE = 'loop queue'
+BEHAVIOR_NAME_SHUFFLE = 'shuffle'
 
-BEHAVIOUR_VALUE_GET = 0
+BEHAVIOR_VALUE_GET = 0
 BEHAVIOR_VALUE_REPEAT_CURRENT = 1
-BEHAVIOUR_VALUE_REPEAT_QUEUE = 2
-BEHAVIOUR_VALUE_SHUFFLE = 3
+BEHAVIOR_VALUE_REPEAT_QUEUE = 2
+BEHAVIOR_VALUE_SHUFFLE = 3
 
 BEHAVIOR_CHOICES = [
     (BEHAVIOR_NAME_REPEAT_CURRENT, BEHAVIOR_VALUE_REPEAT_CURRENT),
-    (BEHAVIOUR_NAME_REPEAT_QUEUE, BEHAVIOUR_VALUE_REPEAT_QUEUE),
-    (BEHAVIOUR_NAME_SHUFFLE, BEHAVIOUR_VALUE_SHUFFLE),
+    (BEHAVIOR_NAME_REPEAT_QUEUE, BEHAVIOR_VALUE_REPEAT_QUEUE),
+    (BEHAVIOR_NAME_SHUFFLE, BEHAVIOR_VALUE_SHUFFLE),
 ]
 
 @VOICE_COMMANDS.interactions
 async def behaviour_(client, event,
-    behaviour : (BEHAVIOR_CHOICES, 'Choose a behaviour') = BEHAVIOUR_VALUE_GET,
+    behaviour : (BEHAVIOR_CHOICES, 'Choose a behavior') = BEHAVIOR_VALUE_GET,
     value : (bool, 'Set value') = True,
 ):
     """Get or set the player's behaviour."""
@@ -598,22 +661,8 @@ async def behaviour_(client, event,
         abort('There is no player at the guild.')
         return
     
-    if behaviour == BEHAVIOUR_VALUE_GET:
-        if player.is_repeating_queue():
-            if player.is_shuffling():
-                content = 'Repeating over the queue.'
-            else:
-                content = 'Repeating and shuffling the queue.'
-        elif player.set_repeat_current():
-            if player.is_shuffling():
-                content = 'Repeating over the current track and shuffling????'
-            else:
-                content = 'Repeating over the current track.'
-        else:
-            if player.is_shuffling():
-                content = 'No repeat, but shuffle queue.'
-            else:
-                content = 'No repeat, no shuffle.'
+    if behaviour == BEHAVIOR_VALUE_GET:
+        content = get_behaviour_string(player)
     
     elif behaviour == BEHAVIOR_VALUE_REPEAT_CURRENT:
         player.set_repeat_current(value)
@@ -622,14 +671,14 @@ async def behaviour_(client, event,
         else:
             content = 'Stopped to repeat the current track.'
     
-    elif behaviour == BEHAVIOUR_VALUE_REPEAT_QUEUE:
+    elif behaviour == BEHAVIOR_VALUE_REPEAT_QUEUE:
         player.set_repeat_queue(value)
         if value:
             content = 'Started to repeat the whole queue.'
         else:
             content = 'Stopped to repeat the whole queue.'
         
-    elif behaviour == BEHAVIOUR_VALUE_SHUFFLE:
+    elif behaviour == BEHAVIOR_VALUE_SHUFFLE:
         player.set_shuffle(value)
         if value:
             content = 'Started shuffling the queue.'
@@ -790,14 +839,59 @@ async def queue_(client, event,
         
         embed = Embed(None, description)
         
+        page_count = ceil(length/5.0)
+        embed.add_footer(f'Page {page} / {page_count}')
+        
         add_current_track_field(embed, player)
         
+        embed.add_field(
+            f'{EMOJI_QUEUE_LENGTH} queue length',
+            str(length),
+            inline = True,
+        )
+        
+        embed.add_field(
+            f'{EMOJI_QUEUE_TIME} queue duration',
+            duration_to_string(player.queue_duration),
+            inline = True,
+        )
+        
+        voice_channel = player.channel
+        if voice_channel is None:
+            # not in cache
+            voice_channel_name = '#unknown'
+        else:
+            voice_channel_name = voice_channel.name
+        
+        embed.add_field(
+            f'{EMOJI_CHANNEL} playing in',
+            voice_channel_name,
+        )
+        
+        embed.add_field(
+            f'{EMOJI_CHANNEL} playing in',
+            voice_channel_name,
+        )
+    
+        embed.add_field(
+            f'{EMOJI_BEHAVIOR} behavior',
+            get_behaviour_string(player),
+            inline = True
+        )
+        
+        embed.add_field(
+            f'{EMOJI_VOLUME} volume',
+            f'{player.get_volume()*100.:.0f}%',
+            inline = True,
+        )
+    
+    
     guild = event.guild
     if guild is None:
         author_icon_url = None
         author_name = 'Queue'
     else:
-        author_icon_url = guild.icon_url_as(size=32)
+        author_icon_url = guild.icon_url_as(size=64)
         author_name = f'Queue for {guild.name}'
     
     embed.add_author(author_icon_url, author_name)
