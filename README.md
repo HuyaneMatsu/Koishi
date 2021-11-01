@@ -10,7 +10,7 @@
 </h1>
 
 <h5 align="center">
-    The bot who will steal your fishing rods and eat your shrimp fry.
+    The bot who steals your fishing rods and eats your shrimp fry.
 </h5>
 
 <p align="center">
