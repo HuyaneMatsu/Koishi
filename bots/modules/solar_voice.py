@@ -22,9 +22,9 @@ EMOJI_VOLUME = BUILTIN_EMOJIS['level_slider']
 class Player(SolarPlayer):
     __slots__ = ('text_channel_id', )
     def __new__(cls, node, guild_id, channel_id):
-        self = SolarPlayer.__new__(cls, node, guild_id, channel_id)
+        self, waiter = SolarPlayer.__new__(cls, node, guild_id, channel_id)
         self.text_channel_id = 0
-        return self
+        return self, waiter
     
     def set_text_channel(self, event):
         self.text_channel_id = event.channel_id
@@ -88,7 +88,7 @@ def get_behaviour_string(player):
             string = 'Repeating over the queue.'
         else:
             string = 'Repeating and shuffling the queue.'
-    elif player.set_repeat_current():
+    elif player.is_repeating_current():
         if player.is_shuffling():
             string = 'Repeating over the current track and shuffling????'
         else:
@@ -151,7 +151,7 @@ def add_track_short_field_description_to(add_to, configured_track):
     add_to.append('\n**Queued by:** ')
     
     # Add who queued it
-    add_to.append(configured_track.requested.full_name)
+    add_to.append(configured_track.requester.full_name)
     
     return configured_track
 

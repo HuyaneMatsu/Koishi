@@ -253,7 +253,7 @@ KOISHI_JOKES = (
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def about(client, event):
-    """My loli secret. Simpers only!"""
+    """My secrets and stats. Simpers only!"""
     embed = Embed(
         None,
         get_koishi_header(),

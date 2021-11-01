@@ -216,7 +216,7 @@ for action_name, action_verb, action_description in (
     ('wave', 'waves at', 'Flap flap'),
     ('highfive', 'highfives', 'Lets go boiz!'),
     ('handhold', 'holds hands of', 'Lewd!!'),
-    ('nom', 'noms', 'Feed your loli, or else'),
+    ('nom', 'noms', 'Feed your nekogirl, or else'),
     ('bite', 'bites', 'Vampy.'),
     ('glomp', 'glomps', 'You can rn, but you cant hide!'),
     ('kill', 'murders', 'Finally, some action.'),
