@@ -6,7 +6,7 @@ from functools import partial as partial_func
 from math import ceil, floor
 from random import choice
 
-from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji, escape_markdown, Permission
+from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji, escape_markdown, Permission, Color
 
 from hata.ext.slash import abort, InteractionResponse, Select, Option, wait_for_component_interaction
 from hata.ext.solarlink import SolarPlayer, TRACK_END_REASONS
@@ -47,6 +47,8 @@ TRACK_EMOJIS = [
     Emoji.precreate(858609857568964618),
 ]
 
+EMBED_COLOR = Color(0xFF9612)
+
 class Player(SolarPlayer):
     __slots__ = ('text_channel_id', )
     def __new__(cls, node, guild_id, channel_id):
@@ -75,10 +77,8 @@ class Player(SolarPlayer):
 
 def duration_to_string(duration):
     duration = int(duration)
-    seconds = duration % 60
-    minutes = duration // 60
-    hours = minutes // 60
-    minutes %= 60
+    minutes, seconds = divmod(duration, 60)
+    hours, minutes = divmod(minutes, 60)
     
     and_index = bool(hours) + bool(minutes) + bool(seconds)
     
@@ -114,9 +114,9 @@ def duration_to_string(duration):
 def get_behavior_string(player):
     if player.is_repeating_queue():
         if player.is_shuffling():
-            string = 'Repeating over the queue.'
-        else:
             string = 'Repeating and shuffling the queue.'
+        else:
+            string = 'Repeating over the queue.'
     elif player.is_repeating_current():
         if player.is_shuffling():
             string = 'Repeating over the current track and shuffling????'
@@ -129,6 +129,25 @@ def get_behavior_string(player):
             string = 'No repeat, no shuffle.'
     
     return string
+
+def get_behavior_representation(player):
+    if player.is_repeating_queue():
+        if player.is_shuffling():
+            representation = 'repeat queue | shuffle'
+        else:
+            representation = 'repeat queue | no shuffle'
+    elif player.is_repeating_current():
+        if player.is_shuffling():
+            representation = 'repeat current | shuffle'
+        else:
+            representation = 'repeat current | no shuffle'
+    else:
+        if player.is_shuffling():
+            representation = 'no repeat | shuffle'
+        else:
+            representation = 'no repeat | no shuffle'
+    
+    return representation
 
 def add_track_title_to(add_to, track):
     title = track.title
@@ -225,6 +244,7 @@ def create_added_music_embed(player, user, title, description):
     embed = Embed(
         None,
         description,
+        color = EMBED_COLOR,
     )
     
     add_current_track_field(embed, player)
@@ -304,6 +324,7 @@ async def pause(client, event):
     
     embed = Embed(
         title,
+        color = EMBED_COLOR,
     )
     
     add_current_track_field(embed, player)
@@ -328,6 +349,7 @@ async def resume(client, event):
     
     embed = Embed(
         title,
+        color = EMBED_COLOR,
     )
     
     add_current_track_field(embed, player)
@@ -351,6 +373,7 @@ async def leave(client, event):
     
     embed = Embed(
         title,
+        color = EMBED_COLOR,
     )
     
     track = player.get_current()
@@ -413,6 +436,7 @@ async def play(client, event,
         embed = Embed(
             None,
             '*no result*',
+            color = EMBED_COLOR,
         )
         
         add_song_selection_header(embed, 'Track selection', user)
@@ -560,6 +584,7 @@ async def play(client, event,
     embed = Embed(
         None,
         description,
+        color = EMBED_COLOR,
     ).add_author(
         user.avatar_url,
         'Song selection | Please select the song(s) to play',
@@ -588,6 +613,7 @@ async def play(client, event,
         embed = Embed(
             None,
             description,
+            color = EMBED_COLOR,
         ).add_author(
             user.avatar_url,
             'Song selection | Nothing was chosen',
@@ -870,7 +896,8 @@ async def queue_(client, event,
     if player is None:
         embed = Embed(
             None,
-            '**Once there were heart throbbing adventures, but now, one can find only dust and decay.**'
+            '**Once there were heart throbbing adventures, but now, one can find only dust and decay.**',
+            color = EMBED_COLOR,
         )
     else:
 
@@ -905,7 +932,7 @@ async def queue_(client, event,
         else:
             description = None
         
-        embed = Embed(None, description)
+        embed = Embed(None, description, color=EMBED_COLOR)
         
         page_count = ceil(length/TRACK_PER_PAGE)
         embed.add_footer(f'Page {page} / {page_count}')
@@ -952,7 +979,7 @@ async def queue_(client, event,
             f'{EMOJI_BEHAVIOR} Behavior',
             (
                 f'```\n'
-                f'{get_behavior_string(player)}\n'
+                f'{get_behavior_representation(player)}\n'
                 f'```'
             ),
             inline = True
@@ -1001,7 +1028,7 @@ async def track_end(client, event):
     if (text_channel is None) or (not text_channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING):
         return
     
-    embed = Embed()
+    embed = Embed(color=EMBED_COLOR)
     
     embed.add_field(
         f'{EMOJI_LAST_TRACK} Finished playing',
