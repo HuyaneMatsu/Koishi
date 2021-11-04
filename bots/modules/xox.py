@@ -146,10 +146,24 @@ Y_PATTERN = (
 
 Y_PATTERN_CHOOSE_FROM = (1, 3, 5, 7)
 
+MIDDLE = 4
+CORNERS = (0, 2, 6, 8)
+CORNERS_TO_EDGES = {
+    0: (1, 3),
+    2: (1, 5),
+    6: (3, 7),
+    8: (5, 7),
+}
+
 def click_p2(array, identifier_p1, identifier_p2):
     should_click_at = -1
     
     while True:
+        # Check whether we or the enemy can do 3 next to each other
+        # ? ? ?
+        # ? ? ?
+        # X X _
+        
         for indexes in LINES:
             
             count_enemy = 0
@@ -182,12 +196,89 @@ def click_p2(array, identifier_p1, identifier_p2):
         if should_click_at != -1:
             break
         
-        # Check whether the enemy or we are trying to setup a trap
+        # Check whether it is the first move for us after the enemy's
+        #
+        # There are 3 cases.
+        #
+        # 1.:
+        # If the enemy selected middle
         # _ _ _
+        # _ O _
         # _ _ _
+        #
+        # We select a corner one.
+        # X _ X
+        # _ O _
+        # X _ X
+        #
+        # 2.:
+        # If the enemy selected a corner
+        # O _ O
+        # _ _ _
+        # O _ O
+        #
+        # We select an adjacent edge to it
+        # O X _
+        # X _ _
+        # _ _ _
+        #
+        # 3.:
+        # If the enemy selected and edge.
+        # _ O _
+        # O _ O
+        # _ O _
+        #
+        # We select the middle
+        #
+        # _ O _
         # O X O
-        # If the middle is empty and the sides look like that, it is possible.
+        # _ O _
+        
+        count_enemy = 0
+        count_own = 0
+        enemy_index = -1
+        
+        for index in range(9):
+            element = array[index]
+            
+            if element == ARRAY_IDENTIFIER_EMPTY:
+                continue
+            
+            if element == identifier_p1:
+                count_enemy += 1
+                enemy_index = index
+                continue
+            
+            count_own += 1
+            continue
+        
+        if (count_enemy == 1) and (count_own == 0):
+            if enemy_index == MIDDLE:
+                should_click_at = choice(CORNERS)
+                break
+            
+            try:
+                edges = CORNERS_TO_EDGES[enemy_index]
+            except KeyError:
+                pass
+            else:
+                should_click_at = choice(edges)
+                break
+            
+            should_click_at = MIDDLE
+            break
+        
+        # Check whether the enemy or we are trying to setup a trap
         if array[4] == ARRAY_IDENTIFIER_EMPTY:
+            # _ _ _
+            # _ _ _
+            # O X O
+            #
+            # If the middle is empty and the sides look like that, it is possible.
+            #
+            # _ ? _
+            # ? O ?
+            # O X O
             for index_1, index_2, index_empty_1, index_empty_2 in CROSSES:
                 
                 if array[index_empty_1] != ARRAY_IDENTIFIER_EMPTY:
@@ -209,7 +300,14 @@ def click_p2(array, identifier_p1, identifier_p2):
             if should_click_at != -1:
                 break
             
-            
+            # _ _ O
+            # _ X ?
+            # O ? _
+            #
+            # Y pattern matching
+            # O _ O
+            # _ X ?
+            # O ? _
             for index_1, index_2, empty_indexes in Y_PATTERN:
                 element = array[index_1]
                 if element == ARRAY_IDENTIFIER_EMPTY:
