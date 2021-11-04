@@ -11,7 +11,7 @@ from PIL.ImageSequence import Iterator as ImageSequenceIterator
 
 from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
     istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
-    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, time_to_id, Client, \
+    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, datetime_to_id, Client, \
     ReuAsyncIO, enter_executor, ApplicationCommand, INTERACTION_RESPONSE_TYPES, ApplicationCommandOption, ChannelVoice, \
     ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, \
     PrivacyLevel
@@ -980,7 +980,7 @@ async def estimate_fast_delete_before_2020_02_00(client, message):
     COUNTER = 0
     OWNED = 0
     
-    before = time_to_id(datetime(2020, 2, 1))
+    before = datetime_to_id(datetime(2020, 2, 1))
     
     while True:
         messages = await client.message_get_chunk(target_channel, before=before)

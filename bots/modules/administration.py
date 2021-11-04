@@ -2,7 +2,7 @@ from datetime import datetime
 from functools import partial as partial_func
 
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
-    parse_rdelta, time_to_id, ChannelCategory, Emoji, Permission
+    parse_rdelta, datetime_to_id, ChannelCategory, Emoji, Permission
 from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
@@ -60,7 +60,7 @@ async def clear(client, event,
         if delta is None:
             abort('`before` could not be parsed.')
         
-        before = time_to_id(datetime.utcnow()-delta)
+        before = datetime_to_id(datetime.utcnow()-delta)
     
     if (after is None) or (not after):
         after = 0
@@ -69,7 +69,7 @@ async def clear(client, event,
         if delta is None:
             yield Embed('Error', '`after` could not be parsed.')
         
-        before = time_to_id(datetime.utcnow()-delta)
+        before = datetime_to_id(datetime.utcnow()-delta)
     
     yield 'Yeeting messages began'
     
