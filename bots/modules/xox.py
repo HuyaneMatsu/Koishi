@@ -515,7 +515,7 @@ async def xoxo(client, event):
             event = await wait_for_component_interaction(
                 event,
                 timeout = 300.0,
-                check = partial_func(check_event_other_user, user),
+                check = partial_func(check_event_user, user),
             )
         except TimeoutError:
             title = 'Timeout occurred.'
@@ -551,7 +551,7 @@ async def xoxo(client, event):
         if game_state == GAME_STATE_DRAW:
             title = 'Draw'
         elif game_state == GAME_STATE_P1_WIN:
-            title = f'{user_2.full_name} win'
+            title = f'{user_2.full_name} won'
         else:
             title = f'{user_1.full_name} won'
         

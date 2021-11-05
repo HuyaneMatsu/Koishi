@@ -1008,6 +1008,48 @@ async def queue_(client, event,
     return embed
 
 
+@VOICE_COMMANDS.interactions
+async def seek_(client, event,
+    seconds: (float, 'Where to seek?'),
+):
+    """Seeks to the given time in seconds."""
+    player = client.solarlink.get_player(event.guild_id)
+    if player is None:
+        abort('No player in the guild.')
+    
+    track = player.get_track()
+    if track is None:
+        abort('The player is not playing anything.')
+    
+    duration = track.track.duration
+    if (seconds < 0.0) or (seconds > duration):
+        abort(f'Cannot seek to {seconds:.0f}.')
+    
+    await player.seek(seconds)
+    
+    embed = Embed(None, f'Seeked to f{duration_to_string(seconds)}')
+    add_current_track_field(embed, player)
+    return embed
+
+
+@VOICE_COMMANDS.interactions
+async def restart_(client, event):
+    """Restarts the current track."""
+    player = client.solarlink.get_player(event.guild_id)
+    if player is None:
+        abort('No player in the guild.')
+    
+    track = player.get_track()
+    if track is None:
+        abort('The player is not playing anything.')
+    
+    await player.seek(0.0)
+
+    embed = Embed('Track restarted.')
+    add_current_track_field(embed, player)
+    return embed
+
+
 PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages = True,
     send_messages_in_threads = True,
