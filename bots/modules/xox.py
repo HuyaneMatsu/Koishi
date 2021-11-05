@@ -1,9 +1,10 @@
 from functools import partial as partial_func
 from random import random, choice
 
-from hata import Emoji, BUILTIN_EMOJIS, Client
+from hata import Emoji, BUILTIN_EMOJIS, Client, Embed, DiscordException, ERROR_CODES
+from hata.ext.slash import iter_component_interactions, Button, ButtonStyle, wait_for_component_interaction
 
-from hata.ext.slash import iter_component_interactions, Button, ButtonStyle
+from bot_utils.constants import GUILD__SUPPORT
 
 EMOJI_P2 = Emoji.precreate(704393708467912875)
 EMOJI_P1 = Emoji.precreate(812069466069663765)
@@ -19,11 +20,22 @@ GAME_STATE_P1_WIN = 2
 GAME_STATE_P2_WIN = 3
 
 CUSTOM_ID_MAP = {str(index): index for index in range(9)}
+CUSTOM_ID_CHALLENGE = 'xox.challenge'
+
+BUTTON_CHALLENGE_ENABLED = Button(
+    label = 'Challenge!',
+    custom_id = CUSTOM_ID_CHALLENGE,
+)
+
+BUTTON_CHALLENGE_DISABLED = BUTTON_CHALLENGE_ENABLED.copy_with(enabled=False)
 
 SLASH_CLIENT: Client
 
 def check_event_user(user, event):
     return event.user is user
+
+def check_event_other_user(user, event):
+    return event.user is not user
 
 def render_array(array, all_disabled):
     row_buttons = []
@@ -366,6 +378,8 @@ async def xox(client, event):
     
     await client.interaction_response_message_create(event, title, components=buttons)
     
+    component_interaction_event = None
+    
     try:
         async for component_interaction_event in iter_component_interactions(event, timeout=300.0,
                 check=partial_func(check_event_user, event.user)):
@@ -395,9 +409,152 @@ async def xox(client, event):
             break
     
     except TimeoutError:
-        message = event.message
-        if (message is not None) and event.channel.cached_permissions_for(client).can_view_channel:
+        title = 'Timeout occurred.'
+        buttons = render_array(array, True)
+        
+        if (component_interaction_event is not None):
+            event = component_interaction_event
+        
+        await client.interaction_response_message_edit(event, title, components=buttons)
+
+
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+async def xoxo(client, event):
+    """The X-O-X game against someone."""
+    user_1 = event.user
+    timestamp = event.created_at
+    
+    embed = Embed(
+        timestamp = timestamp,
+    ).add_author(
+        user_1.avatar_url_as(size=64),
+        f'Challenge {user_1.full_name} in X-O-X!'
+    ).add_footer(
+        'This message times out after 300 seconds.',
+    )
+    
+    await client.interaction_application_command_acknowledge(event)
+    message = await client.interaction_followup_message_create(event, embed=embed, components=BUTTON_CHALLENGE_ENABLED)
+    
+    try:
+        event = await wait_for_component_interaction(
+            message,
+            timeout = 300.0,
+            check = partial_func(check_event_other_user, user_1),
+        )
+    except TimeoutError:
+        
+        embed = Embed(
+            timestamp = timestamp,
+        ).add_author(
+            user_1.avatar_url_as(size=64),
+            f'Challenge {user_1.full_name} X-O-X!'
+        ).add_footer(
+            'This message timed out.',
+        )
+        
+        await client.interaction_response_message_edit(event, embed=embed, components=BUTTON_CHALLENGE_DISABLED)
+        
+        return
+    
+    user_2 = event.user
+    
+    channel = await client.channel_private_create(user_1)
+    
+    try:
+        await client.message_create(
+            channel,
+            embed = Embed(
+                f'{user_2.full_name} accepted your X-O-X challenge',
+            ),
+            components = Button(
+                label = 'Go to message',
+                url = message.url,
+            )
+        )
+    except ConnectionError:
+        # No Internet
+        return
+    
+    except DiscordException as err:
+        if err.code != ERROR_CODES.cannot_message_user:
+            raise
+    
+    array = [0 for _ in range(9)]
+    
+    if random() < 0.5:
+        identifier_user_1 = ARRAY_IDENTIFIER_P1
+        identifier_user_2 = ARRAY_IDENTIFIER_P2
+        emoji_user_1 = EMOJI_P1
+        emoji_user_2 = EMOJI_P2
+    else:
+        identifier_user_1 = ARRAY_IDENTIFIER_P2
+        identifier_user_2 = ARRAY_IDENTIFIER_P1
+        emoji_user_1 = EMOJI_P2
+        emoji_user_2 = EMOJI_P1
+    
+    if random() < 0.5:
+        next_user = 2
+        user = user_1
+        identifier = identifier_user_1
+        emoji = emoji_user_1
+    else:
+        next_user = 1
+        user = user_2
+        identifier = identifier_user_2
+        emoji = emoji_user_2
+    
+    title = f'It is your turn {user.full_name}\nYou are {emoji.as_emoji}'
+    
+    buttons = render_array(array, False)
+    
+    await client.interaction_component_message_edit(event, title, embed=None, omponents=buttons)
+    
+    while True:
+        try:
+            event = await wait_for_component_interaction(
+                event,
+                timeout = 300.0,
+                check = partial_func(check_event_other_user, user),
+            )
+        except TimeoutError:
             title = 'Timeout occurred.'
             buttons = render_array(array, True)
             
-            await client.message_edit(message, title, components=buttons)
+            await client.interaction_response_message_edit(event, title, components=buttons)
+            break
+        
+        if not click(array, event.interaction.custom_id, identifier):
+            await client.interaction_component_acknowledge(event)
+            continue
+        
+        game_state = get_game_state(array, identifier)
+        if game_state == GAME_STATE_NONE:
+            
+            if next_user == 1:
+                next_user = 2
+                user = user_1
+                identifier = identifier_user_1
+                emoji = emoji_user_1
+            else:
+                next_user = 1
+                user = user_2
+                identifier = identifier_user_2
+                emoji = emoji_user_2
+            
+            title = f'It is your turn {user.full_name}\nYou are {emoji.as_emoji}'
+            
+            buttons = render_array(array, False)
+            await client.interaction_component_message_edit(event, title, components=buttons)
+            continue
+        
+        if game_state == GAME_STATE_DRAW:
+            title = 'Draw'
+        elif game_state == GAME_STATE_P1_WIN:
+            title = f'{user_2.full_name} win'
+        else:
+            title = f'{user_1.full_name} won'
+        
+        buttons = render_array(array, True)
+        await client.interaction_component_message_edit(event, title, components=buttons)
+        break
