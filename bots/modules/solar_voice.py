@@ -1017,7 +1017,7 @@ async def seek_(client, event,
     if player is None:
         abort('No player in the guild.')
     
-    track = player.get_track()
+    track = player.get_current()
     if track is None:
         abort('The player is not playing anything.')
     
@@ -1027,7 +1027,7 @@ async def seek_(client, event,
     
     await player.seek(seconds)
     
-    embed = Embed(None, f'Seeked to f{duration_to_string(seconds)}')
+    embed = Embed(None, f'Seeked to {duration_to_string(seconds)}')
     add_current_track_field(embed, player)
     return embed
 
@@ -1039,7 +1039,7 @@ async def restart_(client, event):
     if player is None:
         abort('No player in the guild.')
     
-    track = player.get_track()
+    track = player.get_current()
     if track is None:
         abort('The player is not playing anything.')
     

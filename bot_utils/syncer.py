@@ -162,9 +162,11 @@ async def receive_sync(client, partner):
     try:
         async with SYNC_LOCK:
             # some delay is needed or Koishi might answer too fast.
-            await client.message_create(CHANNEL__SYSTEM__SYNC, REQUEST_APPROVED)
+            message_to_send = REQUEST_APPROVED
             
             while True:
+                Task(client.message_create(CHANNEL__SYSTEM__SYNC, message_to_send), KOKORO)
+                
                 try:
                     message = await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_any(partner), 60.)
                 except TimeoutError:
@@ -222,7 +224,8 @@ async def receive_sync(client, partner):
                         await file.write(binary)
                 
                 # Wait some. It can happen that we send this message, before the other side gets it's answer.
-                await client.message_create(CHANNEL__SYSTEM__SYNC, RECEIVED)
+                message_to_send = RECEIVED
+                
     except BaseException as err:
         with StringIO() as buffer:
             await KOKORO.render_exc_async(err, ['```'], file=buffer)

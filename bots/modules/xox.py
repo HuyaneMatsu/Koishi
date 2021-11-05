@@ -1,7 +1,7 @@
 from functools import partial as partial_func
 from random import random, choice
 
-from hata import Emoji, BUILTIN_EMOJIS, Client, Embed, DiscordException, ERROR_CODES
+from hata import Emoji, BUILTIN_EMOJIS, Client, Embed, DiscordException, ERROR_CODES, Task, KOKORO
 from hata.ext.slash import iter_component_interactions, Button, ButtonStyle, wait_for_component_interaction
 
 from bot_utils.constants import GUILD__SUPPORT
@@ -356,8 +356,19 @@ def click_p2(array, identifier_p1, identifier_p2):
 
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def xox(client, event):
+async def xox(client, event,
+    mode : ([('single-player', 'sg'), ('multi-player', 'mp')], 'Game mode') = 'sg',
+):
     """The X-O-X game with buttons."""
+    if mode == 'sg':
+        coroutine_function = xox_single_player
+    else:
+        coroutine_function = xox_multi_player
+    
+    await coroutine_function(client, event)
+
+
+async def xox_single_player(client, event):
     array = [0 for _ in range(9)]
     
     if random() < 0.5:
@@ -372,7 +383,7 @@ async def xox(client, event):
     if random() < 0.5:
         click_p2(array, identifier_user, identifier_ai)
     
-    title = f'It is your turn {event.user.full_name}\nYou are {emoji.as_emoji}'
+    title = f'It is your turn {event.user.full_name} | {emoji.as_emoji}'
     
     buttons = render_array(array, False)
     
@@ -418,8 +429,52 @@ async def xox(client, event):
         await client.interaction_response_message_edit(event, title, components=buttons)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
-async def xoxo(client, event):
+async def try_send_notification(client, event, message, user_1, user_2, timestamp, emoji):
+    channel = await client.channel_private_create(user_1)
+    
+    embed = Embed(
+        None,
+        f'You are {emoji}\n\n**Good luck!**',
+        color = 0x8000AB,
+        timestamp = timestamp,
+    ).add_author(
+        user_2.avatar_url_as(size=64),
+        f'{user_2.full_name} accepted your X-O-X challenge',
+        url = message.url,
+    )
+    
+    guild = event.guild
+    if (guild is not None):
+        source_channel = event.channel
+        if source_channel is None:
+            channel_name = '???'
+        else:
+            channel_name = source_channel.name
+        
+        embed.add_footer(
+            f'{guild.name} • {channel_name}',
+            guild.icon_url_as(size=64)
+        )
+    
+    try:
+        await client.message_create(
+            channel,
+            embed = embed,
+            components = Button(
+                label = 'Go to message',
+                url = message.url,
+            )
+        )
+    except ConnectionError:
+        # No Internet
+        return
+    
+    except DiscordException as err:
+        if err.code != ERROR_CODES.cannot_message_user:
+            raise
+
+
+async def xox_multi_player(client, event):
     """The X-O-X game against someone."""
     user_1 = event.user
     timestamp = event.created_at
@@ -457,58 +512,34 @@ async def xoxo(client, event):
         
         return
     
+    # acknowledge it for the cases of timeout. If Discord or teh user lags, this might happen.
     user_2 = event.user
-    
-    channel = await client.channel_private_create(user_1)
-    
-    try:
-        await client.message_create(
-            channel,
-            embed = Embed(
-                f'{user_2.full_name} accepted your X-O-X challenge',
-            ),
-            components = Button(
-                label = 'Go to message',
-                url = message.url,
-            )
-        )
-    except ConnectionError:
-        # No Internet
-        return
-    
-    except DiscordException as err:
-        if err.code != ERROR_CODES.cannot_message_user:
-            raise
     
     array = [0 for _ in range(9)]
     
     if random() < 0.5:
-        identifier_user_1 = ARRAY_IDENTIFIER_P1
-        identifier_user_2 = ARRAY_IDENTIFIER_P2
         emoji_user_1 = EMOJI_P1
         emoji_user_2 = EMOJI_P2
     else:
-        identifier_user_1 = ARRAY_IDENTIFIER_P2
-        identifier_user_2 = ARRAY_IDENTIFIER_P1
         emoji_user_1 = EMOJI_P2
         emoji_user_2 = EMOJI_P1
     
     if random() < 0.5:
-        next_user = 2
         user = user_1
-        identifier = identifier_user_1
+        identifier = ARRAY_IDENTIFIER_P1
         emoji = emoji_user_1
     else:
-        next_user = 1
         user = user_2
-        identifier = identifier_user_2
+        identifier = ARRAY_IDENTIFIER_P2
         emoji = emoji_user_2
     
-    title = f'It is your turn {user.full_name}\nYou are {emoji.as_emoji}'
+    Task(try_send_notification(client, event, message, user_1, user_2, timestamp, emoji_user_1), KOKORO)
+    
+    title = f'It is your turn {user.mention} | {emoji}'
     
     buttons = render_array(array, False)
     
-    await client.interaction_component_message_edit(event, title, embed=None, omponents=buttons)
+    await client.interaction_component_message_edit(event, title, embed=None, components=buttons)
     
     while True:
         try:
@@ -528,21 +559,19 @@ async def xoxo(client, event):
             await client.interaction_component_acknowledge(event)
             continue
         
-        game_state = get_game_state(array, identifier)
+        game_state = get_game_state(array, ARRAY_IDENTIFIER_P1)
         if game_state == GAME_STATE_NONE:
             
-            if next_user == 1:
-                next_user = 2
-                user = user_1
-                identifier = identifier_user_1
-                emoji = emoji_user_1
-            else:
-                next_user = 1
+            if identifier == ARRAY_IDENTIFIER_P1:
                 user = user_2
-                identifier = identifier_user_2
+                identifier = ARRAY_IDENTIFIER_P2
                 emoji = emoji_user_2
+            else:
+                user = user_1
+                identifier = ARRAY_IDENTIFIER_P1
+                emoji = emoji_user_1
             
-            title = f'It is your turn {user.full_name}\nYou are {emoji.as_emoji}'
+            title = f'It is your turn {user.mention} | {emoji.as_emoji}'
             
             buttons = render_array(array, False)
             await client.interaction_component_message_edit(event, title, components=buttons)
@@ -551,9 +580,9 @@ async def xoxo(client, event):
         if game_state == GAME_STATE_DRAW:
             title = 'Draw'
         elif game_state == GAME_STATE_P1_WIN:
-            title = f'{user_2.full_name} won'
+            title = f'{user_1.full_name} won against {user_2.full_name}'
         else:
-            title = f'{user_1.full_name} won'
+            title = f'{user_2.full_name} won against {user_1.full_name}'
         
         buttons = render_array(array, True)
         await client.interaction_component_message_edit(event, title, components=buttons)
