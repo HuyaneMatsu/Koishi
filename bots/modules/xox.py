@@ -512,7 +512,7 @@ async def xox_multi_player(client, event):
         
         return
     
-    # acknowledge it for the cases of timeout. If Discord or teh user lags, this might happen.
+    # acknowledge it for the cases of timeout. If Discord or the user lags, this might happen.
     user_2 = event.user
     
     array = [0 for _ in range(9)]
