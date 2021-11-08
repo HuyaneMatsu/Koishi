@@ -415,8 +415,10 @@ CATEGORIES = (
     ), (
         'Actions',
         EMOJI_MASKS,
-        ('bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'glomp', 'handhold', 'happy', 'highfive', 'hug', 'kill',
-        'kiss', 'lick', 'nom', 'pat', 'poke', 'slap', 'smile', 'smug', 'wave', 'wink', 'yeet',),
+        (
+            'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'glomp', 'handhold', 'happy', 'highfive', 'hug',
+            'kill', 'kiss', 'lick', 'nom', 'pat', 'poke', 'slap', 'smile', 'smug', 'wave', 'wink', 'yeet',
+        ),
     ), (
         'Economy',
         EMOJI__HEART_CURRENCY,
@@ -440,8 +442,10 @@ CATEGORIES = (
     ), (
         'Utility',
         EMOJI_MAGIC_WAND,
-        ('avatar', 'calc', 'color', 'guild', 'guild-icon', 'id', 'id-to-datetime', 'now-as-id', 'ping', 'rawr',
-        'sticker', 'role', 'show-emoji', 'user', 'welcome-screen',),
+        (
+            'avatar', 'calc', 'choose', 'color', 'guild', 'guild-icon', 'id', 'id-to-datetime', 'now-as-id', 'ping',
+            'rawr', 'sticker', 'role', 'show-emoji', 'user', 'welcome-screen',
+        ),
     ), (
         'Waifus',
         EMOJI_WAIFU,

@@ -3,6 +3,7 @@ from math import ceil
 from functools import partial as partial_func
 from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
+from random import choice
 
 
 from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, Task, \
@@ -1225,3 +1226,45 @@ async def calc(
     expression: ('expression', 'Mathematical expression to evaluate')
 ):
     return repr(expression)
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def choose(
+    choice_1: (str, 'choice'),
+    choice_2: (str, 'another one') = None,
+    choice_3: (str, 'another one') = None,
+    choice_4: (str, 'another one') = None,
+    choice_5: (str, 'another one') = None,
+    choice_6: (str, 'another one') = None,
+    choice_7: (str, 'another one') = None,
+    choice_8: (str, 'another one') = None,
+    choice_9: (str, 'another one') = None,
+    choice_10: (str, 'another one') = None,
+    choice_11: (str, 'another one') = None,
+    choice_12: (str, 'another one') = None,
+    choice_13: (str, 'another one') = None,
+    choice_14: (str, 'another one') = None,
+    choice_15: (str, 'another one') = None,
+    choice_16: (str, 'another one') = None,
+    choice_17: (str, 'another one') = None,
+    choice_18: (str, 'another one') = None,
+    choice_19: (str, 'another one') = None,
+    choice_20: (str, 'another one') = None,
+    choice_21: (str, 'another one') = None,
+    choice_22: (str, 'another one') = None,
+    choice_23: (str, 'another one') = None,
+    choice_24: (str, 'another one') = None,
+    choice_25: (str, 'another one') = None,
+):
+    return InteractionResponse(
+        choice([
+            choice_ for choice_ in (
+                choice_1, choice_2, choice_3, choice_4, choice_5,
+                choice_6, choice_7, choice_8, choice_9, choice_10,
+                choice_11, choice_12, choice_13, choice_14, choice_15,
+                choice_16, choice_17, choice_18, choice_19, choice_20,
+                choice_21, choice_22, choice_23, choice_24, choice_25,
+            ) if choice_ is not None
+        ]),
+        allowed_mentions = None,
+    )
