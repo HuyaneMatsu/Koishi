@@ -416,7 +416,7 @@ CATEGORIES = (
         'Actions',
         EMOJI_MASKS,
         (
-            'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'glomp', 'handhold', 'happy', 'highfive', 'hug',
+            'bite', 'blush', 'bully', 'cringe', 'cry', 'dancmessage_delete_sequencee', 'glomp', 'handhold', 'happy', 'highfive', 'hug',
             'kill', 'kiss', 'lick', 'nom', 'pat', 'poke', 'slap', 'smile', 'smug', 'wave', 'wink', 'yeet',
         ),
     ), (
