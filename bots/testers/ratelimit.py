@@ -65,7 +65,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
     if CONTENT_TYPE not in headers and data and isinstance(data,(dict,list)):
         headers[CONTENT_TYPE] = 'application/json'
         #converting data to json
-        data=to_json(data)
+        data = to_json(data)
 
     if reason:
         headers['X-Audit-Log-Reason'] = quote(reason)
@@ -128,7 +128,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                 await sleep(10./try_again+1.,self.loop)
                 continue
             
-            raise DiscordException(response,response_data)
+            raise DiscordException(response, response_data, data)
     
     return None
 

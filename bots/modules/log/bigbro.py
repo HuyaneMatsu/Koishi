@@ -69,6 +69,9 @@ async def big_bro_channel_create_waiter(client, channel):
 
 
 async def big_bro_channel_edit_waiter(client, channel, old_attributes):
+    if old_attributes is None:
+        return
+    
     try:
         old_category = old_attributes['category']
     except KeyError:
