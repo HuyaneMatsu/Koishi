@@ -6,9 +6,10 @@ from os import listdir as list_directory
 from time import perf_counter
 from random import choice, random
 
-from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elapsed_time, BUILTIN_EMOJIS, __package__
+from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elapsed_time, BUILTIN_EMOJIS, CHANNELS, \
+    EMOJIS, __package__, MESSAGES, ROLES, STICKERS, USERS, UNICODE_TO_EMOJI
 from hata.ext.slash.menus import Pagination, Closer
-from hata.ext.slash import InteractionResponse, Button, Row
+from hata.ext.slash import InteractionResponse, Button, Row, abort
 
 from bot_utils.constants import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__SUPPORT, GUILD__SUPPORT, \
     LINK__HATA_DOCS, LINK__PASTE, ROLE__SUPPORT__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__SUPPORT__ELEVATED, \
@@ -251,9 +252,8 @@ KOISHI_JOKES = (
     ('Satori', 'why.mp4'),
 )
 
-@SLASH_CLIENT.interactions(is_global=True)
-async def about(client, event):
-    """My secrets and stats. Simpers only!"""
+
+def render_about_generic(client, event):
     embed = Embed(
         None,
         get_koishi_header(),
@@ -381,6 +381,99 @@ async def about(client, event):
         embed = embed,
         components = ABOUT_COMPONENTS,
     )
+
+
+def render_about_cache(client, event):
+    embed = Embed(
+        color = COLOR__KOISHI_HELP,
+        timestamp = event.created_at,
+    ).add_field(
+        'channels',
+        (
+            f'```\n'
+            f'{len(CHANNELS)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'emojis [unicode]',
+        (
+            f'```\n'
+            f'{len(EMOJIS)} [{len(UNICODE_TO_EMOJI)}]\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'guilds',
+        (
+            f'```\n'
+            f'{len(GUILDS)}\n'
+            f'```'
+        )
+    ).add_field(
+        'messages',
+        (
+            f'```\n'
+            f'{len(MESSAGES)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'roles',
+        (
+            f'```\n'
+            f'{len(ROLES)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'stickers',
+        (
+            f'```\n'
+            f'{len(STICKERS)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'users [clients]',
+        (
+            f'```\n'
+            f'{len(USERS)} [{len(CLIENTS)}]\n'
+            f'```'
+        ),
+        inline = True,
+    )
+    
+    add_user_footer(embed, event.user)
+    
+    return embed
+
+
+FIELD_NAME_GENERIC = 'generic'
+FILED_NAME_CACHE = 'cache'
+
+FIELD_CHOICES = [
+    FIELD_NAME_GENERIC,
+    FILED_NAME_CACHE,
+]
+
+FILED_NAME_TO_RENDERER = {
+    FIELD_NAME_GENERIC: render_about_generic,
+    FILED_NAME_CACHE: render_about_cache,
+}
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def about(client, event,
+    field: (FIELD_CHOICES, 'Choose a field!') = FIELD_NAME_GENERIC,
+):
+    """My secrets and stats. Simpers only!"""
+    try:
+        field_renderer = FILED_NAME_TO_RENDERER[field]
+    except KeyError:
+        abort(f'Unknown field: {field!r}.')
+    else:
+        return field_renderer(client, event)
 
 
 def docs_search_pagination_check(user, event):
@@ -686,7 +779,7 @@ async def paste():
 
 
 
-ROLES = SLASH_CLIENT.interactions(
+ROLE_INFO = SLASH_CLIENT.interactions(
     None,
     name = 'roles',
     description = 'Role information!',
@@ -694,7 +787,7 @@ ROLES = SLASH_CLIENT.interactions(
 )
 
 
-@ROLES.interactions
+@ROLE_INFO.interactions
 async def Collectible():
     """A list of collectible roles in ND."""
     embed = Embed('Collectible roles:',
@@ -714,7 +807,7 @@ async def Collectible():
     return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
-@ROLES.interactions
+@ROLE_INFO.interactions
 async def events():
     """Event related role information."""
     embed = Embed(
