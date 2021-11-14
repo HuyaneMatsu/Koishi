@@ -1,8 +1,9 @@
-__all__ = ('BotInfo', 'BotStats',)
+__all__ = ('BotInfo', 'BotStats', 'BriefUserInfo', 'UserConnections', 'UserInfo')
 
 from hata.utils import timestamp_to_datetime
 from hata.bases import IconSlot, Slotted
 from hata.http import urls as module_urls
+from hata.color import Color
 
 # bot info constants
 from .constants import JSON_KEY_BOT_INFO_ID, JSON_KEY_BOT_INFO_NAME, JSON_KEY_BOT_INFO_DISCRIMINATOR_STRING, \
@@ -17,6 +18,17 @@ from .constants import JSON_KEY_BOT_INFO_ID, JSON_KEY_BOT_INFO_NAME, JSON_KEY_BO
 from .constants import JSON_KEY_BOT_STATS_GUILD_COUNT, JSON_KEY_BOT_STATS_GUILD_COUNT_PER_SHARD_ARRAY, \
     JSON_KEY_BOT_STATS_SHARD_ID, JSON_KEY_BOT_STATS_SHARD_COUNT
 
+# user info constants
+from .constants import JSON_KEY_USER_INFO_ID, JSON_KEY_USER_INFO_NAME, JSON_KEY_USER_INFO_DISCRIMINATOR_STRING, \
+    JSON_KEY_USER_INFO_AVATAR_BASE64, JSON_KEY_USER_INFO_BIO, JSON_KEY_USER_INFO_BANNER_URL, \
+    JSON_KEY_USER_INFO_CONNECTIONS, JSON_KEY_USER_INFO_COLOR, JSON_KEY_USER_INFO_IS_SUPPORTER, \
+    JSON_KEY_USER_INFO_IS_CERTIFIED_DEVELOPER, JSON_KEY_USER_INFO_IS_MODERATOR, \
+    JSON_KEY_USER_INFO_IS_WEBSITE_MODERATOR, JSON_KEY_USER_INFO_IS_ADMIN
+
+# user connections constants
+from .constants import JSON_KEY_USER_INFO_CONNECTION_YOUTUBE, JSON_KEY_USER_INFO_CONNECTION_REDDIT, \
+    JSON_KEY_USER_INFO_CONNECTION_TWITTER, JSON_KEY_USER_INFO_CONNECTION_INSTAGRAM, \
+    JSON_KEY_USER_INFO_CONNECTION_GITHUB
 
 class BotInfo(metaclass=Slotted):
     """
@@ -231,3 +243,231 @@ class BotStats:
     def __repr__(self):
         """Returns the bot stats' representation."""
         return f'<{self.__class__.__name__}>'
+
+
+class UserInfo(metaclass=Slotted):
+    """
+    Represents a user.
+    
+    Attributes
+    ----------
+    avatar_hash : `int`
+        The bot's avatar hash.
+    avatar_type : ``IconType``
+        The bot's avatar's type.
+    banner_url : `None` or `str`
+        Url for the user's banner image.
+    bio : `None` or `str`
+        The user's bio.
+    color : ``Color``
+        The custom color of the user.
+    connections : ``UserConnections``
+        Connections of the users to social networks.
+    discriminator : `int`
+        The user's discriminator.
+    id : `int`
+        The user's identifier.
+    is_admin : `bool`
+        Whether the user is an admin.
+    is_certified_developer : `bool`
+        Whether the user is a certified developer.
+    is_moderator : `bool`
+        Whether the user is moderator.
+    is_supporter : `bool`
+        Whether the user is a supporter.
+    is_website_moderator : `bool`
+        Whether the user is a website moderator.
+    name : `str`
+        The user's name.
+    """
+    __slots__ = ('banner_url', 'bio', 'color', 'connections', 'discriminator', 'id', 'is_admin',
+        'is_certified_developer', 'is_moderator', 'is_supporter', 'is_website_moderator', 'name')
+
+    avatar = IconSlot(
+        'avatar',
+        JSON_KEY_USER_INFO_AVATAR_BASE64,
+        module_urls.user_avatar_url,
+        module_urls.user_avatar_url_as,
+    )
+    
+    @classmethod
+    def from_data(cls, data):
+        """
+        Creates a new user info instance.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Deserialized user info data.
+        
+        Returns
+        -------
+        self : ``UserInfo``
+        """
+        self = object.__new__(cls)
+        
+        # avatar_hash & avatar_type
+        self._set_avatar(data)
+        
+        # banner_url
+        self.banner_url = data.get(JSON_KEY_USER_INFO_BANNER_URL, None)
+        
+        # bio
+        self.bio = data.get(JSON_KEY_USER_INFO_BIO, None)
+        
+        # color
+        self.color = Color(data[JSON_KEY_USER_INFO_COLOR], base=16)
+        
+        # connections
+        self.connections = UserConnections.from_data(data[JSON_KEY_USER_INFO_CONNECTIONS])
+        
+        # discriminator
+        self.discriminator = int(data[JSON_KEY_USER_INFO_DISCRIMINATOR_STRING])
+        
+        # id
+        self.id = int(data[JSON_KEY_USER_INFO_ID])
+        
+        # is_admin
+        self.is_admin = data[JSON_KEY_USER_INFO_IS_ADMIN]
+        
+        # is_certified_developer
+        self.is_certified_developer = data[JSON_KEY_USER_INFO_IS_CERTIFIED_DEVELOPER]
+        
+        # is_moderator
+        self.is_moderator = data[JSON_KEY_USER_INFO_IS_MODERATOR]
+        
+        # is_supporter
+        self.is_supporter = data[JSON_KEY_USER_INFO_IS_SUPPORTER]
+        
+        # is_website_moderator
+        self.is_website_moderator = data[JSON_KEY_USER_INFO_IS_WEBSITE_MODERATOR]
+        
+        # name
+        self.name = data[JSON_KEY_USER_INFO_NAME]
+        
+        return self
+    
+    
+    def __repr__(self):
+        """Returns the bot info's representation."""
+        return f'<{self.__class__.__name__} id={self.id} name={self.name}>'
+
+
+class UserConnections:
+    """
+    Represents an user's connections.
+    
+    Attributes
+    ----------
+    github : `None` or `str`
+        The github user name of the user.
+    instagram : `None` or `str`
+        The instagram user name of the user.
+    reddit : `None` or `str`
+        The reddit user name of the user.
+    twitter : `None` or `str`
+        The twitter user name of the user.
+    youtube : `None` or `str`
+        The youtube user name of the user.
+    """
+    __slots__ = ('github', 'instagram', 'reddit', 'twitter', 'youtube')
+    
+    @classmethod
+    def from_data(cls, data):
+        """
+        Creates a new user info instance.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Deserialized user info data.
+        
+        Returns
+        -------
+        self : ``UserInfo``
+        """
+        self = object.__new__(cls)
+        
+        # github
+        self.github = data.get(JSON_KEY_USER_INFO_CONNECTION_GITHUB, None)
+        
+        # instagram
+        self.instagram = data.get(JSON_KEY_USER_INFO_CONNECTION_INSTAGRAM, None)
+        
+        # reddit
+        self.reddit = data.get(JSON_KEY_USER_INFO_CONNECTION_REDDIT, None)
+        
+        # twitter
+        self.twitter = data.get(JSON_KEY_USER_INFO_CONNECTION_TWITTER, None)
+        
+        # youtube
+        self.youtube = data.get(JSON_KEY_USER_INFO_CONNECTION_YOUTUBE, None)
+        
+        return self
+    
+    
+    def __repr__(self):
+        """Returns the bot info's representation."""
+        return f'<{self.__class__.__name__}>'
+
+
+class BriefUserInfo(metaclass=Slotted):
+    """
+    Represents a user, containing only brief fields.
+    
+    Attributes
+    ----------
+    avatar_hash : `int`
+        The bot's avatar hash.
+    avatar_type : ``IconType``
+        The bot's avatar's type.
+    discriminator : `int`
+        The user's discriminator.
+    id : `int`
+        The user's identifier.
+    name : `str`
+        The user's name.
+    """
+    __slots__ = ('discriminator', 'id', 'name')
+
+    avatar = IconSlot(
+        'avatar',
+        JSON_KEY_USER_INFO_AVATAR_BASE64,
+        module_urls.user_avatar_url,
+        module_urls.user_avatar_url_as,
+    )
+    
+    @classmethod
+    def from_data(cls, data):
+        """
+        Creates a new user info instance.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Deserialized user info data.
+        
+        Returns
+        -------
+        self : ``UserInfo``
+        """
+        self = object.__new__(cls)
+        
+        # avatar_hash & avatar_type
+        self._set_avatar(data)
+        
+        # discriminator
+        self.discriminator = int(data[JSON_KEY_USER_INFO_DISCRIMINATOR_STRING])
+        
+        # id
+        self.id = int(data[JSON_KEY_USER_INFO_ID])
+        
+        # name
+        self.name = data[JSON_KEY_USER_INFO_NAME]
+        
+        return self
+    
+    
+    def __repr__(self):
+        """Returns the bot info's representation."""
+        return f'<{self.__class__.__name__} id={self.id} name={self.name}>'
