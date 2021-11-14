@@ -1,4 +1,4 @@
-__all__ = ('BotInfo', )
+__all__ = ('BotInfo', 'BotStats',)
 
 from hata.utils import timestamp_to_datetime
 from hata.bases import IconSlot, Slotted
@@ -12,6 +12,10 @@ from .constants import JSON_KEY_BOT_INFO_ID, JSON_KEY_BOT_INFO_NAME, JSON_KEY_BO
     JSON_KEY_BOT_INFO_OWNER_ID_ARRAY, JSON_KEY_BOT_INFO_FEATURED_GUILD_ID_ARRAY, JSON_KEY_BOT_INFO_INVITE_URL, \
     JSON_KEY_BOT_INFO_CERTIFIED_AT, JSON_KEY_BOT_INFO_IS_CERTIFIED, JSON_KEY_BOT_INFO_VANITY_URL, \
     JSON_KEY_BOT_INFO_UPVOTES, JSON_KEY_BOT_INFO_UPVOTES_MONTHLY, JSON_KEY_BOT_INFO_UP_DONATE_BOT_GUILD_ID
+
+# bot stats constants
+from .constants import JSON_KEY_BOT_STATS_GUILD_COUNT, JSON_KEY_BOT_STATS_GUILD_COUNT_PER_SHARD_ARRAY, \
+    JSON_KEY_BOT_STATS_SHARD_ID, JSON_KEY_BOT_STATS_SHARD_COUNT
 
 
 class BotInfo(metaclass=Slotted):
@@ -80,7 +84,7 @@ class BotInfo(metaclass=Slotted):
     @classmethod
     def from_data(cls, data):
         """
-        Creates a new bot info instance from bot info data.
+        Creates a new bot info instance.
         
         Parameters
         ----------
@@ -91,7 +95,6 @@ class BotInfo(metaclass=Slotted):
         -------
         self : ``BotInfo``
         """
-        
         self = object.__new__(cls)
         
         # avatar_hash & avatar_type
@@ -167,6 +170,64 @@ class BotInfo(metaclass=Slotted):
         
         return self
     
+    
     def __repr__(self):
         """Returns the bot info's representation."""
         return f'<{self.__class__.__name__} id={self.id} name={self.name}>'
+
+
+class BotStats:
+    """
+    Contains a listed bot's stats.
+    
+    Attributes
+    ----------
+    guild_count : `int`
+        The amount of guilds the bot is in. Defaults to `-1`.
+    guild_count_per_shard : `tuple` of `int`
+        The amount of guilds per shards. Can be empty.
+    shard_count : `int`
+        The amount of shards the bot has. Defaults to `-1`.
+    shard_id : `int`
+        The shard ID to post as (?). Defaults to `-1`.
+    """
+    __slots__ = ('guild_count', 'guild_count_per_shard', 'shard_count', 'shard_id')
+    
+    @classmethod
+    def from_data(cls, data):
+        """
+        Creates a new bot stats instance.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Deserialized bot stats data.
+        
+        Returns
+        -------
+        self : ``BotStats``
+        """
+        self = object.__new__(cls)
+        
+        # guild_count
+        self.guild_count = data.get(JSON_KEY_BOT_STATS_GUILD_COUNT, -1)
+        
+        # guild_count_per_shard
+        try:
+            guild_count_per_shard = data[JSON_KEY_BOT_STATS_GUILD_COUNT_PER_SHARD_ARRAY]
+        except KeyError:
+            guild_count_per_shard = ()
+        self.guild_count_per_shard = guild_count_per_shard
+        
+        # shard_count
+        self.shard_count = data.get(JSON_KEY_BOT_STATS_SHARD_COUNT, -1)
+        
+        # shard_id
+        self.shard_id = data.get(JSON_KEY_BOT_STATS_SHARD_ID, -1)
+        
+        return self
+    
+    
+    def __repr__(self):
+        """Returns the bot stats' representation."""
+        return f'<{self.__class__.__name__}>'
