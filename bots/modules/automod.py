@@ -45,7 +45,7 @@ def iter_escaped(value):
 
 FILTERS = (
     'dpy',
-    MixedPart(RegexPart('^|\s'), 'd.py'),
+    MixedPart(RegexPart('^|\s|`'), 'd.py'),
     'd py',
     'd_py',
     'd!py',

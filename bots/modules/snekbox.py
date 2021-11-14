@@ -185,6 +185,7 @@ class EvalUserLock:
         ACTIVE_EXECUTORS.discard(self.user_id)
         
         self.client.command_processor.remove(self.channel, self)
+        return False
 
 if IS_UNIX:
     async def eval_description(ctx):

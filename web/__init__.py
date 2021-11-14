@@ -23,14 +23,14 @@ full_path = None
 base_path = os.path.join(PATH__KOISHI, *ROUTE)
 
 for path in (
-        'hata_docs',
-        'hata_index',
-            ):
+    'hata_docs',
+    'hata_index',
+):
     
     ROUTES = __import__(
         '.'.join((*ROUTE, path)),
         fromlist = (path,)
-            ).ROUTES
+    ).ROUTES
     
     WEBAPP.register_blueprint(ROUTES)
 

@@ -161,7 +161,7 @@ class RLTCTX: #rate limit tester context manager
         return self
     
     def __exit__(self,exc_type,exc_val,exc_tb):
-        type(self).active_ctx=None
+        type(self).active_ctx = None
         if exc_type is CancelledError:
             return True
         
@@ -380,7 +380,7 @@ class RLTPrinterBuffer:
         return self.buffer
     
     def __exit__(self,exc_type,exc_val,exc_tb):
-        self.buffer.start_new_block=True
+        self.buffer.start_new_block = True
         return False
         
         

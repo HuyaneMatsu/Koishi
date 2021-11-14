@@ -7,7 +7,7 @@ from time import perf_counter
 from random import choice, random
 
 from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elapsed_time, BUILTIN_EMOJIS, CHANNELS, \
-    EMOJIS, __package__, MESSAGES, ROLES, STICKERS, USERS, UNICODE_TO_EMOJI
+    EMOJIS, __package__, MESSAGES, ROLES, STICKERS
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.slash import InteractionResponse, Button, Row, abort
 
@@ -253,7 +253,7 @@ KOISHI_JOKES = (
 )
 
 
-def render_about_generic(client, event):
+async def render_about_generic(client, event):
     embed = Embed(
         None,
         get_koishi_header(),
@@ -383,43 +383,28 @@ def render_about_generic(client, event):
     )
 
 
-def render_about_cache(client, event):
+async def render_about_cache(client, event):
     embed = Embed(
         color = COLOR__KOISHI_HELP,
         timestamp = event.created_at,
     ).add_field(
-        'channels',
+        'Emojis',
         (
             f'```\n'
-            f'{len(CHANNELS)}\n'
+            f'{len(EMOJIS)}\n'
             f'```'
         ),
-        inline = True,
+        inline = True
     ).add_field(
-        'emojis [unicode]',
-        (
-            f'```\n'
-            f'{len(EMOJIS)} [{len(UNICODE_TO_EMOJI)}]\n'
-            f'```'
-        ),
-        inline = True,
-    ).add_field(
-        'guilds',
+        'Guilds',
         (
             f'```\n'
             f'{len(GUILDS)}\n'
             f'```'
-        )
-    ).add_field(
-        'messages',
-        (
-            f'```\n'
-            f'{len(MESSAGES)}\n'
-            f'```'
         ),
         inline = True,
     ).add_field(
-        'roles',
+        'Roles',
         (
             f'```\n'
             f'{len(ROLES)}\n'
@@ -427,7 +412,7 @@ def render_about_cache(client, event):
         ),
         inline = True,
     ).add_field(
-        'stickers',
+        'Stickers',
         (
             f'```\n'
             f'{len(STICKERS)}\n'
@@ -435,10 +420,26 @@ def render_about_cache(client, event):
         ),
         inline = True,
     ).add_field(
-        'users [clients]',
+        'Channels',
         (
             f'```\n'
-            f'{len(USERS)} [{len(CLIENTS)}]\n'
+            f'{len(CHANNELS)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Messages',
+        (
+            f'```\n'
+            f'{len(MESSAGES)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Users',
+        (
+            f'```\n'
+            f'{len(USERS)}\n'
             f'```'
         ),
         inline = True,
@@ -473,7 +474,7 @@ async def about(client, event,
     except KeyError:
         abort(f'Unknown field: {field!r}.')
     else:
-        return field_renderer(client, event)
+        return await field_renderer(client, event)
 
 
 def docs_search_pagination_check(user, event):
