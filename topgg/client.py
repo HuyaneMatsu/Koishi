@@ -9,8 +9,10 @@ from hata.discord.client import Client
 from hata.discord.core import KOKORO
 
 from .constants import JSON_KEY_BOT_STATS_GUILD_COUNT, JSON_KEY_BOT_STATS_SHARD_ID, JSON_KEY_BOT_STATS_SHARD_COUNT, \
-    JSON_KEY_WEEKEND_STATUS
-from .types import UserInfo, BotInfo
+    JSON_KEY_WEEKEND_STATUS, QUERY_KEY_GET_BOTS_LIMIT, QUERY_KEY_GET_BOTS_OFFSET, QUERY_KEY_GET_BOTS_SORT_BY, \
+    QUERY_KEY_GET_BOTS_SEARCH_QUERY, QUERY_KEY_GET_BOTS_FIELDS
+from .types import UserInfo, BotInfo, GetBotsResult
+from .bots_query import get_bots_query_sort_by_value, create_bots_query_search_value, BOTS_QUERY_FIELDS_VALUE
 
 AUTO_POST_INTERVAL = 1800.0
 
@@ -211,6 +213,49 @@ class TopGGClient:
         return BotInfo.from_data(data)
     
     
+    async def get_bots(self, *, limit=50, offset=0, sort_by=None, search=None):
+        """
+        Gets information about multiple bots.
+        
+        Parameters
+        ----------
+        limit : `int`, Optional (Keyword only)
+            The amount of bots to query. Defaults to `50`.
+        offset : `int`, Optional (Keyword only)
+            Query offset. Defaults to `0`
+        sort_by : `None` or `str`, Optional (Keyword only)
+            Which field to sort by the bots. Defaults to `None`.
+        search : `None` or `dict` of (`str`, `Any`) items, Optional (Keyword only)
+            Fields an expected values to search for.
+        
+        Returns
+        -------
+        get_bots_result : ``GetBotsResult``
+        
+        Raises
+        ------
+        LookupError
+            - If `sort_by` refers to a not existent field.
+            - If `search` contains a not existent field.
+        """
+        if limit > 500:
+            limit = 500
+        
+        query_sort_by_value = get_bots_query_sort_by_value(sort_by)
+        query_search_value = create_bots_query_search_value(search)
+        
+        query_parameters = {
+            QUERY_KEY_GET_BOTS_LIMIT: limit,
+            QUERY_KEY_GET_BOTS_OFFSET: offset,
+            QUERY_KEY_GET_BOTS_SORT_BY: query_sort_by_value,
+            QUERY_KEY_GET_BOTS_SEARCH_QUERY: query_search_value,
+            QUERY_KEY_GET_BOTS_FIELDS: BOTS_QUERY_FIELDS_VALUE,
+        }
+        
+        data = await self._get_bots(query_parameters)
+        return GetBotsResult.from_data(data)
+    
+    
     async def _post_bot_stats(self, data):
         """
         Posts bot stats to top.gg.
@@ -229,7 +274,7 @@ class TopGGClient:
         return await self._request(
             METHOD_POST,
             f'{TOP_GG_ENDPOINT}/bots/stats',
-            data,
+            data = data,
         )
     
     
@@ -246,7 +291,6 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/weekend',
-            None,
         )
     
     
@@ -263,6 +307,42 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/bots/{self.client_id}/votes',
-            None,
         )
+    
+    
+    async def _get_bot_info(self):
+        """
+        Gets bot information and returns it.
         
+        This method is a coroutine.
+        
+        Returns
+        -------
+        response_data : `Any`
+        """
+        return await self._request(
+            METHOD_GET,
+            f'{TOP_GG_ENDPOINT}/bots/{self.client_id}',
+        )
+    
+    
+    async def _get_bots(self, query_parameters):
+        """
+        Gets information about multiple bots.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        query_parameters : `dict` of (`str`, `Any`) items
+            Query parameters.
+            
+        Returns
+        -------
+        response_data : `Any`
+        """
+        return await self._request(
+            METHOD_GET,
+            f'{TOP_GG_ENDPOINT}/bots/{self.client_id}',
+            query_parameters = query_parameters,
+        )
