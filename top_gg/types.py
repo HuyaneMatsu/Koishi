@@ -1,4 +1,4 @@
-__all__ = ('BotInfo', 'BotStats', 'BriefUserInfo', 'UserConnections', 'UserInfo')
+__all__ = ('BotInfo', 'BotStats','BotsQueryResult', 'BriefUserInfo', 'UserConnections', 'UserInfo')
 
 from hata.utils import timestamp_to_datetime
 from hata.bases import IconSlot, Slotted
@@ -29,6 +29,10 @@ from .constants import JSON_KEY_USER_INFO_ID, JSON_KEY_USER_INFO_NAME, JSON_KEY_
 from .constants import JSON_KEY_USER_INFO_CONNECTION_YOUTUBE, JSON_KEY_USER_INFO_CONNECTION_REDDIT, \
     JSON_KEY_USER_INFO_CONNECTION_TWITTER, JSON_KEY_USER_INFO_CONNECTION_INSTAGRAM, \
     JSON_KEY_USER_INFO_CONNECTION_GITHUB
+
+# bots query result constants
+from .constants import JSON_KEY_BOTS_QUERY_RESULT_RESULTS, JSON_KEY_BOTS_QUERY_RESULT_LIMIT, \
+    JSON_KEY_BOTS_QUERY_RESULT_OFFSET, JSON_KEY_BOTS_QUERY_RESULT_COUNT, JSON_KEY_BOTS_QUERY_RESULT_TOTAL
 
 class BotInfo(metaclass=Slotted):
     """
@@ -126,7 +130,12 @@ class BotInfo(metaclass=Slotted):
         self.discriminator = int(data[JSON_KEY_BOT_INFO_DISCRIMINATOR_STRING])
         
         # donate_bot_guild_id
-        self.donate_bot_guild_id = int(data[JSON_KEY_BOT_INFO_DONATE_BOT_GUILD_ID])
+        donate_bot_guild_id = data[JSON_KEY_BOT_INFO_DONATE_BOT_GUILD_ID]
+        if donate_bot_guild_id:
+            donate_bot_guild_id = int(donate_bot_guild_id)
+        else:
+            donate_bot_guild_id = 0
+        self.donate_bot_guild_id = donate_bot_guild_id
         
         # featured_guild_ids
         featured_guild_ids = data.get(JSON_KEY_BOT_INFO_FEATURED_GUILD_ID_ARRAY, None)
@@ -316,7 +325,11 @@ class UserInfo(metaclass=Slotted):
         self.bio = data.get(JSON_KEY_USER_INFO_BIO, None)
         
         # color
-        self.color = Color(data[JSON_KEY_USER_INFO_COLOR], base=16)
+        try:
+            color = Color(data[JSON_KEY_USER_INFO_COLOR], base=16)
+        except ValueError:
+            color = Color()
+        self.color = color
         
         # connections
         self.connections = UserConnections.from_data(data[JSON_KEY_USER_INFO_CONNECTIONS])
@@ -471,3 +484,93 @@ class BriefUserInfo(metaclass=Slotted):
     def __repr__(self):
         """Returns the bot info's representation."""
         return f'<{self.__class__.__name__} id={self.id} name={self.name}>'
+
+
+class BotsQueryResult:
+    """
+    Represents a get bots query's result.
+    
+    Attributes
+    ----------
+    count : `int`
+        The number of received bots.
+    limit : `int`
+        The limit used.
+    offset : `int`
+        The off set used.
+    results : `None` or `tuple` of ``BotInfo``
+        The matched bots.
+    total : `int`
+        The total number of bots matching the query.
+    """
+    __slots__ = ('count', 'limit', 'offset', 'results', 'total')
+    
+    
+    @classmethod
+    def from_data(cls, data):
+        """
+        Creates a new bots query result instance.
+        
+        Parameters
+        ----------
+        data : `dict` of (`str`, `Any`) items
+            Deserialized bots query result data.
+        
+        Returns
+        -------
+        self : ``BotsQueryResult``
+        """
+        self = object.__new__(cls)
+        
+        # count
+        self.count = data[JSON_KEY_BOTS_QUERY_RESULT_COUNT]
+        
+        # limit
+        self.limit = data[JSON_KEY_BOTS_QUERY_RESULT_LIMIT]
+        
+        # offset
+        self.offset = data[JSON_KEY_BOTS_QUERY_RESULT_OFFSET]
+        
+        # results
+        bot_info_datas = data[JSON_KEY_BOTS_QUERY_RESULT_RESULTS]
+        if bot_info_datas:
+            results = tuple(BotInfo.from_data(bot_info_data) for bot_info_data in bot_info_datas)
+        else:
+            results = None
+        self.results = results
+        
+        # total
+        self.total = data[JSON_KEY_BOTS_QUERY_RESULT_TOTAL]
+        
+        return self
+    
+    def __repr__(self):
+        """Returns the bot info's representation."""
+        return f'<{self.__class__.__name__} count={self.count} total={self.total}>'
+    
+    def __len__(self):
+        """Returns the length of the query result"""
+        return self.count
+    
+    def __iter__(self):
+        """Iterates over the query result."""
+        results = self.results
+        if (results is not None):
+            yield from results
+    
+    def __reversed__(self):
+        """Reversed iterates over the query result."""
+        results = self.results
+        if (results is not None):
+            yield from reversed(results)
+    
+    def __getitem__(self, index):
+        """Gets the elements of the query result."""
+        results = self.results
+        if results is None:
+            if isinstance(index, slice):
+                return ()
+            
+            raise IndexError(index)
+        
+        return results[index]

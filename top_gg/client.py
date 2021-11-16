@@ -1,18 +1,21 @@
 __all__ = ('TopGGClient', )
 
-from hata.backend.utils import WeakReferer
+from hata.backend.utils import WeakReferer, imultidict
 from hata.backned.futures import Task
 from hata.backend.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, \
-    AUTHORIZATION, CONTENT_TYPE
+    AUTHORIZATION, CONTENT_TYPE, USER_AGENT
 
 from hata.discord.client import Client
 from hata.discord.core import KOKORO
+from hata.discord.http import LIBRARY_USER_AGENT
 
 from .constants import JSON_KEY_BOT_STATS_GUILD_COUNT, JSON_KEY_BOT_STATS_SHARD_ID, JSON_KEY_BOT_STATS_SHARD_COUNT, \
     JSON_KEY_WEEKEND_STATUS, QUERY_KEY_GET_BOTS_LIMIT, QUERY_KEY_GET_BOTS_OFFSET, QUERY_KEY_GET_BOTS_SORT_BY, \
-    QUERY_KEY_GET_BOTS_SEARCH_QUERY, QUERY_KEY_GET_BOTS_FIELDS
-from .types import UserInfo, BotInfo, GetBotsResult
+    QUERY_KEY_GET_BOTS_SEARCH_QUERY, QUERY_KEY_GET_BOTS_FIELDS, JSON_KEY_VOTED, QUERY_KEY_GET_USER_VOTE_USER_ID, \
+    RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER, RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER
+from .types import UserInfo, BotInfo, BotsQueryResult
 from .bots_query import get_bots_query_sort_by_value, create_bots_query_search_value, BOTS_QUERY_FIELDS_VALUE
+from .rate_limit_handling import RateLimitHandler
 
 AUTO_POST_INTERVAL = 1800.0
 
@@ -109,16 +112,25 @@ class TopGGClient:
         Handle to repeat the auto poster.
     _auto_post_running : `bool`
         Whether auto posting is still running.
+    _headers : `imultidict`
+        Request headers.
+    _rate_limit_handler_global : ``RateLimitHandler``
+        Rate limit handler applied to all rate limits.
+    _rate_limit_handler_bots : ``RateLimitHandler``
+        Rate limit handler applied to `/bots` endpoints.
     client_id : `int`
         The client's identifier.
     client_reference : ``WeakReferer`` to ``Client``
         Weakreference towards the wrapped bot.
     http : ``DiscordHTTPClient``
         Http client to do requests with.
+    top_gg_token : `str`
+        Top.gg api token.
     """
-    __slots__ = ('__weakref__', '_auto_post_handler', '_auto_post_running', 'client_id', 'client_reference', 'http', )
+    __slots__ = ('__weakref__', '_auto_post_handler', '_auto_post_running', '_headers', '_rate_limit_handler_bots',
+        'client_id', '_rate_limit_handler_global', 'client_reference', 'http', 'top_gg_token',)
     
-    def __new__(cls, client):
+    def __new__(cls, client, top_gg_token):
         """
         Creates a new top.gg client instance.
         
@@ -126,20 +138,41 @@ class TopGGClient:
         ----------
         client : ``Client``
             The discord client.
+        top_gg_token : `str`
+            Top.gg api token.
+        
+        Raises
+        ------
+        TypeError
+            - If `client` is not ``Client`` instance.
+            - If `top_gg_token` is not `str` instance.
         """
         if not isinstance(client, Client):
             raise TypeError(f'`client` can be `{Client.__class__.__name__}` instance, got '
                 f'{client.__class__.__name__}.')
         
+        if not isinstance(top_gg_token, str):
+            raise TypeError(f'`top_gg_token` can be `str` instance, got {top_gg_token.__class__.__name__}.')
+        
         client_reference = WeakReferer(client)
+        
+        headers = imultidict()
+        headers[USER_AGENT] = LIBRARY_USER_AGENT
+        headers[AUTHORIZATION] = top_gg_token
+        headers[CONTENT_TYPE] = 'application/json'
         
         self = object.__new__(cls)
         self.client_reference = client_reference
         self._auto_post_handler = None
         self._auto_post_running = True
+        self._headers = headers
         
         self.client_id = client.id
         self.http = client.http
+        self.top_gg_token = top_gg_token
+        
+        self._rate_limit_handler_global = RateLimitHandler(RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER)
+        self._rate_limit_handler_bots = RateLimitHandler(RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER)
         
         client.top_gg_client = self
         client.events(start_auto_post, name='launch')
@@ -217,6 +250,8 @@ class TopGGClient:
         """
         Gets information about multiple bots.
         
+        This method is a coroutine.
+        
         Parameters
         ----------
         limit : `int`, Optional (Keyword only)
@@ -230,7 +265,7 @@ class TopGGClient:
         
         Returns
         -------
-        get_bots_result : ``GetBotsResult``
+        get_bots_result : ``BotsQueryResult``
         
         Raises
         ------
@@ -249,11 +284,49 @@ class TopGGClient:
             QUERY_KEY_GET_BOTS_OFFSET: offset,
             QUERY_KEY_GET_BOTS_SORT_BY: query_sort_by_value,
             QUERY_KEY_GET_BOTS_SEARCH_QUERY: query_search_value,
-            QUERY_KEY_GET_BOTS_FIELDS: BOTS_QUERY_FIELDS_VALUE,
+            # QUERY_KEY_GET_BOTS_FIELDS: BOTS_QUERY_FIELDS_VALUE, # Defaults to all fields, so we just skip it
         }
         
         data = await self._get_bots(query_parameters)
-        return GetBotsResult.from_data(data)
+        return BotsQueryResult.from_data(data)
+    
+    
+    async def get_user_info(self, user_id):
+        """
+        Gets user info for the given user identifier.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        user_id : `int`
+            The user's identifier to get.
+        
+        Returns
+        -------
+        user_info : ``UserInfo``
+        """
+        data = await self._get_user_info(user_id)
+        return UserInfo.from_data(data)
+    
+    
+    async def get_user_vote(self, user_id):
+        """
+        Returns whether the user voted in the last 12 hours.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        user_id : `int`
+            The user's identifier.
+        
+        Returns
+        -------
+        voted : `bool`
+        """
+        data = await self._get_user_vote({QUERY_KEY_GET_USER_VOTE_USER_ID: user_id})
+        return bool(data[JSON_KEY_VOTED])
     
     
     async def _post_bot_stats(self, data):
@@ -343,6 +416,63 @@ class TopGGClient:
         """
         return await self._request(
             METHOD_GET,
-            f'{TOP_GG_ENDPOINT}/bots/{self.client_id}',
+            f'{TOP_GG_ENDPOINT}/bots',
             query_parameters = query_parameters,
         )
+    
+    
+    async def _get_user_info(self, user_id):
+        """
+        Gets user info for the given user identifier.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        user_id : `int`
+            The user's identifier to get.
+            
+        Returns
+        -------
+        response_data : `Any`
+        """
+        return await self._request(
+            METHOD_GET,
+            f'{TOP_GG_ENDPOINT}/users/{user_id}',
+        )
+
+    async def _get_user_vote(self, query_parameters):
+        """
+        Returns whether the user voted in the last 12 hours.
+        
+        This method is a coroutine.
+        
+        Parameters
+        ----------
+        query_parameters : `dict` of (`str`, `Any`) items
+            Query parameters.
+        
+        Returns
+        -------
+        response_data : `Any`
+        """
+        return await self._request(
+            METHOD_GET,
+            f'{TOP_GG_ENDPOINT}/bots/{self.client_id}/check',
+            query_parameters = query_parameters,
+        )
+    
+    async def _request(self, method, endpoint, data=None, query_parameters=None):
+        """
+        Parameters
+        ----------
+        method : `str`
+            Http method.
+        endpoint : `str`
+            Endpoint to do request towards.
+        data : `None` or `Any`, Optional
+            Json serializable data.
+        query_parameters : `None` or `Any`, Optional
+            Query parameters
+        """
+        
