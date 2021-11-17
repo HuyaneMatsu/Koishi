@@ -219,6 +219,7 @@ async def claim_daily_for_yourself(event):
                     total_love = total_love,
                     daily_next = now+DAILY_INTERVAL,
                     daily_streak = daily_streak,
+                    count_daily_self = user_common_model.count_daily_self+1,
                 )
             )
             
@@ -239,6 +240,7 @@ async def claim_daily_for_yourself(event):
                 total_love = received,
                 daily_next = now+DAILY_INTERVAL,
                 daily_streak = 1,
+                count_daily_self = 1,
             )
         )
         
@@ -326,6 +328,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     user_common_model.id == source_entry[0],
                 ).values(
                     waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
+                    count_daily_by_waifu = user_common_model.count_daily_by_waifu+1,
                 )
             )
             
@@ -337,6 +340,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     daily_next = now+DAILY_INTERVAL,
                     daily_streak = target_daily_streak,
                     waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
+                    count_daily_from_waifu = user_common_model.count_daily_from_waifu+1,
                 )
             )
             

@@ -40,20 +40,34 @@ else:
     
     class user_common_model(BASE):
         __tablename__   = 'CURRENCY'
+        # Generic
         id              = Column(Int64, primary_key=True)
         user_id         = Column(Int64, unique=True)
+        
+        # Love
         total_love      = Column(Int64, default=0)
         total_allocated = Column(Int64, default=0)
+        
+        # Daily
         daily_next      = Column(DateTime, default=func.utc_timestamp())
         daily_streak    = Column(Int32, default=0)
         
+        # Counters
+        count_daily_self = Column(Int32, default=0)
+        count_daily_from_waifu = Column(Int32, default=0)
+        count_daily_by_waifu = Column(Int32, default=0)
+        count_top_gg_vote = Column(Int32, default=0)
+        
+        # Waifu
         waifu_owner_id  = Column(Int64, default=0)
         waifu_cost      = Column(Int64, default=0)
         waifu_divorces  = Column(Int32, default=0)
         waifu_slots     = Column(Int32, default=1)
         
+        # notification settings
         notify_proposal = Column(Boolean, default=True)
         notify_daily = Column(Boolean, default=True)
+    
     
     USER_COMMON_TABLE = user_common_model.__table__
     
@@ -148,7 +162,10 @@ else:
         waifu_slots = 1,
         notify_proposal = True,
         notify_daily = True,
-        
+        count_daily_self = 0,
+        count_daily_from_waifu = 0,
+        count_daily_by_waifu = 0,
+        count_top_gg_vote = 0,
     ):
         if daily_next is None:
             daily_next = datetime.utcnow()
@@ -165,5 +182,8 @@ else:
             waifu_slots     = waifu_slots,
             notify_proposal = notify_proposal,
             notify_daily = notify_daily,
-            
+            count_daily_self = count_daily_self,
+            count_daily_from_waifu = count_daily_from_waifu,
+            count_daily_by_waifu = count_daily_by_waifu,
+            count_top_gg_vote = count_top_gg_vote,
         )
