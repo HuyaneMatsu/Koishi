@@ -94,15 +94,23 @@ async def do_auto_post(top_gg_client, top_gg_client_reference):
         The top.gg client.
     top_gg_client_reference : ``WeakReferer`` to ``TopGGClient``
         Weak reference to the top.gg client.
-    """
-    await top_gg_client.post_bot_stats()
     
-    if top_gg_client._auto_post_running:
-        top_gg_client._auto_post_handler = KOKORO.call_later(
-            AUTO_POST_INTERVAL,
-            trigger_auto_post,
-            top_gg_client_reference,
-        )
+    Raises
+    ------
+    TopGGHttpException
+        Any exception raised by top.gg api.
+    """
+    try:
+        await top_gg_client.post_bot_stats()
+    except ConnectionError:
+        return
+    finally:
+        if top_gg_client._auto_post_running:
+            top_gg_client._auto_post_handler = KOKORO.call_later(
+                AUTO_POST_INTERVAL,
+                trigger_auto_post,
+                top_gg_client_reference,
+            )
 
 
 class TopGGClient:
@@ -191,6 +199,13 @@ class TopGGClient:
         Posts your guild & shard count.
         
         This method is a coroutine.
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         client = self.client_reference()
         if (client is not None):
@@ -218,6 +233,13 @@ class TopGGClient:
         Returns
         -------
         weekend_status : `bool`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         data = await self._get_weekend_status()
         return data[JSON_KEY_WEEKEND_STATUS]
@@ -232,6 +254,13 @@ class TopGGClient:
         Returns
         -------
         voters : `list` of ``UserInfo``
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         user_datas = await self._get_bot_voters()
         return [UserInfo.from_data(user_data) for user_data in user_datas]
@@ -246,6 +275,13 @@ class TopGGClient:
         Returns
         -------
         bot_info : ``BotInfo``
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         data = await self._get_bot_info()
         return BotInfo.from_data(data)
@@ -277,6 +313,10 @@ class TopGGClient:
         LookupError
             - If `sort_by` refers to a not existent field.
             - If `search` contains a not existent field.
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         if limit > 500:
             limit = 500
@@ -310,6 +350,13 @@ class TopGGClient:
         Returns
         -------
         user_info : ``UserInfo``
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         data = await self._get_user_info(user_id)
         return UserInfo.from_data(data)
@@ -329,6 +376,13 @@ class TopGGClient:
         Returns
         -------
         voted : `bool`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         data = await self._get_user_vote({QUERY_KEY_GET_USER_VOTE_USER_ID: user_id})
         return bool(data[JSON_KEY_VOTED])
@@ -348,6 +402,13 @@ class TopGGClient:
         Returns
         -------
         response_data : `Any`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         return await self._request(
             METHOD_POST,
@@ -366,6 +427,13 @@ class TopGGClient:
         Returns
         -------
         response_data : `Any`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         return await self._request(
             METHOD_GET,
@@ -383,6 +451,13 @@ class TopGGClient:
         Returns
         -------
         response_data : `Any`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         return await self._request(
             METHOD_GET,
@@ -400,6 +475,13 @@ class TopGGClient:
         Returns
         -------
         response_data : `Any`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         return await self._request(
             METHOD_GET,
@@ -422,6 +504,13 @@ class TopGGClient:
         Returns
         -------
         response_data : `Any`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         return await self._request(
             METHOD_GET,
@@ -445,6 +534,13 @@ class TopGGClient:
         Returns
         -------
         response_data : `Any`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         return await self._request(
             METHOD_GET,
@@ -466,6 +562,13 @@ class TopGGClient:
         Returns
         -------
         response_data : `Any`
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         return await self._request(
             METHOD_GET,
@@ -476,6 +579,10 @@ class TopGGClient:
     
     async def _request(self, method, url, rate_limit_handler, data=None, query_parameters=None):
         """
+        Does a request towards top.gg API.
+        
+        This method is a coroutine.
+        
         Parameters
         ----------
         method : `str`
@@ -488,6 +595,13 @@ class TopGGClient:
             Rate limit handle to handle rate limit as.
         query_parameters : `None` or `Any`, Optional
             Query parameters
+        
+        Raises
+        ------
+        ConnectionError
+            No internet connection.
+        TopGGHttpException
+            Any exception raised by top.gg api.
         """
         headers = self.headers.copy()
         
