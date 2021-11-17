@@ -35,7 +35,6 @@ else:
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
         String, Boolean
     from sqlalchemy.sql.expression import func
-    from hata.ext.kokoro_sqlalchemy import KOKORO_STRATEGY
     
     BASE = declarative_base()
     
@@ -136,11 +135,6 @@ else:
     # Creating tables
     DB_ENGINE = create_engine(DATABASE_NAME)
     BASE.metadata.create_all(DB_ENGINE)
-    del DB_ENGINE
-    
-    # Create future engine
-    
-    DB_ENGINE = create_engine(DATABASE_NAME, strategy=KOKORO_STRATEGY, single_worker=True)
     
     def get_create_common_user_expression(
         user_id,

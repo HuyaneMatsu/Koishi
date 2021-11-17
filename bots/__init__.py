@@ -7,6 +7,7 @@ from hata import Client, ActivityRich, ACTIVITY_TYPES, IntentFlag
 from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.constants import PATH__KOISHI, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, PREFIX__FLAN, PREFIX__SATORI
 from bot_utils.utils import random_error_message_getter, category_name_rule
+from bot_utils import async_engine # replace sync with async database engine.
 
 MARISA_MODE = config.MARISA_MODE
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
