@@ -361,7 +361,7 @@ async def render_about_generic(client, event):
         'Guild count',
         (
             f'```\n'
-            f'{len(GUILDS)}\n'
+            f'{len(client.guilds)}\n'
             f'```'
         ),
         inline = True,

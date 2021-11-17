@@ -1,9 +1,9 @@
 __all__ = ('BotInfo', 'BotStats','BotsQueryResult', 'BriefUserInfo', 'UserConnections', 'UserInfo')
 
-from hata.utils import timestamp_to_datetime
-from hata.bases import IconSlot, Slotted
-from hata.http import urls as module_urls
-from hata.color import Color
+from hata.discord.utils import timestamp_to_datetime
+from hata.discord.bases import IconSlot, Slotted
+from hata.discord.http import urls as module_urls
+from hata.discord.color import Color
 
 # bot info constants
 from .constants import JSON_KEY_BOT_INFO_ID, JSON_KEY_BOT_INFO_NAME, JSON_KEY_BOT_INFO_DISCRIMINATOR_STRING, \

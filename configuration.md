@@ -7,6 +7,7 @@ KOISHI_TOKEN = ''               # bot token. (str)
 KOISHI_ID = 0                   # bot id (int), can be 0.
 KOISHI_SECRET = None            # client_secret (str) for oauth2, can be None.
 KOISHI_PREFIX = 'k!'            # default prefix. (str)
+KOISHI_TOP_GG_TOKEN = ''        # top.gg token of the bot.
 
 SATORI_TOKEN = ''               # bot token (str) for second bot.
 SATORI_ID = 0                   # bot id (int) for second bot, can be 0.

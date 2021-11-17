@@ -189,7 +189,7 @@ class TopGGClient:
         
         client.top_gg_client = self
         client.events(start_auto_post, name='launch')
-        client.events(stop_auto_post, name='disconnect')
+        client.events(stop_auto_post, name='shutdown')
         
         return self
     
