@@ -1,9 +1,10 @@
 __all__ = ()
 
-from hata.backend.futures import Task, ScarletLock
+from hata.backend.utils import copy_docs
+from hata.backend.futures import ScarletLock
 from hata.discord.core import KOKORO
 
-class RateLimitContext:
+class RateLimitContextBase:
     """
     Rate limit context used to handle static rate limits when communicating with top.gg.
     
@@ -11,29 +12,14 @@ class RateLimitContext:
     ----------
     acquired : `bool`
         Whether the lock is acquired.
-    rate_limit_handler : ``RateLimitHandler``
-        The parent rate limit handler.
-    
-    Usage
-    -----
-    ```py
-    async with RateLimitContext(rate_limit_handler):
-        ...
-    ```
     """
-    __slots__ = ('acquired', 'rate_limit_handler')
+    __slots__ = ('acquired', )
     
-    def __new__(cls, rate_limit_handler):
+    def __new__(cls):
         """
         Creates a new rate limit context instance.
-        
-        Parameters
-        ----------
-        rate_limit_handler : ``RateLimitHandler``
-            The parent rate limit handler.
         """
         self = object.__new__(cls)
-        self.rate_limit_handler = rate_limit_handler
         self.acquired = False
         return self
     
@@ -44,11 +30,10 @@ class RateLimitContext:
         
         This method is a coroutine.
         """
-        await self.rate_limit_handler.lock.acquire()
         self.acquired = True
         return self
-    
-    
+
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """
         Releases the rate limit context.
@@ -66,13 +51,53 @@ class RateLimitContext:
     
     def release(self):
         """Releases the rate limit context."""
+        self.acquired = False
+
+
+class RateLimitContext(RateLimitContextBase):
+    """
+    Rate limit context used to handle static rate limits when communicating with top.gg.
+    
+    Attributes
+    ----------
+    acquired : `bool`
+        Whether the lock is acquired.
+    rate_limit_group : ``RateLimitGroup``
+        The parent rate limit group.
+    """
+    __slots__ = ('rate_limit_group')
+    
+    def __new__(cls, rate_limit_group):
+        """
+        Creates a new rate limit context instance.
+        
+        Parameters
+        ----------
+        rate_limit_group : ``RateLimitGroup``
+            The parent rate limit group.
+        """
+        self = object.__new__(cls)
+        self.rate_limit_group = rate_limit_group
+        self.acquired = False
+        return self
+    
+    
+    @copy_docs(RateLimitContextBase.__aenter__)
+    async def __aenter__(self):
+        await self.rate_limit_group.lock.acquire()
+        self.acquired = True
+        return self
+    
+    
+    @copy_docs(RateLimitContextBase.release)
+    def release(self):
         if self.acquired:
-            rate_limit_handler = self.rate_limit_handler
-            KOKORO.call_later(rate_limit_handler.reset_after, rate_limit_handler.lock.release)
+            rate_limit_group = self.rate_limit_group
+            KOKORO.call_later(rate_limit_group.reset_after, rate_limit_group.lock.release)
             self.acquired = False
 
 
-class StackedRateLimitHandler:
+class StackedRateLimitContext(RateLimitContextBase):
     """
     Rate limit context used to handle multiple static rate limits when communicating with top.gg.
     
@@ -80,86 +105,142 @@ class StackedRateLimitHandler:
     ----------
     acquired : `bool`
         Whether the lock is acquired.
-    rate_limit_handlers : `tuple` of ``RateLimitHandler``
-        The parent rate limit handlers.
-    
-    Usage
-    -----
-    ```py
-    async with StackedRateLimitHandler(rate_limit_handler_1, rate_limit_handler_2):
-        ...
-    ```
+    rate_limit_groups : `tuple` of ``RateLimitGroup``
+        The parent rate limit groups.
     """
-    __slots__ = ('acquired', 'rate_limit_handlers')
+    __slots__ = ('rate_limit_groups')
     
-    def __new__(cls, rate_limit_handlers):
+    def __new__(cls, rate_limit_groups):
         """
         Creates a new rate limit context instance.
         
         Parameters
         ----------
-        *rate_limit_handlers : ``RateLimitHandler``
-            The parent rate limit handlers.
+        rate_limit_groups : `tuple` of ``RateLimitGroup``
+            The parent rate limit groups.
         """
         self = object.__new__(cls)
-        self.rate_limit_handlers = rate_limit_handlers
+        self.rate_limit_groups = rate_limit_groups
         self.acquired = False
         return self
     
     
+    @copy_docs(RateLimitContextBase.__aenter__)
     async def __aenter__(self):
-        """
-        Enters the rate limit context, blocking till acquiring it.
-        
-        This method is a coroutine.
-        """
-        tasks = []
-        for rate_limit_handler in self.rate_limit_handlers:
-            tasks.append(Task(rate_limit_handler.lock.acquire(), KOKORO))
-        
-        try:
-            for task in tasks:
-                await task
-        except:
-            for rate_limit_handler, task in zip(self.rate_limit_handlers, tasks):
-                if task.done():
-                    rate_limit_handler.lock.release()
-                else:
-                    task.cancel()
-            
-            raise
+        # Use linear acquiring.
+        for rate_limit_group in self.rate_limit_groups:
+            try:
+                await rate_limit_group.lock.acquire()
+            except:
+                # If already acquired, release on cancellation
+                for rate_limit_group_to_cancel in self.rate_limit_groups:
+                    if rate_limit_group is rate_limit_group_to_cancel:
+                        break
+                    
+                    rate_limit_group_to_cancel.lock.release()
+                    continue
+                
+                raise
         
         self.acquired = True
         return self
     
     
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """
-        Releases the rate limit context.
-        
-        This method is a coroutine.
-        """
-        self.release()
-        return False
-        
-    
-    def __del__(self):
-        """Releases the rate limit context if not yet released."""
-        self.release()
-    
-    
+    @copy_docs(RateLimitContextBase.release)
     def release(self):
-        """Releases the rate limit context."""
         if self.acquired:
-            for rate_limit_handler in self.rate_limit_handlers:
-                KOKORO.call_later(rate_limit_handler.reset_after, rate_limit_handler.lock.release)
+            for rate_limit_group in self.rate_limit_groups:
+                KOKORO.call_later(rate_limit_group.reset_after, rate_limit_group.lock.release)
             
             self.acquired = False
 
 
-class RateLimitHandler:
+class RateLimitHandlerBase:
     """
-    Static rate limit handler implementation.
+    Rate limit handler which can be entered.
+    """
+    __slots__ = ()
+    
+    def __new__(cls):
+        """
+        Creates a new rate limit handler instance.
+        """
+        return object.__new__(cls)
+    
+    def ctx(self):
+        """
+        Enters the rate limit handler, allowing it to be used as an asynchronous context manager.
+        
+        Returns
+        -------
+        rate_limit_context : ``RateLimitContextBase``
+        """
+        return RateLimitContextBase()
+
+
+class RateLimitHandler(RateLimitHandlerBase):
+    """
+    Rate limit handler which can be entered.
+    
+    Attributes
+    ----------
+    rate_limit_group : ``RateLimitGroup``
+        The wrapped rate limit group.
+    """
+    __slots__ = ('rate_limit_group',)
+    
+    def __new__(cls, rate_limit_group):
+        """
+        Creates a new rate limit handler instance with the given rate limit group.
+        
+        Parameters
+        ----------
+        rate_limit_group : ``RateLimitGroup``
+            The parent rate limit group.
+        """
+        self = object.__new__(cls)
+        self.rate_limit_group = rate_limit_group
+        return self
+    
+    
+    @copy_docs(RateLimitHandlerBase.ctx)
+    def ctx(self):
+        return RateLimitContext(self.rate_limit_group)
+
+
+class StackedRateLimitHandler(RateLimitHandlerBase):
+    """
+    Rate limit handler which can be entered.
+    
+    Attributes
+    ----------
+    rate_limit_groups : `tuple` of ``RateLimitGroup``
+        The wrapped rate limit group.
+    """
+    __slots__ = ('rate_limit_groups',)
+    
+    def __new__(cls, *rate_limit_groups):
+        """
+        Creates a new rate limit handler instance with the given rate limit group.
+        
+        Parameters
+        ----------
+        *rate_limit_groups : ``RateLimitGroup``
+            The parent rate limit groups.
+        """
+        self = object.__new__(cls)
+        self.rate_limit_groups = rate_limit_groups
+        return self
+    
+    
+    @copy_docs(RateLimitHandlerBase.ctx)
+    def ctx(self):
+        return StackedRateLimitContext(self.rate_limit_groups)
+
+
+class RateLimitGroup:
+    """
+    Static rate limit handler group implementation.
     
     Attributes
     ----------

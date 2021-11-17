@@ -1,9 +1,10 @@
 __all__ = ('TopGGClient', )
 
-from hata.backend.utils import WeakReferer, imultidict
-from hata.backned.futures import Task
-from hata.backend.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, \
-    AUTHORIZATION, CONTENT_TYPE, USER_AGENT
+from hata.backend.utils import WeakReferer, imultidict, to_json, from_json
+from hata.backend.futures import Task, sleep, Future
+from hata.backend.headers import RETRY_AFTER, METHOD_GET, METHOD_POST, AUTHORIZATION, CONTENT_TYPE, USER_AGENT
+from hata.backend.http import RequestCM
+from hata.backend.event_loop import LOOP_TIME
 
 from hata.discord.client import Client
 from hata.discord.core import KOKORO
@@ -12,10 +13,12 @@ from hata.discord.http import LIBRARY_USER_AGENT
 from .constants import JSON_KEY_BOT_STATS_GUILD_COUNT, JSON_KEY_BOT_STATS_SHARD_ID, JSON_KEY_BOT_STATS_SHARD_COUNT, \
     JSON_KEY_WEEKEND_STATUS, QUERY_KEY_GET_BOTS_LIMIT, QUERY_KEY_GET_BOTS_OFFSET, QUERY_KEY_GET_BOTS_SORT_BY, \
     QUERY_KEY_GET_BOTS_SEARCH_QUERY, QUERY_KEY_GET_BOTS_FIELDS, JSON_KEY_VOTED, QUERY_KEY_GET_USER_VOTE_USER_ID, \
-    RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER, RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER
+    RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER, RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER, \
+    RATE_LIMIT_GLOBAL_DEFAULT_DURATION
 from .types import UserInfo, BotInfo, BotsQueryResult
 from .bots_query import get_bots_query_sort_by_value, create_bots_query_search_value, BOTS_QUERY_FIELDS_VALUE
-from .rate_limit_handling import RateLimitHandler
+from .rate_limit_handling import RateLimitGroup, RateLimitHandler, StackedRateLimitHandler
+from .exceptions import TopGGHttpException
 
 AUTO_POST_INTERVAL = 1800.0
 
@@ -112,6 +115,8 @@ class TopGGClient:
         Handle to repeat the auto poster.
     _auto_post_running : `bool`
         Whether auto posting is still running.
+    _global_rate_limit_expires_at : `float`
+        When the global rate limit expires in monotonic time.
     _headers : `imultidict`
         Request headers.
     _rate_limit_handler_global : ``RateLimitHandler``
@@ -127,8 +132,8 @@ class TopGGClient:
     top_gg_token : `str`
         Top.gg api token.
     """
-    __slots__ = ('__weakref__', '_auto_post_handler', '_auto_post_running', '_headers', '_rate_limit_handler_bots',
-        'client_id', '_rate_limit_handler_global', 'client_reference', 'http', 'top_gg_token',)
+    __slots__ = ('__weakref__', '_auto_post_handler', '_auto_post_running', '_global_rate_limit_expires_at', '_headers',
+        '_rate_limit_handler_bots', '_rate_limit_handler_global', 'client_id', 'client_reference', 'http', 'top_gg_token',)
     
     def __new__(cls, client, top_gg_token):
         """
@@ -159,7 +164,6 @@ class TopGGClient:
         headers = imultidict()
         headers[USER_AGENT] = LIBRARY_USER_AGENT
         headers[AUTHORIZATION] = top_gg_token
-        headers[CONTENT_TYPE] = 'application/json'
         
         self = object.__new__(cls)
         self.client_reference = client_reference
@@ -171,8 +175,9 @@ class TopGGClient:
         self.http = client.http
         self.top_gg_token = top_gg_token
         
-        self._rate_limit_handler_global = RateLimitHandler(RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER)
-        self._rate_limit_handler_bots = RateLimitHandler(RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER)
+        self._global_rate_limit_expires_at = 0.0
+        self._rate_limit_handler_global = RateLimitGroup(RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER)
+        self._rate_limit_handler_bots = RateLimitGroup(RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER)
         
         client.top_gg_client = self
         client.events(start_auto_post, name='launch')
@@ -218,7 +223,7 @@ class TopGGClient:
         return data[JSON_KEY_WEEKEND_STATUS]
     
     
-    def get_bot_voters(self):
+    async def get_bot_voters(self):
         """
         Gets the last 1000 voters.
         
@@ -347,6 +352,7 @@ class TopGGClient:
         return await self._request(
             METHOD_POST,
             f'{TOP_GG_ENDPOINT}/bots/stats',
+            StackedRateLimitHandler(self._rate_limit_handler_bots, self._rate_limit_handler_global),
             data = data,
         )
     
@@ -364,6 +370,7 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/weekend',
+            RateLimitHandler(self._rate_limit_handler_global),
         )
     
     
@@ -380,6 +387,7 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/bots/{self.client_id}/votes',
+            StackedRateLimitHandler(self._rate_limit_handler_bots, self._rate_limit_handler_global),
         )
     
     
@@ -396,6 +404,7 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/bots/{self.client_id}',
+            StackedRateLimitHandler(self._rate_limit_handler_bots, self._rate_limit_handler_global),
         )
     
     
@@ -417,6 +426,7 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/bots',
+            StackedRateLimitHandler(self._rate_limit_handler_bots, self._rate_limit_handler_global),
             query_parameters = query_parameters,
         )
     
@@ -439,6 +449,7 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/users/{user_id}',
+            RateLimitHandler(self._rate_limit_handler_global),
         )
 
     async def _get_user_vote(self, query_parameters):
@@ -459,20 +470,86 @@ class TopGGClient:
         return await self._request(
             METHOD_GET,
             f'{TOP_GG_ENDPOINT}/bots/{self.client_id}/check',
+            RateLimitHandler(self._rate_limit_handler_global),
             query_parameters = query_parameters,
         )
     
-    async def _request(self, method, endpoint, data=None, query_parameters=None):
+    async def _request(self, method, url, rate_limit_handler, data=None, query_parameters=None):
         """
         Parameters
         ----------
         method : `str`
             Http method.
-        endpoint : `str`
+        url : `str`
             Endpoint to do request towards.
         data : `None` or `Any`, Optional
             Json serializable data.
+        rate_limit_handler : ``RateLimitHandlerBase`
+            Rate limit handle to handle rate limit as.
         query_parameters : `None` or `Any`, Optional
             Query parameters
         """
+        headers = self.headers.copy()
         
+        if (data is not None):
+            headers[CONTENT_TYPE] = 'application/json'
+            data = to_json(data)
+        
+        try_again = 2
+        while try_again > 0:
+            global_rate_limit_expires_at = self._global_rate_limit_expires_at
+            if global_rate_limit_expires_at > LOOP_TIME():
+                future = Future(KOKORO)
+                KOKORO.call_at(global_rate_limit_expires_at, Future.set_result_if_pending, future, None)
+                await future
+            
+            async with rate_limit_handler.ctx():
+                try:
+                    async with RequestCM(self._request(method, url, headers, data, query_parameters)) as response:
+                        response_data = await response.text(encoding='utf-8')
+                except OSError as err:
+                    if not try_again:
+                        raise ConnectionError('Invalid address or no connection with Top.gg.') from err
+                    
+                    await sleep(0.5/try_again, KOKORO)
+                    
+                    try_again -= 1
+                    continue
+                
+                response_headers = response.headers
+                status = response.status
+                
+                content_type_headers = response_headers.get(CONTENT_TYPE, None)
+                if (content_type_headers is not None) and (content_type_headers == 'application/json'):
+                    response_data = from_json(response_data)
+                
+                if 199 < status < 305:
+                    return response_data
+                
+                # Are we rate limited?
+                if status == 429:
+                    try:
+                        retry_after = headers[RETRY_AFTER]
+                    except KeyError:
+                        retry_after = RATE_LIMIT_GLOBAL_DEFAULT_DURATION
+                    else:
+                        try:
+                            retry_after = float(retry_after)
+                        except ValueError:
+                            retry_after = RATE_LIMIT_GLOBAL_DEFAULT_DURATION
+                    
+                    self._global_rate_limit_expires_at = LOOP_TIME()+retry_after
+                    await sleep(retry_after, KOKORO)
+                    continue
+                
+                
+                # Python casts sets to frozensets
+                if (status in {400, 401, 402, 404}):
+                    raise TopGGHttpException(response, response_data)
+                
+                if try_again and (status >= 500):
+                    await sleep(10.0/try_again, KOKORO)
+                    try_again -= 1
+                    continue
+                
+                raise TopGGHttpException(response, response_data)
