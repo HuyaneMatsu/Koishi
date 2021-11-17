@@ -40,7 +40,8 @@ else:
             guild_presences = False,
         ),
         application_id = config.KOISHI_ID,
-        extensions = ('command_utils', 'slash'),
+        extensions = ('command_utils', 'slash', 'top_gg'),
+        top_gg_token = config.KOISHI_TOP_GG_TOKEN,
     )
     
     EXTENSION_LOADER.add_default_variables(Koishi=Koishi, SLASH_CLIENT=Koishi)
