@@ -25,7 +25,7 @@ AUTO_POST_INTERVAL = 1800.0
 
 TOP_GG_ENDPOINT = 'https://top.gg/api'
 
-async def start_auto_post(client):
+async def _start_auto_post(client):
     """
     Client launch event handler starting auto post.
     
@@ -44,12 +44,12 @@ async def start_auto_post(client):
     if top_gg_client._auto_post_running:
         top_gg_client._auto_post_handler = KOKORO.call_later(
             AUTO_POST_INTERVAL,
-            trigger_auto_post,
+            _trigger_auto_post,
             WeakReferer(top_gg_client),
         )
 
 
-async def stop_auto_post(client):
+async def _stop_auto_post(client):
     """
     Client disconnect event handler, which stops auto posting.
     
@@ -69,7 +69,7 @@ async def stop_auto_post(client):
         auto_post_handler.cancel()
 
 
-def trigger_auto_post(top_gg_client_reference):
+def _trigger_auto_post(top_gg_client_reference):
     """
     Triggers an auto post.
     
@@ -80,10 +80,10 @@ def trigger_auto_post(top_gg_client_reference):
     """
     top_gg_client = top_gg_client_reference()
     if (top_gg_client is not None):
-        Task(do_auto_post(top_gg_client, top_gg_client_reference), KOKORO)
+        Task(_do_auto_post(top_gg_client, top_gg_client_reference), KOKORO)
 
 
-async def do_auto_post(top_gg_client, top_gg_client_reference):
+async def _do_auto_post(top_gg_client, top_gg_client_reference):
     """
     Does an auto post.
     
@@ -109,7 +109,7 @@ async def do_auto_post(top_gg_client, top_gg_client_reference):
         if top_gg_client._auto_post_running:
             top_gg_client._auto_post_handler = KOKORO.call_later(
                 AUTO_POST_INTERVAL,
-                trigger_auto_post,
+                _trigger_auto_post,
                 top_gg_client_reference,
             )
 
@@ -157,8 +157,6 @@ class TopGGClient:
         
         Raises
         ------
-        RuntimeError
-            If the client already has `top_gg_client` attribute.
         TypeError
             - If `client` is not ``Client`` instance.
             - If `top_gg_token` is not `str` instance.
@@ -169,9 +167,6 @@ class TopGGClient:
         
         if not isinstance(top_gg_token, str):
             raise TypeError(f'`top_gg_token` can be `str` instance, got {top_gg_token.__class__.__name__}.')
-        
-        if hasattr(client, 'top_gg_client'):
-            raise RuntimeError(f'The client already has `top_gg_client` attribute; got {client!r}.')
         
         client_reference = WeakReferer(client)
         
@@ -192,10 +187,6 @@ class TopGGClient:
         self._global_rate_limit_expires_at = 0.0
         self._rate_limit_handler_global = RateLimitGroup(RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER)
         self._rate_limit_handler_bots = RateLimitGroup(RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER)
-        
-        client.top_gg_client = self
-        client.events(start_auto_post, name='launch')
-        client.events(stop_auto_post, name='shutdown')
         
         return self
     
