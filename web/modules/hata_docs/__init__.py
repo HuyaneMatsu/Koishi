@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
 import hata
 import hata.ext.patchouli
 import hata.ext.extension_loader
 import hata.ext.commands
 import hata.ext.commands.helps.subterranean
 import hata.ext.slash
+import hata.ext.commands_v2
+import hata.ext.commands_v2.helps.subterranean
 
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath, FunctionUnit, ClassAttributeUnit, \
     InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths, set_highlight_html_class, highlight
@@ -63,7 +64,7 @@ class DocsWrapper:
             back_path = back_path,
             structure_html = structure_html,
             structure_js = structure_js,
-                )
+        )
 
 class Redirecter:
     __slots__ = ('redirect_to')
