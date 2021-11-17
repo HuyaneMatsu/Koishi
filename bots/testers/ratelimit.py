@@ -91,7 +91,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
         with RLTPrinterBuffer() as buffer:
             response_headers = response.headers
             status = response.status
-            if response_headers['content-type']=='application/json':
+            if response_headers['content-type'].startswith('application/json'):
                 response_data = from_json(response_data)
             
             value = response_headers.get('X-Ratelimit-Global', None)

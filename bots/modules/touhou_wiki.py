@@ -50,8 +50,8 @@ async def touhou_wiki(client, event,
         response_data = await response.read()
         response_headers = response.headers
     
-    content_type_headers = response_headers.get(CONTENT_TYPE, None)
-    if (content_type_headers is not None) and (content_type_headers == 'application/json'):
+    content_type_header = response_headers.get(CONTENT_TYPE, None)
+    if (content_type_header is not None) and content_type_header.startswith('application/json'):
         json_data = from_json(response_data)
         
         results = list(zip(json_data[1], json_data[3]))

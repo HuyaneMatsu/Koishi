@@ -10,10 +10,11 @@ from hata.discord.client import Client
 from hata.discord.core import KOKORO
 from hata.discord.http import LIBRARY_USER_AGENT
 
-from .constants import JSON_KEY_BOT_STATS_GUILD_COUNT, JSON_KEY_BOT_STATS_SHARD_ID, JSON_KEY_BOT_STATS_SHARD_COUNT, \
-    JSON_KEY_WEEKEND_STATUS, QUERY_KEY_GET_BOTS_LIMIT, QUERY_KEY_GET_BOTS_OFFSET, QUERY_KEY_GET_BOTS_SORT_BY, \
-    QUERY_KEY_GET_BOTS_SEARCH_QUERY, QUERY_KEY_GET_BOTS_FIELDS, JSON_KEY_VOTED, QUERY_KEY_GET_USER_VOTE_USER_ID, \
-    RATE_LIMIT_GLOBAL_SIZE, RATE_LIMIT_GLOBAL_RESET_AFTER, RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER, \
+from .constants import JSON_KEY_POST_BOT_STATS_GUILD_COUNT, JSON_KEY_POST_BOT_STATS_SHARD_ID, \
+    JSON_KEY_POST_BOT_STATS_SHARD_COUNT, JSON_KEY_WEEKEND_STATUS, QUERY_KEY_GET_BOTS_LIMIT, \
+    QUERY_KEY_GET_BOTS_OFFSET, QUERY_KEY_GET_BOTS_SORT_BY, QUERY_KEY_GET_BOTS_SEARCH_QUERY, \
+    QUERY_KEY_GET_BOTS_FIELDS, JSON_KEY_VOTED, QUERY_KEY_GET_USER_VOTE_USER_ID, RATE_LIMIT_GLOBAL_SIZE, \
+    RATE_LIMIT_GLOBAL_RESET_AFTER, RATE_LIMIT_BOTS_SIZE, RATE_LIMIT_BOTS_RESET_AFTER, \
     RATE_LIMIT_GLOBAL_DEFAULT_DURATION
 from .types import UserInfo, BotInfo, BotsQueryResult
 from .bots_query import get_bots_query_sort_by_value, create_bots_query_search_value, BOTS_QUERY_FIELDS_VALUE
@@ -156,6 +157,8 @@ class TopGGClient:
         
         Raises
         ------
+        RuntimeError
+            If the client already has `top_gg_client` attribute.
         TypeError
             - If `client` is not ``Client`` instance.
             - If `top_gg_token` is not `str` instance.
@@ -166,6 +169,9 @@ class TopGGClient:
         
         if not isinstance(top_gg_token, str):
             raise TypeError(f'`top_gg_token` can be `str` instance, got {top_gg_token.__class__.__name__}.')
+        
+        if hasattr(client, 'top_gg_client'):
+            raise RuntimeError(f'The client already has `top_gg_client` attribute; got {client!r}.')
         
         client_reference = WeakReferer(client)
         
@@ -216,9 +222,9 @@ class TopGGClient:
                 shard_count = 1
             
             data = {
-                JSON_KEY_BOT_STATS_GUILD_COUNT: guild_count,
-                JSON_KEY_BOT_STATS_SHARD_COUNT: shard_count,
-                JSON_KEY_BOT_STATS_SHARD_ID: 0,
+                JSON_KEY_POST_BOT_STATS_GUILD_COUNT: guild_count,
+                JSON_KEY_POST_BOT_STATS_SHARD_COUNT: shard_count,
+                JSON_KEY_POST_BOT_STATS_SHARD_ID: 0,
             }
             
             await self._post_bot_stats(data)
@@ -266,7 +272,7 @@ class TopGGClient:
         return [UserInfo.from_data(user_data) for user_data in user_datas]
     
     
-    async def bet_bot_info(self):
+    async def get_bot_info(self):
         """
         Gets bot information and returns it.
         
@@ -603,7 +609,7 @@ class TopGGClient:
         TopGGHttpException
             Any exception raised by top.gg api.
         """
-        headers = self.headers.copy()
+        headers = self._headers.copy()
         
         if (data is not None):
             headers[CONTENT_TYPE] = 'application/json'
@@ -619,7 +625,7 @@ class TopGGClient:
             
             async with rate_limit_handler.ctx():
                 try:
-                    async with RequestCM(self._request(method, url, headers, data, query_parameters)) as response:
+                    async with RequestCM(self.http._request(method, url, headers, data, query_parameters)) as response:
                         response_data = await response.text(encoding='utf-8')
                 except OSError as err:
                     if not try_again:
@@ -634,7 +640,7 @@ class TopGGClient:
                 status = response.status
                 
                 content_type_headers = response_headers.get(CONTENT_TYPE, None)
-                if (content_type_headers is not None) and (content_type_headers == 'application/json'):
+                if (content_type_headers is not None) and content_type_headers.startswith('application/json'):
                     response_data = from_json(response_data)
                 
                 if 199 < status < 305:
