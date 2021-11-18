@@ -15,8 +15,8 @@ from bot_utils.constants import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__SUPPOR
     LINK__HATA_DOCS, LINK__PASTE, ROLE__SUPPORT__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__SUPPORT__ELEVATED, \
     ROLE__SUPPORT__VERIFIED, CHANNEL__SUPPORT__SYSTEM, LINK__HATA_SLASH, ROLE__SUPPORT__NSFW_ACCESS, \
     ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_WINNER, ROLE__SUPPORT__EVENT_PARTICIPANT, \
-    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, STARTUP, PATH__KOISHI
-from bot_utils. cpu_info import CpuUsage, PROCESS
+    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, STARTUP, PATH__KOISHI, LINK__KOISHI_TOP_GG
+from bot_utils.cpu_info import CpuUsage, PROCESS
 
 SLASH_CLIENT: Client
 
@@ -177,6 +177,10 @@ ABOUT_COMPONENTS = Row(
         'Support server',
         url = INVITE__SUPPORT.url,
     ),
+    Button(
+        'Vote for me!',
+        url = LINK__KOISHI_TOP_GG,
+    )
 )
 
 
@@ -250,6 +254,7 @@ KOISHI_JOKES = (
     ('Fishing rods', 'stolen'),
     ('Orin', 'dancing'),
     ('Satori', 'why.mp4'),
+    ('KFC', 'Koishi Fried Chicken'),
 )
 
 
@@ -450,27 +455,27 @@ async def render_about_cache(client, event):
     return embed
 
 
-FIELD_NAME_GENERIC = 'generic'
-FILED_NAME_CACHE = 'cache'
+ABOUT_FIELD_NAME_GENERIC = 'generic'
+ABOUT_FIELD_NAME_CACHE = 'cache'
 
-FIELD_CHOICES = [
-    FIELD_NAME_GENERIC,
-    FILED_NAME_CACHE,
+ABOUT_FIELD_CHOICES = [
+    ABOUT_FIELD_NAME_GENERIC,
+    ABOUT_FIELD_NAME_CACHE,
 ]
 
-FILED_NAME_TO_RENDERER = {
-    FIELD_NAME_GENERIC: render_about_generic,
-    FILED_NAME_CACHE: render_about_cache,
+ABOUT_FIELD_NAME_TO_RENDERER = {
+    ABOUT_FIELD_NAME_GENERIC: render_about_generic,
+    ABOUT_FIELD_NAME_CACHE: render_about_cache,
 }
 
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def about(client, event,
-    field: (FIELD_CHOICES, 'Choose a field!') = FIELD_NAME_GENERIC,
+    field: (ABOUT_FIELD_CHOICES, 'Choose a field!') = ABOUT_FIELD_NAME_GENERIC,
 ):
     """My secrets and stats. Simpers only!"""
     try:
-        field_renderer = FILED_NAME_TO_RENDERER[field]
+        field_renderer = ABOUT_FIELD_NAME_TO_RENDERER[field]
     except KeyError:
         abort(f'Unknown field: {field!r}.')
     else:
@@ -609,12 +614,68 @@ def build_command_list_embed():
 
 COMMAND_LIST_EMBED = build_command_list_embed()
 
-@SLASH_CLIENT.interactions(is_global=True)
-async def help_(client, event):
-    """Lists my commands."""
+HEARD_GUIDE_EMBED = Embed(
+    'Heart Guide',
+    color = COLOR__KOISHI_HELP,
+).add_thumbnail(
+    EMOJI__HEART_CURRENCY.url,
+).add_field(
+    'Getting hearts',
+    (
+        f'`/daily` - Claim you daily reward.\n'
+        f'`/ds` - Complete dungeon sweeper stages.\n'
+        f'`/proposal accept`- Accept marriage proposals.\n'
+        f'[vote]({LINK__KOISHI_TOP_GG}) on me on top.gg'
+    ),
+).add_field(
+    'Spending hearts',
+    (
+        '`\propose` - Propose to your heart\'s chosen one.\n'
+        '`\divorce` - Less waifus.\n'
+        '`\\buy-waifu-slot` - More waifus.\n'
+        '`\heart-shop roles` - Buy roles inside of my support server.'
+    ),
+).add_field(
+    'Gambling hearts',
+    (
+        '`\21` - Almost Blackjack.'
+    ),
+)
+
+async def render_help_generic(client, event):
     embed = COMMAND_LIST_EMBED.copy()
     add_user_footer(embed, event.user)
     return embed
+
+async def render_help_heart_guide(client, event):
+    embed = HEARD_GUIDE_EMBED.copy()
+    add_user_footer(embed, event.user)
+    return embed
+
+HELP_FIELD_NAME_GENERIC = 'generic'
+HELP_FIELD_NAME_HEART_GUIDE = 'heart-guide'
+
+HELP_FIELD_CHOICES = [
+    HELP_FIELD_NAME_GENERIC,
+    HELP_FIELD_NAME_HEART_GUIDE,
+]
+
+HELP_FIELD_NAME_TO_RENDERER = {
+    HELP_FIELD_NAME_GENERIC: render_help_generic,
+    HELP_FIELD_NAME_HEART_GUIDE: render_help_heart_guide,
+}
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def help_(client, event,
+    field: (HELP_FIELD_CHOICES, 'Choose a field!') = HELP_FIELD_NAME_GENERIC,
+):
+    """Lists my commands and such."""
+    try:
+        field_renderer = ABOUT_FIELD_NAME_TO_RENDERER[field]
+    except KeyError:
+        abort(f'Unknown field: {field!r}.')
+    else:
+        return await field_renderer(client, event)
 
 
 @SLASH_CLIENT.interactions(is_global=True)

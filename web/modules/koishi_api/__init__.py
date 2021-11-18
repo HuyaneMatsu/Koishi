@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify, abort
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, abort, Response
 from sqlalchemy.sql import select
 from hata.ext.top_gg import BotVote
 
@@ -8,6 +8,11 @@ from config import KOISHI_TOP_GG_AUTHORIZATION
 URL_PREFIX = '/project/koishi/api'
 
 ROUTES = Blueprint('vote', '', url_prefix=URL_PREFIX)
+
+DAILY_BASE = 100
+DAILY_LIMIT = 300
+DAILY_PER_DAY_BONUS = 5
+
 
 @ROUTES.route('/top_gg/vote', methods=['POST'])
 def vote():
@@ -41,10 +46,10 @@ def vote():
         else:
             connector.execute(
                 get_create_common_user_expression(
-                    user.id,
+                    bot_vote.user_id,
                     total_love = 100,
                     count_top_gg_vote = 1,
                 )
             )
     
-    abort(200)
+    return Response(200)
