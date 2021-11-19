@@ -52,4 +52,4 @@ def vote():
                 )
             )
     
-    return Response(200)
+    return Response(status=200)

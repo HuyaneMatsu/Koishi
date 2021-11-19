@@ -146,9 +146,9 @@ else:
     
     STICKER_COUNTER_TABLE = sticker_counter_model.__table__
     
-    # Creating tables
     DB_ENGINE = create_engine(DATABASE_NAME)
-    BASE.metadata.create_all(DB_ENGINE)
+    DB_ENGINE.dispose()
+    #BASE.metadata.create_all(DB_ENGINE)
     
     def get_create_common_user_expression(
         user_id,
