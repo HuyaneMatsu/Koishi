@@ -26,7 +26,7 @@ HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
 CLAIM_ROLE_VERIFIED_EMOJI = Emoji.precreate(690550890045898812)
 CLAIM_ROLE_VERIFIED_CUSTOM_ID = 'rules.claim_role.verified'
 
-CLAIM_ROLE_ANNOUNCEMENTS_EMOJi = Emoji.precreate(717841004383961221)
+CLAIM_ROLE_ANNOUNCEMENTS_EMOJI = Emoji.precreate(717841004383961221)
 CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID = 'rules.claim_role.announcements'
 
 RULES_COMPONENTS = Row(
@@ -37,7 +37,7 @@ RULES_COMPONENTS = Row(
     ),
     Button(
         'Claim announcements role',
-        CLAIM_ROLE_ANNOUNCEMENTS_EMOJi,
+        CLAIM_ROLE_ANNOUNCEMENTS_EMOJI,
         custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID,
     ),
 )
@@ -624,8 +624,9 @@ HEARD_GUIDE_EMBED = Embed(
     (
         f'`/daily` - Claim you daily reward.\n'
         f'`/ds` - Complete dungeon sweeper stages.\n'
-        f'`/proposal accept`- Accept marriage proposals.\n'
-        f'[vote]({LINK__KOISHI_TOP_GG}) on me on top.gg'
+        f'`/proposal accept` - Accept marriage proposals.\n'
+        f'[vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
+        f'Use any command, to get hearts randomly.'
     ),
 ).add_field(
     'Spending hearts',
@@ -804,34 +805,42 @@ async def docs_search(client, event,
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def ask():
     """How to ask!"""
-    return Embed('How to ask?',
-        'Don\'t ask to ask just ask.\n'
-        '\n'
-        ' • You will have much higher chances of getting an answer\n'
-        ' • It saves time both for us and you as we can skip the whole process of actually getting the question '
-        'out of you\n'
-        '\n'
-        'For more info visit [dontasktoask.com](https://dontasktoask.com/)',
-            color = COLOR__KOISHI_HELP)
+    return Embed(
+        'How to ask?',
+        (
+            'Don\'t ask to ask just ask.\n'
+            '\n'
+            ' • You will have much higher chances of getting an answer\n'
+            ' • It saves time both for us and you as we can skip the whole process of actually getting the question '
+            'out of you\n'
+            '\n'
+            'For more info visit [dontasktoask.com](https://dontasktoask.com/)'
+        ),
+        color = COLOR__KOISHI_HELP,
+    )
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def markdown():
     """How to use markdown."""
-    return Embed('Markdown',
-        'You can format your code by using markdown like this:\n'
-        '\n'
-        '\\`\\`\\`py\n'
-        'print(\'Hello world\')\n'
-        '\\`\\`\\`\n'
-        '\n'
-        'This would give you:\n'
-        '```python\n'
-        'print(\'Hello world\')```\n'
-        'Note that character \` is not a quote but a backtick.\n'
-        '\n'
-        f'If, however, you have large amounts of code then it\'s better to use [our paste service]({LINK__PASTE}).',
-            color = COLOR__KOISHI_HELP)
+    return Embed(
+        'Markdown',
+        (
+            'You can format your code by using markdown like this:\n'
+            '\n'
+            '\\`\\`\\`py\n'
+            'print(\'Hello world\')\n'
+            '\\`\\`\\`\n'
+            '\n'
+            'This would give you:\n'
+            '```python\n'
+            'print(\'Hello world\')```\n'
+            'Note that character \` is not a quote but a backtick.\n'
+            '\n'
+            f'If, however, you have large amounts of code then it\'s better to use [our paste service]({LINK__PASTE}).'
+        ),
+        color = COLOR__KOISHI_HELP,
+    )
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
@@ -852,7 +861,8 @@ ROLE_INFO = SLASH_CLIENT.interactions(
 @ROLE_INFO.interactions
 async def Collectible():
     """A list of collectible roles in ND."""
-    embed = Embed('Collectible roles:',
+    embed = Embed(
+        'Collectible roles:',
         f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY:e} using the `heart-shop roles` command.',
         color = COLOR__KOISHI_HELP,
     ).add_field(

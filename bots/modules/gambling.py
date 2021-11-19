@@ -5,7 +5,7 @@ from random import random
 from math import log10, ceil, floor
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
-    ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission
+    ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission, InteractionType
 from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, wait_for_component_interaction
 from sqlalchemy.sql import select, desc
 
@@ -13,161 +13,29 @@ from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, ge
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
 
 from bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, GUILD__SUPPORT, \
-    EMOJI__HEART_CURRENCY, USER__DISBOARD, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__ADMIN, \
+    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__ADMIN, \
     ROLE__SUPPORT__NSFW_ACCESS, IN_GAME_IDS, COLOR__GAMBLING
 from bot_utils.utils import send_embed_to
+from bot_utils.daily import DAILY_INTERVAL, calculate_daily_new_only, DAILY_PER_DAY_BONUS_W_B, DAILY_LIMIT_BONUS_W_E, \
+    DAILY_BASE_BONUS_W_HE, DAILY_LIMIT_BONUS_W_HE, DAILY_LIMIT_BONUS_W_B, DAILY_BASE, calculate_daily_new, \
+    DAILY_STREAK_BREAK, calculate_daily_for, NSFW_ACCESS_COST, DAILY_LIMIT, DAILY_PER_DAY, ELEVATED_COST, \
+    HEART_BOOST_COST
 
 SLASH_CLIENT: Client
-Satori: Client
-
-def setup(lib):
-    Satori.events.message_create.append(GUILD__SUPPORT, heart_generator)
-
-def teardown(lib):
-    Satori.events.message_create.remove(GUILD__SUPPORT, heart_generator)
 
 
-DAILY_INTERVAL          = timedelta(hours=22)
-DAILY_STREAK_BREAK      = timedelta(hours=26)
-DAILY_STREAK_LOSE       = timedelta(hours=12)
-
-DAILY_BASE              = 100
-DAILY_PER_DAY           = 5
-DAILY_LIMIT             = 300
-
-DAILY_LIMIT_BONUS_W_E   = 300
-
-DAILY_PER_DAY_BONUS_W_B = 5
-DAILY_LIMIT_BONUS_W_B   = 300
-
-DAILY_BASE_BONUS_W_HE   = 514
-DAILY_LIMIT_BONUS_W_HE  = 5140
-
-NSFW_ACCESS_COST        = 666
-ELEVATED_COST           = 10000
-HEART_BOOST_COST        = 514000
-
-
-EVENT_MAX_DURATION      = timedelta(hours=24)
-EVENT_MIN_DURATION      = timedelta(minutes=30)
-EVENT_HEART_MIN_AMOUNT  = 50
-EVENT_HEART_MAX_AMOUNT  = 3000
-EVENT_OK_EMOJI          = BUILTIN_EMOJIS['ok_hand']
-EVENT_ABORT_EMOJI       = BUILTIN_EMOJIS['x']
-EVENT_DAILY_MIN_AMOUNT  = 1
-EVENT_DAILY_MAX_AMOUNT  = 7
-EVENT_OK_BUTTON         = Button(emoji=EVENT_OK_EMOJI)
-EVENT_ABORT_BUTTON      = Button(emoji=EVENT_ABORT_EMOJI)
-EVENT_COMPONENTS        = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
-EVENT_CURRENCY_BUTTON   = Button(emoji=EMOJI__HEART_CURRENCY)
-
-
-def calculate_daily_for(user, daily_streak):
-    """
-    Returns how much daily love the given user gets after the given streak.
-    
-    Parameters
-    ----------
-    user : ``ClientUserBase``
-        The respective user.
-    daily_streak : `int`
-        The daily streak of the respective user.
-    
-    Returns
-    -------
-    received : `int`
-    """
-    daily_base = DAILY_BASE
-    daily_per_day = DAILY_PER_DAY
-    daily_limit = DAILY_LIMIT
-    
-    
-    if user.has_role(ROLE__SUPPORT__ELEVATED):
-        daily_limit += DAILY_LIMIT_BONUS_W_E
-    
-    if user.has_role(ROLE__SUPPORT__BOOSTER):
-        daily_per_day += DAILY_PER_DAY_BONUS_W_B
-        daily_limit += DAILY_LIMIT_BONUS_W_B
-    
-    if user.has_role(ROLE__SUPPORT__HEART_BOOST):
-        daily_base += DAILY_BASE_BONUS_W_HE
-        daily_limit += DAILY_LIMIT_BONUS_W_HE
-    
-    
-    daily_extra = daily_streak*daily_per_day
-    if (daily_extra > daily_limit):
-        daily_extra = daily_limit
-    
-    received = daily_base+daily_extra+daily_streak
-    
-    return received
-
-def calculate_daily_new_only(daily_streak, daily_next, now):
-    """
-    Calculates daily streak loss and the new next claim time.
-    
-    Parameters
-    ----------
-    daily_streak : `int`
-        The user's actual daily streak.
-    daily_next : `datetime`
-        The time when the user can claim it's next daily reward.
-    now : `datetime`
-        The current utc time.
-    
-    Returns
-    -------
-    daily_streak_new : `int`
-        The new daily streak value of the user.
-    """
-    daily_next_with_break = daily_next+DAILY_STREAK_BREAK
-    if daily_next_with_break < now:
-        daily_streak_new = daily_streak-((now-daily_next_with_break)//DAILY_STREAK_LOSE)-1
-        
-        if daily_streak_new < 0:
-            daily_streak_new = 0
-    
-    else:
-        daily_streak_new = daily_streak
-    
-    return daily_streak_new
-
-
-def calculate_daily_new(daily_streak, daily_next, now):
-    """
-    Calculates daily streak loss and the new next claim time.
-    
-    Parameters
-    ----------
-    daily_streak : `int`
-        The user's actual daily streak.
-    daily_next : `datetime`
-        The time when the user can claim it's next daily reward.
-    now : `datetime`
-        The current utc time.
-    
-    Returns
-    -------
-    daily_streak_new : `int`
-        The new daily streak value of the user.
-    daily_next_new : `datetime`
-        The new daily next value of the user.
-    """
-    daily_next_with_break = daily_next+DAILY_STREAK_BREAK
-    if daily_next_with_break < now:
-        daily_streak_new = daily_streak-((now-daily_next_with_break)//DAILY_STREAK_LOSE)-1
-        
-        if daily_streak_new < 0:
-            daily_streak_new = 0
-            daily_next_new = now
-        else:
-            daily_next_new = daily_next+(DAILY_STREAK_LOSE*(daily_streak-daily_streak_new))
-    
-    else:
-        daily_streak_new = daily_streak
-        daily_next_new = daily_next
-    
-    return daily_streak_new, daily_next_new
+EVENT_MAX_DURATION = timedelta(hours=24)
+EVENT_MIN_DURATION = timedelta(minutes=30)
+EVENT_HEART_MIN_AMOUNT = 50
+EVENT_HEART_MAX_AMOUNT = 3000
+EVENT_OK_EMOJI = BUILTIN_EMOJIS['ok_hand']
+EVENT_ABORT_EMOJI = BUILTIN_EMOJIS['x']
+EVENT_DAILY_MIN_AMOUNT = 1
+EVENT_DAILY_MAX_AMOUNT = 7
+EVENT_OK_BUTTON = Button(emoji=EVENT_OK_EMOJI)
+EVENT_ABORT_BUTTON = Button(emoji=EVENT_ABORT_EMOJI)
+EVENT_COMPONENTS = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
+EVENT_CURRENCY_BUTTON = Button(emoji=EMOJI__HEART_CURRENCY)
 
 
 async def claim_daily_for_yourself(event):
@@ -2008,14 +1876,10 @@ async def sell_daily(client, event,
 HEART_GENERATOR_COOLDOWNS = set()
 HEART_GENERATOR_COOLDOWN = 3600.0
 HEART_GENERATION_AMOUNT = 10
-HEART_BUMP_AMOUNT = 100
 
-BUMP_RP = re.compile(
-    '<@!?(\d{7,21})>, \n'
-    ' {6}Bump done :thumbsup:\n' # This is really not an emoji!
-    ' {6}Check it on DISBOARD: https://disboard\.org/'
-)
-
+INTERACTION_TYPE_APPLICATION_COMMAND = InteractionType.application_command
+INTERACTION_TYPE_MESSAGE_COMPONENT = InteractionType.message_component
+INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE = InteractionType.application_command_autocomplete
 
 async def increase_user_total_love(user_id, increase):
     async with DB_ENGINE.connect() as connector:
@@ -2044,27 +1908,23 @@ async def increase_user_total_love(user_id, increase):
         
         await connector.execute(to_execute)
 
-
-async def heart_generator(client, message):
-    user = message.author
-    if user.is_bot:
-        if user is USER__DISBOARD:
-            embeds = message.embeds
-            if (embeds is not None):
-                content = embeds[0].description
-                if (content is not None):
-                    matched = BUMP_RP.fullmatch(content)
-                    if (matched is not None):
-                        user_id = int(matched.group(1))
-                        await increase_user_total_love(user_id, HEART_BUMP_AMOUNT)
-        
+# yup, we are generating hearts
+@SLASH_CLIENT.events(name='interaction_create')
+async def heart_generator(client, event):
+    user_id = event.user.id
+    if user_id in HEART_GENERATOR_COOLDOWNS:
         return
     
-    if random() < 0.01:
-        user_id = user.id
-        if user_id not in HEART_GENERATOR_COOLDOWNS:
-            HEART_GENERATOR_COOLDOWNS.add(user_id)
-            
-            KOKORO.call_later(HEART_GENERATOR_COOLDOWN, set.remove, HEART_GENERATOR_COOLDOWNS, user_id)
-            await increase_user_total_love(user_id, HEART_GENERATION_AMOUNT)
-        
+    event_type = event.type
+    if event_type is INTERACTION_TYPE_APPLICATION_COMMAND:
+        chance = 0.05
+    elif event_type is INTERACTION_TYPE_MESSAGE_COMPONENT:
+        chance = 0.01
+    elif event_type is INTERACTION_TYPE_APPLICATION_COMMAND_AUTOCOMPLETE:
+        chance = 0.005
+    else:
+        return
+    
+    if random() < chance:
+        KOKORO.call_later(HEART_GENERATOR_COOLDOWN, set.remove, HEART_GENERATOR_COOLDOWNS, user_id)
+        await increase_user_total_love(user_id, HEART_GENERATION_AMOUNT)
