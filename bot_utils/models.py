@@ -54,8 +54,8 @@ else:
         
         # Counters
         count_daily_self = Column(Int32, default=0)
-        count_daily_from_waifu = Column(Int32, default=0)
         count_daily_by_waifu = Column(Int32, default=0)
+        count_daily_for_waifu = Column(Int32, default=0)
         count_top_gg_vote = Column(Int32, default=0)
         
         # Waifu
@@ -163,8 +163,8 @@ else:
         notify_proposal = True,
         notify_daily = True,
         count_daily_self = 0,
-        count_daily_from_waifu = 0,
         count_daily_by_waifu = 0,
+        count_daily_for_waifu = 0,
         count_top_gg_vote = 0,
     ):
         if daily_next is None:
@@ -183,7 +183,7 @@ else:
             notify_proposal = notify_proposal,
             notify_daily = notify_daily,
             count_daily_self = count_daily_self,
-            count_daily_from_waifu = count_daily_from_waifu,
             count_daily_by_waifu = count_daily_by_waifu,
+            count_daily_for_waifu = count_daily_for_waifu,
             count_top_gg_vote = count_top_gg_vote,
         )

@@ -9,7 +9,7 @@ DAILY_STREAK_LOSE       = timedelta(hours=12)
 DAILY_BASE              = 100
 DAILY_PER_DAY           = 5
 DAILY_LIMIT             = 300
-DAILY_VOTE_PER_DAY      = 2
+
 
 DAILY_LIMIT_BONUS_W_E   = 300
 
@@ -23,6 +23,12 @@ NSFW_ACCESS_COST        = 666
 ELEVATED_COST           = 10000
 HEART_BOOST_COST        = 514000
 
+
+VOTE_BASE = 100
+VOTE_PER_DAY = 2
+
+VOTE_BASE_BONUS_WEEKEND = 100
+VOTE_PER_DAY_BONUS_WEEKEND = 1
 
 def calculate_daily_for(user, daily_streak):
     """

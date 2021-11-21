@@ -4,22 +4,19 @@ from datetime import datetime, timedelta
 from random import random
 from math import log10, ceil, floor
 
-from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
+from hata import Client, elapsed_time, Embed, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
     ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission, InteractionType
 from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, wait_for_component_interaction
 from sqlalchemy.sql import select, desc
 
-from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
-    waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
+from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression
 
 from bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, GUILD__SUPPORT, \
     EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__ADMIN, \
-    ROLE__SUPPORT__NSFW_ACCESS, IN_GAME_IDS, COLOR__GAMBLING
+    ROLE__SUPPORT__NSFW_ACCESS, COLOR__GAMBLING
 from bot_utils.utils import send_embed_to
-from bot_utils.daily import DAILY_INTERVAL, calculate_daily_new_only, DAILY_PER_DAY_BONUS_W_B, DAILY_LIMIT_BONUS_W_E, \
-    DAILY_BASE_BONUS_W_HE, DAILY_LIMIT_BONUS_W_HE, DAILY_LIMIT_BONUS_W_B, DAILY_BASE, calculate_daily_new, \
-    DAILY_STREAK_BREAK, calculate_daily_for, NSFW_ACCESS_COST, DAILY_LIMIT, DAILY_PER_DAY, ELEVATED_COST, \
-    HEART_BOOST_COST
+from bot_utils.daily import DAILY_INTERVAL, calculate_daily_new_only, calculate_daily_new, DAILY_STREAK_BREAK, \
+    calculate_daily_for, NSFW_ACCESS_COST, ELEVATED_COST, HEART_BOOST_COST
 
 SLASH_CLIENT: Client
 
@@ -196,7 +193,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     user_common_model.id == source_entry[0],
                 ).values(
                     waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
-                    count_daily_by_waifu = user_common_model.count_daily_by_waifu+1,
+                    count_daily_for_waifu = user_common_model.count_daily_for_waifu+1,
                 )
             )
             
@@ -208,7 +205,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     daily_next = now+DAILY_INTERVAL,
                     daily_streak = target_daily_streak,
                     waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
-                    count_daily_from_waifu = user_common_model.count_daily_from_waifu+1,
+                    count_daily_by_waifu = user_common_model.count_daily_by_waifu+1,
                 )
             )
             
@@ -261,182 +258,6 @@ async def daily(client, event,
         coroutine = claim_daily_for_waifu(client, event, target_user)
     
     return await coroutine
-
-
-
-@SLASH_CLIENT.interactions(is_global=True)
-async def hearts(client, event,
-        target_user: ('user', 'Do you wanna know some1 else\'s hearts?') = None,
-        extended: ('bool', 'Extended info.') = False
-            ):
-    """How many hearts do you have?"""
-    if target_user is None:
-        target_user = event.user
-    
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                    user_common_model.total_allocated,
-                ]
-            ).where(
-                user_common_model.user_id == target_user.id,
-            )
-        )
-        
-        results = await response.fetchall()
-    
-        if results:
-            entry_id, total_love, daily_streak, daily_next, total_allocated = results[0]
-            
-            now = datetime.utcnow()
-            if daily_next > now:
-                ready_to_claim = False
-            else:
-                ready_to_claim = True
-                
-                daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
-        
-        else:
-            total_love = 0
-            daily_streak = 0
-            total_allocated = 0
-            ready_to_claim = True
-        
-        if total_allocated and (target_user.id not in IN_GAME_IDS):
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == entry_id,
-                ).values(
-                    total_allocated = 0,
-                )
-            )
-    
-    is_own = (event.user is target_user)
-    
-    if is_own:
-        title_prefix = 'You have'
-    else:
-        title_prefix = target_user.full_name+' has'
-    
-    title = f'{title_prefix} {total_love} {EMOJI__HEART_CURRENCY:e}'
-    
-    if total_love == 0 and daily_streak == 0:
-        if is_own:
-            description = 'Awww, you seem so lonely..'
-        else:
-            description = 'Awww, they seem so lonely..'
-    elif daily_streak:
-        if is_own:
-            if ready_to_claim:
-                description_postfix = 'and you are ready to claim your daily'
-            else:
-                description_postfix = 'keep up the good work'
-            description = f'You are on a {daily_streak} day streak, {description_postfix}!'
-        
-        else:
-            description = f'They are on a {daily_streak} day streak, hope they will keep up their good work.'
-    else:
-        description = None
-    
-    embed = Embed(title, description, color=COLOR__GAMBLING)
-    
-    if extended:
-        field_value_parts = [
-            '**Base:**\n'
-            'Daily base: ', repr(DAILY_BASE), '\n'
-            'Daily bonus: ', repr(DAILY_PER_DAY), '\n'
-            'Daily bonus limit: ', repr(DAILY_LIMIT),
-        ]
-        
-        daily_base = DAILY_BASE
-        daily_per_day = DAILY_PER_DAY
-        daily_limit = DAILY_LIMIT
-        has_extra_role = False
-        
-        if target_user.has_role(ROLE__SUPPORT__ELEVATED):
-            has_extra_role = True
-            
-            field_value_parts.append('\n\n**')
-            field_value_parts.append(ROLE__SUPPORT__ELEVATED.mention)
-            field_value_parts.append(':**\n')
-            
-            field_value_parts.append('+ ')
-            field_value_parts.append(repr(DAILY_LIMIT_BONUS_W_E))
-            field_value_parts.append(' daily bonus limit')
-            
-            daily_limit += DAILY_LIMIT_BONUS_W_E
-        
-        if target_user.has_role(ROLE__SUPPORT__BOOSTER):
-            has_extra_role = True
-            
-            field_value_parts.append('\n\n**')
-            field_value_parts.append(ROLE__SUPPORT__BOOSTER.mention)
-            field_value_parts.append(':**\n')
-            
-            field_value_parts.append('+ ')
-            field_value_parts.append(repr(DAILY_PER_DAY_BONUS_W_B))
-            field_value_parts.append(' daily bonus\n')
-            
-            field_value_parts.append('+ ')
-            field_value_parts.append(repr(DAILY_LIMIT_BONUS_W_B))
-            field_value_parts.append(' daily bonus limit')
-            
-            daily_per_day += DAILY_PER_DAY_BONUS_W_B
-            daily_limit += DAILY_LIMIT_BONUS_W_B
-        
-        if target_user.has_role(ROLE__SUPPORT__HEART_BOOST):
-            has_extra_role = True
-            
-            field_value_parts.append('\n\n**')
-            field_value_parts.append(ROLE__SUPPORT__HEART_BOOST.mention)
-            field_value_parts.append(':**\n')
-            
-            field_value_parts.append('+ ')
-            field_value_parts.append(repr(DAILY_BASE_BONUS_W_HE))
-            field_value_parts.append(' daily base\n')
-            
-            field_value_parts.append('+ ')
-            field_value_parts.append(repr(DAILY_LIMIT_BONUS_W_HE))
-            field_value_parts.append(' daily bonus limit')
-            
-            daily_base += DAILY_BASE_BONUS_W_HE
-            daily_limit += DAILY_LIMIT_BONUS_W_HE
-        
-        field_value_parts.append('\n**\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_**')
-        
-        if has_extra_role:
-            field_value_parts.append('\n\n**Total:**\nDaily base: ')
-            field_value_parts.append(repr(daily_base))
-            field_value_parts.append('\nDaily bonus: ')
-            field_value_parts.append(repr(daily_per_day))
-            field_value_parts.append('\nDaily bonus limit: ')
-            field_value_parts.append(repr(daily_limit))
-        
-        field_value_parts.append('\n\n**Formula:**\ndaily base + min(daily bonus limit, daily bonus * daily streak) + '
-            'daily streak\n')
-        
-        field_value_parts.append(repr(daily_base))
-        field_value_parts.append(' + min(')
-        field_value_parts.append(repr(daily_limit))
-        field_value_parts.append(', ')
-        field_value_parts.append(repr(daily_per_day))
-        field_value_parts.append(' \* ')
-        field_value_parts.append(repr(daily_streak))
-        field_value_parts.append(') + ')
-        field_value_parts.append(repr(daily_streak))
-        field_value_parts.append(' = ')
-        field_value_parts.append(repr(daily_base + min(daily_limit, daily_per_day * daily_streak) + daily_streak))
-        
-        field_value = ''.join(field_value_parts)
-        
-        embed.add_field('Daily reward calculation:', field_value)
-    
-    return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
 def convert_tdelta(delta):

@@ -5,7 +5,8 @@ from sqlalchemy.sql import select
 from hata.ext.top_gg import BotVote
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression
-from bot_utils.daily import DAILY_BASE, DAILY_VOTE_PER_DAY, calculate_daily_new_only
+from bot_utils.daily import VOTE_BASE, VOTE_PER_DAY, calculate_daily_new_only, \
+    VOTE_BASE_BONUS_WEEKEND, VOTE_PER_DAY_BONUS_WEEKEND
 from config import KOISHI_TOP_GG_AUTHORIZATION
 
 URL_PREFIX = '/project/koishi/api'
@@ -42,13 +43,26 @@ def vote():
             entry_id, daily_streak, daily_next = results[0]
             daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
             
-            increase = DAILY_BASE + (daily_streak*DAILY_VOTE_PER_DAY)
-            
             if now > daily_next:
                 daily_next = now
             
             daily_streak += 1
-            
+        else:
+            entry_id = -1
+            daily_streak = 0
+            daily_next = now
+        
+        base = VOTE_BASE
+        per_day = VOTE_PER_DAY
+        
+        if bot_vote.is_weekend:
+            base += VOTE_BASE_BONUS_WEEKEND
+            per_day += VOTE_PER_DAY_BONUS_WEEKEND
+        
+        
+        increase = base + (daily_streak*per_day)
+        
+        if (entry_id != -1):
             connector.execute(
                 USER_COMMON_TABLE.update(
                     user_common_model.id == entry_id,
@@ -63,11 +77,11 @@ def vote():
             connector.execute(
                 get_create_common_user_expression(
                     bot_vote.user_id,
-                    total_love = DAILY_BASE,
+                    total_love = increase,
                     count_top_gg_vote = 1,
                     daily_streak = 1,
-                    daily_next = now,
+                    daily_next = daily_next,
                 )
             )
-    
+        
     return Response(status=200)

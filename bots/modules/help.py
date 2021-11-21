@@ -622,24 +622,24 @@ HEARD_GUIDE_EMBED = Embed(
 ).add_field(
     'Getting hearts',
     (
-        f'`/daily` - Claim you daily reward.\n'
-        f'`/ds` - Complete dungeon sweeper stages.\n'
-        f'`/proposal accept` - Accept marriage proposals.\n'
-        f'[vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
-        f'Use any command, to get hearts randomly.'
+        f'**•** `/daily` - Claim you daily reward.\n'
+        f'**•** `/ds` - Complete dungeon sweeper stages.\n'
+        f'**•** `/proposal accept` - Accept marriage proposals.\n'
+        f'**•** [vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
+        f'**•** Use any command, to get hearts randomly.'
     ),
 ).add_field(
     'Spending hearts',
     (
-        '`\propose` - Propose to your heart\'s chosen one.\n'
-        '`\divorce` - Less waifus.\n'
-        '`\\buy-waifu-slot` - More waifus.\n'
-        '`\heart-shop roles` - Buy roles inside of my support server.'
+        '**•** `/propose` - Propose to your heart\'s chosen one.\n'
+        '**•** `/divorce` - Less waifus.\n'
+        '**•** `/buy-waifu-slot` - More waifus.\n'
+        '**•** `/heart-shop roles` - Buy roles inside of my support server.'
     ),
 ).add_field(
     'Gambling hearts',
     (
-        '`\21` - Almost Blackjack.'
+        '**•** `/21` - Almost Blackjack.'
     ),
 )
 
@@ -672,7 +672,7 @@ async def help_(client, event,
 ):
     """Lists my commands and such."""
     try:
-        field_renderer = ABOUT_FIELD_NAME_TO_RENDERER[field]
+        field_renderer = HELP_FIELD_NAME_TO_RENDERER[field]
     except KeyError:
         abort(f'Unknown field: {field!r}.')
     else:
