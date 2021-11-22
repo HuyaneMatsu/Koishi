@@ -55,7 +55,7 @@ def vote():
         base = VOTE_BASE
         per_day = VOTE_PER_DAY
         
-        if bot_vote.is_weekend:
+        if  (datetime.utcnow().weekday() > 4):
             base += VOTE_BASE_BONUS_WEEKEND
             per_day += VOTE_PER_DAY_BONUS_WEEKEND
         

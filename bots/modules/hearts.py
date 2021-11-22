@@ -1,8 +1,4 @@
-import re
-from functools import partial as partial_func
-from datetime import datetime, timedelta
-from random import random
-from math import log10, ceil, floor
+from datetime import datetime
 
 from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
     ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission, InteractionType, Emoji
@@ -231,7 +227,6 @@ async def render_hearts_daily_extended(client, event, target_user):
 
 async def render_hearts_vote_extended(client, event, target_user):
     ready_to_vote = await client.top_gg.get_user_vote(target_user.id)
-    is_weekend = await client.top_gg.get_weekend_status()
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -308,6 +303,8 @@ async def render_hearts_vote_extended(client, event, target_user):
     
     vote_base = VOTE_BASE
     vote_per_day = VOTE_PER_DAY
+    
+    is_weekend = (datetime.utcnow().weekday() > 4)
     
     if is_weekend:
         field_value_parts.append('\n\n**Weekend bonus:**\n')
