@@ -625,6 +625,7 @@ HEARD_GUIDE_EMBED = Embed(
         f'**•** `/daily` - Claim you daily reward.\n'
         f'**•** `/ds` - Complete dungeon sweeper stages.\n'
         f'**•** `/proposal accept` - Accept marriage proposals.\n'
+        f'**•** `/heart-shop sell-daily` - Sell your daily streak.\n'
         f'**•** [vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
         f'**•** Use any command, to get hearts randomly.'
     ),
