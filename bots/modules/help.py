@@ -233,10 +233,10 @@ KOISHI_HEADER_EASTER_EGG = (
 )
 
 def get_koishi_header():
-    if random() > 0.01:
-        header = KOISHI_HEADER
-    else:
+    if random() < 0.01:
         header = KOISHI_HEADER_EASTER_EGG
+    else:
+        header = KOISHI_HEADER
     
     return header
 
@@ -646,7 +646,7 @@ HEARD_GUIDE_EMBED = Embed(
 )
 
 async def render_help_generic(client, event):
-    if random() < 0.1:
+    if random() < 0.01:
         embed = COMMAND_LIST_EMBED_EASTER_EGG
     else:
         embed = COMMAND_LIST_EMBED

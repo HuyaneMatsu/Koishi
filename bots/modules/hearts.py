@@ -1,7 +1,7 @@
+from random import random
 from datetime import datetime
 
-from hata import Client, elapsed_time, Embed, Color, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
-    ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission, InteractionType, Emoji
+from hata import Client, Embed, Emoji
 from hata.ext.slash import abort, InteractionResponse
 from sqlalchemy.sql import select
 
@@ -22,6 +22,14 @@ EMOJI_COUNT_DAILY_FOR_WAIFU = Emoji.precreate(853998726333726721)
 EMOJI_COUNT_DAILY_BY_WAIFU = Emoji.precreate(854009984916127755)
 EMOJI_COUNT_DAILY_SELF = Emoji.precreate(741004530212274234)
 EMOJI_COUNT_TOP_GG_VOTE = Emoji.precreate(745286745460965466)
+
+EMOJI_HEART_CURRENCY_EASTER_EGG = Emoji.precreate(853152420304912404)
+EMOJI_DAILY_STREAK_EASTER_EGG = Emoji.precreate(690550888187822150)
+EMOJI_COUNT_DAILY_FOR_WAIFU_EASTER_EGG = Emoji.precreate(853509920477413386)
+EMOJI_COUNT_DAILY_BY_WAIFU_EASTER_EGG = Emoji.precreate(852857884478930964)
+EMOJI_COUNT_DAILY_SELF_EASTER_EGG = Emoji.precreate(772356182206840833)
+EMOJI_COUNT_TOP_GG_VOTE_EASTER_EGG = Emoji.precreate(772495100840247306)
+
 
 def create_hearts_short_embed(event, target_user, total_love, daily_streak, ready_to_claim):
     is_own = (event.user is target_user)
@@ -399,13 +407,30 @@ async def render_hearts_stats(client, event, target_user):
             count_daily_for_waifu = 0
             count_top_gg_vote = 0
     
+    
+    if random() < 0.01:
+        emoji_heart_currency = EMOJI_HEART_CURRENCY_EASTER_EGG
+        emoji_daily_streak = EMOJI_DAILY_STREAK_EASTER_EGG
+        emoji_count_daily_self = EMOJI_COUNT_DAILY_SELF_EASTER_EGG
+        emoji_count_daily_for_waifu = EMOJI_COUNT_DAILY_FOR_WAIFU_EASTER_EGG
+        emoji_count_daily_by_waifu = EMOJI_COUNT_DAILY_BY_WAIFU_EASTER_EGG
+        emoji_count_top_gg_vote = EMOJI_COUNT_TOP_GG_VOTE_EASTER_EGG
+    else:
+        emoji_heart_currency = EMOJI__HEART_CURRENCY
+        emoji_daily_streak = EMOJI_DAILY_STREAK
+        emoji_count_daily_self = EMOJI_COUNT_DAILY_SELF
+        emoji_count_daily_for_waifu = EMOJI_COUNT_DAILY_FOR_WAIFU
+        emoji_count_daily_by_waifu = EMOJI_COUNT_DAILY_BY_WAIFU
+        emoji_count_top_gg_vote = EMOJI_COUNT_TOP_GG_VOTE
+    
+    
     return Embed(
         color = COLOR__GAMBLING
     ).add_author(
         event.user.avatar_url,
         f'Heart stats for {event.user.full_name}',
     ).add_field(
-        f'{EMOJI__HEART_CURRENCY} Hearts',
+        f'{emoji_heart_currency} Hearts',
         (
             f'```\n'
             f'{total_love}\n'
@@ -413,7 +438,7 @@ async def render_hearts_stats(client, event, target_user):
         ),
         inline = True,
     ).add_field(
-        f'{EMOJI_DAILY_STREAK} Daily streak',
+        f'{emoji_daily_streak} Daily streak',
         (
             f'```\n'
             f'{daily_streak}\n'
@@ -421,7 +446,7 @@ async def render_hearts_stats(client, event, target_user):
         ),
         inline = True,
     ).add_field(
-        f'{EMOJI_COUNT_DAILY_SELF} Claimed dailies',
+        f'{emoji_count_daily_self} Claimed dailies',
         (
             f'```\n'
             f'{count_daily_self}\n'
@@ -429,7 +454,7 @@ async def render_hearts_stats(client, event, target_user):
         ),
         inline = True,
     ).add_field(
-        f'{EMOJI_COUNT_DAILY_FOR_WAIFU} Claimed for waifus',
+        f'{emoji_count_daily_for_waifu} Claimed for waifus',
         (
             f'```\n'
             f'{count_daily_for_waifu}\n'
@@ -437,7 +462,7 @@ async def render_hearts_stats(client, event, target_user):
         ),
         inline = True,
     ).add_field(
-        f'{EMOJI_COUNT_DAILY_BY_WAIFU} Claimed by waifu',
+        f'{emoji_count_daily_by_waifu} Claimed by waifu',
         (
             f'```\n'
             f'{count_daily_by_waifu}\n'
@@ -445,7 +470,7 @@ async def render_hearts_stats(client, event, target_user):
         ),
         inline = True,
     ).add_field(
-        f'{EMOJI_COUNT_TOP_GG_VOTE} Top.gg votes',
+        f'{emoji_count_top_gg_vote} Top.gg votes',
         (
             f'```\n'
             f'{count_top_gg_vote}\n'
