@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify, abort, Response
+from flask import Blueprint, request, abort, Response
 from sqlalchemy.sql import select
 from hata.ext.top_gg import BotVote
 

@@ -580,11 +580,11 @@ def build_category_into(extend, category_name, emoji, command_names):
     return extend
 
 
-def build_command_list_embed():
+def build_command_list_embed(header):
     length = len(CATEGORIES)
     
     description_parts = []
-    description_parts.append(KOISHI_HEADER)
+    description_parts.append(header)
     
     if length:
         description_parts.append('\n')
@@ -612,7 +612,8 @@ def build_command_list_embed():
     )
 
 
-COMMAND_LIST_EMBED = build_command_list_embed()
+COMMAND_LIST_EMBED = build_command_list_embed(KOISHI_HEADER)
+COMMAND_LIST_EMBED_EASTER_EGG = build_command_list_embed(KOISHI_HEADER_EASTER_EGG)
 
 HEARD_GUIDE_EMBED = Embed(
     'Heart Guide',
@@ -626,7 +627,7 @@ HEARD_GUIDE_EMBED = Embed(
         f'**•** `/ds` - Complete dungeon sweeper stages.\n'
         f'**•** `/proposal accept` - Accept marriage proposals.\n'
         f'**•** `/heart-shop sell-daily` - Sell your daily streak.\n'
-        f'**•** [vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
+        f'**•** [Vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
         f'**•** Use any command, to get hearts randomly.'
     ),
 ).add_field(
@@ -645,7 +646,12 @@ HEARD_GUIDE_EMBED = Embed(
 )
 
 async def render_help_generic(client, event):
-    embed = COMMAND_LIST_EMBED.copy()
+    if random() < 0.1:
+        embed = COMMAND_LIST_EMBED_EASTER_EGG
+    else:
+        embed = COMMAND_LIST_EMBED
+    
+    embed = embed.copy()
     add_user_footer(embed, event.user)
     return embed
 
