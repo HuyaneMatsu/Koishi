@@ -108,6 +108,7 @@ else:
     
     ITEM_TABLE = item_model.__table__
     
+    
     class emoji_counter_model(BASE):
         __tablename__   = 'EMOJI_COUNTER'
         id              = Column(Int64, primary_key=True)
@@ -117,6 +118,16 @@ else:
         action_type     = Column(Int32)
     
     EMOJI_COUNTER_TABLE = emoji_counter_model.__table__
+    
+    class sticker_counter_model(BASE):
+        __tablename__   = 'STICKER_COUNTER'
+        id              = Column(Int64, primary_key=True)
+        user_id         = Column(Int64)
+        sticker_id      = Column(Int64)
+        timestamp       = Column(DateTime)
+    
+    STICKER_COUNTER_TABLE = sticker_counter_model.__table__
+    
     
     class ds_v2_model(BASE):
         __tablename__   = 'DS_V2'
@@ -136,15 +147,6 @@ else:
     
     DS_V2_RESULT_TABLE = ds_v2_result_model.__table__
     
-    class sticker_counter_model(BASE):
-        __tablename__   = 'STICKER_COUNTER'
-        id              = Column(Int64, primary_key=True)
-        user_id         = Column(Int64)
-        sticker_id      = Column(Int64)
-        timestamp       = Column(DateTime)
-    
-    
-    STICKER_COUNTER_TABLE = sticker_counter_model.__table__
     
     DB_ENGINE = create_engine(DATABASE_NAME)
     DB_ENGINE.dispose()

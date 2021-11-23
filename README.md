@@ -91,6 +91,6 @@ And much more!
 
 #### Support server only commands
 
-`all-users` • `ask` • `award` • `crywolf` • `currency-insert` • `daily-event` • `docs-search` • `emoji` • `events` •
-`extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles` •
-`rules` • `sticker` • `take` • `transfer` • `voice`
+`all-users` • `ask` • `award` • `crywolf` • `daily-event` • `docs-search` • `emoji` • `events` • `extension`
+• `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules`
+• `sticker` • `take` • `transfer` • `voice`

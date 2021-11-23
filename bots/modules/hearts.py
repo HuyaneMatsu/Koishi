@@ -306,7 +306,7 @@ async def render_hearts_vote_extended(client, event, target_user):
     field_value_parts = [
         '**Base:**\n'
         'Vote base: ', repr(VOTE_BASE), '\n'
-        'Vote bonus: ', repr(VOTE_PER_DAY), '\n'
+        'Vote bonus: ', repr(VOTE_PER_DAY)
     ]
     
     vote_base = VOTE_BASE
