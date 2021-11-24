@@ -11,6 +11,11 @@ from io import StringIO
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
+try:
+    import watchdog
+except ImportError:
+    watchdog = None
+
 from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_datetime, sleep, KOKORO, \
     alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
     ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
@@ -28,7 +33,7 @@ from hata.ext.command_utils import wait_for_reaction, UserMenuFactory, UserPagin
 from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.extension_loader import EXTENSION_LOADER
+from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS
 
 from bot_utils.constants import COLOR__MARISA_HELP, GUILD__SUPPORT, CHANNEL__SUPPORT__DEFAULT_TEST, \
     ROLE__SUPPORT__TESTER
@@ -1145,3 +1150,30 @@ async def exp(
 async def forward_all_error(client, interaction_event, command, exception):
     await client.events.error(client, f'{command.__class__.__name__}', exception)
     return True
+
+
+if (watchdog is not None):
+    
+    from watchdog.events import FileModifiedEvent
+    from watchdog.observers import Observer
+    
+    class WatchEventHandler:
+        def dispatch(self, event):
+            if isinstance(event, FileModifiedEvent):
+                await EXTENSION_LOADER.reload(event.src_path)
+    
+    @Marisa.events
+    async def launch(client):
+        observer = Observer()
+        client.observer = observer
+        
+        event_handler = WatchEventHandler()
+        
+        for extension in EXTENSIONS.values():
+            observer.schedule(event_handler, extension.file_name, recursive=False)
+        
+        observer.start()
+    
+    @Marisa.events
+    async def shutdown(client):
+        client.observer.stop()
