@@ -11,70 +11,33 @@ from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
 
 SLASH_CLIENT: Client
 
-MULTIPLIERS = (0.4, 0.6, 1.0, 1,4, 1,6, 1.2, 0.8, 0.2,)
-
-ARROWS = (
-    (
-        '\\¨ ',
-        '|\\ ',
-        '  \\',
-    ), (
-        '/|\\',
-        ' | ',
-        ' | ',
-    ), (
-        ' ¨/',
-        ' /|',
-        '/  ',
-    ), (
-        '   ',
-        '<--',
-        '   ',
-    ), (
-        '   ',
-        '-->',
-        '   ',
-    ), (
-        '  /',
-        '|/ ',
-        '/_ ',
-    ), (
-        ' | ',
-        ' | ',
-        '\\|/',
-    ), (
-        '\\  ',
-        ' \\|',
-        ' _\\',
-    )
-)
+MULTIPLIERS = (1.7, 2.4, 1.2, 0.5, 0.3, 0.1, 0.2, 1.5,)
 
 ARROW_BLOCKS = tuple(
     (
-        f'```py'
-        f'[{MULTIPLIERS[0]:.01f}]' f'    ' f'[{MULTIPLIERS[1]:.01f}]' f'    ' f'[{MULTIPLIERS[2]:.01f}]' f'\n'
-        f'     '                   f'    ' f'     '                   f'    ' f'     '                   f'\n'
-        f'     '                   f'    ' f' [{arrow[0]}] '          f'    ' f'     '                   f'\n'
-        f'[{MULTIPLIERS[3]:.01f}]' f'    ' f' [{arrow[1]}] '          f'    ' f'[{MULTIPLIERS[4]:.01f}]' f'\n'
-        f'     '                   f'    ' f' [{arrow[2]}] '          f'    ' f'     '                   f'\n'
-        f'     '                   f'    ' f'     '                   f'    ' f'     '                   f'\n'
-        f'[{MULTIPLIERS[5]:.01f}]' f'    ' f'[{MULTIPLIERS[6]:.01f}]' f'    ' f'[{MULTIPLIERS[7]:.01f}]' f'\n'
+        f'```\n'
+        f'[{MULTIPLIERS[(7+push)%8]:.01f}]    [{MULTIPLIERS[(0+push)%8]:.01f}]    [{MULTIPLIERS[(1+push)%8]:.01f}]\n'
+        f'     '                        f'    ' f'     '                    f'    ' f'     '                    f'\n'
+        f'     '                        f'    ' f' /|\\ '                   f'    ' f'     '                    f'\n'
+        f'[{MULTIPLIERS[(6+push)%8]:.01f}]    ' f'/ | \\'                   f'    [{MULTIPLIERS[(2+push)%8]:.01f}]\n'
+        f'     '                        f'    ' f'  |  '                    f'    ' f'     '                    f'\n'
+        f'     '                        f'    ' f'     '                    f'    ' f'     '                    f'\n'
+        f'[{MULTIPLIERS[(5+push)%8]:.01f}]    [{MULTIPLIERS[(4+push)%8]:.01f}]    [{MULTIPLIERS[(3+push)%8]:.01f}]\n'
         f'```'
-    ) for arrow in ARROWS
+    ) for push in range(8)
 )
-
 
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def lucky_spin(client, event,
-    amount: ('int', 'The amount of hearts to bet') = None,
+    bet: ('int', 'The bet of hearts to bet') = None,
 ):
     index = floor(random()*8.0)
     
-    if (amount is None):
+    if (bet is None):
         description = ARROW_BLOCKS[index]
     else:
-        if (amount < 10):
+        if (bet < 10):
             abort(f'You must bet at least 10 {EMOJI__HEART_CURRENCY}.')
         
         async with DB_ENGINE.connect() as connector:
@@ -101,7 +64,7 @@ async def lucky_spin(client, event,
                 else:
                     available_love = total_love
                 
-                if amount > available_love:
+                if bet > available_love:
                     enough_hearts = False
                 else:
                     enough_hearts = True
@@ -109,7 +72,7 @@ async def lucky_spin(client, event,
             if not enough_hearts:
                 abort(f'You have only {available_love} {EMOJI__HEART_CURRENCY} available hearts.')
             
-            change = floor((MULTIPLIERS[index]-1.0)*amount)
+            change = floor((MULTIPLIERS[index]-1.0)*bet)
             
             await connector.execute(
                 USER_COMMON_TABLE.update(
@@ -125,6 +88,6 @@ async def lucky_spin(client, event,
         else:
             state = 'won'
         
-        description = f'{ARROW_BLOCKS[index]}\n\nYou have {state} {change} {EMOJI__HEART_CURRENCY} !'
+        description = f'{ARROW_BLOCKS[index]}\n\nYou {state} {change} {EMOJI__HEART_CURRENCY} !'
     
-    return Embed(description=description).add_author(client.avatar_url, f'{client.name}\'s lucky spin')
+    return Embed(description=description).add_author(None, f'{client.name}\'s lucky spin')
