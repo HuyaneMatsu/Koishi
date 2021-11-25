@@ -234,8 +234,6 @@ async def render_hearts_daily_extended(client, event, target_user):
 
 
 async def render_hearts_vote_extended(client, event, target_user):
-    ready_to_vote = await client.top_gg.get_user_vote(target_user.id)
-    
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select(
@@ -289,10 +287,12 @@ async def render_hearts_vote_extended(client, event, target_user):
             description = 'Awww, they seem so lonely..'
     elif daily_streak:
         if is_own:
-            if ready_to_vote:
-                description_postfix = 'and you are ready to vote'
-            else:
+            voted = await client.top_gg.get_user_vote(target_user.id)
+            if voted:
                 description_postfix = 'keep up the good work'
+            else:
+                description_postfix = 'and you are ready to vote'
+            
             description = f'You are on a {daily_streak} day streak, {description_postfix}!'
         
         else:
