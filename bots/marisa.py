@@ -1160,7 +1160,7 @@ if (watchdog is not None):
     class WatchEventHandler:
         def dispatch(self, event):
             if isinstance(event, FileModifiedEvent):
-                await EXTENSION_LOADER.reload(event.src_path)
+                EXTENSION_LOADER.reload(event.src_path)
     
     @Marisa.events
     async def launch(client):
