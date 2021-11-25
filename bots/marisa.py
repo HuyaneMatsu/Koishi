@@ -1170,7 +1170,8 @@ if (watchdog is not None):
         event_handler = WatchEventHandler()
         
         for extension in EXTENSIONS.values():
-            observer.schedule(event_handler, extension.file_name, recursive=False)
+            if not extension.locked:
+                observer.schedule(event_handler, extension.file_name, recursive=False)
         
         observer.start()
     
