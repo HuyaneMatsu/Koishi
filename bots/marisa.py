@@ -1159,8 +1159,9 @@ if (watchdog is not None):
     
     class WatchEventHandler:
         def dispatch(self, event):
-            if isinstance(event, FileModifiedEvent):
-                EXTENSION_LOADER.reload(event.src_path)
+            extension = EXTENSION_LOADER.get_extension(event.src_path)
+            if (extension is not None) and extension.is_loaded() and (not extension.locked):
+                EXTENSION_LOADER.reload(extension.name)
     
     @Marisa.events
     async def launch(client):
@@ -1170,7 +1171,7 @@ if (watchdog is not None):
         event_handler = WatchEventHandler()
         
         for extension in EXTENSIONS.values():
-            if not extension.locked:
+            if extension.is_loaded() and (not extension.locked):
                 observer.schedule(event_handler, extension.file_name, recursive=False)
         
         observer.start()
