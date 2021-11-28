@@ -641,7 +641,8 @@ HEARD_GUIDE_EMBED = Embed(
 ).add_field(
     'Gambling hearts',
     (
-        '**•** `/21` - Almost Blackjack.'
+        '**•** `/21` - Almost Blackjack.\n'
+        '**•** `/wheel` - Lucky wheel.'
     ),
 )
 
