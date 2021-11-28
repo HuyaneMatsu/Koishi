@@ -467,7 +467,7 @@ async def get_image_embed(client, tags, name, color):
 
 SCARLET = Nitori.interactions(None, name='scarlet', description='Scarlet?', guild=TEST_GUILD)
 
-@SCARLET.interactions(is_default=True, show_for_invoking_user_only=True)
+@SCARLET.interactions(is_default=True)
 async def devil(client, event):
     """Flandre & Remilia!"""
     yield
@@ -484,6 +484,46 @@ async def remilia(client):
     """Remilia!"""
     yield # Yield one to acknowledge the interaction
     yield await get_image_embed(client, 'remilia_scarlet', 'Scarlet Remilia', 0x9400d3)
+
+# command end
+# command start slash kaboom
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def kaboom(client, event):
+    """Kabooom!!"""
+    await client.interaction_application_command_acknowledge(event)
+    
+    messages = []
+    for x in reversed(range(1, 4)):
+        message = await client.interaction_followup_message_create(event, x)
+        messages.append(message)
+        await sleep(1.0)
+    
+    await client.interaction_followup_message_create(event, 'KABOOM!!')
+    
+    for message in messages:
+        await sleep(1.0)
+        await client.interaction_followup_message_delete(event, message)
+
+# command end
+# command start slash kaboom-mixed
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def kaboom_mixed(client, event):
+    """Kabooom!!"""
+    yield
+    
+    messages = []
+    for x in reversed(range(1, 4)):
+        message = yield str(x)
+        messages.append(message)
+        await sleep(1.0)
+    
+    yield 'KABOOM!!'
+    
+    for message in messages:
+        await sleep(1.0)
+        await client.interaction_followup_message_delete(event, message)
 
 # command end
 # command start slash about
