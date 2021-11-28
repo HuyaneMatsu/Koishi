@@ -1039,118 +1039,13 @@ async def shutdown():
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
-async def thread_only(
-    thread: ('channel_group_thread', 'Please define a thread channel.')
-        ):
-    return repr(thread)
+async def abort_before_yield():
+    abort('a')
+    yield
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
-@configure_parameter('channel', 'channel', 'channel', channel_types=[0, 4])
-async def some_channel(channel):
-    return repr(channel)
-
-
-@Marisa.interactions(guild=GUILD__SUPPORT)
-async def register_autocomplete(client, event):
-    if not client.is_owner(event.user):
-        abort('owner only')
-    
-    application_command = ApplicationCommand(
-        'auto-sub-command',
-        'Auto everything.',
-        options = [
-            ApplicationCommandOption(
-                'sub-command',
-                'Some sub command.',
-                ApplicationCommandOptionType.sub_command,
-                options = (
-                    ApplicationCommandOption(
-                        'autocomplete',
-                        'Wont be complete',
-                        ApplicationCommandOptionType.role,
-                        autocomplete = True,
-                    ),
-                ),
-            ),
-        ]
-    )
-    
-    await client.application_command_guild_create(GUILD__SUPPORT, application_command)
-
-AUTO_SUB = Marisa.interactions(
-    None,
-    name = 'auto-sub',
-    description = 'auto everything.',
-    guild = GUILD__SUPPORT,
-)
-
-@AUTO_SUB.autocomplete('value')
-async def try_auto_complete(value):
-    if value is None:
-        value = 'none'
-    
-    return [value, 'try']
-
-
-@AUTO_SUB.interactions
-async def auto_sub(
-    value: ('str', 'some value')
-):
-    """Auto-sub"""
-    return InteractionResponse(value, allowed_mentions=None)
-
-@AUTO_SUB.interactions
-async def auto_sub_2(
-    value: ('str', 'some value')
-):
-    """Auto-sub"""
-    return InteractionResponse(value, allowed_mentions=None)
-
-
-@auto_sub_2.autocomplete('value')
-async def auto_everything(value):
-    if value is None:
-        value = '*none*'
-    
-    return [value, 'value', 'ayaya']
-
-
-@Marisa.interactions(guild=388267636661682178)
-async def late_complete(laty: ('str', 'cake')):
-    return InteractionResponse(laty, allowed_mentions=None)
-
-@Marisa.interactions(guild=388267636661682178)
-async def range_(value: P('float', min_value=10.0, max_value=20.0)):
-    return value
-
-TEST_A = Marisa.interactions(None, name='testa', description='testa', guild=388267636661682178)
-TEST_B = TEST_A.interactions(None, name='testb', description='testb')
-
-@TEST_B.interactions
-async def testc(
-    aa: ('str', 'aya') = None,
-    bb: ('str', 'baya') = None,
-    cc: ('str', 'caya') = None,
-    dd: ('str', 'daya') = None,
-):
-    """ayaya"""
-    return f'aa={aa!r}, bb={bb!r}, cc={cc!r}, dd={dd!r}'
-
-@testc.autocomplete('aa', 'bb', 'cc', 'dd')
-async def complete(value):
-    return ['value']
-
-@Marisa.interactions(guild=GUILD__SUPPORT)
-async def exp(
-    expression: ('expression', 'Mathematical expression to evaluate')
-):
-    return repr(expression)
-
-@exp.error
-async def forward_all_error(client, interaction_event, command, exception):
-    await client.events.error(client, f'{command.__class__.__name__}', exception)
-    return True
-
+async def just_abort():
+    abort('a')
 
 if (watchdog is not None):
     

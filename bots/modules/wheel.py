@@ -6,7 +6,7 @@ from hata.ext.slash import abort
 
 from sqlalchemy.sql import select
 
-from bot_utils.constants import GUILD__SUPPORT, IN_GAME_IDS, EMOJI__HEART_CURRENCY
+from bot_utils.constants import IN_GAME_IDS, EMOJI__HEART_CURRENCY
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
 
 SLASH_CLIENT: Client
@@ -16,20 +16,20 @@ MULTIPLIERS = (1.7, 2.4, 1.2, 0.5, 0.3, 0.1, 0.2, 1.5,)
 ARROW_BLOCKS = tuple(
     (
         f'```\n'
-        f'[{MULTIPLIERS[(7+push)%8]:.01f}]    [{MULTIPLIERS[(0+push)%8]:.01f}]    [{MULTIPLIERS[(1+push)%8]:.01f}]\n'
-        f'     '                        f'    ' f'     '                    f'    ' f'     '                    f'\n'
-        f'     '                        f'    ' f' /|\\ '                   f'    ' f'     '                    f'\n'
-        f'[{MULTIPLIERS[(6+push)%8]:.01f}]    ' f'/ | \\'                   f'    [{MULTIPLIERS[(2+push)%8]:.01f}]\n'
-        f'     '                        f'    ' f'  |  '                    f'    ' f'     '                    f'\n'
-        f'     '                        f'    ' f'     '                    f'    ' f'     '                    f'\n'
-        f'[{MULTIPLIERS[(5+push)%8]:.01f}]    [{MULTIPLIERS[(4+push)%8]:.01f}]    [{MULTIPLIERS[(3+push)%8]:.01f}]\n'
+        f'「{MULTIPLIERS[(7+push)%8]:.01f}」    「{MULTIPLIERS[(0+push)%8]:.01f}」    「{MULTIPLIERS[(1+push)%8]:.01f}」\n'
+        f'\n'
+        f'　　       　/|\\ \n'
+        f'「{MULTIPLIERS[(6+push)%8]:.01f}」   　/ | \\　   「{MULTIPLIERS[(2+push)%8]:.01f}」\n'
+        f'　　        　| \n'
+        f'\n'
+        f'「{MULTIPLIERS[(5+push)%8]:.01f}」    「{MULTIPLIERS[(4+push)%8]:.01f}」    「{MULTIPLIERS[(3+push)%8]:.01f}」\n'
         f'```'
     ) for push in range(8)
 )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
-async def lucky_spin(client, event,
+@SLASH_CLIENT.interactions(is_global=True)
+async def wheel(client, event,
     bet: ('int', 'The bet of hearts to bet') = None,
 ):
     index = floor(random()*8.0)
@@ -90,4 +90,4 @@ async def lucky_spin(client, event,
         
         description = f'{ARROW_BLOCKS[index]}\n\nYou {state} {change} {EMOJI__HEART_CURRENCY} !'
     
-    return Embed(description=description).add_author(None, f'{client.name}\'s lucky spin')
+    return Embed(description=description).add_author(None, f'{client.name}\'s lucky wheel')
