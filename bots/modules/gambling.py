@@ -1566,5 +1566,5 @@ async def heart_generator(client, event):
         return
     
     if random() < chance:
-        KOKORO.call_later(HEART_GENERATOR_COOLDOWN, set.remove, HEART_GENERATOR_COOLDOWNS, user_id)
+        KOKORO.call_later(HEART_GENERATOR_COOLDOWN, set.discard, HEART_GENERATOR_COOLDOWNS, user_id)
         await increase_user_total_love(user_id, HEART_GENERATION_AMOUNT)
