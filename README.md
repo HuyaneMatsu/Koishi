@@ -70,7 +70,7 @@ And much more!
 
 - Games
     
-    `21` • `ds` • `kanako` • `wheel` • `xox`
+    `21` • `ds` • `kanako` • `lucky-spin` • `xox`
 
 -  Help
     

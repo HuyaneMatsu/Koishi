@@ -306,7 +306,7 @@ async def render_hearts_vote_extended(client, event, target_user):
     field_value_parts = [
         '**Base:**\n'
         'Vote base: ', repr(VOTE_BASE), '\n'
-        'Vote bonus: ', repr(VOTE_PER_DAY)
+        'Daily bonus: ', repr(VOTE_PER_DAY)
     ]
     
     vote_base = VOTE_BASE
@@ -331,7 +331,7 @@ async def render_hearts_vote_extended(client, event, target_user):
     field_value_parts.append('\n**\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_**')
     
     if is_weekend:
-        field_value_parts.append('\n\n**Total:**\nVote base: ')
+        field_value_parts.append('\n\n**Total:**\nDaily base: ')
         field_value_parts.append(repr(vote_base))
         field_value_parts.append('\nDaily bonus: ')
         field_value_parts.append(repr(vote_per_day))
@@ -339,7 +339,7 @@ async def render_hearts_vote_extended(client, event, target_user):
     field_value_parts.append(
         '\n\n'
         '**Formula:**\n'
-        'vote base + vote bonus * daily streak\n'
+        'vote base + daily bonus * daily streak\n'
     )
     
     field_value_parts.append(repr(vote_base))

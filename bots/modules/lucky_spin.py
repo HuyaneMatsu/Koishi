@@ -29,7 +29,7 @@ ARROW_BLOCKS = tuple(
 
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def wheel(client, event,
+async def lucky_spin(client, event,
     bet: ('int', 'The bet of hearts to bet') = None,
 ):
     index = floor(random()*8.0)
@@ -82,12 +82,6 @@ async def wheel(client, event,
                 )
             )
         
-        if change < 0:
-            change = -change
-            state = 'lost'
-        else:
-            state = 'won'
-        
-        description = f'{ARROW_BLOCKS[index]}\n\nYou {state} {change} {EMOJI__HEART_CURRENCY} !'
+        description = f'{ARROW_BLOCKS[index]}\n\nYou won {bet+change} {EMOJI__HEART_CURRENCY} !'
     
     return Embed(description=description).add_author(None, f'{client.name}\'s lucky wheel')

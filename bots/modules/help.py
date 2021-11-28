@@ -529,7 +529,7 @@ CATEGORIES = (
     ), (
         'Games',
         EMOJI_VIDEO_GAME,
-        ('21', 'ds', 'kanako', 'wheel', 'xox',),
+        ('21', 'ds', 'kanako', 'lucky-spin', 'xox',),
     ), (
         'Help',
         EMOJI_SPEECH_BUBBLE,
@@ -642,7 +642,7 @@ HEARD_GUIDE_EMBED = Embed(
     'Gambling hearts',
     (
         '**•** `/21` - Almost Blackjack.\n'
-        '**•** `/wheel` - Lucky wheel.'
+        '**•** `/lucky-spin` - Lucky spin.'
     ),
 )
 
