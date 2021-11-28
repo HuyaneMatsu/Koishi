@@ -529,7 +529,7 @@ CATEGORIES = (
     ), (
         'Games',
         EMOJI_VIDEO_GAME,
-        ('21', 'ds', 'kanako', 'xox',),
+        ('21', 'ds', 'kanako', 'wheel', 'xox',),
     ), (
         'Help',
         EMOJI_SPEECH_BUBBLE,
