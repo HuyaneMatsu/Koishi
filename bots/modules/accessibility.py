@@ -9,9 +9,25 @@ ACCESSIBILITY_INTERACTIONS = SLASH_CLIENT.interactions(
     None,
     name = 'accessibility',
     description = 'Customize your Koishi experience (actually just a few things).',
-    is_global=True,
+    is_global = True,
 )
 
+
+def field_value_to_code_block(field_value):
+    if field_value:
+        code_block = (
+            '```\n'
+            'true\n'
+            '```'
+        )
+    else:
+        code_block = (
+            '```\n'
+            'false\n'
+            '```'
+        )
+    
+    return code_block
 
 @ACCESSIBILITY_INTERACTIONS.interactions
 async def notification_settings(event):
@@ -24,7 +40,7 @@ async def notification_settings(event):
                     user_common_model.notify_proposal,
                     user_common_model.notify_daily,
                     
-                ]
+                ],
             ).where(
                 user_common_model.user_id == user.id,
             )
@@ -38,14 +54,14 @@ async def notification_settings(event):
         notify_daily = True
     
     return Embed(
-        'Notification settings.'
+        'Notification settings'
     ).add_field(
         NOTIFICATION_NAME_PROPOSAL,
-        'true' if notify_proposal else 'false',
+        field_value_to_code_block(notify_proposal),
         inline = True,
     ).add_field(
         NOTIFICATION_NAME_DAILY,
-        'true' if notify_daily else 'false',
+        field_value_to_code_block(notify_daily),
         inline = True,
     ).add_thumbnail(
         user.avatar_url,
@@ -100,7 +116,7 @@ async def change_notification_setting(event,
                 [
                     user_common_model.id,
                     NOTIFICATION_TYPE_TO_FIELD[notification_type],
-                ]
+                ],
             ).where(
                 user_common_model.user_id == user.id,
             )
