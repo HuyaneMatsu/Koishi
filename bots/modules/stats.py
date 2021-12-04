@@ -7,7 +7,8 @@ if IS_PYPY:
 from datetime import datetime
 from threading import enumerate as list_threads, _MainThread as MainThreadType
 
-from hata import EventThread, KOKORO, ExecutorThread, Client, Embed, Color, elapsed_time, Future, sleep
+from scarletio import EventThread, ExecutorThread
+from hata import Client, Embed, Color, elapsed_time
 from hata.ext.commands_v2 import checks
 
 from bot_utils.models import DB_ENGINE

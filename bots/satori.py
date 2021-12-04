@@ -3,8 +3,7 @@ from random import randint
 from itertools import cycle, chain
 from threading import main_thread
 
-from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, WebhookType, KOKORO, Client, CLIENTS, \
-    Permission
+from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, KOKORO, Client, CLIENTS, Permission
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 

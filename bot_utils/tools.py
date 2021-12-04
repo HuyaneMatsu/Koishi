@@ -1,13 +1,12 @@
-import re
 from random import random
 
-from hata import CancelledError, sleep, Task, DiscordException, methodize, ERROR_CODES, BUILTIN_EMOJIS, \
-    EventWaitforBase, KOKORO, ERROR_CODES, is_coroutine_function, InteractionEvent, ComponentButton, ComponentRow
-from hata.ext.commands import CommandProcesser, Timeouter, GUI_STATE_READY, GUI_STATE_SWITCHING_PAGE, \
-    GUI_STATE_CANCELLING, GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CTX
+from scarletio import CancelledError, sleep, Task, methodize
+from hata import DiscordException, BUILTIN_EMOJIS, EventWaitforBase, KOKORO, ERROR_CODES,  ComponentButton, \
+    ComponentRow
+
 from hata.ext.slash.menus.menu import Menu
-from hata.ext.slash.menus.helpers import EMOJI_LEFT_2, EMOJI_LEFT, EMOJI_RIGHT, EMOJI_RIGHT_2, EMOJI_CANCEL, \
-    get_auto_check, CUSTOM_ID_CANCEL, top_level_check, top_level_get_timeout
+from hata.ext.slash.menus.helpers import EMOJI_LEFT, EMOJI_RIGHT, EMOJI_CANCEL, get_auto_check, CUSTOM_ID_CANCEL, \
+    top_level_check, top_level_get_timeout
 
 
 try:

@@ -1,6 +1,7 @@
 import sys
 from os import getpid as get_process_identifier
-from hata import KOKORO, Future, sleep
+from hata import KOKORO
+from scarletio import Future, sleep
 
 try:
     import psutil

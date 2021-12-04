@@ -30,6 +30,7 @@ AUDIO_PLAY_POSSIBLE = False     # Whether FFmpeg and other voice requirement as 
 AUDIO_PATH = None               # path for local audio files, can be None
 HATA_PATH = None                # path to Hata if Any (str or None)
 KOISHI_PATH = None              # path to Koishi if specific. (str or None)
+SCARLETIO_PATH = None           # path to Scarletio if Any (str or None)
 
 DATABASE_NAME = None            # The database's name to connect to. (str)
 

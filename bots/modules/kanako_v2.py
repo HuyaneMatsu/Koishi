@@ -2,9 +2,8 @@ import os, re
 from random import randint, choice
 from itertools import chain
 
-from hata import ERROR_CODES, BUILTIN_EMOJIS, CancelledError, Task, sleep, InvalidStateError, any_to_any, Color, \
-    Embed, DiscordException, ReuBytesIO, LOOP_TIME, Client, KOKORO, future_or_timeout, Future, InteractionEvent, \
-    Permission
+from scarletio import ReuBytesIO, future_or_timeout, Future, Task, LOOP_TIME, any_to_any
+from hata import Color, Embed, Client, KOKORO
 
 from hata.ext.slash import abort, Row, Button, ButtonStyle, InteractionResponse
 
@@ -1043,7 +1042,7 @@ class KanakoRunner:
         if (waiter is None):
             return
         
-        if waiter.done():
+        if waiter.is_done():
             return
         
         if user in self.answers:

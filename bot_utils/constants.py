@@ -1,10 +1,7 @@
 from datetime import datetime
 import os
-from io import StringIO
-from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory, Emoji, User, ERROR_CODES, \
-    DiscordException
-from hata.ext.slash.menus import Pagination
-from random import choice
+from hata import ChannelText, Guild, Role, Invite, Color, ChannelCategory, Emoji, User
+
 
 import config
 

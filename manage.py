@@ -24,6 +24,10 @@ hata_path = config.HATA_PATH
 if (hata_path is not None) and (hata_path not in sys.path):
     sys.path.append(hata_path)
 
+scarletio_path = config.SCARLETIO_PATH
+if (scarletio_path is not None) and (scarletio_path not in sys.path):
+    sys.path.append(scarletio_path)
+
 del hata_path
 
 import hata

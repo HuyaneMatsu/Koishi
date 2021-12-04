@@ -1,8 +1,9 @@
 from random import random
 from itertools import chain
 
-from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, ERROR_CODES, \
-    ChannelGuildBase, WaitTillAll, future_or_timeout, InteractionType
+from scarletio import Task, Future, WaitTillAll, future_or_timeout
+from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, KOKORO, ERROR_CODES, \
+    ChannelGuildBase, InteractionType
 from hata.ext.slash import Button, Row
 from hata.ext.slash.menus.menu import GUI_STATE_READY, GUI_STATE_EDITING, GUI_STATE_CANCELLING, \
     GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CONTEXT, Timeouter
@@ -710,7 +711,7 @@ async def game_21_single_player(client, event, amount):
         
         player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False, event=event)
         player_user_waiter = player_runner.waiter
-        if player_user_waiter.done() or (entry_id == -1):
+        if player_user_waiter.is_done() or (entry_id == -1):
             unallocate = False
         else:
             unallocate = True

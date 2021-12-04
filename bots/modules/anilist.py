@@ -1,10 +1,9 @@
 from re import compile as re_compile, U as re_unicode, M as re_multi_line, S as re_dotall
-from hata import Client, to_json, Embed, istr, KOKORO, sleep, ScarletLock, BUILTIN_EMOJIS
-from hata.backend.headers import CONTENT_TYPE
+from scarletio import to_json, sleep, ScarletLock, IgnoreCaseString
+from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO
+from scarletio.web_common.headers import CONTENT_TYPE
 from hata.ext.slash import abort, Row, Button, InteractionResponse, Select, Option
 from collections import namedtuple as NamedTupleType
-
-from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT: Client
 
@@ -13,7 +12,7 @@ RATE_LIMIT_SIZE = 90
 
 RATE_LIMIT_LOCK = ScarletLock(KOKORO, RATE_LIMIT_SIZE)
 
-RETRY_AFTER = istr('Retry-After')
+RETRY_AFTER = IgnoreCaseString('Retry-After')
 
 CUSTOM_ID_FIND_CHARACTER_LEFT = 'anilist.find_character.l'
 CUSTOM_ID_FIND_CHARACTER_RIGHT = 'anilist.find_character.r'

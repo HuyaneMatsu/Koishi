@@ -1,17 +1,16 @@
 import re
 from math import floor
 
-from hata import Client, Embed, mention_user_by_id, DiscordException, ERROR_CODES, Emoji
+from hata import Client, Embed, mention_user_by_id, Emoji
 from hata.ext.slash import InteractionResponse, abort, Button, Row
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
-from bot_utils.constants import EMOJI__HEART_CURRENCY, GUILD__SUPPORT
+from bot_utils.constants import EMOJI__HEART_CURRENCY
 from bot_utils.utils import send_embed_to
 
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import func as alchemy_function, and_, distinct, or_
-from sqlalchemy.sql import select, desc
+from sqlalchemy import func as alchemy_function, and_, or_
+from sqlalchemy.sql import select
 
 SLASH_CLIENT: Client
 

@@ -3,10 +3,10 @@ from re import compile as re_compile
 
 from hata import Embed, Color, Client
 from hata.ext.command_utils import ChooseMenu, Pagination
-from hata.backend.utils import from_json
+from scarletio import from_json
 from hata.ext.slash import abort
 from hata.discord.http import LIBRARY_USER_AGENT
-from hata.backend.headers import USER_AGENT, CONTENT_TYPE
+from scarletio.web_common.headers import USER_AGENT, CONTENT_TYPE
 from hata.ext.extension_loader import require
 
 from bot_utils.tools import BeautifulSoup

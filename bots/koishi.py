@@ -1,14 +1,14 @@
 import re
-from datetime import datetime, timedelta
 from functools import partial as partial_func
 
-from hata import BUILTIN_EMOJIS, sleep,  Client, KOKORO, cchunkify, alchemy_incendiary, Permission
-from hata.backend.futures import render_exc_to_list
+from hata import BUILTIN_EMOJIS,  Client, KOKORO, cchunkify, Permission
+from scarletio import alchemy_incendiary
+from scarletio.utils.trace import render_exception_into
 from hata.discord.utils import sanitise_mention_escaper
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, EmojiDeleteWaitfor, \
     RoleEditWaitfor
-from bot_utils.constants import GUILD__SUPPORT, CHANNEL__SYSTEM__SYNC, CHANNEL__SUPPORT__DEFAULT_TEST
+from bot_utils.constants import GUILD__SUPPORT, CHANNEL__SUPPORT__DEFAULT_TEST
 
 
 
@@ -33,7 +33,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 @Satori.events
 async def message_create(client, message):
-    if (message.guild_id != GUILD__SUPPORT):
+    if (message.guild_id != GUILD__SUPPORT.id):
         return
     
     if (message.referenced_message is not None):
@@ -98,7 +98,7 @@ async def error(client, name, err):
     ]
     
     if isinstance(err, BaseException):
-        await KOKORO.run_in_executor(alchemy_incendiary(render_exc_to_list, (err, extracted)))
+        await KOKORO.run_in_executor(alchemy_incendiary(render_exception_into, (err, extracted)))
     else:
         if not isinstance(err, str):
             err = repr(err)

@@ -1,12 +1,11 @@
 import re
 
-from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, sleep, ScarletExecutor, ClientWrapper, MESSAGES, \
-    Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, WeakKeyDictionary, Client, parse_message_reference, \
+from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, ClientWrapper, MESSAGES, \
+    Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, Client, parse_message_reference, \
     ChannelBase, parse_role, parse_emoji, Permission
-
+from scarletio import sleep, ScarletExecutor, WeakKeyDictionary
 from hata.ext.command_utils import ChooseMenu, Closer
 from hata.ext.slash import abort
-
 from bot_utils.models import DB_ENGINE, auto_react_role_model, AUTO_REACT_ROLE_TABLE
 from hata.ext.extension_loader import require
 

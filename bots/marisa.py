@@ -1,35 +1,21 @@
 import sys, re
-from random import random, choice, shuffle, randint
+from random import random, choice, randint
 from time import perf_counter
-from math import ceil
-from collections import deque, OrderedDict
-from html import unescape as html_unescape
 from functools import partial as partial_func
-from datetime import datetime, timedelta
 from io import StringIO
-
-from dateutil.relativedelta import relativedelta
-from bs4 import BeautifulSoup
 
 try:
     import watchdog
 except ImportError:
     watchdog = None
 
-from hata import Embed, Client, parse_emoji, DATETIME_FORMAT_CODE, elapsed_time, id_to_datetime, sleep, KOKORO, \
-    alchemy_incendiary, RoleManagerType, ICON_TYPE_NONE, BUILTIN_EMOJIS, Status, ChannelText, ChannelVoice, Lock, \
-    ChannelCategory, ChannelStore, ChannelThread, time_to_id, imultidict, DiscordException, ERROR_CODES, CHANNELS, \
-    MESSAGES, parse_message_reference, parse_emoji, istr, Future, LOOP_TIME, parse_rdelta, parse_tdelta, cchunkify, \
-    ApplicationCommandPermissionOverwriteTargetType, ClientWrapper, INTERACTION_RESPONSE_TYPES, ComponentType, \
-    ButtonStyle, Emoji, Role, StickerType, StickerFormat, ZEROUSER, GUILDS, ApplicationCommandOptionType, \
-    ApplicationCommandOption, ApplicationCommand
-from hata.ext.slash import setup_ext_slash, InteractionResponse, abort, set_permission, SlasherCommandError, \
-    wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option, P
-from hata.backend.futures import render_exc_to_list
-from hata.backend.quote import quote
-from hata.discord.http import LIBRARY_USER_AGENT
-from hata.backend.headers import USER_AGENT, DATE
-from hata.ext.command_utils import wait_for_reaction, UserMenuFactory, UserPagination, WaitAndContinue
+from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
+    parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS
+from scarletio import sleep, alchemy_incendiary
+from hata.ext.slash import InteractionResponse, abort, set_permission, \
+    wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
+from scarletio.utils.trace import render_exception_into
+from hata.ext.command_utils import UserMenuFactory, UserPagination
 from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
@@ -40,7 +26,6 @@ from bot_utils.constants import COLOR__MARISA_HELP, GUILD__SUPPORT, CHANNEL__SUP
 from bot_utils.utils import command_error
 from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter_v2 import Interpreter
-from bot_utils.tools import choose, Cell
 
 Marisa : Client
 
@@ -99,7 +84,7 @@ async def command_error_handler(ctx, exception):
         return False
     
     with StringIO() as buffer:
-        await KOKORO.render_exc_async(exception,[
+        await KOKORO.render_exception_async(exception,[
             ctx.client.full_name,
             ' ignores an occurred exception at command ',
             repr(ctx.command),
@@ -225,7 +210,7 @@ async def error(client, name, err):
     ]
     
     if isinstance(err, BaseException):
-        await KOKORO.run_in_executor(alchemy_incendiary(render_exc_to_list, (err, extracted)))
+        await KOKORO.run_in_executor(alchemy_incendiary(render_exception_into, (err, extracted)))
     else:
         if not isinstance(err, str):
             err = repr(err)

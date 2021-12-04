@@ -1,9 +1,10 @@
-from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Task, Color, eventlist, Permission, \
-    list_difference, ActivityChange, KOKORO, Client
+from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Color, eventlist, Permission, \
+    ActivityChange, KOKORO, Client
+from scarletio import Task, list_difference
 from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
 from hata.ext.prettyprint import pretty_print
 from hata.ext.slash.menus import Pagination, Closer
-from hata.backend.utils import MethodType
+from types import MethodType
 from hata.ext.commands_v2 import Command
 
 DISPATCH_TESTS = eventlist(type_=Command)

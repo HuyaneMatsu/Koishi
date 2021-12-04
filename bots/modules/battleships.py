@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
 import re, time
 from random import randint
 
-from hata import Color, filter_content, is_user_mention, Future, FutureWM, future_or_timeout, sleep, Task, \
-    DiscordException, BUILTIN_EMOJIS, Embed, KOKORO, ERROR_CODES, Client
+from hata import Color, filter_content, is_user_mention, DiscordException, BUILTIN_EMOJIS, Embed, KOKORO, ERROR_CODES, \
+    Client
+from scarletio import ResultGatheringFuture, future_or_timeout, Future, sleep, Task
 from hata.ext.command_utils import WaitAndContinue, Closer
 from hata.ext.commands_v2 import checks, configure_converter
 
@@ -499,7 +499,7 @@ class battleships_game:
             client.events.message_create.append(player2.channel, self)
             
             #game starts            
-            self.future = FutureWM(KOKORO, 2)
+            self.future = ResultGatheringFuture(KOKORO, 2)
             future_or_timeout(self.future, 300.)
             
             #startup

@@ -1,10 +1,10 @@
 from functools import partial as partial_func
 from random import random, choice
 
-from hata import Emoji, BUILTIN_EMOJIS, Client, Embed, DiscordException, ERROR_CODES, Task, KOKORO
+from hata import Emoji, Client, Embed, DiscordException, ERROR_CODES, KOKORO
+from scarletio import Task
 from hata.ext.slash import iter_component_interactions, Button, ButtonStyle, wait_for_component_interaction
 
-from bot_utils.constants import GUILD__SUPPORT
 
 EMOJI_P2 = Emoji.precreate(704393708467912875)
 EMOJI_P1 = Emoji.precreate(812069466069663765)

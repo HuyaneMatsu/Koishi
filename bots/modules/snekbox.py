@@ -1,10 +1,13 @@
-import os, sys, subprocess, re
+import os, subprocess, re
 from functools import partial as partial_func
 from pathlib import Path
 from subprocess import TimeoutExpired
-from hata import Color, KOKORO, Embed, ScarletLock, Client, sanitize_mentions
+from scarletio import ScarletLock
+from hata import Color, KOKORO, Embed, Client, sanitize_mentions
 from hata.ext.commands_v2 import checks
 from hata.ext.slash.menus import Closer
+from scarletio import IS_UNIX
+
 from bot_utils.interpreter_v2 import parse_code_content
 from bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI
 from hata.ext.extension_loader import require
@@ -40,7 +43,6 @@ PATH__PYTHON_EXECUTABLE_C_3_6 = '/usr/bin/pypy3'
 
 PATH__SNEKBOX = Path('/snekbox')
 
-IS_UNIX = (sys.platform != 'win32')
 
 LOG_RP = re.compile('\[[IDWEF]\]\[.+?\] (.*)')
 

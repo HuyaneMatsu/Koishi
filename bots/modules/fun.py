@@ -2,11 +2,11 @@ from random import random, randint, choice
 from html import unescape as html_unescape
 from functools import partial as partial_func
 
-from hata import Client, Embed, BUILTIN_EMOJIS, Lock, KOKORO, DiscordException, ERROR_CODES, WebhookType, Emoji
+from scarletio import Lock
+from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO, DiscordException, ERROR_CODES, Emoji
 from hata.ext.command_utils import wait_for_reaction
 from hata.ext.slash import abort
 
-from bot_utils.tools import Cell
 from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT : Client

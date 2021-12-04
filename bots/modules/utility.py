@@ -1,28 +1,23 @@
-import json, re
+import json
 from math import ceil
 from functools import partial as partial_func
 from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
 from random import choice
 
-
-from hata import Color, Embed, Client, WaitTillExc, ReuBytesIO, DiscordException, now_as_id, parse_emoji, Task, \
+from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
-    parse_message_reference, MESSAGES, CHANNELS, ID_RP, StickerFormat, ZEROUSER, future_or_timeout, ChannelDirectory, \
-    GUILDS, Permission, escape_markdown
-
+    StickerFormat, ZEROUSER, ChannelDirectory, Permission, escape_markdown
+from scarletio import WaitTillExc, ReuBytesIO
 from hata.ext.slash.menus import Pagination
-from hata.ext.prettyprint import pchunkify
-from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, ButtonStyle, \
-    wait_for_component_interaction
+from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row
 
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 
 from bot_utils.tools import Pagination10step
-from bot_utils.constants import ROLE__SUPPORT__TESTER, GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR, \
-    ROLE__SUPPORT__ADMIN
+from bot_utils.constants import ROLE__SUPPORT__TESTER, GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR
 
 UTILITY_COLOR = Color(0x5dc66f)
 
@@ -672,8 +667,8 @@ GUILD_FIELDS = {
 
 @SLASH_CLIENT.interactions(name='guild', is_global=True)
 async def guild_(client, event,
-        field: (list(GUILD_FIELDS.keys()), 'Which fields should I show?') = DEFAULT_GUILD_FILED,
-            ):
+    field: (list(GUILD_FIELDS.keys()), 'Which fields should I show?') = DEFAULT_GUILD_FILED,
+):
     """Shows some information about the guild."""
     guild = event.guild
     if guild.partial:
@@ -782,16 +777,16 @@ def in_role_pagination_check(user, event):
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def in_role(client, event,
-        role_1 : ('role', 'Select a role.'),
-        role_2 : ('role', 'Double role!') = None,
-        role_3 : ('role', 'Triple role!') = None,
-        role_4 : ('role', 'Quadra role!') = None,
-        role_5 : ('role', 'Penta role!') = None,
-        role_6 : ('role', 'Epic!') = None,
-        role_7 : ('role', 'Legendary!') = None,
-        role_8 : ('role', 'Mythical!') = None,
-        role_9 : ('role', 'Lunatic!') = None,
-            ):
+    role_1 : ('role', 'Select a role.'),
+    role_2 : ('role', 'Double role!') = None,
+    role_3 : ('role', 'Triple role!') = None,
+    role_4 : ('role', 'Quadra role!') = None,
+    role_5 : ('role', 'Penta role!') = None,
+    role_6 : ('role', 'Epic!') = None,
+    role_7 : ('role', 'Legendary!') = None,
+    role_8 : ('role', 'Mythical!') = None,
+    role_9 : ('role', 'Lunatic!') = None,
+):
     """Shows the users with the given roles."""
     guild = event.guild
     if guild is None:
@@ -830,8 +825,8 @@ async def in_role(client, event,
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def avatar(client, event,
-        user : ('user', 'Choose a user!') = None,
-            ):
+    user : ('user', 'Choose a user!') = None,
+):
     """Shows your or the chosen user's avatar."""
     if user is None:
         user = event.user
@@ -879,8 +874,8 @@ async def status_(user):
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def show_emoji(client, event,
-        emoji : ('str', 'Yes?'),
-            ):
+    emoji : ('str', 'Yes?'),
+):
     """Shows the given custom emoji."""
     emoji = parse_emoji(emoji)
     if emoji is None:

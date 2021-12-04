@@ -4,7 +4,7 @@ from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTI
 from hata.discord.utils import DISCORD_EPOCH_START
 from hata.ext.extension_loader import require
 
-from bot_utils.constants import CHANNEL__SUPPORT__LOG_MENTION, GUILD__SUPPORT, CATEGORY__SUPPORT__BIG_BRO
+from bot_utils.constants import GUILD__SUPPORT, CATEGORY__SUPPORT__BIG_BRO
 
 require(Satori=Client)
 

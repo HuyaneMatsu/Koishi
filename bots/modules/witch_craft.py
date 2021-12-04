@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
 import os
 from math import floor, sqrt
 from functools import partial as partial_func
 
-from hata import BUILTIN_EMOJIS, Client, Lock, KOKORO, alchemy_incendiary, Embed, Permission
-from hata.backend.utils import to_json, from_json
+from hata import BUILTIN_EMOJIS, Client, KOKORO, Embed, Permission
+from scarletio import to_json, Lock, alchemy_incendiary
 from hata.ext.slash import abort, wait_for_component_interaction, Row, Button, InteractionResponse
 
 from sqlalchemy.sql import select, update
 
 from bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI, EMOJI__HEART_CURRENCY
-from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, item_model, ITEM_TABLE
+from bot_utils.models import DB_ENGINE, user_common_model, item_model, ITEM_TABLE
 
 SLASH_CLIENT: Client
 

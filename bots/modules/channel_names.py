@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from csv import reader as CSVReader, writer as CSVWriter
 from time import time as time_now
@@ -9,8 +8,8 @@ from difflib import get_close_matches
 from bot_utils.constants import CATEGORY__SUPPORT__BOTS, PATH__KOISHI, ROLE__SUPPORT__MODERATOR
 from bot_utils.tools import Cell
 
-from hata import Lock, KOKORO, alchemy_incendiary, Task, Embed, DiscordException, ERROR_CODES, Client, \
-    BUILTIN_EMOJIS
+from hata import KOKORO, Embed, Client, BUILTIN_EMOJIS
+from scarletio import Lock, alchemy_incendiary, Task
 from hata.ext.slash import Button, Row, wait_for_component_interaction
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.commands_v2 import checks

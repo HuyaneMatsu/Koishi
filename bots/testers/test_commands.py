@@ -9,12 +9,12 @@ from io import BytesIO
 from PIL import Image as PIL
 from PIL.ImageSequence import Iterator as ImageSequenceIterator
 
-from hata import eventlist, Future, RATE_LIMIT_GROUPS, future_or_timeout, Embed, cchunkify, WaitTillAll, User, sleep, \
-    istr, imultidict, random_id, WebhookType, chunkify, ICON_TYPE_NONE, Webhook, KOKORO, DiscordEntity, ReuBytesIO, \
-    IconSlot, CHANNELS, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, datetime_to_id, Client, \
-    ReuAsyncIO, enter_executor, ApplicationCommand, INTERACTION_RESPONSE_TYPES, ApplicationCommandOption, ChannelVoice, \
-    ApplicationCommandOptionType, LOOP_TIME, ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, \
-    PrivacyLevel
+from hata import eventlist, RATE_LIMIT_GROUPS, Embed, cchunkify, User, random_id, chunkify, Webhook, \
+    KOKORO, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, datetime_to_id, Client, \
+    ApplicationCommand, ApplicationCommandOption, ChannelVoice, ApplicationCommandOptionType, \
+    ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, PrivacyLevel
+
+from scarletio import Future, future_or_timeout, WaitTillAll, sleep, ReuBytesIO, ReuAsyncIO, enter_executor
 
 from hata.ext.command_utils import ChooseMenu, Pagination, Closer
 from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag, CommandContext

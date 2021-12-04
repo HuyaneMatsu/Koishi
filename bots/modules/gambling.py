@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 from random import random
 from math import log10, ceil, floor
 
-from hata import Client, elapsed_time, Embed, BUILTIN_EMOJIS, DiscordException, Task, Future, KOKORO, \
+from scarletio import Task, Future
+from hata import Client, elapsed_time, Embed, BUILTIN_EMOJIS, DiscordException, KOKORO, \
     ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission, InteractionType
-from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row, wait_for_component_interaction
+from hata.ext.slash import abort, set_permission, Button, Row, wait_for_component_interaction
 from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression

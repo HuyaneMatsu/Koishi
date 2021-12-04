@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 import sys, os, json
 from threading import Lock as SyncLock
 
-from hata import Emoji, alchemy_incendiary, Color, Embed, KOKORO
+from scarletio import alchemy_incendiary
+from hata import Color, Embed
 from bot_utils.constants import PATH__KOISHI
 
 # Emojis are not used, but we will keep them for a time now

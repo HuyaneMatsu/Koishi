@@ -1,4 +1,5 @@
-from hata import Client, Guild, DiscordException, ERROR_CODES, ChannelThread, WaitTillAll, Task, KOKORO, WaitTillExc
+from scarletio import Task, WaitTillExc
+from hata import Client, Guild, DiscordException, ERROR_CODES, ChannelThread, KOKORO
 from hata.ext.slash import abort
 
 SLASH_CLIENT: Client

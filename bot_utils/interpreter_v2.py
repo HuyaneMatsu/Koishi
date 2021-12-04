@@ -1,4 +1,5 @@
-from hata import KOKORO, Lock, Embed, cchunkify, is_awaitable
+from hata import KOKORO, Embed, cchunkify
+from scarletio import is_awaitable, Lock
 import hata
 import re
 from io import StringIO
@@ -158,7 +159,7 @@ class Interpreter:
                         if is_awaitable(coroutine):
                             await coroutine
                     except BaseException as err:
-                        await KOKORO.render_exc_async(err, file=buffer)
+                        await KOKORO.render_exception_async(err, file=buffer)
                 
                 page_contents = get_buffer_value(buffer)
             

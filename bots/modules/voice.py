@@ -1,7 +1,8 @@
 import re, os
 
-from hata import Client, Task, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
-    KOKORO, ChannelVoice, AsyncIO, WaitTillAll, ChannelStage, is_url, InteractionEvent
+from scarletio import Task, AsyncIO, WaitTillAll
+from hata import Client, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
+    KOKORO, ChannelVoice, ChannelStage, is_url, InteractionEvent
 from hata.ext.slash.menus import Pagination
 
 from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE

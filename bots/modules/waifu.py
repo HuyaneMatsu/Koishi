@@ -1,17 +1,18 @@
 from itertools import chain
 
 from hata import Client, BUILTIN_EMOJIS
-from hata.backend.headers import CONTENT_TYPE
-from hata import imultidict, un_map_pack, Task, KOKORO, WaitTillAll, sanitize_mentions, Embed
+from scarletio.web_common.headers import CONTENT_TYPE
+from hata import Embed, KOKORO
+from scarletio import IgnoreCaseMultiValueDictionary, Task, WaitTillAll
 
-from hata.ext.slash import abort, InteractionResponse, Button, Row
+from hata.ext.slash import abort, InteractionResponse, Button
 
 SLASH_CLIENT: Client
 
 WAIFU_API_BASE_URL = 'https://api.waifu.pics'
 PROVIDER_FOOTER = 'Images provided by waifu.pics'
 
-HEADERS = imultidict()
+HEADERS = IgnoreCaseMultiValueDictionary()
 HEADERS[CONTENT_TYPE] = 'application/json'
 
 SFW_WAIFUS = [

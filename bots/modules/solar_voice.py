@@ -3,7 +3,7 @@ require(SOLARLINK_VOICE=True)
 
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case
 from functools import partial as partial_func
-from math import ceil, floor
+from math import ceil
 from random import choice
 
 from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji, escape_markdown, Permission, Color

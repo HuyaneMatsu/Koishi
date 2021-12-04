@@ -1,14 +1,12 @@
-import re
 from functools import partial as partial_func
 from datetime import datetime, timedelta
-from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, KOKORO, \
-    future_or_timeout, Task, is_url
+from scarletio import future_or_timeout, Task
+from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, KOKORO, is_url
 from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row
 from bot_utils.models import DB_ENGINE, sticker_counter_model, STICKER_COUNTER_TABLE
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 from dateutil.relativedelta import relativedelta
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import func as alchemy_function, and_, distinct
+from sqlalchemy import func as alchemy_function, and_
 from sqlalchemy.sql import select, desc
 
 RELATIVE_MONTH = relativedelta(months=1)

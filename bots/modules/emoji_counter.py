@@ -1,12 +1,9 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from math import ceil
-
-from hata import Client, parse_custom_emojis, Embed, EMOJIS, STICKERS, parse_emoji, USERS
-from hata.ext.slash import set_permission, abort
-
+from hata import Client, parse_custom_emojis, Embed, EMOJIS, parse_emoji, USERS
+from hata.ext.slash import abort
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import func as alchemy_function, and_, distinct
+from sqlalchemy import func as alchemy_function, and_
 from sqlalchemy.sql import select, desc
 
 from bot_utils.models import DB_ENGINE, emoji_counter_model, EMOJI_COUNTER_TABLE, sticker_counter_model, \

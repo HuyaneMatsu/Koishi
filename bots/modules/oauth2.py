@@ -1,5 +1,6 @@
-from hata import Color, Embed, parse_oauth2_redirect_url, sleep, DiscordException, ERROR_CODES, \
-    cr_pg_channel_object, ChannelText, Client
+from scarletio import sleep
+from hata import Color, Embed, parse_oauth2_redirect_url, DiscordException, ERROR_CODES, cr_pg_channel_object, \
+    ChannelText, Client
 from hata.ext.commands_v2 import checks
 from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
@@ -214,7 +215,7 @@ class oauth2_my_guild:
             await sleep(1.0, client.loop)
             await client.guild_edit(guild, owner=user.id)
         except BaseException as err:
-            await client.loop.render_exc_async(err, 'Exception occurred at oauth2_my_guild\n')
+            await client.loop.render_exception_async(err, 'Exception occurred at oauth2_my_guild\n')
         finally:
             try:
                 guild

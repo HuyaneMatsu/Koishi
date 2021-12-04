@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 from html import escape as html_escape
 
-from hata.backend.quote import quote
+from scarletio.web_common import quote
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath, FunctionUnit, ClassAttributeUnit, \
     InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths
 from hata.ext.patchouli.parser import ATTRIBUTE_SECTION_NAME_RP

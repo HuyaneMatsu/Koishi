@@ -1,5 +1,5 @@
 from html import escape as html_escape
-from hata.backend.quote import quote
+from scarletio.web_common import quote
 
 class HttpText:
     __slots__ = ('value', )

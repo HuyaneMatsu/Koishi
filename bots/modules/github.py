@@ -1,22 +1,22 @@
 from collections import OrderedDict
 from datetime import datetime
-
-from hata import Client, LOOP_TIME, Lock, imultidict, KOKORO, istr, Future, Embed
+from scarletio import LOOP_TIME, Lock, IgnoreCaseMultiValueDictionary, IgnoreCaseString, Future
+from hata import Client, KOKORO, Embed
 from hata.discord.http import LIBRARY_USER_AGENT
-from hata.backend.headers import USER_AGENT, DATE
+from scarletio.web_common.headers import USER_AGENT, DATE
 from hata.discord.utils import parse_date_header_to_datetime
-from hata.backend.quote import quote
+from scarletio.web_common import quote
 from hata.ext.slash import abort
 
 from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT : Client
 
-GITHUB_HEADERS = imultidict()
+GITHUB_HEADERS = IgnoreCaseMultiValueDictionary()
 GITHUB_HEADERS[USER_AGENT] = LIBRARY_USER_AGENT
 
-GITHUB_HEADER_RATE_LIMIT_REMAINING = istr('x-ratelimit-remaining')
-GITHUB_HEADER_RATE_LIMIT_RESET_AT = istr('x-ratelimit-reset')
+GITHUB_HEADER_RATE_LIMIT_REMAINING = IgnoreCaseString('x-ratelimit-remaining')
+GITHUB_HEADER_RATE_LIMIT_RESET_AT = IgnoreCaseString('x-ratelimit-reset')
 
 class GitHubQueryLimit:
     __slots__ = ('rate_limit_reset_at', 'lock')

@@ -1,4 +1,5 @@
-from hata import Client, Embed, BUILTIN_EMOJIS, Lock, KOKORO, Task, InteractionType
+from scarletio import Lock, Task
+from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO, InteractionType
 from hata.ext.slash import abort, Button, Row, InteractionResponse
 
 SLASH_CLIENT: Client

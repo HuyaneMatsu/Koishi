@@ -4,9 +4,10 @@ from os import mkdir as make_dir
 from datetime import datetime, timedelta
 from io import StringIO
 
-from config import HATA_PATH
+from config import HATA_PATH, SCARLETIO_PATH
 
-from hata import Lock, KOKORO, Task, ReuAsyncIO, AsyncIO, sleep, Embed, WaitTillAll
+from hata import KOKORO, Embed
+from scarletio import Lock, Task, ReuAsyncIO, AsyncIO, WaitTillAll
 from hata.ext.command_utils import wait_for_message, Pagination
 
 from .constants import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
@@ -15,10 +16,12 @@ CHUNK_SIZE = 128*1024 # 128 KB
 
 HATA_HEAD_NAME = 'hata'
 KOISHI_HEAD_NAME = 'koishi'
+SCARLETIO_HEAD_NAME = 'scarletio'
 
 RELATIONS = {
     HATA_HEAD_NAME: HATA_PATH,
     KOISHI_HEAD_NAME: PATH__KOISHI,
+    SCARLETIO_HEAD_NAME: SCARLETIO_PATH,
 }
 
 DATETIME_FORMAT_CODE = '%Y.%m.%d-%H:%M:%S'
@@ -228,7 +231,7 @@ async def receive_sync(client, partner):
                 
     except BaseException as err:
         with StringIO() as buffer:
-            await KOKORO.render_exc_async(err, ['```'], file=buffer)
+            await KOKORO.render_exception_async(err, ['```'], file=buffer)
             
             buffer.seek(0)
             lines = buffer.readlines()

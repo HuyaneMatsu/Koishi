@@ -3,7 +3,8 @@ from time import monotonic
 from config import GOOGLE_API_KEYS
 from bot_utils.constants import GUILD__SUPPORT
 
-from hata import Client, Lock, KOKORO, Embed, Color
+from hata import Client, KOKORO, Embed, Color
+from scarletio import Lock
 from hata.ext.slash.menus import Pagination
 
 

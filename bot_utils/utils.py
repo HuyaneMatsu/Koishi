@@ -1,8 +1,5 @@
-from datetime import datetime
-import os
 from io import StringIO
-from hata import ChannelText, Guild, Role, Invite, Color, Embed, KOKORO, ChannelCategory, Emoji, User, ERROR_CODES, \
-    DiscordException
+from hata import Embed, KOKORO, ERROR_CODES, DiscordException
 from hata.ext.slash.menus import Pagination
 from random import choice
 from .constants import DEFAULT_CATEGORY_NAME
@@ -18,7 +15,7 @@ def category_name_rule(name):
 
 async def command_error(client, message, command, content, exception):
     with StringIO() as buffer:
-        await KOKORO.render_exc_async(exception,[
+        await KOKORO.render_exception_async(exception,[
             client.full_name,
             ' ignores an occurred exception at command ',
             repr(command),

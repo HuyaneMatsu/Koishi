@@ -1,7 +1,7 @@
-from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTIVITY_TYPES
+from hata import Client, Embed, DATETIME_FORMAT_CODE
 from hata.ext.extension_loader import require
 
-from bot_utils.constants import CHANNEL__SUPPORT__LOG_MENTION, GUILD__SUPPORT, CATEGORY__SUPPORT__BIG_BRO
+from bot_utils.constants import CHANNEL__SUPPORT__LOG_MENTION, GUILD__SUPPORT
 
 require(Satori=Client)
 

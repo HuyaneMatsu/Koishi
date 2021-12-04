@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
 from hata import elapsed_time, Embed, Client
 from bot_utils.constants import ROLE__SUPPORT__VERIFIED, EMOJI__HEART_CURRENCY, COLOR__EVENT, \
     CHANNEL__SUPPORT__EVENT, ROLE__SUPPORT__EVENT_MANAGER, LINK__HATA_GIT, GUILD__SUPPORT

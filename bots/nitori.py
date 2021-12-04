@@ -6,7 +6,8 @@ from time import perf_counter
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
-from hata import Client, Embed, parse_emoji, sleep, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, \
+from scarletio import sleep
+from hata import Client, Embed, parse_emoji, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, \
     DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji, CHANNEL_TYPES
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
     wait_for_component_interaction, iter_component_interactions, Select, Option, P
