@@ -18,7 +18,7 @@ TRIVIA_REQUEST_LOCK = Lock(KOKORO)
 TRIVIA_USER_LOCK = set()
 
 async def get_trivias():
-    if TRIVIA_REQUEST_LOCK.locked():
+    if TRIVIA_REQUEST_LOCK.is_locked():
         await TRIVIA_REQUEST_LOCK
         return
     

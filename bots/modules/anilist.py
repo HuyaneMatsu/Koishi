@@ -893,7 +893,7 @@ def array_response_builder(data, extra, work_set):
 
 
 async def search(client, json_query, response_builder, extra):
-    if RATE_LIMIT_LOCK.locked():
+    if RATE_LIMIT_LOCK.is_locked():
         yield
     
     await RATE_LIMIT_LOCK.acquire()

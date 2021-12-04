@@ -32,7 +32,7 @@ MEME_LOCK_GOOD_ANIME_MEMES = MemeLock(f'{URL_BASE}r/goodanimemes.json')
 
 async def get_memes(meme_lock):
     lock = meme_lock.lock
-    if lock.locked():
+    if lock.is_locked():
         await lock
         return
     

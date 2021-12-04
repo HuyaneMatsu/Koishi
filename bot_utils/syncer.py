@@ -299,7 +299,7 @@ async def sync_request_command(client, message, days: int = 7):
         await client.message_create(message.channel, f'please enter a valid day between 1 and 30 days, got {days}.')
         return
     
-    if SYNC_LOCK.locked():
+    if SYNC_LOCK.is_locked():
         await client.message_create(message.channel, 'A sync is already running.')
         return
     
@@ -312,7 +312,7 @@ async def sync_request_waiter(client, message):
     if message.content != INITIAL_MESSAGE:
         return
     
-    if SYNC_LOCK.locked():
+    if SYNC_LOCK.is_locked():
         return
     
     Task(receive_sync(client, message.author), KOKORO)

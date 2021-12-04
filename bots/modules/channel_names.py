@@ -291,7 +291,7 @@ async def add_bot_channel_name(client, message, weight:int, name):
     
     When adding a command please also define weight and not only name as: `weight | name`
     """
-    if EDIT_LOCK.locked():
+    if EDIT_LOCK.is_locked():
         await Closer(client, message.channel, Embed('Ohoho', 'A bot channel editing is already taking place.'))
         return
     

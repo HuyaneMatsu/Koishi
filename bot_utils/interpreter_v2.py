@@ -128,7 +128,7 @@ class Interpreter:
             await client.message_create(message.channel, 'You are not my boss!')
             return
         
-        if self.lock.locked():
+        if self.lock.is_locked():
             await client.message_create(message.channel, 'An execution is already running.')
             return
         
