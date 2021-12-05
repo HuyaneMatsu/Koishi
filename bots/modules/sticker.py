@@ -36,10 +36,10 @@ def item_sort_key(item):
 
 @STICKER_COMMANDS.interactions
 async def user_top(event,
-        user: ('user', 'By who?') = None,
-        count: (range(10, 61, 10), 'The maximal amount of emojis to show') = 30,
-        months: (range(1, 13), 'The months to get') = 1,
-    ):
+    user: ('user', 'By who?') = None,
+    count: (range(10, 61, 10), 'The maximal amount of emojis to show') = 30,
+    months: (range(1, 13), 'The months to get') = 1,
+):
     """List the most used stickers at ND by you or by the selected user."""
     if user is None:
         user = event.user
