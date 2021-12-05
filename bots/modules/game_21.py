@@ -815,15 +815,6 @@ async def game_21_single_player(client, event, amount):
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_single_player', err)
             
-            if (player_runner.message is not None) and channel.cached_permissions_for(client).can_manage_messages:
-                try:
-                    await client.reaction_clear(player_runner.message)
-                except GeneratorExit:
-                    raise
-                except BaseException as err:
-                    if should_render_exception(err):
-                        await client.events.error(client, 'game_21_single_player', err)
-            
             return
         
         if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
@@ -885,13 +876,13 @@ def create_join_embed(users, amount):
             description_parts.append(user.full_name)
             description_parts.append('\n')
     
-    description_parts.append('\nReact with ')
+    description_parts.append('\nClick on ')
     description_parts.append(GAME_21_EMOJI_ENTER.as_emoji)
     description_parts.append(' to join.')
     
     description = ''.join(description_parts)
     
-    return Embed('Game 21 multiplayer', description, color=COLOR__GAMBLING)
+    return Embed('Game 21 multi-player', description, color=COLOR__GAMBLING)
 
 
 async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, joined_user_ids, private_channel,
@@ -927,7 +918,7 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
     try:
         entry_id, embed = await game_21_postcheck(client, user, private_channel, amount)
         if (embed is None):
-            embed = Embed('21 multiplayer game joined.',
+            embed = Embed('21 multi-player game joined.',
                 f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
                 f'Guild: {guild.name}\n'
                 f'Channel: {source_channel.mention}',
@@ -977,7 +968,7 @@ async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, jo
     
     await game_21_refund(entry_id, amount)
     
-    embed = Embed('21 multiplayer game left.',
+    embed = Embed('21 multi-player game left.',
         f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
         f'Guild: {guild.name}\n'
         f'Channel: {source_channel.mention}',
@@ -1002,7 +993,7 @@ async def game_21_mp_cancelled(client, user, guild, source_channel, amount, priv
             values(total_allocated = user_common_model.total_allocated-amount)
         )
     
-    embed = Embed('21 multiplayer game was cancelled.',
+    embed = Embed('21 multi-player game was cancelled.',
         (
             f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
             f'Guild: {guild.name}\n'
@@ -1385,7 +1376,7 @@ async def game_21_multi_player(client, event, amount):
             return
         
         embed = Embed(
-            '21 multiplayer game created.',
+            '21 multi-player game created.',
             (
                 f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
                 f'Guild: {guild.name}\n'
@@ -1444,13 +1435,6 @@ async def game_21_multi_player(client, event, amount):
         if not (game_state == GAME_21_RESULT_FINISH or game_state == GAME_21_RESULT_CANCELLED_BY_USER):
             return
         
-        if channel.cached_permissions_for(client).can_manage_messages:
-            try:
-                await client.reaction_clear(message)
-            except BaseException as err:
-                if should_render_exception(err):
-                    await client.events.error(client, 'game_21_multi_player', err)
-                return
         
         if game_state == GAME_21_RESULT_CANCELLED_BY_USER:
             game_21_mp_notify_cancellation(client, join_gui.joined_tuples, amount, channel, guild, joined_user_ids)
