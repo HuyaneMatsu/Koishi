@@ -2284,6 +2284,14 @@ async def sticker_pack_get_all(client):
     return [StickerPack(sticker_pack_data) for sticker_pack_data in sticker_pack_datas]
 
 
+async def sticker_pack_get(client, sticker_pack_id):
+    data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/sticker-packs/{sticker_pack_id}'
+    )
+    
+    return StickerPack(data)
+
+
 async def sticker_guild_get(client, guild, sticker_id):
     guild_id = guild.id
     
@@ -5925,3 +5933,19 @@ async def rate_limit_test_0164(client, message):
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
         await guild_thread_get_all_active(client, guild)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0165(client, message):
+    """
+    Requests a sticker pack
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0165') as RLT:
+        sticker_packs = await client.sticker_pack_get_all()
+        if not sticker_packs:
+            await RLT.send('No sticker packs detected.')
+        
+        sticker_pack_id = sticker_packs[0].id
+        
+        await sticker_pack_get(client, sticker_pack_id)
