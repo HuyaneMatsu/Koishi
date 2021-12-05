@@ -44,7 +44,7 @@ def checkout_category():
         BIG_BROS[user_id] = channel
 
 
-async def big_bro_channel_delete_waiter(client, channel, guild):
+async def big_bro_channel_delete_waiter(client, channel):
     try:
         user_id = int(channel.name)
     except ValueError:
