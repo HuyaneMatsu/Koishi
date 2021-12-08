@@ -6,11 +6,14 @@ import hata.ext.commands.helps.subterranean
 import hata.ext.slash
 import hata.ext.commands_v2
 import hata.ext.commands_v2.helps.subterranean
+import scarletio
+import scarletio.http_client
 
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath, FunctionUnit, ClassAttributeUnit, \
     InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths, set_highlight_html_class, highlight
 
 map_module('hata')
+map_module('scarletio')
 
 from flask import Blueprint, render_template, redirect, url_for, request, jsonify
 
@@ -99,11 +102,15 @@ hata_module = MAPPED_OBJECTS['hata']
 unit_adder(hata_module)
 recursive_unit_adder(hata_module)
 
+scarletio_module = MAPPED_OBJECTS['scarletio']
+unit_adder(scarletio_module)
+recursive_unit_adder(scarletio_module)
+
 del unit_adder
 del recursive_unit_adder
 del ADDED_OBJECTS
 del hata_module
-
+del scarletio_module
 
 
 @ROUTES.route('/search', methods=['GET', 'POST'])

@@ -27,7 +27,7 @@ def embrace_urban_markdown(text, text_length_limit):
     while True:
         link_start_index = text.find('[', index)
         if link_start_index == -1:
-            if start_index:
+            if start_index == 0:
                 string_parts.append(text)
             elif start_index != len(text):
                 string_parts.append(text[start_index:])
@@ -42,7 +42,7 @@ def embrace_urban_markdown(text, text_length_limit):
         string_parts.append(text[start_index:link_start_index])
         
         # set position
-        start_index = link_start_index+1
+        link_start_index = link_start_index+1
         
         while True:
             link_end_index = text.find(']', index)
@@ -53,15 +53,15 @@ def embrace_urban_markdown(text, text_length_limit):
                 index = link_end_index+1
                 continue
             
-            link_content = text[start_index:link_end_index]
+            link_content = text[link_start_index:link_end_index]
             string_parts.append(('[', link_content,'](', URBAN_DICTIONARY_SEARCH_URL, quote(link_content),')'))
             
             start_index = index = link_end_index+1
-            continue
+            break
         
         # never ended link
         if link_end_index == -1:
-            string_parts.append(text[start_index:])
+            string_parts.append(text[link_start_index:])
             break
     
     string_parts_connectible = []
