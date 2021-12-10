@@ -66,7 +66,8 @@ And much more!
 
 - Fun
     
-    `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • `sex` • `trivia` • `yuno`
+    `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • `sex` • `trivia` •
+    `urban` • `yuno`
 
 - Games
     

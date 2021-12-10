@@ -287,6 +287,18 @@ async def register(event,
     return Embed(title, description)
 
 
+@EXTENSION_COMMANDS.interactions
+async def discard_kept_commands(client, event):
+    """Discards all the kept commands, which are not yet deleted."""
+    check_permission(event)
+    
+    yield Embed('Discarding')
+    
+    await client.slasher.discard_kept_commands()
+    
+    yield Embed('Finished')
+
+
 @load.autocomplete('name')
 @reload.autocomplete('name')
 @unload.autocomplete('name')

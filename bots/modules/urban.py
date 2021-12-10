@@ -93,7 +93,7 @@ def embrace_urban_markdown(text, text_length_limit):
     return ''.join(string_parts_connectible)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(is_global=True)
 async def urban(
     client,
     event,

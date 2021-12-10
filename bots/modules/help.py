@@ -525,7 +525,10 @@ CATEGORIES = (
     ), (
         'Fun',
         EMOJI_PAPER_DRAGON,
-        ('meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll', 'sex', 'trivia', 'yuno')
+        (
+            'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll', 'sex', 'trivia', 'urban',
+            'yuno'
+        )
     ), (
         'Games',
         EMOJI_VIDEO_GAME,
