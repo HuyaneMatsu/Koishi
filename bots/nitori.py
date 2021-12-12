@@ -133,10 +133,10 @@ CAKE_NAMES = ['butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', '
 @cake_love.autocomplete('cake_type') # Define which parameter we want to auto-complete.
 async def autocomplete_cake_type(value):
     if value is None:
-        return CAKE_NAMES
+        return CAKE_NAMES[:20]
     
-    value = value.lower()
-    return [cake_name for cake_name in CAKE_NAMES if cake_name.startswith(value)]
+    value = value.casefold()
+    return [cake_name for cake_name in CAKE_NAMES if (value in cake_name)]
 
 # command end
 # command start slash roll
