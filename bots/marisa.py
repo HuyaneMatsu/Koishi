@@ -12,7 +12,7 @@ except ImportError:
 from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS
 from scarletio import sleep, alchemy_incendiary
-from hata.ext.slash import InteractionResponse, abort, set_permission, \
+from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
     wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from scarletio.utils.trace import render_exception_into
 from hata.ext.command_utils import UserMenuFactory, UserPagination
@@ -471,8 +471,8 @@ async def Late_abort(client, event):
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def debug_command(client, event,
-        command_name: (str, 'The command\'s name.')
-            ):
+    command_name: (str, 'The command\'s name.')
+):
     """Gets debug information about the given command."""
     if not client.is_owner(event.user):
         abort('Owner only.')
@@ -1031,6 +1031,21 @@ async def abort_before_yield():
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def just_abort():
     abort('a')
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_form(event):
+    if not event.user.has_role(ROLE__SUPPORT__TESTER):
+        abort('Tester only')
+    
+    return Form(
+        'This does nothing',
+        [
+            TextInput('watch neko')
+        ],
+    )
+
 
 if (watchdog is not None):
     
