@@ -2486,7 +2486,7 @@ async def scheduled_event_delete(client, scheduled_event):
     )
 
 
-async def scheduled_event_users_get_chunk(client, scheduled_event):
+async def scheduled_event_user_get_chunk(client, scheduled_event):
     guild_id = scheduled_event.guild_id
     scheduled_event_id = scheduled_event.id
     
@@ -6277,7 +6277,7 @@ async def rate_limit_test_0175(client, message):
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0176(client, message, guild_id:str=''):
     """
-    scheduled_event_users_get_chunk | 2 guild
+    scheduled_event_user_get_chunk | 2 guild
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0176') as RLT:
@@ -6302,5 +6302,5 @@ async def rate_limit_test_0176(client, message, guild_id:str=''):
         
         guild_2_scheduled_event = guild_2_scheduled_events[0]
         
-        await scheduled_event_users_get_chunk(client, guild_1_scheduled_event)
-        await scheduled_event_users_get_chunk(client, guild_2_scheduled_event)
+        await scheduled_event_user_get_chunk(client, guild_1_scheduled_event)
+        await scheduled_event_user_get_chunk(client, guild_2_scheduled_event)
