@@ -5,7 +5,7 @@ from time import time as time_now
 from email._parseaddr import _parsedate_tz
 from datetime import datetime, timedelta, timezone
 
-from hata import Embed, \
+from hata import Embed, PrivacyLevel, ScheduledEventEntityType, datetime_to_timestamp,\
     DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS, ChannelText,\
     ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, ChannelStage, \
@@ -2429,6 +2429,70 @@ async def guild_thread_get_all_active(client, guild):
     )
 
 
+async def scheduled_event_get_all_guild(client, guild):
+    guild_id = guild.id
+    
+    return await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events',
+    )
+
+
+async def scheduled_event_create(client, guild, voice, name):
+    guild_id = guild.id
+    
+    data = {
+        'name' : name,
+        'privacy_level': PrivacyLevel.guild_only.value,
+        'channel_id': voice.id,
+        'entity_metadata': None,
+        'entity_type': ScheduledEventEntityType.voice.value,
+        'scheduled_start_time': datetime_to_timestamp(datetime.utcnow()+timedelta(hours=1)),
+    }
+    
+    await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events',
+        data,
+    )
+
+
+async def scheduled_event_get(client, guild, scheduled_event_id):
+    guild_id = guild.id
+    
+    return await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}',
+    )
+
+
+async def scheduled_event_edit(client, scheduled_event, name):
+    guild_id = scheduled_event.guild_id
+    scheduled_event_id = scheduled_event.id
+    
+    data = {
+        'name' : name,
+    }
+    
+    await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}',
+        data,
+    )
+
+
+async def scheduled_event_delete(client, scheduled_event):
+    guild_id = scheduled_event.guild_id
+    scheduled_event_id = scheduled_event.id
+    
+    await bypass_request(client, METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}',
+    )
+
+
+async def scheduled_event_users_get_all(client, scheduled_event):
+    guild_id = scheduled_event.guild_id
+    scheduled_event_id = scheduled_event.id
+    
+    data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/scheduled-events/{scheduled_event_id}/users',
+    )
 
 
 @RATE_LIMIT_COMMANDS
@@ -5949,3 +6013,294 @@ async def rate_limit_test_0165(client, message):
         sticker_pack_id = sticker_packs[0].id
         
         await sticker_pack_get(client, sticker_pack_id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0166(client, message):
+    """
+    scheduled_event_get_all_guild
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0166') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await scheduled_event_get_all_guild(client, guild)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0167(client, message, guild_id:str=''):
+    """
+    scheduled_event_get_all_guild | 2 guilds, please pass a second guild_id
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0167') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        await scheduled_event_get_all_guild(client, guild_1)
+        await scheduled_event_get_all_guild(client, guild_2)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0168(client, message):
+    """
+    scheduled_event_create
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0168') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        voice_channels = guild.voice_channels
+        if (not voice_channels):
+            await RLT.send('The guild has no voice channel, please create one..')
+            
+        voice = voice_channels[0]
+        
+        await scheduled_event_create(client, guild, voice, 'ayaya')
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0169(client, message, guild_id:str=''):
+    """
+    scheduled_event_create | 2 guilds, please pass a second guild_id
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0169') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_1_voice_channels = guild_1.voice_channels
+        if (not guild_1_voice_channels):
+            await RLT.send('The guild has no voice channel, please create one..')
+            
+        voice_1 = guild_1_voice_channels[0]
+        
+        guild_2_voice_channels = guild_2.voice_channels
+        if (not guild_2_voice_channels):
+            await RLT.send('The other guild has no voice channel, please create one..')
+        
+        voice_2 = guild_2_voice_channels[0]
+        
+        await scheduled_event_create(client, guild_1, voice_1, 'ayaya')
+        await scheduled_event_create(client, guild_2, voice_2, 'ayaya')
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0170(client, message):
+    """
+    scheduled_event_get
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0170') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        scheduled_event_id = scheduled_events[0].id
+        
+        await scheduled_event_get(client, guild, scheduled_event_id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0171(client, message, guild_id:str=''):
+    """
+    scheduled_event_get | 2 guild
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0171') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
+        if not guild_1_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_1_scheduled_event_id = guild_1_scheduled_events[0].id
+        
+        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
+        if not guild_2_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_2_scheduled_event_id = guild_2_scheduled_events[0].id
+        
+        await scheduled_event_get(client, guild_1, guild_1_scheduled_event_id)
+        await scheduled_event_get(client, guild_2, guild_2_scheduled_event_id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0172(client, message):
+    """
+    scheduled_event_edit
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0172') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        scheduled_event = scheduled_events[0]
+        if scheduled_event.name == 'ayaya':
+            name = 'apple'
+        else:
+            name = 'ayaya'
+        
+        await scheduled_event_edit(client, scheduled_event, name)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0173(client, message, guild_id:str=''):
+    """
+    scheduled_event_edit | 2 guild
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0173') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
+        if not guild_1_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_1_scheduled_event = guild_1_scheduled_events[0]
+        if guild_1_scheduled_event.name == 'ayaya':
+            guild_1_name = 'apple'
+        else:
+            guild_1_name = 'ayaya'
+        
+        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
+        if not guild_2_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_2_scheduled_event = guild_2_scheduled_events[0]
+        if guild_2_scheduled_event.name == 'ayaya':
+            guild_2_name = 'apple'
+        else:
+            guild_2_name = 'ayaya'
+        
+        await scheduled_event_edit(client, guild_1_scheduled_event, guild_1_name)
+        await scheduled_event_edit(client, guild_2_scheduled_event, guild_2_name)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0174(client, message, guild_id:str=''):
+    """
+    scheduled_event_delete | 2 guild
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0174') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
+        if not guild_1_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_1_scheduled_event = guild_1_scheduled_events[0]
+        
+        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
+        if not guild_2_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_2_scheduled_event = guild_2_scheduled_events[0]
+        
+        await scheduled_event_delete(client, guild_1_scheduled_event)
+        await scheduled_event_delete(client, guild_2_scheduled_event)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0175(client, message):
+    """
+    scheduled_event_edit + scheduled_event_delete
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0175') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        scheduled_events = await client.scheduled_event_get_all_guild(guild)
+        if not scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        scheduled_event = scheduled_events[0]
+        if scheduled_event.name == 'ayaya':
+            name = 'apple'
+        else:
+            name = 'ayaya'
+        
+        await scheduled_event_edit(client, scheduled_event, name)
+        await scheduled_event_delete(client, scheduled_event)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0176(client, message, guild_id:str=''):
+    """
+    scheduled_event_users_get_all | 2 guild
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0176') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        guild_1_scheduled_events = await client.scheduled_event_get_all_guild(guild_1)
+        if not guild_1_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_1_scheduled_event = guild_1_scheduled_events[0]
+        
+        guild_2_scheduled_events = await client.scheduled_event_get_all_guild(guild_2)
+        if not guild_2_scheduled_events:
+            await RLT.send('Please create a scheduled event first.')
+        
+        guild_2_scheduled_event = guild_2_scheduled_events[0]
+        
+        await scheduled_event_users_get_all(client, guild_1_scheduled_event)
+        await scheduled_event_users_get_all(client, guild_2_scheduled_event)
