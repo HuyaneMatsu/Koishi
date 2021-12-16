@@ -10,7 +10,8 @@ except ImportError:
     watchdog = None
 
 from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
-    parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS
+    parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
+    ChannelThread, mention_channel_id
 from scarletio import sleep, alchemy_incendiary
 from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
     wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
@@ -1045,6 +1046,88 @@ async def test_form(event):
             TextInput('watch neko')
         ],
     )
+
+MESSAGE_MOVER_CONTEXTS = {}
+
+class MessageMoverContext:
+    def __init__(self, client, event, webhook, source_channel_id, target_channel_id, target_thread_id):
+        self.client = client
+        self.event = event
+        self.webhook = webhook
+        self.source_channel_id = source_channel_id
+        self.target_channel_id = target_channel_id
+        self.target_thread_id = target_thread_id
+        self.messages = set()
+        self.message = None
+        key = (event.user_id, source_channel_id)
+        self.key = key
+        
+        MESSAGE_MOVER_CONTEXTS[key] = self
+    
+    def get_embed(self):
+        target_thread_id = self.target_thread_id
+        if target_thread_id:
+            channel_id = target_thread_id
+        else:
+            channel_id = self.target_channel_id
+        
+        embed = Embed(
+            f'Moving messages to {mention_channel_id(channel_id)}'
+        ).add_footer(
+            'Times out after 10 minutes.'
+        )
+        
+        messages = self.messages
+        for index, message in enumerate(sorted(messages), 1):
+            embed.add_field(
+                f'Message {index}',
+                (
+                    f'Id: {message.id}\n'
+                    f'Author: {message.author.full_name}\n'
+                    f'Length: {len(message)}'
+                ),
+                inline = True,
+            )
+    
+    
+    async def start(self):
+        try:
+            message = await self.client.interaction_followup_message_create(self.event, self.get_embed())
+        except:
+            try:
+                MESSAGE_MOVER_CONTEXTS[self.key]
+            except KeyError:
+                pass
+            
+            raise
+        
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def move_messages(
+    client,
+    event,
+    channel: ('channel_group_messageable', 'Where to move the message.'),
+):
+    """Moves messages | Mod only"""
+    if not event.user.has_role(ROLE__SUPPORT__TESTER):
+        abort('Tester only')
+    
+    yield
+    
+    if isinstance(channel, ChannelThread):
+        channel_id = channel.parent_id
+        thread_id = channel.id
+    else:
+        channel_id = channel.id
+        thread_id = 0
+    
+    executor_webhook = await client.webhook_get_own_channel(channel_id)
+    if (executor_webhook is None):
+        executor_webhook = await client.webhook_create(channel_id, 'Koishi hook')
+    
+    context = MessageMoverContext(client, event, executor_webhook, event.channel_id, channel_id, thread_id)
+    await context.start()
 
 
 if (watchdog is not None):
