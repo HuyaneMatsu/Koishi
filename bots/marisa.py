@@ -11,8 +11,8 @@ except ImportError:
 
 from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
-    ChannelThread, mention_channel_id
-from scarletio import sleep, alchemy_incendiary
+    ChannelThread, mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES
+from scarletio import sleep, alchemy_incendiary, LOOP_TIME, Task, WaitTillAll
 from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
     wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from scarletio.utils.trace import render_exception_into
@@ -28,7 +28,7 @@ from bot_utils.utils import command_error
 from bot_utils.syncer import sync_request_command
 from bot_utils.interpreter_v2 import Interpreter
 
-Marisa : Client
+Marisa: Client
 
 try:
     SOLARLINK_VOICE = Marisa.solarlink.add_node('127.0.0.1', 2333, 'youshallnotpass', None)
@@ -234,8 +234,8 @@ IMAGE_URL_CACHE = {}
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def retardify(client, event,
-        text : ('str', 'Some text to retardify.'),
-            ):
+    text : ('str', 'Some text to retardify.'),
+):
     """Translates the given text to retard language."""
     if text:
         description_parts = []
@@ -308,9 +308,9 @@ async def return_async_gen(client, event):
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def raffle(client, event,
-        message : ('str', 'The message to raffle from'),
-        emoji : ('str', 'The reactor users to raffle from.'),
-            ):
+    message : ('str', 'The message to raffle from'),
+    emoji : ('str', 'The reactor users to raffle from.'),
+):
     """Raffles an user out who reacted on a message."""
     guild = event.guild
     if (client.get_guild_profile_for(guild) is None):
@@ -406,8 +406,8 @@ async def abort_from_async_gen(client, event):
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def parse_time_delta(client, event,
-        delta: (str, 'The delta to parse'),
-            ):
+    delta: (str, 'The delta to parse'),
+):
     """Tries to parse a time delta."""
     delta = parse_tdelta(delta)
     if delta is None:
@@ -419,8 +419,8 @@ async def parse_time_delta(client, event,
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def parse_relative_delta(client, event,
-        delta: (str, 'The delta to parse'),
-            ):
+    delta: (str, 'The delta to parse'),
+):
     """Tries to parse a relative delta."""
     delta = parse_rdelta(delta)
     if delta is None:
@@ -432,8 +432,8 @@ async def parse_relative_delta(client, event,
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def user_id(client, event,
-        user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
-            ):
+    user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
+):
     """Shows your or the selected user's id."""
     if user_id is None:
         user_id = event.user.id
@@ -547,7 +547,7 @@ async def only_zeref_not(client, event):
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def roll(client, event,
     dice_count: (set(range(1, 7)), 'With how much dice do you wanna roll with?') = 1,
-        ):
+):
     """Loli Police"""
     value = 0
     for dice in range(dice_count):
@@ -732,8 +732,8 @@ async def embed_abort(client, event):
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def mentionable_check(client, event,
-        entity: ('mentionable', 'New field hype!'),
-            ):
+    entity: ('mentionable', 'New field hype!'),
+):
     """Roles and users."""
     yield repr(entity)
 
@@ -1047,7 +1047,29 @@ async def test_form(event):
         ],
     )
 
+MESSAGE_MOVER_CONTEXT_TIMEOUT = 600.0
+
 MESSAGE_MOVER_CONTEXTS = {}
+
+def timeout_message_mover_context(key):
+    try:
+        message_mover_context = MESSAGE_MOVER_CONTEXTS[key]
+    except KeyError:
+        pass
+    else:
+        message_mover_context.trigger_timeout()
+
+CUSTOM_ID_MESSAGE_MOVE_SUBMIT = 'message_mover.submit'
+
+@Marisa.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVE_SUBMIT)
+async def submit_message_move(event):
+    try:
+        message_mover_context = MESSAGE_MOVER_CONTEXTS[(event.user_id, event.channel_id)]
+    except KeyError:
+        pass
+    else:
+        await message_mover_context.submit(event)
+
 
 class MessageMoverContext:
     def __init__(self, client, event, webhook, source_channel_id, target_channel_id, target_thread_id):
@@ -1058,13 +1080,14 @@ class MessageMoverContext:
         self.target_channel_id = target_channel_id
         self.target_thread_id = target_thread_id
         self.messages = set()
-        self.message = None
+        self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
+        self.timeout_handle = None
         key = (event.user_id, source_channel_id)
         self.key = key
         
         MESSAGE_MOVER_CONTEXTS[key] = self
     
-    def get_embed(self):
+    def get_embed(self, expired):
         target_thread_id = self.target_thread_id
         if target_thread_id:
             channel_id = target_thread_id
@@ -1072,10 +1095,17 @@ class MessageMoverContext:
             channel_id = self.target_channel_id
         
         embed = Embed(
-            f'Moving messages to {mention_channel_id(channel_id)}'
-        ).add_footer(
-            'Times out after 10 minutes.'
+            'Moving messages',
+            f'to {mention_channel_by_id(channel_id)}'
         )
+        
+        if expired:
+            embed.add_footer('Expired.')
+        else:
+            embed.color = 0xff0000
+            embed.add_footer(
+                f'Expires after 10 minutes | {format_loop_time(self.next_update, TIMESTAMP_STYLES.relative_time)}'
+            )
         
         messages = self.messages
         for index, message in enumerate(sorted(messages), 1):
@@ -1092,7 +1122,7 @@ class MessageMoverContext:
     
     async def start(self):
         try:
-            message = await self.client.interaction_followup_message_create(self.event, self.get_embed())
+            await self.client.interaction_followup_message_create(self.event, self.get_embed(False))
         except:
             try:
                 MESSAGE_MOVER_CONTEXTS[self.key]
@@ -1101,6 +1131,63 @@ class MessageMoverContext:
             
             raise
         
+        self.timeout_handle = KOKORO.call_at(self.next_update, timeout_message_mover_context, self.key)
+    
+    
+    def trigger_timeout(self):
+        next_update = self.next_update
+        if next_update <= LOOP_TIME():
+            Task(self.do_timeout(), KOKORO)
+            timeout_handle = None
+        else:
+            timeout_handle = KOKORO.call_at(next_update, timeout_message_mover_context, self.key)
+        self.timeout_handle = timeout_handle
+    
+    
+    async def do_timeout(self):
+        try:
+            MESSAGE_MOVER_CONTEXTS[self.key]
+        except KeyError:
+            pass
+        
+        embed = self.get_embed(True)
+        
+        await self.client.interaction_response_message_edit(self.event, embed=embed)
+    
+    
+    async def add_message(self, event, message):
+        self.messages.add(message)
+        await self.client.interaction_followup_message_create(event, self.get_embed(False))
+        await self.client.interaction_response_message_delete(self.event)
+        self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
+        self.event = event
+    
+    
+    async def submit(self, event):
+        timeout_handle = self.timeout_handle
+        if (timeout_handle is not None):
+            self.timeout_handle = None
+            timeout_handle.cancel()
+        
+        try:
+            MESSAGE_MOVER_CONTEXTS[self.key]
+        except KeyError:
+            pass
+        
+        await self.client.interaction_component_acknowledge(event)
+        await self.move_messages_parallelly()
+        await self.client.interaction_response_message_delete(self.event)
+    
+    async def move_messages_parallelly(self):
+        tasks = []
+        for message in self.messages:
+            task = Task(self.delete_message(message), KOKORO)
+            tasks.append(task)
+        
+        await WaitTillAll(
+            tasks,
+            KOKORO,
+        )
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
