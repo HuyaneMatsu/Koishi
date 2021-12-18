@@ -133,8 +133,8 @@ async def move_message(client, event,
         embed = message.clean_embeds,
         file = files,
         allowed_mentions = None,
-        name = message.author.name_at(event.guild),
-        avatar_url = message.author.avatar_url_at(event.guild),
+        name = message.author.name_at(event.guild_id),
+        avatar_url = message.author.avatar_url_at(event.guild_id),
         thread = thread_id,
     )
     

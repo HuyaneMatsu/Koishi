@@ -12,7 +12,7 @@ except ImportError:
 from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
     ChannelThread, mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES
-from scarletio import sleep, alchemy_incendiary, LOOP_TIME, Task, WaitTillAll
+from scarletio import sleep, alchemy_incendiary, LOOP_TIME, Task, WaitTillAll, Future, WaitTillExc
 from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
     wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
 from scarletio.utils.trace import render_exception_into
@@ -1047,6 +1047,67 @@ async def test_form(event):
         ],
     )
 
+
+# Message mover context testing
+
+
+async def get_attachment(client, attachment):
+    file = await client.download_attachment(attachment)
+    return attachment, file
+
+
+async def get_attachments(client, attachments):
+    tasks = []
+    for attachment in attachments:
+        tasks.append(Task(get_attachment(client, attachment), KOKORO))
+    
+    done, pending = await WaitTillExc(tasks, KOKORO)
+    
+    # We do not care about the pending ones
+    for task in pending:
+        task.cancel()
+    
+    attachment_map = {}
+    for task in done:
+        # This line might raise
+        attachment, file = task.result()
+        
+        attachment_map[attachment] = file
+    
+    return [(attachment.name, attachment_map[attachment], attachment.description) for attachment in attachments]
+
+
+async def get_files(client, message):
+    attachments = message.attachments
+    if (attachments is None):
+        files = None
+    else:
+        files = await get_attachments(client, attachments)
+    
+    return files
+
+
+async def get_webhook(client, channel_id):
+    executor_webhook = await client.webhook_get_own_channel(channel_id)
+    if (executor_webhook is None):
+        executor_webhook = await client.webhook_create(channel_id, 'Koishi hook')
+    
+    return executor_webhook
+
+
+async def message_delete(client, message):
+    try:
+        await client.message_delete(message)
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_message:
+            return
+        
+        raise
+    
+    except ConnectionError:
+        return
+
+
 MESSAGE_MOVER_CONTEXT_TIMEOUT = 600.0
 
 MESSAGE_MOVER_CONTEXTS = {}
@@ -1072,10 +1133,10 @@ async def submit_message_move(event):
 
 
 class MessageMoverContext:
-    def __init__(self, client, event, webhook, source_channel_id, target_channel_id, target_thread_id):
+    def __init__(self, client, event, source_channel_id, target_channel_id, target_thread_id):
         self.client = client
         self.event = event
-        self.webhook = webhook
+        self.webhook_waiter = None
         self.source_channel_id = source_channel_id
         self.target_channel_id = target_channel_id
         self.target_thread_id = target_thread_id
@@ -1086,6 +1147,7 @@ class MessageMoverContext:
         self.key = key
         
         MESSAGE_MOVER_CONTEXTS[key] = self
+    
     
     def get_embed(self, expired):
         target_thread_id = self.target_thread_id
@@ -1179,15 +1241,61 @@ class MessageMoverContext:
         await self.client.interaction_response_message_delete(self.event)
     
     async def move_messages_parallelly(self):
+        self.get_webhook_waiter()
+        
         tasks = []
         for message in self.messages:
-            task = Task(self.delete_message(message), KOKORO)
+            task = Task(self.move_message(message), KOKORO)
             tasks.append(task)
         
         await WaitTillAll(
             tasks,
             KOKORO,
         )
+    
+    def get_webhook_waiter(self):
+        webhook_waiter = self.webhook_waiter
+        if (webhook_waiter is not None):
+            webhook_waiter = Future(KOKORO)
+            self.webhook_waiter = webhook_waiter
+            Task(self.get_webhook_task(webhook_waiter), KOKORO)
+        
+        return webhook_waiter
+    
+    
+    async def get_webhook_task(self, webhook_waiter):
+        try:
+            webhook = await get_webhook(self.client, self.target_channel_id)
+        except GeneratorExit:
+            webhook_waiter.cancel()
+            raise
+        except BaseException as err:
+            webhook_waiter.set_exception_if_pending(err)
+        else:
+            webhook_waiter.set_result_if_pending(webhook)
+    
+    
+    async def move_message(self, message):
+        files = get_files(self.client, message)
+        webhook = await self.get_webhook_waiter()
+        
+        guild_id = self.event.guild_id
+        
+        await self.client.webhook_message_create(
+            webhook,
+            message.content,
+            embed = message.clean_embeds,
+            file = files,
+            allowed_mentions = None,
+            name = message.author.name_at(guild_id),
+            avatar_url = message.author.avatar_url_at(guild_id),
+            thread = self.target_thread_id,
+        )
+        
+        files = None
+        
+        Task(message_delete(self.client, message), KOKORO)
+
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
@@ -1209,11 +1317,7 @@ async def move_messages(
         channel_id = channel.id
         thread_id = 0
     
-    executor_webhook = await client.webhook_get_own_channel(channel_id)
-    if (executor_webhook is None):
-        executor_webhook = await client.webhook_create(channel_id, 'Koishi hook')
-    
-    context = MessageMoverContext(client, event, executor_webhook, event.channel_id, channel_id, thread_id)
+    context = MessageMoverContext(client, event, event.channel_id, channel_id, thread_id)
     await context.start()
 
 

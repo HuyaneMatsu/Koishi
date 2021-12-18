@@ -36,7 +36,7 @@ async def perms(event):
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def cookie(event,
-        user : ('user', 'To who?'),
+    user : ('user', 'To who?'),
 ):
     """Gifts a cookie!"""
     return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !')
@@ -176,8 +176,8 @@ class Action:
         self.embed_color = embed_color
     
     async def __call__(self, client, event,
-            user : ('user', 'Who?') = None,
-                ):
+        user: ('user', 'Who?') = None,
+    ):
         if user is None:
             source_user = client
             target_user = event.user
