@@ -272,10 +272,10 @@ async def retardify(client, event,
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_channel_and_role(client, event,
-        user : ('user', 'Please input a user') = None,
-        channel : ('channel', 'Please input a channel') = None,
-        role : ('role', 'Please input a role') = None,
-            ):
+    user : ('user', 'Please input a user') = None,
+    channel : ('channel', 'Please input a channel') = None,
+    role : ('role', 'Please input a role') = None,
+):
     """Testing entities."""
     return \
         f'resolved_users = {event.resolved_users!r}\n' \
@@ -1143,7 +1143,7 @@ class MessageMoverContext:
         self.messages = set()
         self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
         self.timeout_handle = None
-        key = (event.user_id, source_channel_id)
+        key = (event.user.id, source_channel_id)
         self.key = key
         
         MESSAGE_MOVER_CONTEXTS[key] = self
@@ -1156,18 +1156,24 @@ class MessageMoverContext:
         else:
             channel_id = self.target_channel_id
         
-        embed = Embed(
-            'Moving messages',
-            f'to {mention_channel_by_id(channel_id)}'
-        )
-        
         if expired:
-            embed.add_footer('Expired.')
+            description = (
+                f'Channel: {mention_channel_by_id(channel_id)}\n'
+                f'Expired'
+            )
+            color = 0xff0000
         else:
-            embed.color = 0xff0000
-            embed.add_footer(
+            description = (
+                f'Channel: {mention_channel_by_id(channel_id)}\n'
                 f'Expires after 10 minutes | {format_loop_time(self.next_update, TIMESTAMP_STYLES.relative_time)}'
             )
+            color = None
+        
+        embed = Embed(
+            'Moving messages',
+           description,
+            color = color,
+        )
         
         messages = self.messages
         for index, message in enumerate(sorted(messages), 1):
@@ -1180,11 +1186,12 @@ class MessageMoverContext:
                 ),
                 inline = True,
             )
-    
+        
+        return embed
     
     async def start(self):
         try:
-            await self.client.interaction_followup_message_create(self.event, self.get_embed(False))
+            await self.client.interaction_followup_message_create(self.event, embed=self.get_embed(False))
         except:
             try:
                 MESSAGE_MOVER_CONTEXTS[self.key]
@@ -1219,7 +1226,11 @@ class MessageMoverContext:
     
     async def add_message(self, event, message):
         self.messages.add(message)
-        await self.client.interaction_followup_message_create(event, self.get_embed(False))
+        await self.client.interaction_followup_message_create(
+            event,
+            embed = self.get_embed(False),
+            show_for_invoking_user_only = True,
+        )
         await self.client.interaction_response_message_delete(self.event)
         self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
         self.event = event
@@ -1297,7 +1308,7 @@ class MessageMoverContext:
         Task(message_delete(self.client, message), KOKORO)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def move_messages(
     client,
@@ -1319,6 +1330,38 @@ async def move_messages(
     
     context = MessageMoverContext(client, event, event.channel_id, channel_id, thread_id)
     await context.start()
+
+
+@Marisa.interactions(target='message', guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def add_to_move_group(
+    client,
+    event,
+    message,
+):
+    """MAdds a message to message move context."""
+    if not event.user.has_role(ROLE__SUPPORT__TESTER):
+        abort('Tester only')
+    
+    key = (event.user.id, event.channel_id)
+    
+    try:
+        context = MESSAGE_MOVER_CONTEXTS[key]
+    except KeyError:
+        abort('There is no message mover context in the channel.')
+    else:
+        await context.add_message(event, message)
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT)
+async def resend(
+    client,
+    event,
+    attachment: ('attachment', 'File!'),
+):
+    yield
+    file = await client.download_attachment(attachment)
+    yield InteractionResponse(file=(file, attachment.name))
 
 
 if (watchdog is not None):
