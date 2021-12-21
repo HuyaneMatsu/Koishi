@@ -9,7 +9,7 @@ try:
 except ImportError:
     watchdog = None
 
-from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
+from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, Emoji, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
     ChannelThread, mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES
 from scarletio import sleep, alchemy_incendiary, LOOP_TIME, Task, WaitTillAll, Future, WaitTillExc
@@ -1120,17 +1120,81 @@ def timeout_message_mover_context(key):
     else:
         message_mover_context.trigger_timeout()
 
-CUSTOM_ID_MESSAGE_MOVE_SUBMIT = 'message_mover.submit'
+CUSTOM_ID_MESSAGE_MOVER_SUBMIT = 'message_mover.submit'
+CUSTOM_ID_MESSAGE_MOVER_CANCEL = 'message_mover.cancel'
+CUSTOM_ID_MESSAGE_MOVER_CLOSE = 'message_mover.close'
 
-@Marisa.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVE_SUBMIT)
-async def submit_message_move(event):
+BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
+    'Submit',
+    custom_id = CUSTOM_ID_MESSAGE_MOVER_SUBMIT,
+    style = ButtonStyle.green,
+)
+
+BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED = BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED.copy_with(enabled=False)
+
+BUTTON_MESSAGE_MOVE_CANCEL = Button(
+    'Cancel',
+    custom_id = CUSTOM_ID_MESSAGE_MOVER_CANCEL,
+    style = ButtonStyle.red,
+)
+
+BUTTON_MESSAGE_MOVE_CLOSE = Button(
+    'Close',
+    custom_id = CUSTOM_ID_MESSAGE_MOVER_CLOSE,
+    style = ButtonStyle.red,
+)
+
+MESSAGE_MOVER_COMPONENTS_ENABLED = Row(
+    BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED,
+    BUTTON_MESSAGE_MOVE_CANCEL,
+)
+
+MESSAGE_MOVER_COMPONENTS_DISABLED = Row(
+    BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED,
+    BUTTON_MESSAGE_MOVE_CANCEL,
+)
+
+MESSAGE_MOVER_COMPONENTS_AFTERLIFE = Row(
+    CUSTOM_ID_MESSAGE_MOVER_CLOSE,
+)
+
+@Marisa.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_SUBMIT)
+async def submit_message_mover(event):
+    await maybe_call_message_mover_method(event, MessageMoverContext.submit)
+
+
+@Marisa.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_CANCEL)
+async def cancel_message_mover(event):
+    await maybe_call_message_mover_method(event, MessageMoverContext.cancel)
+
+@Marisa.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_CLOSE)
+async def close_message_mover(client, event):
+    if (
+        event.user_permissions.can_manage_messages or
+        (event.user is event.message.interaction.user)
+    ):
+        await client.interaction_component_acknowledge(event)
+        await client.interaction_response_message_delete(event)
+
+
+async def maybe_call_message_mover_method(event, function):
+    if event.user is not event.message.interaction.user:
+        return
+    
     try:
         message_mover_context = MESSAGE_MOVER_CONTEXTS[(event.user_id, event.channel_id)]
     except KeyError:
         pass
     else:
-        await message_mover_context.submit(event)
+        await function(message_mover_context, event)
 
+MESSAGE_MOVER_FINALIZATION_REASON_NONE = 0
+MESSAGE_MOVER_FINALIZATION_REASON_CANCELLED = 1
+MESSAGE_MOVER_FINALIZATION_REASON_TIMEOUT = 2
+MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTED = 3
+MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTING = 4
+
+MESSAGE_MOVER_SUBMITTING_EMOJI = Emoji.precreate(704393708467912875)
 
 class MessageMoverContext:
     def __init__(self, client, event, source_channel_id, target_channel_id, target_thread_id):
@@ -1149,29 +1213,55 @@ class MessageMoverContext:
         MESSAGE_MOVER_CONTEXTS[key] = self
     
     
-    def get_embed(self, expired):
+    def get_embed(self, finalization_reason):
         target_thread_id = self.target_thread_id
         if target_thread_id:
             channel_id = target_thread_id
         else:
             channel_id = self.target_channel_id
         
-        if expired:
-            description = (
-                f'Channel: {mention_channel_by_id(channel_id)}\n'
-                f'Expired'
-            )
-            color = 0xff0000
-        else:
+        if finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_NONE:
             description = (
                 f'Channel: {mention_channel_by_id(channel_id)}\n'
                 f'Expires after 10 minutes | {format_loop_time(self.next_update, TIMESTAMP_STYLES.relative_time)}'
             )
             color = None
         
+        elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_CANCELLED:
+            description = (
+                f'Channel: {mention_channel_by_id(channel_id)}\n'
+                f'Cancelled'
+            )
+            color = 0xff0000
+        
+        elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_TIMEOUT:
+            description = (
+                f'Channel: {mention_channel_by_id(channel_id)}\n'
+                f'Timeout'
+            )
+            color = 0xff0000
+        
+        elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTED:
+            description = (
+                f'Channel: {mention_channel_by_id(channel_id)}\n'
+                'Messages moved.'
+            )
+            color = 0x00ff00
+        
+        elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTING:
+            description = (
+                f'Channel: {mention_channel_by_id(channel_id)}\n'
+                'Moving right now!'
+            )
+            color = None,
+        
+        else:
+            description = None
+            color = None
+        
         embed = Embed(
             'Moving messages',
-           description,
+            description,
             color = color,
         )
         
@@ -1187,11 +1277,24 @@ class MessageMoverContext:
                 inline = True,
             )
         
+        embed.add_footer('Up to 20 messages')
+        
+        if (
+            (finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTING) or
+            (finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTED)
+        ):
+            embed.add_thumbnail(MESSAGE_MOVER_SUBMITTING_EMOJI.url)
+        
         return embed
+    
     
     async def start(self):
         try:
-            await self.client.interaction_followup_message_create(self.event, embed=self.get_embed(False))
+            await self.client.interaction_followup_message_create(
+                self.event,
+                embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_NONE),
+                components = MESSAGE_MOVER_COMPONENTS_ENABLED,
+            )
         except:
             try:
                 MESSAGE_MOVER_CONTEXTS[self.key]
@@ -1213,43 +1316,78 @@ class MessageMoverContext:
         self.timeout_handle = timeout_handle
     
     
-    async def do_timeout(self):
+    def _cancel(self):
         try:
             MESSAGE_MOVER_CONTEXTS[self.key]
         except KeyError:
             pass
         
-        embed = self.get_embed(True)
+        timeout_handle = self._timeout_handle
+        if (timeout_handle is not None):
+            self._timeout_handle = timeout_handle
+            timeout_handle.cancel()
+    
+    
+    async def do_timeout(self):
+        self._cancel()
         
-        await self.client.interaction_response_message_edit(self.event, embed=embed)
+        await self.client.interaction_response_message_edit(
+            self.event,
+            embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_TIMEOUT),
+            components = MESSAGE_MOVER_COMPONENTS_AFTERLIFE,
+        )
     
     
     async def add_message(self, event, message):
-        self.messages.add(message)
-        await self.client.interaction_followup_message_create(
-            event,
-            embed = self.get_embed(False),
-            show_for_invoking_user_only = True,
-        )
-        await self.client.interaction_response_message_delete(self.event)
-        self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
-        self.event = event
+        messages = self.messages
+        if len(messages) == 20:
+            await self.client.interaction_followup_message_create(
+                event,
+                '20 message limit reached',
+                show_for_invoking_user_only = True,
+            )
+        
+        else:
+            messages.add(message)
+            await self.client.interaction_followup_message_create(
+                event,
+                embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_NONE),
+                components = MESSAGE_MOVER_COMPONENTS_ENABLED,
+            )
+            await self.client.interaction_response_message_delete(self.event)
+            self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
+            self.event = event
     
     
     async def submit(self, event):
-        timeout_handle = self.timeout_handle
-        if (timeout_handle is not None):
-            self.timeout_handle = None
-            timeout_handle.cancel()
+        self._cancel()
         
+        move_messages_task = Task(self.move_messages_parallelly(), KOKORO)
         try:
-            MESSAGE_MOVER_CONTEXTS[self.key]
-        except KeyError:
-            pass
+            await self.client.interaction_component_message_edit(
+                event,
+                embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTING),
+                components = None,
+            )
+        except:
+            move_messages_task.cancel()
+            raise
         
-        await self.client.interaction_component_acknowledge(event)
-        await self.move_messages_parallelly()
-        await self.client.interaction_response_message_delete(self.event)
+        await self.client.interaction_response_message_edit(
+            event,
+            embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTED),
+            components = MESSAGE_MOVER_COMPONENTS_AFTERLIFE,
+        )
+    
+    
+    async def cancel(self, event):
+        self._cancel()
+        
+        await self.client.interaction_component_message_edit(
+            event,
+            embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_CANCELLED),
+            components = MESSAGE_MOVER_COMPONENTS_AFTERLIFE,
+        )
     
     async def move_messages_parallelly(self):
         self.get_webhook_waiter()
