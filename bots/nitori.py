@@ -36,7 +36,7 @@ async def perms(event):
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def cookie(event,
-    user : ('user', 'To who?'),
+    user: ('user', 'To who?'),
 ):
     """Gifts a cookie!"""
     return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !')
@@ -52,7 +52,7 @@ CAKES = [
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def cake(event,
-    user : P('user', 'To who?'),
+    user: P('user', 'To who?'),
 ):
     """Gifts a cake!"""
     return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !').add_image(choice(CAKES))
@@ -96,14 +96,17 @@ async def guild_icon(event,
         name = 'icon'
         url = guild.icon_url_as(size=4096)
         hash_value = guild.icon_hash
+    
     elif choice == 'banner':
         name = 'banner'
         url = guild.banner_url_as(size=4096)
         hash_value = guild.banner_hash
+    
     elif choice == 'discovery_splash':
         name = 'discovery splash'
         url = guild.discovery_splash_url_as(size=4096)
         hash_value = guild.discovery_splash_hash
+    
     else:
         name = 'invite splash'
         url = guild.invite_splash_url_as(size=4096)
@@ -157,7 +160,7 @@ async def roll(
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def id_to_datetime_(
-    snowflake : ('int', 'Id please!'),
+    snowflake: ('int', 'Id please!'),
 ):
     """Converts the given Discord snowflake to time."""
     time = id_to_datetime(snowflake)
@@ -199,7 +202,7 @@ for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def repeat(
-    text : ('str', 'The content to repeat')
+    text: ('str', 'The content to repeat')
 ):
     """What should I exactly repeat?"""
     if not text:
@@ -365,12 +368,14 @@ async def latest_users(event):
             created_at = user.created_at
             embed.add_field(
                 f'{index}. {user.full_name}',
-                f'Id: {user.id}\n'
-                f'Mention: {user.mention}\n'
-                '\n'
-                f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
-                f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-                f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
+                (
+                    f'Id : {user.id}\n'
+                    f'Mention : {user.mention}\n'
+                    '\n'
+                    f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
+                    f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+                    f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}'
+                ),
             )
     
     else:
@@ -395,7 +400,7 @@ async def ping():
 
 @Nitori.interactions(is_global=True)
 async def enable_ping(client, event,
-    allow: ('bool', 'Enable?')=True,
+    allow: ('bool', 'Enable?') = True,
 ):
     """Enables the ping command in your guild."""
     guild = event.guild

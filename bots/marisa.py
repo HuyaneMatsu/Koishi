@@ -11,7 +11,8 @@ except ImportError:
 
 from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, Emoji, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
-    ChannelThread, mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES
+    ChannelThread, mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES, CHANNEL_TYPES
+from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from scarletio import sleep, alchemy_incendiary, LOOP_TIME, Task, WaitTillAll, Future, WaitTillExc
 from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
     wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
@@ -1477,7 +1478,7 @@ async def add_to_move_group(
     event,
     message,
 ):
-    """MAdds a message to message move context."""
+    """Adds a message to message move context."""
     if not event.user.has_role(ROLE__SUPPORT__TESTER):
         abort('Tester only')
     
@@ -1489,6 +1490,40 @@ async def add_to_move_group(
         abort('There is no message mover context in the channel.')
     else:
         await context.add_message(event, message)
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def embedded_application_invite_create(
+    client,
+    event,
+    activity : (EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID, 'Select an activity'),
+    channel: ('channel_guild_voice', 'The channel to create the activity in.') = None,
+):
+    """Creates an embedded activity."""
+    if not event.user.has_role(ROLE__SUPPORT__TESTER):
+        abort('Tester only')
+    
+    # Use goto to detect channel.
+    while True:
+        if channel is not None:
+            break
+        
+        guild = event.guild
+        if (guild is not None):
+            try:
+                voice_state = guild.voice_states[event.user.id]
+            except KeyError:
+                pass
+            else:
+                channel = voice_state.channel
+                if channel.type == CHANNEL_TYPES.guild_voice:
+                    break
+        
+        abort('Please give a voice channel or be in one.')
+    
+    invite = await client.application_invite_create(channel, activity)
+    return invite.url
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
