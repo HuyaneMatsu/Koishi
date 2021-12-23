@@ -1156,7 +1156,7 @@ MESSAGE_MOVER_COMPONENTS_DISABLED = Row(
 )
 
 MESSAGE_MOVER_COMPONENTS_AFTERLIFE = Row(
-    CUSTOM_ID_MESSAGE_MOVER_CLOSE,
+    BUTTON_MESSAGE_MOVE_CLOSE,
 )
 
 @Marisa.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_SUBMIT)
@@ -1494,10 +1494,10 @@ async def add_to_move_group(
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
-async def embedded_application_invite_create(
+async def embedded_activity(
     client,
     event,
-    activity : (EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID, 'Select an activity'),
+    activity: (EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID, 'Select an activity'),
     channel: ('channel_guild_voice', 'The channel to create the activity in.') = None,
 ):
     """Creates an embedded activity."""
