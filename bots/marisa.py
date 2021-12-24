@@ -1183,7 +1183,7 @@ async def maybe_call_message_mover_method(event, function):
         return
     
     try:
-        message_mover_context = MESSAGE_MOVER_CONTEXTS[(event.user_id, event.channel_id)]
+        message_mover_context = MESSAGE_MOVER_CONTEXTS[(event.user.id, event.channel_id)]
     except KeyError:
         pass
     else:
@@ -1207,7 +1207,7 @@ class MessageMoverContext:
         self.target_thread_id = target_thread_id
         self.messages = set()
         self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
-        self.timeout_handle = None
+        self._timeout_handle = None
         key = (event.user.id, source_channel_id)
         self.key = key
         
@@ -1222,46 +1222,48 @@ class MessageMoverContext:
             channel_id = self.target_channel_id
         
         if finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_NONE:
+            title = None
             description = (
-                f'Channel: {mention_channel_by_id(channel_id)}\n'
+                f'To channel: {mention_channel_by_id(channel_id)}\n\n'
                 f'Expires after 10 minutes | {format_loop_time(self.next_update, TIMESTAMP_STYLES.relative_time)}'
             )
             color = None
         
         elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_CANCELLED:
-            description = (
-                f'Channel: {mention_channel_by_id(channel_id)}\n'
-                f'Cancelled'
-            )
+            title = 'Cancelled'
+            description = None
             color = 0xff0000
         
         elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_TIMEOUT:
-            description = (
-                f'Channel: {mention_channel_by_id(channel_id)}\n'
-                f'Timeout'
-            )
+            title = 'Timeout'
+            description = None
             color = 0xff0000
         
         elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTED:
-            description = (
-                f'Channel: {mention_channel_by_id(channel_id)}\n'
-                'Messages moved.'
-            )
+            title = 'Messages moved'
+            description = None
             color = 0x00ff00
         
         elif finalization_reason == MESSAGE_MOVER_FINALIZATION_REASON_SUBMITTING:
-            description = (
-                f'Channel: {mention_channel_by_id(channel_id)}\n'
-                'Moving right now!'
-            )
-            color = None,
-        
-        else:
+            title = 'Moving right now!'
             description = None
             color = None
         
+        else:
+            title = None
+            description = None
+            color = None
+        
+        if description is None:
+            description = f'To channel: {mention_channel_by_id(channel_id)}'
+        
+        if title is None:
+            title = 'Moving messages'
+        else:
+            title = f'Moving messages | {title}'
+        
         embed = Embed(
-            'Moving messages',
+            title,
             description,
             color = color,
         )
@@ -1304,7 +1306,7 @@ class MessageMoverContext:
             
             raise
         
-        self.timeout_handle = KOKORO.call_at(self.next_update, timeout_message_mover_context, self.key)
+        self._timeout_handle = KOKORO.call_at(self.next_update, timeout_message_mover_context, self.key)
     
     
     def trigger_timeout(self):
@@ -1314,7 +1316,7 @@ class MessageMoverContext:
             timeout_handle = None
         else:
             timeout_handle = KOKORO.call_at(next_update, timeout_message_mover_context, self.key)
-        self.timeout_handle = timeout_handle
+        self._timeout_handle = timeout_handle
     
     
     def _cancel(self):
@@ -1405,7 +1407,7 @@ class MessageMoverContext:
     
     def get_webhook_waiter(self):
         webhook_waiter = self.webhook_waiter
-        if (webhook_waiter is not None):
+        if (webhook_waiter is None):
             webhook_waiter = Future(KOKORO)
             self.webhook_waiter = webhook_waiter
             Task(self.get_webhook_task(webhook_waiter), KOKORO)
@@ -1426,7 +1428,7 @@ class MessageMoverContext:
     
     
     async def move_message(self, message):
-        files = get_files(self.client, message)
+        files = await get_files(self.client, message)
         webhook = await self.get_webhook_waiter()
         
         guild_id = self.event.guild_id

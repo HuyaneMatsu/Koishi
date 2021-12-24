@@ -22,7 +22,7 @@ class dispatch_tester:
     old_events = {}
     
     @classmethod
-    async def here(self,client, message):
+    async def here(self, client, message):
         if message.channel is self.channel:
             try:
                 await client.message_create(message.channel, 'Current channel removed')
@@ -63,7 +63,7 @@ class dispatch_tester:
     
     
     @classmethod
-    async def client_edit(self,client, old):
+    async def client_edit(self, client, old):
         Task(self.old_events['client_edit'](client, old), KOKORO)
         if self.channel is None:
             return
@@ -80,7 +80,7 @@ class dispatch_tester:
     
     
     @classmethod
-    async def message_delete(self,client, message):
+    async def message_delete(self, client, message):
         Task(self.old_events['message_delete'](client, message), KOKORO)
         if self.channel is None:
             return
@@ -92,7 +92,7 @@ class dispatch_tester:
     
     
     @classmethod
-    async def message_edit(self,client, message, old):
+    async def message_edit(self, client, message, old):
         Task(self.old_events['message_edit'](client, message, old), KOKORO)
         if self.channel is None:
             return
@@ -213,7 +213,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def embed_update(self,client, message, flag):
+    async def embed_update(self, client, message, flag):
         Task(self.old_events['embed_update'](client, message, flag), KOKORO)
         if self.channel is None:
             return
@@ -270,7 +270,7 @@ class dispatch_tester:
     
     
     @classmethod
-    async def reaction_clear(self,client, message, old):
+    async def reaction_clear(self, client, message, old):
         Task(self.old_events['reaction_clear'](client, message, old), KOKORO)
         if self.channel is None:
             return
@@ -284,7 +284,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def reaction_delete_emoji(self,client, message, emoji, users):
+    async def reaction_delete_emoji(self, client, message, emoji, users):
         Task(self.old_events['reaction_delete_emoji'](client, message, emoji, users), KOKORO)
         if self.channel is None:
             return
@@ -346,7 +346,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def user_edit(self,client, user, old):
+    async def user_edit(self, client, user, old):
         Task(self.old_events['user_edit'](client, user, old), KOKORO)
         if self.channel is None:
             return
@@ -359,7 +359,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def guild_user_edit(self,client, user, guild, old):
+    async def guild_user_edit(self, client, user, guild, old):
         Task(self.old_events['guild_user_edit'](client, user, old, guild), KOKORO)
         if self.channel is None:
             return
@@ -390,7 +390,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def channel_delete(self,client,channel, guild):
+    async def channel_delete(self, client,channel, guild):
         Task(self.old_events['channel_delete'](client,channel, guild), KOKORO)
         if self.channel is None:
             return
@@ -435,7 +435,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def channel_create(self,client,channel):
+    async def channel_create(self, client,channel):
         Task(self.old_events['channel_create'](client,channel), KOKORO)
         if self.channel is None:
             return
@@ -446,7 +446,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def channel_pin_update(self,client,channel):
+    async def channel_pin_update(self, client,channel):
         Task(self.old_events['channel_pin_update'](client,channel), KOKORO)
         if self.channel is None:
             return
@@ -456,7 +456,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def emoji_create(self,client, emoji):
+    async def emoji_create(self, client, emoji):
         Task(self.old_events['emoji_create'](client, emoji), KOKORO)
         if self.channel is None:
             return
@@ -467,7 +467,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def emoji_delete(self,client, emoji):
+    async def emoji_delete(self, client, emoji):
         Task(self.old_events['emoji_delete'](client, emoji), KOKORO)
         if self.channel is None:
             return
@@ -478,7 +478,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
         
     @classmethod
-    async def emoji_edit(self,client, emoji, old):
+    async def emoji_edit(self, client, emoji, old):
         Task(self.old_events['emoji_edit'](client, emoji, old), KOKORO)
         if self.channel is None:
             return
@@ -527,7 +527,7 @@ class dispatch_tester:
         await Closer(client, self.channel, embed, timeout=120.)
     
     @classmethod
-    async def sticker_edit(self,client, sticker, old):
+    async def sticker_edit(self, client, sticker, old):
         Task(self.old_events['sticker_edit'](client, sticker, old), KOKORO)
         if self.channel is None:
             return
@@ -542,7 +542,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def guild_user_add(self,client, guild, user):
+    async def guild_user_add(self, client, guild, user):
         Task(self.old_events['guild_user_add'](client, guild, user), KOKORO)
         if self.channel is None:
             return
@@ -550,7 +550,7 @@ class dispatch_tester:
         await client.message_create(self.channel, f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!')
 
     @classmethod
-    async def guild_user_delete(self,client, guild, user, profile):
+    async def guild_user_delete(self, client, guild, user, profile):
         Task(self.old_events['guild_user_delete'](client, guild, user, profile), KOKORO)
         if self.channel is None:
             return
@@ -568,7 +568,7 @@ class dispatch_tester:
         await client.message_create(self.channel, '\n'.join(text))
         
     @classmethod
-    async def guild_create(self,client, guild):
+    async def guild_create(self, client, guild):
         Task(self.old_events['guild_create'](client, guild,), KOKORO)
         if self.channel is None:
             return
@@ -582,7 +582,7 @@ class dispatch_tester:
     #guild_sync
     
     @classmethod
-    async def guild_edit(self,client, guild, old):
+    async def guild_edit(self, client, guild, old):
         
         Task(self.old_events['guild_edit'](client, guild, old), KOKORO)
         if self.channel is None:
@@ -655,7 +655,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
         
     @classmethod
-    async def guild_delete(self,client, guild, profile):
+    async def guild_delete(self, client, guild, profile):
         Task(self.old_events['guild_delete'](client, guild, profile), KOKORO)
         if self.channel is None:
             return
@@ -670,7 +670,7 @@ class dispatch_tester:
 
 
     @classmethod
-    async def guild_ban_add(self,client, guild, user):
+    async def guild_ban_add(self, client, guild, user):
         Task(self.old_events['guild_ban_add'](client, guild, user), KOKORO)
         if self.channel is None:
             return
@@ -680,7 +680,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def guild_ban_delete(self,client, guild, user):
+    async def guild_ban_delete(self, client, guild, user):
         Task(self.old_events['guild_ban_delete'](client, guild, user), KOKORO)
         if self.channel is None:
             return
@@ -695,7 +695,7 @@ class dispatch_tester:
     #integration_edit
 
     @classmethod
-    async def role_create(self,client,role):
+    async def role_create(self, client,role):
         Task(self.old_events['role_create'](client,role,), KOKORO)
         if self.channel is None:
             return
@@ -706,7 +706,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def role_delete(self,client,role, guild):
+    async def role_delete(self, client,role, guild):
         Task(self.old_events['role_delete'](client,role, guild), KOKORO)
         if self.channel is None:
             return
@@ -743,7 +743,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def webhook_update(self,client,channel):
+    async def webhook_update(self, client,channel):
         Task(self.old_events['webhook_update'](client,channel), KOKORO)
         if self.channel is None:
             return
@@ -809,7 +809,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
             
     @classmethod
-    async def typing(self,client,channel, user,timestamp):
+    async def typing(self, client,channel, user,timestamp):
         Task(self.old_events['typing'](client,channel, user,timestamp), KOKORO)
         if self.channel is None:
             return
@@ -826,7 +826,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def client_edit_settings(self,client, old):
+    async def client_edit_settings(self, client, old):
         Task(self.old_events['client_edit_settings'](client, old), KOKORO)
         if self.channel is None:
             return
@@ -849,7 +849,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
-    async def invite_delete(self,client,invite):
+    async def invite_delete(self, client,invite):
         Task(self.old_events['invite_delete'](client, invite), KOKORO)
         if self.channel is None:
             return
@@ -964,76 +964,182 @@ class dispatch_tester:
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout=120.)
+    
+    
+    @classmethod
+    async def embedded_activity_create(self, client, embedded_activity_state):
+        Task(self.old_events['embedded_activity_create'](client, embedded_activity_state), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'Embedded activity created',
+            f'guild_id: {embedded_activity_state.guild_id!r}',
+            f'channel_id: {embedded_activity_state.guild_id!r}',
+            f'activity: {embedded_activity_state.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+        ]
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages, timeout=120.)
+    
+    
+    @classmethod
+    async def embedded_activity_update(self, client, embedded_activity_state, old_attributes):
+        Task(self.old_events['embedded_activity_update'](client, embedded_activity_state, old_attributes), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'Embedded activity updated',
+            f'guild_id: {embedded_activity_state.guild_id!r}',
+            f'channel_id: {embedded_activity_state.guild_id!r}',
+            f'activity: {embedded_activity_state.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            'Changes',
+        ]
+        
+        activity = embedded_activity_state.activity
+        for key, value in old_attributes.items():
+            text.append(f'- {key} : {value} -> {getattr(activity, key)}')
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages, timeout=120.)
 
+
+    @classmethod
+    async def embedded_activity_delete(self, client, embedded_activity_state):
+        Task(self.old_events['embedded_activity_delete'](client, embedded_activity_state), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'Embedded activity deleted',
+            f'guild_id: {embedded_activity_state.guild_id!r}',
+            f'channel_id: {embedded_activity_state.guild_id!r}',
+            f'activity: {embedded_activity_state.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+        ]
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages, timeout=120.)
+    
+    
+    @classmethod
+    async def embedded_activity_user_add(self, client, embedded_activity_state, user_id):
+        Task(self.old_events['embedded_activity_user_add'](client, embedded_activity_state, user_id), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'Embedded activity user add',
+            f'guild_id: {embedded_activity_state.guild_id!r}',
+            f'channel_id: {embedded_activity_state.guild_id!r}',
+            f'activity: {embedded_activity_state.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            f'user id: {user_id!r}'
+        ]
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages, timeout=120.)
+    
+    
+    @classmethod
+    async def embedded_activity_user_delete(self, client, embedded_activity_state, user_id):
+        Task(self.old_events['embedded_activity_user_delete'](client, embedded_activity_state, user_id), KOKORO)
+        if self.channel is None:
+            return
+        
+        text = [
+            f'Embedded activity user delete',
+            f'guild_id: {embedded_activity_state.guild_id!r}',
+            f'channel_id: {embedded_activity_state.guild_id!r}',
+            f'activity: {embedded_activity_state.activity!r}'
+            f'users: {", ".join(user.full_name for user in embedded_activity_state.users)}',
+            f'user id: {user_id!r}'
+        ]
+        
+        pages = [Embed(description=chunk) for chunk in cchunkify(text)]
+        await Pagination(client, self.channel, pages, timeout=120.)
 
 
 async def here_description(client, message):
     prefix = client.command_processor.get_prefix_for(message)
-    return Embed('here', (
-        'I set the dispatch tester commands\' output to this channel.\n'
-        f'Usage: `{prefix}here`\n'
-        'By calling the command again, I ll remove the current channel.\n'
-        'You can switch the dispatch testers, like:\n'
-        f'`{prefix}switch *event_name*`\n'
-        'For the event names, use:\n'
-        f'`{prefix}help switch`'
-            ), color=DISPATCH_COLOR).add_footer(
-            'Owner only!')
+    return Embed(
+        'here',
+        (
+            'I set the dispatch tester commands\' output to this channel.\n'
+            f'Usage: `{prefix}here`\n'
+            'By calling the command again, I ll remove the current channel.\n'
+            'You can switch the dispatch testers, like:\n'
+            f'`{prefix}switch *event_name*`\n'
+            'For the event names, use:\n'
+            f'`{prefix}help switch`'
+        ),
+        color = DISPATCH_COLOR
+    ).add_footer(
+        'Owner only!',
+    )
 
 async def switch_description(client, message):
     prefix = client.command_processor.get_prefix_for(message)
-    return Embed('here', (
-        'I can turn on a dispatch tester for you.\n'
-        f'`{prefix}switch *event_name*`\n'
-        'The list of defined testers:\n'
-        '- `channel_create`\n'
-        '- `channel_delete`\n'
-        '- `channel_edit`\n'
-        '- `channel_pin_update`\n'
-        '- `client_edit_settings`\n'
-        '- `client_edit`\n'
-        '- `embed_update`\n'
-        '- `emoji_create`\n'
-        '- `emoji_delete`\n'
-        '- `emoji_edit`\n'
-        '- `guild_ban_add`\n'
-        '- `guild_ban_delete`\n'
-        '- `guild_create`\n'
-        '- `guild_delete`\n'
-        '- `guild_edit`\n'
-        '- `guild_user_add`\n'
-        '- `guild_user_delete`\n'
-        '- `invite_create`\n'
-        '- `invite_delete`\n'
-        '- `message_delete`\n'
-        '- `message_edit`\n'
-        '- `reaction_clear`\n'
-        '- `reaction_delete_emoji`\n'
-        '- `role_create`\n'
-        '- `role_delete`\n'
-        '- `role_edit`\n'
-        '- `typing`\n'
-        '- `user_edit`\n'
-        '- `user_presence_update`\n'
-        '- `guild_user_edit`\n'
-        '- `user_voice_join`\n'
-        '- `user_voice_leave`\n'
-        '- `user_voice_update`\n'
-        '- `integration_create`\n'
-        '- `integration_delete`\n'
-        '- `integration_edit`\n'
-        '- `integration_update`\n'
-        '- `webhook_update`\n'
-        '- `application_command_permission_update`\n'
-        '- `stage_create`\n'
-        '- `stage_edit`\n'
-        '- `stage_delete`\n'
-        '- `sticker_create`\n'
-        '- `sticker_delete`\n'
-        '- `sticker_edit`\n'
-        f'For setting channel, use: `{prefix}here`'
-            ), color=DISPATCH_COLOR).add_footer(
-            'Owner only!')
+    return Embed(
+        'here',
+        (
+            'I can turn on a dispatch tester for you.\n'
+            f'`{prefix}switch *event_name*`\n'
+            'The list of defined testers:\n'
+            '- `channel_create`\n'
+            '- `channel_delete`\n'
+            '- `channel_edit`\n'
+            '- `channel_pin_update`\n'
+            '- `client_edit_settings`\n'
+            '- `client_edit`\n'
+            '- `embed_update`\n'
+            '- `emoji_create`\n'
+            '- `emoji_delete`\n'
+            '- `emoji_edit`\n'
+            '- `guild_ban_add`\n'
+            '- `guild_ban_delete`\n'
+            '- `guild_create`\n'
+            '- `guild_delete`\n'
+            '- `guild_edit`\n'
+            '- `guild_user_add`\n'
+            '- `guild_user_delete`\n'
+            '- `invite_create`\n'
+            '- `invite_delete`\n'
+            '- `message_delete`\n'
+            '- `message_edit`\n'
+            '- `reaction_clear`\n'
+            '- `reaction_delete_emoji`\n'
+            '- `role_create`\n'
+            '- `role_delete`\n'
+            '- `role_edit`\n'
+            '- `typing`\n'
+            '- `user_edit`\n'
+            '- `user_presence_update`\n'
+            '- `guild_user_edit`\n'
+            '- `user_voice_join`\n'
+            '- `user_voice_leave`\n'
+            '- `user_voice_update`\n'
+            '- `integration_create`\n'
+            '- `integration_delete`\n'
+            '- `integration_edit`\n'
+            '- `integration_update`\n'
+            '- `webhook_update`\n'
+            '- `application_command_permission_update`\n'
+            '- `stage_create`\n'
+            '- `stage_edit`\n'
+            '- `stage_delete`\n'
+            '- `sticker_create`\n'
+            '- `sticker_delete`\n'
+            '- `sticker_edit`\n'
+            f'For setting channel, use: `{prefix}here`'
+        ),
+        color = DISPATCH_COLOR
+    ).add_footer(
+        'Owner only!',
+    )
 
 DISPATCH_TESTS(dispatch_tester.here, description=here_description, category='TEST COMMANDS')
 DISPATCH_TESTS(dispatch_tester.switch, description=switch_description, category='TEST COMMANDS')
