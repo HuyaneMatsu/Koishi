@@ -31,6 +31,10 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
+@Koishi.events
+async def unknown_dispatch_event(client, name, data):
+    await client.events.error(client, name, repr(data))
+
 @Satori.events
 async def message_create(client, message):
     if (message.guild_id != GUILD__SUPPORT.id):
