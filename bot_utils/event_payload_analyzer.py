@@ -2,7 +2,8 @@ __all__ = ()
 
 import re
 
-from ..utils import PARSE_TIMESTAMP_RP
+from scarletio import copy_docs
+from hata.discord.utils import PARSE_TIMESTAMP_RP
 
 NoneType = type(None)
 
@@ -598,17 +599,329 @@ class Guesser:
         repr_parts.append('>')
         return ''.join(repr_parts)
 
+# Define sub-nodes
+
+class SubNodeBase:
+    """
+    
+    Attributes
+    ----------
+    name : `str`
+        The name of the sub-node.
+    """
+    __slots__ = ('name', )
+    
+    def __new__(cls, name):
+        """
+        Creates a new sub node.
+        
+        Parameters
+        ----------
+        name : `str`
+            The name of teh sub-node.
+        """
+        self = object.__new__(cls)
+        self.name = name
+        return self
+    
+    def feed(self, value):
+        """
+        Feeds a value to the node.
+        
+        Parameters
+        ----------
+        value : `Any`
+            The fed value.
+        """
+        pass
+
+
+class ArraySubNode(SubNodeBase):
+    """
+    Attributes
+    ----------
+    name : `str`
+        The name of the array.
+        
+        This name is applied to the names of the elements.
+    
+    state : ``GuesserState``
+        Guesser state for the elements for the sub-nodes.
+    """
+    __slots__ = ('state',)
+    
+    @copy_docs(SubNodeBase.__new__)
+    def __new__(cls, name):
+        self = SubNodeBase.__new__(cls, name)
+        self.state = GuesserState(name)
+        return self
+    
+    
+    @copy_docs(SubNodeBase.feed)
+    def feed(self, value):
+        if (value is not None):
+            for element in value:
+                self.state.feed(element)
+
+
+class ObjectSubNode(SubNodeBase):
+    """
+    Attributes
+    ----------
+    name : `str`
+        The name of the array.
+        
+        This name is applied to the names of the elements.
+    
+    state : `dict` of (`str`, ``GuesserState``) items
+        Guesser state for the elements for the sub-nodes.
+    """
+    __slots__ = ('states',)
+    
+    @copy_docs(SubNodeBase.__new__)
+    def __new__(cls, name):
+        self = SubNodeBase.__new__(cls, name)
+        self.states = {}
+        return self
+    
+    
+    @copy_docs(SubNodeBase.feed)
+    def feed(self, value):
+        if (value is not None):
+            for name, element in value.items():
+                try:
+                    state = self.states[name]
+                except KeyError:
+                    state = GuesserState(name)
+                
+                state.feed(value)
+
+# Define guessers
+
+Guesser(
+    guess_is_enum,
+    ENUM_GUESS_CHANCE_MAX,
+    'enum',
+    None,
+)
+
+
+Guesser(
+    guess_is_icon,
+    ICON_GUESS_CHANCE_MAX,
+    'icon',
+    None,
+)
+
+
+Guesser(
+    guess_is_color,
+    COLOR_GUESS_MAX_CHANCE,
+    'color',
+    None,
+)
+
+
+Guesser(
+    guess_is_snowflake,
+    SNOWFLAKE_GUESS_MAX_CHANCE,
+    'snowflake',
+    None,
+)
+
+
+Guesser(
+    guess_is_string_field,
+    STRING_GUESS_MAX_CHANCE,
+    'string',
+    None,
+)
+
+
+Guesser(
+    guess_is_int_field,
+    INT_GUESS_MAX_CHANCE,
+    'int',
+    None,
+)
+
+
+Guesser(
+    guess_is_float_field,
+    FLOAT_GUESS_MAX_CHANCE,
+    'float',
+    None,
+)
+
+
+Guesser(
+    guess_is_timestamp_field,
+    TIMESTAMP_GUESS_MAX_CHANCE,
+    'timestamp',
+    None,
+)
+
+
+Guesser(
+    guess_is_unix_time,
+    UNIX_TIME_GUESS_MAX_CHANCE,
+    'unix_time',
+    None,
+)
+
+Guesser(
+    guess_is_multi_type_value,
+    MULTI_TYPE_VALUE_GUESS_MAX_CHANCE,
+    'multi_type',
+    None,
+)
+
+Guesser(
+    guess_is_object,
+    OBJECT_GUESS_MAX_CHANCE,
+    'object',
+    ObjectSubNode,
+)
+
+Guesser(
+    guess_is_array,
+    ARRAY_GUESS_MAX_CHANCE,
+    'array',
+    ArraySubNode,
+)
+
+
+def freeze(value):
+    """
+    Freezes the given object.
+    
+    Parameters
+    ----------
+    value : `object`
+        The value to freeze.
+    
+    Returns
+    -------
+    value : `object`
+        The frozen value.
+    """
+    if (value is None):
+        pass
+    elif isinstance(value, (str, int, float)):
+        pass
+    elif isinstance(value, list):
+        value = tuple(freeze(element) for element in value)
+    elif isinstance(value, dict):
+        value = FrozenDict(value)
+    else:
+        pass
+    
+    return value
+
+
+class FrozenDict:
+    """
+    Represents a hashable dictionary.
+    
+    Attributes
+    ----------
+    hash_value : `int`
+        The hashed value of the dictionary.
+    value : `dict`
+        The frozen dictionary.
+    """
+    __slots__ = ('hash_value', 'value')
+    
+    def __new__(cls, source_dictionary):
+        """
+        Creates a new frozen dict from the given non-frozen one.
+        
+        Parameters
+        ----------
+        source_dictionary : `dict`
+        """
+        frozen_dictionary = {key: freeze(value) for key, value in source_dictionary.items()}
+        
+        # Let python do the work for us.
+        hash_value = hash(tuple(frozen_dictionary.items()))
+        
+        self = object.__new__(cls)
+        self.value = source_dictionary
+        self.hash_value = hash_value
+        return self
+    
+    def __hash__(self):
+        """Returns the hash value of the frozen dictionary."""
+        return self.hash_value
+    
+    def __eq__(self, other):
+        """Returns whether teh two objects are the same."""
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        if self.hash_value != other.hash_value:
+            return False
+        
+        if self.value != other.value:
+            return False
+        
+        return True
+    
+    def __repr__(self):
+        """Returns the object's representation."""
+        return f'{self.__class__.__name__}({self.value!r})'
+
 
 class GuessStateNode:
     """
-    total_guess_chance : `int`
     
+    Attributes
+    ----------
+    guesser : ``Guesser``
+        The parent guesser instance form what teh state inherits from-
     node : ``GuessNode``
         Guess node if applicable.
+    total_guess_chance : `int`
+        The total amount of guess chances.
     """
-    __slots__ = ('node', 'total_guess_chance', )
+    __slots__ = ('guesser', 'node', 'total_guess_chance', )
     
-    # todo
+    def __new__(cls, guesser):
+        """
+        Creates a new guess state node instance.
+        """
+        self = object.__new__(cls)
+        self.guesser = guesser
+        self.node = None
+        self.total_guess_chance = 0
+        return self
+    
+    
+    def feed(self, name, value, chance):
+        """
+        Feeds a result to the guess state node.
+        
+        Parameters
+        ----------
+        name : `str`
+            The field's name.
+        value : `object`
+            the field's value.
+        chance : `int`
+            Matching chance.
+        """
+        self.total_guess_chance += chance
+        
+        node = self.node
+        if (node is None):
+            sub_node_type = self.guesser.sub_node_type
+            if (sub_node_type is not None):
+                node = sub_node_type(name)
+                self.node = node
+        
+        if (node is not None):
+            node.feed(value)
+
 
 class GuesserState:
     """
@@ -626,20 +939,35 @@ class GuesserState:
     __slots__ = ('guessers', 'name', 'received_count', 'received_values')
     
     def __new__(cls, name):
+        """
+        Creates a new guess state instance with the given name.
+        
+        Parameters
+        ----------
+        
+        """
         self = object.__new__(cls)
         self.name = name
-        self.received_values = None
-        self.guessers = {guesser: GuessStateNode() for guesser in GUESSERS}
+        self.received_values = {}
+        self.guessers = {guesser: GuessStateNode(guesser) for guesser in GUESSERS}
         self.received_count = 0
         return self
     
     
-    def guess(self, name, value):
+    def feed(self, value):
+        """
+        Guesses what type the given value.
+        
+        Parameters
+        ----------
+        value : `object`
+            The field's value.
+        """
         guessers_to_remove = None
         
         guessers = self.guessers
         for guesser, guess_state_node in guessers.items():
-            chance = guesser.guesser_function(name, value)
+            chance = guesser.guesser_function(self.name, value)
             if chance == -1:
                 if guessers_to_remove:
                     guessers_to_remove = []
@@ -647,11 +975,24 @@ class GuesserState:
                 guessers_to_remove.append(guesser)
             
             else:
-                guess_state_node.feed(name, value, chance)
+                guess_state_node.feed(self.name, value, chance)
         
         if (guessers_to_remove is not None):
             for guesser in guessers_to_remove:
                 del guessers_to_remove[guesser]
         
+        # count how much times we received this payload.
         
-        # todo
+        value = freeze(value)
+        
+        received_values = self.received_values
+        try:
+            received_count = received_values[value]
+        except KeyError:
+            received_count = 1
+        else:
+            received_count += 1
+        
+        received_values[value] = received_count
+        
+        self.received_count += 1
