@@ -5,10 +5,11 @@ from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
 from random import choice
 
-from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, \
+from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, CHANNEL_TYPES, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
     StickerFormat, ZEROUSER, ChannelDirectory, Permission, escape_markdown
+from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from scarletio import WaitTillExc, ReuBytesIO
 from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row
@@ -1263,3 +1264,51 @@ async def choose(
         ]),
         allowed_mentions = None,
     )
+
+
+CREATE_EMBEDDED_ACTIVITY_PERMISSIONS = Permission().update_by_keys(
+    start_embedded_activities = True,
+    create_instant_invite = True,
+)
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def create_activity(
+    client,
+    event,
+    activity: (EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID, 'Select an activity'),
+    channel: ('channel_guild_voice', 'The channel to create the activity for.') = None,
+):
+    """Creates an embedded activity."""
+    if event.user_permissions&CREATE_EMBEDDED_ACTIVITY_PERMISSIONS != CREATE_EMBEDDED_ACTIVITY_PERMISSIONS:
+        abort(
+            'You need to have `create instant invite` and `create embedded activities` permission to invoke this '
+            'command'
+        )
+    
+    # Use goto to detect channel.
+    while True:
+        if channel is not None:
+            break
+        
+        guild = event.guild
+        if (guild is not None):
+            try:
+                voice_state = guild.voice_states[event.user.id]
+            except KeyError:
+                pass
+            else:
+                channel = voice_state.channel
+                if channel.type == CHANNEL_TYPES.guild_voice:
+                    break
+        
+        abort('Please give a voice channel or be in one.')
+    
+    client_permissions = channel.cached_permissions_for(client)
+    if client_permissions&CREATE_EMBEDDED_ACTIVITY_PERMISSIONS != CREATE_EMBEDDED_ACTIVITY_PERMISSIONS:
+        abort(
+            f'I need to have `create instant invite` and `create embedded activities` permission in '
+            f'{channel.mention} to execute this command.'
+        )
+    
+    invite = await client.application_invite_create(channel, activity, max_age=21600) # 6 hours
+    return invite.url

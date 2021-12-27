@@ -100,6 +100,7 @@ CARD_COST_TYPE_MUL_LEVEL = 2
 CARD_COST_TYPE_MUL_CARDS = 3
 CARD_COST_TYPE_MUL_OTHERS_CARDS = 4
 CARD_COST_TYPE_ALL_STARS = 5
+CARD_COST_TYPE_MUL_X = 6
 
 CARD_LEVEL_FILTERABLE_STRINGS = ['0', '1', '2', '3', '4', '5']
 CARD_LIMIT_FILTERABLE_STRINGS = ['1', '3']
@@ -120,6 +121,8 @@ class OJCardCost:
             string = f'cards held by others x {factor} {EMOJI_STAR:e}'
         elif type_ == CARD_COST_TYPE_ALL_STARS:
             string = f'all held {EMOJI_STAR:e}'
+        elif type_ == CARD_COST_TYPE_MUL_X:
+            string = f'(X) x {factor} {EMOJI_STAR}'
         else:
             string = 'undefined'
         
@@ -672,12 +675,15 @@ CARD_COST_Stp10 = OJCardCost(CARD_COST_TYPE_DIV_STARS, 10)
 
 CARD_COST_Lvx3 = OJCardCost(CARD_COST_TYPE_MUL_LEVEL, 3)
 CARD_COST_Lvx5 = OJCardCost(CARD_COST_TYPE_MUL_LEVEL, 5)
+CARD_COST_Lvx7 = OJCardCost(CARD_COST_TYPE_MUL_LEVEL, 7)
 CARD_COST_Lvx10 = OJCardCost(CARD_COST_TYPE_MUL_LEVEL, 10)
 
 CARD_COST_HCx5 = OJCardCost(CARD_COST_TYPE_MUL_CARDS, 5)
 CARD_COST_OCx5 = OJCardCost(CARD_COST_TYPE_MUL_OTHERS_CARDS, 5)
 
 CARD_COST_StALL = OJCardCost(CARD_COST_TYPE_ALL_STARS, 0)
+
+CARD_COST_Xx10 = OJCardCost(CARD_COST_TYPE_MUL_X, 10)
 
 #### #### #### #### EVENTS #### #### #### ####
 
@@ -1015,7 +1021,7 @@ CARD_PRESIDENTS_PRIVILEGE = OJCard(32,
     'President\'s_Privilege.png',
 )
 
-CARD_PRINCESSS_PRIVILEGE = OJCard(33,
+CARD_PRINCESS_PRIVILEGE = OJCard(33,
     'Princess\'s Privilege',
     4, CARD_COST_20, 1, CARD_TYPE_BOOST, CARD_PACK_EXPANSION_PACK, CARD_RARITY_RARE,
     'Discard all cards in your hand. Draw 3 new cards. Can only be used when you have at least 3 cards in your hand.',
@@ -1072,7 +1078,7 @@ CARD_TREASURE_THIEF = OJCard(38,
 
 CARD_ACCELERATING_SKY = OJCard(39,
     'Accelerating Sky',
-    3, CARD_COST_30, 3, CARD_TYPE_EVENT, CARD_PACK_COMMUNITY_PACK_2, CARD_RARITY_UNCOMMON,
+    3, CARD_COST_20, 3, CARD_TYPE_EVENT, CARD_PACK_COMMUNITY_PACK_2, CARD_RARITY_UNCOMMON,
     'Effect Duration: 3 chapters. All players gain +1 EVD and -1 DEF.',
     '"Girls are leaping through the sky...?"',
     None,
@@ -1833,7 +1839,10 @@ CARD_MIRACLE_WALKER = OJCard(118,
 CARD_OBSERVER_OF_ETERNITY = OJCard(119,
     'Observer of Eternity',
     3, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
-    'Add 2 random Boost/Event cards that deal damage to your hand.',
+    (
+        'Add 2 random Boost/Event cards that deal damage to your hand.\n'
+        'You may play another card this turn.'
+    ),
     '"Now then, let\'s see how this will turn out." - Suguri',
     None,
     'Observer_of_Eternity.png',
@@ -1922,8 +1931,10 @@ CARD_SPECIAL_STAGE = OJCard(127,
 CARD_STEALTH_ON = OJCard(128,
     'Stealth On',
     2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
-    'Effect Duration: 3 chapters. Cannot be challenged to battle or targeted by boost cards by other players. Effect '
-    'expires on entering battle. Gain +2 ATK when entering battle.',
+    (
+        'Effect Duration: 3 chapters. Cannot be challenged to battle or targeted by Boost cards by other players. '
+        'Do not trigger Encounter or Boss panels. Effect expires on entering battle. Gain +2 ATK when entering battle.'
+    ),
     '"Look at me vanish!" ―Tsih',
     None,
     'Stealth_On.png',
@@ -2228,7 +2239,7 @@ CARD_MIRACLE_RED_BEAN_ICE_CREAM = OJCard(160,
     (
         '+1 ATK while this card is held. Tomomo (Casual): When played, turn into Tomomo (Sweet Eater) and fully '
         'restore HP.\n'
-        'Tomomo (Sweet Eater): When held, this card becomes Magical Revenge. Discard upon use or KO in battle.'
+        'Tomomo (Sweet Eater): When held, this card becomes Magical Revenge. Discard upon use.'
     ),
     '"Miracle red bean ice cream!" ―Tomomo',
     None,
@@ -2468,8 +2479,10 @@ CARD_BANA_NANA = OJCard(183,
 CARD_SAFE_JOURNEY = OJCard(184,
     'Safe Journey',
     3, CARD_COST_5, -1, CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
-    'Lose 5 stars at the start of each turn. Ignore Drop panels, traps, and card effect damage. This effect ends when '
-    'you stop on your own Home panel or have less than 5 stars.',
+    (
+        'Lose 5 stars at the start of each turn. Ignore Drop panels, traps, and card effect damage. This effect ends '
+        'when you stop on your own Home panel or have less than 5 stars.'
+    ),
     '"Now, let\'s get going." ―Halena',
     None,
     'Safe_Journey.png',
@@ -2478,8 +2491,10 @@ CARD_SAFE_JOURNEY = OJCard(184,
 CARD_GUIDANCE_OF_THE_WEATHERCOCK = OJCard(185,
     'Guidance of the Weathercock',
     3, CARD_COST_30, -1, CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
-    'Roll 2 dice for everything except for battle. This effect ends when you stop on your own Home panel. Can only '
-    f'check Norma on own Home panel.',
+    (
+        'Roll 2 dice for everything except for battle. This effect ends when you stop on your own Home panel. Can only '
+        'check Norma on own Home panel.'
+    ),
     '"*Cheep cheep*! Cook wants to go this way." ―Cook',
     None,
     'Guidance_of_the_Weathercock.png',
@@ -2517,6 +2532,74 @@ CARD_FREIGHT = OJCard(188,
     '"You may keep all that freight, yes you may." ―Merchant',
     None,
     'Freight.png',
+)
+
+#### #### #### #### DLC 32 #### #### #### ####
+
+CARD_NEW_NOBILITY = OJCard(189,
+    'New Nobility',
+    2, CARD_COST_0, -1, CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    (
+        'Stock Effect: All opposing units randomly gain -1 ATK, DEF or EVD during their next battle.\n'
+        'If held by Fernet, this card can be transformed into "Affluence (1)" instead.'
+    ),
+    '"Pleased to make your acquaintance. I hope we can get along well in the future." ―Fernet',
+    None,
+    'New_Nobility.png',
+)
+
+CARD_AFFLUENCE_X = OJCard(190,
+    'Affluence (X)',
+    2, CARD_COST_Xx10, -1, CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    (
+        'If this card is Affluence (4): Active players battle you in a random order. They gain -3 ATK. If you are not '
+        'KO\'d, opponent gives you (their Lvl) x 10 stars.\n'
+        'If not Affluence (4): Upgrade this card.\n'
+        'If not held by Fernet, this card becomes New Nobility.'
+    ),
+    '"You wish to ask me for a favor...? My my, of course I\'d be ever so happy to help a friend." ―Fernet',
+    None,
+    'Affluence_(X).png',
+)
+
+CARD_DANCE_IN_THE_MOONLIT_NIGHT = OJCard(191,
+    'Dance in the Moonlit Night',
+    2, CARD_COST_20, -1, CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    (
+        'On successful Evasion, deal damage to the opponent equal to what you would have taken from them.\n'
+        'If used by Hime (Moonlight) during full moon (every 5 chapters), deal double that damage but cannot use the '
+        'Defend command.'
+    ),
+    '"Now let us dance." ―Hime',
+    None,
+    'Dance_in_the_Moonlit_Night.png',
+)
+
+#### #### #### #### DLC 33 #### #### #### ####
+
+CARD_TWILIGHT_COLORED_DREAM = OJCard(192,
+    'Twilight-Colored Dream',
+    2, CARD_COST_Lvx7, -1, CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    (
+        'Effect Duration: (Your Lvl) x Chapters\n'
+        'Turn all Bonus and Draw panels into Encounter panels. If an enemy moves onto an Encounter or Boss panel with '
+        'a Battle card you set as a Trap, they must stop on that panel.'
+    ),
+    '"Look at all those countless planes crossing the sky... It\'s like watching a dream, is it not?" ―Malt',
+    None,
+    'Twilight-Colored_Dream.png',
+)
+
+CARD_LITTLE_MAGNUM = OJCard(193,
+    'Twilight-Colored Dream',
+    2, CARD_COST_10, -1, CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    (
+        'During this battle, gain +1 ATK. Additionally, gain +X ATK where X is the damage you have taken during this '
+        'battle.'
+    ),
+    '"Stop bullying Daddy!" ―Mescal',
+    None,
+    'Little_Magnum.png',
 )
 
 #### #### #### #### CHARACTERS #### #### #### ####
@@ -3173,7 +3256,7 @@ CHARACTER_HALENA = OJCharacter(71,
     'Halena',
     5, -1, +1, +1, 5,
     ORIGIN_100_ORANGE_JUICE,
-    'Gain Lvl x23 stars after landing on your own home.',
+    'Gain Lvl x2 stars after landing on your own home.',
     (CARD_SAFE_JOURNEY,),
     'Halena_(unit).png',
 )
@@ -3208,6 +3291,55 @@ CHARACTER_MERCHANT = OJCharacter(74,
     (CARD_ZEALOUS_SALESMAN,),
     'Merchant_(unit).png',
 )
+
+#### #### #### #### DLC 32 #### #### #### ####
+
+CHARACTER_HIME_MOONLIGHT = OJCharacter(75,
+    'Hime (Moonlight)',
+    5, +1, -2, +2, 5,
+    ORIGIN_SUGURI,
+    'During full moon (every 5 chapters), base attributes are -1 ATK, -1 DEF, +3 EVD..',
+    (CARD_DANCE_IN_THE_MOONLIT_NIGHT,),
+    'Hime_(Moonlight)_(unit).png',
+)
+
+FERNET_NOBLE = OJCharacter(76,
+    'Fernet (Noble)',
+    6, -1, +1, -1, 5,
+    ORIGIN_FLYING_RED_BARREL,
+    'Any player challenging you on the field must pay their Lvl x Stars to do so.',
+    (CARD_NEW_NOBILITY, CARD_AFFLUENCE_X,),
+    'Fernet_(Noble)_(unit).png',
+)
+
+#### #### #### #### DLC 33 #### #### #### ####
+
+CHARACTER_MALT = OJCharacter(77,
+    'Malt',
+    5, +1, +1, +1, 5,
+    ORIGIN_FLYING_RED_BARREL,
+    (
+        'Give 3 Wins when KO\'d in battle (as opposed to the standard 2). Cannot challenge other units when meeting '
+        'them on the field. Can set a Battle card without special use requirements as a Trap card without paying its '
+        'cost. When another enemy steps on it, they will battle you and both player units gain the card\'s effect. '
+        'No other battle cards can be played in this battle.'
+    ),
+    (CARD_TWILIGHT_COLORED_DREAM,),
+    'Lone_Rider_(unit).png',
+)
+
+CHARACTER_MESCAL = OJCharacter(78,
+    'Mescal',
+    4, 0, +1, +1, 5,
+    ORIGIN_FLYING_RED_BARREL,
+    (
+        'When challenged to a battle, there is a 50% chance a Pirate Crew Member will fight in your place. Pirate '
+        'Crew Member gives 1 Win on KO and gives stars gained in battle to your unit.'
+    ),
+    (CARD_LITTLE_MAGNUM,),
+    'Mescal_(unit).png',
+)
+
 
 #### #### #### #### COMMANDS #### #### #### ####
 
@@ -3381,7 +3513,7 @@ RELATIONS = {
     'Stiff_Crystal.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029991901437972/Stiff_Crystal.png',
     'Sweet_Destroyer.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029996359987200/Sweet_Destroyer.png',
     'Treasure_Thief.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030002047451146/Treasure_Thief.png',
-    'Accelerating_Sky.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030006338224138/Accelerating_Sky.png',
+    'Accelerating_Sky.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924794756242997318/Accelerating_Sky.png',
     'Cloud_of_Seagulls.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030010066989066/Cloud_of_Seagulls.png',
     'Dinner.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030014018019348/Dinner.png',
     'Forced_Revival.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030017709010944/Forced_Revival.png',
@@ -3461,7 +3593,7 @@ RELATIONS = {
     "Lulu's_Lucky_Egg.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030709303578654/Lulus_Lucky_Egg.png',
     'Manager,_I_Could_Use_Some_Help!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030714013810718/Manager_I_Could_Use_Some_Help.png',
     'Miracle_Walker.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030719147626516/Miracle_Walker.png',
-    'Observer_of_Eternity.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030724902207498/Observer_of_Eternity.png',
+    'Observer_of_Eternity.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924797274272448562/Observer_of_Eternity.png',
     "Protagonist's_Privilege.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901030729142640680/Protagonists_Privilege.png',
     'Raging_Madness.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030733479559168/Raging_Madness.png',
     'Reproduction_of_Records.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030737174732800/Reproduction_of_Records.png',
@@ -3470,7 +3602,7 @@ RELATIONS = {
     'Saint_Eyes.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030749581500416/Saint_Eyes.png',
     'Solid_Witch.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030753075347476/Solid_Witch.png',
     'Special_Stage.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030757273862144/Special_Stage.png',
-    'Stealth_On.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030764278345728/Stealth_On.png',
+    'Stealth_On.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924796713573683270/Stealth_On.png',
     'Sweet_Guardian.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030768774631444/Sweet_Guardian.png',
     'Turbo_Charged.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030772817952818/Turbo_Charged.png',
     'Ubiquitous.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901030776034967612/Ubiquitous.png',
@@ -3502,7 +3634,7 @@ RELATIONS = {
     'Banned_for_Life.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031017480089600/Banned_for_Life.png',
     'Beast_Witch.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031021426933800/Beast_Witch.png',
     'Evil_Spy_Work_―_Execution.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031024853647400/Evil_Spy_Work__Execution.png',
-    'Miracle_Red_Bean_Ice_Cream.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031029664518144/Miracle_Red_Bean_Ice_Cream.png',
+    'Miracle_Red_Bean_Ice_Cream.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924797785906225233/Miracle_Red_Bean_Ice_Cream.png',
     "Santa's_Job.png": 'https://cdn.discordapp.com/attachments/568837922288173058/901031034446045194/Santas_Job.png',
     'Big_Bang_Bell.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031040641011732/Big_Bang_Bell.png',
     'Dance,_Long-Eared_Beasts!.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031044134879232/Dance_Long-Eared_Beasts.png',
@@ -3531,6 +3663,15 @@ RELATIONS = {
     'Upshift.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031261106216980/Upshift.png',
     'Zealous_Salesman.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031264444882974/Zealous_Salesman.png',
     'Freight.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031272489578496/Freight.png',
+    'New_Nobility.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924786225456513044/New_Nobility.png',
+    'Affluence_(X).png': 'https://cdn.discordapp.com/attachments/568837922288173058/924787732646068224/Affluence_X.png',
+    'Dance_in_the_Moonlit_Night.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924788747848019988/Dance_in_the_Moonlit_Night.png',
+    'Twilight-Colored_Dream.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924789734377680896/Twilight-Colored_Dream.png',
+    'Little_Magnum.png': 'https://cdn.discordapp.com/attachments/568837922288173058/924790500786049064/Little_Magnum.png',
+    'Hime_(Moonlight)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/924791836747386890/Hime_Moonlight_unit.png',
+    'Fernet_(Noble)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/924792474365468713/Fernet_Noble_unit.png',
+    'Malt_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/924793528335364106/Malt_unit.png',
+    'Mescal_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/924794097129107506/Mescal_unit.png',
 }
 
 

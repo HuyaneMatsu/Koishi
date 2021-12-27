@@ -83,8 +83,8 @@ And much more!
 
 - Utility
     
-    `avatar` • `calc` • `choose` • `color` • `guild` • `guild-icon` • `id` • `id-to-datetime` • `now-as-id` • `ping` •
-    `rawr` • `sticker` • `role` • `show-emoji` • `user` • `welcome-screen`
+    `avatar` • `calc` • `choose` • `create-activity` • `color` • `guild` • `guild-icon` • `id` • `id-to-datetime` •
+    `now-as-id` • `ping` • `rawr` • `sticker` • `role` • `show-emoji` • `user` • `welcome-screen`
 
 - Waifus
     
@@ -92,6 +92,6 @@ And much more!
 
 #### Support server only commands
 
-`all-users` • `ask` • `award` • `crywolf` • `daily-event` • `docs-search` • `emoji` • `events` • `extension`
-• `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules`
-• `sticker` • `take` • `transfer` • `voice`
+`add_to_move_group` • `all-users` • `ask` • `award` • `crywolf` • `daily-event` • `docs-search` • `emoji` • `events`
+• `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles`
+• `rules` • `sticker` • `take` • `transfer` • `move_message` • `move_messages` • `voice`

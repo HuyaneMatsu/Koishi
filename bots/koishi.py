@@ -1,15 +1,15 @@
 import re
 from functools import partial as partial_func
 
-from hata import BUILTIN_EMOJIS,  Client, KOKORO, cchunkify, Permission
-from scarletio import alchemy_incendiary
+from hata import BUILTIN_EMOJIS,  Client, KOKORO, cchunkify, Permission, ClientWrapper
+from scarletio import alchemy_incendiary, to_coroutine
 from scarletio.utils.trace import render_exception_into
 from hata.discord.utils import sanitise_mention_escaper
 
 from bot_utils.tools import MessageDeleteWaitfor, GuildDeleteWaitfor, RoleDeleteWaitfor, EmojiDeleteWaitfor, \
     RoleEditWaitfor
 from bot_utils.constants import GUILD__SUPPORT, CHANNEL__SUPPORT__DEFAULT_TEST
-
+from bot_utils.event_payload_analyzer import guess_event_payload_structure, render_payload_states
 
 
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
@@ -113,3 +113,23 @@ async def error(client, name, err):
     extracted = ''.join(extracted).split('\n')
     for chunk in cchunkify(extracted, lang='py'):
         await client.message_create(CHANNEL__SUPPORT__DEFAULT_TEST, chunk)
+
+
+# Add the event payload analyzer to all client's events.
+ALL = ClientWrapper()
+@ALL.events()
+async def unknown_dispatch_event(client, event_name, payload):
+    guess_event_payload_structure(event_name, payload)
+
+
+@Koishi.events
+@to_coroutine
+def unknown_dispatch_event(client, event_name, payload):
+    yield # This makes sure, the event above is called first.
+    
+    file_content = render_payload_states()
+    
+    yield from client.message_create(
+        CHANNEL__SUPPORT__DEFAULT_TEST,
+        file = ('unknown_dispatch_event.txt', file_content)
+    ).__await__()
