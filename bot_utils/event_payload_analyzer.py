@@ -421,6 +421,7 @@ def guess_is_float_field(name, value):
 TIMESTAMP_EXPECTED_NAME_PARTS = (
     'timestamp',
     '_at',
+    '_until',
 )
 
 TIMESTAMP_GUESS_MAX_CHANCE = 2

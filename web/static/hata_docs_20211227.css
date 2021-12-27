@@ -9,8 +9,10 @@
     --size-min601-width: calc(75% + 150px);
     --size-min601-min-width: 601px;
 
-    --docs-size-min-width-border : 28px;
-    --content-table-size-min-width : 300px;
+    --docs-size-min-width-border: 28px;
+    --content-table-size-min-width: 300px;
+    --parameter-table-border-radius: 0.375rem;
+    --font-size: 1rem;
 
     --color-body-font: rgb(255 255 255);
     --color-body-background: rgb(54 57 63);
@@ -18,12 +20,21 @@
     --color-code-background: rgb(166 193 220 / 0.10);
     --color-code-link-font: rgb(227 255 197);
     --color-code-link-hover-background: rgb(195 181 255 / 0.20);
-    --color-table-border: rgb(200 225 255 / 0.30);
-    --color-table-head-background: rgb(0 128 255 / 0.05);
-    --color-table-line-even-background: rgb(255 245 178 / 0.05);
-    --color-table-line-even-hover-background: rgb(255 245 178 / 0.20);
-    --color-table-line-odd-background: rgb(172 179 172 / 0.05);
-    --color-table-line-odd-hover-background: rgb(172 179 172 / 0.20);
+
+    --color-generic-table-border: rgb(200 225 255 / 0.30);
+    --color-generic-table-head-background: rgb(0 128 255 / 0.05);
+    --color-generic-table-line-even-background: rgb(255 245 178 / 0.05);
+    --color-generic-table-line-even-hover-background: rgb(255 245 178 / 0.20);
+    --color-generic-table-line-odd-background: rgb(172 179 172 / 0.05);
+    --color-generic-table-line-odd-hover-background: rgb(172 179 172 / 0.20);
+
+    --color-parameter-table-border: rgb(200 225 255 / 0.30);
+    --color-parameter-table-head-background: rgb(191 158 255 / 0.12);
+    --color-parameter-table-line-even-background: inherit;
+    --color-parameter-table-line-even-hover-background: rgb(178 185 255 / 0.08);
+    --color-parameter-table-line-odd-background: var(--color-parameter-table-line-even-background);
+    --color-parameter-table-line-odd-hover-background: var(--color-parameter-table-line-even-hover-background);
+
     --color-code-block-background: rgb(246 248 250 / 0.10);
     --color-scrollbar-track: rgb(87 96 96 / 0.50);
     --color-scrollbar-thumb: rgb(26 29 29 / 0.75);
@@ -62,7 +73,7 @@
     --color-python-format-string-postfix: rgb(255 152 44);
     --color-python-comment: rgb(155 185 243);
 
-        }
+}
 
 [variable-theme="black"] {
     --color-body-background: rgb(0 0 0);
@@ -70,16 +81,17 @@
     --color-search-entry-border-focus: rgb(213 192 230 / 0.6);
     --color-content-table-search-background: rgb(91 101 101 / 0.50);
     --color-search-entry-border: rgb(127 127 127 / 0.4);
-    --color-table-head-background: rgb(0 128 255 / 0.15);
-    --color-table-line-even-background: rgb(255 245 178 / 0.15);
-    --color-table-line-even-hover-background: rgb(255 245 178 / 0.30);
-    --color-table-line-odd-background: rgb(172 179 172 / 0.15);
-    --color-table-line-odd-hover-background: rgb(172 179 172 / 0.30);
+    --color-generic-table-head-background: rgb(0 128 255 / 0.15);
+    --color-generic-table-line-even-background: rgb(255 245 178 / 0.15);
+    --color-generic-table-line-even-hover-background: rgb(255 245 178 / 0.30);
+    --color-generic-table-line-odd-background: rgb(172 179 172 / 0.15);
+    --color-generic-table-line-odd-hover-background: rgb(172 179 172 / 0.30);
+
     --color-scrollbar-thumb: rgb(91 103 103 / 0.75);
     --color-block-quote-background: rgb(80 152 167 / 0.10);
     --color-block-quote-border: rgb(80 152 167 / 0.50);
     --color-header-background: rgb(127 127 127 / 0.20);
-        }
+}
 
 [variable-theme="white"] {
     --color-body-font: rgb(0 0 0);
@@ -109,7 +121,7 @@
     --color-python-keyword: rgb(230 0 0);
     --color-block-quote-background: rgb(80 86 167 / 0.10);
     --color-block-quote-border: rgb(80 86 167 / 0.50);
-        }
+}
 
 
 body {
@@ -119,7 +131,10 @@ body {
     padding: 0;
     background-color: var(--color-body-background);
     color: var(--color-body-font);
-        }
+    font-family:
+        system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji';
+}
 
 p {
     padding-top: 0.75em;
@@ -130,7 +145,7 @@ p {
     margin-bottom: 0.75em;
     margin-left: 0px;
     margin-right: 0px;
-        }
+}
 
 h1 {
     margin-top: 0px;
@@ -138,32 +153,32 @@ h1 {
     margin-left: -0.8em;
     margin-right: 0px;
     padding-left: 0.8em;
-    font-size : 2em;
-        }
+    font-size : calc(var(--font-size) * 2.00);
+}
 
 h2 {
-    font-size : 1.70em;
-        }
+    font-size : calc(var(--font-size) * 1.70);
+}
 
 h3 {
-    font-size: 1.61em;
-        }
+    font-size: calc(var(--font-size) * 1.61);
+}
 
 h4 {
-    font-size: 1.37em;
-        }
+    font-size: calc(var(--font-size) * 1.37);
+}
 
 h5 {
-    font-size: 1.30em
-        }
+    font-size: calc(var(--font-size) * 1.30);
+}
 
 h6 {
-    font-size: 1.11em;
-        }
+    font-size: calc(var(--font-size) * 1.11);
+}
 
 h7 {
-    font-size: 1.05em;
-        }
+    font-size: calc(var(--font-size) * 1.05);
+}
 
 h2, h3, h4, h5, h6, h7 {
     margin-top: 0.5em;
@@ -171,66 +186,66 @@ h2, h3, h4, h5, h6, h7 {
     margin-left: -0.8em;
     margin-right: 0px;
     padding-left: 0.8em;
-        }
+}
 
 h2, h4, h6 {
-    font-weight: lighter;
-        }
+    font-weight: normal;
+}
 
 h1 .anchor, h2 .anchor, h3 .anchor, h4 .anchor, h5 .anchor, h6 .anchor, h7 .anchor, h7 .anchor, .with_anchor .anchor {
     cursor: pointer;
     position: sticky;
-        }
+}
 
 h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
 h7:hover .anchor, .with_anchor:hover .anchor {
     visibility: visible;
-        }
+}
 
 h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
 h7:hover .anchor, .with_anchor:hover .anchor {
     visibility: visible;
-        }
+}
 
 svg {
     z-index: -1;
-        }
+}
 
 h1 .anchor svg, h2 .anchor svg, h3 .anchor svg, h4 .anchor svg, h5 .anchor svg, h6 .anchor svg,
 h7 .anchor svg, .with_anchor .anchor svg{
     margin-top: 0.07em;
     cursor: pointer;
-        }
+}
 
 ul {
     margin: 0px;
     padding-left: 28px;
-        }
+}
 
 li {
     margin: 6px;
-        }
+}
 
 a {
     text-decoration: none;
     color : var(--color-link-font);
-        }
+}
 
 a svg {
     padding-top: 0.2em;
     padding-bottom: 0.15em;
     width: 0.65em;
     height: 0.65em;
-        }
+}
 
 a code {
     color: var(--color-code-link-font);
     transition: background-color 400ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
+}
 
 a code:hover {
     background-color: var(--color-code-link-hover-background);
-        }
+}
 
 code {
     padding: .2em .3em;
@@ -238,9 +253,9 @@ code {
     font-size: 85%;
     background-color: var(--color-code-background);
     border-radius: 6px;
-        }
+}
 
-table {
+.generic_table {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     margin-left: 0px;
@@ -249,52 +264,52 @@ table {
     border-collapse: collapse;
     width: max-content;
     max-width: 100%;
-        }
+}
 
-td, th {
+.generic_table td, .generic_table th {
     padding: 6px 13px;
     border-color: var(--color-underline);
     border-width: 1px;
     border-style: solid;
-        }
+}
 
-thead tr {
-    background-color: var(--color-table-head-background);
-        }
+.generic_table thead tr {
+    background-color: var(--color-generic-table-head-background);
+}
 
-tbody tr:nth-child(even) {
-    background-color: var(--color-table-line-even-background);
-        }
+.generic_table tbody tr:nth-child(even) {
+    background-color: var(--color-generic-table-line-even-background);
+}
 
-tbody tr:nth-child(even):hover {
-    background-color: var(--color-table-line-even-hover-background);
-        }
+.generic_table tbody tr:nth-child(even):hover {
+    background-color: var(--color-generic-table-line-even-hover-background);
+}
 
-tbody tr:nth-child(odd) {
-    background-color: var(--color-table-line-odd-background);
-        }
+.generic_table tbody tr:nth-child(odd) {
+    background-color: var(--color-generic-table-line-odd-background);
+}
 
-tbody tr:nth-child(odd):hover {
-    background-color: var(--color-table-line-odd-hover-background);
-        }
+.generic_table tbody tr:nth-child(odd):hover {
+    background-color: var(--color-generic-table-line-odd-hover-background);
+}
 
 form {
     padding: 0;
     margin: 0;
-        }
+}
 
 i {
     font-style: normal;
-        }
+}
 
 pre {
     padding: 16px;
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
-    background-color: var(--color-table-line-odd-hover-background);
+    background-color: var(--color-generic-table-line-odd-hover-background);
     border-radius: 6px;
-        }
+}
 
 blockquote {
     margin: 0;
@@ -302,12 +317,12 @@ blockquote {
     width: max-content;
     max-width: 100%;
     min-width: calc(35% + 200px);
-        }
+}
 
 ::-webkit-scrollbar {
     width: calc(0.3em + 4px);
     height: calc(0.3em + 4px);
-        }
+}
 
 ::-webkit-scrollbar-track{
     margin-top: 0px;
@@ -315,39 +330,39 @@ blockquote {
     margin-left: 0px;
     margin-right: 0px;
     background-color: var(--color-scrollbar-track);
-        }
+}
 
 ::-webkit-scrollbar-thumb{
     border-radius: 8px;
     background-color: var(--color-scrollbar-thumb);
-        }
+}
 
 ::-webkit-scrollbar-corner{
     background-color: var(--color-scrollbar-track);
-        }
+}
 
 .sub_section {
     padding-left: 24px;
-        }
+}
 
 .unit_section, .sub_unit {
     padding-left: 12px;
-        }
+}
 
 .sub_section p:first-child, .unit_section p:first-child {
     padding-top: 0px;
     margin-top: 0.2em;
-        }
+}
 
 .main_block {
     padding-top: 0px;
     padding-bottom : 0px;
     padding-left: 0px;
     padding-right: 0px;
-    font-size: 16px;
+    font-size: var(--font-size);
     margin-top: 0px;
     margin-bottom: 0px;
-        }
+}
 
 @media screen and (max-width: 600px) {
     .main_block {
@@ -355,8 +370,8 @@ blockquote {
         margin-right: var(--size-max600-space-right);
         width: var(--size-max600-width);
         min-width: var(--size-max600-min-width);
-            }
-        }
+    }
+}
 
 @media screen and (min-width: 601px) {
     .main_block {
@@ -364,29 +379,29 @@ blockquote {
         margin-right: var(--size-min601-space-right);
         width: var(--size-min601-width);
         min-width: var(--size-min601-min-width);
-            }
-        }
+    }
+}
 
 .search_result_block {
     padding-top: 40px;
     padding-right: 32px;
     padding-bottom: 0px;
     padding-left: 32px;
-        }
+}
 
 .content_block {
     padding-top: 40px;
     padding-right: 0px;
     padding-bottom: 0px;
     padding-left: 0px;
-        }
+}
 
 .underline{
     padding-bottom: 0.3em;
     border-bottom-width: 1px;
     border-bottom-style: solid;
     border-bottom-color: var(--color-underline);
-        }
+}
 
 .anchor {
     float: left;
@@ -396,21 +411,21 @@ blockquote {
     fill: var(--color-anchor);
     vertical-align: middle;
     visibility: hidden;
-        }
+}
 
 .with_anchor {
     margin-left: -0.8em;
     margin-right: 0px;
     padding-left: 0.8em;
-        }
+}
 
 .unit_listing .listing_linker:hover .listing_name {
     text-decoration: underline;
-        }
+}
 
 .unit_listing .listing_linker .listing_comment {
     color: var(--color-listing-comment-font);
-        }
+}
 
 .unit_listing .listing_linker .listing_preview {
     display: none;
@@ -426,18 +441,18 @@ blockquote {
     padding-right: 4px;
     border-radius: 6px;
     z-index: 1;
-    font-size: 14px;
+    font-size: calc(var(--font-size) * 0.85);
     margin-left: 40px;
     margin-top: 5px;
-        }
+}
 
 .unit_listing .listing_linker {
      position: relative;
-        }
+}
 
 .unit_listing .listing_linker:hover .listing_preview {
     display: block;
-        }
+}
 
 .header {
     position: fixed;
@@ -446,7 +461,7 @@ blockquote {
     display: block;
     padding-top: 8px;
     padding-bottom: 8px;
-        }
+}
 
 @media screen and (max-width: 600px) {
     .header {
@@ -454,8 +469,8 @@ blockquote {
         padding-right: var(--size-max600-space-right);
         width: var(--size-max600-width);
         min-width: var(--size-max600-min-width);
-            }
-        }
+    }
+}
 
 @media screen and (min-width: 601px) {
     .header {
@@ -463,35 +478,35 @@ blockquote {
         padding-right: var(--size-min601-space-right);
         width: var(--size-min601-width);
         min-width: var(--size-min601-min-width);
-            }
-        }
+    }
+}
 
 .header_block_left {
     float: left!important;
     width: calc(100% - 400px);
     overflow: hidden;
     max-width: fit-content;
-        }
+}
 
 .header_block_left .overflow_left_cut {
-    font-size: 20px;
+    font-size: calc(var(--font-size) * 1.25);
     line-height: 24px;
     color: var(--color-header-path-font);
     float: right;
     width: max-content;
-        }
+}
 
 .header_block_left .overflow_left_cut a {
     color: var(--color-header-path-font);
-        }
+}
 
 .header_block_left .overflow_left_cut a:hover {
     text-decoration: underline;
-        }
+}
 
 .header_block_right {
     float: right !important;
-        }
+}
 
 .header_search {
     max-height: 24px;
@@ -499,13 +514,13 @@ blockquote {
     display: flex;
     flex-direction: row;
     float: left;
-        }
+}
 
 .header_search .entry {
     background-color: var(--color-search-entry-border);
     height: 20px;
     padding: 2px;
-        }
+}
 
 .header_search .entry input {
     border: none;
@@ -518,24 +533,24 @@ blockquote {
     padding-bottom: 0px;
     padding-left: 3px;
     padding-right: 2px;
-        }
+}
 
 .header_search .submit input {
     height: 24px;
     line-height: 20px;
-    font-size: 14px;
+    font-size: calc(var(--font-size) * 0.85);
     border: none;
     background-color: var(--color-search-entry-border);
     color: var(--color-search-entry-submit-font);
     width: 60px;
     outline-offset: -2px;
-        }
+}
 
 .header_search .entry input:focus, .header_search .submit input:focus {
     outline-color: var(--color-search-entry-border-focus);
     outline-style: solid;
     outline-width: 2px;
-        }
+}
 
 .header_theme_picker {
     height: 24px;
@@ -545,19 +560,19 @@ blockquote {
     line-height: 24px;
     width: 80px;
     text-align: center;
-        }
+}
 
 .header_theme_picker summary {
     cursor: pointer;
-        }
+}
 
 .header_theme_picker summary:focus {
     outline-style: none;
-        }
+}
 
 .header_theme_picker summary::-webkit-details-marker {
     display: none;
-        }
+}
 
 .header_theme_list_box {
     width: 80px;
@@ -575,16 +590,16 @@ blockquote {
     border-bottom-width: 1px;
     border-right-width: 1px;
     border-left-width: 1px;
-        }
+}
 
 .header_theme_list_spacer {
     height: 8px;
     width: inherit;
-        }
+}
 
 .header_theme_list {
     background-color: var(--color-header-background);
-        }
+}
 
 .header_theme_list_element {
     width: inherit;
@@ -593,7 +608,7 @@ blockquote {
     cursor: pointer;
     padding-top: 2px;
     padding-bottom: 2px;
-        }
+}
 
 .header_theme_list_element:hover {
     border-style: solid;
@@ -604,7 +619,7 @@ blockquote {
     padding-top: 1px;
     padding-bottom: 1px;
     width: calc(inherit - 2px);
-        }
+}
 
 .content_table {}
 
@@ -615,7 +630,7 @@ blockquote {
     margin-inline-start: 0;
     margin-inline-end: 0;
     padding-inline-start: 1em;
-        }
+}
 
 .content_table .content_listing svg {
     padding-top: 0.175em;
@@ -623,11 +638,11 @@ blockquote {
     height: 0.65em;
     margin-left: -1em;
     fill: var(--color-content-table-svg);
-        }
+}
 
 .content_table .content_listing a:hover {
     text-decoration: underline;
-        }
+}
 
 .content_table .content_listing {}
 
@@ -643,7 +658,7 @@ blockquote {
     margin-right: 3px;
     margin-bottom: 3px;
     margin-top: 5px;
-        }
+}
 
 .content_table .content_search input {
     height: 24px;
@@ -656,7 +671,7 @@ blockquote {
     width: calc(100% - 24px);
     background-color: rgb(0 0 0 / 0.0);
     color: var(--color-content-table-search-input);
-        }
+}
 
 .content_table .content_search button {
     height: 24px;
@@ -671,7 +686,7 @@ blockquote {
     outline: none;
     float: right!important;
     cursor: pointer;
-        }
+}
 
 .content_table .content_search button svg {
     fill: var(--color-content-table-search-submit);
@@ -681,7 +696,7 @@ blockquote {
     padding: 0;
     position: absolute;
     margin-left: -12px;
-        }
+}
 
 .docs {}
 
@@ -698,7 +713,7 @@ blockquote {
     padding-right: 0.75em;
     padding-bottom: 0em;
     color: var(--color-block-quote-font);
-        }
+}
 
 .docs blockquote p,  .docs blockquote p:first-child{
     padding-top: 0.75em;
@@ -709,7 +724,7 @@ blockquote {
     margin-bottom: 0px;
     margin-left: 0px;
     margin-right: 0px;
-        }
+}
 
 @media screen and (max-width: 1100px) {
     .content_table {
@@ -719,17 +734,17 @@ blockquote {
         border-bottom-width: 1px;
         border-bottom-style: solid;
         border-bottom-color: var(--color-underline);
-            }
+    }
 
     .content_table .content_listing {
         min-height: 4px;
-            }
+    }
 
     .docs {
         margin-left: var(--docs-size-min-width-border);
         margin-right: var(--docs-size-min-width-border);
-            }
-        }
+    }
+}
 
 @media screen and (min-width: 1101px) {
     .content_table {
@@ -737,7 +752,7 @@ blockquote {
         position: fixed;
         max-height: calc(100vh - 40px);
         height: calc(100vh - 40px);
-            }
+    }
 
     .content_table .content_listing {
         border-right-width: 1px;
@@ -750,72 +765,157 @@ blockquote {
         overflow: overlay;
         height: calc(100vh - 80px);
         position: absolute;
-            }
+    }
 
     .docs {
         width: calc(100% - var(--content-table-size-min-width) - var(--docs-size-min-width-border) - 4px);
         float: right;
-            }
+    }
 
-        }
+}
 
 
 .c_py_operator {
     color: var(--color-python-operator);
-        }
+}
 
 .c_py_magic {
     color: var(--color-python-magic);
-        }
+}
 
 .c_py_numeric {
     color: var(--color-python-numeric);
-        }
+}
 
 .c_py_string {
     color: var(--color-python-string);
-        }
+}
 
 .c_py_keyword {
     color: var(--color-python-keyword);
-        }
+}
 
 .c_py_builtin {
     color: var(--color-python-builtin);
-        }
+}
 
 .c_py_builtin_exception {
     color: var(--color-python-builtin-exception);
-        }
+}
 
 .c_py_punctuation {
     color: var(--color-python-punctuation);
-        }
+}
 
 .c_py_operator_attribute {
     color: var(--color-python-operator-attribute);
-        }
+}
 
 .c_py_identifier_attribute {
     color: var(--color-python-identifier-attribute);
-        }
+}
 
 .c_py_identifier_console_prefix {
     color: var(--color-python-identifier-console-prefix);
-        }
+}
 
 .c_py_format_string_mark {
     color: var(--color-python-format-string-mark);
-        }
+}
 
 .c_py_comment {
     color: var(--color-python-comment);
-        }
+}
 
 .c_py_format_string_code {
     color: var(--color-python-format-string-code);
-        }
+}
 
 .c_py_format_string_postfix {
     color: var(--color-python-format-string-postfix);
-        }
+}
+
+
+.parameter_table {
+    width: 100%;
+    table-layout: auto;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    margin-left: 0px;
+    margin-right: 0px;
+    border-spacing: 0;
+    border-radius: var(--parameter-table-border-radius);
+}
+
+.parameter_table td, .parameter_table th {
+    padding: 6px 13px;
+    border-color: var(--color-underline);
+    border-width: 1px;
+    border-style: solid;
+}
+
+.parameter_table thead tr th {
+    background-color: var(--color-parameter-table-head-background);
+    text-transform: uppercase!important;
+    padding-top: 0.75em;
+    padding-bottom: 0.75em;
+    padding-left: 0px;
+    padding-right: 0px;
+    min-width: 8rem;
+}
+
+.parameter_table_name, .parameter_table_type, .parameter_table_optional, .parameter_table_keyword_only {
+    text-align: center;
+}
+
+.parameter_table_description {
+    text-align: left;
+}
+
+.parameter_table tbody tr:nth-child(even) {
+    background-color: var(--color-parameter-table-line-even-background);
+}
+
+.parameter_table tbody tr:nth-child(even):hover {
+    background-color: var(--color-parameter-table-line-even-hover-background);
+}
+
+.parameter_table tbody tr:nth-child(odd) {
+    background-color: var(--color-parameter-table-line-odd-background);
+}
+
+.parameter_table tbody tr:nth-child(odd):hover {
+    background-color: var(--color-parameter-table-line-odd-hover-background);
+}
+
+.parameter_table th:first-child {
+    border-radius: var(--parameter-table-border-radius) 0 0 0 !important;
+}
+
+.parameter_table th {
+    border-width: 1px 1px 1px 0;
+}
+
+.parameter_table th:first-child {
+    border-width: 1px 1px 1px 1px;
+}
+
+.parameter_table td {
+    border-width: 0px 1px 1px 0;
+}
+
+.parameter_table td:first-child {
+    border-width: 0px 1px 1px 1px;
+}
+
+.parameter_table th:last-child {
+    border-radius: 0 var(--parameter-table-border-radius) 0 0 !important;
+}
+
+.parameter_table tr:last-child td:first-child {
+    border-radius: 0 0 0 var(--parameter-table-border-radius) !important;
+}
+
+.parameter_table tr:last-child td:last-child {
+    border-radius: 0 0 var(--parameter-table-border-radius) 0 !important;
+}

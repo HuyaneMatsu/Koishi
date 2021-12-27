@@ -1,6 +1,6 @@
 function $(v){
     return document.getElementById(v);
-        }
+}
 
 var svg_none = '<path d="M 3 6 a 3 3 0 1 1 6 0 a 3 3 0 1 1 -6 0"></path>';
 var svg_open = '<path d="m 1 4 l 6 6 l 0 -2.8 L 3.8 4 M 13 4 l -6 6 l 0 -2.8 L 10.2 4"></path>';
@@ -33,14 +33,14 @@ class CTPart {
                 children.push(new_element);
 
                 index = index+1;
-                    }
+            }
             should_display_children = 1;
-                }
+        }
 
         this.children = children;
         this.should_display_children = should_display_children;
         elements[id_] = this;
-            }
+    }
 
     entry_updated(entry_content){
         var should_display;
@@ -48,7 +48,7 @@ class CTPart {
             should_display = 0;
         } else {
             should_display = 1;
-                }
+        }
 
         var children = this.children;
         var should_display_children = 0;
@@ -64,11 +64,11 @@ class CTPart {
                 if (child.entry_updated(entry_content)){
                     should_display_children = 1;
                     should_display = 1;
-                        }
+                }
 
                 index = index+1;
-                    }
-                }
+            }
+        }
 
 
         this.should_display = should_display;
@@ -76,7 +76,7 @@ class CTPart {
         this.update_display_state();
 
         return should_display;
-            }
+    }
 
     click(){
         var clicked;
@@ -84,11 +84,11 @@ class CTPart {
             clicked = 0;
         } else {
             clicked = 1;
-                }
+        }
 
         this.clicked = clicked;
         this.update_display_state();
-            }
+    }
 
     update_display_state(){
         var new_display;
@@ -103,20 +103,20 @@ class CTPart {
                     new_svg = svg_open;
                 } else {
                     new_svg = svg_none;
-                        }
+                }
             } else {
                 new_display_children = 'none';
                 if (this.should_display_children){
                     new_svg = svg_closed;
                 } else {
                     new_svg = svg_none;
-                        }
-                    }
+                }
+            }
         } else {
             new_display = 'none';
             new_svg = svg_none;
             new_display_children = 'none';
-                }
+        }
 
         var id_ = this.id;
         var html_element;
@@ -130,9 +130,9 @@ class CTPart {
 
             html_element = $(id_+'_s');
             html_element.innerHTML = new_svg;
-                }
-            }
         }
+    }
+}
 
 class CT {
     constructor(raw_structures){
@@ -151,18 +151,18 @@ class CT {
             structures.push(part);
 
             index = index+1;
-                }
-            }
+        }
+    }
 
     click(id_) {
         this.elements[id_].click();
-            }
+    }
 
     entry_update() {
         var entry_content = $('ct_input').value.toLowerCase();
         if (this.entry_content == entry_content) {
             return;
-                }
+        }
 
         this.entry_content = entry_content;
 
@@ -176,13 +176,11 @@ class CT {
             structure.entry_updated(entry_content);
 
             index = index+1;
-                }
-
-            }
+        }
+    }
 
     entry_clear() {
         $('ct_input').value = '';
         this.entry_update();
-            }
-        }
-
+    }
+}
