@@ -17,6 +17,7 @@
     --color-body-font: rgb(255 255 255);
     --color-body-background: rgb(54 57 63);
     --color-link-font: var(--color-body-font);
+    --color-function-parameter-font: rgb(213 213 213);
     --color-code-background: rgb(166 193 220 / 0.10);
     --color-code-link-font: rgb(227 255 197);
     --color-code-link-hover-background: rgb(195 181 255 / 0.20);
@@ -100,6 +101,7 @@
     --color-underline: rgb(0 0 0 / 0.30);
     --color-code-background: rgb(34 61 88 / 0.10);
     --color-code-link-font: rgb(58 112 0);
+    --color-function-parameter-font: rgb(42 42 42);
     --color-code-link-hover-background: rgb(195 181 255 / 0.30);
     --color-search-entry-input-background: rgb(0 0 0 / 0.1);
     --color-content-table-search-background: rgb(19 21 21 / 0.10);
@@ -216,6 +218,7 @@ h7 .anchor svg, .with_anchor .anchor svg{
     margin-top: 0.07em;
     cursor: pointer;
 }
+
 
 ul {
     margin: 0px;
@@ -918,4 +921,14 @@ blockquote {
 
 .parameter_table tr:last-child td:last-child {
     border-radius: 0 0 var(--parameter-table-border-radius) 0 !important;
+}
+
+.parameter_table blockquote {
+    width: initial;
+    min-width: initial;
+}
+
+.function_parameter {
+    font-size: 80%;
+    color: var(--color-function-parameter-font);
 }
