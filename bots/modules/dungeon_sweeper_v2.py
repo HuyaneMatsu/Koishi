@@ -1295,9 +1295,9 @@ class StageSource:
     
     Attributes
     ----------
-    after_stage_source : `None` or ``StageSource``
+    after_stage_source : `None`, ``StageSource``
         The next stage source.
-    before_stage_source : `None` or ``StageSource``
+    before_stage_source : `None`, ``StageSource``
         The before stage source.
     best : `int`
         The lowest amount of steps needed to solve the stage.
@@ -1326,7 +1326,7 @@ class StageSource:
     @classmethod
     def from_json(cls, data):
         """
-        Creates a new a ``StageSource`` instance from json data.
+        Creates a new a ``StageSource`` from json data.
         
         Parameters
         ----------
@@ -1832,7 +1832,7 @@ class StageResult:
     @classmethod
     def from_entry(cls, entry):
         """
-        Creates a new ``StageResult`` instance from the given entry.
+        Creates a new ``StageResult`` from the given entry.
         
         Parameters
         ----------
@@ -1863,7 +1863,7 @@ class UserState:
         The field identifier in the database.
     field_exists : `bool`
         Whether the field is stored in the database.
-    game_state : `None` or ``GameState``
+    game_state : `None`, ``GameState``
         The state of the actual game.
     selected_stage_id : `int`
         The selected stage's identifier.
@@ -1876,7 +1876,7 @@ class UserState:
     
     async def __new__(cls, user_id):
         """
-        Creates a new ``UserState`` instance based on he given `user_id`.
+        Creates a new ``UserState`` based on he given `user_id`.
         
         This method is a coroutine.
         
@@ -1950,7 +1950,7 @@ class UserState:
         
         Returns
         -------
-        game_state_data : `None` or `dict`
+        game_state_data : `None`, `dict`
         """
         game_state = self.game_state
         if (game_state is None) or (not game_state.history):
@@ -3566,7 +3566,7 @@ class DungeonSweeperRunner:
     
     Attributes
     ----------
-    _canceller : None` or `CoroutineFunction`
+    _canceller : None`, `CoroutineFunction`
         Canceller set as `._canceller_function``, meanwhile the gui is not cancelled.
     
     _gui_state : `int`
@@ -3605,7 +3605,7 @@ class DungeonSweeperRunner:
         | RUNNER_STATE_END_SCREEN       | 3     |
         +-------------------------------+-------+
     
-    _timeouter : `None` or ``Timeouter``
+    _timeouter : `None`, ``Timeouter``
         Timeouts the gui if no action is performed within the expected time.
     
     client : ``Client``
@@ -3872,12 +3872,12 @@ class DungeonSweeperRunner:
         
         Parameters
         ----------
-        exception : `None` or ``BaseException`` instance, Optional
+        exception : `None`, ``BaseException``, Optional
             Exception to cancel the pagination with. Defaults to `None`
         
         Returns
         -------
-        canceller_task : `None` or ``Task``
+        canceller_task : `None`, ``Task``
         """
         if self._gui_state in (GUI_STATE_READY, GUI_STATE_EDITING, GUI_STATE_CANCELLING):
             self._gui_state = GUI_STATE_CANCELLED
@@ -3936,7 +3936,7 @@ class DungeonSweeperRunner:
         
         Parameters
         ----------
-        exception : `None` or `BaseException`
+        exception : `None`, `BaseException`
             The close exception to handle.
         
         Returns

@@ -739,7 +739,7 @@ async def guild_delete(client, guild,):
         f'{API_ENDPOINT}/guilds/{guild_id}',
         )
 
-async def guild_edit(client,guild, afk_channel=...): #keep it short
+async def guild_edit(client, guild, afk_channel=...): #keep it short
     data = {}
     
     if (afk_channel is not ...):
@@ -750,33 +750,33 @@ async def guild_edit(client,guild, afk_channel=...): #keep it short
         f'{API_ENDPOINT}/guilds/{guild_id}',
         data,)
 
-async def audit_log_get_chunk(client,guild,):
+async def audit_log_get_chunk(client, guild,):
     data={'limit':100}
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/audit-logs',
         params=data,)
 
-async def guild_ban_get_all(client,guild,):
+async def guild_ban_get_all(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans',
         )
 
-async def guild_ban_add(client,guild,user_id,):
+async def guild_ban_add(client, guild,user_id,):
     data={'delete_message_days':0}
     guild_id=guild.id
     return await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         params=data,)
 
-async def guild_ban_delete(client,guild,user_id,):
+async def guild_ban_delete(client, guild,user_id,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         )
 
-async def guild_ban_get(client,guild,user_id,):
+async def guild_ban_get(client, guild,user_id,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
@@ -1163,7 +1163,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',data,
         )
 
-async def channel_create(client,guild, name, category=None, type_=0):
+async def channel_create(client, guild, name, category=None, type_=0):
     data=cr_pg_channel_object(type_=type_,name=name)
     data['parent_id']=category.id if type(category) is ChannelCategory else None
     guild_id=guild.id
@@ -1172,7 +1172,7 @@ async def channel_create(client,guild, name, category=None, type_=0):
         data,)
     return CHANNEL_TYPE_MAP.get(data['type'], ChannelGuildUndefined)(data, client, guild_id)
 
-async def emoji_guild_get_all(client,guild,):
+async def emoji_guild_get_all(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis',
@@ -1222,13 +1222,13 @@ async def emoji_edit(client,emoji,name,): #keep it short
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis/{emoji_id}',
         data,)
 
-async def integration_get_all(client,guild,):
+async def integration_get_all(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/integrations',
         )
 
-async def invite_get_all_guild(client,guild,):
+async def invite_get_all_guild(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/invites',
@@ -1241,14 +1241,14 @@ async def guild_user_delete(client, guild, user,):
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
         )
 
-async def user_edit(client,guild,user,nick,mute=False,):
+async def user_edit(client, guild,user,nick,mute=False,):
     guild_id=guild.id
     user_id=user.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
         data={'nick':nick,'mute':mute},)
 
-async def guild_user_add(client,guild,user,):
+async def guild_user_add(client, guild,user,):
     guild_id=guild.id
     user_id=user.id
     return await bypass_request(client,METHOD_PUT,
@@ -1271,19 +1271,19 @@ async def user_role_delete(client,user,role,):
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
         )
 
-async def guild_prune(client,guild,):
+async def guild_prune(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
         params={'days':30},)
 
-async def guild_prune_estimate(client,guild,):
+async def guild_prune_estimate(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
         params={'days':30},)
 
-async def role_create(client,guild,name=None,permissions=None,color=None,
+async def role_create(client, guild,name=None,permissions=None,color=None,
         separated=None,mentionable=None,reason=None,):
 
     data={}
@@ -1346,13 +1346,13 @@ async def role_delete(client,role,):
         )
 
 
-async def webhook_get_all_guild(client,guild,):
+async def webhook_get_all_guild(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/webhooks',
         )
 
-async def guild_widget_image(client,guild,):
+async def guild_widget_image(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/widget.png',
@@ -1474,31 +1474,31 @@ async def webhook_message_get(client, webhook, message_id):
         f'{webhook.url}/messages/{message_id}',
         headers={},)
 
-async def guild_user_get_chunk(client,guild,):
+async def guild_user_get_chunk(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members',
         )
 
-async def guild_voice_region_get_all(client,guild,):
+async def guild_voice_region_get_all(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/regions',
         )
 
-async def guild_channels(client,guild,):
+async def guild_channels(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         )
 
-async def guild_role_get_all(client,guild,):
+async def guild_role_get_all(client, guild,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
         )
 
-async def guild_user_get(client,guild,user_id,):
+async def guild_user_get(client, guild,user_id,):
     guild_id=guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
@@ -1520,7 +1520,7 @@ async def guild_user_search(client, guild, query, limit=1):
         f'{API_ENDPOINT}/guilds/{guild_id}/members/search', params = data,
             )
 
-async def guild_widget_get(client,guild_id,):
+async def guild_widget_get(client, guild_id,):
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/widget.json',
         headers={},)

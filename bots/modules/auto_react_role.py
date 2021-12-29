@@ -202,12 +202,12 @@ def render_message_content(message):
 AUTO_REACT_ROLE_GUI_EMBED_FIELD_NAME = 'HOW TO'
 AUTO_REACT_ROLE_GUI_EMBED_FIELD_VALUE = (
     'Type `add <emoji> <role>` to add a new emoji-role pair to add a new connection\n'
-    'Type `del <emoji>` or `del <role>` to remove a connection.\n'
+    'Type `del <emoji>` / `del <role>` to remove a connection.\n'
     'Type `behaviour enable/disable delete role/emoji` to enable or disable deleting the emoji if the role is removed, '
     'or deleting the role if the emoji is removed.\n'
     'Type `apply` to save or `cancel` to not.\n'
     'Type `destroy` to destroy the auto react role instance, if exists.'
-        )
+)
 
 SUB_COMMAND_RP = re.compile('(add|del|behaviour|apply|cancel|destroy)(?:[ \t]+(.+))?', re.I)
 SUB_BEHAVIOUR_RP = re.compile('(?:(enable|disable)[ \t]+)?delete[ \t]+(role|emoji)', re.I)

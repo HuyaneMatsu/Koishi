@@ -320,12 +320,12 @@ class Item:
         
         Defaults to `None`.
     
-    cooking : `None` or ``CookingFactor``
+    cooking : `None`, ``CookingFactor``
         Cooking factor of the item, if has any.
         
         Defaults to `None`.
     
-    edibility : `None` or ``EdibilityFactor``
+    edibility : `None`, ``EdibilityFactor``
         Edibility factor of the item.
     emoji : ``Emoji``
         Emoji representing the item.
@@ -350,12 +350,12 @@ class Item:
             The name of the item.
         emoji : ``Emoji``
             The emoji representation of the item.
-        cooking : `None` or ``CookingFactor``, Optional (Keyword only)
+        cooking : `None`, ``CookingFactor``, Optional (Keyword only)
             Cooking factor of the item, if has any.
             
             Defaults to `None`.
         
-        edibility : `None` or ``EdibilityFactor``, Optional (Keyword only)
+        edibility : `None`, ``EdibilityFactor``, Optional (Keyword only)
             Edibility factor of the item.
             
             Defaults to `None`.

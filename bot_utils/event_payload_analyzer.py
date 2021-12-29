@@ -606,14 +606,14 @@ def collect_guessers_recursively(collected_guessers, guessers):
     
     Parameters
     ----------
-    collected_guessers : `None` or `set` of ``Guesser``
+    collected_guessers : `None`, `set` of ``Guesser``
         The already collected guessers.
-    guessers : `None` or `iterable` of ``Guesser``
+    guessers : `None`, `iterable` of ``Guesser``
         The guessers to collect from.
     
     Returns
     -------
-    collected_guessers : `None` or `set` of ``Guesser``
+    collected_guessers : `None`, `set` of ``Guesser``
         The collected guessers.
     """
     if (guessers is not None):
@@ -648,7 +648,7 @@ class Guesser(RichAttributeErrorBaseType):
         Whether values should be rendered when the field is displayed.
     sub_node_type : `type`
         Node type for if applicable.
-    parents : `None` or `set` of ``Guesser``
+    parents : `None`, `set` of ``Guesser``
         Parent guessers.
     """
     __slots__ = ('collect_values', 'guess_max_chance', 'guesser_function', 'name', 'parents', 'render_all_values',
@@ -673,7 +673,7 @@ class Guesser(RichAttributeErrorBaseType):
             Whether values should be collected or nah.
         render_all_values : `bool`
             Whether values should be rendered when the field is displayed.
-        parents : `None` or `iterable` of ``Guesser``
+        parents : `None`, `iterable` of ``Guesser``
             Parent guessers.
         """
         parents = collect_guessers_recursively(None, parents)
@@ -1224,7 +1224,7 @@ class GuesserStateNode(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        best_guess_state_node : `None` or ``GuesserStateNode``
+        best_guess_state_node : `None`, ``GuesserStateNode``
             The guesser which scored the highest chance.
         best_chance : `float`
             The scored chance without the applied multiplier.
@@ -1268,7 +1268,7 @@ class ReceivedValueSorter(RichAttributeErrorBaseType):
     
     def __new__(cls, value):
         """
-        Creates a new ``ReceivedValueSorter`` instance with the given `value`.
+        Creates a new ``ReceivedValueSorter`` with the given `value`.
         
         Parameters
         ----------
@@ -1345,7 +1345,7 @@ class GuesserState(RichAttributeErrorBaseType):
         The node state's name.
     received_count : `int`
         The total amount of received values passed to this node.
-    received_values : `None` or `dict` of (`object`, `Any`) items
+    received_values : `None`, `dict` of (`object`, `Any`) items
         The already received values.
     """
     __slots__ = ('guessers', 'name', 'received_count', 'received_values')
@@ -1434,7 +1434,7 @@ class GuesserState(RichAttributeErrorBaseType):
         
         Returns
         -------
-        best_guess_state_node : `None` or ``GuesserStateNode``
+        best_guess_state_node : `None`, ``GuesserStateNode``
             The guesser which scored the highest chance.
         best_chance : `float`
             The scored chance without the applied multiplier.
@@ -1467,7 +1467,7 @@ class GuesserState(RichAttributeErrorBaseType):
         
         Returns
         -------
-        items : `None` or `list` of `object`
+        items : `None`, `list` of `object`
         """
         received_values = self.received_values
         
@@ -1485,7 +1485,7 @@ class GuesserState(RichAttributeErrorBaseType):
         
         Returns
         -------
-        items : `None` or `list` of `object`
+        items : `None`, `list` of `object`
         """
         received_values = self.received_values
         
@@ -1589,7 +1589,7 @@ class GuesserState(RichAttributeErrorBaseType):
             The list to render the string parts to.
         indent : `int`
             The indention level of the field.
-        best_guesser : `None` or ``GuesserStateNode``
+        best_guesser : `None`, ``GuesserStateNode``
             The node matching the represented values the most.
         """
         if (best_guesser is None):
