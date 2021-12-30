@@ -156,6 +156,7 @@ class NewWaifu:
             else:
                 embed = Embed(source_embed.title, ERROR_MESSAGE_NO_WAIFU, url=source_embed.description)
                 embed.image = source_embed.image
+                embed.add_footer(PROVIDER_FOOTER)
         
         else:
             embed = Embed('link', url=url).add_image(url).add_footer(PROVIDER_FOOTER)
