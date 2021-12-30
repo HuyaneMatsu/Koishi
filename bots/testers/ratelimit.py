@@ -2801,7 +2801,7 @@ async def rate_limit_test_0012(client,message):
             'Please authorize yourself and resend the redirected url after it\n'
             'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
             '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
-            '&response_type=code & scope=identify%20applications.store.update'))
+            '&response_type=code&scope=identify%20applications.store.update'))
         
         try:
             message = await wait_for_message(client,channel,check_is_owner(client),60.)

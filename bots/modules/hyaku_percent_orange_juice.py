@@ -3022,7 +3022,7 @@ CHARACTER_CUTIES = OJCharacter(46,
     'Can only choose Stars norma. Gain X additional stars from all sources, where X is the number of different Event '
     'cards you played. In battle, randomly gain +1 ATK or DEF.',
     (CARD_SPECIAL_STAGE,),
-    'Sora_ & _Sham_(Cuties)_(unit).png',
+    'Sora_&_Sham_(Cuties)_(unit).png',
 )
 
 CHARACTER_YUUKI = OJCharacter(47,
@@ -3446,7 +3446,7 @@ RELATIONS = {
     'Arthur_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901551697829167124/Arthur_unit.png',
     'Iru_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901553480664244284/Iru_unit.png',
     'Mira_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029461816901642/Mira_unit.png',
-    'Sora_ & _Sham_(Cuties)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029465910550548/Sora__Sham_Cuties_unit.png',
+    'Sora_&_Sham_(Cuties)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029465910550548/Sora__Sham_Cuties_unit.png',
     'Yuuki_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029471962935296/Yuuki_unit.png',
     'Islay_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029475251265536/Islay_unit.png',
     'Suguri_(46_Billion_Years)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901552830823952454/Suguri_46_Billion_Years_unit.png',
@@ -3650,7 +3650,7 @@ RELATIONS = {
     'Lifeguard_on_the_White_Beach_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031205011587133/Lifeguard_on_the_White_Beach_Original.png',
     'Guardian_of_Blooming_Flowers_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031209134604358/Guardian_of_Blooming_Flowers_Original.png',
     'Unforgiving_Avenger_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031212880101386/Unforgiving_Avenger_Original.png',
-    'Red_ & _Blue.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031216961163324/Red__Blue.png',
+    'Red_&_Blue.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031216961163324/Red__Blue.png',
     'Blue_Mushroom_(Boost).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031220035608586/Blue_Mushroom_Boost.png',
     'Deceptive_Disarming.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031227753103380/Deceptive_Disarming.png',
     'Overtime.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031231188250634/Overtime.png',
