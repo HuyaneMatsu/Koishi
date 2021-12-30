@@ -118,7 +118,7 @@ class ChannelNameDescriber:
     def chance(self):
         chance = self._chance
         if chance is None:
-            self._chance = chance = (1.0 + (time_now()-self.last_present)*DAY_CHANCE_MULTIPLIER) * self.weight
+            self._chance = chance = (1.0 + (time_now() - self.last_present) * DAY_CHANCE_MULTIPLIER) * self.weight
         
         return chance
     
@@ -152,7 +152,7 @@ async def get_random_names(count):
             total_chance += describer.chance
         
         for _ in range(count):
-            position = total_chance*random()
+            position = total_chance * random()
             
             # Add some extra for security issues. If the first name was selected and `random()` returns `0.0`, then
             # the same name could be selected twice.
@@ -231,7 +231,7 @@ COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks=[checks
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(
-        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp()-time_now()+DAY, cycle_rename)
+        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp() - time_now() + DAY, cycle_rename)
 
 def teardown(lib):
     value = NAME_CYCLER_HANDLER.value

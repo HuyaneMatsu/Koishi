@@ -194,29 +194,29 @@ BIT_MASK_WALL_W      = 0b1000000000000000
 # BIT_MASK_WALL_SE     = 0b0110000000000000
 # BIT_MASK_WALL_SW     = 0b1100000000000000
 
-BIT_MASK_UNPUSHABLE  = BIT_MASK_WALL|BIT_MASK_SPECIAL
-BIT_MASK_BLOCKS_LOS  = BIT_MASK_WALL|BIT_MASK_PUSHABLE|BIT_MASK_OBJECT_U
+BIT_MASK_UNPUSHABLE  = BIT_MASK_WALL | BIT_MASK_SPECIAL
+BIT_MASK_BLOCKS_LOS  = BIT_MASK_WALL | BIT_MASK_PUSHABLE | BIT_MASK_OBJECT_U
 
 STYLE_DEFAULT_PARTS = {
     BIT_MASK_NOTHING                    : EMOJI_NOTHING.as_emoji,
     BIT_MASK_WALL_E                     : Emoji.precreate(568838488464687169, name='0P').as_emoji,
     BIT_MASK_WALL_S                     : Emoji.precreate(568838546853462035, name='0N').as_emoji,
     BIT_MASK_WALL_W                     : Emoji.precreate(568838580278132746, name='0K').as_emoji,
-    BIT_MASK_WALL_N|BIT_MASK_WALL_E|BIT_MASK_WALL_S|BIT_MASK_WALL_W:
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W:
                                           Emoji.precreate(578678249518006272, name='0X').as_emoji,
-    BIT_MASK_WALL_E|BIT_MASK_WALL_S     : Emoji.precreate(568838557318250499, name='0M').as_emoji,
-    BIT_MASK_WALL_S|BIT_MASK_WALL_W     : Emoji.precreate(568838569087598627, name='0L').as_emoji,
-    BIT_MASK_WALL_N|BIT_MASK_WALL_E     : Emoji.precreate(574312331849498624, name='01').as_emoji,
-    BIT_MASK_WALL_N|BIT_MASK_WALL_W     : Emoji.precreate(574312332453216256, name='00').as_emoji,
-    BIT_MASK_WALL_N|BIT_MASK_WALL_E|BIT_MASK_WALL_S:
+    BIT_MASK_WALL_E | BIT_MASK_WALL_S     : Emoji.precreate(568838557318250499, name='0M').as_emoji,
+    BIT_MASK_WALL_S | BIT_MASK_WALL_W     : Emoji.precreate(568838569087598627, name='0L').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E     : Emoji.precreate(574312331849498624, name='01').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_W     : Emoji.precreate(574312332453216256, name='00').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S:
                                           Emoji.precreate(578648597621506048, name='0R').as_emoji,
-    BIT_MASK_WALL_N|BIT_MASK_WALL_S|BIT_MASK_WALL_W:
+    BIT_MASK_WALL_N | BIT_MASK_WALL_S | BIT_MASK_WALL_W:
                                           Emoji.precreate(578648597546139652, name='0S').as_emoji,
-    BIT_MASK_WALL_N|BIT_MASK_WALL_S     : Emoji.precreate(578654051848421406, name='0T').as_emoji,
-    BIT_MASK_WALL_E|BIT_MASK_WALL_W     : Emoji.precreate(578674409968238613, name='0U').as_emoji,
-    BIT_MASK_WALL_N|BIT_MASK_WALL_E|BIT_MASK_WALL_W:
+    BIT_MASK_WALL_N | BIT_MASK_WALL_S     : Emoji.precreate(578654051848421406, name='0T').as_emoji,
+    BIT_MASK_WALL_E | BIT_MASK_WALL_W     : Emoji.precreate(578674409968238613, name='0U').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_W:
                                           Emoji.precreate(578676096829227027, name='0V').as_emoji,
-    BIT_MASK_WALL_E|BIT_MASK_WALL_S|BIT_MASK_WALL_W:
+    BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W:
                                           Emoji.precreate(578676650389274646, name='0W').as_emoji,
 }
 
@@ -232,22 +232,22 @@ STYLE_REIMU = {**STYLE_DEFAULT_PARTS,
     BIT_MASK_BOX_OBJECT                 : EMOJI_NOTHING.as_emoji,
     BIT_MASK_HOLE_U                     : Emoji.precreate(574187906642477066, name='0J').as_emoji,
     BIT_MASK_OBJECT_U                   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_FLOOR      : Emoji.precreate(574214258871500800, name='0D').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_FLOOR      : Emoji.precreate(574213472347226114, name='0E').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_FLOOR      : Emoji.precreate(574220751662612502, name='0B').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_FLOOR      : Emoji.precreate(574218036156825629, name='0C').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_TARGET     : Emoji.precreate(574249292496371732, name='04').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_TARGET     : Emoji.precreate(574249292026478595, name='07').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_TARGET     : Emoji.precreate(574249292261490690, name='06').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_TARGET     : Emoji.precreate(574249292487720970, name='05').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_HOLE_P     : Emoji.precreate(574249293662388264, name='02').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_HOLE_P     : Emoji.precreate(574249291074240523, name='09').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_HOLE_P     : Emoji.precreate(574249291145543681, name='08').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_HOLE_P     : Emoji.precreate(574249292957614090, name='03').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(574214258871500800, name='0D').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(574213472347226114, name='0E').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(574220751662612502, name='0B').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(574218036156825629, name='0C').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(574249292496371732, name='04').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(574249292026478595, name='07').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(574249292261490690, name='06').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(574249292487720970, name='05').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(574249293662388264, name='02').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(574249291074240523, name='09').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(574249291145543681, name='08').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(574249292957614090, name='03').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
 }
 
 STYLE_FLAN = {**STYLE_DEFAULT_PARTS,
@@ -262,22 +262,22 @@ STYLE_FLAN = {**STYLE_DEFAULT_PARTS,
     BIT_MASK_BOX_OBJECT                 : Emoji.precreate(580151963937931277, name='0a').as_emoji,
     BIT_MASK_HOLE_U                     : Emoji.precreate(580156463888990218, name='0c').as_emoji,
     BIT_MASK_OBJECT_U                   : Emoji.precreate(580151385258065925, name='0Z').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_FLOOR      : Emoji.precreate(580357693022142485, name='0g').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_FLOOR      : Emoji.precreate(580357693093576714, name='0h').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_FLOOR      : Emoji.precreate(580357693160685578, name='0i').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_FLOOR      : Emoji.precreate(580357693152165900, name='0j').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_TARGET     : Emoji.precreate(580357693018210305, name='0k').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_TARGET     : Emoji.precreate(580357693085188109, name='0l').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_TARGET     : Emoji.precreate(580357693181657089, name='0m').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_TARGET     : Emoji.precreate(580357693361881089, name='0n').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_HOLE_P     : Emoji.precreate(580357693324132352, name='0o').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_HOLE_P     : Emoji.precreate(580357693072736257, name='0p').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_HOLE_P     : Emoji.precreate(580357693131456513, name='0q').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_HOLE_P     : Emoji.precreate(580357693366337536, name='0r').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_OBJECT_P   : Emoji.precreate(580357693143777300, name='0s').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_OBJECT_P   : Emoji.precreate(580357692711763973, name='0t').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_OBJECT_P   : Emoji.precreate(580357693269606410, name='0u').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_OBJECT_P   : Emoji.precreate(580357693387177984, name='0v').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(580357693022142485, name='0g').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(580357693093576714, name='0h').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(580357693160685578, name='0i').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(580357693152165900, name='0j').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(580357693018210305, name='0k').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(580357693085188109, name='0l').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(580357693181657089, name='0m').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(580357693361881089, name='0n').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(580357693324132352, name='0o').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(580357693072736257, name='0p').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(580357693131456513, name='0q').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(580357693366337536, name='0r').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693143777300, name='0s').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P   : Emoji.precreate(580357692711763973, name='0t').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693269606410, name='0u').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693387177984, name='0v').as_emoji,
 }
 
 STYLE_YUKARI = {**STYLE_DEFAULT_PARTS,
@@ -292,22 +292,22 @@ STYLE_YUKARI = {**STYLE_DEFAULT_PARTS,
     BIT_MASK_BOX_OBJECT                 : EMOJI_NOTHING.as_emoji,
     BIT_MASK_HOLE_U                     : Emoji.precreate(593179300153262196, name='13').as_emoji,
     BIT_MASK_OBJECT_U                   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_FLOOR      : Emoji.precreate(593179300161650871, name='14').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_FLOOR      : Emoji.precreate(593179300153262257, name='15').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_FLOOR      : Emoji.precreate(593179300300324887, name='16').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_FLOOR      : Emoji.precreate(593179300237410314, name='17').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_TARGET     : Emoji.precreate(593179300207919125, name='18').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_TARGET     : Emoji.precreate(593179300145135646, name='19').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_TARGET     : Emoji.precreate(593179300170301451, name='1A').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_TARGET     : Emoji.precreate(593179300153262189, name='1B').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_HOLE_P     : Emoji.precreate(593179300199399531, name='1C').as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_HOLE_P     : Emoji.precreate(593179300300193800, name='1D').as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_HOLE_P     : Emoji.precreate(593179300216176760, name='1E').as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_HOLE_P     : Emoji.precreate(593179300153524224, name='1F').as_emoji,
-    BIT_MASK_CHAR_N|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_E|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_S|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_W|BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(593179300161650871, name='14').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(593179300153262257, name='15').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(593179300300324887, name='16').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(593179300237410314, name='17').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(593179300207919125, name='18').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(593179300145135646, name='19').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(593179300170301451, name='1A').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(593179300153262189, name='1B').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(593179300199399531, name='1C').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(593179300300193800, name='1D').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(593179300216176760, name='1E').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(593179300153524224, name='1F').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
 }
 
 RULES_HELP = Embed(
@@ -325,22 +325,22 @@ RULES_HELP = Embed(
         f'\n'
         f'You can push boxes by moving towards them, but you cannot push more at the same time or push into the '
         f'wall:\n'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
         f'{EMOJI_EAST:e}'
-        f'{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
+        f'{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
         f'\n'
         f'You can push the boxes into the holes to pass them, but be careful, you might lose too much boxes to finish'
         f'the stages!\n'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
         f'{STYLE_REIMU[BIT_MASK_HOLE_P]}{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_HOLE_P]}\n'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_P]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_HOLE_P]}\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_P]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
         f'{STYLE_REIMU[BIT_MASK_BOX_HOLE]}\n'
         f'If you get a box on the it\'s desired place it\'s color will change:\n'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_TARGET]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_TARGET]}'
+        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
         f'{STYLE_REIMU[BIT_MASK_BOX_TARGET]}\n'
         f'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
         f'play with.'
@@ -351,12 +351,12 @@ RULES_HELP = Embed(
     (
         f'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
         f'Reimu can jump over a box or hole.\n'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
         f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}\n'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]:}{STYLE_REIMU[BIT_MASK_HOLE_U]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}\n'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]:}{STYLE_REIMU[BIT_MASK_HOLE_U]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
         f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
-        f'{STYLE_REIMU[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
     ),
 ).add_field(
     f'Chapter 2 {EMOJI_FLAN:e}',
@@ -364,11 +364,11 @@ RULES_HELP = Embed(
         f'Your character is Scarlet Flandre (スカーレット・フランドール Sukaaretto Furandooru), who want to put her '
         f'*bookshelves* on their desired place.\n'
         f'Flandre can destroy absolutely anything and everything, and she will get rid of the pillars for you.\n'
-        f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_U]}{EMOJI_EAST:e}'
-        f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}{EMOJI_EAST:e}'
-        f'{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_OBJECT_P]}\n'
-        f'{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_BOX]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}'
-        f'{EMOJI_EAST:e}{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_U]}{EMOJI_EAST:e}'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}{EMOJI_EAST:e}'
+        f'{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P]}\n'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_BOX]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}'
+        f'{EMOJI_EAST:e}{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
         f'{STYLE_FLAN[BIT_MASK_BOX_OBJECT]}'
     ),
 ).add_field(
@@ -377,12 +377,12 @@ RULES_HELP = Embed(
         f'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some replacing at her home.\n'
         f'Yukari can create gaps and travel trough them. She will open gap to the closest place straightforward, '
         f'which is separated by a bedding or with wall from her.\n'
-        f'{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
+        f'{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
         f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
-        f'{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}\n'
-        f'{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_BOX]}'
+        f'{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}\n'
+        f'{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_BOX]}'
         f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}'
-        f'{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_CHAR_E|BIT_MASK_FLOOR]}'
+        f'{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
     ),
 ).add_footer(
     'Game based on Sweeper of Suika.'
@@ -651,9 +651,9 @@ def get_rating_for(stage, steps):
         The step's rating.
     """
     stage_best = stage.best
-    rating_factor = floor(stage_best/20.0)+5.0
+    rating_factor = floor(stage_best / 20.0) + 5.0
     
-    rating_level = ceil((steps-stage_best)/rating_factor)
+    rating_level = ceil((steps - stage_best) / rating_factor)
     if rating_level > RATING_MAX:
         rating_level = RATING_MAX
     
@@ -681,11 +681,11 @@ def get_reward_for_steps(stage_id, steps):
     
     if steps < stage_best:
         set_new_best(stage, steps)
-        return NEW_RECORD_REWARD+RATING_REWARDS[0]
+        return NEW_RECORD_REWARD + RATING_REWARDS[0]
     
-    rating_factor = floor(stage_best/20.0)+5.0
+    rating_factor = floor(stage_best / 20.0) + 5.0
     
-    rating_level = ceil((steps-stage_best)/rating_factor)
+    rating_level = ceil((steps - stage_best) / rating_factor)
     if rating_level > RATING_MAX:
         rating_level = RATING_MAX
     
@@ -712,9 +712,9 @@ def get_reward_difference(stage_id, steps_1, steps_2):
     """
     stage = STAGES_BY_ID[stage_id]
     stage_best = stage.best
-    rating_factor = floor(stage_best/20.0)+5.0
+    rating_factor = floor(stage_best / 20.0) + 5.0
     
-    rating_level = ceil((steps_1-stage_best)/rating_factor)
+    rating_level = ceil((steps_1 - stage_best) / rating_factor)
     if rating_level > RATING_MAX:
         rating_level = RATING_MAX
     
@@ -722,16 +722,16 @@ def get_reward_difference(stage_id, steps_1, steps_2):
     
     if steps_2 < stage_best:
         set_new_best(stage, steps_2)
-        reward_2 = NEW_RECORD_REWARD+RATING_REWARDS[0]
+        reward_2 = NEW_RECORD_REWARD + RATING_REWARDS[0]
     else:
-        rating_level = ceil((steps_2-stage_best)/rating_factor)
+        rating_level = ceil((steps_2 - stage_best) / rating_factor)
         if rating_level > RATING_MAX:
             rating_level = RATING_MAX
         
         reward_2 = RATING_REWARDS[rating_level]
     
     
-    reward = reward_2-reward_1
+    reward = reward_2 - reward_1
     if reward < 0:
         reward = 0
     
@@ -780,15 +780,15 @@ def REIMU_SKILL_CAN_ACTIVATE(game_state):
     position = game_state.position
     map_ = game_state.map
     
-    for step in (-x_size, 1, x_size, -1):
-        target_tile=map_[position+step]
+    for step in ( -x_size, 1, x_size, -1):
+        target_tile=map_[position + step]
         
-        if not target_tile&(BIT_MASK_PUSHABLE|BIT_MASK_SPECIAL):
+        if not target_tile & (BIT_MASK_PUSHABLE | BIT_MASK_SPECIAL):
             continue
         
-        after_tile = map_[position+(step<<1)]
+        after_tile = map_[position + (step << 1)]
 
-        if not after_tile&BIT_MASK_PASSABLE:
+        if not after_tile & BIT_MASK_PASSABLE:
             continue
         
         return True
@@ -815,13 +815,13 @@ def REIMU_SKILL_GET_DIRECTORIES(game_state):
     
     move_directories = MoveDirectories()
     
-    for step, descriptor in zip((-x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
-        target_tile = map_[position+step]
+    for step, descriptor in zip(( -x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
+        target_tile = map_[position + step]
         
-        if target_tile&(BIT_MASK_PUSHABLE|BIT_MASK_SPECIAL):
-            after_tile = map_[position+(step<<1)]
+        if target_tile & (BIT_MASK_PUSHABLE | BIT_MASK_SPECIAL):
+            after_tile = map_[position + (step << 1)]
     
-            if after_tile&BIT_MASK_PASSABLE:
+            if after_tile & BIT_MASK_PASSABLE:
                 can_go_to_directory = True
             else:
                 can_go_to_directory = False
@@ -854,23 +854,25 @@ def REIMU_SKILL_USE(game_state, step, align):
     map_ = game_state.map
     position = game_state.position
     
-    target_tile = map_[position+step]
+    target_tile = map_[position + step]
     
-    if not target_tile&(BIT_MASK_PUSHABLE|BIT_MASK_SPECIAL):
+    if not target_tile & (BIT_MASK_PUSHABLE | BIT_MASK_SPECIAL):
         return False
     
-    after_tile = map_[position+(step<<1)]
+    after_tile = map_[position + (step << 1)]
     
-    if not after_tile&BIT_MASK_PASSABLE:
+    if not after_tile & BIT_MASK_PASSABLE:
         return False
     
     actual_tile = map_[position]
-    game_state.history.append(HistoryElement(position, True, ((position, actual_tile), (position+(step<<1), after_tile))))
+    game_state.history.append(
+        HistoryElement(position, True, ((position, actual_tile), (position + (step << 1), after_tile)))
+    )
     
-    map_[position] = actual_tile&BIT_MASK_PASSABLE
-    game_state.position = position = position+(step<<1)
+    map_[position] = actual_tile & BIT_MASK_PASSABLE
+    game_state.position = position = position + (step << 1)
     
-    map_[position] = after_tile|align
+    map_[position] = after_tile | align
     game_state.has_skill = False
     
     return True
@@ -893,8 +895,8 @@ def FLAN_SKILL_CAN_ACTIVATE(game_state):
     position = game_state.position
     map_ = game_state.map
     
-    for step in (-x_size, 1, x_size, -1):
-        target_tile = map_[position+step]
+    for step in ( -x_size, 1, x_size, -1):
+        target_tile = map_[position + step]
         
         if target_tile == BIT_MASK_OBJECT_U:
             return True
@@ -921,8 +923,8 @@ def FLAN_SKILL_GET_DIRECTORIES(game_state):
     
     move_directories = MoveDirectories()
     
-    for step, descriptor in zip((-x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
-        target_tile = map_[position+step]
+    for step, descriptor in zip(( -x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
+        target_tile = map_[position + step]
         if target_tile == BIT_MASK_OBJECT_U:
             can_go_to_directory = True
         else:
@@ -954,16 +956,16 @@ def FLAN_SKILL_USE(game_state, step, align):
     map_ = game_state.map
     position = game_state.position
     
-    target_tile = map_[position+step]
+    target_tile = map_[position + step]
     
     if target_tile != BIT_MASK_OBJECT_U:
         return False
     
     actual_tile = map_[position]
-    game_state.history.append(HistoryElement(position, True, ((position, actual_tile), (position+step, target_tile))))
+    game_state.history.append(HistoryElement(position, True, ((position, actual_tile), (position + step, target_tile))))
     
-    map_[position] = actual_tile&BIT_MASK_PASSABLE|align
-    map_[position+step] = BIT_MASK_OBJECT_P
+    map_[position] = actual_tile & BIT_MASK_PASSABLE | align
+    map_[position + step] = BIT_MASK_OBJECT_P
     game_state.has_skill = False
     
     return True
@@ -985,23 +987,23 @@ def YUKARI_SKILL_CAN_ACTIVATE(game_state):
     map_ = game_state.map
     
     x_size = game_state.stage.x_size
-    y_size = len(map_)//x_size
+    y_size = len(map_) // x_size
 
     position = game_state.position
     y_position, x_position = divmod(position, x_size)
 
     # x_min = x_size*y_position
-    # x_max = x_size*(y_position+1)-1
+    # x_max = x_size*(y_position + 1)-1
     # y_min = x_position
-    # y_max = x_position+(x_size*(y_size-1))
+    # y_max = x_position + (x_size*(y_size-1))
     
     for step, limit in (
             (-x_size , -x_size                       ,),
-            (1       , x_size*(y_position+1)-1       ,),
-            (x_size  , x_position+(x_size*(y_size-1)),),
-            (-1      , x_size*y_position             ,),
-                 ):
-        target_position = position+step
+            (1       , x_size * (y_position + 1) - 1       ,),
+            (x_size  , x_position + (x_size * (y_size - 1)),),
+            ( -1      , x_size * y_position             ,),
+     ):
+        target_position = position + step
         if target_position == limit:
             continue
         
@@ -1009,15 +1011,15 @@ def YUKARI_SKILL_CAN_ACTIVATE(game_state):
             continue
         
         while True:
-            target_position = target_position+step
+            target_position = target_position + step
             if target_position == limit:
                 break
             
             target_tile = map_[target_position]
-            if target_tile&BIT_MASK_BLOCKS_LOS:
+            if target_tile & BIT_MASK_BLOCKS_LOS:
                 continue
             
-            if target_tile&BIT_MASK_PASSABLE:
+            if target_tile & BIT_MASK_PASSABLE:
                 return True
             
             break
@@ -1041,7 +1043,7 @@ def YUKARI_SKILL_GET_DIRECTORIES(game_state):
     map_ = game_state.map
     
     x_size = game_state.stage.x_size
-    y_size = len(map_)//x_size
+    y_size = len(map_) // x_size
     
     move_directories = MoveDirectories()
     
@@ -1049,33 +1051,36 @@ def YUKARI_SKILL_GET_DIRECTORIES(game_state):
     y_position, x_position = divmod(position, x_size)
 
     # x_min = x_size*y_position
-    # x_max = x_size*(y_position+1)-1
+    # x_max = x_size*(y_position + 1)-1
     # y_min = x_position
-    # y_max = x_position+(x_size*(y_size-1))
+    # y_max = x_position + (x_size*(y_size-1))
     
-    for (step, limit), descriptor in zip((
-            (-x_size , -x_size                       ,),
-            (1       , x_size*(y_position+1)-1       ,),
-            (x_size  , x_position+(x_size*(y_size-1)),),
-            (-1      , x_size*y_position             ,),
-                 ), SKILL_DIRECTORY_DESCRIPTORS):
+    for (step, limit), descriptor in zip(
+        (
+            ( -x_size , -x_size                             ,),
+            (1        , x_size * (y_position + 1) - 1       ,),
+            (x_size   , x_position + (x_size * (y_size - 1)),),
+            ( -1      , x_size * y_position                 ,),
+        ),
+        SKILL_DIRECTORY_DESCRIPTORS,
+    ):
         
-        target_position = position+step
+        target_position = position + step
         if target_position == limit:
             can_go_to_directory = False
         else:
             if map_[target_position]&BIT_MASK_BLOCKS_LOS:
                 while True:
-                    target_position = target_position+step
+                    target_position = target_position + step
                     if target_position == limit:
                         can_go_to_directory = False
                         break
                     
                     target_tile = map_[target_position]
-                    if target_tile&BIT_MASK_BLOCKS_LOS:
+                    if target_tile & BIT_MASK_BLOCKS_LOS:
                         continue
                     
-                    if target_tile&BIT_MASK_PASSABLE:
+                    if target_tile & BIT_MASK_PASSABLE:
                         can_go_to_directory = True
                         break
                     
@@ -1110,23 +1115,23 @@ def YUKARI_SKILL_USE(game_state, step, align):
     map_ = game_state.map
 
     x_size = game_state.stage.x_size
-    y_size = len(map_)//x_size
+    y_size = len(map_) // x_size
     
     position = game_state.position
     y_position, x_position = divmod(position, x_size)
 
     if step > 0:
         if step == 1:
-            limit = x_size*(y_position+1)-1
+            limit = x_size * (y_position + 1) - 1
         else:
-            limit = x_position+(x_size*(y_size-1))
+            limit = x_position + (x_size * (y_size - 1))
     else:
         if step == -1:
-            limit = x_size*y_position
+            limit = x_size * y_position
         else:
             limit = -x_size
 
-    target_position = position+step
+    target_position = position + step
     
     if target_position == limit:
         return False
@@ -1135,15 +1140,15 @@ def YUKARI_SKILL_USE(game_state, step, align):
         return False
     
     while True:
-        target_position = target_position+step
+        target_position = target_position + step
         if target_position == limit:
             return False
         
         target_tile = map_[target_position]
-        if target_tile&BIT_MASK_BLOCKS_LOS:
+        if target_tile & BIT_MASK_BLOCKS_LOS:
             continue
         
-        if target_tile&BIT_MASK_PASSABLE:
+        if target_tile & BIT_MASK_PASSABLE:
             break
         
         return False
@@ -1151,10 +1156,10 @@ def YUKARI_SKILL_USE(game_state, step, align):
     actual_tile = map_[position]
     game_state.history.append(HistoryElement(position, True, ((position, actual_tile), (target_position, target_tile))))
     
-    map_[position] = actual_tile&BIT_MASK_PASSABLE
+    map_[position] = actual_tile & BIT_MASK_PASSABLE
     game_state.position = target_position
     
-    map_[target_position] = target_tile|align
+    map_[target_position] = target_tile | align
     game_state.has_skill = False
     
     return True
@@ -1235,30 +1240,30 @@ TILE_NAME_TO_VALUE = {
     'HOLE_U'    : BIT_MASK_HOLE_U,
     'HOLE_P'    : BIT_MASK_HOLE_P,
     'OBJECT_U'  : BIT_MASK_OBJECT_U,
-    'CN_FLOOR'  : BIT_MASK_CHAR_N|BIT_MASK_FLOOR,
-    'CE_FLOOR'  : BIT_MASK_CHAR_E|BIT_MASK_FLOOR,
-    'CS_FLOOR'  : BIT_MASK_CHAR_S|BIT_MASK_FLOOR,
-    'CW_FLOOR'  : BIT_MASK_CHAR_W|BIT_MASK_FLOOR,
+    'CN_FLOOR'  : BIT_MASK_CHAR_N | BIT_MASK_FLOOR,
+    'CE_FLOOR'  : BIT_MASK_CHAR_E | BIT_MASK_FLOOR,
+    'CS_FLOOR'  : BIT_MASK_CHAR_S | BIT_MASK_FLOOR,
+    'CW_FLOOR'  : BIT_MASK_CHAR_W | BIT_MASK_FLOOR,
     'NOTHING'   : BIT_MASK_NOTHING,
     'WALL_N'    : BIT_MASK_WALL_N,
     'WALL_E'    : BIT_MASK_WALL_E,
     'WALL_S'    : BIT_MASK_WALL_S,
     'WALL_W'    : BIT_MASK_WALL_W,
-    'WALL_HV'   : BIT_MASK_WALL_N|BIT_MASK_WALL_E|BIT_MASK_WALL_S|BIT_MASK_WALL_W,
-    'WALL_SE'   : BIT_MASK_WALL_E|BIT_MASK_WALL_S,
-    'WALL_SW'   : BIT_MASK_WALL_S|BIT_MASK_WALL_W,
-    'WALL_NE'   : BIT_MASK_WALL_N|BIT_MASK_WALL_E,
-    'WALL_NW'   : BIT_MASK_WALL_N|BIT_MASK_WALL_W,
-    'WALL_HE'   : BIT_MASK_WALL_N|BIT_MASK_WALL_E|BIT_MASK_WALL_S,
-    'WALL_HW'   : BIT_MASK_WALL_N|BIT_MASK_WALL_S|BIT_MASK_WALL_W,
-    'WALL_H'    : BIT_MASK_WALL_N|BIT_MASK_WALL_S,
-    'CN_TARGET' : BIT_MASK_CHAR_N|BIT_MASK_TARGET,
-    'CE_TARGET' : BIT_MASK_CHAR_E|BIT_MASK_TARGET,
-    'CS_TARGET' : BIT_MASK_CHAR_S|BIT_MASK_TARGET,
-    'CW_TARGET' : BIT_MASK_CHAR_W|BIT_MASK_TARGET,
-    'WALL_V'    : BIT_MASK_WALL_E|BIT_MASK_WALL_W,
-    'WALL_NV'   : BIT_MASK_WALL_E|BIT_MASK_WALL_S|BIT_MASK_WALL_W,
-    'WALL_SV'   : BIT_MASK_WALL_N|BIT_MASK_WALL_E|BIT_MASK_WALL_W,
+    'WALL_HV'   : BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W,
+    'WALL_SE'   : BIT_MASK_WALL_E | BIT_MASK_WALL_S,
+    'WALL_SW'   : BIT_MASK_WALL_S | BIT_MASK_WALL_W,
+    'WALL_NE'   : BIT_MASK_WALL_N | BIT_MASK_WALL_E,
+    'WALL_NW'   : BIT_MASK_WALL_N | BIT_MASK_WALL_W,
+    'WALL_HE'   : BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S,
+    'WALL_HW'   : BIT_MASK_WALL_N | BIT_MASK_WALL_S | BIT_MASK_WALL_W,
+    'WALL_H'    : BIT_MASK_WALL_N | BIT_MASK_WALL_S,
+    'CN_TARGET' : BIT_MASK_CHAR_N | BIT_MASK_TARGET,
+    'CE_TARGET' : BIT_MASK_CHAR_E | BIT_MASK_TARGET,
+    'CS_TARGET' : BIT_MASK_CHAR_S | BIT_MASK_TARGET,
+    'CW_TARGET' : BIT_MASK_CHAR_W | BIT_MASK_TARGET,
+    'WALL_V'    : BIT_MASK_WALL_E | BIT_MASK_WALL_W,
+    'WALL_NV'   : BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W,
+    'WALL_SV'   : BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_W,
 }
 
 TILE_VALUE_TO_NAME = {value: key for key, value in TILE_NAME_TO_VALUE.items()}
@@ -1477,7 +1482,7 @@ def pretty_dump_stage_sources(stage_sources):
                 json_parts.append('"')
                 json_parts.append(tile_name)
                 json_parts.append('"')
-                json_parts.append(' '*(10-len(tile_name)))
+                json_parts.append(' '*(10 - len(tile_name)))
                 json_parts.append(',')
             
             json_parts.append('\n')
@@ -1780,14 +1785,14 @@ def load_stages():
             stage.after_stage_source = chapter_stages_sorted[1]
             stage.index = 0
             
-            index = chapter_stages_sorted_length-1
+            index = chapter_stages_sorted_length - 1
             stage = chapter_stages_sorted[index]
-            stage.before_stage_source = chapter_stages_sorted[chapter_stages_sorted_length-2]
+            stage.before_stage_source = chapter_stages_sorted[chapter_stages_sorted_length - 2]
             
-            for index in range(1, chapter_stages_sorted_length-1):
+            for index in range(1, chapter_stages_sorted_length - 1):
                 stage = chapter_stages_sorted[index]
-                stage.after_stage_source = chapter_stages_sorted[index+1]
-                stage.before_stage_source = chapter_stages_sorted[index-1]
+                stage.after_stage_source = chapter_stages_sorted[index + 1]
+                stage.before_stage_source = chapter_stages_sorted[index - 1]
                 stage.index = index
 
 load_stages()
@@ -2102,7 +2107,7 @@ class UserState:
                         to_execute = USER_COMMON_TABLE.update(
                             user_common_model.id == entry_id
                         ).values(
-                            total_love = user_common_model.total_love+reward
+                            total_love = user_common_model.total_love + reward
                         )
                     else:
                         to_execute = get_create_common_user_expression(
@@ -2294,7 +2299,7 @@ class GameState:
         moved : `bool`
             Whether the character move successfully.
         """
-        return self.move(-self.stage.x_size, BIT_MASK_CHAR_N)
+        return self.move( -self.stage.x_size, BIT_MASK_CHAR_N)
     
     
     def move_east(self):
@@ -2330,7 +2335,7 @@ class GameState:
         moved : `bool`
             Whether the character move successfully.
         """
-        return self.move(-1, BIT_MASK_CHAR_W)
+        return self.move( -1, BIT_MASK_CHAR_W)
     
     
     def get_move_directories(self):
@@ -2361,16 +2366,16 @@ class GameState:
         
         move_directories = MoveDirectories()
         
-        for step, descriptor in zip((-x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
-            target_tile = map_[position+step]
+        for step, descriptor in zip(( -x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
+            target_tile = map_[position + step]
             
-            if target_tile&BIT_MASK_UNPUSHABLE:
+            if target_tile & BIT_MASK_UNPUSHABLE:
                 can_go_to_directory = False
-            elif target_tile&BIT_MASK_PASSABLE:
+            elif target_tile & BIT_MASK_PASSABLE:
                 can_go_to_directory = True
             else:
-                after_tile = map_[position+(step<<1)]
-                if target_tile&BIT_MASK_PUSHABLE and after_tile&(BIT_MASK_PASSABLE|BIT_MASK_HOLE_U):
+                after_tile = map_[position + (step << 1)]
+                if target_tile & BIT_MASK_PUSHABLE and after_tile & (BIT_MASK_PASSABLE | BIT_MASK_HOLE_U):
                     can_go_to_directory = True
                 else:
                     can_go_to_directory = False
@@ -2407,51 +2412,51 @@ class GameState:
         position = self.position
         
         actual_tile = map_[position]
-        target_tile = map_[position+step]
+        target_tile = map_[position + step]
         
-        if target_tile&BIT_MASK_UNPUSHABLE:
+        if target_tile & BIT_MASK_UNPUSHABLE:
             return False
         
-        if target_tile&BIT_MASK_PASSABLE:
+        if target_tile & BIT_MASK_PASSABLE:
             self.history.append(
                 HistoryElement(
                     position,
                     False,
                     (
                         (position, actual_tile),
-                        (position+step, target_tile),
+                        (position + step, target_tile),
                     ),
                 )
             )
             
-            map_[position] = actual_tile&BIT_MASK_PASSABLE
-            self.position = position = position+step
-            map_[position] = target_tile|align
+            map_[position] = actual_tile & BIT_MASK_PASSABLE
+            self.position = position = position + step
+            map_[position] = target_tile | align
             
             return True
 
-        after_tile = map_[position+(step<<1)]
+        after_tile = map_[position + (step << 1)]
 
-        if target_tile&BIT_MASK_PUSHABLE and after_tile&(BIT_MASK_PASSABLE|BIT_MASK_HOLE_U):
+        if target_tile & BIT_MASK_PUSHABLE and after_tile & (BIT_MASK_PASSABLE | BIT_MASK_HOLE_U):
             self.history.append(
                 HistoryElement(
                     position,
                     False,
                     (
                         (position, actual_tile),
-                        (position+step, target_tile),
-                        (position+(step<<1), after_tile),
+                        (position + step, target_tile),
+                        (position + (step << 1), after_tile),
                     ),
                 )
             )
             
-            map_[position] = actual_tile&BIT_MASK_PASSABLE
-            self.position = position = position+step
-            map_[position] = (target_tile>>3)|align
-            if after_tile&BIT_MASK_PASSABLE:
-                map_[position+step] = after_tile<<3
+            map_[position] = actual_tile & BIT_MASK_PASSABLE
+            self.position = position = position + step
+            map_[position] = (target_tile >> 3) | align
+            if after_tile & BIT_MASK_PASSABLE:
+                map_[position + step] = after_tile << 3
             else:
-                map_[position+step] = BIT_MASK_HOLE_P
+                map_[position + step] = BIT_MASK_HOLE_P
             return True
         
         return False
@@ -2536,32 +2541,32 @@ class GameState:
             start = 0
             shift = 0
         else:
-            step_count = limit//step
+            step_count = limit // step
             if step_count < step:
-                if (step_count * (step-2)) <= 75:
+                if (step_count * (step - 2)) <= 75:
                     start = 1
                     step -= 2
                     shift = 2
                 else:
-                    start = step+1
+                    start = step + 1
                     limit -= step
                     step -= 2
                     shift = 2
             else:
-                if ((step_count-2) * step) <= 75:
+                if ((step_count - 2) * step) <= 75:
                     start = step
                     limit -= step
                     shift = 0
                 else:
-                    start = step+1
+                    start = step + 1
                     limit -= step
                     step -= 2
                     shift = 2
         
         while start < limit:
-            end = start+step
+            end = start + step
             result.append(''.join([style[element] for element in map_[start:end]]))
-            start = end+shift
+            start = end + shift
         
         return '\n'.join(result)
     
@@ -2580,8 +2585,8 @@ class GameState:
         stage = self.stage
         difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
         title = (
-            f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji}, {difficulty_name}: '
-            f'{stage.stage_index+1}'
+            f'Chapter {stage.chapter_index + 1} {self.chapter.emoji.as_emoji}, {difficulty_name}: '
+            f'{stage.stage_index + 1}'
         )
         
         description = self.render_description()
@@ -2659,8 +2664,8 @@ class GameState:
         
         difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
         title = (
-            f'Chapter {stage.chapter_index+1} {self.chapter.emoji.as_emoji} {difficulty_name} '
-            f'{stage.stage_index+1} finished with {steps} steps with {rating} rating!'
+            f'Chapter {stage.chapter_index + 1} {self.chapter.emoji.as_emoji} {difficulty_name} '
+            f'{stage.stage_index + 1} finished with {steps} steps with {rating} rating!'
         )
         
         description = self.render_description()
@@ -2714,7 +2719,7 @@ class GameState:
         if not history:
             return False
         
-        element = history.pop(-1)
+        element = history.pop( -1)
         map_ = self.map
         self.position = element.position
         
@@ -2782,7 +2787,7 @@ def can_play_selected_stage(user_state):
             difficulty_index -= 1
         else:
             if chapter_index:
-                if CHAPTERS[chapter_index-1].next_stage_unlock_id in stage_results:
+                if CHAPTERS[chapter_index - 1].next_stage_unlock_id in stage_results:
                     return True
                 else:
                     return False
@@ -2877,13 +2882,13 @@ def render_menu(user_state):
         The components of the menu.
     """
     chapter = STAGES_BY_ID[user_state.selected_stage_id].chapter
-    embed = Embed(f'Chapter {chapter.id+1}').add_thumbnail(chapter.emoji.url)
+    embed = Embed(f'Chapter {chapter.id + 1}').add_thumbnail(chapter.emoji.url)
     
     if can_play_selected_stage(user_state):
         get_selectable = get_selectable_stages(user_state)
         for stage, best, is_selected in get_selectable:
             difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
-            field_name = f'{difficulty_name} level {stage.stage_index+1}'
+            field_name = f'{difficulty_name} level {stage.stage_index + 1}'
             if best == -1:
                 field_value = 'No results recorded yet!'
             else:
@@ -2918,7 +2923,7 @@ def render_menu(user_state):
         embed.color = COLOR_TUTORIAL
         embed.description = (
             f'**You must finish chapter {chapter.id} {CHAPTER_UNLOCK_DIFFICULTY_NAME} '
-            f'{CHAPTER_UNLOCK_STAGE+1} first.**'
+            f'{CHAPTER_UNLOCK_STAGE + 1} first.**'
         )
         
         button_stage_before = BUTTON_DOWN_DISABLED
@@ -2929,7 +2934,7 @@ def render_menu(user_state):
         
         button_select = BUTTON_SELECT_DISABLED
     
-    if chapter.id+1 in CHAPTERS:
+    if chapter.id + 1 in CHAPTERS:
         button_chapter_next = BUTTON_RIGHT_ENABLED
     else:
         button_chapter_next = BUTTON_RIGHT_DISABLED
@@ -3119,7 +3124,7 @@ async def process_identifier_left(dungeon_sweeper_runner):
         stage_source = STAGES_BY_ID[user_state.selected_stage_id]
         
         try:
-            chapter = CHAPTERS[stage_source.chapter.id-1]
+            chapter = CHAPTERS[stage_source.chapter.id - 1]
         except KeyError:
             return False
         
@@ -3128,7 +3133,7 @@ async def process_identifier_left(dungeon_sweeper_runner):
         chapter_stages_sorted = chapter.stages_sorted
         chapter_stages_sorted_length = len(chapter_stages_sorted)
         if index >= chapter_stages_sorted_length:
-            index = chapter_stages_sorted_length-1
+            index = chapter_stages_sorted_length - 1
         
         user_state.selected_stage_id = chapter_stages_sorted[index].id
         return True
@@ -3159,7 +3164,7 @@ async def process_identifier_right(dungeon_sweeper_runner):
         stage_source = STAGES_BY_ID[user_state.selected_stage_id]
         
         try:
-            chapter = CHAPTERS[stage_source.chapter.id+1]
+            chapter = CHAPTERS[stage_source.chapter.id + 1]
         except KeyError:
             return False
         
@@ -3168,14 +3173,14 @@ async def process_identifier_right(dungeon_sweeper_runner):
         chapter_stages_sorted = chapter.stages_sorted
         chapter_stages_sorted_length = len(chapter_stages_sorted)
         if index >= chapter_stages_sorted_length:
-            index = chapter_stages_sorted_length-1
+            index = chapter_stages_sorted_length - 1
         
         
         stage_source_id = chapter_stages_sorted[index].id
         stage_results = user_state.stage_results
         if (
             (stage_source_id not in stage_results) and
-            (chapter_stages_sorted[index-1].id not in stage_results)
+            (chapter_stages_sorted[index - 1].id not in stage_results)
         ):
             stage_source_id = chapter.difficulties[0][0].id
         

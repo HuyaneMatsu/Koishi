@@ -163,9 +163,9 @@ def add_track_title_to(add_to, track):
 def add_track_duration_to(add_to, track):
     duration = int(track.duration)
     add_to.append('(')
-    add_to.append(str(duration//60))
+    add_to.append(str(duration // 60))
     add_to.append(':')
-    add_to.append(format(duration%60, '0>2'))
+    add_to.append(format(duration % 60, '0>2'))
     add_to.append(')')
 
 def add_track_short_description_to(add_to, track):
@@ -479,7 +479,7 @@ async def play(client, event,
             
             if length:
                 if length > TRACK_PER_PAGE:
-                    length_truncated = -(TRACK_PER_PAGE-length)
+                    length_truncated = -(TRACK_PER_PAGE - length)
                     length = TRACK_PER_PAGE
                 else:
                     length_truncated = 0
@@ -701,7 +701,7 @@ async def volume_(client, event,
     
     if volume is None:
         volume = player.get_volume()
-        return f'{EMOJI_VOLUME.as_emoji} Volume: {volume*100.:.0f}%'
+        return f'{EMOJI_VOLUME.as_emoji} Volume: {volume * 100.:.0f}%'
     
     if volume <= 0:
         volume = 0.0
@@ -711,7 +711,7 @@ async def volume_(client, event,
         volume /= 100.0
     
     await player.set_volume(volume)
-    return f'{EMOJI_VOLUME.as_emoji} Volume set to: {volume*100.:.0f}%.'
+    return f'{EMOJI_VOLUME.as_emoji} Volume set to: {volume * 100.:.0f}%.'
 
 
 @VOICE_COMMANDS.interactions
@@ -903,8 +903,8 @@ async def queue_(client, event,
 
         queue = player.queue
         length = len(queue)
-        limit_low = (page-1)*TRACK_PER_PAGE
-        limit_high = limit_low+TRACK_PER_PAGE
+        limit_low = (page - 1) * TRACK_PER_PAGE
+        limit_high = limit_low + TRACK_PER_PAGE
         if limit_high > length:
             limit_high = length
         
@@ -934,7 +934,7 @@ async def queue_(client, event,
         
         embed = Embed(None, description, color=EMBED_COLOR)
         
-        page_count = ceil(length/TRACK_PER_PAGE)
+        page_count = ceil(length / TRACK_PER_PAGE)
         embed.add_footer(f'Page {page} / {page_count}')
         
         add_current_track_field(embed, player)
@@ -989,7 +989,7 @@ async def queue_(client, event,
             f'{EMOJI_VOLUME} Volume',
             (
                 f'```\n'
-                f'{player.get_volume()*100.:.0f}%\n'
+                f'{player.get_volume() * 100.:.0f}%\n'
                 f'```'
             ),
             inline = True,
@@ -1067,7 +1067,7 @@ async def track_end(client, event):
         return
     
     text_channel = player.text_channel
-    if (text_channel is None) or (not text_channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING):
+    if (text_channel is None) or (not text_channel.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING):
         return
     
     embed = Embed(color=EMBED_COLOR)

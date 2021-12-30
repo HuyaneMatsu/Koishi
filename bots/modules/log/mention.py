@@ -125,7 +125,7 @@ async def mention_logger(client, message):
         content_parts.append('\n')
         
         index = 0
-        limit = mention_count-truncated
+        limit = mention_count - truncated
         
         while True:
             user = user_mentions[index]
@@ -180,7 +180,7 @@ async def mention_logger(client, message):
         content_parts.append('\n')
         
         index = 0
-        limit = mention_count-truncated
+        limit = mention_count - truncated
         
         while True:
             role = role_mentions[index]

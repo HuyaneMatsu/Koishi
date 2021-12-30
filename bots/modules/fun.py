@@ -156,7 +156,7 @@ async def roll(client, event,
     """Rolls with dices."""
     amount = 0
     for _ in range(dice_count):
-        amount += round(1.+(random()*5.))
+        amount += round(1.+(random() * 5.))
     
     return str(amount)
 
@@ -172,7 +172,7 @@ async def rate(client, event,
     if isinstance(target_user, Client) or client.is_owner(target_user):
         result = 10
     else:
-        result = target_user.id%11
+        result = target_user.id % 11
     
     return f'I rate {target_user.name_at(event.guild)} {result}/10'
 
@@ -400,7 +400,7 @@ async def love(client, event,
     if source_user is target_user:
         abort('huh?')
     
-    percent = ((source_user.id&0x1111111111111111111111)+(target_user.id&0x1111111111111111111111))%101
+    percent = ((source_user.id & 0x1111111111111111111111) + (target_user.id & 0x1111111111111111111111)) % 101
     element = LOVE_VALUES[percent]
     
     return Embed(
@@ -430,7 +430,7 @@ MINE_MINE = tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
 
 MINE_X_SIZE = 9
 MINE_Y_SIZE = 9
-MINE_SIZE = MINE_X_SIZE*MINE_Y_SIZE
+MINE_SIZE = MINE_X_SIZE * MINE_Y_SIZE
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def minesweeper(
@@ -444,7 +444,7 @@ async def minesweeper(
     while bomb_count:
         x = randint(0, 8)
         y = randint(0, 8)
-        position = x+y*MINE_X_SIZE
+        position = x + y * MINE_X_SIZE
         
         value = data[position]
         if value == 9:
@@ -453,24 +453,24 @@ async def minesweeper(
         local_count = 0
 
         for c_x, c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
-            local_x = x+c_x
-            local_y = y+c_y
+            local_x = x + c_x
+            local_y = y + c_y
             if local_x != MINE_X_SIZE and local_x != -1 and local_y != MINE_Y_SIZE and local_y != -1 and \
-                    data[local_x+local_y*MINE_X_SIZE] == 9:
+                    data[local_x + local_y * MINE_X_SIZE] == 9:
                 local_count += 1
         
         if local_count > 3:
             continue
 
         for c_x,c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
-            local_x = x+c_x
-            local_y = y+c_y
+            local_x = x + c_x
+            local_y = y + c_y
             if local_x != MINE_X_SIZE and local_x != -1 and local_y != MINE_Y_SIZE and local_y != -1:
-                local_position = local_x+local_y*MINE_X_SIZE
+                local_position = local_x + local_y * MINE_X_SIZE
                 local_value = data[local_position]
                 if local_value == 9:
                     continue
-                data[local_position] = local_value+1
+                data[local_position] = local_value + 1
         
         data[position] = 9
         
@@ -485,7 +485,7 @@ async def minesweeper(
     while True:
         x = 0
         while True:
-            result_sub.append(MINE_MINE[data[x+y]])
+            result_sub.append(MINE_MINE[data[x + y]])
             x += 1
             if x == MINE_X_SIZE:
                 break

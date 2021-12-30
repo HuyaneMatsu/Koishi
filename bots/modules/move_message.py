@@ -257,7 +257,7 @@ class MessageMoverContext:
         self.target_channel_id = target_channel_id
         self.target_thread_id = target_thread_id
         self.messages = set()
-        self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
+        self.next_update = LOOP_TIME() + MESSAGE_MOVER_CONTEXT_TIMEOUT
         self._timeout_handle = None
         key = (event.user.id, source_channel_id)
         self.key = key
@@ -409,7 +409,7 @@ class MessageMoverContext:
                 components = MESSAGE_MOVER_COMPONENTS_ENABLED,
             )
             await self.client.interaction_response_message_delete(self.event)
-            self.next_update = LOOP_TIME()+MESSAGE_MOVER_CONTEXT_TIMEOUT
+            self.next_update = LOOP_TIME() + MESSAGE_MOVER_CONTEXT_TIMEOUT
             self.event = event
     
     

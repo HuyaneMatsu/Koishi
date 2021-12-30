@@ -50,7 +50,7 @@ async def command_error(client, message, command, content, exception):
             break
         
         line = lines[index]
-        index = index+1
+        index = index + 1
         
         line_length = len(line)
         # long line check, should not happen
@@ -58,7 +58,7 @@ async def command_error(client, message, command, content, exception):
             line = line[:500]+'...\n'
             line_length = 504
         
-        if page_length+line_length > 1997:
+        if page_length + line_length > 1997:
             if index == limit:
                 # If we are at the last element, we don\'t need to shard up,
                 # because the last element is always '```'
@@ -76,7 +76,7 @@ async def command_error(client, message, command, content, exception):
             page_contents.append('```py\n')
             page_contents.append(line)
             
-            page_length = 6+line_length
+            page_length = 6 + line_length
             continue
         
         page_contents.append(line)

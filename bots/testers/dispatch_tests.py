@@ -112,7 +112,7 @@ class dispatch_tester:
             result.append(f'content: (len={content_length})')
             if content_length > 500:
                 content = content[:500].replace('`', '\\`')
-                result.append(f'--------------------\n{content}\n... +{content_length-500} more\n--------------------')
+                result.append(f'--------------------\n{content}\n... +{content_length - 500} more\n--------------------')
             else:
                 content=content.replace('`', '\\`')
                 result.append(f'--------------------\n{content}\n--------------------')
@@ -149,7 +149,7 @@ class dispatch_tester:
                         result.append(f'{key}: (len={content_length})')
                         if content_length > 500:
                             content = content[:500].replace('`', '\\`')
-                            result.append(f'--------------------\n{content}\n... +{content_length-500} more\n--------------------')
+                            result.append(f'--------------------\n{content}\n... +{content_length - 500} more\n--------------------')
                         else:
                             content = content.replace('`', '\\`')
                             result.append(f'--------------------\n{content}\n--------------------')
@@ -733,8 +733,8 @@ class dispatch_tester:
                 result.append('permissions :')
                 other = role.permissions
                 for name,index in Permission.__keys__.items():
-                    old_value = (value>>index)&1
-                    new_value = (other>>index)&1
+                    old_value = (value >> index) & 1
+                    new_value = (other >> index) & 1
                     if old_value != new_value:
                         result.append(f'{name} : {bool(old_value)} -> {bool(new_value)}')
                 continue

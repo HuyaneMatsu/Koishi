@@ -23,10 +23,10 @@ PIL.font = truetype
 del ImageDraw, truetype, methodize
 
 def choose(list_):
-    return list_[int((random()*len(list_)))]
+    return list_[int((random() * len(list_)))]
 
 def choose_not_same(list_,last):
-    index = int(random()*len(list_))
+    index = int(random() * len(list_))
     value = list_[index]
     if value == last:
         index +=1
@@ -37,14 +37,14 @@ def choose_not_same(list_,last):
     return value
 
 def pop_one(list_):
-    return list_.pop(int((random()*len(list_))))
+    return list_.pop(int((random() * len(list_))))
 
 def smart_join(list_, limit=2000, sep='\n'):
     result = []
     separator_length = len(sep)
-    limit -= (3+separator_length)
+    limit -= (3 + separator_length)
     for value in list_:
-        limit -= (len(value)+separator_length)
+        limit -= (len(value) + separator_length)
         if limit < 0:
             result.append('...')
             break
@@ -210,16 +210,16 @@ class Pagination10step(Menu):
             self.cancel(CancelledError())
             return False
         
-        pages_index_limit = len(self.pages)-1
+        pages_index_limit = len(self.pages) - 1
         
         if interaction == self.BUTTON_LEFT:
-            page_index = self.page_index-1
+            page_index = self.page_index - 1
         elif interaction == self.BUTTON_RIGHT:
-            page_index = self.page_index+1
+            page_index = self.page_index + 1
         elif interaction == self.BUTTON_LEFT_2:
-            page_index = self.page_index-10
+            page_index = self.page_index - 10
         elif interaction == self.BUTTON_RIGHT_2:
-            page_index = self.page_index+10
+            page_index = self.page_index + 10
         elif interaction == self.BUTTON_RESET:
             page_index = 0
         else:

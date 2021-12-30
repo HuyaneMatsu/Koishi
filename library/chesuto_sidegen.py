@@ -47,7 +47,7 @@ PIL.font=truetype
 del ImageDraw,truetype
 
 def char_range(start,end):
-    for x in range(ord(start),ord(end)+1):
+    for x in range(ord(start),ord(end) + 1):
         yield chr(x)
 
 
@@ -65,7 +65,7 @@ for text in char_range('1','8'):
     image=PIL.new('RGB',(size,size),BC)
     image.draw().rectangle((0,0,side_size,53),fill=DC)
     text_size=FONT.getsize(text)
-    image.draw().text((side_size+((size-side_size-text_size[0])>>1),((size-text_size[1])>>1),),text,fill=FONT_COLOR,font=FONT)
+    image.draw().text((side_size + ((size - side_size - text_size[0]) >> 1),((size - text_size[1]) >> 1),),text,fill=FONT_COLOR,font=FONT)
     image.save(f'CHESUTO_S{text}.png')
 
 image=image=PIL.new('RGB',(size,size),BC)
@@ -77,5 +77,5 @@ for text in char_range('A','H'):
     image=PIL.new('RGB',(size,size),BC)
     image.draw().rectangle((0,0,53,side_size),fill=DC)
     text_size=FONT.getsize(text)
-    image.draw().text((((size-text_size[0])>>1),side_size+((size-side_size-text_size[1])>>1),),text,fill=FONT_COLOR,font=FONT)
+    image.draw().text((((size - text_size[0]) >> 1),side_size + ((size - side_size - text_size[1]) >> 1),),text,fill=FONT_COLOR,font=FONT)
     image.save(f'CHESUTO_S{text}.png')

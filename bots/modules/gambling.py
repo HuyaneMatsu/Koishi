@@ -68,13 +68,13 @@ async def claim_daily_for_yourself(event):
             
             daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
             
-            if daily_next+DAILY_STREAK_BREAK < now:
+            if daily_next + DAILY_STREAK_BREAK < now:
                 streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
             else:
-                streak_text = f'You are in a {daily_streak+1} day streak! Keep up the good work!'
+                streak_text = f'You are in a {daily_streak + 1} day streak! Keep up the good work!'
             
             received = calculate_daily_for(user, daily_streak)
-            total_love = total_love+received
+            total_love = total_love + received
             
             daily_streak += 1
             
@@ -83,9 +83,9 @@ async def claim_daily_for_yourself(event):
                     user_common_model.id == entry_id,
                 ).values(
                     total_love = total_love,
-                    daily_next = now+DAILY_INTERVAL,
+                    daily_next = now + DAILY_INTERVAL,
                     daily_streak = daily_streak,
-                    count_daily_self = user_common_model.count_daily_self+1,
+                    count_daily_self = user_common_model.count_daily_self + 1,
                 )
             )
             
@@ -104,7 +104,7 @@ async def claim_daily_for_yourself(event):
             get_create_common_user_expression(
                 user.id,
                 total_love = received,
-                daily_next = now+DAILY_INTERVAL,
+                daily_next = now + DAILY_INTERVAL,
                 daily_streak = 1,
                 count_daily_self = 1,
             )
@@ -175,26 +175,26 @@ async def claim_daily_for_waifu(client, event, target_user):
             target_daily_streak = target_entry[4]
             target_daily_streak = calculate_daily_new_only(target_daily_streak, target_daily_next, now)
             
-            if target_daily_next+DAILY_STREAK_BREAK < now:
+            if target_daily_next + DAILY_STREAK_BREAK < now:
                 streak_text = f'They did not claim daily for more than 1 day, they got down to {target_daily_streak}.'
             else:
-                streak_text = f'They are in a {target_daily_streak+1} day streak! Keep up the good work for them!'
+                streak_text = f'They are in a {target_daily_streak + 1} day streak! Keep up the good work for them!'
             
             received = calculate_daily_for(target_user, target_daily_streak)
             
             target_total_love = target_entry[3]
-            target_total_love = target_total_love+received
+            target_total_love = target_total_love + received
             
             target_daily_streak += 1
             
-            waifu_cost_increase = 1+floor(received*0.01)
+            waifu_cost_increase = 1 + floor(received * 0.01)
             
             await connector.execute(
                 USER_COMMON_TABLE.update(
                     user_common_model.id == source_entry[0],
                 ).values(
-                    waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
-                    count_daily_for_waifu = user_common_model.count_daily_for_waifu+1,
+                    waifu_cost = user_common_model.waifu_cost + waifu_cost_increase,
+                    count_daily_for_waifu = user_common_model.count_daily_for_waifu + 1,
                 )
             )
             
@@ -203,10 +203,10 @@ async def claim_daily_for_waifu(client, event, target_user):
                     user_common_model.id == target_entry[0],
                 ).values(
                     total_love = target_total_love,
-                    daily_next = now+DAILY_INTERVAL,
+                    daily_next = now + DAILY_INTERVAL,
                     daily_streak = target_daily_streak,
-                    waifu_cost = user_common_model.waifu_cost+waifu_cost_increase,
-                    count_daily_by_waifu = user_common_model.count_daily_by_waifu+1,
+                    waifu_cost = user_common_model.waifu_cost + waifu_cost_increase,
+                    count_daily_by_waifu = user_common_model.count_daily_by_waifu + 1,
                 )
             )
             
@@ -267,11 +267,11 @@ def convert_tdelta(delta):
     if rest:
         result.append(f'{rest} days')
     rest = delta.seconds
-    amount = rest//3600
+    amount = rest // 3600
     if amount:
         result.append(f'{amount} hours')
         rest %= 3600
-    amount = rest//60
+    amount = rest // 60
     if amount:
         result.append(f'{amount} minutes')
         rest %= 60
@@ -308,7 +308,7 @@ async def heart_event(client, event,
             break
         
         permissions = event.channel.cached_permissions_for(client)
-        if not permissions&PERMISSION_MASK_MESSAGING:
+        if not permissions & PERMISSION_MASK_MESSAGING:
             response = (
                 'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
                 'command.'
@@ -454,7 +454,7 @@ class HeartEventGUI:
     def generate_embed(self):
         title = f'Click on {EMOJI__HEART_CURRENCY:e} to receive {self.amount}'
         if self.user_limit:
-            description = f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
+            description = f'{convert_tdelta(self.duration)} left or {self.user_limit - len(self.user_ids)} users'
         else:
             description = f'{convert_tdelta(self.duration)} left'
         return Embed(title, description, color=COLOR__GAMBLING)
@@ -496,7 +496,7 @@ class HeartEventGUI:
             entry_id = results[0][0]
             to_execute = USER_COMMON_TABLE. \
                 update(user_common_model.id==entry_id). \
-                values(total_love=user_common_model.total_love+self.amount)
+                values(total_love=user_common_model.total_love + self.amount)
         
         else:
             to_execute = get_create_common_user_expression(
@@ -512,7 +512,7 @@ class HeartEventGUI:
         update_delta = self._update_delta
         waiter = self.waiter
         
-        sleep_time = (self.duration%update_delta).seconds
+        sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
             self.duration -= timedelta(seconds=sleep_time)
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
@@ -595,7 +595,7 @@ async def daily_event(client, event,
             break
         
         permissions = event.channel.cached_permissions_for(client)
-        if not permissions&PERMISSION_MASK_MESSAGING:
+        if not permissions & PERMISSION_MASK_MESSAGING:
             response = (
                 'I require `send messages`, `add reactions` and `user external emojis` permissions to invoke this '
                 'command.'
@@ -743,7 +743,7 @@ class DailyEventGUI:
     def generate_embed(self):
         title = f'React with {EMOJI__HEART_CURRENCY:e} to increase your daily streak by {self.amount}'
         if self.user_limit:
-            description = f'{convert_tdelta(self.duration)} left or {self.user_limit-len(self.user_ids)} users'
+            description = f'{convert_tdelta(self.duration)} left or {self.user_limit - len(self.user_ids)} users'
         else:
             description = f'{convert_tdelta(self.duration)} left'
         return Embed(title, description, color=COLOR__GAMBLING)
@@ -787,7 +787,7 @@ class DailyEventGUI:
             now = datetime.utcnow()
             
             daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
-            daily_streak = daily_streak+self.amount
+            daily_streak = daily_streak + self.amount
             
             to_execute = USER_COMMON_TABLE.update(
                 user_common_model.id == entry_id,
@@ -810,7 +810,7 @@ class DailyEventGUI:
         update_delta = self._update_delta
         waiter = self.waiter
         
-        sleep_time = (self.duration%update_delta).seconds
+        sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
             self.duration -= timedelta(seconds=sleep_time)
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
@@ -951,22 +951,22 @@ async def gift(client, event,
         source_user_total_love -= source_user_total_allocated
         
         if amount > source_user_total_love:
-            amount = source_user_total_love-source_user_total_allocated
+            amount = source_user_total_love - source_user_total_allocated
             source_user_new_love = source_user_total_allocated
         else:
-            source_user_new_love = source_user_total_love-amount
+            source_user_new_love = source_user_total_love - amount
         
-        target_user_new_total_love = target_user_total_love+amount
+        target_user_new_total_love = target_user_total_love + amount
         
         await connector.execute(USER_COMMON_TABLE. \
             update(user_common_model.id==source_user_entry_id). \
-            values(total_love = user_common_model.total_love-amount)
+            values(total_love = user_common_model.total_love - amount)
         )
         
         if target_user_entry_id != -1:
             to_execute = USER_COMMON_TABLE. \
                 update(user_common_model.id==target_user_entry_id). \
-                values(total_love = user_common_model.total_love+amount)
+                values(total_love = user_common_model.total_love + amount)
         
         else:
             to_execute = get_create_common_user_expression(
@@ -1071,7 +1071,7 @@ async def award(client, event,
         
         
         if with_ == 'hearts':
-            target_user_new_total_love = target_user_total_love+amount
+            target_user_new_total_love = target_user_total_love + amount
             target_user_new_daily_streak = target_user_daily_streak
         else:
             now = datetime.utcnow()
@@ -1080,7 +1080,7 @@ async def award(client, event,
                 target_user_daily_streak, target_user_daily_next = calculate_daily_new(target_user_daily_streak, 
                     target_user_daily_next, now)
             
-            target_user_new_daily_streak = target_user_daily_streak+amount
+            target_user_new_daily_streak = target_user_daily_streak + amount
         
         target_user_new_daily_next = target_user_daily_next
             
@@ -1181,11 +1181,11 @@ async def take(client, event,
         results = await response.fetchall()
         if results:
             target_user_entry_id, target_user_total_love, target_user_total_allocated = results[0]
-            target_user_heart_reducible = target_user_total_love-target_user_total_allocated
+            target_user_heart_reducible = target_user_total_love - target_user_total_allocated
             if target_user_heart_reducible <= 0:
                 target_user_new_total_love = 0
             else:
-                target_user_new_total_love = target_user_heart_reducible-amount
+                target_user_new_total_love = target_user_heart_reducible - amount
                 if target_user_new_total_love < 0:
                     target_user_new_total_love = 0
                 
@@ -1233,7 +1233,7 @@ async def top_list(client, event,
             ).limit(
                 20,
             ).offset(
-                20*(page-1),
+                20 * (page - 1),
             )
         )
         
@@ -1242,7 +1242,7 @@ async def top_list(client, event,
         parts = []
         max_hearts = 0
         
-        for index, (user_id, total_hearts) in enumerate(results, (page*20)-19):
+        for index, (user_id, total_hearts) in enumerate(results, (page * 20) - 19):
             try:
                 user = USERS[user_id]
             except KeyError:
@@ -1280,8 +1280,8 @@ async def top_list(client, event,
     
     if max_hearts:
         result_parts.append('cs\n')
-        index_adjust = floor(log10((page-1)*20+len(parts)))+1
-        hearts_adjust = floor(log10(max_hearts))+1
+        index_adjust = floor(log10((page - 1) * 20 + len(parts))) + 1
+        hearts_adjust = floor(log10(max_hearts)) + 1
         
         for index, total_hearts, full_name in parts:
             result_parts.append(str(index).rjust(index_adjust))
@@ -1355,7 +1355,7 @@ async def roles(client, event,
         
         if results:
             total_love, total_allocated = results[0]
-            available_love = total_love-total_allocated
+            available_love = total_love - total_allocated
         else:
             total_love = 0
             available_love = 0
@@ -1374,7 +1374,7 @@ async def roles(client, event,
             await connector.execute(USER_COMMON_TABLE. \
                 update(user_common_model.user_id == user_id). \
                 values(
-                    total_love = user_common_model.total_love-cost,
+                    total_love = user_common_model.total_love - cost,
                 )
             )
     
@@ -1385,7 +1385,7 @@ async def roles(client, event,
         embed.description = 'Was successful.'
         embed.add_field(
             f'Your {EMOJI__HEART_CURRENCY:e}',
-            f'{total_love} -> {total_love-cost}',
+            f'{total_love} -> {total_love - cost}',
         )
     else:
         embed.description = 'You have insufficient amount of hearts.'
@@ -1397,27 +1397,27 @@ async def roles(client, event,
     yield embed
 
 
-# ((d+1)*d)>>1 - (((d-a)+1)*(d-a))>>1
-# (((d+1)*d) - (((d-a)+1)*(d-a)))>>1
-# (d*d+d - (((d-a)+1)*(d-a)))>>1
-# (d*d+d - ((d-a+1)*(d-a)))>>1
-# (d*d+d - (d*d-d*a+d-d*a+a*a-a))>>1
-# (d*d+d - (d*d - d*a + d - d*a + a*a - a))>>1
-# (d*d+d + (-d*d + d*a - d + d*a - a*a + a))>>1
-# (d*d + d - d*d + d*a - d + d*a - a*a + a)>>1
-# (d + d*a - d + d*a - a*a + a)>>1
-# (d*a + d*a - a*a + a)>>1
-# (d*a + d*a - a*a + a)>>1
-# (2*d*a - a*a + a)>>1
-# (a*(2*d - a + 1))>>1
-# (a*((d<<1) - a + 1))>>1
-# (a*((d<<1)-a+1))>>1
+# ((d + 1)*d) >> 1 - (((d-a) + 1)*(d-a)) >> 1
+# (((d + 1)*d) - (((d-a) + 1)*(d-a))) >> 1
+# (d*d + d - (((d-a) + 1)*(d-a))) >> 1
+# (d*d + d - ((d-a + 1)*(d-a))) >> 1
+# (d*d + d - (d*d-d*a + d-d*a + a*a-a)) >> 1
+# (d*d + d - (d*d - d*a + d - d*a + a*a - a)) >> 1
+# (d*d + d + (-d*d + d*a - d + d*a - a*a + a)) >> 1
+# (d*d + d - d*d + d*a - d + d*a - a*a + a) >> 1
+# (d + d*a - d + d*a - a*a + a) >> 1
+# (d*a + d*a - a*a + a) >> 1
+# (d*a + d*a - a*a + a) >> 1
+# (2*d*a - a*a + a) >> 1
+# (a*(2*d - a + 1)) >> 1
+# (a*((d << 1) - a + 1)) >> 1
+# (a*((d << 1)-a + 1)) >> 1
 
 DAILY_REFUND_MIN = 124
 
 def calculate_sell_price(daily_count, daily_refund):
 
-    under_price = DAILY_REFUND_MIN-daily_count+daily_refund
+    under_price = DAILY_REFUND_MIN - daily_count + daily_refund
     if under_price < 0:
         under_price = 0
         over_price = daily_refund
@@ -1426,15 +1426,15 @@ def calculate_sell_price(daily_count, daily_refund):
             under_price = daily_refund
             over_price = 0
         else:
-            over_price = daily_refund-under_price
+            over_price = daily_refund - under_price
     
     price = 0
     
     if over_price:
-        price += (over_price*((daily_count<<1)-over_price+1))>>1
+        price += (over_price * ((daily_count << 1) - over_price + 1)) >> 1
     
     if under_price:
-        price += (under_price*DAILY_REFUND_MIN)
+        price += (under_price * DAILY_REFUND_MIN)
     
     return price
 
@@ -1481,9 +1481,9 @@ async def sell_daily(client, event,
             await connector.execute(USER_COMMON_TABLE. \
                 update(user_common_model.id == entry_id). \
                 values(
-                    total_love = user_common_model.total_love+sell_price,
+                    total_love = user_common_model.total_love + sell_price,
                     daily_next = daily_next,
-                    daily_streak = daily_streak-amount,
+                    daily_streak = daily_streak - amount,
                 )
             )
             
@@ -1498,11 +1498,11 @@ async def sell_daily(client, event,
         embed.description = 'Great success!'
         embed.add_field(
             f'Your daily streak',
-            f'{daily_streak} -> {daily_streak-amount}',
+            f'{daily_streak} -> {daily_streak - amount}',
         )
         embed.add_field(
             f'Your {EMOJI__HEART_CURRENCY:e}',
-            f'{total_love} -> {total_love+sell_price}',
+            f'{total_love} -> {total_love + sell_price}',
         )
     else:
         embed.description = 'You have insufficient amount of daily streak.'
@@ -1539,7 +1539,7 @@ async def increase_user_total_love(user_id, increase):
             to_execute = USER_COMMON_TABLE. \
                 update(user_common_model.id == entry_id). \
                 values(
-                    total_love = user_common_model.total_love+increase,
+                    total_love = user_common_model.total_love + increase,
                 )
         else:
             to_execute = get_create_common_user_expression(

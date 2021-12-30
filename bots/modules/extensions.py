@@ -175,7 +175,7 @@ async def list_all(event):
         
         if limit > EXTENSION_LIMIT:
             description_parts.append('\n\n*')
-            description_parts.append(str(limit-EXTENSION_LIMIT))
+            description_parts.append(str(limit - EXTENSION_LIMIT))
             description_parts.append(' truncated*')
         
         description = ''.join(description_parts)

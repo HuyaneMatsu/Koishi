@@ -113,10 +113,10 @@ async def guild_icon(event,
         hash_value = guild.invite_splash_hash
     
     if url is None:
-        color = (event.id>>22)&0xFFFFFF
+        color = (event.id >> 22) & 0xFFFFFF
         return Embed(f'{guild.name} has no {name}', color=color)
     
-    color = hash_value&0xFFFFFF
+    color = hash_value & 0xFFFFFF
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
 
 # command end
@@ -151,7 +151,7 @@ async def roll(
     """Rolls with dices."""
     amount = 0
     for _ in range(dice_count):
-        amount += round(1.+(random()*5.))
+        amount += round(1.+(random() * 5.))
     
     return str(amount)
 
@@ -229,7 +229,7 @@ IMPROVISATION_CHOICES = [
 async def improvise():
     """Improvises some derpage"""
     yield '*Thinks*'
-    await sleep(1.0+random()*4.0)
+    await sleep(1.0 + random() * 4.0)
     yield choice(IMPROVISATION_CHOICES)
 
 # command end
@@ -391,7 +391,7 @@ async def ping():
     """HTTP ping-pong."""
     start = perf_counter()
     yield
-    delay = (perf_counter()-start)*1000.0
+    delay = (perf_counter() - start) * 1000.0
     
     yield f'{delay:.0f} ms'
 
@@ -451,7 +451,7 @@ async def get_image_embed(client, tags, name, color):
     if image_urls is None:
         
         # Request image information
-        async with client.http.get(SAFE_BOORU+tags) as response:
+        async with client.http.get(SAFE_BOORU + tags) as response:
             if response.status != 200:
                 return Embed('Error', 'Safe-booru unavailable', color=color)
             
@@ -601,7 +601,7 @@ async def character_popularity(
     position: P('number', 'Please select a number between 1 and 20', min_value=1, max_value=20)
 ):
     """Returns the name of the touhou character by it's popularity position."""
-    return MOST_POPULAR_TOUHOU_CHARACTERS[position-1]
+    return MOST_POPULAR_TOUHOU_CHARACTERS[position - 1]
 
 # command end
 # command start context avatar
@@ -875,9 +875,9 @@ def render_joined_users(users):
 
 def get_liking(client_id, user_id):
     if user_id > client_id:
-        liking = user_id-client_id
+        liking = user_id - client_id
     else:
-        liking = client_id-user_id
+        liking = client_id - user_id
     
     return liking
 
@@ -1241,7 +1241,7 @@ def build_command_string(command_lines):
     # Remove 2+ continuous empty lines.
     continuous_empty = 0
     
-    for index in reversed(range(1, len(command_lines)-1)):
+    for index in reversed(range(1, len(command_lines) - 1)):
         if command_lines[index]:
             continuous_empty = 0
             continue
@@ -1264,14 +1264,14 @@ def build_command_string(command_lines):
     chunk_start_index = 0
     
     index = 1
-    limit = len(command_lines)-2
+    limit = len(command_lines) - 2
     
     while index < limit:
         if command_lines[index]:
             index += 1
             continue
         
-        if command_lines[index+1]:
+        if command_lines[index + 1]:
             index += 2
             continue
         
@@ -1288,7 +1288,7 @@ def build_command_string(command_lines):
     # Group chunks
     chunks_with_length = []
     for chunk in chunks:
-        chunk_length = 12+len(chunk)
+        chunk_length = 12 + len(chunk)
         
         for line in chunk:
             chunk_length += len(line)
@@ -1469,21 +1469,21 @@ async def switch_page(event, command_type, command_name, page_index):
         button_back_page_index = '_'
         
         button_next_enabled = True
-        button_next_page_index = str(page_index+1)
-    elif page_index > len(command_source)-2:
-        page_index = len(command_source)-1
+        button_next_page_index = str(page_index + 1)
+    elif page_index > len(command_source) - 2:
+        page_index = len(command_source) - 1
         
         button_back_enabled = True
-        button_back_page_index = str(page_index-1)
+        button_back_page_index = str(page_index - 1)
         
         button_next_enabled = False
         button_next_page_index = '_'
     else:
         button_back_enabled = True
-        button_back_page_index = str(page_index-1)
+        button_back_page_index = str(page_index - 1)
         
         button_next_enabled = True
-        button_next_page_index = str(page_index+1)
+        button_next_page_index = str(page_index + 1)
     
     page = command_source[page_index]
     

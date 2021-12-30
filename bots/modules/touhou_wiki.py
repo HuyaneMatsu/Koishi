@@ -242,7 +242,7 @@ async def download_wiki_page(client, title_, url):
                     collected.append(block)
                     section_ln = len(block)
                 else:
-                    section_ln=section_ln+len(block)
+                    section_ln=section_ln + len(block)
                     collected.append(block)
                 
                 index +=1
@@ -254,7 +254,7 @@ async def download_wiki_page(client, title_, url):
                 
                 continue
             
-            if section_ln+len(block)>1980:
+            if section_ln + len(block)>1980:
             
                 if section_ln > 1400:
                     collected.append('...')
@@ -265,16 +265,16 @@ async def download_wiki_page(client, title_, url):
                     section_ln = len(block)
                 
                 else:
-                    max_ln = 1900-section_ln
+                    max_ln = 1900 - section_ln
                     break_point = block.find(' ', max_ln)
-                    if break_point == -1 or break_point+80 > max_ln:
+                    if break_point == -1 or break_point + 80 > max_ln:
                         # too long word (lol category)
                         pre_part = block[:max_ln]+' ...'
-                        post_part = '... '+block[max_ln:]
+                        post_part = '... ' + block[max_ln:]
                     else:
                         # space found, brake next to it
                         pre_part = block[:break_point]+' ...'
-                        post_part = '...'+block[break_point:]
+                        post_part = '...' + block[break_point:]
                     
                     index += 1
                     blocks.insert(index, post_part)
@@ -286,7 +286,7 @@ async def download_wiki_page(client, title_, url):
                     continue
             
             else:
-                section_ln=section_ln+len(block)
+                section_ln=section_ln + len(block)
                 collected.append(block)
             
             index += 1

@@ -225,7 +225,7 @@ async def join(client, user, guild, volume):
             volume /= 100.0
         
         await do_set_volume(voice_client, volume)
-        content = f'{content}; Volume set to {volume*100.:.0f}%'
+        content = f'{content}; Volume set to {volume * 100.:.0f}%'
     
     yield content
     return
@@ -391,7 +391,7 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE and (not SOLARLINK_VOICE):
                 continue
             
             start = parsed.start()
-            length = parsed.end()-start
+            length = parsed.end() - start
             most_accurate = (start, length, len(name), name)
             break
         
@@ -416,10 +416,10 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE and (not SOLARLINK_VOICE):
                 continue
             
             if start < target:
-                most_accurate = (start, parsed.end()-start, len(name), name)
+                most_accurate = (start, parsed.end() - start, len(name), name)
                 continue
             
-            length = parsed.end()-start
+            length = parsed.end() - start
             target = most_accurate[1]
             
             if length > target:
@@ -471,7 +471,7 @@ async def volume_(client, event_or_message, volume):
     
     if volume is None:
         volume = await do_get_volume(voice_client)
-        return f'{volume*100.:.0f}%'
+        return f'{volume * 100.:.0f}%'
     
     if volume <= 0:
         volume = 0.0
@@ -481,7 +481,7 @@ async def volume_(client, event_or_message, volume):
         volume /= 100.0
     
     await do_set_volume(voice_client, volume)
-    return f'Volume set to {volume*100.:.0f}%.'
+    return f'Volume set to {volume * 100.:.0f}%.'
 
 
 async def skip(client, event_or_message, index):
@@ -599,7 +599,7 @@ async def queue(client, event_or_message, guild):
                 if index == limit:
                     break
                 
-                if index%10 == 0:
+                if index % 10 == 0:
                     page = Embed(title, color=color)
                     pages.append(page)
             

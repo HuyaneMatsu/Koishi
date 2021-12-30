@@ -10,7 +10,7 @@ SLASH_CLIENT : Client
 URBAN_DICTIONARY_API_URL = 'https://api.urbandictionary.com/v0/define'
 URBAN_DICTIONARY_SEARCH_URL = 'https://www.urbandictionary.com/define.php?term='
 # Response structure
-# https://github.com/NightfallAlicorn/urban-dictionary#definitionobject
+# https://github.com/NightfallAlicorn/urban - dictionary#definitionobject
 
 
 URBAN_COLOR = Color.from_rgb(207, 123, 87)
@@ -34,29 +34,29 @@ def embrace_urban_markdown(text, text_length_limit):
             
             break
         
-        if link_start_index and text[link_start_index-1] == '\\':
-            index = link_start_index+1
+        if link_start_index and text[link_start_index - 1] == '\\':
+            index = link_start_index + 1
             continue
         
         # add pre link.
         string_parts.append(text[start_index:link_start_index])
         
         # set position
-        link_start_index = link_start_index+1
+        link_start_index = link_start_index + 1
         
         while True:
             link_end_index = text.find(']', index)
             if link_end_index == -1:
                 break
             
-            if text[link_end_index-1] == '\\':
-                index = link_end_index+1
+            if text[link_end_index - 1] == '\\':
+                index = link_end_index + 1
                 continue
             
             link_content = text[link_start_index:link_end_index]
             string_parts.append(('[', link_content,'](', URBAN_DICTIONARY_SEARCH_URL, quote(link_content),')'))
             
-            start_index = index = link_end_index+1
+            start_index = index = link_end_index + 1
             break
         
         # never ended link

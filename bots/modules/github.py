@@ -31,7 +31,7 @@ class GitHubQueryLimit:
         if headers.get(GITHUB_HEADER_RATE_LIMIT_REMAINING, '') == '0':
             now = parse_date_header_to_datetime(headers[DATE]).timestamp()
             reset = int(headers[GITHUB_HEADER_RATE_LIMIT_RESET_AT])
-            self.rate_limit_reset_at = LOOP_TIME() + float(reset-now)
+            self.rate_limit_reset_at = LOOP_TIME() + float(reset - now)
 
 class GitHubQuery:
     __slots__ = ('active', 'limit', 'http', 'query_builder', 'cache', 'object_type')
@@ -323,7 +323,7 @@ class OrganizationContainerType:
         else:
             organization_count = len(data)
             if organization_count > 6:
-                truncated = 6-organization_count
+                truncated = 6 - organization_count
                 data = data[:6]
             else:
                 truncated = 0

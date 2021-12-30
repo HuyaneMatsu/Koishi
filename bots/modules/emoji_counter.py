@@ -18,7 +18,7 @@ EMOJI_ACTION_TYPE_REACTION = 2
 
 RELATIVE_MONTH = relativedelta(months=1)
 
-MONTH = timedelta(days=367, hours=6)/12
+MONTH = timedelta(days=367, hours=6) / 12
 
 MOST_USED_PER_PAGE = 30
 
@@ -74,7 +74,7 @@ async def message_edit(client, message, old_attributes):
     if (old_custom_emojis is None):
         custom_emojis = new_custom_emojis
     else:
-        custom_emojis = new_custom_emojis-old_custom_emojis
+        custom_emojis = new_custom_emojis - old_custom_emojis
     
     timestamp = message.edited_at
     if timestamp is None:
@@ -215,7 +215,7 @@ async def user_top(event,
             ).where(
                 and_(
                     emoji_counter_model.user_id == user.id,
-                    emoji_counter_model.timestamp > datetime.utcnow()-RELATIVE_MONTH*months,
+                    emoji_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
                 )
             ).limit(
                 count,
@@ -258,7 +258,7 @@ async def user_top(event,
             description_parts.append(str(count))
             description_parts.append('** x ')
             description_parts.append(emoji.as_emoji)
-            if (not index%10) or (index == limit):
+            if (not index % 10) or (index == limit):
                 description = ''.join(description_parts)
                 description_parts.clear()
                 embed.add_field(f'{start} - {index}', description, inline=True)
@@ -266,7 +266,7 @@ async def user_top(event,
                 if (index == limit):
                     break
                 
-                start = index+1
+                start = index + 1
                 continue
             
             description_parts.append('\n')
@@ -306,7 +306,7 @@ async def emoji_top(
             ]). \
             where(and_(
                 emoji_counter_model.emoji_id == emoji.id,
-                emoji_counter_model.timestamp > datetime.utcnow()-RELATIVE_MONTH*months,
+                emoji_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
             )). \
             limit(30). \
             group_by(emoji_counter_model.user_id). \
@@ -473,8 +473,8 @@ async def most_used(
     if page < 1:
         abort('Page value can be only positive')
     
-    low_date_limit = datetime.utcnow()-RELATIVE_MONTH*months
-    is_new_limit = datetime.utcnow()-MONTH
+    low_date_limit = datetime.utcnow() - RELATIVE_MONTH * months
+    is_new_limit = datetime.utcnow() - MONTH
     
     async with DB_ENGINE.connect() as connector:
         
@@ -521,10 +521,10 @@ async def most_used(
     
     items.sort(key=item_sort_key, reverse=order)
     
-    page_shift = (page-1)*MOST_USED_PER_PAGE
+    page_shift = (page - 1) * MOST_USED_PER_PAGE
     
     index = page_shift
-    limit = min(len(items), index+MOST_USED_PER_PAGE)
+    limit = min(len(items), index + MOST_USED_PER_PAGE)
     
     description_parts = []
     
@@ -553,4 +553,4 @@ async def most_used(
         description = '*No recorded data*'
     
     return Embed('Most used emojis:', description). \
-        add_footer(f'Page {page} / {(len(items)//MOST_USED_PER_PAGE)+1}')
+        add_footer(f'Page {page} / {(len(items) // MOST_USED_PER_PAGE) + 1}')

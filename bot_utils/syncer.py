@@ -12,7 +12,7 @@ from hata.ext.command_utils import wait_for_message, Pagination
 
 from .constants import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
 
-CHUNK_SIZE = 128*1024 # 128 KB
+CHUNK_SIZE = 128 * 1024 # 128 KB
 
 HATA_HEAD_NAME = 'hata'
 KOISHI_HEAD_NAME = 'koishi'
@@ -252,7 +252,7 @@ async def receive_sync(client, partner):
                 break
             
             line = lines[index]
-            index = index+1
+            index = index + 1
             
             line_length = len(line)
             # long line check, should not happen
@@ -260,7 +260,7 @@ async def receive_sync(client, partner):
                 line = line[:500]+'...\n'
                 line_length = 504
             
-            if page_length+line_length > 1997:
+            if page_length + line_length > 1997:
                 if index == limit:
                     # If we are at the last element, we don't need to shard up,
                     # because the last element is always '```'
@@ -278,7 +278,7 @@ async def receive_sync(client, partner):
                 page_contents.append('```py\n')
                 page_contents.append(line)
                 
-                page_length = 6+line_length
+                page_length = 6 + line_length
                 continue
             
             page_contents.append(line)

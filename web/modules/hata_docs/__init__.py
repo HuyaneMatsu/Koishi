@@ -85,7 +85,7 @@ def unit_adder(unit):
     ROUTES.add_url_rule(path, path, DocsWrapper(unit))
     
     path += '/'
-    ROUTES.add_url_rule(path, path, Redirecter('../'+unit.path.parts[-1]))
+    ROUTES.add_url_rule(path, path, Redirecter('../' + unit.path.parts[-1]))
     ADDED_OBJECTS.add(unit)
 
 def recursive_unit_adder(module_unit):

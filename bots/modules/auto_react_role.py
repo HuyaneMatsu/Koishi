@@ -31,11 +31,11 @@ BEHAVIOUR_FLAG_KEYS = {
 class BehaviourFlag(int):
     @property
     def remove_emoji_if_role(self):
-        return self&1
+        return self & 1
     
     @property
     def remove_role_if_emoji(self):
-        return (self>>1)&1
+        return (self >> 1) & 1
     
     def update_by_keys(self,**kwargs):
         
@@ -43,10 +43,10 @@ class BehaviourFlag(int):
         for name, value in kwargs.items():
             shift = BEHAVIOUR_FLAG_KEYS[name]
             if value:
-                new = new | (1<<shift)
+                new = new | (1 << shift)
             else:
-                if (new>>shift)&1:
-                    new = new^(1<<shift)
+                if (new >> shift) & 1:
+                    new = new ^ (1 << shift)
         
         return type(self)(new)
     
@@ -174,15 +174,15 @@ def render_message_content(message):
                 if len(part) <= leftover_length:
                     collected_parts.append(part)
                     collected_parts.append(' ')
-                    leftover_length = leftover_length-len(part)-1
+                    leftover_length = leftover_length - len(part) - 1
                     
                     if leftover_length < 20:
                         break
                 
                 else:
-                    space_position = content.rfind(' ', leftover_length-20, leftover_length)
+                    space_position = content.rfind(' ', leftover_length - 20, leftover_length)
                     if space_position == -1:
-                        space_position = leftover_length-4
+                        space_position = leftover_length - 4
                     
                     part = part[:space_position]
                     collected_parts.append(part)
@@ -429,7 +429,7 @@ class AutoReactRoleChange:
         old_behaviour = self.old_behaviour
         new_behaviour = self.new_behaviour
         
-        added = BehaviourFlag(new_behaviour&(~old_behaviour))
+        added = BehaviourFlag(new_behaviour & (~old_behaviour))
         if added:
             result.append('Added behaviours:\n')
             if added.remove_emoji_if_role:
@@ -440,7 +440,7 @@ class AutoReactRoleChange:
             
             result.append('\n')
             
-        actual = BehaviourFlag(new_behaviour&old_behaviour)
+        actual = BehaviourFlag(new_behaviour & old_behaviour)
         if actual:
             result.append('Actual behaviours:\n')
             if actual.remove_emoji_if_role:
@@ -451,7 +451,7 @@ class AutoReactRoleChange:
             
             result.append('\n')
         
-        removed = BehaviourFlag(old_behaviour&(~new_behaviour))
+        removed = BehaviourFlag(old_behaviour & (~new_behaviour))
         if removed:
             result.append('Removed behaviours:\n')
             if removed.remove_emoji_if_role:
@@ -921,9 +921,9 @@ class AutoReactRoleManager:
         relations = {}
         
         for emoji, role in changes.added:
-            data[position:position+8] = emoji.id.to_bytes(8, byteorder='big')
+            data[position:position + 8] = emoji.id.to_bytes(8, byteorder='big')
             position +=8
-            data[position:position+8] = role.id.to_bytes(8, byteorder='big')
+            data[position:position + 8] = role.id.to_bytes(8, byteorder='big')
             position +=8
 
             relations[emoji] = role
@@ -1002,7 +1002,7 @@ class AutoReactRoleManager:
         re_do = False
         data = query.data
         for position in range(0, 320, 16):
-            emoji_id = int.from_bytes(data[position:position+8], byteorder='big')
+            emoji_id = int.from_bytes(data[position:position + 8], byteorder='big')
             
             if emoji_id == 0:
                 break
@@ -1013,7 +1013,7 @@ class AutoReactRoleManager:
                 re_do = True
                 continue
             
-            role_id = int.from_bytes(data[position+8:position+16], byteorder='big')
+            role_id = int.from_bytes(data[position + 8:position + 16], byteorder='big')
             
             try:
                 role = ROLES[role_id]
@@ -1028,9 +1028,9 @@ class AutoReactRoleManager:
                 data = bytearray(320)
                 position = 0
                 for emoji, role in relations.items():
-                    data[position:position+8]=emoji.id.to_bytes(8, byteorder='big')
+                    data[position:position + 8]=emoji.id.to_bytes(8, byteorder='big')
                     position +=8
-                    data[position:position+8]=role.id.to_bytes(8, byteorder='big')
+                    data[position:position + 8]=role.id.to_bytes(8, byteorder='big')
                     position +=8
                 
                 await connector.execute(AUTO_REACT_ROLE_TABLE.update().values(
@@ -1347,9 +1347,9 @@ class AutoReactRoleManager:
         data = bytearray(320)
         position = 0
         for emoji, role in self.relations.items():
-            data[position:position+8] = emoji.id.to_bytes(8, byteorder='big')
+            data[position:position + 8] = emoji.id.to_bytes(8, byteorder='big')
             position +=8
-            data[position:position+8] = role.id.to_bytes(8, byteorder='big')
+            data[position:position + 8] = role.id.to_bytes(8, byteorder='big')
             position +=8
         
         async with DB_ENGINE.connect() as connector:
@@ -1388,7 +1388,7 @@ class load_auto_react_roles:
     called = 0
     
     async def __call__(self, client):
-        called = self.called+1
+        called = self.called + 1
         type(self).called = called
         if called != len(CLIENTS):
             return
@@ -1434,7 +1434,7 @@ async def show_auto_react_roles(client, event):
         abort('You must have `administrator` permission to invoke this command.')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
+    if (not permissions & PERMISSION_MASK_MESSAGING) or ( not permissions & PERMISSION_MASK_REACT):
         abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
     managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type=True, is_method=True)

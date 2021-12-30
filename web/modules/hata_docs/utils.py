@@ -44,12 +44,12 @@ def get_back_path(unit):
         if unit is None:
             break
         
-        parts.append((unit.name, '../'*counter+quote(unit.name)))
+        parts.append((unit.name, '../'*counter + quote(unit.name)))
         counter += 1
         continue
     
     result = []
-    index = len(parts)-1
+    index = len(parts) - 1
     while True:
         name, url = parts[index]
         result.append('<a href="')
@@ -199,7 +199,7 @@ def get_searched_info(path, order_priority_base=0):
         preview = None
     else:
         preview = unit.preview
-    return order_priority_base+order_priority, name, url, type_, preview
+    return order_priority_base + order_priority, name, url, type_, preview
 
 
 def search_info_sort_key(search_info):

@@ -129,7 +129,7 @@ else:
     MODULE_NAMES.discard('google')
 
 for path in MODULE_NAMES:
-    EXTENSION_LOADER.add('bots.modules.'+path)
+    EXTENSION_LOADER.add('bots.modules.' + path)
 
 del path
 

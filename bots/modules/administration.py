@@ -60,7 +60,7 @@ async def clear(client, event,
         if delta is None:
             abort('`before` could not be parsed.')
         
-        before = datetime_to_id(datetime.utcnow()-delta)
+        before = datetime_to_id(datetime.utcnow() - delta)
     
     if (after is None) or (not after):
         after = 0
@@ -69,7 +69,7 @@ async def clear(client, event,
         if delta is None:
             yield Embed('Error', '`after` could not be parsed.')
         
-        before = datetime_to_id(datetime.utcnow()-delta)
+        before = datetime_to_id(datetime.utcnow() - delta)
     
     yield 'Yeeting messages began'
     
@@ -172,7 +172,7 @@ async def bans(client, event):
                 if reason is None:
                     reason = 'Not defined.'
                 name = f'{user:f} {user.id}'
-                embed_length += len(reason)+len(name)
+                embed_length += len(reason) + len(name)
                 if embed_length > 5900:
                     break
                 embed.add_field(name, reason)
@@ -195,7 +195,7 @@ async def bans(client, event):
     while True:
         embed = embeds[index]
         index +=1
-        embed.add_footer(f'Page: {index}/{embed_ln}. Bans {field_count+1}-{field_count+len(embed.fields)}/{limit}')
+        embed.add_footer(f'Page: {index}/{embed_ln}. Bans {field_count + 1}-{field_count + len(embed.fields)}/{limit}')
         field_count += len(embed.fields)
         
         result.append(embed)
@@ -250,7 +250,7 @@ async def invites_(client, event,
     if (channel is not None) and isinstance(channel, ChannelCategory):
         abort('Category channels have no invites.')
     
-    if not event.channel.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING:
+    if not event.channel.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING:
         abort('I must have `send messages` permission to invoke this command correctly.')
     
     if channel is None:

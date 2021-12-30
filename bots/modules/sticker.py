@@ -10,7 +10,7 @@ from sqlalchemy import func as alchemy_function, and_
 from sqlalchemy.sql import select, desc
 
 RELATIVE_MONTH = relativedelta(months=1)
-MONTH = timedelta(days=367, hours=6)/12
+MONTH = timedelta(days=367, hours=6) / 12
 MOST_USED_PER_PAGE = 30
 
 SLASH_CLIENT: Client
@@ -52,7 +52,7 @@ async def user_top(event,
             ]). \
             where(and_(
                 sticker_counter_model.user_id == user.id,
-                sticker_counter_model.timestamp > datetime.utcnow()-RELATIVE_MONTH*months,
+                sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
             )). \
             limit(count). \
             group_by(sticker_counter_model.sticker_id). \
@@ -90,7 +90,7 @@ async def user_top(event,
             description_parts.append('** x ')
             description_parts.append(sticker.name)
             
-            if (not index%10) or (index == limit):
+            if (not index % 10) or (index == limit):
                 description = ''.join(description_parts)
                 description_parts.clear()
                 embed.add_field(f'{start} - {index}', description, inline=True)
@@ -98,7 +98,7 @@ async def user_top(event,
                 if (index == limit):
                     break
                 
-                start = index+1
+                start = index + 1
                 continue
             
             description_parts.append('\n')
@@ -128,7 +128,7 @@ async def sticker_top(
             ]). \
             where(and_(
                 sticker_counter_model.sticker_id == sticker.id,
-                sticker_counter_model.timestamp > datetime.utcnow()-RELATIVE_MONTH*months,
+                sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
             )). \
             limit(30). \
             group_by(sticker_counter_model.user_id). \
@@ -258,8 +258,8 @@ async def most_used(
     if page < 1:
         abort('Page value can be only positive')
     
-    low_date_limit = datetime.utcnow()-RELATIVE_MONTH*months
-    is_new_limit = datetime.utcnow()-MONTH
+    low_date_limit = datetime.utcnow() - RELATIVE_MONTH * months
+    is_new_limit = datetime.utcnow() - MONTH
     
     async with DB_ENGINE.connect() as connector:
         
@@ -297,10 +297,10 @@ async def most_used(
     
     items.sort(key=item_sort_key, reverse=order)
     
-    page_shift = (page-1)*MOST_USED_PER_PAGE
+    page_shift = (page - 1) * MOST_USED_PER_PAGE
     
     index = page_shift
-    limit = min(len(items), index+MOST_USED_PER_PAGE)
+    limit = min(len(items), index + MOST_USED_PER_PAGE)
     
     description_parts = []
     
@@ -329,7 +329,7 @@ async def most_used(
         description = '*No recorded data*'
     
     return Embed('Most used stickers:', description). \
-        add_footer(f'Page {page} / {(len(items)//MOST_USED_PER_PAGE)+1}')
+        add_footer(f'Page {page} / {(len(items) // MOST_USED_PER_PAGE) + 1}')
 
 
 @STICKER_COMMANDS.interactions

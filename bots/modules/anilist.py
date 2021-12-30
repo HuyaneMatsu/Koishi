@@ -663,7 +663,7 @@ DESCRIPTION_RP = re_compile(
         '&#039|' # They don't know what not html format means
         '</?i>' # They don't know what not html format means
     ),
-    re_multi_line|re_unicode|re_dotall,
+    re_multi_line | re_unicode | re_dotall,
 )
 
 DESCRIPTION_RELATION = {

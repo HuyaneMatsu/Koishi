@@ -45,8 +45,8 @@ def teardown(lib):
 def parse_date_to_datetime(data):
     *date_tuple, tz = _parsedate_tz(data)
     if tz is None:
-        return datetime(*date_tuple[:6])
-    return datetime(*date_tuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
+        return datetime( * date_tuple[:6])
+    return datetime( * date_tuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
 
 def parse_header_rate_limit(headers):
     delay1 = ( \
@@ -124,7 +124,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                 continue
             
             elif status==500 or status==502:
-                await sleep(10./try_again+1.,self.loop)
+                await sleep(10./try_again + 1.,self.loop)
                 continue
             
             raise DiscordException(response, response_data, data)
@@ -266,7 +266,7 @@ class RLTCTX: #rate limit tester context manager
             page_count=len(pages)
             index=0
             for page in pages:
-                index=index+1
+                index=index + 1
                 page.add_footer(f'Page {index}/{page_count}')
         else:
             pages.append(Embed(self.title,).add_footer('Page 1/1'))
@@ -322,7 +322,7 @@ class RLTCTX: #rate limit tester context manager
         page_count=len(pages)
         index=0
         for page in pages:
-            index=index+1
+            index=index + 1
             page.add_footer(f'Page {index}/{page_count}')
         
         await Pagination(self.client,self.channel,pages)
@@ -833,7 +833,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
         
         type_=channel_.type
         type_index=indexes[type_]
-        indexes[type_]=type_index+1
+        indexes[type_]=type_index + 1
         
         ordered.append((index_0,index_1,type_index,channel_),)
         
@@ -852,18 +852,18 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
                 
                 type_=channel_.type
                 type_index=indexes[type_]
-                indexes[type_]=type_index+1
+                indexes[type_]=type_index + 1
                 
                 ordered.append((index_0,index_1,type_index,channel_),)
                 
                 #loop block end
-                index_1=index_1+1
+                index_1=index_1 + 1
             #reseting inner
             index_1=0
             #loop ended
         
         #loop block end
-        index_0=index_0+1
+        index_0=index_0 + 1
     #loop ended
     
     #prepare loop
@@ -881,7 +881,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             break
 
         #loop block end
-        index_0=index_0+1
+        index_0=index_0 + 1
     #loop ended
 
     restricted_positions=[]
@@ -902,7 +902,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
                 restricted_positions.append(index_0)
             
             #loop block end
-            index_0=index_0+1
+            index_0=index_0 + 1
         #loop ended
     else:
         #loop start
@@ -913,7 +913,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             category_index=index_0 #we might need it
             #loop block start
             if info_line[3] is category:
-                index_0=index_0+1
+                index_0=index_0 + 1
                 #loop preapre
                 #loop start
                 while True:
@@ -927,23 +927,23 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
                     restricted_positions.append(index_0)
                     
                     #loop block end
-                    index_0=index_0+1
+                    index_0=index_0 + 1
                 #loop ended
                 break
             
             #loop block end
-            index_0=index_0+1
+            index_0=index_0 + 1
         #loop ended
         
     index_0=(4,2,0).index(channel.ORDER_GROUP)
     before=(4,2,0)[index_0:]
-    after =(4,2,0)[:index_0+1]
+    after =(4,2,0)[:index_0 + 1]
 
     possible_indexes=[]
     if restricted_positions:
         #loop prepare
         index_0=0
-        limit_0=len(restricted_positions)-1
+        limit_0=len(restricted_positions) - 1
         info_line=ordered[restricted_positions[index_0]]
         #loop at 0 block start
         
@@ -956,7 +956,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
                 break
             info_line=ordered[restricted_positions[index_0]]
             #next step mixin
-            index_0=index_0+1
+            index_0=index_0 + 1
             info_line_2=ordered[restricted_positions[index_0]]
             #loop block start
 
@@ -969,13 +969,13 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
         #loop at -1 block start
         
         if info_line[3].ORDER_GROUP in before:
-            possible_indexes.append((index_0+1,restricted_positions[index_0]+1,),)
+            possible_indexes.append((index_0 + 1,restricted_positions[index_0]+1,),)
 
         #loop at -1 block ended
         #loop ended
     else:
         #empty category
-        possible_indexes.append((0,category_index+1,),)
+        possible_indexes.append((0,category_index + 1,),)
         
     #GOTO start
     while True:
@@ -1000,7 +1000,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
         end_goto=False
         #setup GOTO from loop ended
         
-        index_0=index_0+1
+        index_0=index_0 + 1
         while True:
             if index_0==limit_0:
                 break
@@ -1016,7 +1016,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
                 #GOTO ended inner 1
 
             #loop block end
-            index_0=index_0+1
+            index_0=index_0 + 1
         #loop ended
 
         #GOTO end
@@ -1033,9 +1033,9 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
     ordered.insert(result_position,ordered[original_position])
     higher_flag=(result_position<original_position)
     if higher_flag:
-        original_position=original_position+1
+        original_position=original_position + 1
     else:
-        result_position=result_position-1
+        result_position=result_position - 1
     del ordered[original_position]
     
     if channel.type==4:
@@ -1056,17 +1056,17 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             channels_to_move.append(info_line)
             
             #loop block end
-            index_0=index_0+1
+            index_0=index_0 + 1
         #loop ended
 
-        insert_to=result_position+1
+        insert_to=result_position + 1
         
         #loop prepare
         index_0=len(channels_to_move)
         limit_0=0
         #loop start
         while True:
-            index_0=index_0-1
+            index_0=index_0 - 1
             info_line=channels_to_move[index_0]
             #loop block start
             
@@ -1079,7 +1079,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
 
         delete_from=original_position
         if higher_flag:
-            delete_from=delete_from+len(channels_to_move) #len(channels_to_move)
+            delete_from=delete_from + len(channels_to_move) #len(channels_to_move)
 
         #loop prepare
         index_0=0
@@ -1094,7 +1094,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             del ordered[delete_from]
             
             #loop block end
-            index_0=index_0+1
+            index_0=index_0 + 1
         #loop ended
         
     indexes[0]=indexes[2]=indexes[4]=indexes[5]=indexes[6]=0 #reset
@@ -1111,12 +1111,12 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
         
         type_=channel_.type
         type_index=indexes[type_]
-        indexes[type_]=type_index+1
+        indexes[type_]=type_index + 1
         
         ordered[index_0]=(type_index,channel_)
 
         #loop block step
-        index_0=index_0+1
+        index_0=index_0 + 1
         #loop block continue
         
         if type_==4:
@@ -1131,32 +1131,32 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
                 #loop block start
                 
                 type_=channel_.type
-                if type_==4:
+                if type_ == 4:
                     break
-                type_index=indexes[type_]
-                indexes[type_]=type_index+1
+                type_index = indexes[type_]
+                indexes[type_] = type_index + 1
 
-                ordered[index_0]=(type_index,channel_)
+                ordered[index_0] = (type_index, channel_)
                 
                 #loop block end
-                index_0=index_0+1
+                index_0 = index_0 + 1
             
         #loop block end
     #loop ended
 
-    bonus_data={'lock_permissions':lock_permissions}
+    bonus_data = {'lock_permissions':lock_permissions}
     if category is guild:
-        bonus_data['parent_id']=None
+        bonus_data['parent_id'] = None
     else:
-        bonus_data['parent_id']=category.id
+        bonus_data['parent_id'] = category.id
     
     data=[]
     for position,channel_ in ordered:
         if channel is channel_:
-            data.append({'id':channel_.id,'position':position,**bonus_data})
+            data.append({'id': channel_.id, 'position':position, **bonus_data})
             continue
-        if channel_.position!=position:
-            data.append({'id':channel_.id,'position':position})
+        if channel_.position != position:
+            data.append({'id': channel_.id,'position': position})
     
     guild_id = guild.id
     return await bypass_request(client,METHOD_PATCH,
@@ -2446,7 +2446,7 @@ async def scheduled_event_create(client, guild, voice, name):
         'channel_id': voice.id,
         'entity_metadata': None,
         'entity_type': ScheduledEventEntityType.voice.value,
-        'scheduled_start_time': datetime_to_timestamp(datetime.utcnow()+timedelta(hours=1)),
+        'scheduled_start_time': datetime_to_timestamp(datetime.utcnow() + timedelta(hours=1)),
     }
     
     await bypass_request(client, METHOD_POST,
@@ -2801,7 +2801,7 @@ async def rate_limit_test_0012(client,message):
             'Please authorize yourself and resend the redirected url after it\n'
             'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
             '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
-            '&response_type=code&scope=identify%20applications.store.update'))
+            '&response_type=code & scope=identify%20applications.store.update'))
         
         try:
             message = await wait_for_message(client,channel,check_is_owner(client),60.)
@@ -2814,7 +2814,7 @@ async def rate_limit_test_0012(client,message):
         except ValueError:
             await RLT.send('Bad redirect url.')
         
-        access = await client.activate_authorization_code(*result,['identify', 'applications.store.update'])
+        access = await client.activate_authorization_code( * result,['identify', 'applications.store.update'])
         
         if access is None:
             await RLT.send('Too old redirect url.')
@@ -2855,7 +2855,7 @@ async def rate_limit_test_0013(client,message):
         if not channel.cached_permissions_for(client).can_adminIgnoreCaseStringator:
             await RLT.send('I need admin permission to complete this command.')
         
-        target_time = int((time_now()-40*86400.)*1000.-DISCORD_EPOCH)<<22
+        target_time = int((time_now() - 40 * 86400.) * 1000.-DISCORD_EPOCH) << 22
         async for message_ in await client.message_iterator(channel):
             if message_.id > target_time:
                 continue
@@ -2864,8 +2864,8 @@ async def rate_limit_test_0013(client,message):
         now = time_now()
         time_bounds = []
         for day in range(41):
-            before= int((now-(day  )*86400.+100.)*1000.-DISCORD_EPOCH)<<22
-            after = int((now-(day+1)*86400.-100.)*1000.-DISCORD_EPOCH)<<22
+            before= int((now - (day    ) * 86400.0 + 100.0) * 1000.0 - DISCORD_EPOCH) << 22
+            after = int((now - (day + 1) * 86400.0 - 100.0) * 1000.0 - DISCORD_EPOCH) << 22
             time_bounds.append((before,after),)
         
         messages = []
@@ -4450,7 +4450,7 @@ async def rate_limit_test_0092(client, message, channel2:ChannelText=None):
         if channel2 is None:
             await RLT.send('No second channel was given.')
         
-        if not channel2.cached_permissions_for(client)&PERMISSION_MASK_MESSAGING:
+        if not channel2.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING:
             await RLT.send('I have no permissions to send messages at the other channel.')
         
         messages = []

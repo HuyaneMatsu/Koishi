@@ -10,7 +10,7 @@ from hata.ext.slash.menus import Pagination
 try:
     from ast import PyCF_ALLOW_TOP_LEVEL_AWAIT
 except ImportError:
-    PyCF_ALLOW_TOP_LEVEL_AWAIT = 1<<13
+    PyCF_ALLOW_TOP_LEVEL_AWAIT = 1 << 13
 
 # No other flag right now
 COMPILE_FLAGS = PyCF_ALLOW_TOP_LEVEL_AWAIT
@@ -66,9 +66,9 @@ def parse_code_content(content, no_code_output=None):
                         break
                     matched = pattern.search(line)
                     if matched is None:
-                        index = index+1
+                        index = index + 1
                         continue
-                    line = line[:matched.start()+1]
+                    line = line[:matched.start() + 1]
                     lines[index] = line
                     index += 1
                     del lines[index:]
@@ -78,7 +78,7 @@ def parse_code_content(content, no_code_output=None):
                     
     index = len(lines)
     while index:
-        index = index-1
+        index = index - 1
         line = lines[index]
         start = LINE_START.match(line).end()
         if (start != len(line)) and (line[0] != '#'):
@@ -144,8 +144,8 @@ class Interpreter:
                 except SyntaxError as err:
                     buffer.write(
                         f'{err.__class__.__name__} at line {err.lineno}: {err.msg}\n'
-                        f'{result[err.lineno-1]}\n'
-                        f'{" "*(err.offset-1)}^'
+                        f'{result[err.lineno - 1]}\n'
+                        f'{" "*(err.offset - 1)}^'
                     )
                 
                 else:

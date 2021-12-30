@@ -105,7 +105,7 @@ MAPS = {NAME_HIRAGANA:HIRAGANA, NAME_KATAKANA:KATAKANA}
 
 CIRCLE_TIME = 60.0
 MODIFY_BEFORE = 10.0
-NOTIFY_AFTER = CIRCLE_TIME-MODIFY_BEFORE
+NOTIFY_AFTER = CIRCLE_TIME - MODIFY_BEFORE
 
 KANAKO_COLOR = Color.from_tuple(FONT_COLOR)
 
@@ -382,7 +382,7 @@ def render_showcase(name,map_):
     element_limit = len(map_)
     
     page_index = 1
-    page_limit = (element_limit+29)//30
+    page_limit = (element_limit + 29) // 30
 
     field_text = []
     
@@ -393,8 +393,8 @@ def render_showcase(name,map_):
         embed = Embed(name.capitalize(), '', KANAKO_COLOR)
         embed.add_footer(f'page {page_index} / {page_limit}')
         
-        for _ in range(((element_limit%30)+9)//10 if (page_index == page_limit) else 3):
-            field_index_limit = element_index+10
+        for _ in range(((element_limit % 30) + 9) // 10 if (page_index == page_limit) else 3):
+            field_index_limit = element_index + 10
             if field_index_limit > element_limit:
                 field_index_limit = element_limit
             
@@ -403,7 +403,7 @@ def render_showcase(name,map_):
                 element_index += 1
                 field_text.append(f'{element_index}.: **{element[0]} - {element[1]}**')
             
-            embed.add_field(f'{element_index-9} - {element_index}', '\n'.join(field_text),inline=True)
+            embed.add_field(f'{element_index - 9} - {element_index}', '\n'.join(field_text),inline=True)
             field_text.clear()
         
         result.append(embed)
@@ -466,7 +466,7 @@ class GameStatistics:
         self = object.__new__(cls)
         self.users = source.users
         self.history = history = source.history
-        self.cache = [None for _ in range((len(history)+9)//10+1)]
+        self.cache = [None for _ in range((len(history) + 9) // 10 + 1)]
         self.create_page_0()
         return self
     
@@ -508,8 +508,8 @@ class GameStatistics:
                 else:
                     lose_firsts[first_index] += 1
         
-        win_medians = [value[len(value)//2] if value else CIRCLE_TIME for value in win_times]
-        lose_medians = [value[len(value)//2] if value else CIRCLE_TIME for value in lose_times]
+        win_medians = [value[len(value) // 2] if value else CIRCLE_TIME for value in win_times]
+        lose_medians = [value[len(value) // 2] if value else CIRCLE_TIME for value in lose_times]
         
         embed = Embed('Statistics', color=KANAKO_COLOR)
         
@@ -522,10 +522,10 @@ class GameStatistics:
             lose_first = lose_firsts[index]
             
             total = float(win_count)
-            total += (((2**0.5)-1.0)-((((CIRCLE_TIME+win_median)/CIRCLE_TIME)**0.5)-1.0))*win_count
-            total += win_first/5.
-            total -= (((2**0.5)-1.0)-((((CIRCLE_TIME+lose_median)/CIRCLE_TIME)**0.5)-1.0))*lose_count*2.0
-            total -= lose_first*0.4
+            total += (((2 ** 0.5) - 1.0) - ((((CIRCLE_TIME + win_median) / CIRCLE_TIME) ** 0.5) - 1.0)) * win_count
+            total += win_first / 5.
+            total -= (((2 ** 0.5) - 1.0) - ((((CIRCLE_TIME + lose_median) / CIRCLE_TIME) ** 0.5) - 1.0)) * lose_count * 2.0
+            total -= lose_first * 0.4
             
             embed.add_field(f'{user:f} :',
                 f'Correct answers : {win_count}\n'
@@ -548,8 +548,8 @@ class GameStatistics:
         return page
     
     def create_page(self,index):
-        end = index*10
-        start = end-9
+        end = index * 10
+        start = end - 9
         if end > len(self.history):
             end = len(self.history)
         
@@ -557,7 +557,7 @@ class GameStatistics:
         
         field_value_parts = []
         
-        for question_index, history_element in enumerate(self.history[start-1:end], start):
+        for question_index, history_element in enumerate(self.history[start - 1:end], start):
             field_value_parts.append('```diff\n')
             
             options = history_element.options
@@ -602,7 +602,7 @@ class GameStatistics:
             )
             field_value_parts.clear()
         
-        embed.add_footer(f'Page {index+1} / {len(self.cache)}')
+        embed.add_footer(f'Page {index + 1} / {len(self.cache)}')
         
         self.cache[index] = embed
         return embed
@@ -816,9 +816,9 @@ class KanakoRunner:
         self.answers = {}
         
         full_map = MAPS[map_name].copy()
-        limit = len(full_map)-1
+        limit = len(full_map) - 1
         
-        self.map = map_ = [full_map.pop(randint(0, limit)) for limit in range(limit, limit-length, -1)]
+        self.map = map_ = [full_map.pop(randint(0, limit)) for limit in range(limit, limit - length, -1)]
         self.romajis = {element[1] for element in map_}
         self.options = None
         self.embed = Embed(color=KANAKO_COLOR)

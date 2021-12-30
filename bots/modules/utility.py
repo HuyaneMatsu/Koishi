@@ -63,7 +63,7 @@ async def rawr(client, event):
         if client_ is client:
             coroutine = client.interaction_response_message_create(event, 'Rawrr !')
         else:
-            if not channel.cached_permissions_for(client_)&PERMISSION_MASK_MESSAGING:
+            if not channel.cached_permissions_for(client_) & PERMISSION_MASK_MESSAGING:
                 continue
             
             coroutine = client_.message_create(channel, 'Rawrr !')
@@ -91,13 +91,13 @@ async def color_(client, event,
     
     embed = Embed(color=color)
     embed.add_field('hex', f'#{color:06X}', inline=True)
-    embed.add_field('rgb', f'{color>>16} r\n{(color>>8)&255} g\n{color&255} b', inline=True)
+    embed.add_field('rgb', f'{color >> 16} r\n{(color >> 8) & 255} g\n{color & 255} b', inline=True)
     r, g, b = color.as_rgb_float_tuple
-    embed.add_field('rgb%', f'{r*100.0:0.2f}% r\n{g*100.0:0.2f}% g\n{b*100.0:0.2f}% b', inline=True)
+    embed.add_field('rgb%', f'{r * 100.0:0.2f}% r\n{g * 100.0:0.2f}% g\n{b * 100.0:0.2f}% b', inline=True)
     h, s, v = rgb_to_hsv(r, g, b)
-    embed.add_field('hsv%', f'{h*100.0:0.2f}% h\n{s*100.0:0.2f}% s\n{v*100.0:0.2f}% v', inline=True)
+    embed.add_field('hsv%', f'{h * 100.0:0.2f}% h\n{s * 100.0:0.2f}% s\n{v * 100.0:0.2f}% v', inline=True)
     y, i, q = rgb_to_yiq(r, g, b)
-    embed.add_field('yiq%', f'{y*100.0:0.2f}% y\n{i*100.0:0.2f}% i\n{q*100.0:0.2f}% q', inline=True)
+    embed.add_field('yiq%', f'{y * 100.0:0.2f}% y\n{i * 100.0:0.2f}% i\n{q * 100.0:0.2f}% q', inline=True)
     
     embed.add_image('attachment://color.png')
     
@@ -137,11 +137,13 @@ class RoleCache:
         return self
     
     def create_page_0(self, guild):
-        embed = Embed(f'Roles of **{guild.name}**:',
+        embed = Embed(
+            f'Roles of **{guild.name}**:',
             '\n'.join([role.mention for role in self.roles]),
-            color=(guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF))
+            color = (guild.icon_hash & 0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id >> 22) & 0xFFFFFF),
+        )
         
-        embed.add_footer(f'Page 1 / {len(self.roles)+1}')
+        embed.add_footer(f'Page 1 / {len(self.roles) + 1}')
         self.cache[0] = embed
     
     def __getitem__(self,index):
@@ -152,7 +154,7 @@ class RoleCache:
         return page
 
     def create_page(self,index):
-        role = self.roles[index-1]
+        role = self.roles[index - 1]
         embed = Embed(role.name,
             '\n'.join([
                 f'id : {role.id!r}',
@@ -166,13 +168,13 @@ class RoleCache:
                 '```',
                     ]),
             color=role.color)
-        embed.add_footer(f'Page {index+1} /  {len(self.roles)+1}')
+        embed.add_footer(f'Page {index + 1} /  {len(self.roles) + 1}')
         
         self.cache[index] = embed
         return embed
     
     def __len__(self):
-        return len(self.roles)+1
+        return len(self.roles) + 1
 
 PERMISSION_MASK_REACT = Permission().update_by_keys(
     add_reactions = True,
@@ -189,7 +191,7 @@ async def roles_(client, event):
         abort('I must be in the guild to execute this command')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
+    if (not permissions & PERMISSION_MASK_MESSAGING) or ( not permissions & PERMISSION_MASK_REACT):
         abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
     await Pagination10step(client, event, RoleCache(guild))
@@ -382,7 +384,7 @@ async def user_(client, event,
         if user.avatar_type is ICON_TYPE_NONE:
             color = user.default_avatar.color
         else:
-            color = user.avatar_hash&0xFFFFFF
+            color = user.avatar_hash & 0xFFFFFF
         embed.color = color
     
     else:
@@ -585,17 +587,17 @@ async def add_guild_emojis_field(client, guild, embed, even_if_empty):
         emoji_limit = guild.emoji_limit
         sections_parts.append(str(normal_static))
         sections_parts.append('** [')
-        sections_parts.append(str(emoji_limit-normal_static))
+        sections_parts.append(str(emoji_limit - normal_static))
         sections_parts.append(
             ' free]\n'
             '**Animated emojis: '
         )
         sections_parts.append(str(normal_animated))
         sections_parts.append('** [')
-        sections_parts.append(str(emoji_limit-normal_animated))
+        sections_parts.append(str(emoji_limit - normal_animated))
         sections_parts.append(' free]')
         
-        managed_total = managed_static+managed_animated
+        managed_total = managed_static + managed_animated
         if managed_total:
             sections_parts.append('\n**Managed: ')
             sections_parts.append(str(managed_total))
@@ -614,7 +616,7 @@ async def add_guild_stickers_field(client, guild, embed, even_if_empty):
     sticker_count = len(guild.stickers)
     if sticker_count:
         sections_parts = [
-            '**Total: ', str(sticker_count), '** [', str(guild.sticker_limit-sticker_count), ' free]\n'
+            '**Total: ', str(sticker_count), '** [', str(guild.sticker_limit - sticker_count), ' free]\n'
             '**Static stickers: '
         ]
         
@@ -677,7 +679,7 @@ async def guild_(client, event,
     
     embed = Embed(
         guild.name,
-        color = (guild.icon_hash&0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id>>22)&0xFFFFFF),
+        color = (guild.icon_hash & 0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id >> 22) & 0xFFFFFF),
     ).add_thumbnail(
         guild.icon_url_as(size=128),
     )
@@ -720,7 +722,7 @@ class InRolePageGetter:
     def __len__(self):
         length = len(self.users)
         if length:
-            length = ceil(length/USER_PER_PAGE)
+            length = ceil(length / USER_PER_PAGE)
         else:
             length = 1
         
@@ -731,8 +733,8 @@ class InRolePageGetter:
         length = len(users)
         guild = self.guild
         if length:
-            user_index = index*USER_PER_PAGE
-            user_limit = user_index+USER_PER_PAGE
+            user_index = index * USER_PER_PAGE
+            user_limit = user_index + USER_PER_PAGE
             
             if user_limit > length:
                 user_limit = length
@@ -763,7 +765,7 @@ class InRolePageGetter:
         
         return Embed(self.title, description). \
             add_author(guild.icon_url, guild.name). \
-            add_footer(f'Page {index+1}/{ceil(len(self.users)/USER_PER_PAGE)}')
+            add_footer(f'Page {index + 1}/{ceil(len(self.users) / USER_PER_PAGE)}')
 
 
 def in_role_pagination_check(user, event):
@@ -833,7 +835,7 @@ async def avatar(client, event,
         user = event.user
     
     if user.avatar:
-        color = user.avatar_hash&0xffffff
+        color = user.avatar_hash & 0xffffff
     else:
         color = user.default_avatar.color
     
@@ -941,10 +943,10 @@ GUILD_ICON_INVITE_SPLASH_COMPONENTS = Row(
 
 def create_embed(guild, name, url, hash_value):
     if url is None:
-        color = (guild.id>>22)&0xFFFFFF
+        color = (guild.id >> 22) & 0xFFFFFF
         embed = Embed(f'{guild.name} has no {name}', color=color)
     else:
-        color = hash_value&0xFFFFFF
+        color = hash_value & 0xFFFFFF
         embed = Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
     
     return embed
@@ -1089,7 +1091,7 @@ async def all_users(client, event,):
     embeds = []
     
     for index, (joined_at, user) in enumerate(users, 1):
-        if index%10==1:
+        if index % 10 == 1:
             embed = Embed('Joined users')
             embeds.append(embed)
         
@@ -1279,7 +1281,7 @@ async def create_activity(
     channel: ('channel_guild_voice', 'The channel to create the activity for.') = None,
 ):
     """Creates an embedded activity."""
-    if event.user_permissions&CREATE_EMBEDDED_ACTIVITY_PERMISSIONS != CREATE_EMBEDDED_ACTIVITY_PERMISSIONS:
+    if event.user_permissions & CREATE_EMBEDDED_ACTIVITY_PERMISSIONS != CREATE_EMBEDDED_ACTIVITY_PERMISSIONS:
         abort(
             'You need to have `create instant invite` and `create embedded activities` permission to invoke this '
             'command'
@@ -1304,7 +1306,7 @@ async def create_activity(
         abort('Please give a voice channel or be in one.')
     
     client_permissions = channel.cached_permissions_for(client)
-    if client_permissions&CREATE_EMBEDDED_ACTIVITY_PERMISSIONS != CREATE_EMBEDDED_ACTIVITY_PERMISSIONS:
+    if client_permissions & CREATE_EMBEDDED_ACTIVITY_PERMISSIONS != CREATE_EMBEDDED_ACTIVITY_PERMISSIONS:
         abort(
             f'I need to have `create instant invite` and `create embedded activities` permission in '
             f'{channel.mention} to execute this command.'

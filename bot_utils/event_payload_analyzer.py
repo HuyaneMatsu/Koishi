@@ -184,11 +184,11 @@ SNOWFLAKE_EXPECTED_NAME_PARTS = (
     'id',
 )
 
-SNOWFLAKE_EXPECTED_STRING_MIN_VALUE = 1<<21
-SNOWFLAKE_EXPECTED_STRING_MAX_VALUE = (1<<64)-1
+SNOWFLAKE_EXPECTED_STRING_MIN_VALUE = 1 << 21
+SNOWFLAKE_EXPECTED_STRING_MAX_VALUE = (1 << 64) - 1
 
 SNOWFLAKE_EXPECTED_INT_MIN_VALUE = 0
-SNOWFLAKE_EXPECTED_INT_MAX_VALUE = (1<<64)-1
+SNOWFLAKE_EXPECTED_INT_MAX_VALUE = (1 << 64) - 1
 
 SNOWFLAKE_GUESS_MAX_CHANCE = 3
 
@@ -812,7 +812,7 @@ class ArraySubNode(SubNodeBase):
         
         into.append(' of ')
         
-        self.state.render_into(into, indent+1, True)
+        self.state.render_into(into, indent + 1, True)
         
         nullable = self.nullable
         min_length = self.min_length
@@ -821,7 +821,7 @@ class ArraySubNode(SubNodeBase):
             
             into.append('\n')
             
-            for counter in range(indent+1):
+            for counter in range(indent + 1):
                 into.append(INDENT)
             
             into.append('details:')
@@ -829,14 +829,14 @@ class ArraySubNode(SubNodeBase):
             if nullable:
                 
                 into.append('\n')
-                for counter in range(indent+2):
+                for counter in range(indent + 2):
                     into.append(INDENT)
                 
                 into.append('nullable: true')
             
             if (min_length != -1) and (max_length != -1) and (min_length == max_length):
                     into.append('\n')
-                    for counter in range(indent+2):
+                    for counter in range(indent + 2):
                         into.append(INDENT)
                     
                     into.append('length: ')
@@ -846,7 +846,7 @@ class ArraySubNode(SubNodeBase):
                 if (min_length != -1):
                     
                     into.append('\n')
-                    for counter in range(indent+2):
+                    for counter in range(indent + 2):
                         into.append(INDENT)
                     
                     into.append('min_length: ')
@@ -855,7 +855,7 @@ class ArraySubNode(SubNodeBase):
                 if (max_length != -1):
                     
                     into.append('\n')
-                    for counter in range(indent+2):
+                    for counter in range(indent + 2):
                         into.append(INDENT)
                     
                     into.append('max_length: ')
@@ -912,7 +912,7 @@ class ObjectSubNode(SubNodeBase):
             into.append('\n')
             
             for state in states.values():
-                state.render_into(into, indent+1, False)
+                state.render_into(into, indent + 1, False)
                 into.append('\n')
         
         for counter in range(indent):
@@ -1250,7 +1250,7 @@ def received_values_most_common_sort_key(item):
     """
     key, value = item
     if key is None:
-        value = (1<<63)-1
+        value = (1 << 63) - 1
     
     return value
 
@@ -1444,21 +1444,21 @@ class GuesserState(RichAttributeErrorBaseType):
         best_multiplier = 1.0
         
         for guesser_state_node in self.guessers:
-            chance = guesser_state_node.total_guess_chance/guesser_state_node.guesser.guess_max_chance
+            chance = guesser_state_node.total_guess_chance / guesser_state_node.guesser.guess_max_chance
             
             multiplier = 1.0
             parents = guesser_state_node.guesser.parents
             if (parents is not None):
-                multiplier += len(parents)*GUESS_CHANCE_MULTIPLIER_BY_PARENT
+                multiplier += len(parents) * GUESS_CHANCE_MULTIPLIER_BY_PARENT
             
-            total_chance = chance*multiplier
+            total_chance = chance * multiplier
             
             if total_chance > best_chance:
                 best_chance = total_chance
                 best_guesser = guesser_state_node
                 best_multiplier = multiplier
         
-        return best_guesser, best_chance/best_multiplier
+        return best_guesser, best_chance / best_multiplier
     
     
     def get_most_common_values(self):
@@ -1529,23 +1529,23 @@ class GuesserState(RichAttributeErrorBaseType):
             
             into.append('\n')
             
-            for counter in range(indent+1):
+            for counter in range(indent + 1):
                 into.append(INDENT)
             
             into.append('values: [\n')
             
             for value, count in items:
-                for counter in range(indent+2):
+                for counter in range(indent + 2):
                     into.append(INDENT)
                 
                 into.append(reprlib.repr(value))
                 
                 into.append(' (')
-                into.append(str(floor(100*count/received_count)))
+                into.append(str(floor(100 * count / received_count)))
                 into.append('%),\n')
             
             
-            for counter in range(indent+1):
+            for counter in range(indent + 1):
                 into.append(INDENT)
             
             into.append(']')
@@ -1629,7 +1629,7 @@ class GuesserState(RichAttributeErrorBaseType):
         else:
             into.append(best_guesser.guesser.name)
             into.append(' (')
-            percentage = floor(100*best_chance/self.received_count)
+            percentage = floor(100 * best_chance / self.received_count)
             into.append(str(percentage))
             into.append('%)')
         

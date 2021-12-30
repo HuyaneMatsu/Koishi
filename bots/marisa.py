@@ -120,7 +120,7 @@ async def command_error_handler(ctx, exception):
             break
         
         line = lines[index]
-        index = index+1
+        index = index + 1
         
         line_length = len(line)
         # long line check, should not happen
@@ -128,7 +128,7 @@ async def command_error_handler(ctx, exception):
             line = line[:500]+'...\n'
             line_length = 504
         
-        if page_length+line_length > 1997:
+        if page_length + line_length > 1997:
             if index == limit:
                 # If we are at the last element, we don\'t need to shard up,
                 # because the last element is always '```'
@@ -146,7 +146,7 @@ async def command_error_handler(ctx, exception):
             page_contents.append('```py\n')
             page_contents.append(line)
             
-            page_length = 6+line_length
+            page_length = 6 + line_length
             continue
         
         page_contents.append(line)
@@ -244,14 +244,14 @@ async def retardify(client, event,
         for char in text:
             if random() > chance:
                 if chance > 0.5:
-                    chance = 1.0-(chance*0.5)
+                    chance = 1.0 - (chance * 0.5)
                 else:
                     chance = 0.5
                 
                 char = char.lower()
             else:
                 if chance <= 0.5:
-                    chance = chance*0.5
+                    chance = chance * 0.5
                 else:
                     chance = 0.5
                 
@@ -559,7 +559,7 @@ async def roll(client, event,
 @UserMenuFactory
 class ZerefPagination(UserPagination):
     cake = BUILTIN_EMOJIS['cake']
-    emojis = (*UserPagination.emojis[:-1], cake, *UserPagination.emojis[-1:])
+    emojis = ( * UserPagination.emojis[:-1], cake, *UserPagination.emojis[-1:])
     
     __slots__ = ('user',)
     
@@ -815,7 +815,7 @@ now = perf_counter()
 
 @Marisa.events
 async def ready(client):
-    print(perf_counter()-now)
+    print(perf_counter() - now)
 
 @Marisa.commands
 @checks.owner_only()
@@ -999,9 +999,9 @@ async def count_message_fields(client, message):
     if message_count:
         total_total_fields = 0
         for total_fields, message_amount in total_fields_array:
-            total_total_fields += total_fields*message_amount
+            total_total_fields += total_fields * message_amount
         
-        average_fields = total_total_fields/message_count
+        average_fields = total_total_fields / message_count
     else:
         average_fields = 0.0
     

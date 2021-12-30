@@ -168,25 +168,25 @@ class CardFlag(int):
         collected = []
         # 0 = Can't be
         # 1 = Will not
-        if self&1:
+        if self & 1:
             collected.append((0, 'duplicated'))
         
-        #if (self>>1)&1:
+        #if (self >> 1) & 1:
         #    collected.append((1, 'end your turn'))
         
-        if (self>>2)&1:
+        if (self >> 2) & 1:
             collected.append((0,'put into decks'))
         
-        if (self>>3)&1:
+        if (self >> 3) & 1:
             collected.append((1, 'count towards your hand size and will not be discarded if it exceeds your current hand size'))
         
-        if (self>>4)&1:
+        if (self >> 4) & 1:
             collected.append((0,'given'))
         
-        if (self>>5)&1:
+        if (self >> 5) & 1:
             collected.append((0,'discarded by enemy spells'))
         
-        if (self>>6)&1:
+        if (self >> 6) & 1:
             collected.append((0,'discarded, transformed, given or put into your deck'))
         
         if not collected:
@@ -200,7 +200,7 @@ class CardFlag(int):
             while True:
                 if index:
                     parts.append(', ')
-                    if collected[index-1][0]==start_type:
+                    if collected[index - 1][0]==start_type:
                         parts.append('neither')
                         break
                     else:
@@ -211,7 +211,7 @@ class CardFlag(int):
             parts.append(' ')
             parts.append(content)
             
-            index = index+1
+            index = index + 1
             if index == limit:
                 break
         
@@ -318,14 +318,14 @@ class Card:
         # name length
         name_ln = len(self.name)
         if name_ln>EMBED_NAME_LENGTH:
-            name_ln = EMBED_NAME_LENGTH+3
+            name_ln = EMBED_NAME_LENGTH + 3
         
         result += name_ln
         
         # description length
         description_ln = len(self.description)
         if description_ln > EMBED_DESCRIPTION_LENGTH:
-            description_ln = EMBED_DESCRIPTION_LENGTH+3
+            description_ln = EMBED_DESCRIPTION_LENGTH + 3
         
         result += description_ln
         

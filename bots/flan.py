@@ -160,7 +160,7 @@ async def guild_user_add(client, guild, user):
 @Flan.commands.from_class
 class ping:
     async def ping(client, message):
-        await client.message_create(message.channel, f'{client.gateway.latency*1000.:.0f} ms')
+        await client.message_create(message.channel, f'{client.gateway.latency * 1000.:.0f} ms')
     
     aliases = 'pong'
     
@@ -425,16 +425,16 @@ class CardPaginator:
             card=collected[index]
             
             # 2 extra linebreak
-            local_length=2+len(card)
+            local_length = 2 + len(card)
             
-            if total_length+local_length>2000:
-                page_information.append((page_information_start,index),)
-                page_information_start=index
-                index=index+1
+            if total_length + local_length > 2000:
+                page_information.append((page_information_start, index),)
+                page_information_start = index
+                index = index + 1
                 total_length=local_length
                 continue
             
-            index=index+1
+            index = index + 1
             total_length+=local_length
             continue
         
@@ -460,15 +460,15 @@ class CardPaginator:
             card=self.collected[index]
             card.render_to(page_parts)
             
-            index = index+1
-            if index==end:
+            index = index + 1
+            if index == end:
                 break
             
             page_parts.append('\n\n')
             continue
         
         return Embed(self.title,''.join(page_parts), color=CHESUTO_COLOR).add_footer(
-            f'Page: {page_index+1}/{len(self.page_information)}. Results {start+1}-{end}/{len(self.collected)}')
+            f'Page: {page_index + 1}/{len(self.page_information)}. Results {start + 1}-{end}/{len(self.collected)}')
 
 ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_IMAGE_CANCEL = BUILTIN_EMOJIS['x']
@@ -631,7 +631,7 @@ class checklist:
                             break
                         
                         card=filtered[index]
-                        index=index+1
+                        index=index + 1
                         name=card.name
                         
                         name_ln=len(name)
@@ -639,7 +639,7 @@ class checklist:
                             name = name[:EMBED_NAME_LENGTH]+'...'
                             name_ln = 203
                         
-                        length=length+name_ln+1
+                        length=length + name_ln + 1
                         if length>2000:
                             result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
                             length=name_ln
@@ -686,10 +686,10 @@ class checklist:
                     parts.clear()
                 else:
                     parts.append('\n\n')
-                    length = length+2
+                    length = length + 2
                 
                 rarity_name=f'**{Rarity.INSTANCES[rarity_index].name}**\n\n'
-                length = length+len(rarity_name)
+                length = length + len(rarity_name)
                 parts.append(rarity_name)
                 
                 card=container[0]
@@ -699,7 +699,7 @@ class checklist:
                     name = name[:EMBED_NAME_LENGTH]+'...'
                     name_ln = 203
                 
-                length = length+name_ln
+                length = length + name_ln
                 parts.append(name)
                 index=1
                 
@@ -708,17 +708,17 @@ class checklist:
                         break
                     
                     card=container[index]
-                    index=index+1
+                    index=index + 1
                     name=card.name
                     name_ln=len(name)
                     if name_ln>EMBED_NAME_LENGTH:
                         name = name[:EMBED_NAME_LENGTH]+'...'
                         name_ln=203
                     
-                    length = length+1+name_ln
+                    length = length + 1 + name_ln
                     if length>2000:
                         result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
-                        length=len(rarity_name)+name_ln
+                        length=len(rarity_name) + name_ln
                         parts.clear()
                         parts.append(rarity_name)
                         parts.append(name)
@@ -740,7 +740,7 @@ class checklist:
                 break
             
             embed=result[index]
-            index=index+1
+            index=index + 1
             embed.add_footer(f'Page: {index}/{limit}')
         
         await Pagination(client,message.channel,result)
@@ -997,7 +997,7 @@ def get_bgm(content):
         return None
     
     if content.isnumeric():
-        index = int(content)-1
+        index = int(content) - 1
         if index >= 0 and index < len(CHESUTO_BGM_TRACKS_SORTED):
             return CHESUTO_BGM_TRACKS_SORTED[index]
     

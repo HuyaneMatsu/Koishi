@@ -177,7 +177,7 @@ def build_auto_mod():
     for word in FILTERS:
         node.add(word)
     
-    regex_pattern = re.compile(node.build(), re.I|re.M|re.S|re.U,)
+    regex_pattern = re.compile(node.build(), re.I | re.M | re.S | re.U,)
     
     return regex_pattern
 

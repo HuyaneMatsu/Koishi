@@ -71,7 +71,7 @@ def render_map(data, values):
         x = 0
         line.append(LINE_Y_LEAD[y])
         while True:
-            line.append(values[data[x+y*10]])
+            line.append(values[data[x + y * 10]])
             x += 1
             if x == 10:
                 break
@@ -118,7 +118,7 @@ class active_request:
     def __init__(self, source, target):
         self.source = source
         self.target = target
-        self.hash = (source.id>>1)+(target.id>>1)
+        self.hash = (source.id >> 1) + (target.id >> 1)
     def __hash__(self):
         return self.hash
     def __eq__(self, other):
@@ -240,16 +240,16 @@ class ship_type:
         self.size1 = size1
         self.size2 = size2
         self.type = type_
-        self.parts_left = size1*size2
+        self.parts_left = size1 * size2
 
     def __iter__(self):
         x_start = self.x
-        x_end = x_start+self.size1
-        y_start = self.y*10
-        y_end = y_start+self.size2*10
+        x_end = x_start + self.size1
+        y_start = self.y * 10
+        y_end = y_start + self.size2 * 10
         for n_x in range(x_start, x_end):
             for n_y in range(y_start, y_end, 10):
-                yield n_x+n_y
+                yield n_x + n_y
 
 class user_profile:
     __slots__ = ('channel', 'client', 'data', 'last_switch', 'message', 'other', 'page', 'process', 'ship_positions',
@@ -357,7 +357,7 @@ class user_profile:
             return
         
         now = time.time()
-        if now < self.last_switch+1.2:
+        if now < self.last_switch + 1.2:
             return
         self.last_switch = now
         self.page ^= 1
@@ -637,18 +637,18 @@ class battleships_game:
             if x_start > 0:
                 x_start -= 1
             
-            x_end = x+size1
+            x_end = x + size1
             if x_end > 10:
                 text = 'There is not enough space to place that ship!'
                 break
             elif x_end < 10:
                 x_end += 1
             
-            y_start = y*10
+            y_start = y * 10
             if y_start > 0:
                 y_start -= 10
 
-            y_end = (y+size2)*10
+            y_end = (y + size2) * 10
             if y_end > 100:
                 text = 'There is not enough space to place that ship!'
                 break
@@ -659,10 +659,10 @@ class battleships_game:
             data = player.data
             for n_x in range(x_start, x_end):
                 for n_y in range(y_start, y_end, 10):
-                    if data[n_x+n_y]:
+                    if data[n_x + n_y]:
                         text = (
-                            f'Can not set ship to {1+x}/{chr(65+y)}, because coordinate {1+n_x}/{chr(65+n_y//10)} is '
-                            'already used.'
+                            f'Can not set ship to {1 + x}/{chr(65 + y)}, because coordinate '
+                            f'{1 + n_x}/{chr(65 + n_y // 10)} is already used.'
                                 )
                         break
             if text:
@@ -672,15 +672,15 @@ class battleships_game:
             cords = []
             
             x_start = x
-            x_end = x+size1
-            y_start = y*10
-            y_end = (y+size2)*10
+            x_end = x + size1
+            y_start = y * 10
+            y_end = (y + size2) * 10
             for n_x in range(x_start, x_end):
                 for n_y in range(y_start, y_end, 10):
-                    cord = n_x+n_y
+                    cord = n_x + n_y
                     data[cord] = type_
                     player.ship_positions[cord] = ship
-                    cords.append(f'{chr(65+n_y//10)}/{1+n_x}')
+                    cords.append(f'{chr(65 + n_y // 10)}/{1 + n_x}')
             
             player.ships_left[type_] -= 1
             
@@ -739,7 +739,7 @@ class battleships_game:
                 if x > 10:
                     text = 'Bad input format.'
                     break
-                x = x-1
+                x = x - 1
                 y = 100
             else:
                 x = 100
@@ -754,14 +754,14 @@ class battleships_game:
                 if x > 10:
                     text = 'Bad input format.'
                     break
-                x = x-1
+                x = x - 1
             else:
                 if y != 100:
                     text = 'Dupe coordinate'
                     break
                 y = ('abcdefghij').index(value)
             
-            value = data[x+y*10]
+            value = data[x + y * 10]
             if value > 4:
                 text='That position is already shot'
                 break
@@ -777,40 +777,40 @@ class battleships_game:
             return
 
         if value == 0:
-            data[x+y*10] = 5
+            data[x + y * 10] = 5
 
             player.state = False
             other.state = True
                 
             await player.process(False, 'You missed!')
-            await other.process(True, f'Your opponent shot {chr(65+y)}/{1+x}, it missed!\n')
+            await other.process(True, f'Your opponent shot {chr(65 + y)}/{1 + x}, it missed!\n')
             self.future.set_result(True)
             return
         
         del text
         
-        data[x+y*10] = 6
-        ship = other.ship_positions.pop(x+y*10)
+        data[x + y * 10] = 6
+        ship = other.ship_positions.pop(x + y * 10)
         ship.parts_left -= 1
         if ship.parts_left == 0:
             other.ships_left[ship.type] -= 1
             for cord in ship:
                 data[cord] = 7
             if sum(other.ships_left):
-                text1 = f'You shot {chr(65+y)}/{1+x} and you sinked 1 of your opponents ships!\n'
-                text2 = f'Your opponent shot {chr(65+y)}/{1+x} and your ship sinked :c\n'
+                text1 = f'You shot {chr(65 + y)}/{1 + x} and you sinked 1 of your opponents ships!\n'
+                text2 = f'Your opponent shot {chr(65 + y)}/{1 + x} and your ship sinked :c\n'
             else:
                 self.process = None
                 await player.set_state_2(True,
-                    f'You shot {chr(65+y)}/{1+x} and you sinked your opponents last ship!')
+                    f'You shot {chr(65 + y)}/{1 + x} and you sinked your opponents last ship!')
                 await other.set_state_2(False,
-                    f'Your opponent shot {chr(65+y)}/{1+x} and your last ship sinked :c')
+                    f'Your opponent shot {chr(65 + y)}/{1 + x} and your last ship sinked :c')
                 self.future.set_result(False)
                 return
         else:
 
-            text1 = f'You shot {chr(65+y)}/{1+x} and you hit a ship!'
-            text2 = f'Your opponent shot {chr(65+y)}/{1+x} and hit 1 of your ships!'
+            text1 = f'You shot {chr(65 + y)}/{1 + x} and you hit a ship!'
+            text2 = f'Your opponent shot {chr(65 + y)}/{1 + x} and hit 1 of your ships!'
 
         player.state = True
         other.state = False

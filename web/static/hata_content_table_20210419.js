@@ -32,7 +32,7 @@ class CTPart {
                 var new_element = new CTPart(element, elements);
                 children.push(new_element);
 
-                index = index+1;
+                index = index + 1;
             }
             should_display_children = 1;
         }
@@ -66,7 +66,7 @@ class CTPart {
                     should_display = 1;
                 }
 
-                index = index+1;
+                index = index + 1;
             }
         }
 
@@ -150,7 +150,7 @@ class CT {
             var part = new CTPart(structure, elements);
             structures.push(part);
 
-            index = index+1;
+            index = index + 1;
         }
     }
 
@@ -175,7 +175,7 @@ class CT {
             structure = structures[index];
             structure.entry_updated(entry_content);
 
-            index = index+1;
+            index = index + 1;
         }
     }
 

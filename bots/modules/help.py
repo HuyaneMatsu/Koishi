@@ -695,7 +695,7 @@ async def ping(client, event):
     """HTTP ping-pong."""
     start = perf_counter()
     yield
-    delay = (perf_counter()-start)*1000.0
+    delay = (perf_counter() - start) * 1000.0
     
     yield add_user_footer(
         Embed(
@@ -712,7 +712,7 @@ async def ping(client, event):
             'Gateway latency',
             (
                 f'```\n'
-                f'{client.gateway.latency*1000.:.0f} ms\n'
+                f'{client.gateway.latency * 1000.:.0f} ms\n'
                 f'```'
             ),
             inline = True,

@@ -206,7 +206,7 @@ class BooruCycler(Menu):
                 if history_step == history_length:
                     history_step =1
                 
-                image_url_tag_pair = choose_not_same(image_url_tag_pairs, history[history_length-history_step])
+                image_url_tag_pair = choose_not_same(image_url_tag_pairs, history[history_length - history_step])
             
             self.history.append(image_url_tag_pair)
             self.history_step = 1
@@ -508,14 +508,14 @@ async def touhou_character(client, event,
     if name_length > 10:
         name_length = 10
     
-    diversity = 0.2+(10-name_length)*0.02
+    diversity = 0.2 + (10 - name_length) * 0.02
     
-    matcheds = get_close_matches(name, TOUHOU_NAMES, n=1, cutoff=1.0-diversity)
+    matcheds = get_close_matches(name, TOUHOU_NAMES, n=1, cutoff=1.0 - diversity)
     if matcheds:
         return TOUHOU_NAME_RELATIONS[matcheds[0]](client, event)
     
     embed = Embed('No match', color=BOORU_COLOR)
-    matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.8-diversity)
+    matcheds = get_close_matches(name, TOUHOU_NAMES, n=10, cutoff=0.8 - diversity)
     if matcheds:
         field_value_parts = []
         for index, matched in enumerate(matcheds, 1):
@@ -543,7 +543,7 @@ async def autocomplete_touhou_character_name(value):
     if value is None:
         return MOST_POPULAR_TOUHOU_CHARACTERS
     
-    matcher = re_compile(re_escape(value), re_ignore_case|re_unicode)
+    matcher = re_compile(re_escape(value), re_ignore_case | re_unicode)
     
     matched_names = []
     
@@ -556,9 +556,9 @@ async def autocomplete_touhou_character_name(value):
         if len(value) > 10:
             value_length = 10
         
-        diversity = 0.2+(10-value_length)*0.02
+        diversity = 0.2 + (10 - value_length) * 0.02
         
-        matched_names.extend(get_close_matches(value, TOUHOU_NAMES, n=20, cutoff=1.0-diversity))
+        matched_names.extend(get_close_matches(value, TOUHOU_NAMES, n=20, cutoff=1.0 - diversity))
     
     unique = []
     system_names = set()

@@ -76,7 +76,7 @@ BUTTON_DIVORCE_CANCEL = Button(
 )
 
 def get_multiplier(user_id_1, user_id_2):
-    return 2.1-(((user_id_1&0x1111111111111111111111)+(user_id_2&0x1111111111111111111111))%101*0.01)
+    return 2.1 - (((user_id_1 & 0x1111111111111111111111) + (user_id_2 & 0x1111111111111111111111)) % 101 * 0.01)
 
 
 CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM = 'marriage.buy_waifu_slot.confirm'
@@ -115,7 +115,7 @@ async def buy_waifu_slot(event):
         results = await response.fetchall()
         if results:
             entry_id, waifu_slots, total_love, total_allocated = results[0]
-            new_waifu_slot_count = waifu_slots+1
+            new_waifu_slot_count = waifu_slots + 1
             
             if waifu_slots >= MAX_WAIFU_SLOTS:
                 return Embed(
@@ -123,7 +123,7 @@ async def buy_waifu_slot(event):
                     'You reached the maximum amount of waifu slots.',
                 )
             
-            available_love = total_love-total_allocated
+            available_love = total_love - total_allocated
             required_love = WAIFU_SLOT_COSTS.get(new_waifu_slot_count, WAIFU_SLOT_COST_DEFAULT)
             
             if (required_love != WAIFU_SLOT_COST_DEFAULT) and (available_love >= required_love):
@@ -192,7 +192,7 @@ async def buy_marriage_slot_confirm(event):
             return
             
         entry_id, waifu_slots, total_love, total_allocated = results[0]
-        new_waifu_slot_count = waifu_slots+1
+        new_waifu_slot_count = waifu_slots + 1
         
         if waifu_slots >= MAX_WAIFU_SLOTS:
             return Embed(
@@ -200,7 +200,7 @@ async def buy_marriage_slot_confirm(event):
                 'You reached the maximum amount of waifu slots meanwhile.',
             )
         
-        available_love = total_love-total_allocated
+        available_love = total_love - total_allocated
         required_love = WAIFU_SLOT_COSTS.get(new_waifu_slot_count, WAIFU_SLOT_COST_DEFAULT)
         
         if (required_love == WAIFU_SLOT_COST_DEFAULT) or (available_love < required_love):
@@ -216,8 +216,8 @@ async def buy_marriage_slot_confirm(event):
             USER_COMMON_TABLE.update(
                 user_common_model.id == entry_id,
             ).values(
-                total_love = user_common_model.total_love-required_love,
-                waifu_slots = user_common_model.waifu_slots+1,
+                total_love = user_common_model.total_love - required_love,
+                waifu_slots = user_common_model.waifu_slots + 1,
             )
         )
         
@@ -307,7 +307,7 @@ async def waifu_info(event,
     
     embed.add_field(
         f'Minimal cost:',
-        f'{floor(waifu_cost*1.1)} - {floor(waifu_cost*2.1)} {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'{floor(waifu_cost * 1.1)} - {floor(waifu_cost * 2.1)} {EMOJI__HEART_CURRENCY.as_emoji}',
         inline = True,
     )
     
@@ -334,7 +334,7 @@ async def waifu_info(event,
     event_user_id = event_user.id
     if (user_id != event_user_id) and (waifu_owner_id != event_user_id):
         footer_text = (
-            f'To buy {user.full_name} you need at least {floor(get_multiplier(event_user_id, user_id)*waifu_cost)} '
+            f'To buy {user.full_name} you need at least {floor(get_multiplier(event_user_id, user_id) * waifu_cost)} '
             f'love.\n'
             f'Requested by {event_user.full_name}'
         )
@@ -461,7 +461,7 @@ async def propose(client, event,
                 target_waifu_cost = WAIFU_COST_DEFAULT
         
         
-        required_love = floor(target_waifu_cost*get_multiplier(source_user_id, target_user_id))
+        required_love = floor(target_waifu_cost * get_multiplier(source_user_id, target_user_id))
         
         # Case 1: the user has not enough money
         if amount < required_love:
@@ -488,7 +488,7 @@ async def propose(client, event,
                     )
                     return
                 
-                available_love = source_total_love-source_total_allocated+investment
+                available_love = source_total_love - source_total_allocated + investment
                 
                 # Case 3: The user has not enough love even with proposal
                 if available_love < amount:
@@ -542,7 +542,7 @@ async def propose(client, event,
                     USER_COMMON_TABLE.update(
                         user_common_model.id == source_entry_id,
                     ).values(
-                        total_love = user_common_model.total_love-(amount-investment),
+                        total_love = user_common_model.total_love - (amount - investment),
                     )
                 )
                 
@@ -571,7 +571,7 @@ async def propose(client, event,
         else:
             proposed_user_count = len(proposed_user_ids)
         
-        if source_waifu_slots-source_waifu_count-proposed_user_count <= 0:
+        if source_waifu_slots - source_waifu_count - proposed_user_count <= 0:
             yield Embed(
                 None,
                 f'You can not propose to more users.\n'
@@ -584,7 +584,7 @@ async def propose(client, event,
             return
         
         # case 6: The proposal amount is under required amount.
-        available_love = source_total_love-source_total_allocated
+        available_love = source_total_love - source_total_allocated
         if amount > available_love:
             embed_description_parts = []
             
@@ -616,7 +616,7 @@ async def propose(client, event,
         
         # case 7: Proposing to a bot
         if user.is_bot:
-            love_increase = (amount>>1)
+            love_increase = (amount >> 1)
             if target_entry_id == -1:
                 to_execute = get_create_common_user_expression(
                     target_user_id,
@@ -627,7 +627,7 @@ async def propose(client, event,
                 to_execute = USER_COMMON_TABLE.update(
                     user_common_model.id == target_entry_id,
                 ).values(
-                    total_love = user_common_model.total_love+love_increase,
+                    total_love = user_common_model.total_love + love_increase,
                     waifu_owner_id = source_user_id,
                     waifu_cost = amount,
                 )
@@ -687,7 +687,7 @@ async def propose(client, event,
             USER_COMMON_TABLE.update(
                 user_common_model.id == source_entry_id,
             ).values(
-                total_love = user_common_model.total_love-amount,
+                total_love = user_common_model.total_love - amount,
             )
         )
         
@@ -849,7 +849,7 @@ async def accept(client, event,
             entry_id = -1
             waifu_owner_id = 0
         
-        love_increase = (investment>>1)
+        love_increase = (investment >> 1)
         if entry_id == -1:
             to_execute = get_create_common_user_expression(
                 source_user_id,
@@ -860,7 +860,7 @@ async def accept(client, event,
             to_execute = USER_COMMON_TABLE.update(
                 user_common_model.id == entry_id,
             ).values(
-                total_love = user_common_model.total_love+love_increase,
+                total_love = user_common_model.total_love + love_increase,
                 waifu_owner_id = target_user_id,
                 waifu_cost = investment,
             )
@@ -1114,7 +1114,7 @@ async def divorce(client, event,
         
         
         if is_incoming:
-            available_love = total_love-total_allocated
+            available_love = total_love - total_allocated
             
             if available_love < waifu_cost:
                 embed_description_parts = []
@@ -1272,7 +1272,7 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
         total_allocated = result[1]
         waifu_cost = result[3]
         
-        available_love = total_love-total_allocated
+        available_love = total_love - total_allocated
         
         if available_love < waifu_cost:
             yield InteractionResponse(
@@ -1289,15 +1289,15 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
             return
         
         entry_id = result[4]
-        refund = (waifu_cost>>1)
+        refund = (waifu_cost >> 1)
         
         await connector.execute(
             USER_COMMON_TABLE.update(
                 user_common_model.id == entry_id,
             ).values(
-                total_love = user_common_model.total_love-waifu_cost,
-                waifu_cost = user_common_model.waifu_cost-refund,
-                waifu_divorces = user_common_model.waifu_divorces+1,
+                total_love = user_common_model.total_love - waifu_cost,
+                waifu_cost = user_common_model.waifu_cost - refund,
+                waifu_divorces = user_common_model.waifu_divorces + 1,
                 waifu_owner_id = 0,
             )
         )
@@ -1306,7 +1306,7 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
             USER_COMMON_TABLE.update(
                 user_common_model.user_id == target_user_id,
             ).values(
-                total_love = user_common_model.total_love+waifu_cost,
+                total_love = user_common_model.total_love + waifu_cost,
             )
         )
         
@@ -1468,7 +1468,7 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
         total_allocated = result[1]
         waifu_cost = result[2]
         
-        available_love = total_love-total_allocated
+        available_love = total_love - total_allocated
         
         if available_love < waifu_cost:
             yield InteractionResponse(
@@ -1485,15 +1485,15 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
             return
         
         entry_id = result[3]
-        refund = (waifu_cost>>1)
+        refund = (waifu_cost >> 1)
         
         await connector.execute(
             USER_COMMON_TABLE.update(
                 user_common_model.id == entry_id,
             ).values(
-                total_love = user_common_model.total_love-waifu_cost,
-                waifu_cost = user_common_model.waifu_cost-refund,
-                waifu_divorces = user_common_model.waifu_divorces+1,
+                total_love = user_common_model.total_love - waifu_cost,
+                waifu_cost = user_common_model.waifu_cost - refund,
+                waifu_divorces = user_common_model.waifu_divorces + 1,
                 waifu_owner_id = 0,
             )
         )
@@ -1502,7 +1502,7 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
             USER_COMMON_TABLE.update(
                 user_common_model.user_id == target_user_id,
             ).values(
-                total_love = user_common_model.total_love+waifu_cost,
+                total_love = user_common_model.total_love + waifu_cost,
                 waifu_owner_id = 0,
             )
         )

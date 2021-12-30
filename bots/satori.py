@@ -71,9 +71,9 @@ TRANSFORMATIONS = {
 }
     
 for char in range(b'a'[0], b'z'[0]+1):
-    emoji = BUILTIN_EMOJIS['regional_indicator_'+chr(char)].as_emoji
+    emoji = BUILTIN_EMOJIS['regional_indicator_' + chr(char)].as_emoji
     TRANSFORMATIONS[chr(char)] = emoji
-    TRANSFORMATIONS[chr(char-32)] = emoji
+    TRANSFORMATIONS[chr(char - 32)] = emoji
 
 del char, emoji
 
@@ -128,7 +128,7 @@ class auto_pyramid:
         channel = message.channel
         for client_ in channel.clients:
             permissions = channel.cached_permissions_for(client_)
-            if not permissions&PERMISSION_MASK_MESSAGING:
+            if not permissions & PERMISSION_MASK_MESSAGING:
                 continue
             
             if not client_.can_use_emoji(emoji):
@@ -186,7 +186,7 @@ class auto_pyramid_u:
         
         users = list(message.guild.users.values())
         selected_users = []
-        needed_users = (size<<1) - 1
+        needed_users = (size << 1) - 1
         user_count = len(users)
         while True:
             if user_count == 0:
@@ -195,7 +195,7 @@ class auto_pyramid_u:
             if needed_users == 0:
                 break
             
-            user = users.pop(randint(0, user_count-1))
+            user = users.pop(randint(0, user_count - 1))
             user_count -= 1
             if user.is_bot:
                 continue

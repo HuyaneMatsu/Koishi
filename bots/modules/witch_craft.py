@@ -183,22 +183,22 @@ class CookingFactor:
         cost = 0.0
         
         flavor = self.flavor
-        cost += (flavor*flavor)*0.4
+        cost += (flavor * flavor) * 0.4
         
         fruit = self.fruit
-        cost += fruit*fruit
+        cost += fruit * fruit
         
         meat = self.meat
-        cost += meat*meat
+        cost += meat * meat
         
         vegetable = self.vegetable
-        cost += vegetable*vegetable
+        cost += vegetable * vegetable
         
         mushroom = self.mushroom
-        cost += (mushroom*mushroom)*2.0
+        cost += (mushroom * mushroom) * 2.0
         
         monster = self.monster
-        cost += monster*monster
+        cost += monster * monster
         
         return cost
 
@@ -298,13 +298,13 @@ class EdibilityFactor:
         """
         cost = 0.0
         health = self.health
-        cost += health*health
+        cost += health * health
         
         hunger = self.hunger
-        cost += hunger*hunger
+        cost += hunger * hunger
         
         sanity = self.sanity
-        cost += sanity*sanity
+        cost += sanity * sanity
         
         return cost
 
@@ -367,7 +367,7 @@ class Item:
         if (edibility is not None):
             cost += cooking.get_raw_cost()
         
-        cost = int(cost**0.5)
+        cost = int(cost ** 0.5)
         
         self = object.__new__(cls)
         self.id = item_id
@@ -519,28 +519,28 @@ async def load_data():
         
         KOKORO.run_in_executor(alchemy_incendiary(save_file, (data,)))
 
-# ((((x-1)+n)+1)*((x-1)+n))/2 - (((x-1)+1)*(x-1))/2
-# (((x-1+n)+1)*((x-1)+n))/2 - (x*(x-1))/2
-# ((x+n)*(x-1+n))/2 - (x*(x-1))/2
-# (((x+n)*(x-1+n)) - (x*(x-1)))/2
-# ((x*x+n*x-x-n+x*n+n*n) - (x*(x-1)))/2
-# ((x*x+n*x-x-n+x*n+n*n) - (x*x-x))/2
-# (x*x+n*x-x-n+x*n+n*n - x*x+x)/2
+# ((((x-1) + n) + 1)*((x-1) + n))/2 - (((x-1) + 1)*(x-1))/2
+# (((x-1 + n) + 1)*((x-1) + n))/2 - (x*(x-1))/2
+# ((x + n)*(x-1 + n))/2 - (x*(x-1))/2
+# (((x + n)*(x-1 + n)) - (x*(x-1)))/2
+# ((x*x + n*x-x-n + x*n + n*n) - (x*(x-1)))/2
+# ((x*x + n*x-x-n + x*n + n*n) - (x*x-x))/2
+# (x*x + n*x-x-n + x*n + n*n - x*x + x)/2
 # (x*x + n*x - x - n + x*n + n*n - x*x + x)/2
 # (n*x - n + x*n + n*n)/2
 # (2*n*x - n + n*n)/2
 # (n*n + 2*n*x - n)/2
-# (n*(n+2*x-1))/2
-# (n*(n+(x<<1)-1))/2
+# (n*(n + 2*x-1))/2
+# (n*(n + (x << 1)-1))/2
 
 
 def calculate_buy_cost(market_cost, n):
-    return floor((n*(n+(market_cost<<1)-1))/2*(1.0+MARKET_COST_FEE))
+    return floor((n * (n + (market_cost << 1) - 1)) / 2 * (1.0 + MARKET_COST_FEE))
 
 
 def calculate_sell_price(market_cost, n):
 
-    under_price = MARKET_COST_MIN-market_cost+n
+    under_price = MARKET_COST_MIN - market_cost + n
     if under_price < 0:
         under_price = 0
         over_price = n
@@ -549,23 +549,23 @@ def calculate_sell_price(market_cost, n):
             under_price = n
             over_price = 0
         else:
-            over_price = n-under_price
+            over_price = n - under_price
     
     price = 0
     
     if over_price:
-        price += (over_price*((market_cost<<1)-over_price+1))>>1
+        price += (over_price * ((market_cost << 1) - over_price + 1)) >> 1
     
     if under_price:
-        price += (under_price*MARKET_COST_MIN)
+        price += (under_price * MARKET_COST_MIN)
     
     return price
 
 
 def calculate_max_buyable(market_cost, usable):
-    f = 1.0+MARKET_COST_FEE
-    b = sqrt(f*((usable<<3)+f*((1-(market_cost<<1))**2)))
-    return floor(((b)-2*market_cost*f+f)/(2*f))
+    f = 1.0 + MARKET_COST_FEE
+    b = sqrt(f * ((usable << 3) + f * ((1 - (market_cost << 1)) ** 2)))
+    return floor(((b) - 2 * market_cost * f + f) / (2 * f))
 
 def calculate_buyable_and_cost(market_cost, n, usable):
     cost = calculate_buy_cost(market_cost, n)
@@ -585,8 +585,8 @@ async def prices(client, event):
     for item in BUYABLE:
         embed_field_name = f'{item.emoji:e} {item.name}'
         market_cost = item.market_cost
-        embed_field_value = f'Sell for: {floor(market_cost*(1.0-MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY:e}\n' \
-                            f'Buy for: {floor(market_cost*(1.0+MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY:e}'
+        embed_field_value = f'Sell for: {floor(market_cost * (1.0 - MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY:e}\n' \
+                            f'Buy for: {floor(market_cost * (1.0 + MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY:e}'
         
         embed.add_field(embed_field_name, embed_field_value, inline=True)
     
@@ -624,7 +624,7 @@ async def buy(client, event,
         abort('Item not available.')
     
     permissions = event.channel.cached_permissions_for(client)
-    if (not permissions&PERMISSION_MASK_MESSAGING) or ( not permissions&PERMISSION_MASK_REACT):
+    if (not permissions & PERMISSION_MASK_MESSAGING) or ( not permissions & PERMISSION_MASK_REACT):
         abort('I need `send messages` and `add reactions` permissions to execute the command.')
     
     yield
@@ -692,14 +692,14 @@ async def buy(client, event,
             if total_love == 0:
                 amount = cost = 0
             else:
-                amount, cost = calculate_buyable_and_cost(item.market_cost, amount, total_love-total_allocated)
+                amount, cost = calculate_buyable_and_cost(item.market_cost, amount, total_love - total_allocated)
                 
                 item.market_cost += amount
             
             if cost == 0:
                 new_love = total_love
             else:
-                new_love = total_love-cost
+                new_love = total_love - cost
                 await connector.execute(update(user_common_model.user_id==user.id). \
                     values(total_love = new_love))
                 
@@ -709,7 +709,7 @@ async def buy(client, event,
                 results = await response.fetchall()
                 if results:
                     row_id, actual_amount = results[0]
-                    new_amount = actual_amount+amount
+                    new_amount = actual_amount + amount
                     to_execute = ITEM_TABLE.update(
                         item_model.id == row_id,
                     ).values(

@@ -32,7 +32,7 @@ class threads:
         for thread in list_threads():
             thread_count += 1
             thread_type = thread.__class__
-            thread_count_by_type[thread_type] = thread_count_by_type.get(thread_type,0)+1
+            thread_count_by_type[thread_type] = thread_count_by_type.get(thread_type,0) + 1
         
         description = []
         
@@ -63,7 +63,7 @@ class threads:
             
             description.append(
                 f'--------------------\n'
-                f'Total: {main_thread_count+event_thread_count}'
+                f'Total: {main_thread_count + event_thread_count}'
             )
         
         
@@ -184,7 +184,7 @@ if IS_PYPY:
                 '----------------------------\n'
                 f'Total: {stats.memory_allocated_sum}\n'
                 '\n'
-                f'Total time spent in GC: {stats.total_gc_time/1000.0:.3f}',
+                f'Total time spent in GC: {stats.total_gc_time / 1000.0:.3f}',
                   color=STAT_COLOR)
             
             await client.message_create(message.channel, embed=embed)

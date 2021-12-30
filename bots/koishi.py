@@ -43,7 +43,7 @@ async def message_create(client, message):
     if (message.referenced_message is not None):
         return
     
-    if not message.channel.cached_permissions_for(Koishi)&PERMISSION_MASK_MESSAGING:
+    if not message.channel.cached_permissions_for(Koishi) & PERMISSION_MASK_MESSAGING:
         return
     
     if message.author.is_bot:

@@ -62,11 +62,11 @@ def calculate_daily_for(user, daily_streak):
         daily_limit += DAILY_LIMIT_BONUS_W_HE
     
     
-    daily_extra = daily_streak*daily_per_day
+    daily_extra = daily_streak * daily_per_day
     if (daily_extra > daily_limit):
         daily_extra = daily_limit
     
-    received = daily_base+daily_extra+daily_streak
+    received = daily_base + daily_extra + daily_streak
     
     return received
 
@@ -88,9 +88,9 @@ def calculate_daily_new_only(daily_streak, daily_next, now):
     daily_streak_new : `int`
         The new daily streak value of the user.
     """
-    daily_next_with_break = daily_next+DAILY_STREAK_BREAK
+    daily_next_with_break = daily_next + DAILY_STREAK_BREAK
     if daily_next_with_break < now:
-        daily_streak_new = daily_streak-((now-daily_next_with_break)//DAILY_STREAK_LOSE)-1
+        daily_streak_new = daily_streak - ((now - daily_next_with_break) // DAILY_STREAK_LOSE) - 1
         
         if daily_streak_new < 0:
             daily_streak_new = 0
@@ -121,15 +121,15 @@ def calculate_daily_new(daily_streak, daily_next, now):
     daily_next_new : `datetime`
         The new daily next value of the user.
     """
-    daily_next_with_break = daily_next+DAILY_STREAK_BREAK
+    daily_next_with_break = daily_next + DAILY_STREAK_BREAK
     if daily_next_with_break < now:
-        daily_streak_new = daily_streak-((now-daily_next_with_break)//DAILY_STREAK_LOSE)-1
+        daily_streak_new = daily_streak - ((now - daily_next_with_break) // DAILY_STREAK_LOSE) - 1
         
         if daily_streak_new < 0:
             daily_streak_new = 0
             daily_next_new = now
         else:
-            daily_next_new = daily_next+(DAILY_STREAK_LOSE*(daily_streak-daily_streak_new))
+            daily_next_new = daily_next + (DAILY_STREAK_LOSE * (daily_streak - daily_streak_new))
     
     else:
         daily_streak_new = daily_streak

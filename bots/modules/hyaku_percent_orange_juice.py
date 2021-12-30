@@ -55,12 +55,12 @@ CARD_RARITY_FILTERABLE_NAMES = [
 
 CARD_RARITY_NAME_TO_VALUE = {value:key for key, value in CARD_RARITY_VALUE_TO_NAME.items()}
 
-CARD_TYPE_BATTLE = 1<<0
-CARD_TYPE_BOOST = 1<<1
-CARD_TYPE_EVENT = 1<<2
-CARD_TYPE_GIFT = 1<<3
-CARD_TYPE_TRAP = 1<<4
-CARD_TYPE_HYPER = 1<<7
+CARD_TYPE_BATTLE = 1 << 0
+CARD_TYPE_BOOST = 1 << 1
+CARD_TYPE_EVENT = 1 << 2
+CARD_TYPE_GIFT = 1 << 3
+CARD_TYPE_TRAP = 1 << 4
+CARD_TYPE_HYPER = 1 << 7
 
 CARD_TYPE_NAME_BATTLE = 'BATTLE'
 CARD_TYPE_NAME_BOOST = 'BOOST'
@@ -480,7 +480,7 @@ class OJCard(OJEntityBase):
         field_added = False
         
         for mask, name in CARD_TYPE_GENERIC_MASK_NAME_PAIRS:
-            if type_&mask:
+            if type_ & mask:
                 if field_added:
                     string_parts.append('/')
                 else:
@@ -1558,7 +1558,7 @@ CARD_WANTED = OJCard(89,
 
 CARD_ANOTHER_ULTIMATE_WEAPON = OJCard(90,
     'Another Ultimate Weapon',
-    3, CARD_COST_StALL, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    3, CARD_COST_StALL, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Gain +1 ATK and DEF and an additional +1 ATK and DEF for every 20 stars spent on this card.',
     '"With you gone, I am their ultimate weapon now." ―YNath',
     None,
@@ -1567,7 +1567,7 @@ CARD_ANOTHER_ULTIMATE_WEAPON = OJCard(90,
 
 CARD_BEYOND_HELL = OJCard(91,
     'Beyond Hell',
-    1, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'During this battle, gain +1 to ATK, DEF and EVD for every HP you are missing.',
     '"Syura\'s powers go beyond Hell itself! Allow me to demonstrate!" ―Syura',
     None,
@@ -1576,7 +1576,7 @@ CARD_BEYOND_HELL = OJCard(91,
 
 CARD_BLUE_CROW_THE_SECOND = OJCard(92,
     'Blue Crow the Second',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'During this battle, gain ATK and DEF but lose EVD equal to the number of cards in your hand.',
     '"I\'m gonna settle this!" - Peat',
     None,
@@ -1585,7 +1585,7 @@ CARD_BLUE_CROW_THE_SECOND = OJCard(92,
 
 CARD_DEPLOY_BITS = OJCard(93,
     'Deploy Bits',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'During this battle, gain a total of +7 points to ATK, DEF, and/or EVD, distributed randomly.',
     '"No matter what, you can\'t escape my Bits." ―YNanako',
     None,
@@ -1594,7 +1594,7 @@ CARD_DEPLOY_BITS = OJCard(93,
 
 CARD_HYPER_MODE = OJCard(94,
     'Hyper Mode',
-    1, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    1, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Gain +2 ATK during this battle. If your unit suffers KO during this battle, you give no stars or Wins and the '
     'unit will revive next turn.',
     '"HYPER MODE!" ―YQP',
@@ -1604,7 +1604,7 @@ CARD_HYPER_MODE = OJCard(94,
 
 CARD_INTELLIGENCE_OFFICER = OJCard(95,
     'Intelligence Officer',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Gain one of the following effects depending on the top-of-the-deck card: '
     'Event +3 ATK\n'
     'Boost +3 DEF\n'
@@ -1616,7 +1616,7 @@ CARD_INTELLIGENCE_OFFICER = OJCard(95,
 
 CARD_REFLECTIVE_SHELL = OJCard(96,
     'Reflective Shell',
-    1, CARD_COST_5, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    1, CARD_COST_5, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Base ATK is 0 in this battle. Absorb up to 2 damage. Gain an additional +2 ATK for every damage absorbed.\n'
     'Can only be used when defending.',
     '"Enemy detected. Destroying." ―Robo Ball',
@@ -1626,7 +1626,7 @@ CARD_REFLECTIVE_SHELL = OJCard(96,
 
 CARD_SELF_DESTRUCT = OJCard(97,
     'Self-Destruct',
-    3, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    3, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'On KO, also KO the opponent. Enemy gains no stars or wins, and loses half their stars.',
     '"I\'m sorry...I can\'t make it back..." ―Alte',
     None,
@@ -1635,7 +1635,7 @@ CARD_SELF_DESTRUCT = OJCard(97,
 
 CARD_WARUDA_MACHINE_BLAST_OFF = OJCard(98,
     'Waruda Machine, Blast Off!',
-    3, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    3, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'During this battle, gain ATK and DEF but lose EVD equal to the number of cards in your opponent\'s hand.',
     '"Revenge!" ―Tomato',
     None,
@@ -1644,7 +1644,7 @@ CARD_WARUDA_MACHINE_BLAST_OFF = OJCard(98,
 
 CARD_ACCELERATOR = OJCard(99,
     'Accelerator',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Effect Duration: 1 chapter Roll two dice for movement, battle, bonus and drop.',
     '"I\'m accelerating." ―Suguri',
     None,
@@ -1653,7 +1653,7 @@ CARD_ACCELERATOR = OJCard(99,
 
 CARD_ANGEL_HAND = OJCard(100,
     'Angel Hand',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Heal target player to full HP and gain 10 stars per healed HP. In even-numbered chapters, this card turns into '
     'Devil Hand.',
     '"This is the power of mercy." ―Yuuki',
@@ -1663,7 +1663,7 @@ CARD_ANGEL_HAND = OJCard(100,
 
 CARD_AWAKENING_OF_TALENT = OJCard(101,
     'Awakening of Talent',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Until end of turn, roll 5 for move, battle, bonus or drop. This card can also be used as a Battle Card.',
     '"I\'ll commence... my operation now." ―Sora',
     None,
@@ -1672,7 +1672,7 @@ CARD_AWAKENING_OF_TALENT = OJCard(101,
 
 CARD_BIG_ROCKET_CANNON = OJCard(102,
     'Big Rocket Cannon',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Deal 3 damage to target enemy. If KO\'d, you gain wins as though KO\'d in battle. This card becomes '
     '"Rocket Cannon" when you use another card or you suffer KO.',
     '"Go!" ―Marc',
@@ -1682,7 +1682,7 @@ CARD_BIG_ROCKET_CANNON = OJCard(102,
 
 CARD_BLAZING = OJCard(103,
     'Blazing!',
-    3, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Inflicts Blazing! on units within 2 panels, and refreshes the duration of existing Blazing! Effect Duration: 3 '
     'Chapters. ATK +1, DEF -1. Effect expires on KO.',
     '"Good! Good! This feeling really is the best!" ―Kae',
@@ -1692,7 +1692,7 @@ CARD_BLAZING = OJCard(103,
 
 CARD_BRANCH_EXPANSION_STRATEGY = OJCard(104,
     'Branch Expansion Strategy',
-    3, CARD_COST_HCx5, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_HCx5, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Turn all your cards, including this one, into "Rbit Hobby Shop." You may play one more card in this turn.',
     '"Phaaw..." ―Arthur',
     None,
@@ -1701,7 +1701,7 @@ CARD_BRANCH_EXPANSION_STRATEGY = OJCard(104,
 
 CARD_CAST_OFF = OJCard(105,
     'Cast Off',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Stock Effect Swap unit\'s base ATK and DEF. Lasts until KO, or Cast Off is used again.',
     '"This calls for a good distraction..." ―Kyousuke',
     None,
@@ -1710,7 +1710,7 @@ CARD_CAST_OFF = OJCard(105,
 
 CARD_CHEF_I_COULD_USE_SOME_HELP = OJCard(106,
     'Chef, I Could Use Some Help!',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Summon Chef. Fights battles on behalf of your unit. Gives 2 Wins on KO. Gives stars gained in battle to your '
     'unit. Effect ends with Chef\'s KO. This card turns to "Manager, I Could Use Some Help!" if you have 4 or more '
     'Store Manager Counters and your Lvl is 4 or higher.',
@@ -1721,7 +1721,7 @@ CARD_CHEF_I_COULD_USE_SOME_HELP = OJCard(106,
 
 CARD_CRYSTAL_BARRIER = OJCard(107,
     'Crystal Barrier',
-    1, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Stock Effect (3) Cancel a trap, a battle, or drop panel. Take 1 damage. Consumes 1 stack. Effect expires on KO.',
     '"What a piece of junk, huh..." - Kyoko',
     None,
@@ -1730,7 +1730,7 @@ CARD_CRYSTAL_BARRIER = OJCard(107,
 
 CARD_ELLIES_MIRACLE = OJCard(108,
     'Ellie\'s Miracle',
-    2, CARD_COST_Lvx10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_Lvx10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Cost: Level x10 stars. Effect Duration: 2 chapters. Gain +X ATK, +Y DEF, and +Z EVD, where X = Your total Norma '
     'completed, Y = your number of Wins Norma completed, and Z = your number of Stars Norma completed.',
     '"Receive my miracle!" - Ellie',
@@ -1740,7 +1740,7 @@ CARD_ELLIES_MIRACLE = OJCard(108,
 
 CARD_EXTENDED_PHOTON_RIFLE = OJCard(109,
     'Extended Photon Rifle',
-    1, CARD_COST_Lvx5, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_Lvx5, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Deal 1 damage to another random unit. If KO\'d, gain 1 win. Repeat as many times as your current level.',
     '"I\'ll shoot you all down." ―Iru',
     None,
@@ -1749,7 +1749,7 @@ CARD_EXTENDED_PHOTON_RIFLE = OJCard(109,
 
 CARD_EXTRAORDINARY_SPECS = OJCard(110,
     'Extraordinary Specs',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Effect Duration: 1 chapter Roll 6 for movement, battle, bonus and drop.',
     '"I\'d appreciate it if you dropped your weapons." ―Sora',
     None,
@@ -1758,7 +1758,7 @@ CARD_EXTRAORDINARY_SPECS = OJCard(110,
 
 CARD_FULL_SPEED_ALICIANRONE = OJCard(111,
     'Full Speed Alicianrone',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Roll a die and move result x 3 panels. Deal damage equal to the result to each unit you pass during the move. If '
     'they are KO\'d by the damage, gain Wins as though from a normal battle. After this effect, your turn ends.',
     '"I\'ll go fast and cut my way through!" - Alicianrone',
@@ -1768,7 +1768,7 @@ CARD_FULL_SPEED_ALICIANRONE = OJCard(111,
 
 CARD_IMMOVABLE_OBJECT = OJCard(112,
     'Immovable Object',
-    3, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Effect Duration: 2 Chapters Cannot move. Gain +2 DEF. Can counterattack. Enemies who move into the same panel '
     'must battle you.',
     '"With this power, everything in the sky will be ours." ―Guild Master',
@@ -1778,7 +1778,7 @@ CARD_IMMOVABLE_OBJECT = OJCard(112,
 
 CARD_JONATHAN_RUSH = OJCard(113,
     'Jonathan Rush',
-    3, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Move to an enemy and attack them. Target gains -1 DEF. After the battle, your turn ends.',
     '"Squaawk!" ―Seagull',
     None,
@@ -1787,7 +1787,7 @@ CARD_JONATHAN_RUSH = OJCard(113,
 
 CARD_LEAP_THROUGH_SPACE = OJCard(114,
     'Leap Through Space',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Warp to the marked panel and unmark it. Apply Binding Smoke to enemies within 1 panel radius. If no marked panels '
     'exist, this card becomes "Leap through Space (Marking)."',
     '"Poof." ―Mira',
@@ -1797,7 +1797,7 @@ CARD_LEAP_THROUGH_SPACE = OJCard(114,
 
 CARD_LEAP_THROUGH_SPACE_MARKING = OJCard(115,
     'Leap Through Space (Marking)',
-    1, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Mark the panel where your unit is. When a marked panel exists, this card becomes "Leap through Space." This card '
     'is not discarded upon use.',
     '"Poof." ―Mira',
@@ -1807,7 +1807,7 @@ CARD_LEAP_THROUGH_SPACE_MARKING = OJCard(115,
 
 CARD_LULUS_LUCKY_EGG = OJCard(116,
     'Lulu\'s Lucky Egg',
-    2, CARD_COST_40, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_40, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Can only be played with 2 HP or less. Gain one of the following effects at random: - Roll a die and gain the die '
     'number x 20 stars. - Draw 5 cards. - Heal to full HP and permanently gain +1 ATK, +1 DEF, and +1 EVD. This effect '
     'can only trigger once.',
@@ -1818,7 +1818,7 @@ CARD_LULUS_LUCKY_EGG = OJCard(116,
 
 CARD_MANAGER_I_COULD_USE_SOME_HELP = OJCard(117,
     'Manager, I Could Use Some Help!',
-    4, CARD_COST_40, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    4, CARD_COST_40, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Summon Store Manager. Fights battles on behalf of your unit. Gives 2 Wins on KO. Gives stars gained in battle to '
     'your unit. Effect ends with Store Manager\'s KO, and your Store Manager Counters reset to 0. This card turns to '
     '"Chef, I Could Use Some Help!" if you have less than 4 Store Manager Counters.',
@@ -1829,7 +1829,7 @@ CARD_MANAGER_I_COULD_USE_SOME_HELP = OJCard(117,
 
 CARD_MIRACLE_WALKER = OJCard(118,
     'Miracle Walker',
-    3, CARD_COST_HCx5, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_HCx5, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Turn all your cards, including this one, into random Hyper cards. You may play one more card this turn.',
     '"Hooray! Nico will try her best!" ―Nico',
     None,
@@ -1838,7 +1838,7 @@ CARD_MIRACLE_WALKER = OJCard(118,
 
 CARD_OBSERVER_OF_ETERNITY = OJCard(119,
     'Observer of Eternity',
-    3, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     (
         'Add 2 random Boost/Event cards that deal damage to your hand.\n'
         'You may play another card this turn.'
@@ -1850,7 +1850,7 @@ CARD_OBSERVER_OF_ETERNITY = OJCard(119,
 
 CARD_PROTAGONISTS_PRIVILEGE = OJCard(120,
     'Protagonist\'s Privilege',
-    3, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Effect Duration: 3 chapters When you are allowed to attack first, the opposing unit cannot attack (once per '
     'combat).',
     '"This is the privilege of the main character!" - Kai',
@@ -1860,7 +1860,7 @@ CARD_PROTAGONISTS_PRIVILEGE = OJCard(120,
 
 CARD_RAGING_MADNESS = OJCard(121,
     'Raging Madness',
-    2, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Gain +1 Rage Counter. Target another active unit and enter Raging Mode: gain +X ATK and +X EVD where X is the '
     'number of your Rage Counters. Raging Mode ends and Rage Counters become 0 upon target\'s KO. Gain +2 Wins if you '
     'KO target in battle, and -50% Stars and Wins if you KO any other unit.',
@@ -1871,7 +1871,7 @@ CARD_RAGING_MADNESS = OJCard(121,
 
 CARD_REPRODUCTION_OF_RECORDS = OJCard(122,
     'Reproduction of Records',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Add a copy of the two most recent cards in the discard pile that aren\'t "Reproduction of Records" to your hand. '
     'Those cards will be treated as being Level 1 and having no base cost while in your hand.',
     '"Sumika\'s sweet memory!" - Sumika',
@@ -1881,7 +1881,7 @@ CARD_REPRODUCTION_OF_RECORDS = OJCard(122,
 
 CARD_RIVAL = OJCard(123,
     'Rival',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Challenge target player. You attack first. During battle, gain +1 ATK.',
     '"Just like you... I have my battles to fight." - Islay',
     None,
@@ -1890,7 +1890,7 @@ CARD_RIVAL = OJCard(123,
 
 CARD_ROCKET_CANNON = OJCard(124,
     'Rocket Cannon',
-    1, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Choose one of the following two effects to activate: 1. This card becomes "Big Rocket Cannon". 2. Deal 1 damage '
     'to target enemy. If KO\'d, you gain wins as though KO\'d in battle.',
     '"Red Barrel... It\'s time to use that!" ―Marc',
@@ -1900,7 +1900,7 @@ CARD_ROCKET_CANNON = OJCard(124,
 
 CARD_SAINT_EYES = OJCard(125,
     'Saint Eyes',
-    1, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Stock Effect (3). In a battle where you attack first, gain -1 ATK and +1 DEF for every 2 stock, and +1 ATK per '
     'stock. This effect can stack.',
     '"I\'m going to use my saint eyes!" - Kyupita',
@@ -1910,7 +1910,7 @@ CARD_SAINT_EYES = OJCard(125,
 
 CARD_SOLID_WITCH = OJCard(126,
     'Solid Witch',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Effect Duration: 1 chapter. Take no damage.',
     '"No flimsy attacks can hurt me!" ―Miusaki',
     None,
@@ -1919,7 +1919,7 @@ CARD_SOLID_WITCH = OJCard(126,
 
 CARD_SPECIAL_STAGE = OJCard(127,
     'Special Stage',
-    1, CARD_COST_Lvx10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_Lvx10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Go to Live Mode for (your Lvl) turns. Gain -3 MOV, can only trigger movement type panels and cannot use cards. '
     'Cannot be challenged or be the target of Boost cards. If an opponent ends their turn in 2 panel radius, steal '
     '(your Lvl) x5 stars from them. Ends on KO.',
@@ -1930,7 +1930,7 @@ CARD_SPECIAL_STAGE = OJCard(127,
 
 CARD_STEALTH_ON = OJCard(128,
     'Stealth On',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     (
         'Effect Duration: 3 chapters. Cannot be challenged to battle or targeted by Boost cards by other players. '
         'Do not trigger Encounter or Boss panels. Effect expires on entering battle. Gain +2 ATK when entering battle.'
@@ -1942,7 +1942,7 @@ CARD_STEALTH_ON = OJCard(128,
 
 CARD_SWEET_GUARDIAN = OJCard(129,
     'Sweet Guardian',
-    3, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    3, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Draw 2 cards with "Pudding" in their name from the center deck.',
     '"My little... pudding..." ―QP',
     None,
@@ -1951,7 +1951,7 @@ CARD_SWEET_GUARDIAN = OJCard(129,
 
 CARD_TURBO_CHARGED = OJCard(130,
     'Turbo Charged',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Drop to 1 HP. Gain +1 ATK per lost HP. Effect Duration: As many Chapters as lost HP. Lose 1 ATK per turn for the '
     'duration. Effect expires on KO.',
     '"Rumble rumble rumble." ―Shifu Robot',
@@ -1961,7 +1961,7 @@ CARD_TURBO_CHARGED = OJCard(130,
 
 CARD_UBIQUITOUS = OJCard(131,
     'Ubiquitous',
-    1, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Move to target unit\'s panel. In addition, steal stars equal to 10x their level.',
     '"Poppo! Poppopopopopo!" ―Marie Poppo',
     None,
@@ -1970,7 +1970,7 @@ CARD_UBIQUITOUS = OJCard(131,
 
 CARD_WITCHS_HAIR_LOCK = OJCard(132,
     'Witch\'s Hair Lock',
-    1, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Stop target unit\'s next move action.',
     '"No one can get out of Repa\'s hair." ―Ceoreparque',
     None,
@@ -1979,7 +1979,7 @@ CARD_WITCHS_HAIR_LOCK = OJCard(132,
 
 CARD_X16_BIG_ROCKET = OJCard(133,
     'x16 Big Rocket',
-    1, CARD_COST_Lvx10, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    1, CARD_COST_Lvx10, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Deal damage equal to your level to target unit. A KO from this effect gives you 2 Wins.',
     '"Charged! Go!" - Marc',
     None,
@@ -1988,7 +1988,7 @@ CARD_X16_BIG_ROCKET = OJCard(133,
 
 CARD_AIR_STRIKE = OJCard(134,
     'Air Strike',
-    2, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Every unit except your own receives 1 to 3 damage. Gain 15 stars on every KO',
     '"Hmph, go down, all of you." - Fernet',
     None,
@@ -1997,7 +1997,7 @@ CARD_AIR_STRIKE = OJCard(134,
 
 CARD_BINDING_CHAINS = OJCard(135,
     'Binding Chains',
-    3, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Stock Effect All Units except yours will skip their next turn. Apply "Bound" to all active enemies. Effect '
     'Duration: 2 Chapters. Gain -2 EVD and -1 MOV.',
     '"I don\'t like this sort of thing." ―Hime',
@@ -2007,7 +2007,7 @@ CARD_BINDING_CHAINS = OJCard(135,
 
 CARD_COOKING_TIME = OJCard(136,
     'Cooking Time',
-    1, CARD_COST_Lvx5, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    1, CARD_COST_Lvx5, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'All players recover your Lvl x HP. Gain 5 stars for each HP recovered.',
     '"It\'s meal time!" ―Natsumi',
     None,
@@ -2016,7 +2016,7 @@ CARD_COOKING_TIME = OJCard(136,
 
 CARD_DELTA_FIELD = OJCard(137,
     'Delta Field',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'All other units receive the following effect until your next turn: All dice rolls will be 1.',
     '"If you insist on staying here, I\'ll take you back no matter how!" ―Sham',
     None,
@@ -2025,7 +2025,7 @@ CARD_DELTA_FIELD = OJCard(137,
 
 CARD_DEVIL_HAND = OJCard(138,
     'Devil Hand',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Lower a random player\'s HP to 1 and gain 10 stars per lowered HP. In odd-numbered chapters, this card turns '
     'into Angel Hand.',
     '"Eat the power of the devil!" ―Yuuki',
@@ -2035,7 +2035,7 @@ CARD_DEVIL_HAND = OJCard(138,
 
 CARD_DO_PIRATES_FLY_IN_THE_SKY = OJCard(139,
     'Do Pirates Fly in the Sky?',
-    3, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Set "Flying Pirate" on 2-3 random panels.',
     '"There ain\'t no law against pirates flying in the sky." ―Tequila',
     None,
@@ -2044,7 +2044,7 @@ CARD_DO_PIRATES_FLY_IN_THE_SKY = OJCard(139,
 
 CARD_EVIL_MASTERMIND = OJCard(140,
     'Evil Mastermind',
-    2, CARD_COST_13, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_13, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Draw a trap card from the deck. Set all trap cards in hand on random panels. If not holding any trap cards, draw '
     '3 from the deck and set a random one on your current panel.',
     '"Fear my powers!" ―Yuki',
@@ -2054,7 +2054,7 @@ CARD_EVIL_MASTERMIND = OJCard(140,
 
 CARD_EVIL_SPY_WORK_PREPARATION = OJCard(141,
     'Evil Spy Work - Preparation',
-    2, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Place 4 "Evil Spy Work - Execution" cards at random positions in the Center Deck.',
     '"Fear Mimyuu\'s pranks." ―Mimyuu',
     None,
@@ -2063,7 +2063,7 @@ CARD_EVIL_SPY_WORK_PREPARATION = OJCard(141,
 
 CARD_FINAL_SURGERY = OJCard(142,
     'Final Surgery',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'KO all units with 1 HP and gain stars equal to 25x the number of KO\'d units.',
     '"Just hold still, I\'ll fix you up real quick." ―Kiriko',
     None,
@@ -2072,7 +2072,7 @@ CARD_FINAL_SURGERY = OJCard(142,
 
 CARD_GAMBLE = OJCard(143,
     'Gamble!',
-    3, CARD_COST_13, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_13, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'A randomly chosen unit is KO\'d.',
     '"Why not use this to decide whose turn it is?" ―Yuki',
     None,
@@ -2081,7 +2081,7 @@ CARD_GAMBLE = OJCard(143,
 
 CARD_MAGICAL_INFERNO = OJCard(144,
     'Magical Inferno',
-    3, CARD_COST_50, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_50, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'KO all units on any other panel in the same uninterrupted column or row as the panel your unit is on. You gain'
     'stars from each KO\'d unit as though KO\'d in battle. Then end your turn.',
     '"Inferno!" ―Mio',
@@ -2091,7 +2091,7 @@ CARD_MAGICAL_INFERNO = OJCard(144,
 
 CARD_MAGICAL_MASSACRE = OJCard(145,
     'Magical Massacre',
-    4, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    4, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'All units whose HP is full or higher will suffer KO. Gain -1 REC on next Revive roll for each enemy KO\'d.',
     '"Disappear." ―Tomomo',
     None,
@@ -2100,7 +2100,7 @@ CARD_MAGICAL_MASSACRE = OJCard(145,
 
 CARD_MAGICAL_REVENGE = OJCard(146,
     'Magical Revenge',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'For each missing HP, random enemy takes 1 damage. If a unit is KO\'d, you gain 1 Win. When not held by Tomomo '
     '(Sweet Eater), this card becomes Miracle Red Bean Ice Cream.',
     '"It\'s Magical Revenge time!" ―Tomomo',
@@ -2110,7 +2110,7 @@ CARD_MAGICAL_REVENGE = OJCard(146,
 
 CARD_MELTING_MEMORIES = OJCard(147,
     'Melting Memories',
-    3, CARD_COST_OCx5, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_OCx5, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'All other players discard and replace a card from their hand. Reverse all enemy cards.',
     '"How foolish you are to have challenged a God. Prepare to taste your bitter defeat!" - Sweet Breaker',
     None,
@@ -2119,7 +2119,7 @@ CARD_MELTING_MEMORIES = OJCard(147,
 
 CARD_OVERSEER = OJCard(148,
     'Overseer',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'A boss appears. If a boss is already on the field, treat this card as a battle card: End the battle. Opponent '
     'fights the boss instead. Can only use against players.',
     '"Hahaha! Here comes my friend!" ―NoName',
@@ -2129,7 +2129,7 @@ CARD_OVERSEER = OJCard(148,
 
 CARD_PLUSHIE_MASTER = OJCard(149,
     'Plushie Master',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Set "Dance, Long-Eared Beasts!" trap on 3-5 random panels.',
     '"Dance, long-eared beasts!" ―Krilalaris',
     None,
@@ -2138,7 +2138,7 @@ CARD_PLUSHIE_MASTER = OJCard(149,
 
 CARD_PRESENT_FOR_YOU = OJCard(150,
     'Present for You',
-    2, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'All players draw cards until they have a full hand. Those with full hand draw 1 card instead. Gain stars equal '
     'to 10x the number of all cards drawn.',
     '"Presents for good boys and girls." ―Aru',
@@ -2148,7 +2148,7 @@ CARD_PRESENT_FOR_YOU = OJCard(150,
 
 CARD_REVIVAL_OF_STARS = OJCard(151,
     'Revival of Stars',
-     1, CARD_COST_Lvx3, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+     1, CARD_COST_Lvx3, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Effect Duration: 3 Chapters. Turn all Drop Panels into Bonus Panels and Encounter and Boss Panels into Draw '
     'Panels. -1 ATK when on a marked panel.',
     '"The dream you protected has spread across the whole planet." ―Suguri',
@@ -2158,7 +2158,7 @@ CARD_REVIVAL_OF_STARS = OJCard(151,
 
 CARD_STAR_BLASTING_FUSE = OJCard(152,
     'Star Blasting Fuse',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Set "Invisible Bomb" on 3-5 random panels',
     '"Because I am Star Breaker, the blasting fuse to the world\'s end." ―Star Breaker',
     None,
@@ -2167,7 +2167,7 @@ CARD_STAR_BLASTING_FUSE = OJCard(152,
 
 CARD_SUBSPACE_TUNNEL = OJCard(153,
     'Subspace Tunnel',
-    1, CARD_COST_Lvx5, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    1, CARD_COST_Lvx5, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Effect Duration: Player level Turn 4-6 panels into Warp Move panels and then warp to one of them.',
     '"Po! Po! Po! Popoppo!!" ―Marie Poppo',
     None,
@@ -2176,7 +2176,7 @@ CARD_SUBSPACE_TUNNEL = OJCard(153,
 
 CARD_TRUE_WHITE_CHRISTSMASHER = OJCard(154,
     'True White Christsmasher',
-    3, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Deal 4 damage to players within 1 panel of you. For each player KO\'d, gain 2 wins and KO\'d Player\'s Lvl x10 '
     'stars. When not carrying "Red & Blue", this card becomes "White Christsmasher".',
     '"White Christsmasher!" ―Mei, Red & Blue',
@@ -2186,7 +2186,7 @@ CARD_TRUE_WHITE_CHRISTSMASHER = OJCard(154,
 
 CARD_WHIMSICAL_WINDMILL = OJCard(155,
     'Whimsical Windmill',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Fight all other players in order. The enemy goes first. During battle, gain +1 EVD.',
     '"We just want to fly around freely." - Sherry',
     None,
@@ -2195,7 +2195,7 @@ CARD_WHIMSICAL_WINDMILL = OJCard(155,
 
 CARD_WHITE_CHRISTSMASHER = OJCard(156,
     'White Christsmasher',
-    2, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    2, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'Deal 2 damage to players on the same panel as you. For each player KO\'d, gain a win and KO\'d Player\'s Lvl x5 '
     'stars. When carrying "Red & Blue", this card becomes "True White Christsmasher".',
     '"White Christsmasher!" ―Mei',
@@ -2205,7 +2205,7 @@ CARD_WHITE_CHRISTSMASHER = OJCard(156,
 
 CARD_BANNER_FOR_LIFE = OJCard(157,
     'Banned for Life',
-    1, CARD_COST_Stp10, -1, CARD_TYPE_HYPER|CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
+    1, CARD_COST_Stp10, -1, CARD_TYPE_HYPER | CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
     'Can only play Gift cards. Using this card sends it to another player. Discards entire hand upon discard.',
     '"Manager, it\'s your turn!!" ―Chris',
     None,
@@ -2214,7 +2214,7 @@ CARD_BANNER_FOR_LIFE = OJCard(157,
 
 CARD_BEAST_WITCH = OJCard(158,
     'Beast Witch',
-    1, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
     'When another player loses stars from an Encounter panel battle and those stars would go to the Encounter panel '
     'unit, you will receive them instead. If this effect is triggered, discard this card at the end of your turn. If '
     'several players carry Beast Witch, the stars are split between them.',
@@ -2225,7 +2225,7 @@ CARD_BEAST_WITCH = OJCard(158,
 
 CARD_EVIL_SPY_WORK_EXECUTION = OJCard(159,
     'Evil Spy Work - Execution',
-    1, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
     'This card cannot be played. When holding this card, take 3 damage at the end of your turn, and remove this card '
     'from the game.',
     '"You fell for it! Eat it!!" ―Mimyuu',
@@ -2235,7 +2235,7 @@ CARD_EVIL_SPY_WORK_EXECUTION = OJCard(159,
 
 CARD_MIRACLE_RED_BEAN_ICE_CREAM = OJCard(160,
     'Miracle Red Bean Ice Cream',
-    3, CARD_COST_30, -1, CARD_TYPE_HYPER|CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
+    3, CARD_COST_30, -1, CARD_TYPE_HYPER | CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
     (
         '+1 ATK while this card is held. Tomomo (Casual): When played, turn into Tomomo (Sweet Eater) and fully '
         'restore HP.\n'
@@ -2248,7 +2248,7 @@ CARD_MIRACLE_RED_BEAN_ICE_CREAM = OJCard(160,
 
 CARD_SANTAS_JOB = OJCard(161,
     'Santa\'s Job',
-    1, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_GIFT, None, CARD_RARITY_NONE,
     'After your turn, send a card of usable Lvl from your hand to a random player. Gain stars equal to Card Lvl x5. '
     'Target cannot challenge players to a battle until your next turn. This card is discarded upon KO or use',
     '"Children of the world, we are coming for you!" ―Aru',
@@ -2258,7 +2258,7 @@ CARD_SANTAS_JOB = OJCard(161,
 
 CARD_BIG_BANG_BELL = OJCard(162,
     'Big Bang Bell',
-    3, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
+    3, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
     'Every unit on this and 2 adjacent squares takes 2 damage, +1 for every 2 chapters since setting the trap. On KO, '
     'half of their stars go to the player who set this trap.',
     '"Mauuuuuryaaaaaaahh!" ―Saki',
@@ -2268,7 +2268,7 @@ CARD_BIG_BANG_BELL = OJCard(162,
 
 CARD_DANCE_LONG_EARED_BEASTS = OJCard(163,
     'Dance, Long-Eared Beasts!',
-    2, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
+    2, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
     'Set "Dance, Long-Eared Beasts!" trap on 3-5 random panels.',
     '"Dance, long-eared beasts!" ―Krilalaris',
     None,
@@ -2277,7 +2277,7 @@ CARD_DANCE_LONG_EARED_BEASTS = OJCard(163,
 
 CARD_FLYING_PIRATE = OJCard(164,
     'Flying Pirate',
-    3, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
+    3, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
     'Fight a Pirate Crew Member summoned by the player who set this card. The enemy will attack first. No effect on '
     'the player who set this card.',
     '"Captain～!" - Pirate Minion',
@@ -2287,7 +2287,7 @@ CARD_FLYING_PIRATE = OJCard(164,
 
 CARD_GOLDEN_EGG = OJCard(165,
     'Golden Egg',
-    2, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
+    2, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
     'If target is Chicken, Stock Effect (3). Drop Panels will act as Bonus Panels. Otherwise, Stock Effect (3). '
     'Bonus Panels will act as Drop Panels.',
     '"Cluuuuck!" ―Chicken',
@@ -2297,7 +2297,7 @@ CARD_GOLDEN_EGG = OJCard(165,
 
 CARD_INVISIBLE_BOMB = OJCard(166,
     'Invisible Bomb',
-    3, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
+    3, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
     'Reduces HP to 1. Does not affect the player who set the trap. Only visible to the player who used this card.',
     '"Because I am Star Breaker, the blasting fuse to the world\'s end." ―Star Breaker',
     None,
@@ -2306,7 +2306,7 @@ CARD_INVISIBLE_BOMB = OJCard(166,
 
 CARD_RBIT_HOBBY_SHOP = OJCard(167,
     'Rbit Hobby Shop',
-    1, CARD_COST_0, -1, CARD_TYPE_HYPER|CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_HYPER | CARD_TYPE_TRAP, None, CARD_RARITY_NONE,
     'Pay X stars to the player who set this card, where X is the Lvl of the player who set this card. Draw a card from '
     'the deck. This card remains on board when triggered but can be replaced by a new trap. No effect on the player '
     'who set this trap.',
@@ -2319,7 +2319,7 @@ CARD_RBIT_HOBBY_SHOP = OJCard(167,
 
 CARD_SWEET_BATTLE = OJCard(168,
     'Sweet Battle!',
-    1, CARD_COST_0, 6, CARD_TYPE_GIFT|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, 6, CARD_TYPE_GIFT | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'When held: Pick up 2x chocolate. When played in battle: Steal 200 chocolate for each damage dealt. This card is '
     'discarded upon KO or use.',
     '"Here comes another cute and sweet battle!" ―QP',
@@ -2360,7 +2360,7 @@ CARD_LEGENDARY_MUSHROOM = OJCard(171,
 
 CARD_ULTIMATE_WEAPON_IN_THE_SUN = OJCard(172,
     'Ultimate Weapon in the Sun',
-    5, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    5, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'During this battle, gain 2 ATK.',
     'I\'ll commence... my vacation now." ―Sora',
     (EVENT_BEACH_PARTY,),
@@ -2369,7 +2369,7 @@ CARD_ULTIMATE_WEAPON_IN_THE_SUN = OJCard(172,
 
 CARD_LIFEGUARD_ON_THE_WHITE_BEACH = OJCard(173,
     'Lifeguard on the White Beach',
-    5, CARD_COST_10, -1, CARD_TYPE_HYPER|CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
+    5, CARD_COST_10, -1, CARD_TYPE_HYPER | CARD_TYPE_EVENT, None, CARD_RARITY_NONE,
     'All allies gain a damage reduction of 2 during their next battle.',
     '"Geez, you\'re going overboard." ―Suguri',
     (EVENT_BEACH_PARTY,),
@@ -2378,7 +2378,7 @@ CARD_LIFEGUARD_ON_THE_WHITE_BEACH = OJCard(173,
 
 CARD_GUARDIAN_OF_BLOOMING_FLOWERS = OJCard(174,
     'Guardian of Blooming Flowers',
-    5, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
+    5, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BOOST, None, CARD_RARITY_NONE,
     'Revive one KO\'d ally with full HP',
     '"You\'re fine now. The pain\'s gone." ―Hime',
     (EVENT_BEACH_PARTY,),
@@ -2387,7 +2387,7 @@ CARD_GUARDIAN_OF_BLOOMING_FLOWERS = OJCard(174,
 
 CARD_UNFORGIVING_AVENGER = OJCard(175,
     'Unforgiving Avenger',
-    5, CARD_COST_20, -1, CARD_TYPE_HYPER|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    5, CARD_COST_20, -1, CARD_TYPE_HYPER | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'During this battle, damage taken by both sides is doubled.',
     '"Mimyuu! Who did this to you..." ―Tomato',
     (EVENT_BEACH_PARTY,),
@@ -2402,12 +2402,12 @@ CARD_RED_AND_BLUE = OJCard(176,
     'When holding this card, gain +1 ATK, DEF and EVD in battle. On Discard or KO, this card is removed from the game.',
     '"We can\'t do this anymore!" ―Red & Blue',
     None,
-    'Red_&_Blue.png',
+    'Red_ & _Blue.png',
 )
 
 CARD_MUSHROOM_BOOST = OJCard(177,
     'Mushroom',
-    1, CARD_COST_0, -1, CARD_TYPE_BOOST|CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
+    1, CARD_COST_0, -1, CARD_TYPE_BOOST | CARD_TYPE_BATTLE, None, CARD_RARITY_NONE,
     'Smells funky.',
     None,
     None,
@@ -3022,7 +3022,7 @@ CHARACTER_CUTIES = OJCharacter(46,
     'Can only choose Stars norma. Gain X additional stars from all sources, where X is the number of different Event '
     'cards you played. In battle, randomly gain +1 ATK or DEF.',
     (CARD_SPECIAL_STAGE,),
-    'Sora_&_Sham_(Cuties)_(unit).png',
+    'Sora_ & _Sham_(Cuties)_(unit).png',
 )
 
 CHARACTER_YUUKI = OJCharacter(47,
@@ -3446,7 +3446,7 @@ RELATIONS = {
     'Arthur_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901551697829167124/Arthur_unit.png',
     'Iru_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901553480664244284/Iru_unit.png',
     'Mira_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029461816901642/Mira_unit.png',
-    'Sora_&_Sham_(Cuties)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029465910550548/Sora__Sham_Cuties_unit.png',
+    'Sora_ & _Sham_(Cuties)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029465910550548/Sora__Sham_Cuties_unit.png',
     'Yuuki_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029471962935296/Yuuki_unit.png',
     'Islay_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901029475251265536/Islay_unit.png',
     'Suguri_(46_Billion_Years)_(unit).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901552830823952454/Suguri_46_Billion_Years_unit.png',
@@ -3650,7 +3650,7 @@ RELATIONS = {
     'Lifeguard_on_the_White_Beach_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031205011587133/Lifeguard_on_the_White_Beach_Original.png',
     'Guardian_of_Blooming_Flowers_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031209134604358/Guardian_of_Blooming_Flowers_Original.png',
     'Unforgiving_Avenger_(Original).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031212880101386/Unforgiving_Avenger_Original.png',
-    'Red_&_Blue.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031216961163324/Red__Blue.png',
+    'Red_ & _Blue.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031216961163324/Red__Blue.png',
     'Blue_Mushroom_(Boost).png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031220035608586/Blue_Mushroom_Boost.png',
     'Deceptive_Disarming.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031227753103380/Deceptive_Disarming.png',
     'Overtime.png': 'https://cdn.discordapp.com/attachments/568837922288173058/901031231188250634/Overtime.png',

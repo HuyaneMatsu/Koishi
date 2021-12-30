@@ -85,7 +85,7 @@ def build_output(output, return_code):
             continue
         
         if parsed.group(1).startswith('Executing'):
-            lines = lines[index:-(1+(return_code == 137))]
+            lines = lines[index:-(1 + (return_code == 137))]
             break
     
     if not lines:
@@ -121,7 +121,7 @@ def build_output(output, return_code):
         
         content_left_length -= line_length
         if content_left_length < 0:
-            lines[index-1] = line[:content_left_length]
+            lines[index - 1] = line[:content_left_length]
             del lines[index:]
             is_truncated = True
             break

@@ -60,15 +60,15 @@ def vote():
             per_day += VOTE_PER_DAY_BONUS_WEEKEND
         
         
-        increase = base + (daily_streak*per_day)
+        increase = base + (daily_streak * per_day)
         
         if (entry_id != -1):
             connector.execute(
                 USER_COMMON_TABLE.update(
                     user_common_model.id == entry_id,
                 ).values(
-                    total_love = user_common_model.total_love+increase,
-                    count_top_gg_vote = user_common_model.count_top_gg_vote+1,
+                    total_love = user_common_model.total_love + increase,
+                    count_top_gg_vote = user_common_model.count_top_gg_vote + 1,
                     daily_streak = daily_streak,
                     daily_next = daily_next,
                 )

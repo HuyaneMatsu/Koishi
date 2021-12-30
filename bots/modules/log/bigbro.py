@@ -724,7 +724,7 @@ def make_chunks(parts):
         else:
             chunk_length += len(part)
             if chunk_length > MAX_CHUNK_SIZE:
-                chunk_length = MAX_CHUNK_SIZE-chunk_length
+                chunk_length = MAX_CHUNK_SIZE - chunk_length
                 chunk.append(part[:chunk_length])
                 add_chunk(chunks, chunk)
                 chunk.append(part[chunk_length:])

@@ -40,7 +40,7 @@ CARD_NUMBERS = (
 )
 
 DECK_SIZE   = len(CARD_TYPES) * len(CARD_NUMBERS)
-ACE_INDEX   = len(CARD_NUMBERS)-1
+ACE_INDEX   = len(CARD_NUMBERS) - 1
 BET_MIN     = 10
 
 @SLASH_CLIENT.interactions(name='21', is_global=True)
@@ -102,7 +102,7 @@ class Game21Base:
     
     def pull_card(self):
         all_pulled = self.all_pulled
-        card = int((DECK_SIZE-len(all_pulled))*random())
+        card = int((DECK_SIZE - len(all_pulled)) * random())
         for pulled in all_pulled:
             if pulled > card:
                 break
@@ -127,14 +127,14 @@ class Game21Player:
             
             hand.append(card)
             
-            number_index = card%len(CARD_NUMBERS)
+            number_index = card % len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
                 ace += 1
                 card_weight = 11
             elif number_index > 7:
                 card_weight = 10
             else:
-                card_weight = number_index+2
+                card_weight = number_index + 2
             
             total += card_weight
             
@@ -167,14 +167,14 @@ class Game21Player:
             
             hand.append(card)
             
-            number_index = card%len(CARD_NUMBERS)
+            number_index = card % len(CARD_NUMBERS)
             if number_index == ACE_INDEX:
                 ace += 1
                 card_weight = 11
             elif number_index > 7:
                 card_weight = 10
             else:
-                card_weight = number_index+2
+                card_weight = number_index + 2
             
             total += card_weight
             
@@ -196,14 +196,14 @@ class Game21Player:
         
         hand.append(card)
         
-        number_index = card%len(CARD_NUMBERS)
+        number_index = card % len(CARD_NUMBERS)
         if number_index == ACE_INDEX:
             ace += 1
             card_weight = 11
         elif number_index > 7:
             card_weight = 10
         else:
-            card_weight = number_index+2
+            card_weight = number_index + 2
         
         total += card_weight
         
@@ -680,7 +680,7 @@ async def game_21_postcheck(client, user, channel, amount):
             total_allocated = 0
             entry_id = -1
         
-        if total_love-total_allocated < amount:
+        if total_love - total_allocated < amount:
             error_message = f'You have just {total_love} {EMOJI__HEART_CURRENCY.as_emoji}'
         else:
             return entry_id, None
@@ -718,7 +718,7 @@ async def game_21_single_player(client, event, amount):
             async with DB_ENGINE.connect() as connector:
                 await connector.execute(USER_COMMON_TABLE. \
                     update(user_common_model.id == entry_id). \
-                    values(total_allocated = user_common_model.total_allocated-amount)
+                    values(total_allocated = user_common_model.total_allocated - amount)
                 )
         
         game_state = await player_user_waiter
@@ -753,10 +753,10 @@ async def game_21_single_player(client, event, amount):
                 expression = USER_COMMON_TABLE.update(user_common_model.user_id == user.id)
                 
                 if amount:
-                    expression = expression.values(total_love=user_common_model.total_love+bonus)
+                    expression = expression.values(total_love=user_common_model.total_love + bonus)
                 
                 if unallocate:
-                    expression = expression.values(total_allocated=user_common_model.total_allocated-amount)
+                    expression = expression.values(total_allocated=user_common_model.total_allocated - amount)
                 
                 await connector.execute(expression)
             
@@ -823,12 +823,12 @@ async def game_21_single_player(client, event, amount):
                     expression = USER_COMMON_TABLE.update(
                         user_common_model.id == entry_id
                     ).values(
-                        total_love = user_common_model.total_love-amount
+                        total_love = user_common_model.total_love - amount
                     )
                     
                     if unallocate:
                         expression = expression.values(
-                            total_allocated = user_common_model.total_allocated-amount
+                            total_allocated = user_common_model.total_allocated - amount
                         )
                     
                     await connector.execute(expression)
@@ -856,7 +856,7 @@ async def game_21_single_player(client, event, amount):
             async with DB_ENGINE.connect() as connector:
                 expression = USER_COMMON_TABLE. \
                     update(user_common_model.id == entry_id). \
-                    values(total_allocated = user_common_model.total_allocated-amount)
+                    values(total_allocated = user_common_model.total_allocated - amount)
                 
                 await connector.execute(expression)
     
@@ -940,7 +940,7 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
                 async with DB_ENGINE.connect() as connector:
                     await connector.execute(USER_COMMON_TABLE. \
                         update(user_common_model.id == entry_id). \
-                        values(total_allocated = user_common_model.total_allocated+amount)
+                        values(total_allocated = user_common_model.total_allocated + amount)
                     )
             
             joined_tuple = user, private_channel, entry_id
@@ -958,7 +958,7 @@ async def game_21_refund(entry_id, amount):
     async with DB_ENGINE.connect() as connector:
         await connector.execute(USER_COMMON_TABLE. \
             update(user_common_model.id == entry_id). \
-            values(total_allocated = user_common_model.total_allocated-amount)
+            values(total_allocated = user_common_model.total_allocated - amount)
         )
 
 async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, joined_user_ids, private_channel,
@@ -990,7 +990,7 @@ async def game_21_mp_cancelled(client, user, guild, source_channel, amount, priv
     async with DB_ENGINE.connect() as connector:
         await connector.execute(USER_COMMON_TABLE. \
             update(user_common_model.id == entry_id). \
-            values(total_allocated = user_common_model.total_allocated-amount)
+            values(total_allocated = user_common_model.total_allocated - amount)
         )
     
     embed = Embed('21 multi-player game was cancelled.',
@@ -1518,7 +1518,7 @@ async def game_21_multi_player(client, event, amount):
                     await client.events.error(client, 'game_21_multi_player', err)
             return
         
-        total_bet_amount = len(joined_tuples)*amount
+        total_bet_amount = len(joined_tuples) * amount
         # Update message
         description_parts = [
             'Total bet amount: ',
@@ -1651,19 +1651,19 @@ async def game_21_multi_player(client, event, amount):
                 await connector.execute(USER_COMMON_TABLE. \
                     update(user_common_model.id.in_(loser_entry_ids)). \
                     values(
-                        total_allocated = user_common_model.total_allocated-amount,
-                        total_love = user_common_model.total_love-amount,
+                        total_allocated = user_common_model.total_allocated - amount,
+                        total_love = user_common_model.total_love - amount,
                     )
                 )
                 
                 if (winner_entry_ids is not None):
-                    won_per_user = int(len(losers)*amount//len(winners))
+                    won_per_user = int(len(losers) * amount // len(winners))
                     
                     await connector.execute(USER_COMMON_TABLE. \
                         update(user_common_model.id.in_(winner_entry_ids)). \
                         values(
-                            total_allocated = user_common_model.total_allocated-amount,
-                            total_love = user_common_model.total_love+won_per_user,
+                            total_allocated = user_common_model.total_allocated - amount,
+                            total_love = user_common_model.total_love + won_per_user,
                         )
                     )
                 
@@ -1672,7 +1672,7 @@ async def game_21_multi_player(client, event, amount):
                     await connector.execute(USER_COMMON_TABLE. \
                         update(user_common_model.id.in_(winner_entry_ids)). \
                         values(
-                            total_allocated = user_common_model.total_allocated-amount,
+                            total_allocated = user_common_model.total_allocated - amount,
                         )
                     )
         

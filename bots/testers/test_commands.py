@@ -39,7 +39,7 @@ def setup(lib):
 def teardown(lib):
     MAIN_CLIENT.commands.unextend(TEST_COMMANDS)
 
-def test_choose_menu_repr_choose_menu_selector(*args):
+def test_choose_menu_repr_choose_menu_selector( * args):
     return Future(KOKORO)
 
 
@@ -138,7 +138,7 @@ async def test_100_messages(client, message):
     await WaitTillAll(tasks,client.loop)
     end = perf_counter()
     
-    await client.message_create(message.channel, repr(end-start))
+    await client.message_create(message.channel, repr(end - start))
 
 @TEST_COMMANDS
 async def crosspost(client, message, message_id:int):
@@ -349,7 +349,7 @@ async def discovery_validate_randoms(client, message):
     """
     Does 30 discovery validate request with random terms. 10 of them is duped tho.
     """
-    words = [''.join(chr(97+int(random()*25.0)) for _ in range(10)) for _ in range(20)]
+    words = [''.join(chr(97 + int(random() * 25.0)) for _ in range(10)) for _ in range(20)]
     for index in range(10):
         words.append(words[index])
     
@@ -359,7 +359,7 @@ async def discovery_validate_randoms(client, message):
         result = await client.discovery_validate_term(word)
         end = perf_counter()
         
-        collected.append(f'{word} : {result} ({end-start:.2f}s)')
+        collected.append(f'{word} : {result} ({end - start:.2f}s)')
     
     await client.message_create(message.channel, '\n'.join(collected))
 
@@ -848,7 +848,7 @@ async def detect_custom_emojis(client, message):
         for x, emoji in zip(range(1, 21), emojis):
             content_lines.append(f'{x}.: {emoji:e}')
         
-        truncated = len(emojis)-20
+        truncated = len(emojis) - 20
         if truncated > 0:
             content_lines.append(f'*{truncated} truncated*')
         
@@ -881,7 +881,7 @@ async def avatar_1(client, message, user: 'user' = None):
         user = message.author
     
     if user.avatar:
-        color = user.avatar_hash&0xffffff
+        color = user.avatar_hash & 0xffffff
     else:
         color = user.default_avatar.color
     
@@ -911,7 +911,7 @@ async def avatar_2(client, message, user: 'user'=None):
         user = message.author
     
     if user.avatar:
-        color = user.avatar_hash&0xffffff
+        color = user.avatar_hash & 0xffffff
     else:
         color = user.default_avatar.color
     
@@ -928,7 +928,7 @@ async def avatar_3(client, message, user: 'user'=None):
         user = message.author
     
     if user.avatar:
-        color = user.avatar_hash&0xffffff
+        color = user.avatar_hash & 0xffffff
     else:
         color = user.default_avatar.color
     
@@ -1001,17 +1001,17 @@ async def estimate_fast_delete_before_2020_02_00(client, message):
     LIMIT = 30
     DELAY = 0.1
     
-    times, remainder = divmod(COUNTER, PARALLELISM*LIMIT)
+    times, remainder = divmod(COUNTER, PARALLELISM * LIMIT)
     
-    DURATION = DELAY + times*(RESET+DELAY)
+    DURATION = DELAY + times * (RESET + DELAY)
     
     if remainder:
-        DURATION += DELAY + DELAY*remainder/PARALLELISM
+        DURATION += DELAY + DELAY * remainder / PARALLELISM
     else:
         DURATION -= RESET
-        DURATION += LIMIT*DELAY/PARALLELISM
+        DURATION += LIMIT * DELAY / PARALLELISM
     
-    await client.message_create(target_channel, f'Total messages: {COUNTER+OWNED}.\nEstimated duration {DURATION:.2f}')
+    await client.message_create(target_channel, f'Total messages: {COUNTER + OWNED}.\nEstimated duration {DURATION:.2f}')
 
 @TEST_COMMANDS
 async def do_delete(client, message):
@@ -1038,7 +1038,7 @@ async def do_delete(client, message):
     import gc
     gc.collect()
     """
-    await client.message_create(message.channel, repr(end-start))
+    await client.message_create(message.channel, repr(end - start))
 
 
 @TEST_COMMANDS
@@ -1490,7 +1490,7 @@ async def load_messages(client, message, channel:ChannelText):
         if collected == limit:
             break
     
-    delay = (perf_counter()-start)
+    delay = (perf_counter() - start)
     
     return f'Loaded: {collected} messages (limit={limit}); Took: {delay:.3f} seconds.'
     
@@ -1629,7 +1629,7 @@ async def test_application_command_option_choice_type_4(client, message):
         'number',
         'Dunno something',
         ApplicationCommandOptionType.integer,
-        choices = [ApplicationCommandOptionChoice('cake', 1<<60), ApplicationCommandOptionChoice('cookie', (1<<60)+1556656)]
+        choices = [ApplicationCommandOptionChoice('cake', 1 << 60), ApplicationCommandOptionChoice('cookie', (1 << 60) + 1556656)]
             ))
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
@@ -1664,12 +1664,17 @@ async def test_application_command_option_choice_type_5(client, message):
         'ayaya',
             )
     
-    application_command_schema.add_option(ApplicationCommandOption(
-        'number',
-        'Dunno something',
-        ApplicationCommandOptionType.integer,
-        choices = [ApplicationCommandOptionChoice('cake', 1<<64), ApplicationCommandOptionChoice('cookie', (1<<64)+4554656)]
-            ))
+    application_command_schema.add_option(
+        ApplicationCommandOption(
+            'number',
+            'Dunno something',
+            ApplicationCommandOptionType.integer,
+            choices = [
+                ApplicationCommandOptionChoice('cake', 1 << 64),
+                ApplicationCommandOptionChoice('cookie', (1 << 64) + 4554656)
+            ],
+        )
+    )
     
     application_command = await client.application_command_guild_create(guild, application_command_schema)
     
