@@ -380,8 +380,8 @@ GET_ORGANIZATIONS = GitHubQuery(build_get_organizations_url, SLASH_CLIENT.http, 
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def github_profile(client, event,
-        user: ('str', 'The user\'s name to get'),
-            ):
+    user: ('str', 'The user\'s name to get'),
+):
     """Gets the user's guild profile."""
     guild = event.guild
     if (client.get_guild_profile_for(guild) is None):
@@ -406,8 +406,12 @@ async def github_profile(client, event,
     elif len(names) == 1:
         name = names[0]
     else:
-        yield Embed('Multiple matches', ''.join(user_search.render_description_to([]))) \
-            .add_footer(f'Total: {user_search.total_count}')
+        yield Embed(
+            'Multiple matches',
+            ''.join(user_search.render_description_to([])),
+        ).add_footer(
+            f'Total: {user_search.total_count}',
+        )
         return
     
     user_object, rate_limited = await GET_USER(name)
@@ -424,7 +428,12 @@ async def github_profile(client, event,
     description = ''.join(description_parts)
     
     title = ''.join(user_object.render_title_to([]))
-    yield Embed(title, description, url=f'https://github.com/{quote(user_object.user_name)}'). \
-        add_thumbnail(user_object.avatar_url)
+    yield Embed(
+        title,
+        description,
+        url = f'https://github.com/{quote(user_object.user_name)}',
+    ).add_thumbnail(
+        user_object.avatar_url,
+    )
     
     return

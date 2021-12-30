@@ -46,17 +46,23 @@ async def user_top(event,
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([
+            select(
+                [
+                    sticker_counter_model.sticker_id,
+                    alchemy_function.count(sticker_counter_model.sticker_id).label('total'),
+                ],
+            ).where(
+                and_(
+                    sticker_counter_model.user_id == user.id,
+                    sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
+                ),
+            ).limit(
+                count,
+            ).group_by(
                 sticker_counter_model.sticker_id,
-                alchemy_function.count(sticker_counter_model.sticker_id).label('total'),
-            ]). \
-            where(and_(
-                sticker_counter_model.user_id == user.id,
-                sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
-            )). \
-            limit(count). \
-            group_by(sticker_counter_model.sticker_id). \
-            order_by(desc('total'))
+            ).order_by(
+                desc('total'),
+            )
         )
         
         results = await response.fetchall()
@@ -65,7 +71,9 @@ async def user_top(event,
     embed = Embed(
         f'Most used stickers by {user.full_name}',
         color = user.color_at(GUILD__SUPPORT),
-    ).add_thumbnail(user.avatar_url)
+    ).add_thumbnail(
+        user.avatar_url,
+    )
     
     
     if results:
@@ -112,9 +120,9 @@ async def user_top(event,
 
 @STICKER_COMMANDS.interactions
 async def sticker_top(
-        raw_sticker: ('str', 'Pick an sticker', 'sticker'),
-        months: (range(1, 13), 'The months to get') = 1,
-            ):
+    raw_sticker: ('str', 'Pick an sticker', 'sticker'),
+    months: (range(1, 13), 'The months to get') = 1,
+):
     """List the users using the given sticker the most."""
     sticker = GUILD__SUPPORT.get_sticker_like(raw_sticker)
     if sticker is None:
@@ -122,17 +130,23 @@ async def sticker_top(
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([
-            sticker_counter_model.user_id,
-            alchemy_function.count(sticker_counter_model.user_id).label('total'),
-            ]). \
-            where(and_(
-                sticker_counter_model.sticker_id == sticker.id,
-                sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
-            )). \
-            limit(30). \
-            group_by(sticker_counter_model.user_id). \
-            order_by(desc('total'))
+            select(
+                [
+                    sticker_counter_model.user_id,
+                    alchemy_function.count(sticker_counter_model.user_id).label('total'),
+                ],
+            ).where(
+                and_(
+                    sticker_counter_model.sticker_id == sticker.id,
+                    sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
+                )
+            ).limit(
+                30,
+            ).group_by(
+                sticker_counter_model.user_id,
+            ).order_by(
+                desc('total')
+            )
         )
         
         results = await response.fetchall()
@@ -212,7 +226,7 @@ async def sync_stickers_(event):
         if sticker_ids_to_remove:
             await connector.execute(
                 STICKER_COUNTER_TABLE.delete().where(
-                    sticker_counter_model.sticker_id.in_(sticker_ids_to_remove)
+                    sticker_counter_model.sticker_id.in_(sticker_ids_to_remove),
                 )
             )
     
@@ -250,10 +264,10 @@ async def sync_users_(event):
 
 @STICKER_COMMANDS.interactions
 async def most_used(
-        months: (range(1, 13), 'The months to get') = 1,
-        page: ('int', 'Select a page') = 1,
-        order: (ORDERS, 'Ordering?') = ORDER_DECREASING,
-            ):
+    months: (range(1, 13), 'The months to get') = 1,
+    page: ('int', 'Select a page') = 1,
+    order: (ORDERS, 'Ordering?') = ORDER_DECREASING,
+):
     """Shows the most used stickers."""
     if page < 1:
         abort('Page value can be only positive')
@@ -264,14 +278,16 @@ async def most_used(
     async with DB_ENGINE.connect() as connector:
         
         response = await connector.execute(
-            select([
-                sticker_counter_model.sticker_id,
-                alchemy_function.count(sticker_counter_model.user_id).label('total'),
-            ]). \
-            where(and_(
+            select(
+                [
+                    sticker_counter_model.sticker_id,
+                    alchemy_function.count(sticker_counter_model.user_id).label('total'),
+                ],
+            ).where(
                 sticker_counter_model.timestamp > low_date_limit,
-            )). \
-            group_by(sticker_counter_model.sticker_id)
+            ).group_by(
+                sticker_counter_model.sticker_id,
+            )
         )
         
         results = await response.fetchall()
@@ -328,17 +344,21 @@ async def most_used(
     else:
         description = '*No recorded data*'
     
-    return Embed('Most used stickers:', description). \
-        add_footer(f'Page {page} / {(len(items) // MOST_USED_PER_PAGE) + 1}')
+    return Embed(
+        'Most used stickers:',
+        description,
+    ).add_footer(
+        f'Page {page} / {(len(items) // MOST_USED_PER_PAGE) + 1}',
+    )
 
 
 @STICKER_COMMANDS.interactions
 async def add_(client, event,
-        link: (str, 'Link to the sticker to add'),
-        name: (str, 'The sticker\'s name.'),
-        emoji_value: (str, 'Emoji representation of the sticker.', 'emoji'),
-        description: (str, 'Description for the sticker.')=None,
-                ):
+    link: (str, 'Link to the sticker to add'),
+    name: (str, 'The sticker\'s name.'),
+    emoji_value: (str, 'Emoji representation of the sticker.', 'emoji'),
+    description: (str, 'Description for the sticker.') = None,
+):
     """Adds a sticker to the guild. (You must have emoji-council role)"""
     if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
         abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
@@ -359,8 +379,9 @@ async def add_(client, event,
     if (description is not None):
         description_length = len(description)
         if (description_length > 100):
-            abort(f'Sticker description\'s length can be in range [0:100], got {description_length!r}, '
-                f'{description!r}.')
+            abort(
+                f'Sticker description\'s length can be in range [0:100], got {description_length!r}, {description!r}.'
+            )
     
     if not is_url(link):
         abort(f'The given link is invalid, got {link!r}.')
@@ -388,7 +409,7 @@ async def add_(client, event,
             error_message = f'Getting image failed: {err.args[0]}'
             break
         
-        except TimeoutError as err:
+        except TimeoutError:
             error_message = 'Timeout (15s) occurred meanwhile trying to read the response.'
             break
         
@@ -399,7 +420,7 @@ async def add_(client, event,
         
         try:
             sticker = await client.sticker_guild_create(event.guild, name, image, emoji, description)
-        except ConnectionError as err:
+        except ConnectionError:
             return
         
         except DiscordException as err:
@@ -428,8 +449,8 @@ STICKER_DELETE_COMPONENTS = Row(STICKER_DELETE_BUTTON_CONFIRM, STICKER_DELETE_BU
 
 @STICKER_COMMANDS.interactions
 async def delete_(client, event,
-        sticker_name: ('str', 'The sticker\'s name to delete', 'sticker'),
-            ):
+    sticker_name: ('str', 'The sticker\'s name to delete', 'sticker'),
+):
     """Deletes the given sticker. (You must have emoji-council role)"""
     if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
         abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
@@ -500,11 +521,11 @@ STICKER_EDIT_COMPONENTS = Row(STICKER_EDIT_BUTTON_CONFIRM, STICKER_EDIT_BUTTON_C
 
 @STICKER_COMMANDS.interactions
 async def edit_(client, event,
-        sticker_name: ('str', 'The sticker\'s name to delete', 'sticker'),
-        new_name: ('str', 'New name for the sticker',) = None,
-        new_emoji_value: (str, 'Emoji representation of the sticker.', 'new_emoji') = None,
-        new_description: (str, 'Description for the sticker.') = None,
-            ):
+    sticker_name: ('str', 'The sticker\'s name to delete', 'sticker'),
+    new_name: ('str', 'New name for the sticker',) = None,
+    new_emoji_value: (str, 'Emoji representation of the sticker.', 'new_emoji') = None,
+    new_description: (str, 'Description for the sticker.') = None,
+):
     """Edits the given sticker. (You must have emoji-council role)"""
     if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
         abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')

@@ -230,8 +230,8 @@ async def claim_daily_for_waifu(client, event, target_user):
                     Embed(
                         f'{source_user.full_name} claimed daily love for you.',
                         (
-                            f'You received {received} {EMOJI__HEART_CURRENCY.as_emoji} and now you have '
-                            f'{target_total_love} {EMOJI__HEART_CURRENCY.as_emoji}\n'
+                            f'You received {received} {EMOJI__HEART_CURRENCY} and now you have '
+                            f'{target_total_love} {EMOJI__HEART_CURRENCY}\n'
                             f'You are on a {target_daily_streak} day streak.'
                         ),
                         color = COLOR__GAMBLING,
@@ -296,10 +296,10 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def heart_event(client, event,
-        duration : ('str', 'The event\'s duration.'),
-        amount : ('int', 'The hearst to earn.'),
-        user_limit : ('int', 'The maximal amount fo claimers.') = 0,
-            ):
+    duration : ('str', 'The event\'s duration.'),
+    amount : ('int', 'The hearst to earn.'),
+    user_limit : ('int', 'The maximal amount fo claimers.') = 0,
+):
     """Starts a heart event at the channel."""
     while True:
         if not event.user.has_role(ROLE__SUPPORT__ADMIN):
@@ -494,9 +494,11 @@ class HeartEventGUI:
         results = await response.fetchall()
         if results:
             entry_id = results[0][0]
-            to_execute = USER_COMMON_TABLE. \
-                update(user_common_model.id==entry_id). \
-                values(total_love=user_common_model.total_love + self.amount)
+            to_execute = USER_COMMON_TABLE.update(
+                user_common_model.id == entry_id,
+            ).values(
+                total_love=user_common_model.total_love + self.amount,
+            )
         
         else:
             to_execute = get_create_common_user_expression(
@@ -535,12 +537,12 @@ class HeartEventGUI:
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
                         break
                 
                 await client.events.error(client, f'{self!r}.countdown', err)
@@ -556,10 +558,10 @@ class HeartEventGUI:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.missing_access, # client removed
-                            ):
+                    ERROR_CODES.unknown_channel, # message's channel deleted
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.missing_access, # client removed
+                ):
                     return
             
             await client.events.error(client, f'{self!r}.countdown', err)
@@ -583,10 +585,10 @@ class HeartEventGUI:
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def daily_event(client, event,
-        duration : ('str', 'The event\'s duration.'),
-        amount : ('int', 'The extra daily steaks to earn.'),
-        user_limit : ('int', 'The maximal amount fo claimers.') = 0,
-            ):
+    duration: ('str', 'The event\'s duration.'),
+    amount: ('int', 'The extra daily steaks to earn.'),
+    user_limit: ('int', 'The maximal amount fo claimers.') = 0,
+):
     """Starts a heart event at the channel. (Bot owner only)"""
     while True:
         if not event.user.has_role(ROLE__SUPPORT__ADMIN):
@@ -751,6 +753,7 @@ class DailyEventGUI:
     async def __call__(self, event):
         if event.interaction != EVENT_CURRENCY_BUTTON:
             return
+        
         user = event.user
         
         user_id = user.id
@@ -833,12 +836,12 @@ class DailyEventGUI:
                 
                 if isinstance(err,DiscordException):
                     if err.code in (
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.unknown_channel, # message's channel deleted
-                            ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # message's channel deleted
+                        ERROR_CODES.max_reactions, # reached reaction 20, some1 is trolling us.
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
                         break
                 
                 await client.events.error(client, f'{self!r}.countdown', err)
@@ -854,10 +857,10 @@ class DailyEventGUI:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.missing_access, # client removed
-                            ):
+                    ERROR_CODES.unknown_channel, # message's channel deleted
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.missing_access, # client removed
+                ):
                     return
             
             await client.events.error(client, f'{self!r}.countdown', err)
@@ -882,8 +885,8 @@ class DailyEventGUI:
 @SLASH_CLIENT.interactions(is_global=True)
 async def gift(client, event,
     target_user: ('user', 'Who is your heart\'s chosen one?'),
-    amount : ('int', 'How much do u love them?'),
-    message : ('str', 'Optional message to send with the gift.') = None,
+    amount: ('int', 'How much do u love them?'),
+    message: ('str', 'Optional message to send with the gift.') = None,
 ):
     """Gifts hearts to the chosen by your heart."""
     source_user = event.user
@@ -958,15 +961,20 @@ async def gift(client, event,
         
         target_user_new_total_love = target_user_total_love + amount
         
-        await connector.execute(USER_COMMON_TABLE. \
-            update(user_common_model.id==source_user_entry_id). \
-            values(total_love = user_common_model.total_love - amount)
+        await connector.execute(
+            USER_COMMON_TABLE.update(
+                user_common_model.id == source_user_entry_id
+            ).values(
+                total_love = user_common_model.total_love - amount,
+            )
         )
         
         if target_user_entry_id != -1:
-            to_execute = USER_COMMON_TABLE. \
-                update(user_common_model.id==target_user_entry_id). \
-                values(total_love = user_common_model.total_love + amount)
+            to_execute = USER_COMMON_TABLE.update(
+                user_common_model.id == target_user_entry_id
+            ).values(
+                total_love = user_common_model.total_love + amount,
+            )
         
         else:
             to_execute = get_create_common_user_expression(
@@ -976,14 +984,15 @@ async def gift(client, event,
         
         await connector.execute(to_execute)
         
-    embed = Embed('Aww, so lovely',
-        f'You gifted {amount} {EMOJI__HEART_CURRENCY.as_emoji} to {target_user.full_name}',
-        color=COLOR__GAMBLING,
+    embed = Embed(
+        'Aww, so lovely',
+        f'You gifted {amount} {EMOJI__HEART_CURRENCY} to {target_user.full_name}',
+        color = COLOR__GAMBLING,
     ).add_field(
-        f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'Your {EMOJI__HEART_CURRENCY}',
         f'{source_user_total_love} -> {source_user_new_love}',
     ).add_field(
-        f'Their {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'Their {EMOJI__HEART_CURRENCY}',
         f'{target_user_total_love} -> {target_user_new_total_love}',
     )
     
@@ -1001,10 +1010,10 @@ async def gift(client, event,
         return
     
     embed = Embed('Aww, love is in the air',
-        f'You have been gifted {amount} {EMOJI__HEART_CURRENCY.as_emoji} by {source_user.full_name}',
+        f'You have been gifted {amount} {EMOJI__HEART_CURRENCY} by {source_user.full_name}',
         color = COLOR__GAMBLING,
     ).add_field(
-        f'Your {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'Your {EMOJI__HEART_CURRENCY}',
         f'{target_user_total_love} -> {target_user_new_total_love}',
     )
     
@@ -1030,17 +1039,21 @@ AWARD_TYPES = [
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def award(client, event,
-        target_user: ('user', 'Who do you want to award?'),
-        amount: ('int', 'With how much love do you wanna award them?'),
-        message : ('str', 'Optional message to send with the gift.') = None,
-        with_: (AWARD_TYPES, 'Select award type') = 'hearts',
-            ):
+    target_user: ('user', 'Who do you want to award?'),
+    amount: ('int', 'With how much love do you wanna award them?'),
+    message : ('str', 'Optional message to send with the gift.') = None,
+    with_: (AWARD_TYPES, 'Select award type') = 'hearts',
+):
     """Awards the user with love."""
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
     
     if amount <= 0:
-        yield Embed('BAKA !!', 'You cannot award non-positive amount of hearts..', color=COLOR__GAMBLING)
+        yield Embed(
+            'BAKA !!',
+            'You cannot award non-positive amount of hearts..',
+            color = COLOR__GAMBLING,
+        )
         return
     
     if (message is not None) and len(message) > 1000:
@@ -1077,21 +1090,24 @@ async def award(client, event,
             now = datetime.utcnow()
             target_user_new_total_love = target_user_total_love
             if target_user_daily_next < now:
-                target_user_daily_streak, target_user_daily_next = calculate_daily_new(target_user_daily_streak, 
-                    target_user_daily_next, now)
+                target_user_daily_streak, target_user_daily_next = calculate_daily_new(
+                    target_user_daily_streak, 
+                    target_user_daily_next,
+                    now
+                )
             
             target_user_new_daily_streak = target_user_daily_streak + amount
         
         target_user_new_daily_next = target_user_daily_next
             
         if (target_user_entry_id != -1):
-            to_execute = USER_COMMON_TABLE. \
-                update(user_common_model.id == target_user_entry_id). \
-                values(
-                    total_love  = target_user_new_total_love,
-                    daily_streak = target_user_new_daily_streak,
-                    daily_next = target_user_new_daily_next,
-                )
+            to_execute = USER_COMMON_TABLE.update(
+                user_common_model.id == target_user_entry_id,
+            ).values(
+                total_love  = target_user_new_total_love,
+                daily_streak = target_user_new_daily_streak,
+                daily_next = target_user_new_daily_next,
+            )
         else:
             to_execute = get_create_common_user_expression(
                 target_user.id,
@@ -1156,9 +1172,9 @@ async def award(client, event,
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
 async def take(client, event,
-        target_user: ('user', 'From who do you want to take love away?'),
-        amount: ('int', 'How much love do you want to take away?'),
-            ):
+    target_user: ('user', 'From who do you want to take love away?'),
+    amount: ('int', 'How much love do you want to take away?'),
+):
     """Takes away hearts form the lucky user."""
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
@@ -1203,8 +1219,8 @@ async def take(client, event,
             target_user_new_total_love = 0
     
     yield Embed(
-        f'You took {amount} {EMOJI__HEART_CURRENCY.as_emoji} away from {target_user.full_name}',
-        f'They got down from {target_user_total_love} to {target_user_new_total_love} {EMOJI__HEART_CURRENCY.as_emoji}',
+        f'You took {amount} {EMOJI__HEART_CURRENCY} away from {target_user.full_name}',
+        f'They got down from {target_user_total_love} to {target_user_new_total_love} {EMOJI__HEART_CURRENCY}',
         color = COLOR__GAMBLING,
     )
     
@@ -1213,8 +1229,8 @@ async def take(client, event,
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def top_list(client, event,
-        page : ('number', 'page?') = 1,
-            ):
+    page : ('number', 'page?') = 1,
+):
     """A list of my best simps."""
     if page < 1:
         page = 1
@@ -1326,8 +1342,8 @@ ROLE_CHOICES = [
 
 @HEART_SHOP.interactions
 async def roles(client, event,
-        role_: (ROLE_CHOICES, 'Choose a role to buy!')
-            ):
+    role_: (ROLE_CHOICES, 'Choose a role to buy!')
+):
     """Buy roles to enhance your love!"""
     role, cost = BUYABLE_ROLES[role_]
     
@@ -1371,15 +1387,19 @@ async def roles(client, event,
             
             await client.user_role_add(user, role)
             
-            await connector.execute(USER_COMMON_TABLE. \
-                update(user_common_model.user_id == user_id). \
-                values(
+            await connector.execute(
+                USER_COMMON_TABLE.update(
+                    user_common_model.user_id == user_id,
+                ).values(
                     total_love = user_common_model.total_love - cost,
                 )
             )
     
-    embed = Embed(f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY:e}'). \
-        add_thumbnail(client.avatar_url)
+    embed = Embed(
+        f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY}'
+    ).add_thumbnail(
+        client.avatar_url,
+    )
     
     if bought:
         embed.description = 'Was successful.'
@@ -1397,21 +1417,21 @@ async def roles(client, event,
     yield embed
 
 
-# ((d + 1)*d) >> 1 - (((d-a) + 1)*(d-a)) >> 1
-# (((d + 1)*d) - (((d-a) + 1)*(d-a))) >> 1
-# (d*d + d - (((d-a) + 1)*(d-a))) >> 1
-# (d*d + d - ((d-a + 1)*(d-a))) >> 1
-# (d*d + d - (d*d-d*a + d-d*a + a*a-a)) >> 1
-# (d*d + d - (d*d - d*a + d - d*a + a*a - a)) >> 1
-# (d*d + d + (-d*d + d*a - d + d*a - a*a + a)) >> 1
-# (d*d + d - d*d + d*a - d + d*a - a*a + a) >> 1
-# (d + d*a - d + d*a - a*a + a) >> 1
-# (d*a + d*a - a*a + a) >> 1
-# (d*a + d*a - a*a + a) >> 1
-# (2*d*a - a*a + a) >> 1
-# (a*(2*d - a + 1)) >> 1
-# (a*((d << 1) - a + 1)) >> 1
-# (a*((d << 1)-a + 1)) >> 1
+# ((d + 1) * d) >> 1 - (((d - a) + 1) * (d - a)) >> 1
+# (((d + 1) * d) - (((d - a) + 1) * (d - a))) >> 1
+# (d * d + d - (((d - a) + 1) * (d - a))) >> 1
+# (d * d + d - ((d - a + 1) * (d - a))) >> 1
+# (d * d + d - (d * d - d * a + d - d * a + a * a - a)) >> 1
+# (d * d + d - (d * d - d * a + d - d * a + a * a - a)) >> 1
+# (d * d + d + (-d * d + d * a - d + d * a - a * a + a)) >> 1
+# (d * d + d - d * d + d * a - d + d * a - a * a + a) >> 1
+# (d + d * a - d + d * a - a * a + a) >> 1
+# (d * a + d * a - a*a + a) >> 1
+# (d * a + d * a - a*a + a) >> 1
+# (2 * d * a - a * a + a) >> 1
+# (a*(2 * d - a + 1)) >> 1
+# (a * ((d << 1) - a + 1)) >> 1
+# (a * ((d << 1)-a + 1)) >> 1
 
 DAILY_REFUND_MIN = 124
 
@@ -1478,9 +1498,10 @@ async def sell_daily(client, event,
         if amount <= daily_streak:
             sell_price = calculate_sell_price(daily_streak, amount)
             
-            await connector.execute(USER_COMMON_TABLE. \
-                update(user_common_model.id == entry_id). \
-                values(
+            await connector.execute(
+                USER_COMMON_TABLE.update(
+                    user_common_model.id == entry_id
+                ).values(
                     total_love = user_common_model.total_love + sell_price,
                     daily_next = daily_next,
                     daily_streak = daily_streak - amount,
@@ -1491,8 +1512,11 @@ async def sell_daily(client, event,
         else:
             sold = False
     
-    embed = Embed(f'Selling {amount} daily for {EMOJI__HEART_CURRENCY:e}'). \
-        add_thumbnail(client.avatar_url)
+    embed = Embed(
+        f'Selling {amount} daily for {EMOJI__HEART_CURRENCY}'
+    ).add_thumbnail(
+        client.avatar_url,
+    )
     
     if sold:
         embed.description = 'Great success!'
@@ -1536,11 +1560,11 @@ async def increase_user_total_love(user_id, increase):
         results = await response.fetchall()
         if results:
             entry_id = results[0][0]
-            to_execute = USER_COMMON_TABLE. \
-                update(user_common_model.id == entry_id). \
-                values(
-                    total_love = user_common_model.total_love + increase,
-                )
+            to_execute = USER_COMMON_TABLE.update(
+                user_common_model.id == entry_id
+            ).values(
+                total_love = user_common_model.total_love + increase,
+            )
         else:
             to_execute = get_create_common_user_expression(
                 user_id,

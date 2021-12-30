@@ -614,9 +614,9 @@ BUTTON_CANCEL = Button(
 
 @SHOP.interactions
 async def buy(client, event,
-        item : ([(item.name, item.id) for item in BUYABLE], 'Select the item to buy nya!'),
-        amount : (int, 'How much items would you want to buy?'),
-            ):
+    item: ([(item.name, item.id) for item in BUYABLE], 'Select the item to buy nya!'),
+    amount: (int, 'How much items would you want to buy?'),
+):
     """Buy?"""
     try:
         item = ITEMS[item]
@@ -632,8 +632,14 @@ async def buy(client, event,
     user = event.user
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
-            select([user_common_model.total_love]). \
-                where(user_common_model.user_id==user.id))
+            select(
+                [
+                    user_common_model.total_love,
+                ],
+            ).where(
+                user_common_model.user_id == user.id,
+            )
+        )
         
         results = await response.fetchall()
         if results:
@@ -641,12 +647,15 @@ async def buy(client, event,
         else:
             total_love = 0
     
-    embed = Embed('Confirm buying',
-        f'Selected item: {item.emoji:e} **{item.name}**\n'
-        f'Amount: **{amount}**\n'
-        f'\n'
-        f'Price: {calculate_buy_cost(item.market_cost, amount)} {EMOJI__HEART_CURRENCY:e}\n'
-        f'Budget: {total_love} {EMOJI__HEART_CURRENCY:e}'
+    embed = Embed(
+        'Confirm buying',
+        (
+            f'Selected item: {item.emoji:e} **{item.name}**\n'
+            f'Amount: **{amount}**\n'
+            f'\n'
+            f'Price: {calculate_buy_cost(item.market_cost, amount)} {EMOJI__HEART_CURRENCY:e}\n'
+            f'Budget: {total_love} {EMOJI__HEART_CURRENCY:e}'
+        ),
     )
     
     embed.add_author(user.avaar_url, user.full_name)
@@ -680,8 +689,15 @@ async def buy(client, event,
         user = event.user
         async with DB_ENGINE.connect() as connector:
             response = await connector.execute(
-                select([user_common_model.total_love, user_common_model.total_allocated]). \
-                    where(user_common_model.user_id==user.id))
+                select(
+                    [
+                        user_common_model.total_love,
+                        user_common_model.total_allocated
+                    ]
+                ).where(
+                    user_common_model.user_id == user.id,
+                )
+            )
             
             results = await response.fetchall()
             if results:
@@ -700,11 +716,26 @@ async def buy(client, event,
                 new_love = total_love
             else:
                 new_love = total_love - cost
-                await connector.execute(update(user_common_model.user_id==user.id). \
-                    values(total_love = new_love))
+                await connector.execute(
+                    update(
+                        user_common_model.user_id == user.id,
+                    ).values(
+                        total_love = new_love,
+                    )
+                )
                 
-                response = await connector.execute(select([item_model.id, item_model.amount]). \
-                    where(item_model.user_id==user.id).where(item_model.type==item.id))
+                response = await connector.execute(
+                    select(
+                        [
+                            item_model.id,
+                            item_model.amount,
+                        ],
+                    ).where(
+                        item_model.user_id == user.id,
+                    ).where(
+                        item_model.type == item.id,
+                    )
+                )
                 
                 results = await response.fetchall()
                 if results:

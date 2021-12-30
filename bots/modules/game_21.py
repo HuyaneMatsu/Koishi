@@ -716,9 +716,12 @@ async def game_21_single_player(client, event, amount):
         else:
             unallocate = True
             async with DB_ENGINE.connect() as connector:
-                await connector.execute(USER_COMMON_TABLE. \
-                    update(user_common_model.id == entry_id). \
-                    values(total_allocated = user_common_model.total_allocated - amount)
+                await connector.execute(
+                    USER_COMMON_TABLE.update(
+                        user_common_model.id == entry_id,
+                    ).values(
+                        total_allocated = user_common_model.total_allocated - amount,
+                    )
                 )
         
         game_state = await player_user_waiter
@@ -854,9 +857,11 @@ async def game_21_single_player(client, event, amount):
         # Error occurred
         if unallocate:
             async with DB_ENGINE.connect() as connector:
-                expression = USER_COMMON_TABLE. \
-                    update(user_common_model.id == entry_id). \
-                    values(total_allocated = user_common_model.total_allocated - amount)
+                expression = USER_COMMON_TABLE.update(
+                    user_common_model.id == entry_id
+                ).values(
+                    total_allocated = user_common_model.total_allocated - amount,
+                )
                 
                 await connector.execute(expression)
     
@@ -938,9 +943,12 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
         if result:
             if (entry_id != -1):
                 async with DB_ENGINE.connect() as connector:
-                    await connector.execute(USER_COMMON_TABLE. \
-                        update(user_common_model.id == entry_id). \
-                        values(total_allocated = user_common_model.total_allocated + amount)
+                    await connector.execute(
+                        USER_COMMON_TABLE.update(
+                            user_common_model.id == entry_id,
+                        ).values(
+                            total_allocated = user_common_model.total_allocated + amount,
+                        )
                     )
             
             joined_tuple = user, private_channel, entry_id
@@ -956,9 +964,12 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
 
 async def game_21_refund(entry_id, amount):
     async with DB_ENGINE.connect() as connector:
-        await connector.execute(USER_COMMON_TABLE. \
-            update(user_common_model.id == entry_id). \
-            values(total_allocated = user_common_model.total_allocated - amount)
+        await connector.execute(
+            USER_COMMON_TABLE.update(
+                user_common_model.id == entry_id,
+            ).values(
+                total_allocated = user_common_model.total_allocated - amount,
+            )
         )
 
 async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, joined_user_ids, private_channel,
@@ -988,9 +999,12 @@ async def game_21_mp_cancelled(client, user, guild, source_channel, amount, priv
     joined_user_ids.discard(user.id)
     
     async with DB_ENGINE.connect() as connector:
-        await connector.execute(USER_COMMON_TABLE. \
-            update(user_common_model.id == entry_id). \
-            values(total_allocated = user_common_model.total_allocated - amount)
+        await connector.execute(
+            USER_COMMON_TABLE.update(
+                user_common_model.id == entry_id,
+            ).values(
+                total_allocated = user_common_model.total_allocated - amount,
+            )
         )
     
     embed = Embed('21 multi-player game was cancelled.',
@@ -1648,9 +1662,10 @@ async def game_21_multi_player(client, event, amount):
         
         async with DB_ENGINE.connect() as connector:
             if (loser_entry_ids is not None):
-                await connector.execute(USER_COMMON_TABLE. \
-                    update(user_common_model.id.in_(loser_entry_ids)). \
-                    values(
+                await connector.execute(
+                    USER_COMMON_TABLE.update(
+                        user_common_model.id.in_(loser_entry_ids),
+                    ).values(
                         total_allocated = user_common_model.total_allocated - amount,
                         total_love = user_common_model.total_love - amount,
                     )
@@ -1659,9 +1674,10 @@ async def game_21_multi_player(client, event, amount):
                 if (winner_entry_ids is not None):
                     won_per_user = int(len(losers) * amount // len(winners))
                     
-                    await connector.execute(USER_COMMON_TABLE. \
-                        update(user_common_model.id.in_(winner_entry_ids)). \
-                        values(
+                    await connector.execute(
+                        USER_COMMON_TABLE.update(
+                            user_common_model.id.in_(winner_entry_ids),
+                        ).values(
                             total_allocated = user_common_model.total_allocated - amount,
                             total_love = user_common_model.total_love + won_per_user,
                         )
@@ -1669,9 +1685,10 @@ async def game_21_multi_player(client, event, amount):
                 
             else:
                 if (winner_entry_ids is not None):
-                    await connector.execute(USER_COMMON_TABLE. \
-                        update(user_common_model.id.in_(winner_entry_ids)). \
-                        values(
+                    await connector.execute(
+                        USER_COMMON_TABLE.update(
+                            user_common_model.id.in_(winner_entry_ids),
+                        ).values(
                             total_allocated = user_common_model.total_allocated - amount,
                         )
                     )

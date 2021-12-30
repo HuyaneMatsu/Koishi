@@ -331,10 +331,21 @@ async def ban(client, event,
     if (reason is not None) and (not reason):
         reason = None
     
-    embed = Embed('Confirmation', f'Are you sure to yeet {user.mention} from {guild.name}?'). \
-        add_field('Delete message day', str(delete_message_days), inline=True). \
-        add_field('Notify user', 'true' if notify_user else 'false', inline=True). \
-        add_field('Reason', '*No reason provided.*' if reason is None else reason)
+    embed = Embed(
+        'Confirmation',
+        f'Are you sure to yeet {user.mention} from {guild.name}?',
+    ).add_field(
+        'Delete message day',
+        str(delete_message_days),
+        inline = True
+    ).add_field(
+        'Notify user',
+        'true' if notify_user else 'false',
+        inline = True,
+    ).add_field(
+        'Reason',
+        '*No reason provided.*' if reason is None else reason,
+    )
 
     
     message = yield InteractionResponse(embed=embed, components=BAN_COMPONENTS, allowed_mentions=None)
@@ -378,8 +389,13 @@ async def ban(client, event,
                 
                 raise
             
-            embed = Embed('Yeeted', f'You were yeeted from {guild.name}.'). \
-                add_field('Reason', '*No reason provided.*' if reason is None else reason)
+            embed = Embed(
+                'Yeeted',
+                f'You were yeeted from {guild.name}.',
+            ).add_field(
+                'Reason',
+                '*No reason provided.*' if reason is None else reason,
+            )
             
             try:
                 await client.message_create(channel, embed=embed)

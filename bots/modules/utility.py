@@ -763,9 +763,15 @@ class InRolePageGetter:
         else:
             description = '*none*'
         
-        return Embed(self.title, description). \
-            add_author(guild.icon_url, guild.name). \
-            add_footer(f'Page {index + 1}/{ceil(len(self.users) / USER_PER_PAGE)}')
+        return Embed(
+            self.title,
+            description,
+        ).add_author(
+            guild.icon_url,
+            guild.name,
+        ).add_footer(
+            f'Page {index + 1}/{ceil(len(self.users) / USER_PER_PAGE)}',
+        )
 
 
 def in_role_pagination_check(user, event):
@@ -780,15 +786,15 @@ def in_role_pagination_check(user, event):
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def in_role(client, event,
-    role_1 : ('role', 'Select a role.'),
-    role_2 : ('role', 'Double role!') = None,
-    role_3 : ('role', 'Triple role!') = None,
-    role_4 : ('role', 'Quadra role!') = None,
-    role_5 : ('role', 'Penta role!') = None,
-    role_6 : ('role', 'Epic!') = None,
-    role_7 : ('role', 'Legendary!') = None,
-    role_8 : ('role', 'Mythical!') = None,
-    role_9 : ('role', 'Lunatic!') = None,
+    role_1: ('role', 'Select a role.'),
+    role_2: ('role', 'Double role!') = None,
+    role_3: ('role', 'Triple role!') = None,
+    role_4: ('role', 'Quadra role!') = None,
+    role_5: ('role', 'Penta role!') = None,
+    role_6: ('role', 'Epic!') = None,
+    role_7: ('role', 'Legendary!') = None,
+    role_8: ('role', 'Mythical!') = None,
+    role_9: ('role', 'Lunatic!') = None,
 ):
     """Shows the users with the given roles."""
     guild = event.guild
@@ -877,7 +883,7 @@ async def status_(user):
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def show_emoji(client, event,
-    emoji : ('str', 'Yes?'),
+    emoji: ('str', 'Yes?'),
 ):
     """Shows the given custom emoji."""
     emoji = parse_emoji(emoji)
@@ -892,8 +898,8 @@ async def show_emoji(client, event,
 
 @SLASH_CLIENT.interactions(name='id-to-time', is_global=True)
 async def id_to_datetime_(client, event,
-        snowflake : ('int', 'Id please!'),
-            ):
+    snowflake: ('int', 'Id please!'),
+):
     """Converts the given Discord snowflake to time."""
     time = id_to_datetime(snowflake)
     return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
@@ -1033,17 +1039,19 @@ def add_user_field(embed, index, joined_at, user):
     created_at = user.created_at
     embed.add_field(
         f'{index}. {user.full_name}',
-        f'Id: {user.id}\n'
-        f'Mention: {user.mention}\n'
-        '\n'
-        f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
-        f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-        f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}',
+        (
+            f'Id: {user.id}\n'
+            f'Mention: {user.mention}\n'
+            '\n'
+            f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
+            f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
+            f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}'
+        ),
     )
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR, True)
-async def latest_users(client, event,):
+async def latest_users(client, event):
     """Shows the new users of the guild."""
     if not event.user.has_role(ROLE__SUPPORT__MODERATOR):
         abort('Hacker trying to hack Discord.')

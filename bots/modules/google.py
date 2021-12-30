@@ -178,8 +178,15 @@ if (GOOGLE_API_KEYS is not None):
                 result = result_or_error_message[index]
                 index += 1
                 
-                page_embed = Embed(result.title, result.description, Color.random(), result.url). \
-                    add_footer(f'Page {index}/{limit}', client.avatar_url)
+                page_embed = Embed(
+                    result.title,
+                    result.description,
+                    color = Color.random(),
+                    url = result.url,
+                ).add_footer(
+                    f'Page {index}/{limit}',
+                    client.avatar_url,
+                )
                 
                 image_url = result.image_url
                 if (image_url is not None):

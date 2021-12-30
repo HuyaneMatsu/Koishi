@@ -132,8 +132,10 @@ async def emoji_delete(client, emoji):
         return
     
     async with DB_ENGINE.connect() as connector:
-        await connector.execute(EMOJI_COUNTER_TABLE.delete(). \
-            where(emoji_counter_model.emoji_id == emoji.id)
+        await connector.execute(
+            EMOJI_COUNTER_TABLE.delete().where(
+                emoji_counter_model.emoji_id == emoji.id,
+            )
         )
 
 @Satori.events
@@ -142,8 +144,10 @@ async def sticker_delete(client, sticker):
         return
     
     async with DB_ENGINE.connect() as connector:
-        await connector.execute(STICKER_COUNTER_TABLE.delete(). \
-            where(sticker_counter_model.sticker_id == sticker.id)
+        await connector.execute(
+            STICKER_COUNTER_TABLE.delete().where(
+                sticker_counter_model.sticker_id == sticker.id,
+            )
         )
 
 
@@ -196,11 +200,11 @@ EMOJI_COMMAND_ACTION_TYPES = [
 
 @EMOJI_COMMANDS.interactions
 async def user_top(event,
-        user: ('user', 'By who?') = None,
-        count: (range(10, 91, 10), 'The maximal amount of emojis to show') = 30,
-        months: (range(1, 13), 'The months to get') = 1,
-        action_type: (EMOJI_COMMAND_ACTION_TYPES, ('Choose emoji action type')) = EMOJI_COMMAND_ACTION_TYPE_ALL,
-            ):
+    user: ('user', 'By who?') = None,
+    count: (range(10, 91, 10), 'The maximal amount of emojis to show') = 30,
+    months: (range(1, 13), 'The months to get') = 1,
+    action_type: (EMOJI_COMMAND_ACTION_TYPES, ('Choose emoji action type')) = EMOJI_COMMAND_ACTION_TYPE_ALL,
+):
     """List the most used emojis at ND by you or by the selected user."""
     if user is None:
         user = event.user
@@ -235,7 +239,9 @@ async def user_top(event,
     embed = Embed(
         f'Most used emojis by {user.full_name}',
         color = user.color_at(GUILD__SUPPORT),
-    ).add_thumbnail(user.avatar_url)
+    ).add_thumbnail(
+        user.avatar_url,
+    )
     
     if results:
         description_parts = []
@@ -300,17 +306,23 @@ async def emoji_top(
     
     async with DB_ENGINE.connect() as connector:
         statement = (
-            select([
-            emoji_counter_model.user_id,
-            alchemy_function.count(emoji_counter_model.user_id).label('total'),
-            ]). \
-            where(and_(
-                emoji_counter_model.emoji_id == emoji.id,
-                emoji_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
-            )). \
-            limit(30). \
-            group_by(emoji_counter_model.user_id). \
-            order_by(desc('total'))
+            select(
+                [
+                    emoji_counter_model.user_id,
+                    alchemy_function.count(emoji_counter_model.user_id).label('total'),
+                ],
+            ).where(
+                and_(
+                    emoji_counter_model.emoji_id == emoji.id,
+                    emoji_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * months,
+                ),
+            ).limit(
+                30,
+            ).group_by(
+                emoji_counter_model.user_id,
+            ).order_by(
+                desc('total'),
+            )
         )
         
         if (action_type != EMOJI_COMMAND_ACTION_TYPE_ALL):
@@ -462,12 +474,12 @@ EMOJI_MOST_USED_FILTERS = {
 
 @EMOJI_COMMANDS.interactions
 async def most_used(
-        months: (range(1, 13), 'The months to get') = 1,
-        page: ('int', 'Select a page') = 1,
-        type_: (EMOJI_MOST_USED_TYPES, 'Choose emoji type to filter on') = EMOJI_MOST_USED_TYPE_ALL,
-        action_type: (EMOJI_COMMAND_ACTION_TYPES, ('Choose emoji action type')) = EMOJI_COMMAND_ACTION_TYPE_ALL,
-        order: (ORDERS, 'Ordering?') = ORDER_DECREASING,
-            ):
+    months: (range(1, 13), 'The months to get') = 1,
+    page: ('int', 'Select a page') = 1,
+    type_: (EMOJI_MOST_USED_TYPES, 'Choose emoji type to filter on') = EMOJI_MOST_USED_TYPE_ALL,
+    action_type: (EMOJI_COMMAND_ACTION_TYPES, ('Choose emoji action type')) = EMOJI_COMMAND_ACTION_TYPE_ALL,
+    order: (ORDERS, 'Ordering?') = ORDER_DECREASING,
+):
     """Shows the most used emojis."""
     
     if page < 1:
@@ -479,14 +491,16 @@ async def most_used(
     async with DB_ENGINE.connect() as connector:
         
         statement = (
-            select([
-                emoji_counter_model.emoji_id,
-                alchemy_function.count(emoji_counter_model.user_id).label('total'),
-            ]). \
-            where(and_(
+            select(
+                [
+                    emoji_counter_model.emoji_id,
+                    alchemy_function.count(emoji_counter_model.user_id).label('total'),
+                ],
+            ).where(
                 emoji_counter_model.timestamp > low_date_limit,
-            )). \
-            group_by(emoji_counter_model.emoji_id)
+            ).group_by(
+                emoji_counter_model.emoji_id,
+            )
         )
         
         if (action_type != EMOJI_COMMAND_ACTION_TYPE_ALL):
@@ -552,5 +566,9 @@ async def most_used(
     else:
         description = '*No recorded data*'
     
-    return Embed('Most used emojis:', description). \
-        add_footer(f'Page {page} / {(len(items) // MOST_USED_PER_PAGE) + 1}')
+    return Embed(
+        'Most used emojis:',
+        description,
+    ).add_footer(
+        f'Page {page} / {(len(items) // MOST_USED_PER_PAGE) + 1}',
+    )
