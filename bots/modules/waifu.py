@@ -149,13 +149,14 @@ class NewWaifu:
         
         url = await get_waifu_image(client, event, *self.get_waifu_parameters)
         if url is None:
-            embed = event.message.embed
-            if embed is None:
+            source_embed = event.message.embed
+            if source_embed is None:
                 # Should not happen
                 embed = Embed(None, ERROR_MESSAGE_NO_WAIFU).add_footer(PROVIDER_FOOTER)
             else:
-                embed.description = ERROR_MESSAGE_NO_WAIFU
-                
+                embed = Embed(source_embed.title, ERROR_MESSAGE_NO_WAIFU, url=source_embed.description)
+                embed.image = source_embed.image
+        
         else:
             embed = Embed('link', url=url).add_image(url).add_footer(PROVIDER_FOOTER)
         
