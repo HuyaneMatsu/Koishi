@@ -122,7 +122,7 @@ class NewVocaloid:
         if event.user is not event.message.interaction.user:
             return
         
-        url = await get_vocaloid_image(client, event, self.character, False)
+        url = await get_vocaloid_image(client, event, self.character, True)
         
         if url is None:
             source_embed = event.message.embed
