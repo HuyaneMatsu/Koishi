@@ -180,7 +180,7 @@ class Action:
         self.cache = []
     
     async def __call__(self, client, event,
-        user : ('user', 'Select someone.') = None,
+        user: ('user', 'Select someone.') = None,
     ):
         guild_id = event.guild_id
         if not guild_id:
