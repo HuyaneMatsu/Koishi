@@ -551,7 +551,7 @@ CATEGORIES = (
     ), (
         'Waifus',
         EMOJI_WAIFU,
-        ('nsfw-booru', 'safe-booru', 'touhou-character', 'waifu',)
+        ('nsfw-booru', 'safe-booru', 'touhou-character', 'vocaloid', 'waifu',)
     ),
 )
 

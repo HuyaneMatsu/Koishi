@@ -88,7 +88,7 @@ And much more!
 
 - Waifus
     
-    `nsfw-booru` • `safe-booru` • `touhou-character` • `waifu`
+    `nsfw-booru` • `safe-booru` • `touhou-character` • `vocaloid` • `waifu`
 
 #### Support server only commands
 
