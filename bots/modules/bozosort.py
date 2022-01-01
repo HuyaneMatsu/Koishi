@@ -1682,15 +1682,18 @@ async def bozosort_(
         abort('Hacking trying to hack Discord')
     
     content = message.content
-    if not content:
+    if content is None:
         attachments = message.attachments
-        for attachment in attachments:
-            content_type = attachment.content_type
-            if (content_type is not None) and content_type.startswith('text/plain'):
-                yield # ack the event before downloading the attachment
-                content = await client.download_attachment(attachment)
-                content = content.decode('utf-8')
-        else:
+        if (attachments is not None):
+            for attachment in attachments:
+                content_type = attachment.content_type
+                if (content_type is not None) and content_type.startswith('text/plain'):
+                    yield # ack the event before downloading the attachment
+                    content = await client.download_attachment(attachment)
+                    content = content.decode('utf-8')
+                    break
+        
+        if (content is None):
             abort('No content detected')
     
     output = bozosort(content)
