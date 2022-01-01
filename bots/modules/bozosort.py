@@ -376,7 +376,7 @@ class Identifier:
     __slots__ = ('before_parts', 'after_part')
     
     def __new__(cls, token, text):
-        if token.type == TOKEN_TYPE_KEYWORD_AS:
+        if token.type == TOKEN_GROUP_TYPE_KEYWORD_AS:
             before_token = token.tokens[0]
             after_token = token.tokens[2]
         else:
