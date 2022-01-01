@@ -323,7 +323,7 @@ async def render_hearts_vote_extended(client, event, target_user):
         
         field_value_parts.append('+ ')
         field_value_parts.append(repr(VOTE_PER_DAY_BONUS_WEEKEND))
-        field_value_parts.append(' vote bonus')
+        field_value_parts.append(' daily bonus')
         
         vote_base += VOTE_BASE_BONUS_WEEKEND
         vote_per_day += VOTE_PER_DAY_BONUS_WEEKEND

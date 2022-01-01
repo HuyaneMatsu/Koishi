@@ -1695,9 +1695,14 @@ async def bozosort_(
         
         if (content is None):
             abort('No content detected')
-    
+            
     output = bozosort(content)
-    if len(output) < 1000:
+    
+    if not output:
+        content = '*no output*'
+        file = None
+    
+    elif len(output) < 1900:
         content = f'```py\n{output}```'
         file = None
     
