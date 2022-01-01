@@ -187,39 +187,39 @@ class IdentifierPartStar(IdentifierPartBase):
     
     def __eq__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return True
-        
         if other_type is IdentifierPartDot:
             return False
         
         if other_type is IdentifierPartString:
             return False
+        
+        if other_type is IdentifierPartStar:
+            return True
         
         return NotImplemented
     
     def __gt__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
+        if other_type is IdentifierPartDot:
             return False
         
-        if other_type is IdentifierPartDot:
-            return True
-        
         if other_type is IdentifierPartString:
-            return True
+            return False
+        
+        if other_type is IdentifierPartStar:
+            return False
         
         return NotImplemented
     
     def __lt__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return False
-        
         if other_type is IdentifierPartDot:
-            return False
+            return True
         
         if other_type is IdentifierPartString:
+            return True
+        
+        if other_type is IdentifierPartStar:
             return False
         
         return NotImplemented
@@ -244,39 +244,39 @@ class IdentifierPartDot(IdentifierPartBase):
     
     def __eq__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return False
-        
         if other_type is IdentifierPartDot:
             return True
         
         if other_type is IdentifierPartString:
+            return False
+        
+        if other_type is IdentifierPartStar:
             return False
         
         return NotImplemented
     
     def __gt__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return False
-        
         if other_type is IdentifierPartDot:
             return False
         
         if other_type is IdentifierPartString:
+            return True
+        
+        if other_type is IdentifierPartStar:
             return True
         
         return NotImplemented
     
     def __lt__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return True
-        
         if other_type is IdentifierPartDot:
             return False
         
         if other_type is IdentifierPartString:
+            return False
+        
+        if other_type is IdentifierPartStar:
             return False
         
         return NotImplemented
@@ -303,9 +303,6 @@ class IdentifierPartString(IdentifierPartBase):
     
     def __eq__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return False
-        
         if other_type is IdentifierPartDot:
             return False
         
@@ -315,13 +312,13 @@ class IdentifierPartString(IdentifierPartBase):
             
             return False
         
+        if other_type is IdentifierPartStar:
+            return False
+        
         return NotImplemented
     
     def __gt__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return False
-        
         if other_type is IdentifierPartDot:
             return False
         
@@ -331,12 +328,13 @@ class IdentifierPartString(IdentifierPartBase):
             
             return False
         
+        if other_type is IdentifierPartStar:
+            return True
+        
         return NotImplemented
     
     def __lt__(self, other):
         other_type = type(other)
-        if other_type is IdentifierPartStar:
-            return True
         
         if other_type is IdentifierPartDot:
             return True
@@ -345,6 +343,9 @@ class IdentifierPartString(IdentifierPartBase):
             if self.value < other.value:
                 return True
             
+            return False
+        
+        if other_type is IdentifierPartStar:
             return False
         
         return NotImplemented
@@ -363,7 +364,7 @@ def create_identifier_part(token, text):
     if token_type == TOKEN_TYPE_IDENTIFIER:
         value = text[token.get_start():token.get_end()]
         part = IdentifierPartString(value)
-    elif token_type == TOKEN_TYPE_IDENTIFIER:
+    elif token_type == TOKEN_TYPE_STAR:
         part = IDENTIFIER_STAR
     else:
         part = IDENTIFIER_DOT
