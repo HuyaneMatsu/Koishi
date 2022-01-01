@@ -916,6 +916,7 @@ TOKEN_FOLLOWING_IDS = {
     TOKEN_TYPE_ATTRIBUTE_ACCESS: frozenset((
         TOKEN_TYPE_ATTRIBUTE_ACCESS,
         TOKEN_TYPE_IDENTIFIER,
+        TOKEN_TYPE_KEYWORD_IMPORT,
     )),
     # TOKEN_TYPE_LINE_BREAK: NO_IDS # Already all removed
     # TOKEN_TYPE_EOF: NO_IDS # Already all removed
@@ -1237,7 +1238,11 @@ def merge_identifiers(tokens):
         
         if identifier_since != -1:
             if identifier_since == index - 1:
-                new_tokens.append(tokens[identifier_since])
+                before_token = tokens[identifier_since]
+                if before_token.type == TOKEN_TYPE_ATTRIBUTE_ACCESS:
+                    before_token = TokenGroup(TOKEN_GROUP_TYPE_IDENTIFIER, [before_token])
+                
+                new_tokens.append(before_token)
             else:
                 token_group = TokenGroup(TOKEN_GROUP_TYPE_IDENTIFIER, tokens[identifier_since:index])
                 new_tokens.append(token_group)
@@ -1250,7 +1255,11 @@ def merge_identifiers(tokens):
     
     if identifier_since != -1:
         if identifier_since == index:
-            new_tokens.append(tokens[identifier_since])
+            before_token = tokens[identifier_since]
+            if before_token.type == TOKEN_TYPE_ATTRIBUTE_ACCESS:
+                before_token = TokenGroup(TOKEN_GROUP_TYPE_IDENTIFIER, [before_token])
+            
+            new_tokens.append(before_token)
         else:
             token_group = TokenGroup(TOKEN_GROUP_TYPE_IDENTIFIER, tokens[identifier_since:index + 1])
             new_tokens.append(token_group)
