@@ -581,6 +581,11 @@ BUILTIN_MODULES = frozenset((
     'string',
     'ipaddress',
     'email',
+    'tempfile',
+    'setuptools',
+    'errno',
+    'selectors',
+    'linecache',
 ))
 
 # We cheat more
@@ -592,6 +597,7 @@ PACKAGE_MODULES = frozenset((
     'nacl',
     'dotenv',
     'brotli',
+    'sqlalchemy',
 ))
 
 class ImportStatement:
