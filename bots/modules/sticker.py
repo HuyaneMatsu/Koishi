@@ -1,8 +1,9 @@
 from functools import partial as partial_func
 from datetime import datetime, timedelta
-from scarletio import future_or_timeout, Task
+from scarletio import future_or_timeout, Task, to_json
 from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, KOKORO, is_url
-from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row
+from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row, \
+    set_permission
 from bot_utils.models import DB_ENGINE, sticker_counter_model, STICKER_COUNTER_TABLE
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 from dateutil.relativedelta import relativedelta
@@ -40,7 +41,7 @@ async def user_top(event,
     count: (range(10, 61, 10), 'The maximal amount of emojis to show') = 30,
     months: (range(1, 13), 'The months to get') = 1,
 ):
-    """List the most used stickers at ND by you or by the selected user."""
+    """List the most used stickers at KW by you or by the selected user."""
     if user is None:
         user = event.user
     
@@ -200,7 +201,13 @@ async def sticker_top(
     ).add_thumbnail(sticker.url)
 
 
-STICKER_SYNC_COMMANDS = STICKER_COMMANDS.interactions(None,
+STICKER_SYNC_COMMANDS = STICKER_COMMANDS.interactions(
+    set_permission(
+        GUILD__SUPPORT,
+        ROLE__SUPPORT__EMOJI_MANAGER,
+        True,
+    )(None),
+    guild = GUILD__SUPPORT,
     name = 'sync',
     description = 'Syncs sticker table. (You must have emoji-council role)',
 )
@@ -652,3 +659,83 @@ async def edit_(client, event,
     
     # Edit the source message
     yield InteractionResponse(embed=embed, message=message, components=None)
+
+
+@STICKER_COMMANDS.interactions
+async def user_sticker_compare(
+    raw_sticker_1: ('str', 'Pick an sticker', 'sticker-1'),
+    raw_sticker_2: ('str', 'Pick an sticker', 'sticker-2'),
+):
+    """Compares the two stickers or something, smh smh."""
+    sticker_1 = GUILD__SUPPORT.get_sticker_like(raw_sticker_1)
+    if sticker_1 is None:
+        abort(f'There is not sticker with name `{raw_sticker_1}` in the guild.')
+    
+    sticker_2 = GUILD__SUPPORT.get_sticker_like(raw_sticker_2)
+    if sticker_2 is None:
+        abort(f'There is not sticker with name `{raw_sticker_2}` in the guild.')
+    
+    
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select(
+                [
+                    sticker_counter_model.sticker_id,
+                    alchemy_function.count(sticker_counter_model.sticker_id),
+                    alchemy_function.month(sticker_counter_model.timestamp).label('month'),
+                ],
+            ).where(
+                and_(
+                    sticker_counter_model.sticker_id in [sticker_1.id, sticker_2.id],
+                    sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * 12,
+                )
+            ).group_by(
+                sticker_counter_model.sticker_id,
+                'month',
+            )
+        )
+        
+        results = await response.fetchall()
+    
+    unique_months = set()
+    sticker_1_results_by_month = {}
+    sticker_2_results_by_month = {}
+    
+    for sticker_id, count, month in results:
+        unique_months.add(month)
+        
+        if sticker_id == sticker_1.id:
+            container = sticker_1_results_by_month
+        else:
+            container = sticker_2_results_by_month
+        
+        container[month] = count
+    
+    unique_months = sorted(unique_months)
+    
+    
+    data = to_json({
+        'type': 'line',
+        'data': {
+            'labels': [str(month) for month in unique_months],
+            'datasets': [
+                {
+                    'label': sticker_1.name,
+                    'data': [sticker_1_results_by_month.get(month, 0) for month in unique_months],
+                    'borderColor': 'green'
+                }, {
+                    'label': sticker_2.name,
+                    'data': [sticker_2_results_by_month.get(month, 0) for month in unique_months],
+                    'borderColor': 'red'
+                }
+            ]
+        }
+    })
+    
+    chart_url = f'https://quickchart.io/chart?c={data}'
+    
+    return Embed(
+        'Sticker comparison'
+    ).add_image(
+        chart_url,
+    )
