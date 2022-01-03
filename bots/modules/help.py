@@ -42,48 +42,75 @@ RULES_COMPONENTS = Row(
     ),
 )
 
+
+RULES = [
+    (
+        'Guidelines',
+        lambda: 'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
+    ), (
+        'Behaviour',
+        lambda: 'Listen to staff and follow their instructions.',
+    ), (
+        'Language',
+        lambda: f'{GUILD__SUPPORT.name} is an english speaking server, please try to stick yourself to it.'
+    ), (
+        'Channels',
+        lambda: 'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
+    ), (
+        'Usernames',
+        lambda: 'Invisible, offensive or noise unicode names are not allowed.',
+    ), (
+        'Spamming',
+        lambda: 'Forbidden in any form. Spamming server members in DM-s counts as well.'
+    ), (
+        'NSFW',
+        lambda: 'Keep explicit content in nsfw channels.',
+    ), (
+        'Advertisements',
+        lambda: 'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.',
+    ), (
+        'Political and Religious topics',
+        lambda: 'I do not say either that aliens exists, even tho they do.',
+    ), (
+        'Alternative accounts',
+        lambda: 'Instant ban.',
+    ), (
+        'Deep frying fumos',
+        lambda: 'Fumo frying is bannable offense.',
+    )
+]
+
+RULE_CHOICES = [(f'{index}. {title}', index) for index, (title, description_builder) in enumerate(RULES)]
+
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
-async def rules(client, event):
+async def rules(
+    event,
+    rule: (RULE_CHOICES, 'Select a rule to show.') = None
+):
     """Neko Dungeon\'s rules!"""
-    embed = Embed(f'Rules of {GUILD__SUPPORT}:', color=COLOR__KOISHI_HELP,
-        ).add_field(
-            '0. Guidelines',
-            'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
-        ).add_field(
-            '1. Behaviour',
-            'Listen to staff and follow their instructions.',
-        ).add_field(
-            '2. Language',
-            f'{GUILD__SUPPORT} is an english speaking server, please try to stick yourself to it.',
-        ).add_field(
-            '3. Channels',
-            'Read the channel\'s topics. Make sure to keep the conversations in their respective channels.'
-        ).add_field(
-            '4. Usernames',
-            'Invisible, offensive or noise unicode names are not allowed.'
-        ).add_field(
-            '5. Spamming',
-            'Forbidden in any form. Spamming server members in DM-s counts as well.',
-        ).add_field(
-            '6. NSFW',
-            'Keep explicit content in nsfw channels.',
-        ).add_field(
-            '7. Advertisements',
-            'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.'
-        ).add_field(
-            '8. No political or religious topics.',
-            'I do not say either that aliens exists, even tho they do.',
-        ).add_field(
-            '9. Alternative accounts',
-            'Instant ban.'
-        ).add_field(
-            '10. Deep frying fumos',
-            'Fumo frying is bannable offense.'
-        )
     
-    if client.is_owner(event.user):
-        components = RULES_COMPONENTS
+    if rule is None:
+        embed = Embed(
+            f'Rules of {GUILD__SUPPORT.name}:',
+            color = COLOR__KOISHI_HELP,
+        )
+        
+        for index, (title, description_builder) in enumerate(RULES):
+            embed.add_field(f'{index}. {title}', description_builder())
+        
+        if event.user_permissions.can_administrator:
+            components = RULES_COMPONENTS
+        else:
+            components = None
+    
     else:
+        embed = Embed(
+            f'Rules {rule} of {GUILD__SUPPORT.name}:',
+            color = COLOR__KOISHI_HELP,
+        )
+        
+        title, description_builder = RULES[rule]
+        embed.add_field(title, description_builder())
         components = None
     
     return InteractionResponse(embed=embed, components=components, allowed_mentions=None)
@@ -723,8 +750,8 @@ async def ping(client, event):
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def docs_search(client, event,
-        search_for: ('str', 'Search term'),
-            ):
+    search_for: ('str', 'Search term'),
+):
     """Searchers the given query from hata docs."""
     guild = event.guild
     if guild is None:
