@@ -72,7 +72,7 @@ async def user_(client, event,
     yield do_transfer(client, event, source_user, target_user, message)
 
 
-def do_transfer(client, event, source_user, target_user, message):
+async def do_transfer(client, event, source_user, target_user, message):
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
     
