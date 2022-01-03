@@ -92,6 +92,6 @@ And much more!
 
 #### Support server only commands
 
-`add_to_move_group` • `all-users` • `ask` • `award` • `crywolf` • `daily-event` • `docs-search` • `emoji` • `events`
-• `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw` • `roles`
-• `rules` • `sticker` • `take` • `transfer` • `move_message` • `move_messages` • `voice`
+`add_to_move_group` • `all-users` • `ask` • `award` • `bozosort` • `crywolf` • `daily-event` • `docs-search` • `emoji`
+• `events` • `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw`
+• `roles` • `rules` • `sticker` • `take` • `transfer` • `move_message` • `move_messages` • `voice`

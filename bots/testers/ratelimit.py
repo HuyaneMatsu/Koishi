@@ -615,7 +615,7 @@ async def channel_edit(client,channel,name='',topic='',nsfw=None,slowmode=None,u
         
         if type_<128:
             if type_ not in (0,5):
-                raise ValueError('You can switch chanel type only between only Text channel (0) and Guild news channel (5)')
+                raise ValueError('You can switch channel type only between only Text channel (0) and Guild news channel (5)')
             if type_!=value:
                 data['type']=type_
         
