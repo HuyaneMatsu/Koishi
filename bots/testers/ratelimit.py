@@ -1195,7 +1195,7 @@ async def emoji_create(client, guild, name, image,):
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis',
         data,)
     
-    return Emoji(data, guild)
+    return Emoji(data, guild_id)
 
 async def emoji_get(client, emoji):
     guild = emoji.guild
