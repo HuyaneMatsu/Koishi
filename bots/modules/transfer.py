@@ -23,14 +23,56 @@ PROPOSAL_CANCEL_REASON_OVER_LIMIT = 2
 
 SLASH_CLIENT: Client
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
-async def transfer(client, event,
+TRANSFER = SLASH_CLIENT.interactions(
+    set_permission(
+        GUILD__SUPPORT,
+        ROLE__SUPPORT__ADMIN,
+        True,
+    )(None),
+    name = 'transfer',
+    description = 'Transfers all of someone\'s hearts to an other person.',
+    guild = GUILD__SUPPORT,
+    allow_by_default = False,
+)
+
+@TRANSFER.interactions
+async def user_(client, event,
     source_user: ('user', 'Who\'s hearst do you want to transfer?'),
     target_user: ('user', 'To who do you want transfer the taken heart?'),
     message : ('str', 'Optional message to send with the transfer.') = None,
 ):
-    """Transfers all of someone\'s hearts to an other person."""
+    """Transfer with user parameters."""
+    return do_transfer(client, event, source_user, target_user, message)
+
+@TRANSFER.interactions
+async def user_(client, event,
+    source_user_id: (int, 'Who\'s hearst do you want to transfer?'),
+    target_user_id: (int, 'To who do you want transfer the taken heart?'),
+    message : ('str', 'Optional message to send with the transfer.') = None,
+):
+    """Transfer with user_id parameters | Use this for deleted users."""
+    yield
+    
+    try:
+        source_user = await client.user_get(source_user_id)
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_user:
+            abort(f'`source_user` not found.')
+        
+        raise
+    
+    try:
+        target_user = await client.user_get(target_user_id)
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_user:
+            abort(f'`target_user` not found.')
+        
+        raise
+    
+    yield do_transfer(client, event, source_user, target_user, message)
+
+
+def do_transfer(client, event, source_user, target_user, message):
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
     

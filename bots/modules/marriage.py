@@ -236,8 +236,8 @@ async def buy_marriage_slot_confirm(event):
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def waifu_info(event,
-        user: ('user', 'The user to get') = None,
-            ):
+    user: ('user', 'The user to get') = None,
+):
     
     if user is None:
         user = event.user
@@ -351,9 +351,9 @@ async def waifu_info(event,
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def propose(client, event,
-        user: ('user', 'The user to propose to.'),
-        amount: ('int', 'The amount of love to propose with.'),
-            ):
+    user: ('user', 'The user to propose to.'),
+    amount: ('int', 'The amount of love to propose with.'),
+):
     """Propose marriage to a user."""
     source_user_id = event.user.id
     target_user_id = user.id
@@ -717,16 +717,16 @@ PROPOSAL = SLASH_CLIENT.interactions(
 
 @PROPOSAL.interactions
 async def list_outgoing(event,
-        user: ('user', 'The user to list proposals of.') = None,
-            ):
+    user: ('user', 'The user to list proposals of.') = None,
+):
     """Lists outgoing proposals."""
     return await list_proposals(event, user, True)
 
 
 @PROPOSAL.interactions
 async def list_incoming(event,
-        user: ('user', 'The user to list proposals of.') = None,
-            ):
+    user: ('user', 'The user to list proposals of.') = None,
+):
     """Lists incoming proposals."""
     return await list_proposals(event, user, False)
 
@@ -801,8 +801,8 @@ async def list_proposals(event, user, outgoing):
 
 @PROPOSAL.interactions
 async def accept(client, event,
-        user: ('user', 'Who\'s proposal to accept?'),
-            ):
+    user: ('user', 'Who\'s proposal to accept?'),
+):
     source_user_id = event.user.id
     target_user_id = user.id
     
@@ -919,8 +919,8 @@ async def accept(client, event,
 
 @PROPOSAL.interactions
 async def reject(client, event,
-        user : ('user', 'The user, who\'s proposal you want to reject.'),
-            ):
+    user: ('user', 'The user, who\'s proposal you want to reject.'),
+):
     target_user_id = user.id
     source_user_id = event.user.id
     
@@ -977,8 +977,8 @@ async def reject(client, event,
 
 @PROPOSAL.interactions
 async def cancel(client, event,
-        user : ('user', 'The user, who\'s proposal you want to cancel.'),
-            ):
+    user: ('user', 'The user, who\'s proposal you want to cancel.'),
+):
     source_user_id = event.user.id
     target_user_id = user.id
     
@@ -1052,8 +1052,8 @@ async def cancel(client, event,
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def divorce(client, event,
-        user : ('user', 'Who do you want to divorce?'),
-            ):
+    user: ('user', 'Who do you want to divorce?'),
+):
     source_user_id = event.user.id
     target_user_id = user.id
     

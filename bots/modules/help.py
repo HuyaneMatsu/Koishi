@@ -750,8 +750,8 @@ async def ping(client, event):
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
 async def docs_search(client, event,
-        search_for: ('str', 'Search term'),
-            ):
+    search_for: ('str', 'Search term'),
+):
     """Searchers the given query from hata docs."""
     guild = event.guild
     if guild is None:

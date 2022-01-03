@@ -178,7 +178,7 @@ async def rate(client, event,
 
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def yuno(client, event):
+async def yuno():
     """Your personal yandere!"""
     return Embed(
         'YUKI YUKI YUKI!',
@@ -224,10 +224,10 @@ async def paranoia(client, event):
 
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def random_(client, event,
-    n1 : ('int', 'Number limit.'),
-    n2 : ('int', 'Other number limit!') = 0,
-        ):
+async def random_(
+    n1: ('int', 'Number limit.'),
+    n2: ('int', 'Other number limit!') = 0,
+):
     """Do you need some random numbers?"""
     if n1 == n2:
         result = n1
