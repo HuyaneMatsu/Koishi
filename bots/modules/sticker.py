@@ -1,6 +1,7 @@
 from functools import partial as partial_func
 from datetime import datetime, timedelta
 from scarletio import future_or_timeout, Task, to_json
+from scarletio.web_common import quote
 from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, KOKORO, is_url
 from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row, \
     set_permission
@@ -732,7 +733,7 @@ async def user_sticker_compare(
         }
     })
     
-    chart_url = f'https://quickchart.io/chart?c={data}'
+    chart_url = f'https://quickchart.io/chart?c={quote(data)}'
     
     return Embed(
         'Sticker comparison'
