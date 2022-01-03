@@ -101,7 +101,7 @@ And much more!
 
 ##### Prefix
 
-Koishi has no chat-input commands. Only slash (*and other application commands*)!
+Koishi has no old-style chat commands. Only slash (*and other application commands*)!
 
 ##### Not in member list, but her commands are present
 
