@@ -107,7 +107,8 @@ Koishi has no old-style chat commands. Only slash (*and other application comman
 
 This can happen if Koishi has no view-channel permission, but you have use-application-commands.
 
-Since Koishi is added without any permissions, make sure to assign a role to her.
+Since Koishi is added without any permissions, make sure to assign a role to her, **else she will stay invisible and
+be forgotten by everyone. That will make her sad.**
 
 *Koishi so meta!*
 
