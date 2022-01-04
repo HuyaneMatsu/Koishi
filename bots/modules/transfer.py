@@ -45,7 +45,7 @@ async def user_(client, event,
     return do_transfer(client, event, source_user, target_user, message)
 
 @TRANSFER.interactions
-async def user_(client, event,
+async def user_id(client, event,
     source_user_id: (int, 'Who\'s hearst do you want to transfer?'),
     target_user_id: (int, 'To who do you want transfer the taken heart?'),
     message : ('str', 'Optional message to send with the transfer.') = None,

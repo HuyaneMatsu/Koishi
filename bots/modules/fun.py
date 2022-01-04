@@ -583,21 +583,24 @@ class SexSpamLock:
 
 
 SEX_IMAGES = [
-    'https://media1.tenor.com/images/f85aafba0c5f18c9496068250777dfd0/tenor.gif?itemid=19617482',
+    'https://cdn.discordapp.com/attachments/568837922288173058/927858207764918284/no-sex-0000.gif',
     'https://cdn.discordapp.com/attachments/568837922288173058/837747879497433158/yes-sex.gif',
     'https://cdn.discordapp.com/attachments/568837922288173058/840676567180771348/yes-sex-hyper-opti.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/927858614226526228/sex_2_0.png',
 ]
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def sex(event):
     """You horny?"""
     value = random()
-    if value > 0.1:
+    if value > 0.100:
         level = 0
-    elif value > 0.01:
+    elif value > 0.012:
         level = 1
-    else:
+    elif value > 0.004:
         level = 2
+    else:
+        level = 3
     
     channel_id = event.channel_id
     try:
