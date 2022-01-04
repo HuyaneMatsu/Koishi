@@ -33,18 +33,18 @@ def render_all_emoji_field(emoji):
         '**Allowed roles:** '
     )
     
-    roles = emoji.roles
-    if (roles is None):
+    role_ids = emoji.role_ids
+    if (role_ids is None):
         description_parts.append('null')
     else:
         index = 0
-        limit = len(roles)
+        limit = len(role_ids)
         
         while True:
-            role = roles[index]
+            role_id = role_ids[index]
             index += 1
             
-            description_parts.append(role.mention)
+            description_parts.append(mention_role_by_id(role_id))
             
             if index == limit:
                 break
