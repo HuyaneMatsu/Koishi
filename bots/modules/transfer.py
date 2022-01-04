@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from hata import Client, Embed, DiscordException, ERROR_CODES
+from hata import Client, Embed, DiscordException, ERROR_CODES, User
 from hata.ext.slash import abort, set_permission
 from sqlalchemy.sql import select
 from sqlalchemy.dialects.postgresql import insert
@@ -39,7 +39,7 @@ TRANSFER = SLASH_CLIENT.interactions(
 async def user_(client, event,
     source_user: ('user', 'Who\'s hearst do you want to transfer?'),
     target_user: ('user', 'To who do you want transfer the taken heart?'),
-    message : ('str', 'Optional message to send with the transfer.') = None,
+    message: ('str', 'Optional message to send with the transfer.') = None,
 ):
     """Transfer with user parameters."""
     return do_transfer(client, event, source_user, target_user, message)
@@ -48,7 +48,7 @@ async def user_(client, event,
 async def user_id(client, event,
     source_user_id: (int, 'Who\'s hearst do you want to transfer?'),
     target_user_id: (int, 'To who do you want transfer the taken heart?'),
-    message : ('str', 'Optional message to send with the transfer.') = None,
+    message: ('str', 'Optional message to send with the transfer.') = None,
 ):
     """Transfer with user_id parameters | Use this for deleted users."""
     yield
@@ -57,17 +57,17 @@ async def user_id(client, event,
         source_user = await client.user_get(source_user_id)
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_user:
-            abort(f'`source_user` not found.')
-        
-        raise
+            source_user = User.precreate(source_user_id, name='Deleted User')
+        else:
+            raise
     
     try:
         target_user = await client.user_get(target_user_id)
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_user:
-            abort(f'`target_user` not found.')
-        
-        raise
+            target_user = User.precreate(target_user_id, name='Deleted User')
+        else:
+            raise
     
     yield do_transfer(client, event, source_user, target_user, message)
 
