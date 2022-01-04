@@ -1,4 +1,4 @@
-from hata import Client, Embed, StickerFormat
+from hata import Client, Embed, StickerFormat, mention_role_by_id
 from hata.ext.extension_loader import require
 
 from bot_utils.constants import CHANNEL__SUPPORT__LOG_EMOJI, GUILD__SUPPORT
@@ -136,28 +136,28 @@ async def emoji_edit(client, emoji, old_attributes):
     
     
     try:
-        old_roles = old_attributes['roles']
+        old_role_ids = old_attributes['role_ids']
     except KeyError:
         pass
     else:
-        new_roles = emoji.roles
+        new_role_ids = emoji.role_ids
         
         if description_parts:
             description_parts.append('\n')
         
         description_parts.append('**Allowed roles:** ')
         
-        if (old_roles is None):
+        if (old_role_ids is None):
             description_parts.append('null')
         else:
             index = 0
-            limit = len(old_roles)
+            limit = len(old_role_ids)
             
             while True:
-                role = old_roles[index]
+                role_id = old_role_ids[index]
                 index += 1
                 
-                description_parts.append(role.mention)
+                description_parts.append(mention_role_by_id(role_id))
         
                 if index == limit:
                     break
@@ -167,17 +167,17 @@ async def emoji_edit(client, emoji, old_attributes):
         
         description_parts.append(' -> ')
         
-        if (new_roles is None):
+        if (new_role_ids is None):
             description_parts.append('null')
         else:
             index = 0
-            limit = len(new_roles)
+            limit = len(new_role_ids)
             
             while True:
-                role = new_roles[index]
+                role_id = new_role_ids[index]
                 index += 1
                 
-                description_parts.append(role.mention)
+                description_parts.append(mention_role_by_id(role_id))
         
                 if index == limit:
                     break
