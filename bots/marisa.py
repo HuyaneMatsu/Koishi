@@ -1024,15 +1024,6 @@ async def shutdown():
     await Marisa.stop()
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
-async def abort_before_yield():
-    abort('a')
-    yield
-
-@Marisa.interactions(guild=GUILD__SUPPORT)
-async def just_abort():
-    abort('a')
-
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
@@ -1057,6 +1048,14 @@ async def resend(
     yield
     file = await client.download_attachment(attachment)
     yield InteractionResponse(file=(file, attachment.name))
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT)
+async def locale(event):
+    return (
+        f'Locale: {event.locale}\n'
+        f'guild locale: {event.guild_locale}'
+    )
 
 
 if (watchdog is not None):
