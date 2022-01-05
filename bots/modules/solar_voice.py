@@ -1,12 +1,14 @@
 from hata.ext.extension_loader import require
 require(SOLARLINK_VOICE=True)
 
+from scarletio import LOOP_TIME
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case
 from functools import partial as partial_func
-from math import ceil
+from math import ceil, floor
 from random import choice
 
-from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji, escape_markdown, Permission, Color
+from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji, escape_markdown, Permission, Color, KOKORO, \
+    GUILDS
 
 from hata.ext.slash import abort, InteractionResponse, Select, Option, wait_for_component_interaction
 from hata.ext.solarlink import SolarPlayer, TRACK_END_REASONS
@@ -20,6 +22,8 @@ EMOJI_QUEUE_LENGTH = BUILTIN_EMOJIS['dango']
 EMOJI_BEHAVIOR = BUILTIN_EMOJIS['control_knobs']
 EMOJI_CHANNEL = BUILTIN_EMOJIS['mega']
 EMOJI_VOLUME = BUILTIN_EMOJIS['level_slider']
+EMOJI_PLAYING = BUILTIN_EMOJIS['loud_sound']
+EMOJI_STOPPED =  BUILTIN_EMOJIS['speaker']
 
 TRACK_PER_PAGE = 10
 
@@ -49,11 +53,30 @@ TRACK_EMOJIS = [
 
 EMBED_COLOR = Color(0xFF9612)
 
+LAVE_TIMEOUT = 120.0
+
 class Player(SolarPlayer):
-    __slots__ = ('text_channel_id', )
+    __slots__ = ('__weakref__', 'text_channel_id', 'leave_handle', 'leave_initiated_at', 'active_users',)
+    
     def __new__(cls, node, guild_id, channel_id):
+        
+        try:
+            guild = GUILDS[guild_id]
+        except KeyError:
+            active_users = -999999
+        else:
+            active_users = 0
+            
+            for voice_state in guild.voice_states.values():
+                if (voice_state.channel_id == channel_id) and (not voice_state.deaf) and (not voice_state.self_deaf):
+                    active_users += 1
+        
         self, waiter = SolarPlayer.__new__(cls, node, guild_id, channel_id)
         self.text_channel_id = 0
+        self.leave_handle = None
+        self.leave_initiated_at = None
+        self.active_users = active_users
+        
         return self, waiter
     
     def set_text_channel(self, event):
@@ -73,6 +96,37 @@ class Player(SolarPlayer):
             duration += configured_track.track.duration
         
         return duration
+    
+    
+    def maybe_cancel_leave(self):
+        active_users = self.active_users + 1
+        self.active_users = active_users
+        
+        if active_users == 1:
+            self.cancel_leave()
+        
+    def cancel_leave(self):
+        handle = self.leave_handle
+        if (handle is not None):
+            self.leave_handle = None
+            handle.cancel()
+        
+        self.leave_initiated_at = 0.0
+    
+    
+    def initiate_leave(self):
+        now = LOOP_TIME()
+        
+        handle = self.leave_handle
+        if (handle is None):
+            self.leave_initiated_at = 0.0
+            self.leave_handle = KOKORO.call_at_weak(now+LAVE_TIMEOUT, self.cancel)
+        else:
+            self.leave_initiated_at = now
+    
+    
+    def cancel(self):
+        pass
 
 
 def duration_to_string(duration):
@@ -149,79 +203,80 @@ def get_behavior_representation(player):
     
     return representation
 
-def add_track_title_to(add_to, track):
+def add_track_title_to(into, track):
     title = track.title
     if len(title) > 50:
         title = title[:47]
         title = escape_markdown(title)
-        add_to.append(title)
-        add_to.append('...')
+        into.append(title)
+        into.append('...')
     else:
         title = escape_markdown(title)
-        add_to.append(title)
+        into.append(title)
 
-def add_track_duration_to(add_to, track):
+def add_track_duration_to(into, track):
     duration = int(track.duration)
-    add_to.append('(')
-    add_to.append(str(duration // 60))
-    add_to.append(':')
-    add_to.append(format(duration % 60, '0>2'))
-    add_to.append(')')
+    into.append('(')
+    into.append(str(duration // 60))
+    into.append(':')
+    into.append(format(duration % 60, '0>2'))
+    into.append(')')
 
-def add_track_short_description_to(add_to, track):
+def add_track_short_description_to(into, track):
     # Add title
     url = track.url
     
     if (url is not None):
-        add_to.append('[')
+        into.append('[')
     
-    add_to.append('**')
-    add_track_title_to(add_to, track)
-    add_to.append('**')
+    into.append('**')
+    add_track_title_to(into, track)
+    into.append('**')
     
     if (url is not None):
-        add_to.append('](')
-        add_to.append(url)
-        add_to.append(')')
+        into.append('](')
+        into.append(url)
+        into.append(')')
     
-    add_to.append(' ')
+    into.append(' ')
     
-    add_track_duration_to(add_to, track)
+    add_track_duration_to(into, track)
 
 
 
 def create_track_short_description(configured_track):
-    add_to = []
-    add_to.append(configured_track.emoji.as_emoji)
-    add_to.append(' ')
-    add_track_short_description_to(add_to, configured_track.track)
-    return ''.join(add_to)
+    into = []
+    into.append(configured_track.emoji.as_emoji)
+    into.append(' ')
+    add_track_short_description_to(into, configured_track.track)
+    return ''.join(into)
 
 
-def add_track_short_field_description_to(add_to, configured_track):
-    add_to.append(configured_track.emoji.as_emoji)
-    add_to.append(' ')
+def add_track_short_field_description_to(into, configured_track):
+    into.append(configured_track.emoji.as_emoji)
+    into.append(' ')
     
-    add_track_short_description_to(add_to, configured_track.track)
+    add_track_short_description_to(into, configured_track.track)
     
-    add_to.append('\n**Queued by:** ')
+    into.append('\n**Queued by:** ')
     
     # Add who queued it
-    add_to.append(configured_track.requester.full_name)
+    into.append(configured_track.requester.full_name)
     
     return configured_track
 
 
 def create_track_short_field_description(configured_track):
-    add_to = []
-    add_track_short_field_description_to(add_to, configured_track)
-    return ''.join(add_to)
+    into = []
+    add_track_short_field_description_to(into, configured_track)
+    return ''.join(into)
 
 def add_song_selection_header(embed, title, user):
     return embed.add_author(
         user.avatar_url,
         title,
     )
+
 
 
 def add_current_track_field(embed, player):
@@ -235,6 +290,68 @@ def add_current_track_field(embed, player):
         embed.add_field(
             f'{EMOJI_CURRENT_TRACK} Currently {title}',
             create_track_short_field_description(track),
+        )
+    
+    return embed
+
+
+def add_current_track_field_with_bar(embed, player):
+    track = player.get_current()
+    if (track is not None):
+        if player.is_paused():
+            title = 'paused'
+            playing_emoji = EMOJI_STOPPED
+        else:
+            title = 'playing'
+            playing_emoji = EMOJI_PLAYING
+        
+        into = []
+        into.append(track.emoji.as_emoji)
+        into.append(' ')
+        url = track.url
+        
+        if (url is not None):
+            into.append('[')
+        
+        into.append('**')
+        add_track_title_to(into, track)
+        into.append('**')
+        
+        if (url is not None):
+            into.append('](')
+            into.append(url)
+            into.append(')')
+        
+        into.append('\n')
+        into.append(playing_emoji.as_emoji)
+        into.append(' 【')
+        
+        duration = track.duration
+        position = player.position
+        
+        before = floor(19.0 * (position / duration))
+        
+        into.append('—'*before)
+        into.append('⚪')
+        into.append('—'*(19-before))
+        into.append('】')
+        
+        duration = int(duration)
+        position = int(position)
+        
+        into.append('(')
+        into.append(str(position // 60))
+        into.append(':')
+        into.append(format(position % 60, '0>2'))
+        into.append(' / ')
+        into.append(str(duration // 60))
+        into.append(':')
+        into.append(format(duration % 60, '0>2'))
+        into.append(')')
+        
+        embed.add_field(
+            f'{EMOJI_CURRENT_TRACK} Currently {title}',
+            ''.join(into),
         )
     
     return embed
@@ -491,7 +608,8 @@ async def play(client, event,
                     emoji = emojis[index]
                     index += 1
                     description_parts.append(emoji.as_emoji)
-                    description_parts.append(' **')
+                    description_parts.append(' ')
+                    description_parts.append('**')
                     description_parts.append(str(index))
                     description_parts.append('.** ')
                     
@@ -567,6 +685,7 @@ async def play(client, event,
         index += 1
         
         description_parts.append(emoji.as_emoji)
+        description_parts.append(' ')
         description_parts.append(' **')
         description_parts.append(str(index))
         description_parts.append('.** ')
@@ -825,7 +944,7 @@ async def skip(client, event,
 
 @VOICE_COMMANDS.interactions
 async def remove(client, event,
-    track : ('str', 'Which track to skip?') = None,
+    track: ('str', 'Which track to skip?') = None,
 ):
     """Removes the selected track from the queue"""
     player = client.solarlink.get_player(event.guild_id)
@@ -937,7 +1056,7 @@ async def queue_(client, event,
         page_count = ceil(length / TRACK_PER_PAGE)
         embed.add_footer(f'Page {page} / {page_count}')
         
-        add_current_track_field(embed, player)
+        add_current_track_field_with_bar(embed, player)
         
         embed.add_field(
             f'{EMOJI_QUEUE_LENGTH} Queue length',
@@ -1028,7 +1147,7 @@ async def seek_(client, event,
     await player.seek(seconds)
     
     embed = Embed(None, f'Seeked to {duration_to_string(seconds)}')
-    add_current_track_field(embed, player)
+    add_current_track_field_with_bar(embed, player)
     return embed
 
 
@@ -1087,3 +1206,11 @@ async def track_end(client, event):
         text_channel,
         embed = embed,
     )
+
+
+@SLASH_CLIENT.events
+async def user_voice_join(client, voice_state):
+    if (not voice_state.deaf) and (not voice_state.self_deaf):
+        player = client.solarlink.get_player(voice_state.guild_id)
+        if (player is not None):
+            player.maybe_cancel_leave()
