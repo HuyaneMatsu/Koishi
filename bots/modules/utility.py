@@ -166,8 +166,9 @@ class RoleCache:
                 '\nPermissions:\n```diff',
                 *(f'{"+" if value else "-"}{key.replace("_", "-")}' for key, value in role.permissions.items()),
                 '```',
-                    ]),
-            color=role.color)
+            ]),
+            color = role.color,
+        )
         embed.add_footer(f'Page {index + 1} /  {len(self.roles) + 1}')
         
         self.cache[index] = embed
@@ -232,7 +233,7 @@ async def welcome_screen_(client, event):
             embed.add_field(
                 f'{welcome_channel.emoji:e} {welcome_channel.description}',
                 f'#{welcome_channel.channel:d}'
-                    )
+            )
     
     yield embed
 
@@ -245,8 +246,8 @@ ID = SLASH_CLIENT.interactions(
 
 @ID.interactions
 async def user_(client, event,
-        user : ('user', 'Who\'s id do you want to see?') = None,
-           ):
+    user: ('user', 'Who\'s id do you want to see?') = None,
+):
     """Returns your or the selected user's identifier."""
     if user is None:
         user = event.user
@@ -256,8 +257,8 @@ async def user_(client, event,
 
 @ID.interactions
 async def channel_(client, event,
-        channel : ('channel', 'Which channel\'s id do you want to see?') = None,
-           ):
+    channel: ('channel', 'Which channel\'s id do you want to see?') = None,
+):
     """Returns this or the selected channel's identifier."""
     if channel is None:
         channel = event.channel
@@ -276,8 +277,8 @@ async def guild_(client, event):
 
 @ID.interactions
 async def role_(client, event,
-        role : ('role', 'Which role\'s id do you want to see?') = None,
-           ):
+    role: ('role', 'Which role\'s id do you want to see?') = None,
+):
     """Returns this or the guild\'s default role's identifier."""
     guild = event.guild
     if guild is None:
@@ -354,8 +355,8 @@ async def shared_guilds(client, event):
 
 @SLASH_CLIENT.interactions(name='user', is_global=True)
 async def user_(client, event,
-        user: ('user', 'Check out someone other user?') = None,
-    ):
+    user: ('user', 'Check out someone other user?') = None,
+):
     """Shows some information about your or about the selected user."""
     if user is None:
         user = event.user
@@ -409,15 +410,15 @@ async def user_(client, event,
             text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
         
         text.append(f'Roles: {roles}')
-        embed.add_field('In guild profile','\n'.join(text))
+        embed.add_field('In guild profile', '\n'.join(text))
     
     return embed
 
 
 @SLASH_CLIENT.interactions(name='role', is_global=True)
 async def role_(client, event,
-        role: ('role', 'Select the role to show information of.'),
-            ):
+    role: ('role', 'Select the role to show information of.'),
+):
     """Shows the information about a role."""
     if role.partial:
         abort('I must be in the guild, where the role is.')
@@ -452,16 +453,23 @@ async def role_(client, event,
     
     color = role.color
     embed.add_field('color',
-        f'html: {color.as_html}\n'
-        f'rgb: {color.as_rgb}\n'
-        f'int: {color:d}',
-            inline = True)
+        (
+            f'html: {color.as_html}\n'
+            f'rgb: {color.as_rgb}\n'
+            f'int: {color:d}'
+        ),
+        inline = True,
+    )
     
     created_at = role.created_at
-    embed.add_field('Created at',
-        f'{created_at:{DATETIME_FORMAT_CODE}}\n'
-        f'{elapsed_time(created_at)} ago',
-            inline=True)
+    embed.add_field(
+        'Created at',
+        (
+            f'{created_at:{DATETIME_FORMAT_CODE}}\n'
+            f'{elapsed_time(created_at)} ago'
+        ),
+        inline = True,
+    )
     
     return embed
 

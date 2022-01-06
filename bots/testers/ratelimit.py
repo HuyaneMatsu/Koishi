@@ -1248,12 +1248,17 @@ async def user_edit(client, guild,user,nick,mute=False,):
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
         data={'nick':nick,'mute':mute},)
 
-async def guild_user_add(client, guild,user,):
-    guild_id=guild.id
-    user_id=user.id
-    return await bypass_request(client,METHOD_PUT,
+async def guild_user_add(client, guild, user,):
+    guild_id = guild.id
+    user_id = user.id
+    return await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
-        data={'access_token':user.access.access_token},)
+        data = {
+            'access_token': user.access.access_token,
+        },
+    )
 
 async def user_role_add(client,user,role,):
     guild_id=role.guild.id
