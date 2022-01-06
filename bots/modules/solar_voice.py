@@ -1,7 +1,7 @@
 from hata.ext.extension_loader import require
 require(SOLARLINK_VOICE=True)
 
-from scarletio import LOOP_TIME
+from scarletio import LOOP_TIME, to_coroutine
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case
 from functools import partial as partial_func
 from math import ceil, floor
@@ -56,26 +56,13 @@ EMBED_COLOR = Color(0xFF9612)
 LAVE_TIMEOUT = 120.0
 
 class Player(SolarPlayer):
-    __slots__ = ('__weakref__', 'text_channel_id', 'leave_handle', 'leave_initiated_at', 'active_users',)
+    __slots__ = ('__weakref__', 'text_channel_id', 'leave_handle', 'leave_initiated_at',)
     
     def __new__(cls, node, guild_id, channel_id):
-        
-        try:
-            guild = GUILDS[guild_id]
-        except KeyError:
-            active_users = -999999
-        else:
-            active_users = 0
-            
-            for voice_state in guild.voice_states.values():
-                if (voice_state.channel_id == channel_id) and (not voice_state.deaf) and (not voice_state.self_deaf):
-                    active_users += 1
-        
         self, waiter = SolarPlayer.__new__(cls, node, guild_id, channel_id)
         self.text_channel_id = 0
         self.leave_handle = None
         self.leave_initiated_at = None
-        self.active_users = active_users
         
         return self, waiter
     
@@ -98,13 +85,39 @@ class Player(SolarPlayer):
         return duration
     
     
-    def maybe_cancel_leave(self):
-        active_users = self.active_users + 1
-        self.active_users = active_users
+    def check_auto_leave(self, channel_id=0):
+        try:
+            guild = GUILDS[self.guild_id]
+        except KeyError:
+            active_users = -999999
+        else:
+            active_users = 0
+            
+            if not channel_id:
+                channel_id = self.channel_id
+            
+            for voice_state in guild.voice_states.values():
+                if (voice_state.channel_id != channel_id):
+                    continue
+                
+                if voice_state.deaf:
+                    continue
+                
+                if voice_state.self_deaf:
+                    continue
+                
+                if voice_state.user.is_bot:
+                    continue
+                
+                active_users += 1
         
-        if active_users == 1:
-            self.cancel_leave()
+        if active_users == 0:
+            return self.initiate_leave()
         
+        self.cancel_leave()
+        return False
+    
+    
     def cancel_leave(self):
         handle = self.leave_handle
         if (handle is not None):
@@ -121,8 +134,11 @@ class Player(SolarPlayer):
         if (handle is None):
             self.leave_initiated_at = 0.0
             self.leave_handle = KOKORO.call_at_weak(now+LAVE_TIMEOUT, self.cancel)
-        else:
-            self.leave_initiated_at = now
+            return True
+        
+        
+        self.leave_initiated_at = now
+        return False
     
     
     def cancel(self):
@@ -568,13 +584,18 @@ async def play(client, event,
     length = len(tracks)
     description_parts = []
     
+    if player is None:
+        join_player = True
+    else:
+        join_player = False
+    
     # We are in a playlist
     if (playlist_name is not None):
         # All track selected -> add all
         title_parts = []
         
         if (selected_track_index <= 0) or (selected_track_index >= length):
-            if player is None:
+            if join_player:
                 player = await client.solarlink.join_voice(channel, cls=Player)
             
             player.set_text_channel(event)
@@ -629,7 +650,7 @@ async def play(client, event,
         else:
             # 1 Track is selected, add only that one
             
-            if player is None:
+            if join_player:
                 player = await client.solarlink.join_voice(channel, cls=Player)
             
             player.set_text_channel(event)
@@ -657,7 +678,7 @@ async def play(client, event,
         return
     
     if is_name_an_url:
-        if player is None:
+        if join_player:
             player = await client.solarlink.join_voice(channel, cls=Player)
         
         player.set_text_channel(event)
@@ -755,7 +776,7 @@ async def play(client, event,
                     emojis[option],
                 ))
         
-        if player is None:
+        if join_player:
             player = await client.solarlink.join_voice(channel, cls=Player)
         
         player.set_text_channel(event)
@@ -797,6 +818,14 @@ async def play(client, event,
         description_parts = None # clear reference
         
         embed = create_added_music_embed(player, user, title, description)
+    
+    
+    if join_player and player.check_auto_leave():
+        embed.add_footer(
+            f'There are no users listening in {channel.mention}. '
+            f'I will leave from the channel after {LAVE_TIMEOUT:.0f} seconds.'
+        )
+    
     
     yield InteractionResponse(
         embed = embed,
@@ -862,8 +891,8 @@ BEHAVIOR_CHOICES = [
 
 @VOICE_COMMANDS.interactions
 async def behavior_(client, event,
-    behavior : (BEHAVIOR_CHOICES, 'Choose a behavior') = BEHAVIOR_VALUE_GET,
-    value : (bool, 'Set value') = True,
+    behavior: (BEHAVIOR_CHOICES, 'Choose a behavior') = BEHAVIOR_VALUE_GET,
+    value: (bool, 'Set value') = True,
 ):
     """Get or set the player's behavior."""
     player = client.solarlink.get_player(event.guild_id)
@@ -912,7 +941,7 @@ def generate_track_autocomplete_form(configured_track):
 
 @VOICE_COMMANDS.interactions
 async def skip(client, event,
-    track : ('str', 'Which track to skip?') = None,
+    track: ('str', 'Which track to skip?') = None,
 ):
     """Skips the selected track."""
     player = client.solarlink.get_player(event.guild_id)
@@ -1169,6 +1198,39 @@ async def restart_(client, event):
     return embed
 
 
+@VOICE_COMMANDS.interactions
+async def move(client, event,
+    channel: ('channel_group_connectable', 'Select a channel.'),
+):
+    """Moves me to the selected voice channel | You must have move users permission."""
+    if not event.user_permissions.can_move_users:
+        abort('You must have move move users permission to invoke this command.')
+    
+    if not channel.cached_permissions_for(client).can_connect:
+        abort(f'I have no permissions to connect to {channel.mention}.')
+    
+    player = client.solarlink.get_player(event.guild_id)
+    if player is None:
+        abort('No player in the guild.')
+    
+    yield
+    
+    moved = await player.move_to(channel)
+    
+    embed = Embed(
+        None,
+        f'Moved to {channel.mention}.'
+    )
+    
+    if moved and player.check_auto_leave(channel.id):
+        embed.add_footer(
+            f'There are no users listening in {channel.mention}. '
+            f'I will leave from the channel after {LAVE_TIMEOUT:.0f} seconds.'
+        )
+    
+    yield embed
+
+
 PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages = True,
     send_messages_in_threads = True,
@@ -1208,9 +1270,56 @@ async def track_end(client, event):
     )
 
 
+async def notify_leave(client, player):
+    text_channel = player.text_channel
+    if (text_channel is None) or (not text_channel.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING):
+        return
+    
+    embed = Embed(
+        f'There are no users listening in {text_channel.mention}.',
+        color = EMBED_COLOR,
+    ).add_footer(
+        f'I will leave from the channel after {LAVE_TIMEOUT:.0f} seconds.',
+    )
+    
+    await client.message_create(text_channel, embed=embed)
+
+
 @SLASH_CLIENT.events
 async def user_voice_join(client, voice_state):
-    if (not voice_state.deaf) and (not voice_state.self_deaf):
-        player = client.solarlink.get_player(voice_state.guild_id)
-        if (player is not None):
-            player.maybe_cancel_leave()
+    player = client.solarlink.get_player(voice_state.guild_id)
+    if (player is not None):
+        player.check_auto_leave()
+
+
+@SLASH_CLIENT.events
+async def user_voice_leave(client, voice_state):
+    player = client.solarlink.get_player(voice_state.guild_id)
+    if (player is not None) and player.check_auto_leave():
+           await notify_leave(client, player)
+
+
+@SLASH_CLIENT.events
+async def user_voice_update(client, voice_state, old_attributes):
+    player = client.solarlink.get_player(voice_state.guild_id)
+    if (player is not None) and player.check_auto_leave():
+           await notify_leave(client, player)
+
+
+@SLASH_CLIENT.events
+async def user_voice_update(client, voice_state, old_channel_id):
+    player = client.solarlink.get_player(voice_state.guild_id)
+    if (player is not None):
+        if player.check_auto_leave():
+           await notify_leave(client, player)
+
+
+@SLASH_CLIENT.events
+@to_coroutine
+def voice_client_move(client, voice_state, old_channel_id):
+    yield
+    
+    player = client.solarlink.get_player(voice_state.guild_id)
+    if (player is not None):
+        if player.check_auto_leave():
+           yield from notify_leave(client, player).__await__()
