@@ -391,7 +391,7 @@ async def user_(client, event,
     
     else:
         embed.color = user.color_at(guild)
-        roles = guild_profile.role_ids
+        roles = guild_profile.roles
         if roles is None:
             roles = '*none*'
         else:
