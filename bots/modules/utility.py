@@ -79,7 +79,8 @@ async def rawr(client, event):
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def color_(client, event,
-        color: ('str', 'Beauty!')):
+    color: ('str', 'Beauty!')
+):
     """Shows the given color"""
     
     color = parse_color(color)
@@ -232,7 +233,7 @@ async def welcome_screen_(client, event):
         for welcome_channel in welcome_channels:
             embed.add_field(
                 f'{welcome_channel.emoji:e} {welcome_channel.description}',
-                f'#{welcome_channel.channel:d}'
+                f'#{welcome_channel.channel:d}',
             )
     
     yield embed
@@ -390,7 +391,7 @@ async def user_(client, event,
     
     else:
         embed.color = user.color_at(guild)
-        roles = guild_profile.roles
+        roles = guild_profile.role_ids
         if roles is None:
             roles = '*none*'
         else:
