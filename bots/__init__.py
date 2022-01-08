@@ -13,7 +13,8 @@ MARISA_MODE = config.MARISA_MODE
 EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 
 if MARISA_MODE:
-    Marisa = Client(config.MARISA_TOKEN,
+    Marisa = Client(
+        config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
         http_debug_options = 'canary',
         extensions = ('command_utils', 'slash', 'commands_v2', 'solarlink'),
@@ -31,7 +32,8 @@ if MARISA_MODE:
 else:
     EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=False)
     
-    Koishi = Client(config.KOISHI_TOKEN,
+    Koishi = Client(
+        config.KOISHI_TOKEN,
         secret = config.KOISHI_SECRET,
         client_id = config.KOISHI_ID,
         activity = ActivityRich('with Satori'),
@@ -47,7 +49,8 @@ else:
     
     EXTENSION_LOADER.add_default_variables(Koishi=Koishi, SLASH_CLIENT=Koishi)
     
-    Satori = Client(config.SATORI_TOKEN,
+    Satori = Client(
+        config.SATORI_TOKEN,
         secret = config.SATORI_SECRET,
         client_id = config.SATORI_ID,
         activity = ActivityRich('with Koishi'),
@@ -61,7 +64,8 @@ else:
     
     EXTENSION_LOADER.add_default_variables(Satori=Satori, COMMAND_CLIENT=Satori)
     
-    Flan = Client(config.FLAN_TOKEN,
+    Flan = Client(
+        config.FLAN_TOKEN,
         client_id = config.FLAN_ID,
         activity = ActivityRich('Chesuto development', type_=ACTIVITY_TYPES.watching),
         status = 'idle',
@@ -74,7 +78,8 @@ else:
     
     EXTENSION_LOADER.add_default_variables(Flan=Flan)
     
-    Nitori = Client(config.NITORI_TOKEN,
+    Nitori = Client(
+        config.NITORI_TOKEN,
         client_id = config.NITORI_ID,
         application_id = config.NITORI_ID,
         extensions = 'slash',
