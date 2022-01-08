@@ -10,7 +10,7 @@ from random import choice
 from hata import Client, is_url, Embed, CHANNELS, BUILTIN_EMOJIS, Emoji, escape_markdown, Permission, Color, KOKORO, \
     GUILDS
 
-from hata.ext.slash import abort, InteractionResponse, Select, Option, wait_for_component_interaction
+from hata.ext.slash import abort, InteractionResponse, Select, Option, wait_for_component_interaction, P
 from hata.ext.solarlink import SolarPlayer, TRACK_END_REASONS
 
 from bot_utils.constants import GUILD__SUPPORT
@@ -838,7 +838,7 @@ async def play(client, event,
 
 @VOICE_COMMANDS.interactions
 async def volume_(client, event,
-    volume: ('number', 'Percentage?') = None,
+    volume: P('number', 'Percentage?', min_value=0, max_value=200) = None,
 ):
     """Gets or sets my volume to the given percentage."""
     player = client.solarlink.get_player(event.guild_id)
@@ -851,15 +851,8 @@ async def volume_(client, event,
         volume = player.get_volume()
         return f'{EMOJI_VOLUME.as_emoji} Volume: {volume * 100.:.0f}%'
     
-    if volume <= 0:
-        volume = 0.0
-    elif volume >= 200:
-        volume = 2.0
-    else:
-        volume /= 100.0
-    
-    await player.set_volume(volume)
-    return f'{EMOJI_VOLUME.as_emoji} Volume set to: {volume * 100.:.0f}%.'
+    await player.set_volume(volume/100)
+    return f'{EMOJI_VOLUME.as_emoji} Volume set to: {volume}%.'
 
 
 @VOICE_COMMANDS.interactions
@@ -873,6 +866,7 @@ async def stop(client, event):
 
     await player.stop()
     return 'Stopped playing'
+
 
 BEHAVIOR_NAME_REPEAT_CURRENT = 'loop current'
 BEHAVIOR_NAME_REPEAT_QUEUE = 'loop queue'
@@ -1122,7 +1116,7 @@ async def queue_(client, event,
                 f'```'
             )
         )
-    
+        
         embed.add_field(
             f'{EMOJI_BEHAVIOR} Behavior',
             (
@@ -1169,9 +1163,9 @@ async def seek_(client, event,
     if track is None:
         abort('The player is not playing anything.')
     
-    duration = track.track.duration
+    duration = track.duration
     if (seconds < 0.0) or (seconds > duration):
-        abort(f'Cannot seek to {seconds:.0f}.')
+        abort(f'Cannot seek to {seconds:.2f} seconds. Please define a value between `0` and {duration:.0f}.')
     
     await player.seek(seconds)
     
