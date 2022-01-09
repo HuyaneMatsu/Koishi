@@ -48,7 +48,9 @@ And much more!
 
 <h1></h1>
 
-#### Global commands
+<h3 align="center">
+    Global commands
+</h3>
 
 - Administration
     
