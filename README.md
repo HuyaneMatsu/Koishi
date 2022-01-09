@@ -28,7 +28,9 @@ commands to get the people together.
 
 To get started with Koishi, use the `/help` command, which lists all the available global commands.
 
-#### What she does?
+<h3 align="center">
+    What she does?
+</h3>
 
 Koishi excels in a variety of areas, just to mention a few featured commands:
 
@@ -91,7 +93,9 @@ And much more!
     
     `nsfw-booru` • `safe-booru` • `touhou-character` • `vocaloid` • `waifu`
 
-#### Support server only commands
+<h3 align="center">
+    Support server only commands
+</h3>
 
 `add_to_move_group` • `all-users` • `ask` • `award` • `bozosort` • `crywolf` • `daily-event` • `docs-search` • `emoji`
 • `events` • `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw`
@@ -99,7 +103,9 @@ And much more!
 
 <h1></h1>
 
-#### FQA
+<h3 align="center">
+    FAQ
+</h3>
 
 ##### Prefix
 
