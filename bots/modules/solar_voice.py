@@ -1264,6 +1264,34 @@ async def track_end(client, event):
     )
 
 
+@SLASH_CLIENT.events
+async def track_exception(client, event):
+    old_track = event.track
+    new_track = event.player.get_current()
+
+    text_channel = event.player.text_channel
+    if (text_channel is None) or (not text_channel.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING):
+        return
+    
+    embed = Embed(color=EMBED_COLOR)
+    
+    embed.add_field(
+        f'{EMOJI_LAST_TRACK} Something went wrong meanwhile playing',
+        create_track_short_field_description(old_track),
+    )
+    
+    if (new_track is not None):
+        embed.add_field(
+            f'{EMOJI_CURRENT_TRACK} Started playing',
+            create_track_short_field_description(new_track),
+        )
+    
+    await client.message_create(
+        text_channel,
+        embed = embed,
+    )
+
+
 async def notify_leave(client, player):
     text_channel = player.text_channel
     if (text_channel is None) or (not text_channel.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING):
