@@ -17,9 +17,7 @@
     <a href="https://discord.com/oauth2/authorize?client_id=486565096164687885&scope=bot%20applications.commands">
         Invite me!
     </a>
-    <b>
-        ·
-    </b>
+    •
     <a href="http://discord.gg/3cH2r5d">
         Join our gang!
     </a>
