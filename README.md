@@ -44,6 +44,7 @@ Koishi excels in a variety of areas, just to mention a few featured commands:
 
 And much more!
 
+<h1></h1>
 
 #### Global commands
 
@@ -96,6 +97,7 @@ And much more!
 • `events` • `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw`
 • `roles` • `rules` • `sticker` • `take` • `transfer` • `move_message` • `move_messages` • `voice`
 
+<h1></h1>
 
 #### FQA
 
