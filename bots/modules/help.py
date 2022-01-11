@@ -82,13 +82,14 @@ RULES = [
 
 RULE_CHOICES = [(f'{index}. {title}', index) for index, (title, description_builder) in enumerate(RULES)]
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(
+    guild = GUILD__SUPPORT,
+    description = f'{GUILD__SUPPORT.name}\'s rules!'
+)
 async def rules(
     event,
     rule: (RULE_CHOICES, 'Select a rule to show.') = None
 ):
-    """Neko Dungeon\'s rules!"""
-    
     if rule is None:
         embed = Embed(
             f'Rules of {GUILD__SUPPORT.name}:',

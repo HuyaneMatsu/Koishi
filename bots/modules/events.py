@@ -10,7 +10,7 @@ SLASH_CLIENT: Client
 EVENTS = SLASH_CLIENT.interactions(
     None,
     name = 'events',
-    description = 'Neko Dungeon event information.',
+    description = f'{GUILD__SUPPORT.name} event information.',
     guild = GUILD__SUPPORT,
 )
 
