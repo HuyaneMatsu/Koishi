@@ -49,14 +49,14 @@ for char in range(b'a'[0], b'z'[0]+1):
     CHANNEL_CHAR_TABLE[char] = char
 
 # Add uppercase letters
-for shift in range(0, b'Z'[0]-b'A'[0]+1):
+for shift in range(0, b'Z'[0] - b'A'[0]+1):
     source = chr(b'A'[0] + shift)
     target = chr(ord('𝖠') + shift)
     CHANNEL_CHAR_TABLE[source] = target
     CHANNEL_CHAR_TABLE[target] = target
 
 # Add numbers
-for char in range(b'0'[0], b'9'[0]+1):
+for char in range(b'0'[0], b'9'[0] + 1):
     char = chr(char)
     CHANNEL_CHAR_TABLE[char] = char
 
@@ -231,7 +231,9 @@ COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks=[checks
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(
-        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp() - time_now() + DAY, cycle_rename)
+        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp() - time_now() + DAY,
+        cycle_rename,
+    )
 
 def teardown(lib):
     value = NAME_CYCLER_HANDLER.value
@@ -305,21 +307,31 @@ async def add_bot_channel_name(client, message, weight:int, name):
         close_matches = get_close_matches(name, [describer.name for describer in names], n=1, cutoff=0.8)
         if not close_matches:
             overwrite = False
-            embed = Embed('Add bot channel name',
-                f'Would you like to add a channel name:\n{name}\nWith weight of {weight}.')
+            embed = Embed(
+                'Add bot channel name',
+                f'Would you like to add a channel name:\n{name}\nWith weight of {weight}.',
+            )
         elif close_matches[0] == name:
             overwrite = True
-            embed = Embed('Add bot channel name',
-                f'Would you like to overwrite the following bot channel name:\n'
-                f'{name}\n'
-                f'To weight of {weight}.')
+            embed = Embed(
+                'Add bot channel name',
+                (
+                    f'Would you like to overwrite the following bot channel name:\n'
+                    f'{name}\n'
+                    f'To weight of {weight}.'
+                ),
+            )
         else:
             overwrite = False
-            embed = Embed('Add bot channel name',
-                f'There is a familiar channel name already added: {close_matches[0]}\n'
-                f'Would you like to overwrite the following bot channel name:\n'
-                f'{name}\n'
-                f'To weight of {weight}.')
+            embed = Embed(
+                'Add bot channel name',
+                (
+                    f'There is a familiar channel name already added: {close_matches[0]}\n'
+                    f'Would you like to overwrite the following bot channel name:\n'
+                    f'{name}\n'
+                    f'To weight of {weight}.'
+                ),
+            )
         
         message = await client.message_create(message.channel, embed=embed, components=ADD_COMPONENTS)
         

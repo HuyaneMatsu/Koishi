@@ -86,8 +86,8 @@ async def clear(client, event,
 
 @SLASH_CLIENT.interactions(is_global=True, show_for_invoking_user_only=True)
 async def invite_create(client, event,
-        permanent : ('bool', 'Create permanent?') = False,
-            ):
+    permanent: ('bool', 'Create permanent?') = False,
+):
     """I create an invite for you!"""
     guild = event.guild
     if guild is None:
@@ -237,8 +237,8 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def invites_(client, event,
-        channel : ('channel', 'Which channel\'s invites do you wanna check?') = None,
-            ):
+    channel: ('channel', 'Which channel\'s invites do you wanna check?') = None,
+):
     """Shows up the guild's or the selected channel's invites."""
     guild = event.guild
     if guild is None:
@@ -301,11 +301,11 @@ BAN_COMPONENTS = Row(BAN_BUTTON_CONFIRM, BAN_BUTTON_CANCEL)
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def ban(client, event,
-        user : ('user', 'Select the user to yeet!'),
-        reason : ('str', 'Any reason why you would want to yeet?') = None,
-        delete_message_days : (range(8), 'Delete previous messages?') = 0,
-        notify_user : ('bool', 'Whether the user should get DM about the ban.') = True,
-            ):
+    user: ('user', 'Select the user to yeet!'),
+    reason: ('str', 'Any reason why you would want to yeet?') = None,
+    delete_message_days: (range(8), 'Delete previous messages?') = 0,
+    notify_user: ('bool', 'Whether the user should get DM about the ban.') = True,
+):
     """Yeets someone out of the guild. You must have ban users permission."""
     # Check permissions
     guild = event.guild
@@ -428,8 +428,8 @@ async def ban(client, event,
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def is_banned(client, event,
-        user: ('user', 'Who should I check?')
-            ):
+    user: ('user', 'Who should I check?')
+):
     """Checks whether the user is banned."""
     if (not event.user.has_role(ROLE__SUPPORT__TESTER)) and (not event.user_permissions.can_ban_users):
         abort('You need to have `ban users` permissions to do this.')
@@ -485,17 +485,17 @@ def role_emoji_checker(event):
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def emoji_role(client, event,
-        emoji: ('str', 'Select the emoji to bind to roles.'),
-        role_1: ('role', 'Select a role.') = None,
-        role_2: ('role', 'Double role!') = None,
-        role_3: ('role', 'Triple role!') = None,
-        role_4: ('role', 'Quadra role!') = None,
-        role_5: ('role', 'Penta role!') = None,
-        role_6: ('role', 'Epic!') = None,
-        role_7: ('role', 'Legendary!') = None,
-        role_8: ('role', 'Mythical!') = None,
-        role_9: ('role', 'Lunatic!') = None,
-            ):
+    emoji: ('str', 'Select the emoji to bind to roles.'),
+    role_1: ('role', 'Select a role.') = None,
+    role_2: ('role', 'Double role!') = None,
+    role_3: ('role', 'Triple role!') = None,
+    role_4: ('role', 'Quadra role!') = None,
+    role_5: ('role', 'Penta role!') = None,
+    role_6: ('role', 'Epic!') = None,
+    role_7: ('role', 'Legendary!') = None,
+    role_8: ('role', 'Mythical!') = None,
+    role_9: ('role', 'Lunatic!') = None,
+):
     """Binds the given emoji to the selected roles. You must have administrator permission."""
     guild = event.guild
     if guild is None:
