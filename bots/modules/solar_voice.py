@@ -1315,7 +1315,7 @@ async def user_voice_join(client, voice_state):
 
 
 @SLASH_CLIENT.events
-async def user_voice_leave(client, voice_state):
+async def user_voice_leave(client, voice_state, old_channel_id):
     player = client.solarlink.get_player(voice_state.guild_id)
     if (player is not None) and player.check_auto_leave():
            await notify_leave(client, player)

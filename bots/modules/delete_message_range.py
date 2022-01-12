@@ -47,7 +47,7 @@ class DeleteRangeContext:
     
     
     def get_embed(self, state):
-        user = self.event.user
+        user = self.message_since.author.user
         
         if state == DELETE_RANGE_CONTEXT_STATE_NONE:
             title = 'Range delete context'
@@ -103,14 +103,12 @@ class DeleteRangeContext:
         )
 
 
-DELETE_RANGE = SLASH_CLIENT.interactions(
+@SLASH_CLIENT.interactions(
     guild = GUILD__SUPPORT,
-    name = 'delete range',
+    target = 'message',
+    show_for_invoking_user_only = True,
 )
-
-
-@DELETE_RANGE.interactions(show_for_invoking_user_only=True)
-async def since(
+async def delete_since(
     client,
     event,
     target,
@@ -133,8 +131,12 @@ def match_message_author(user, message):
     return (message.author is user)
 
 
-@DELETE_RANGE.interactions(show_for_invoking_user_only=True)
-async def till(
+@SLASH_CLIENT.interactions(
+    guild = GUILD__SUPPORT,
+    target = 'message',
+    show_for_invoking_user_only = True,
+)
+async def delete_till(
     client,
     event,
     target,
