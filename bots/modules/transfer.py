@@ -281,7 +281,7 @@ async def do_transfer(client, event, source_user, target_user, message):
         
         else:
             new_waifu_cost = source_user_waifu_cost
-            new_waifu_owner_id = target_user_waifu_owner_id
+            new_waifu_owner_id = source_user_waifu_owner_id
             
             if target_user_waifu_owner_id:
                 keep_target_waifu_owner = WAIFU_STATE_DIVORCE
@@ -324,9 +324,9 @@ async def do_transfer(client, event, source_user, target_user, message):
         
         await connector.execute(
             WAIFU_LIST_TABLE.update(
-                waifu_list_model.waifu_id == 197918569894379520,
+                waifu_list_model.waifu_id == source_user.id,
             ).values(
-                waifu_id = 635250226835488768,
+                waifu_id = target_user.id,
             )
         )
         
