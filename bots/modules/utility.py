@@ -484,8 +484,7 @@ async def add_guild_generic_field(client, guild, embed, even_if_empty):
 async def add_guild_info_field(client, guild, embed, even_if_empty):
     created_at = guild.created_at
     sections_parts = [
-        '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]\n'
-        '**Voice region**: ', guild.region.name,
+        '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]'
     ]
     
     features = guild.features
@@ -683,7 +682,7 @@ async def guild_(client, event,
 ):
     """Shows some information about the guild."""
     guild = event.guild
-    if guild.partial:
+    if (guild is None) or guild.partial:
         abort('I must be in the guild to execute this command.')
     
     embed = Embed(
