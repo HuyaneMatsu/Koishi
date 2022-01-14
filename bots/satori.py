@@ -43,9 +43,9 @@ async def invalid_command(client, message, command, content):
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.cannot_message_user, # dm disabled
-                            ):
+                    ERROR_CODES.missing_access, # client removed
+                    ERROR_CODES.cannot_message_user, # dm disabled
+                ):
                     return
             
             await client.events.error(client, 'invalid_command', err)
@@ -145,17 +145,22 @@ class auto_pyramid:
             return
         
         
-        for client_, count in zip(cycle(available_clients), chain(range(1,size),range(size,0,-1))):
+        for client_, count in zip(cycle(available_clients), chain(range(1, size),range(size, 0, -1))):
             await client_.message_create(channel, ' '.join(emoji.as_emoji for _ in range(count)))
     
     checks = checks.has_guild_permissions(manage_messages=True)
     
     async def description(command_context):
-        return Embed('auto-pyramid', (
-            'Creates a pyramid!\n'
-            f'Usage: `{command_context.prefix}auto-pyramid <emoji> <size>`'
-                ), color=COLOR__SATORI_HELP).add_footer(
-                'Guild only! You must have manage messages permission to use it.')
+        return Embed(
+            'auto-pyramid',
+            (
+                'Creates a pyramid!\n'
+                f'Usage: `{command_context.prefix}auto-pyramid <emoji> <size>`'
+            ),
+            color = COLOR__SATORI_HELP,
+        ).add_footer(
+            'Guild only! You must have manage messages permission to use it.',
+        )
 
 @Satori.commands.from_class
 class auto_pyramid_u:
@@ -214,11 +219,16 @@ class auto_pyramid_u:
     checks = checks.has_guild_permissions(manage_messages=True)
     
     async def description(command_context):
-        return Embed('auto-pyramid-u', (
-            'Creates a pyramid!\n'
-            f'Usage: `{command_context.prefix}auto-pyramid-u <emoji> <size>`'
-                ), color=COLOR__SATORI_HELP).add_footer(
-                'Guild only! You must have manage messages permission to use it.')
+        return Embed(
+            'auto-pyramid-u',
+            (
+                'Creates a pyramid!\n'
+                f'Usage: `{command_context.prefix}auto-pyramid-u <emoji> <size>`'
+            ),
+            color = COLOR__SATORI_HELP,
+        ).add_footer(
+            'Guild only! You must have manage messages permission to use it.',
+        )
 
 
 @Satori.commands.from_class
@@ -228,10 +238,14 @@ class reverse:
             await client.message_create(message, content[::-1], allowed_mentions=None)
     
     async def description(command_context):
-        return Embed('reverse', (
-            'Reverses your message\n'
-            f'Usage: `{command_context.prefix}reverse <content>`'
-                ), color=COLOR__SATORI_HELP)
+        return Embed(
+            'reverse',
+            (
+                'Reverses your message\n'
+                f'Usage: `{command_context.prefix}reverse <content>`'
+            ),
+            color = COLOR__SATORI_HELP,
+        )
 
 
 @Satori.commands.from_class
@@ -250,11 +264,16 @@ class shutdown:
     checks = checks.owner_only()
     
     async def description(command_context):
-        return Embed('shutdown', (
-            'Shuts the clients down, then stops the process.'
-            f'Usage  `{command_context.prefix}shutdown`'
-            ), color=COLOR__SATORI_HELP).add_footer(
-                'Owner only!')
+        return Embed(
+            'shutdown',
+            (
+                'Shuts the clients down, then stops the process.'
+                f'Usage  `{command_context.prefix}shutdown`'
+            ),
+            color = COLOR__SATORI_HELP,
+        ).add_footer(
+            'Owner only!',
+        )
 
 async def execute_description(command_context):
     return Embed(
@@ -275,13 +294,18 @@ async def execute_description(command_context):
             '\n'
             '... and many more ways.'
         ),
-        color = COLOR__SATORI_HELP
+        color = COLOR__SATORI_HELP,
     ).add_footer(
         'Owner only!',
     )
 
-Satori.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
-    checks=[checks.owner_only()])
+Satori.commands(
+    Interpreter(locals().copy()),
+    name = 'execute',
+    description = execute_description,
+    category = 'UTILITY',
+    checks = [checks.owner_only()],
+)
 
 @Satori.events
 async def shutdown(client):
