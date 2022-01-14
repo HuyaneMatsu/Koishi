@@ -92,10 +92,24 @@ def make_url(base, requested_tags, required_tags, banned_tags):
 
 def parse_xml(xml):
     soup = BeautifulSoup(xml, 'lxml')
-    return [
-        (post['file_url'], post['tags'])
-        for post in soup.find_all('post')
-    ]
+    
+    image_url_tag_pairs = []
+    
+    for post in soup.find_all('post'):
+        try:
+            file_url = post['file_url']
+        except KeyError:
+            continue
+        
+        try:
+            tags = post['tags']
+        except KeyError:
+            continue
+        
+        image_url_tag_pairs.append((file_url, tags))
+    
+    return image_url_tag_pairs
+
 
 def make_bad_status_embed(response, provider):
     return Embed(
