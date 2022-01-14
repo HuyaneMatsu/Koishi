@@ -143,6 +143,7 @@ async def message_me(client, event):
     except DiscordException as err:
         if err.code == ERROR_CODES.cannot_message_user:
             yield 'Pls turn on private messages from this server!'
+            return
         
         raise
     
