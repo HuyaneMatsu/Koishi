@@ -47,7 +47,7 @@ class DeleteRangeContext:
     
     
     def get_embed(self, state):
-        user = self.message_since.author.user
+        user = self.message_since.author
         
         if state == DELETE_RANGE_CONTEXT_STATE_NONE:
             title = 'Range delete context'
@@ -108,7 +108,7 @@ class DeleteRangeContext:
     target = 'message',
     show_for_invoking_user_only = True,
 )
-async def delete_since(
+async def delete_from(
     client,
     event,
     target,
