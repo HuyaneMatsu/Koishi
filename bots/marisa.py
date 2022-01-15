@@ -343,15 +343,15 @@ async def raffle(client, event,
         yield
         
         try:
-            message = client.message_get(channel, message_id)
+            message = await client.message_get(channel, message_id)
         except ConnectionError:
             # No internet
             return
         except DiscordException as err:
             if err.code in (
-                    ERROR_CODES.unknown_channel, # message deleted
-                    ERROR_CODES.unknown_message, # channel deleted
-                        ):
+                ERROR_CODES.unknown_channel, # message deleted
+                ERROR_CODES.unknown_message, # channel deleted
+            ):
                 # The message is already deleted.
                 abort('The referenced message is already yeeted.')
                 return
@@ -368,7 +368,7 @@ async def raffle(client, event,
     
     yield
     
-    users = await client.reaction_user_get_all(message)
+    users = await client.reaction_user_get_all(message, emoji)
     
     if users:
         user = choice(users)
@@ -816,6 +816,8 @@ now = perf_counter()
 @Marisa.events
 async def ready(client):
     print(perf_counter() - now)
+    Marisa.events.remove(ready)
+
 
 @Marisa.commands
 @checks.owner_only()
@@ -1024,6 +1026,54 @@ async def shutdown():
     await Marisa.stop()
 
 
+PING = Marisa.interactions(
+    None,
+    name = 'ping',
+    description = 'some random ping commands',
+    guild = GUILD__SUPPORT,
+)
+
+@PING.interactions
+async def no_wait():
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    delay = (perf_counter()-start)*1000.0
+    
+    yield f'{delay:.0f} ms'
+
+@PING.interactions(wait_for_acknowledgement=True)
+async def wait():
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    delay = (perf_counter()-start)*1000.0
+    
+    yield InteractionResponse(f'{delay:.0f} ms')
+
+@PING.interactions
+async def no_wait_full():
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    delay = (perf_counter()-start)*1000.0
+    
+    yield InteractionResponse(f'{delay:.0f} ms')
+    
+    delay = (perf_counter()-start)*1000.0
+    yield f'{delay:.0f} ms'
+
+@PING.interactions(wait_for_acknowledgement=True)
+async def wait_full():
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    delay = (perf_counter()-start)*1000.0
+    
+    yield f'{delay:.0f} ms'
+
+    delay = (perf_counter()-start)*1000.0
+    yield f'{delay:.0f} ms'
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
