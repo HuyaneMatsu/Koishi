@@ -2776,6 +2776,7 @@ def can_play_selected_stage(user_state):
     except KeyError:
         stage = STAGES_BY_ACCESS_ROUTE[(CHAPTER_REIMU_INDEX, 0, 0)]
         user_state.selected_stage_id = stage.id
+        return True
     
     stage_results = user_state.stage_results
     
