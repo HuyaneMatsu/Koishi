@@ -2771,7 +2771,12 @@ def can_play_selected_stage(user_state):
         Whether the selected chapter can be played.
     """
     selected_stage_id = user_state.selected_stage_id
-    stage = STAGES_BY_ID[selected_stage_id]
+    try:
+        stage = STAGES_BY_ID[selected_stage_id]
+    except KeyError:
+        stage = STAGES_BY_ACCESS_ROUTE[(CHAPTER_REIMU_INDEX, 0, 0)]
+        user_state.selected_stage_id = stage.id
+    
     stage_results = user_state.stage_results
     
     if stage.id in stage_results:
@@ -2814,7 +2819,11 @@ def get_selectable_stages(user_state):
     selectable_stages : `list` of (``StageSource``, `int`, `bool`)
         The selectable stages in a list of tuples. Contains 3 elements: `stage` , `best`, `is_selected`.
     """
-    selected_stage = STAGES_BY_ID[user_state.selected_stage_id]
+    try:
+        selected_stage = STAGES_BY_ID[user_state.selected_stage_id]
+    except KeyError:
+        selected_stage = STAGES_BY_ACCESS_ROUTE[(CHAPTER_REIMU_INDEX, 0, 0)]
+        user_state.selected_stage_id = selected_stage.id
     
     stages = []
     
@@ -2888,6 +2897,7 @@ def render_menu(user_state):
     except KeyError:
         # something went wrong
         chapter = CHAPTERS[CHAPTER_REIMU_INDEX]
+        user_state.selected_stage_id = STAGES_BY_ACCESS_ROUTE[(CHAPTER_REIMU_INDEX, 0, 0)].id
     else:
         chapter = stage.chapter
     
