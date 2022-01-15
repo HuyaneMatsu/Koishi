@@ -1892,7 +1892,9 @@ class UserState:
         """
         async with DB_ENGINE.connect() as connector:
             response = await connector.execute(
-                DS_V2_TABLE.select(ds_v2_model.user_id==user_id)
+                DS_V2_TABLE.select(
+                    ds_v2_model.user_id == user_id,
+                )
             )
             results = await response.fetchall()
             
@@ -1911,7 +1913,7 @@ class UserState:
                 
                 response = await connector.execute(
                     DS_V2_RESULT_TABLE.select(
-                        ds_v2_result_model.ds_v2_entry_id == entry_id
+                        ds_v2_result_model.user_id == user_id,
                     )
                 )
                 
@@ -2062,7 +2064,7 @@ class UserState:
                 if state_stage is None:
                     response = await connector.execute(
                         DS_V2_RESULT_TABLE.insert().values(
-                            ds_v2_entry_id = self.entry_id,
+                            user_id = self.user_id,
                             stage_id = stage_id,
                             best = steps,
                         ).returning(
@@ -2881,7 +2883,14 @@ def render_menu(user_state):
     components : `tuple` of ``Row`` of ``ComponentButton``
         The components of the menu.
     """
-    chapter = STAGES_BY_ID[user_state.selected_stage_id].chapter
+    try:
+        stage = STAGES_BY_ID[user_state.selected_stage_id]
+    except KeyError:
+        # something went wrong
+        chapter = CHAPTERS[CHAPTER_REIMU_INDEX]
+    else:
+        chapter = stage.chapter
+    
     embed = Embed(f'Chapter {chapter.id + 1}').add_thumbnail(chapter.emoji.url)
     
     if can_play_selected_stage(user_state):

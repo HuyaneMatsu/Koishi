@@ -141,7 +141,7 @@ else:
     class ds_v2_result_model(BASE):
         __tablename__   = 'DS_V2_RESULT'
         id              = Column(Int64, primary_key=True)
-        ds_v2_entry_id  = Column(Int64)
+        user_id         = Column(Int64)
         stage_id        = Column(Int64)
         best            = Column(Int32)
     

@@ -512,19 +512,19 @@ async def do_transfer(client, event, source_user, target_user, message):
                 
                 await connector.execute(
                     DS_V2_RESULT_TABLE.update(
-                        ds_v2_result_model.ds_v2_entry_id == source_user_ds_entry_id,
+                        ds_v2_result_model.user_id == source_user.id,
                     ).values(
-                        ds_v2_entry_id = target_user_ds_entry_id,
+                        user_id = target_user.id,
                     )
                 )
                 
             else:
                 response = await connector.execute(
                     DS_V2_RESULT_TABLE.delete().where(
-                        waifu_proposal_model.ds_v2_entry_id.in_(
+                        ds_v2_result_model.user_id.in_(
                             [
-                                target_user_ds_entry_id,
-                                source_user_ds_entry_id,
+                                target_user.id,
+                                source_user.id,
                             ]
                         ),
                     ).returning(
@@ -550,7 +550,7 @@ async def do_transfer(client, event, source_user, target_user, message):
                 
                 data = [
                     {
-                        'ds_v2_entry_id': target_user_ds_entry_id,
+                        'user_id': target_user.id,
                         'stage_id': stage_id,
                         'best': best,
                     } for stage_id, best in ds_result_relations.items()
