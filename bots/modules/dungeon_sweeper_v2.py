@@ -1920,10 +1920,12 @@ class UserState:
                 results = await response.fetchall()
                 
                 stage_results = {}
-                for result in results:
-                    stage_result = StageResult.from_entry(result)
-                    stage_results[stage_result.stage_id] = stage_result
-                
+                if results:
+                    for result in results:
+                        stage_result = StageResult.from_entry(result)
+                        stage_results[stage_result.stage_id] = stage_result
+                else:
+                    selected_stage_id = CHAPTERS[0].difficulties[0][0].id
                 
                 if (entry_id is not None):
                     await connector.execute(
@@ -2778,6 +2780,9 @@ def can_play_selected_stage(user_state):
         user_state.selected_stage_id = stage.id
         return True
     
+    if stage.chapter_index == CHAPTER_REIMU_INDEX:
+        return True
+    
     stage_results = user_state.stage_results
     
     if stage.id in stage_results:
@@ -2906,6 +2911,8 @@ def render_menu(user_state):
     
     if can_play_selected_stage(user_state):
         get_selectable = get_selectable_stages(user_state)
+        color = DIFFICULTY_COLORS[0]
+        
         for stage, best, is_selected in get_selectable:
             difficulty_name = DIFFICULTY_NAMES.get(stage.difficulty_index, '???')
             field_name = f'{difficulty_name} level {stage.stage_index + 1}'
