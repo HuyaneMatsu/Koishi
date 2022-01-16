@@ -662,10 +662,43 @@ async def edit_(client, event,
     yield InteractionResponse(embed=embed, message=message, components=None)
 
 
+def get_month_keys():
+    now = datetime.utcnow()
+    year = now.year
+    month = now.month
+    
+    month_keys = [(year, month)]
+    for _ in range(12):
+        month -= 1
+        if month == 0:
+            month = 12
+            year -= 1
+        
+        month_keys.append((year, month))
+    
+    month_keys.reverse()
+    return month_keys
+
+
+MONTHS = {
+    1: 'jan',
+    2: 'feb',
+    3: 'mar',
+    4: 'apr',
+    5: 'may',
+    6: 'jun',
+    7: 'jul',
+    8: 'aug',
+    9: 'sep',
+    10: 'oct',
+    11: 'nov',
+    12: 'dec',
+}
+
 @STICKER_COMMANDS.interactions
 async def user_sticker_compare(
-    raw_sticker_1: ('str', 'Pick an sticker', 'sticker-1'),
-    raw_sticker_2: ('str', 'Pick an sticker', 'sticker-2'),
+    raw_sticker_1: ('str', 'Pick a sticker', 'sticker-1'),
+    raw_sticker_2: ('str', 'Pick a sticker', 'sticker-2'),
 ):
     """Compares the two stickers or something, smh smh."""
     sticker_1 = GUILD__SUPPORT.get_sticker_like(raw_sticker_1)
@@ -683,60 +716,100 @@ async def user_sticker_compare(
                 [
                     sticker_counter_model.sticker_id,
                     alchemy_function.count(sticker_counter_model.sticker_id),
-                    alchemy_function.month(sticker_counter_model.timestamp).label('month'),
+                    alchemy_function.date_part('year', sticker_counter_model.timestamp).label('year'),
+                    alchemy_function.date_part('month', sticker_counter_model.timestamp).label('month'),
                 ],
             ).where(
                 and_(
-                    sticker_counter_model.sticker_id in [sticker_1.id, sticker_2.id],
+                    sticker_counter_model.sticker_id.in_([sticker_1.id, sticker_2.id]),
                     sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * 12,
                 )
             ).group_by(
                 sticker_counter_model.sticker_id,
                 'month',
+                'year',
             )
         )
         
         results = await response.fetchall()
     
-    unique_months = set()
     sticker_1_results_by_month = {}
     sticker_2_results_by_month = {}
     
-    for sticker_id, count, month in results:
-        unique_months.add(month)
-        
+    for sticker_id, count, year, month in results:
         if sticker_id == sticker_1.id:
             container = sticker_1_results_by_month
         else:
             container = sticker_2_results_by_month
         
-        container[month] = count
+        container[(int(year), int(month))] = count
     
-    unique_months = sorted(unique_months)
-    
+    month_keys = get_month_keys()
     
     data = to_json({
         'type': 'line',
         'data': {
-            'labels': [str(month) for month in unique_months],
+            'labels': [f'{year} {MONTHS[month]}' for year, month in month_keys],
             'datasets': [
                 {
                     'label': sticker_1.name,
-                    'data': [sticker_1_results_by_month.get(month, 0) for month in unique_months],
+                    'data': [sticker_1_results_by_month.get(month, 0) for month in month_keys],
                     'borderColor': 'green'
                 }, {
                     'label': sticker_2.name,
-                    'data': [sticker_2_results_by_month.get(month, 0) for month in unique_months],
+                    'data': [sticker_2_results_by_month.get(month, 0) for month in month_keys],
                     'borderColor': 'red'
                 }
-            ]
-        }
+            ],
+        },
+        'options': {
+            'legend': {
+                'labels': {
+                    'fontColor': 'white',
+                },
+            },
+            'scales': {
+                'yAxes': [
+                    {
+                        'ticks': {
+                            'beginAtZero': 'true',
+                            'fontColor': 'white',
+                            'fontStyle': 'bold',
+                        },
+                        'gridLines': {
+                            'color': 'white',
+                        },
+                    },
+                ],
+                'xAxes': [
+                    {
+                        'ticks': {
+                            'fontColor': 'white',
+                            'fontStyle': 'bold',
+                        },
+                        'gridLines': {
+                            'color': 'white',
+                        },
+                    },
+                ],
+            },
+        },
     })
     
-    chart_url = f'https://quickchart.io/chart?c={quote(data)}'
+    chart_url = f'https://quickchart.io/chart?width=500&height=300&c={quote(data)}'
     
     return Embed(
         'Sticker comparison'
     ).add_image(
         chart_url,
     )
+
+@user_sticker_compare.autocomplete('raw_sticker_1', 'raw_sticker_2')
+async def autocomplete_sticker_name(event, value):
+    guild_stickers = GUILD__SUPPORT.stickers
+    
+    if value is None:
+        return sorted(sticker.name for sticker in guild_stickers.values())
+    
+    value = value.casefold()
+    return sorted(sticker.name for sticker in guild_stickers.values() if value in sticker.name.casefold())

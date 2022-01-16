@@ -10,7 +10,6 @@ from sqlalchemy.sql import select
 
 from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, user_common_model, USER_COMMON_TABLE, \
     ds_v2_result_model, DS_V2_RESULT_TABLE, get_create_common_user_expression
-
 from bot_utils.constants import PATH__KOISHI
 
 DUNGEON_SWEEPER_COLOR = Color(0xa000c4)
@@ -26,6 +25,7 @@ STAGE_STEP_MULTI_STEP_BUTTON = 10
 EMOJI_KOISHI_WAVE = Emoji.precreate(648173118392762449)
 
 GUI_TIMEOUT = 600.0
+MAX_RENDER_EMOJI = 150
 
 GUI_STATE_NONE = 0
 GUI_STATE_READY = 1
@@ -2541,13 +2541,13 @@ class GameState:
         limit = len(map_)
         step = self.stage.x_size
         
-        if limit <= 75:
+        if limit <= MAX_RENDER_EMOJI:
             start = 0
             shift = 0
         else:
             step_count = limit // step
             if step_count < step:
-                if (step_count * (step - 2)) <= 75:
+                if (step_count * (step - 2)) <= MAX_RENDER_EMOJI:
                     start = 1
                     step -= 2
                     shift = 2
@@ -2557,7 +2557,7 @@ class GameState:
                     step -= 2
                     shift = 2
             else:
-                if ((step_count - 2) * step) <= 75:
+                if ((step_count - 2) * step) <= MAX_RENDER_EMOJI:
                     start = step
                     limit -= step
                     shift = 0
@@ -2923,7 +2923,7 @@ def render_menu(user_state):
                 field_value = f'rating {rating}; steps : {best}'
             
             if is_selected:
-                field_name = f'**{field_name}**'
+                field_name = f'**{field_name} <--**'
                 field_value = f'**{field_value}**'
                 color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
             
