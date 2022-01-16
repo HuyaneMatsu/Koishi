@@ -668,7 +668,7 @@ def get_month_keys():
     month = now.month
     
     month_keys = [(year, month)]
-    for _ in range(12):
+    for _ in range(11):
         month -= 1
         if month == 0:
             month = 12
