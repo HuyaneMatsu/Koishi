@@ -1,10 +1,24 @@
 import re
+from functools import partial as partial_func
+
 from re import escape as re_escape
-from hata import Client, ChannelThread, KOKORO
-from scarletio import Task, WaitTillAll
+from hata import Client, ChannelThread, KOKORO, Permission
+from scarletio import Task, WaitTillAll, BUILTIN_EMOJIS
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR
+from hata.discord.utils import sanitise_mention_escaper
 
 Satori : Client
+Koishi: Client
+
+_KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
+_KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
+_KOISHI_OMAE_RP = re.compile('omae wa mou', re.I)
+
+PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
+    send_messages = True,
+    send_messages_in_threads = True,
+)
+
 
 class RegexPart:
     __slots__ = ('part', )
@@ -196,11 +210,21 @@ class Replacer:
 
 @Satori.events
 async def message_create(client, message):
-    await filter(client, message)
+    if message.guild_id != GUILD__SUPPORT.id:
+        return
+    
+    if await filter_content(client, message):
+        return
+    
+    await alter_content(client, message)
+
 
 @Satori.events
 async def message_edit(client, message, old_attributes):
-    await filter(client, message)
+    if message.guild_id != GUILD__SUPPORT.id:
+        return
+    
+    await filter_content(client, message)
 
 
 async def replace_coroutine(client, message, content):
@@ -228,23 +252,20 @@ async def replace_coroutine(client, message, content):
     )
 
 
-async def filter(client, message):
-    if message.guild_id != GUILD__SUPPORT.id:
-        return
-    
+async def filter_content(client, message):
     user = message.author
     if user.is_bot or user.has_role(ROLE__SUPPORT__MODERATOR):
-        return
+        return False
     
     content = message.content
     if (content is None):
-        return
+        return False
     
     replacer = Replacer()
     content = FILTER.sub(replacer, content)
     
     if not replacer.called:
-        return
+        return False
     
     delete_task = Task(client.message_delete(message), KOKORO)
     replace_task = Task(replace_coroutine(client, message, content), KOKORO)
@@ -259,3 +280,60 @@ async def filter(client, message):
         replace_task.result()
     except ConnectionError:
         pass
+    
+    return True
+
+
+
+async def alter_content(client, message):
+    if (message.referenced_message is not None):
+        return False
+    
+    if not message.channel.cached_permissions_for(Koishi) & PERMISSION_MASK_MESSAGING:
+        return False
+    
+    if message.author.is_bot:
+        return False
+    
+    content = message.content
+    if content is None:
+        return False
+    
+    user_mentions = message.user_mentions
+    if (user_mentions is not None) and (Koishi in user_mentions):
+        author = message.author
+        m1 = author.mention
+        m2 = Koishi.mention
+        m3 = author.mention_nick
+        m4 = Koishi.mention_nick
+        replace = {
+            '@everyone'   : '@\u200beveryone',
+            '@here'       : '@\u200bhere',
+            re_escape(m1) : m2,
+            re_escape(m2) : m1,
+            re_escape(m3) : m4,
+            re_escape(m4) : m3,
+        }
+        pattern = re.compile('|'.join(replace.keys()))
+        result = pattern.sub(partial_func(sanitise_mention_escaper, replace), content)
+        await Koishi.message_create(message.channel, result, allowed_mentions=[author])
+        return True
+        
+    if message.channel.cached_permissions_for(Koishi).can_add_reactions and (_KOISHI_NOU_RP.match(content) is not None):
+        for value in 'nou':
+            emoji = BUILTIN_EMOJIS[f'regional_indicator_{value}']
+            await Koishi.reaction_add(message, emoji)
+        return True
+    
+    matched = _KOISHI_OWO_RP.fullmatch(content,)
+    if (matched is not None):
+        text = f'{content[0].upper()}{content[1].lower()}{content[2].upper()}'
+    
+    elif (_KOISHI_OMAE_RP.match(content) is not None):
+        text = 'NANI?'
+    
+    else:
+        return False
+    
+    await Koishi.message_create(message.channel, text)
+    return True
