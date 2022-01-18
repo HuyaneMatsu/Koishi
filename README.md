@@ -132,3 +132,14 @@ be forgotten by everyone. That will make her sad.**
 - The guild has 50+ bots.
 
 - Discord client is derping, give it a restart.
+
+<h1></h1>
+
+<h3 align="center">
+    Contribution
+</h3>
+
+If you want to contribute fork the repo and create a pull request.
+
+You have no clue about coding, but still want to contribute? Open an
+[issue](https://github.com/HuyaneMatsu/Koishi/issues) with all your crazy ideas!
