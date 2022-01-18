@@ -695,20 +695,50 @@ MONTHS = {
     12: 'dec',
 }
 
+def create_sticker_graph_line_data_set(sticker, results_by_month, month_keys):
+    return {
+        'label': sticker.name,
+        'data': [results_by_month.get(month, 0) for month in month_keys],
+        'borderColor': (sticker.id >> 22) & 0xffffff
+    }
+
+
 @STICKER_COMMANDS.interactions
 async def user_sticker_compare(
     raw_sticker_1: ('str', 'Pick a sticker', 'sticker-1'),
-    raw_sticker_2: ('str', 'Pick a sticker', 'sticker-2'),
+    raw_sticker_2: ('str', 'Pick a sticker', 'sticker-2') = None,
+    raw_sticker_3: ('str', 'Pick a sticker', 'sticker-3') = None,
+    raw_sticker_4: ('str', 'Pick a sticker', 'sticker-4') = None,
+    raw_sticker_5: ('str', 'Pick a sticker', 'sticker-5') = None,
+    raw_sticker_6: ('str', 'Pick a sticker', 'sticker-6') = None,
+    raw_sticker_7: ('str', 'Pick a sticker', 'sticker-7') = None,
+    raw_sticker_8: ('str', 'Pick a sticker', 'sticker-8') = None,
+    raw_sticker_9: ('str', 'Pick a sticker', 'sticker-9') = None,
+    raw_sticker_10: ('str', 'Pick a sticker', 'sticker-10') = None,
 ):
     """Compares the two stickers or something, smh smh."""
-    sticker_1 = GUILD__SUPPORT.get_sticker_like(raw_sticker_1)
-    if sticker_1 is None:
-        abort(f'There is not sticker with name `{raw_sticker_1}` in the guild.')
+    stickers = set()
     
-    sticker_2 = GUILD__SUPPORT.get_sticker_like(raw_sticker_2)
-    if sticker_2 is None:
-        abort(f'There is not sticker with name `{raw_sticker_2}` in the guild.')
+    for raw_sticker in (
+        raw_sticker_1, raw_sticker_2, raw_sticker_3, raw_sticker_4, raw_sticker_5, raw_sticker_6, raw_sticker_7,
+        raw_sticker_8, raw_sticker_9, raw_sticker_10,
+    ):
+        if raw_sticker is None:
+            continue
+        
+        sticker = GUILD__SUPPORT.get_sticker_like(raw_sticker)
+        if sticker is None:
+            
+            # Slash command parameters have no length limit
+            if len(raw_sticker) > 100:
+                raw_sticker = raw_sticker[:100]
+            
+            abort(f'There is not sticker with name `{raw_sticker}` in the guild.')
+            return # this makes the linters stop crying
+        
+        stickers.add(sticker)
     
+    stickers = sorted(stickers)
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -721,7 +751,7 @@ async def user_sticker_compare(
                 ],
             ).where(
                 and_(
-                    sticker_counter_model.sticker_id.in_([sticker_1.id, sticker_2.id]),
+                    sticker_counter_model.sticker_id.in_([sticker.id for sticker in stickers]),
                     sticker_counter_model.timestamp > datetime.utcnow() - RELATIVE_MONTH * 12,
                 )
             ).group_by(
@@ -733,16 +763,10 @@ async def user_sticker_compare(
         
         results = await response.fetchall()
     
-    sticker_1_results_by_month = {}
-    sticker_2_results_by_month = {}
+    sticker_id_to_results_by_month = {sticker.id: {} for sticker in stickers}
     
     for sticker_id, count, year, month in results:
-        if sticker_id == sticker_1.id:
-            container = sticker_1_results_by_month
-        else:
-            container = sticker_2_results_by_month
-        
-        container[(int(year), int(month))] = count
+        sticker_id_to_results_by_month[sticker_id][(int(year), int(month))] = count
     
     month_keys = get_month_keys()
     
@@ -751,15 +775,8 @@ async def user_sticker_compare(
         'data': {
             'labels': [f'{year} {MONTHS[month]}' for year, month in month_keys],
             'datasets': [
-                {
-                    'label': sticker_1.name,
-                    'data': [sticker_1_results_by_month.get(month, 0) for month in month_keys],
-                    'borderColor': 'green'
-                }, {
-                    'label': sticker_2.name,
-                    'data': [sticker_2_results_by_month.get(month, 0) for month in month_keys],
-                    'borderColor': 'red'
-                }
+                create_sticker_graph_line_data_set(sticker, sticker_id_to_results_by_month[sticker.id], month_keys)
+                for sticker in stickers
             ],
         },
         'options': {
@@ -804,12 +821,76 @@ async def user_sticker_compare(
         chart_url,
     )
 
-@user_sticker_compare.autocomplete('raw_sticker_1', 'raw_sticker_2')
-async def autocomplete_sticker_name(event, value):
+@user_sticker_compare.autocomplete('raw_sticker_1')
+async def autocomplete_sticker_name_except_1(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-1')
+
+@user_sticker_compare.autocomplete('raw_sticker_2')
+async def autocomplete_sticker_name_except_2(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-2')
+
+@user_sticker_compare.autocomplete('raw_sticker_3')
+async def autocomplete_sticker_name_except_3(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-3')
+
+@user_sticker_compare.autocomplete('raw_sticker_4')
+async def autocomplete_sticker_name_except_4(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-4')
+
+@user_sticker_compare.autocomplete('raw_sticker_5')
+async def autocomplete_sticker_name_except_5(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-5')
+
+@user_sticker_compare.autocomplete('raw_sticker_6')
+async def autocomplete_sticker_name_except_6(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-6')
+
+@user_sticker_compare.autocomplete('raw_sticker_7')
+async def autocomplete_sticker_name_except_7(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-7')
+
+@user_sticker_compare.autocomplete('raw_sticker_8')
+async def autocomplete_sticker_name_except_8(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-8')
+
+@user_sticker_compare.autocomplete('raw_sticker_9')
+async def autocomplete_sticker_name_except_9(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-9')
+
+@user_sticker_compare.autocomplete('raw_sticker_10')
+async def autocomplete_sticker_name_except_10(event, value):
+    return get_autocomplete_sticker_names_except(event, value, 'sticker-10')
+
+
+def get_autocomplete_sticker_names_except(event, value, except_):
+    stickers_except = set()
+    
+    for parameter_name in (
+        'sticker-1', 'sticker-2', 'sticker-3', 'sticker-4', 'sticker-5', 'sticker-6', 'sticker-7', 'sticker-8',
+        'sticker-9', 'sticker-10'
+    ):
+        if parameter_name == except_:
+            continue
+        
+        raw_sticker = event.interaction.get_value_of(parameter_name)
+        sticker = GUILD__SUPPORT.get_sticker_like(raw_sticker)
+        if (sticker is not None):
+            stickers_except.add(sticker)
+    
     guild_stickers = GUILD__SUPPORT.stickers
     
     if value is None:
-        return sorted(sticker.name for sticker in guild_stickers.values())
+        return sorted(
+            sticker.name for sticker in guild_stickers.values()
+            if (sticker not in stickers_except)
+        )
     
     value = value.casefold()
-    return sorted(sticker.name for sticker in guild_stickers.values() if value in sticker.name.casefold())
+    
+    return sorted(
+        sticker.name for sticker in guild_stickers.values()
+        if (
+            (sticker not in stickers_except) and
+            (value in sticker.name.casefold())
+        )
+    )

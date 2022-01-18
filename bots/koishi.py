@@ -46,7 +46,7 @@ async def error(client, name, err):
 
 # Add the event payload analyzer to all client's events.
 ALL = ClientWrapper()
-@ALL.events()
+@ALL.events
 async def unknown_dispatch_event(client, event_name, payload):
     guess_event_payload_structure(event_name, payload)
 
