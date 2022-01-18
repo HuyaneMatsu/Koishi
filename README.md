@@ -99,9 +99,10 @@ And much more!
     Support server only commands
 </h3>
 
-`add_to_move_group` • `all-users` • `ask` • `award` • `bozosort` • `crywolf` • `daily-event` • `docs-search` • `emoji`
-• `events` • `extension` • `github-profile` • `heart-event` • `in-role` • `latest-users` • `markdown` • `paste` • `raw`
-• `roles` • `rules` • `sticker` • `take` • `transfer` • `move_message` • `move_messages` • `voice`
+`add-to-move-group` • `all-users` • `ask` • `award` • `bozosort` • `crywolf` • `daily-event` • `delete-from` •
+`delete-till` • `docs-search` • `emoji` • `events` • `extension` • `github-profile` • `heart-event` • `in-role` •
+`latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules` • `sticker` • `take` • `transfer` • `move-message` •
+`move-messages` • `voice`
 
 <h1></h1>
 

@@ -160,6 +160,10 @@ async def delete_till(
         if before < after:
             before, after = after, before
         
+        # This will fix not including issues
+        before += 1
+        after -= 1
+        
         await client.multi_client_message_delete_sequence(
             event.channel,
             after = after,
