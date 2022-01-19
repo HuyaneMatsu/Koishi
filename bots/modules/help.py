@@ -7,7 +7,7 @@ from time import perf_counter
 from random import choice, random
 
 from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elapsed_time, BUILTIN_EMOJIS, CHANNELS, \
-    EMOJIS, __package__, MESSAGES, ROLES, STICKERS
+    EMOJIS, __package__, MESSAGES, ROLES, STICKERS, InteractionType
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.slash import InteractionResponse, Button, Row, abort
 
@@ -19,6 +19,19 @@ from bot_utils.constants import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__SUPPOR
 from bot_utils.cpu_info import CpuUsage, PROCESS
 
 SLASH_CLIENT: Client
+
+@SLASH_CLIENT.events(name='interaction_create')
+class interaction_counter:
+    __slots__ = ('application_command', 'total')
+    
+    def __init__(self):
+        self.application_command = 0
+        self.total = 0
+    
+    async def __call__(self, client, interaction_event):
+        self.application_command += (interaction_event.type is InteractionType.application_command)
+        self.total += 1
+
 
 HATA_DOCS_BASE_URL = 'https://www.astil.dev/project/hata/docs/'
 HATA_DOCS_SEARCH_API = HATA_DOCS_BASE_URL + 'api/v1/search'
@@ -283,6 +296,7 @@ KOISHI_JOKES = (
     ('Orin', 'dancing'),
     ('Satori', 'why.mp4'),
     ('KFC', 'Koishi Fried Chicken'),
+    ('Koishi', '"Not thinking is fun!"'),
 )
 
 
@@ -399,10 +413,18 @@ async def render_about_generic(client, event):
         ),
         inline = True,
     ).add_field(
-        'Client count',
+        'Used commands',
         (
             f'```\n'
-            f'{len(CLIENTS)}\n'
+            f'{interaction_counter.application_command}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Total interactions',
+        (
+            f'```\n'
+            f'{interaction_counter.total}\n'
             f'```'
         ),
         inline = True,
@@ -473,6 +495,14 @@ async def render_about_cache(client, event):
         (
             f'```\n'
             f'{len(USERS)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Clients',
+        (
+            f'```\n'
+            f'{len(CLIENTS)}\n'
             f'```'
         ),
         inline = True,
