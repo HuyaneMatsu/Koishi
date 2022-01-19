@@ -44,7 +44,33 @@ def create_user_embed(user, guild_profile, join):
     
     if join:
         description_parts.append('\nDifference: ')
-        description_parts.append(elapsed_time(relativedelta(created_at, joined_at)))
+        
+        if joined_at is None:
+            difference_string = 'N/A'
+        else:
+            difference_string = elapsed_time(relativedelta(created_at, joined_at))
+        
+        description_parts.append(difference_string)
+    
+    else:
+        description_parts.append('\nCreated-joined difference: ')
+        
+        if joined_at is None:
+            difference_string = 'N/A'
+        else:
+            difference_string = elapsed_time(relativedelta(created_at, joined_at))
+        
+        description_parts.append(difference_string)
+    
+        description_parts.append('\nJoined-left difference: ')
+        
+        if joined_at is None:
+            difference_string = 'N/A'
+        else:
+            difference_string = elapsed_time(relativedelta(joined_at))
+        
+        description_parts.append(difference_string)
+    
     
     description = ''.join(description_parts)
     description_parts = None
