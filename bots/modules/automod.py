@@ -1,13 +1,14 @@
 import re
 from functools import partial as partial_func
+from datetime import timedelta
 
 from re import escape as re_escape
-from hata import Client, ChannelThread, KOKORO, Permission
-from scarletio import Task, WaitTillAll, BUILTIN_EMOJIS
+from hata import Client, ChannelThread, KOKORO, Permission, BUILTIN_EMOJIS, Emoji, Sticker
+from scarletio import Task, WaitTillAll
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR
 from hata.discord.utils import sanitise_mention_escaper
 
-Satori : Client
+Satori: Client
 Koishi: Client
 
 _KOISHI_NOU_RP = re.compile(r'n+\s*o+\s*u+', re.I)
@@ -19,6 +20,9 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
+EMOJI__REIMU_HAMMER = Emoji.precreate(690550890045898812)
+EMOJI__YUUKA_REMBER = Emoji.precreate(856244196129243146)
+STICKER__VANILLA_WOKE = Sticker.precretae(6)
 
 class RegexPart:
     __slots__ = ('part', )
@@ -252,6 +256,105 @@ async def replace_coroutine(client, message, content):
     )
 
 
+FILTER_HITS = {}
+FILTER_HIT_TIMEOUT = 1800
+
+FILTER_HIT_LEVEL_3_TIMEOUT = timedelta(minutes=40)
+FILTER_HIT_LEVEL_4_TIMEOUT = timedelta(hours=2)
+FILTER_HIT_LEVEL_5_TIMEOUT = timedelta(days=28)
+
+ESCALATION_MAX = 27
+
+
+def filter_escalation(user_id):
+    try:
+        escalation_count, total_escalation_streak = FILTER_HITS[user_id]
+    except KeyError:
+        escalation_count = 1
+        total_escalation_streak = 1
+        
+        KOKORO.call_later(FILTER_HIT_TIMEOUT, automatic_filter_deescalation, user_id)
+    else:
+        escalation_count += 1
+        total_escalation_streak += 1
+        
+        if escalation_count == ESCALATION_MAX:
+            # The person is timed out forever, we can remove them
+            del FILTER_HITS[user_id]
+    
+    FILTER_HITS[user_id] = (escalation_count, total_escalation_streak)
+    
+    return total_escalation_streak
+
+
+def automatic_filter_deescalation(user_id):
+    escalation_count, total_escalation_streak = FILTER_HITS.pop(user_id, 0)
+    if escalation_count > 1:
+        escalation_count -= 1
+        
+        FILTER_HITS[user_id] = (escalation_count, total_escalation_streak)
+        KOKORO.call_later(FILTER_HIT_TIMEOUT, automatic_filter_deescalation, user_id)
+
+
+async def notify_escalation_level_1(message):
+    await Koishi.message_create(message.channel, f'{message.author:m} please stop triggering my auto mod filter.')
+
+
+async def notify_escalation_level_2(message):
+    await Koishi.message_create(message.channel, EMOJI__REIMU_HAMMER.url)
+
+
+async def notify_escalation_level_3(message):
+    await Koishi.user_guild_profile_edit(
+        message.guild_id,
+        message.author,
+        timed_out_until = message.created_at + FILTER_HIT_LEVEL_3_TIMEOUT,
+        reason = 'auto mod filter level 3',
+    )
+    
+    await Koishi.message_create(
+        message.channel,
+        f'{message.author:m} you hit my auto mod filter multiple times, enjoy a short timeout {EMOJI__REIMU_HAMMER}'
+    )
+
+
+async def notify_escalation_level_4(message):
+    await Koishi.user_guild_profile_edit(
+        message.guild_id,
+        message.author,
+        timed_out_until = message.created_at + FILTER_HIT_LEVEL_4_TIMEOUT,
+        reason = 'auto mod filter level 4',
+    )
+    
+    await Koishi.message_create(
+        message.channel,
+        f'{message.author:m} please rember happy day {EMOJI__YUUKA_REMBER}.'
+    )
+
+async def notify_escalation_level_5(message):
+    await Koishi.user_guild_profile_edit(
+        message.guild_id,
+        message.author,
+        timed_out_until = message.created_at + FILTER_HIT_LEVEL_5_TIMEOUT,
+        reason = 'auto mod filter level 5',
+    )
+    
+    await Koishi.message_create(
+        message.channel,
+        message.author.mention,
+        sticker = STICKER__VANILLA_WOKE,
+    )
+
+ESCALATION_NOTIFIERS = {
+    6: notify_escalation_level_1,
+    12: notify_escalation_level_2,
+    15: notify_escalation_level_3,
+    21: notify_escalation_level_4,
+    ESCALATION_MAX: notify_escalation_level_5
+    
+}
+
+
 async def filter_content(client, message):
     user = message.author
     if user.is_bot or user.has_role(ROLE__SUPPORT__MODERATOR):
@@ -267,6 +370,8 @@ async def filter_content(client, message):
     if not replacer.called:
         return False
     
+    total_escalation_streak = filter_escalation(user.id)
+    
     delete_task = Task(client.message_delete(message), KOKORO)
     replace_task = Task(replace_coroutine(client, message, content), KOKORO)
     await WaitTillAll([delete_task, replace_task], KOKORO)
@@ -280,6 +385,13 @@ async def filter_content(client, message):
         replace_task.result()
     except ConnectionError:
         pass
+    
+    escalation_notifier = ESCALATION_NOTIFIERS.get(total_escalation_streak, None)
+    if (total_escalation_streak is not None):
+        try:
+            await escalation_notifier(message)
+        except ConnectionError:
+            pass
     
     return True
 
@@ -323,6 +435,7 @@ async def alter_content(client, message):
         for value in 'nou':
             emoji = BUILTIN_EMOJIS[f'regional_indicator_{value}']
             await Koishi.reaction_add(message, emoji)
+        
         return True
     
     matched = _KOISHI_OWO_RP.fullmatch(content,)
