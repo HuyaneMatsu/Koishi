@@ -45,14 +45,14 @@ def teardown(lib):
 def parse_date_to_datetime(data):
     *date_tuple, tz = _parsedate_tz(data)
     if tz is None:
-        return datetime( * date_tuple[:6])
-    return datetime( * date_tuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
+        return datetime(*date_tuple[:6])
+    return datetime(*date_tuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
 
 def parse_header_rate_limit(headers):
-    delay1 = ( \
+    delay1 = (
         datetime.fromtimestamp(float(headers[RATE_LIMIT_RESET]), timezone.utc)
-        -parse_date_to_datetime(headers[DATE])
-            ).total_seconds()
+        - parse_date_to_datetime(headers[DATE])
+    ).total_seconds()
     delay2=float(headers[RATE_LIMIT_RESET_AFTER])
     return (delay1 if delay1 < delay2 else delay2)
 
@@ -112,19 +112,19 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                 buffer.write(f'reset after : {value}\n')
     
             
-            if 199<status<305:
+            if 199 < status < 305:
                 if response_headers.get('X-Ratelimit-Remaining', '1') == '0':
                     buffer.write(f'reached 0\n try again after {delay}\n',)
                 return response_data
             
-            if status==429:
+            if status == 429:
                 retry_after=response_data['retry_after']
                 buffer.write(f'RATE LIMITED\nretry after : {retry_after}\n',)
                 await sleep(retry_after,self.loop)
                 continue
             
-            elif status==500 or status==502:
-                await sleep(10./try_again + 1.,self.loop)
+            elif status == 500 or status == 502:
+                await sleep(10.0 / try_again + 1.0, self.loop)
                 continue
             
             raise DiscordException(response, response_data, data)
