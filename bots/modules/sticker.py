@@ -873,6 +873,9 @@ def get_autocomplete_sticker_names_except(event, value, except_):
             continue
         
         raw_sticker = event.interaction.get_value_of(parameter_name)
+        if raw_sticker is None:
+            continue
+        
         sticker = GUILD__SUPPORT.get_sticker_like(raw_sticker)
         if (sticker is not None):
             stickers_except.add(sticker)
