@@ -388,6 +388,11 @@ async def user_(client, event,
         else:
             color = user.avatar_hash & 0xFFFFFF
         embed.color = color
+        
+        components = Row(
+            Button('Show avatar', custom_id=f'user_info.{user.id}.avatar'),
+            Button('Show banner', custom_id=f'user_info.{user.id}.banner'),
+        )
     
     else:
         embed.color = user.color_at(guild)
@@ -417,16 +422,17 @@ async def user_(client, event,
         
         text.append(f'Roles: {roles}')
         embed.add_field('In guild profile', '\n'.join(text))
-    
-    components = Row(
-        Button('Show avatar', custom_id=f'user_info.{user.id}.avatar'),
-        Button('Show banner', custom_id=f'user_info.{user.id}.banner'),
-    )
+        
+        components = Row(
+            Button('Show avatar', custom_id=f'user_info.{user.id}.avatar'),
+            Button('Show in-guild avatar', custom_id=f'user_info.{user.id}.in-guild avatar'),
+            Button('Show banner', custom_id=f'user_info.{user.id}.banner'),
+        )
     
     return InteractionResponse(embed=embed, components=components)
 
 
-@SLASH_CLIENT.interactions(custom_id=re.compile('user_info\.(\d+)\.(avatar|banner)'))
+@SLASH_CLIENT.interactions(custom_id=re.compile('user_info\.(\d+)\.(avatar|banner|in-guild avatar)'))
 async def show_user_icon(client, event, user_id, icon_type):
     user_id = int(user_id)
     
@@ -445,10 +451,17 @@ async def show_user_icon(client, event, user_id, icon_type):
     elif icon_type == 'banner':
         icon_url = user.banner_url_as(size=4096)
         
-        if user.banner:
-            color = user.banner_hash & 0xffffff
-        else:
+        if icon_url is None:
             color = None
+        else:
+            color = user.banner_hash & 0xffffff
+    
+    elif icon_type == 'in-guild avatar':
+        icon_url = user.avatar_url_for_as(event.guild_id, size=4096)
+        if icon_url is None:
+            color = None
+        else:
+            color = user.get_guild_profile_for(event.guild_id).avatar_hash & 0xffffff
     
     else:
         icon_url = None

@@ -2,7 +2,7 @@ from functools import partial as partial_func
 from datetime import datetime, timedelta
 from scarletio import future_or_timeout, Task, to_json
 from scarletio.web_common import quote
-from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, KOKORO, is_url
+from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, KOKORO, is_url, Color
 from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row, \
     set_permission
 from bot_utils.models import DB_ENGINE, sticker_counter_model, STICKER_COUNTER_TABLE
@@ -696,10 +696,13 @@ MONTHS = {
 }
 
 def create_sticker_graph_line_data_set(sticker, results_by_month, month_keys):
+    color = Color((sticker.id >> 22) & 0xffffff).as_html
     return {
         'label': sticker.name,
         'data': [results_by_month.get(month, 0) for month in month_keys],
-        'borderColor': (sticker.id >> 22) & 0xffffff
+        'borderColor': color,
+        'backgroundColor': color,
+        'fill': False,
     }
 
 

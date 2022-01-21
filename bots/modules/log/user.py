@@ -67,7 +67,7 @@ def create_user_embed(user, guild_profile, join):
         if joined_at is None:
             difference_string = 'N/A'
         else:
-            difference_string = elapsed_time(relativedelta(joined_at))
+            difference_string = elapsed_time(joined_at)
         
         description_parts.append(difference_string)
     
