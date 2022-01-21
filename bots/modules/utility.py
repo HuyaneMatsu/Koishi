@@ -1,4 +1,4 @@
-import json
+import json, re
 from math import ceil
 from functools import partial as partial_func
 from colorsys import rgb_to_hsv, rgb_to_yiq
@@ -401,6 +401,7 @@ async def user_(client, event,
         if guild_profile.nick is not None:
             text.append(f'Nick: {guild_profile.nick}')
         
+        
         # Joined at can be `None` if the user is in lurking mode.
         joined_at = guild_profile.joined_at
         if joined_at is not None:
@@ -410,10 +411,65 @@ async def user_(client, event,
         if (boosts_since is not None):
             text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
         
+        timed_out_until = guild_profile.timed_out_until
+        if (timed_out_until is not None) and (timed_out_until > datetime.utcnow()):
+            text.append(f'Timed out until: {timed_out_until:{DATETIME_FORMAT_CODE}} [*{elapsed_time(timed_out_until)}*]')
+        
         text.append(f'Roles: {roles}')
         embed.add_field('In guild profile', '\n'.join(text))
     
-    return embed
+    components = Row(
+        Button('Show avatar', custom_id=f'user_info.{user.id}.avatar'),
+        Button('Show banner', custom_id=f'user_info.{user.id}.banner'),
+    )
+    
+    return InteractionResponse(embed=embed, components=components)
+
+
+@SLASH_CLIENT.interactions(custom_id=re.compile('user_info\.(\d+)\.(avatar|banner)'))
+async def show_user_icon(client, event, user_id, icon_type):
+    user_id = int(user_id)
+    
+    yield
+    
+    user = await client.user_get(user_id, force_update=True)
+    
+    if icon_type == 'avatar':
+        icon_url = user.avatar_url_as(size=4096)
+        
+        if user.avatar:
+            color = user.avatar_hash & 0xffffff
+        else:
+            color = user.default_avatar.color
+    
+    elif icon_type == 'banner':
+        icon_url = user.banner_url_as(size=4096)
+        
+        if user.banner:
+            color = user.banner_hash & 0xffffff
+        else:
+            color = None
+    
+    else:
+        icon_url = None
+        color = None
+    
+    embed = Embed(
+        f'{user:f}\'s {icon_type}',
+        url = icon_url,
+        color = color,
+    )
+    
+    if icon_url is None:
+        embed.add_footer(
+            f'The user has no {icon_type}.',
+        )
+    else:
+        embed.add_image(
+            icon_url,
+        )
+    
+    await client.interaction_followup_message_create(event, embed=embed, show_for_invoking_user_only=True)
 
 
 @SLASH_CLIENT.interactions(name='role', is_global=True)

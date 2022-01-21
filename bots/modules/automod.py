@@ -22,7 +22,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 EMOJI__REIMU_HAMMER = Emoji.precreate(690550890045898812)
 EMOJI__YUUKA_REMBER = Emoji.precreate(856244196129243146)
-STICKER__VANILLA_WOKE = Sticker.precretae(6)
+STICKER__VANILLA_WOKE = Sticker.precreate(926470801409069136)
 
 class RegexPart:
     __slots__ = ('part', )
@@ -351,7 +351,6 @@ ESCALATION_NOTIFIERS = {
     15: notify_escalation_level_3,
     21: notify_escalation_level_4,
     ESCALATION_MAX: notify_escalation_level_5
-    
 }
 
 

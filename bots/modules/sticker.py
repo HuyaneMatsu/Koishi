@@ -821,6 +821,7 @@ async def user_sticker_compare(
         chart_url,
     )
 
+
 @user_sticker_compare.autocomplete('raw_sticker_1')
 async def autocomplete_sticker_name_except_1(event, value):
     return get_autocomplete_sticker_names_except(event, value, 'sticker-1')
@@ -872,7 +873,7 @@ def get_autocomplete_sticker_names_except(event, value, except_):
         if parameter_name == except_:
             continue
         
-        raw_sticker = event.interaction.get_value_of(parameter_name)
+        raw_sticker = event.interaction.get_value_of('user-sticker-compare', parameter_name)
         if raw_sticker is None:
             continue
         
@@ -887,6 +888,7 @@ def get_autocomplete_sticker_names_except(event, value, except_):
             sticker.name for sticker in guild_stickers.values()
             if (sticker not in stickers_except)
         )
+    
     
     value = value.casefold()
     
