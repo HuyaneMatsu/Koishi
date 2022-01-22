@@ -11,7 +11,8 @@ except ImportError:
 
 from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, Emoji, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
-    ChannelThread, mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES, CHANNEL_TYPES
+    ChannelThread, mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES, CHANNEL_TYPES, \
+    INTERACTION_RESPONSE_TYPES, MessageFlag, InteractionResponseContext
 from scarletio import sleep, alchemy_incendiary, LOOP_TIME, Task, WaitTillAll, Future, WaitTillExc
 from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
     wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
@@ -1075,6 +1076,7 @@ async def wait_full():
     delay = (perf_counter()-start)*1000.0
     yield f'{delay:.0f} ms'
 
+
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def test_form(event):
@@ -1106,6 +1108,180 @@ async def locale(event):
         f'Locale: {event.locale}\n'
         f'guild locale: {event.guild_locale}'
     )
+
+MESSAGE_FLAG_VALUE_INVOKING_USER_ONLY = MessageFlag().update_by_keys(invoking_user_only=True)
+MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS = MessageFlag().update_by_keys(embeds_suppressed=True)
+
+TO_SUPPRESS = 'https://www.youtube.com/watch?v=QO9CuvM-Pjk'
+
+SUPPRESS_EMBEDS_TESTING = Marisa.interactions(
+    None,
+    guild = GUILD__SUPPORT,
+    name = 'suppress-embeds-testing',
+    description = 'we suppress some embeds',
+)
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def create(client, event):
+    data = {
+        'data': {
+            'content': TO_SUPPRESS,
+            'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+        },
+        'type': INTERACTION_RESPONSE_TYPES.message_and_source,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_response_message_create(event.id, event.token, data)
+
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def ack(client, event):
+    await client.interaction_application_command_acknowledge(event)
+    
+    data = {
+        'content': TO_SUPPRESS,
+        'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_followup_message_create(client.application.id, event.id, event.token, data)
+
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def ack_2(client, event):
+    data = {
+        'data': {
+            'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+        },
+        'type': INTERACTION_RESPONSE_TYPES.source,
+    }
+    
+    async with InteractionResponseContext(event, True, False):
+        await client.http.interaction_response_message_create(event.id, event.token, data)
+    
+    data = {
+        'content': TO_SUPPRESS,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_followup_message_create(client.application.id, event.id, event.token, data)
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def ack_3(client, event):
+    data = {
+        'data': {
+            'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+        },
+        'type': INTERACTION_RESPONSE_TYPES.source,
+    }
+    
+    async with InteractionResponseContext(event, True, False):
+        await client.http.interaction_response_message_create(event.id, event.token, data)
+    
+    data = {
+        'content': TO_SUPPRESS,
+        'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_followup_message_create(client.application.id, event.id, event.token, data)
+
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def ack_4(client, event):
+    data = {
+        'data': {
+            'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+        },
+        'type': INTERACTION_RESPONSE_TYPES.source,
+    }
+    
+    async with InteractionResponseContext(event, True, False):
+        await client.http.interaction_response_message_create(event.id, event.token, data)
+    
+    data = {
+        'content': TO_SUPPRESS,
+        'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_response_message_edit(client.application.id, event.id, event.token, data)
+
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def followup(client, event):
+    yield 'cake'
+    
+    data = {
+        'content': TO_SUPPRESS,
+        'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_followup_message_create(client.application.id, event.id, event.token, data)
+
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def edit(client, event):
+    data = {
+        'data': {
+            'content': TO_SUPPRESS,
+            # 'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+        },
+        'type': INTERACTION_RESPONSE_TYPES.message_and_source,
+    }
+    
+    async with InteractionResponseContext(event, True, False):
+        await client.http.interaction_response_message_create(event.id, event.token, data)
+    
+    await sleep(2.0)
+    
+    data = {
+        'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_response_message_edit(client.application.id, event.id, event.token, data)
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def edit_2(client, event):
+    data = {
+        'data': {
+            'content': TO_SUPPRESS,
+            # 'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+        },
+        'type': INTERACTION_RESPONSE_TYPES.message_and_source,
+    }
+    
+    async with InteractionResponseContext(event, True, False):
+        await client.http.interaction_response_message_create(event.id, event.token, data)
+    
+    message = await event.wait_for_response_message()
+    
+    await sleep(2.0)
+    
+    data = {
+        'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+    }
+    
+    async with InteractionResponseContext(event, False, False):
+        await client.http.interaction_followup_message_edit(client.application.id, event.id, event.token, message.id,
+            data)
+
+@SUPPRESS_EMBEDS_TESTING.interactions
+async def webhook(client, event):
+    channel = event.channel
+    executor_webhook = await client.webhook_get_own_channel(channel)
+    if (executor_webhook is None):
+        executor_webhook = await client.webhook_create(channel, 'marisad')
+    
+    data = {
+        'content': TO_SUPPRESS,
+        'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
+    }
+    
+    await client.http.webhook_message_create(executor_webhook.id, executor_webhook.token, data, None)
 
 
 if (watchdog is not None):
