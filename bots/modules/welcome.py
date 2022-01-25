@@ -155,7 +155,7 @@ async def guild_user_add(client, guild, user):
 
 
 @Satori.events
-async def guild_user_delete(client, guild, user):
+async def guild_user_delete(client, guild, user, guild_profile):
     if guild is not GUILD__SUPPORT:
         return
     
