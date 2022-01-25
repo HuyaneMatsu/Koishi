@@ -2,6 +2,7 @@ import os, sys
 os.environ['HATA_DOCS_ENABLED'] = 'True'
 os.environ['HATA_API_VERSION'] = '9'
 os.environ['HATA_RICH_DISCORD_EXCEPTION'] = 'True'
+os.environ['HATA_ALLOW_DEAD_EVENTS'] = 'True'
 
 # Load config
 config_path = os.path.split(__file__)[0]

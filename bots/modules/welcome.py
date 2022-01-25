@@ -6,11 +6,11 @@ from random import random, choice
 Satori: Client
 Koishi: Client
 
-STICKER__WELCOME = Sticker.precreate(566)
+STICKER__WELCOME = Sticker.precreate(914216876819767347)
 
-WELCOME_EMOJI_ANIMATED = Emoji.precreate(6)
-WELCOME_EMOJI_STATIC = Emoji.precreate(7)
-WELCOME_EMOJI_ALTERNATIVE = Emoji.precreate(8)
+WELCOME_EMOJI_ANIMATED = Emoji.precreate(648173118392762449)
+WELCOME_EMOJI_STATIC = Emoji.precreate(767445550378254366)
+WELCOME_EMOJI_ALTERNATIVE = Emoji.precreate(772496201642934272)
 
 
 async def auto_welcome_interaction_0():

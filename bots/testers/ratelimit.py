@@ -3042,8 +3042,8 @@ async def rate_limit_test_0020(client,message):
             await RLT.send('I need admin permission to complete this command.')
         
         data = await channel_create(client, guild)
-        channel_id=int(data['id'])
-        await client.http.channel_delete(channel_id,None)
+        channel_id = int(data['id'])
+        await client.http.channel_delete(channel_id, None)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0021(client,message):
