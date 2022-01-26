@@ -29,6 +29,7 @@ def field_value_to_code_block(field_value):
     
     return code_block
 
+
 @ACCESSIBILITY_INTERACTIONS.interactions
 async def notification_settings(event):
     """Shows your notification settings."""
@@ -56,69 +57,68 @@ async def notification_settings(event):
     return Embed(
         'Notification settings',
     ).add_field(
-        NOTIFICATION_NAME_PROPOSAL,
+        'Proposal',
         field_value_to_code_block(notify_proposal),
         inline = True,
     ).add_field(
-        NOTIFICATION_NAME_DAILY,
+        'Daily claimed by waifu',
         field_value_to_code_block(notify_daily),
         inline = True,
     ).add_thumbnail(
         user.avatar_url,
     )
 
-NOTIFICATION_TYPE_PROPOSALS = 1
-NOTIFICATION_TYPE_DAILY = 2
 
-NOTIFICATION_NAME_PROPOSAL = 'Proposals'
-NOTIFICATION_NAME_DAILY = 'Daily'
+NOTIFICATION_TYPE_TO_OPTION = {}
+NOTIFICATION_CHOICES = []
 
-NOTIFICATION_NAME_IN_LINE_PROPOSAL = 'proposal'
-NOTIFICATION_NAME_IN_LINE_DAILY = 'daily-by-waifu'
-
-NOTIFICATION_CHOICES = [
-    (NOTIFICATION_NAME_PROPOSAL, NOTIFICATION_TYPE_PROPOSALS),
-    (NOTIFICATION_NAME_DAILY, NOTIFICATION_TYPE_DAILY),
-]
-
-NOTIFICATION_TYPE_TO_FIELD = {
-    NOTIFICATION_TYPE_PROPOSALS: user_common_model.notify_proposal,
-    NOTIFICATION_TYPE_DAILY: user_common_model.notify_daily,
-}
-
-NOTIFICATION_TYPE_TO_NAME = {
-    NOTIFICATION_TYPE_PROPOSALS: NOTIFICATION_NAME_PROPOSAL,
-    NOTIFICATION_TYPE_DAILY: NOTIFICATION_NAME_DAILY,
-}
-
-NOTIFICATION_TYPE_TO_SYSTEM_NAME = {
-    NOTIFICATION_TYPE_PROPOSALS: 'notify_proposal',
-    NOTIFICATION_TYPE_DAILY: 'notify_daily',
-}
-
-
-NOTIFICATION_TYPE_TO_NAME_INLINE = {
-    NOTIFICATION_TYPE_PROPOSALS: NOTIFICATION_NAME_IN_LINE_PROPOSAL,
-    NOTIFICATION_TYPE_DAILY: NOTIFICATION_NAME_IN_LINE_DAILY,
-}
-
-@ACCESSIBILITY_INTERACTIONS.interactions
-async def change_notification_setting(event,
-    notification_type: (NOTIFICATION_CHOICES, 'Select the notification to change.'),
-    enabled: ('bool', 'Whether the notification should be enabled.'),
-):
-    """Set your notification."""
-    user = event.user
+class NotificationOption:
+    __slots__ = ('id', 'name', 'name_in_line', 'system_name', 'field')
     
+    _id_counter = 1
+    
+    def __new__(cls, name, system_name, name_in_line):
+        id_ = cls._id_counter
+        cls._id_counter = id_ + 1
+        
+        field = getattr(user_common_model, system_name)
+        
+        self = object.__new__(cls)
+        self.id = id_
+        self.name = name
+        self.name_in_line = name_in_line
+        self.system_name = system_name
+        self.field = field
+        
+        NOTIFICATION_TYPE_TO_OPTION[id_] = self
+        NOTIFICATION_CHOICES.append((name, id_))
+        
+        return self
+
+PROPOSAL_NOTIFICATION_OPTION = NotificationOption(
+    'Proposal',
+    'proposal',
+    'notify_proposal',
+)
+
+
+DAILY_NOTIFICATION_OPTION = NotificationOption(
+    'Daily',
+    'daily-by-waifu',
+    'notify_daily',
+)
+
+
+async def switch_notification(user_id, enable, notification_option):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select(
                 [
                     user_common_model.id,
-                    NOTIFICATION_TYPE_TO_FIELD[notification_type],
+                    notification_option.field,
                 ],
             ).where(
-                user_common_model.user_id == user.id,
+                user_common_model.user_id == user_id,
             )
         )
         
@@ -128,11 +128,11 @@ async def change_notification_setting(event,
             entry_id = -1
             notification_value = True
         
-        if notification_value != enabled:
-            update_to = {NOTIFICATION_TYPE_TO_SYSTEM_NAME[notification_type]: enabled}
+        if notification_value != enable:
+            update_to = {notification_option.system_name: enable}
             
             if entry_id == -1:
-                to_execute = get_create_common_user_expression(user.id, **notification_value)
+                to_execute = get_create_common_user_expression(user_id, **notification_value)
             else:
                 to_execute = USER_COMMON_TABLE.update(
                     user_common_model.id == entry_id,
@@ -141,14 +141,36 @@ async def change_notification_setting(event,
                 )
             
             await connector.execute(to_execute)
+
+
+def get_notification_change_description(notification_option, enable):
+    name_in_line = notification_option.name_in_line
     
-    
-    name_in_line = NOTIFICATION_TYPE_TO_NAME_INLINE[notification_type]
-    
-    if enabled:
-        description = f'From now on you will receive {name_in_line} notifications.'
+    if enable:
+        description = f'From now on, you will receive {name_in_line} notifications.'
     else:
-        description = f'From now, you will not receive {name_in_line} notifications.'
+        description = f'From now, you will **not** receive {name_in_line} notifications.'
+    
+    return description
+
+
+@ACCESSIBILITY_INTERACTIONS.interactions
+async def change_notification_setting(event,
+    notification_type: (NOTIFICATION_CHOICES, 'Select the notification to change.'),
+    enabled: ('bool', 'Whether the notification should be enabled.'),
+):
+    """Set your notification."""
+    user = event.user
+    
+    notification_option = NOTIFICATION_TYPE_TO_OPTION[notification_type]
+    
+    await switch_notification(
+        user.id,
+        enabled,
+        notification_option,
+    )
+    
+    description = get_notification_change_description(notification_option, enabled)
     
     return Embed(
         'Great success!',
@@ -156,3 +178,31 @@ async def change_notification_setting(event,
     ).add_thumbnail(
         user.avatar_url,
     )
+
+    
+
+async def change_notification_button_click(client, event, notification_option, enable):
+    await client.interaction_component_acknowledge(event)
+    await switch_notification(event.user.id, enable, notification_option)
+    await client.interaction_followup_message_create(
+        event,
+        get_notification_change_description(notification_option, enable),
+        show_for_invoking_user_only = True,
+    )
+
+
+@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.proposal.enable')
+async def enable_proposal_notification(client, event):
+    await change_notification_button_click(client, event, PROPOSAL_NOTIFICATION_OPTION, True)
+
+@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.proposal.disable')
+async def enable_proposal_notification(client, event):
+    await change_notification_button_click(client, event, PROPOSAL_NOTIFICATION_OPTION, False)
+
+@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.daily.enable')
+async def enable_proposal_notification(client, event):
+    await change_notification_button_click(client, event, DAILY_NOTIFICATION_OPTION, True)
+
+@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.daily.disable')
+async def enable_proposal_notification(client, event):
+    await change_notification_button_click(client, event, DAILY_NOTIFICATION_OPTION, False)
