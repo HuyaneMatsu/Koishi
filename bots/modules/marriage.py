@@ -704,6 +704,9 @@ async def propose(client, event,
                 Embed(
                     None,
                     f'{event.user.full_name} proposed to you with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                ).add_footer(
+                    'You can disable this notification with `/accessibility change-notification-settings '
+                    'notification-type: proposal enabled: false`'
                 )
             )
 
@@ -899,7 +902,7 @@ async def accept(client, event,
         target_user_id,
         Embed(
             None,
-            f'{event.user.full_name} accepted your proposal.'
+            f'{event.user.full_name} accepted your proposal.',
         )
     )
     
@@ -912,7 +915,7 @@ async def accept(client, event,
                 waifu_owner_id,
                 Embed(
                     None,
-                    f'{event.user.full_name} divorced you in favor of marrying {user.full_name} instead.'
+                    f'{event.user.full_name} divorced you in favor of marrying {user.full_name} instead.',
                 )
             )
 
@@ -968,9 +971,11 @@ async def reject(client, event,
         target_user_id,
         Embed(
             None,
-            f'{event.user.full_name} rejected your proposal.\n'
-            f'\n'
-            f'You got your {investment} {EMOJI__HEART_CURRENCY.as_emoji} back.'
+            (
+                f'{event.user.full_name} rejected your proposal.\n'
+                f'\n'
+                f'You got your {investment} {EMOJI__HEART_CURRENCY.as_emoji} back.'
+            ),
         )
     )
 
@@ -1001,7 +1006,7 @@ async def cancel(client, event,
         if not results:
             yield Embed(
                 None,
-                f'You are not proposing towards {user.full_name}.'
+                f'You are not proposing towards {user.full_name}.',
             )
             return
         

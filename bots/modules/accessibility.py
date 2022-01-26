@@ -54,7 +54,7 @@ async def notification_settings(event):
         notify_daily = True
     
     return Embed(
-        'Notification settings'
+        'Notification settings',
     ).add_field(
         NOTIFICATION_NAME_PROPOSAL,
         field_value_to_code_block(notify_proposal),
@@ -74,7 +74,7 @@ NOTIFICATION_NAME_PROPOSAL = 'Proposals'
 NOTIFICATION_NAME_DAILY = 'Daily'
 
 NOTIFICATION_NAME_IN_LINE_PROPOSAL = 'proposal'
-NOTIFICATION_NAME_IN_LINE_DAILY = 'daily'
+NOTIFICATION_NAME_IN_LINE_DAILY = 'daily-by-waifu'
 
 NOTIFICATION_CHOICES = [
     (NOTIFICATION_NAME_PROPOSAL, NOTIFICATION_TYPE_PROPOSALS),

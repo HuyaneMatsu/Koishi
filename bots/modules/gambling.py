@@ -235,6 +235,9 @@ async def claim_daily_for_waifu(client, event, target_user):
                             f'You are on a {target_daily_streak} day streak.'
                         ),
                         color = COLOR__GAMBLING,
+                    ).add_footer(
+                        'You can disable this notification with `/accessibility change-notification-settings '
+                        'notification-type: daily-by-waifu enabled: false`'
                     )
                 )
             
