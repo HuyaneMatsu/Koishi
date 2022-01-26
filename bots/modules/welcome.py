@@ -89,12 +89,16 @@ class WelcomeState:
     def call_auto_welcome(self, user_ids):
         for user in self.users:
             if user.id in user_ids:
-                self.cancel()
-                Task(self.auto_welcome(), KOKORO)
+                break
+        else:
+            return
+        
+        self.cancel()
+        Task(self.auto_welcome(), KOKORO)
     
     
     async def auto_welcome(self):
-        await choice(AUTO_WELCOME_INTERACTIONS)
+        await choice(AUTO_WELCOME_INTERACTIONS)()
     
     
     def feed_user(self, user):
@@ -120,7 +124,7 @@ class WelcomeState:
         if message.author.is_bot:
             return
         
-        if message.has_sticker():
+        if message.has_stickers():
             self.cancel()
             return
         
