@@ -14,10 +14,11 @@ from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, ge
 
 from bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, GUILD__SUPPORT, \
     EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__ADMIN, \
-    ROLE__SUPPORT__NSFW_ACCESS, COLOR__GAMBLING
+    ROLE__SUPPORT__NSFW_ACCESS, COLOR__GAMBLING, LINK__KOISHI_TOP_GG
 from bot_utils.utils import send_embed_to
 from bot_utils.daily import DAILY_INTERVAL, calculate_daily_new_only, calculate_daily_new, DAILY_STREAK_BREAK, \
-    calculate_daily_for, NSFW_ACCESS_COST, ELEVATED_COST, HEART_BOOST_COST
+    calculate_daily_for, NSFW_ACCESS_COST, ELEVATED_COST, HEART_BOOST_COST, TOP_GG_VOTE_DELAY_MIN, \
+    TOP_GG_VOTE_DELAY_MAX
 
 SLASH_CLIENT: Client
 
@@ -36,7 +37,7 @@ EVENT_COMPONENTS = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
 EVENT_CURRENCY_BUTTON = Button(emoji=EMOJI__HEART_CURRENCY)
 
 
-async def claim_daily_for_yourself(event):
+async def claim_daily_for_yourself(client, event):
     user = event.user
     
     async with DB_ENGINE.connect() as connector:
@@ -47,6 +48,8 @@ async def claim_daily_for_yourself(event):
                     user_common_model.total_love,
                     user_common_model.daily_streak,
                     user_common_model.daily_next,
+                    user_common_model.count_top_gg_vote,
+                    user_common_model.top_gg_last_vote,
                 ]
             ).where(
                 user_common_model.user_id == user.id,
@@ -57,7 +60,7 @@ async def claim_daily_for_yourself(event):
         
         results = await response.fetchall()
         if results:
-            entry_id, total_love, daily_streak, daily_next = results[0]
+            entry_id, total_love, daily_streak, daily_next, count_top_gg_vote, top_gg_last_vote = results[0]
             
             if daily_next > now:
                 return Embed(
@@ -89,11 +92,24 @@ async def claim_daily_for_yourself(event):
                 )
             )
             
+            if (
+                (count_top_gg_vote > 0) and
+                (now - TOP_GG_VOTE_DELAY_MIN > top_gg_last_vote) and
+                (now - TOP_GG_VOTE_DELAY_MAX < top_gg_last_vote)
+            ):
+                voted = await client.top_gg.get_user_vote(user.id)
+                if not voted:
+                    streak_text = (
+                        f'{streak_text}\n'
+                        f'\n'
+                        f'Please vote for me on [top.gg]({LINK__KOISHI_TOP_GG}) for extra {EMOJI__HEART_CURRENCY}'
+                    )
+            
             return Embed(
                 'Here, some love for you~\nCome back tomorrow !',
                 (
                     f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} '
-                    f'{EMOJI__HEART_CURRENCY:e}\n'
+                    f'{EMOJI__HEART_CURRENCY}\n'
                     f'{streak_text}'
                 ),
                 color = COLOR__GAMBLING,
@@ -256,12 +272,14 @@ async def daily(client, event,
     target_user: ('user', 'Anyone to gift your daily love?', 'waifu') = None,
 ):
     """Claim a share of my love every day for yourself or for your waifu."""
+    yield
+    
     if target_user is None:
-        coroutine = claim_daily_for_yourself(event)
+        coroutine = claim_daily_for_yourself(client, event)
     else:
         coroutine = claim_daily_for_waifu(client, event, target_user)
     
-    return await coroutine
+    yield await coroutine
 
 
 def convert_tdelta(delta):

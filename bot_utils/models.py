@@ -67,6 +67,10 @@ else:
         # notification settings
         notify_proposal = Column(Boolean, default=True)
         notify_daily = Column(Boolean, default=True)
+        
+        # Notify voters that they can vote on top.gg if they can. We base this on a top.gg vote timer and whether they
+        # voted before
+        top_gg_last_vote = Column(DateTime, default=func.utc_timestamp())
     
     
     USER_COMMON_TABLE = user_common_model.__table__
@@ -168,9 +172,21 @@ else:
         count_daily_by_waifu = 0,
         count_daily_for_waifu = 0,
         count_top_gg_vote = 0,
+        top_gg_last_vote = None,
     ):
+        now = None
+        
         if daily_next is None:
-            daily_next = datetime.utcnow()
+            if now is None:
+                now = datetime.utcnow()
+
+            daily_next = now
+        
+        if top_gg_last_vote is None:
+            if now is None:
+                now = datetime.utcnow()
+            
+            top_gg_last_vote = now
         
         return USER_COMMON_TABLE.insert().values(
             user_id         = user_id,
@@ -188,4 +204,5 @@ else:
             count_daily_by_waifu = count_daily_by_waifu,
             count_daily_for_waifu = count_daily_for_waifu,
             count_top_gg_vote = count_top_gg_vote,
+            top_gg_last_vote = top_gg_last_vote,
         )
