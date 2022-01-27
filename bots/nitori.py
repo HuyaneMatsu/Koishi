@@ -386,7 +386,7 @@ async def latest_users(event):
 # command end
 # command start slash ping
 
-@Nitori.interactions
+@Nitori.interactions(wait_for_acknowledgement=True)
 async def ping():
     """HTTP ping-pong."""
     start = perf_counter()
