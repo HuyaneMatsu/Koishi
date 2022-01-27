@@ -4,15 +4,15 @@ from bot_utils.http_builder import HttpText, HttpUrl, HttpContent
 from bot_utils.constants import INVITE__SUPPORT
 
 URL_PREFIX = '/project/hata'
-ROUTES = Blueprint('index', '',
-    url_prefix=URL_PREFIX,
+ROUTES = Blueprint(
+    'index',
+    '',
+    url_prefix = URL_PREFIX,
 )
 
 
 DESCRIPTION_PARTS = (
-    'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro.',
-    'It specializes in running multiple simultaneous clients, optimizing performance and getting all the newest '
-    'Discord API features before all the other similar wrappers.',
+    'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running on top of scarletio.'
 )
 
 FEATURES = (
@@ -21,8 +21,7 @@ FEATURES = (
             'Multiple simultaneous clients',
         ).render(),
         HttpText(
-            'Hata can run multiple clients from the same instance without sacrificing performance, all while being '
-            'easy to code.',
+            'Hata can run multiple clients from the same instance without sacrificing performance',
         ).render(),
         SVG_GEAR,
     ), (
@@ -76,7 +75,8 @@ ADDITIONAL_FEATURES = (
 
 @ROUTES.route('/testing')
 def home():
-    return render_template('hata_index_page.html',
+    return render_template(
+        'hata_index_page.html',
         description_parts = DESCRIPTION_PARTS,
         features = FEATURES,
         major_sellout = MAJOR_SELLOUT,

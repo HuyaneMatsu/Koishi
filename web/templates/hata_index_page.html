@@ -38,8 +38,8 @@
                             </svg>
                         </div>
                         <div class="text">
-                            <h5>{{ feature_title }}</h5>
-                            <p>{{ feature_description }}</p>
+                            <h5>{{ feature_title|safe }}</h5>
+                            <p>{{ feature_description|safe }}</p>
                         </div>
                     </div>
                 {% endfor %}
@@ -62,8 +62,8 @@
                             </svg>
                         </div>
                         <div class="text">
-                            <h5>{{ feature_title }}</h5>
-                            <p>{{ feature_description }}</p>
+                            <h5>{{ feature_title|safe }}</h5>
+                            <p>{{ feature_description|safe }}</p>
                         </div>
                     </div>
                 {% endfor %}
