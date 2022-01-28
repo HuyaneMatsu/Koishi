@@ -6,7 +6,7 @@ from io import StringIO
 
 from config import HATA_PATH, SCARLETIO_PATH
 
-from hata import KOKORO, Embed
+from hata import KOKORO, Embed, DiscordException
 from scarletio import Lock, Task, ReuAsyncIO, AsyncIO, WaitTillAll
 from hata.ext.command_utils import wait_for_message, Pagination
 
@@ -123,7 +123,13 @@ async def send_file(client, file):
         
         file_name = ''.join(file_name_parts)
         
-        await client.message_create(CHANNEL__SYSTEM__SYNC, file_name, file=io)
+        try:
+            await client.message_create(CHANNEL__SYSTEM__SYNC, file_name, file=io)
+        except DiscordException as err:
+            if err.code == 40005:
+                sys.stderr.write(repr(err))
+            else:
+                raise
 
 
 async def request_sync(client, days_allowed):
