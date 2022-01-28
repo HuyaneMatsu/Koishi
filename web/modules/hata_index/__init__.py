@@ -12,7 +12,9 @@ ROUTES = Blueprint(
 
 
 DESCRIPTION_PARTS = (
-    'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running on top of scarletio.'
+    HttpText(
+        'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running on top of scarletio.'
+    ).render(),
 )
 
 FEATURES = (
