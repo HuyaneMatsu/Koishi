@@ -38,6 +38,10 @@ body {
     background-color: var(--color-header-menu);
 }
 
+.header_button_selected {
+
+}
+
 .intro {
     position: relative;
     top: 0px;

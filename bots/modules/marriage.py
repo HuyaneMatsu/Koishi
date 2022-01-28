@@ -704,9 +704,10 @@ async def propose(client, event,
                 Embed(
                     None,
                     f'{event.user.full_name} proposed to you with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
-                ).add_footer(
-                    'You can disable this notification with `/accessibility change-notification-settings '
-                    'notification-type: proposal enabled: false`'
+                ),
+                Button(
+                    'I don\'t want notifs, nya!!',
+                    custom_id = 'accessibility.change_notification_settings.proposal.disable',
                 )
             )
 

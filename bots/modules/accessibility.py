@@ -97,15 +97,15 @@ class NotificationOption:
 
 PROPOSAL_NOTIFICATION_OPTION = NotificationOption(
     'Proposal',
-    'proposal',
     'notify_proposal',
+    'proposal',
 )
 
 
 DAILY_NOTIFICATION_OPTION = NotificationOption(
     'Daily',
-    'daily-by-waifu',
     'notify_daily',
+    'daily-by-waifu',
 )
 
 

@@ -105,7 +105,7 @@ def random_error_message_getter():
     return choice(ERROR_MESSAGES)
 
 
-async def send_embed_to(client, user_id, embed):
+async def send_embed_to(client, user_id, embed, components=None):
     try:
         user_channel = await client.channel_private_create(user_id)
     except ConnectionError:
@@ -116,6 +116,7 @@ async def send_embed_to(client, user_id, embed):
             user_channel,
             embed = embed,
             allowed_mentions = None,
+            components = components,
         )
     except ConnectionError:
         return
