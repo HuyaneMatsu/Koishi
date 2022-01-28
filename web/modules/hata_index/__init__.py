@@ -11,12 +11,6 @@ ROUTES = Blueprint(
 )
 
 
-DESCRIPTION_PARTS = (
-    HttpText(
-        'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running on top of scarletio.'
-    ).render(),
-)
-
 FEATURES = (
     (
         HttpText(
@@ -55,7 +49,7 @@ FEATURES = (
 
 MAJOR_SELLOUT = (
     HttpText(
-        'Some of the major sellout reasons.',
+        'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running on top of scarletio.'
     ).render()
 )
 
@@ -79,7 +73,6 @@ ADDITIONAL_FEATURES = (
 def home():
     return render_template(
         'hata_index_page.html',
-        description_parts = DESCRIPTION_PARTS,
         features = FEATURES,
         major_sellout = MAJOR_SELLOUT,
         additional_features = ADDITIONAL_FEATURES,
