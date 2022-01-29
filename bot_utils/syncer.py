@@ -128,8 +128,12 @@ async def send_file(client, file):
         except DiscordException as err:
             if err.code == 40005:
                 sys.stderr.write(repr(err))
-            else:
-                raise
+                sys.stderr.write('\n')
+                return False
+            
+            raise
+    
+    return True
 
 
 async def request_sync(client, days_allowed):
@@ -152,20 +156,25 @@ async def request_sync(client, days_allowed):
             await WaitTillAll([sending_task, response_task], KOKORO)
             
             try:
-                sending_task.result()
+                sent = sending_task.result()
             except BaseException as err:
                 # Cancel it, so no double exception will be dropped.
                 response_task.cancel()
                 sys.stderr.write(f'Sync failed, {err!r}.\n')
                 raise
             
-            try:
-                response_task.result()
-            except TimeoutError:
-                sys.stderr.write('Sync failed, timeout.\n')
-                return
+            if sent:
+                try:
+                    response_task.result()
+                except TimeoutError:
+                    sys.stderr.write('Sync failed, timeout.\n')
+                    return
+            else:
+                response_task.cancel()
+                continue
         
         await client.message_create(CHANNEL__SYSTEM__SYNC, SYNC_DONE)
+
 
 async def receive_sync(client, partner):
     try:

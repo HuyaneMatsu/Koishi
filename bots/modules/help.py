@@ -748,7 +748,7 @@ async def help_(client, event,
         return await field_renderer(client, event)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global=True, wait_for_acknowledgement=True)
 async def ping(client, event):
     """HTTP ping-pong."""
     start = perf_counter()

@@ -1076,6 +1076,27 @@ async def wait_full():
     delay = (perf_counter()-start)*1000.0
     yield f'{delay:.0f} ms'
 
+@PING.interactions
+async def extra_1():
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    await sleep(1.0, KOKORO)
+    delay = (perf_counter()-start)*1000.0
+    
+    yield f'{delay:.0f} ms'
+
+
+@PING.interactions
+async def extra_2():
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    await sleep(0.1, KOKORO)
+    delay = (perf_counter()-start)*1000.0
+    
+    yield f'{delay:.0f} ms'
+
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
