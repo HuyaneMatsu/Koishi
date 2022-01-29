@@ -1114,6 +1114,17 @@ async def extra_3():
     yield f'{delay:.0f} ms'
 
 
+@PING.interactions
+async def extra_4(client, event):
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    await client.message_create(event.channel, 'hoy!')
+    delay = (perf_counter()-start)*1000.0
+    
+    yield f'{delay:.0f} ms'
+
+
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def test_form(event):

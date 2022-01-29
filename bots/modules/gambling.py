@@ -226,7 +226,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             )
             
-            await client.interaction_response_message_create(
+            await client.interaction_followup_message_create(
                 event,
                 embed = Embed(
                     'How sweet, you claimed my love for your chosen one !',
