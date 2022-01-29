@@ -1064,6 +1064,7 @@ async def no_wait_full():
     delay = (perf_counter()-start)*1000.0
     yield f'{delay:.0f} ms'
 
+
 @PING.interactions(wait_for_acknowledgement=True)
 async def wait_full():
     """HTTP ping-pong."""
@@ -1075,6 +1076,7 @@ async def wait_full():
 
     delay = (perf_counter()-start)*1000.0
     yield f'{delay:.0f} ms'
+
 
 @PING.interactions
 async def extra_1():
@@ -1095,6 +1097,20 @@ async def extra_2():
     await sleep(0.1, KOKORO)
     delay = (perf_counter()-start)*1000.0
     
+    yield f'{delay:.0f} ms'
+
+
+@PING.interactions
+async def extra_3():
+    """HTTP ping-pong."""
+    start = perf_counter()
+    yield
+    await sleep(0.1, KOKORO)
+    delay = (perf_counter()-start)*1000.0
+    
+    yield f'{delay:.0f} ms'
+    
+    delay = (perf_counter()-start)*1000.0
     yield f'{delay:.0f} ms'
 
 
