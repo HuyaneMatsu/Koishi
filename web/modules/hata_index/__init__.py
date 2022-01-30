@@ -11,57 +11,72 @@ ROUTES = Blueprint(
 )
 
 
-FEATURES = (
+ADDITIONAL_FEATURES = (
     (
         HttpText(
-            'Multiple simultaneous clients',
+            'Multiple simultaneous clients'
         ).render(),
         HttpText(
-            'Hata can run multiple clients from the same instance without sacrificing performance',
+            'Hata can run multiple clients from the same instance without sacrificing performance'
         ).render(),
         SVG_GEAR,
     ), (
         HttpText(
-            'Performant',
+            'Performant'
         ).render(),
         HttpText(
-            'Fast concurrent code using async/await syntax, cache control, PyPy support and more!',
+            'Fast concurrent code using async/await syntax, cache control, PyPy support and more!'
         ).render(),
         SVG_LIGHTING,
     ), (
         HttpText(
-            'Newest API features',
+            'Newest API features'
         ).render(),
         HttpText(
-            'Whatever Discord decides to release/update/break Hata will support it natively in no time!',
+            'Whatever Discord decides to release/update/break Hata will support it natively in no time!'
         ).render(),
         SVG_CLOCK,
     ), (
         HttpText(
-            '100% Python',
+            '100% Python'
         ).render(),
         HttpText(
-            'Completely relies on Python! Easy to read, easy to understand, easy to code.',
+            'Completely relies on Python! Easy to read, easy to understand, easy to code.'
         ).render(),
         SVG_CODE,
     ),
 )
 
-MAJOR_SELLOUT = (
+DESCRIPTION = (
     HttpText(
         'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running on top of scarletio.'
     ).render()
 )
 
+FEATURES = (
+    HttpText(
+        'Asynchronous using async / await syntax'
+    ).render(),
+    HttpText(
+        'Feature rich API'
+    ).render(),
+    HttpText(
+        'Object oriented design'
+    ).render(),
+    HttpText(
+        'Automatic sharding'
+    ).render(),
+)
 
-ADDITIONAL_FEATURES = (
+
+GETTING_STARTED = (
     (
         HttpUrl(
-            'Comfy Discord support server',
+            'Support server',
             INVITE__SUPPORT.url,
         ).render(),
         HttpText(
-            'Great server for support and any questions! Also boosting a wide variety of good emojis.',
+            'If you have issues, suggestions, want to contribute, or just want to hang out, join our discord server.'
         ).render(),
         SVG_DISCORD,
     ),
@@ -73,8 +88,9 @@ ADDITIONAL_FEATURES = (
 def home():
     return render_template(
         'hata_index_page.html',
-        features = FEATURES,
-        major_sellout = MAJOR_SELLOUT,
         additional_features = ADDITIONAL_FEATURES,
+        description = DESCRIPTION,
+        features = FEATURES,
+        getting_started = GETTING_STARTED,
     )
 

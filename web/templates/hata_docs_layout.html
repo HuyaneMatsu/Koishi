@@ -9,33 +9,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_docs_20211227.css') }}">
 
     <!-- JS -->
-    <script type="module">
-        var theme = localStorage.getItem('theme');
-        if (theme != null){
-            document.documentElement.setAttribute('variable-theme', theme);
-        }
-    </script>
-    <script>
-        function set_theme(theme_value){
-            localStorage.setItem('theme', theme_value);
-            document.documentElement.setAttribute('variable-theme', theme_value);
-        }
-
-        function turn_off_theme_picker(event){
-            if (event.target.tagName == 'SUMMARY'){
-                return;
-            }
-
-            var element = document.getElementById('header_theme_list_spacer');
-            if (element.open){
-                element.open = false;
-            }
-        }
-
-        document.onclick = turn_off_theme_picker;
-
-    </script>
-    {% block head_extra%}{% endblock %}
+    {% include "hata_header_theme_picker_js.html" %}
+    {% block head_extra %}{% endblock %}
 
     <title>Hata Docs{% if (title is not none and title) %} - {{title}}{% endif %}</title>
 </head>

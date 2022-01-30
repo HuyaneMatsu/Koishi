@@ -1,11 +1,36 @@
-from markdown import markdown
-from os import listdir as list_directory
-from os.path import join as join_paths, isfile as is_file
+from markdown import markdown as generate_markdown
+from os.path import join as join_paths, isfile as is_file, split as split_path, listdir as list_directory
+import hata
 
-def generate_markdown(markdown_folder):
-    markdowns = {}
+TOPICS_FOLDER = join_paths(split_path(hata.__file__)[0], 'docs', 'topics')
+TOPICS_ASSETS_FOLDER = join_paths(TOPICS_FOLDER, 'assets')
+
+MARKDOWN_CACHE = {}
+
+def get_markdown(name):
+    try:
+        item = MARKDOWN_CACHE[name]
+    except KeyError:
+        return None
     
-    for name in list_directory(markdown_folder):
+    is_path, value = item
+    if is_path:
+        value = create_markdown(value)
+        MARKDOWN_CACHE[name] = (False, value)
+    
+    return value
+
+
+def create_markdown(path):
+    with open(path, 'r') as file:
+        content = file.read()
+        markdown = generate_markdown(content)
+    
+    return markdown
+
+
+def find_markdowns():
+    for name in list_directory(TOPICS_FOLDER):
         if not name.endswith(('.md', '.MD')):
             continue
         
@@ -13,10 +38,11 @@ def generate_markdown(markdown_folder):
         if ('wip' in case_fold_name) or ('deprecated' in case_fold_name):
             continue
         
-        file_path = join_paths(markdown_folder, name)
+        file_path = join_paths(TOPICS_FOLDER, name)
         if not is_file(file_path):
             continue
         
-        with open(file_path, 'r'):
-            
-        
+        MARKDOWN_CACHE[name[:-3]] = (True, file_path)
+
+
+find_markdowns()

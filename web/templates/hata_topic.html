@@ -6,7 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_index_page_2022128.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_topic.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_header_20221230.css') }}">
 
 </head>
 <body>
+    <nav class="header_menu">
+        <a href='/#' class="header_button">
+            Hata
+        </a>
+        <a href='#' class="header_button_selected">
+            Guides
+        </a>
+        <a href='/#' class="header_button">
+            Documentation
+        </a>
+        {% include "hata_header_index_github_button.html" %}
+    </nav>
+    {{ markdown }}
+</body>
