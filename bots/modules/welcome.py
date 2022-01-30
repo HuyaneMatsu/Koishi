@@ -29,7 +29,7 @@ async def auto_welcome_interaction_2():
     await sleep(1.0 + random() * 1.0)
     await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, f'Welcome to KW')
     await sleep(0.5 + random() * 1.0)
-    await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, WELCOME_EMOJI_ANIMATED)
+    await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, WELCOME_EMOJI_ANIMATED.as_emoji)
 
 
 async def auto_welcome_interaction_3():
@@ -37,7 +37,7 @@ async def auto_welcome_interaction_3():
     await sleep(1.0 + random() * 1.0)
     await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, f'Welcome to KW')
     await sleep(0.5 + random() * 1.0)
-    await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, WELCOME_EMOJI_STATIC)
+    await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, WELCOME_EMOJI_STATIC.as_emoji)
 
 
 async def auto_welcome_interaction_4():
@@ -45,7 +45,7 @@ async def auto_welcome_interaction_4():
     await sleep(1.0 + random() * 2.0)
     await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, f'Welcome qtie!')
     await sleep(0.5 + random() * 1.0)
-    await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, WELCOME_EMOJI_ALTERNATIVE)
+    await Koishi.message_create(CHANNEL__SUPPORT__SYSTEM, WELCOME_EMOJI_ALTERNATIVE.as_emoji)
 
 
 AUTO_WELCOME_INTERACTIONS = [
