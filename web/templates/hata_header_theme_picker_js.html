@@ -1,0 +1,25 @@
+<script type="module">
+    var theme = localStorage.getItem('theme');
+    if (theme != null){
+        document.documentElement.setAttribute('variable-theme', theme);
+    }
+</script>
+<script>
+    function set_theme(theme_value){
+        localStorage.setItem('theme', theme_value);
+        document.documentElement.setAttribute('variable-theme', theme_value);
+    }
+
+    function turn_off_theme_picker(event){
+        if (event.target.tagName == 'SUMMARY'){
+            return;
+        }
+
+        var element = document.getElementById('header_theme_list_spacer');
+        if (element.open){
+            element.open = false;
+        }
+    }
+
+    document.onclick = turn_off_theme_picker;
+</script>
