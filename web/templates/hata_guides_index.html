@@ -1,0 +1,55 @@
+{% extends 'hata_docs_layout.html' %}
+
+{% block body %}
+
+<div class="guides_listing">
+    <h2> {{ 'Getting started' }} </h2>
+    <div class="underline"></div>
+    <p>
+        {{ 'First time creating a Discord bot or using the library?' }}
+    </p>
+    <ul>
+        <li>
+            {{ 'First time' }}
+            <a href="/getting_started"> {{ 'created a Discord bot' }} </a>
+            {{ '.' }}
+        </li>
+        <li>
+            {{ 'Brief introduction to' }}
+            <a href="/introduction"> {{ 'python' }} </a>
+            {{ '.' }}
+        </li>
+        <li>
+            {{ 'Examples can be found in our' }}
+            <a href="https://github.com/HuyaneMatsu/hata/tree/master/docs/examples"> {{ 'repository' }} </a>
+            {{ '.' }}
+        </li>
+    </ul>
+
+    <h2> {{ 'Getting help' }} </h2>
+    <p>
+        {{ 'Need some help in troubleshooting? These resources might help.' }}
+    </p>
+    <ul>
+        <li>
+            {{ 'Frequently asked questions' }}
+        </li>
+        <li>
+            {{ 'Ask us in our cosy' }}
+            <a href="https://discord.gg/3cH2r5d"> {{ 'Discord server' }} </a>
+            {{ '.' }}
+        </li>
+        <li>
+            {{ 'Report a bug at our' }}
+            <a href="https://github.com/HuyaneMatsu/hata/issues"> {{ 'Issue tracker' }} </a>
+            {{ '.' }}
+        </li>
+        <li>
+            {{ 'Ask in our' }}
+            <a href="https://github.com/HuyaneMatsu/hata/discussions"> {{ 'Github discussion page' }} </a>
+            {{ '.' }}
+        </li>
+    </ul>
+
+</div>
+{% endblock body %}

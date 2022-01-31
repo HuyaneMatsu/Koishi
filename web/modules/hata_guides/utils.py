@@ -31,11 +31,12 @@ def create_markdown(path):
 
 def find_markdowns():
     for name in list_directory(TOPICS_FOLDER):
-        if not name.endswith(('.md', '.MD')):
-            continue
         
         case_fold_name = name.casefold()
-        if ('wip' in case_fold_name) or ('deprecated' in case_fold_name):
+        if not name.endswith('.md'):
+            continue
+        
+        if ('readme' in case_fold_name) or ('wip' in case_fold_name) or ('deprecated' in case_fold_name):
             continue
         
         file_path = join_paths(TOPICS_FOLDER, name)

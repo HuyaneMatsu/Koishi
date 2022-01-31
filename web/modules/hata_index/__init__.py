@@ -87,7 +87,7 @@ GETTING_STARTED = (
 @ROUTES.route('/testing')
 def home():
     return render_template(
-        'hata_index_page.html',
+        'hata_index.html',
         additional_features = ADDITIONAL_FEATURES,
         description = DESCRIPTION,
         features = FEATURES,
