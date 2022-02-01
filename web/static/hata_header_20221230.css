@@ -5,11 +5,25 @@
     --size-header-menu-min1025-padding-left: calc(50% - 512px + 16px);
     --size-header-menu-min1025-padding-right: calc(50% - 512px + 16px);
 
-
     --size-header-menu-min1665-padding-left: calc(320px);
     --size-header-menu-min1665-padding-right: calc(320px);
 
-    --color-header-menu: rgb(205 174 161 / 0.20);
+
+    --size-header-inner-border: 0.5rem;
+    --size-header-button-border-radius: 0.375rem;
+    --size-header-button-border-width: 1px;
+    --size-header-button-line-height: 1.25rem;
+    --size-header-button-inner-border: 0.75rem;
+    
+    --size-header-navigation-button-spacing: 0.5rem;
+    --size-header-theme-picker-width: 5rem;
+    
+    --font-size: 0.875rem;
+    --font-weight: 600;
+    --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'
+
+    --color-underline: rgb(200 225 255 / 0.30);
+    --color-header-background: rgb(205 174 161 / 0.20);
     --color-header-text: rgb(255 255 255);
     --color-header-button: rgb(16 72 12 / 0.40);
     --color-header-button-selected: rgb(16 72 12 / 0.66);
@@ -18,23 +32,23 @@
 
 
 .header_menu {
-    transition: all .3s;
-    border-bottom: 1px solid transparent;
-    -webkit-align-items: center;
-    -webkit-justify-content: space-between;
+    transition: all 0.3s;
     left: 0;
     right: 0;
     top: 0;
     word-wrap: break-word;
     position: fixed;
-    background-color: var(--color-header-menu);
+    background-color: var(--color-header-background);
     box-sizing: border-box;
     border-width: 0;
     border-style: solid;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    font-family: system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji';
-    color: var(--color-header-text)
+    padding-top: var(--size-header-inner-border);
+    padding-bottom: var(--size-header-inner-border);
+    font-family: var(--font-family);
+    color: var(--color-header-text);
+    line-height: var(--size-header-button-line-height);
+    font-size: var(--font-size);
+    font-weight: var(--font-weight);
 }
 
 @media screen and (max-width: 1024px) {
@@ -58,40 +72,129 @@
     }
 }
 
-.header_menu a {
-    color: inherit;
-    font-family: inherit;
-    font-weight: 600;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-radius: 0.375rem;
-    align-items: center;
-    display: inline-flex;
-    text-decoration: inherit;
-    margin-left: 0.50rem;
+.header_menu .header_left {
+    float: left!important;
+    width: calc(100% - 400px);
+    overflow: hidden;
+    max-width: fit-content;
 }
 
-.header_menu a:first-child {
+.header_menu .header_left .header_left_overflow_cut {
+    font-size: calc(var(--font-size) * 1.25);
+    color: var(--color-header-path-font);
+    float: right;
+    width: max-content;
+}
+
+.header_menu .header_left .header_left_overflow_cut  a {
+    color: var(--color-header-path-font);
+}
+
+.header_menu .header_left .header_left_overflow_cut a:hover {
+    text-decoration: underline;
+}
+
+.header_menu .header_right {
+    float: right !important;
+}
+
+.header_menu a {
+    padding-left: var(--size-header-button-inner-border);
+    padding-right: var(--size-header-button-inner-border);
+    padding-top: var(--size-header-button-inner-border);
+    padding-bottom: var(--size-header-button-inner-border);
+    align-items: center;
+}
+
+.header_menu .header_right a {
+    border-radius: var(--size-header-button-border-radius);
+    display: inline-flex;
+    margin-left: var(--size-header-navigation-button-spacing);
+}
+
+.header_menu .header_right a:first-child {
     margin-left: 0;
 }
 
-Why use Hata?
-Some of the major sellout reasons.
-
-
-.header_button {
+.header_menu .header_right .header_button {
     background-color: var(--color-header-button);
 }
 
-.header_button_selected {
+.header_menu .header_right .header_button_selected {
     background-color: var(--color-header-button-selected);
 }
 
-
-.header_button:hover, .header_button_selected:hover {
+.header_menu .header_right .header_button:hover, .header_menu .header_right .header_button_selected:hover {
     background-color: var(--color-header-button-hover);
+}
+
+
+.header_theme_picker {
+    height: var(--size-header-button-line-height);
+    max-height: var(--size-header-button-line-height);
+    border-radius: var(--size-header-button-border-radius);
+    align-items: center;
+    display: inline-flex;
+    text-decoration: inherit;
+    float: right;
+    width: var(--size-header-theme-picker-width);
+}
+
+.header_theme_picker summary {
+    cursor: pointer;
+}
+
+.header_theme_picker summary:focus {
+    outline-style: none;
+}
+
+.header_theme_picker summary::-webkit-details-marker {
+    display: none;
+}
+
+.header_theme_list_box {
+    width: var(--size-header-theme-picker-width);
+    display: block;
+    text-align: inherit;
+    background-color: var(--color-header-background);
+    border-bottom-style: solid;
+    border-left-style: solid;
+    border-right-style: solid;
+    border-bottom-left-radius: var(--size-header-button-border-radius);
+    border-bottom-right-radius: var(--size-header-button-border-radius);
+    border-bottom-color: var(--color-underline);
+    border-right-color: var(--color-underline);
+    border-left-color: var(--color-underline);
+    border-bottom-width: var(--size-header-button-border-width);
+    border-right-width: var(--size-header-button-border-width);
+    border-left-width: var(--size-header-button-border-width);
+}
+
+.header_theme_list_spacer {
+    height: var(--size-header-inner-border);
+    width: inherit;
+}
+
+.header_theme_list {
+    background-color: var(--color-header-background);
+}
+
+.header_theme_list_element {
+    width: inherit;
+    display: inherit;
+    text-align: inherit;
+    cursor: pointer;
+    padding-top: calc(2 * var(--size-header-button-border-width));
+    padding-bottom: calc(2 * var(--size-header-button-border-width));
+}
+
+.header_theme_list_element:hover {
+    border-style: solid;
+    border-color: var(--color-underline);
+    border-width: var(--size-header-button-border-width);
+    box-sizing: border-box;
+    border-radius: var(--size-header-button-border-radius);
+    padding-top: var(--size-header-button-border-width);
+    padding-bottom: var(--size-header-button-border-width);
+    width: calc(inherit - 2 * var(--size-header-button-border-width));
 }

@@ -2,8 +2,7 @@
 <html>
 <head>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% include 'hata_meta_generic.html' %}
 
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_index_page_2022128.css') }}">
@@ -12,16 +11,18 @@
 </head>
 <body>
     <nav class="header_menu">
-        <a href='#' class="header_button_selected">
-            Hata
-        </a>
-        <a href='/#' class="header_button">
-            Guides
-        </a>
-        <a href='/#' class="header_button">
-            Documentation
-        </a>
-        {% include 'hata_header_index_github_button.html' %}
+        <div class="header_left">
+            <a href='#' class="header_button_selected">
+                Hata
+            </a>
+            <a href='/#' class="header_button">
+                Guides
+            </a>
+            <a href='/#' class="header_button">
+                Documentation
+            </a>
+            {% include 'hata_header_index_github_button.html' %}
+        </div>
     </nav>
     <section class="intro">
         <div class="intro_background"></div>
