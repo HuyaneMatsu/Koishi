@@ -25,6 +25,7 @@ base_path = os.path.join(PATH__KOISHI, *ROUTE)
 for path in (
     'hata_docs',
     'hata_index',
+    'hata_guides',
     'koishi_api',
 ):
     

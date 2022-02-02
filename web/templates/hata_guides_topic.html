@@ -1,5 +1,5 @@
-{% extends 'hata_docs_layout.html' %}
+{% extends 'hata_guides_layout.html' %}
 
 {% block body %}
-{{ markdown }}
+{{ markdown|safe }}
 {% endblock body %}

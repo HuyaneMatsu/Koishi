@@ -1,8 +1,9 @@
 from markdown import markdown as generate_markdown
-from os.path import join as join_paths, isfile as is_file, split as split_path, listdir as list_directory
+from os.path import join as join_paths, isfile as is_file, split as split_path
+from os import listdir as list_directory
 import hata
 
-TOPICS_FOLDER = join_paths(split_path(hata.__file__)[0], 'docs', 'topics')
+TOPICS_FOLDER = join_paths(split_path(split_path(hata.__file__)[0])[0], 'docs', 'topics')
 TOPICS_ASSETS_FOLDER = join_paths(TOPICS_FOLDER, 'assets')
 
 MARKDOWN_CACHE = {}

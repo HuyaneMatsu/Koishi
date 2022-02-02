@@ -5,10 +5,10 @@ from .utils import get_markdown, TOPICS_ASSETS_FOLDER
 
 URL_PREFIX = '/project/hata/guides'
 
-ROUTES = Blueprint('topics', '', url_prefix=URL_PREFIX)
+ROUTES = Blueprint('guides', '', url_prefix=URL_PREFIX)
 
 
-@ROUTES.route('/<name:str>')
+@ROUTES.route('/<name>')
 def get_topic(name):
     markdown = get_markdown(name)
     if markdown is None:
@@ -19,14 +19,13 @@ def get_topic(name):
         markdown = markdown,
     )
 
-@ROUTES.route('/assets/<name:str>')
+@ROUTES.route('/assets/<name>')
 def get_asset(name):
     return send_from_directory(TOPICS_ASSETS_FOLDER, name)
 
 
 @ROUTES.route('/')
 def index():
-    render_template(
+    return render_template(
         'hata_guides_index.html',
     )
-

@@ -1,17 +1,95 @@
 :root {
+    /* Body */
     --color-body-font: rgb(255 255 255);
-    --color-body-background: rgb(34 45 45);
 
-    --color-intro-underline: rgb(255 255 255);
+    --color-banner-underline: rgb(255 255 255);
 
-    --color-content-background: var(--color-body-background);
     --color-content-item-icon: rgb(108 230 101);
     --color-content-item-icon-svg: rgb(110 75 230);
     --color-content-card-icon: rgb(108 230 101);
 
-    --color-scrollbar-track: rgb(87 96 96 / 0.50);
-    --color-scrollbar-thumb: rgb(26 29 29 / 0.75);
+    /* Banner */
+
+    --color-banner-background-opacity: 0.4;
+
+    --font-banner-color: rgb(255 255 255);
+    --font-banner-weight: 400;
+    --font-banner-description-font-size: 1.2rem;
+    --font-banner-description-line-height: 1.5;
+    --font-banner-title-size: 12rem;
+
+    /* Content */
+
+    --font-content-line-height: 1.5;
+    --size-content-spacing: 6rem;
+
+    /* Feature List */
+
+    --size-feature-list-spacing: 2rem;
+    --size-feature-list-icon: 2.75rem;
+    --size-feature-list-icon-box: 4rem;
+    --size-feature-list-icon-border: calc((var(--size-feature-list-icon-box) - var(--size-feature-list-icon)) * 0.5);
+    --size-feature-list-icon-spacing: 1rem;
+
+    --font-feature-list-title-size: 3rem;
+    --font-feature-list-title-weight: 800;
+
+    --font-feature-list-sub-title-size: 1.5rem;
+    --font-feature-list-sub-title-weight: 800;
+    --size-feature-list-sub-title-spacing: 0.5rem;
+
+    --font-feature-list-size: 1.1rem;
+    --font-feature-list-weight: 400;
+    --size-feature-list-spacing: 0.5rem;
+
+    --font-feature-list-sellout-size: 1.2rem;
+    --font-feature-list-sellout-weight: 400rem;
+
+    --size-feature-list-listing-indent: 1.2rem;
+
+    /* Extras */
+
+    --font-extra-title-size: 3rem;
+    --font-extra-title-line-height: 1.1;
+    --font-extra-title-line-weight: 800;
+
+    --size-card-spacing: 3rem;
+    --size-card-border-radius: 2rem;
+    --size-card-width: calc(33% - var(--size-card-border-radius) * 2);
+    --size-card-min-width: calc(var(--size-body-top) * 0.25);
+    --size-card-max-width: calc(var(--size-body-top) * 0.50);
+    --size-card-title-spacing: 0.75rem;
+    --size-card-icon: 6rem;
+
+    --font-card-title-size: 1.2rem;
+    --font-card-title-weight: 800;
+
+    --color-card-hover: rgb(0 0 0 / 0.10);
 }
+
+[variable-theme="black"] {
+    /* Banner */
+
+    --color-banner-background-opacity: 0.3;
+
+    /* Extras */
+
+    --color-card-hover: rgb(124 124 124 / 0.10);
+
+}
+
+[variable-theme="white"] {
+    /* Banner */
+
+    --color-banner-background-opacity: 0.9;
+
+    /* Extras */
+
+    --color-card-hover: rgb(124 124 124 / 0.10);
+}
+
+
+/* Define custom fonts */
 
 @font-face {
   font-family: "kokoro";
@@ -20,16 +98,8 @@
   font-style: normal;
 }
 
-body {
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: var(--color-body-background);
-    color: var(--color-body-font);
-}
 
-
-.intro {
+.banner {
     position: relative;
     top: 0px;
     left: 0px;
@@ -44,7 +114,7 @@ body {
     display: flex;
 }
 
-.intro_box {
+.banner_box {
     text-align: center;
     position: relative;
     width: max-content;
@@ -52,38 +122,39 @@ body {
     margin-left: auto;
     word-break: break-word;
     word-wrap: break-word;
-    font-weight: 400;
-    line-height: 1.5;
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-weight: var(--font-banner-weight);
+    font-family: var(--font-body-family);
+    color: var(--font-banner-color);
 }
 
-.intro_box .title {
-    font-size: 12rem;
-    line-height: 12rem;
+.banner_box .title {
+    font-size: var(--font-banner-title-size);
+    line-height: var(--font-banner-title-size);
     text-transform: uppercase!important;
     font-family: kokoro;
 }
 
-.intro_box .underline{
+.banner_box .underline {
     width: 90%;
     border-bottom-width: 0.3rem;
     border-bottom-style: solid;
     margin-bottom: 1rem;
-    border-bottom-color: rgb(255 255 255);
+    border-bottom-color: var(--font-banner-color);
     margin-left: auto;
     margin-right: auto;
 }
 
-.intro_box .description{
-    font-size: 1.2rem;
+.banner_box .description {
+    font-size: var(--font-banner-description-font-size);
+    line-height: var(--size-banner-line-height);
     text-transform: uppercase!important;
     font-family: inherit;
     font-style: italic;
 }
 
-.intro_background {
-    opacity: 0.3;
-    background-image: url('https://cdn.discordapp.com/attachments/568837922288173058/936625563047723058/ashy-koishi-kokoro-0000.png');
+.banner_background {
+    opacity: var(--color-banner-background-opacity);
+    background-image: url('./koishi_kokoro_graffiti_censored_by_ashy.png');
     background-repeat: no-repeat;
     background-attachment: local;
     background-position: center;
@@ -106,187 +177,126 @@ h1, h2, h3, h4, h5, h6, h7, h8, p{
 }
 
 .content {
-    line-height: 1.5;
-    font-family: 'Jost', sans-serif;
+    line-height: var(--font-content-line-height);
+    font-family: var(--font-body-family);
     word-break: break-word;
     word-wrap: break-word;
+    margin-top: var(--size-content-spacing);
 }
 
+.content:last-child{
+    margin-bottom: var(--size-content-spacing);
+}
 
 .feature_list {
     width: 100%;
-    background-color: var(--color-content-background);
 }
 
 .feature_list .content {
-    padding-top: 6rem;
-    padding-bottom: 6rem;
-    max-width: 1200px;
     margin-right: auto;
     margin-left: auto;
-    box-sizing: border-box;
+    display: var(--display-collapsible-field);
 }
 
-@media screen and (max-width: 960px) {
-    .feature_list .content {
-        display: block;
-            }
-        }
-
-@media screen and (min-width: 961px) {
-    .feature_list .content {
-        display: flex;
-        }
-    }
-
-
-.additional_features {
-    width: 100%;
-    background-color: var(--color-content-background);
-}
-
-.additional_features .content {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
-}
 
 .content .column_0001, .content .column_0002 {
     position: relative;
-    width: 100%;
+    width: var(--size-collapsible-field-width);
+    max-width: var(--size-collapsible-field-width);
 }
 
-@media screen and (max-width: 756px) {
-    .column_0001, .column_0002 {
-        max-width: calc(100% - 32px);
-        padding-left: 16px;
-        padding-right: 16px;
-    }
+.content .column_0001 {
+    padding-left: var(--size-collapsible-field-border-outer);
+    padding-right: var(--size-collapsible-field-border-inner);
 }
 
-@media screen and (min-width: 757px) and (max-width: 960px) {
-    .column_0001, .column_0002 {
-        max-width: 720px;
-        padding-left: calc(50% - 360px);
-        padding-right: calc(50% - 360px);
-    }
+.content .column_0002 {
+    padding-left: var(--size-collapsible-field-border-inner);
+    padding-right: var(--size-collapsible-field-border-outer);
 }
 
-@media screen and (min-width: 961px) {
-    .column_0001, .column_0002 {
-        max-width: calc(50% - 32px);
-        padding-left: 16px;
-        padding-right: 16px;
-            }
-        }
-
-
-.feature_list .content .card {
+.feature_list .content .column_0001 {
     overflow: hidden;
-    -webkit-flex: 1;
-    box-sizing: border-box;
     word-wrap: break-word;
     text-align: left;
 }
 
-.feature_list .content .card h4 {
-    font-weight: 800;
-    font-size: 3rem;
-    margin-bottom: 2rem !important;
+.feature_list .content .column_0001 h4 {
+    font-weight: var(--font-feature-list-title-weight);
+    font-size: var(--font-feature-list-title-size);
+    margin-bottom: var(--size-feature-list-spacing);
+    word-break: break-word;
+    word-wrap: break-word;
+    text-align: var(--font-collapsible-text-align);
+}
+
+.feature_list ul {
+    padding-left: var(--size-feature-list-listing-indent);
+}
+
+.feature_list .content p {
+    font-size: var(--font-feature-list-sellout-size);
+    font-weight: var(--font-feature-list-sellout-weight);
+    margin-bottom: var(--size-feature-list-spacing);
     word-break: break-word;
     word-wrap: break-word;
 }
 
-@media screen and (min-width: 961px) {
-    .feature_list .content .card h4 {
-        text-align: left;
-    }
-}
-
-@media screen and (max-width: 960px) {
-    .feature_list .content .card h4 {
-        text-align: center;
-    }
-}
-
-.feature_list  .content .card p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem !important;
-    word-break: break-word;
-    word-wrap: break-word;
-    font-weight: 400;
-}
-
-.content .item {
+.feature_list .content .item {
     display: flex;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: var(--size-feature-list-spacing);
 }
 
-.content .item .icon {
+.feature_list .content .item .icon {
     background: var(--color-content-item-icon);
-    width: 60px;
-    min-width: 60px;
-    height: 60px;
+    width: var(--size-feature-list-icon-box);
+    min-width: var(--size-feature-list-icon-box);
+    height: var(--size-feature-list-icon-box);
     border-radius: 50%;
-    margin-right: 1rem;
+    margin-right: var(--size-feature-list-icon-spacing);
     justify-content: center;
     align-items: center;
-    box-sizing: border-box;
+    
 }
 
-.content .item .icon svg {
-    margin: 10px;
-    width: 40px;
-    height: 40px;
+.feature_list .content .item .icon svg {
+    margin: var(--size-feature-list-icon-border);
+    width: var(--size-feature-list-icon);
+    height: var(--size-feature-list-icon);
     fill: var(--color-content-item-icon-svg);
 }
 
-.content .item .text {
-    box-sizing: border-box;
-}
-
-.content .item .text h5 {
-    font-size: 1.2rem;
-    font-weight: 800;
+.feature_list h5 {
+    font-size: var(--font-feature-list-sub-title-size);
+    font-weight: var(--font-feature-list-sub-title-weight);
     margin-top: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--size-feature-list-sub-title-spacing);
 }
 
-.content .item .text p {
-    font-size: 1.1rem;
-    font-weight: 400;
+.feature_list .content .item .text p, .feature_list li {
+    font-size: var(--font-feature-list-size);
+    font-weight: var(--font-feature-list-weight);
     margin-top: 0;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--size-feature-list-spacing);
 }
 
 
-::-webkit-scrollbar {
-    width: calc(0.3em + 4px);
-    height: calc(0.3em + 4px);
+/* Extra */
+
+.extras {
+    width: 100%;
+    max-width: var(--size-content-width);
+    padding-left: var(--size-content-border-side);
+    padding-right: var(--size-content-border-side);
 }
 
-::-webkit-scrollbar-track {
-    margin-top: 0px;
-    margin-bottom: 0px;
-    margin-left: 0px;
-    margin-right: 0px;
-    background-color: var(--color-scrollbar-track);
-}
 
-::-webkit-scrollbar-thumb{
-    border-radius: 8px;
-    background-color: var(--color-scrollbar-thumb);
-}
-
-::-webkit-scrollbar-corner{
-    background-color: var(--color-scrollbar-track);
-}
-
-.additional_features .content .row {
+.extras .content .row {
     width: 100%;
 }
 
-.additional_features .content .row .section_title {
+.extras .content .row .section_title {
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
@@ -294,34 +304,41 @@ h1, h2, h3, h4, h5, h6, h7, h8, p{
 }
 
 .section_title h3 {
-    font-size: 3rem;
-    line-height: 1.1;
-    font-weight: 800;
+    font-size: var(--font-extra-title-size);
+    line-height: var(--font-extra-title-line-height);
+    font-weight: var(--font-extra-title-line-weight);
 }
 
-.additional_features .content .card {
-    margin-top: 3rem;
-    max-width: 500px;
-    min-width: 400px;
-    width: 33%;
+.extras .content .card {
+    margin-top: var(--size-card-spacing);
+    max-width: var(--size-card-max-width);
+    min-width: var(--size-card-min-width);
+    width: var(--size-card-width);
     text-align: center;
+    display: block;
+    cursor: pointer;
+    padding: var(--size-card-border-radius);
+    border-radius: var(--size-card-border-radius);
 }
 
-.additional_features .content .card .icon {
+.extras .content .card:hover {
+    background-color: var(--color-card-hover);
+}
+
+.extras .content .card .icon {
     width: 100%;
     text-align: center;
-    box-sizing: border-box;
     fill: var(--color-content-card-icon);
 }
 
-.additional_features .content .card .icon svg {
-    margin: 0px;
-    width: 90px;
-    height: 90px;
+.extras .content .card .icon svg {
+    margin: 0;
+    width: var(--size-card-icon);
+    height: var(--size-card-icon);
 }
 
-.additional_features .content  .card .text h5 {
-    margin-bottom: .75rem;
-    font-size: 1.2rem;
-    font-weight: 800;
+.extras .content .card .text h5 {
+    margin-bottom: var(--size-card-title-spacing);
+    font-size: var(--font-card-title-size);
+    font-weight: var(--font-card-title-weight);
 }

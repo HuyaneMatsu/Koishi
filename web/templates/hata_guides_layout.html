@@ -5,26 +5,31 @@
     {% include 'hata_meta_generic.html' %}
 
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_topic.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_header_20221230.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_guides_20220202.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_shared_20221230.css') }}">
 
+    <!-- JS -->
+    {% include 'hata_header_theme_picker_js.html' %}
 </head>
 <body>
     <nav class="header_menu">
-        <div class="header_right">
-            <a href='/#' class="header_button">
+        <div class="header_left">
+            <a href='./../'>
                 Hata
             </a>
-            <a href='#' class="header_button_selected">
+            <a href='#' class="selected">
                 Guides
             </a>
-            <a href='/#' class="header_button">
+            <a href='/#'>
                 Documentation
             </a>
-            {% include 'hata_header_index_github_button.html' %}
+            {% include 'hata_header_github_button.html' %}
+        </div>
+        <div class="header_right">
+            {% include 'hata_header_theme_picker.html' %}
         </div>
     </nav>
-    <div class="main_block">
+    <div class="section">
         {% block body %}{% endblock %}
     </div>
 </body>
