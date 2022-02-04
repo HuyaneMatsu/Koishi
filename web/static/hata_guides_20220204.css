@@ -1,7 +1,8 @@
 :root {
     --size-title-spacing: 2rem;
 
-    --font-color-link: rgb(174 251 255);
+    --font-color-link: rgb(255 212 0);
+    --font-color-link-hover: rgb(174 251 255);
 
     --size-content-max-width: 1200px;
 
@@ -15,7 +16,8 @@
 }
 
 [variable-theme="white"] {
-    --font-color-link: rgb(0 141 149);
+    --font-color-link: rgb(189 156 0);
+    --font-color-link-hover: rgb(0 141 149);
 }
 
 .main_block {
@@ -35,8 +37,12 @@
     border-bottom-color: var(--color-generic-underline);
 }
 
-.main_block a:hover {
+.main_block a {
     color: var(--font-color-link);
+}
+
+.main_block a:hover {
+    color: var(--font-color-link-hover);
     transition: color 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
