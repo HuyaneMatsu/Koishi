@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, redirect
 from bot_utils.constants import PATH__KOISHI
 
 ROUTE = ('web', 'modules')
@@ -15,7 +15,7 @@ if SECRET_KEY is not None:
 
 @WEBAPP.route('/')
 def hello_world():
-    return 'Nothing to see here.'
+    return redirect('/project/hata')
 
 
 path = None

@@ -12,3 +12,5 @@ pillow
 psutil
 lxml
 youtube_dl
+gh-md-to-html
+gh-md-to-html[offline_conversion]

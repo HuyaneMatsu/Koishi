@@ -1,4 +1,4 @@
-from markdown import markdown as generate_markdown
+from gh_md_to_html.core_converter import markdown as generate_markdown
 from os.path import join as join_paths, isfile as is_file, split as split_path
 from os import listdir as list_directory
 import hata
@@ -14,12 +14,12 @@ def get_markdown(name):
     except KeyError:
         return None
     
-    is_path, value = item
+    is_path, value, title = item
     if is_path:
         value = create_markdown(value)
-        MARKDOWN_CACHE[name] = (False, value)
+        MARKDOWN_CACHE[name] = (False, value, title)
     
-    return value
+    return value, title
 
 
 def create_markdown(path):
@@ -28,6 +28,10 @@ def create_markdown(path):
         markdown = generate_markdown(content)
     
     return markdown
+
+
+def markdown_name_to_title(name):
+    return name[:-3].replace('_', ' ').capitalize()
 
 
 def find_markdowns():
@@ -44,7 +48,7 @@ def find_markdowns():
         if not is_file(file_path):
             continue
         
-        MARKDOWN_CACHE[name[:-3]] = (True, file_path)
+        MARKDOWN_CACHE[name[:-3]] = (True, file_path, markdown_name_to_title(name))
 
 
 find_markdowns()

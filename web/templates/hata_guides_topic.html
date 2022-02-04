@@ -1,5 +1,25 @@
 {% extends 'hata_guides_layout.html' %}
 
+{% block header_self_link %}
+<a href="./" class="selected">
+    Guides
+</a>
+{% endblock header_self_link %}
+
+
+{% block header_path %}
+<div class="header_left_overflow_cut">
+    <div class="overflow">
+        <a href="./">Guides</a>
+        {{ '/' }}
+        <a href="#">{{ title }}</a>
+    </div>
+</div>
+{% endblock header_path %}
+
+
 {% block body %}
-{{ markdown|safe }}
+<div class="md">
+    {{ markdown|safe }}
+</div>
 {% endblock body %}

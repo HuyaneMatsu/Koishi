@@ -10,12 +10,13 @@ ROUTES = Blueprint('guides', '', url_prefix=URL_PREFIX)
 
 @ROUTES.route('/<name>')
 def get_topic(name):
-    markdown = get_markdown(name)
+    markdown, title = get_markdown(name)
     if markdown is None:
         abort(404)
     
     return render_template(
         'hata_guides_topic.html',
+        title = title,
         markdown = markdown,
     )
 
@@ -28,4 +29,5 @@ def get_asset(name):
 def index():
     return render_template(
         'hata_guides_index.html',
+        title = 'guides',
     )

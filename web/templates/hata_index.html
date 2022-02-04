@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- Title -->
+    <title>Hata</title>
+
     <!-- Required meta tags -->
     {% include 'hata_meta_generic.html' %}
 
@@ -14,13 +17,13 @@
 <body>
     <nav class="header_menu">
         <div class="header_left">
-            <a href='#' class="selected">
+            <a href="#" class="selected">
                 Hata
             </a>
-            <a href='./guides'>
+            <a href="./guides">
                 Guides
             </a>
-            <a href='/#'>
+            <a href="./docs/hata">
                 Documentation
             </a>
             {% include 'hata_header_github_button.html' %}
@@ -43,12 +46,12 @@
     </section>
     <section class="feature_list">
         <div class="content">
-            <div class="column_0001">
-                <h4> What is hata </h4>
-                <p> {{
+            <div class="column_1">
+                <h3> What is hata </h3>
+                <mark> {{
                     'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running '
                     'on top of scarletio.'
-                }} <p>
+                }} </mark>
 
                 <h5> Features </h5>
 
@@ -59,113 +62,53 @@
                     <li> {{ 'Automatic sharding' }} </li>
                 </ul>
             </div>
-            <div class="column_0002">
+            <div class="column_2">
 
                 <div class="item">
                     <div class="icon">
-                        <svg viewBox="0 -64 1024 1024">
-                            <path
-                                d="
-                                    M1024 328.533v238.933l-123.733 29.867-8.533 21.333 68.267 106.667-170.667 170.667
-                                    -106.667-68.267-25.6 8.533-25.6 123.733h-238.933l-29.867-123.733-21.333-8.533
-                                    -106.667 68.267-170.667-170.667 68.267-106.667-8.533-21.333-123.733-29.867v
-                                    -238.933l123.733-29.867 8.533-21.333-68.267-106.667 170.667-170.667 106.667 68.267
-                                    25.6-8.533 25.6-123.733h238.933l29.867 123.733 25.6 8.533 106.667-68.267 170.667
-                                    170.667-72.533 106.667 8.533 25.6 123.733 25.6zM849.067 183.467l-72.533-72.533
-                                    -85.333 55.467-106.667-42.667-21.333-102.4h-102.4l-21.333 98.133-106.667 42.667
-                                    -85.333-55.467-72.533 72.533 55.467 85.333-42.667 106.667-102.4 25.6v102.4l98.133
-                                    21.333 42.667 106.667-55.467 85.333 72.533 72.533 85.333-55.467 106.667 42.667 25.6
-                                    102.4h102.4l21.333-98.133 106.667-42.667 85.333 55.467 72.533-72.533-55.467-85.333
-                                    42.667-106.667 98.133-21.333v-102.4l-98.133-21.333-42.667-106.667 55.467-89.6zM512
-                                    661.333c-119.467 0-213.333-93.867-213.333-213.333s93.867-213.333 213.333-213.333
-                                    213.333 93.867 213.333 213.333-93.867 213.333-213.333 213.333zM512 320c-72.533 0
-                                    -128 55.467-128 128s55.467 128 128 128 128-55.467 128-128-55.467-128-128-128z
-                                "
-                                transform="scale(1, -1) translate(0, -908)"
-                            />
-                        </svg>
+                        <img src="/static/gear.svg">
                     </div>
                     <div class="text">
                         <h5>{{ 'Multiple simultaneous clients' }}</h5>
-                        <p>{{
+                        <mark>{{
                             'Hata can run multiple clients from the same instance without sacrificing performance'
-                        }}</p>
+                        }}</mark>
                     </div>
                 </div>
 
                 <div class="item">
                     <div class="icon">
-                        <svg viewBox="0 -64 1024 1024">
-                            <path
-                                d="
-                                    M276.083 960.25c-10.184-0.638-18.391-8.332-19.82-18.219l-85.347-554.781c-0.158
-                                    -0.976-0.249-2.101-0.249-3.248 0-11.782 9.55-21.333 21.332-21.335h187.334l-80.25
-                                    -401.167c-0.262-1.254-0.412-2.695-0.412-4.171 0-11.783 9.552-21.335 21.335-21.335
-                                    6.721 0 12.717 3.108 16.627 7.965l512.032 640.041c2.914 3.617 4.678 8.268 4.678
-                                    13.331 0 11.783-9.552 21.335-21.335 21.335-0.003 0-0.006 0-0.009 0h-264.166l155.25
-                                    310.5c1.407 2.769 2.231 6.037 2.231 9.498 0 11.776-9.54 21.323-21.313 21.335h
-                                    -341.334c-0.090 0.001-0.196 0.002-0.302 0.002-11.783 0-21.335-9.552-21.335-21.335
-                                    s9.552-21.335 21.335-21.335c0.106 0 0.212 0.001 0.318 0.002h306.817l-155.25-310.5c
-                                    -1.407-2.769-2.231-6.037-2.231-9.498 0-11.776 9.54-21.323 21.313-21.335h254.251l
-                                    -429.5-536.833 68.167 340.667c0.261 1.252 0.41 2.691 0.41 4.165 0 11.78-9.547
-                                    21.331-21.327 21.335h-188.5l81.583 530.083c0.188 1.063 0.295 2.288 0.295 3.537 0
-                                    11.783-9.552 21.335-21.335 21.335-0.455 0-0.907-0.014-1.354-0.042z
-                                "
-                                transform="scale(1, -1) translate(0, -908)"
-                            />
-                        </svg>
+                        <img src="/static/lighting.svg">
                     </div>
                     <div class="text">
                         <h5>{{ 'Performant' }}</h5>
-                        <p>{{
+                        <mark>{{
                             'Fast concurrent code using async/await syntax, cache control, PyPy support and more!'
-                        }}</p>
+                        }}</mark>
                     </div>
                 </div>
 
                 <div class="item">
                     <div class="icon">
-                        <svg viewBox="0 -64 1024 1024">
-                            <path
-                                d="
-                                    M512 960c-281.6 0-512-230.4-512-512s230.4-512 512-512 512 230.4 512 512-230.4 512
-                                    -512 512zM512 21.333c-234.667 0-426.667 192-426.667 426.667s192 426.667 426.667
-                                    426.667 426.667-192 426.667-426.667-192-426.667-426.667-426.667zM469.333
-                                    789.333h85.333v-384h-256v85.333h170.667v298.667z
-                                "
-                                transform="scale(1, -1) translate(0, -908)"
-                            />
-                        </svg>
+                        <img src="/static/clock.svg">
                     </div>
                     <div class="text">
                         <h5>{{ 'Newest API features' }}</h5>
-                        <p>{{
+                        <mark>{{
                             'Whatever Discord decides to release/update/break Hata will support it natively in no time!'
-                        }}</p>
+                        }}</mark>
                     </div>
                 </div>
 
                 <div class="item">
                     <div class="icon">
-                        <svg viewBox="0 -64 1024 1024">
-                            <path
-                                d="
-                                    M672.206 743.685c-10.128 6.005-23.208 2.665-29.215-7.46l-341.16-554.125c-13.934
-                                    -22.67 21.339-46.745 36.344-22.324 l341.16 554.125c6.464 10.159 3.235 23.651-7.129
-                                    29.784zM773.697 654.58c8.006 8.6 21.461 9.1 30.083 1.118l213.172- 191.851c9.397
-                                    -8.466 9.397-23.205 0-31.671l-213.113-191.792c-20.188-18.167-48.835 13.483-28.552
-                                    31.73l195.511 175.886-195.511 176.027c-9.052 7.913-9.772 21.743-1.59 30.552z
-                                    M250.303 654.58c-8.006 8.6-21.461 9.1-30.083 1.118l -213.172-191.851c-9.397-8.466
-                                    -9.397-23.205 0-31.671l213.113-191.792c20.199-18.209 49.284 13.112 28.552 31.73l
-                                    -195.511 175.886 195.511 176.027c9.052 7.913 9.772 21.743 1.59 30.552z
-                                "
-                                transform="scale(1, -1) translate(0, -908)"
-                            />
-                        </svg>
+                        <img src="/static/code.svg">
                     </div>
                     <div class="text">
                         <h5>{{ '100% Python' }}</h5>
-                        <p>{{ 'Completely relies on Python! Easy to read, easy to understand, easy to code.' }}</p>
+                        <mark>{{
+                            'Completely relies on Python! Easy to read, easy to understand, easy to code.'
+                        }}</mark>
                     </div>
                 </div>
 
@@ -179,35 +122,45 @@
                     <h3>Getting started</h3>
                 </div>
             </div>
+
             <div class="row">
-                <a class="card" href="https://discord.gg/koishi">
-                    <div class="icon">
-                        <svg viewBox="0 -64 1024 1024">
-                            <path
-                                d="
-                                    M898 722c-126 94-246 90-246 90l-12-14c150-44 218-110 218-110-92 48-182 74-264
-                                    82-64 8-124 6-178-2-4 0-8 0-14-2-32-2-106-14-200-54-34-16-52-26-52-26s72 70 230
-                                    114l-10 10c0 0-120 4-246-90 0 0-126-228-126-508 0 0 74-126 268-132 0 0 34 40 58
-                                    72-112 34-152 102-152 102s8-6 24-14c0 0 2-2 2-2 4-2 6-4 8-6 22-12 44-20 66-28
-                                    36-16 78-28 128-38 66-12 144-18 228-2 40 8 82 20 126 38 32 12 66 28 102 52 0
-                                    0-44-70-158-102 26-34 58-72 58-72 194 6 266 132 266 132 2 282-124 510-124 510zM348
-                                    296c-48 0-88 44-88 96 0 54 40 96 88 96 50 0 90-42 90-96 0-52-40-96-90-96zM668
-                                    296c-48 0-88 44-88 96 0 54 40 96 88 96 50 0 90-42 90-96 0-52-40-96-90-96z
-                                "
-                                transform="scale(1, -1) translate(0, -908)"
-                            />
-                        </svg>
-                    </div>
-                    <div class="text">
-                        <h5> Support server </h5>
-                        <p> {{
-                            'If you have issues, suggestions, want to contribute, or just want to hang out, '
-                            'join our discord server.'
-                        }} </p>
-                    </div>
-                </a>
+
+                <div class="column_1">
+                    <a class="card" href="https://discord.gg/koishi">
+                        <div class="icon">
+                            <img src="/static/discord.svg">
+                        </div>
+                        <div class="text">
+                            <h5> Support server </h5>
+                            <mark> {{
+                                'If you have issues, suggestions, want to contribute, or just want to hang out, '
+                                'join our discord server.'
+                            }} </mark>
+                        </div>
+                    </a>
+                </div>
+                <div class="column_2">
+                    <a class="card" href="/guides">
+                        <div class="icon">
+                            <img src="/static/notes.svg">
+                        </div>
+                        <div class="text">
+                            <h5> Guides </h5>
+                            <mark> {{
+                                'First time creating a Discord bot, or want to get proficient with the library.'
+                            }} </mark>
+                        </div>
+                    </a>
+                </div>
+
             </div>
         </div>
     </section>
+    <footer>
+        <ul>
+            <li>{{ '© 2022, HuyaneMatsu' }}</li>
+            <li>{{ 'Banner by Ashy yup' }}</li>
+        </ul>
+    </footer>
 </body>
 </html>
