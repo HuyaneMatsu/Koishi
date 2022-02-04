@@ -22,6 +22,10 @@ def get_markdown(name):
     return value, title
 
 
+def has_markdown(name):
+    return name in MARKDOWN_CACHE
+
+
 def create_markdown(path):
     with open(path, 'r') as file:
         content = file.read()
