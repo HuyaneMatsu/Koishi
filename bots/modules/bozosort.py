@@ -587,6 +587,7 @@ BUILTIN_MODULES = frozenset((
     'selectors',
     'linecache',
     'platform',
+    'code',
 ))
 
 # We cheat more
