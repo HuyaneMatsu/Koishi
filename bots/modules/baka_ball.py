@@ -1,17 +1,17 @@
 from hata import Client, Embed
-from collections import OrderedDict
 from bot_utils.constants import GUILD__SUPPORT
 from hata.ext.slash import abort
-from random import choice
-from difflib import SequenceMatcher
 from hata.ext.extension_loader import require
+from hashlib import md5
+
+def hash_string(string):
+    return int.from_bytes(md5(string.encode()).digest(), 'big') & 0xffffffffffffffff
+
 
 require('Marisa')
 
 SLASH_CLIENT: Client
 
-CACHED_RESPONSES = OrderedDict()
-CACHE_SIZE = 1000
 
 BAKA_BALL_RESPONSES = [
     'It is certain',
@@ -33,42 +33,34 @@ BAKA_BALL_RESPONSES = [
     'My reply is no',
     'My sources say no',
     'Outlook not so good',
-    'Very doubtful'
+    'Very doubtful',
+    None,
 ]
+
+BAKA_BALL_IMAGE = 'https://cdn.discordapp.com/attachments/568837922288173058/939974559476621352/chiruno-run.gif'
 
 @SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, name="9ball-preview")
 async def baka_ball(
-    client,
     event,
     question: str,
 ):
     if len(question.split()) < 3:
-        abort()
+        abort('Please ask 2 and longer.')
     
     if len(question) > 2000:
         question = question[:2000]
     
-    user_id = event.user.id
-    for key in CACHED_RESPONSES.keys():
-        if key[0] != user_id:
-            continue
-        
-        match = SequenceMatcher(None, question, key[1]).ratio()
-        if match < 0.9:
-            continue
-        
-        CACHED_RESPONSES.move_to_end(key)
-        response = CACHED_RESPONSES[key]
-        break
+    user = event.user
+    response = BAKA_BALL_RESPONSES[(hash_string(question.casefold()) ^ user.id) % len(BAKA_BALL_RESPONSES)]
     
+    embed = Embed(description=question).add_author(user.avatar_url, user.full_name)
+    
+    if response is None:
+        
+        embed.add_image(
+            BAKA_BALL_IMAGE,
+        )
     else:
-        response = choice(BAKA_BALL_RESPONSES)
-        CACHED_RESPONSES[(user_id, question)] = response
-        
-        if len(CACHED_RESPONSES) >= 1000:
-            CACHED_RESPONSES.popitem(0)
+        embed.add_field('⑨ Ball', response).add_thumbnail(BAKA_BALL_IMAGE)
     
-    return Embed(
-        '⑨ Ball',
-        response,
-    )
+    return embed
