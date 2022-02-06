@@ -122,6 +122,7 @@ if MARISA_MODE:
     MARISA_ALLOWED_MODULES.add('google')
     MARISA_ALLOWED_MODULES.add('log')
     MARISA_ALLOWED_MODULES.add('baka_ball')
+    MARISA_ALLOWED_MODULES.add('waifu_score')
     
     for path in list(MODULE_NAMES):
         if path not in MARISA_ALLOWED_MODULES:
