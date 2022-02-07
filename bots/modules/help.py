@@ -584,8 +584,8 @@ CATEGORIES = (
         'Fun',
         EMOJI_PAPER_DRAGON,
         (
-            'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll', 'sex', 'trivia', 'urban',
-            'yuno'
+            '9ball', 'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll', 'sex', 'trivia',
+            'urban', 'waifu-score', 'yuno'
         )
     ), (
         'Games',
