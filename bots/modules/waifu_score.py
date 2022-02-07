@@ -99,8 +99,8 @@ async def waifu_score(
         
         stats[index] = value
     
-    red = str(color_mask & 0xff0000)
-    green = str(color_mask & 0x00ff00)
+    red = str((color_mask & 0xff0000) >> 16)
+    green = str((color_mask & 0x00ff00) >> 8)
     blue = str(color_mask & 0x0000ff)
     
     data = to_json({
