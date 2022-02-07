@@ -859,6 +859,7 @@ async def accept(client, event,
                 source_user_id,
                 total_love = love_increase,
                 waifu_owner_id = target_user_id,
+                waifu_cost = investment,
             )
         else:
             to_execute = USER_COMMON_TABLE.update(
