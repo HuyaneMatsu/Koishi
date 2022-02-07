@@ -847,7 +847,7 @@ async def accept(client, event,
         )
         
         results = await response.fetchall()
-        if response:
+        if results:
             entry_id, waifu_owner_id = results[0]
         else:
             entry_id = -1
