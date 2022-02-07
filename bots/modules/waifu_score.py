@@ -1,20 +1,40 @@
 from hata import Client, Embed
-from bot_utils.constants import GUILD__SUPPORT
-from hata.ext.extension_loader import require
 from scarletio import to_json
 from scarletio.web_common import quote
 from math import floor
-
-require('Marisa')
+from hashlib import md5
 
 SLASH_CLIENT: Client
 
-WAIFU_SCORE_GRAPH_CHART_LABELS = ['Funny', 'Caring', 'Loyal', 'Creative', 'Horny', 'Smart', 'Attractive']
+WAIFU_SCORE_GRAPH_CHART_LABELS = ['Housewife capabilities', 'Cuteness', 'Bedroom skills', 'Charm', 'Loyalty']
+
+def create_mask(string):
+    string = string.casefold().replace(' ', '')
+    return int.from_bytes(md5(string.encode()).digest(), 'big') & 0xffffffffffffffff
+
+
+MASK_MAP = [create_mask(string) for string in WAIFU_SCORE_GRAPH_CHART_LABELS]
+
+STAT_COUNT = len(WAIFU_SCORE_GRAPH_CHART_LABELS)
+
+def get_multiplier_fields(value):
+    positive = [(value - 1) % STAT_COUNT, (value + 1) % STAT_COUNT]
+    negative = [index for index in range(STAT_COUNT) if (index != value) and (value not in positive)]
+    
+    return positive, negative
+
+def generate_multiplier_fields():
+    return {index: get_multiplier_fields(index) for index in range(STAT_COUNT)}
+
+MULTIPLIER_FIELDS = generate_multiplier_fields()
+MULTIPLIER_FACTOR = 1.0 / 4.0
+MAX_MULTIPLIER = 10.0 * MULTIPLIER_FACTOR
+
 
 WAIFU_SCORE_GRAPH_CHART_OPTIONS = {
     'scale': {
         'ticks': {
-            'suggestedMin': 2,
+            'suggestedMin': 0,
             'suggestedMax': 10,
             'fontColor': 'white',
             'backdropColor': 'transparent',
@@ -35,50 +55,49 @@ WAIFU_SCORE_GRAPH_CHART_OPTIONS = {
 }
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, name="waifu-score-preview")
+@SLASH_CLIENT.interactions(is_global=True)
 async def waifu_score(
     event,
+    user: ('user', 'Select someone else?') = None,
 ):
-    user_id = event.user.id
-    """
-    RANDOM_GENERATOR.seed(user_id)
+    if user is None:
+        user = event.user
     
-    stats = [RANDOM_GENERATOR.randint(0, 10) for _ in range(7)]
+    user_id = user.id
     
-    extra_index = RANDOM_GENERATOR.randint(0, 6)
-    value = stats[extra_index] + RANDOM_GENERATOR.randint(0, 10)
-    if value > 10:
-        value = 10
-    stats[extra_index] = value
-    """
     color_mask = (user_id >> 22) & 0xffffff
-    stat_mask = (((user_id & ((1 << 22) - 1)) ^ color_mask) * (user_id >> (22 + 24)))
+    user_mask = (user_id >> (22 + 24)) | (color_mask << 21)
     
-    roll = stat_mask % 7
-    print(roll)
-    if roll:
-        stat_mask = ((stat_mask & ((1 << roll) - 1)) << (24 - roll)) | (stat_mask >> roll)
+    stats = [(mask & user_mask) % 11 for mask in MASK_MAP]
     
     
-    stats = []
+    bonuses = [0.0 for x in range(STAT_COUNT)]
     
-    for n in range(7):
-        stat = ((stat_mask) & 32767) % 11
-        stats.append(stat)
-        stat_mask >>= 1
-    
-    
-    for _ in range(0, 1 + (not roll)):
-        choice = stat_mask % 7
-        value = stats[choice] + (stat_mask & 1023) % 11
+    for index in range(STAT_COUNT):
+        bonus = stats[index] * MULTIPLIER_FACTOR
+        positive, negative = MULTIPLIER_FIELDS[index]
         
+        local_bonus = (bonus / len(positive))
+        for index in positive:
+            bonuses[index] += local_bonus
+        
+        bonus = MAX_MULTIPLIER - bonus
+        
+        local_bonus = (bonus / len(negative))
+        for index in negative:
+            bonuses[index] += local_bonus
+    
+    for index in range(STAT_COUNT):
+        bonus = bonuses[index]
+        bonus = floor(bonus)
+        
+        value = stats[index]
+        
+        value = value + bonus
         if value > 10:
             value = 10
         
-        stats[roll] = value
-        
-        stat_mask >>= 1
-    
+        stats[index] = value
     
     red = str(color_mask & 0xff0000)
     green = str(color_mask & 0x00ff00)
@@ -102,7 +121,7 @@ async def waifu_score(
     chart_url = f'https://quickchart.io/chart?width=500&height=300&c={quote(data)}'
     
     return Embed(
-        f'{event.user:f}\'s waifu score',
+        f'{user:f}\'s waifu score',
         color = color_mask,
     ).add_image(
         chart_url,
