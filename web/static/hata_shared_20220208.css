@@ -1079,16 +1079,20 @@ section mark {
 
 
 .md h1 {
-    margin-left: calc(0px - var(--font-generic-title-size));
-    padding-left: var(--font-generic-title-size);
+    margin-left: calc(0px - var(--size-anchor-title-spacing));
+    padding-left: var(--size-anchor-title-spacing);
 }
 
 .md h1 .anchor {
     width: calc(var(--font-generic-title-size) * var(--size-anchor-scale));
     height: calc(var(--font-generic-title-size) * var(--size-anchor-scale));
-    margin-left: calc(0px - var(--font-generic-title-size));
+    margin-left: calc(0px - var(--size-anchor-title-spacing));
 }
 
+.md h2 {
+    margin-left: calc(0px - var(--size-anchor-medium-title-spacing));
+    padding-left: var(--size-anchor-medium-title-spacing);
+}
 
 .md h2 .anchor {
     width: calc(var(--font-generic-medium-title-size) * var(--size-anchor-scale));
@@ -1096,9 +1100,13 @@ section mark {
     margin-left: calc(0px - var(--size-anchor-medium-title-spacing));
 }
 
+.md h3 {
+    margin-left: calc(0px - var(--size-anchor-sub-title-spacing));
+    padding-left: var(--size-anchor-sub-title-spacing);
+}
 
 .md h3 .anchor {
     width: calc(var(--font-generic-sub-title-size) * var(--size-anchor-scale));
     height: calc(var(--font-generic-sub-title-size) * var(--size-anchor-scale));
-    margin-left: calc(0px - var(-size-anchor-title-spacing));
+    margin-left: calc(0px - var(--size-anchor-sub-title-spacing));
 }

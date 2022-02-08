@@ -28,7 +28,7 @@
     max-width: var(--size-content-max-width);
 }
 
-.main_block h1, .main_block h4, .main_block h3 {
+.main_block h1, .main_block h2, .main_block h3 {
     padding-top: var(--size-title-spacing);
     padding-bottom: var(--size-generic-underline-spacing);
     border-bottom-width: var(--size-generic-underline);
