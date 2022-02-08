@@ -7,11 +7,14 @@
 </script>
 {% endblock head_extra %}
 
-{% block head_left %}
-<div class="overflow_left_cut">
-    {{ back_path|safe }}
+{% block header_path %}
+<div class="header_left_overflow_cut">
+    <div class="overflow">
+        {{ back_path|safe }}
+    </div>
 </div>
-{% endblock head_left %}
+{% endblock header_path %}
+
 
 {% block body %}
 <div class="content_block">

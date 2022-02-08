@@ -8,11 +8,11 @@
     {% include 'hata_meta_generic.html' %}
 
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_shared_20221230.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_guides_20220204.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_shared_20220207.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_guides_20220207.css') }}">
 
     <!-- JS -->
-    {% include 'hata_header_theme_picker_js.html' %}
+    {% include 'hata_header_js.html' %}
 </head>
 <body>
     <nav class="header_menu">
@@ -23,7 +23,7 @@
 
             {% block header_self_link %}{% endblock %}
 
-            <a href='/#'>
+            <a href='/project/hata/docs/hata'>
                 Documentation
             </a>
             {% include 'hata_header_github_button.html' %}
@@ -35,6 +35,9 @@
             {% include 'hata_header_theme_picker.html' %}
         </div>
     </nav>
+
+    <div class="background"></div>
+
     <section class="main_block">
         {% block body %}{% endblock %}
     </section>

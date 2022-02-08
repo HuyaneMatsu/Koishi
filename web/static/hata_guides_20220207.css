@@ -1,7 +1,7 @@
 :root {
     --size-title-spacing: 2rem;
 
-    --font-color-link: rgb(255 212 0);
+    --font-color-link: rgb(203 255 219);
     --font-color-link-hover: rgb(174 251 255);
 
     --size-content-max-width: 1200px;
@@ -16,12 +16,11 @@
 }
 
 [variable-theme="white"] {
-    --font-color-link: rgb(189 156 0);
+    --font-color-link: rgb(0 102 31);
     --font-color-link-hover: rgb(0 141 149);
 }
 
 .main_block {
-    margin-top: var(--size-header-height);
     margin-left: auto;
     margin-right: auto;
     margin-bottom: var(--size-content-spacing-bot);
@@ -29,7 +28,7 @@
     max-width: var(--size-content-max-width);
 }
 
-.main_block h3, .main_block h4, .main_block h5 {
+.main_block h1, .main_block h4, .main_block h3 {
     padding-top: var(--size-title-spacing);
     padding-bottom: var(--size-generic-underline-spacing);
     border-bottom-width: var(--size-generic-underline);

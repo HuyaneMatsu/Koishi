@@ -6,46 +6,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_docs_20211227.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_shared_20220207.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_docs_20220207.css') }}">
 
     <!-- JS -->
-    {% include "hata_header_theme_picker_js.html" %}
+    {% include "hata_header_js.html" %}
     {% block head_extra %}{% endblock %}
 
     <title>Hata Docs{% if (title is not none and title) %} - {{title}}{% endif %}</title>
 </head>
 <body>
-    <div class="header">
-        <div class="header_block_left">
-            {% block head_left %}{% endblock %}
+    <nav class="header_menu with_search">
+        <div class="header_left">
+            <details class="burger_1200" id="header_left_burger">
+                <summary>
+                    <img src="/static/hamburger.svg">
+                </summary>
+                <details-menu>
+                    <a href="/project/hata">
+                        Hata
+                    </a>
+
+                    <a href="/project/hata/guides/">
+                        Guides
+                    </a>
+
+                    <a href="/project/hata/docs/hata" class="selected">
+                        Documentation
+                    </a>
+
+                    {% include 'hata_header_github_button.html' %}
+                </details-menu>
+            </details>
+
+            <div class="burgerable_1200">
+                <a href="/project/hata">
+                    Hata
+                </a>
+
+                <a href="/project/hata/guides/">
+                    Guides
+                </a>
+
+                <a href="/project/hata/docs/hata" class="selected">
+                    Documentation
+                </a>
+
+                {% include 'hata_header_github_button.html' %}
+            </div>
+
+            {% block header_path %}{% endblock %}
+
         </div>
-        <div class="header_block_right">
+        <div class="header_right">
             <form class="header_search" method="POST" action="{{ url_for('docs.search') }}">
                 {{ search_form.hidden_tag() }}
-                <div class="entry">
-                    {{ search_form.query }}
-                </div>
+                <img src="/static/search.svg">
+                {{ search_form.query }}
                 <div class="submit">
+                    <img src="/static/arrow_left_to_right.svg">
                     {{ search_form.submit }}
                 </div>
             </form>
-            <details class="header_theme_picker" id="header_theme_list_spacer">
-                <summary>
-                    Themes
-                </summary>
-                <div class="header_theme_list_spacer"></div>
-                <details-menu class="header_theme_list_box">
-                    <div class="header_theme_list">
-                        <a class="header_theme_list_element" onclick="set_theme('black')">Black</a>
-                        <a class="header_theme_list_element" onclick="set_theme('dark')">Dark</a>
-                        <a class="header_theme_list_element" onclick="set_theme('white')">White</a>
-                    </div>
-                </details-menu>
-            </details>
+
+            {% include 'hata_header_theme_picker.html' %}
         </div>
-    </div>
-    <div class="main_block">
+    </nav>
+
+    <div class="background"></div>
+
+    <section class="main_block">
         {% block body %}{% endblock %}
-    </div>
+    </section>
+
 </body>
 </html>

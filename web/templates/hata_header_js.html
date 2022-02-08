@@ -10,16 +10,25 @@
         document.documentElement.setAttribute('variable-theme', theme_value);
     }
 
-    function turn_off_theme_picker(event){
-        if (event.target.tagName == 'SUMMARY'){
+    function turn_off_details(event){
+        var tag_name = event.target.tagName
+        if ((tag_name == 'SUMMARY') || (tag_name == 'IMG')) {
             return;
         }
 
-        var element = document.getElementById('header_theme_list_spacer');
+        var element
+
+        element = document.getElementById('header_theme_list_spacer');
         if (element.open){
             element.open = false;
         }
+     
+        element = document.getElementById('header_left_burger');
+        if (element.open){
+            element.open = false;
+        }
+       
     }
 
-    document.onclick = turn_off_theme_picker;
+    document.onclick = turn_off_details;
 </script>

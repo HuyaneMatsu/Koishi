@@ -60,7 +60,8 @@ class DocsWrapper:
         structure_html = build_html_structure(structure)
         structure_js = build_js_structure(structure)
         
-        return render_template('hata_docs_content.html',
+        return render_template(
+            'hata_docs_content.html',
             title = unit.name,
             content = content,
             search_form = search_form,

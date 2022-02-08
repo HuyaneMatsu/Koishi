@@ -8,11 +8,11 @@
     {% include 'hata_meta_generic.html' %}
 
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_index_page_20220205.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_shared_20221230.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_index_20220205.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='hata_shared_20220207.css') }}">
 
     <!-- JS -->
-    {% include 'hata_header_theme_picker_js.html' %}
+    {% include 'hata_header_js.html' %}
 </head>
 <body>
     <nav class="header_menu">
@@ -47,19 +47,19 @@
     <section class="feature_list">
         <div class="content">
             <div class="column_1">
-                <h3> What is hata </h3>
-                <mark> {{
+                <h1> What is hata </h1>
+                <mark>{{
                     'Hata is an async Discord API wrapper written in Python named after Hata no Kokoro running '
                     'on top of scarletio.'
-                }} </mark>
+                }}</mark>
 
-                <h5> Features </h5>
+                <h3> Features </h3>
 
                 <ul>
-                    <li> {{ 'Asynchronous using async / await syntax' }} </li>
-                    <li> {{ 'Feature rich API' }} </li>
-                    <li> {{ 'Object oriented design' }} </li>
-                    <li> {{ 'Automatic sharding' }} </li>
+                    <li>{{ 'Asynchronous using async / await syntax' }}</li>
+                    <li>{{ 'Feature rich API' }}</li>
+                    <li>{{ 'Object oriented design' }}</li>
+                    <li>{{ 'Automatic sharding' }}</li>
                 </ul>
             </div>
             <div class="column_2">
@@ -69,7 +69,7 @@
                         <img src="/static/gear.svg">
                     </div>
                     <div class="text">
-                        <h5>{{ 'Multiple simultaneous clients' }}</h5>
+                        <h3>{{ 'Multiple simultaneous clients' }}</h3>
                         <mark>{{
                             'Hata can run multiple clients from the same instance without sacrificing performance'
                         }}</mark>
@@ -81,7 +81,7 @@
                         <img src="/static/lighting.svg">
                     </div>
                     <div class="text">
-                        <h5>{{ 'Performant' }}</h5>
+                        <h3>{{ 'Performant' }}</h3>
                         <mark>{{
                             'Fast concurrent code using async/await syntax, cache control, PyPy support and more!'
                         }}</mark>
@@ -93,7 +93,7 @@
                         <img src="/static/clock.svg">
                     </div>
                     <div class="text">
-                        <h5>{{ 'Newest API features' }}</h5>
+                        <h3>{{ 'Newest API features' }}</h3>
                         <mark>{{
                             'Whatever Discord decides to release/update/break Hata will support it natively in no time!'
                         }}</mark>
@@ -105,7 +105,7 @@
                         <img src="/static/code.svg">
                     </div>
                     <div class="text">
-                        <h5>{{ '100% Python' }}</h5>
+                        <h3>{{ '100% Python' }}</h3>
                         <mark>{{
                             'Completely relies on Python! Easy to read, easy to understand, easy to code.'
                         }}</mark>
@@ -119,7 +119,7 @@
         <div class="content">
             <div class="row">
                 <div class="section_title">
-                    <h3>Getting started</h3>
+                    <h1>Getting started</h1>
                 </div>
             </div>
 
@@ -131,11 +131,11 @@
                             <img src="/static/discord.svg">
                         </div>
                         <div class="text">
-                            <h5> Support server </h5>
-                            <mark> {{
+                            <h3> Support server </h3>
+                            <mark>{{
                                 'If you have issues, suggestions, want to contribute, or just want to hang out, '
                                 'join our discord server.'
-                            }} </mark>
+                            }}</mark>
                         </div>
                     </a>
                 </div>
@@ -145,10 +145,10 @@
                             <img src="/static/notes.svg">
                         </div>
                         <div class="text">
-                            <h5> Guides </h5>
-                            <mark> {{
+                            <h3> Guides </h3>
+                            <mark>{{
                                 'First time creating a Discord bot, or want to get proficient with the library.'
-                            }} </mark>
+                            }}</mark>
                         </div>
                     </a>
                 </div>

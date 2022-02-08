@@ -6,4 +6,4 @@ class SearchForm(FlaskForm):
     query = StringField('search', validators=[DataRequired(), Length(min=4, max=100)],
         render_kw={'placeholder': 'Search'})
     
-    submit = SubmitField('GO')
+    submit = SubmitField('')

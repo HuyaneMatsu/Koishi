@@ -145,7 +145,6 @@
     opacity: var(--color-banner-background-opacity);
     background-image: url('./koishi_kokoro_graffiti_censored_by_ashy_opt.jpg');
     background-repeat: no-repeat;
-    background-attachment: local;
     background-position: center;
     background-size: cover;
     width: 100%;
