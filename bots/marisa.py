@@ -1147,7 +1147,7 @@ async def resend(
 ):
     yield
     file = await client.download_attachment(attachment)
-    yield InteractionResponse(file=(file, attachment.name))
+    yield InteractionResponse(file=(attachment.name, file))
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
