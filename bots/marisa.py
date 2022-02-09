@@ -1340,7 +1340,7 @@ if (watchdog is not None):
     class WatchEventHandler:
         def dispatch(self, event):
             extension = EXTENSION_LOADER.get_extension(event.src_path)
-            if (extension is not None) and extension.is_loaded() and (not extension.locked):
+            if (extension is not None) and (not extension.locked):
                 EXTENSION_LOADER.reload(extension.name)
     
     @Marisa.events
