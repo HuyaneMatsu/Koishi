@@ -1134,9 +1134,15 @@ async def test_form(event):
     return Form(
         'This does nothing',
         [
-            TextInput('watch neko')
+            TextInput('watch neko', custom_id='form_value')
         ],
+        custom_id = 'watch_neko',
     )
+
+
+@Marisa.interactions(custom_id='watch_neko', target='form', allowed_mentions=[])
+async def watch_neko(*, form_value):
+    return form_value
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
