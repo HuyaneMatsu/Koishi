@@ -185,7 +185,7 @@ BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
 
 BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED = BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED.copy_with(enabled=False)
 
-BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
+BUTTON_MESSAGE_MOVE_ADD_BY_ID= Button(
     'Enter message id',
     custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
     style = ButtonStyle.violet,
@@ -205,13 +205,13 @@ BUTTON_MESSAGE_MOVE_CLOSE = Button(
 
 MESSAGE_MOVER_COMPONENTS_ENABLED = Row(
     BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED,
-    CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
+    BUTTON_MESSAGE_MOVE_ADD_BY_ID,
     BUTTON_MESSAGE_MOVE_CANCEL,
 )
 
 MESSAGE_MOVER_COMPONENTS_DISABLED = Row(
     BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED,
-    CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
+    BUTTON_MESSAGE_MOVE_ADD_BY_ID,
     BUTTON_MESSAGE_MOVE_CANCEL,
 )
 
@@ -244,16 +244,13 @@ async def cancel_message_mover(event):
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_CLOSE)
 async def close_message_mover(client, event):
-    if (
-        event.user_permissions.can_manage_messages or
-        (event.user is event.message.interaction.user)
-    ):
+    if event.user_permissions.can_manage_messages:
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)
 
 
 async def maybe_call_message_mover_method(event, function):
-    if event.user is not event.message.interaction.user:
+    if not event.user_permissions.can_manage_messages:
         return
     
     try:
@@ -367,7 +364,7 @@ class MessageMoverContext:
     
     async def start(self):
         try:
-            await self.client.interaction_followup_message_create(
+            await self.client.interaction_response_message_create(
                 self.event,
                 embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_NONE),
                 components = MESSAGE_MOVER_COMPONENTS_ENABLED,
@@ -555,10 +552,7 @@ async def add_to_move_group(
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
 async def add_message_by_id_button_click(event):
-    if (
-        event.user_permissions.can_manage_messages or
-        (event.user is event.message.interaction.user)
-    ):
+    if event.user_permissions.can_manage_messages:
         return MESSAGE_MODER_ADD_BY_ID_FORM
 
 
@@ -568,7 +562,7 @@ async def add_message_by_id_form_submit(client, event, *, message_id):
         abort(f'Please submit a message\'s id.')
     
     try:
-        message = await client.get_message(event.channel_id, int(message_id))
+        message = await client.message_get(event.channel_id, int(message_id))
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_message:
             abort('The given id refers to a non-existing message.')
