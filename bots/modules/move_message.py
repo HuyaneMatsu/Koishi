@@ -1,7 +1,7 @@
 from scarletio import Task, WaitTillExc, LOOP_TIME, WaitTillAll, Future
 from hata import Client, Guild, DiscordException, ERROR_CODES, ChannelThread, KOKORO, Emoji, format_loop_time, \
-    mention_channel_by_id, TIMESTAMP_STYLES, Embed
-from hata.ext.slash import abort, Button, Row, ButtonStyle
+    mention_channel_by_id, TIMESTAMP_STYLES, Embed, is_id
+from hata.ext.slash import abort, Button, Row, ButtonStyle, Form, TextInput
 
 from bot_utils.constants import GUILD__SUPPORT
 
@@ -175,6 +175,7 @@ def timeout_message_mover_context(key):
 CUSTOM_ID_MESSAGE_MOVER_SUBMIT = 'message_mover.submit'
 CUSTOM_ID_MESSAGE_MOVER_CANCEL = 'message_mover.cancel'
 CUSTOM_ID_MESSAGE_MOVER_CLOSE = 'message_mover.close'
+CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID = 'message_mover.add_by_id'
 
 BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
     'Submit',
@@ -183,6 +184,12 @@ BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
 )
 
 BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED = BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED.copy_with(enabled=False)
+
+BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
+    'Enter message id',
+    custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
+    style = ButtonStyle.violet,
+)
 
 BUTTON_MESSAGE_MOVE_CANCEL = Button(
     'Cancel',
@@ -198,16 +205,31 @@ BUTTON_MESSAGE_MOVE_CLOSE = Button(
 
 MESSAGE_MOVER_COMPONENTS_ENABLED = Row(
     BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED,
+    CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
     BUTTON_MESSAGE_MOVE_CANCEL,
 )
 
 MESSAGE_MOVER_COMPONENTS_DISABLED = Row(
     BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED,
+    CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
     BUTTON_MESSAGE_MOVE_CANCEL,
 )
 
 MESSAGE_MOVER_COMPONENTS_AFTERLIFE = Row(
     BUTTON_MESSAGE_MOVE_CLOSE,
+)
+
+MESSAGE_MODER_ADD_BY_ID_FORM = Form(
+    'Add message by id to move group',
+    [
+        TextInput(
+            'message\'s id',
+            min_length = 7,
+            max_length = 21,
+            custom_id = 'message_id',
+        )
+    ],
+    custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
 )
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_SUBMIT)
@@ -218,6 +240,7 @@ async def submit_message_mover(event):
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_CANCEL)
 async def cancel_message_mover(event):
     await maybe_call_message_mover_method(event, MessageMoverContext.cancel)
+
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_CLOSE)
 async def close_message_mover(client, event):
@@ -395,7 +418,7 @@ class MessageMoverContext:
     async def add_message(self, event, message):
         messages = self.messages
         if len(messages) == 20:
-            await self.client.interaction_followup_message_create(
+            await self.client.interaction_response_message_create(
                 event,
                 '20 message limit reached',
                 show_for_invoking_user_only = True,
@@ -403,7 +426,7 @@ class MessageMoverContext:
         
         else:
             messages.add(message)
-            await self.client.interaction_followup_message_create(
+            await self.client.interaction_response_message_create(
                 event,
                 embed = self.get_embed(MESSAGE_MOVER_FINALIZATION_REASON_NONE),
                 components = MESSAGE_MOVER_COMPONENTS_ENABLED,
@@ -526,6 +549,37 @@ async def add_to_move_group(
     message,
 ):
     """Adds a message to message move context."""
+    await add_message_to_move_group(event, message)
+
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
+async def add_message_by_id_button_click(event):
+    if (
+        event.user_permissions.can_manage_messages or
+        (event.user is event.message.interaction.user)
+    ):
+        return MESSAGE_MODER_ADD_BY_ID_FORM
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID, target='form')
+async def add_message_by_id_form_submit(client, event, *, message_id):
+    if not is_id(message_id):
+        abort(f'Please submit a message\'s id.')
+    
+    try:
+        message = await client.get_message(event.channel_id, int(message_id))
+    except DiscordException as err:
+        if err.code == ERROR_CODES.unknown_message:
+            abort('The given id refers to a non-existing message.')
+        
+        raise
+    
+    await add_message_to_move_group(event, message)
+    
+
+
+async def add_message_to_move_group(event, message):
     key = (event.user.id, event.channel_id)
     
     try:

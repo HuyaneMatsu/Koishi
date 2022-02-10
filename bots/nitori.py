@@ -10,7 +10,7 @@ from scarletio import sleep
 from hata import Client, Embed, parse_emoji, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, \
     DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji, CHANNEL_TYPES
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
-    wait_for_component_interaction, iter_component_interactions, Select, Option, P
+    wait_for_component_interaction, iter_component_interactions, Select, Option, P, Form, TextInput, TextInputStyle
 
 from bot_utils.constants import GUILD__SUPPORT as TEST_GUILD, ROLE__SUPPORT__MODERATOR
 MODERATOR_ROLE_ID = ROLE__SUPPORT__MODERATOR.id
@@ -130,8 +130,10 @@ async def cake_love(
 ):
     return f'Hmmm, yes, I love {cake_type} {EMOJI_CAKE:e} as well.'
 
-CAKE_NAMES = ['butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless',
-    'unbaked flourless', 'carrot', 'red velvet', ]
+CAKE_NAMES = [
+    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
+    'carrot', 'red velvet'
+]
 
 @cake_love.autocomplete('cake_type') # Define which parameter we want to auto-complete.
 async def autocomplete_cake_type(value):
@@ -1215,6 +1217,407 @@ async def party(client, event):
         'Please start your own party to dance!',
         show_for_invoking_user_only = True,
     )
+
+# command end
+# command start forms introduce-myself
+
+INTRODUCTION_FORM = Form(
+    'Introduce yourself',
+    [
+        TextInput(
+            'What is your name?',
+            min_length = 2,
+            max_length = 128,
+            custom_id = 'name',
+        ),
+        TextInput(
+            'Something about you?',
+            style = TextInputStyle.paragraph,
+            min_length = 64,
+            max_length = 1024,
+            custom_id = 'bio',
+        ),
+    ],
+    custom_id = 'introduction',
+)
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def introduce_myself():
+    """Creates an introduction embed after filling a form."""
+    return INTRODUCTION_FORM
+
+
+@Nitori.interactions(custom_id='introduction', target='form')
+async def introduction_form_submit(event, *, name, bio):
+    return Embed(
+        f'Hi, my name is {name}',
+    ).add_field(
+        'About me',
+        bio,
+    ).add_thumbnail(
+        event.user.avatar_url,
+    )
+
+# command end
+# command start forms add-role
+
+ADD_ROLE_FORM = Form(
+    'Add role', # Any dummy title does it
+    [
+        TextInput(
+            'Additional message to send?',
+            style = TextInputStyle.paragraph,
+            max_length = 512,
+            custom_id = 'message',
+        ),
+    ],
+)
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def add_role(
+    client,
+    event,
+    user: ('user', 'User to add role to'),
+    role: ('role', 'The role to give'),
+):
+    """Add role to a user."""
+    # Check for permissions
+    if not event.user_permissions.can_manage_roles:
+        abort('You need `manage roles` permission to invoke this command.')
+    
+    if not event.guild.cached_permissions_for(client).can_manage_roles:
+        abort('I need `manage roles` permission to execute this command.')
+    
+    if not event.user.has_higher_role_than(role):
+        abort('You must have higher role than the role you are trying to give.')
+    
+    if not client.has_higher_role_than(role):
+        abort('I must have higher role than the role you are trying to give.')
+    
+    # Using `.copy_to` on forms works as well.
+    return ADD_ROLE_FORM.copy_with(
+        title = f'Add role {role.name} to {user.full_name}',
+        custom_id = f'add_role.{user.id}.{role.id}',
+    )
+
+
+@Nitori.interactions(custom_id=re.compile('add_role\.(\d+)\.(\d+)'), target='form')
+async def add_role(client, event, user_id, role_id, *, message):
+    user_id = int(user_id)
+    role_id = int(role_id)
+    
+    yield # acknowledge the even
+    
+    await client.user_role_add(user_id, (event.guild_id, role_id), reason=message)
+    
+    # Try to send DM to the poor being.
+    channel = await client.channel_private_create(user_id)
+    
+    guild = event.guild
+    role = guild.roles[role_id]
+    
+    embed = Embed(
+        description = f'You have received role {role.name} in {guild.name}.',
+    )
+    
+    # Since message doesn't have `required` nor `min_length` passed it can be `None`.
+    if (message is not None):
+        embed.add_field(
+            'Message',
+            message,
+        )
+    
+    try:
+        await client.message_create(channel, embed=embed)
+    except DiscordException as err:
+        # Ignore the exception if the user has dm-s disabled.
+        if err.code != ERROR_CODES.cannot_message_user: # user has dm-s disabled
+            raise
+    
+    # Note: The user might not be cached at this point. Request it.
+    # If you have user caching enabled + intent, it will do nothing.
+    user = await client.user_get(user_id)
+    
+    embed = Embed(
+        description = f'You gave {role.name} to {user.full_name}',
+    )
+    
+    if (message is not None):
+        embed.add_field(
+            'Message',
+            message,
+        )
+    
+    yield embed
+
+# command end
+# command start forms add-waifu
+
+WAIFUS = {}
+
+CUSTOM_ID_WAIFU_FORM = 'waifu.form'
+CUSTOM_ID_WAIFU_AGE = 'waifu.age'
+CUSTOM_ID_WAIFU_BIO = 'waifu.bio'
+CUSTOM_ID_WAIFU_HAIR = 'waifu.hair'
+CUSTOM_ID_WAIFU_NAME = 'waifu.name'
+
+CUSTOM_ID_WAIFU_BIO_REGEX = re.compile('waifu\.(?:description|bio)')
+
+class Waifu:
+    __slots__ = ('age', 'bio', 'hair', 'name', 'user')
+    
+    def __init__(self, age, bio, hair, name, user):
+        self.age = age
+        self.bio = bio
+        self.hair = hair
+        self.name = name
+        self.user = user
+    
+    @property
+    def embed(self):
+        return Embed(
+            self.name,
+            self.bio,
+        ).add_field(
+            'age',
+            self.age,
+            inline = True,
+        ).add_field(
+            'hair',
+            self.hair,
+            inline = True,
+        ).add_footer(
+            f'Added by: {self.user:f}'
+        )
+
+# We will need these 3 in an example later
+
+TEXT_INPUT_WAIFU_BIO = TextInput(
+    'Bio',
+    style = TextInputStyle.paragraph,
+    min_length = 64,
+    max_length = 1024,
+    custom_id = CUSTOM_ID_WAIFU_BIO,
+)
+
+TEXT_INPUT_WAIFU_AGE = TextInput(
+    'Age',
+    min_length = 1,
+    max_length = 1024,
+    custom_id = CUSTOM_ID_WAIFU_AGE,
+)
+
+TEXT_INPUT_WAIFU_HAIR = TextInput(
+    'hair',
+    min_length = 1,
+    max_length = 1024,
+    custom_id = CUSTOM_ID_WAIFU_HAIR,
+)
+
+
+WAIFU_FORM = Form(
+    'Describe your waifu',
+    [
+        TextInput(
+            'Name',
+            min_length = 2,
+            max_length = 64,
+            custom_id = CUSTOM_ID_WAIFU_NAME,
+        ),
+        TEXT_INPUT_WAIFU_BIO,
+        TEXT_INPUT_WAIFU_AGE,
+        TEXT_INPUT_WAIFU_HAIR,
+    ],
+    custom_id = CUSTOM_ID_WAIFU_FORM,
+)
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def add_waifu():
+    """Add a new waifu to the database!"""
+    return WAIFU_FORM
+
+
+@Nitori.interactions(custom_id=CUSTOM_ID_WAIFU_FORM, target='form')
+async def waifu_add_form_submit(
+    event,
+    *,
+    age: CUSTOM_ID_WAIFU_AGE,
+    bio: CUSTOM_ID_WAIFU_BIO_REGEX,
+    hair: CUSTOM_ID_WAIFU_HAIR,
+    name: CUSTOM_ID_WAIFU_NAME,
+):
+    key = name.casefold()
+    if key in WAIFUS:
+        abort('A waifu with the given name is already added.')
+    
+    WAIFUS[key] = waifu = Waifu(age, bio, hair, name, event.user)
+    
+    return waifu.embed
+
+# command end
+# command start get-waifu
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def get_waifu(
+    name: ('str', 'Their name?')
+):
+    """Returns an added waifu."""
+    try:
+        waifu = WAIFUS[name.casefold()]
+    except KeyError:
+        abort(f'There is no waifu named like: {name}.')
+    
+    return waifu.embed
+
+
+@get_waifu.autocomplete('name')
+async def autocomplete_waifu_name(value):
+    if (value is None):
+        # Return the 20 oldest
+        return [waifu.name for waifu, _ in zip(WAIFUS.values(), range(20))]
+    
+    value = value.casefold()
+    return [waifu.name for key, waifu in WAIFUS.items() if value in key]
+
+# command end
+# command start edit-waifu
+
+CUSTOM_ID_WAIFU_EDIT_BASE = 'waifu.edit.'
+CUSTOM_ID_WAIFU_EDIT_REGEX = re.compile('waifu\.edit\.(.*)')
+CUSTOM_ID_WAIFU_FIELD_ALL = re.compile('waifu\.(?P<field>age|bio|hair)')
+
+FIELD_TO_TEXT_INPUT = {
+    'age': TEXT_INPUT_WAIFU_AGE,
+    'bio': TEXT_INPUT_WAIFU_BIO,
+    'hair': TEXT_INPUT_WAIFU_HAIR,
+}
+
+FIELD_TO_ATTRIBUTE = {
+    'age': Waifu.age,
+    'bio': Waifu.bio,
+    'hair': Waifu.hair,
+}
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def edit_waifu(
+    event,
+    name: ('str', 'Their name?'),
+    field : (['age', 'bio', 'hair'], 'Which field to edit?'),
+):
+    """Edits a waifu. | You must own her."""
+    key = name.casefold()
+    try:
+        waifu = WAIFUS[key]
+    except KeyError:
+        abort(f'There is no waifu named like: {name}.')
+    
+    if waifu.user is not event.user:
+        abort('You can only edit waifus added by yourself.')
+    
+    text_input = FIELD_TO_TEXT_INPUT[field]
+    
+    # We auto-fill the current value
+    text_input = text_input.copy_with(value=FIELD_TO_ATTRIBUTE[field].__get__(waifu, Waifu))
+    
+    return Form(
+        f'Editing {waifu.name}',
+        [text_input],
+        custom_id = f'{CUSTOM_ID_WAIFU_EDIT_BASE}{key}',
+    )
+
+
+@edit_waifu.autocomplete('name')
+async def autocomplete_waifu_name(event, value):
+    user = event.user
+    
+    if (value is None):
+        # Return the 20 newest oldest
+        return [waifu.name for waifu, _ in zip((waifu for waifu in WAIFUS.values() if waifu.user is user), range(20))]
+    
+    value = value.casefold()
+    return [waifu.name for key, waifu in WAIFUS.items() if value in key and waifu.user is user]
+
+
+@Nitori.interactions(custom_id=CUSTOM_ID_WAIFU_EDIT_REGEX, target='form')
+async def waifu_edit_form_submit(
+    key,
+    *,
+    edited_field: CUSTOM_ID_WAIFU_FIELD_ALL,
+):
+    # Both `group_dict` and `value` might be `None` at cases, so check them if you are not sure.
+    group_dict, value = edited_field
+    field = group_dict['field']
+    
+    waifu = WAIFUS[key]
+    FIELD_TO_ATTRIBUTE[field].__set__(waifu, value)
+    
+    return waifu.embed
+
+# command end
+# command start forms rate-cakes
+
+
+EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+
+CUSTOM_ID_RATE_CAKE = 'rate_cake'
+CUSTOM_ID_RATE_CAKE_FIELD = 'rate_cake.field'
+
+
+CAKE_NAMES = [
+    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
+    'carrot', 'red velvet'
+]
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def rate_cakes(
+    cake_1: ('str', 'Please rate this cake'),
+    cake_2: ('str', 'Please rate this cake') = None,
+    cake_3: ('str', 'Please rate this cake') = None,
+    cake_4: ('str', 'Please rate this cake') = None,
+    cake_5: ('str', 'Please rate this cake') = None,
+):
+    """Rate cakes."""
+    # Filter
+    cakes = {cake for cake in (cake_1, cake_2, cake_3, cake_4, cake_5) if (cake is not None)}
+    
+    return Form(
+        'Rate your cakes',
+        [
+            TextInput(
+                f'Please rate {cake}',
+                min_length = 2,
+                max_length = 128,
+                custom_id = f'{CUSTOM_ID_RATE_CAKE_FIELD}[{cake}]',
+            ) for cake in cakes
+        ],
+        custom_id = CUSTOM_ID_RATE_CAKE,
+    )
+
+@rate_cakes.autocomplete('cake-1', 'cake-2', 'cake-3', 'cake-4', 'cake-5')
+async def autocomplete_cake_type(value):
+    if value is None:
+        return CAKE_NAMES[:20]
+    
+    value = value.casefold()
+    return [cake_name for cake_name in CAKE_NAMES if (value in cake_name)]
+
+
+@Nitori.interactions(custom_id=CUSTOM_ID_RATE_CAKE, target='form')
+async def rate_cake_form_submit(
+    event,
+    *cakes: re.compile(f'{CUSTOM_ID_RATE_CAKE_FIELD}\[(\w+)\]'),
+):
+    user = event.user
+    embed = Embed(f'{user:f}\'s cake ratings').add_thumbnail(user.avatar_url)
+    
+    for (cake, ), rating in cakes:
+        embed.add_field(cake, rating)
+    
+    return embed
 
 # command end
 

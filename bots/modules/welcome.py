@@ -132,14 +132,20 @@ class WelcomeState:
         if content is None:
             return
         
+        welcome_count = self.welcome_count
         emoji = parse_emoji(content)
         if (emoji is not None) and 'wave' in emoji.name.casefold():
-            self.welcome_count += 1
+            welcome_count += 1
         else:
             if 'welcome' in content.casefold():
-                self.welcome_count += 1
+                welcome_count += 1
         
-        if random() * self.welcome_count ** 0.5 >= 1.4:
+        self.welcome_count = welcome_count
+        if welcome_count == 1:
+            self.cancel()
+            return
+        
+        if random() * welcome_count ** 0.5 >= 1.4:
             self.cancel()
             await Koishi.typing(CHANNEL__SUPPORT__SYSTEM)
             await sleep(0.5 + random() * 2.5)

@@ -20,7 +20,7 @@ BAKA_BALL_RESPONSES = [
     'Looks cool',
     '9 / 9',
     'There are many like it',
-    'What\'s that?',
+    'Please don\'t ask me that question again I might cry',
     'I\'m playing now, ask later',
     'You don\'t wanna know Lili',
     'Where is Dai?',
