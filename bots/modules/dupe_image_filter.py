@@ -1,11 +1,13 @@
 from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError
 from scarletio.web_common.headers import CONTENT_LENGTH
 from hata import Embed, KOKORO, seconds_to_elapsed_time, Client, Message, DiscordException, ERROR_CODES, now_as_id, \
-    seconds_to_id_difference
+    seconds_to_id_difference, Guild
 from hata.ext.slash import Button, abort
 from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT: Client
+
+GUILD__KOISHI_CLAN = Guild.precreate(866746184990720020)
 
 E_TAG = IgnoreCaseString('ETag')
 
@@ -332,7 +334,7 @@ class DupeImageFilter:
             FILTERED_CHANNEL_IDS.discard(self.channel_id)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild=[GUILD__KOISHI_CLAN, GUILD__SUPPORT])
 async def dupe_image_filter(
     client,
     event,
