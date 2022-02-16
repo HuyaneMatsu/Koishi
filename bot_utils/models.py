@@ -33,7 +33,7 @@ if DATABASE_NAME is None:
 else:
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
-        String, Boolean
+        String, Boolean, Unicode
     from sqlalchemy.sql.expression import func
     
     BASE = declarative_base()
@@ -83,6 +83,7 @@ else:
     
     WAIFU_LIST_TABLE = waifu_list_model.__table__
     
+    
     class waifu_proposal_model(BASE):
         __tablename__   = 'WAIFU_PROPOSAL'
         id              = Column(Int64, primary_key=True)
@@ -91,6 +92,7 @@ else:
         investment      = Column(Int64)
     
     WAIFU_PROPOSAL_TABLE = waifu_proposal_model.__table__
+    
     
     class auto_react_role_model(BASE):
         __tablename__   = 'AUTO_REACT_ROLE'
@@ -102,6 +104,7 @@ else:
         client_id       = Column(Int64)
     
     AUTO_REACT_ROLE_TABLE = auto_react_role_model.__table__
+    
     
     class item_model(BASE):
         __tablename__   = 'ITEM'
@@ -123,6 +126,7 @@ else:
     
     EMOJI_COUNTER_TABLE = emoji_counter_model.__table__
     
+    
     class sticker_counter_model(BASE):
         __tablename__   = 'STICKER_COUNTER'
         id              = Column(Int64, primary_key=True)
@@ -142,6 +146,7 @@ else:
     
     DS_V2_TABLE = ds_v2_model.__table__
     
+    
     class ds_v2_result_model(BASE):
         __tablename__   = 'DS_V2_RESULT'
         id              = Column(Int64, primary_key=True)
@@ -150,6 +155,17 @@ else:
         best            = Column(Int32)
     
     DS_V2_RESULT_TABLE = ds_v2_result_model.__table__
+    
+    
+    class todo_model(BASE):
+        __tablename__ = 'TODO'
+        id = Column(Int64, primary_key=True)
+        name = Column(Unicode)
+        description = Column(Unicode)
+        created_at = Column(DateTime)
+        creator_id = Column(Int64)
+    
+    TODO_TABLE = todo_model.__table__
     
     
     DB_ENGINE = create_engine(DATABASE_NAME)

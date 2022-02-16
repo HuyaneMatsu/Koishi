@@ -165,12 +165,14 @@ async def reaction_add(client, event):
     timestamp = datetime.utcnow()
     
     async with DB_ENGINE.connect() as connector:
-        await connector.execute(EMOJI_COUNTER_TABLE.insert().values(
-            user_id         = user_id,
-            emoji_id        = emoji.id,
-            timestamp       = timestamp,
-            action_type     = EMOJI_ACTION_TYPE_REACTION,
-        ))
+        await connector.execute(
+            EMOJI_COUNTER_TABLE.insert().values(
+                user_id = user_id,
+                emoji_id = emoji.id,
+                timestamp = timestamp,
+                action_type = EMOJI_ACTION_TYPE_REACTION,
+            )
+        )
 
 
 ORDER_DECREASING = 1
@@ -287,10 +289,10 @@ async def user_top(event,
 
 @EMOJI_COMMANDS.interactions
 async def emoji_top(
-        raw_emoji: ('str', 'Pick an emoji', 'emoji'),
-        months: (range(1, 13), 'The months to get') = 1,
-        action_type: (EMOJI_COMMAND_ACTION_TYPES, ('Choose emoji action type')) = EMOJI_COMMAND_ACTION_TYPE_ALL,
-            ):
+    raw_emoji: ('str', 'Pick an emoji', 'emoji'),
+    months: (range(1, 13), 'The months to get') = 1,
+    action_type: (EMOJI_COMMAND_ACTION_TYPES, ('Choose emoji action type')) = EMOJI_COMMAND_ACTION_TYPE_ALL,
+):
     """List the users using the given emoji the most."""
     emoji = parse_emoji(raw_emoji)
     if emoji is None:
@@ -377,7 +379,9 @@ async def emoji_top(
     return Embed(
         f'Top emoji users of {emoji.name}',
         description,
-    ).add_thumbnail(emoji.url)
+    ).add_thumbnail(
+        emoji.url,
+    )
 
 
 

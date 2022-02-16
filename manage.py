@@ -1,6 +1,6 @@
 import os, sys
 os.environ['HATA_DOCS_ENABLED'] = 'True'
-os.environ['HATA_API_VERSION'] = '9'
+os.environ['HATA_API_VERSION'] = '10'
 os.environ['HATA_RICH_DISCORD_EXCEPTION'] = 'True'
 os.environ['HATA_ALLOW_DEBUG_MESSAGES'] = 'True'
 
