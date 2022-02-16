@@ -54,8 +54,6 @@ PLATFORMS = ('desktop', 'mobile', 'web')
 @SLASH_CLIENT.interactions(is_global=True)
 async def rawr(client, event):
     """Sends a message with everyone from my universe."""
-    yield
-    
     channel = event.channel
     tasks = []
     
