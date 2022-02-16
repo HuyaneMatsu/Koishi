@@ -354,6 +354,14 @@ async def do_transfer(client, event, source_user, target_user, message):
                 )
             )
         
+        await connector.execute(
+            USER_COMMON_TABLE.update(
+                user_common_model.waifu_owner_id == source_user.id,
+            ).values(
+                waifu_owner_id = target_user.id,
+            )
+        )
+        
         if (target_user_entry_id != -1):
             await connector.execute(
                 USER_COMMON_TABLE.update(
