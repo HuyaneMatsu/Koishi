@@ -170,8 +170,8 @@ def create_entry_embed(entry, user):
         ),
         inline = True,
     ).add_field(
-        name,
-        description,
+        entry.name,
+        entry.description,
     ).add_thumbnail(
         user.avatar_url,
     )
