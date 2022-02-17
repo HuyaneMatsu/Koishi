@@ -101,8 +101,8 @@ And much more!
 
 `add-to-move-group` • `all-users` • `ask` • `award` • `bozosort` • `crywolf` • `daily-event` • `delete-from` •
 `delete-till` • `docs-search` • `emoji` • `events` • `extension` • `github-profile` • `heart-event` • `in-role` •
-`latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules` • `sticker` • `take` • `transfer` • `move-message` •
-`move-messages` • `voice`
+`latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules` • `sticker` • `take` • `transfer` • `todo` •
+`move-message` • `move-messages` • `voice`
 
 <h1></h1>
 

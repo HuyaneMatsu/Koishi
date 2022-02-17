@@ -8,7 +8,7 @@ from random import choice
 from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, CHANNEL_TYPES, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
-    StickerFormat, ZEROUSER, ChannelDirectory, Permission, escape_markdown
+    StickerFormat, ZEROUSER, ChannelDirectory, Permission, escape_markdown, GUILDS
 from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from scarletio import WaitTillExc, ReuBytesIO
 from hata.ext.slash.menus import Pagination
@@ -907,21 +907,46 @@ async def in_role(client, event,
     await Pagination(client, event, pages, check=partial_func(in_role_pagination_check, event.user))
 
 
+AVATAR_TYPE_LOCAL = 'local'
+AVATAR_TYPE_GUILD = 'guild'
+AVATAR_TYPE_GLOBAL = 'global'
+AVATAR_TYPE_DEFAULT = 'default'
+
+AVATAR_CHOICES = [
+    AVATAR_TYPE_LOCAL,
+    AVATAR_TYPE_GUILD,
+    AVATAR_TYPE_GLOBAL,
+    AVATAR_TYPE_DEFAULT,
+]
+
 @SLASH_CLIENT.interactions(is_global=True)
-async def avatar(client, event,
+async def avatar(
+    event,
     user : ('user', 'Choose a user!') = None,
+    type_ : (AVATAR_CHOICES, 'Which avatar of the user?') = AVATAR_TYPE_LOCAL,
 ):
     """Shows your or the chosen user's avatar."""
     if user is None:
         user = event.user
+    
+    if type_ == AVATAR_TYPE_LOCAL:
+        url = user.avatar_url_at_as(event.guild_id, size=4096)
+    
+    elif type_ == AVATAR_TYPE_GUILD:
+        url = user.avatar_url_for(event.guild_id, size=4096)
+    
+    elif type_ == AVATAR_TYPE_GLOBAL:
+        url = user.avatar_url_as(size=4096)
+    
+    else:
+        url = user.default_avatar_url
     
     if user.avatar:
         color = user.avatar_hash & 0xffffff
     else:
         color = user.default_avatar.color
     
-    url = user.avatar_url_as(size=4096)
-    return Embed(f'{user:f}\'s avatar', color=color, url=url).add_image(url)
+    return Embed(f'{user:f}\'s {type_} avatar', color=color, url=url).add_image(url)
 
 
 @SLASH_CLIENT.interactions(is_global=True, target='user')
@@ -957,7 +982,7 @@ async def status_(user):
 
 
 @SLASH_CLIENT.interactions(is_global=True)
-async def show_emoji(client, event,
+async def show_emoji(
     emoji: ('str', 'Yes?'),
 ):
     """Shows the given custom emoji."""
@@ -968,7 +993,197 @@ async def show_emoji(client, event,
     if emoji.is_unicode_emoji():
         return 'That\' an unicode emoji, cannot link it.'
     
-    return f'**Name:** {emoji:e} **Link:** {emoji.url}'
+    return f'**Name:** {emoji} **Link:** {emoji.url}'
+
+
+@SLASH_CLIENT.interactions(is_global=True)
+async def emoji(
+    client,
+    event,
+    raw_emoji: ('str', 'The emoji, or it\'s name.', 'emoji'),
+):
+    """Shows details about the given emoji."""
+    
+    # Use goto
+    while True:
+        emoji = parse_emoji(raw_emoji)
+        if (emoji is not None):
+            break
+        
+        # Try resolve emoji from guild's.
+        guild = event.guild
+        if (guild is not None):
+            emoji = guild.get_emoji_like(raw_emoji)
+            if (emoji is not None):
+                break
+        
+        abort('Could not resolve emoji')
+        # Use return or the linter derps out
+        return
+    
+    
+    if emoji.is_unicode_emoji():
+        embed = Embed(
+            f'Unicode Emoji: {emoji.name}',
+        ).add_field(
+            'Internal identifier',
+            (
+                f'```\n'
+                f'{emoji.id}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Unicode',
+            (
+                f'```\n'
+                f'{emoji.unicode}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    else:
+        guild = emoji.guild
+        
+        # If the emoji's creator is unknown, try to request it.
+        if (emoji.user is ZEROUSER) and (guild is not None) and (guild in client.guilds):
+            await client.emoji_get(emoji)
+        
+        
+        embed = Embed(
+            f'Custom emoji: {emoji.name}'
+        ).add_field(
+            'Identifier',
+            (
+                f'```\n'
+                f'{emoji.id}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Animated',
+            (
+                f'```\n'
+                f'{"true" if emoji.animated else "false"}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+        
+        created_at = emoji.created_at
+        
+        embed.add_field(
+            'Created at',
+            (
+                f'```\n'
+                f'{created_at:{DATETIME_FORMAT_CODE}} [{elapsed_time(created_at)} ago]\n'
+                f'```'
+            ),
+        )
+        
+        user = emoji.user
+        if user is ZEROUSER:
+            creator_name = 'unknown'
+        else:
+            creator_name = f'{user.full_name} [{user.id}]'
+        
+        embed.add_field(
+            'Creator',
+            (
+                f'```\n'
+                f'{creator_name}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+        
+        guild_id = emoji.guild_id
+        if guild_id == 0:
+            guild_name = 'unknown'
+        
+        else:
+            guild = GUILDS.get(guild_id, None)
+            if guild is None:
+                guild_name = str(guild_id)
+            
+            else:
+                guild_name = f'{guild.name} [{guild_id}]'
+        
+        embed.add_field(
+            'Guild',
+            (
+                f'```\n'
+                f'{guild_name}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+        
+        roles = emoji.roles
+        if roles is None:
+            roles_description = 'N/A'
+        
+        else:
+            roles_description_parts = []
+            
+            limit = len(roles)
+            if limit > 10:
+                truncated_count = limit - 10
+                limit = 10
+            else:
+                truncated_count = 0
+            
+            index = 0
+            while True:
+                role = roles[index]
+                roles_description_parts.append(role.name)
+                
+                index += 1
+                if index == limit:
+                    break
+                
+                roles_description_parts.append('\n')
+                continue
+            
+            if truncated_count:
+                roles_description_parts.append('\n\n... ')
+                roles_description_parts.append(str(truncated_count))
+                roles_description_parts.append(' truncated...')
+            
+            roles_description = ''.join(roles_description_parts)
+            roles_description_parts = None
+        
+        
+        embed.add_field(
+            'Roles',
+            (
+                f'```\n'
+                f'{roles_description}\n'
+                f'```'
+            ),
+        )
+        
+        emoji.add_field(
+            'Available',
+            (
+                f'```\n'
+                f'{"true" if emoji.available else "false"}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Managed',
+            (
+                f'```\n'
+                f'{"true" if emoji.managed else "false"}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    
+    return embed
 
 
 @SLASH_CLIENT.interactions(name='id-to-time', is_global=True)
