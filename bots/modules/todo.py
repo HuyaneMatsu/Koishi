@@ -50,7 +50,7 @@ async def request_entries():
             TODOEntry(*result)
 
 
-KOKORO.run(request_entries)
+KOKORO.run(request_entries())
 
 
 TODO_FORM_SUBMIT_CUSTOM_ID = 'todo.add.form'
