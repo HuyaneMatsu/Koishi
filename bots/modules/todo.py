@@ -225,7 +225,7 @@ async def todo_add_form_submit(
     entry = TODOEntry(entry_id, name, description, created_at, creator_id)
     
     embed = create_entry_embed(entry, event.user)
-    embed.add_author('Entry created')
+    embed.add_author(None, 'Entry created')
     return embed
 
 
@@ -333,7 +333,7 @@ async def del_(
     
     user = await client.user_get(entry.creator_id)
     embed = create_entry_embed(entry, user)
-    embed.add_author('Are you sure to delete this entry?')
+    embed.add_author(None, 'Are you sure to delete this entry?')
     
     return InteractionResponse(
         embed = embed,
@@ -377,9 +377,9 @@ async def del_approval(
     embed = create_entry_embed(entry, user)
     
     if state == '1':
-        embed.add_author('Entry deleted')
+        embed.add_author(None, 'Entry deleted')
     else:
-        embed.add_author('Deleting entry cancelled')
+        embed.add_author(None, 'Deleting entry cancelled')
     
     return InteractionResponse(embed=embed, components=None)
 
@@ -439,5 +439,5 @@ async def edit_form_submit(
     
     user = await client.user_get(entry.creator_id)
     embed = create_entry_embed(entry, user)
-    embed.add_author('Entry edited')
+    embed.add_author(None, 'Entry edited')
     return embed
