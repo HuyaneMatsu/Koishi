@@ -112,7 +112,7 @@ def _try_resolve_entries(value):
             value = value.casefold()
             for entry in TODO_ENTRIES.values():
                 sort_key = _entry_sot_key_by_value(entry, value)
-                if sort_key is None:
+                if sort_key is not None:
                     to_sort.append((sort_key, entry))
             
             to_sort.sort(key=_entry_by_value_sort_key)
@@ -186,9 +186,20 @@ TODO = SLASH_CLIENT.interactions(
 )
 
 
+def _autocomplete_format_entry(entry):
+    entry_name = entry.name
+    if len(entry_name) > 60:
+        entry_name = entry_name[:60]
+        postfix = '...'
+    else:
+        postfix = ''
+    
+    return f'#{entry.entry_id} {entry_name}{postfix}'
+
+
 @TODO.autocomplete('name')
 async def autocomplete_entry_name(value):
-    return [entry.name for entry in _try_resolve_entries(value)]
+    return [_autocomplete_format_entry(entry) for entry in _try_resolve_entries(value)]
 
 
 @TODO.interactions
