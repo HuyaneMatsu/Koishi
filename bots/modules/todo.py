@@ -143,7 +143,7 @@ def try_resolve_entry(name):
 
 
 def has_permission(event):
-    return not event.user.has_role(ROLE__SUPPORT__TESTER)
+    return event.user.has_role(ROLE__SUPPORT__TESTER)
 
 
 def check_permission(event):
