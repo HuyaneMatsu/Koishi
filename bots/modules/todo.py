@@ -167,6 +167,7 @@ def create_entry_embed(entry, user):
         (
             f'```\n'
             f'{entry.created_at:{DATETIME_FORMAT_CODE}}\n'
+            f'```'
         ),
         inline = True,
     ).add_field(
@@ -187,7 +188,7 @@ TODO = SLASH_CLIENT.interactions(
 
 @TODO.autocomplete('name')
 async def autocomplete_entry_name(value):
-    return _try_resolve_entries(value)
+    return [entry.name for entry in _try_resolve_entries(value)]
 
 
 @TODO.interactions
