@@ -449,6 +449,9 @@ async def edit_form_submit(
             )
         )
     
+    entry.name = name
+    entry.description = description
+    
     user = await client.user_get(entry.creator_id)
     embed = create_entry_embed(entry, user)
     embed.add_author(None, 'Entry edited')
