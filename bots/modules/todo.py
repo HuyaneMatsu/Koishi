@@ -194,7 +194,7 @@ def _autocomplete_format_entry(entry):
     else:
         postfix = ''
     
-    return f'#{entry.entry_id} {entry_name}{postfix}'
+    return  f'#{entry.entry_id}', f'#{entry.entry_id} {entry_name}{postfix}'
 
 
 @TODO.autocomplete('name')
