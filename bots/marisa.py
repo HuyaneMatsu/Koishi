@@ -1201,7 +1201,7 @@ async def test_form_response_repr_mc():
     return InteractionResponse('_ _', components=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON)
 
 @Marisa.interactions(custom_id=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID)
-async def test_form_response_repr_mc_form_submit(event):
+async def test_form_response_repr_mc_call_form(event):
     if event.user.has_role(ROLE__SUPPORT__TESTER):
         return TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_FORM
 
@@ -1209,6 +1209,84 @@ async def test_form_response_repr_mc_form_submit(event):
 async def test_form_response_repr_mc_form_submit(client, event):
     await client.interaction_component_message_edit(event, f'{event.user:f} submitted')
     return repr(event)
+
+
+TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_CUSTOM_ID = 'test.component_responding_double_yield'
+TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_BUTTON = Button(
+    'click',
+    custom_id = TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_CUSTOM_ID,
+)
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_component_responding_double():
+    return InteractionResponse('_ _', components=TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_BUTTON)
+
+
+@Marisa.interactions(custom_id=TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_CUSTOM_ID)
+async def test_component_responding_click(event):
+    if event.user.has_role(ROLE__SUPPORT__TESTER):
+        yield
+        yield 'clicked'
+        yield 'followup'
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_double():
+    yield 'followup'
+    yield 'cake'
+
+
+TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_CUSTOM_ID = 'test.form_responding_double.application_command'
+TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_FORM = Form(
+    'Pls submit',
+    [
+        TextInput('pain')
+    ],
+    custom_id = TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_CUSTOM_ID,
+)
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_form_responding_ac_double():
+    return TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_FORM
+
+@Marisa.interactions(custom_id=TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_CUSTOM_ID, target='form')
+async def test_form_component_response_double(event):
+    yield 'submitted from command'
+    yield 'double kill'
+
+
+TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID = 'test.form_responding_double.message_component'
+TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_FORM = Form(
+    'Pls submit',
+    [
+        TextInput('pain')
+    ],
+    custom_id = TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID,
+)
+
+TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_BUTTON = Button(
+    'click',
+    custom_id = TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID,
+)
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_form_responding_mc_double():
+    return InteractionResponse('_ _', components=TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_BUTTON)
+
+@Marisa.interactions(custom_id=TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID)
+async def test_form_response_mc_responding_double_call_form(event):
+    if event.user.has_role(ROLE__SUPPORT__TESTER):
+        return TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_FORM
+
+@Marisa.interactions(custom_id=TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID, target='form')
+async def test_form_responding_mc_double_form_submit(client, event):
+    yield 'submitted from component'
+    yield 'double kill'
+
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
