@@ -1150,17 +1150,69 @@ TEST_COMPONENT_RESPONSE_BUTTON = Button(
     custom_id = TEST_COMPONENT_RESPONSE_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def test_component_response():
     return InteractionResponse('_ _', components=TEST_COMPONENT_RESPONSE_BUTTON)
 
 
 @Marisa.interactions(custom_id=TEST_COMPONENT_RESPONSE_CUSTOM_ID)
 async def test_component_response_click(client, event):
-    await client.interaction_response_message_create(event, 'ayyy', show_for_invoking_user_only=True)
+    if event.user.has_role(ROLE__SUPPORT__TESTER):
+        await client.interaction_response_message_create(event, 'ayyy', show_for_invoking_user_only=True)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID = 'test.form_response_repr.application_command'
+TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_FORM = Form(
+    'Pls submit',
+    [
+        TextInput('pain')
+    ],
+    custom_id = TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID,
+)
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_form_response_repr_ac():
+    return TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_FORM
+
+@Marisa.interactions(custom_id=TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID, target='form')
+async def test_form_response_repr_ac_form_submit(event):
+    return repr(event)
+
+
+TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID = 'test.form_response_repr.message_component'
+TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_FORM = Form(
+    'Pls submit',
+    [
+        TextInput('pain')
+    ],
+    custom_id = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID,
+)
+
+TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON = Button(
+    'click',
+    custom_id = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID,
+)
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_form_response_repr_mc():
+    return InteractionResponse('_ _', components=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON)
+
+@Marisa.interactions(custom_id=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID)
+async def test_form_response_repr_mc_form_submit(event):
+    if event.user.has_role(ROLE__SUPPORT__TESTER):
+        return TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_FORM
+
+@Marisa.interactions(custom_id=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID, target='form')
+async def test_form_response_repr_mc_form_submit(client, event):
+    await client.interaction_component_message_edit(event, f'{event.user:f} submitted')
+    return repr(event)
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def resend(
     client,
     event,
