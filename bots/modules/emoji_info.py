@@ -59,9 +59,13 @@ async def emoji_info_preview(
         if (emoji.user is ZEROUSER) and (guild is not None) and (guild in client.guilds):
             await client.emoji_get(emoji)
         
+        url = emoji.url
         
         embed = Embed(
-            f'Custom emoji: {emoji.name}'
+            f'Custom emoji: {emoji.name}',
+            url = url,
+        ).add_image(
+            url,
         ).add_field(
             'Identifier',
             (
@@ -86,7 +90,7 @@ async def emoji_info_preview(
             'Created at',
             (
                 f'```\n'
-                f'{created_at:{DATETIME_FORMAT_CODE}} [{elapsed_time(created_at)} ago]\n'
+                f'{created_at:{DATETIME_FORMAT_CODE}} | {elapsed_time(created_at)} ago\n'
                 f'```'
             ),
         )
@@ -95,7 +99,7 @@ async def emoji_info_preview(
         if user is ZEROUSER:
             creator_name = 'unknown'
         else:
-            creator_name = f'{user.full_name} [{user.id}]'
+            creator_name = f'{user.full_name}\n{user.id}'
         
         embed.add_field(
             'Creator',
@@ -117,7 +121,7 @@ async def emoji_info_preview(
                 guild_name = str(guild_id)
             
             else:
-                guild_name = f'{guild.name} [{guild_id}]'
+                guild_name = f'{guild.name}\n{guild_id}'
         
         embed.add_field(
             'Guild',
@@ -173,7 +177,7 @@ async def emoji_info_preview(
             ),
         )
         
-        emoji.add_field(
+        embed.add_field(
             'Available',
             (
                 f'```\n'

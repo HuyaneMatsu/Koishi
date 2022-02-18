@@ -461,3 +461,13 @@ async def sticker_delete(client, sticker):
     embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})', description)
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
+
+
+@Satori.events
+async def initial_request_stickers(client):
+    await client.sticker_guild_get_all(GUILD__SUPPORT, force_update=True)
+
+
+@Satori.events
+async def initial_request_emmojis(client):
+    await client.emoji_guild_get_all(GUILD__SUPPORT, force_update=True)
