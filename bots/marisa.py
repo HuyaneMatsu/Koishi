@@ -1139,10 +1139,25 @@ async def test_form(event):
         custom_id = 'watch_neko',
     )
 
-
 @Marisa.interactions(custom_id='watch_neko', target='form', allowed_mentions=[])
 async def watch_neko(*, form_value):
     return form_value
+
+
+TEST_COMPONENT_RESPONSE_CUSTOM_ID = 'test.component_response'
+TEST_COMPONENT_RESPONSE_BUTTON = Button(
+    'click',
+    custom_id = TEST_COMPONENT_RESPONSE_CUSTOM_ID,
+)
+
+@Marisa.interactions(guild=GUILD__SUPPORT)
+async def test_component_response():
+    return InteractionResponse('_ _', components=TEST_COMPONENT_RESPONSE_BUTTON)
+
+
+@Marisa.interactions(custom_id=TEST_COMPONENT_RESPONSE_CUSTOM_ID)
+async def test_component_response_click(client, event):
+    await client.interaction_response_message_create(event, 'ayyy', show_for_invoking_user_only=True)
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT)

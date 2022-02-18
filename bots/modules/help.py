@@ -132,7 +132,6 @@ async def rules(
 
 @SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_VERIFIED_CUSTOM_ID)
 async def claim_verified_role(client, event):
-    await client.interaction_component_acknowledge(event)
     user = event.user
     if user.has_role(ROLE__SUPPORT__VERIFIED):
         response = f'You already have {ROLE__SUPPORT__VERIFIED.name} role claimed.'
@@ -140,12 +139,11 @@ async def claim_verified_role(client, event):
         await client.user_role_add(user, ROLE__SUPPORT__VERIFIED)
         response = f'You claimed {ROLE__SUPPORT__VERIFIED.name} role.'
     
-    await client.interaction_followup_message_create(event, response, show_for_invoking_user_only=True)
+    await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
 
 
 @SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID)
 async def claim_announcements_role(client, event):
-    await client.interaction_component_acknowledge(event)
     user = event.user
     if user.has_role(ROLE__SUPPORT__ANNOUNCEMENTS):
         await client.user_role_delete(user, ROLE__SUPPORT__ANNOUNCEMENTS)
@@ -154,7 +152,7 @@ async def claim_announcements_role(client, event):
         await client.user_role_add(user, ROLE__SUPPORT__ANNOUNCEMENTS)
         response = f'You claimed {ROLE__SUPPORT__ANNOUNCEMENTS.name} role.'
     
-    await client.interaction_followup_message_create(event, response, show_for_invoking_user_only=True)
+    await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
 
 
 def create_interpreter_info():

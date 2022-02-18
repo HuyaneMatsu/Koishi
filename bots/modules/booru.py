@@ -194,8 +194,7 @@ class BooruCycler(Menu):
             image_url_tag_pair = history[history_length - history_step]
             
             client = self.client
-            await client.interaction_component_acknowledge(event)
-            await client.interaction_followup_message_create(
+            await client.interaction_response_message_create(
                 event,
                 embed = Embed(
                     'Tags',

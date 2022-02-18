@@ -182,9 +182,8 @@ async def change_notification_setting(event,
     
 
 async def change_notification_button_click(client, event, notification_option, enable):
-    await client.interaction_component_acknowledge(event)
     await switch_notification(event.user.id, enable, notification_option)
-    await client.interaction_followup_message_create(
+    await client.interaction_response_message_create(
         event,
         get_notification_change_description(notification_option, enable),
         show_for_invoking_user_only = True,
