@@ -1,4 +1,4 @@
-from hata import Client, Embed, StickerFormat, mention_role_by_id
+from hata import Client, Embed, StickerFormat, mention_role_by_id, DiscordException, ERROR_CODES
 from hata.ext.extension_loader import require
 
 from bot_utils.constants import CHANNEL__SUPPORT__LOG_EMOJI, GUILD__SUPPORT
@@ -72,8 +72,20 @@ def render_all_emoji_field(emoji):
 
 @Satori.events
 async def emoji_create(client, emoji):
-    if emoji.guild is not GUILD__SUPPORT:
+    if emoji.guild_id != GUILD__SUPPORT.id:
         return
+    
+    # We get the creator of the emoji.
+    try:
+        await client.emoji_guild_get(emoji, force_update=True)
+    except ConnectionError:
+        # No internet connection
+        return
+    
+    except DiscordException as err:
+        # Sticker already deleted?
+        if err.code != ERROR_CODES.unknown_emoji:
+            raise
     
     description = render_all_emoji_field(emoji)
     emoji_url = emoji.url
@@ -85,7 +97,7 @@ async def emoji_create(client, emoji):
 
 @Satori.events
 async def emoji_edit(client, emoji, old_attributes):
-    if emoji.guild is not GUILD__SUPPORT:
+    if emoji.guild_id != GUILD__SUPPORT.id:
         return
     
     description_parts = []
@@ -230,7 +242,7 @@ async def emoji_edit(client, emoji, old_attributes):
 
 @Satori.events
 async def emoji_delete(client, emoji):
-    if emoji.guild is not GUILD__SUPPORT:
+    if emoji.guild_id != GUILD__SUPPORT.id:
         return
     
     description = render_all_emoji_field(emoji)
@@ -306,8 +318,20 @@ def render_all_sticker_field(sticker):
 
 @Satori.events
 async def sticker_create(client, sticker):
-    if sticker.guild is not GUILD__SUPPORT:
+    if sticker.guild_id != GUILD__SUPPORT.id:
         return
+    
+    # We get the creator of the sticker.
+    try:
+        await client.sticker_guild_get(sticker, force_update=True)
+    except ConnectionError:
+        # No internet connection
+        return
+    
+    except DiscordException as err:
+        # Sticker already deleted?
+        if err.code != ERROR_CODES.unknown_sticker:
+            raise
     
     description = render_all_sticker_field(sticker)
     sticker_url = sticker.url
@@ -323,7 +347,7 @@ async def sticker_create(client, sticker):
 
 @Satori.events
 async def sticker_edit(client, sticker, old_attributes):
-    if sticker.guild is not GUILD__SUPPORT:
+    if sticker.guild_id != GUILD__SUPPORT.id:
         return
     
     description_parts = []
@@ -454,7 +478,7 @@ async def sticker_edit(client, sticker, old_attributes):
 
 @Satori.events
 async def sticker_delete(client, sticker):
-    if sticker.guild is not GUILD__SUPPORT:
+    if sticker.guild_id != GUILD__SUPPORT.id:
         return
     
     description = render_all_sticker_field(sticker)
@@ -463,11 +487,22 @@ async def sticker_delete(client, sticker):
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
-@Satori.events
+@Satori.events(name='ready')
 async def initial_request_stickers(client):
-    await client.sticker_guild_get_all(GUILD__SUPPORT, force_update=True)
+    try:
+        await client.sticker_guild_get_all(GUILD__SUPPORT)
+    except ConnectionError:
+        # No internet connection
+        return
 
+    client.events.remove(initial_request_stickers, name='ready')
 
-@Satori.events
+@Satori.events(name='ready')
 async def initial_request_emmojis(client):
-    await client.emoji_guild_get_all(GUILD__SUPPORT, force_update=True)
+    try:
+        await client.emoji_guild_get_all(GUILD__SUPPORT)
+    except ConnectionError:
+        # No internet connection
+        return
+    
+    client.events.remove(initial_request_emmojis, name='ready')
