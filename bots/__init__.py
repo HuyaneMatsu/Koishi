@@ -83,6 +83,7 @@ else:
         config.NITORI_TOKEN,
         client_id = config.NITORI_ID,
         application_id = config.NITORI_ID,
+        intents = IntentFlag() - IntentFlag(0).update_by_keys(message_content=True),
         extensions = 'slash',
         random_error_message_getter = random_error_message_getter,
     )
@@ -122,7 +123,6 @@ if MARISA_MODE:
     MARISA_ALLOWED_MODULES.add('extensions')
     MARISA_ALLOWED_MODULES.add('google')
     MARISA_ALLOWED_MODULES.add('log')
-    MARISA_ALLOWED_MODULES.add('emoji_info')
     
     for path in list(MODULE_NAMES):
         if path not in MARISA_ALLOWED_MODULES:
