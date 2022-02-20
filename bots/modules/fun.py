@@ -585,6 +585,7 @@ class SexSpamLock:
 
 SEX_IMAGES = [
     'https://cdn.discordapp.com/attachments/568837922288173058/927858207764918284/no-sex-0000.gif',
+    'https://cdn.discordapp.com/attachments/568837922288173058/944868502676865144/chiruno-maybe-sex.gif',
     'https://cdn.discordapp.com/attachments/568837922288173058/837747879497433158/yes-sex.gif',
     'https://cdn.discordapp.com/attachments/568837922288173058/840676567180771348/yes-sex-hyper-opti.gif',
     'https://cdn.discordapp.com/attachments/568837922288173058/927858614226526228/sex_2_0.png',
@@ -594,14 +595,16 @@ SEX_IMAGES = [
 async def sex(event):
     """You horny?"""
     value = random()
-    if value > 0.100:
+    if value > 0.14:
         level = 0
-    elif value > 0.012:
+    elif value > 0.9:
         level = 1
-    elif value > 0.004:
+    elif value > 0.05:
         level = 2
-    else:
+    elif value > 0.02:
         level = 3
+    else:
+        level = 4
     
     channel_id = event.channel_id
     try:
