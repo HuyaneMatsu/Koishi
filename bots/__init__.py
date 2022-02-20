@@ -16,6 +16,7 @@ if MARISA_MODE:
     Marisa = Client(
         config.MARISA_TOKEN,
         client_id = config.MARISA_ID,
+        # intents = IntentFlag() - IntentFlag(0).update_by_keys(message_content=True),
         http_debug_options = 'canary',
         extensions = ('command_utils', 'slash', 'commands_v2', 'solarlink'),
         prefix = PREFIX__MARISA,

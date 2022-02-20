@@ -67,7 +67,7 @@ TEXT_INPUT_DESCRIPTION = TextInput(
     'Description',
     style = TextInputStyle.paragraph,
     min_length = 2,
-    max_length = 1024,
+    max_length = 1000,
     custom_id = 'description',
 )
 
@@ -172,7 +172,11 @@ def create_entry_embed(entry, user):
         inline = True,
     ).add_field(
         entry.name,
-        entry.description,
+        (
+            f'```sh\n'
+            f'{entry.description}\n'
+            f'```'
+        ),
     ).add_thumbnail(
         user.avatar_url,
     )
@@ -218,6 +222,8 @@ async def todo_add_form_submit(
 ):
     created_at = event.created_at
     creator_id = event.user.id
+    
+    description = description.replace('`', '')
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -427,11 +433,13 @@ async def edit(
 async def edit_form_submit(
     client,
     entry_id,
-    *
+    *,
     name,
     description,
 ):
     entry_id = int(entry_id)
+    
+    description = description.replace('`', '')
     
     try:
         entry = TODO_ENTRIES[entry_id]

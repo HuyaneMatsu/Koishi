@@ -57,7 +57,7 @@ async def emoji_info_preview(
         
         # If the emoji's creator is unknown, try to request it.
         if (emoji.user is ZEROUSER) and (guild is not None) and (guild in client.guilds):
-            await client.emoji_get(emoji)
+            await client.emoji_get(emoji, force_update=True)
         
         url = emoji.url
         
