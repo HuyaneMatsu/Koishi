@@ -597,7 +597,7 @@ async def sex(event):
     value = random()
     if value > 0.14:
         level = 0
-    elif value > 0.9:
+    elif value > 0.09:
         level = 1
     elif value > 0.05:
         level = 2
