@@ -45,9 +45,9 @@
     --color-header-path-font: rgb(255 255 255 / 0.75);
     --color-header-path-select-font: var(--font-header-color);
 
-    --color-header-path-spacing: 0.5rem;
+    --size-header-path-spacing: 0.5rem;
 
-
+    --size-header-icon-spacing: 0.5rem;
     --size-header-search-width: 14rem;
 
     /* Body */
@@ -107,6 +107,9 @@
     --size-generic-underline-spacing: 0.5rem;
     --size-generic-underline: 1px;
     --color-generic-underline: rgb(200 225 255 / 0.30);
+
+    --size-generic-line-spacing-top: 2rem;
+    --size-generic-line-spacing-bot: 1rem;
 
     /* CodeBlock */
 
@@ -362,18 +365,21 @@
     left: 0;
     right: 0;
     top: 0;
-    word-wrap: break-word;
     position: fixed;
     background-color: var(--color-header-background);
     box-sizing: border-box;
     border-width: 0;
     border-style: solid;
+    min-width: var(--size-body-min);
+}
+
+.header_menu, p[align] a {
     font-family: var(--font-header-family);
     color: var(--font-header-color);
     line-height: var(--size-header-button-line-height);
     font-size: var(--font-header-size);
     font-weight: var(--font-header-weight);
-    min-width: var(--size-body-min);
+    word-wrap: break-word;
 }
 
 .header_menu .header_left {
@@ -470,7 +476,7 @@
 }
 
 .header_menu .header_left .header_left_overflow_cut {
-    padding-right: var(--color-header-path-spacing);
+    padding-right: var(--size-header-path-spacing);
     font-size: calc(var(--font-header-size) * 1.5);
     color: var(--color-header-path-font);
     float: right;
@@ -507,7 +513,7 @@
     float: right !important;
 }
 
-.header_menu a, .header_menu details, .header-menu details-menu {
+.header_menu a, .header_menu details, .header-menu details-menu, p[align] a {
     color: inherit;
     padding-left: var(--size-header-button-inner-border);
     padding-right: var(--size-header-button-inner-border);
@@ -517,21 +523,46 @@
     text-decoration: inherit;
 }
 
-.header_menu .header_left a {
+.header_menu .header_left a{
     display: inline-flex;
     margin-right: var(--size-header-navigation-button-spacing);
     background-color: var(--color-header-button-left);
 }
 
-.header_menu a {
+p[align] a {
+    display: inline-flex;
+}
+
+p[align="left"] a {
+    background-color: var(--color-header-button-left);
+}
+
+p[align="right"] a {
+    background-color: var(--color-header-button-right);
+}
+
+p[align] a::after {
+    height: var(--size-header-button-line-height);
+    width: var(--size-header-button-line-height);
+    content: "";
+    background-size: cover;
+    filter: var(--color-svg-filter);
+}
+
+p[align="right"] a::after {
+    margin-left: var(--size-header-icon-spacing);
+    background-image: url(/static/arrow_left_to_right.svg);
+}
+
+.header_menu a, p[align] a {
     border-radius: var(--size-header-button-border-radius);
 }
 
-.header_menu .header_left a:hover {
+.header_menu .header_left a:hover, p[align="left"] a:hover {
     background-color: var(--color-header-button-left-hover);
 }
 
-.header_menu .header_right a:hover {
+.header_menu .header_right a:hover, p[align="right"] a:hover {
     background-color: var(--color-header-button-right-hover);
 }
 
@@ -839,6 +870,17 @@ section mark {
     border-bottom-color: var(--color-generic-underline);
 }
 
+hr {
+    border-top-style: none;
+    border-left-style: none;
+    border-right-style: none;
+    width: 100%;
+    border-bottom-width: var(--size-generic-underline);
+    border-bottom-style: solid;
+    border-bottom-color: var(--color-generic-underline);
+    margin-bottom: var(--size-generic-line-spacing-bot);
+    margin-top: var(--size-generic-line-spacing-top);
+}
 
 .main_block {
     margin-top: var(--size-header-height);
