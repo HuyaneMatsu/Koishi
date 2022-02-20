@@ -4,7 +4,7 @@
     --font-color-link: rgb(203 255 219);
     --font-color-link-hover: rgb(174 251 255);
 
-    --size-content-max-width: 1200px;
+    --size-content-max-width: 1300px;
 
     --size-footnote-spacing-top: 5rem;
     --size-footnote-spacing-bot: 2.5rem;
@@ -21,12 +21,26 @@
 }
 
 .main_block {
-    margin-left: auto;
-    margin-right: auto;
     margin-bottom: var(--size-content-spacing-bot);
-    width: 100%;
-    max-width: var(--size-content-max-width);
 }
+
+@media screen and (max-width: 1300px) {
+    .main_block {
+        margin-left: var(--size-content-border-side);
+        margin-right: var(--size-content-border-side);
+        width: calc(100% - var(--size-content-border-side) * 2);
+        max-width: calc(100% - var(--size-content-border-side) * 2);
+    }
+}
+@media screen and (min-width: 1301px) {
+    .main_block {
+        margin-left: auto;
+        margin-right: auto;
+        width: calc(var(--size-content-max-width) - var(--size-content-border-side) * 2);
+        max-width: calc(var(--size-content-max-width) - var(--size-content-border-side) * 2);
+    }
+}
+
 
 .main_block h1, .main_block h2, .main_block h3 {
     padding-top: var(--size-title-spacing);
