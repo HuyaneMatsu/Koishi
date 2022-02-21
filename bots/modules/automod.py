@@ -386,7 +386,7 @@ async def filter_content(client, message):
         pass
     
     escalation_notifier = ESCALATION_NOTIFIERS.get(total_escalation_streak, None)
-    if (total_escalation_streak is not None):
+    if (escalation_notifier is not None):
         try:
             await escalation_notifier(message)
         except ConnectionError:
