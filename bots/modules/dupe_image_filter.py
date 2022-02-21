@@ -96,7 +96,7 @@ CLOSE_BUTTON = Button(
 class DupeImageFilter:
     __slots__ = (
         'after_id', 'channel_id', 'client', 'request_more', 'urls', 'message_ids_to_delete', 'total_scanned_messages',
-        'message_ids_deleted', 'message_request_task', 'message_delete_task', 'started_at', 'update_waiter',
+        'total_deleted_messages', 'runner', 'message_delete_task', 'started_at', 'update_waiter',
         'all_delete_message_id'
     )
     
@@ -106,14 +106,11 @@ class DupeImageFilter:
         self.client = client
         self.channel_id = event.channel_id
         self.urls = set()
-        self.message_ids_deleted = set()
+        self.total_deleted_messages = 0
         self.message_ids_to_delete = set()
         self.started_at = LOOP_TIME()
         
         self.total_scanned_messages = 0
-        
-        self.message_request_task = Task(self.message_request_loop(), KOKORO)
-        self.message_delete_task = None
         
         self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
         
@@ -122,26 +119,44 @@ class DupeImageFilter:
         FILTERED_CHANNEL_IDS.add(self.channel_id)
     
     
-    async def message_request_loop(self):
+    async def run(self):
         try:
-            while self.request_more:
-                messages = await self.client.message_get_chunk(self.channel_id, after=self.after_id)
-                if len(messages) < 100:
-                    self.request_more = False
-                else:
-                    self.after_id = messages[0].id
-                
-                for message in reversed(messages):
-                    await self.scan_message(message)
-                    self.total_scanned_messages += 1
-                
-                continue
+            await self.message_request_loop()
+            await self.message_delete_loop()
         finally:
-            self.message_request_task = None
-            self.maybe_finished()
+            self.update_waiter.cancel()
     
     
-    async def scan_message(self, message):
+    async def message_request_loop(self):
+        while self.request_more:
+            messages = await self.client.message_get_chunk(self.channel_id, after=self.after_id)
+            if len(messages) < 100:
+                self.request_more = False
+            else:
+                self.after_id = messages[0].id
+            
+            for message in reversed(messages):
+                await self.scan_message(message)
+                self.total_scanned_messages += 1
+            
+            continue
+    
+    
+    async def message_delete_loop(self):
+        message_ids_to_delete = self.message_ids_to_delete
+        while message_ids_to_delete:
+            message_id = message_ids_to_delete.pop()
+            
+            try:
+                await self.client.message_delete((self.channel_id, message_id))
+            except DiscordException as err:
+                if err.code != ERROR_CODES.unknown_message:
+                    raise
+            
+            self.total_deleted_messages += 1
+    
+    
+    async def get_processed_urls_of(self, message):
         urls = None
         
         embeds = message.embeds
@@ -177,80 +192,69 @@ class DupeImageFilter:
                     
                     urls.add(attachment.url)
         
-        if urls:
-            processed_urls = set()
-            attachment_urls = None
+        if (urls is None) or (not urls):
+            return None
+        
+        processed_urls = set()
+        attachment_urls = None
+        
+        for url in urls:
+            if is_attachment_url(url):
+                if attachment_urls is None:
+                    attachment_urls = set()
+                
+                attachment_urls.add(url)
             
-            for url in urls:
-                if is_attachment_url(url):
-                    if attachment_urls is None:
-                        attachment_urls = set()
-                    
-                    attachment_urls.add(url)
+            else:
+                processed_url = ProcessedUrl(False, url, None)
+                processed_urls.add(processed_url)
+        
+        if attachment_urls is not None:
+            for attachment_url in attachment_urls:
+                response = await self.client.http.head(attachment_url)
+                headers = response.headers
+                
+                identifier = headers.get(CONTENT_LENGTH), headers.get(E_TAG)
+                
+                processed_url = ProcessedUrl(True, attachment_url, identifier)
+                processed_urls.add(processed_url)
+        
+        return processed_urls
+    
+    
+    async def scan_message(self, message):
+        # referenced message
+        referenced_message = message.referenced_message
+        if referenced_message is None:
+            message_id = 0
+        elif isinstance(referenced_message, Message):
+            message_id = referenced_message.id
+        else:
+            message_id = referenced_message.message_id
+        
+        processed_urls = self.get_processed_urls_of(message)
+        
+        urls = self.urls
+        if message_id:
+            self.message_ids_to_delete.discard(message_id)
+            
+            if (processed_urls is not None):
+                urls.update(processed_urls)
+                
+        else:
+            if (processed_urls is not None):
+                for url in processed_urls:
+                    if url not in urls:
+                        is_present = False
+                        break
                 
                 else:
-                    processed_url = ProcessedUrl(False, url, None)
-                    processed_urls.add(processed_url)
-            
-            if attachment_urls is not None:
-                for attachment_url in attachment_urls:
-                    response = await self.client.http.head(attachment_url)
-                    headers = response.headers
-                    
-                    identifier = headers.get(CONTENT_LENGTH), headers.get(E_TAG)
-                    
-                    processed_url = ProcessedUrl(True, attachment_url, identifier)
-                    processed_urls.add(processed_url)
-            
-            urls = self.urls
-            for url in processed_urls:
-                if url not in urls:
-                    is_present = False
-                    break
-            
-            else:
-                is_present = True
-            
-            if is_present:
-                self.message_ids_to_delete.add(message.id)
-                self.maybe_start_message_delete_task()
-            else:
-                urls.update(processed_urls)
-        else:
-            referenced_message = message.referenced_message
-            if referenced_message is None:
-                message_id = 0
-            elif isinstance(referenced_message, Message):
-                message_id = referenced_message.id
-            else:
-                message_id = referenced_message.message_id
-            
-            if message_id:
-                if (message_id in self.message_ids_to_delete) or (message_id in self.message_ids_deleted):
+                    is_present = True
+                
+                if is_present:
                     self.message_ids_to_delete.add(message.id)
-                    self.maybe_start_message_delete_task()
-    
-    def maybe_start_message_delete_task(self):
-        if self.message_delete_task is None:
-            self.message_delete_task = Task(self.message_delete_loop(), KOKORO)
-    
-    
-    async def message_delete_loop(self):
-        try:
-            message_ids_to_delete = self.message_ids_to_delete
-            while message_ids_to_delete:
-                message_id = message_ids_to_delete.pop()
-                
-                try:
-                    await self.client.message_delete((self.channel_id, message_id))
-                except DiscordException as err:
-                    if err.code != ERROR_CODES.unknown_message:
-                        raise
-                
-                self.message_ids_deleted.add(message_id)
-        finally:
-            self.message_delete_task = None
-            self.maybe_finished()
+                else:
+                    urls.update(processed_urls)
     
     
     def get_embed(self):
@@ -289,7 +293,7 @@ class DupeImageFilter:
             'Messages deleted',
             (
                 f'```\n'
-                f'{len(self.message_ids_deleted)}\n'
+                f'{self.total_deleted_messages}\n'
                 f'```'
             ),
             inline = True,
@@ -308,10 +312,6 @@ class DupeImageFilter:
         
         
         return embed
-    
-    def maybe_finished(self):
-        if (self.message_delete_task is None) and (self.message_request_task is None):
-            self.update_waiter.cancel()
     
     
     async def state_update_loop(self, client, event):

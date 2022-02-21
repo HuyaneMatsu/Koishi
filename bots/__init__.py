@@ -71,6 +71,7 @@ else:
         activity = ActivityRich('Chesuto development', type_=ACTIVITY_TYPES.watching),
         status = 'idle',
         application_id = config.FLAN_ID,
+        intents = IntentFlag() - IntentFlag(0).update_by_keys(message_content=True),
         extensions = ('command_utils', 'commands_v2',),
         default_category_name = 'GENERAL COMMANDS',
         category_name_rule = category_name_rule,

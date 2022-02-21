@@ -127,7 +127,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                 await sleep(10.0 / try_again + 1.0, self.loop)
                 continue
             
-            raise DiscordException(response, response_data, data)
+            raise DiscordException(response, response_data, data, None)
     
     return None
 

@@ -1308,6 +1308,13 @@ async def locale(event):
         f'guild locale: {event.guild_locale}'
     )
 
+@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
+@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+async def test_edit(client, event):
+    yield
+    yield 'a'
+
+
 MESSAGE_FLAG_VALUE_INVOKING_USER_ONLY = MessageFlag().update_by_keys(invoking_user_only=True)
 MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS = MessageFlag().update_by_keys(embeds_suppressed=True)
 
