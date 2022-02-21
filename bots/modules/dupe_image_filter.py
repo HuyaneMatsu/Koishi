@@ -101,8 +101,12 @@ class DupeImageFilter:
     )
     
     def __init__(self, client, event, look_back):
+        after_id = now_as_id() - seconds_to_id_difference(DAY_IN_SECONDS * look_back)
+        if after_id < 0:
+            after_id = 0
+        
         self.request_more = True
-        self.after_id = now_as_id() - seconds_to_id_difference(DAY_IN_SECONDS * look_back)
+        self.after_id = after_id
         self.client = client
         self.channel_id = event.channel_id
         self.urls = set()
