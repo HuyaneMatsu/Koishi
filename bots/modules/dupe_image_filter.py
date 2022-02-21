@@ -114,6 +114,7 @@ class DupeImageFilter:
         
         self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
         
+        Task(self.run(), KOKORO)
         Task(self.state_update_loop(client, event), KOKORO)
         
         FILTERED_CHANNEL_IDS.add(self.channel_id)
@@ -232,7 +233,7 @@ class DupeImageFilter:
         else:
             message_id = referenced_message.message_id
         
-        processed_urls = self.get_processed_urls_of(message)
+        processed_urls = await self.get_processed_urls_of(message)
         
         urls = self.urls
         if message_id:
