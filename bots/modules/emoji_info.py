@@ -1,12 +1,10 @@
 from hata import Embed, Client, parse_emoji, elapsed_time, DATETIME_FORMAT_CODE, ZEROUSER,  GUILDS
 from hata.ext.slash import abort
 
-from bot_utils.constants import GUILD__SUPPORT
-
 SLASH_CLIENT: Client
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
-async def emoji_info_preview(
+@SLASH_CLIENT.interactions(is_global=True)
+async def emoji_info(
     client,
     event,
     raw_emoji: ('str', 'The emoji, or it\'s name.', 'emoji'),

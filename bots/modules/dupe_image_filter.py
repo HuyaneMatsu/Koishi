@@ -1,8 +1,8 @@
-from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError
+from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError, WaitTillAll, get_current_task
 from scarletio.web_common.headers import CONTENT_LENGTH
 from hata import Embed, KOKORO, seconds_to_elapsed_time, Client, Message, DiscordException, ERROR_CODES, now_as_id, \
-    seconds_to_id_difference, Guild
-from hata.ext.slash import Button, abort
+    seconds_to_id_difference, Guild, format_loop_time, TIMESTAMP_STYLES
+from hata.ext.slash import Button, abort, ButtonStyle, Row, wait_for_component_interaction
 from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT: Client
@@ -56,10 +56,11 @@ class ProcessedUrl:
 
 
 class ProcessedMessage:
-    __slots__ = ('message_id', 'urls')
+    __slots__ = ('message_id', 'replied_message_id', 'urls')
     
-    def __init__(self, message_id, urls):
+    def __init__(self, message_id, replied_message_id, urls):
         self.message_id = message_id
+        self.replied_message_id = replied_message_id
         self.urls = urls
     
     def __repr__(self):
@@ -81,16 +82,39 @@ class ProcessedMessage:
 def is_attachment_url(url):
     return url.startswith('https://cdn.discordapp.com/attachments')
 
-FILTERED_CHANNEL_IDS = set()
+FILTERERS = {}
 
 UPDATE_INTERVAL = 5.0
 
-CUSTOM_ID_CLOSE_MESSAGE = 'dupe_image_filter.close'
+CUSTOM_ID_APPROVE = 'dupe_image_filter.approve'
+CUSTOM_ID_CANCEL = 'dupe_image_filter.cancel'
+CUSTOM_ID_CLOSE = 'dupe_image_filter.close'
 
-CLOSE_BUTTON = Button(
-    'close',
-    custom_id = CUSTOM_ID_CLOSE_MESSAGE,
+
+
+BUTTON_APPROVE = Button(
+    'approve',
+    custom_id = CUSTOM_ID_APPROVE,
+    style = ButtonStyle.green,
 )
+
+BUTTON_CANCEL = Button(
+    'cancel',
+    custom_id = CUSTOM_ID_CANCEL,
+    style = ButtonStyle.red,
+)
+
+COMPONENTS_APPROVE = Row(
+    BUTTON_APPROVE,
+    BUTTON_CANCEL,
+)
+
+BUTTON_CLOSE = Button(
+    'close',
+    custom_id = CUSTOM_ID_CLOSE,
+)
+
+
 
 
 class DupeImageFilter:
@@ -118,47 +142,53 @@ class DupeImageFilter:
         
         self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
         
-        Task(self.run(), KOKORO)
         Task(self.state_update_loop(client, event), KOKORO)
         
-        FILTERED_CHANNEL_IDS.add(self.channel_id)
-    
-    
-    async def run(self):
-        try:
-            await self.message_request_loop()
-            await self.message_delete_loop()
-        finally:
-            self.update_waiter.cancel()
+        FILTERERS[self.channel_id] = self
     
     
     async def message_request_loop(self):
-        while self.request_more:
-            messages = await self.client.message_get_chunk(self.channel_id, after=self.after_id)
-            if len(messages) < 100:
-                self.request_more = False
-            else:
-                self.after_id = messages[0].id
-            
-            for message in reversed(messages):
-                await self.scan_message(message)
-                self.total_scanned_messages += 1
-            
-            continue
-    
-    
-    async def message_delete_loop(self):
-        message_ids_to_delete = self.message_ids_to_delete
-        while message_ids_to_delete:
-            message_id = message_ids_to_delete.pop()
+        try:
+            task = None
             
             try:
-                await self.client.message_delete((self.channel_id, message_id))
-            except DiscordException as err:
-                if err.code != ERROR_CODES.unknown_message:
-                    raise
+                while self.request_more:
+                    messages = await self.client.message_get_chunk(self.channel_id, after=self.after_id)
+                    if len(messages) < 100:
+                        self.request_more = False
+                    else:
+                        self.after_id = messages[0].id
+                    
+                    task = Task(self.scan_messages(messages, task), KOKORO)
+                    continue
+            except:
+                task.cancel()
+                raise
             
-            self.total_deleted_messages += 1
+            finally:
+                # Clear references
+                task = None
+                tasks = None
+        
+        finally:
+            self.update_waiter.cancel()
+        
+    
+    async def message_delete_loop(self):
+        try:
+            message_ids_to_delete = self.message_ids_to_delete
+            while message_ids_to_delete:
+                message_id = message_ids_to_delete.pop()
+                
+                try:
+                    await self.client.message_delete((self.channel_id, message_id))
+                except DiscordException as err:
+                    if err.code != ERROR_CODES.unknown_message:
+                        raise
+                
+                self.total_deleted_messages += 1
+        finally:
+            self.update_waiter.cancel()
     
     
     async def get_processed_urls_of(self, message):
@@ -216,7 +246,25 @@ class DupeImageFilter:
         
         if attachment_urls is not None:
             for attachment_url in attachment_urls:
-                response = await self.client.http.head(attachment_url)
+                
+                retries = 5
+                while True:
+                    try:
+                        response = await self.client.http.head(attachment_url)
+                    except ConnectionError:
+                        if retries <= 0:
+                            raise
+                        
+                        retries -= 1
+                        continue
+                    
+                    else:
+                        break
+                
+                if response.status != 200:
+                    # Message probably deleted meanwhile or something
+                    return None
+                
                 headers = response.headers
                 
                 identifier = headers.get(CONTENT_LENGTH), headers.get(E_TAG)
@@ -227,21 +275,51 @@ class DupeImageFilter:
         return processed_urls
     
     
+    async def scan_messages(self, messages, previous_task):
+        try:
+            processed_messages = []
+            for message in reversed(messages):
+                processed_message = await self.scan_message(message)
+                processed_messages.append(processed_message)
+                self.total_scanned_messages += 1
+            
+            if (previous_task is not None):
+                await previous_task.wait_for_completion()
+                previous_task = None
+            
+            for processed_message in processed_messages:
+                self.decide_about_message(processed_message)
+        
+        except CancelledError:
+            if (previous_task is not None):
+                previous_task.cancel()
+                previous_task = None
+            
+            raise
+    
+    
     async def scan_message(self, message):
         # referenced message
         referenced_message = message.referenced_message
         if referenced_message is None:
-            message_id = 0
+            replied_message_id = 0
         elif isinstance(referenced_message, Message):
-            message_id = referenced_message.id
+            replied_message_id = referenced_message.id
         else:
-            message_id = referenced_message.message_id
+            replied_message_id = referenced_message.message_id
         
         processed_urls = await self.get_processed_urls_of(message)
         
+        return ProcessedMessage(message.id, replied_message_id, processed_urls)
+    
+    
+    def decide_about_message(self, processed_message):
+        replied_message_id = processed_message.replied_message_id
+        processed_urls = processed_message.urls
+        
         urls = self.urls
-        if message_id:
-            self.message_ids_to_delete.discard(message_id)
+        if replied_message_id:
+            self.message_ids_to_delete.discard(replied_message_id)
             
             if (processed_urls is not None):
                 urls.update(processed_urls)
@@ -257,7 +335,7 @@ class DupeImageFilter:
                     is_present = True
                 
                 if is_present:
-                    self.message_ids_to_delete.add(message.id)
+                    self.message_ids_to_delete.add(processed_message.message_id)
                 else:
                     urls.update(processed_urls)
     
@@ -318,25 +396,113 @@ class DupeImageFilter:
         
         return embed
     
+    async def message_update_loop(self, client, message, footer):
+        while True:
+            try:
+                await self.update_waiter
+            except CancelledError:
+                break
+            
+            self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
+            embed = self.get_embed()
+            embed.add_footer(footer)
+            await client.message_edit(message, embed=embed)
+            embed = None
+    
+    
+    async def try_message_user(self, user_id, message):
+        try:
+            channel = await self.client.channel_private_create(user_id)
+        except ConnectionError:
+            return
+        
+        dupe_count = len(self.message_ids_to_delete)
+        if dupe_count:
+            description = f'Please confirm to remove **{dupe_count}** messages with dupe images.'
+        else:
+            description = 'There are no dupe images in the channel.'
+            
+        try:
+            await self.client.message_create(
+                channel,
+                f'Your dupe message filtering finished.\n\n{description}',
+                components = Button('Go to message', url=message.url),
+            )
+        except ConnectionError:
+            return
+        
+        except DiscordException as err:
+            if err.code == ERROR_CODES.cannot_message_user:
+                return
+            
+            raise
+        
+        return
+    
     
     async def state_update_loop(self, client, event):
         try:
-            await client.interaction_response_message_create(event, embed=self.get_embed())
+            Task(self.message_request_loop(), KOKORO)
             
-            while True:
-                try:
-                    await self.update_waiter
-                except CancelledError:
-                    break
+            embed = self.get_embed()
+            embed.add_footer('Requesting and processing messages')
+            await client.interaction_response_message_create(event, embed=embed)
+            message = await client.interaction_response_message_get(event)
+            user_id = event.user.id
+            event = None
+            
+            await self.message_update_loop(client, message, 'Requesting and processing messages')
+            
+            await self.try_message_user(user_id, message)
+            
+            if self.message_ids_to_delete:
+                embed = self.get_embed()
+                embed.description = (
+                    f'**Please confirm the deletion**\n\n'
+                    f'Expires after 15 minutes | {format_loop_time(LOOP_TIME()+900.0, TIMESTAMP_STYLES.relative_time)}'
+                )
                 
+                await client.message_edit(message, embed=embed, components=COMPONENTS_APPROVE)
+                embed = None
+                
+                try:
+                    event = await wait_for_component_interaction(
+                        message,
+                        timeout = 900.0,
+                        check = has_manage_messages_permission,
+                    )
+                except TimeoutError:
+                    embed = self.get_embed()
+                    embed.add_footer('Timed out')
+                    await client.message_edit(message, embed=embed, components=BUTTON_CLOSE)
+                    embed = None
+                    return
+                
+                if event.interaction == BUTTON_CANCEL:
+                    embed = self.get_embed()
+                    embed.add_footer('Edit cancelled')
+                    await client.interaction_component_message_edit(event, embed=embed, components=BUTTON_CLOSE)
+                    embed = None
+                    return
+                
+                # Reset update waiter
                 self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
-                await client.interaction_response_message_edit(event, embed=self.get_embed())
-            
-            await client.interaction_response_message_edit(event, embed=self.get_embed(), components=CLOSE_BUTTON)
-            
-            
+                Task(self.message_delete_loop(), KOKORO)
+                
+                embed = self.get_embed()
+                embed.add_footer('Deleting dupes')
+                await client.interaction_component_message_edit(event, embed=embed, components=None)
+                
+                await self.message_update_loop(client, message, 'Deleting dupes')
+                
+            await client.message_edit(message, embed=self.get_embed(), components=BUTTON_CLOSE)
         finally:
-            FILTERED_CHANNEL_IDS.discard(self.channel_id)
+            if FILTERERS.get(self.channel_id, self) is self:
+                del FILTERERS[self.channel_id]
+
+
+def has_manage_messages_permission(event):
+    return bool(event.user_permissions.can_manage_messages)
 
 
 @SLASH_CLIENT.interactions(guild=[GUILD__KOISHI_CLAN, GUILD__SUPPORT])
@@ -359,7 +525,7 @@ async def dupe_image_filter(
     if not guild.cached_permissions_for(client).can_manage_messages:
         abort(f'{client.name_at(guild)} must have manage messages permission to execute this command.')
     
-    if event.channel_id in FILTERED_CHANNEL_IDS:
+    if event.channel_id in FILTERERS:
         abort('There is already one message filter running in the channel.')
     
     if look_back <= 0:
@@ -368,7 +534,7 @@ async def dupe_image_filter(
     DupeImageFilter(client, event, look_back)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_CLOSE_MESSAGE)
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_CLOSE)
 async def close_dupe_image_filter(client, event):
     if event.user_permissions.can_manage_messages:
         await client.interaction_component_acknowledge(event)

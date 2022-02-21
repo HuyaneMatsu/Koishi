@@ -77,7 +77,7 @@ async def emoji_create(client, emoji):
     
     # We get the creator of the emoji.
     try:
-        await client.emoji_guild_get(emoji, force_update=True)
+        await client.emoji_get(emoji, force_update=True)
     except ConnectionError:
         # No internet connection
         return
