@@ -157,6 +157,9 @@ async def request_sync(client, days_allowed):
             
             try:
                 sent = sending_task.result()
+            except GeneratorExit:
+                raise
+            
             except BaseException as err:
                 # Cancel it, so no double exception will be dropped.
                 response_task.cancel()
@@ -244,6 +247,9 @@ async def receive_sync(client, partner):
                 # Wait some. It can happen that we send this message, before the other side gets it's answer.
                 message_to_send = RECEIVED
                 
+    except GeneratorExit:
+        raise
+    
     except BaseException as err:
         with StringIO() as buffer:
             await KOKORO.render_exception_async(err, ['```'], file=buffer)

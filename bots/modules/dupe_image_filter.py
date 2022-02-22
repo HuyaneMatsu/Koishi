@@ -294,9 +294,14 @@ class DupeImageFilter:
             if (previous_task is not None):
                 previous_task.cancel()
                 previous_task = None
+        
+            raise
+        
+        except:
+            if (previous_task is not None):
+                previous_task = None
             
             raise
-    
     
     async def scan_message(self, message):
         # referenced message

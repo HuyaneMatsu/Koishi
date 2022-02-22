@@ -58,9 +58,6 @@ RULES_COMPONENTS = Row(
 
 RULES = [
     (
-        'Guidelines',
-        lambda: 'Follow [Discord\'s guidelines](https://discord.com/guidelines)',
-    ), (
         'Behaviour',
         lambda: 'Listen to staff and follow their instructions.',
     ), (
@@ -79,6 +76,9 @@ RULES = [
         'NSFW',
         lambda: 'Keep explicit content in nsfw channels.',
     ), (
+        'Earrape and other cursed contents',
+        lambda: 'Just no.',
+    ), (
         'Advertisements',
         lambda: 'Advertising other social medias, servers, communities or services in chat or in DM-s are disallowed.',
     ), (
@@ -86,7 +86,7 @@ RULES = [
         lambda: 'I do not say either that aliens exists, even tho they do.',
     ), (
         'Alternative accounts',
-        lambda: 'Instant ban.',
+        lambda: 'Unless, you have really good reason, like you were locked out from the original.',
     ), (
         'Deep frying fumos',
         lambda: 'Fumo frying is bannable offense.',
@@ -104,19 +104,30 @@ async def rules(
     rule: (RULE_CHOICES, 'Select a rule to show.') = None
 ):
     if rule is None:
-        embed = Embed(
-            f'Rules of {GUILD__SUPPORT.name}:',
-            color = COLOR__KOISHI_HELP,
+        description_parts = []
+        for index, (title, description_builder) in enumerate(RULES):
+            description_parts.append(f'**{index}. {title}**\n')
+            description_parts.append(description_builder())
+            description_parts.append('\n\n')
+        
+        description_parts.append(
+            'If ever in doubt about rules, follow [Discord\'s guidelines](https://discord.com/guidelines).'
         )
         
-        for index, (title, description_builder) in enumerate(RULES):
-            embed.add_field(f'{index}. {title}', description_builder())
+        description = ''.join(description_parts)
+        description_parts = None
+        
+        embed = Embed(
+            f'Rules of {GUILD__SUPPORT.name}:',
+            description,
+            color = COLOR__KOISHI_HELP,
+        )
         
         if event.user_permissions.can_administrator:
             components = RULES_COMPONENTS
         else:
             components = None
-    
+
     else:
         embed = Embed(
             f'Rules {rule} of {GUILD__SUPPORT.name}:',
