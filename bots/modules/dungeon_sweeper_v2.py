@@ -317,7 +317,7 @@ RULES_HELP = Embed(
         f'These places are marked with an {BUILTIN_EMOJIS["x"]:e} on the floor. Because our characters are lazy, the '
         f'less steps required to sort their stuffs, makes them give you a better rating.\n'
         f'\n'
-        f'You can move with the buttons under the embed, to activate your characters\' skill, or go back, reset the'
+        f'You can move with the buttons under the embed, to activate your characters\' skill, or go back, reset the '
         f'map or cancel the game:\n'
         f'{EMOJI_NOTHING:e}{EMOJI_NORTH:e}{EMOJI_NOTHING:e}{EMOJI_BACK:e}\n'
         f'{EMOJI_WEST:e}{EMOJI_REIMU:e}{EMOJI_EAST:e}{EMOJI_RESET:e}\n'
