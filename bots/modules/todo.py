@@ -73,7 +73,7 @@ TEXT_INPUT_DESCRIPTION = TextInput(
 
 
 ADD_TODO_FORM = Form(
-    'Add message by id to move group',
+    'Add todo entry',
     [
         TEXT_INPUT_NAME,
         TEXT_INPUT_DESCRIPTION,
