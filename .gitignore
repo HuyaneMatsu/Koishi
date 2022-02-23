@@ -5,5 +5,9 @@ __pycache__/
 # Editor
 .idea
 
+# Data files
+*.pickle
+*.sqlite3
+
 # Some data files
 /chesuto_data/*.mp3
