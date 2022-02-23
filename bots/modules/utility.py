@@ -5,7 +5,7 @@ from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
 from random import choice
 
-from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, CHANNEL_TYPES, \
+from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, CHANNEL_TYPES, GuildFeature, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
     StickerFormat, ZEROUSER, ChannelDirectory, Permission, escape_markdown
@@ -207,12 +207,25 @@ async def welcome_screen_(client, event):
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute this command')
     
-    yield
+    if GuildFeature.welcome_screen_enabled not in guild.features:
+        welcome_screen = None
+    else:
+        yield
+        
+        try:
+            welcome_screen = await client.welcome_screen_get(guild)
+        except DiscordException as err:
+            # If the guild's settings were changed meanwhile, this can drop up.
+            if err.code == ERROR_CODES.unknown_guild_welcome_screen:
+                welcome_screen = None
+            
+            else:
+                raise
     
-    welcome_screen = await client.welcome_screen_get(guild)
     if welcome_screen is None:
         yield Embed(description=f'**{guild.name}** *has no welcome screen enabled*.')
         return
+    
     
     description = welcome_screen.description
     if (description is None):

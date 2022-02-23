@@ -52,6 +52,7 @@ GOOGLE_API_KEYS = None          # (None or list of str) A list of google api key
 - [pillow](https://pypi.org/project/Pillow/)
 
 #### Hata requirements
+- [scarletio](https://pypi.org/project/scarletio/)
 - [chardet](https://pypi.python.org/pypi/chardet)
 - [dateutil](https://pypi.org/project/python-dateutil/)
 
@@ -68,4 +69,5 @@ GOOGLE_API_KEYS = None          # (None or list of str) A list of google api key
 #### More requirements
 - [psutil](https://pypi.org/project/psutil/)
 - [nsjail](https://github.com/google/nsjail)
-
+- [gh-md-to-html](https://pypi.org/project/gh-md-to-html/)
+- [gh-md-to-html](https://pypi.org/project/gh-md-to-html/)\[offline_conversion\]
