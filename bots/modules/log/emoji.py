@@ -1,4 +1,4 @@
-from hata import Client, Embed, StickerFormat, mention_role_by_id, DiscordException, ERROR_CODES
+from hata import Client, Embed, StickerFormat, mention_role_by_id, DiscordException, ERROR_CODES, ROLES
 from hata.ext.extension_loader import require
 
 from bot_utils.constants import CHANNEL__SUPPORT__LOG_EMOJI, GUILD__SUPPORT
@@ -7,67 +7,175 @@ require('Satori')
 
 Satori: Client
 
-def render_all_emoji_field(emoji):
-    description_parts = []
+
+def get_role_name(role_id):
+    try:
+        role = ROLES[role_id]
+    except KeyError:
+        role_name = str(role_id)
+    else:
+        role_name = role.name
     
-    description_parts.append('**Name:** ')
-    description_parts.append(emoji.name)
-    
-    
-    description_parts.append(
-        '\n'
-        '**Animated:** '
+    return role_name
+
+
+def add_role_names_to_description_parts(role_ids, description_parts, truncate, truncate_at):
+    if (role_ids is None):
+        description_parts.append('null\n')
+    else:
+        if truncate:
+            truncated = len(role_ids) - truncate_at
+            if truncated < 0:
+                truncated = 0
+            else:
+                role_ids = role_ids[:truncate_at]
+        else:
+            truncated = 0
+        
+        for role_id in role_ids:
+            description_parts.append(get_role_name(role_id))
+            description_parts.append('\n')
+        
+        if truncated:
+            description_parts.append(str(truncated))
+            description_parts.append(' truncated ...\n')
+
+
+def create_modified_string_field_description(old_value, new_value):
+    return (
+        f'```\n'
+        f'{old_value} -> {new_value}\n'
+        f'```'
     )
-    description_parts.append('true' if emoji.animated else 'false')
-    
-    
-    description_parts.append(
-        '\n'
-        '**Available:** '
+
+def get_bool_repr(value):
+    return 'true' if value else 'false'
+
+
+def get_preinstanced_repr(value):
+    return f'{value.name} ({value.value})'
+
+
+def get_nullable_container_repr(value):
+    return 'null' if value is None else ''.join([repr(element) for element in value])
+
+
+def get_nullable_string_repr(value):
+    return 'null' if value is None else value
+
+
+def add_modified_string_field(embed, name, old_value, new_value):
+    return embed.add_field(
+        name,
+        create_modified_string_field_description(old_value, new_value),
     )
-    description_parts.append('true' if emoji.available else 'false')
+
+
+def try_get_modified_difference(entity, old_attributes, attribute_name):
+    try:
+        old_value = old_attributes[attribute_name]
+    except KeyError:
+        difference = None
+    else:
+        new_value = getattr(entity, attribute_name)
+        
+        difference = old_value, new_value
     
-    
-    description_parts.append(
-        '\n'
-        '**Allowed roles:** '
+    return difference
+
+
+def maybe_add_modified_string_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    return _maybe_add_difference_field(embed, entity, old_attributes, attribute_name, pretty_name, None)
+
+
+def _maybe_add_difference_field(embed, entity, old_attributes, attribute_name, pretty_name, converter):
+    difference = try_get_modified_difference(entity, old_attributes, attribute_name)
+    if (difference is not None):
+        embed = add_modified_string_field(
+            embed,
+            pretty_name,
+            *(difference if (difference is None) else map(converter, difference))
+        )
+    return embed
+
+def maybe_add_modified_bool_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    return _maybe_add_difference_field(embed, entity, old_attributes, attribute_name, pretty_name, get_bool_repr)
+
+
+def maybe_add_modified_nullable_string_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    return _maybe_add_difference_field(
+        embed,
+        entity,
+        old_attributes,
+        attribute_name,
+        pretty_name,
+        get_nullable_string_repr,
+)
+
+def maybe_add_modified_nullable_container_field(embed, entity, old_attributes, attribute_name, pretty_name):
+    return _maybe_add_difference_field(
+        embed,
+        entity,
+        old_attributes,
+        attribute_name,
+        pretty_name,
+        get_nullable_container_repr,
+)
+
+def add_string_field(embed, value, pretty_name):
+    return embed.add_value(
+        pretty_name,
+        (
+            f'```\n'
+            f'{value}\n'
+            f'```'
+        ),
     )
+
+
+def add_bool_field(embed, value, pretty_name):
+    return add_string_field(embed, get_bool_repr(value), pretty_name)
+
+
+def add_preinstanced_field(embed, value, pretty_name):
+    return add_string_field(embed, get_preinstanced_repr(value), pretty_name)
+
+
+def add_nullable_container_field(embed, value, pretty_name):
+    return add_string_field(embed, get_preinstanced_repr(value), pretty_name)
+
+
+def add_nullable_string_field(embed, value, pretty_name):
+    return add_string_field(embed, get_nullable_string_repr(value), pretty_name)
+
+
+def add_emoji_fields_to(embed, emoji):
+    add_string_field(embed, emoji.name, 'Name')
+    add_bool_field(embed, emoji.animated, 'Animated')
+    add_bool_field(embed, emoji.available, 'Available')
+    
+    
+    description_parts = ['```\n']
     
     role_ids = emoji.role_ids
     if (role_ids is None):
-        description_parts.append('null')
+        description_parts.append('null\n')
     else:
-        index = 0
-        limit = len(role_ids)
-        
-        while True:
-            role_id = role_ids[index]
-            index += 1
-            
-            description_parts.append(mention_role_by_id(role_id))
-            
-            if index == limit:
-                break
-            
-            description_parts.append(', ')
-            continue
+        add_role_names_to_description_parts(role_ids, description_parts, True, 8)
+    description_parts.append('```')
     
+    description = ''.join(description_parts)
+    description_parts = None
     
-    description_parts.append(
-        '\n'
-        '**Managed:** '
+    embed.add_field(
+        'Allowed roles',
+        description,
     )
-    description_parts.append('true' if emoji.managed else 'false')
     
+    add_bool_field(embed, emoji.managed, 'Managed')
+    add_bool_field(embed, emoji.require_colons, 'Require colons')
     
-    description_parts.append(
-        '\n'
-        '**Require colons:** '
-    )
-    description_parts.append('true' if emoji.require_colons else 'false')
-    
-    
-    return ''.join(description_parts)
+    return embed
 
 
 @Satori.events
@@ -87,10 +195,12 @@ async def emoji_create(client, emoji):
         if err.code != ERROR_CODES.unknown_emoji:
             raise
     
-    description = render_all_emoji_field(emoji)
     emoji_url = emoji.url
     
-    embed = Embed(f'Emoji created: {emoji.name} ({emoji.id})', description, url=emoji_url).add_thumbnail(emoji_url)
+    embed = add_emoji_fields_to(
+        emoji,
+        Embed(f'Emoji created: {emoji.name} ({emoji.id})', url=emoji_url).add_thumbnail(emoji_url),
+    )
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
@@ -100,52 +210,16 @@ async def emoji_edit(client, emoji, old_attributes):
     if emoji.guild_id != GUILD__SUPPORT.id:
         return
     
-    description_parts = []
     
-    try:
-        old_name = old_attributes['name']
-    except KeyError:
-        pass
-    else:
-        new_name = emoji.name
-        
-        description_parts.append('**Name:** ')
-        description_parts.append(old_name)
-        description_parts.append(' -> ')
-        description_parts.append(new_name)
+    emoji_url = emoji.url
     
+    embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', description, url=emoji_url).add_thumbnail(emoji_url)
     
-    try:
-        old_animated = old_attributes['animated']
-    except KeyError:
-        pass
-    else:
-        new_animated = emoji.animated
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        description_parts.append('**Animated:** ')
-        description_parts.append('true' if old_animated else 'false')
-        description_parts.append(' -> ')
-        description_parts.append('true' if new_animated else 'false')
+    maybe_add_modified_string_field(embed, emoji, old_attributes, 'name', 'name')
     
+    maybe_add_modified_bool_field(embed, emoji, old_attributes, 'animated', 'Animated')
     
-    try:
-        old_available = old_attributes['available']
-    except KeyError:
-        pass
-    else:
-        new_available = emoji.available
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        description_parts.append('**Available:** ')
-        description_parts.append('true' if old_available else 'false')
-        description_parts.append(' -> ')
-        description_parts.append('true' if new_available else 'false')
-    
+    maybe_add_modified_bool_field(embed, emoji, old_attributes, 'available', 'Available')
     
     try:
         old_role_ids = old_attributes['role_ids']
@@ -154,89 +228,35 @@ async def emoji_edit(client, emoji, old_attributes):
     else:
         new_role_ids = emoji.role_ids
         
-        if description_parts:
-            description_parts.append('\n')
+        total_role_count = 0
+        if (old_role_ids is not None):
+            total_role_count += len(old_role_ids)
         
-        description_parts.append('**Allowed roles:** ')
+        if (new_role_ids is not None):
+            total_role_count += len(new_role_ids)
         
-        if (old_role_ids is None):
-            description_parts.append('null')
-        else:
-            index = 0
-            limit = len(old_role_ids)
-            
-            while True:
-                role_id = old_role_ids[index]
-                index += 1
-                
-                description_parts.append(mention_role_by_id(role_id))
+        truncate = (total_role_count > 8)
         
-                if index == limit:
-                    break
-                
-                description_parts.append(', ')
-                continue
+        description_parts = ['```\n']
         
-        description_parts.append(' -> ')
+        add_role_names_to_description_parts(old_role_ids, description_parts, truncate, 4)
+        description_parts.append('->\n')
+        add_role_names_to_description_parts(new_role_ids, description_parts, truncate, 4)
         
-        if (new_role_ids is None):
-            description_parts.append('null')
-        else:
-            index = 0
-            limit = len(new_role_ids)
-            
-            while True:
-                role_id = new_role_ids[index]
-                index += 1
-                
-                description_parts.append(mention_role_by_id(role_id))
+        description_parts.append('```')
         
-                if index == limit:
-                    break
-                
-                description_parts.append(', ')
-                continue
+        description = ''.join(description_parts)
+        description_parts = None
         
-        description_parts.append(' -> ')
+        embed.add_field(
+            'Allowed roles',
+            description,
+        )
     
+    maybe_add_modified_bool_field(embed, emoji, old_attributes, 'managed', 'Managed')
     
-    try:
-        old_managed = old_attributes['managed']
-    except KeyError:
-        pass
-    else:
-        new_managed = emoji.managed
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        description_parts.append('**Managed:** ')
-        description_parts.append('true' if old_managed else 'false')
-        description_parts.append(' -> ')
-        description_parts.append('true' if new_managed else 'false')
+    maybe_add_modified_bool_field(embed, emoji, old_attributes, 'require_colons', 'Require colons')
     
-    
-    try:
-        old_require_colons = old_attributes['require_colons']
-    except KeyError:
-        pass
-    else:
-        new_require_colons = emoji.require_colons
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        description_parts.append('**Require colons:** ')
-        description_parts.append('true' if old_require_colons else 'false')
-        description_parts.append(' -> ')
-        description_parts.append('true' if new_require_colons else 'false')
-    
-    
-    description = ''.join(description_parts)
-    emoji_url = emoji.url
-    
-    embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', description, url=emoji_url).add_thumbnail(emoji_url)
-
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
@@ -245,75 +265,24 @@ async def emoji_delete(client, emoji):
     if emoji.guild_id != GUILD__SUPPORT.id:
         return
     
-    description = render_all_emoji_field(emoji)
-    embed = Embed(f'Emoji deleted: {emoji.name} ({emoji.id})', description)
+    embed = add_emoji_fields_to(
+        emoji,
+        Embed(f'Emoji deleted: {emoji.name} ({emoji.id})'),
+    )
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
 
-def render_all_sticker_field(sticker):
+def add_sticker_fields_to(sticker, embed):
     description_parts = []
     
-    description_parts.append('**Name:** ')
-    description_parts.append(sticker.name)
+    add_string_field(embed, sticker.name, 'Name')
+    add_nullable_string_field(embed, sticker.description, 'Description')
+    add_preinstanced_field(embed, sticker.format, 'Format')
+    add_bool_field(embed, sticker.available, 'Available')
+    add_nullable_container_field(embed, sticker.tags, 'Tags')
     
-    
-    description_parts.append(
-        '\n'
-        '**Description:** '
-    )
-    description = sticker.description
-    if (description is None):
-        description_parts.append('null')
-    else:
-        description_parts.append(repr(description))
-    
-    
-    description_parts.append(
-        '\n'
-        '**Format:** '
-    )
-    sticker_format = sticker.format
-    description_parts.append(sticker_format.name)
-    description_parts.append(' (')
-    description_parts.append(str(sticker_format.value))
-    description_parts.append(')')
-    
-    
-    description_parts.append(
-        '\n'
-        '**Available:** '
-    )
-    description_parts.append('true' if sticker.available else 'false')
-    
-    
-    description_parts.append(
-        '\n'
-        '**Tags:** '
-    )
-    tags = sticker.tags
-    if (tags is None):
-        description_parts.append('null')
-    else:
-        tags = sorted(tags)
-        
-        index = 0
-        limit = len(tags)
-        
-        while True:
-            tag = tags[index]
-            index += 1
-            
-            description_parts.append(repr(tag))
-            
-            if index == limit:
-                break
-            
-            description_parts.append(', ')
-            continue
-    
-    
-    return ''.join(description_parts)
+    return embed
 
 
 @Satori.events
@@ -333,10 +302,12 @@ async def sticker_create(client, sticker):
         if err.code != ERROR_CODES.unknown_sticker:
             raise
     
-    description = render_all_sticker_field(sticker)
     sticker_url = sticker.url
     
-    embed = Embed(f'Sticker created: {sticker.name} ({sticker.id})', description, url=sticker_url)
+    embed = add_sticker_fields_to(
+        sticker,
+        Embed(f'Sticker created: {sticker.name} ({sticker.id})', url=sticker_url)
+    )
     
     sticker_format = sticker.format
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
@@ -350,124 +321,13 @@ async def sticker_edit(client, sticker, old_attributes):
     if sticker.guild_id != GUILD__SUPPORT.id:
         return
     
-    description_parts = []
-
-    try:
-        old_name = old_attributes['name']
-    except KeyError:
-        pass
-    else:
-        new_name = sticker.name
-        
-        description_parts.append('**Name:** ')
-        description_parts.append(old_name)
-        description_parts.append(' -> ')
-        description_parts.append(new_name)
-    
-    
-    try:
-        old_description = old_attributes['description']
-    except KeyError:
-        pass
-    else:
-        new_description = sticker.description
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        description_parts.append('**Description:** ')
-        
-        if (old_description is None):
-            description_parts.append('null')
-        else:
-            description_parts.append(repr(old_description))
-        
-        description_parts.append(' -> ')
-        
-        if (new_description is None):
-            description_parts.append('null')
-        else:
-            description_parts.append(repr(new_description))
-    
-    
-    try:
-        old_available = old_attributes['available']
-    except KeyError:
-        pass
-    else:
-        new_available = sticker.available
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        description_parts.append('**Available:** ')
-        description_parts.append('true' if old_available else 'false')
-        description_parts.append(' -> ')
-        description_parts.append('true' if new_available else 'false')
-    
-    
-    try:
-        old_tags = old_attributes['tags']
-    except KeyError:
-        pass
-    else:
-        new_tags = sticker.tags
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        description_parts.append('**Tags:** ')
-        
-        if description_parts:
-            description_parts.append('\n')
-        
-        if (old_tags is None):
-            description_parts.append('null')
-        else:
-            tags = sorted(old_tags)
-            
-            index = 0
-            limit = len(tags)
-            
-            while True:
-                tag = tags[index]
-                index += 1
-                
-                description_parts.append(repr(tag))
-                
-                if index == limit:
-                    break
-                
-                description_parts.append(', ')
-                continue
-        
-        description_parts.append(' -> ')
-        
-        if (new_tags is None):
-            description_parts.append('null')
-        else:
-            tags = sorted(new_tags)
-            
-            index = 0
-            limit = len(tags)
-            
-            while True:
-                tag = tags[index]
-                index += 1
-                
-                description_parts.append(repr(tag))
-                
-                if index == limit:
-                    break
-                
-                description_parts.append(', ')
-                continue
-    
-    
-    description = ''.join(description_parts)
     sticker_url = sticker.url
+    embed = Embed(f'Sticker edited: {sticker.name} ({sticker.id})', url=sticker_url)
     
-    embed = Embed(f'Sticker edited: {sticker.name} ({sticker.id})', description, url=sticker_url)
+    maybe_add_modified_string_field(embed, sticker, old_attributes, 'name', 'name')
+    maybe_add_modified_nullable_string_field(embed, sticker, old_attributes, 'description', 'Description')
+    maybe_add_modified_bool_field(embed, sticker, old_attributes, 'available', 'Available')
+    maybe_add_modified_nullable_container_field(embed, sticker, old_attributes, 'tags', 'Tags')
     
     sticker_format = sticker.format
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
@@ -481,8 +341,10 @@ async def sticker_delete(client, sticker):
     if sticker.guild_id != GUILD__SUPPORT.id:
         return
     
-    description = render_all_sticker_field(sticker)
-    embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})', description)
+    embed = add_sticker_fields_to(
+        sticker,
+        Embed(f'Sticker deleted: {sticker.name} ({sticker.id})')
+    )
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
