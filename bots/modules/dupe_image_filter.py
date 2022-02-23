@@ -4,6 +4,7 @@ from hata import Embed, KOKORO, seconds_to_elapsed_time, Client, Message, Discor
     seconds_to_id_difference, Guild, format_loop_time, TIMESTAMP_STYLES
 from hata.ext.slash import Button, abort, ButtonStyle, Row, wait_for_component_interaction
 from bot_utils.constants import GUILD__SUPPORT
+from config import MARISA_MODE
 
 SLASH_CLIENT: Client
 
@@ -194,40 +195,36 @@ class DupeImageFilter:
     async def get_processed_urls_of(self, message):
         urls = None
         
-        embeds = message.embeds
-        if (embeds is not None):
-            for embed in embeds:
-                if embed.type in ('image', 'video'):
-                    thumbnail = embed.thumbnail
-                    if (thumbnail is not None):
-                        url = thumbnail.url
-                        if (url is not None):
-                            if urls is None:
-                                urls = set()
-                            
-                            urls.add(url)
+        for embed in message.iter_embeds():
+            if embed.type in ('image', 'video'):
+                thumbnail = embed.thumbnail
+                if (thumbnail is not None):
+                    url = thumbnail.url
+                    if (url is not None):
+                        if urls is None:
+                            urls = set()
+                        
+                        urls.add(url)
+            
+            else:
+                image = embed.image
+                if (image is not None):
+                    url = image.url
+                    if (url is not None):
+                        if urls is None:
+                            urls = set()
+                        
+                        urls.add(url)
+        
+        for attachment in message.iter_attachments():
+            content_type = attachment.content_type
+            if (content_type is None) or (content_type.startswith('image')):
+                if urls is None:
+                    urls = set()
                 
-                else:
-                    image = embed.image
-                    if (image is not None):
-                        url = image.url
-                        if (url is not None):
-                            if urls is None:
-                                urls = set()
-                            
-                            urls.add(url)
+                urls.add(attachment.url)
         
-        attachments = message.attachments
-        if (attachments is not None):
-            for attachment in attachments:
-                content_type = attachment.content_type
-                if (content_type is None) or (content_type.startswith('image')):
-                    if urls is None:
-                        urls = set()
-                    
-                    urls.add(attachment.url)
-        
-        if (urls is None) or (not urls):
+        if (urls is None):
             return None
         
         processed_urls = set()
@@ -510,7 +507,13 @@ def has_manage_messages_permission(event):
     return bool(event.user_permissions.can_manage_messages)
 
 
-@SLASH_CLIENT.interactions(guild=[GUILD__KOISHI_CLAN, GUILD__SUPPORT])
+if MARISA_MODE:
+    allowed_guilds = [GUILD__SUPPORT]
+else:
+    allowed_guilds = [GUILD__KOISHI_CLAN, GUILD__SUPPORT]
+
+
+@SLASH_CLIENT.interactions(guild=allowed_guilds)
 async def dupe_image_filter(
     client,
     event,
