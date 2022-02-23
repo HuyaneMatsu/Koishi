@@ -582,3 +582,53 @@ async def add_message_to_move_group(event, message):
         abort('There is no message mover context in the channel.')
     else:
         await context.add_message(event, message)
+
+
+@SLASH_CLIENT.interactions(guild=[GUILD__KOISHI_CLAN, GUILD__SUPPORT], show_for_invoking_user_only=True)
+async def move_channel(
+    client,
+    event,
+    channel: ('channel_group_messageable', 'Where to move the channel\'s messages.'),
+):
+    """Moves channel's all messages | Mod only"""
+    check_permissions(client, event, channel)
+    
+    yield f'Starting to move messages to {channel.name}'
+    
+    if isinstance(channel, ChannelThread):
+        channel_id = channel.parent_id
+        thread_id = channel.id
+    else:
+        channel_id = channel.id
+        thread_id = 0
+    
+    source_channel_id = event.channel_id
+    guild_id = event.guild_id
+    
+    request_more = True
+    after_id = 0
+    webhook = await get_webhook(client, channel_id)
+    
+    while request_more:
+        messages = await client.message_get_chunk(source_channel_id, after=after_id)
+        
+        if len(messages) < 100:
+            request_more = False
+        else:
+            after_id = messages[0].id
+        
+        for message in reversed(messages):
+            files = await get_files(client, message)
+            
+            await client.webhook_message_create(
+                webhook,
+                message.content,
+                embed = message.clean_embeds,
+                file = files,
+                allowed_mentions = None,
+                name = message.author.name_at(guild_id),
+                avatar_url = message.author.avatar_url_at(guild_id),
+                thread = thread_id,
+            )
+            
+            files = None
