@@ -123,7 +123,7 @@ def maybe_add_modified_nullable_container_field(embed, entity, old_attributes, a
 )
 
 def add_string_field(embed, value, pretty_name):
-    return embed.add_value(
+    return embed.add_field(
         pretty_name,
         (
             f'```\n'
