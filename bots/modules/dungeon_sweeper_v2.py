@@ -613,7 +613,7 @@ async def save_stage_sources():
     This function is a coroutine.
     """
     async with FILE_LOCK:
-        stage_sources = sorted(STAGES_BY_ID.keys(), key=stage_source_sort_key)
+        stage_sources = sorted(STAGES_BY_ID.values(), key=stage_source_sort_key)
         data = pretty_dump_stage_sources(stage_sources)
         with await AsyncIO(FILE_PATH, 'w') as file:
             await file.write(data)
