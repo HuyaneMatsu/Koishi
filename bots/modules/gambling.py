@@ -1370,9 +1370,8 @@ async def roles(client, event,
     role, cost = BUYABLE_ROLES[role_]
     
     user = event.user
-    guild = role.guild
-    if (client.get_guild_profile_for(guild) is None):
-        abort(f'You must be in {guild.name} to buy any role.')
+    if (user.get_guild_profile_for(GUILD__SUPPORT) is None):
+        abort(f'You must be in {GUILD__SUPPORT.name} to buy any role.')
     
     if user.has_role(role):
         abort(f'You already have {role.name} role.')
@@ -1399,15 +1398,28 @@ async def roles(client, event,
             available_love = 0
         
         if available_love > cost:
-            bought = True
+            can_buy = True
         else:
-            bought = False
+            can_buy = False
         
         
-        if bought:
+        if can_buy:
             yield
             
-            await client.user_role_add(user, role)
+            try:
+                await client.user_role_add(user, role)
+            except DiscordException as err:
+                if err.code in (
+                    ERROR_CODES.unknown_user,
+                    ERROR_CODES.unknown_member,
+                ):
+                    buying_success = False
+                
+                else:
+                    raise
+            
+            else:
+                buying_success = True
             
             await connector.execute(
                 USER_COMMON_TABLE.update(
@@ -1423,12 +1435,15 @@ async def roles(client, event,
         client.avatar_url,
     )
     
-    if bought:
-        embed.description = 'Was successful.'
-        embed.add_field(
-            f'Your {EMOJI__HEART_CURRENCY:e}',
-            f'{total_love} -> {total_love - cost}',
-        )
+    if can_buy:
+        if buying_success:
+            embed.description = 'Was successful.'
+            embed.add_field(
+                f'Your {EMOJI__HEART_CURRENCY:e}',
+                f'{total_love} -> {total_love - cost}',
+            )
+        else:
+            embed.description = 'Was unsuccessful; user not in guild.'
     else:
         embed.description = 'You have insufficient amount of hearts.'
         embed.add_field(
