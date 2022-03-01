@@ -180,7 +180,7 @@ async def claim_daily_for_waifu(client, event, target_user):
             
             now = datetime.utcnow()
             
-            target_user_name = target_user_name.name
+            target_user_name = target_user.name
             target_daily_next = target_entry[5]
             if target_daily_next > now:
                 return Embed(
