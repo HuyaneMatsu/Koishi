@@ -180,10 +180,11 @@ async def claim_daily_for_waifu(client, event, target_user):
             
             now = datetime.utcnow()
             
+            target_user_name = target_user.name
             target_daily_next = target_entry[5]
             if target_daily_next > now:
                 return Embed(
-                    'They already claimed your daily love for today~',
+                    f'{target_user_name} already claimed your daily love for today~',
                     f'Come back in {elapsed_time(target_daily_next)}.',
                     color = COLOR__GAMBLING,
                 )
@@ -192,9 +193,9 @@ async def claim_daily_for_waifu(client, event, target_user):
             target_daily_streak = calculate_daily_new_only(target_daily_streak, target_daily_next, now)
             
             if target_daily_next + DAILY_STREAK_BREAK < now:
-                streak_text = f'They did not claim daily for more than 1 day, they got down to {target_daily_streak}.'
+                streak_text = f'{target_user_name} did not claim daily for more than 1 day, they got down to {target_daily_streak}.'
             else:
-                streak_text = f'They are in a {target_daily_streak + 1} day streak! Keep up the good work for them!'
+                streak_text = f'{target_user_name} are in a {target_daily_streak + 1} day streak! Keep up the good work for them!'
             
             received = calculate_daily_for(target_user, target_daily_streak)
             
@@ -231,7 +232,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 embed = Embed(
                     'How sweet, you claimed my love for your chosen one !',
                     (
-                        f'They received {received} {EMOJI__HEART_CURRENCY:e} and they have {target_total_love} '
+                        f'{target_user_name} received {received} {EMOJI__HEART_CURRENCY:e} and they have {target_total_love} '
                         f'{EMOJI__HEART_CURRENCY:e}\n'
                         f'{streak_text}'
                     ),
