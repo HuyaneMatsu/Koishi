@@ -123,6 +123,7 @@ if MARISA_MODE:
     
     MARISA_ALLOWED_MODULES.add('extensions')
     MARISA_ALLOWED_MODULES.add('google')
+    MARISA_ALLOWED_MODULES.add('help_me_remember')
     MARISA_ALLOWED_MODULES.add('log')
     
     for path in list(MODULE_NAMES):
