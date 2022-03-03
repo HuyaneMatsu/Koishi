@@ -173,14 +173,14 @@ def create_entry_embed(entry, user):
     ).add_field(
         'Name',
         (
-            f'```sh\n'
+            f'```\n'
             f'{entry.name}\n'
             f'```'
         ),
     ).add_field(
         'Description',
         (
-            f'```sh\n'
+            f'```\n'
             f'{entry.description}\n'
             f'```'
         ),

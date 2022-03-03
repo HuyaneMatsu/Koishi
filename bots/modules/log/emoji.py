@@ -1,4 +1,4 @@
-from hata import Client, Embed, StickerFormat, mention_role_by_id, DiscordException, ERROR_CODES, ROLES
+from hata import Client, Embed, StickerFormat, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, ROLES, ZEROUSER
 from hata.ext.extension_loader import require
 
 from bot_utils.constants import CHANNEL__SUPPORT__LOG_EMOJI, GUILD__SUPPORT
@@ -91,10 +91,17 @@ def maybe_add_modified_string_field(embed, entity, old_attributes, attribute_nam
 def _maybe_add_difference_field(embed, entity, old_attributes, attribute_name, pretty_name, converter):
     difference = try_get_modified_difference(entity, old_attributes, attribute_name)
     if (difference is not None):
+        old_value, new_value = difference
+        
+        if (converter is not None):
+            old_value = converter(old_value)
+            new_value = converter(new_value)
+        
         embed = add_modified_string_field(
             embed,
             pretty_name,
-            *(difference if (difference is None) else map(converter, difference))
+            old_value,
+            new_value,
         )
     return embed
 
@@ -149,7 +156,7 @@ def add_nullable_string_field(embed, value, pretty_name):
     return add_string_field(embed, get_nullable_string_repr(value), pretty_name)
 
 
-def add_emoji_fields_to(embed, emoji):
+def add_emoji_fields_to(emoji, embed):
     add_string_field(embed, emoji.name, 'Name')
     add_bool_field(embed, emoji.animated, 'Animated')
     add_bool_field(embed, emoji.available, 'Available')
@@ -178,6 +185,19 @@ def add_emoji_fields_to(embed, emoji):
     return embed
 
 
+def add_creator_field_to(entity, embed):
+    created_at_string = format(entity.created_at, DATETIME_FORMAT_CODE)
+    user = entity.user
+    if user is ZEROUSER:
+        footer_text = created_at_string
+        icon_url = None
+    else:
+        footer_text = f'{user.full_name} | {created_at_string}'
+        icon_url = user.avatar_url
+    
+    return embed.add_footer(footer_text, icon_url)
+
+
 @Satori.events
 async def emoji_create(client, emoji):
     if emoji.guild_id != GUILD__SUPPORT.id:
@@ -197,10 +217,9 @@ async def emoji_create(client, emoji):
     
     emoji_url = emoji.url
     
-    embed = add_emoji_fields_to(
-        emoji,
-        Embed(f'Emoji created: {emoji.name} ({emoji.id})', url=emoji_url).add_thumbnail(emoji_url),
-    )
+    embed = Embed(f'Emoji created: {emoji.name} ({emoji.id})', url=emoji_url).add_thumbnail(emoji_url)
+    add_emoji_fields_to(emoji, embed)
+    add_creator_field_to(emoji, embed)
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
@@ -213,7 +232,8 @@ async def emoji_edit(client, emoji, old_attributes):
     
     emoji_url = emoji.url
     
-    embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', description, url=emoji_url).add_thumbnail(emoji_url)
+    embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', url=emoji_url).add_thumbnail(emoji_url)
+    add_creator_field_to(emoji, embed)
     
     maybe_add_modified_string_field(embed, emoji, old_attributes, 'name', 'name')
     
@@ -265,10 +285,8 @@ async def emoji_delete(client, emoji):
     if emoji.guild_id != GUILD__SUPPORT.id:
         return
     
-    embed = add_emoji_fields_to(
-        emoji,
-        Embed(f'Emoji deleted: {emoji.name} ({emoji.id})'),
-    )
+    embed = Embed(f'Emoji deleted: {emoji.name} ({emoji.id})')
+    embed = add_emoji_fields_to(emoji, embed)
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
@@ -304,10 +322,9 @@ async def sticker_create(client, sticker):
     
     sticker_url = sticker.url
     
-    embed = add_sticker_fields_to(
-        sticker,
-        Embed(f'Sticker created: {sticker.name} ({sticker.id})', url=sticker_url)
-    )
+    embed = Embed(f'Sticker created: {sticker.name} ({sticker.id})', url=sticker_url)
+    add_sticker_fields_to(sticker, embed)
+    add_creator_field_to(sticker, embed)
     
     sticker_format = sticker.format
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
@@ -323,6 +340,7 @@ async def sticker_edit(client, sticker, old_attributes):
     
     sticker_url = sticker.url
     embed = Embed(f'Sticker edited: {sticker.name} ({sticker.id})', url=sticker_url)
+    add_creator_field_to(sticker, embed)
     
     maybe_add_modified_string_field(embed, sticker, old_attributes, 'name', 'name')
     maybe_add_modified_nullable_string_field(embed, sticker, old_attributes, 'description', 'Description')
@@ -341,10 +359,9 @@ async def sticker_delete(client, sticker):
     if sticker.guild_id != GUILD__SUPPORT.id:
         return
     
-    embed = add_sticker_fields_to(
-        sticker,
-        Embed(f'Sticker deleted: {sticker.name} ({sticker.id})')
-    )
+    embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})')
+    add_sticker_fields_to(sticker, embed)
+    add_creator_field_to(sticker, embed)
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
 
