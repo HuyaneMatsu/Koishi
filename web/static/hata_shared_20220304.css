@@ -90,12 +90,12 @@
 
 
     --font-generic-title-size: 3rem;
-    --font-generic-title-line-weight: 800;
+    --font-generic-title-weight: 800;
     --font-generic-title-line-height: calc(var(--font-generic-title-size) * 1.1);
     --size-generic-title-spacing: 1rem;
 
     --font-generic-medium-title-size: 2.0rem;
-    --font-generic-medium-title-line-weight: 800;
+    --font-generic-medium-title-weight: 800;
     --font-generic-medium-title-line-height: calc(var(--font-generic-medium-title-size) * 1.1);
     --size-generic-medium-title-spacing: 0.5rem;
 
@@ -813,14 +813,14 @@ section p, section li {
 
 section h1 {
     font-size: var(--font-generic-title-size);
-    font-weight: var(--font-generic-title-line-weight);
+    font-weight: var(--font-generic-title-weight);
     line-height: var(--font-generic-title-line-height);
     margin-bottom: var(--size-generic-title-spacing);
 }
 
 section h2 {
     font-size: var(--font-generic-medium-title-size);
-    font-weight: var(--font-generic-medium-title-line-weight);
+    font-weight: var(--font-generic-medium-title-weight);
     line-height: var(--font-generic-medium-title-line-height);
     margin-bottom: var(--size-generic-medium-title-spacing);
 }
@@ -960,7 +960,7 @@ hr {
 /* MarkDown - Table */
 
 
-.md table {
+table {
     width: 100%;
     table-layout: auto;
     padding-top: var(--size-generic-table-border-inner);
@@ -977,7 +977,7 @@ hr {
     margin-bottom: var(--size-generic-table-spacing)
 }
 
-.md table td, .md table th {
+table td, table th {
     padding-top: var(--size-generic-table-border-inner);
     padding-left: var(--size-generic-table-border-inner);
     padding-bottom: var(--size-generic-table-border-inner);
@@ -988,7 +988,7 @@ hr {
     overflow: hidden;
 }
 
-.md table thead tr th {
+table thead tr th {
     background-color: var(--color-generic-table-head-background);
     text-transform: uppercase!important;
     padding-top: var(--size-generic-table-border-inner);
@@ -998,63 +998,56 @@ hr {
     min-width: 8rem;
 }
 
-.md table_name, .md table_type, .md table_optional, .md table_keyword_only {
-    text-align: center;
-}
 
-.md table_description {
-    text-align: left;
-}
-
-.md table tbody tr:nth-child(even) {
+table tbody tr:nth-child(even) {
     background-color: var(--color-generic-table-line-even-background);
 }
 
-.md table tbody tr:nth-child(even):hover {
+table tbody tr:nth-child(even):hover {
     background-color: var(--color-generic-table-line-even-hover-background);
 }
 
-.md table tbody tr:nth-child(odd) {
+table tbody tr:nth-child(odd) {
     background-color: var(--color-generic-table-line-odd-background);
 }
 
-.md table tbody tr:nth-child(odd):hover {
+table tbody tr:nth-child(odd):hover {
     background-color: var(--color-generic-table-line-odd-hover-background);
 }
 
-.md table th:first-child {
+table th:first-child {
     border-radius: var(--size-generic-table-border-radius) 0 0 0 !important;
 }
 
-.md table th {
+table th {
     border-width: 1px 1px 1px 0;
 }
 
-.md table th:first-child {
+table th:first-child {
     border-width: 1px 1px 1px 1px;
 }
 
-.md table td {
+table td {
     border-width: 0px 1px 1px 0;
 }
 
-.md table td:first-child {
+table td:first-child {
     border-width: 0px 1px 1px 1px;
 }
 
-.md table th:last-child {
+table th:last-child {
     border-radius: 0 var(--size-generic-table-border-radius) 0 0 !important;
 }
 
-.md table tr:last-child td:first-child {
+table tr:last-child td:first-child {
     border-radius: 0 0 0 var(--size-generic-table-border-radius) !important;
 }
 
-.md table tr:last-child td:last-child {
+table tr:last-child td:last-child {
     border-radius: 0 0 var(--size-generic-table-border-radius) 0 !important;
 }
 
-.md table blockquote {
+table blockquote {
     width: initial;
     min-width: initial;
 }

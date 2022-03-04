@@ -22,20 +22,6 @@
     --color-code-link-font: rgb(227 255 197);
     --color-code-link-hover-background: rgb(195 181 255 / 0.20);
 
-    --color-generic-table-border: rgb(200 225 255 / 0.30);
-    --color-generic-table-head-background: rgb(0 128 255 / 0.05);
-    --color-generic-table-line-even-background: rgb(255 245 178 / 0.05);
-    --color-generic-table-line-even-hover-background: rgb(255 245 178 / 0.20);
-    --color-generic-table-line-odd-background: rgb(172 179 172 / 0.05);
-    --color-generic-table-line-odd-hover-background: rgb(172 179 172 / 0.20);
-
-    --color-parameter-table-border: rgb(200 225 255 / 0.30);
-    --color-parameter-table-head-background: rgb(191 158 255 / 0.12);
-    --color-parameter-table-line-even-background: inherit;
-    --color-parameter-table-line-even-hover-background: rgb(178 185 255 / 0.08);
-    --color-parameter-table-line-odd-background: var(--color-parameter-table-line-even-background);
-    --color-parameter-table-line-odd-hover-background: var(--color-parameter-table-line-even-hover-background);
-
     --color-code-block-background: rgb(246 248 250 / 0.10);
     --color-scrollbar-track: rgb(87 96 96 / 0.50);
     --color-scrollbar-thumb: rgb(26 29 29 / 0.75);
@@ -81,11 +67,6 @@
     --color-search-entry-border-focus: rgb(213 192 230 / 0.6);
     --color-content-table-search-background: rgb(91 101 101 / 0.50);
     --color-search-entry-border: rgb(127 127 127 / 0.4);
-    --color-generic-table-head-background: rgb(0 128 255 / 0.15);
-    --color-generic-table-line-even-background: rgb(255 245 178 / 0.15);
-    --color-generic-table-line-even-hover-background: rgb(255 245 178 / 0.30);
-    --color-generic-table-line-odd-background: rgb(172 179 172 / 0.15);
-    --color-generic-table-line-odd-hover-background: rgb(172 179 172 / 0.30);
 
     --color-scrollbar-thumb: rgb(91 103 103 / 0.75);
     --color-block-quote-background: rgb(80 152 167 / 0.10);
@@ -256,44 +237,6 @@ code {
     border-radius: 6px;
 }
 
-.generic_table {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    margin-left: 0px;
-    margin-right: 0px;
-    border-spacing: 0;
-    border-collapse: collapse;
-    width: max-content;
-    max-width: 100%;
-}
-
-.generic_table td, .generic_table th {
-    padding: 6px 13px;
-    border-color: var(--color-underline);
-    border-width: 1px;
-    border-style: solid;
-}
-
-.generic_table thead tr {
-    background-color: var(--color-generic-table-head-background);
-}
-
-.generic_table tbody tr:nth-child(even) {
-    background-color: var(--color-generic-table-line-even-background);
-}
-
-.generic_table tbody tr:nth-child(even):hover {
-    background-color: var(--color-generic-table-line-even-hover-background);
-}
-
-.generic_table tbody tr:nth-child(odd) {
-    background-color: var(--color-generic-table-line-odd-background);
-}
-
-.generic_table tbody tr:nth-child(odd):hover {
-    background-color: var(--color-generic-table-line-odd-hover-background);
-}
-
 form {
     padding: 0;
     margin: 0;
@@ -308,7 +251,7 @@ pre {
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
-    background-color: var(--color-generic-table-line-odd-hover-background);
+    background-color: var(--color-code-block);
     border-radius: 6px;
 }
 
@@ -344,6 +287,7 @@ blockquote {
 
 .sub_section {
     padding-left: 24px;
+    margin-bottom: 1rem;
 }
 
 .unit_section, .sub_unit {
@@ -412,6 +356,9 @@ blockquote {
 }
 
 .with_anchor {
+    font-size: var(--font-generic-highlight-size);
+    font-weight: var(--font-generic-highlight-weight);
+    line-height: var(--font-generic-highlight-line-height);
     margin-left: -0.8em;
     margin-right: 0px;
     padding-left: 0.8em;
@@ -694,89 +641,12 @@ blockquote {
     color: var(--color-python-format-string-postfix);
 }
 
-
-.parameter_table {
-    width: 100%;
-    table-layout: auto;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    margin-left: 0px;
-    margin-right: 0px;
-    border-spacing: 0;
-    border-radius: var(--parameter-table-border-radius);
-}
-
-.parameter_table td, .parameter_table th {
-    padding: 6px 13px;
-    border-color: var(--color-underline);
-    border-width: 1px;
-    border-style: solid;
-}
-
-.parameter_table thead tr th {
-    background-color: var(--color-parameter-table-head-background);
-    text-transform: uppercase!important;
-    padding-top: 0.75em;
-    padding-bottom: 0.75em;
-    padding-left: 0px;
-    padding-right: 0px;
-    min-width: 8rem;
-}
-
 .parameter_table_name, .parameter_table_type, .parameter_table_optional, .parameter_table_keyword_only {
     text-align: center;
 }
 
 .parameter_table_description {
     text-align: left;
-}
-
-.parameter_table tbody tr:nth-child(even) {
-    background-color: var(--color-parameter-table-line-even-background);
-}
-
-.parameter_table tbody tr:nth-child(even):hover {
-    background-color: var(--color-parameter-table-line-even-hover-background);
-}
-
-.parameter_table tbody tr:nth-child(odd) {
-    background-color: var(--color-parameter-table-line-odd-background);
-}
-
-.parameter_table tbody tr:nth-child(odd):hover {
-    background-color: var(--color-parameter-table-line-odd-hover-background);
-}
-
-.parameter_table th:first-child {
-    border-radius: var(--parameter-table-border-radius) 0 0 0 !important;
-}
-
-.parameter_table th {
-    border-width: 1px 1px 1px 0;
-}
-
-.parameter_table th:first-child {
-    border-width: 1px 1px 1px 1px;
-}
-
-.parameter_table td {
-    border-width: 0px 1px 1px 0;
-}
-
-.parameter_table td:first-child {
-    border-width: 0px 1px 1px 1px;
-}
-
-.parameter_table th:last-child {
-    border-radius: 0 var(--parameter-table-border-radius) 0 0 !important;
-}
-
-.parameter_table tr:last-child td:first-child {
-    border-radius: 0 0 0 var(--parameter-table-border-radius) !important;
-}
-
-.parameter_table tr:last-child td:last-child {
-    border-radius: 0 0 var(--parameter-table-border-radius) 0 !important;
 }
 
 .parameter_table blockquote {
