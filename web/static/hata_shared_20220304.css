@@ -889,6 +889,62 @@ hr {
     margin-top: var(--size-header-height);
 }
 
+
+
+table tbody tr:nth-child(even) {
+    background-color: var(--color-generic-table-line-even-background);
+}
+
+table tbody tr:nth-child(even):hover {
+    background-color: var(--color-generic-table-line-even-hover-background);
+}
+
+table tbody tr:nth-child(odd) {
+    background-color: var(--color-generic-table-line-odd-background);
+}
+
+table tbody tr:nth-child(odd):hover {
+    background-color: var(--color-generic-table-line-odd-hover-background);
+}
+
+table th:first-child {
+    border-radius: var(--size-generic-table-border-radius) 0 0 0 !important;
+}
+
+table th {
+    border-width: 1px 1px 1px 0;
+}
+
+table th:first-child {
+    border-width: 1px 1px 1px 1px;
+}
+
+table td {
+    border-width: 0px 1px 1px 0;
+}
+
+table td:first-child {
+    border-width: 0px 1px 1px 1px;
+}
+
+table th:last-child {
+    border-radius: 0 var(--size-generic-table-border-radius) 0 0 !important;
+}
+
+table tr:last-child td:first-child {
+    border-radius: 0 0 0 var(--size-generic-table-border-radius) !important;
+}
+
+table tr:last-child td:last-child {
+    border-radius: 0 0 var(--size-generic-table-border-radius) 0 !important;
+}
+
+table blockquote {
+    width: initial;
+    min-width: initial;
+}
+
+
 /* MarkDown - CodeBlock */
 
 .md {
@@ -1002,58 +1058,23 @@ table thead tr th {
 }
 
 
-table tbody tr:nth-child(even) {
-    background-color: var(--color-generic-table-line-even-background);
+h1 .anchor, h2 .anchor, h3 .anchor, h4 .anchor, h5 .anchor, h6 .anchor, h7 .anchor, h7 .anchor, .with_anchor .anchor {
+    margin-top: calc(0px - var(--size-header-anchor-total-push));
+    padding-top: var(--size-header-anchor-total-push);
+    cursor: pointer;
+    position: sticky;
 }
 
-table tbody tr:nth-child(even):hover {
-    background-color: var(--color-generic-table-line-even-hover-background);
+h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
+h7:hover .anchor, .with_anchor:hover .anchor {
+    visibility: visible;
 }
 
-table tbody tr:nth-child(odd) {
-    background-color: var(--color-generic-table-line-odd-background);
+h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
+h7:hover .anchor, .with_anchor:hover .anchor {
+    visibility: visible;
 }
 
-table tbody tr:nth-child(odd):hover {
-    background-color: var(--color-generic-table-line-odd-hover-background);
-}
-
-table th:first-child {
-    border-radius: var(--size-generic-table-border-radius) 0 0 0 !important;
-}
-
-table th {
-    border-width: 1px 1px 1px 0;
-}
-
-table th:first-child {
-    border-width: 1px 1px 1px 1px;
-}
-
-table td {
-    border-width: 0px 1px 1px 0;
-}
-
-table td:first-child {
-    border-width: 0px 1px 1px 1px;
-}
-
-table th:last-child {
-    border-radius: 0 var(--size-generic-table-border-radius) 0 0 !important;
-}
-
-table tr:last-child td:first-child {
-    border-radius: 0 0 0 var(--size-generic-table-border-radius) !important;
-}
-
-table tr:last-child td:last-child {
-    border-radius: 0 0 var(--size-generic-table-border-radius) 0 !important;
-}
-
-table blockquote {
-    width: initial;
-    min-width: initial;
-}
 
 /* MarkDown - Code */
 

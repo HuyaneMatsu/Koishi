@@ -173,23 +173,6 @@ h2, h4, h6 {
     font-weight: normal;
 }
 
-h1 .anchor, h2 .anchor, h3 .anchor, h4 .anchor, h5 .anchor, h6 .anchor, h7 .anchor, h7 .anchor, .with_anchor .anchor {
-    margin-top: calc(0px - var(--size-header-anchor-total-push));
-    padding-top: var(--size-header-anchor-total-push);
-    cursor: pointer;
-    position: sticky;
-}
-
-h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
-h7:hover .anchor, .with_anchor:hover .anchor {
-    visibility: visible;
-}
-
-h1:hover .anchor, h2:hover .anchor, h3:hover .anchor, h4:hover .anchor, h5:hover .anchor, h6:hover .anchor,
-h7:hover .anchor, .with_anchor:hover .anchor {
-    visibility: visible;
-}
-
 svg {
     z-index: -1;
 }
