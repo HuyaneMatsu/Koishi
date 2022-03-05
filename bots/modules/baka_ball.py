@@ -1,4 +1,4 @@
-from hata import Client, Embed
+from hata import Client, Embed, Color
 from hata.ext.slash import abort
 from hashlib import md5
 
@@ -35,6 +35,8 @@ BAKA_BALL_RESPONSES = [
 
 BAKA_BALL_IMAGE = 'https://cdn.discordapp.com/attachments/568837922288173058/939974559476621352/chiruno-run.gif'
 
+EMBED_COLOR = Color(0x2e93ff)
+
 @SLASH_CLIENT.interactions(is_global=True, name='9ball')
 async def baka_ball(
     event,
@@ -49,13 +51,19 @@ async def baka_ball(
     user = event.user
     response = BAKA_BALL_RESPONSES[(hash_string(question.casefold()) ^ user.id) % len(BAKA_BALL_RESPONSES)]
     
-    embed = Embed(description=question).add_author(user.avatar_url, user.full_name)
+    embed = Embed(
+        description=question,
+        color = EMBED_COLOR,
+    ).add_author(
+        user.avatar_url,
+        user.full_name,
+    )
     
     if response is None:
-        
         embed.add_image(
             BAKA_BALL_IMAGE,
         )
+    
     else:
         embed.add_field('⑨ Ball', response).add_thumbnail(BAKA_BALL_IMAGE)
     

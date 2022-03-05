@@ -81,6 +81,7 @@ def get_multiplier(user_id_1, user_id_2):
 
 CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM = 'marriage.buy_waifu_slot.confirm'
 CUSTOM_ID_BUY_WAIFU_SLOT_CANCEL = 'marriage.buy_waifu_slot.cancel'
+CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE = 'buy_waifu_slot.invoke'
 
 BUY_WAIFU_SLOT_COMPONENTS = Row(
     Button(
@@ -95,8 +96,24 @@ BUY_WAIFU_SLOT_COMPONENTS = Row(
     ),
 )
 
+BUY_WAIFU_SLOT_INVOKE_COMPONENT = Button(
+    'I want some More! More!',
+    custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE,
+)
+
+
 @SLASH_CLIENT.interactions(is_global=True)
 async def buy_waifu_slot(event):
+    return await buy_waifu_slot_invoke(event)
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE)
+async def buy_waifu_slot_in_inline(event):
+    if event.message.interaction.user is event.user:
+        return await buy_waifu_slot_invoke(event)
+
+
+async def buy_waifu_slot_invoke(event):
     user_id = event.user.id
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -118,9 +135,13 @@ async def buy_waifu_slot(event):
             new_waifu_slot_count = waifu_slots + 1
             
             if waifu_slots >= MAX_WAIFU_SLOTS:
-                return Embed(
-                    None,
-                    'You reached the maximum amount of waifu slots.',
+                return
+                InteractionResponse(
+                    Embed(
+                        None,
+                        'You reached the maximum amount of waifu slots.',
+                    ),
+                    components = None,
                 )
             
             available_love = total_love - total_allocated
@@ -143,13 +164,16 @@ async def buy_waifu_slot(event):
             required_love = WAIFU_SLOT_2_COST
             new_waifu_slot_count = 2
     
-    return Embed(
-        None,
-        (
-            'You do not have enough available love to buy more waifu slots.\n'
-            f'You need {required_love} {EMOJI__HEART_CURRENCY.as_emoji} to buy the {new_waifu_slot_count}'
-            f'{GET_NUMBER_TH_ENDING.get(new_waifu_slot_count, DEFAULT_TH_ENDING)} slot.'
+    return Interactionsresponse(
+        Embed(
+            None,
+            (
+                'You do not have enough available love to buy more waifu slots.\n'
+                f'You need {required_love} {EMOJI__HEART_CURRENCY.as_emoji} to buy the {new_waifu_slot_count}'
+                f'{GET_NUMBER_TH_ENDING.get(new_waifu_slot_count, DEFAULT_TH_ENDING)} slot.'
+            ),
         ),
+        components = None,
     )
 
 
@@ -572,15 +596,19 @@ async def propose(client, event,
             proposed_user_count = len(proposed_user_ids)
         
         if source_waifu_slots - source_waifu_count - proposed_user_count <= 0:
-            yield Embed(
-                None,
-                f'You can not propose to more users.\n'
-                f'\n'
-                f'Waifu slots: {source_waifu_slots}\n'
-                f'Waifus: {source_waifu_count}\n'
-                f'Propositions: {proposed_user_count}'
+            yield InteractionResponse(
+                Embed(
+                    'You can not propose to more users.',
+                    (
+                        f'Waifu slots: {source_waifu_slots}\n'
+                        f'Waifus: {source_waifu_count}\n'
+                        f'Propositions: {proposed_user_count}'
+                    ),
+                ).add_footer(
+                    'To buy more waifu slot, use: /buy-waifu-slot'
+                ),
+                components = BUY_WAIFU_SLOT_INVOKE_COMPONENT,
             )
-            
             return
         
         # case 6: The proposal amount is under required amount.
@@ -748,7 +776,7 @@ async def list_proposals(event, user, outgoing):
                     waifu_proposal_model.investment,
                 ]
             ).where(
-                waifu_proposal_model.source_id == user_id
+                waifu_proposal_model.source_id == user_id,
             )
         else:
             to_execute = select(
@@ -757,7 +785,7 @@ async def list_proposals(event, user, outgoing):
                     waifu_proposal_model.investment,
                 ]
             ).where(
-                waifu_proposal_model.target_id == user_id
+                waifu_proposal_model.target_id == user_id,
             )
         
         response = await connector.execute(to_execute)
