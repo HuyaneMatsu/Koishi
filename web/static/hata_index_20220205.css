@@ -122,6 +122,7 @@
     font-family: kokoro;
     word-break: keep-all;
     overflow: hidden;
+    height: var(--font-banner-title-size);
 }
 
 .banner_box .underline {

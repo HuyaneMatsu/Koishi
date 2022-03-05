@@ -36,7 +36,7 @@
         'Apple Color Emoji', 'Segoe UI Emoji';
     --font-header-color: rgb(255 255 255);
 
-    --color-header-background: rgb(84 91 99 / 0.90);
+    --color-header-background: rgb(128 137 147 / 0.90);
     
     --color-header-button-left: rgb(20 219 81 / 0.40);
     --color-header-button-left-selected: rgb(20 219 81 / 0.60);
@@ -80,7 +80,7 @@
     
     --font-generic-size: 1.0rem;
     --font-generic-weight: 400;
-    --font-generic-line-height: 1.3;
+    --font-generic-line-height: 1.2rem;
     --size-generic-spacing: 0.5rem;
     --size-generic-continuous-spacing: calc(var(--size-generic-spacing) * 2);
 
@@ -113,6 +113,8 @@
 
     --size-generic-line-spacing-top: 2rem;
     --size-generic-line-spacing-bot: 1rem;
+
+    --ratio-text-icon-split: 0.125;
 
     /* CodeBlock */
 
@@ -191,6 +193,10 @@
 }
 
 [variable-theme="black"] {
+    /* Header */
+
+    --color-header-background: rgb(84 91 99 / 0.90);
+
     /* Body */
 
     --color-body-background: rgb(0 0 0);
@@ -527,7 +533,7 @@
     text-decoration: inherit;
 }
 
-.header_menu .header_left a{
+.header_menu .header_left a {
     display: inline-flex;
     margin-right: var(--size-header-navigation-button-spacing);
     background-color: var(--color-header-button-left);
@@ -574,11 +580,13 @@ p[align="right"] a::after {
     background-color: var(--color-header-button-left-selected);
 }
 
-.header_menu .header_left a svg {
-    height: inherit;
-    width: inherit;
-    padding-top: 0;
-    padding-bottom: 0;
+.header_menu .header_left a img {
+    filter: var(--color-svg-filter);
+    height: var(--font-header-size);
+    width: var(--font-header-size);
+    padding-top: calc((var(--size-header-button-line-height) - var(--font-header-size)) / 2);
+    padding-bottom: calc((var(--size-header-button-line-height) - var(--font-header-size)) / 2);
+    padding-left: calc(var(--font-header-size) * var(--ratio-text-icon-split));
 }
 
 .header_menu details {
@@ -813,6 +821,17 @@ section p, section li {
     font-weight: var(--font-generic-weight);
     line-height: var(--font-generic-line-height);
     margin-bottom: var(--size-generic-spacing);
+    min-height: var(--font-generic-line-height);
+}
+
+section p a img, section li a img {
+    height: var(--font-generic-size);
+    width: var(--font-generic-size);
+    padding-top: calc((var(--font-generic-line-height) - var(--font-generic-size)) / 2);
+    padding-bottom: calc((var(--font-generic-line-height) - var(--font-generic-size)) / 2);
+    filter: var(--color-svg-filter);
+    position: absolute;
+    padding-left: calc(var(--font-generic-size) * var(--ratio-text-icon-split));
 }
 
 section h1 {
@@ -864,6 +883,16 @@ section mark {
     font-weight: var(--font-generic-highlight-weight);
     line-height: var(--font-generic-highlight-line-height);
     margin-bottom: var(--font-generic-highlight-spacing);
+}
+
+section mark a img {
+    height: var(--font-generic-highlight-size);
+    width: var(--font-generic-highlight-size);
+    padding-top: calc((var(--font-generic-highlight-line-height) - var(--font-generic-highlight-size)) / 2);
+    padding-bottom: calc((var(--font-generic-highlight-line-height) - var(--font-generic-highlight-size)) / 2);
+    filter: var(--color-svg-filter);
+    position: absolute;
+    padding-left: calc(var(--font-generic-highlight-size) * var(--ratio-text-icon-split));
 }
 
 .underline {

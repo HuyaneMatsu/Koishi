@@ -29,7 +29,6 @@
     --color-anchor: var(--color-body-font);
     --color-listing-comment-font: rgb(146 137 152);
     --color-listing-preview-background: rgb(90 90 90);
-    --color-header-background: rgb(127 127 127 / 0.10);
     --color-search-entry-border: rgb(127 127 127 / 0.20);
     --color-search-entry-border-focus: rgb(189 150 222 / 0.30);
     --color-search-entry-input-font: var(--color-body-font);
@@ -71,7 +70,6 @@
     --color-scrollbar-thumb: rgb(91 103 103 / 0.75);
     --color-block-quote-background: rgb(80 152 167 / 0.10);
     --color-block-quote-border: rgb(80 152 167 / 0.50);
-    --color-header-background: rgb(127 127 127 / 0.20);
 }
 
 [variable-theme="white"] {
@@ -236,7 +234,7 @@ pre {
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
-    background-color: var(--color-code-block);
+    background-color: var(--color-code-block-background);
     border-radius: 6px;
 }
 
