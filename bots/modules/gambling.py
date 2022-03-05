@@ -1,8 +1,7 @@
-import re
 from functools import partial as partial_func
 from datetime import datetime, timedelta
 from random import random
-from math import log10, ceil, floor
+from math import log10, floor
 
 from scarletio import Task, Future
 from hata import Client, elapsed_time, Embed, BUILTIN_EMOJIS, DiscordException, KOKORO, \
@@ -13,12 +12,10 @@ from sqlalchemy.sql import select, desc
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression
 
 from bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, GUILD__SUPPORT, \
-    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__ADMIN, \
-    ROLE__SUPPORT__NSFW_ACCESS, COLOR__GAMBLING, LINK__KOISHI_TOP_GG
+    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__ADMIN, COLOR__GAMBLING, LINK__KOISHI_TOP_GG
 from bot_utils.utils import send_embed_to
 from bot_utils.daily import DAILY_INTERVAL, calculate_daily_new_only, calculate_daily_new, DAILY_STREAK_BREAK, \
-    calculate_daily_for, NSFW_ACCESS_COST, ELEVATED_COST, HEART_BOOST_COST, TOP_GG_VOTE_DELAY_MIN, \
-    TOP_GG_VOTE_DELAY_MAX
+    calculate_daily_for, TOP_GG_VOTE_DELAY_MIN, TOP_GG_VOTE_DELAY_MAX
 
 SLASH_CLIENT: Client
 
@@ -1337,242 +1334,7 @@ async def top_list(client, event,
     return
 
 
-HEART_SHOP = SLASH_CLIENT.interactions(
-    None,
-    name = 'heart-shop',
-    description = 'Trade your love!',
-    is_global = True,
-)
 
-
-NSFW_ACCESS_IDENTIFIER = '0'
-ELEVATED_IDENTIFIER = '1'
-HEART_BOOST_IDENTIFIER = '2'
-
-BUYABLE_ROLES = {
-    NSFW_ACCESS_IDENTIFIER: (ROLE__SUPPORT__NSFW_ACCESS, NSFW_ACCESS_COST),
-    ELEVATED_IDENTIFIER: (ROLE__SUPPORT__ELEVATED, ELEVATED_COST),
-    HEART_BOOST_IDENTIFIER: (ROLE__SUPPORT__HEART_BOOST, HEART_BOOST_COST),
-}
-
-ROLE_CHOICES = [
-    (f'Horny ({NSFW_ACCESS_COST})', NSFW_ACCESS_IDENTIFIER),
-    (f'Nekogirl Worshipper ({ELEVATED_COST})', ELEVATED_IDENTIFIER),
-    (f'Koishi enjoyer ({HEART_BOOST_COST})', HEART_BOOST_IDENTIFIER),
-]
-
-
-@HEART_SHOP.interactions
-async def roles(client, event,
-    role_: (ROLE_CHOICES, 'Choose a role to buy!')
-):
-    """Buy roles to enhance your love!"""
-    role, cost = BUYABLE_ROLES[role_]
-    
-    user = event.user
-    if (user.get_guild_profile_for(GUILD__SUPPORT) is None):
-        abort(f'You must be in {GUILD__SUPPORT.name} to buy any role.')
-    
-    if user.has_role(role):
-        abort(f'You already have {role.name} role.')
-    
-    user_id = user.id
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.total_love,
-                    user_common_model.total_allocated,
-                ]
-            ).where(
-                user_common_model.user_id == user_id,
-            )
-        )
-        results = await response.fetchall()
-        
-        if results:
-            total_love, total_allocated = results[0]
-            available_love = total_love - total_allocated
-        else:
-            total_love = 0
-            available_love = 0
-        
-        if available_love > cost:
-            can_buy = True
-        else:
-            can_buy = False
-        
-        
-        if can_buy:
-            yield
-            
-            try:
-                await client.user_role_add(user, role)
-            except DiscordException as err:
-                if err.code in (
-                    ERROR_CODES.unknown_user,
-                    ERROR_CODES.unknown_member,
-                ):
-                    buying_success = False
-                
-                else:
-                    raise
-            
-            else:
-                buying_success = True
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.user_id == user_id,
-                ).values(
-                    total_love = user_common_model.total_love - cost,
-                )
-            )
-    
-    embed = Embed(
-        f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY}'
-    ).add_thumbnail(
-        client.avatar_url,
-    )
-    
-    if can_buy:
-        if buying_success:
-            embed.description = 'Was successful.'
-            embed.add_field(
-                f'Your {EMOJI__HEART_CURRENCY:e}',
-                f'{total_love} -> {total_love - cost}',
-            )
-        else:
-            embed.description = 'Was unsuccessful; user not in guild.'
-    else:
-        embed.description = 'You have insufficient amount of hearts.'
-        embed.add_field(
-            f'Your {EMOJI__HEART_CURRENCY:e}',
-            str(total_love),
-        )
-    
-    yield embed
-
-
-# ((d + 1) * d) >> 1 - (((d - a) + 1) * (d - a)) >> 1
-# (((d + 1) * d) - (((d - a) + 1) * (d - a))) >> 1
-# (d * d + d - (((d - a) + 1) * (d - a))) >> 1
-# (d * d + d - ((d - a + 1) * (d - a))) >> 1
-# (d * d + d - (d * d - d * a + d - d * a + a * a - a)) >> 1
-# (d * d + d - (d * d - d * a + d - d * a + a * a - a)) >> 1
-# (d * d + d + (-d * d + d * a - d + d * a - a * a + a)) >> 1
-# (d * d + d - d * d + d * a - d + d * a - a * a + a) >> 1
-# (d + d * a - d + d * a - a * a + a) >> 1
-# (d * a + d * a - a*a + a) >> 1
-# (d * a + d * a - a*a + a) >> 1
-# (2 * d * a - a * a + a) >> 1
-# (a*(2 * d - a + 1)) >> 1
-# (a * ((d << 1) - a + 1)) >> 1
-# (a * ((d << 1)-a + 1)) >> 1
-
-DAILY_REFUND_MIN = 124
-
-def calculate_sell_price(daily_count, daily_refund):
-
-    under_price = DAILY_REFUND_MIN - daily_count + daily_refund
-    if under_price < 0:
-        under_price = 0
-        over_price = daily_refund
-    else:
-        if under_price > daily_refund:
-            under_price = daily_refund
-            over_price = 0
-        else:
-            over_price = daily_refund - under_price
-    
-    price = 0
-    
-    if over_price:
-        price += (over_price * ((daily_count << 1) - over_price + 1)) >> 1
-    
-    if under_price:
-        price += (under_price * DAILY_REFUND_MIN)
-    
-    return price
-
-
-
-@HEART_SHOP.interactions
-async def sell_daily(client, event,
-        amount: ('number', 'How much?'),
-            ):
-    """Sell excess daily streak for extra hearts."""
-    if amount < 1:
-        abort('`amount` must be non-negative!')
-    
-    user_id = event.user.id
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                ]
-            ).where(
-                user_common_model.user_id == user_id,
-            )
-        )
-        
-        results = await response.fetchall()
-        if results:
-            entry_id, total_love, daily_streak, daily_next = results[0]
-            now = datetime.utcnow()
-            if daily_next < now:
-                daily_streak, daily_next = calculate_daily_new(daily_streak, daily_next, now)
-        
-        else:
-            entry_id = -1
-            total_love = 0
-            daily_streak = 0
-        
-        if amount <= daily_streak:
-            sell_price = calculate_sell_price(daily_streak, amount)
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == entry_id
-                ).values(
-                    total_love = user_common_model.total_love + sell_price,
-                    daily_next = daily_next,
-                    daily_streak = daily_streak - amount,
-                )
-            )
-            
-            sold = True
-        else:
-            sold = False
-    
-    embed = Embed(
-        f'Selling {amount} daily for {EMOJI__HEART_CURRENCY}'
-    ).add_thumbnail(
-        client.avatar_url,
-    )
-    
-    if sold:
-        embed.description = 'Great success!'
-        embed.add_field(
-            f'Your daily streak',
-            f'{daily_streak} -> {daily_streak - amount}',
-        )
-        embed.add_field(
-            f'Your {EMOJI__HEART_CURRENCY:e}',
-            f'{total_love} -> {total_love + sell_price}',
-        )
-    else:
-        embed.description = 'You have insufficient amount of daily streak.'
-        embed.add_field(
-            f'Your daily streak',
-            str(daily_streak),
-        )
-    
-    return embed
 
 
 HEART_GENERATOR_COOLDOWNS = set()

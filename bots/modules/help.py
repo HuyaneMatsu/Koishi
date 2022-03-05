@@ -607,7 +607,7 @@ CATEGORIES = (
     ), (
         'Marriage',
         EMOJI_RING,
-        ('buy-waifu-slot', 'divorce', 'love', 'propose', 'proposals', 'waifu-info',)
+        ('divorce', 'love', 'propose', 'proposals', 'waifu-info',)
     ), (
         'Utility',
         EMOJI_MAGIC_WAND,
@@ -705,8 +705,8 @@ HEARD_GUIDE_EMBED = Embed(
     (
         '**•** `/propose` - Propose to your heart\'s chosen one.\n'
         '**•** `/divorce` - Less waifus.\n'
-        '**•** `/buy-waifu-slot` - More waifus.\n'
-        '**•** `/heart-shop roles` - Buy roles inside of my support server.'
+        '**•** `/heart-shop roles` - Buy roles inside of my support server.\n'
+        '**•** `/heart-shop waifu-slot` - More waifus.'
     ),
 ).add_field(
     'Gambling hearts',

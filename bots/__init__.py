@@ -138,7 +138,12 @@ else:
     MODULE_NAMES.discard('google')
 
 for path in MODULE_NAMES:
-    EXTENSION_LOADER.add('bots.modules.' + path)
+    extension_full_name = 'bots.modules.' + path
+    
+    if path.startswith('shared__'):
+        EXTENSION_LOADER.load_extension(extension_full_name)
+    else:
+        EXTENSION_LOADER.add(extension_full_name)
 
 del path
 

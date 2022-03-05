@@ -84,7 +84,7 @@ And much more!
 
 -  Marriage
     
-    `buy-waifu-slot` • `divorce` • `love` • `propose` • `proposals` • `waifu-info`
+    `divorce` • `love` • `propose` • `proposals` • `waifu-info`
 
 - Utility
     
