@@ -12,7 +12,7 @@ from sqlalchemy.sql import select, desc
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression
 
 from bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, GUILD__SUPPORT, \
-    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__ADMIN, COLOR__GAMBLING, LINK__KOISHI_TOP_GG
+    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__ADMIN, COLOR__GAMBLING, LINK__KOISHI_TOP_GG, WAIFU_COST_DEFAULT
 from bot_utils.utils import send_embed_to
 from bot_utils.daily import DAILY_INTERVAL, calculate_daily_new_only, calculate_daily_new, DAILY_STREAK_BREAK, \
     calculate_daily_for, TOP_GG_VOTE_DELAY_MIN, TOP_GG_VOTE_DELAY_MAX
@@ -148,6 +148,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                         user_common_model.daily_streak,
                         user_common_model.daily_next,
                         user_common_model.notify_daily,
+                        user_common_model.waifu_cost,
                     ]
                 ).where(
                     user_common_model.user_id.in_(
@@ -202,14 +203,25 @@ async def claim_daily_for_waifu(client, event, target_user):
             
             waifu_cost_increase = 1 + floor(received * 0.01)
             
+            
+            new_waifu_cost = source_entry[7]
+            if not new_waifu_cost:
+                new_waifu_cost = WAIFU_COST_DEFAULT
+            new_waifu_cost += waifu_cost_increase
+            
             await connector.execute(
                 USER_COMMON_TABLE.update(
                     user_common_model.id == source_entry[0],
                 ).values(
-                    waifu_cost = user_common_model.waifu_cost + waifu_cost_increase,
+                    waifu_cost = new_waifu_cost,
                     count_daily_for_waifu = user_common_model.count_daily_for_waifu + 1,
                 )
             )
+            
+            new_waifu_cost = target_entry[7]
+            if not new_waifu_cost:
+                new_waifu_cost = WAIFU_COST_DEFAULT
+            new_waifu_cost += waifu_cost_increase
             
             await connector.execute(
                 USER_COMMON_TABLE.update(
@@ -218,7 +230,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     total_love = target_total_love,
                     daily_next = now + DAILY_INTERVAL,
                     daily_streak = target_daily_streak,
-                    waifu_cost = user_common_model.waifu_cost + waifu_cost_increase,
+                    waifu_cost = new_waifu_cost,
                     count_daily_by_waifu = user_common_model.count_daily_by_waifu + 1,
                 )
             )
