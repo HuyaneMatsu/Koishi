@@ -229,7 +229,7 @@
     --font-header-color: rgb(0 0 0);
 
     --color-header-path-font: rgb(0 0 0 / 0.75);
-    --color-header-background: rgb(171 182 196 / 0.90)
+    --color-header-background: rgb(171 182 196 / 0.90);
 
     /* Body */
 
@@ -513,6 +513,7 @@
     background-color: transparent;
     border-radius: 0;
     border-style: none;
+    color: var(--color-header-path-font);
 }
 
 .header_menu .header_left .header_left_overflow_cut a:hover {

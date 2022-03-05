@@ -21,6 +21,11 @@
 [variable-theme="white"] {
     --font-color-link: rgb(0 102 31);
     --font-color-link-hover: rgb(0 141 149);
+
+    --color-link-img: invert(24%) sepia(47%) saturate(2084%) hue-rotate(112deg) brightness(97%) contrast(102%);
+    --color-link-img-hover: invert(31%) sepia(75%) saturate(1651%) hue-rotate(157deg) brightness(95%) contrast(107%);
+
+
 }
 
 .main_block {
