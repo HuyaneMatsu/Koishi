@@ -1204,3 +1204,12 @@ h7:hover .anchor, .with_anchor:hover .anchor {
     height: calc(var(--font-generic-sub-title-size) * var(--size-anchor-scale));
     margin-left: calc(0px - var(--size-anchor-sub-title-spacing));
 }
+
+/* MarkDown - Image */
+
+.md a img {
+    filter: initial !important;
+    width: initial !important;
+    height: initial !important;
+    position: initial !important;
+}
