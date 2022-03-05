@@ -36,7 +36,7 @@
         'Apple Color Emoji', 'Segoe UI Emoji';
     --font-header-color: rgb(255 255 255);
 
-    --color-header-background: rgb(155 177 205 / 0.40);
+    --color-header-background: rgb(84 91 99 / 0.90);
     
     --color-header-button-left: rgb(20 219 81 / 0.40);
     --color-header-button-left-selected: rgb(20 219 81 / 0.60);
@@ -223,6 +223,7 @@
     --font-header-color: rgb(0 0 0);
 
     --color-header-path-font: rgb(0 0 0 / 0.75);
+    --color-header-background: rgb(171 182 196 / 0.90)
 
     /* Body */
 
