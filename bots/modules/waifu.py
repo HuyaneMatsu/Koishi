@@ -122,7 +122,7 @@ async def nsfw(client, event,
         abort('Guild only command')
     
     channel = event.channel
-    if (channel is None) or getattr(channel, 'nsfw', False):
+    if (channel is None) or (not getattr(channel, 'nsfw', False)):
         abort('Nsfw channel only!')
     
     url = await get_waifu_image(client, event, type_, False, WAIFU_CACHE_BY_KEY[(type_, False)], False)
