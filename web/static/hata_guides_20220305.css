@@ -4,6 +4,9 @@
     --font-color-link: rgb(203 255 219);
     --font-color-link-hover: rgb(174 251 255);
 
+    --color-link-img: invert(98%) sepia(62%) saturate(509%) hue-rotate(59deg) brightness(102%) contrast(101%);
+    --color-link-img-hover: invert(92%) sepia(98%) saturate(5510%) hue-rotate(167deg) brightness(105%) contrast(104%);
+
     --size-content-max-width: 1300px;
 
     --size-footnote-spacing-top: 5rem;
@@ -54,8 +57,17 @@
     color: var(--font-color-link);
 }
 
+.main_block a img {
+    filter: var(--color-link-img);
+}
+
 .main_block a:hover {
     color: var(--font-color-link-hover);
+    transition: color 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main_block a:hover img {
+    filter: var(--color-link-img-hover);
     transition: color 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
