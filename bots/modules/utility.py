@@ -1285,7 +1285,7 @@ async def choose(
 
 
 CREATE_EMBEDDED_ACTIVITY_PERMISSIONS = Permission().update_by_keys(
-    start_embedded_activities = True,
+    use_embedded_activities = True,
     create_instant_invite = True,
 )
 
