@@ -106,6 +106,7 @@ FILTERS = (
     'd\\\u202bpy',
     'dpiy',
     'dp \\y',
+    'dp\\\u202by',
 )
 
 def trie_node_sort_key(node):
