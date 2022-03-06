@@ -101,6 +101,7 @@ FILTERS = (
     'novus',
     'fusion.py',
     'pincer',
+    'd\u202bpy',
 )
 
 def trie_node_sort_key(node):
