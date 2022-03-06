@@ -8,7 +8,7 @@ from random import choice
 from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, CHANNEL_TYPES, GuildFeature, \
     elapsed_time, Status, BUILTIN_EMOJIS, ChannelText, ChannelCategory, id_to_datetime, RoleManagerType, ERROR_CODES, \
     cchunkify, ICON_TYPE_NONE, KOKORO, ChannelVoice, ChannelStore, ChannelThread, DATETIME_FORMAT_CODE, parse_color, \
-    StickerFormat, ZEROUSER, ChannelDirectory, Permission, escape_markdown
+    ChannelDirectory, Permission, escape_markdown
 from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from scarletio import WaitTillExc, ReuBytesIO
 from hata.ext.slash.menus import Pagination
@@ -1220,111 +1220,6 @@ async def all_users(client, event,):
     
     
     await Pagination(client, event, embeds)
-
-
-def build_sticker_embed(sticker):
-
-    sticker_url = sticker.url_as(size=4096)
-    
-    description_parts = []
-    
-    sticker_description = sticker.description
-    if (sticker_description is not None):
-        description_parts.append(sticker_description)
-        description_parts.append('\n\n')
-    
-    
-    tags = sticker.tags
-    if (tags is not None):
-        description_parts.append('**Tags:**: ')
-        description_parts.append(', '.join(sorted(tags)))
-        description_parts.append('\n')
-    
-    
-    description_parts.append('**Id**: ')
-    description_parts.append(str(sticker.id))
-    description_parts.append('\n')
-    
-    created_at = sticker.created_at
-    description_parts.append('**Created at:** ')
-    description_parts.append(created_at.__format__(DATETIME_FORMAT_CODE))
-    description_parts.append(' *[')
-    description_parts.append(elapsed_time(created_at))
-    description_parts.append(']*\n')
-    
-    
-    sticker_type = sticker.type
-    description_parts.append('**Type:** ')
-    description_parts.append(sticker_type.name)
-    description_parts.append(' (')
-    description_parts.append(str(sticker_type.value))
-    description_parts.append(')\n')
-    
-    
-    sticker_format = sticker.format
-    description_parts.append('**Format:** ')
-    description_parts.append(sticker_format.name)
-    description_parts.append(' (')
-    description_parts.append(str(sticker_format.value))
-    description_parts.append(')')
-    
-    
-    sort_value = sticker.sort_value
-    if sort_value:
-        description_parts.append('\n**Sort value:** ')
-        description_parts.append(str(sort_value))
-    
-    
-    user = sticker.user
-    if (user is not ZEROUSER):
-        description_parts.append('\n**Creator:** ')
-        description_parts.append(user.full_name)
-        description_parts.append(' (')
-        description_parts.append(str(user.id))
-        description_parts.append(')')
-    
-    
-    guild_id = sticker.guild_id
-    if guild_id:
-        description_parts.append('\n**Guild id:** ')
-        description_parts.append(str(guild_id))
-    
-    
-    pack_id = sticker.pack_id
-    if pack_id:
-        description_parts.append('\n**pack id:** ')
-        description_parts.append(str(pack_id))
-    
-    
-    description = ''.join(description_parts)
-    
-    embed = Embed(sticker.name, description, url=sticker_url)
-    if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
-        embed.add_image(sticker_url)
-    
-    return embed
-
-
-@SLASH_CLIENT.interactions(is_global=True, target='message')
-async def sticker_(client, message):
-    """Shows up the message's sticker."""
-    sticker = message.sticker
-    if sticker is None:
-        abort('The message has no sticker.')
-    
-    try:
-        await client.sticker_get(sticker)
-    except BaseException as err:
-        if isinstance(err, ConnectionError):
-            return
-        
-        if isinstance(err, DiscordException):
-            if err.code == ERROR_CODES.unknown_sticker:
-                abort(f'Sticker: {sticker.id} is already deleted.')
-        
-        raise
-    
-    return build_sticker_embed(sticker)
 
 
 @SLASH_CLIENT.interactions(is_global=True, target='message')

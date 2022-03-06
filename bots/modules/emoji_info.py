@@ -1,7 +1,17 @@
-from hata import Embed, Client, parse_emoji, elapsed_time, DATETIME_FORMAT_CODE, ZEROUSER,  GUILDS
-from hata.ext.slash import abort
+from hata import Embed, Client, parse_emoji, elapsed_time, DATETIME_FORMAT_CODE, ZEROUSER,  GUILDS, BUILTIN_EMOJIS
+from hata.ext.slash import abort, Button, InteractionResponse
 
 SLASH_CLIENT: Client
+
+CLOSE_EMOJI = BUILTIN_EMOJIS['x']
+
+CUSTOM_ID_EMOJI_INFO_CLOSE = 'emoji_info.close'
+
+BUTTON_EMOJI_INFO_CLOSE = Button(
+    emoji = CLOSE_EMOJI,
+    custom_id = CUSTOM_ID_EMOJI_INFO_CLOSE,
+)
+
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def emoji_info(
@@ -194,4 +204,11 @@ async def emoji_info(
         )
     
     
-    return embed
+    return InteractionResponse(embed=embed, components=BUTTON_EMOJI_INFO_CLOSE)
+
+
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_EMOJI_INFO_CLOSE)
+async def close_emoji_info(client, event):
+    if (event.user is event.message.interaction.user):
+        await client.interaction_component_acknowledge(event)
+        await client.interaction_response_message_delete(event)

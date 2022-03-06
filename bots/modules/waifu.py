@@ -200,7 +200,14 @@ class Action:
         
         title = f'{hugger:f} {self.verb} {hugged:f}.'
         
-        return Embed(title, color=(event.id >> 22) & 0xffffff).add_image(url).add_footer(PROVIDER_FOOTER)
+        return Embed(
+            title,
+            color = (event.id >> 22) & 0xffffff
+        ).add_image(
+            url,
+        ).add_footer(
+            PROVIDER_FOOTER,
+        )
 
 
 for action_name, action_verb, action_description in (
