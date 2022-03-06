@@ -84,4 +84,4 @@ async def lucky_spin(client, event,
         
         description = f'{ARROW_BLOCKS[index]}\n\nYou won {bet + change} {EMOJI__HEART_CURRENCY} !'
     
-    return Embed(description=description).add_author(None, f'{client.name}\'s lucky wheel')
+    return Embed(description=description).add_author(f'{client.name}\'s lucky wheel')

@@ -289,8 +289,8 @@ def create_track_short_field_description(configured_track):
 
 def add_song_selection_header(embed, title, user):
     return embed.add_author(
-        user.avatar_url,
         title,
+        user.avatar_url,
     )
 
 
@@ -726,8 +726,8 @@ async def play(client, event,
         description,
         color = EMBED_COLOR,
     ).add_author(
-        user.avatar_url,
         'Song selection | Please select the song(s) to play',
+        user.avatar_url,
     ).add_footer(
         'This timeouts in 60 seconds.',
     )
@@ -755,8 +755,8 @@ async def play(client, event,
             description,
             color = EMBED_COLOR,
         ).add_author(
-            user.avatar_url,
             'Song selection | Nothing was chosen',
+            user.avatar_url,
         ).add_footer(
             'Timeout occurred.',
         )
@@ -1146,7 +1146,7 @@ async def queue_(client, event,
         author_icon_url = guild.icon_url_as(size=64)
         author_name = f'Queue for {guild.name}'
     
-    embed.add_author(author_icon_url, author_name)
+    embed.add_author(author_name, author_icon_url)
     return embed
 
 

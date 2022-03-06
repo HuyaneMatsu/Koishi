@@ -316,8 +316,8 @@ async def render_about_generic(client, event):
         color = COLOR__KOISHI_HELP,
         timestamp = event.created_at,
     ).add_author(
-        client.avatar_url,
         client.full_name,
+        client.avatar_url,
     ).add_field(
         UPTIME_TITLE,
         (

@@ -55,8 +55,8 @@ async def baka_ball(
         description=question,
         color = EMBED_COLOR,
     ).add_author(
-        user.avatar_url,
         user.full_name,
+        user.avatar_url,
     )
     
     if response is None:

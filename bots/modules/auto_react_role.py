@@ -536,7 +536,7 @@ class AutoReactRoleGUI:
     def render(self):
         message = self.target_message
         embed = Embed(render_message_content(message), self.changes.render(), color=AUTO_REACT_ROLE_COLOR)
-        embed.add_author(message.author.avatar_url,message.author.full_name,message.url)
+        embed.add_author(message.author.full_name, message.author.avatar_url, message.url)
         embed.add_field(AUTO_REACT_ROLE_GUI_EMBED_FIELD_NAME, AUTO_REACT_ROLE_GUI_EMBED_FIELD_VALUE)
         return embed
     

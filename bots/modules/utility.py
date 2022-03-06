@@ -855,8 +855,8 @@ class InRolePageGetter:
             self.title,
             description,
         ).add_author(
-            guild.icon_url,
             guild.name,
+            guild.icon_url,
         ).add_footer(
             f'Page {index + 1}/{ceil(len(self.users) / USER_PER_PAGE)}',
         )

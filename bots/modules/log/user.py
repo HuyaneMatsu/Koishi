@@ -88,7 +88,6 @@ def create_user_embed(user, guild_profile, join):
         state = 'left from'
     
     embed.add_author(
-        None,
         f'User {state} {GUILD__SUPPORT.name}'
     )
     

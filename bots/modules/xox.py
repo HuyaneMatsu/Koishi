@@ -438,8 +438,8 @@ async def try_send_notification(client, event, message, user_1, user_2, timestam
         color = 0x8000AB,
         timestamp = timestamp,
     ).add_author(
-        user_2.avatar_url_as(size=64),
         f'{user_2.full_name} accepted your X-O-X challenge',
+        user_2.avatar_url_as(size=64),
         url = message.url,
     )
     
@@ -482,8 +482,8 @@ async def xox_multi_player(client, event):
     embed = Embed(
         timestamp = timestamp,
     ).add_author(
-        user_1.avatar_url_as(size=64),
         f'Challenge {user_1.full_name} in X-O-X!'
+        user_1.avatar_url_as(size=64),
     ).add_footer(
         'This message times out after 300 seconds.',
     )
@@ -502,8 +502,8 @@ async def xox_multi_player(client, event):
         embed = Embed(
             timestamp = timestamp,
         ).add_author(
-            user_1.avatar_url_as(size=64),
             f'Challenge {user_1.full_name} X-O-X!'
+            user_1.avatar_url_as(size=64),
         ).add_footer(
             'This message timed out.',
         )

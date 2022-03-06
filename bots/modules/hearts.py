@@ -427,8 +427,8 @@ async def render_hearts_stats(client, event, target_user):
     return Embed(
         color = COLOR__GAMBLING
     ).add_author(
-        target_user.avatar_url,
         f'Heart stats for {target_user.full_name}',
+        target_user.avatar_url,
     ).add_field(
         f'{emoji_heart_currency} Hearts',
         (

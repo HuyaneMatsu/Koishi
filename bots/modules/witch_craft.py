@@ -658,7 +658,7 @@ async def buy(client, event,
         ),
     )
     
-    embed.add_author(user.avaar_url, user.full_name)
+    embed.add_author(user.full_name, user.avatar_url)
     embed.add_footer('The prices of context of demand and supply.')
     
     components = Row(

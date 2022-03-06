@@ -399,7 +399,7 @@ class user_profile:
                 ]
         text.extend(render_map(self.data, SHIP_VALUES))
         embed = Embed('', '\n'.join(text), 0x010101)
-        embed.add_author(other.user.avatar_url_as(size=64), f'vs.: {other.user.full_name}')
+        embed.add_author(f'vs.: {other.user.full_name}', other.user.avatar_url_as(size=64))
         
         text.clear()
         if sum(self.ships_left):
@@ -442,7 +442,7 @@ class user_profile:
             footer = f'You have {sum(self.ships_left)} ships left on {len(self.ship_positions)} tiles. {self.text}'
 
         embed = Embed('', '\n'.join(text), 0x010101)
-        embed.add_author(other.user.avatar_url_as(size=64), f'vs.: {other.user:f}')
+        embed.add_author(f'vs.: {other.user:f}', other.user.avatar_url_as(size=64))
         embed.add_footer(footer)
         return embed
 
@@ -462,7 +462,7 @@ class user_profile:
             text.extend(render_map(self.data, SHIP_VALUES))
         
         embed = Embed('', '\n'.join(text), 0x010101)
-        embed.add_author(other.user.avatar_url_as(size=64), f'vs.: {other.user:f}')
+        embed.add_author(f'vs.: {other.user:f}', other.user.avatar_url_as(size=64))
         embed.add_footer(self.text)
         return embed
 

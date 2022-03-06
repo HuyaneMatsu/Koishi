@@ -105,7 +105,7 @@ async def trivia_(client, event):
         description = ''.join(description_parts)
         
        
-        message = yield Embed(question, description).add_author(user.avatar_url, user.full_name)
+        message = yield Embed(question, description).add_author(user.full_name, user.avatar_url)
         
         for emoji in TRIVIA_OPTIONS:
             await client.reaction_add(message, emoji)
@@ -123,7 +123,7 @@ async def trivia_(client, event):
                 title = 'Oof'
                 description = f'The correct answer is:\n\n{correct_emoji.as_emoji} {correct}'
         
-        yield Embed(title, description).add_author(user.avatar_url, user.full_name)
+        yield Embed(title, description).add_author(user.full_name, user.avatar_url)
         
         if message.channel.cached_permissions_for(client).can_manage_messages:
             await client.reaction_clear(message)

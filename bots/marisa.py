@@ -266,7 +266,7 @@ async def retardify(client, event,
     
     embed = Embed(description=description)
     user = event.user
-    embed.add_author(user.avatar_url, user.full_name)
+    embed.add_author(user.full_name, user.avatar_url)
     
     await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
 

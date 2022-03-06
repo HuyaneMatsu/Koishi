@@ -260,7 +260,7 @@ if IS_UNIX:
                     description = build_output(output, return_code)
         
         author = ctx.message.author
-        embed = Embed(title, description, color=SNEKBOX_COLOR).add_author(author.avatar_url, author.full_name)
+        embed = Embed(title, description, color=SNEKBOX_COLOR).add_author(author.full_name, author.avatar_url)
         await Closer(ctx.client, ctx.message.channel, embed, check=partial_func(check_reactor, author))
     
     @COMMAND_CLIENT.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
