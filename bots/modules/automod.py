@@ -102,6 +102,8 @@ FILTERS = (
     'fusion.py',
     'pincer',
     'd\u202bpy',
+    'dp\u0489y',
+    'd\\\u202bpy',
 )
 
 def trie_node_sort_key(node):
