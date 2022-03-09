@@ -1,6 +1,8 @@
+import re
+
 from hata import Client, Embed
 from hata.ext.extension_loader import require
-from hata.ext.slash import abort, Button
+from hata.ext.slash import abort, Button, InteractionResponse
 from random import choice, randint, random
 from bot_utils.constants import GUILD__SUPPORT
 from math import sqrt, floor, ceil
@@ -13,7 +15,36 @@ SLASH_CLIENT: Client
 
 
 DETAILS_BY_CATEGORY = {}
-FAMILIAR_DETAILS = {}
+
+OBJECTS_BY_CATEGORY = {}
+
+ACTIVE_GAMES = {}
+
+QUESTION_COUNT = 3
+
+
+QUESTION_TYPE_NONE = 0
+QUESTION_TYPE_IS = 1
+QUESTION_TYPE_CAN = 2
+
+QUESTION_TYPE_NAMES = {
+    QUESTION_TYPE_NONE: 'null',
+    QUESTION_TYPE_IS: 'is',
+    QUESTION_TYPE_CAN: 'can',
+}
+
+DEFAULT_QUESTION_TYPE_NAME = 'unknown'
+
+def get_question_type():
+    if random() < 0.5:
+        question_type = QUESTION_TYPE_CAN
+    else:
+        question_type = QUESTION_TYPE_IS
+    
+    return question_type
+
+def get_question_type_name(question_type):
+    return QUESTION_TYPE_NAMES.get(question_type, DEFAULT_QUESTION_TYPE_NAME)
 
 
 class Detail:
@@ -28,14 +59,20 @@ class Detail:
         The object's name.
     mutually_exclusive_with : `None`, `frozenset` of ``Detail``
         A frozenset of mutually exclusive details.
+    value_by_question_type : `None` or `dict` of (`int`, `str`) items
+        Question type value overwrites.
+    sort_value : `int`
+        Sort value of the detail.
     """
-    __slots__ = ('name', 'category', 'mutually_exclusive_with')
+    __slots__ = ('name', 'category', 'mutually_exclusive_with', 'value_by_question_type', 'sort_value')
     
-    def __new__(cls, category, name):
+    def __new__(cls, category, name, *, value_by_question_type=None):
         self = object.__new__(cls)
         self.category = category
         self.name = name
         self.mutually_exclusive_with = None
+        self.value_by_question_type = value_by_question_type
+        self.sort_value = 0
         
         try:
             details = DETAILS_BY_CATEGORY[category]
@@ -56,6 +93,9 @@ class Detail:
         if type(self) is not type(other):
             return NotImplemented
         
+        if self.sort_value != other.sort_value:
+            return False
+        
         if self.category != other.category:
             return False
         
@@ -68,6 +108,9 @@ class Detail:
         if type(self) is not type(other):
             return NotImplemented
         
+        if self.sort_value > other.sort_value:
+            return True
+        
         if self.name > other.name:
             return True
         
@@ -77,6 +120,9 @@ class Detail:
     def __lt__(self, other):
         if type(self) is not type(other):
             return NotImplemented
+        
+        if self.sort_value < other.sort_value:
+            return True
         
         if self.name < other.name:
             return True
@@ -89,9 +135,43 @@ class Detail:
         hash_value ^= hash(self.category)
         hash_value ^= hash(self.name)
         return hash_value
-
-
-OBJECTS_BY_CATEGORY = {}
+    
+    
+    def increase_sort_value(self, by):
+        self.sort_value += by
+    
+    
+    def get_question_for(self, question_type):
+        value_by_question_type = self.value_by_question_type
+        
+        while True:
+            if (value_by_question_type is not None):
+                try:
+                    value = value_by_question_type[question_type]
+                except KeyError:
+                    pass
+                else:
+                    if question_type == QUESTION_TYPE_IS:
+                        question_word = 'Is it'
+                    elif question_type == QUESTION_TYPE_CAN:
+                        question_word = 'Can it'
+                    else:
+                        question_word = 'Hmmm'
+                        
+                    break
+            
+            value = self.name
+            
+            if question_type == QUESTION_TYPE_IS:
+                question_word = 'Is it'
+            elif question_type == QUESTION_TYPE_CAN:
+                question_word = 'Can it be'
+            else:
+                question_word = 'Hmmm'
+                
+            break
+        
+        return f'{question_word} {value}?'
 
 
 def create_mutually_exclusive_detail_group(*details):
@@ -158,6 +238,12 @@ class Object:
     def __new__(cls, category, name, true_details, optional_details):
         true_details = frozenset(true_details)
         optional_details = frozenset(optional_details)
+        
+        for detail in true_details:
+            detail.increase_sort_value(2)
+        
+        for detail in optional_details:
+            detail.increase_sort_value(1)
         
         self = object.__new__(cls)
         self.category = category
@@ -252,8 +338,22 @@ DETAIL_FRUIT_WHITE_INSIDE = Detail(CATEGORY_FRUIT, 'white inside')
 DETAIL_FRUIT_SWEET = Detail(CATEGORY_FRUIT, 'sweet')
 DETAIL_FRUIT_SOUR = Detail(CATEGORY_FRUIT, 'sour')
 
-DETAIL_FRUIT_GROWS_ON_TREES = Detail(CATEGORY_FRUIT, 'grows on trees')
-DETAIL_FRUIT_GROWS_ON_BUSHES = Detail(CATEGORY_FRUIT, 'grows on bushes')
+DETAIL_FRUIT_GROWS_ON_TREES = Detail(
+    CATEGORY_FRUIT,
+    'grows on trees',
+    value_by_question_type = {
+        QUESTION_TYPE_IS: 'growing on trees',
+        QUESTION_TYPE_CAN: 'grow on trees',
+    },
+)
+DETAIL_FRUIT_GROWS_ON_BUSHES = Detail(
+    CATEGORY_FRUIT,
+    'grows on bushes',
+    value_by_question_type = {
+        QUESTION_TYPE_IS: 'growing on bushes',
+        QUESTION_TYPE_CAN: 'grow on bushes',
+    },
+)
 
 DETAIL_FRUIT_BROWN_OUTSIDE = Detail(CATEGORY_FRUIT, 'brown outside')
 DETAIL_FRUIT_BROWN_INSIDE = Detail(CATEGORY_FRUIT, 'brown inside')
@@ -264,8 +364,22 @@ DETAIL_FRUIT_PINK_INSIDE = Detail(CATEGORY_FRUIT, 'pink inside')
 DETAIL_FRUIT_ORANGE_OUTSIDE = Detail(CATEGORY_FRUIT, 'orange outside')
 DETAIL_FRUIT_ORANGE_INSIDE = Detail(CATEGORY_FRUIT, 'orange inside')
 
-DETAIL_FRUIT_GROWS_ON_VINE_LIKE_PLANTS = Detail(CATEGORY_FRUIT, 'grows on vine-like plants')
-DETAIL_FRUIT_GROWS_ON_HERBACEOUS_PLANTS = Detail(CATEGORY_FRUIT, 'grows on herbaceous plants')
+DETAIL_FRUIT_GROWS_ON_VINE_LIKE_PLANTS = Detail(
+    CATEGORY_FRUIT,
+    'grows on vine-like plants',
+    value_by_question_type = {
+        QUESTION_TYPE_IS: 'growing on vine-like plants',
+        QUESTION_TYPE_CAN: 'grow on vine-like plants',
+    },
+)
+DETAIL_FRUIT_GROWS_ON_HERBACEOUS_PLANTS = Detail(
+    CATEGORY_FRUIT,
+    'grows on herbaceous plants',
+    value_by_question_type = {
+        QUESTION_TYPE_IS: 'growing on herbaceous plants',
+        QUESTION_TYPE_CAN: 'grow on herbaceous plants',
+    },
+)
 
 create_mutually_exclusive_detail_group(
     DETAIL_FRUIT_HARD_OUTSIDE,
@@ -430,33 +544,54 @@ OBJECT_FRUIT_ORANGE = Object(
 )
 
 
-DetailSortItem = NamedTuple('CategorySortItem', ('match_rate', 'detail'))
-
-
 def get_details_sorted_no_filter(category):
     try:
         details = DETAILS_BY_CATEGORY[category]
     except KeyError:
         return []
     
+    return sorted(details)
+
+
+class AllowedDetailQuestion:
+    """
+    """
+    __slots__ = ('detail', 'allowed_question_types')
+    
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return NotImplemented
+        
+        if self.detail != other.detail:
+            return False
+        
+        if self.allowed_question_types != other.allowed_question_types:
+            return False
+        
+        return True
+
+
+
+def get_details_sorted_filter(category, answers):
     try:
-        objects = OBJECTS_BY_CATEGORY[category]
+        details = DETAILS_BY_CATEGORY[category]
     except KeyError:
         return []
     
-    collected_details = []
+    disallowed_details = set()
     
-    for detail in details:
-        match_rate = 0
-        for object_ in objects:
-            match_rate += ((detail in object_.true_details) << 1) + (detail in object_.optional_details)
-        
-        if match_rate:
-            collected_details.append(DetailSortItem(match_rate, detail))
+    for answer in answers:
+        if answer.result:
+            detail = answer.detail
+            mutually_exclusive_with = detail.mutually_exclusive_with
+            if mutually_exclusive_with is None:
+                disallowed_details.add(detail)
+            else:
+                disallowed_details.update(mutually_exclusive_with)
+        else:
+            disallowed_details.add(detail)
     
-    collected_details.sort()
-    
-    return [item.detail for item in collected_details]
+    return sorted(set(details) - disallowed_details)
 
 
 def get_random_object(category):
@@ -467,34 +602,6 @@ def get_random_object(category):
     
     return choice(objects)
 
-
-QUESTION_TYPE_NONE = 0
-QUESTION_TYPE_IS = 1
-QUESTION_TYPE_CAN = 2
-
-QUESTION_TYPE_NAMES = {
-    QUESTION_TYPE_NONE: 'null',
-    QUESTION_TYPE_IS: 'is',
-    QUESTION_TYPE_CAN: 'can',
-}
-
-DEFAULT_QUESTION_TYPE_NAME = 'unknown'
-
-def get_question_type():
-    if random() < 5.0:
-        question_type = QUESTION_TYPE_CAN
-    else:
-        question_type = QUESTION_TYPE_IS
-    
-    return question_type
-
-def get_question_type_name(question_type):
-    return QUESTION_TYPE_NAMES.get(question_type, DEFAULT_QUESTION_TYPE_NAME)
-
-
-ACTIVE_GAMES = {}
-
-QUESTION_COUNT = 3
 
 class Question:
     """
@@ -516,18 +623,43 @@ class Question:
         return self
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} type={get_question_type_name(self.type)} detail={self.detail!r}>'
+        return f'<{self.__class__.__name__} type={get_question_type_name(self.type)}, detail={self.detail!r}>'
     
     def ask(self):
-        type_ = self.type
-        if type_ == QUESTION_TYPE_IS:
-            question_word = 'Is'
-        elif type_ == QUESTION_TYPE_CAN:
-            question_word = 'Can'
-        else:
-            question_word = 'Hmmm'
-        
-        return f'{question_word} it {self.detail.name}?'
+        return self.detail.get_question_for(self.type)
+    
+
+
+class Answer(Question):
+    """
+    A question asked from the user.
+    
+    Attributes
+    ----------
+    type : `int`
+        The question's type.
+    detail : ``Detail``
+        The detail to ask about.
+    response : `bool`
+        The response on the question.
+    """
+    def __new__(cls, question, response):
+        self = object.__new__(cls)
+        self.type = question.type
+        self.detail = question.detail
+        self.response = response
+    
+    def __repr__(self):
+        return (
+            f'<{self.__class__.__name__} '
+                f'type={get_question_type_name(self.type)}, '
+                f'detail={self.detail!r}, '
+                f'response={self.response!r}'
+            f'>'
+        )
+    
+    def answer(self):
+        return 'Yes.' if self.response else 'No.'
 
 
 class GameState:
@@ -546,8 +678,10 @@ class GameState:
         The client with who the event operates with.
     questions : `list` of ``Question``
         Questions proposed to the user.
+    answers : `list` of ``Answer``
+        A list of answers submitted.
     """
-    __slots__ = ('client', 'described_object', 'event', 'message', 'questions')
+    __slots__ = ('client', 'described_object', 'event', 'message', 'questions', 'answers')
     
     async def __new__(cls, client, event, category):
         described_object = DescribedObject(get_random_object(category))
@@ -558,6 +692,7 @@ class GameState:
         self.event = event
         self.message = None
         self.questions = self.get_questions()
+        self.answers = []
         
         ACTIVE_GAMES[event.user.id] = self
         
@@ -602,21 +737,50 @@ class GameState:
         user = self.event.user
         embed.add_footer(user.full_name, user.avatar_url)
         
+        
+        for answer in self.answers:
+            embed.add_field(answer.ask(), answer.answer())
+        
         components = [
-            Button(question.ask(), custom_id=f'help_me_rember.question.{index}')
+            Button(question.ask(), custom_id=f'{CUSTOM_ID_QUESTION_BASE}.{index}')
             for index, question in enumerate(self.questions)
         ]
         
         return embed, components
+    
+    
+    def get_question_answer(self, question):
+        question_type = question.type
+        detail = question.detail
+        if question_type == QUESTION_TYPE_IS:
+            response = detail in self.described_object
+        
+        elif question_type == QUESTION_TYPE_IS:
+            object_ = self.described_object.object
+            response = (detail in object_.true_details) or (detail in object_.optional_details)
+        
+        else:
+            response = False
+        
+        answer = Answer(question, response)
+        self.answers.append(answer)
+    
+    
+    async def select_question(self, event, index):
+        questions = self.questions
+        if index >= questions:
+            return
+        
+        question = questions[index]
+        self.get_question_answer(question)
+        
 
-
-
+        
 
 
 CATEGORIES = [
     CATEGORY_FRUIT,
 ]
-
 
 
 
@@ -641,3 +805,20 @@ async def rember_preview(
         return
     
     await GameState(client, event, category)
+
+
+CUSTOM_ID_QUESTION_BASE = 'help_me_rember.question'
+
+
+@SLASH_CLIENT.interactions(custom_id=re.compile(f'{re.escape(CUSTOM_ID_QUESTION_BASE)}\.(\d+)'))
+async def select_question(event, index):
+    user = event.user
+    if event.message.interaction.user is not user:
+        return
+    
+    try:
+        active_game = ACTIVE_GAMES[event.user.id]
+    except KeyError:
+        return InteractionResponse(components=None) # KEKW
+    
+    await active_game.select_question(event, index)

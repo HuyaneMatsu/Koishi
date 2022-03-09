@@ -2819,7 +2819,7 @@ async def rate_limit_test_0012(client,message):
         except ValueError:
             await RLT.send('Bad redirect url.')
         
-        access = await client.activate_authorization_code( * result,['identify', 'applications.store.update'])
+        access = await client.activate_authorization_code( * result, ['identify', 'applications.store.update'])
         
         if access is None:
             await RLT.send('Too old redirect url.')

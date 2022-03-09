@@ -149,7 +149,7 @@ def add_preinstanced_field(embed, value, pretty_name):
 
 
 def add_nullable_container_field(embed, value, pretty_name):
-    return add_string_field(embed, get_preinstanced_repr(value), pretty_name)
+    return add_string_field(embed, get_nullable_container_repr(value), pretty_name)
 
 
 def add_nullable_string_field(embed, value, pretty_name):

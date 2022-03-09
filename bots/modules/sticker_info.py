@@ -244,13 +244,17 @@ async def sticker_info(
     else:
         guild = event.guild
         if (guild is None):
+            sticker = None
+        else:
+            sticker = guild.get_sticker_like(sticker_name_or_id)
+        
+        if sticker is None:
             # Users can pass long strings as well. For this case limit the length of the returned value.
             if len(sticker_name_or_id) > 100:
                 sticker_name_or_id = sticker_name_or_id[:100]
             
             abort(f'Cannot find sticker in local scope: {sticker_name_or_id}')
         
-        sticker = guild.get_sticker_like(sticker_name_or_id)
         sticker = await get_sticker(client, sticker, sticker.id)
     
     return get_sticker_info(sticker)
