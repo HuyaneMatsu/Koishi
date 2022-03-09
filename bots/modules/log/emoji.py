@@ -235,7 +235,7 @@ async def emoji_edit(client, emoji, old_attributes):
     embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', url=emoji_url).add_thumbnail(emoji_url)
     add_creator_field_to(emoji, embed)
     
-    maybe_add_modified_string_field(embed, emoji, old_attributes, 'name', 'name')
+    maybe_add_modified_string_field(embed, emoji, old_attributes, 'name', 'Name')
     
     maybe_add_modified_bool_field(embed, emoji, old_attributes, 'animated', 'Animated')
     
@@ -342,7 +342,7 @@ async def sticker_edit(client, sticker, old_attributes):
     embed = Embed(f'Sticker edited: {sticker.name} ({sticker.id})', url=sticker_url)
     add_creator_field_to(sticker, embed)
     
-    maybe_add_modified_string_field(embed, sticker, old_attributes, 'name', 'name')
+    maybe_add_modified_string_field(embed, sticker, old_attributes, 'name', 'Name')
     maybe_add_modified_nullable_string_field(embed, sticker, old_attributes, 'description', 'Description')
     maybe_add_modified_bool_field(embed, sticker, old_attributes, 'available', 'Available')
     maybe_add_modified_nullable_container_field(embed, sticker, old_attributes, 'tags', 'Tags')
