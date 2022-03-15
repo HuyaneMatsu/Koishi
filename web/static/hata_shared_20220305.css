@@ -525,7 +525,7 @@
     float: right !important;
 }
 
-.header_menu a, .header_menu details, .header-menu details-menu, p[align] a {
+.header_menu a, .header_menu details, .header_menu details-menu, p[align] a {
     color: inherit;
     padding-left: var(--size-header-button-inner-border);
     padding-right: var(--size-header-button-inner-border);

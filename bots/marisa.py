@@ -1304,8 +1304,8 @@ async def resend(
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def locale(event):
     return (
-        f'Locale: {event.locale}\n'
-        f'guild locale: {event.guild_locale}'
+        f'Locale: {event.locale.name}\n'
+        f'guild locale: {event.guild_locale.name}'
     )
 
 @Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
@@ -1499,6 +1499,11 @@ async def webhook(client, event):
     }
     
     await client.http.webhook_message_create(executor_webhook.id, executor_webhook.token, data, None)
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT, required_permissions=8)
+async def test_required_permissions():
+    return 'Hello'
 
 
 if (watchdog is not None):

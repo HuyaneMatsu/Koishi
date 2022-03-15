@@ -3,7 +3,7 @@ from os import listdir as list_directory
 
 import config
 
-from hata import Client, ActivityRich, ACTIVITY_TYPES, IntentFlag
+from hata import Client, ActivityRich, ACTIVITY_TYPES, IntentFlag, Locale
 from hata.ext.extension_loader import EXTENSION_LOADER
 from bot_utils.constants import PATH__KOISHI, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, PREFIX__FLAN, PREFIX__SATORI
 from bot_utils.utils import random_error_message_getter, category_name_rule
@@ -22,6 +22,16 @@ if MARISA_MODE:
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,
         category_name_rule = category_name_rule,
+        translation_table = {
+            Locale.english_us: {
+                'cat-feeder': 'feed-ya-meow',
+                'Feed the cat!': 'Owner hungry!'
+            },
+            Locale.english_gb: {
+                'cat-feeder': 'feed-ya-meow',
+                'Feed the cat!': 'Owner hungry!'
+            },
+        },
     )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)

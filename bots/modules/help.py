@@ -11,9 +11,9 @@ from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elap
 from hata.ext.slash.menus import Pagination, Closer
 from hata.ext.slash import InteractionResponse, Button, Row, abort
 
-from bot_utils.constants import LINK__KOISHI_GIT, LINK__HATA_GIT, INVITE__SUPPORT, GUILD__SUPPORT, \
-    LINK__PASTE, ROLE__SUPPORT__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__SUPPORT__ELEVATED, \
-    ROLE__SUPPORT__VERIFIED, ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_WINNER, \
+from bot_utils.constants import LINK__KOISHI_GIT, INVITE__SUPPORT, GUILD__SUPPORT, LINK__PASTE, \
+    ROLE__SUPPORT__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__VERIFIED, \
+    ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_WINNER, \
     ROLE__SUPPORT__EVENT_PARTICIPANT, EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, STARTUP, PATH__KOISHI, \
     LINK__KOISHI_TOP_GG
 from bot_utils.cpu_info import CpuUsage, PROCESS
@@ -209,14 +209,6 @@ PLATFORM_FIELD_VALUE = (
 
 ABOUT_COMPONENTS = Row(
     Button(
-        'Library',
-        url = LINK__HATA_GIT,
-    ),
-    Button(
-        'Source code',
-        url = LINK__KOISHI_GIT,
-    ),
-    Button(
         'Invite me!',
         url = (
             f'https://discord.com/oauth2/authorize?client_id={SLASH_CLIENT.application.id}&scope=bot%20'
@@ -224,13 +216,17 @@ ABOUT_COMPONENTS = Row(
         ),
     ),
     Button(
+        'Vote for me!',
+        url = LINK__KOISHI_TOP_GG,
+    ),
+    Button(
         'Support server',
         url = INVITE__SUPPORT.url,
     ),
     Button(
-        'Vote for me!',
-        url = LINK__KOISHI_TOP_GG,
-    )
+        'Source code',
+        url = LINK__KOISHI_GIT,
+    ),
 )
 
 
