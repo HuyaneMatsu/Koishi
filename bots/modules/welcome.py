@@ -74,7 +74,7 @@ async def guild_user_add(client, guild, user):
     )
 
 
-@Koishi.interactions(custom_id=re.compile(f'welcome\.(\d+).create_response_message'))
+@Koishi.interactions(custom_id=re.compile(f'welcome\.(\d+)\.create_response_message'))
 async def welcome_user(client, event, user_id):
     yield
     
