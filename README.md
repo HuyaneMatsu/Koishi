@@ -88,7 +88,7 @@ And much more!
 
 - Utility
     
-    `avatar` • `calc` • `choose` • `create-activity` • `color` • `emoji-info` • `guild` • `guild-icon` • `id` •
+    `avatar` • `calc` • `choose` • `create-activity` • `color` • `emoji-info` • `guild-info` • `guild-icon` • `id` •
     `id-to-datetime` • `now-as-id` • `ping` • `rawr` • `sticker` • `sticker-info` • `role-info` • `show-emoji` •
     `user` • `welcome-screen`
 

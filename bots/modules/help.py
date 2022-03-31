@@ -608,7 +608,7 @@ CATEGORIES = (
         'Utility',
         EMOJI_MAGIC_WAND,
         (
-            'avatar', 'calc', 'choose', 'color', 'emoji-info', 'guild', 'guild-icon', 'id', 'id-to-datetime',
+            'avatar', 'calc', 'choose', 'color', 'emoji-info', 'guild-info', 'guild-icon', 'id', 'id-to-datetime',
             'now-as-id', 'ping', 'rawr', 'sticker', 'role-info', 'show-emoji', 'sticker-info', 'user',
             'welcome-screen',
         ),
