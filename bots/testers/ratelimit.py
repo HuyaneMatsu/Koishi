@@ -5,14 +5,14 @@ from time import time as time_now
 from email._parseaddr import _parsedate_tz
 from datetime import datetime, timedelta, timezone
 
-from hata import Embed, PrivacyLevel, ScheduledEventEntityType, datetime_to_timestamp,\
-    DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS, ChannelText,\
-    ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, ChannelGuildUndefined, \
-    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, ChannelStage, \
-    ERROR_CODES, ComponentType, Sticker, StickerPack, ChannelDirectory, Permission, \
+from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp,\
+    DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS,\
+    ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, \
+    ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
+    ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
-    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, ChannelCategory, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, PermissionOverwrite, ChannelVoice, Guild
+    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, Channel, Role, GUILDS, CLIENTS, \
+    Team, WebhookType, PermissionOverwrite, Guild
 from scarletio import sleep, Task, WaitTillAll, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, WaitTillExc, change_on_switch, to_json, from_json
 
@@ -23,9 +23,8 @@ from scarletio.http_client import RequestContextManager
 from scarletio.web_common import quote, BasicAuth, Formdata
 from hata.discord.utils import image_to_base64
 from hata.discord.guild import create_partial_guild_from_data, GuildDiscovery
-from hata.discord.channel import CHANNEL_TYPE_MAP
 from hata.discord.http import API_ENDPOINT, STATUS_ENDPOINT
-from hata.discord.http.headers import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER, RATE_LIMIT_PRECISION
+from hata.discord.http.headers import RATE_LIMIT_RESET, RATE_LIMIT_RESET_AFTER
 from hata.discord.client.functionality_helpers import role_move_key
 
 from hata.ext.command_utils import wait_for_message, wait_for_reaction
@@ -799,7 +798,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
     elif type(category) is Guild:
         if guild is not category:
             raise ValueError('Can not move channel between guilds!')
-    elif type(category) is ChannelCategory:
+    elif type(category) is Channel:
         if category.guild is not guild:
             raise ValueError('Can not move channel between guilds!')
     else:
@@ -935,7 +934,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             index_0=index_0 + 1
         #loop ended
         
-    index_0=(4,2,0).index(channel.ORDER_GROUP)
+    index_0=(4,2,0).index(channel.order_group)
     before=(4,2,0)[index_0:]
     after =(4,2,0)[:index_0 + 1]
 
@@ -947,7 +946,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
         info_line=ordered[restricted_positions[index_0]]
         #loop at 0 block start
         
-        if info_line[3].ORDER_GROUP in after:
+        if info_line[3].order_group in after:
             possible_indexes.append((0,restricted_positions[index_0],),)
             
         #loop at 0 block ended
@@ -960,7 +959,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             info_line_2=ordered[restricted_positions[index_0]]
             #loop block start
 
-            if info_line[3].ORDER_GROUP in before and info_line_2[3].ORDER_GROUP in after:
+            if info_line[3].order_group in before and info_line_2[3].order_group in after:
                 possible_indexes.append((index_0,restricted_positions[index_0],),)
 
             #loop block end
@@ -968,7 +967,7 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             info_line=info_line_2
         #loop at -1 block start
         
-        if info_line[3].ORDER_GROUP in before:
+        if info_line[3].order_group in before:
             possible_indexes.append((index_0 + 1,restricted_positions[index_0]+1,),)
 
         #loop at -1 block ended
@@ -1165,12 +1164,12 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
 
 async def channel_create(client, guild, name, category=None, type_=0):
     data=cr_pg_channel_object(type_=type_,name=name)
-    data['parent_id']=category.id if type(category) is ChannelCategory else None
+    data['parent_id'] = category.id if type(category) is Channel else None
     guild_id=guild.id
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         data,)
-    return CHANNEL_TYPE_MAP.get(data['type'], ChannelGuildUndefined)(data, client, guild_id)
+    return Channel(data, client, guild_id)
 
 async def emoji_guild_get_all(client, guild,):
     guild_id=guild.id
@@ -1460,7 +1459,7 @@ async def webhook_execute(client, webhook, content,):
     
     channel = webhook.channel
     if channel is None:
-        channel = ChannelText.precreate(int(data['channel_id']))
+        channel = Channel.precreate(int(data['channel_id']), channel_type=0)
     
     return channel._create_new_message(data)
 
@@ -1540,7 +1539,7 @@ async def message_suppress_embeds(client,message,suppress=True,):
 async def channel_follow(client,source_channel,target_channel,):
     if source_channel.type!=5:
         raise ValueError(f'\'source_channel\' must be type 5, so news (announcements) channel, got {source_channel}')
-    if target_channel.type not in ChannelText.INTERCHANGE:
+    if target_channel.type not in (0, 5):
         raise ValueError(f'\'target_channel\' must be type 0 or 5, so any guild text channel, got  {target_channel}')
     
     data = {
@@ -3141,7 +3140,7 @@ async def rate_limit_test_0025(client,message):
             if channel is channel_1:
                 continue
             
-            if type(channel) is not ChannelText:
+            if not channel.is_in_group_guild_main_text():
                 continue
             
             channel_2 = channel
@@ -3642,7 +3641,7 @@ async def rate_limit_test_0045(client, message):
         afk_channel = guild.afk_channel
         
         for channel_ in guild.channels.values():
-            if type(channel_) is not ChannelVoice:
+            if not channel.is_guild_voice():
                 continue
             
             if channel_ is afk_channel:
@@ -4446,7 +4445,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 )
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0092(client, message, channel2:ChannelText=None):
+async def rate_limit_test_0092(client, message, channel2: Channel=None):
     """
     Creates 3 messages in 2 channels and deletes them. Please also define an other channel.
     """
@@ -5259,7 +5258,7 @@ async def rate_limit_test_0123(client, message, stage_channel:'channel'=None):
         if stage_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not isinstance(stage_channel, ChannelStage):
+        if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
         if not guild.cached_permissions_for(client).can_adminIgnoreCaseStringator:
@@ -5283,7 +5282,7 @@ async def rate_limit_test_0124(client, message, stage_channel:'channel'=None):
         if stage_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not isinstance(stage_channel, ChannelStage):
+        if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
         if not guild.cached_permissions_for(client).can_adminIgnoreCaseStringator:
@@ -5316,7 +5315,7 @@ async def rate_limit_test_0126(client, message, stage_channel:'channel'=None):
         if stage_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not isinstance(stage_channel, ChannelStage):
+        if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
         if not guild.cached_permissions_for(client).can_adminIgnoreCaseStringator:
@@ -5595,7 +5594,7 @@ async def rate_limit_test_0141(client, message, stage_channel:'channel'=None):
         if stage_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not isinstance(stage_channel, ChannelStage):
+        if not stage_channel.is_guild_stage():
             await RLT.send('Stage channel only.')
         
         if not guild.cached_permissions_for(client).can_adminIgnoreCaseStringator:
@@ -5866,7 +5865,7 @@ async def rate_limit_test_0157(client, message, directory_channel:'channel'=None
         if directory_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not isinstance(directory_channel, ChannelDirectory):
+        if not channel.is_diretcory():
             await RLT.send('Directory channel only.')
         
         if name is None:
@@ -5891,7 +5890,7 @@ async def rate_limit_test_0158(client, message, directory_channel:'channel'=None
         if directory_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not isinstance(directory_channel, ChannelDirectory):
+        if not channel.is_diretcory():
             await RLT.send('Directory channel only.')
         
         await channel_directory_counts(client, directory_channel)
@@ -5913,7 +5912,7 @@ async def rate_limit_test_0159(client, message, directory_channel:'channel'=None
         if directory_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not isinstance(directory_channel, ChannelDirectory):
+        if not channel.is_diretcory():
             await RLT.send('Directory channel only.')
         
         await channel_directory_get_all(client, directory_channel)

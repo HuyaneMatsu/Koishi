@@ -609,7 +609,8 @@ CATEGORIES = (
         EMOJI_MAGIC_WAND,
         (
             'avatar', 'calc', 'choose', 'color', 'emoji-info', 'guild', 'guild-icon', 'id', 'id-to-datetime',
-            'now-as-id', 'ping', 'rawr', 'sticker', 'role', 'show-emoji', 'sticker-info', 'user', 'welcome-screen',
+            'now-as-id', 'ping', 'rawr', 'sticker', 'role-info', 'show-emoji', 'sticker-info', 'user',
+            'welcome-screen',
         ),
     ), (
         'Waifus',
@@ -934,7 +935,7 @@ ROLE_INFO = SLASH_CLIENT.interactions(
 
 @ROLE_INFO.interactions
 async def Collectible():
-    """A list of collectible roles in ND."""
+    """A list of collectible roles in KW."""
     embed = Embed(
         'Collectible roles:',
         f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY:e} using the `heart-shop roles` command.',

@@ -496,65 +496,6 @@ async def show_user_icon(client, event, user_id, icon_type):
     await client.interaction_followup_message_create(event, embed=embed, show_for_invoking_user_only=True)
 
 
-@SLASH_CLIENT.interactions(name='role', is_global=True)
-async def role_(client, event,
-    role: ('role', 'Select the role to show information of.'),
-):
-    """Shows the information about a role."""
-    if role.partial:
-        abort('I must be in the guild, where the role is.')
-    
-    embed = Embed(f'Role information for: {role.name}', color=role.color)
-    embed.add_field('Position', str(role.position), inline=True)
-    embed.add_field('Id', str(role.id), inline=True)
-    
-    embed.add_field('Separated', 'true' if role.separated else 'false', inline=True)
-    embed.add_field('Mentionable', 'true' if role.mentionable else 'false', inline=True)
-    
-    manager_type = role.manager_type
-    if manager_type is RoleManagerType.none:
-        managed_description = 'false'
-    else:
-        if manager_type is RoleManagerType.unset:
-            await client.sync_roles(role.guild)
-            manager_type = role.manager_type
-        
-        if manager_type is RoleManagerType.bot:
-            managed_description = f'Special role for bot: {role.manager:f}'
-        elif manager_type is RoleManagerType.booster:
-            managed_description = 'Role for the boosters of the guild.'
-        elif manager_type is RoleManagerType.integration:
-            managed_description = f'Special role for integration: {role.manager.name}'
-        elif manager_type is RoleManagerType.unknown:
-            managed_description = 'Some new things.. Never heard of them.'
-        else:
-            managed_description = 'I have no clue.'
-    
-    embed.add_field('Managed', managed_description, inline=True)
-    
-    color = role.color
-    embed.add_field('color',
-        (
-            f'html: {color.as_html}\n'
-            f'rgb: {color.as_rgb}\n'
-            f'int: {color:d}'
-        ),
-        inline = True,
-    )
-    
-    created_at = role.created_at
-    embed.add_field(
-        'Created at',
-        (
-            f'{created_at:{DATETIME_FORMAT_CODE}}\n'
-            f'{elapsed_time(created_at)} ago'
-        ),
-        inline = True,
-    )
-    
-    return embed
-
-
 async def add_guild_generic_field(client, guild, embed, even_if_empty):
     await add_guild_info_field(client, guild, embed, False)
     await add_guild_counts_field(client, guild, embed, False)

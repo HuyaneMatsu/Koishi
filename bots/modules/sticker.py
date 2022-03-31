@@ -362,7 +362,7 @@ async def most_used(
 
 @STICKER_COMMANDS.interactions
 async def add_(client, event,
-    link: (str, 'Link to the sticker to add'),
+    file: ('attachment', 'File!'),
     name: (str, 'The sticker\'s name.'),
     emoji_value: (str, 'Emoji representation of the sticker.', 'emoji'),
     description: (str, 'Description for the sticker.') = None,
@@ -382,7 +382,6 @@ async def add_(client, event,
     
     if emoji.is_custom_emoji():
         abort(f'Only unicode can be used, got {emoji:e}')
-
     
     if (description is not None):
         description_length = len(description)
@@ -391,34 +390,29 @@ async def add_(client, event,
                 f'Sticker description\'s length can be in range [0:100], got {description_length!r}, {description!r}.'
             )
     
-    if not is_url(link):
-        abort(f'The given link is invalid, got {link!r}.')
+    file_type = file.content_type
+    if (file_type is None) or (file_type != 'image/png'):
+        if file_type is None:
+            file_type = 'N/A'
+        
+        abort(f'File is not a `.png` file, got: {file_type!r}')
+    
+    file_size = file.size
+    if file_size > 524288:
+        abort(f'Max file size can be 512 kb, got {file_size//1024}kb.')
+    
+    file_height = file.height
+    file_width = file.width
+    if (file_height == 0) or (file_height > 320) or (file_width == 0) or (file_width > 320):
+        abort(f'Max file dimensions: 320x320px, got {file_width}x{file_width}px')
     
     yield
     
     while True:
         try:
-            async with client.http.get(link) as response:
-                response_status = response.status
-                if response_status != 200:
-                    response_reason = response.reason
-                    if response_reason is None:
-                        error_message = f'Request failed: {response_status}'
-                    else:
-                        error_message = f'Request failed: {response_status} {response_reason}'
-                    
-                    break
-                
-                future = Task(response.read(), KOKORO)
-                future_or_timeout(future, 15.0)
-                image = await future
-        
+            image = await client.download_attachment(file)
         except ConnectionError as err:
             error_message = f'Getting image failed: {err.args[0]}'
-            break
-        
-        except TimeoutError:
-            error_message = 'Timeout (15s) occurred meanwhile trying to read the response.'
             break
         
         except OSError as err:
@@ -824,81 +818,49 @@ async def user_sticker_compare(
         chart_url,
     )
 
-
-@user_sticker_compare.autocomplete('raw_sticker_1')
-async def autocomplete_sticker_name_except_1(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-1')
-
-@user_sticker_compare.autocomplete('raw_sticker_2')
-async def autocomplete_sticker_name_except_2(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-2')
-
-@user_sticker_compare.autocomplete('raw_sticker_3')
-async def autocomplete_sticker_name_except_3(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-3')
-
-@user_sticker_compare.autocomplete('raw_sticker_4')
-async def autocomplete_sticker_name_except_4(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-4')
-
-@user_sticker_compare.autocomplete('raw_sticker_5')
-async def autocomplete_sticker_name_except_5(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-5')
-
-@user_sticker_compare.autocomplete('raw_sticker_6')
-async def autocomplete_sticker_name_except_6(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-6')
-
-@user_sticker_compare.autocomplete('raw_sticker_7')
-async def autocomplete_sticker_name_except_7(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-7')
-
-@user_sticker_compare.autocomplete('raw_sticker_8')
-async def autocomplete_sticker_name_except_8(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-8')
-
-@user_sticker_compare.autocomplete('raw_sticker_9')
-async def autocomplete_sticker_name_except_9(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-9')
-
-@user_sticker_compare.autocomplete('raw_sticker_10')
-async def autocomplete_sticker_name_except_10(event, value):
-    return get_autocomplete_sticker_names_except(event, value, 'sticker-10')
+@STICKER_COMMANDS.autocomplete('sticker_name', 'sticker')
+async def autocomplete_sticker_name(value):
+    if value is None:
+        return sorted(
+            sticker.name for sticker in GUILD__SUPPORT.stickers.values()
+        )
+    
+    value = value.casefold()
+    
+    return sorted(
+        sticker.name for sticker in GUILD__SUPPORT.stickers.values()
+        if value in sticker.name.casefold()
+    )
 
 
-def get_autocomplete_sticker_names_except(event, value, except_):
+@user_sticker_compare.autocomplete(
+    'sticker-1', 'sticker-2', 'sticker-3', 'sticker-4', 'sticker-5', 'sticker-6', 'sticker-7', 'sticker-8',
+    'sticker-9', 'sticker-10'
+)
+async def get_autocomplete_sticker_names_except(event, actual_value):
     stickers_except = set()
     
-    for parameter_name in (
-        'sticker-1', 'sticker-2', 'sticker-3', 'sticker-4', 'sticker-5', 'sticker-6', 'sticker-7', 'sticker-8',
-        'sticker-9', 'sticker-10'
-    ):
-        if parameter_name == except_:
-            continue
-        
-        raw_sticker = event.interaction.get_value_of('user-sticker-compare', parameter_name)
-        if raw_sticker is None:
-            continue
-        
-        sticker = GUILD__SUPPORT.get_sticker_like(raw_sticker)
-        if (sticker is not None):
-            stickers_except.add(sticker)
+    for value in event.interaction.get_non_focused_values().values():
+        if value is not None:
+            sticker = GUILD__SUPPORT.get_sticker_like(value)
+            if (sticker is not None):
+                stickers_except.add(sticker)
     
     guild_stickers = GUILD__SUPPORT.stickers
     
-    if value is None:
+    if actual_value is None:
         return sorted(
             sticker.name for sticker in guild_stickers.values()
             if (sticker not in stickers_except)
         )
     
     
-    value = value.casefold()
+    actual_value = actual_value.casefold()
     
     return sorted(
         sticker.name for sticker in guild_stickers.values()
         if (
             (sticker not in stickers_except) and
-            (value in sticker.name.casefold())
+            (actual_value in sticker.name.casefold())
         )
     )

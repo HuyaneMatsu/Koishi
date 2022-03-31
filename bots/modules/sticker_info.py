@@ -72,7 +72,7 @@ def get_sticker_info(sticker):
     elif sticker_format is StickerFormat.lottie:
         is_sticker_animated = True
     else:
-        is_sticker_animated = True
+        is_sticker_animated = False
     
     embed.add_field(
         'Animated',

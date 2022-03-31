@@ -10,8 +10,8 @@ from PIL import Image as PIL
 from PIL.ImageSequence import Iterator as ImageSequenceIterator
 
 from hata import eventlist, RATE_LIMIT_GROUPS, Embed, cchunkify, User, random_id, chunkify, Webhook, \
-    KOKORO, ChannelText, VoiceRegion, parse_custom_emojis, UserBase, ChannelBase, datetime_to_id, Client, \
-    ApplicationCommand, ApplicationCommandOption, ChannelVoice, ApplicationCommandOptionType, \
+    KOKORO, VoiceRegion, parse_custom_emojis, UserBase, Channel, datetime_to_id, Client, \
+    ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionType, \
     ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, PrivacyLevel
 
 from scarletio import Future, future_or_timeout, WaitTillAll, sleep, ReuBytesIO, ReuAsyncIO, enter_executor
@@ -822,11 +822,11 @@ async def autohelp_singles(client, message, name:str, user:'user', *words):
     pass
 
 @TEST_COMMANDS(aliases=['autohelp-defaulted-alt'])
-async def autohelp_defaulted(client, message, name:str=None, channel:ChannelText=None, rest=None):
+async def autohelp_defaulted(client, message, name:str=None, channel:Channel=None, rest=None):
     pass
 
 @TEST_COMMANDS(separator=('[', ']'))
-async def autohelp_multy(client, message, value:{int, str}, user:{User, 'invite'}, *cakes:{ChannelText, 'tdelta'}):
+async def autohelp_multy(client, message, value:{int, str}, user:{User, 'invite'}, *cakes:{Channel, 'tdelta'}):
     pass
 
 @TEST_COMMANDS(separator=('[', ']'))
@@ -897,7 +897,7 @@ async def what_is_it_1(client, message, entity: {'user', 'channel', 'role'} = No
         result = 'Nothing is recognized.'
     elif isinstance(entity, UserBase):
         result = 'user'
-    elif isinstance(entity, ChannelBase):
+    elif isinstance(entity, Channel):
         result = 'channel'
     else:
         result = 'role'
@@ -946,7 +946,7 @@ async def avatar_3(client, message, user: 'user'=None):
 async def what_is_it_2(client, message, entity: {'user', 'channel', 'role'}):
     if isinstance(entity, UserBase):
         result = 'user'
-    elif isinstance(entity, ChannelBase):
+    elif isinstance(entity, Channel):
         result = 'channel'
     else:
         result = 'role'
@@ -1480,7 +1480,7 @@ async def test_application_command_option_value_1(client, message):
 
 
 @TEST_COMMANDS(checks=checks.guild_only())
-async def load_messages(client, message, channel:ChannelText):
+async def load_messages(client, message, channel:Channel):
     start = perf_counter()
     collected = 0
     limit = 2000
@@ -1861,7 +1861,7 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
         await client.message_create(message.channel, text)
 
     @TEST_COMMANDS(separator='|', checks=checks.owner_only(), category='VOICE')
-    @configure_converter(ChannelVoice, ConverterFlag.channel_all)
+    @configure_converter(Channel, ConverterFlag.channel_all)
     async def play_from(client, message, voice_channel):
         
         while True:

@@ -1,13 +1,14 @@
 import re
 from math import floor
 
-from hata import Client, Embed, mention_user_by_id, Emoji
+from hata import Client, Embed
 from hata.ext.slash import InteractionResponse, abort, Button, Row
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
 from bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
 from bot_utils.utils import send_embed_to
+from bot_utils.user_getter import get_user
 
 from sqlalchemy import func as alchemy_function, and_, or_
 from sqlalchemy.sql import select
@@ -36,6 +37,8 @@ async def waifu_info(event,
     
     if user is None:
         user = event.user
+    
+    yield
     
     user_id = user.id
     
@@ -80,14 +83,16 @@ async def waifu_info(event,
             waifu_ids = None
     
     embed = Embed(
-        f'{user.full_name}\'s waifu info',
+        f'{user:f}\'s waifu info',
         timestamp = event.created_at,
     ).add_thumbnail(
         user.avatar_url
     )
     
     if waifu_owner_id:
-        field_value = mention_user_by_id(waifu_owner_id)
+        waifu_owner = await get_user(waifu_owner_id)
+    
+        field_value = waifu_owner.full_name
     else:
         field_value = '*none*'
     
@@ -116,7 +121,13 @@ async def waifu_info(event,
         field_value = '*none*'
         waifu_count_value = '0'
     else:
-        field_value = '\n'.join(mention_user_by_id(waifu_id) for waifu_id in waifu_ids)
+        waifu_names = []
+        
+        for waifu_id in waifu_ids:
+            waifu = await get_user(waifu_id)
+            waifu_names.append(waifu.full_name)
+        
+        field_value = '\n'.join(waifu_names)
         waifu_count_value = repr(len(waifu_ids))
     
     embed.add_field(
@@ -129,19 +140,19 @@ async def waifu_info(event,
     event_user_id = event_user.id
     if (user_id != event_user_id) and (waifu_owner_id != event_user_id):
         footer_text = (
-            f'To buy {user.full_name} you need at least {floor(get_multiplier(event_user_id, user_id) * waifu_cost)} '
+            f'To buy {user:f} you need at least {floor(get_multiplier(event_user_id, user_id) * waifu_cost)} '
             f'love.\n'
-            f'Requested by {event_user.full_name}'
+            f'Requested by {event_user:f}'
         )
     else:
-        footer_text = f'Requested by {event_user.full_name}'
+        footer_text = f'Requested by {event_user:f}'
     
     embed.add_footer(
         footer_text,
         icon_url = event_user.avatar_url,
     )
     
-    return InteractionResponse(embed=embed, allowed_mentions=None)
+    yield InteractionResponse(embed=embed, allowed_mentions=None)
 
 
 @SLASH_CLIENT.interactions(is_global=True)
@@ -263,7 +274,7 @@ async def propose(client, event,
             yield Embed(
                 None,
                 f'You need to propose with at least {required_love} {EMOJI__HEART_CURRENCY} to '
-                f'{user.full_name}.'
+                f'{user:f}.'
             )
             return
         
@@ -278,7 +289,7 @@ async def propose(client, event,
                 if amount == investment:
                     yield Embed(
                         None,
-                        f'You are already proposing to {user.full_name} with {amount} '
+                        f'You are already proposing to {user:f} with {amount} '
                         f'{EMOJI__HEART_CURRENCY}.'
                     )
                     return
@@ -343,8 +354,8 @@ async def propose(client, event,
                 
                 yield Embed(
                     None,
-                    f'You changed your proposal towards {user.full_name} from {investment} '
-                    f'{EMOJI__HEART_CURRENCY.as_emoji} to {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                    f'You changed your proposal towards {user:f} from {investment} '
+                    f'{EMOJI__HEART_CURRENCY} to {amount} {EMOJI__HEART_CURRENCY}.'
                 )
                 
                 if target_waifu_notify_proposal:
@@ -353,8 +364,8 @@ async def propose(client, event,
                         target_user_id,
                         Embed(
                             None,
-                            f'{event.user.full_name} changed their proposal towards you from {investment} '
-                            f'{EMOJI__HEART_CURRENCY.as_emoji} to {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                            f'{event.user:f} changed their proposal towards you from {investment} '
+                            f'{EMOJI__HEART_CURRENCY} to {amount} {EMOJI__HEART_CURRENCY}.'
                         )
                     )
                 
@@ -454,7 +465,7 @@ async def propose(client, event,
             
             yield Embed(
                 None,
-                f'You married {user.full_name} with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                f'You married {user:f} with {amount} {EMOJI__HEART_CURRENCY}.'
             )
             
             # Notify the divorced if not bot.
@@ -466,7 +477,7 @@ async def propose(client, event,
                         target_waifu_owner_id,
                         Embed(
                             None,
-                            f'{event.user.full_name} divorced you in favor of marrying {user.full_name} instead.'
+                            f'{event.user:f} divorced you in favor of marrying {user:f} instead.'
                         )
                     )
             
@@ -492,7 +503,7 @@ async def propose(client, event,
         
         yield Embed(
             None,
-            f'You proposed towards {user.full_name} with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+            f'You proposed towards {user:f} with {amount} {EMOJI__HEART_CURRENCY}.'
         )
         
         
@@ -502,7 +513,7 @@ async def propose(client, event,
                 target_user_id,
                 Embed(
                     None,
-                    f'{event.user.full_name} proposed to you with {amount} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                    f'{event.user:f} proposed to you with {amount} {EMOJI__HEART_CURRENCY}.'
                 ),
                 Button(
                     'I don\'t want notifs, nya!!',
@@ -523,7 +534,8 @@ async def list_outgoing(event,
     user: ('user', 'The user to list proposals of.') = None,
 ):
     """Lists outgoing proposals."""
-    return await list_proposals(event, user, True)
+    yield
+    yield await list_proposals(event, user, True)
 
 
 @PROPOSAL.interactions
@@ -531,7 +543,9 @@ async def list_incoming(event,
     user: ('user', 'The user to list proposals of.') = None,
 ):
     """Lists incoming proposals."""
-    return await list_proposals(event, user, False)
+    yield
+    yield await list_proposals(event, user, False)
+
 
 async def list_proposals(event, user, outgoing):
     if user is None:
@@ -571,7 +585,8 @@ async def list_proposals(event, user, outgoing):
         while True:
             target_id, investment = results[index]
             index += 1
-            embed_description_parts.append(mention_user_by_id(target_id))
+            requested_user = await get_user(target_id)
+            embed_description_parts.append(requested_user.full_name)
             embed_description_parts.append(' ')
             embed_description_parts.append(repr(investment))
             embed_description_parts.append(' ')
@@ -588,9 +603,9 @@ async def list_proposals(event, user, outgoing):
     description = ''.join(embed_description_parts)
     
     if outgoing:
-        title = f'Proposals from {user.full_name}'
+        title = f'Proposals from {user:f}'
     else:
-        title = f'Proposals to {user.full_name}'
+        title = f'Proposals to {user:f}'
     
     embed = Embed(
         title,
@@ -628,7 +643,7 @@ async def accept(client, event,
         if not results:
             yield Embed(
                 None,
-                f'{user.full_name} is not proposing to you.'
+                f'{user:f} is not proposing to you.'
             )
             return
         
@@ -693,9 +708,9 @@ async def accept(client, event,
     
     yield Embed(
         None,
-        f'You accepted the proposal from {user.full_name}.\n'
+        f'You accepted the proposal from {user:f}.\n'
         f'\n'
-        f'You received {love_increase} {EMOJI__HEART_CURRENCY.as_emoji}.'
+        f'You received {love_increase} {EMOJI__HEART_CURRENCY}.'
     )
     
     await send_embed_to(
@@ -703,7 +718,7 @@ async def accept(client, event,
         target_user_id,
         Embed(
             None,
-            f'{event.user.full_name} accepted your proposal.',
+            f'{event.user:f} accepted your proposal.',
         )
     )
     
@@ -716,7 +731,7 @@ async def accept(client, event,
                 waifu_owner_id,
                 Embed(
                     None,
-                    f'{event.user.full_name} divorced you in favor of marrying {user.full_name} instead.',
+                    f'{event.user:f} divorced you in favor of marrying {user:f} instead.',
                 )
             )
 
@@ -747,7 +762,7 @@ async def reject(client, event,
         if not results:
             yield Embed(
                 None,
-                f'{user.full_name} is not proposing to you.'
+                f'{user:f} is not proposing to you.'
             )
             return
         
@@ -764,7 +779,7 @@ async def reject(client, event,
     
     yield Embed(
         None,
-        f'You rejected the proposal from {user.full_name}.'
+        f'You rejected the proposal from {user:f}.'
     )
     
     await send_embed_to(
@@ -773,9 +788,9 @@ async def reject(client, event,
         Embed(
             None,
             (
-                f'{event.user.full_name} rejected your proposal.\n'
+                f'{event.user:f} rejected your proposal.\n'
                 f'\n'
-                f'You got your {investment} {EMOJI__HEART_CURRENCY.as_emoji} back.'
+                f'You got your {investment} {EMOJI__HEART_CURRENCY} back.'
             ),
         )
     )
@@ -807,7 +822,7 @@ async def cancel(client, event,
         if not results:
             yield Embed(
                 None,
-                f'You are not proposing towards {user.full_name}.',
+                f'You are not proposing towards {user:f}.',
             )
             return
         
@@ -839,9 +854,9 @@ async def cancel(client, event,
     
     yield Embed(
         None,
-        f'You canceled the proposal towards {user.full_name}.'
+        f'You canceled the proposal towards {user:f}.'
         f'\n'
-        f'You got your {investment} {EMOJI__HEART_CURRENCY.as_emoji} back.'
+        f'You got your {investment} {EMOJI__HEART_CURRENCY} back.'
     )
     
     
@@ -851,7 +866,7 @@ async def cancel(client, event,
             target_user_id,
             Embed(
                 None,
-                f'{event.user.full_name} cancelled the proposal towards you.'
+                f'{event.user:f} cancelled the proposal towards you.'
             )
         )
 
@@ -959,17 +974,16 @@ async def divorce(client, event,
             return InteractionResponse(
                 embed = Embed(
                     None,
-                    f'Are you sure you want to divorce {user.full_name}?\n'
+                    f'Are you sure you want to divorce {user:f}?\n'
                     f'\n'
-                    f'This action requires {waifu_cost} {EMOJI__HEART_CURRENCY.as_emoji}'
+                    f'This action requires {waifu_cost} {EMOJI__HEART_CURRENCY}'
                 ),
                 components = Row(
                     Button(
                         'Yes',
                         EMOJI_YES,
                         custom_id = (
-                            f'marriage.divorce.{mode}-{source_user_id:x}-{target_user_id:x}-'
-                            f'{"1" if user.is_bot else "0"}'
+                            f'marriage.divorce.{mode}-{source_user_id:x}-{target_user_id:x}'
                         ),
                     ),
                     BUTTON_DIVORCE_CANCEL,
@@ -981,14 +995,14 @@ async def divorce(client, event,
             return InteractionResponse(
                 embed = Embed(
                     None,
-                    f'Are you sure to divorce {user.full_name}?'
+                    f'Are you sure to divorce {user:f}?'
                 ),
                 components = Row(
                     Button(
                         'Yes',
                         EMOJI_YES,
                         custom_id = (
-                            f'marriage.divorce.o-{source_user_id:x}-{target_user_id:x}-{"1" if user.is_bot else "0"}'
+                            f'marriage.divorce.o-{source_user_id:x}-{target_user_id:x}'
                         ),
                     ),
                     Button(
@@ -1001,7 +1015,7 @@ async def divorce(client, event,
         
         return Embed(
             None,
-            f'You are not married to {user.full_name}.'
+            f'You are not married to {user:f}.'
         )
 
 
@@ -1020,25 +1034,28 @@ async def divorce_cancelled(event):
 
 
 @SLASH_CLIENT.interactions(
-    custom_id = re.compile('marriage\.divorce\.([cio])\-([0-9a-f]{6,16})\-([0-9a-f]{6,16})\-([01])')
+    custom_id = re.compile('marriage\.divorce\.([cio])\-([0-9a-f]{6,16})\-([0-9a-f]{6,16})')
 )
-async def divorce_execute(client, event, mode, source_user_id, target_user_id, is_bot):
+async def divorce_execute(client, event, mode, source_user_id, target_user_id):
     if event.user is not event.message.interaction.user:
         return
     
     source_user_id = int(source_user_id, 16)
     target_user_id = int(target_user_id, 16)
-    is_bot = (is_bot == '1')
+    
+    yield
+    
+    target_user = get_user(target_user_id)
     
     if mode == 'i':
-        return divorce_incoming(client, event, source_user_id, target_user_id, is_bot)
+        yield divorce_incoming(client, event, source_user_id, target_user)
     elif mode == 'o':
-        return divorce_outgoing(client, event, source_user_id, target_user_id, is_bot)
+        yield divorce_outgoing(client, event, source_user_id, target_user)
     elif mode == 'c':
-        return divorce_circular(client, event, source_user_id, target_user_id, is_bot)
+        yield divorce_circular(client, event, source_user_id, target_user)
 
 
-async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot):
+async def divorce_incoming(client, event, source_user_id, target_user):
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select(
@@ -1061,12 +1078,12 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
         result = results[0]
         waifu_owner_id = result[2]
         
-        if waifu_owner_id != target_user_id:
+        if waifu_owner_id != target_user.id:
             yield InteractionResponse(
                 embed = Embed(
                     None,
                     (
-                        f'You are not claimed by {mention_user_by_id(target_user_id)} anymore.'
+                        f'You are not claimed by {target_user:f} anymore.'
                     ),
                 ),
                 allowed_mentions = None,
@@ -1086,7 +1103,7 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
                     None,
                     (
                         f'Heart amounts changed meanwhile. You have sufficient amount of '
-                        f'{EMOJI__HEART_CURRENCY.as_emoji} to divorce {mention_user_by_id(target_user_id)}'
+                        f'{EMOJI__HEART_CURRENCY} to divorce {target_user:f}'
                     ),
                 ),
                 allowed_mentions = None,
@@ -1110,7 +1127,7 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
         
         await connector.execute(
             USER_COMMON_TABLE.update(
-                user_common_model.user_id == target_user_id,
+                user_common_model.user_id == target_user.id,
             ).values(
                 total_love = user_common_model.total_love + waifu_cost,
             )
@@ -1127,36 +1144,36 @@ async def divorce_incoming(client, event, source_user_id, target_user_id, is_bot
         embed = Embed(
             None,
             (
-                f'You divorced {mention_user_by_id(target_user_id)} successfully.\n'
+                f'You divorced {target_user:f} successfully.\n'
                 f'\n'
-                f'You paid {refund} {EMOJI__HEART_CURRENCY.as_emoji} as refund.'
+                f'You paid {refund} {EMOJI__HEART_CURRENCY} as refund.'
             ),
         ),
         allowed_mentions = None,
         components = None,
     )
     
-    if not is_bot:
+    if not target_user.is_bot:
         await send_embed_to(
             client,
-            target_user_id,
+            target_user.id,
             Embed(
                 None,
-                f'{event.user.full_name} divorced you.\n'
+                f'{event.user:f} divorced you.\n'
                 f'\n'
-                f'You received back {refund} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                f'You received back {refund} {EMOJI__HEART_CURRENCY}.'
             )
         )
 
 
-async def divorce_outgoing(client, event, source_user_id, target_user_id, is_bot):
+async def divorce_outgoing(client, event, source_user_id, target_user):
 
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             WAIFU_LIST_TABLE.delete().where(
                 and_(
                     waifu_list_model.user_id == source_user_id,
-                    waifu_list_model.waifu_id == target_user_id,
+                    waifu_list_model.waifu_id == target_user.id,
                 )
             )
         )
@@ -1166,7 +1183,7 @@ async def divorce_outgoing(client, event, source_user_id, target_user_id, is_bot
                 embed = Embed(
                     None,
                     (
-                        f'You are not claiming {mention_user_by_id(target_user_id)} anymore.'
+                        f'You are not claiming {target_user.id:f} anymore.'
                     ),
                 ),
                 allowed_mentions = None,
@@ -1184,7 +1201,7 @@ async def divorce_outgoing(client, event, source_user_id, target_user_id, is_bot
         
         await connector.execute(
             USER_COMMON_TABLE.update(
-                user_common_model.user_id == target_user_id,
+                user_common_model.user_id == target_user.id,
             ).values(
                 waifu_owner_id = 0,
             )
@@ -1194,25 +1211,25 @@ async def divorce_outgoing(client, event, source_user_id, target_user_id, is_bot
         embed = Embed(
             None,
             (
-                f'You divorced {mention_user_by_id(target_user_id)} successfully.'
+                f'You divorced {target_user:f} successfully.'
             ),
         ),
         allowed_mentions = None,
         components = None,
     )
     
-    if not is_bot:
+    if not target_user.is_bot:
         await send_embed_to(
             client,
-            target_user_id,
+            target_user.id,
             Embed(
                 None,
-                f'You have been divorced by {event.user.full_name}.'
+                f'You have been divorced by {event.user:f}.'
             )
         )
 
 
-async def divorce_circular(client, event, source_user_id, target_user_id, is_bot):
+async def divorce_circular(client, event, source_user_id, target_user):
 
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -1224,10 +1241,10 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
                 or_(
                     and_(
                         waifu_list_model.user_id == source_user_id,
-                        waifu_list_model.waifu_id == target_user_id,
+                        waifu_list_model.waifu_id == target_user.id,
                     ),
                     and_(
-                        waifu_list_model.user_id == target_user_id,
+                        waifu_list_model.user_id == target_user.id,
                         waifu_list_model.waifu_id == source_user_id,
                     ),
                 )
@@ -1240,7 +1257,7 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
                 embed = Embed(
                     None,
                     (
-                        f'You are not mutually married to {mention_user_by_id(target_user_id)} anymore.'
+                        f'You are not mutually married to {target_user:f} anymore.'
                     ),
                 ),
                 allowed_mentions = None,
@@ -1282,7 +1299,7 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
                     None,
                     (
                         f'Heart amounts changed meanwhile. You have sufficient amount of '
-                        f'{EMOJI__HEART_CURRENCY.as_emoji} to divorce {mention_user_by_id(target_user_id)}'
+                        f'{EMOJI__HEART_CURRENCY} to divorce {target_user:f}'
                     ),
                 ),
                 allowed_mentions = None,
@@ -1306,7 +1323,7 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
         
         await connector.execute(
             USER_COMMON_TABLE.update(
-                user_common_model.user_id == target_user_id,
+                user_common_model.user_id == target_user.id,
             ).values(
                 total_love = user_common_model.total_love + waifu_cost,
                 waifu_owner_id = 0,
@@ -1323,23 +1340,23 @@ async def divorce_circular(client, event, source_user_id, target_user_id, is_bot
         embed = Embed(
             None,
             (
-                f'You divorced {mention_user_by_id(target_user_id)} successfully.\n'
+                f'You divorced {target_user:f} successfully.\n'
                 f'\n'
-                f'You paid {refund} {EMOJI__HEART_CURRENCY.as_emoji} as refund.'
+                f'You paid {refund} {EMOJI__HEART_CURRENCY} as refund.'
             ),
         ),
         allowed_mentions = None,
         components = None,
     )
     
-    if not is_bot:
+    if not target_user.is_bot:
         await send_embed_to(
             client,
-            target_user_id,
+            target_user.id,
             Embed(
                 None,
-                f'{event.user.full_name} divorced you.\n'
+                f'{event.user:f} divorced you.\n'
                 f'\n'
-                f'You received back {refund} {EMOJI__HEART_CURRENCY.as_emoji}.'
+                f'You received back {refund} {EMOJI__HEART_CURRENCY}.'
             )
         )

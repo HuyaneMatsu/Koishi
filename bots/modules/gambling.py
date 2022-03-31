@@ -1369,20 +1369,25 @@ async def increase_user_total_love(user_id, increase):
             )
         )
         results = await response.fetchall()
-        if results:
-            entry_id = results[0][0]
-            to_execute = USER_COMMON_TABLE.update(
-                user_common_model.id == entry_id
-            ).values(
-                total_love = user_common_model.total_love + increase,
-            )
-        else:
-            to_execute = get_create_common_user_expression(
-                user_id,
-                total_love = increase,
-            )
+        if not results:
+            # avoid race condition, do not add hearts if the user is not yet stored.
+            #
+            # to_execute = get_create_common_user_expression(
+            #     user_id,
+            #     total_love = increase,
+            # )
+            return
+            
+        entry_id = results[0][0]
+        to_execute = USER_COMMON_TABLE.update(
+            user_common_model.id == entry_id
+        ).values(
+            total_love = user_common_model.total_love + increase,
+        )
         
         await connector.execute(to_execute)
+
+        
 
 # yup, we are generating hearts
 @SLASH_CLIENT.events(name='interaction_create')

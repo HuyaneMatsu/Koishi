@@ -106,7 +106,7 @@ async def buy_waifu_slot_invoke(event):
             required_love = WAIFU_SLOT_2_COST
             new_waifu_slot_count = 2
     
-    return Interactionsresponse(
+    return InteractionResponse(
         Embed(
             None,
             (
