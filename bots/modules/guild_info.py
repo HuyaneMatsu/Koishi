@@ -144,15 +144,15 @@ async def add_guild_stickers_field(client, guild, embed, even_if_empty):
 
 
 async def add_guild_boosters_field(client, guild, embed, even_if_empty):
-    booster_count = guild.booster_count
-    if booster_count:
+    boost_count = guild.boost_count
+    if boost_count:
         
         boosters = guild.boosters
         count = len(boosters)
         
         embed.add_field(
             f'Most awesome people of the guild',
-            f'{booster_count} boosts {EMOJI_HEART_GIFT} | {count} people {EMOJI_HEART_GIFT}'
+            f'{boost_count} boosts {EMOJI_HEART_GIFT} | {count} people {EMOJI_HEART_GIFT}'
         )
         
         for user in boosters[:21]:
