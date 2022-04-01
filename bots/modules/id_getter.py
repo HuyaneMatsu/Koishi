@@ -64,7 +64,7 @@ async def role_(client, event,
 
 @ID_GETTER_COMMANDS.interactions
 async def sticker_(client, event,
-    sticker_name: ('sticker', 'Select a sticker', 'sticker'),
+    sticker_name: ('str', 'Select a sticker', 'sticker'),
 ):
     guild = event.guild
     if guild is None:
@@ -94,7 +94,7 @@ async def autocomplete_sticker(client, event, value):
 
 @ID_GETTER_COMMANDS.interactions
 async def emoji_(client, event,
-    emoji_name: ('sticker', 'Select a sticker', 'emoji_name'),
+    emoji_name: ('str', 'Select an emoji', 'emoji'),
 ):
     while True:
         emoji = parse_emoji(emoji_name)
@@ -128,12 +128,12 @@ async def autocomplete_emoji(client, event, emoji_name):
     if emoji_name is None:
         guild = event.guild
         if guild is None:
-            return None
+            return
         
         emoji_names = []
         count = 0
         for emoji in guild.emojis.values():
-            emoji_names.append(emoji)
+            emoji_names.append(emoji.name)
             count += 1
             if count == 25:
                 break
@@ -147,24 +147,27 @@ async def autocomplete_emoji(client, event, emoji_name):
         if emoji.is_custom_emoji():
             return [emoji.as_emoji]
         else:
-            return None
+            return
     
     guild = event.guild
     if guild is None:
-        return None
+        return
     
     start = emoji_name.startswith(':')
-    length = len(emoji)
+    length = len(emoji_name)
     end = length - emoji_name.endswith(':')
     stripped_emoji_name = emoji_name[start:end]
     
     if end != length:
         emoji = guild.get_emoji_like(stripped_emoji_name)
+        if emoji is None:
+            return
+        
         if emoji.name == stripped_emoji_name:
             return [emoji_name]
         
         else:
-            return None
+            return
     
     emojis = guild.get_emojis_like(stripped_emoji_name)
     emoji_names = sorted(emoji.name for emoji in emojis)
