@@ -247,61 +247,6 @@ async def welcome_screen_(client, event):
     
     yield embed
 
-ID = SLASH_CLIENT.interactions(
-    None,
-    name = 'id',
-    description = 'Shows the id of the selected entity',
-    is_global = True,
-)
-
-@ID.interactions
-async def user_(client, event,
-    user: ('user', 'Who\'s id do you want to see?') = None,
-):
-    """Returns your or the selected user's identifier."""
-    if user is None:
-        user = event.user
-    
-    return str(user.id)
-
-
-@ID.interactions
-async def channel_(client, event,
-    channel: ('channel', 'Which channel\'s id do you want to see?') = None,
-):
-    """Returns this or the selected channel's identifier."""
-    if channel is None:
-        channel = event.channel
-    
-    return str(channel.id)
-
-
-@ID.interactions
-async def guild_(client, event):
-    """Returns the guild's identifier."""
-    guild = event.guild
-    if guild is None:
-        return Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
-    
-    return str(guild.id)
-
-@ID.interactions
-async def role_(client, event,
-    role: ('role', 'Which role\'s id do you want to see?') = None,
-):
-    """Returns this or the guild\'s default role's identifier."""
-    guild = event.guild
-    if guild is None:
-        return Embed('Error', 'Guild only command.', color=UTILITY_COLOR)
-    
-    if role is None:
-        # Hax
-        role_id = guild.id
-    else:
-        role_id = role.id
-    
-    return str(role_id)
-
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def now_as_id_(client, event):
@@ -798,8 +743,8 @@ GUILD_ICON_CHOICES = [
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def guild_icon(event,
-        choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
-            ):
+    choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
+):
     """Shows the guild's icon."""
     guild = event.guild
     if (guild is None) or guild.partial:
