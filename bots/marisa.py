@@ -660,7 +660,7 @@ def check_user(user, event):
 async def getting_good(client, event):
     """Getting there."""
     main_component = Row(
-        Button('cake', custom_id='cake', style=ButtonStyle.violet),
+        Button('cake', custom_id='cake', style=ButtonStyle.blue),
         Button('cat', custom_id='cat', style=ButtonStyle.gray),
         Button('snake', custom_id='snake', style=ButtonStyle.green),
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
@@ -683,7 +683,7 @@ async def getting_good(client, event):
 async def we_gucci(client, event):
     """Getting there."""
     components = [
-        Button('cake', custom_id='cake', style=ButtonStyle.violet),
+        Button('cake', custom_id='cake', style=ButtonStyle.blue),
         Button('cat', custom_id='cat', style=ButtonStyle.gray),
         Button('snake', custom_id='snake', style=ButtonStyle.green),
         Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),

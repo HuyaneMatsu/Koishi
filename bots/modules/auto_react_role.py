@@ -2,7 +2,7 @@ import re
 
 from hata import CHANNELS, KOKORO, DiscordException, ERROR_CODES, ClientWrapper, MESSAGES, \
     Color, Embed, Emoji, CLIENTS, Role, ROLES, EMOJIS, Client, parse_message_reference, \
-    ChannelBase, parse_role, parse_emoji, Permission
+    Channel, parse_role, parse_emoji, Permission
 from scarletio import sleep, ScarletExecutor, WeakKeyDictionary
 from hata.ext.command_utils import ChooseMenu, Closer
 from hata.ext.slash import abort
@@ -563,7 +563,7 @@ class AutoReactRoleGUI:
         try:
             embed = self.render()
             if message is None:
-                if isinstance(channel_or_event, ChannelBase):
+                if isinstance(channel_or_event, Channel):
                     message = await client.message_create(channel_or_event, embed=embed)
                 else:
                     if channel_or_event.is_unanswered():
@@ -1457,7 +1457,7 @@ async def select_auto_react_role_gui(client, channel_or_event, message, title, m
     guild = manager.message.guild
     if manager.destroy_called or (guild is None):
         embed = Embed('The selected entity was already destroyed', color=AUTO_REACT_ROLE_COLOR)
-        if isinstance(channel_or_event, ChannelBase):
+        if isinstance(channel_or_event, Channel):
             await client.message_create(channel_or_event, embed=embed)
         else:
             if channel_or_event.is_unanswered():

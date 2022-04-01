@@ -50,7 +50,7 @@ def render_array(array, all_disabled):
         
         if element == ARRAY_IDENTIFIER_EMPTY:
             emoji = EMOJI_NOTHING
-            style = ButtonStyle.violet
+            style = ButtonStyle.blue
         elif element == ARRAY_IDENTIFIER_P1:
             emoji = EMOJI_P1
             style = ButtonStyle.red

@@ -1,6 +1,6 @@
 from scarletio import sleep
 from hata import Color, Embed, parse_oauth2_redirect_url, DiscordException, ERROR_CODES, cr_pg_channel_object, \
-    ChannelText, Client
+    Client, CHANNEL_TYPES
 from hata.ext.commands_v2 import checks
 from hata.ext.slash.menus import Pagination
 from hata.ext.prettyprint import pchunkify
@@ -207,8 +207,12 @@ class oauth2_my_guild:
             return
         
         try:
-            guild = await client.guild_create(name='Luv ya',
-                channels=[cr_pg_channel_object(name=f'Love u {message.author.name}',type_=ChannelText),])
+            guild = await client.guild_create(
+                'Luv ya',
+                channels = [
+                    cr_pg_channel_object(f'Love u {message.author.name}', CHANNEL_TYPES.guild_text),
+                ],
+            )
             
             await sleep(1.0, client.loop)
             await client.guild_user_add(guild, user)

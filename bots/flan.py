@@ -3,7 +3,7 @@ from itertools import cycle
 from random import choice
 
 from scarletio import sleep, ReuAsyncIO, AsyncIO, Lock, alchemy_incendiary
-from hata import Guild, Embed, Color, Role, BUILTIN_EMOJIS, ChannelText, KOKORO, Client, DiscordException, \
+from hata import Guild, Embed, Color, Role, BUILTIN_EMOJIS, Channel, KOKORO, Client, DiscordException, \
     ERROR_CODES, Permission
 from scarletio import SortedList
 from hata.ext.command_utils import Pagination, wait_for_reaction, wait_for_message
@@ -21,10 +21,11 @@ CHESUTO_COLOR = Color.from_rgb(73, 245, 73)
 CARDS_ROLE = Role.precreate(598708907816517632)
 CARD_HDR_RP = re.compile(
     ' *(?:\*\*)? *(.+?) *(?:\[((?:token)|(?:passive)|(?:basic))\])? *(?:\(([a-z]+)\)?)? *(?:\*\*)?',
-    re.I,)
+    re.I,
+)
 VISITORS_ROLE = Role.precreate(669875992159977492)
 CHESUTO_BGM_MESSAGES = set()
-CHESUTO_BGM_CHANNEL = ChannelText.precreate(707892105749594202)
+CHESUTO_BGM_CHANNEL = Channel.precreate(707892105749594202)
 CHESUTO_BGM_TRACKS = {}
 CHESUTO_BGM_TRACKS_SORTED = SortedList()
 BGM_SPLIT_PATTERN = re.compile('([^ _-]+)')

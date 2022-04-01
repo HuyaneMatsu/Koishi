@@ -2,8 +2,7 @@ from random import random
 from itertools import chain
 
 from scarletio import Task, Future, WaitTillAll, future_or_timeout
-from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, KOKORO, ERROR_CODES, \
-    ChannelGuildBase, InteractionType
+from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, KOKORO, ERROR_CODES, InteractionType
 from hata.ext.slash import Button, Row
 from hata.ext.slash.menus.menu import GUI_STATE_READY, GUI_STATE_EDITING, GUI_STATE_CANCELLING, \
     GUI_STATE_CANCELLED, GUI_STATE_SWITCHING_CONTEXT, Timeouter
@@ -650,7 +649,7 @@ def game_21_precheck(client, user, channel, amount, require_guild):
         error_message = 'You are already at a game.'
     elif amount < BET_MIN:
         error_message = f'You must bet at least {BET_MIN} {EMOJI__HEART_CURRENCY.as_emoji}'
-    elif require_guild and (not isinstance(channel, ChannelGuildBase)):
+    elif require_guild and (not channel.guild_id):
         error_message = 'Guild only command.'
     else:
         return

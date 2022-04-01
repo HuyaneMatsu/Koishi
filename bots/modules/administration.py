@@ -1,8 +1,8 @@
 from datetime import datetime
 from functools import partial as partial_func
 
-from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, ChannelText, \
-    parse_rdelta, datetime_to_id, ChannelCategory, Emoji, Permission
+from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, \
+    parse_rdelta, datetime_to_id, Emoji, Permission
 from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
 from hata.ext.prettyprint import pchunkify
@@ -20,13 +20,13 @@ def match_message_author(user, message):
 
 @SLASH_CLIENT.interactions(is_global=True, show_for_invoking_user_only=True)
 async def clear(client, event,
-        limit  : ('int'     , 'How much message?'                        )        ,
-        before : ('str'     , 'Till when?'                               ) = None ,
-        after  : ('str'     , 'Since when?'                              ) = None ,
-        where  : ('channel' , 'Where?'                                   ) = None ,
-        whos   : ('user'    , 'Who\'s message?'                          ) = None ,
-        reason : ('str'     , 'Will show up in the guild\'s audit logs.' ) = None ,
-            ):
+    limit: ('int', 'How much message?'),
+    before: ('str', 'Till when?') = None,
+    after: ('str', 'Since when?') = None,
+    where: ('channel_group_guild_messageable', 'Where?') = None,
+    whos: ('user', 'Who\'s message?') = None,
+    reason: ('str', 'Will show up in the guild\'s audit logs.') = None,
+):
     """Yeets messages."""
     guild = event.guild
     if guild is None:
@@ -38,9 +38,6 @@ async def clear(client, event,
     if where is None:
         channel = event.channel
     else:
-        if not isinstance(where, ChannelText):
-            abort('The channel must be a text channel.')
-        
         channel = where
     
     if limit < 1:
@@ -247,8 +244,8 @@ async def invites_(client, event,
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute the command.')
     
-    if (channel is not None) and isinstance(channel, ChannelCategory):
-        abort('Category channels have no invites.')
+    if (channel is not None) and (not channel.is_in_group_can_create_invite_to()):
+        abort('Cannot create invite to the selected channel.')
     
     if not event.channel.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING:
         abort('I must have `send messages` permission to invoke this command correctly.')
@@ -468,7 +465,7 @@ ROLE_EMOJI_CONFIRM= BUILTIN_EMOJIS['ok_hand']
 ROLE_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 
 EMOJI_ROLE_BUTTON_CONFIRM = Button(emoji=ROLE_EMOJI_CONFIRM, style=ButtonStyle.green)
-EMOJI_ROLE_BUTTON_CANCEL = Button(emoji=ROLE_EMOJI_CANCEL, style=ButtonStyle.violet)
+EMOJI_ROLE_BUTTON_CANCEL = Button(emoji=ROLE_EMOJI_CANCEL, style=ButtonStyle.blue)
 EMOJI_ROLE_COMPONENTS = Row(EMOJI_ROLE_BUTTON_CONFIRM, EMOJI_ROLE_BUTTON_CANCEL)
 
 

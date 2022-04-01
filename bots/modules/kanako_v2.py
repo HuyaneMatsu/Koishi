@@ -658,7 +658,7 @@ CUSTOM_ID_KANAKO_CANCEL = 'kanako.cancel'
 BUTTON_KANAKO_JOIN_OR_LEAVE = Button(
     'Join / Leave',
     custom_id = CUSTOM_ID_KANAKO_JOIN_OR_LEAVE,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_KANAKO_JOIN_OR_LEAVE_DISABLED = BUTTON_KANAKO_JOIN_OR_LEAVE.copy_with(

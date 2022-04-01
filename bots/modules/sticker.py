@@ -515,7 +515,7 @@ async def delete_(client, event,
 def check_sticker_editor(user, event):
     return user is event.user
 
-STICKER_EDIT_BUTTON_CONFIRM = Button('Yes', style=ButtonStyle.violet)
+STICKER_EDIT_BUTTON_CONFIRM = Button('Yes', style=ButtonStyle.blue)
 STICKER_EDIT_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
 
 STICKER_EDIT_COMPONENTS = Row(STICKER_EDIT_BUTTON_CONFIRM, STICKER_EDIT_BUTTON_CANCEL)

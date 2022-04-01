@@ -30,7 +30,7 @@ COMPONENTS_ROLE_INFO = Row(
 )
 
 
-@SLASH_CLIENT.interactions(name='role', is_global=True)
+@SLASH_CLIENT.interactions(is_global=True)
 async def role_info(
     client,
     event,
@@ -44,8 +44,10 @@ async def role_info(
     
     embed = Embed(
         f'Role info: {role.name}',
-        color = color,
     )
+    
+    if color:
+        embed.color = color
     
     embed.add_field(
         'Identifier',
@@ -58,7 +60,7 @@ async def role_info(
     )
     
     embed.add_field(
-        'permissions',
+        'Permissions',
         (
             f'```\n'
             f'{role.permissions:d}\n'
@@ -108,14 +110,16 @@ async def role_info(
         inline = True,
     )
     
-    embed.add_field(
-        'color',
-        (
-            f'```\n'
-            f'html: {color.as_html} | rgb: {color.as_rgb} | int: {color:d}\n'
-            f'```'
-        ),
-    )
+    color = role.color
+    if color:
+        embed.add_field(
+            'color',
+            (
+                f'```\n'
+                f'html: {color.as_html} | rgb: {color.red}, {color.green}, {color.blue} | int: {color:d}\n'
+                f'```'
+            ),
+        )
     
     manager_type = role.manager_type
     if manager_type is not RoleManagerType.none:
@@ -168,7 +172,7 @@ async def close_role_info(client, event):
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_ROLE_INFO_SHOW_PERMISSIONS)
 async def close_role_info(client, event):
-    embed = event.embed
+    embed = event.message.embed
     if embed is None:
         return
     
@@ -209,6 +213,6 @@ async def close_role_info(client, event):
     
     await client.interaction_response_message_create(
         event,
-        embed = embed(title, description, color=color),
+        embed = Embed(title, description, color=color),
         show_for_invoking_user_only = True,
     )

@@ -339,7 +339,7 @@ DELETE_ENTRY_APPROVE = Button(
 
 DELETE_ENTRY_CANCEL = Button(
     'Nah.',
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
     custom_id = DELETE_ENTRY_BASE,
 )
 

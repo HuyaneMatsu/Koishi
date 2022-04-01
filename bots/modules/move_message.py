@@ -1,5 +1,5 @@
 from scarletio import Task, WaitTillExc, LOOP_TIME, WaitTillAll, Future
-from hata import Client, Guild, DiscordException, ERROR_CODES, ChannelThread, KOKORO, Emoji, format_loop_time, \
+from hata import Client, Guild, DiscordException, ERROR_CODES, KOKORO, Emoji, format_loop_time, \
     mention_channel_by_id, TIMESTAMP_STYLES, Embed, is_id
 from hata.ext.slash import abort, Button, Row, ButtonStyle, Form, TextInput
 
@@ -108,7 +108,7 @@ async def move_message(
     """Moves a message | Mod only"""
     check_permissions(client, event, channel)
     
-    if isinstance(channel, ChannelThread):
+    if channel.is_in_group_thread():
         channel_id = channel.parent_id
         thread_id = channel.id
     else:
@@ -188,7 +188,7 @@ BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED = BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED.copy_wi
 BUTTON_MESSAGE_MOVE_ADD_BY_ID= Button(
     'Enter message id',
     custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_MESSAGE_MOVE_CANCEL = Button(
@@ -529,7 +529,7 @@ async def move_messages(
     """Moves messages | Mod only"""
     check_permissions(client, event, channel)
     
-    if isinstance(channel, ChannelThread):
+    if channel.is_in_group_thread():
         channel_id = channel.parent_id
         thread_id = channel.id
     else:
@@ -595,7 +595,7 @@ async def move_channel(
     
     yield f'Starting to move messages to {channel.name}'
     
-    if isinstance(channel, ChannelThread):
+    if channel.is_in_group_thread():
         channel_id = channel.parent_id
         thread_id = channel.id
     else:

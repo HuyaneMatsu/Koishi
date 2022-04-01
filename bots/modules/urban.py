@@ -1,6 +1,5 @@
-from hata import Client, Embed, Color, DATETIME_FORMAT_CODE, BUILTIN_EMOJIS, ChannelText
+from hata import Client, Embed, Color, DATETIME_FORMAT_CODE, BUILTIN_EMOJIS
 from hata.discord.utils import timestamp_to_datetime
-from bot_utils.constants import GUILD__SUPPORT
 from hata.ext.slash import abort
 from scarletio.web_common import quote
 
@@ -102,7 +101,7 @@ async def urban(
     """Finds the most accurate definition of the given term | Nsfw channel only"""
     
     channel = event.channel
-    if (channel is None) or (not isinstance(channel, ChannelText)) or (not channel.nsfw):
+    if (channel is None) or (not channel.nsfw):
         abort('Command only allowed in nsfw channels.')
     
     async with client.http.get(URBAN_DICTIONARY_API_URL, params={'term': term}) as response:
@@ -146,7 +145,7 @@ async def urban(
             f'{thumbs_up_count}\n'
             f'```'
         ),
-        inline = True
+        inline = True,
     ).add_field(
         EMOJI_THUMBS_DOWN.as_emoji,
         (
@@ -154,7 +153,7 @@ async def urban(
             f'{thumbs_down_count}\n'
             f'```'
         ),
-        inline = True
+        inline = True,
     )
     
     # Add footer

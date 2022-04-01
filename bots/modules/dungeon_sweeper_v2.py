@@ -391,7 +391,7 @@ RULES_HELP = Embed(
 BUTTON_UP_ENABLED = Button(
     emoji = EMOJI_UP,
     custom_id = IDENTIFIER_UP,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_UP_DISABLED = BUTTON_UP_ENABLED.copy()
@@ -400,7 +400,7 @@ BUTTON_UP_DISABLED.enabled = False
 BUTTON_DOWN_ENABLED = Button(
     emoji = EMOJI_DOWN,
     custom_id = IDENTIFIER_DOWN,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_DOWN_DISABLED = BUTTON_DOWN_ENABLED.copy()
@@ -409,7 +409,7 @@ BUTTON_DOWN_DISABLED.enabled = False
 BUTTON_UP2_ENABLED = Button(
     emoji = EMOJI_UP2,
     custom_id = IDENTIFIER_UP2,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_UP2_DISABLED = BUTTON_UP2_ENABLED.copy()
@@ -418,7 +418,7 @@ BUTTON_UP2_DISABLED.enabled = False
 BUTTON_DOWN2_ENABLED = Button(
     emoji = EMOJI_DOWN2,
     custom_id = IDENTIFIER_DOWN2,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_DOWN2_DISABLED = BUTTON_DOWN2_ENABLED.copy()
@@ -427,7 +427,7 @@ BUTTON_DOWN2_DISABLED.enabled = False
 BUTTON_LEFT_ENABLED = Button(
     emoji = EMOJI_LEFT,
     custom_id = IDENTIFIER_LEFT,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_LEFT_DISABLED = BUTTON_LEFT_ENABLED.copy()
@@ -436,7 +436,7 @@ BUTTON_LEFT_DISABLED.enabled = False
 BUTTON_RIGHT_ENABLED = Button(
     emoji = EMOJI_RIGHT,
     custom_id = IDENTIFIER_RIGHT,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_RIGHT_DISABLED = BUTTON_RIGHT_ENABLED.copy()
@@ -465,7 +465,7 @@ BUTTON_EMPTY_4 = BUTTON_EMPTY_1.copy_with(custom_id=IDENTIFIER_EMPTY_4)
 BUTTON_SKILL_REIMU_ENABLED = Button(
     emoji = EMOJI_REIMU,
     custom_id = IDENTIFIER_SKILL,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_SKILL_REIMU_DISABLED = BUTTON_SKILL_REIMU_ENABLED.copy()
@@ -504,7 +504,7 @@ BUTTON_SKILL_YUKARI_ACTIVATED.style = ButtonStyle.green
 BUTTON_WEST_ENABLED = Button(
     emoji = EMOJI_WEST,
     custom_id = IDENTIFIER_WEST,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_WEST_DISABLED = BUTTON_WEST_ENABLED.copy()
@@ -513,7 +513,7 @@ BUTTON_WEST_DISABLED.enabled = False
 BUTTON_NORTH_ENABLED = Button(
     emoji = EMOJI_NORTH,
     custom_id = IDENTIFIER_NORTH,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_NORTH_DISABLED = BUTTON_NORTH_ENABLED.copy()
@@ -522,7 +522,7 @@ BUTTON_NORTH_DISABLED.enabled = False
 BUTTON_SOUTH_ENABLED = Button(
     emoji = EMOJI_SOUTH,
     custom_id = IDENTIFIER_SOUTH,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_SOUTH_DISABLED = BUTTON_SOUTH_ENABLED.copy()
@@ -531,7 +531,7 @@ BUTTON_SOUTH_DISABLED.enabled = False
 BUTTON_EAST_ENABLED = Button(
     emoji = EMOJI_EAST,
     custom_id = IDENTIFIER_EAST,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_EAST_DISABLED = BUTTON_EAST_ENABLED.copy()
@@ -540,7 +540,7 @@ BUTTON_EAST_DISABLED.enabled = False
 BUTTON_BACK_ENABLED = Button(
     emoji = EMOJI_BACK,
     custom_id = IDENTIFIER_BACK,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_BACK_DISABLED = BUTTON_BACK_ENABLED.copy()
@@ -549,7 +549,7 @@ BUTTON_BACK_DISABLED.enabled = False
 BUTTON_RESET_ENABLED = Button(
     emoji = EMOJI_RESET,
     custom_id = IDENTIFIER_RESET,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_RESET_DISABLED = BUTTON_RESET_ENABLED.copy()
@@ -558,13 +558,13 @@ BUTTON_RESET_DISABLED.enabled = False
 BUTTON_CANCEL = Button(
     emoji = EMOJI_CANCEL,
     custom_id = IDENTIFIER_CANCEL,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_NEXT = Button(
     emoji = EMOJI_NEXT,
     custom_id = IDENTIFIER_NEXT,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_NEXT_DISABLED = BUTTON_NEXT.copy()
@@ -573,13 +573,13 @@ BUTTON_NEXT_DISABLED.enabled = False
 BUTTON_CLOSE = Button(
     emoji = EMOJI_CLOSE,
     custom_id = IDENTIFIER_CLOSE,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 BUTTON_RESTART = Button(
     emoji = EMOJI_RESTART,
     custom_id = IDENTIFIER_RESTART,
-    style = ButtonStyle.violet,
+    style = ButtonStyle.blue,
 )
 
 

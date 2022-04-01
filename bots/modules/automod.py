@@ -3,7 +3,7 @@ from functools import partial as partial_func
 from datetime import timedelta
 
 from re import escape as re_escape
-from hata import Client, ChannelThread, KOKORO, Permission, BUILTIN_EMOJIS, Emoji, Sticker
+from hata import Client, KOKORO, Permission, BUILTIN_EMOJIS, Emoji, Sticker
 from scarletio import Task, WaitTillAll
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR
 from hata.discord.utils import sanitise_mention_escaper
@@ -239,7 +239,7 @@ async def message_edit(client, message, old_attributes):
 
 async def replace_coroutine(client, message, content):
     channel = message.channel
-    if isinstance(channel, ChannelThread):
+    if channel.is_in_group_thread():
         channel_id = channel.parent_id
         thread = channel
     else:
