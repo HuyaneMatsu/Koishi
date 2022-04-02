@@ -191,17 +191,16 @@ class Action:
         if url is None:
             abort('*Could not get any images, please try again later.*')
         
-        if user is None:
-            hugger = client
-            hugged = event.user
+        event_user = event.user
+        if (user is None) or (user is event_user):
+            caller = client
+            target = event_user
         else:
-            hugger = event.user
-            hugged = user
-        
-        title = f'{hugger:f} {self.verb} {hugged:f}.'
+            caller = event_user
+            target = user
         
         return Embed(
-            title,
+            f'{caller:f} {self.verb} {target:f}.',
             color = (event.id >> 22) & 0xffffff
         ).add_image(
             url,

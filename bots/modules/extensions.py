@@ -277,7 +277,7 @@ async def register(event,
     
     try:
         EXTENSION_LOADER.add(name)
-    except TypeError:
+    except ImportError:
         title = f'Registering {name!r} extension failed.'
         description = 'There is no such extension.'
     else:
