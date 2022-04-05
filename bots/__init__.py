@@ -36,6 +36,7 @@ if MARISA_MODE:
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
     
+    
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
     EXTENSION_LOADER.add('bots.testers', MAIN_CLIENT=Marisa)
@@ -156,5 +157,6 @@ for path in MODULE_NAMES:
         EXTENSION_LOADER.add(extension_full_name)
 
 del path
+
 
 EXTENSION_LOADER.load_all()

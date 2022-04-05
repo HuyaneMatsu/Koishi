@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from hata import Client, Embed, StickerFormat, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, ROLES, ZEROUSER
 from hata.ext.extension_loader import require
