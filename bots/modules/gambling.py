@@ -181,7 +181,7 @@ async def claim_daily_for_waifu(client, event, target_user):
             target_daily_next = target_entry[5]
             if target_daily_next > now:
                 return Embed(
-                    f'{target_user.name} already claimed your daily love for today~',
+                    f'{target_user.name} already claimed their daily love for today~',
                     f'Come back in {elapsed_time(target_daily_next)}.',
                     color = COLOR__GAMBLING,
                 )

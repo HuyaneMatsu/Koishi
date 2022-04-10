@@ -1,3 +1,6 @@
+from hata.ext.extension_loader import require
+require('Koishi')
+
 import os
 from math import floor, sqrt
 from functools import partial as partial_func
@@ -11,6 +14,7 @@ from sqlalchemy.sql import select, update
 from bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI, EMOJI__HEART_CURRENCY
 from bot_utils.models import DB_ENGINE, user_common_model, item_model, ITEM_TABLE
 
+
 SLASH_CLIENT: Client
 
 ITEMS = {}
@@ -21,6 +25,8 @@ MARKET_COST_MIN = 40
 
 COST_FILE_LOCK = Lock(KOKORO)
 COST_FILE_PATH = os.path.join(PATH__KOISHI, 'library', 'witch_craft_costs.json')
+
+
 
 class CookingFactor:
     """

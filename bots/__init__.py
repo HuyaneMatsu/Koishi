@@ -40,6 +40,7 @@ if MARISA_MODE:
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
     EXTENSION_LOADER.add('bots.testers', MAIN_CLIENT=Marisa)
+    EXTENSION_LOADER.add('bots.previews', MAIN_CLIENT=Marisa)
 
 else:
     EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=False)

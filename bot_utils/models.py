@@ -30,10 +30,13 @@ if DATABASE_NAME is None:
     
     get_create_common_user_expression = None
     
+    waifu_stats_model = None
+    WAIFU_STATS_TABLE = None
+    
 else:
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
-        String, Boolean, Unicode
+        String, Boolean, Unicode, SmallInteger as Int16
     from sqlalchemy.sql.expression import func
     
     BASE = declarative_base()
@@ -71,7 +74,7 @@ else:
         # Notify voters that they can vote on top.gg if they can. We base this on a top.gg vote timer and whether they
         # voted before
         top_gg_last_vote = Column(DateTime, default=func.utc_timestamp())
-    
+        
     
     USER_COMMON_TABLE = user_common_model.__table__
     
@@ -166,6 +169,29 @@ else:
         creator_id = Column(Int64)
     
     TODO_TABLE = todo_model.__table__
+    
+    
+    class waifu_stats_model(BASE):
+        __tablename__ = 'WAIFU_STATS'
+        
+        id = Column(Int64, primary_key=True)
+        user_id = Column(Int64, unique=True)
+        
+        stat_housewife = Column(Int32)
+        stat_cuteness = Column(Int32)
+        stat_bedroom = Column(Int32)
+        stat_charm = Column(Int32)
+        stat_loyalty = Column(Int32)
+        
+        level = Column(Int32)
+        experience = Column(Int32)
+        
+        raw_species = Column(Binary(), nullable=True)
+        raw_weapon = Column(Binary(), nullable=True)
+        raw_costume = Column(Binary(), nullable=True)
+    
+    
+    WAIFU_STATS_TABLE = waifu_stats_model.__table__
     
     
     DB_ENGINE = create_engine(DATABASE_NAME)
