@@ -32,7 +32,7 @@ WAIFU_SCORE_GRAPH_CHART_OPTIONS = {
 }
 
 
-@SLASH_CLIENT.interactions(guild=388267636661682178)
+@SLASH_CLIENT.interactions(is_global=True)
 async def waifu_stats(
     event,
     user: ('user', 'Select someone else?') = None,

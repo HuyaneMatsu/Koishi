@@ -56,13 +56,18 @@
     /* Body */
 
     --font-body-color: rgb(255 255 255);
-    --font-body-size : 1rem;
+    --font-body-size: 1rem;
     --font-body-family: 'Jost', sans-serif;
 
     --color-body-background: rgb(54 57 63);
 
     --background-image-opacity: 0.2;
     --background-image-filter: blur(0rem) contrast(100%) brightness(34%);
+
+    --color-focus-primary: rgb(0 175 244);
+    --size-focus-width: 1px;
+    --size-focus-shadow: 3px;
+    --shadow-focus: 0px 0px var(--size-focus-shadow) var(--size-focus-shadow) rgb(0 175 244);
 
     /* MarkDown */
 
@@ -366,10 +371,10 @@
 /* Header */
 
 .header_menu {
-    padding-left: var(--size-header-side-border);
+    padding-left: calc(var(--size-header-side-border) - var(--size-focus-shadow));
     padding-right: var(--size-header-side-border);
-    padding-top: var(--size-header-inner-border);
-    padding-bottom: var(--size-header-inner-border);
+    padding-top: calc(var(--size-header-inner-border) - var(--size-focus-shadow));
+    padding-bottom: calc(var(--size-header-inner-border) - var(--size-focus-shadow));
     z-index: 1;
     transition: all 0.3s;
     left: 0;
@@ -439,6 +444,15 @@
     display: inline-flex;
 }
 
+.header_menu>div {
+    padding-top: var(--size-focus-shadow);
+    padding-bottom: var(--size-focus-shadow);
+}
+
+.header_menu>div:first-child {
+    padding-left: var(--size-focus-shadow);
+}
+
 .header_menu .burger_1200 {
     max-width: var(--size-header-button-line-height);
 }
@@ -471,8 +485,7 @@
 }
 
 .header_menu .header_left .burger_1200[open] {
-    max-width: calc(var(--size-header-burger-open-width) - var(--size-header-button-inner-border) * 2);
-    width: calc(var(--size-header-burger-open-width) - var(--size-header-button-inner-border) * 2);
+    max-width: calc(var(--size-header-burger-open-width));
 }
 
 .header_menu .burger_1200 details-menu {
@@ -618,6 +631,7 @@ p[align="right"] a::after {
 .header_menu details[open] {
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
+    width: var(--size-header-theme-picker-width);
 }
 
 .header_theme_picker {
@@ -627,6 +641,28 @@ p[align="right"] a::after {
 
 .header_theme_picker summary, .header_theme_picker details-menu a {
     cursor: pointer;
+}
+
+.header_theme_picker summary, .header_menu .burger_1200 > summary {
+    padding-left: var(--size-header-button-inner-border);
+    padding-right: var(--size-header-button-inner-border);
+    padding-top: var(--size-header-button-inner-border);
+    padding-bottom: var(--size-header-button-inner-border);
+    margin-left: calc(0px - var(--size-header-button-inner-border));
+    margin-right: calc(0px - var(--size-header-button-inner-border));
+    margin-top: calc(0px - var(--size-header-button-inner-border));
+    margin-bottom: calc(0px - var(--size-header-button-inner-border));
+    border-radius: var(--size-header-button-border-radius);
+}
+
+.header_menu .header_left .burger_1200[open] > summary {
+    padding-right: calc(
+        var(--size-header-burger-open-width)
+        - var(--size-header-button-line-height)
+        + var(--size-header-button-inner-border) * 2
+    );
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 .header_menu summary:focus-visible {
@@ -641,6 +677,12 @@ p[align="right"] a::after {
     text-align: inherit;
     border-bottom-left-radius: var(--size-header-button-border-radius);
     border-bottom-right-radius: var(--size-header-button-border-radius);
+}
+
+.header_theme_picker[open] > summary {
+    width: var(--size-header-theme-picker-width);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .header_theme_picker summary::-webkit-details-marker {
@@ -796,6 +838,19 @@ input {
 
 ::-webkit-scrollbar-corner{
     background-color: var(--color-scrollbar-track);
+}
+
+nav a {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+:focus-visible {
+    outline-color: var(--color-focus-primary);
+    outline-style: solid;
+    box-shadow: var(--shadow-focus);
+    outline-width: var(--size-focus-width);
+    outline-offset: 0px;
 }
 
 /* Generic */
@@ -1090,7 +1145,7 @@ table thead tr th {
     padding-bottom: var(--size-generic-table-border-inner);
     padding-left: 0px;
     padding-right: 0px;
-    min-width: 8rem;
+    text-align: center;
 }
 
 

@@ -40,6 +40,8 @@
     --color-block-quote-background: rgb(152 167 80 / 0.10);
     --color-block-quote-border: rgb(152 167 80 / 0.50);
     --color-block-quote-font: rgb(220 221 222);
+    --size-table-mark-field-width: 6rem;
+    --size-table-description-width: 40%;
 
     --color-python-operator: rgb(255 199 222);
     --color-python-magic: rgb(122 255 244);
@@ -623,11 +625,20 @@ blockquote {
     color: var(--color-python-format-string-postfix);
 }
 
-.parameter_table_name, .parameter_table_type, .parameter_table_optional, .parameter_table_keyword_only {
+td.parameter_table_name, td.parameter_table_type, td.parameter_table_optional, td.parameter_table_keyword_only,
+td.parameter_table_default {
     text-align: center;
 }
 
+.parameter_table_keyword_only, .parameter_table_optional {
+    width: var(--size-table-mark-field-width);
+}
+
 .parameter_table_description {
+    width: var(--size-table-description-width);
+}
+
+td.parameter_table_description {
     text-align: left;
 }
 
