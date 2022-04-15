@@ -235,7 +235,7 @@ async def run_extension_coroutine(extension_name, action_name, coroutine):
 @EXTENSION_COMMANDS.interactions
 async def load(event,
     name: ('str', 'Please provide a name to load.'),
-    deep: ('bool', 'you know what it means') = False,
+    deep: ('bool', 'you know what it means') = True,
 ):
     """Loads the specified extension by it's name."""
     check_permission(event)
@@ -253,7 +253,7 @@ async def load(event,
 @EXTENSION_COMMANDS.interactions
 async def reload(event,
     name: ('str', 'Please provide a name to reload.'),
-    deep: ('bool', 'you know what it means') = False,
+    deep: ('bool', 'you know what it means') = True,
 ):
     """Reloads the specified extension by it's name."""
     check_permission(event)
@@ -271,7 +271,7 @@ async def reload(event,
 @EXTENSION_COMMANDS.interactions
 async def unload(event,
     name: ('str', 'Please provide a name to unload.'),
-    deep: ('bool', 'you know what it means') = False,
+    deep: ('bool', 'you know what it means') = True,
 ):
     """Unloads the specified extension by it's name."""
     check_permission(event)

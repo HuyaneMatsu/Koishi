@@ -59,6 +59,12 @@
     --color-python-format-string-postfix: rgb(255 152 44);
     --color-python-comment: rgb(155 185 243);
 
+
+    --size-content-search-spacing-vertical: 4px;
+    --size-content-search-spacing-left: 8px;
+    --size-content-search-spacing-right: 4px;
+    --size-content-search-border: 8px;
+    --size-content-search-height: 24px;
 }
 
 [variable-theme="black"] {
@@ -290,6 +296,7 @@ blockquote {
     padding-right: 0px;
     font-size: var(--font-size);
     margin-bottom: 0px;
+    display: flow-root;
 }
 
 @media screen and (max-width: 600px) {
@@ -437,13 +444,13 @@ blockquote {
 .content_table .content_listing {}
 
 .content_table .content_search {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 8px;
-    padding-right: 4px;
+    padding-top: var(--size-content-search-spacing-vertical);
+    padding-left: var(--size-content-search-spacing-left);
+    padding-bottom: var(--size-content-search-spacing-vertical);
+    padding-right: var(--size-content-search-spacing-right);
     background-color: var(--color-content-table-search-background);
-    border-radius: 8px;
-    height: 24px;
+    border-radius: var(--size-content-search-border);
+    height: var(--size-content-search-height);
     margin-left: 3px;
     margin-right: 3px;
     margin-bottom: 3px;
@@ -451,41 +458,49 @@ blockquote {
 }
 
 .content_table .content_search input {
-    height: 24px;
-    padding-top: 0px;
-    padding-left: 0px;
-    padding-bottom: 0px;
-    padding-right: 0px;
+    height: var(--size-content-search-height);
+    margin-top: calc(0px - var(--size-content-search-spacing-vertical));
+    margin-left: calc(0px - var(--size-content-search-spacing-left));
+    margin-bottom: calc(0px - var(--size-content-search-spacing-vertical));
+    margin-right: calc(0px - var(--size-content-search-height) - var(--size-content-search-spacing-right));
+    padding-top: var(--size-content-search-spacing-vertical);
+    padding-left: var(--size-content-search-spacing-left);
+    padding-bottom: var(--size-content-search-spacing-vertical);
+    padding-right: calc(var(--size-content-search-height) + var(--size-content-search-spacing-right));
+    border-radius: var(--size-content-search-border);
     border: none;
     outline: none;
-    width: calc(100% - 24px);
+    width: calc(100% - var(--size-content-search-height));
     background-color: rgb(0 0 0 / 0.0);
     color: var(--color-content-table-search-input);
 }
 
 .content_table .content_search button {
-    height: 24px;
-    width: 24px;
+    height: calc(var(--size-content-search-height) + var(--size-content-search-spacing-vertical) * 2);
+    width: calc(var(--size-content-search-height) + var(--size-content-search-spacing-right));
     background-color: rgb(0 0 0 / 0.0);
-    padding-top: 0px;
     padding-left: 0px;
     padding-right: 0px;
-    padding-bottom: 0px;
     border-width: 0px;
     border-style: none;
     outline: none;
     float: right!important;
     cursor: pointer;
+    border-bottom-right-radius: var(--size-content-search-border);
+    border-top-right-radius: var(--size-content-search-border);
+    margin-top: calc(0px - var(--size-content-search-spacing-vertical));
+    margin-bottom: calc(0px - var(--size-content-search-spacing-vertical));
+    margin-right: calc(0px - var(--size-content-search-spacing-right));
 }
 
 .content_table .content_search button svg {
     fill: var(--color-content-table-search-submit);
-    width: 24px;
-    height: 24px;
-    margin-top: -10px;
+    width: var(--size-content-search-height);
+    height: var(--size-content-search-height);
+    margin-top: calc(0px - var(--size-content-search-height) / 2);
     padding: 0;
     position: absolute;
-    margin-left: -12px;
+    margin-left: calc(0px - var(--size-content-search-height) / 2);
 }
 
 .docs {}

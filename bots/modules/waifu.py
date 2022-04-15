@@ -187,7 +187,12 @@ class Action:
         if not guild_id:
             abort('Guild only command')
         
-        url = await get_waifu_image(client, event, self.name, True, self.cache, False)
+        try:
+            url = await get_waifu_image(client, event, self.name, True, self.cache, False)
+        except TimeoutError:
+            abort('*Did not get response in time, please try again later.*')
+            return
+        
         if url is None:
             abort('*Could not get any images, please try again later.*')
         

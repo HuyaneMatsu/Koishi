@@ -3,8 +3,26 @@
         Themes
     </summary>
     <details-menu>
-        <a onclick="set_theme('black')">Black</a>
-        <a onclick="set_theme('dark')">Dark</a>
-        <a class="" onclick="set_theme('white')">White</a>
+        <a
+            tabindex="0"
+            onclick="set_theme('black')"
+            onkeypress="set_theme_if_keyboard_clicked(event, 'black')"
+        >
+            Black
+        </a>
+        <a
+            tabindex="0"
+            onclick="set_theme('dark')"
+            onkeypress="set_theme_if_keyboard_clicked(event, 'dark')"
+        >
+            Dark
+        </a>
+        <a
+            tabindex="0"
+            onclick="set_theme('white')"
+            onkeypress="set_theme_if_keyboard_clicked(event, 'white')"
+        >
+            White
+        </a>
     </details-menu>
 </details>

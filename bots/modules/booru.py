@@ -187,9 +187,13 @@ class BooruCycler(Menu):
         history_length = len(history)
         
         if interaction == self.BUTTON_TAGS:
-            history_step = self.history_step
-            if history_step == history_length:
+            if history_length == 1:
                 history_step = 1
+            
+            else:
+                history_step = self.history_step
+                if history_step == 0:
+                    history_step = history_length
             
             image_url_tag_pair = history[history_length - history_step]
             
@@ -217,7 +221,7 @@ class BooruCycler(Menu):
             else:
                 history_step = self.history_step
                 if history_step == history_length:
-                    history_step =1
+                    history_step = 1
                 
                 image_url_tag_pair = choose_not_same(image_url_tag_pairs, history[history_length - history_step])
             

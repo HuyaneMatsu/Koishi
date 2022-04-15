@@ -409,7 +409,7 @@
     width: calc(
     100%
     - var(--size-header-theme-picker-width)
-    - var(--size-header-button-inner-border) * 2
+    - var(--size-header-button-inner-border) * 4
     - var(--size-header-search-width)
     - var(--size-header-navigation-button-spacing)
     ) !important;
@@ -453,12 +453,7 @@
     padding-left: var(--size-focus-shadow);
 }
 
-.header_menu .burger_1200 {
-    max-width: var(--size-header-button-line-height);
-}
-
 .header_menu .burger_1200 summary {
-    max-width: var(--size-header-button-line-height);
     height: var(--size-header-button-line-height);
 }
 
@@ -482,10 +477,6 @@
     display: block;
     margin-right: 0;
     background-color: transparent;
-}
-
-.header_menu .header_left .burger_1200[open] {
-    max-width: calc(var(--size-header-burger-open-width));
 }
 
 .header_menu .burger_1200 details-menu {
@@ -628,9 +619,23 @@ p[align="right"] a::after {
     border: 0;
 }
 
+.header_menu details[open].header_theme_picker {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    width: var(--size-header-theme-picker-width);
+}
+
 .header_menu details[open] {
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+
+.header_menu details[open].burger_1200 {
+    width: var(--size-header-burger-open-width);
+}
+
+.header_menu details[open].header_theme_picker {
     width: var(--size-header-theme-picker-width);
 }
 
@@ -655,14 +660,10 @@ p[align="right"] a::after {
     border-radius: var(--size-header-button-border-radius);
 }
 
-.header_menu .header_left .burger_1200[open] > summary {
-    padding-right: calc(
-        var(--size-header-burger-open-width)
-        - var(--size-header-button-line-height)
-        + var(--size-header-button-inner-border) * 2
-    );
+.header_menu .burger_1200[open] > summary {
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
+    width: var(--size-header-burger-open-width);
 }
 
 .header_menu summary:focus-visible {
@@ -680,7 +681,6 @@ p[align="right"] a::after {
 }
 
 .header_theme_picker[open] > summary {
-    width: var(--size-header-theme-picker-width);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }

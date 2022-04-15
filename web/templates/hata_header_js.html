@@ -5,12 +5,20 @@
     }
 </script>
 <script>
-    function set_theme(theme_value){
+    function set_theme(theme_value) {
         localStorage.setItem('theme', theme_value);
         document.documentElement.setAttribute('variable-theme', theme_value);
     }
 
-    function turn_off_details(event){
+    function set_theme_if_keyboard_clicked(event, theme_value) {
+        var key_code = event.keyCode;
+        console.log(key_code);
+        if ((key_code === 13) || (key_code === 32)) {
+            set_theme(theme_value);
+        }
+    }
+
+    function turn_off_details(event) {
         var tag_name = event.target.tagName
         if ((tag_name == 'SUMMARY') || (tag_name == 'IMG')) {
             return;
