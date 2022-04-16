@@ -3,6 +3,7 @@ from math import floor
 
 from hata import Client, Embed
 from hata.ext.slash import InteractionResponse, abort, Button, Row
+from hata.ext.extension_loader import import_extension
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression, \
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
@@ -13,7 +14,10 @@ from bot_utils.user_getter import get_user
 from sqlalchemy import func as alchemy_function, and_, or_
 from sqlalchemy.sql import select
 
-from bots.modules.shared__marriage_slot import BUY_WAIFU_SLOT_INVOKE_COMPONENT, EMOJI_YES, EMOJI_NO
+
+BUY_WAIFU_SLOT_INVOKE_COMPONENT, EMOJI_YES, EMOJI_NO = import_extension(
+    '.marriage_slot', 'BUY_WAIFU_SLOT_INVOKE_COMPONENT', 'EMOJI_YES', 'EMOJI_NO'
+)
 
 
 SLASH_CLIENT: Client

@@ -132,7 +132,7 @@ async def switch_notification(user_id, enable, notification_option):
             update_to = {notification_option.system_name: enable}
             
             if entry_id == -1:
-                to_execute = get_create_common_user_expression(user_id, **notification_value)
+                to_execute = get_create_common_user_expression(user_id, **update_to)
             else:
                 to_execute = USER_COMMON_TABLE.update(
                     user_common_model.id == entry_id,

@@ -4,6 +4,8 @@ import hata.ext.extension_loader
 import hata.ext.slash
 import hata.ext.commands_v2
 import hata.ext.commands_v2.helps.subterranean
+import hata.ext.top_gg
+import hata.ext.solarlink
 import scarletio
 import scarletio.http_client
 

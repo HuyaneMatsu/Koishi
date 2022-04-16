@@ -32,10 +32,10 @@ async def filter_list(client, event):
     guild = event.guild
     if guild is None:
         author_icon_url = None
-        author_name = 'Queue'
+        author_name = 'Filters'
     else:
         author_icon_url = guild.icon_url_as(size=64)
-        author_name = f'Queue for {guild.name}'
+        author_name = f'Filters for {guild.name}'
     
     embed.add_author(author_name, author_icon_url)
     
