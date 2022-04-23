@@ -13,7 +13,7 @@ from bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI
 from hata.ext.extension_loader import require
 
 # installing nsjail:
-# make a folder for it somewhere
+# make a directory for it somewhere
 # $ sudo apt install autoconf bison flex gcc g++ git libprotobuf-dev libtool make pkg-config protobuf-compiler
 # $ sudo apt-get install libnl-route-3-dev
 # $ git clone https://github.com/google/nsjail.git

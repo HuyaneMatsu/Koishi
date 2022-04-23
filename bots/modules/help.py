@@ -1,7 +1,7 @@
 import sys
 from functools import partial as partial_func
 from platform import platform as get_platform
-from os.path import join as join_paths, isdir as is_folder, isfile as is_file
+from os.path import join as join_paths, isdir as is_directory, isfile as is_file
 from os import listdir as list_directory
 from time import perf_counter
 from random import choice, random
@@ -242,7 +242,7 @@ def count_lines_of(directory_path):
             
             continue
         
-        if is_folder(path):
+        if is_directory(path):
             line_break_count += count_lines_of(path)
             continue
     
