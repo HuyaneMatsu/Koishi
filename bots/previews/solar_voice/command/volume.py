@@ -1,15 +1,11 @@
-from hata.ext.slash import SlasherApplicationCommand, P
-from hata.ext.extension_loader import import_extension
+__all__ = ('volume_',)
+
+from hata.ext.slash import P
+
+from ..constants import EMOJI_VOLUME
+from ..helpers import get_player_or_abort
 
 
-EMOJI_VOLUME = import_extension('..constants', 'EMOJI_VOLUME')
-get_player_or_abort = import_extension('..helpers', 'get_player_or_abort')
-
-
-COMMAND: SlasherApplicationCommand
-
-
-@COMMAND.interactions
 async def volume_(client, event,
     volume: P('number', 'Percentage?', min_value=0, max_value=200) = None,
 ):

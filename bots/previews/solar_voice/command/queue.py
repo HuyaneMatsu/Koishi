@@ -1,43 +1,17 @@
+__all__ = ('queue_',)
+
 from math import ceil
+
 from hata import Embed
-from hata.ext.slash import SlasherApplicationCommand
-from hata.ext.extension_loader import import_extension
 
-(
-    EMBED_COLOR,
-    TRACK_PER_PAGE,
-    EMOJI_CHANNEL,
-    EMOJI_QUEUE_TIME,
-    EMOJI_BEHAVIOR,
-    EMOJI_VOLUME,
-    EMOJI_QUEUE_LENGTH,
-) = import_extension('..constants',
-    'EMBED_COLOR',
-    'TRACK_PER_PAGE',
-    'EMOJI_CHANNEL',
-    'EMOJI_QUEUE_TIME',
-    'EMOJI_BEHAVIOR',
-    'EMOJI_VOLUME',
-    'EMOJI_QUEUE_LENGTH',
+from ..constants import (
+    EMBED_COLOR, EMOJI_BEHAVIOR, EMOJI_CHANNEL, EMOJI_QUEUE_LENGTH, EMOJI_QUEUE_TIME, EMOJI_VOLUME, TRACK_PER_PAGE
 )
-
-(
-    add_track_short_description_to,
-    add_current_track_field_with_bar,
-    duration_to_string,
-    get_behavior_representation,
-) = import_extension('..helpers',
-    'add_track_short_description_to',
-    'add_current_track_field_with_bar',
-    'duration_to_string',
-    'get_behavior_representation',
+from ..helpers import (
+    add_current_track_field_with_bar, add_track_short_description_to, duration_to_string, get_behavior_representation
 )
 
 
-COMMAND: SlasherApplicationCommand
-
-
-@COMMAND.interactions
 async def queue_(client, event,
     page: (int, 'Which page to show?') = 1,
 ):

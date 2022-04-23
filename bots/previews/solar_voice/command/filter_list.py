@@ -1,18 +1,13 @@
+__all__ = ('filter_list_',)
+
 from hata import Embed
-from hata.ext.slash import SlasherApplicationCommand
-from hata.ext.extension_loader import import_extension
+
+from ..constants import EMBED_COLOR
+from ..filtering import add_filter_field_to
+from ..helpers import get_player_or_abort
 
 
-EMBED_COLOR = import_extension('..constants', 'EMBED_COLOR')
-get_player_or_abort = import_extension('..helpers', 'get_player_or_abort')
-add_filter_field_to = import_extension('..filtering', 'add_filter_field_to')
-
-
-COMMAND: SlasherApplicationCommand
-
-
-@COMMAND.interactions
-async def filter_list(client, event):
+async def filter_list_(client, event):
     """List the applied filters to the player."""
     player = get_player_or_abort(client, event)
     

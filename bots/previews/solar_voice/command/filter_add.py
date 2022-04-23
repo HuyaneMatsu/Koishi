@@ -1,37 +1,33 @@
-from hata import Embed
-from hata.ext.slash import SlasherApplicationCommand, P
-from hata.ext.solarlink import ChannelMix, Distortion, Equalizer, Karaoke, LowPass, Rotation, Timescale, Tremolo, \
-    Vibrato, Volume
-from hata.ext.extension_loader import import_extension
-
-
-EMBED_COLOR = import_extension('..constants', 'EMBED_COLOR')
-add_current_track_field, get_player_or_abort = import_extension(
-    '..helpers', 'add_current_track_field', 'get_player_or_abort'
+__all__ = (
+    'FILTER_ADD_GROUP_PARAMETERS', 'channel_mix', 'distortion', 'equalizer', 'karaoke', 'low_pass', 'rotation',
+    'timescale', 'tremolo', 'vibrato', 'volume__'
 )
-add_filter_field_to = import_extension('..filtering', 'add_filter_field_to')
 
+from hata import Embed
+from hata.ext.slash import P
+from hata.ext.solarlink import (
+    ChannelMix, Distortion, Equalizer, Karaoke, LowPass, Rotation, Timescale, Tremolo, Vibrato, Volume
+)
 
-COMMAND: SlasherApplicationCommand
+from ..constants import EMBED_COLOR
+from ..filtering import add_filter_field_to
+from ..helpers import get_player_or_abort
 
 
 def create_filter_added_embed(filter):
     return add_filter_field_to(Embed('Filter added', color=EMBED_COLOR), filter)
-    
-
-FILTER_ADD = COMMAND.interactions(
-    None,
-    name = 'filter-add',
-    description = 'add a filter',
-)
 
 
-@FILTER_ADD.interactions
+FILTER_ADD_GROUP_PARAMETERS = {
+    'name': 'filter-add',
+    'description': 'add a filter',
+}
+
 async def channel_mix(client, event,
-    left_to_left: P('float', 'left to left factor', min_value=0.0, max_value=5.0),
-    left_to_right: P('float', 'left to left factor', min_value=0.0, max_value=5.0),
-    right_to_right: P('float', 'left to left factor', min_value=0.0, max_value=5.0),
-    right_to_left: P('float', 'left to left factor', min_value=0.0, max_value=5.0),
+    left_to_left  : P('float', 'left to left factor'  , min_value=0.0, max_value=5.0),
+    left_to_right : P('float', 'left to right factor' , min_value=0.0, max_value=5.0),
+    right_to_right: P('float', 'right to right factor', min_value=0.0, max_value=5.0),
+    right_to_left : P('float', 'right to left factor' , min_value=0.0, max_value=5.0),
 ):
     """Mixes both channels (left and right)"""
     player = get_player_or_abort(client, event)
@@ -43,16 +39,15 @@ async def channel_mix(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def distortion(client, event,
-    offset: P('float', 'offset', min_value=0.0, max_value=100.0) = 0.0,
-    scale: P('float', 'scale', min_value=0.0, max_value=100.0) = 1.0,
+    offset    : P('float', 'offset'    , min_value=0.0, max_value=100.0) = 0.0,
+    scale     : P('float', 'scale'     , min_value=0.0, max_value=100.0) = 1.0,
     sin_offset: P('float', 'sin offset', min_value=0.0, max_value=100.0) = 0.0,
-    sin_scale: P('float', 'sin scale', min_value=0.0, max_value=100.0) = 1.0,
+    sin_scale : P('float', 'sin scale' , min_value=0.0, max_value=100.0) = 1.0,
     cos_offset: P('float', 'cos offset', min_value=0.0, max_value=100.0) = 0.0,
-    cos_scale: P('float', 'cos scale', min_value=0.0, max_value=100.0) = 1.0,
+    cos_scale : P('float', 'cos scale' , min_value=0.0, max_value=100.0) = 1.0,
     tan_offset: P('float', 'tan offset', min_value=0.0, max_value=100.0) = 0.0,
-    tan_scale: P('float', 'tan scale', min_value=0.0, max_value=100.0) = 1.0,
+    tan_scale : P('float', 'tan scale' , min_value=0.0, max_value=100.0) = 1.0,
 ):
     """Distortion effect"""
     player = get_player_or_abort(client, event)
@@ -73,7 +68,6 @@ async def distortion(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def equalizer(client, event,
     band_00: P('float', 'band 0' , min_value=-0.25, max_value=1.0) = 0.0,
     band_01: P('float', 'band 1' , min_value=-0.25, max_value=1.0) = 0.0,
@@ -117,7 +111,6 @@ async def equalizer(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def karaoke(client, event,
     filter_band : P('float', 'Filter band'      , min_value=0.0, max_value=48000.0) = 220.0,
     filter_width: P('float', 'Filter width'     , min_value=0.0, max_value=48000.0) = 100.0,
@@ -134,7 +127,6 @@ async def karaoke(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def low_pass(client, event,
     smoothing: P('float', 'smoothing', min_value=0.0, max_value=5.0),
 ):
@@ -148,7 +140,6 @@ async def low_pass(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def rotation(client, event,
     rotation: P('float', 'rotation / second', min_value=0.0, max_value=20.0),
 ):
@@ -162,7 +153,6 @@ async def rotation(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def timescale(client, event,
     pitch: P('float', 'pitch', min_value=0.0, max_value=5.0) = 1.0,
     rate : P('float', 'rate' , min_value=0.0, max_value=5.0) = 1.0,
@@ -178,7 +168,6 @@ async def timescale(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def tremolo(client, event,
     frequency: P('float', 'frequency', min_value=0.0, max_value=5.0),
     depth    : P('float', 'depth'    , min_value=0.0, max_value=5.0),
@@ -193,7 +182,6 @@ async def tremolo(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
 async def vibrato(client, event,
     frequency: P('float', 'frequency', min_value=0.0, max_value=5.0),
     depth    : P('float', 'depth'    , min_value=0.0, max_value=5.0),
@@ -207,8 +195,7 @@ async def vibrato(client, event,
     return create_filter_added_embed(filter)
 
 
-@FILTER_ADD.interactions
-async def volume(client, event,
+async def volume__(client, event,
     volume: P('float', 'volume', min_value=0.0, max_value=5.0),
 ):
     """Float value where 1.0 is 100%"""

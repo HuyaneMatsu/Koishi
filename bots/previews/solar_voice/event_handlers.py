@@ -1,13 +1,11 @@
+__all__ = ()
+
 from scarletio import to_coroutine
 from hata import Client, Embed
 from hata.ext.solarlink import TRACK_END_REASONS
-from hata.ext.extension_loader import import_extension
 
-
-EMBED_COLOR, EMOJI_LAST_TRACK, EMOJI_CURRENT_TRACK, LEAVE_TIMEOUT = import_extension(
-    '.constants', 'EMBED_COLOR', 'EMOJI_LAST_TRACK', 'EMOJI_CURRENT_TRACK', 'LEAVE_TIMEOUT'
-)
-create_track_short_field_description = import_extension('.helpers', 'create_track_short_field_description')
+from .constants import EMBED_COLOR, EMOJI_LAST_TRACK, EMOJI_CURRENT_TRACK, LEAVE_TIMEOUT
+from .helpers import create_track_short_field_description
 
 
 SLASH_CLIENT: Client

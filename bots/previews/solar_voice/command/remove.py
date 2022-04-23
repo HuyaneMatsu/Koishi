@@ -1,19 +1,12 @@
-from hata.ext.slash import SlasherApplicationCommand, P
-from hata.ext.extension_loader import import_extension
+__all__ = ('remove_',)
+
+from hata.ext.slash import P
+
+from ..autocomplete_track import autocomplete_track_name, generate_track_autocomplete_form
+from ..helpers import create_added_music_embed, create_track_short_description, get_player_or_abort
 
 
-create_added_music_embed, get_player_or_abort, create_track_short_description = import_extension(
-    '..helpers', 'create_added_music_embed', 'get_player_or_abort', 'create_track_short_description'
-)
-generate_track_autocomplete_form, autocomplete_track_name = import_extension(
-    '..autocomplete_track', 'generate_track_autocomplete_form', 'autocomplete_track_name',
-)
-
-COMMAND: SlasherApplicationCommand
-
-
-@COMMAND.interactions
-async def remove(client, event,
+async def remove_(client, event,
     track: P('str', 'Which track to skip?', autocomplete=autocomplete_track_name) = None,
 ):
     """Removes the selected track from the queue"""

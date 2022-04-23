@@ -1,7 +1,6 @@
-from hata.ext.extension_loader import import_extension
+__all__ = ()
 
-
-FILTER_TYPE_TO_FILTER_NAME = import_extension('.constants', 'FILTER_TYPE_TO_FILTER_NAME')
+from .constants import FILTER_TYPE_TO_FILTER_NAME
 
 
 async def autocomplete_filter_name(client, event, value):

@@ -1,24 +1,11 @@
-from hata.ext.slash import SlasherApplicationCommand
-from hata.ext.extension_loader import import_extension
+__all__ = ('behavior_',)
 
-
-(
-    BEHAVIOR_CHOICES,
-    BEHAVIOR_VALUE_GET,
-    BEHAVIOR_VALUE_REPEAT_CURRENT,
-    BEHAVIOR_VALUE_REPEAT_QUEUE,
-) = import_extension('..constants',
-    'BEHAVIOR_CHOICES',
-    'BEHAVIOR_VALUE_GET',
-    'BEHAVIOR_VALUE_REPEAT_CURRENT',
-    'BEHAVIOR_VALUE_REPEAT_QUEUE',
+from ..constants import (
+    BEHAVIOR_CHOICES, BEHAVIOR_VALUE_GET, BEHAVIOR_VALUE_REPEAT_CURRENT, BEHAVIOR_VALUE_REPEAT_QUEUE
 )
+from ..helpers import get_behavior_string, get_player_or_abort
 
-get_player_or_abort, get_behavior_string = import_extension('..helpers', 'get_player_or_abort', 'get_behavior_string')
 
-COMMAND: SlasherApplicationCommand
-
-@COMMAND.interactions
 async def behavior_(client, event,
     behavior: (BEHAVIOR_CHOICES, 'Choose a behavior') = BEHAVIOR_VALUE_GET,
     value: (bool, 'Set value') = True,

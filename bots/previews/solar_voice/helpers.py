@@ -1,12 +1,12 @@
+__all__ = ()
+
 from math import floor
 from hata import Embed, escape_markdown
-from hata.ext.extension_loader import import_extension
 from hata.ext.slash import  Select, Option, abort
 
-EMOJI_CURRENT_TRACK, EMOJI_STOPPED, EMOJI_PLAYING, EMBED_COLOR, LAVA_VOICE_TRACK_SELECT_CUSTOM_ID = import_extension(
-    '.constants', 'EMOJI_CURRENT_TRACK', 'EMOJI_STOPPED', 'EMOJI_PLAYING', 'EMBED_COLOR',
-    'LAVA_VOICE_TRACK_SELECT_CUSTOM_ID'
-)
+from .constants import EMOJI_CURRENT_TRACK, EMOJI_STOPPED, EMOJI_PLAYING, EMBED_COLOR, \
+    LAVA_VOICE_TRACK_SELECT_CUSTOM_ID
+
 
 def duration_to_string(duration):
     duration = int(duration)

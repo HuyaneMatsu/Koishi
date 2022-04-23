@@ -1,12 +1,12 @@
-from os.path import join as join_paths, isdir as is_folder, isfile as is_file
-from os import listdir as list_directory
+import sys
+
+from hata import ACTIVITY_TYPES, ActivityRich, Client, IntentFlag, Locale
+from hata.ext.extension_loader import EXTENSION_LOADER
 
 import config
+from bot_utils.constants import DEFAULT_CATEGORY_NAME, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI
+from bot_utils.utils import category_name_rule, random_error_message_getter
 
-from hata import Client, ActivityRich, ACTIVITY_TYPES, IntentFlag, Locale
-from hata.ext.extension_loader import EXTENSION_LOADER
-from bot_utils.constants import PATH__KOISHI, DEFAULT_CATEGORY_NAME, PREFIX__MARISA, PREFIX__FLAN, PREFIX__SATORI
-from bot_utils.utils import random_error_message_getter, category_name_rule
 from bot_utils import async_engine # replace sync with async database engine.
 
 MARISA_MODE = config.MARISA_MODE
@@ -108,51 +108,12 @@ else:
     EXTENSION_LOADER.load_extension('bots.flan'  , locked=True)
     EXTENSION_LOADER.load_extension('bots.nitori', locked=True)
 
-MODULE_NAMES = set()
 
-path = None
-for path in list_directory(join_paths(PATH__KOISHI, 'bots', 'modules')):
-    full_path = join_paths(PATH__KOISHI, 'bots', 'modules', path)
-    if is_file(full_path):
-        if not path.endswith('.py'):
-            continue
-        
-        path = path[:-3]
-    
-    elif is_folder(full_path):
-        if path.startswith('_'):
-            continue
-    else:
-        continue
-    
-    MODULE_NAMES.add(path)
-
+EXTENSION_LOADER.add('bots.system')
 if MARISA_MODE:
-    MARISA_ALLOWED_MODULES = set()
-    
-    if config.ALLOW_MARISA_SNEKBOX:
-        MARISA_ALLOWED_MODULES.add('snekbox')
-    
-    MARISA_ALLOWED_MODULES.add('extensions')
-    MARISA_ALLOWED_MODULES.add('google')
-    MARISA_ALLOWED_MODULES.add('help_me_remember')
-    MARISA_ALLOWED_MODULES.add('log')
-    
-    for path in list(MODULE_NAMES):
-        if path not in MARISA_ALLOWED_MODULES:
-            MODULE_NAMES.remove(path)
-    
+    EXTENSION_LOADER.add('bots.previews')
+    EXTENSION_LOADER.add('bots.testers')
 else:
-    if not config.ALLOW_KOISHI_SNEKBOX:
-        MODULE_NAMES.discard('snekbox')
-    
-    MODULE_NAMES.discard('witch_craft')
-    MODULE_NAMES.discard('google')
+    EXTENSION_LOADER.add('bots.modules')
 
-for path in MODULE_NAMES:
-    EXTENSION_LOADER.add('bots.modules.' + path)
-
-del path
-
-
-EXTENSION_LOADER.load_all()
+EXTENSION_LOADER.load_all(blocking=sys.implementation.name == 'pypy')

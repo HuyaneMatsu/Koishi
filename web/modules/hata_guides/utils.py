@@ -1,3 +1,10 @@
+## At some cases `mistune.scanner` has no attribute `escape_html`, but some why `gh_md_to_html` imports it.
+import mistune
+from mistune import scanner
+mistune.scanner.escape_html = mistune.escape_html
+
+# Normal code begins
+
 from gh_md_to_html.core_converter import markdown as generate_markdown
 from os.path import join as join_paths, isfile as is_file, split as split_path
 from os import listdir as list_directory

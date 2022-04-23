@@ -2031,3 +2031,8 @@ async def show_help_for(ctx, user:'user', content):
     command = client.command_processor.command_name_to_command['help']
     context = CommandContext(client, message, ctx.prefix, content, command)
     await context.invoke()
+
+
+@TEST_COMMANDS
+async def voice_channels_only(channel: 'guild_voice' = None):
+    return repr(channel)

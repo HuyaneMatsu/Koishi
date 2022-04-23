@@ -38,7 +38,6 @@ except BaseException as err:
     SOLARLINK_VOICE = False
 
 EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=SOLARLINK_VOICE)
-EXTENSION_LOADER.add('bots.modules.solar_voice')
 
 Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())

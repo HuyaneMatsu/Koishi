@@ -1,3 +1,5 @@
+__all__ = ()
+
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case
 
 

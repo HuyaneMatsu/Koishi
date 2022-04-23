@@ -1,10 +1,10 @@
+__all__ = ()
+
 from scarletio import LOOP_TIME
 from hata import CHANNELS, GUILDS, KOKORO
 from hata.ext.solarlink import SolarPlayer
-from hata.ext.extension_loader import import_extension
 
-
-LEAVE_TIMEOUT = import_extension('.constants').LEAVE_TIMEOUT
+from .constants import LEAVE_TIMEOUT
 
 
 class Player(SolarPlayer):

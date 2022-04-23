@@ -1,37 +1,23 @@
-from hata import Embed, is_url
-from hata.ext.slash import SlasherApplicationCommand, abort, InteractionResponse, wait_for_component_interaction
-from hata.ext.extension_loader import import_extension
-from random import choice
+__all__ = ('play_',)
+
 from functools import partial as partial_func
+from random import choice
 
+from hata import Embed, is_url
+from hata.ext.slash import InteractionResponse, abort, wait_for_component_interaction
 
-EMBED_COLOR, TRACK_EMOJIS, TRACK_PER_PAGE, LEAVE_TIMEOUT = import_extension(
-    '..constants', 'EMBED_COLOR', 'TRACK_EMOJIS', 'TRACK_PER_PAGE', 'LEAVE_TIMEOUT'
+from ..constants import EMBED_COLOR, LEAVE_TIMEOUT, TRACK_EMOJIS, TRACK_PER_PAGE
+from ..helpers import (
+    add_song_selection_header, add_track_short_description_to, create_added_music_embed, create_track_select
 )
-(
-    add_current_track_field,
-    add_song_selection_header,
-    add_track_short_description_to,
-    create_added_music_embed,
-    create_track_select,
-) = import_extension('..helpers',
-    'add_current_track_field',
-    'add_song_selection_header',
-    'add_track_short_description_to',
-    'create_added_music_embed',
-    'create_track_select',
-)
-Player = import_extension('..player', 'Player')
-
-COMMAND: SlasherApplicationCommand
+from ..player import Player
 
 
 def check_is_user_same(user, event):
     return (user is event.user)
 
 
-@COMMAND.interactions
-async def play(client, event,
+async def play_(client, event,
     name: ('str', 'The name of the audio to play.')
 ):
     """Plays an audio from youtube."""

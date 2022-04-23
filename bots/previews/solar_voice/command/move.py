@@ -1,18 +1,13 @@
+__all__ = ('move_',)
+
 from hata import Embed
-from hata.ext.slash import SlasherApplicationCommand, abort
-from hata.ext.extension_loader import import_extension
+from hata.ext.slash import abort
+
+from ..constants import LEAVE_TIMEOUT
+from ..helpers import get_player_or_abort
 
 
-LEAVE_TIMEOUT = import_extension('..constants', 'LEAVE_TIMEOUT')
-get_player_or_abort = import_extension(
-    '..helpers', 'get_player_or_abort'
-)
-
-COMMAND: SlasherApplicationCommand
-
-
-@COMMAND.interactions
-async def move(client, event,
+async def move_(client, event,
     channel: ('channel_group_connectable', 'Select a channel.'),
 ):
     """Moves me to the selected voice channel | You must have move users permission."""

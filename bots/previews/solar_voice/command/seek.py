@@ -1,24 +1,11 @@
+__all__ = ('seek_',)
+
 from hata import Embed
-from hata.ext.slash import SlasherApplicationCommand, abort
-from hata.ext.extension_loader import import_extension
+from hata.ext.slash import abort
+
+from ..helpers import add_current_track_field_with_bar, duration_to_string, get_player_or_abort
 
 
-(
-    create_added_music_embed,
-    get_player_or_abort,
-    duration_to_string,
-    add_current_track_field_with_bar,
-) = import_extension('..helpers',
-    'create_added_music_embed',
-    'get_player_or_abort',
-    'duration_to_string',
-    'add_current_track_field_with_bar',
-)
-
-COMMAND: SlasherApplicationCommand
-
-
-@COMMAND.interactions
 async def seek_(client, event,
     seconds: (float, 'Where to seek?'),
 ):

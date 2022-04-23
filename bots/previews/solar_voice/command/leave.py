@@ -1,18 +1,12 @@
+__all__ = ('leave_',)
+
 from hata import Embed
-from hata.ext.slash import SlasherApplicationCommand
-from hata.ext.extension_loader import import_extension
+
+from ..constants import EMBED_COLOR, EMOJI_CURRENT_TRACK
+from ..helpers import create_track_short_field_description, get_player_or_abort
 
 
-EMBED_COLOR, EMOJI_CURRENT_TRACK = import_extension('..constants', 'EMBED_COLOR', 'EMOJI_CURRENT_TRACK')
-add_current_track_field, create_track_short_field_description, get_player_or_abort = import_extension(
-    '..helpers', 'add_current_track_field', 'create_track_short_field_description', 'get_player_or_abort'
-)
-
-COMMAND: SlasherApplicationCommand
-
-
-@COMMAND.interactions
-async def leave(client, event):
+async def leave_(client, event):
     """Leaves from the voice channel."""
     player = get_player_or_abort(client, event)
     
