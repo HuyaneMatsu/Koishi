@@ -110,17 +110,17 @@ class OJCardCost:
     def __new__(cls, type_, factor):
         
         if type_ == CARD_COST_TYPE_STATIC:
-            string = f'{factor} {EMOJI_STAR:e}'
+            string = f'{factor} {EMOJI_STAR}'
         elif type_ == CARD_COST_TYPE_DIV_STARS:
-            string = f'stars / {factor} {EMOJI_STAR:e}'
+            string = f'stars / {factor} {EMOJI_STAR}'
         elif type_ == CARD_COST_TYPE_MUL_LEVEL:
-            string = f'level x {factor} {EMOJI_STAR:e}'
+            string = f'level x {factor} {EMOJI_STAR}'
         elif type_ == CARD_COST_TYPE_MUL_CARDS:
-            string = f'cards held x {factor} {EMOJI_STAR:e}'
+            string = f'cards held x {factor} {EMOJI_STAR}'
         elif type_ == CARD_COST_TYPE_MUL_OTHERS_CARDS:
-            string = f'cards held by others x {factor} {EMOJI_STAR:e}'
+            string = f'cards held by others x {factor} {EMOJI_STAR}'
         elif type_ == CARD_COST_TYPE_ALL_STARS:
-            string = f'all held {EMOJI_STAR:e}'
+            string = f'all held {EMOJI_STAR}'
         elif type_ == CARD_COST_TYPE_MUL_X:
             string = f'(X) x {factor} {EMOJI_STAR}'
         else:

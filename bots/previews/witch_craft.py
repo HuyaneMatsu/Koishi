@@ -589,10 +589,10 @@ async def prices(client, event):
     """Lists the prices of the shop."""
     embed = Embed('Witch shop')
     for item in BUYABLE:
-        embed_field_name = f'{item.emoji:e} {item.name}'
+        embed_field_name = f'{item.emoji} {item.name}'
         market_cost = item.market_cost
-        embed_field_value = f'Sell for: {floor(market_cost * (1.0 - MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY:e}\n' \
-                            f'Buy for: {floor(market_cost * (1.0 + MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY:e}'
+        embed_field_value = f'Sell for: {floor(market_cost * (1.0 - MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}\n' \
+                            f'Buy for: {floor(market_cost * (1.0 + MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}'
         
         embed.add_field(embed_field_name, embed_field_value, inline=True)
     
@@ -656,11 +656,11 @@ async def buy(client, event,
     embed = Embed(
         'Confirm buying',
         (
-            f'Selected item: {item.emoji:e} **{item.name}**\n'
+            f'Selected item: {item.emoji} **{item.name}**\n'
             f'Amount: **{amount}**\n'
             f'\n'
-            f'Price: {calculate_buy_cost(item.market_cost, amount)} {EMOJI__HEART_CURRENCY:e}\n'
-            f'Budget: {total_love} {EMOJI__HEART_CURRENCY:e}'
+            f'Price: {calculate_buy_cost(item.market_cost, amount)} {EMOJI__HEART_CURRENCY}\n'
+            f'Budget: {total_love} {EMOJI__HEART_CURRENCY}'
         ),
     )
     
@@ -763,10 +763,10 @@ async def buy(client, event,
         
         embed.title = 'Buying confirmed'
         embed.description = (
-            f'Selected item: {item.emoji:e} **{item.name}**\n'
+            f'Selected item: {item.emoji} **{item.name}**\n'
             f'Bought mount: **{amount}**\n'
             f'\n'
-            f'Hearts: {total_love} {EMOJI__HEART_CURRENCY:e} -> {new_love} {EMOJI__HEART_CURRENCY:e}'
+            f'Hearts: {total_love} {EMOJI__HEART_CURRENCY} -> {new_love} {EMOJI__HEART_CURRENCY}'
         )
     
     yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)

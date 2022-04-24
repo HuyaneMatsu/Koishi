@@ -29,9 +29,9 @@ HATA_JAM_2_DESCRIPTION = Embed(
     '**Python version**: >=3.6'
 ).add_field(
     'Prize pool',
-    f'1st place: 6 month of Discord Nitro + 24k {EMOJI__HEART_CURRENCY:e} + NEKOPARA Vol. 4 on Steam\n'
-    f'2nd place: 4 month of Discord Nitro + 16k {EMOJI__HEART_CURRENCY:e} \n'
-    f'3rd place: 2 month of Discord Nitro + 8k {EMOJI__HEART_CURRENCY:e}'
+    f'1st place: 6 month of Discord Nitro + 24k {EMOJI__HEART_CURRENCY} + NEKOPARA Vol. 4 on Steam\n'
+    f'2nd place: 4 month of Discord Nitro + 16k {EMOJI__HEART_CURRENCY} \n'
+    f'3rd place: 2 month of Discord Nitro + 8k {EMOJI__HEART_CURRENCY}'
 ).add_field(
     'Event organizers',
     'HuyaneMatsu#2016\n'

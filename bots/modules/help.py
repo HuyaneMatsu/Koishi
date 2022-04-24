@@ -939,7 +939,7 @@ async def Collectible():
     """A list of collectible roles in KW."""
     embed = Embed(
         'Collectible roles:',
-        f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY:e} using the `heart-shop roles` command.',
+        f'Collect roles by buying them for heart {EMOJI__HEART_CURRENCY} using the `heart-shop roles` command.',
         color = COLOR__KOISHI_HELP,
     ).add_field(
         ROLE__SUPPORT__NSFW_ACCESS.name,

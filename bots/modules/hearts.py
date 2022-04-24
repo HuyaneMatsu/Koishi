@@ -39,7 +39,7 @@ def create_hearts_short_embed(event, target_user, total_love, daily_streak, read
     else:
         title_prefix = target_user.full_name+' has'
     
-    title = f'{title_prefix} {total_love} {EMOJI__HEART_CURRENCY:e}'
+    title = f'{title_prefix} {total_love} {EMOJI__HEART_CURRENCY}'
     
     if total_love == 0 and daily_streak == 0:
         if is_own:

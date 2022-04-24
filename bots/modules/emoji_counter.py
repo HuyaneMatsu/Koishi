@@ -301,10 +301,10 @@ async def emoji_top(
             abort(f'`{raw_emoji}` is not an emoji.')
     else:
         if emoji.is_unicode_emoji():
-            abort(f'{emoji:e} is an unicode emoji. Please give custom.')
+            abort(f'{emoji} is an unicode emoji. Please give custom.')
         
         if emoji.guild is not GUILD__SUPPORT:
-            abort(f'{emoji:e} is bound to an other guild.')
+            abort(f'{emoji} is bound to an other guild.')
     
     async with DB_ENGINE.connect() as connector:
         statement = (

@@ -241,7 +241,7 @@ async def welcome_screen_(client, event):
     if (welcome_channels is not None):
         for welcome_channel in welcome_channels:
             embed.add_field(
-                f'{welcome_channel.emoji:e} {welcome_channel.description}',
+                f'{welcome_channel.emoji} {welcome_channel.description}',
                 f'#{welcome_channel.channel:d}',
             )
     
@@ -630,7 +630,7 @@ async def status_(user):
     status = user.status
     emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status.value, EMOJI_HEART_BLACK)
     
-    embed = Embed(f'{user.full_name}\'s status', f'{emoji:e} {status.name}').add_thumbnail(user.avatar_url)
+    embed = Embed(f'{user.full_name}\'s status', f'{emoji} {status.name}').add_thumbnail(user.avatar_url)
     
     statuses = user.statuses
     if (statuses is not None) and statuses:

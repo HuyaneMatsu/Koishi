@@ -1,21 +1,23 @@
-from functools import partial as partial_func
 from datetime import datetime, timedelta
+from functools import partial as partial_func
+from math import floor, log10
 from random import random
-from math import log10, floor
 
-from scarletio import Task, Future
-from hata import Client, elapsed_time, Embed, BUILTIN_EMOJIS, DiscordException, KOKORO, \
-    ERROR_CODES, USERS, ZEROUSER, parse_tdelta, Permission, InteractionType
-from hata.ext.slash import abort, set_permission, Button, Row, wait_for_component_interaction
-from sqlalchemy.sql import select, desc
+from hata import (
+    BUILTIN_EMOJIS, Client, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, USERS, ZEROUSER,
+    parse_tdelta
+)
+from hata.ext.slash import Button, Row, abort, set_permission, wait_for_component_interaction
+from scarletio import Future, Task
+from sqlalchemy.sql import desc, select
 
-from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, get_create_common_user_expression
+from bot_utils.constants import (
+    COLOR__GAMBLING, EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, ROLE__SUPPORT__BOOSTER,
+    ROLE__SUPPORT__ELEVATED
+)
+from bot_utils.daily import calculate_daily_new
+from bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, get_create_common_user_expression, user_common_model
 
-from bot_utils.constants import ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__BOOSTER, GUILD__SUPPORT, \
-    EMOJI__HEART_CURRENCY, ROLE__SUPPORT__ADMIN, COLOR__GAMBLING, LINK__KOISHI_TOP_GG, WAIFU_COST_DEFAULT
-from bot_utils.utils import send_embed_to
-from bot_utils.daily import DAILY_INTERVAL, calculate_daily_new_only, calculate_daily_new, DAILY_STREAK_BREAK, \
-    calculate_daily_for, TOP_GG_VOTE_DELAY_MIN, TOP_GG_VOTE_DELAY_MAX
 
 SLASH_CLIENT: Client
 
@@ -34,262 +36,6 @@ EVENT_COMPONENTS = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
 EVENT_CURRENCY_BUTTON = Button(emoji=EMOJI__HEART_CURRENCY)
 
 
-async def claim_daily_for_yourself(client, event):
-    user = event.user
-    
-    async with DB_ENGINE.connect() as connector:
-        response = await connector.execute(
-            select(
-                [
-                    user_common_model.id,
-                    user_common_model.total_love,
-                    user_common_model.daily_streak,
-                    user_common_model.daily_next,
-                    user_common_model.count_top_gg_vote,
-                    user_common_model.top_gg_last_vote,
-                ]
-            ).where(
-                user_common_model.user_id == user.id,
-            )
-        )
-        
-        now = datetime.utcnow()
-        
-        results = await response.fetchall()
-        if results:
-            entry_id, total_love, daily_streak, daily_next, count_top_gg_vote, top_gg_last_vote = results[0]
-            
-            if daily_next > now:
-                return Embed(
-                    'You already claimed your daily love for today~',
-                    f'Come back in {elapsed_time(daily_next)}.',
-                    color = COLOR__GAMBLING,
-                )
-            
-            daily_streak = calculate_daily_new_only(daily_streak, daily_next, now)
-            
-            if daily_next + DAILY_STREAK_BREAK < now:
-                streak_text = f'You did not claim daily for more than 1 day, you got down to {daily_streak}.'
-            else:
-                streak_text = f'You are in a {daily_streak + 1} day streak! Keep up the good work!'
-            
-            received = calculate_daily_for(user, daily_streak)
-            total_love = total_love + received
-            
-            daily_streak += 1
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == entry_id,
-                ).values(
-                    total_love = total_love,
-                    daily_next = now + DAILY_INTERVAL,
-                    daily_streak = daily_streak,
-                    count_daily_self = user_common_model.count_daily_self + 1,
-                )
-            )
-            
-            if (
-                (count_top_gg_vote > 0) and
-                (now - TOP_GG_VOTE_DELAY_MIN > top_gg_last_vote) and
-                (now - TOP_GG_VOTE_DELAY_MAX < top_gg_last_vote)
-            ):
-                voted = await client.top_gg.get_user_vote(user.id)
-                if not voted:
-                    streak_text = (
-                        f'{streak_text}\n'
-                        f'\n'
-                        f'Please vote for me on [top.gg]({LINK__KOISHI_TOP_GG}) for extra {EMOJI__HEART_CURRENCY}'
-                    )
-            
-            return Embed(
-                'Here, some love for you~\nCome back tomorrow !',
-                (
-                    f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {total_love} '
-                    f'{EMOJI__HEART_CURRENCY}\n'
-                    f'{streak_text}'
-                ),
-                color = COLOR__GAMBLING,
-            )
-        
-        received = calculate_daily_for(user, 0)
-        await connector.execute(
-            get_create_common_user_expression(
-                user.id,
-                total_love = received,
-                daily_next = now + DAILY_INTERVAL,
-                daily_streak = 1,
-                count_daily_self = 1,
-            )
-        )
-        
-        return Embed(
-            'Here, some love for you~\nCome back tomorrow !',
-            (
-                f'You received {received} {EMOJI__HEART_CURRENCY:e} and now have {received} {EMOJI__HEART_CURRENCY:e}'
-            ),
-            color = COLOR__GAMBLING,
-        )
-
-
-async def claim_daily_for_waifu(client, event, target_user):
-    source_user = event.user
-    
-    while True:
-        async with DB_ENGINE.connect() as connector:
-            # To be someone your waifu, you both need to be in the database, so simple.
-            response = await connector.execute(
-                select(
-                    [
-                        user_common_model.id,
-                        user_common_model.user_id,
-                        user_common_model.waifu_owner_id,
-                        user_common_model.total_love,
-                        user_common_model.daily_streak,
-                        user_common_model.daily_next,
-                        user_common_model.notify_daily,
-                        user_common_model.waifu_cost,
-                    ]
-                ).where(
-                    user_common_model.user_id.in_(
-                        [
-                            source_user.id,
-                            target_user.id,
-                        ]
-                    )
-                )
-            )
-            
-            if response.rowcount != 2:
-                break
-            
-            results = await response.fetchall()
-            if results[0][1] == source_user.id:
-                source_entry, target_entry = results
-                
-            else:
-                target_entry, source_entry = results
-            
-            source_waifu_owner_id = source_entry[2]
-            target_waifu_owner_id = target_entry[2]
-            
-            if (source_waifu_owner_id != target_user.id) and (target_waifu_owner_id != source_user.id):
-                break
-            
-            now = datetime.utcnow()
-            
-            target_daily_next = target_entry[5]
-            if target_daily_next > now:
-                return Embed(
-                    f'{target_user.name} already claimed their daily love for today~',
-                    f'Come back in {elapsed_time(target_daily_next)}.',
-                    color = COLOR__GAMBLING,
-                )
-            
-            target_daily_streak = target_entry[4]
-            target_daily_streak = calculate_daily_new_only(target_daily_streak, target_daily_next, now)
-            
-            if target_daily_next + DAILY_STREAK_BREAK < now:
-                streak_text = f'They did not claim daily for more than 1 day, they got down to {target_daily_streak}.'
-            else:
-                streak_text = f'They are in a {target_daily_streak + 1} day streak! Keep up the good work for them!'
-            
-            received = calculate_daily_for(target_user, target_daily_streak)
-            
-            target_total_love = target_entry[3]
-            target_total_love = target_total_love + received
-            
-            target_daily_streak += 1
-            
-            waifu_cost_increase = 1 + floor(received * 0.01)
-            
-            
-            new_waifu_cost = source_entry[7]
-            if not new_waifu_cost:
-                new_waifu_cost = WAIFU_COST_DEFAULT
-            new_waifu_cost += waifu_cost_increase
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == source_entry[0],
-                ).values(
-                    waifu_cost = new_waifu_cost,
-                    count_daily_for_waifu = user_common_model.count_daily_for_waifu + 1,
-                )
-            )
-            
-            new_waifu_cost = target_entry[7]
-            if not new_waifu_cost:
-                new_waifu_cost = WAIFU_COST_DEFAULT
-            new_waifu_cost += waifu_cost_increase
-            
-            await connector.execute(
-                USER_COMMON_TABLE.update(
-                    user_common_model.id == target_entry[0],
-                ).values(
-                    total_love = target_total_love,
-                    daily_next = now + DAILY_INTERVAL,
-                    daily_streak = target_daily_streak,
-                    waifu_cost = new_waifu_cost,
-                    count_daily_by_waifu = user_common_model.count_daily_by_waifu + 1,
-                )
-            )
-            
-            await client.interaction_followup_message_create(
-                event,
-                embed = Embed(
-                    'How sweet, you claimed my love for your chosen one !',
-                    (
-                        f'{target_user.name} received {received} {EMOJI__HEART_CURRENCY:e} and they have '
-                        f'{target_total_love} {EMOJI__HEART_CURRENCY:e}\n'
-                        f'{streak_text}'
-                    ),
-                    color = COLOR__GAMBLING,
-                )
-            )
-            
-            if (not target_user.is_bot) and target_entry[6]:
-                await send_embed_to(
-                    client,
-                    target_user.id,
-                    Embed(
-                        f'{source_user.full_name} claimed daily love for you.',
-                        (
-                            f'You received {received} {EMOJI__HEART_CURRENCY} and now you have '
-                            f'{target_total_love} {EMOJI__HEART_CURRENCY}\n'
-                            f'You are on a {target_daily_streak} day streak.'
-                        ),
-                        color = COLOR__GAMBLING,
-                    ),
-                    Button(
-                        'I don\'t want notifs, nya!!',
-                        custom_id = 'accessibility.change_notification_settings.daily.disable',
-                    ),
-                )
-            
-            return
-    
-    return Embed(
-        'Savage',
-        f'{target_user.full_name} is not your waifu.',
-        color = COLOR__GAMBLING,
-    )
-
-
-
-@SLASH_CLIENT.interactions(is_global=True)
-async def daily(client, event,
-    target_user: ('user', 'Anyone to gift your daily love?', 'waifu') = None,
-):
-    """Claim a share of my love every day for yourself or for your waifu."""
-    yield
-    
-    if target_user is None:
-        coroutine = claim_daily_for_yourself(client, event)
-    else:
-        coroutine = claim_daily_for_waifu(client, event, target_user)
-    
-    yield await coroutine
 
 
 def convert_tdelta(delta):
@@ -483,7 +229,7 @@ class HeartEventGUI:
         return
     
     def generate_embed(self):
-        title = f'Click on {EMOJI__HEART_CURRENCY:e} to receive {self.amount}'
+        title = f'Click on {EMOJI__HEART_CURRENCY} to receive {self.amount}'
         if self.user_limit:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit - len(self.user_ids)} users'
         else:
@@ -774,7 +520,7 @@ class DailyEventGUI:
         return
     
     def generate_embed(self):
-        title = f'React with {EMOJI__HEART_CURRENCY:e} to increase your daily streak by {self.amount}'
+        title = f'React with {EMOJI__HEART_CURRENCY} to increase your daily streak by {self.amount}'
         if self.user_limit:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit - len(self.user_ids)} users'
         else:

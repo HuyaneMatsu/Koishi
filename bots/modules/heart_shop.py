@@ -297,7 +297,7 @@ async def roles(client, event,
         if buying_success:
             embed.description = 'Was successful.'
             embed.add_field(
-                f'Your {EMOJI__HEART_CURRENCY:e}',
+                f'Your {EMOJI__HEART_CURRENCY}',
                 f'{total_love} -> {total_love - cost}',
             )
         else:
@@ -305,7 +305,7 @@ async def roles(client, event,
     else:
         embed.description = 'You have insufficient amount of hearts.'
         embed.add_field(
-            f'Your {EMOJI__HEART_CURRENCY:e}',
+            f'Your {EMOJI__HEART_CURRENCY}',
             str(total_love),
         )
     
@@ -420,7 +420,7 @@ async def sell_daily(client, event,
             f'{daily_streak} -> {daily_streak - amount}',
         )
         embed.add_field(
-            f'Your {EMOJI__HEART_CURRENCY:e}',
+            f'Your {EMOJI__HEART_CURRENCY}',
             f'{total_love} -> {total_love + sell_price}',
         )
     else:

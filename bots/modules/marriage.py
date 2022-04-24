@@ -1049,7 +1049,7 @@ async def divorce_execute(client, event, mode, source_user_id, target_user_id):
     
     yield
     
-    target_user = get_user(target_user_id)
+    target_user = await get_user(target_user_id)
     
     if mode == 'i':
         yield divorce_incoming(client, event, source_user_id, target_user)

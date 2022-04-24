@@ -601,7 +601,7 @@ class CatFeeder:
     
     
     async def initial_invoke(self):
-        return f'Please react with {self.cat:e} to feed her!\n' \
+        return f'Please react with {self.cat} to feed her!\n' \
                f'If no new person reacts for 5 minutes the cat will be sad.'
     
     
@@ -616,13 +616,13 @@ class CatFeeder:
             
             reacted.add(user)
             
-            return f'Please react with {self.cat:e} to feed her!\n' \
+            return f'Please react with {self.cat} to feed her!\n' \
                    f'If no no new unique person reacts for 5 minutes the cat will be sad.\n' \
                    f'\n' \
                    f'{len(reacted)} people gave the cat a slice of cake!'
         
         if emoji is self.eggplant:
-            return f'Please react with {self.cat:e} to feed her!\n' \
+            return f'Please react with {self.cat} to feed her!\n' \
                    f'If no no new unique person reacts for 5 minutes the cat will be sad.\n' \
                    f'\n' \
                    f'{len(reacted)} people gave the cat a slice of cake!\n' \
@@ -638,7 +638,7 @@ class CatFeeder:
         if isinstance(exception, TimeoutError):
             menu = self.menu
             
-            content = f'The {self.cat:e}has been fed by {len(self.reacted)} people.'
+            content = f'The {self.cat} has been fed by {len(self.reacted)} people.'
             await menu.client.message_edit(menu.message, content)
             
             if menu.channel.cached_permissions_for(menu.client).can_manage_messages:
@@ -749,7 +749,7 @@ async def configured_show_emoji(emoji):
     if emoji.is_unicode_emoji():
         return 'That\' an unicode emoji, cannot link it.'
     
-    return f'**Name:** {emoji:e} **Link:** {emoji.url}'
+    return f'**Name:** {emoji} **Link:** {emoji.url}'
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT)

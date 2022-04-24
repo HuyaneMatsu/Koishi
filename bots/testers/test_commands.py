@@ -846,7 +846,7 @@ async def detect_custom_emojis(client, message):
     if emojis:
         content_lines = []
         for x, emoji in zip(range(1, 21), emojis):
-            content_lines.append(f'{x}.: {emoji:e}')
+            content_lines.append(f'{x}.: {emoji}')
         
         truncated = len(emojis) - 20
         if truncated > 0:

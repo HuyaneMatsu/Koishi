@@ -381,7 +381,7 @@ async def add_(client, event,
         abort(f'{emoji_value} cannot be interpreted as an emoji.')
     
     if emoji.is_custom_emoji():
-        abort(f'Only unicode can be used, got {emoji:e}')
+        abort(f'Only unicode can be used, got {emoji}')
     
     if (description is not None):
         description_length = len(description)
@@ -557,7 +557,7 @@ async def edit_(client, event,
             abort(f'{new_emoji_value} cannot be interpreted as an emoji.')
         
         if new_emoji.is_custom_emoji():
-            abort(f'Only unicode can be used, got {new_emoji:e}')
+            abort(f'Only unicode can be used, got {new_emoji}')
         
         tags = sticker.tags
         if (tags is None) or (len(tags) != 1) or (next(iter(tags)) != new_emoji.name):

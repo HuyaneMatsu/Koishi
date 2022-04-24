@@ -293,7 +293,7 @@ class dispatch_tester:
             text = []
         else:
             text = pretty_print(users)
-        text.insert(0, f'{emoji:e} were removed from message {message.id}:')
+        text.insert(0, f'{emoji} were removed from message {message.id}:')
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout=120.)
         

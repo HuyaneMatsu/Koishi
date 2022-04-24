@@ -314,74 +314,74 @@ RULES_HELP = Embed(
     'Rules of Dungeon sweeper',
     (
         f'Your quest is to help our cute Touhou characters to put their stuffs on places, where they supposed be. '
-        f'These places are marked with an {BUILTIN_EMOJIS["x"]:e} on the floor. Because our characters are lazy, the '
+        f'These places are marked with an {BUILTIN_EMOJIS["x"]} on the floor. Because our characters are lazy, the '
         f'less steps required to sort their stuffs, makes them give you a better rating.\n'
         f'\n'
         f'You can move with the buttons under the embed, to activate your characters\' skill, or go back, reset the '
         f'map or cancel the game:\n'
-        f'{EMOJI_NOTHING:e}{EMOJI_NORTH:e}{EMOJI_NOTHING:e}{EMOJI_BACK:e}\n'
-        f'{EMOJI_WEST:e}{EMOJI_REIMU:e}{EMOJI_EAST:e}{EMOJI_RESET:e}\n'
-        f'{EMOJI_NOTHING:e}{EMOJI_SOUTH:e}{EMOJI_NOTHING:e}{EMOJI_CANCEL:e}\n'
+        f'{EMOJI_NOTHING}{EMOJI_NORTH}{EMOJI_NOTHING}{EMOJI_BACK}\n'
+        f'{EMOJI_WEST}{EMOJI_REIMU}{EMOJI_EAST}{EMOJI_RESET}\n'
+        f'{EMOJI_NOTHING}{EMOJI_SOUTH}{EMOJI_NOTHING}{EMOJI_CANCEL}\n'
         f'\n'
         f'You can push boxes by moving towards them, but you cannot push more at the same time or push into the '
         f'wall:\n'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-        f'{EMOJI_EAST:e}'
+        f'{EMOJI_EAST}'
         f'{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
         f'\n'
         f'You can push the boxes into the holes to pass them, but be careful, you might lose too much boxes to finish'
         f'the stages!\n'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
-        f'{STYLE_REIMU[BIT_MASK_HOLE_P]}{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
+        f'{EMOJI_EAST}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
+        f'{STYLE_REIMU[BIT_MASK_HOLE_P]}{EMOJI_EAST}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_HOLE_P]}\n'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_HOLE_P]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
+        f'{EMOJI_EAST}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
         f'{STYLE_REIMU[BIT_MASK_BOX_HOLE]}\n'
         f'If you get a box on the it\'s desired place it\'s color will change:\n'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_TARGET]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
+        f'{EMOJI_EAST}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
         f'{STYLE_REIMU[BIT_MASK_BOX_TARGET]}\n'
         f'The game has 3 chapters. *(there will be more maybe.)* Each chapter introduces a different character to '
         f'play with.'
     ),
     color = DUNGEON_SWEEPER_COLOR,
 ).add_field(
-    f'Chapter 1 {EMOJI_REIMU:e}',
+    f'Chapter 1 {EMOJI_REIMU}',
     (
         f'Your character is Hakurei Reimu (博麗　霊夢), who needs some help at her basement to sort her *boxes* out.\n'
         f'Reimu can jump over a box or hole.\n'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
+        f'{EMOJI_EAST}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_BOX]}'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}\n'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]:}{STYLE_REIMU[BIT_MASK_HOLE_U]}{STYLE_REIMU[BIT_MASK_FLOOR]}'
-        f'{EMOJI_EAST:e}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
+        f'{EMOJI_EAST}{STYLE_REIMU[BIT_MASK_FLOOR]}{STYLE_REIMU[BIT_MASK_HOLE_U]}'
         f'{STYLE_REIMU[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
     ),
 ).add_field(
-    f'Chapter 2 {EMOJI_FLAN:e}',
+    f'Chapter 2 {EMOJI_FLAN}',
     (
         f'Your character is Scarlet Flandre (スカーレット・フランドール Sukaaretto Furandooru), who want to put her '
         f'*bookshelves* on their desired place.\n'
         f'Flandre can destroy absolutely anything and everything, and she will get rid of the pillars for you.\n'
-        f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_U]}{EMOJI_EAST:e}'
-        f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}{EMOJI_EAST:e}'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_U]}{EMOJI_EAST}'
+        f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}{EMOJI_EAST}'
         f'{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P]}\n'
         f'{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_BOX]}{STYLE_FLAN[BIT_MASK_OBJECT_P]}'
-        f'{EMOJI_EAST:e}{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
+        f'{EMOJI_EAST}{STYLE_FLAN[BIT_MASK_FLOOR]}{STYLE_FLAN[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
         f'{STYLE_FLAN[BIT_MASK_BOX_OBJECT]}'
     ),
 ).add_field(
-    f'Chapter 3 {EMOJI_YUKARI:e}',
+    f'Chapter 3 {EMOJI_YUKARI}',
     (
         f'Your character is Yakumo Yukari (八雲　紫). Her beddings needs some replacing at her home.\n'
         f'Yukari can create gaps and travel trough them. She will open gap to the closest place straightforward, '
         f'which is separated by a bedding or with wall from her.\n'
         f'{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
-        f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
+        f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_WALL_N]}'
         f'{STYLE_YUKARI[BIT_MASK_WALL_N]}{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}\n'
         f'{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_BOX]}'
-        f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST:e}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}'
+        f'{STYLE_YUKARI[BIT_MASK_FLOOR]}{EMOJI_EAST}{STYLE_YUKARI[BIT_MASK_FLOOR]}{STYLE_YUKARI[BIT_MASK_BOX]}'
         f'{STYLE_YUKARI[BIT_MASK_BOX]}{STYLE_YUKARI[BIT_MASK_CHAR_E | BIT_MASK_FLOOR]}'
     ),
 ).add_footer(
