@@ -1,5 +1,3 @@
-import sys
-
 from hata import ACTIVITY_TYPES, ActivityRich, Client, IntentFlag, Locale
 from hata.ext.extension_loader import EXTENSION_LOADER
 
@@ -115,5 +113,3 @@ if MARISA_MODE:
     EXTENSION_LOADER.add('bots.testers')
 else:
     EXTENSION_LOADER.add('bots.modules')
-
-EXTENSION_LOADER.load_all(blocking=sys.implementation.name == 'pypy')

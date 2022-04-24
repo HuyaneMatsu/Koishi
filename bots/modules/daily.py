@@ -291,9 +291,9 @@ async def get_waifu_ids(user_id):
                                 waifu_list_model.user_id == user_id,
                             )
                         )
-                    )
-                ),
-                user_common_model.daily_next > datetime.utcnow(),
+                    ),
+                user_common_model.daily_next < datetime.utcnow(),
+                )
             )
         )
         
@@ -344,7 +344,7 @@ async def daily(client, event,
         yield await claim_daily_for_waifu(client, event, target_user)
 
 
-@daily.autocomplete('target_user')
+@daily.autocomplete('target_user_name')
 async def autocomplete_waifu_name(event, value):
     waifus = await get_waifus_with_name(event, value)
     return sorted(waifu.full_name for waifu in waifus)

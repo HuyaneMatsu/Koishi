@@ -32,6 +32,7 @@ if (scarletio_path is not None) and (scarletio_path not in sys.path):
 del hata_path
 
 import hata
+
 # Import things depending on settings and which file is started up.
 #
 # As self host, turn `RUN_WEBAPP_AS_MAIN` on and run this file.
@@ -41,7 +42,7 @@ import hata
 
 if __name__ == '__main__':
     import bots
-    
+    hata.ext.extension_loader.EXTENSION_LOADER.load_all()
     hata.start_clients()
     if config.RUN_WEBAPP_AS_MAIN:
         from web import WEBAPP
