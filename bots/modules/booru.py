@@ -49,6 +49,7 @@ SAFE_BANNED = frozenset((
     'ass',
     'bikini',
     'clothed_female_nude_male',
+    'no_panties',
 ))
 
 NSFW_BANNED = frozenset((

@@ -21,7 +21,7 @@ EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
     name = 'extension',
     description = 'extension related commands',
     guild = GUILD__SUPPORT,
-    allow_by_default = False
+    allow_by_default = False,
 )
 
 EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'extension.list_per_client'

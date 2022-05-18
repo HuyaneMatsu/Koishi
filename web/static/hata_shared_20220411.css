@@ -549,6 +549,14 @@ p[align] a {
     display: inline-flex;
 }
 
+p[align="left"] {
+    float: left;
+}
+
+p[align="right"] {
+    float: right;
+}
+
 p[align="left"] a {
     background-color: var(--color-header-button-left);
 }
@@ -557,17 +565,23 @@ p[align="right"] a {
     background-color: var(--color-header-button-right);
 }
 
-p[align] a::after {
+p[align="right"] a::after, p[align="left"] a::before {
     height: var(--size-header-button-line-height);
     width: var(--size-header-button-line-height);
     content: "";
     background-size: cover;
     filter: var(--color-svg-filter);
+    display: block;
 }
 
 p[align="right"] a::after {
     margin-left: var(--size-header-icon-spacing);
     background-image: url(/static/arrow_left_to_right.svg);
+}
+
+p[align="left"] a::before {
+    margin-right: var(--size-header-icon-spacing);
+    background-image: url(/static/arrow_right_to_left.svg);
 }
 
 .header_menu a, p[align] a {

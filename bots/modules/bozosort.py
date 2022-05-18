@@ -588,6 +588,7 @@ BUILTIN_MODULES = frozenset((
     'linecache',
     'platform',
     'code',
+    'contextlib',
 ))
 
 # We cheat more

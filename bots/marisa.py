@@ -500,7 +500,8 @@ async def debug_command(client, event,
         '**Application command**:\n'
         'Name : `', application_command.name, '`\n'
         'Id : `', repr(application_command.id), '`\n'
-        'Allow by default : `', repr(application_command.allow_by_default), '`\n'
+        'Allow in dm : `', repr(application_command.allow_in_dm), '`\n'
+        'required_permissions : `', repr(application_command.required_permissions), '`\n'
         '**Permission overwrites**:\n'
     ]
     
@@ -1500,9 +1501,18 @@ async def webhook(client, event):
     await client.http.webhook_message_create(executor_webhook.id, executor_webhook.token, data, None)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, required_permissions=8)
+@Marisa.interactions(guild=GUILD__SUPPORT, required_permissions=2197949382599)
 async def test_required_permissions():
     return 'Hello'
+
+@Marisa.interactions(is_global=True, allow_in_dm=False)
+async def not_in_dm():
+    return 'not in dm'
+
+@Marisa.interactions(is_global=True, allow_in_dm=True)
+async def in_dm_too():
+    return 'try in dm too'
+
 
 
 if (watchdog is not None):

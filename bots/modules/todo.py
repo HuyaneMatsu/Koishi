@@ -4,6 +4,7 @@ from math import ceil
 from hata import Client, Embed, KOKORO, DATETIME_FORMAT_CODE
 from hata.ext.slash import abort, Form, TextInput, TextInputStyle, InteractionResponse, Button, ButtonStyle, Row
 from sqlalchemy.sql import select
+from sqlalchemy.exc import OperationalError
 
 from bot_utils.models import DB_ENGINE, TODO_TABLE, todo_model
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__TESTER
@@ -11,6 +12,7 @@ from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__TESTER
 
 SLASH_CLIENT : Client
 
+ENTRIES_REQUESTED = False
 TODO_ENTRIES = {}
 
 ENTRY_BY_ID_RP = re.compile('#(\d*)')
@@ -32,6 +34,7 @@ class TODOEntry:
 
 
 async def request_entries():
+    global ENTRIES_REQUESTED
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
             select(
@@ -48,12 +51,26 @@ async def request_entries():
         results = await response.fetchall()
         for result in results:
             TODOEntry(*result)
+    
+    ENTRIES_REQUESTED = True
 
 
-KOKORO.run(request_entries())
-
+try:
+    KOKORO.run(request_entries())
+except OperationalError:
+    pass
 
 TODO_FORM_SUBMIT_CUSTOM_ID = 'todo.add.form'
+
+
+async def get_entries():
+    if not  ENTRIES_REQUESTED:
+        try:
+            await request_entries()
+        except OperationalError:
+            abort('No connection to database')
+    
+    return TODO_ENTRIES
 
 
 TEXT_INPUT_NAME = TextInput(
@@ -101,16 +118,18 @@ def _entry_by_value_sort_key(item):
     return item[0]
 
 
-def _try_resolve_entries(value):
+async def _try_resolve_entries(value):
+    todo_entries = await get_entries()
+    
     if value is None:
-        entries = sorted(TODO_ENTRIES.values(), key=_entry_id_sort_key)
+        entries = sorted(todo_entries.values(), key=_entry_id_sort_key)
     
     else:
         parsed = ENTRY_BY_ID_RP.fullmatch(value)
         if parsed is None:
             to_sort = []
             value = value.casefold()
-            for entry in TODO_ENTRIES.values():
+            for entry in todo_entries.values():
                 sort_key = _entry_sot_key_by_value(entry, value)
                 if sort_key is not None:
                     to_sort.append((sort_key, entry))
@@ -123,19 +142,19 @@ def _try_resolve_entries(value):
             if entry_id:
                 entry_id = int(entry_id)
                 try:
-                    entry = TODO_ENTRIES[entry_id]
+                    entry = todo_entries[entry_id]
                 except KeyError:
                     entries = []
                 else:
                     entries = [entry]
             else:
-                entries = sorted(TODO_ENTRIES.values(), key=_entry_id_sort_key)
+                entries = sorted(todo_entries.values(), key=_entry_id_sort_key)
     
     return entries
 
 
-def try_resolve_entry(name):
-    entries = _try_resolve_entries(name)
+async def try_resolve_entry(name):
+    entries = await _try_resolve_entries(name)
     if not entries:
         abort('No entry found')
     
@@ -210,7 +229,8 @@ def _autocomplete_format_entry(entry):
 
 @TODO.autocomplete('name')
 async def autocomplete_entry_name(value):
-    return [_autocomplete_format_entry(entry) for entry in _try_resolve_entries(value)]
+    entries = await _try_resolve_entries(value)
+    return [_autocomplete_format_entry(entry) for entry in entries]
 
 
 @TODO.interactions
@@ -262,7 +282,7 @@ async def get(
     name: PARAMETER_ENTRY_NAME_ANNOTATION,
 ):
     """Shows the defined entry"""
-    entry = try_resolve_entry(name)
+    entry = await try_resolve_entry(name)
     user = await client.user_get(entry.creator_id)
     return create_entry_embed(entry, user)
 
@@ -278,13 +298,15 @@ async def list_(
     if page < 0:
         abort('Page cannot be non-positive')
     
+    todo_entries = await get_entries()
+    
     if creator is None:
-        entries = sorted(TODO_ENTRIES.values(), key=_entry_id_sort_key)
+        entries = sorted(todo_entries.values(), key=_entry_id_sort_key)
     else:
         creator_id = creator.id
-        entries = [entry for entry in TODO_ENTRIES if entry.creator_id == creator_id]
+        entries = [entry for entry in todo_entries if entry.creator_id == creator_id]
         entries.sort(key=_entry_id_sort_key)
-        
+    
     page_count = ceil(len(entries) / ENTRY_PER_PAGE)
     
     # Fast precheck
@@ -354,7 +376,7 @@ async def del_(
 ):
     """Removes the defined entry."""
     check_permission(event)
-    entry = try_resolve_entry(name)
+    entry = await try_resolve_entry(name)
     
     user = await client.user_get(entry.creator_id)
     embed = create_entry_embed(entry, user)
@@ -379,10 +401,12 @@ async def del_approval(
     if not has_permission(event):
         return
     
+    todo_entries = await get_entries()
+    
     entry_id = int(entry_id)
     
     try:
-        entry = TODO_ENTRIES[entry_id]
+        entry = todo_entries[entry_id]
     except KeyError:
         abort('The entry was deleted meanwhile')
         return # do return, so the linter stops crying
@@ -395,7 +419,7 @@ async def del_approval(
                 )
             )
         
-        del TODO_ENTRIES[entry.entry_id]
+        del todo_entries[entry.entry_id]
     
     
     user = await client.user_get(entry.creator_id)
@@ -420,7 +444,7 @@ async def edit(
 ):
     """Edit the defined entry!"""
     check_permission(event)
-    entry = try_resolve_entry(name)
+    entry = await try_resolve_entry(name)
     
     if entry.creator_id != event.user.id:
         abort('You can edit only your own entries.')
@@ -444,12 +468,15 @@ async def edit_form_submit(
     name,
     description,
 ):
+    todo_entries = await get_entries()
+    
     entry_id = int(entry_id)
     
     description = description.replace('`', '')
     
+    
     try:
-        entry = TODO_ENTRIES[entry_id]
+        entry = todo_entries[entry_id]
     except KeyError:
         abort('The entry was deleted meanwhile')
         return # do return, so the linter stops crying
