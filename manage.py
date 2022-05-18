@@ -40,13 +40,18 @@ import hata
 # If hosting, wsgi will import this file, so the bots will not start up. Those need to be started up separately by an
 # always running task.
 
+CONNECT = ('--no-connect' not in sys.argv)
+
 if __name__ == '__main__':
     import bots
     hata.ext.extension_loader.EXTENSION_LOADER.load_all()
-    hata.start_clients()
+    if CONNECT:
+        hata.start_clients()
+    
     if config.RUN_WEBAPP_AS_MAIN:
         from web import WEBAPP
-        WEBAPP.run()
+        if CONNECT:
+            WEBAPP.run()
 else:
     hata.KOKORO.stop()
     from web import WEBAPP

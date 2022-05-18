@@ -804,7 +804,7 @@ class KanakoRunner:
         self = object.__new__(cls)
         self.client = client
         self.event = event
-        self.users = users
+        self.users = [*users]
         self.message = event.message
         self.map_name = map_name
         self.length = length
