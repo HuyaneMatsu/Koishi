@@ -2,6 +2,7 @@ import re, functools
 from datetime import datetime, timedelta
 from random import random, choice
 from time import perf_counter
+from enum import Enum
 
 from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
@@ -58,24 +59,6 @@ async def cake(event,
     return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !').add_image(choice(CAKES))
 
 # command end
-# command start typing-interactions show-emoji
-
-@Nitori.interactions(guild=TEST_GUILD)
-@configure_parameter('emoji_name', 'str', 'Yes?', 'emoji')
-async def show_emoji(
-    emoji_name: str
-):
-    """Shows the given custom emoji."""
-    emoji = parse_emoji(emoji_name)
-    if emoji is None:
-        abort('Please give an emoji')
-    
-    if emoji.is_unicode_emoji():
-        abort('Cannot link unicode emojis.')
-    
-    return f'**Name:** {emoji} **Link:** {emoji.url}'
-
-# command end
 # command start slash guild-icon
 
 GUILD_ICON_CHOICES = [
@@ -122,156 +105,6 @@ async def guild_icon(event,
     return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
 
 # command end
-# command start autocomplete cake-love
-
-EMOJI_CAKE = BUILTIN_EMOJIS['cake']
-
-CAKE_NAMES = [
-    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
-    'carrot', 'red velvet'
-]
-
-
-@Nitori.interactions(guild=TEST_GUILD)
-async def cake_love(
-    cake_name: ('str', 'Please pick a cake.')
-):
-    """Do I love the cake or nah?"""
-    return f'Hmmm, yes, I love {cake_name} {EMOJI_CAKE} as well.'
-
-
-@cake_love.autocomplete('cake_name') # Define which parameter we want to auto-complete.
-async def autocomplete_cake_name(value):
-    if value is None:
-        return CAKE_NAMES[:25]
-    
-    value = value.casefold()
-    return [cake_name for cake_name in CAKE_NAMES if (value in cake_name)]
-
-# command end
-# command start autocomplete pick-cake
-
-CAKE_NAMES = [
-    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
-    'carrot', 'red velvet'
-]
-
-# Define `get_one_like˙ function
-def get_cake_name_like(name):
-    name = name.casefold()
-    
-    for cake_name in CAKE_NAMES:
-        if name in cake_name:
-            return cake_name
-
-
-# Define `get_multiple_like` function
-def get_cake_names_like(name):
-    name = name.casefold()
-    
-    return [cake_name for cake_name in CAKE_NAMES if (name in cake_name)]
-
-
-@Nitori.interactions(guild=TEST_GUILD)
-async def pick_cake(
-    cake_name_1: ('str', 'Select a cake!'),
-    cake_name_2: ('str', 'Another one.'),
-    cake_name_3: ('str', 'Another one.') = None,
-    cake_name_4: ('str', 'Another one.') = None,
-    cake_name_5: ('str', 'Another one.') = None,
-):
-    """Picks a cake."""
-    cakes = []
-    
-    for cake_name in (cake_name_1, cake_name_2, cake_name_3, cake_name_4, cake_name_5):
-        if cake_name is not None:
-            cake_name = get_cake_name_like(cake_name)
-            if cake_name is not None:
-                cakes.append(cake_name)
-    
-    if not cakes:
-        abort('No valid choices provided.')
-    
-    return f'I choose: {choice(cakes)}'
-
-
-@pick_cake.autocomplete('cake_name_1', 'cake_name_2', 'cake_name_3', 'cake_name_4', 'cake_name_5')
-async def exclusive_autocomplete_cake_name(event, actual_cake_name):
-    excluded_cake_names = set()
-    
-    for cake_name in event.interaction.get_non_focused_values().values():
-        if cake_name is not None:
-            cake_name = get_cake_name_like(cake_name)
-            if cake_name is not None:
-                excluded_cake_names.add(cake_name)
-    
-    
-    if actual_cake_name is None:
-        if excluded_cake_names:
-            return [cake_name for cake_name in CAKE_NAMES if cake_name not in excluded_cake_names]
-        
-        else:
-            return CAKE_NAMES[:25]
-    
-    else:
-        cake_names = get_cake_names_like(actual_cake_name)
-        if excluded_cake_names:
-            return [cake_name for cake_name in cake_names if cake_name not in excluded_cake_names]
-        
-        else:
-            return cake_names
-
-# command end
-# command start autocomplete shop
-
-
-PRODUCT_TYPES = {
-    'pudding': ['choco', 'dark choco', 'strawberry', 'vanilla'],
-    'croissant': ['choco', 'cherry', 'hazelnut', 'strawberry', 'vanilla'],
-}
-
-
-def get_option_like(options, name):
-    name = name.casefold()
-    
-    for option in options:
-        if name in option:
-            return option
-
-
-def get_options_like(options, name):
-    name = name.casefold()
-    
-    return [option for option in options if name in option]
-
-
-@Nitori.interactions(guild=TEST_GUILD)
-async def shop(
-    product: ([*PRODUCT_TYPES], 'Select a product to buy.'),
-    type_: ('str', 'Select a type'),
-):
-    """Buy some sweets."""
-    type_ = get_option_like(PRODUCT_TYPES[product], type_),
-    if type_ is None:
-        abort('Invalid product type.')
-    
-    return f'You just bought a {type_} {product}'
-
-
-@shop.autocomplete('type_')
-async def autocomplete_product_type(event, value):
-    product = event.intearction.get_value_of('product')
-    if product is None:
-        return
-    
-    options = PRODUCT_TYPES[product]
-    
-    if value is None:
-        return options[:25]
-    
-    return get_options_like(options, value)
-
-# command end
 # command start slash roll
 
 @Nitori.interactions(guild=TEST_GUILD)
@@ -284,6 +117,39 @@ async def roll(
         amount += round(1.+(random() * 5.))
     
     return str(amount)
+
+# command end
+# command start slash pet-info
+
+class PetInfoFieldType(Enum):
+    all = 'all'
+    starve = 'hunger'
+    love = 'love'
+    energy = 'energy'
+
+
+def create_pet_info_field(field, user):
+     return f'**{field.value}**: {(user.id >> (22 + len(field.value))) % 101}'
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def pet_info(client, event, field: PetInfoFieldType = PetInfoFieldType.all):
+    user = event.user
+    
+    if field == PetInfoFieldType.all:
+        description = '\n'.join(
+            create_pet_info_field(field, user) for field in PetInfoFieldType
+            if field != PetInfoFieldType.all
+        )
+    
+    else:
+        description = create_pet_info_field(field, user)
+    
+    
+    return Embed(
+        f'{event.user}\'s pet info',
+        description,
+    )
 
 # command end
 # command start slash id-to-time
@@ -327,109 +193,6 @@ for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 
         guild = TEST_GUILD,
     )
 
-# command end
-# command start autocomplete spell
-
-
-SPELLS = [
-    'ankle snare', 'blade of wind', 'blast', 'blessing', 'bottomless swamp', 'break spell', 'burning flash',
-    'control of weather', 'create earth', 'create earth golem', 'create water', 'crystal prison', 'cursed lighting',
-    'detonation', 'earthshaker', 'energy ignition', 'exorcism', 'explosion', 'fireball', 'flash', 'force fire',
-    'freeze', 'freeze bind', 'freeze gust', 'heal', 'inferno', 'light of reflection', 'light of saber', 'lighting',
-    'lightning strike', 'lock', 'magic canceller', 'paralyze', 'powered', 'puppet', 'purification', 'reflect',
-    'resurrection', 'sacred shell', 'silent', 'sleep', 'teleport', 'tinder', 'tornado', 'turn undead', 'unlock',
-    'versatile actor', 'wind breath', 'wind curtain'
-]
-
-
-def get_spell_or_abort(name):
-    name = name.casefold()
-    
-    for spell in SPELLS:
-        if name in spell:
-            break
-    
-    else:
-        abort('Unknown spell.')
-    
-    return name
-
-
-def get_spells_like(name):
-    name = name.casefold()
-    
-    return [spell for spell in SPELLS if name in spell]
-
-
-
-SPELL_COMMANDS = Nitori.interactions(
-    None,
-    name = 'spell',
-    description = 'Magic!',
-    guild = TEST_GUILD,
-)
-
-
-@SPELL_COMMANDS.interactions
-async def cast(
-    event,
-    spell: ('str', 'select a spell'),
-):
-    """Uses the selected spell"""
-    spell = get_spell_or_abort(spell)
-    
-    return f'{event.user:f} just used {spell}; It is super effective!'
-
-
-@SPELL_COMMANDS.interactions
-async def upgrade(
-    event,
-    spell: ('str', 'select a spell'),
-):
-    """Uses the selected spell"""
-    spell = get_spell_or_abort(spell)
-    
-    return f'{event.user:f} just upgraded their {spell}; It was a *next* level move!'
-
-
-@cast.autocomplete('spell')
-@upgrade.autocomplete('spell')
-async def auto_complete_spell_name(value):
-    if value is None:
-        return SPELLS[:25]
-    
-    return get_spells_like(value)
-
-# command end
-# command start autocomplete get-sticker-id
-
-async def autocomplete_sticker_name(event, value):
-    guild = event.guild
-    if guild is None:
-        return None
-    
-    
-    if value is None:
-        return sorted(sticker.name for sticker in guild.stickers.values())
-    
-    return sorted(sticker.name for sticker in guild.get_stickers_like(value))
-
-
-@Nitori.interactions(guild=TEST_GUILD)
-async def get_sticker_id(
-    event,
-    sticker: P('str', 'Sticker\'s name', autocomplete=autocomplete_sticker_name),
-):
-    guild = event.guild
-    if guild is None:
-        abort('Please use the command inside of a guild')
-    
-    sticker = guild.get_sticker_like(sticker)
-    if sticker:
-        abort('Unknown sticker')
-    
-    return f'{sticker.name}\'s id: `{sticker.id}`'
-    
 # command end
 # command start slash repeat
 
@@ -821,15 +584,6 @@ async def thread_channel_name_length(
     return len(channel.name)
 
 # command end
-# command start typing-interactions text-channel-name-length
-
-@Nitori.interactions(guild=TEST_GUILD)
-@configure_parameter('channel', 'channel', 'Select a text channel', channel_types=[CHANNEL_TYPES.guild_text])
-async def text_channel_name_length(channel):
-    """Returns the selected text channel's name's length."""
-    return len(channel.name)
-
-# command end
 # command start slash voice-channel-name-length
 
 from hata import CHANNEL_TYPES
@@ -924,8 +678,258 @@ async def command_count(client, event):
     )
 
 # command end
-# command start components ping-pong
+# command start autocomplete cake-love
 
+EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+
+CAKE_NAMES = [
+    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
+    'carrot', 'red velvet'
+]
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def cake_love(
+    cake_name: ('str', 'Please pick a cake.')
+):
+    """Do I love the cake or nah?"""
+    return f'Hmmm, yes, I love {cake_name} {EMOJI_CAKE} as well.'
+
+
+@cake_love.autocomplete('cake_name') # Define which parameter we want to auto-complete.
+async def autocomplete_cake_name(value):
+    if value is None:
+        return CAKE_NAMES[:25]
+    
+    value = value.casefold()
+    return [cake_name for cake_name in CAKE_NAMES if (value in cake_name)]
+
+# command end
+# command start autocomplete pick-cake
+
+CAKE_NAMES = [
+    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
+    'carrot', 'red velvet'
+]
+
+# Define `get_one_like˙ function
+def get_cake_name_like(name):
+    name = name.casefold()
+    
+    for cake_name in CAKE_NAMES:
+        if name in cake_name:
+            return cake_name
+
+
+# Define `get_multiple_like` function
+def get_cake_names_like(name):
+    name = name.casefold()
+    
+    return [cake_name for cake_name in CAKE_NAMES if (name in cake_name)]
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def pick_cake(
+    cake_name_1: ('str', 'Select a cake!'),
+    cake_name_2: ('str', 'Another one.'),
+    cake_name_3: ('str', 'Another one.') = None,
+    cake_name_4: ('str', 'Another one.') = None,
+    cake_name_5: ('str', 'Another one.') = None,
+):
+    """Picks a cake."""
+    cakes = []
+    
+    for cake_name in (cake_name_1, cake_name_2, cake_name_3, cake_name_4, cake_name_5):
+        if cake_name is not None:
+            cake_name = get_cake_name_like(cake_name)
+            if cake_name is not None:
+                cakes.append(cake_name)
+    
+    if not cakes:
+        abort('No valid choices provided.')
+    
+    return f'I choose: {choice(cakes)}'
+
+
+@pick_cake.autocomplete('cake_name_1', 'cake_name_2', 'cake_name_3', 'cake_name_4', 'cake_name_5')
+async def exclusive_autocomplete_cake_name(event, actual_cake_name):
+    excluded_cake_names = set()
+    
+    for cake_name in event.interaction.get_non_focused_values().values():
+        if cake_name is not None:
+            cake_name = get_cake_name_like(cake_name)
+            if cake_name is not None:
+                excluded_cake_names.add(cake_name)
+    
+    
+    if actual_cake_name is None:
+        if excluded_cake_names:
+            return [cake_name for cake_name in CAKE_NAMES if cake_name not in excluded_cake_names]
+        
+        else:
+            return CAKE_NAMES[:25]
+    
+    else:
+        cake_names = get_cake_names_like(actual_cake_name)
+        if excluded_cake_names:
+            return [cake_name for cake_name in cake_names if cake_name not in excluded_cake_names]
+        
+        else:
+            return cake_names
+
+# command end
+# command start autocomplete shop
+
+
+PRODUCT_TYPES = {
+    'pudding': ['choco', 'dark choco', 'strawberry', 'vanilla'],
+    'croissant': ['choco', 'cherry', 'hazelnut', 'strawberry', 'vanilla'],
+}
+
+
+def get_option_like(options, name):
+    name = name.casefold()
+    
+    for option in options:
+        if name in option:
+            return option
+
+
+def get_options_like(options, name):
+    name = name.casefold()
+    
+    return [option for option in options if name in option]
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def shop(
+    product: ([*PRODUCT_TYPES], 'Select a product to buy.'),
+    type_: ('str', 'Select a type'),
+):
+    """Buy some sweets."""
+    type_ = get_option_like(PRODUCT_TYPES[product], type_),
+    if type_ is None:
+        abort('Invalid product type.')
+    
+    return f'You just bought a {type_} {product}'
+
+
+@shop.autocomplete('type_')
+async def autocomplete_product_type(event, value):
+    product = event.intearction.get_value_of('product')
+    if product is None:
+        return
+    
+    options = PRODUCT_TYPES[product]
+    
+    if value is None:
+        return options[:25]
+    
+    return get_options_like(options, value)
+
+# command end
+# command start autocomplete spell
+
+
+SPELLS = [
+    'ankle snare', 'blade of wind', 'blast', 'blessing', 'bottomless swamp', 'break spell', 'burning flash',
+    'control of weather', 'create earth', 'create earth golem', 'create water', 'crystal prison', 'cursed lighting',
+    'detonation', 'earthshaker', 'energy ignition', 'exorcism', 'explosion', 'fireball', 'flash', 'force fire',
+    'freeze', 'freeze bind', 'freeze gust', 'heal', 'inferno', 'light of reflection', 'light of saber', 'lighting',
+    'lightning strike', 'lock', 'magic canceller', 'paralyze', 'powered', 'puppet', 'purification', 'reflect',
+    'resurrection', 'sacred shell', 'silent', 'sleep', 'teleport', 'tinder', 'tornado', 'turn undead', 'unlock',
+    'versatile actor', 'wind breath', 'wind curtain'
+]
+
+
+def get_spell_or_abort(name):
+    name = name.casefold()
+    
+    for spell in SPELLS:
+        if name in spell:
+            break
+    
+    else:
+        abort('Unknown spell.')
+    
+    return name
+
+
+def get_spells_like(name):
+    name = name.casefold()
+    
+    return [spell for spell in SPELLS if name in spell]
+
+
+
+SPELL_COMMANDS = Nitori.interactions(
+    None,
+    name = 'spell',
+    description = 'Magic!',
+    guild = TEST_GUILD,
+)
+
+
+@SPELL_COMMANDS.interactions
+async def cast(
+    event,
+    spell: ('str', 'select a spell'),
+):
+    """Uses the selected spell"""
+    spell = get_spell_or_abort(spell)
+    
+    return f'{event.user:f} just used {spell}; It is super effective!'
+
+
+@SPELL_COMMANDS.interactions
+async def upgrade(
+    event,
+    spell: ('str', 'select a spell'),
+):
+    """Uses the selected spell"""
+    spell = get_spell_or_abort(spell)
+    
+    return f'{event.user:f} just upgraded their {spell}; It was a *next* level move!'
+
+
+@cast.autocomplete('spell')
+@upgrade.autocomplete('spell')
+async def auto_complete_spell_name(value):
+    if value is None:
+        return SPELLS[:25]
+    
+    return get_spells_like(value)
+
+# command end
+# command start autocomplete get-sticker-id
+
+async def autocomplete_sticker_name(event, value):
+    guild = event.guild
+    if guild is None:
+        return None
+    
+    
+    if value is None:
+        return sorted(sticker.name for sticker in guild.stickers.values())
+    
+    return sorted(sticker.name for sticker in guild.get_stickers_like(value))
+
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def get_sticker_id(
+    event,
+    sticker: P('str', 'Sticker\'s name', autocomplete=autocomplete_sticker_name),
+):
+    guild = event.guild
+    if guild is None:
+        abort('Please use the command inside of a guild')
+    
+    sticker = guild.get_sticker_like(sticker)
+    if sticker:
+        abort('Unknown sticker')
+    
+    return f'{sticker.name}\'s id: `{sticker.id}`'
+    
 # command end
 # command start components ping-pong
 
@@ -1890,6 +1894,101 @@ async def rate_cake_form_submit(
         embed.add_field(cake, rating)
     
     return embed
+
+# command end
+# command start typing-interactions show-emoji
+
+@Nitori.interactions(guild=TEST_GUILD)
+@configure_parameter('emoji_name', 'str', 'Yes?', 'emoji')
+async def show_emoji(
+    emoji_name: str
+):
+    """Shows the given custom emoji."""
+    emoji = parse_emoji(emoji_name)
+    if emoji is None:
+        abort('Please give an emoji')
+    
+    if emoji.is_unicode_emoji():
+        abort('Cannot link unicode emojis.')
+    
+    return f'**Name:** {emoji} **Link:** {emoji.url}'
+
+# command end
+# command start typing-interactions text-channel-name-length
+
+@Nitori.interactions(guild=TEST_GUILD)
+@configure_parameter('channel', 'channel', 'Select a text channel', channel_types=[CHANNEL_TYPES.guild_text])
+async def text_channel_name_length(channel):
+    """Returns the selected text channel's name's length."""
+    return len(channel.name)
+
+# command end
+
+class TypingMeta(type):
+    def __getitem__(cls, parameters):
+        if isinstance(parameters, tuple):
+            return cls(*parameters)
+        else:
+            return cls(parameters)
+
+
+class Annotated(metaclass=TypingMeta):
+    __slots__ = ('__args__', '__metadata__')
+    
+    def __new__(cls, pep_484, *metadata):
+        if not metadata:
+            raise TypeError(
+                f'Metadata is required.'
+            )
+        
+        if not isinstance(pep_484, tuple):
+            pep_484 = (pep_484, )
+        
+        self = object.__new__(cls)
+        self.__args__ = pep_484
+        self.__metadata__ = metadata
+        return self
+
+
+# command start typing-interactions grocery-bag
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def grocery_bag(
+    cucumber: Annotated[int, P('int', 'How much cucumbers to buy?', min_value=0, max_value=1000)] = 0,
+    strawberry: Annotated[int, P('int', 'How much oranges to buy?', min_value=0, max_value=1000)] = 0,
+    orange: Annotated[int, P('int', 'How much oranges to buy?', min_value=0, max_value=1000)] = 0,
+    watermelon: Annotated[int, P('int', 'How much watermelons to buy?', min_value=0, max_value=1000)] = 0,
+):
+    in_bag = []
+    
+    for count, name in zip(
+        (cucumber, strawberry, orange, watermelon),
+        ('cucumber', 'strawberry', 'orange', 'watermelon'),
+    ):
+        if count:
+            in_bag.append(f'{name}: {count}')
+    
+    if in_bag:
+        description = '\n'.join(in_bag)
+    else:
+        description = '*nothing*'
+    
+    return Embed(
+        'In bag',
+        description,
+    )
+
+# command end
+# command start typing-interactions set-difficulty
+
+@Nitori.interactions(guild=TEST_GUILD)
+async def set_difficulty(
+    difficulty: Annotated[str, ['easy', 'lunatic'], 'difficulty'],
+):
+    if difficulty == 'low':
+        return 'Only kids play on easy mode.\nHow lame!'
+    
+    return 'Crazy moon rabbit mode activated!'
 
 # command end
 
