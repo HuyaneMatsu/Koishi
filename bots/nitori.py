@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
 from scarletio import sleep
-from hata import Client, Embed, parse_emoji, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, \
+from hata import Client, Embed, parse_emoji, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, Channel, \
     DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji, CHANNEL_TYPES, Permission
 from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
     wait_for_component_interaction, iter_component_interactions, Select, Option, P, Form, TextInput, TextInputStyle
@@ -679,13 +679,19 @@ async def command_count(client, event):
 
 # command end
 # command start autocomplete cake-love
-
-EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+# command start autocomplete pick-cake
+# command start forms rate-cakes
 
 CAKE_NAMES = [
     'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
     'carrot', 'red velvet'
 ]
+
+# command end
+# command start autocomplete cake-love
+
+EMOJI_CAKE = BUILTIN_EMOJIS['cake']
+
 
 
 @Nitori.interactions(guild=TEST_GUILD)
@@ -706,11 +712,6 @@ async def autocomplete_cake_name(value):
 
 # command end
 # command start autocomplete pick-cake
-
-CAKE_NAMES = [
-    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
-    'carrot', 'red velvet'
-]
 
 # Define `get_one_like˙ function
 def get_cake_name_like(name):
@@ -807,7 +808,7 @@ async def shop(
     type_: ('str', 'Select a type'),
 ):
     """Buy some sweets."""
-    type_ = get_option_like(PRODUCT_TYPES[product], type_),
+    type_ = get_option_like(PRODUCT_TYPES[product], type_)
     if type_ is None:
         abort('Invalid product type.')
     
@@ -816,7 +817,7 @@ async def shop(
 
 @shop.autocomplete('type_')
 async def autocomplete_product_type(event, value):
-    product = event.intearction.get_value_of('product')
+    product = event.interaction.get_value_of('product')
     if product is None:
         return
     
@@ -925,11 +926,11 @@ async def get_sticker_id(
         abort('Please use the command inside of a guild')
     
     sticker = guild.get_sticker_like(sticker)
-    if sticker:
+    if sticker is None:
         abort('Unknown sticker')
     
     return f'{sticker.name}\'s id: `{sticker.id}`'
-    
+
 # command end
 # command start components ping-pong
 
@@ -1836,17 +1837,11 @@ async def waifu_edit_form_submit(
 # command end
 # command start forms rate-cakes
 
-
 EMOJI_CAKE = BUILTIN_EMOJIS['cake']
 
 CUSTOM_ID_RATE_CAKE = 'rate_cake'
 CUSTOM_ID_RATE_CAKE_FIELD = 'rate_cake.field'
 
-
-CAKE_NAMES = [
-    'butter', 'pound', 'sponge', 'genoise', 'biscuit', 'angel food', 'chiffon', 'baked flourless', 'unbaked flourless',
-    'carrot', 'red velvet'
-]
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def rate_cakes(
@@ -1918,7 +1913,9 @@ async def show_emoji(
 
 @Nitori.interactions(guild=TEST_GUILD)
 @configure_parameter('channel', 'channel', 'Select a text channel', channel_types=[CHANNEL_TYPES.guild_text])
-async def text_channel_name_length(channel):
+async def text_channel_name_length(
+    channel: Channel
+):
     """Returns the selected text channel's name's length."""
     return len(channel.name)
 
@@ -1985,7 +1982,7 @@ async def grocery_bag(
 async def set_difficulty(
     difficulty: Annotated[str, ['easy', 'lunatic'], 'difficulty'],
 ):
-    if difficulty == 'low':
+    if difficulty == 'easy':
         return 'Only kids play on easy mode.\nHow lame!'
     
     return 'Crazy moon rabbit mode activated!'
