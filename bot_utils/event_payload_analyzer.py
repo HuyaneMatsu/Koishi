@@ -4,7 +4,9 @@ import re, reprlib
 from math import floor
 
 from scarletio import copy_docs, RichAttributeErrorBaseType
+from hata import DISCORD_EPOCH_START
 from hata.discord.utils import PARSE_TIMESTAMP_RP
+
 
 NoneType = type(None)
 
@@ -466,7 +468,7 @@ UNIX_TIME_EXPECTED_NAME_PARTS = (
     'end',
 )
 
-UNIX_TIME_GUESS_MAX_CHANCE = 2
+UNIX_TIME_GUESS_MAX_CHANCE = 3
 
 def guess_is_unix_time(name, value):
     """
@@ -491,6 +493,9 @@ def guess_is_unix_time(name, value):
     
     else:
         return -1
+    
+    if value > DISCORD_EPOCH_START:
+        chance += 1
     
     for expected_name_part in UNIX_TIME_EXPECTED_NAME_PARTS:
         if expected_name_part in name:
@@ -1680,9 +1685,7 @@ def render_payload_states():
 
 
 def test():
-    TEXT_PAYLOAD_EVENT_NAME = 'EMBEDDED_ACTIVITY_UPDATE'
-    
-    TEST_PAYLOADS = [
+    for payload in  [
         {'users': [], 'guild_id': '817005167500984320', 'embedded_activity': {'application_id': '814288819477020702'}, 'channel_id': '881247624009756713'},
         {'users': [], 'guild_id': '388267636661682178', 'embedded_activity': {'application_id': '755827207812677713'}, 'channel_id': '388267637236563971'},
         {'users': ['184734189386465281'], 'guild_id': '388267636661682178', 'embedded_activity': {'type': 0, 'timestamps': None, 'state': 'Playing Poker', 'secrets': {'join': '154ce3b8915f70fe1afbf903bffa224e073b62f70be3a9dbe714eced'}, 'name': 'Poker Night', 'details': None, 'created_at': None, 'assets': {'small_text': 'Poker Night', 'large_text': 'Poker Night', 'large_image': '839608726894018561'}, 'application_id': '755827207812677713'}, 'channel_id': '388267637236563971'},
@@ -1725,10 +1728,50 @@ def test():
         {'users': ['184734189386465281'], 'guild_id': '388267636661682178', 'embedded_activity': {'type': 0, 'timestamps': None, 'state': 'Creating Party', 'secrets': None, 'name': 'Fishington.io', 'details': 'In Menu', 'created_at': None, 'assets': {'small_text': 'Betrayal.io', 'large_text': 'Betrayal.io'}, 'application_id': '814288819477020702'}, 'channel_id': '388267637236563971'},
         {'users': ['184734189386465281'], 'guild_id': '388267636661682178', 'embedded_activity': {'type': None, 'timestamps': None, 'state': None, 'secrets': None, 'name': 'Fishington.io', 'details': None, 'created_at': None, 'assets': None, 'application_id': '814288819477020702'}, 'channel_id': '388267637236563971'},
         {'users': [], 'guild_id': '388267636661682178', 'embedded_activity': {'application_id': '814288819477020702'}, 'channel_id': '388267637236563971'},
-    ]
-
-    for payload in TEST_PAYLOADS:
-        guess_event_payload_structure(TEXT_PAYLOAD_EVENT_NAME, payload)
+    ]:
+        guess_event_payload_structure('EMBEDDED_ACTIVITY_UPDATE', payload)
+    
+    
+    for payload in [
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 938}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 938}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'f8Xv7/svKQQ'}, 'metadata': {'hash': '4qBNTX0m4ZM'}, 'channels': {'hash': 'KAwDbEx/6B4'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'f8Xv7/svKQQ'}, 'metadata': {'hash': '4qBNTX0m4ZM'}, 'channels': {'hash': 'KAwDbEx/6B4'}}, 'application_command_counts': {'3': 9, '2': 11, '1': 328}, 'guild_id': '920190307595874304'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'e3t6nmJR0OE'}, 'metadata': {'hash': 'unG66bcLvjA'}, 'channels': {'hash': '0zb3S3eBy4k'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'e3t6nmJR0OE'}, 'metadata': {'hash': 'unG66bcLvjA'}, 'channels': {'hash': '0zb3S3eBy4k'}}, 'application_command_counts': {'3': 2, '2': 1, '1': 182}, 'guild_id': '497213653913829407'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'application_command_counts': {'3': 4, '2': 18, '1': 1715}, 'guild_id': '971771931705630730'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 938}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'application_command_counts': {'3': 4, '2': 18, '1': 1715}, 'guild_id': '971771931705630730'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'application_command_counts': {'3': 4, '2': 18, '1': 1715}, 'guild_id': '971771931705630730'},
+        {'hashes': {'version': 1, 'roles': {'hash': '2iXXdLhnCZc'}, 'metadata': {'hash': 'LMUyOEQ28i8'}, 'channels': {'hash': 'vHpqh9ULdrY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': '2iXXdLhnCZc'}, 'metadata': {'hash': 'LMUyOEQ28i8'}, 'channels': {'hash': 'vHpqh9ULdrY'}}, 'application_command_counts': {'3': 5, '2': 9, '1': 824}, 'guild_id': '928332257628946472'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'SAUOFO0lMqI'}, 'metadata': {'hash': 'c6v8R6nmQ5Q'}, 'channels': {'hash': '5Fcp/2iMASc'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'SAUOFO0lMqI'}, 'metadata': {'hash': 'c6v8R6nmQ5Q'}, 'channels': {'hash': '5Fcp/2iMASc'}}, 'application_command_counts': {'3': 9, '2': 3, '1': 662}, 'guild_id': '797521418387980359'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'ibS3cBSHUpE'}, 'metadata': {'hash': '4t4PWPNf874'}, 'channels': {'hash': 'mkdlznNGSQc'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'ibS3cBSHUpE'}, 'metadata': {'hash': '4t4PWPNf874'}, 'channels': {'hash': 'mkdlznNGSQc'}}, 'application_command_counts': {'3': 2, '2': 3, '1': 626}, 'guild_id': '909800923113586709'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'z/fX+kCLgvA'}, 'metadata': {'hash': 'kpDjhH+SiCY'}, 'channels': {'hash': 'rfGCM7FrRBY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'z/fX+kCLgvA'}, 'metadata': {'hash': 'kpDjhH+SiCY'}, 'channels': {'hash': 'rfGCM7FrRBY'}}, 'application_command_counts': {'3': 8, '2': 2, '1': 336}, 'guild_id': '794923357241999400'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'application_command_counts': {'3': 4, '2': 18, '1': 1715}, 'guild_id': '971771931705630730'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'application_command_counts': {'3': 4, '2': 18, '1': 1715}, 'guild_id': '971771931705630730'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'OOvQ+m1QAN0'}, 'metadata': {'hash': 'nB+id/Qu/Tc'}, 'channels': {'hash': '8YC5rk0gymE'}}, 'application_command_counts': {'3': 4, '2': 18, '1': 1715}, 'guild_id': '971771931705630730'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'h8wsFhOABYc'}, 'metadata': {'hash': 'm0LoLYH5NqQ'}, 'channels': {'hash': 'fCVHa+o4cb8'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'h8wsFhOABYc'}, 'metadata': {'hash': 'm0LoLYH5NqQ'}, 'channels': {'hash': 'fCVHa+o4cb8'}}, 'application_command_counts': {'3': 6, '2': 14, '1': 321}, 'guild_id': '785391518789140481'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'tFy1HhbsXbU'}, 'metadata': {'hash': 'u9BmFezx6ZQ'}, 'channels': {'hash': '6/rfKkdYQ0Y'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'tFy1HhbsXbU'}, 'metadata': {'hash': 'u9BmFezx6ZQ'}, 'channels': {'hash': '6/rfKkdYQ0Y'}}, 'application_command_counts': {'3': 3, '2': 5, '1': 343}, 'guild_id': '942291966442496021'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Mv2RMjM8YQ4'}, 'metadata': {'hash': 'd91OcpSYDUA'}, 'channels': {'hash': 'JV3qZq28jjM'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Mv2RMjM8YQ4'}, 'metadata': {'hash': 'd91OcpSYDUA'}, 'channels': {'hash': 'JV3qZq28jjM'}}, 'application_command_counts': {'3': 3, '2': 8, '1': 555}, 'guild_id': '817005167500984320'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'dPyGwlqnuZo'}, 'metadata': {'hash': 'v0v9h69tHkY'}, 'channels': {'hash': 'T42QNy8wI+o'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'dPyGwlqnuZo'}, 'metadata': {'hash': 'v0v9h69tHkY'}, 'channels': {'hash': 'T42QNy8wI+o'}}, 'application_command_counts': {'3': 4, '2': 1, '1': 251}, 'guild_id': '945174912987959348'},
+        {'hashes': {'version': 1, 'roles': {'hash': '+AmCdVCXVmo'}, 'metadata': {'hash': 'xmDFn8Sb7To'}, 'channels': {'hash': 'FkyqAEjbpEM'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': '+AmCdVCXVmo'}, 'metadata': {'hash': 'xmDFn8Sb7To'}, 'channels': {'hash': 'FkyqAEjbpEM'}}, 'application_command_counts': {'3': 7, '2': 16, '1': 1348}, 'guild_id': '753556676459888680'},
+        {'hashes': {'version': 1, 'roles': {'hash': '+8mI25Hq048'}, 'metadata': {'hash': 'g90km9q1/Fk'}, 'channels': {'hash': 'xYfJ1ePaL4s'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': '+8mI25Hq048'}, 'metadata': {'hash': 'g90km9q1/Fk'}, 'channels': {'hash': 'xYfJ1ePaL4s'}}, 'application_command_counts': {'3': 2, '2': 1, '1': 152}, 'guild_id': '550314773774991362'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'Bgtq3X/Jk5A'}, 'metadata': {'hash': 'x2/xfj0Wj5g'}, 'channels': {'hash': 'S/pTFlHEYGY'}}, 'application_command_counts': {'3': 16, '2': 12, '1': 939}, 'guild_id': '694994318468841542'},
+        {'hashes': {'version': 1, 'roles': {'hash': 'jJGfDz0M4q8'}, 'metadata': {'hash': 'D2QElAjvtFs'}, 'channels': {'hash': 'ENjmgHBPuIs'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': 'jJGfDz0M4q8'}, 'metadata': {'hash': 'D2QElAjvtFs'}, 'channels': {'hash': 'ENjmgHBPuIs'}}, 'application_command_counts': {'3': 7, '2': 2, '1': 167}, 'guild_id': '641548871792721930'},
+        {'hashes': {'version': 1, 'roles': {'hash': '5gtlhTuJwTo'}, 'metadata': {'hash': '/iKOCWycYz8'}, 'channels': {'hash': 'vWeiPGoX7CQ'}}, 'guild_hashes': {'version': 1, 'roles': {'hash': '5gtlhTuJwTo'}, 'metadata': {'hash': '/iKOCWycYz8'}, 'channels': {'hash': 'vWeiPGoX7CQ'}}, 'application_command_counts': {'3': 8, '2': 2, '1': 246}, 'guild_id': '388267636661682178'},
+        
+    ]:
+        guess_event_payload_structure('GUILD_APPLICATION_COMMAND_INDEX_UPDATE', payload)
     
     print(render_payload_states())
 

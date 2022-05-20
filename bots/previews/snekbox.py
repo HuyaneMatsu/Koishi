@@ -33,9 +33,9 @@ MEM_MAX = 52428800
 MAX_TIMEOUT = 13
 
 NSJAIL_EXECUTABLE = os.getenv('NSJAIL_PATH', '/usr/sbin/nsjail')
-NSJAIL_CONFIG_3_8 = os.getenv('NSJAIL_CFG_3_8', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_Cpython_3_8.cfg'))
-NSJAIL_CONFIG_3_10 = os.getenv('NSJAIL_CFG_3_10', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_Cpython_3_10.cfg'))
-NSJAIL_CONFIG_C_3_6 = os.getenv('NSJAIL_CFG_C_3_6', os.path.join(PATH__KOISHI, 'bots', 'modules', 'nsjail_pypy_3_6.cfg'))
+NSJAIL_CONFIG_3_8 = os.getenv('NSJAIL_CFG_3_8', os.path.join(PATH__KOISHI, 'bots', 'previews', 'nsjail_Cpython_3_8.cfg'))
+NSJAIL_CONFIG_3_10 = os.getenv('NSJAIL_CFG_3_10', os.path.join(PATH__KOISHI, 'bots', 'previews', 'nsjail_Cpython_3_10.cfg'))
+NSJAIL_CONFIG_C_3_6 = os.getenv('NSJAIL_CFG_C_3_6', os.path.join(PATH__KOISHI, 'bots', 'previews', 'nsjail_pypy_3_6.cfg'))
 
 PATH__PYTHON_EXECUTABLE_3_8 = '/usr/bin/python3.8'
 PATH__PYTHON_EXECUTABLE_3_10 = '/usr/bin/python3.10'
@@ -191,23 +191,28 @@ class EvalUserLock:
 
 if IS_UNIX:
     async def eval_description(ctx):
-        return Embed('eval', (
-            'Executes the given code in an isolated environment.\n'
-            'Usages:\n'
-            f'{ctx.prefix}eval # code goes here\n'
-            '# code goes here\n'
-            '# code goes here\n'
-            '\n'
-            f'{ctx.prefix}eval\n'
-            '```\n'
-            '# code goes here\n'
-            '# code goes here\n'
-            '```\n'
-            '*not code*\n'
-            '\n'
-            '... and many more ways.'
-                ), color=SNEKBOX_COLOR).add_footer(
-                f'{GUILD__SUPPORT} only!')
+        return Embed(
+            'eval',
+            (
+                'Executes the given code in an isolated environment.\n'
+                'Usages:\n'
+                f'{ctx.prefix}eval # code goes here\n'
+                '# code goes here\n'
+                '# code goes here\n'
+                '\n'
+                f'{ctx.prefix}eval\n'
+                '```\n'
+                '# code goes here\n'
+                '# code goes here\n'
+                '```\n'
+                '*not code*\n'
+                '\n'
+                '... and many more ways.'
+            ),
+            color = SNEKBOX_COLOR,
+        ).add_footer(
+            f'{GUILD__SUPPORT} only!'
+        )
     
     async def snake_box(ctx, content, executable, config):
         code, is_exception = parse_code_content(content)
@@ -226,18 +231,19 @@ if IS_UNIX:
         
         with ctx.keep_typing(), EvalUserLock(user_id) as user_lock:
             async with EVAL_LOCK:
-                process = await KOKORO.subprocess_exec(NSJAIL_EXECUTABLE,
-                        '--config', config,
-                        f'--cgroup_mem_max={MEM_MAX}',
-                        '--cgroup_mem_mount', str(CGROUP_MEMORY_PARENT.parent),
-                        '--cgroup_mem_parent', CGROUP_MEMORY_PARENT.name,
-                        '--cgroup_pids_max=1',
-                        '--cgroup_pids_mount', str(CGROUP_PIDS_PARENT.parent),
-                        '--cgroup_pids_parent', CGROUP_PIDS_PARENT.name,
-                        '--', executable, '-Iqu', '-c', code,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                        )
+                process = await KOKORO.subprocess_exec(
+                    NSJAIL_EXECUTABLE,
+                    '--config', config,
+                    f'--cgroup_mem_max={MEM_MAX}',
+                    '--cgroup_mem_mount', str(CGROUP_MEMORY_PARENT.parent),
+                    '--cgroup_mem_parent', CGROUP_MEMORY_PARENT.name,
+                    '--cgroup_pids_max=1',
+                    '--cgroup_pids_mount', str(CGROUP_PIDS_PARENT.parent),
+                    '--cgroup_pids_parent', CGROUP_PIDS_PARENT.name,
+                    '--', executable, '-Iqu', '-c', code,
+                    stdout = subprocess.PIPE,
+                    stderr = subprocess.STDOUT,
+                )
                 
                 user_lock.register_input_source(ctx.client, ctx.message.channel, process)
                 
@@ -248,11 +254,12 @@ if IS_UNIX:
                 
                 return_code = process.return_code
                 if return_code is None or return_code == 255:
-                    title = f'Your eval job has failed! Returncode: {return_code!r}'
+                    title = f'Your eval job has failed! Return code: {return_code!r}'
                     description = 'A fatal NsJail error occurred'
+                
                 else:
                     if return_code == 137:
-                        title = f'Your eval job timed out or ran out of memory. Returncode: {return_code!r}'
+                        title = f'Your eval job timed out or ran out of memory. Return code: {return_code!r}'
                     else:
                         title = f'Your eval job has completed with return code {return_code}.'
                     

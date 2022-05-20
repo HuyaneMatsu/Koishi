@@ -72,8 +72,8 @@ And much more!
 
 - Fun
     
-    `9ball` • `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • `sex` •
-    `trivia` • `urban` • `waifu-stats` • `yuno`
+    `9ball` • `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • `self-mute` •
+    `sex` • `trivia` • `urban` • `waifu-stats` • `yuno`
 
 - Games
     
