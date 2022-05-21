@@ -4,8 +4,7 @@ import re, reprlib
 from math import floor
 
 from scarletio import copy_docs, RichAttributeErrorBaseType
-from hata import DISCORD_EPOCH_START
-from hata.discord.utils import PARSE_TIMESTAMP_RP
+from hata.discord.utils import PARSE_TIMESTAMP_RP, DISCORD_EPOCH_START
 
 
 NoneType = type(None)
