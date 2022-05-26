@@ -70,8 +70,8 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
+
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
 async def heart_event(client, event,
     duration : ('str', 'The event\'s duration.'),
     amount : ('int', 'The hearst to earn.'),
@@ -359,8 +359,7 @@ class HeartEventGUI:
         Task(connector.close(), KOKORO)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
 async def daily_event(client, event,
     duration: ('str', 'The event\'s duration.'),
     amount: ('int', 'The extra daily steaks to earn.'),
@@ -813,8 +812,8 @@ AWARD_TYPES = [
     ('daily-streak', 'daily-streak')
 ]
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
+
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
 async def award(client, event,
     target_user: ('user', 'Who do you want to award?'),
     amount: ('int', 'With how much love do you wanna award them?'),
@@ -946,8 +945,8 @@ async def award(client, event,
         raise
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True)
+
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
 async def take(client, event,
     target_user: ('user', 'From who do you want to take love away?'),
     amount: ('int', 'How much love do you want to take away?'),

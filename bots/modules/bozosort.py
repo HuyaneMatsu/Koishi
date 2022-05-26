@@ -1681,7 +1681,7 @@ def bozosort(text):
     return output
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, target='message', allow_by_default=False)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, target='message')
 @set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
 async def bozosort_(
     client,

@@ -13,15 +13,10 @@ def check_permission(event):
         abort(f'You must have {ROLE__SUPPORT__ADMIN.mention} to invoke this command.')
 
 EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
-    set_permission(
-        GUILD__SUPPORT,
-        ROLE__SUPPORT__ADMIN,
-        True,
-    )(None),
+    set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True) @ set_permission(GUILD__SUPPORT, ('role', 0), False),
     name = 'extension',
     description = 'extension related commands',
     guild = GUILD__SUPPORT,
-    allow_by_default = False,
 )
 
 EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'extension.list_per_client'

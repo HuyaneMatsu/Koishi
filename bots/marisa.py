@@ -282,7 +282,7 @@ async def retardify(client, event,
     await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
 
 
-Marisa@set_permission(GUILD__SUPPORT, ('role',     GUILD__SUPPORT.id), False)
+Marisa@set_permission(GUILD__SUPPORT, ('role',                     0), False)
 Marisa@set_permission(GUILD__SUPPORT,           ROLE__SUPPORT__TESTER,  True)
 Marisa@set_permission(GUILD__SUPPORT, ('channel',                  0), False)
 Marisa@set_permission(GUILD__SUPPORT, ('channel', 648137901632126996), True )
@@ -552,7 +552,7 @@ async def debug_command(client, event,
     return ''.join(text_parts)
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
-@set_permission(GUILD__SUPPORT, ('role', GUILD__SUPPORT.id), False)
+@set_permission(GUILD__SUPPORT, ('role',                  0), False)
 @set_permission(GUILD__SUPPORT, ('user', 835013882397458513), True)
 @set_permission(GUILD__SUPPORT, ('user', 385575610006765579), True)
 async def zeref_and_sleep_only(client, event):
