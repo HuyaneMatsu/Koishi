@@ -2,7 +2,7 @@ from hata import ACTIVITY_TYPES, ActivityRich, Client, IntentFlag, Locale
 from hata.ext.extension_loader import EXTENSION_LOADER
 
 import config
-from bot_utils.constants import DEFAULT_CATEGORY_NAME, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI
+from bot_utils.constants import DEFAULT_CATEGORY_NAME, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI, GUILD__SUPPORT
 from bot_utils.utils import category_name_rule, random_error_message_getter
 
 from bot_utils import async_engine # replace sync with async database engine.
@@ -13,6 +13,7 @@ EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
 if MARISA_MODE:
     Marisa = Client(
         config.MARISA_TOKEN,
+        secret = config.MARISA_SECRET,
         client_id = config.MARISA_ID,
         # intents = IntentFlag() - IntentFlag(0).update_by_keys(message_content=True),
         http_debug_options = 'canary',
@@ -30,6 +31,8 @@ if MARISA_MODE:
                 'Feed the cat!': 'Owner hungry!'
             },
         },
+        assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
+        enforce_application_command_permissions = True,
     )
     
     EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)

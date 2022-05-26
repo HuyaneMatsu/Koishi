@@ -1375,11 +1375,14 @@ async def invite_delete(client,invite,):
         )
 
 async def user_info_get(client,access,):
-    headers=IgnoreCaseMultiValueDictionary()
-    headers[AUTHORIZATION]=f'Bearer {access.access_token}'
-    return await bypass_request(client,METHOD_GET,
+    headers = IgnoreCaseMultiValueDictionary()
+    headers[AUTHORIZATION] = f'Bearer {access.access_token}'
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/users/@me',
-        headers=headers,)
+        headers = headers,
+    )
 
 async def client_user_get(client,):
     return await bypass_request(client,METHOD_GET,
@@ -2033,16 +2036,23 @@ async def application_command_permission_get(client, guild, application_command)
     
     return ApplicationCommandPermission.from_data(permission_data)
 
-async def application_command_permission_edit(client, guild, application_command, overwrites):
+async def application_command_permission_edit(client, access, guild, application_command, overwrites):
     application_id = client.application.id
     guild_id = guild.id
     application_command_id = application_command.id
     
     data = {'permissions': [overwrite.to_data() for overwrite in overwrites]}
     
-    await bypass_request(client, METHOD_PUT,
+    headers = IgnoreCaseMultiValueDictionary()
+    headers[AUTHORIZATION] = f'Bearer {access.access_token}'
+    
+    await bypass_request(
+        client,
+        METHOD_PUT,
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}/permissions',
-        data)
+        data,
+        headers = headers,
+    )
 
 async def voice_state_client_edit(client, channel, suppress=False, request_to_speak=False):
     channel_id = channel.id
@@ -5011,10 +5021,12 @@ async def rate_limit_test_0114(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
+        access = await client.owners_access('applications.commands.permissions.update')
+        
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_guild_create(guild, application_command)
         
-        await application_command_permission_edit(client, guild, application_command,
+        await application_command_permission_edit(client, access, guild, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         await application_command_permission_get(client, guild, application_command)
         
@@ -5031,10 +5043,12 @@ async def rate_limit_test_0115(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
+        access = await client.owners_access('applications.commands.permissions.update')
+        
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_guild_create(guild, application_command)
         
-        await application_command_permission_edit(client, guild, application_command,
+        await application_command_permission_edit(client, access, guild, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
         await client.application_command_guild_delete(guild, application_command)
@@ -5050,10 +5064,12 @@ async def rate_limit_test_0116(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
+        access = await client.owners_access('applications.commands.permissions.update')
+        
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_guild_create(guild, application_command)
         
-        await application_command_permission_edit(client, guild, application_command,
+        await application_command_permission_edit(client, access, guild, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
         await client.application_command_guild_delete(guild, application_command)
@@ -5061,7 +5077,7 @@ async def rate_limit_test_0116(client, message):
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_global_create(application_command)
         
-        await application_command_permission_edit(client, guild, application_command,
+        await application_command_permission_edit(client, access, guild, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
         await client.application_command_global_delete(application_command)
@@ -5080,11 +5096,13 @@ async def rate_limit_test_0117(client, message, guild2:'guild'=None):
         
         if guild2 is None:
             await RLT.send('Second guild unknown.')
-
+        
+        access = await client.owners_access('applications.commands.permissions.update')
+        
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_guild_create(guild, application_command)
         
-        await application_command_permission_edit(client, guild, application_command,
+        await application_command_permission_edit(client, access, guild, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
         await client.application_command_guild_delete(guild, application_command)
@@ -5092,7 +5110,7 @@ async def rate_limit_test_0117(client, message, guild2:'guild'=None):
         application_command = ApplicationCommand('test_command_56', 'ayaya')
         application_command = await client.application_command_guild_create(guild2, application_command)
         
-        await application_command_permission_edit(client, guild2, application_command,
+        await application_command_permission_edit(client, access, guild2, application_command,
             [ApplicationCommandPermissionOverwrite(client.owner, True)])
         
         await client.application_command_guild_delete(guild2, application_command)

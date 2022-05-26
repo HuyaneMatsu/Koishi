@@ -178,26 +178,38 @@ async def ready(client):
 
 async def execute_description(client, message):
     prefix = client.command_processor.get_prefix_for(message)
-    return Embed('execute', (
-        'Use an interpreter trough me :3\n'
-        'Usages:\n'
-        f'{prefix}execute # code goes here\n'
-        '# code goes here\n'
-        '# code goes here\n'
-        '\n'
-        f'{prefix}execute\n'
-        '```\n'
-        '# code goes here\n'
-        '# code goes here\n'
-        '```\n'
-        '*not code*\n'
-        '\n'
-        '... and many more ways.'
-            ), color=COLOR__MARISA_HELP).add_footer(
-            'Owner only!')
+    return Embed(
+        'execute',
+        (
+            'Use an interpreter trough me :3\n'
+            'Usages:\n'
+            f'{prefix}execute # code goes here\n'
+            '# code goes here\n'
+            '# code goes here\n'
+            '\n'
+            f'{prefix}execute\n'
+            '```\n'
+            '# code goes here\n'
+            '# code goes here\n'
+            '```\n'
+            '*not code*\n'
+            '\n'
+            '... and many more ways.'
+        ),
+        color = COLOR__MARISA_HELP,
+    ).add_footer(
+        'Owner only!'
+    )
 
-Marisa.commands(Interpreter(locals().copy()), name='execute', description=execute_description, category='UTILITY',
-    checks=[checks.owner_only()])
+Marisa.commands(
+    Interpreter(locals().copy()),
+    name = 'execute',
+    description = execute_description,
+    category = 'UTILITY',
+    checks = [
+        checks.owner_only(),
+    ],
+)
 
 Marisa.commands(sync_request_command, name='sync', category='UTILITY', checks=[checks.owner_only()])
 
@@ -270,6 +282,22 @@ async def retardify(client, event,
     await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
 
 
+Marisa@set_permission(GUILD__SUPPORT, ('role',     GUILD__SUPPORT.id), False)
+Marisa@set_permission(GUILD__SUPPORT,           ROLE__SUPPORT__TESTER,  True)
+Marisa@set_permission(GUILD__SUPPORT, ('channel',                  0), False)
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 648137901632126996), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 890686019811307560), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 791260426780278785), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 790028318237261864), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 776864383183749141), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 830877889322811413), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 403584215855267853), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 557187647831932938), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 654932659620937748), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 533609128288059392), True )
+Marisa@set_permission(GUILD__SUPPORT, ('channel', 918901494839922689), True )
+
+
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_channel_and_role(client, event,
     user : ('user', 'Please input a user') = None,
@@ -277,13 +305,17 @@ async def test_channel_and_role(client, event,
     role : ('role', 'Please input a role') = None,
 ):
     """Testing entities."""
-    return \
-        f'resolved_users = {event.resolved_users!r}\n' \
-        f'resolved_channels = {event.resolved_channels!r}\n' \
-        f'resolved_roles = {event.resolved_roles!r}\n' \
-        f'user = {user!r}\n' \
-        f'channel = {channel!r}\n' \
+    interaction = event.interaction
+    
+    return (
+        f'resolved_users = {interaction.resolved_users!r}\n'
+        f'resolved_channels = {interaction.resolved_channels!r}\n'
+        f'resolved_roles = {interaction.resolved_roles!r}\n'
+        f'\n'
+        f'user = {user!r}\n'
+        f'channel = {channel!r}\n'
         f'role = {role!r}'
+    )
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
@@ -456,19 +488,6 @@ async def collect_reactions(client, event):
     else:
         yield 'No reactions were collected.'
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
-async def tester_only(client, event):
-    """Tester only hopefully."""
-    return 'Noice'
-
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
-async def Late_abort(client, event):
-    """Aborts after acknowledging."""
-    yield
-    abort('Nice?')
-
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def debug_command(client, event,
@@ -501,7 +520,8 @@ async def debug_command(client, event,
         'Name : `', application_command.name, '`\n'
         'Id : `', repr(application_command.id), '`\n'
         'Allow in dm : `', repr(application_command.allow_in_dm), '`\n'
-        'required_permissions : `', repr(application_command.required_permissions), '`\n'
+        'required permissions : `', repr(application_command.required_permissions), '`\n'
+        'target type : `', repr(application_command.target_type.name), '`\n'
         '**Permission overwrites**:\n'
     ]
     
@@ -531,15 +551,16 @@ async def debug_command(client, event,
     
     return ''.join(text_parts)
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ('user', 707113350785400884), True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
+@set_permission(GUILD__SUPPORT, ('role', GUILD__SUPPORT.id), False)
+@set_permission(GUILD__SUPPORT, ('user', 835013882397458513), True)
 @set_permission(GUILD__SUPPORT, ('user', 385575610006765579), True)
 async def zeref_and_sleep_only(client, event):
     """Zeref and sleep only."""
     return 'LuL'
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
-@set_permission(GUILD__SUPPORT, ('user', 707113350785400884), False)
+@set_permission(GUILD__SUPPORT, ('user', 835013882397458513), False)
 async def only_zeref_not(client, event):
     """Loli Police"""
     return 'Lets go nekos.'
@@ -1125,12 +1146,8 @@ async def extra_4(client, event):
     yield f'{delay:.0f} ms'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_form(event):
-    if not event.user.has_role(ROLE__SUPPORT__TESTER):
-        abort('Tester only')
-    
     return Form(
         'This does nothing',
         [
@@ -1150,8 +1167,7 @@ TEST_COMPONENT_RESPONSE_BUTTON = Button(
     custom_id = TEST_COMPONENT_RESPONSE_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_component_response():
     return InteractionResponse('_ _', components=TEST_COMPONENT_RESPONSE_BUTTON)
 
@@ -1171,8 +1187,7 @@ TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_FORM = Form(
     custom_id = TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_form_response_repr_ac():
     return TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_FORM
 
@@ -1195,8 +1210,7 @@ TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON = Button(
     custom_id = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_form_response_repr_mc():
     return InteractionResponse('_ _', components=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON)
 
@@ -1217,8 +1231,7 @@ TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_BUTTON = Button(
     custom_id = TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_component_responding_double():
     return InteractionResponse('_ _', components=TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_BUTTON)
 
@@ -1231,8 +1244,7 @@ async def test_component_responding_click(event):
         yield 'followup'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_double():
     yield 'followup'
     yield 'cake'
@@ -1247,8 +1259,7 @@ TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_FORM = Form(
     custom_id = TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_form_responding_ac_double():
     return TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_FORM
 
@@ -1272,8 +1283,7 @@ TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_BUTTON = Button(
     custom_id = TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def test_form_responding_mc_double():
     return InteractionResponse('_ _', components=TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_BUTTON)
 
@@ -1289,8 +1299,7 @@ async def test_form_responding_mc_double_form_submit(client, event):
 
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT)
 async def resend(
     client,
     event,
@@ -1308,15 +1317,13 @@ async def locale(event):
         f'guild locale: {event.guild_locale.name}'
     )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def test_edit(client, event):
     yield
     yield 'a'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, allow_by_default=False, show_for_invoking_user_only=True)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def test_autocomplete_count(client, event, parameter:str):
     return parameter
 
@@ -1512,6 +1519,11 @@ async def not_in_dm():
 @Marisa.interactions(is_global=True, allow_in_dm=True)
 async def in_dm_too():
     return 'try in dm too'
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT, target='message')
+async def message_context():
+    return 'I am a message context command'
 
 
 

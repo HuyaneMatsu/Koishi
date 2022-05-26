@@ -52,6 +52,7 @@ async def clear(client, event,
     
     if (before is None) or (not before):
         before = event.id
+    
     else:
         delta = parse_rdelta(before)
         if delta is None:
@@ -66,7 +67,7 @@ async def clear(client, event,
         if delta is None:
             yield Embed('Error', '`after` could not be parsed.')
         
-        before = datetime_to_id(datetime.utcnow() - delta)
+        after = datetime_to_id(datetime.utcnow() - delta)
     
     yield 'Yeeting messages began'
     

@@ -5,14 +5,14 @@ MARISA_MODE = True              # (bool) Whether Marisa or the other clients sho
 
 KOISHI_TOKEN = ''               # bot token. (str)
 KOISHI_ID = 0                   # bot id (int), can be 0.
-KOISHI_SECRET = None            # client_secret (str) for oauth2, can be None.
+KOISHI_SECRET = None            # client secret (str) for oauth2, can be None.
 KOISHI_PREFIX = 'k!'            # default prefix. (str)
 KOISHI_TOP_GG_TOKEN = ''        # top.gg token of the bot.
 KOISHI_TOP_GG_AUTHORIZATION = ''# top.gg authorization used for received webhooks.
 
 SATORI_TOKEN = ''               # bot token (str) for second bot.
 SATORI_ID = 0                   # bot id (int) for second bot, can be 0.
-SATORI_SECRET = None            # client_secret (str) for oauth2, can be None.
+SATORI_SECRET = None            # client secret (str) for oauth2, can be None.
 SATORI_PREFIX = '&'             # default prefix (str)
 
 FLAN_TOKEN = ''                 # bot token (str) for third bot.
@@ -21,6 +21,7 @@ FLAN_PREFIX = '/'               # default prefix. (str)
 
 MARISA_TOKEN = ''               # bot token (str) for third bot.
 MARISA_ID = 0                   # bot id (int) for 4th bot, can be 0.
+MARISA_SECRET = None            # client secret (str) for oauth2, can be None.
 MARISA_PREFIX  = '$'            # default prefix (str)
 
 NITORI_TOKEN = ''               # bot token (str) for Nitori

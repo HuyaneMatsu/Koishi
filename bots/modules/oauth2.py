@@ -16,6 +16,7 @@ VALUABLE_SCOPES = [
     'guilds',
     'guilds.join',
     'email',
+    'applications.commands.permissions.update',
     'applications.builds.read',
     'applications.builds.upload',
     'applications.entitlements',
