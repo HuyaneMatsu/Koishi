@@ -1,10 +1,9 @@
 from functools import partial as partial_func
 from datetime import datetime, timedelta
-from scarletio import future_or_timeout, Task, to_json
+from scarletio import to_json
 from scarletio.web_common import quote
-from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, KOKORO, is_url, Color
-from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row, \
-    set_permission
+from hata import Embed, parse_emoji, DiscordException, ERROR_CODES, Client, STICKERS, USERS, Color, Permission
+from hata.ext.slash import abort, InteractionResponse, Button, ButtonStyle, wait_for_component_interaction, Row
 from bot_utils.models import DB_ENGINE, sticker_counter_model, STICKER_COUNTER_TABLE
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
 from dateutil.relativedelta import relativedelta
@@ -202,22 +201,23 @@ async def sticker_top(
     ).add_thumbnail(sticker.url)
 
 
+def assert_user_permissions(event):
+    if not event.user_permissions.can_manage_emojis_and_stickers:
+        abort(f'You must have manage emojis & stickers permissions to invoke this command.')
+
+
 STICKER_SYNC_COMMANDS = STICKER_COMMANDS.interactions(
-    set_permission(
-        GUILD__SUPPORT,
-        ROLE__SUPPORT__EMOJI_MANAGER,
-        True,
-    )(None),
+    None,
     guild = GUILD__SUPPORT,
     name = 'sync',
     description = 'Syncs sticker table. (You must have emoji-council role)',
+    required_permissions = Permission().update_by_keys(manage_emojis_and_stickers=True)
 )
 
 @STICKER_SYNC_COMMANDS.interactions
 async def sync_stickers_(event):
     """Syncs sticker list stickers. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
+    assert_user_permissions(event)
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(
@@ -244,8 +244,7 @@ async def sync_stickers_(event):
 @STICKER_SYNC_COMMANDS.interactions
 async def sync_users_(event):
     """Syncs sticker list users. (You must have emoji-council role)"""
-    if not event.user.has_role(ROLE__SUPPORT__EMOJI_MANAGER):
-        abort(f'You must have {ROLE__SUPPORT__EMOJI_MANAGER:m} role to invoke this command.')
+    assert_user_permissions(event)
     
     async with DB_ENGINE.connect() as connector:
         response = await connector.execute(

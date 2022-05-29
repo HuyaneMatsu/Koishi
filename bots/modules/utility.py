@@ -11,13 +11,13 @@ from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji,
 from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from scarletio import WaitTillExc, ReuBytesIO
 from hata.ext.slash.menus import Pagination
-from hata.ext.slash import abort, InteractionResponse, set_permission, Button, Row
+from hata.ext.slash import abort, InteractionResponse, Button, Row
 
 from PIL import Image as PIL
 from dateutil.relativedelta import relativedelta
 
 from bot_utils.tools import Pagination10step
-from bot_utils.constants import ROLE__SUPPORT__TESTER, GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR
+from bot_utils.constants import GUILD__SUPPORT
 
 UTILITY_COLOR = Color(0x5dc66f)
 
@@ -106,12 +106,15 @@ async def color_(client, event,
         await client.interaction_followup_message_create(event, embed=embed, file=('color.png', buffer))
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False, target='message')
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@SLASH_CLIENT.interactions(
+    guild = GUILD__SUPPORT,
+    target = 'message',
+    required_permissions = Permission().update_by_keys(manage_messages=True),
+)
 async def raw(client, event):
     """Shows up the message's payload."""
-    if not event.user.has_role(ROLE__SUPPORT__TESTER):
-        abort(f'You must have {ROLE__SUPPORT__TESTER.mention} to invoke this command.')
+    if not event.user_permissions.can_administrator:
+        abort('You must have manage messages permission to invoke this command.')
     
     data = await client.http.message_get(event.channel_id, event.interaction.target_id)
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
@@ -825,12 +828,11 @@ def add_user_field(embed, index, joined_at, user):
         ),
     )
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR, True)
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(kick_users=True))
 async def latest_users(client, event):
     """Shows the new users of the guild."""
-    if not event.user.has_role(ROLE__SUPPORT__MODERATOR):
-        abort('Hacker trying to hack Discord.')
+    if not event.user_permissions.can_kick_users:
+        abort('You must have kick users to invoke this command.')
     
     date_limit = datetime.now() - timedelta(days=7)
     
@@ -856,12 +858,11 @@ async def latest_users(client, event):
     return InteractionResponse(embed=embed, allowed_mentions=None)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, allow_by_default=False)
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__MODERATOR, True)
-async def all_users(client, event,):
+@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(kick_users=True))
+async def all_users(client, event):
     """Shows the new users of the guild."""
-    if not event.user.has_role(ROLE__SUPPORT__MODERATOR):
-        abort('Hacker trying to hack Discord.')
+    if not event.user_permissions.can_kick_users:
+        abort('You must have kick users to invoke this command.')
     
     users = []
     guild = event.guild

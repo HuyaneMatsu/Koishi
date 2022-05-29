@@ -7,7 +7,7 @@ from hata import (
     BUILTIN_EMOJIS, Client, DiscordException, ERROR_CODES, Embed, InteractionType, KOKORO, Permission, USERS, ZEROUSER,
     parse_tdelta
 )
-from hata.ext.slash import Button, Row, abort, set_permission, wait_for_component_interaction
+from hata.ext.slash import Button, Row, abort, wait_for_component_interaction
 from scarletio import Future, Task
 from sqlalchemy.sql import desc, select
 
@@ -79,7 +79,7 @@ async def heart_event(client, event,
 ):
     """Starts a heart event at the channel."""
     while True:
-        if not event.user.has_role(ROLE__SUPPORT__ADMIN):
+        if not event.user_permissions.can_administrator:
             response = f'{ROLE__SUPPORT__ADMIN.mention} only!'
             error = True
             break
@@ -463,7 +463,7 @@ async def daily_event(client, event,
     
     try:
         component_event = await wait_for_component_interaction(message,
-            check=partial_func(heart_event_start_checker, client), timeout=300.)
+            check=partial_func(heart_event_start_checker, client), timeout=300.0)
     except TimeoutError:
         try:
             await client.interaction_response_message_edit(event, message, 'Daily event cancelled, timeout.',
@@ -668,8 +668,10 @@ async def gift(client, event,
     source_user = event.user
     
     if not (source_user.has_role(ROLE__SUPPORT__ELEVATED) or source_user.has_role(ROLE__SUPPORT__BOOSTER)):
-        abort(f'You must have either {ROLE__SUPPORT__ELEVATED.name} or '
-            f'{ROLE__SUPPORT__BOOSTER.name} role to invoke this command.', allowed_mentions=None)
+        abort(
+            f'You must have either {ROLE__SUPPORT__ELEVATED.name} or '
+            f'{ROLE__SUPPORT__BOOSTER.name} role to invoke this command.'
+        )
     
     if source_user is target_user:
         abort('You cannot give love to yourself..')
@@ -821,8 +823,8 @@ async def award(client, event,
     with_: (AWARD_TYPES, 'Select award type') = 'hearts',
 ):
     """Awards the user with love."""
-    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
-        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
+    if not event.user_permissions.can_administrator:
+        abort(f'You must have administrator permission to invoke this command.')
     
     if amount <= 0:
         yield Embed(
@@ -952,8 +954,8 @@ async def take(client, event,
     amount: ('int', 'How much love do you want to take away?'),
 ):
     """Takes away hearts form the lucky user."""
-    if not event.user.has_role(ROLE__SUPPORT__ADMIN):
-        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
+    if not event.user_permissions.can_administrator:
+        abort(f'You must have administrator permission to invoke this command.')
     
     if amount <= 0:
         abort('You cannot award non-positive amount of hearts..')

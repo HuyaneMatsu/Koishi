@@ -1,16 +1,14 @@
 import re, functools
-from datetime import datetime, timedelta
 from random import random, choice
 from time import perf_counter
 from enum import Enum
 
-from dateutil.relativedelta import relativedelta
 from bs4 import BeautifulSoup
 
 from scarletio import sleep
-from hata import Client, Embed, parse_emoji, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, Channel, \
-    DiscordException, ERROR_CODES, Role, BUILTIN_EMOJIS, Emoji, CHANNEL_TYPES, Permission
-from hata.ext.slash import configure_parameter, InteractionResponse, abort, set_permission, Button, Row, ButtonStyle, \
+from hata import Client, Embed, parse_emoji, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, Channel, Role, \
+    DiscordException, ERROR_CODES, BUILTIN_EMOJIS, Emoji, Permission
+from hata.ext.slash import configure_parameter, InteractionResponse, abort, Button, Row, ButtonStyle, \
     wait_for_component_interaction, iter_component_interactions, Select, Option, P, Form, TextInput, TextInputStyle
 
 from bot_utils.constants import GUILD__SUPPORT as TEST_GUILD, ROLE__SUPPORT__MODERATOR
@@ -375,50 +373,6 @@ async def user_id(event,
     return str(user_id)
 
 # command end
-# command start slash latest-users
-
-MODERATOR_ROLE = Role.precreate(MODERATOR_ROLE_ID)
-
-@Nitori.interactions(guild=TEST_GUILD, allow_by_default=False)
-@set_permission(TEST_GUILD, MODERATOR_ROLE, True)
-async def latest_users(event):
-    """Shows the new users of the guild."""
-    date_limit = datetime.utcnow() - timedelta(days=7)
-    
-    users = []
-    guild = event.guild
-    for user in guild.users.values():
-        # `joined_at` might be set as `None` if the user is a lurker.
-        # We can ignore lurkers, so use `created_at` which defaults to Discord epoch.
-        created_at = user.get_guild_profile_for(guild).created_at
-        if created_at > date_limit:
-            users.append((created_at, user))
-    
-    users.sort(reverse=True)
-    del users[10:]
-    
-    embed = Embed('Recently joined users')
-    if users:
-        for index, (joined_at, user) in enumerate(users, 1):
-            created_at = user.created_at
-            embed.add_field(
-                f'{index}. {user.full_name}',
-                (
-                    f'Id : {user.id}\n'
-                    f'Mention : {user.mention}\n'
-                    '\n'
-                    f'Joined : {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]\n'
-                    f'Created : {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-                    f'Difference : {elapsed_time(relativedelta(created_at, joined_at))}'
-                ),
-            )
-    
-    else:
-        embed.description = '*none*'
-    
-    return InteractionResponse(embed=embed, allowed_mentions=None)
-
-# command end
 # command start slash ping
 
 @Nitori.interactions(wait_for_acknowledgement=True)
@@ -434,7 +388,9 @@ async def ping():
 # command start slash enable-ping
 
 @Nitori.interactions(is_global=True)
-async def enable_ping(client, event,
+async def enable_ping(
+    client,
+    event,
     allow: ('bool', 'Enable?') = True,
 ):
     """Enables the ping command in your guild."""
@@ -443,7 +399,7 @@ async def enable_ping(client, event,
         abort('Guild only command.')
     
     if not event.user_permissions.can_administrator:
-        abort('You must have administrator permission to use this command.')
+        abort('You must have administrator permission to invoke this command.')
     
     application_commands = await client.application_command_guild_get_all(guild)
     for application_command in application_commands:
@@ -992,7 +948,6 @@ async def cat_fed(event):
 # command end
 # command start components role-claimer
 
-ROLE_OWNER = Role.precreate(403581319139033090)
 
 ROLE_NSFW_ACCESS = Role.precreate(828576094776590377)
 ROLE_ANNOUNCEMENTS = Role.precreate(538397994421190657)
@@ -1008,14 +963,13 @@ ROLE_CLAIMER_ROLES = {
 }
 
 
-@Nitori.interactions(guild=TEST_GUILD, allow_by_default=False)
-@set_permission(TEST_GUILD, ROLE_OWNER, True)
+@Nitori.interactions(guild=TEST_GUILD, required_permissions=Permission().update_by_keys(administrator=True))
 async def role_claimer(event):
     """Role claimer message. (Owner only)"""
     
     # Double check.
-    if not event.user.has_role(ROLE_OWNER):
-        abort('Owner only')
+    if not event.user_permissions.can_administrator:
+        abort('Admin only')
     
     return InteractionResponse('Claim role by clicking on it', components=ROLE_CLAIMER_COMPONENTS)
 

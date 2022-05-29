@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from hata import Client, Embed, DiscordException, ERROR_CODES, User
-from hata.ext.slash import abort, set_permission
+from hata import Client, Embed, DiscordException, ERROR_CODES, User, Permission
+from hata.ext.slash import abort
 from sqlalchemy.sql import select
 from sqlalchemy.dialects.postgresql import insert
 
@@ -23,16 +23,18 @@ PROPOSAL_CANCEL_REASON_OVER_LIMIT = 2
 
 SLASH_CLIENT: Client
 
+
+def assert_required_permission(event):
+    if not event.user_permissions.can_administrator:
+        abort('You must have administrator permission to invoke this command.')
+
+
 TRANSFER = SLASH_CLIENT.interactions(
-    set_permission(
-        GUILD__SUPPORT,
-        ROLE__SUPPORT__ADMIN,
-        True,
-    )(None),
+    None,
     name = 'transfer',
     description = 'Transfers all of someone\'s hearts to an other person.',
     guild = GUILD__SUPPORT,
-    allow_by_default = False,
+    required_permissions = Permission().update_by_keys(administrator=True),
 )
 
 @TRANSFER.interactions
@@ -42,6 +44,7 @@ async def user_(client, event,
     message: ('str', 'Optional message to send with the transfer.') = None,
 ):
     """Transfer with user parameters."""
+    assert_required_permission(event)
     return do_transfer(client, event, source_user, target_user, message)
 
 @TRANSFER.interactions
@@ -51,6 +54,7 @@ async def user_id(client, event,
     message: ('str', 'Optional message to send with the transfer.') = None,
 ):
     """Transfer with user_id parameters | Use this for deleted users."""
+    assert_required_permission(event)
     yield
     
     try:

@@ -1,7 +1,7 @@
 import re
 
-from hata import Client
-from hata.ext.slash import set_permission, abort, InteractionResponse
+from hata import Client, Permission
+from hata.ext.slash import abort, InteractionResponse
 
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__TESTER
 
@@ -1681,15 +1681,18 @@ def bozosort(text):
     return output
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, target='message')
-@set_permission(GUILD__SUPPORT, ROLE__SUPPORT__TESTER, True)
+@SLASH_CLIENT.interactions(
+    guild = GUILD__SUPPORT,
+    target = 'message',
+    required_permissions = Permission().update_by_keys(manage_messages=True),
+)
 async def bozosort_(
     client,
     event,
     message,
 ):
-    if not event.user.has_role(ROLE__SUPPORT__TESTER):
-        abort('Hacking trying to hack Discord')
+    if (not event.user_permissions.can_manage_messages):
+        abort('You need to have manage messages to invoke this command.')
     
     content = message.content
     if content is None:

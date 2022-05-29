@@ -123,7 +123,7 @@ class WaifuType(RichAttributeErrorBaseType):
         
         async def _save_task(self):
             try:
-                async with DB_ENGINE() as connector:
+                async with DB_ENGINE.connect() as connector:
                     while True:
                         entry_id = self.entry_id
                         if entry_id == ENTRY_ID_NON_EXISTENT:

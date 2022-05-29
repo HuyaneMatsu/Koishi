@@ -551,20 +551,6 @@ async def debug_command(client, event,
     
     return ''.join(text_parts)
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
-@set_permission(GUILD__SUPPORT, ('role',                  0), False)
-@set_permission(GUILD__SUPPORT, ('user', 835013882397458513), True)
-@set_permission(GUILD__SUPPORT, ('user', 385575610006765579), True)
-async def zeref_and_sleep_only(client, event):
-    """Zeref and sleep only."""
-    return 'LuL'
-
-@Marisa.interactions(guild=GUILD__SUPPORT)
-@set_permission(GUILD__SUPPORT, ('user', 835013882397458513), False)
-async def only_zeref_not(client, event):
-    """Loli Police"""
-    return 'Lets go nekos.'
-
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
 async def roll(client, event,
@@ -701,30 +687,6 @@ async def getting_good(client, event):
 
 
 @Marisa.interactions(guild=GUILD__SUPPORT)
-async def we_gucci(client, event):
-    """Getting there."""
-    components = [
-        Button('cake', custom_id='cake', style=ButtonStyle.blue),
-        Button('cat', custom_id='cat', style=ButtonStyle.gray),
-        Button('snake', custom_id='snake', style=ButtonStyle.green),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
-    ]
-    
-    yield InteractionResponse(embed=Embed('Choose your poison.'), components=components)
-    
-    try:
-        async for component_interaction in iter_component_interactions(event, timeout=10.0, count=3):
-            emoji = BUILTIN_EMOJIS[component_interaction.interaction.custom_id]
-            yield InteractionResponse(emoji.as_emoji, components=components, event=component_interaction)
-    except TimeoutError:
-        await client.interaction_response_message_edit(event, components=None)
-        return
-    
-    yield InteractionResponse(embed=Embed('Choose your poison.', 'Interaction exhausted.'),
-        components=None, message=event.message)
-
-
-@Marisa.interactions(guild=GUILD__SUPPORT)
 async def link():
     """Melo Melo!"""
     component = Button(
@@ -788,8 +750,11 @@ async def select_test():
         ),
     ]
     
-    yield InteractionResponse(embed=Embed('Choose your poison.'), components=main_component,
-        show_for_invoking_user_only=True)
+    yield InteractionResponse(
+        embed = Embed('Choose your poison.'),
+        components = main_component,
+        show_for_invoking_user_only = True,
+    )
 
 @Marisa.commands
 @cooldown('user', 30.0)
@@ -1151,7 +1116,7 @@ async def test_form(event):
     return Form(
         'This does nothing',
         [
-            TextInput('watch neko', custom_id='form_value')
+            TextInput('watch neko', custom_id='form_value'),
         ],
         custom_id = 'watch_neko',
     )
@@ -1182,7 +1147,7 @@ TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID = 'test.form_response_repr
 TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_FORM = Form(
     'Pls submit',
     [
-        TextInput('pain')
+        TextInput('pain'),
     ],
     custom_id = TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID,
 )
@@ -1200,7 +1165,7 @@ TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID = 'test.form_response_repr.m
 TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_FORM = Form(
     'Pls submit',
     [
-        TextInput('pain')
+        TextInput('pain'),
     ],
     custom_id = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID,
 )
@@ -1322,6 +1287,10 @@ async def test_edit(client, event):
     yield
     yield 'a'
 
+@Marisa.interactions(guild=GUILD__SUPPORT)
+@set_permission(GUILD__SUPPORT, ('role', 0), False)
+async def test_permissions():
+    return 'beep'
 
 @Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def test_autocomplete_count(client, event, parameter:str):
