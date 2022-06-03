@@ -1,7 +1,7 @@
 import re
 
 from hata import Client, Embed
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 from hata.ext.slash import abort, Button, InteractionResponse
 from random import choice, randint, random
 from bot_utils.constants import GUILD__SUPPORT

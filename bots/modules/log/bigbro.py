@@ -2,7 +2,7 @@ from datetime import datetime
 
 from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTIVITY_TYPES
 from hata.discord.utils import DISCORD_EPOCH_START
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 
 from bot_utils.constants import GUILD__SUPPORT, CATEGORY__SUPPORT__BIG_BRO
 

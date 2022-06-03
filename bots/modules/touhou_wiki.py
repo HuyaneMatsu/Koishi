@@ -7,7 +7,7 @@ from scarletio import from_json
 from hata.ext.slash import abort
 from hata.discord.http import LIBRARY_USER_AGENT
 from scarletio.web_common.headers import USER_AGENT, CONTENT_TYPE
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 
 from bot_utils.tools import BeautifulSoup
 

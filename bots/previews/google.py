@@ -6,7 +6,7 @@ from bot_utils.constants import GUILD__SUPPORT
 from hata import Client, KOKORO, Embed, Color
 from scarletio import Lock
 from hata.ext.slash.menus import Pagination
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 
 require(GOOGLE_API_KEYS=list)
 

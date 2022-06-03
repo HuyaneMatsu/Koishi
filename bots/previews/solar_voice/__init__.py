@@ -1,4 +1,4 @@
-from hata.ext.extension_loader import import_extension, require
+from hata.ext.plugin_loader import import_extension, require
 require(SOLARLINK_VOICE=True)
 
 from .command import *

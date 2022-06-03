@@ -1,8 +1,8 @@
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case
 
-from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS, ExtensionError
-from hata import Embed, Client, CLIENTS
-from hata.ext.slash import set_permission, Select, Option, InteractionResponse, abort
+from hata.ext.plugin_loader import EXTENSION_LOADER, EXTENSIONS, ExtensionError
+from hata import Embed, Client, CLIENTS, Permission
+from hata.ext.slash import Select, Option, InteractionResponse, abort
 
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__ADMIN
 
@@ -13,10 +13,11 @@ def check_permission(event):
         abort(f'You must have {ROLE__SUPPORT__ADMIN.mention} to invoke this command.')
 
 EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
-    set_permission(GUILD__SUPPORT, ROLE__SUPPORT__ADMIN, True) @ set_permission(GUILD__SUPPORT, ('role', 0), False),
+    None,
     name = 'extension',
     description = 'extension related commands',
     guild = GUILD__SUPPORT,
+    required_permissions = Permission().update_by_keys(administrator=True),
 )
 
 EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'extension.list_per_client'
@@ -293,7 +294,7 @@ async def register(event,
         abort(f'There is already an extension added with the given name: `{extension.name}`.')
     
     try:
-        EXTENSION_LOADER.add(name)
+        EXTENSION_LOADER.register(name)
     except ImportError:
         title = f'Registering {name!r} extension failed.'
         description = 'There is no such extension.'

@@ -62,7 +62,6 @@ else:
         count_top_gg_vote = Column(Int32, default=0)
         
         # Waifu
-        waifu_owner_id  = Column(Int64, default=0)
         waifu_cost      = Column(Int64, default=0)
         waifu_divorces  = Column(Int32, default=0)
         waifu_slots     = Column(Int32, default=1)
@@ -83,6 +82,8 @@ else:
         id              = Column(Int64, primary_key=True)
         user_id         = Column(Int64)
         waifu_id        = Column(Int64)
+        waifu_type      = Column(Int16)
+    
     
     WAIFU_LIST_TABLE = waifu_list_model.__table__
     
@@ -204,7 +205,6 @@ else:
         daily_next = None,
         daily_streak = 0,
         total_allocated = 0,
-        waifu_owner_id = 0,
         waifu_cost = 0,
         waifu_divorces = 0,
         waifu_slots = 1,
@@ -236,7 +236,6 @@ else:
             daily_next      = daily_next,
             daily_streak    = daily_streak,
             total_allocated = total_allocated,
-            waifu_owner_id  = waifu_owner_id,
             waifu_cost      = waifu_cost,
             waifu_divorces  = waifu_divorces,
             waifu_slots     = waifu_slots,

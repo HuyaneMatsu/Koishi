@@ -10,7 +10,7 @@ from scarletio import IS_UNIX
 
 from bot_utils.interpreter_v2 import parse_code_content
 from bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 
 # installing nsjail:
 # make a directory for it somewhere

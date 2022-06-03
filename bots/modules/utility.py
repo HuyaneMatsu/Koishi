@@ -612,7 +612,7 @@ async def avatar(
         url = user.avatar_url_at_as(event.guild_id, size=4096)
     
     elif type_ == AVATAR_TYPE_GUILD:
-        url = user.avatar_url_for(event.guild_id, size=4096)
+        url = user.avatar_url_for_as(event.guild_id, size=4096)
     
     elif type_ == AVATAR_TYPE_GLOBAL:
         url = user.avatar_url_as(size=4096)

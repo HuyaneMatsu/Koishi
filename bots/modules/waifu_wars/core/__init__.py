@@ -1,4 +1,4 @@
-from hata.ext.extension_loader import import_extension
+from hata.ext.plugin_loader import import_extension
 
 constants = import_extension('.constants')
 waifu_type = import_extension('.waifu_type')

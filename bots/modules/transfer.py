@@ -104,7 +104,6 @@ async def do_transfer(client, event, source_user, target_user, message):
                     user_common_model.count_daily_for_waifu,
                     user_common_model.count_top_gg_vote,
                     
-                    user_common_model.waifu_owner_id,
                     user_common_model.waifu_cost,
                     user_common_model.waifu_divorces,
                     user_common_model.waifu_slots,
@@ -155,7 +154,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             source_user_count_daily_for_waifu = 0
             source_user_count_top_gg_vote = 0
             
-            source_user_waifu_owner_id = 0
             source_user_waifu_cost = 0
             source_user_waifu_divorces = 0
             source_user_waifu_slots = 1
@@ -168,7 +166,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             _, \
             \
             source_user_total_love, \
-            source_user_total_allocated, \
             \
             source_user_daily_next, \
             source_user_daily_streak, \
@@ -178,7 +175,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             source_user_count_daily_for_waifu, \
             source_user_count_top_gg_vote, \
             \
-            source_user_waifu_owner_id, \
             source_user_waifu_cost, \
             source_user_waifu_divorces, \
             source_user_waifu_slots, \
@@ -209,7 +205,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             target_user_count_daily_for_waifu = 0
             target_user_count_top_gg_vote = 0
             
-            target_user_waifu_owner_id = 0
             target_user_waifu_cost = 0
             target_user_waifu_divorces = 0
             target_user_waifu_slots = 1
@@ -232,7 +227,6 @@ async def do_transfer(client, event, source_user, target_user, message):
             target_user_count_daily_for_waifu, \
             target_user_count_top_gg_vote, \
             \
-            target_user_waifu_owner_id, \
             target_user_waifu_cost, \
             target_user_waifu_divorces, \
             target_user_waifu_slots, \
@@ -271,31 +265,8 @@ async def do_transfer(client, event, source_user, target_user, message):
         
         if target_user_waifu_cost >= source_user_waifu_cost:
             new_waifu_cost = target_user_waifu_cost
-            new_waifu_owner_id = target_user_waifu_owner_id
-            
-            if target_user_waifu_owner_id:
-                keep_target_waifu_owner = WAIFU_STATE_KEEP
-            else:
-                keep_target_waifu_owner = WAIFU_STATE_NONE
-            
-            if source_user_waifu_owner_id:
-                keep_source_waifu_owner = WAIFU_STATE_DIVORCE
-            else:
-                keep_source_waifu_owner = WAIFU_STATE_NONE
-        
         else:
             new_waifu_cost = source_user_waifu_cost
-            new_waifu_owner_id = source_user_waifu_owner_id
-            
-            if target_user_waifu_owner_id:
-                keep_target_waifu_owner = WAIFU_STATE_DIVORCE
-            else:
-                keep_target_waifu_owner = WAIFU_STATE_NONE
-            
-            if source_user_waifu_owner_id:
-                keep_source_waifu_owner = WAIFU_STATE_KEEP
-            else:
-                keep_source_waifu_owner = WAIFU_STATE_NONE
         
         
         new_waifu_divorces = source_user_waifu_divorces + target_user_waifu_divorces
@@ -358,14 +329,6 @@ async def do_transfer(client, event, source_user, target_user, message):
                 )
             )
         
-        await connector.execute(
-            USER_COMMON_TABLE.update(
-                user_common_model.waifu_owner_id == source_user.id,
-            ).values(
-                waifu_owner_id = target_user.id,
-            )
-        )
-        
         if (target_user_entry_id != -1):
             await connector.execute(
                 USER_COMMON_TABLE.update(
@@ -375,7 +338,6 @@ async def do_transfer(client, event, source_user, target_user, message):
                     daily_next = new_daily_next,
                     daily_streak = new_daily_streak,
                     total_allocated = target_user_total_allocated,
-                    waifu_owner_id = new_waifu_owner_id,
                     waifu_cost = new_waifu_cost,
                     waifu_divorces = new_waifu_divorces,
                     waifu_slots = new_waifu_slots,
@@ -396,7 +358,6 @@ async def do_transfer(client, event, source_user, target_user, message):
                     daily_next = new_daily_next,
                     daily_streak = new_daily_streak,
                     total_allocated = target_user_total_allocated,
-                    waifu_owner_id = new_waifu_owner_id,
                     waifu_cost = new_waifu_cost,
                     waifu_divorces = new_waifu_divorces,
                     waifu_slots = new_waifu_slots,
@@ -410,29 +371,13 @@ async def do_transfer(client, event, source_user, target_user, message):
             )
         
         # Transfer ownership
-        
-        if keep_target_waifu_owner == WAIFU_STATE_DIVORCE:
-            await connector.execute(
-                WAIFU_LIST_TABLE.delete().where(
-                    waifu_list_model.waifu_id == target_user.id,
-                )
+        await connector.execute(
+            WAIFU_LIST_TABLE.update(
+                waifu_list_model.waifu_id == source_user.id,
+            ).values(
+                waifu_id = target_user.id,
             )
-        
-        if keep_source_waifu_owner == WAIFU_STATE_DIVORCE:
-            await connector.execute(
-                WAIFU_LIST_TABLE.delete().where(
-                    waifu_list_model.waifu_id == source_user.id,
-                )
-            )
-            
-        elif keep_source_waifu_owner == WAIFU_STATE_KEEP:
-            await connector.execute(
-                WAIFU_LIST_TABLE.update(
-                    waifu_list_model.waifu_id == source_user.id,
-                ).values(
-                    waifu_id = target_user.id,
-                )
-            )
+        )
         
         # Transfer items
         

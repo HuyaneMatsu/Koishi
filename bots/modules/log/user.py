@@ -2,7 +2,7 @@ from datetime import datetime
 from hata import Client, Embed, DATETIME_FORMAT_CODE, elapsed_time
 from dateutil.relativedelta import relativedelta
 from bot_utils.constants import CHANNEL__SUPPORT__LOG_USER, GUILD__SUPPORT
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 
 require(Satori=Client)
 

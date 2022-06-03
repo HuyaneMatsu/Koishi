@@ -1,6 +1,6 @@
 import hata
 import hata.ext.patchouli
-import hata.ext.extension_loader
+import hata.ext.plugin_loader
 import hata.ext.slash
 import hata.ext.commands_v2
 import hata.ext.commands_v2.helps.subterranean

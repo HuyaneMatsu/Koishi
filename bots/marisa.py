@@ -21,7 +21,7 @@ from hata.ext.command_utils import UserMenuFactory, UserPagination
 from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.extension_loader import EXTENSION_LOADER, EXTENSIONS
+from hata.ext.plugin_loader import EXTENSION_LOADER, EXTENSIONS
 
 from bot_utils.constants import COLOR__MARISA_HELP, GUILD__SUPPORT, CHANNEL__SUPPORT__DEFAULT_TEST, \
     ROLE__SUPPORT__TESTER

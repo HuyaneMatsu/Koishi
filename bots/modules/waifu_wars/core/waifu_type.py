@@ -2,9 +2,8 @@ __all__ = ('WaifuType', )
 
 from scarletio import RichAttributeErrorBaseType, Task
 from hata import KOKORO
-from hata.ext.extension_loader import import_extension
 
-get_default_user_stats = import_extension('.constants', 'get_default_user_stats')
+from .constants import get_default_user_stats
 
 from bot_utils.models import DB_ENGINE, WAIFU_STATS_TABLE, waifu_stats_model
 
@@ -186,7 +185,7 @@ class WaifuType(RichAttributeErrorBaseType):
     
     
     def __getstate__(self):
-        state = {
+        return {
             'user_id': self.user_id,
             'entry_id': self.entry_id,
             'stat_housewife': self.stat_housewife,

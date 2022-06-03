@@ -1,4 +1,4 @@
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 require('Koishi')
 
 import os

@@ -1,10 +1,8 @@
 from hata import Client, Embed
 from scarletio import to_json
 from scarletio.web_common import quote
-from hata.ext.extension_loader import import_extension
 
-WAIFU_SCORE_GRAPH_CHART_LABELS, get_user_graph_colors, get_embed_color = \
-    import_extension('..core.constants', 'WAIFU_SCORE_GRAPH_CHART_LABELS', 'get_user_graph_colors', 'get_embed_color')
+from ..core.constants import WAIFU_SCORE_GRAPH_CHART_LABELS, get_user_graph_colors, get_embed_color
 
 SLASH_CLIENT: Client
 

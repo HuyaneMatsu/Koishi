@@ -1,5 +1,5 @@
 from hata import ACTIVITY_TYPES, ActivityRich, Client, IntentFlag, Locale
-from hata.ext.extension_loader import EXTENSION_LOADER
+from hata.ext.plugin_loader import EXTENSION_LOADER
 
 import config
 from bot_utils.constants import DEFAULT_CATEGORY_NAME, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI, GUILD__SUPPORT
@@ -40,8 +40,8 @@ if MARISA_MODE:
     
     EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
     
-    EXTENSION_LOADER.add('bots.testers', MAIN_CLIENT=Marisa)
-    EXTENSION_LOADER.add('bots.previews', MAIN_CLIENT=Marisa)
+    EXTENSION_LOADER.register('bots.testers', MAIN_CLIENT=Marisa)
+    EXTENSION_LOADER.register('bots.previews', MAIN_CLIENT=Marisa)
 
 else:
     EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=False)
@@ -110,9 +110,9 @@ else:
     EXTENSION_LOADER.load_extension('bots.nitori', locked=True)
 
 
-EXTENSION_LOADER.add('bots.system')
+EXTENSION_LOADER.register('bots.system')
 if MARISA_MODE:
-    EXTENSION_LOADER.add('bots.previews')
-    EXTENSION_LOADER.add('bots.testers')
+    EXTENSION_LOADER.register('bots.previews')
+    EXTENSION_LOADER.register('bots.testers')
 else:
-    EXTENSION_LOADER.add('bots.modules')
+    EXTENSION_LOADER.register('bots.modules')
