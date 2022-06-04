@@ -37,7 +37,9 @@ class CodeBuilder(RichAttributeErrorBaseType):
     
     
     def build(self):
-        return ''.join(self.parts)
+        a = ''.join(self.parts)
+        print(a)
+        return a
     
     
     def add(self, *parts_to_add):
@@ -99,7 +101,7 @@ def compile_getter(attribute_name, slot_name, is_query_key):
     
     code = CodeBuilder()
     
-    with code('def ', func_name, '(self)'):
+    with code('def ', func_name, '(self):'):
         if is_query_key:
             code('return self.', attribute_name)
         else:
@@ -116,10 +118,10 @@ def compile_setter(attribute_name, slot_name, is_query_key):
     
     with code('def ', func_name, '(self, value, field):'):
         if is_query_key:
-            code('self.', slot_name, ' = value')
+            code('self.', attribute_name, ' = value')
         
         else:
-            code('self.', attribute_name, ' = value')
+            code('self.', slot_name, ' = value')
             code('self._field_modified(field)')
     
     return compile_and_get(func_name, code.build())
