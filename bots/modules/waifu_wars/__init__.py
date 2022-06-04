@@ -1,4 +1,7 @@
-from hata.ext.plugin_loader import import_extension
+from .core import *
+from .commands import *
 
-import_extension('.core')
-import_extension('.commands')
+__all__ = (
+    *core.__all__,
+    *commands.__all__,
+)

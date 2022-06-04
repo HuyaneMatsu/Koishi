@@ -1,10 +1,12 @@
-from hata.ext.plugin_loader import import_extension
+from .constants import *
+from .waifu_type import *
 
-constants = import_extension('.constants')
-waifu_type = import_extension('.waifu_type')
-
+__all__ = (
+    *constants.__all__,
+    *waifu_type.__all__,
+)
 
 from hata import bind,  ClientUserBase
 
 
-bind(ClientUserBase, waifu_type.WaifuType, 'waifu_stats')
+bind(ClientUserBase, waifu_type.WaifuType, 'waifu_stats', weak=True, weak_cache_size=1000)
