@@ -93,33 +93,32 @@ def compile_and_get(variable_name, code, globals=None):
     return locals_[variable_name]
 
 
-def compile_getter(attribute_name, slot_name, is_query_key):
+def compile_getter(attribute_name, slot_name, require_internal_field):
     func_name = f'_get_{attribute_name}'
     
     code = CodeBuilder()
     
     with code('def ', func_name, '(self):'):
-        if is_query_key:
-            code('return self.', attribute_name)
-        else:
+        if require_internal_field:
             code('return self.', slot_name)
+        else:
+            code('return self.', attribute_name)
     
     return compile_and_get(func_name, code.build())
 
 
 
-def compile_setter(attribute_name, slot_name, is_query_key):
+def compile_setter(attribute_name, slot_name, require_internal_field):
     func_name = f'_set_{attribute_name}'
     
     code = CodeBuilder()
     
     with code('def ', func_name, '(self, value, field):'):
-        if is_query_key:
-            code('self.', attribute_name, ' = value')
-        
-        else:
+        if require_internal_field:
             code('self.', slot_name, ' = value')
             code('self._field_modified(field)')
+        else:
+            code('self.', attribute_name, ' = value')
     
     return compile_and_get(func_name, code.build())
 
@@ -266,19 +265,29 @@ def get_load_method_string(fields, engine):
                 code('result = await response.fetchone()')
                 
                 with code('if result is None:'):
-                    code('self.', primary_key_field.slot_name, '= ', str(ENTRY_ID_MISSING))
+                    code('self.', primary_key_field.slot_name, ' = ', str(ENTRY_ID_MISSING))
                 
                 with code('else:'):
                     for field in fields:
                         if field is query_key_field:
                             continue
                         
-                        code('self.', field.slot_name, '= result.', field.field_name)
+                        code('self.', field.slot_name, ' = result.', field.field_name)
             
             with code('finally:'):
                 code('self._load_task = None')
     
     return code.build()
+
+
+def _get_require_internal_field(primary_key, query_key):
+    if primary_key:
+        return False
+    
+    if (query_key is not None):
+        return False
+    
+    return True
 
 
 class FieldDescriptor(RichAttributeErrorBaseType):
@@ -295,10 +304,10 @@ class FieldDescriptor(RichAttributeErrorBaseType):
         query_key = field.query_key
         slot_name = SLOT_NAME_PREFIX + attribute_name
         
-        is_query_key = query_key is not None
+        require_internal_field = _get_require_internal_field(primary_key, query_key)
         
-        getter = compile_getter(attribute_name, slot_name, is_query_key)
-        setter = compile_setter(attribute_name, slot_name, is_query_key)
+        getter = compile_getter(attribute_name, slot_name, require_internal_field)
+        setter = compile_setter(attribute_name, slot_name, require_internal_field)
         
         self = object.__new__(cls)
         
@@ -327,7 +336,10 @@ class FieldDescriptor(RichAttributeErrorBaseType):
             return self
         
         return self.setter(instance, value, self)
-
+    
+    
+    def is_require_internal_field(self):
+        return _get_require_internal_field(self.primary_key, self.query_key)
 
 
 class ModelLinkType(type):
@@ -346,7 +358,10 @@ class ModelLinkType(type):
             for class_attribute_name, class_attribute_value in collected_fields:
                 field = FieldDescriptor(class_attribute_name, class_attribute_value)
                 fields.append(field)
-                class_attributes[class_attribute_name] = field
+                if field.is_require_internal_field():
+                    class_attributes[class_attribute_name] = field
+                else:
+                    del class_attributes[class_attribute_name]
             
             fields = tuple(fields)
             
@@ -369,12 +384,8 @@ class ModelLinkType(type):
             class_attributes['__loaded__']: compile_and_get('__loaded__', loaded_method_string, globals)
             class_attributes['__load__']: compile_and_get('__load__', load_method_string, globals)
             
-            query_key_field = _get_query_key_field(fields)
-            del class_attributes[query_key_field.attribute_name] # move attribute name to slots
-            
-            extra_slots = (
-                *(field.slot_name for field in fields if field is not query_key_field),
-                *query_key_field.attribute_name,
+            extra_slots = tuple(
+                field.slot_name if field.is_require_internal_field() else field.attribute_name for field in fields
             )
             
             added_slots = class_attributes.get('__slots__', None)
