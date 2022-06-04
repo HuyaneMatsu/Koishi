@@ -18,7 +18,12 @@ EMOJI__REIMU_HAMMER = Emoji.precreate(690550890045898812)
 def match_message_author(user, message):
     return (message.author is user)
 
-@SLASH_CLIENT.interactions(is_global=True, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(
+    is_global = True,
+    show_for_invoking_user_only = True,
+    allow_in_dm = False,
+    required_permissions = Permission().update_by_keys(administrator = True),
+)
 async def clear(client, event,
     limit: ('int', 'How much message?'),
     before: ('str', 'Till when?') = None,
@@ -82,7 +87,12 @@ async def clear(client, event,
     await client.multi_client_message_delete_sequence(channel, after=after, before=before, limit=limit, filter=filter,
         reason=reason)
 
-@SLASH_CLIENT.interactions(is_global=True, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(
+    is_global = True,
+    show_for_invoking_user_only = True,
+    allow_in_dm = False,
+    required_permissions = Permission().update_by_keys(create_instant_invite=True),
+)
 async def invite_create(client, event,
     permanent: ('bool', 'Create permanent?') = False,
 ):
@@ -133,7 +143,13 @@ def bans_pagination_check(event):
     
     return False
 
-@SLASH_CLIENT.interactions(is_global=True, allow_in_dm=False)
+
+@SLASH_CLIENT.interactions(
+    is_global = True,
+    allow_in_dm = False,
+    required_permissions = Permission().update_by_keys(ban_users=True),
+)
+
 async def bans(client, event):
     """Lists the guild's bans."""
     guild = event.guild
@@ -233,7 +249,11 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages_in_threads = True,
 )
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(
+    is_global = True,
+    allow_in_dm = False,
+    required_permissions = Permission().update_by_keys(create_instant_invite = True),
+)
 async def invites_(client, event,
     channel: ('channel', 'Which channel\'s invites do you wanna check?') = None,
 ):
@@ -485,7 +505,11 @@ def role_emoji_checker(event):
     return False
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(
+    is_global = True,
+    allow_in_dm = False,
+    required_permissions = Permission().update_by_keys(administrator = True),
+)
 async def emoji_role(client, event,
     emoji: ('str', 'Select the emoji to bind to roles.'),
     role_1: ('role', 'Select a role.') = None,
@@ -506,8 +530,8 @@ async def emoji_role(client, event,
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to do this.')
     
-    if not event.user_permissions.can_ban_users:
-        abort('You must have ban users permission to use this command.')
+    if not event.user_permissions.can_administrator:
+        abort('You must have administrator users permission to use this command.')
     
     permissions = event.channel.cached_permissions_for(client)
     if (not permissions.can_manage_emojis_and_stickers) or (not permissions.can_add_reactions):
