@@ -253,7 +253,7 @@ def get_load_method_string(fields):
     primary_key_field = _get_primary_key_field(fields)
     
     code = CodeBuilder()
-    with code('async def __load__(self, parent):'):
+    with code('async def __load__(self):'):
         if DB_ENGINE is None:
             code('pass')
         
