@@ -367,14 +367,23 @@ class ModelLinkType(type):
             class_attributes['__loaded__']: compile_and_get('__loaded__', loaded_method_string, globals)
             class_attributes['__load__']: compile_and_get('__load__', load_method_string, globals)
             
-            extra_slots = [field.slot_name for field in fields if field.is_query_key is None]
+            query_key_field = _get_query_key_field(fields)
+            del class_attributes[query_key_field.attribute_name] # move attribute name to slots
+            
+            extra_slots = (
+                *(field.slot_name for field in fields if field is not query_key_field),
+                *query_key_field.attribute_name,
+            )
+            
             added_slots = class_attributes.get('__slots__', None)
             if added_slots is None:
-                new_slots = (*extra_slots, '__dict__')
+                new_slots = {*extra_slots, '__dict__'}
             else:
-                new_slots = (*extra_slots, *added_slots)
+                new_slots = {*extra_slots, *added_slots}
+            new_slots = tuple(new_slots)
+            
             class_attributes['__slots__'] = new_slots
-        
+            
         
         return type.__new__(cls, class_name, class_parents, class_attributes)
 
