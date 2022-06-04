@@ -136,11 +136,12 @@ def get_new_method_string(fields, globals, added_initializer):
             code('self = INITIALIZER.__new__(cls, parent)')
         
         for field in fields:
-            if (field.query_key is not None) and (added_initializer is not None):
+            if (field.query_key is not None) and (added_initializer is None):
                 continue
             
             if field.primary_key:
                 display_default = repr(ENTRY_ID_NOT_LOADED)
+                attribute_name = field.attribute_name
             
             else:
                 default = field.default
@@ -150,8 +151,11 @@ def get_new_method_string(fields, globals, added_initializer):
                 else:
                     display_default = 'DEFAULT_' + field.field_name.upper()
                     globals[display_default] = default
+                
+                
+                attribute_name = field.slot_name
             
-            code('self.', field.slot_name, ' = ', display_default)
+            code('self.', attribute_name, ' = ', display_default)
         
         code('return self')
     
