@@ -259,7 +259,7 @@ def get_load_method_string(fields, engine):
                 with code('async with ENGINE.connect() as connector:'):
                     with code('response = await connector.execute('):
                         with code('TABLE.select('):
-                            code('MODEl.', query_key_field.field_name, ' == self.', query_key_field.query_key, ', ')
+                            code('MODEL.', query_key_field.field_name, ' == self.', query_key_field.query_key, ', ')
                         code(')')
                     code(')')
                 
@@ -390,7 +390,7 @@ class ModelLinkType(type):
         return type.__new__(cls, class_name, class_parents, class_attributes)
 
 
-class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None, table=None, is_base=True):
+class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None, table=None, engine=None, is_base=True):
     __slots__ = ('__weakref__', '_load_task', '_fields_modified', '_saving')
     
     
