@@ -2,7 +2,6 @@ from datetime import datetime
 
 from hata import Client, Embed, DiscordException, ERROR_CODES, Sticker
 from hata.ext.slash import abort, Button, Row, InteractionResponse
-from hata.ext.plugin_loader import import_extension
 from sqlalchemy.sql import select
 
 from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
@@ -13,9 +12,7 @@ from bot_utils.constants import ROLE__SUPPORT__ELEVATED, GUILD__SUPPORT, EMOJI__
 from bot_utils.daily import calculate_daily_new, NSFW_ACCESS_COST, ELEVATED_COST, HEART_BOOST_COST
 
 
-buy_waifu_slot_invoke, EMOJI_YES, EMOJI_NO = import_extension(
-    '.marriage_slot', 'buy_waifu_slot_invoke', 'EMOJI_YES', 'EMOJI_NO'
-)
+from .marriage_slot import buy_waifu_slot_invoke, EMOJI_YES, EMOJI_NO
 
 
 SLASH_CLIENT: Client

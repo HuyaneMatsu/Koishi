@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Client, Embed
 from scarletio import to_json
 from scarletio.web_common import quote

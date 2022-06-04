@@ -21,7 +21,7 @@ from hata.ext.command_utils import UserMenuFactory, UserPagination
 from hata.ext.slash.menus import Pagination
 from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.plugin_loader import EXTENSION_LOADER, EXTENSIONS
+from hata.ext.plugin_loader import get_plugin, reload_plugin, PLUGINS, add_default_plugin_variables
 
 from bot_utils.constants import COLOR__MARISA_HELP, GUILD__SUPPORT, CHANNEL__SUPPORT__DEFAULT_TEST, \
     ROLE__SUPPORT__TESTER
@@ -37,7 +37,7 @@ except BaseException as err:
     sys.stderr.write(f'Failed to connect to lavalink server: {err!r}.\n')
     SOLARLINK_VOICE = False
 
-EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=SOLARLINK_VOICE)
+add_default_plugin_variables(SOLARLINK_VOICE=SOLARLINK_VOICE)
 
 Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
 Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())
@@ -1503,9 +1503,9 @@ if (watchdog is not None):
     
     class WatchEventHandler:
         def dispatch(self, event):
-            extension = EXTENSION_LOADER.get_extension(event.src_path)
+            extension = get_plugin(event.src_path)
             if (extension is not None) and (not extension.locked):
-                EXTENSION_LOADER.reload(extension.name)
+                reload_plugin(extension.name)
     
     @Marisa.events
     async def launch(client):
@@ -1514,7 +1514,7 @@ if (watchdog is not None):
         
         event_handler = WatchEventHandler()
         
-        for extension in EXTENSIONS.values():
+        for extension in PLUGINS.values():
             if extension.is_loaded() and (not extension.locked):
                 observer.schedule(event_handler, extension.file_name, recursive=False)
         

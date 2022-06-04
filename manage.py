@@ -44,7 +44,7 @@ CONNECT = ('--no-connect' not in sys.argv)
 
 if __name__ == '__main__':
     import bots
-    hata.ext.extension_loader.EXTENSION_LOADER.load_all()
+    hata.ext.plugin_loader.load_all_plugin()
     if CONNECT:
         hata.start_clients()
     

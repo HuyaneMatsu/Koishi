@@ -1,5 +1,5 @@
 from hata import ACTIVITY_TYPES, ActivityRich, Client, IntentFlag, Locale
-from hata.ext.plugin_loader import EXTENSION_LOADER
+from hata.ext.plugin_loader import add_default_plugin_variables, register_and_load_plugin, register_plugin
 
 import config
 from bot_utils.constants import DEFAULT_CATEGORY_NAME, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI, GUILD__SUPPORT
@@ -8,7 +8,7 @@ from bot_utils.utils import category_name_rule, random_error_message_getter
 from bot_utils import async_engine # replace sync with async database engine.
 
 MARISA_MODE = config.MARISA_MODE
-EXTENSION_LOADER.add_default_variables(MARISA_MODE=MARISA_MODE)
+add_default_plugin_variables(MARISA_MODE=MARISA_MODE)
 
 if MARISA_MODE:
     Marisa = Client(
@@ -35,16 +35,16 @@ if MARISA_MODE:
         enforce_application_command_permissions = True,
     )
     
-    EXTENSION_LOADER.add_default_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
+    add_default_plugin_variables(Marisa=Marisa, COMMAND_CLIENT=Marisa, SLASH_CLIENT=Marisa)
     
     
-    EXTENSION_LOADER.load_extension('bots.marisa', locked=True)
+    register_and_load_plugin('bots.marisa', locked=True)
     
-    EXTENSION_LOADER.register('bots.testers', MAIN_CLIENT=Marisa)
-    EXTENSION_LOADER.register('bots.previews', MAIN_CLIENT=Marisa)
+    register_plugin('bots.testers', MAIN_CLIENT=Marisa)
+    register_plugin('bots.previews', MAIN_CLIENT=Marisa)
 
 else:
-    EXTENSION_LOADER.add_default_variables(SOLARLINK_VOICE=False)
+    add_default_plugin_variables(SOLARLINK_VOICE=False)
     
     Koishi = Client(
         config.KOISHI_TOKEN,
@@ -61,7 +61,7 @@ else:
         top_gg_token = config.KOISHI_TOP_GG_TOKEN,
     )
     
-    EXTENSION_LOADER.add_default_variables(Koishi=Koishi, SLASH_CLIENT=Koishi)
+    add_default_plugin_variables(Koishi=Koishi, SLASH_CLIENT=Koishi)
     
     Satori = Client(
         config.SATORI_TOKEN,
@@ -76,7 +76,7 @@ else:
         default_category_name = DEFAULT_CATEGORY_NAME,
     )
     
-    EXTENSION_LOADER.add_default_variables(Satori=Satori, COMMAND_CLIENT=Satori)
+    add_default_plugin_variables(Satori=Satori, COMMAND_CLIENT=Satori)
     
     Flan = Client(
         config.FLAN_TOKEN,
@@ -91,7 +91,7 @@ else:
         prefix = PREFIX__FLAN,
     )
     
-    EXTENSION_LOADER.add_default_variables(Flan=Flan)
+    add_default_plugin_variables(Flan=Flan)
     
     Nitori = Client(
         config.NITORI_TOKEN,
@@ -102,17 +102,17 @@ else:
         random_error_message_getter = random_error_message_getter,
     )
     
-    EXTENSION_LOADER.add_default_variables(Nitori=Nitori)
+    add_default_plugin_variables(Nitori=Nitori)
     
-    EXTENSION_LOADER.load_extension('bots.koishi', locked=True)
-    EXTENSION_LOADER.load_extension('bots.satori', locked=True)
-    EXTENSION_LOADER.load_extension('bots.flan'  , locked=True)
-    EXTENSION_LOADER.load_extension('bots.nitori', locked=True)
+    register_and_load_plugin('bots.koishi', locked=True)
+    register_and_load_plugin('bots.satori', locked=True)
+    register_and_load_plugin('bots.flan'  , locked=True)
+    register_and_load_plugin('bots.nitori', locked=True)
 
 
-EXTENSION_LOADER.register('bots.system')
+register_plugin('bots.system')
 if MARISA_MODE:
-    EXTENSION_LOADER.register('bots.previews')
-    EXTENSION_LOADER.register('bots.testers')
+    register_plugin('bots.previews')
+    register_plugin('bots.testers')
 else:
-    EXTENSION_LOADER.register('bots.modules')
+    register_plugin('bots.modules')

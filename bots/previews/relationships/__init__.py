@@ -1,5 +1,5 @@
 from hata import Client
-from hata.ext.extension_loader import require
+from hata.ext.plugin_loader import require
 
 # This will fail
 require(Koishi=Client)
@@ -19,4 +19,3 @@ __all__ = (
     
     *helpers.__all__,
 )
-

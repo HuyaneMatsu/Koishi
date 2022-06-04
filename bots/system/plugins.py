@@ -1,6 +1,5 @@
-from re import compile as re_compile, escape as re_escape, I as re_ignore_case
-
-from hata.ext.plugin_loader import EXTENSION_LOADER, EXTENSIONS, ExtensionError
+from hata.ext.plugin_loader import register_plugin, load_plugin, get_plugin, reload_plugin, unload_plugin, \
+    get_plugins_like, PLUGINS, PluginError, get_plugin_like
 from hata import Embed, Client, CLIENTS, Permission
 from hata.ext.slash import Select, Option, InteractionResponse, abort
 
@@ -14,17 +13,17 @@ def check_permission(event):
 
 EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
     None,
-    name = 'extension',
-    description = 'extension related commands',
+    name = 'plugin',
+    description = 'plugin related commands',
     guild = GUILD__SUPPORT,
     required_permissions = Permission().update_by_keys(administrator=True),
 )
 
-EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'extension.list_per_client'
+EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'plugin.list_per_client'
 
 @EXTENSION_COMMANDS.interactions
 async def list_per_client(event):
-    """Lists the extensions for each client."""
+    """Lists the plugins for each client."""
     check_permission(event)
     
     clients = sorted(CLIENTS.values())
@@ -77,17 +76,17 @@ async def handle_list_per_client_component(event):
 def list_per_client_get_response(selected_client, clients):
     description_parts = []
     
-    extensions = selected_client.extensions
-    limit = len(extensions)
+    plugins = selected_client.plugins
+    limit = len(plugins)
     if limit:
         index = 0
         
         while True:
-            extension = extensions[index]
+            plugin = plugins[index]
             index += 1
             
             description_parts.append('`')
-            description_parts.append(extension.name)
+            description_parts.append(plugin.name)
             description_parts.append('`')
             
             if index == limit:
@@ -97,7 +96,7 @@ def list_per_client_get_response(selected_client, clients):
             continue
     
     else:
-        description_parts.append('*No extension detected.*')
+        description_parts.append('*No plugin detected.*')
     
     description = ''.join(description_parts)
     
@@ -128,17 +127,17 @@ def list_per_client_get_response(selected_client, clients):
 
 EXTENSION_LIMIT = 40
 
-def extension_item_sort_key(item):
+def plugin_item_sort_key(item):
     return item[0]
 
 @EXTENSION_COMMANDS.interactions
 async def list_all(event):
-    """Lists all the available extensions."""
+    """Lists all the available plugins."""
     check_permission(event)
     
     items = sorted(
-        ((extension.name, extension.locked) for extension in EXTENSIONS.values()),
-        key = extension_item_sort_key,
+        ((plugin.name, plugin.locked) for plugin in PLUGINS.values()),
+        key = plugin_item_sort_key,
     )
     
     items_length = len(items)
@@ -153,14 +152,14 @@ async def list_all(event):
         description_parts = []
         
         while True:
-            extension_name, extension_locked = items[index]
+            plugin_name, plugin_locked = items[index]
             index += 1
             
             description_parts.append('- `')
-            description_parts.append(extension_name)
+            description_parts.append(plugin_name)
             description_parts.append('`')
             
-            if extension_locked:
+            if plugin_locked:
                 description_parts.append('*(locked)*')
             
             if index == limit:
@@ -176,27 +175,27 @@ async def list_all(event):
         
         description = ''.join(description_parts)
     else:
-        description = '*No extensions detected*'
+        description = '*No plugins detected*'
     
-    return Embed('Available extensions', description)
+    return Embed('Available plugins', description)
 
 
-def get_extension_by_name(name):
-    extension = EXTENSION_LOADER.get_extension(name)
-    if (extension is None):
-        abort('There is no extension with the specified name.')
+def get_plugin_by_name(name):
+    plugin = get_plugin_like(name)
+    if (plugin is None):
+        abort('There is no plugin with the specified name.')
     
-    if extension.locked:
-        abort('The extension is locked, probably for reason.')
+    if plugin.locked:
+        abort('The plugin is locked, probably for reason.')
     
-    return extension
+    return plugin
 
 
-async def run_extension_coroutine(extension_name, action_name, coroutine):
+async def run_plugin_coroutine(plugin_name, action_name, coroutine):
     try:
-        extensions = await coroutine
-    except ExtensionError as err:
-        title = f'{action_name.title()}ing {extension_name} failed.'
+        plugins = await coroutine
+    except PluginError as err:
+        title = f'{action_name.title()}ing {plugin_name} failed.'
         
         description = err.message
         if len(description) > 4000:
@@ -208,15 +207,15 @@ async def run_extension_coroutine(extension_name, action_name, coroutine):
         description_length = 4
         description_parts = ['```\n']
         
-        for extension in extensions:
-            extension_name = extension.name
-            extension_name_length = len(extension_name)
-            description_length += extension_name_length + 1
+        for plugin in plugins:
+            plugin_name = plugin.name
+            plugin_name_length = len(plugin_name)
+            description_length += plugin_name_length + 1
             if description_length > 3993:
                 description_parts.append('...\n')
                 break
             
-            description_parts.append(extension_name)
+            description_parts.append(plugin_name)
             description_parts.append('\n')
             continue
         
@@ -233,16 +232,16 @@ async def load(event,
     name: ('str', 'Please provide a name to load.'),
     deep: ('bool', 'you know what it means') = True,
 ):
-    """Loads the specified extension by it's name."""
+    """Loads the specified plugin by it's name."""
     check_permission(event)
-    extension = get_extension_by_name(name)
+    plugin = get_plugin_by_name(name)
     
     yield
-    name = extension.name
-    yield await run_extension_coroutine(
+    name = plugin.name
+    yield await run_plugin_coroutine(
         name,
         'load',
-        EXTENSION_LOADER.load(name, deep=deep),
+        load_plugin(name, deep=deep),
     )
 
 
@@ -251,16 +250,16 @@ async def reload(event,
     name: ('str', 'Please provide a name to reload.'),
     deep: ('bool', 'you know what it means') = True,
 ):
-    """Reloads the specified extension by it's name."""
+    """Reloads the specified plugin by it's name."""
     check_permission(event)
-    extension = get_extension_by_name(name)
+    plugin = get_plugin_by_name(name)
     
     yield
-    name = extension.name
-    yield await run_extension_coroutine(
+    name = plugin.name
+    yield await run_plugin_coroutine(
         name,
         'reload',
-        EXTENSION_LOADER.reload(name, deep=deep),
+        reload_plugin(name, deep=deep),
     )
 
 
@@ -269,16 +268,16 @@ async def unload(event,
     name: ('str', 'Please provide a name to unload.'),
     deep: ('bool', 'you know what it means') = True,
 ):
-    """Unloads the specified extension by it's name."""
+    """Unloads the specified plugin by it's name."""
     check_permission(event)
-    extension = get_extension_by_name(name)
+    plugin = get_plugin_by_name(name)
     
     yield
-    name = extension.name
-    yield await run_extension_coroutine(
+    name = plugin.name
+    yield await run_plugin_coroutine(
         name,
         'unload',
-        EXTENSION_LOADER.unload(name, deep=deep),
+        unload_plugin(name, deep=deep),
     )
 
 
@@ -286,18 +285,18 @@ async def unload(event,
 async def register(event,
     name: ('str', 'Please provide a name to register.'),
 ):
-    """Registers the specified extension by it's name."""
+    """Registers the specified plugin by it's name."""
     check_permission(event)
     
-    extension = EXTENSION_LOADER.get_extension(name)
-    if (extension is not None):
-        abort(f'There is already an extension added with the given name: `{extension.name}`.')
+    plugin = get_plugin(name)
+    if (plugin is not None):
+        abort(f'There is already an plugin added with the given name: `{plugin.name}`.')
     
     try:
-        EXTENSION_LOADER.register(name)
+        register_plugin(name)
     except ImportError:
-        title = f'Registering {name!r} extension failed.'
-        description = 'There is no such extension.'
+        title = f'Registering {name!r} plugin failed.'
+        description = 'There is no such plugin.'
     else:
         title = f'Registering {name!r} was successful.'
         description = None
@@ -320,20 +319,14 @@ async def discard_kept_commands(client, event):
 @load.autocomplete('name')
 @reload.autocomplete('name')
 @unload.autocomplete('name')
-async def autocomplete_extension_name(value):
+async def autocomplete_plugin_name(value):
     if value is None:
-        extensions = list(EXTENSIONS.values())
+        plugins = list(PLUGINS.values())
     else:
-        extensions = []
-        
-        pattern = re_compile(re_escape(value), re_ignore_case)
-        
-        for extension in EXTENSIONS.values():
-            if (not extension.locked) and (pattern.search(extension.name) is not None):
-                extensions.append(extension)
+        plugins = get_plugins_like(value)
     
-    if not extensions:
+    if not plugins:
         return None
     
-    del extensions[20:]
-    return [extension.name for extension in extensions]
+    del plugins[20:]
+    return [plugin.name for plugin in plugins]
