@@ -1,18 +1,15 @@
-from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError, WaitTillAll, get_current_task
+from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError, WaitTillAll
 from scarletio.web_common.headers import CONTENT_LENGTH
 from hata import Embed, KOKORO, seconds_to_elapsed_time, Client, Message, DiscordException, ERROR_CODES, now_as_id, \
-    seconds_to_id_difference, Guild, format_loop_time, TIMESTAMP_STYLES
+    seconds_to_id_difference, Guild, format_loop_time, TIMESTAMP_STYLES, Permission
 from hata.ext.slash import Button, abort, ButtonStyle, Row, wait_for_component_interaction
-from bot_utils.constants import GUILD__SUPPORT
-from config import MARISA_MODE
 
 SLASH_CLIENT: Client
-
-GUILD__KOISHI_CLAN = Guild.precreate(866746184990720020)
 
 E_TAG = IgnoreCaseString('ETag')
 
 DAY_IN_SECONDS = 60 * 60 * 24
+
 
 class ProcessedUrl:
     __slots__ = ('_hash', 'is_attachment', 'url', 'identifier')
@@ -121,8 +118,8 @@ BUTTON_CLOSE = Button(
 class DupeImageFilter:
     __slots__ = (
         'after_id', 'channel_id', 'client', 'request_more', 'urls', 'message_ids_to_delete', 'total_scanned_messages',
-        'total_deleted_messages', 'runner', 'message_delete_task', 'started_at', 'update_waiter',
-        'all_delete_message_id'
+        'total_deleted_messages', 'runner', 'message_delete_task', 'started_at', 'update_waiter', 'message',
+        'all_delete_message_id', 'task',
     )
     
     def __init__(self, client, event, look_back):
@@ -130,6 +127,8 @@ class DupeImageFilter:
         if after_id < 0:
             after_id = 0
         
+        self.task = None
+        self.message = None
         self.request_more = True
         self.after_id = after_id
         self.client = client
@@ -143,7 +142,7 @@ class DupeImageFilter:
         
         self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
         
-        Task(self.state_update_loop(client, event), KOKORO)
+        self.task = Task(self.state_update_loop(client, event), KOKORO)
         
         FILTERERS[self.channel_id] = self
     
@@ -450,6 +449,8 @@ class DupeImageFilter:
             embed.add_footer('Requesting and processing messages')
             await client.interaction_response_message_create(event, embed=embed)
             message = await client.interaction_response_message_get(event)
+            self.message = message
+            
             user_id = event.user.id
             event = None
             
@@ -498,9 +499,42 @@ class DupeImageFilter:
                 await self.message_update_loop(client, message, 'Deleting dupes')
                 
             await client.message_edit(message, embed=self.get_embed(), components=BUTTON_CLOSE)
+        
+        except:
+            self.update_waiter.cancel()
+            raise
+        
         finally:
             if FILTERERS.get(self.channel_id, self) is self:
                 del FILTERERS[self.channel_id]
+            
+            self.task = None
+    
+    
+    def get_cancel_task(self):
+        task = self.task
+        if (task is not None):
+            self.task = None
+            task.cancel()
+            
+            message = self.message
+            if (message is not None):
+                embed = self.get_embed()
+                embed.description = (
+                    f'```\n'
+                    f'!!!! {self.client.name} is shutting down, sorry inconvenience. '
+                    f'Please try invoking the command again later !!!!\n'
+                    f'```'
+                )
+                
+                return Task(
+                    self.client.message_edit(
+                        message,
+                        embed = embed,
+                        components = BUTTON_CLOSE,
+                    ),
+                    KOKORO,
+                )
 
 
 def has_manage_messages_permission(event):
@@ -508,7 +542,7 @@ def has_manage_messages_permission(event):
 
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global=True, required_permissions=Permission().update_by_keys(manage_messages=True))
 async def dupe_image_filter(
     client,
     event,
@@ -542,3 +576,17 @@ async def close_dupe_image_filter(client, event):
     if event.user_permissions.can_manage_messages:
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)
+
+
+@SLASH_CLIENT.events
+async def shutdown(client):
+    cancel_tasks = []
+    
+    for filterer in FILTERERS.values():
+        cancel_task = filterer.get_cancel_task()
+        if (cancel_task is not None):
+            cancel_tasks.append(cancel_task)
+    
+    cancel_task = None
+    
+    await WaitForAll(cancel_tasks)
