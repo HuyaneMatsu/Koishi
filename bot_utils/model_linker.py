@@ -243,7 +243,7 @@ def get_loaded_method_string(fields):
     
     code = CodeBuilder()
     with code('def __loaded__(self):'):
-        code('return self.', primary_key_field.slot_name, ' == ', repr(ENTRY_ID_NOT_LOADED))
+        code('return self.', primary_key_field.slot_name, ' != ', repr(ENTRY_ID_NOT_LOADED))
     
     return code.build()
 
