@@ -1,6 +1,6 @@
-__all__ = ()
+__all__ = ('ModelLink', 'Field',)
 
-from scarletio import RichAttributeErrorBaseType, to_coroutine, Task
+from scarletio import RichAttributeErrorBaseType, to_coroutine, Task, shield
 from hata import KOKORO
 
 from .models import DB_ENGINE
@@ -126,7 +126,7 @@ def get_new_method_string(fields, globals, added_initializer):
     
     with code('def __new__(cls):'):
         if added_initializer is None:
-            code('self = ModelLinker.__new__(cls, parent)')
+            code('self = ModelLink.__new__(cls, parent)')
         else:
             code('self = INITIALIZER.__new__(cls, parent)')
         
@@ -319,7 +319,7 @@ class FieldDescriptor(RichAttributeErrorBaseType):
 
 
 
-class ModelLinkerType(type):
+class ModelLinkType(type):
     def __new__(cls, class_name, class_parents, class_attributes, *, model, table, is_base=False):
         
         if not is_base:
@@ -342,7 +342,7 @@ class ModelLinkerType(type):
             added_initializer = class_attributes.get('__new__', None)
             
             globals = {}
-            globals['ModelLinker'] = ModelLinker
+            globals['ModelLink'] = ModelLink
             globals['INITIALIZER'] = added_initializer
             globals['DB_ENGINE'] = DB_ENGINE
             globals['TABLE'] = table
@@ -370,8 +370,8 @@ class ModelLinkerType(type):
         return type.__new__(cls, class_name, class_parents, class_attributes)
 
 
-class ModelLinker(RichAttributeErrorBaseType, metaclass=ModelLinkerType, model=None, table=None, is_base=True):
-    __slots__ = ('_load_task', '_fields_modified', '_saving')
+class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None, table=None, is_base=True):
+    __slots__ = ('__weakref__', '_load_task', '_fields_modified', '_saving')
     
     def __new__(cls, parent):
         self = object.__new__(cls)
@@ -412,6 +412,4 @@ class ModelLinker(RichAttributeErrorBaseType, metaclass=ModelLinkerType, model=N
             load_task = Task(self.__load__(parent), KOKORO)
             self._load_task = load_task
         
-        # If the current task is cancelled this wont cancel the loader task
-        # This also supports direct `yield from` since it is an awaitable generator
-        yield from load_task.wait_for_completion()
+        yield from shield(load_task, KOKORO)

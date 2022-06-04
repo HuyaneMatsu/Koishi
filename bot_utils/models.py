@@ -82,8 +82,6 @@ else:
         id              = Column(Int64, primary_key=True)
         user_id         = Column(Int64)
         waifu_id        = Column(Int64)
-        waifu_type      = Column(Int16)
-    
     
     WAIFU_LIST_TABLE = waifu_list_model.__table__
     
