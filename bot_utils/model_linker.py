@@ -94,14 +94,18 @@ def compile_and_get(variable_name, code, globals=None):
     return locals_[variable_name]
 
 
-def compile_getter(attribute_name, slot_name):
+def compile_getter(attribute_name, slot_name, is_query_key):
     func_name = f'_get_{attribute_name}'
     
-    code_string = (
-        f'def {func_name}(self):\n'
-        f'    return self.{slot_name}\n'
-    )
-    return compile_and_get(func_name, code_string)
+    code = CodeBuilder()
+    
+    with code('def ', func_name, '(self)'):
+        if is_query_key:
+            code('return self.', attribute_name)
+        else:
+            code('return self.', slot_name)
+    
+    return compile_and_get(func_name, code.build())
 
 
 
@@ -111,8 +115,11 @@ def compile_setter(attribute_name, slot_name, is_query_key):
     code = CodeBuilder()
     
     with code('def ', func_name, '(self, value, field):'):
-        code('self.', slot_name, ' = value')
-        if not is_query_key:
+        if is_query_key:
+            code('self.', slot_name, ' = value')
+        
+        else:
+            code('self.', attribute_name, ' = value')
             code('self._field_modified(field)')
     
     return compile_and_get(func_name, code.build())
@@ -286,8 +293,10 @@ class FieldDescriptor(RichAttributeErrorBaseType):
         query_key = field.query_key
         slot_name = SLOT_NAME_PREFIX + attribute_name
         
-        getter = compile_getter(attribute_name, slot_name)
-        setter = compile_setter(attribute_name, slot_name, query_key is not None)
+        is_query_key = query_key is not None
+        
+        getter = compile_getter(attribute_name, slot_name, is_query_key)
+        setter = compile_setter(attribute_name, slot_name, is_query_key)
         
         self = object.__new__(cls)
         
@@ -358,7 +367,7 @@ class ModelLinkType(type):
             class_attributes['__loaded__']: compile_and_get('__loaded__', loaded_method_string, globals)
             class_attributes['__load__']: compile_and_get('__load__', load_method_string, globals)
             
-            extra_slots = [field.slot_name for field in fields]
+            extra_slots = [field.slot_name for field in fields if field.is_query_key is None]
             added_slots = class_attributes.get('__slots__', None)
             if added_slots is None:
                 new_slots = (*extra_slots, '__dict__')
@@ -372,6 +381,7 @@ class ModelLinkType(type):
 
 class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None, table=None, is_base=True):
     __slots__ = ('__weakref__', '_load_task', '_fields_modified', '_saving')
+    
     
     def __new__(cls, parent):
         self = object.__new__(cls)
