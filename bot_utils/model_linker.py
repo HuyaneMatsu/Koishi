@@ -140,7 +140,7 @@ def get_new_method_string(fields, globals, added_initializer):
             code('self = INITIALIZER.__new__(cls, parent)')
         
         for field in fields:
-            if field.query_key is not None:
+            if (field.query_key is not None) and (added_initializer is not None):
                 continue
             
             if field.primary_key:
