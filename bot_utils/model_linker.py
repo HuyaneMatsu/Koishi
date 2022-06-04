@@ -3,9 +3,6 @@ __all__ = ('ModelLink', 'Field',)
 from scarletio import RichAttributeErrorBaseType, to_coroutine, Task, shield
 from hata import KOKORO
 
-from .models import DB_ENGINE
-
-
 COMPILATION_FILE_NAME = '<model_linker>'
 SLOT_NAME_PREFIX = '__slot__'
 DISPLAY_DEFAULT_PREFIX = 'DEFAULT_'
@@ -178,18 +175,18 @@ def _get_query_key_field(fields):
     raise RuntimeError('Missing query key field.')
 
 
-def get_save_method_string(fields):
+def get_save_method_string(fields, engine):
     primary_key_field = _get_primary_key_field(fields)
     
     code = CodeBuilder()
     
     with code('async def __save__(self):'):
-        if (DB_ENGINE is None):
+        if (engine is None):
             code.add_line('pass')
         
         else:
             with code('try:'):
-                with code('async with DB_ENGINE.connect() as connector:'):
+                with code('async with ENGINE.connect() as connector:'):
                     with code('while True:'):
                         code('fields_modified = self._fields_modified')
                         with code('if (fields_modified is None):'):
@@ -238,7 +235,7 @@ def get_save_method_string(fields):
     return code.build()
 
 
-def get_loaded_method_string(fields):
+def get_loaded_method_string(fields, engine):
     primary_key_field = _get_primary_key_field(fields)
     
     code = CodeBuilder()
@@ -248,18 +245,18 @@ def get_loaded_method_string(fields):
     return code.build()
 
 
-def get_load_method_string(fields):
+def get_load_method_string(fields, engine):
     query_key_field = _get_query_key_field(fields)
     primary_key_field = _get_primary_key_field(fields)
     
     code = CodeBuilder()
     with code('async def __load__(self):'):
-        if DB_ENGINE is None:
+        if engine is None:
             code('pass')
         
         else:
             with code('try:'):
-                with code('async with DB_ENGINE.connect() as connector:'):
+                with code('async with ENGINE.connect() as connector:'):
                     with code('response = await connector.execute('):
                         with code('TABLE.select('):
                             code('MODEl.', query_key_field.field_name, ' == self.', query_key_field.query_key, ', ')
@@ -334,7 +331,7 @@ class FieldDescriptor(RichAttributeErrorBaseType):
 
 
 class ModelLinkType(type):
-    def __new__(cls, class_name, class_parents, class_attributes, *, model, table, is_base=False):
+    def __new__(cls, class_name, class_parents, class_attributes, *, model, table, engine, is_base=False):
         
         if not is_base:
             collected_fields = []
@@ -358,14 +355,14 @@ class ModelLinkType(type):
             globals = {}
             globals['ModelLink'] = ModelLink
             globals['INITIALIZER'] = added_initializer
-            globals['DB_ENGINE'] = DB_ENGINE
+            globals['ENGINE'] = engine
             globals['TABLE'] = table
             globals['MODEL'] = model
 
             new_method_string = get_new_method_string(fields, globals, added_initializer)
-            save_method_string = get_save_method_string(fields)
-            loaded_method_string = get_loaded_method_string(fields)
-            load_method_string = get_load_method_string(fields)
+            save_method_string = get_save_method_string(fields, engine)
+            loaded_method_string = get_loaded_method_string(fields, engine)
+            load_method_string = get_load_method_string(fields, engine)
             
             class_attributes['__new__']: compile_and_get('__new__', new_method_string, globals)
             class_attributes['__save__']: compile_and_get('__save__', save_method_string, globals)
