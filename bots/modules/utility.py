@@ -744,7 +744,7 @@ GUILD_ICON_CHOICES = [
     ('Invite-splash'    , 'invite_splash'    ),
 ]
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global=True, allow_in_dm=False)
 async def guild_icon(event,
     choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
 ):

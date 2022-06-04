@@ -542,7 +542,11 @@ def has_manage_messages_permission(event):
 
 
 
-@SLASH_CLIENT.interactions(is_global=True, required_permissions=Permission().update_by_keys(manage_messages=True))
+@SLASH_CLIENT.interactions(
+    is_global = True,
+    required_permissions = Permission().update_by_keys(manage_messages=True),
+    allow_in_dm = False,
+)
 async def dupe_image_filter(
     client,
     event,

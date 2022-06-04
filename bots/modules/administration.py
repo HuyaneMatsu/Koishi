@@ -133,7 +133,7 @@ def bans_pagination_check(event):
     
     return False
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global=True, allow_in_dm=False)
 async def bans(client, event):
     """Lists the guild's bans."""
     guild = event.guild
@@ -297,7 +297,11 @@ BAN_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
 BAN_COMPONENTS = Row(BAN_BUTTON_CONFIRM, BAN_BUTTON_CANCEL)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(
+    is_global = True,
+    allow_in_dm = False,
+    required_permissions = Permission().update_by_keys(ban_users=True)
+)
 async def ban(client, event,
     user: ('user', 'Select the user to yeet!'),
     reason: ('str', 'Any reason why you would want to yeet?') = None,
@@ -424,7 +428,7 @@ async def ban(client, event,
     yield InteractionResponse(embed=embed, message=message, components=None)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global=True, allow_in_dm=False)
 async def is_banned(client, event,
     user: ('user', 'Who should I check?')
 ):

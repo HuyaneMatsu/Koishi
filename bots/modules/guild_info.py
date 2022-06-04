@@ -179,7 +179,7 @@ GUILD_FIELDS = {
     'boosters'          : add_guild_boosters_field ,
 }
 
-@SLASH_CLIENT.interactions(name='guild', is_global=True)
+@SLASH_CLIENT.interactions(name='guild', is_global=True, allow_in_dm=False)
 async def guild_info(client, event,
     field: (list(GUILD_FIELDS.keys()), 'Which fields should I show?') = DEFAULT_GUILD_FILED,
 ):
