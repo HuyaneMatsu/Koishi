@@ -197,14 +197,11 @@ def get_save_method_string(fields, engine):
                         
                         code('self._fields_modified = None')
                         
-                        code('entry_id = self.', primary_key_field.slot_name)
+                        code('entry_id = self.', primary_key_field.attribute_name)
                         with code('if entry_id > 0:'):
-                            with code('response = await connector.execute('):
+                            with code('await connector.execute('):
                                 with code('TABLE.update('):
-                                    code(
-                                        'MODEL.', primary_key_field.field_name, ' == ',
-                                        'self.', primary_key_field.slot_name
-                                    )
+                                    code('MODEL.', primary_key_field.field_name, ' == self.entry_id,')
                                 
                                 with code(').values('):
                                     code('**{field.field_name: field.getter(self), for field in fields_modified}')
@@ -212,7 +209,7 @@ def get_save_method_string(fields, engine):
                                 code(')')
                             code(')')
                         
-                        with code('if entry_id == ', str(ENTRY_ID_MISSING), ':'):
+                        with code('elif entry_id == ', str(ENTRY_ID_MISSING), ':'):
                             with code('response = await connector.execute('):
                                 with code('TABLE.insert().values('):
                                     for field in fields:
@@ -226,7 +223,7 @@ def get_save_method_string(fields, engine):
                             code(')')
                             
                             code('result = await response.fetchone()')
-                            code('self.', primary_key_field.slot_name, ' = result[0]')
+                            code('self.', primary_key_field.attribute_name, ' = result[0]')
                         
                         with code('else:'):
                             code('return')
@@ -243,7 +240,7 @@ def get_loaded_method_string(fields, engine):
     
     code = CodeBuilder()
     with code('def __loaded__(self):'):
-        code('return self.', primary_key_field.slot_name, ' != ', repr(ENTRY_ID_NOT_LOADED))
+        code('return self.', primary_key_field.attribute_name, ' != ', repr(ENTRY_ID_NOT_LOADED))
     
     return code.build()
 
@@ -265,15 +262,15 @@ def get_load_method_string(fields, engine):
                             code('MODEL.', query_key_field.field_name, ' == self.', query_key_field.query_key, ', ')
                         code(')')
                     code(')')
-                
-                code('result = await response.fetchone()')
+                    
+                    code('result = await response.fetchone()')
                 
                 with code('if result is None:'):
-                    code('self.', primary_key_field.slot_name, ' = ', str(ENTRY_ID_MISSING))
+                    code('self.', primary_key_field.attribute_name, ' = ', str(ENTRY_ID_MISSING))
                 
                 with code('else:'):
                     for field in fields:
-                        if field is query_key_field:
+                        if (field is query_key_field) or (field is primary_key_field):
                             continue
                         
                         code('self.', field.slot_name, ' = result.', field.field_name)
