@@ -522,8 +522,8 @@ class DupeImageFilter:
                 embed = self.get_embed()
                 embed.description = (
                     f'```\n'
-                    f'!!!! {self.client.name} is shutting down, sorry inconvenience. '
-                    f'Please try invoking the command again later !!!!\n'
+                    f'!!!! {self.client.name} is shutting down, sorry for the inconvenience. '
+                    f'Please try re-invoking the command later !!!!\n'
                     f'```'
                 )
                 
