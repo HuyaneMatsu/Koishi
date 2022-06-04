@@ -507,13 +507,8 @@ def has_manage_messages_permission(event):
     return bool(event.user_permissions.can_manage_messages)
 
 
-if MARISA_MODE:
-    allowed_guilds = [GUILD__SUPPORT]
-else:
-    allowed_guilds = [GUILD__KOISHI_CLAN, GUILD__SUPPORT]
 
-
-@SLASH_CLIENT.interactions(guild=allowed_guilds)
+@SLASH_CLIENT.interactions(is_global=True)
 async def dupe_image_filter(
     client,
     event,
