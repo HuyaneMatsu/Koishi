@@ -34,9 +34,7 @@ class CodeBuilder(RichAttributeErrorBaseType):
     
     
     def build(self):
-        a = ''.join(self.parts)
-        print(a)
-        return a
+        return ''.join(self.parts)
     
     
     def add(self, *parts_to_add):
@@ -214,8 +212,12 @@ def get_save_method_string(fields, engine):
                                 with code('TABLE.insert().values('):
                                     for field in fields:
                                         if not field.primary_key:
-                                            code(field.field_name, ' = self.', field.slot_name, ',')
-                                
+                                            if field.query_key is None:
+                                                attribute_name = field.slot_name
+                                            else:
+                                                attribute_name = field.attribute_name
+                                            code(field.field_name, ' = self.', attribute_name, ',')
+                                        
                                 with code(').returning('):
                                     code('MODEL.', primary_key_field.field_name, ',')
                                 
@@ -270,10 +272,16 @@ def get_load_method_string(fields, engine):
                 
                 with code('else:'):
                     for field in fields:
-                        if (field is query_key_field) or (field is primary_key_field):
+                        if (field is query_key_field):
                             continue
                         
-                        code('self.', field.slot_name, ' = result.', field.field_name)
+                        if field.primary_key:
+                            attribute_name = field.attribute_name
+                        else:
+                            attribute_name = field.slot_name
+                        
+                        code('self.', attribute_name, ' = result.', field.field_name)
+            
             
             with code('finally:'):
                 code('self._load_task = None')
@@ -365,6 +373,7 @@ class ModelLinkType(type):
                     del class_attributes[class_attribute_name]
             
             fields = tuple(fields)
+            class_attributes['__fields__'] = fields
             
             added_initializer = class_attributes.get('__new__', None)
             
@@ -397,7 +406,6 @@ class ModelLinkType(type):
             new_slots = tuple(new_slots)
             
             class_attributes['__slots__'] = new_slots
-            
         
         return type.__new__(cls, class_name, class_parents, class_attributes)
 
@@ -446,3 +454,41 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
             self._load_task = load_task
         
         yield from shield(load_task, KOKORO)
+    
+    
+    def __bool__(self):
+        return self.__loaded__()
+    
+    
+    def __getstate__(self):
+        state = {}
+        
+        for field in self.__fields__:
+            key = field.attribute_name
+                
+            if field.is_require_internal_field:
+                attribute_name = field.attribute_name
+            else:
+                attribute_name = field.slot_name
+            
+            value = getattr(self, attribute_name)
+            
+            state[key] = value
+        
+        return state
+    
+    
+    def __setstate__(self, state):
+        self._load_task = None
+        self._fields_modified = None
+        self._saving = None
+        
+        for field in self.__fields__:
+            key = field.attribute_name
+                
+            if field.is_require_internal_field:
+                attribute_name = field.attribute_name
+            else:
+                attribute_name = field.slot_name
+            
+            setattr(self, attribute_name, state[key])
