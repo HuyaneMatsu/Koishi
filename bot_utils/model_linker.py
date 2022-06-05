@@ -202,7 +202,7 @@ def get_save_method_string(fields, engine):
                                     code('MODEL.', primary_key_field.field_name, ' == self.entry_id,')
                                 
                                 with code(').values('):
-                                    code('**{field.field_name: field.getter(self), for field in fields_modified}')
+                                    code('**{field.field_name: field.getter(self) for field in fields_modified}')
                                 
                                 code(')')
                             code(')')
