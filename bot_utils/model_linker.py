@@ -131,7 +131,7 @@ def get_new_method_string(fields, globals, added_initializer):
         if added_initializer is None:
             code('self = ModelLink.__new__(cls, parent)')
         else:
-            code('self = INITIALIZER.__new__(cls, parent)')
+            code('self = INITIALIZER(cls, parent)')
         
         for field in fields:
             if (field.query_key is not None) and (added_initializer is None):
@@ -139,7 +139,6 @@ def get_new_method_string(fields, globals, added_initializer):
             
             if field.primary_key:
                 display_default = repr(ENTRY_ID_NOT_LOADED)
-                attribute_name = field.attribute_name
             
             else:
                 default = field.default
@@ -150,7 +149,9 @@ def get_new_method_string(fields, globals, added_initializer):
                     display_default = 'DEFAULT_' + field.field_name.upper()
                     globals[display_default] = default
                 
-                
+            if field.is_require_internal_field():
+                attribute_name = field.attribute_name
+            else:
                 attribute_name = field.slot_name
             
             code('self.', attribute_name, ' = ', display_default)
@@ -467,7 +468,7 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
         for field in self.__fields__:
             key = field.attribute_name
                 
-            if field.is_require_internal_field:
+            if field.is_require_internal_field():
                 attribute_name = field.attribute_name
             else:
                 attribute_name = field.slot_name
@@ -487,7 +488,7 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
         for field in self.__fields__:
             key = field.attribute_name
                 
-            if field.is_require_internal_field:
+            if field.is_require_internal_field():
                 attribute_name = field.attribute_name
             else:
                 attribute_name = field.slot_name
