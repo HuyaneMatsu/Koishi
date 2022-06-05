@@ -8,7 +8,7 @@ class WaifuType(ModelLink, model=waifu_stats_model, table=WAIFU_STATS_TABLE, eng
     __slots__ = ()
     
     def __new__(cls, user):
-        self = WaifuType.__new__(cls, user)
+        self = ModelLink.__new__(cls, user)
         self.user_id = user.id
         return self
     
