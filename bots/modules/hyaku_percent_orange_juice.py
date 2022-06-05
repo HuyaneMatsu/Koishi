@@ -1,3 +1,5 @@
+__all__ = ()
+
 from os.path import join as join_paths, exists
 from re import compile as re_compile, I as re_ignore_case, escape as re_escape
 from functools import partial as partial_func

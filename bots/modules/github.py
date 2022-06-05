@@ -1,3 +1,5 @@
+__all__ = ()
+
 from collections import OrderedDict
 from datetime import datetime
 from scarletio import LOOP_TIME, Lock, IgnoreCaseMultiValueDictionary, IgnoreCaseString, Future

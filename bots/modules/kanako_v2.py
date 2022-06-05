@@ -1,4 +1,6 @@
-import os, re
+__all__ = ()
+
+import os
 from random import randint, choice
 from itertools import chain
 

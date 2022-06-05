@@ -1,3 +1,5 @@
+__all__ = ()
+
 from random import random, randint, choice
 from html import unescape as html_unescape
 from functools import partial as partial_func

@@ -1,3 +1,5 @@
+__all__ = ()
+
 from datetime import datetime
 
 from hata import Client, Embed, DiscordException, ERROR_CODES, Sticker

@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Client, Embed
 from sqlalchemy.sql import select
 

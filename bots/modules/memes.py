@@ -1,3 +1,5 @@
+__all__ = ()
+
 from scarletio import Lock, Task
 from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO, InteractionType
 from hata.ext.slash import abort, Button, Row, InteractionResponse

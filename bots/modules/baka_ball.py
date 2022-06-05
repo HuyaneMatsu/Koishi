@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Client, Embed, Color
 from hata.ext.slash import abort
 from hashlib import md5

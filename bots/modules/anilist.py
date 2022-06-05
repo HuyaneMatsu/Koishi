@@ -1,3 +1,5 @@
+__all__ = ()
+
 from re import compile as re_compile, U as re_unicode, M as re_multi_line, S as re_dotall
 from scarletio import to_json, sleep, ScarletLock, IgnoreCaseString
 from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO

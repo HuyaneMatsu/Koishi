@@ -1,3 +1,5 @@
+__all__ = ()
+
 import re
 from hata import Client, Guild, mention_user_by_id, Embed
 from hata.ext.slash import Button, ButtonStyle

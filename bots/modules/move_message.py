@@ -1,3 +1,5 @@
+__all__ = ()
+
 from scarletio import Task, WaitTillExc, LOOP_TIME, WaitTillAll, Future
 from hata import Client, Guild, DiscordException, ERROR_CODES, KOKORO, Emoji, format_loop_time, \
     mention_channel_by_id, TIMESTAMP_STYLES, Embed, is_id

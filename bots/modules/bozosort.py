@@ -1,9 +1,11 @@
+__all__ = ()
+
 import re
 
 from hata import Client, Permission
 from hata.ext.slash import abort, InteractionResponse
 
-from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__TESTER
+from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT: Client
 

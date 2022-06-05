@@ -1,3 +1,5 @@
+__all__ = ()
+
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case, U as re_unicode
 from scarletio import LOOP_TIME, Task
 from hata import Client, KOKORO, DiscordException, ERROR_CODES, InviteTargetType, Embed
@@ -131,7 +133,9 @@ class koi_guilds:
                 description_parts.append(guild.name)
                 description_parts.append('](')
                 description_parts.append(invite_url)
-                description_parts.append(')\n')
+                description_parts.append(')')
+            
+            description_parts.append('\n')
         
         description = ''.join(description_parts)
         description_parts = None

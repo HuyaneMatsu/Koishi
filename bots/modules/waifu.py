@@ -1,3 +1,5 @@
+__all__ = ()
+
 from itertools import chain
 
 from hata import Client, BUILTIN_EMOJIS

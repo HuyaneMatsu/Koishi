@@ -1,44 +1,61 @@
 from config import DATABASE_NAME
 from datetime import datetime
+import warnings
 
-if DATABASE_NAME is None:
-    user_common_model = None
-    USER_COMMON_TABLE = None
-    
-    waifu_list_model = None
-    WAIFU_LIST_TABLE = None
-    
-    waifu_proposal_model = None
-    WAIFU_PROPOSAL_TABLE = None
-    
-    auto_react_role_model = None
-    AUTO_REACT_ROLE_TABLE = None
-    
-    emoji_counter_model = None
-    EMOJI_COUNTER_TABLE = None
-    
-    ds_v2_model = None
-    DS_V2_TABLE = None
-    
-    ds_v2_result_model = None
-    DS_V2_RESULT_TABLE = None
-    
-    sticker_counter_model = None
-    STICKER_COUNTER_TABLE = None
-    
-    DB_ENGINE = None
-    
-    get_create_common_user_expression = None
-    
-    waifu_stats_model = None
-    WAIFU_STATS_TABLE = None
-    
-else:
+
+user_common_model = None
+USER_COMMON_TABLE = None
+
+waifu_list_model = None
+WAIFU_LIST_TABLE = None
+
+waifu_proposal_model = None
+WAIFU_PROPOSAL_TABLE = None
+
+auto_react_role_model = None
+AUTO_REACT_ROLE_TABLE = None
+
+emoji_counter_model = None
+EMOJI_COUNTER_TABLE = None
+
+ds_v2_model = None
+DS_V2_TABLE = None
+
+ds_v2_result_model = None
+DS_V2_RESULT_TABLE = None
+
+sticker_counter_model = None
+STICKER_COUNTER_TABLE = None
+
+DB_ENGINE = None
+
+get_create_common_user_expression = None
+
+waifu_stats_model = None
+WAIFU_STATS_TABLE = None
+
+todo_model = None
+TODO_TABLE = None
+
+item_model = None
+ITEM_TABLE = None
+
+if (DATABASE_NAME is not None):
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy import Column, Integer as Int32, BIGINT as Int64, LargeBinary as Binary, create_engine, DateTime, \
         String, Boolean, Unicode, SmallInteger as Int16
     from sqlalchemy.sql.expression import func
     
+    try:
+        DB_ENGINE = create_engine(DATABASE_NAME)
+    except ImportError as err:
+        warnings.warn(
+            f'Could not create database engine: {err!r}.'
+        )
+        DB_ENGINE = None
+        
+    
+if (DB_ENGINE is not None):
     BASE = declarative_base()
     
     class user_common_model(BASE):
@@ -193,9 +210,8 @@ else:
     WAIFU_STATS_TABLE = waifu_stats_model.__table__
     
     
-    DB_ENGINE = create_engine(DATABASE_NAME)
     DB_ENGINE.dispose()
-    #BASE.metadata.create_all(DB_ENGINE)
+    # BASE.metadata.create_all(DB_ENGINE)
     
     def get_create_common_user_expression(
         user_id,

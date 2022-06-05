@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Client, Embed, Emoji
 from hata.ext.slash import InteractionResponse, Button, Row
 

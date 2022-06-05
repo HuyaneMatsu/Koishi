@@ -1,3 +1,5 @@
+__all__ = ()
+
 from scarletio import Task, sleep
 from hata import Client, Sticker, KOKORO, Emoji, parse_emoji
 from bot_utils.constants import GUILD__SUPPORT, CHANNEL__SUPPORT__SYSTEM

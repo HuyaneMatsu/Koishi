@@ -1,3 +1,5 @@
+__all__ = ()
+
 from bot_utils.constants import GUILD__SUPPORT
 from hata import Client, KOKORO, Embed, DATETIME_FORMAT_CODE
 from hata.ext.slash import abort

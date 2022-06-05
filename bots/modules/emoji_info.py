@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Embed, Client, parse_emoji, elapsed_time, DATETIME_FORMAT_CODE, ZEROUSER,  GUILDS, BUILTIN_EMOJIS
 from hata.ext.slash import abort, Button, InteractionResponse
 

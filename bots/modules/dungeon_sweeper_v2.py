@@ -1,3 +1,5 @@
+__all__ = ()
+
 import os
 from zlib import compress, decompress
 from json import load as from_json_file, dumps as to_json, loads as from_json

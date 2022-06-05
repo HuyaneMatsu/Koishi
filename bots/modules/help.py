@@ -1,3 +1,5 @@
+__all__ = ()
+
 import sys
 from functools import partial as partial_func
 from platform import platform as get_platform

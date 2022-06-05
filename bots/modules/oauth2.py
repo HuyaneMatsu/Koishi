@@ -1,3 +1,5 @@
+__all__ = ()
+
 from scarletio import sleep
 from hata import Color, Embed, parse_oauth2_redirect_url, DiscordException, ERROR_CODES, cr_pg_channel_object, \
     Client, CHANNEL_TYPES

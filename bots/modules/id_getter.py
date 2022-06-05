@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Client, parse_emoji
 from hata.ext.slash import abort
 

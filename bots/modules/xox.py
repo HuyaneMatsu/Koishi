@@ -1,3 +1,5 @@
+__all__ = ()
+
 from functools import partial as partial_func
 from random import random, choice
 

@@ -1,5 +1,6 @@
-import re
+__all__ = ()
 
+import re
 from hata import ROLES, Embed, Client, elapsed_time, BUILTIN_EMOJIS, RoleManagerType, DATETIME_FORMAT_CODE
 from hata.ext.slash import abort, InteractionResponse, Button, Row
 

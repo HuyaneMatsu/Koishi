@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Client, BUILTIN_EMOJIS
 from hata import Embed, KOKORO
 from scarletio import Task, WaitTillAll

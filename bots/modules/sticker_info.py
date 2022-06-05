@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import GUILDS, Embed, Client, DiscordException, StickerType, elapsed_time, BUILTIN_EMOJIS, ERROR_CODES, \
     DATETIME_FORMAT_CODE, StickerFormat, ZEROUSER, is_id
 from hata.ext.slash import abort, InteractionResponse, Button

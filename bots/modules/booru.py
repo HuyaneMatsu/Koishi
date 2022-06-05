@@ -1,3 +1,5 @@
+__all__ = ()
+
 from re import compile as re_compile, I as re_ignore_case, U as re_unicode, escape as re_escape
 from collections import deque
 from difflib import get_close_matches

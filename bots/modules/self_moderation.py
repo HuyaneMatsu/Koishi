@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Client, Embed, Emoji
 from datetime import datetime, timedelta
 from random import random, randint

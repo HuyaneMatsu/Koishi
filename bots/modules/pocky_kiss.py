@@ -1,8 +1,8 @@
+__all__ = ()
+
 from random import choice
 
-from hata import Client
-from hata import Embed
-
+from hata import Client, Embed
 from hata.ext.slash import abort
 
 

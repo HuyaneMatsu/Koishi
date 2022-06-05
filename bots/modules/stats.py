@@ -1,3 +1,5 @@
+__all__ = ()
+
 import os, sys
 IS_PYPY = (sys.implementation.name == 'pypy')
 

@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata import Embed, Client, elapsed_time, ICON_TYPE_NONE, DATETIME_FORMAT_CODE, BUILTIN_EMOJIS, CHANNEL_TYPES
 from hata.ext.slash import abort
 

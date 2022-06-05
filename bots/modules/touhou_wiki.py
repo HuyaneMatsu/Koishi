@@ -1,3 +1,5 @@
+__all__ = ()
+
 import sys
 from re import compile as re_compile
 
