@@ -54,7 +54,7 @@ class koi_guilds:
         
         for guild in SLASH_CLIENT.guilds:
             if PATTERN.search(guild.name) is not None:
-                guilds.append(guild.name)
+                guilds.append(guild)
         
         guilds.sort()
         
