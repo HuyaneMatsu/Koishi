@@ -34,6 +34,7 @@ class CodeBuilder(RichAttributeErrorBaseType):
     
     
     def build(self):
+        print (''.join(self.parts))
         return ''.join(self.parts)
     
     
@@ -148,11 +149,11 @@ def get_new_method_string(fields, globals, added_initializer):
                 else:
                     display_default = 'DEFAULT_' + field.field_name.upper()
                     globals[display_default] = default
-                
+            
             if field.is_require_internal_field():
-                attribute_name = field.attribute_name
-            else:
                 attribute_name = field.slot_name
+            else:
+                attribute_name = field.attribute_name
             
             code('self.', attribute_name, ' = ', display_default)
         
@@ -469,9 +470,9 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
             key = field.attribute_name
                 
             if field.is_require_internal_field():
-                attribute_name = field.attribute_name
-            else:
                 attribute_name = field.slot_name
+            else:
+                attribute_name = field.attribute_name
             
             value = getattr(self, attribute_name)
             
@@ -489,8 +490,8 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
             key = field.attribute_name
                 
             if field.is_require_internal_field():
-                attribute_name = field.attribute_name
-            else:
                 attribute_name = field.slot_name
+            else:
+                attribute_name = field.attribute_name
             
             setattr(self, attribute_name, state[key])
