@@ -452,7 +452,7 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
     def __load_synchronised__(self, parent):
         load_task = self._load_task
         if (load_task is None):
-            load_task = Task(self.__load__(parent), KOKORO)
+            load_task = Task(self.__load__(), KOKORO)
             self._load_task = load_task
         
         yield from shield(load_task, KOKORO)
