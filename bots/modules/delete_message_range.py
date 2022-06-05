@@ -98,7 +98,7 @@ class DeleteRangeContext:
     
     
     async def notify_timeout(self):
-        self.client.interaction_followup_message_create(
+        await self.client.interaction_followup_message_create(
             self.event,
             embed = self.get_embed(DELETE_RANGE_CONTEXT_STATE_TIMEOUT),
             show_for_invoking_user_only = True,
