@@ -34,7 +34,6 @@ class CodeBuilder(RichAttributeErrorBaseType):
     
     
     def build(self):
-        print (''.join(self.parts))
         return ''.join(self.parts)
     
     
