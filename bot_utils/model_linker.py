@@ -379,7 +379,8 @@ class ModelLinkType(type):
             
             globals = {}
             globals['ModelLink'] = ModelLink
-            globals['INITIALIZER'] = added_initializer
+            if (added_initializer is not None):
+                globals['INITIALIZER'] = added_initializer
             globals['ENGINE'] = engine
             globals['TABLE'] = table
             globals['MODEL'] = model
@@ -389,10 +390,10 @@ class ModelLinkType(type):
             loaded_method_string = get_loaded_method_string(fields, engine)
             load_method_string = get_load_method_string(fields, engine)
             
-            class_attributes['__new__']: compile_and_get('__new__', new_method_string, globals)
-            class_attributes['__save__']: compile_and_get('__save__', save_method_string, globals)
-            class_attributes['__loaded__']: compile_and_get('__loaded__', loaded_method_string, globals)
-            class_attributes['__load__']: compile_and_get('__load__', load_method_string, globals)
+            class_attributes['__new__'] = compile_and_get('__new__', new_method_string, globals)
+            class_attributes['__save__'] = compile_and_get('__save__', save_method_string, globals)
+            class_attributes['__loaded__'] = compile_and_get('__loaded__', loaded_method_string, globals)
+            class_attributes['__load__'] = compile_and_get('__load__', load_method_string, globals)
             
             extra_slots = tuple(
                 field.slot_name if field.is_require_internal_field() else field.attribute_name for field in fields
