@@ -127,7 +127,7 @@ def get_new_method_string(fields, globals, added_initializer):
     code = CodeBuilder()
     code.add_line()
     
-    with code('def __new__(cls):'):
+    with code('def __new__(cls, parent):'):
         if added_initializer is None:
             code('self = ModelLink.__new__(cls, parent)')
         else:
