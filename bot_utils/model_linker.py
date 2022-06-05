@@ -4,7 +4,7 @@ from scarletio import RichAttributeErrorBaseType, to_coroutine, Task, shield
 from hata import KOKORO
 
 COMPILATION_FILE_NAME = '<model_linker>'
-SLOT_NAME_PREFIX = '__slot__'
+SLOT_NAME_PREFIX = '_slot_'
 DISPLAY_DEFAULT_PREFIX = 'DEFAULT_'
 ENTRY_ID_NOT_LOADED = -1
 ENTRY_ID_MISSING = -2
