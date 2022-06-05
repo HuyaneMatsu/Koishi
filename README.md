@@ -54,7 +54,7 @@ And much more!
 
 - Administration
     
-    `clear` • `ban` • `bans` • `emoji-role` • `invite-create` • `invites` • `is-banned`
+    `clear` • `ban` • `bans` • `dupe-image-filter` • `emoji-role` • `invite-create` • `invites` • `is-banned`
 
 - Anime
     
