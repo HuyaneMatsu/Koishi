@@ -2,14 +2,14 @@ __all__ = ()
 
 from re import compile as re_compile, escape as re_escape, I as re_ignore_case, U as re_unicode
 from scarletio import LOOP_TIME, Task
-from hata import Client, KOKORO, DiscordException, ERROR_CODES, InviteTargetType, Embed
+from hata import Client, KOKORO, DiscordException, ERROR_CODES, InviteTargetType, Embed, ICON_TYPE_NONE, elapsed_time
 from hata.ext.slash import abort
 
 SLASH_CLIENT: Client
 
 
-CACHING_INTERVAL = 4 * 60.0 * 60.0 # 4 hour
-GUILD_PER_PAGE = 10
+CACHING_INTERVAL = 8 * 60.0 * 60.0 # 8 hour
+GUILD_PER_PAGE = 5
 
 
 PATTERN = re_compile(
@@ -101,51 +101,124 @@ class koi_guilds:
             task = Task(cls.build_embed_task(page), KOKORO)
             EMBED_BUILDER_TASKS[page] = task
             
-            embed = None
+            embeds = None
             try:
-                embed = await task
+                embeds = await task
             
             finally:
                 if EMBED_BUILDER_TASKS.get(page, None) is task:
                     del EMBED_BUILDER_TASKS[page]
                     
-                    if embed is not None:
-                        cls.EMBED_CACHE[page] = embed
+                    if embeds is not None:
+                        cls.EMBED_CACHE[page] = embeds
         else:
-            embed = await task
+            embeds = await task
         
-        yield embed
+        yield embeds
     
     
     @classmethod
     async def build_embed_task(cls, page):
         guilds = cls.GUILD_CACHE[page - 1]
         
-        description_parts = []
+        embeds = []
         
         for guild in guilds:
-            invite_url = await cls.try_get_invite_url_of(guild)
-            
-            if invite_url is None:
-                description_parts.append(guild.name)
+            embed = await cls.build_guild_embed(guild)
+            embeds.append(embed)
+        
+        embeds[-1].add_footer(f'Page {page} out of {len(cls.GUILD_CACHE)}')
+        
+        return embeds
+    
+    
+    @classmethod
+    async def build_guild_embed(cls, guild):
+        invite_url = await cls.try_get_invite_url_of(guild)
+        
+        approximate_user_count = guild.approximate_user_count
+        if approximate_user_count == 0:
+            await SLASH_CLIENT.guild_get(guild)
+            approximate_user_count = guild.approximate_user_count
+        
+        if invite_url is None:
+            description = None
+        else:
+            vanity_code = guild.vanity_code
+            if vanity_code is None:
+                description = f'[Join {guild.name} !]({invite_url})'
             else:
-                description_parts.append('[')
-                description_parts.append(guild.name)
-                description_parts.append('](')
-                description_parts.append(invite_url)
-                description_parts.append(')')
-            
-            description_parts.append('\n')
+                description = f'[Join discord.gg/{vanity_code} !]({invite_url})'
         
-        description = ''.join(description_parts)
-        description_parts = None
-        
-        return Embed(
-            'Koishi guilds',
+        embed = Embed(
+            guild.name,
             description,
-        ).add_footer(
-            f'Page {page} out of {len(cls.GUILD_CACHE)}'
+            color  = (guild.icon_hash & 0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id >> 22) & 0xFFFFFF),
+        ).add_thumbnail(
+            guild.icon_url_as(size=128),
         )
+        
+        guild_description = guild.guild_description
+        if (guild_description is not None):
+            embed.add_field(
+                'Description',
+                (
+                    f'```\n'
+                    f'{guild_description}\n'
+                    f'```'
+                ),
+            )
+        
+        embed.add_field(
+            'Users',
+            (
+                f'```\n'
+                f'{approximate_user_count}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Online users',
+            (
+                f'```\n'
+                f'{guild.approximate_online_count}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Age',
+            (
+                f'```\n'
+                f'{elapsed_time(guild.created_at)}\n'
+                f'```'
+            ),
+        ).add_field(
+            'Boost level',
+            (
+                f'```\n'
+                f'{guild.premium_tier}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Emojis',
+            (
+                f'```\n'
+                f'{len(guild.emojis)}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Stickers',
+            (
+                f'```\n'
+                f'{len(guild.stickers)}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+        
+        return embed
     
     
     @classmethod

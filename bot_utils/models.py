@@ -82,6 +82,7 @@ if (DB_ENGINE is not None):
         waifu_cost      = Column(Int64, default=0)
         waifu_divorces  = Column(Int32, default=0)
         waifu_slots     = Column(Int32, default=1)
+        waifu_owner_id  = Column(Int64, default=0)
         
         # notification settings
         notify_proposal = Column(Boolean, default=True)
@@ -229,6 +230,7 @@ if (DB_ENGINE is not None):
         count_daily_for_waifu = 0,
         count_top_gg_vote = 0,
         top_gg_last_vote = None,
+        waifu_owner_id = 0,
     ):
         now = None
         
@@ -260,4 +262,5 @@ if (DB_ENGINE is not None):
             count_daily_for_waifu = count_daily_for_waifu,
             count_top_gg_vote = count_top_gg_vote,
             top_gg_last_vote = top_gg_last_vote,
+            waifu_owner_id = waifu_owner_id,
         )

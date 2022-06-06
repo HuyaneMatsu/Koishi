@@ -426,14 +426,14 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
     
     def __await__(self):
         if not self.__loaded__():
-            yield from self.__load_synchronised__(self)
+            yield from self.__load_synchronised__()
         
         return self
     
     
     def _field_modified(self, field):
         fields_modified = self._fields_modified
-        if (fields_modified is not None):
+        if (fields_modified is None):
             fields_modified = set()
             self._fields_modified = fields_modified
         
@@ -449,7 +449,7 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
     
     
     @to_coroutine
-    def __load_synchronised__(self, parent):
+    def __load_synchronised__(self):
         load_task = self._load_task
         if (load_task is None):
             load_task = Task(self.__load__(), KOKORO)

@@ -5,7 +5,7 @@ from math import floor
 
 from hata import Client, Embed, elapsed_time
 from hata.ext.slash import Button, abort
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.sql import select
 
 from bot_utils.constants import COLOR__GAMBLING, EMOJI__HEART_CURRENCY, LINK__KOISHI_TOP_GG, WAIFU_COST_DEFAULT
@@ -128,13 +128,35 @@ async def claim_daily_for_waifu(client, event, target_user):
     
     while True:
         async with DB_ENGINE.connect() as connector:
+            response = await connector.execute(
+                select(
+                    [
+                        waifu_list_model.id,
+                    ]
+                ).where(
+                    or_(
+                        and_(
+                            waifu_list_model.user_id == source_user.id,
+                            waifu_list_model.waifu_id == target_user.id,
+                        ),
+                        and_(
+                            waifu_list_model.user_id == target_user.id,
+                            waifu_list_model.waifu_id == source_user.id,
+                        ),
+                    )
+                )
+            )
+            
+            results = await response.fetchall()
+            if len(results) < 1:
+                break
+            
             # To be someone your waifu, you both need to be in the database, so simple.
             response = await connector.execute(
                 select(
                     [
                         user_common_model.id,
                         user_common_model.user_id,
-                        user_common_model.waifu_owner_id,
                         user_common_model.total_love,
                         user_common_model.daily_streak,
                         user_common_model.daily_next,
@@ -161,15 +183,10 @@ async def claim_daily_for_waifu(client, event, target_user):
             else:
                 target_entry, source_entry = results
             
-            source_waifu_owner_id = source_entry[2]
-            target_waifu_owner_id = target_entry[2]
-            
-            if (source_waifu_owner_id != target_user.id) and (target_waifu_owner_id != source_user.id):
-                break
             
             now = datetime.utcnow()
             
-            target_daily_next = target_entry[5]
+            target_daily_next = target_entry[4]
             if target_daily_next > now:
                 return Embed(
                     f'{target_user.name} already claimed their daily love for today~',
@@ -177,7 +194,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                     color = COLOR__GAMBLING,
                 )
             
-            target_daily_streak = target_entry[4]
+            target_daily_streak = target_entry[3]
             target_daily_streak = calculate_daily_new_only(target_daily_streak, target_daily_next, now)
             
             if target_daily_next + DAILY_STREAK_BREAK < now:
@@ -187,7 +204,7 @@ async def claim_daily_for_waifu(client, event, target_user):
             
             received = calculate_daily_for(target_user, target_daily_streak)
             
-            target_total_love = target_entry[3]
+            target_total_love = target_entry[2]
             target_total_love = target_total_love + received
             
             target_daily_streak += 1
@@ -195,7 +212,7 @@ async def claim_daily_for_waifu(client, event, target_user):
             waifu_cost_increase = 1 + floor(received * 0.01)
             
             
-            new_waifu_cost = source_entry[7]
+            new_waifu_cost = source_entry[6]
             if not new_waifu_cost:
                 new_waifu_cost = WAIFU_COST_DEFAULT
             new_waifu_cost += waifu_cost_increase
@@ -209,7 +226,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             )
             
-            new_waifu_cost = target_entry[7]
+            new_waifu_cost = target_entry[6]
             if not new_waifu_cost:
                 new_waifu_cost = WAIFU_COST_DEFAULT
             new_waifu_cost += waifu_cost_increase
@@ -239,7 +256,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             )
             
-            if (not target_user.is_bot) and target_entry[6]:
+            if (not target_user.is_bot) and target_entry[5]:
                 await send_embed_to(
                     client,
                     target_user.id,
