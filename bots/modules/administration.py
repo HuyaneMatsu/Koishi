@@ -135,6 +135,7 @@ async def invite_create(client, event,
     
     yield content
 
+'''
 def bans_pagination_check(event):
     guild = event.message.guild
     if guild is None:
@@ -144,6 +145,7 @@ def bans_pagination_check(event):
         return True
     
     return False
+
 
 
 @SLASH_CLIENT.interactions(
@@ -220,7 +222,7 @@ async def bans(client, event):
             break
     
     await Pagination(client, event, result, check=bans_pagination_check)
-
+'''
 
 def check_channel_invites_pagination_permissions(event):
     permissions = event.message.channel.permissions_for(event.user)
