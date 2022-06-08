@@ -148,6 +148,10 @@ def get_new_method_string(fields, globals, added_initializer):
                 else:
                     display_default = 'DEFAULT_' + field.field_name.upper()
                     globals[display_default] = default
+                    
+                    if callable(default):
+                        display_default = display_default + '()'
+            
             
             if field.is_require_internal_field():
                 attribute_name = field.slot_name
@@ -270,6 +274,7 @@ def get_load_method_string(fields, engine):
                 
                 with code('if result is None:'):
                     code('self.', primary_key_field.attribute_name, ' = ', str(ENTRY_ID_MISSING))
+                    code('self.__set_initial_values__()')
                 
                 with code('else:'):
                     for field in fields:
@@ -460,6 +465,10 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
     
     def __bool__(self):
         return self.__loaded__()
+    
+    
+    def __set_initial_values__(self):
+        self._fields_modified = None
     
     
     def __getstate__(self):

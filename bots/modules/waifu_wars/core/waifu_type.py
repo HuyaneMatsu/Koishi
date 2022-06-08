@@ -1,6 +1,5 @@
 __all__ = ('WaifuType', )
 
-from scarletio import to_coroutine
 from bot_utils.models import DB_ENGINE, WAIFU_STATS_TABLE, waifu_stats_model
 from bot_utils.model_linker import ModelLink, Field
 
@@ -32,7 +31,7 @@ class WaifuType(ModelLink, model=waifu_stats_model, table=WAIFU_STATS_TABLE, eng
     raw_costume = Field(waifu_stats_model.raw_costume, 0)
     
     
-    def __set_defaults__(self):
+    def __set_initial_values__(self):
         (
             self.stat_housewife,
             self.stat_cuteness,
@@ -40,12 +39,4 @@ class WaifuType(ModelLink, model=waifu_stats_model, table=WAIFU_STATS_TABLE, eng
             self.stat_charm,
             self.stat_loyalty,
         ) = get_default_user_stats(self.user_id)
-    
-    
-    @to_coroutine
-    def __load_synchronised__(self):
-        yield from ModelLink.__load_synchronised__(self)
-        
-        if self.entry_id < 0:
-            self.__set_defaults__()
-            self._fields_resolved()
+        ModelLink.__set_initial_values__(self)
