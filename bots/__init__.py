@@ -104,10 +104,23 @@ else:
     
     add_default_plugin_variables(Nitori=Nitori)
     
+    
+    Renes = Client(
+        config.RENES_TOKEN,
+        client_id = config.RENES_ID,
+        application_id = config.RENES_ID,
+        extensions = 'slash',
+    )
+    
+    add_default_plugin_variables(Renes=Renes)
+    
+    
     register_and_load_plugin('bots.koishi', locked=True)
     register_and_load_plugin('bots.satori', locked=True)
     register_and_load_plugin('bots.flan'  , locked=True)
     register_and_load_plugin('bots.nitori', locked=True)
+    register_and_load_plugin('bots.renes' , locked=True)
+
 
 
 register_plugin('bots.system')
