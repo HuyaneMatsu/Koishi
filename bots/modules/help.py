@@ -611,9 +611,9 @@ CATEGORIES = (
         'Utility',
         EMOJI_MAGIC_WAND,
         (
-            'avatar', 'calc', 'choose', 'color', 'emoji-info', 'guild-info', 'guild-icon', 'id', 'id-to-datetime',
-            'now-as-id', 'ping', 'rawr', 'sticker', 'role-info', 'show-emoji', 'sticker-info', 'user',
-            'welcome-screen',
+            'avatar', 'calc', 'choose', 'color', 'emoji-info', 'enlarge-emojis', 'enlarge-reactions', 'guild-icon',
+            'guild-info', 'id', 'id-to-datetime', 'now-as-id', 'ping', 'rawr', 'role-info', 'show-emoji', 'sticker',
+            'sticker-info', 'user', 'welcome-screen'
         ),
     ), (
         'Waifus',
@@ -621,6 +621,10 @@ CATEGORIES = (
         ('nsfw-booru', 'safe-booru', 'touhou-character', 'vocaloid', 'waifu',)
     ),
 )
+
+
+NOT_LISTED_COMMANDS = ('koi-guilds', 'koi-guilds-how-to')
+
 
 def build_category_into(extend, category_name, emoji, command_names):
     extend.append(emoji.as_emoji)

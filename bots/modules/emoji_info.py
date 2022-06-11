@@ -1,6 +1,7 @@
 __all__ = ()
 
-from hata import Embed, Client, parse_emoji, elapsed_time, DATETIME_FORMAT_CODE, ZEROUSER,  GUILDS, BUILTIN_EMOJIS
+from hata import Embed, Client, parse_emoji, elapsed_time, DATETIME_FORMAT_CODE, ZEROUSER,  GUILDS, BUILTIN_EMOJIS, \
+    DiscordException, ERROR_CODES
 from hata.ext.slash import abort, Button, InteractionResponse
 
 SLASH_CLIENT: Client
@@ -66,8 +67,14 @@ async def emoji_info(
         guild = emoji.guild
         
         # If the emoji's creator is unknown, try to request it.
-        if (emoji.user is ZEROUSER) and (guild is not None) and (guild in client.guilds):
-            await client.emoji_get(emoji, force_update=True)
+        if (emoji.user is ZEROUSER) and (guild is not None) and (guild in client.guilds) and (not emoji.managed):
+            try:
+                await client.emoji_get(emoji, force_update=True)
+            except DiscordException as err:
+                if err.code not in (
+                    ERROR_CODES.missing_access, # Client removed.
+                ):
+                    raise
         
         url = emoji.url
         

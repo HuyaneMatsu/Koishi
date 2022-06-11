@@ -503,3 +503,9 @@ class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None,
                 attribute_name = field.attribute_name
             
             setattr(self, attribute_name, state[key])
+    
+    
+    def save(self):
+        if not self._saving:
+            self._saving = True
+            Task(self.__save__(), KOKORO)

@@ -29,17 +29,18 @@ GUILD_CACHE = []
 EMBED_CACHE = {}
 EMBED_BUILDER_TASKS = {}
 
+
 def clear_cache():
+    GUILD_CACHE.clear()
     EMBED_CACHE.clear()
     EMBED_BUILDER_TASKS.clear()
-    cache_guilds()
 
 
 def cache_guilds():
     guilds = []
     
     for guild in SLASH_CLIENT.guilds:
-        if guild.owner not in GUILD__SUPPORT.users:
+        if guild.owner_id not in GUILD__SUPPORT.users:
             continue
         
         if PATTERN.search(guild.name) is None:
@@ -50,8 +51,6 @@ def cache_guilds():
     
     guilds.sort()
     
-    
-    GUILD_CACHE.clear()
     
     guild_chunk = []
     guild_chunk_length = 0
@@ -144,7 +143,7 @@ async def build_guild_embed(guild):
         guild.icon_url_as(size=128),
     )
     
-    guild_description = guild.guild_description
+    guild_description = guild.description
     if (guild_description is not None):
         embed.add_field(
             'Description',
@@ -259,6 +258,7 @@ class koi_guilds:
     async def __new__(cls, page: ('number', 'Page') = 1):
         if cls.should_recache():
             clear_cache()
+            cache_guilds()
         
         return get_embed(page)
     

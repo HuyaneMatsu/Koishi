@@ -63,7 +63,7 @@ class user_presence_update:
             added_streaming_activity = None
         
         if (added_streaming_activity is not None):
-            if LOOP_TIME() + cls.STREAM_PING_DIFFERENCE > cls.LAST_STREAM_OVER:
+            if LOOP_TIME() > cls.LAST_STREAM_OVER - cls.STREAM_PING_DIFFERENCE:
                 message = await client.message_create(
                     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION,
                     f'> {ROLE__ESTS_HOME__STREAM_NOTIFICATION:m}',
