@@ -12,3 +12,6 @@ else:
         
         DB_ENGINE = create_engine(DATABASE_NAME, strategy=KOKORO_STRATEGY, single_worker=True)
         module_models.DB_ENGINE = DB_ENGINE
+    
+    from .bind_types import *
+

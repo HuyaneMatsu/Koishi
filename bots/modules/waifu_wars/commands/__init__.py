@@ -1,5 +1,5 @@
-from .waifu_stats import *
+from .stats import *
 
 __all__ = (
-    *waifu_stats.__all__,
+    *stats.__all__,
 )

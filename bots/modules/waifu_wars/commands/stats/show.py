@@ -1,12 +1,11 @@
-__all__ = ()
+__all__ = ('show',)
 
-from hata import Client, Embed
+from hata import Embed
 from scarletio import to_json
 from scarletio.web_common import quote
 
-from ..core.constants import WAIFU_SCORE_GRAPH_CHART_LABELS, get_user_graph_colors, get_embed_color
+from ...core.constants import WAIFU_SCORE_GRAPH_CHART_LABELS, get_user_graph_colors, get_embed_color
 
-SLASH_CLIENT: Client
 
 WAIFU_SCORE_GRAPH_CHART_OPTIONS = {
     'scale': {
@@ -32,11 +31,11 @@ WAIFU_SCORE_GRAPH_CHART_OPTIONS = {
 }
 
 
-@SLASH_CLIENT.interactions(is_global=True)
-async def waifu_stats(
+async def show(
     event,
     user: ('user', 'Select someone else?') = None,
 ):
+    """Shows your waifu stats."""
     if user is None:
         user = event.user
     

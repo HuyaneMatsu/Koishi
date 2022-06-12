@@ -1459,8 +1459,9 @@ async def edit_2(client, event):
     }
     
     async with InteractionResponseContext(event, False, False):
-        await client.http.interaction_followup_message_edit(client.application.id, event.id, event.token, message.id,
-            data)
+        await client.http.interaction_followup_message_edit(
+            client.application.id, event.id, event.token, message.id, data
+        )
 
 @SUPPRESS_EMBEDS_TESTING.interactions
 async def webhook(client, event):
