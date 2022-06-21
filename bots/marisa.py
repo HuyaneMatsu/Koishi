@@ -1506,7 +1506,11 @@ if (watchdog is not None):
         def dispatch(self, event):
             extension = get_plugin(event.src_path)
             if (extension is not None) and (not extension.locked):
-                reload_plugin(extension.name)
+                try:
+                    reload_plugin(extension.name)
+                except ModuleNotFoundError:
+                    # File probably deleted
+                    pass
     
     @Marisa.events
     async def launch(client):
