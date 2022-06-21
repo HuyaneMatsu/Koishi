@@ -14,6 +14,8 @@ STAT_MASKS = [
 ]
 
 
+STAT_COUNT = 5  
+
 def get_multiplier_fields(value):
     positive = [(value - 1) % STAT_COUNT, (value + 1) % STAT_COUNT]
     negative = [index for index in range(STAT_COUNT) if (index != value) and (value not in positive)]
@@ -29,7 +31,6 @@ MULTIPLIER_FIELDS = generate_multiplier_fields()
 MULTIPLIER_FACTOR = 1.0 / 4.0
 MAX_MULTIPLIER = 10.0 * MULTIPLIER_FACTOR
 
-STAT_COUNT = 5
 
 def get_default_user_stats(user_id):
     # structure:

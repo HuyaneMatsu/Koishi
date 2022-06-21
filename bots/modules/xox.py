@@ -428,7 +428,13 @@ async def xox_single_player(client, event):
         if (component_interaction_event is not None):
             event = component_interaction_event
         
-        await client.interaction_response_message_edit(event, title, components=buttons)
+        try:
+            await client.interaction_response_message_edit(event, title, components=buttons)
+        except DiscordException as err:
+            if err.code not in (
+                ERROR_CODES.unknown_message,
+            ):
+                raise
 
 
 async def try_send_notification(client, event, message, user_1, user_2, timestamp, emoji):

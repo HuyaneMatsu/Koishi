@@ -1208,7 +1208,7 @@ async def update_and_display_roles(client, message):
     if guild is None:
         return
     
-    await client.guild_sync_roles(guild)
+    await client.guild_role_get_all(guild)
     
     pages = [Embed(description=chunk) for chunk in pchunkify(guild.role_list, detailed=False)]
     await Pagination(client, message.channel, pages,)

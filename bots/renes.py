@@ -4,7 +4,7 @@ from bot_utils.constants import GUILD__ESTS_HOME, ROLE__ESTS_HOME__STREAM_NOTIFI
     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION
 
 Renes: Client
-
+Koishi: Client
 
 @Renes.events
 async def guild_user_add(client, guild, user):
@@ -43,6 +43,8 @@ class user_presence_update:
     async def __new__(cls, client, user, activity_change):
         if user is not USER__EST:
             return
+        
+        await Koishi.message_create(557187647831932938, f'Debug: {activity_change!r}', allowed_mentions=None)
         
         for activity in activity_change.iter_removed():
             if activity.type == ACTIVITY_TYPES.stream:

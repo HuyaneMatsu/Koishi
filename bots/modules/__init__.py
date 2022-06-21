@@ -18,6 +18,7 @@ from .dungeon_sweeper_v2 import *
 from .dupe_image_filter import *
 from .emoji_counter import *
 from .emoji_info import *
+from .enlarge_emojis import *
 from .events import *
 from .fun import *
 from .gambling import *
