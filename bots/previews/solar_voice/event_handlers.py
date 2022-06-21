@@ -26,18 +26,18 @@ def can_send_message_in_channel(client, channel):
 
 
 async def notify_leave(client, player):
-    text_channel = player.text_channel
-    if not can_send_message_in_channel(client, text_channel):
+    channel = player.channel
+    if not can_send_message_in_channel(client, channel):
         return
     
     embed = Embed(
-        f'There are no users listening in {text_channel.name}.',
+        f'There are no users listening in {channel.name}.',
         color = EMBED_COLOR,
     ).add_footer(
         f'I will leave from the channel after {LEAVE_TIMEOUT:.0f} seconds.',
     )
     
-    await client.message_create(text_channel, embed=embed)
+    await client.message_create(channel, embed=embed)
 
 
 @SLASH_CLIENT.events
@@ -51,8 +51,8 @@ async def track_end(client, event):
     if new_track is old_track:
         return
     
-    text_channel = player.text_channel
-    if not can_send_message_in_channel(client, text_channel):
+    channel = player.channel
+    if not can_send_message_in_channel(client, channel):
         return
     
     embed = Embed(color=EMBED_COLOR)
@@ -69,7 +69,7 @@ async def track_end(client, event):
         )
     
     await client.message_create(
-        text_channel,
+        channel,
         embed = embed,
     )
 
@@ -80,8 +80,8 @@ async def track_exception(client, event):
     new_track = event.player.get_current()
 
     
-    text_channel = event.player.text_channel
-    if not can_send_message_in_channel(client, text_channel):
+    channel = event.player.channel
+    if not can_send_message_in_channel(client, channel):
         return
     
     embed = Embed(color=EMBED_COLOR)
@@ -98,7 +98,7 @@ async def track_exception(client, event):
         )
     
     await client.message_create(
-        text_channel,
+        channel,
         embed = embed,
     )
 

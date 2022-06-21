@@ -83,8 +83,6 @@ async def play_(client, event,
             if join_player:
                 player = await client.solarlink.join_voice(channel, cls=Player)
             
-            player.set_text_channel(event)
-            
             emojis = [choice(TRACK_EMOJIS) for index in range(length)]
             
             for (track, emoji) in zip(tracks, emojis):
@@ -138,8 +136,6 @@ async def play_(client, event,
             if join_player:
                 player = await client.solarlink.join_voice(channel, cls=Player)
             
-            player.set_text_channel(event)
-            
             emoji = choice(TRACK_EMOJIS)
             track = tracks[selected_track_index]
             await player.append(track, requester=user, emoji=emoji)
@@ -165,8 +161,6 @@ async def play_(client, event,
     if is_name_an_url:
         if join_player:
             player = await client.solarlink.join_voice(channel, cls=Player)
-        
-        player.set_text_channel(event)
         
         track = tracks[0]
         emoji = choice(TRACK_EMOJIS)
@@ -263,8 +257,6 @@ async def play_(client, event,
         
         if join_player:
             player = await client.solarlink.join_voice(channel, cls=Player)
-        
-        player.set_text_channel(event)
         
         for track, emoji in selected_tracks_and_emojis:
             await player.append(track, requester=user, emoji=emoji)

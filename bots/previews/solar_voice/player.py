@@ -8,24 +8,14 @@ from .constants import LEAVE_TIMEOUT
 
 
 class Player(SolarPlayer):
-    __slots__ = ('__weakref__', 'text_channel_id', 'leave_handle', 'leave_initiated_at',)
+    __slots__ = ('__weakref__', 'leave_handle', 'leave_initiated_at',)
     
     def __new__(cls, node, guild_id, channel_id):
         self, waiter = SolarPlayer.__new__(cls, node, guild_id, channel_id)
-        self.text_channel_id = 0
         self.leave_handle = None
         self.leave_initiated_at = None
         
         return self, waiter
-    
-    def set_text_channel(self, event):
-        self.text_channel_id = event.channel_id
-    
-    @property
-    def text_channel(self):
-        text_channel_id = self.text_channel_id
-        if text_channel_id:
-            return CHANNELS[text_channel_id]
     
     @property
     def queue_duration(self):
