@@ -5,7 +5,7 @@ from time import time as time_now
 from email._parseaddr import _parsedate_tz
 from datetime import datetime, timedelta, timezone
 
-from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp,\
+from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoModerationRule, AutoModerationAction, \
     DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS,\
     ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
@@ -554,7 +554,7 @@ async def client_gateway_bot(client,):
         f'{API_ENDPOINT}/gateway/bot',
         )
 
-async def client_application_get(client,):
+async def application_get_own(client,):
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/oauth2/applications/@me',
         )
@@ -2509,6 +2509,47 @@ async def scheduled_event_user_get_chunk(client, scheduled_event):
     )
 
 
+async def auto_moderation_rule_get(client, guild_id, auto_moderation_rule_id):
+    data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules/{auto_moderation_rule_id}',
+    )
+    
+    return AutoModerationRule.from_data(data)
+
+
+async def auto_moderation_rule_get_all(client, guild_id):
+    data = await bypass_request(client, METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules',
+    )
+    
+    return [AutoModerationRule.from_data(data) for data in data]
+
+
+async def auto_moderation_rule_create(client, guild_id, rule):
+    data = rule.to_data()
+    data = await bypass_request(client, METHOD_POST,
+        f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules',
+        data,
+    )
+    
+    return AutoModerationRule.from_data(data)
+
+async def auto_moderation_rule_edit(client, guild_id, rule_id, rule):
+    data = rule.to_data()
+    data = await bypass_request(client, METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules/{rule_id}',
+        data,
+    )
+    
+    return AutoModerationRule.from_data(data)
+
+
+async def auto_moderation_rule_delete(client, guild_id, auto_moderation_rule_id):
+    await bypass_request(client, METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules/{auto_moderation_rule_id}',
+    )
+
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0000(client, message):
     """
@@ -3931,7 +3972,7 @@ async def rate_limit_test_0061(client, message):
     """
     channel = message.channel
     with RLTCTX(client, channel, 'rate_limit_test_0061') as RLT:
-        await client_application_get(client)
+        await application_get_own(client)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0062(client, message):
@@ -4552,7 +4593,7 @@ async def rate_limit_test_0097(client, message):
         application_command_schema = ApplicationCommand(
             'This-command_cake',
             'But does nothing for real, pls don\'t use it.',
-                )
+        )
         
         application_command = await application_command_global_create(client, application_command_schema)
         
@@ -4591,7 +4632,7 @@ async def rate_limit_test_0099(client, message):
         application_command_schema = ApplicationCommand(
             'This-command_cake',
             'But does nothing for real, pls don\'t use it.',
-                )
+        )
         
         application_command = await application_command_guild_create(client, guild, application_command_schema)
         
@@ -4669,7 +4710,7 @@ async def rate_limit_test_0101(client, message):
         application_command_schema = ApplicationCommand(
             'test_command',
             'ayaya',
-                )
+        )
         
         # Command
         application_command = await client.application_command_guild_create(guild, application_command_schema)
@@ -6326,3 +6367,129 @@ async def rate_limit_test_0176(client, message, guild_id:str=''):
         
         await scheduled_event_user_get_chunk(client, guild_1_scheduled_event)
         await scheduled_event_user_get_chunk(client, guild_2_scheduled_event)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0177(client, message):
+    """
+    auto_moderation_rule_get
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0177') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        rules = await client.auto_moderation_rule_get_all(guild)
+        
+        if not rules:
+            await RLT.send('Guild has no rules. Please add one.')
+        
+        rule = rules[0]
+        
+        await auto_moderation_rule_get(client, rule.guild_id, rule.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0178(client, message):
+    """
+    auto_moderation_rule_get_all
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0178') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await auto_moderation_rule_get_all(client, guild.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0179(client, message):
+    """
+    auto_moderation_rule_create
+    auto_moderation_rule_edit
+    auto_moderation_rule_delete
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0179') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        rule = await auto_moderation_rule_create(
+            client,
+            guild.id,
+            AutoModerationRule(
+                'meow',
+                actions = [
+                    AutoModerationAction(duration=60),
+                ],
+                keywords = ['windows'],
+            ),
+        )
+        
+        await auto_moderation_rule_edit(
+            client,
+            guild.id,
+            rule.id,
+            AutoModerationRule(
+                'moo',
+                actions = [
+                    AutoModerationAction(duration=60),
+                ],
+                keywords = ['windows'],
+            ),
+        )
+        
+        await auto_moderation_rule_delete(client, guild.id, rule.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0180(client, message):
+    """
+    Actually tests no rate limit, just calls the following requests:
+    
+    auto_moderation_rule_get_all
+    auto_moderation_rule_get
+    auto_moderation_rule_create
+    auto_moderation_rule_edit
+    auto_moderation_rule_delete
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0180') as RLT:
+        guild = channel.guild
+        if guild is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        rules = await client.auto_moderation_rule_get_all(guild)
+        if not rules:
+            await RLT.send('Guild has no rules. Please add one.')
+        
+        rule = rules[0]
+        
+        await client.auto_moderation_rule_get(rule)
+        
+        rule = await client.auto_moderation_rule_create(
+            guild,
+            AutoModerationRule(
+                'meow',
+                actions = [
+                    AutoModerationAction(duration=60),
+                ],
+                keywords = ['windows'],
+            ),
+        )
+        
+        await client.auto_moderation_rule_edit(
+            rule,
+            AutoModerationRule(
+                'moo',
+                actions = [
+                    AutoModerationAction(duration=60),
+                ],
+                keywords = ['windows'],
+            ),
+        )
+        
+        await client.auto_moderation_rule_delete(rule)
