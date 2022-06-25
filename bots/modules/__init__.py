@@ -1,5 +1,6 @@
 from .log import *
 from .waifu_wars import *
+from .snipe import *
 
 from .accessibility import *
 from .administration import *
@@ -17,8 +18,6 @@ from .delete_message_range import *
 from .dungeon_sweeper_v2 import *
 from .dupe_image_filter import *
 from .emoji_counter import *
-from .emoji_info import *
-from .enlarge_emojis import *
 from .events import *
 from .fun import *
 from .gambling import *
@@ -43,7 +42,6 @@ from .role_info import *
 from .self_moderation import *
 from .stats import *
 from .sticker import *
-from .sticker_info import *
 from .todo import *
 from .touhou_wiki import *
 from .transfer import *
