@@ -1,9 +1,6 @@
 __all__ = ()
 
 from hata import StickerFormat, Embed, DATETIME_FORMAT_CODE, elapsed_time, StickerType, ZEROUSER, GUILDS
-from hata.ext.slash import InteractionResponse, Row
-
-from .constants import BUTTON_SNIPE_CLOSE, BUTTON_SNIPE_DM
 
 
 def get_sticker_info(event, sticker):
@@ -184,12 +181,4 @@ def get_sticker_info(event, sticker):
             inline = True,
         )
     
-    if event.guild_id:
-        components = Row(BUTTON_SNIPE_CLOSE, BUTTON_SNIPE_DM)
-    else:
-        components = Row(BUTTON_SNIPE_CLOSE)
-    
-    return InteractionResponse(
-        embed = embed,
-        components = components
-    )
+    return embed

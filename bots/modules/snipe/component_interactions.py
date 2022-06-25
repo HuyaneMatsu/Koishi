@@ -3,10 +3,8 @@ __all__ = ()
 import re
 
 from hata import Client, ComponentType, DiscordException, ERROR_CODES, EMOJIS, Emoji, ZEROUSER
-from hata.ext.slash import abort
 
-from .constants import CUSTOM_ID_SNIPE_CLOSE, CUSTOM_ID_SNIPE_DM, CUSTOM_ID_SNIPE_EMOJI_INFO, \
-    CUSTOM_ID_SNIPE_STICKER_INFO
+from .constants import CUSTOM_ID_SNIPE_DM, CUSTOM_ID_SNIPE_EMOJI_INFO, CUSTOM_ID_SNIPE_STICKER_INFO
 from .emoji_info import get_emoji_info
 from .sticker_helpers import get_sticker
 from .sticker_info import get_sticker_info
@@ -16,13 +14,6 @@ MATCH_ID_IN_FIELD_VALUE = re.compile('[0-9]+')
 MATCH_NAME_IN_FIELD_VALUE = re.compile('[0-9a-zA-Z_\-]+')
 
 SLASH_CLIENT : Client
-
-
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_CLOSE)
-async def snipe_message_close(client, event):
-    if (event.user is event.message.interaction.user):
-        await client.interaction_component_acknowledge(event)
-        await client.interaction_response_message_delete(event)
 
 
 def without_dm_button(component):
@@ -40,16 +31,31 @@ def iter_without_dm_button(row):
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_DM)
 async def snipe_message_dm(client, event):
+    await client.interaction_component_acknowledge(event, wait=False)
+    
     message = event.message
     if message is None:
         return
     
-    yield
-    
     embed = message.embed
+    if embed is None:
+        # Rare Discord bug where not every message field is resolved correctly. :derp:
+        # I dont even know what is going on.
+        try:
+            await client.message_get(message, force_update=True)
+        except DiscordException as err:
+            if err.code == ERROR_CODES.unknown_message: # Message deleted
+                return
+            
+            raise
+        
+        embed = message.embed
+        if embed is None:
+            return
+    
     components = message.components
     if (components is not None):
-        components = [without_dm_button(component) for component in message.iter_components]
+        components = [without_dm_button(component) for component in components]
     
     
     channel = await client.channel_private_create(event.user)
@@ -58,27 +64,33 @@ async def snipe_message_dm(client, event):
         await client.message_create(channel, embed=embed, components=components)
     except DiscordException as err:
         if err.code != ERROR_CODES.cannot_message_user: # user has dm-s disabled:
-            abort('Could not send message: dm-s disabled.')
-
+            await client.interaction_followup_message_create(
+                event, 'Could not deliver direct message.', show_for_invoking_user_only=True
+            )
+        
+        else:
+            raise
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_EMOJI_INFO)
 async def show_emoji_info(client, event):
+    await client.interaction_component_acknowledge(event, wait=False)
+    
     message = event.message
     if message is None:
-        return None
+        return
     
     embed = message.embed
     if embed is None:
-        return None
+        return
     
     fields = embed.fields
     if (fields is None) or len(fields) < 2:
-        return None
+        return
     
     field = fields[1]
     match = MATCH_ID_IN_FIELD_VALUE.search(field.value)
     if match is None:
-        return None
+        return
     
     emoji_id = int(match.group(0))
     
@@ -111,27 +123,37 @@ async def show_emoji_info(client, event):
                 ):
                     raise
     
-    return get_emoji_info(event, emoji)
+    response_embed = get_emoji_info(emoji)
+    response_embed.author = embed.author
+    response_embed.footer = embed.footer
+    
+    await client.interaction_followup_message_create(
+        event,
+        embed = response_embed,
+        show_for_invoking_user_only = bool(event.guild_id),
+    )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_EMOJI_INFO)
+@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_STICKER_INFO)
 async def show_sticker_info(client, event):
+    await client.interaction_component_acknowledge(event, wait=False)
+    
     message = event.message
     if message is None:
-        return None
+        return
     
     embed = message.embed
     if embed is None:
-        return None
+        return
     
     fields = embed.fields
     if (fields is None) or len(fields) < 2:
-        return None
+        return
     
     field = fields[1]
     match = MATCH_ID_IN_FIELD_VALUE.search(field.value)
     if match is None:
-        return None
+        return
     
     sticker_id = int(match.group(0))
     
@@ -139,4 +161,12 @@ async def show_sticker_info(client, event):
     if sticker is None:
         return
     
-    return get_sticker_info(event, sticker)
+    response_embed = get_sticker_info(event, sticker)
+    response_embed.author = embed.author
+    response_embed.footer = embed.footer
+    
+    await client.interaction_followup_message_create(
+        event,
+        embed = response_embed,
+        show_for_invoking_user_only = bool(event.guild_id),
+    )

@@ -26,9 +26,29 @@ def option_builder_sticker(sticker):
 
 
 def build_embed(event, entity, message_url, type_name):
-    user = event.user
+    entity_url = entity.url
+    if entity_url is None:
+        title = None
+        url = None
     
-    emoji_url = entity.url
+    else:
+        title =  'Click to open'
+        url = entity_url
+    
+    embed = Embed(
+        title,
+        color = (entity.id >> 22) & 0xffffff,
+        url = url,
+    ).add_field(
+        'Name',
+        f'```\n{entity.name}\n```',
+        inline = True,
+    ).add_field(
+        'ID',
+        f'```\n{entity.id}\n```',
+        inline = True,
+    )
+    
     
     guild = entity.guild
     if (guild is None):
@@ -38,28 +58,24 @@ def build_embed(event, entity, message_url, type_name):
         footer_text = f'from {guild.name}'
         footer_icon_url = guild.icon_url
     
-    return Embed(
-        'Click to open',
-        color = (entity.id >> 22) & 0xffffff,
-        url = emoji_url,
-    ).add_author(
-        f'{user.name_at(event.guild_id)}\'s sniped {type_name}s!',
-        user.avatar_url,
-        message_url,
-    ).add_image(
-        emoji_url,
-    ).add_field(
-        'Name',
-        f'```\n{entity.name}\n```',
-        inline = True,
-    ).add_field(
-        'ID',
-        f'```\n{entity.id}\n```',
-        inline = True,
-    ).add_footer(
+    embed.add_footer(
         footer_text,
         footer_icon_url,
     )
+    
+    
+    if entity_url is not None:
+        embed.add_image(entity_url)
+    
+    
+    user = event.user
+    embed.add_author(
+        f'{user.name_at(event.guild_id)}\'s sniped {type_name}s!',
+        user.avatar_url,
+        message_url,
+    )
+    
+    return embed
 
 
 def create_initial_response(event, target, entities, embed_builder, option_builder, custom_id, button_info):
@@ -70,8 +86,12 @@ def create_initial_response(event, target, entities, embed_builder, option_build
     
     embed = embed_builder(event, entities[0], target_url)
     
+    
     if len(entities) == 1:
-        components = None
+        components = Row(
+            button_info,
+            BUTTON_SNIPE_DM,
+        )
     
     else:
         del entities[25:]
@@ -83,8 +103,8 @@ def create_initial_response(event, target, entities, embed_builder, option_build
                 placeholder = 'Select an emoji!',
             ),
             Row(
-                button_info,
                 BUTTON_SNIPE_DM,
+                button_info,
             )
         ]
     

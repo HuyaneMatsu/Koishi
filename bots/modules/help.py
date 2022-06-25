@@ -611,9 +611,9 @@ CATEGORIES = (
         'Utility',
         EMOJI_MAGIC_WAND,
         (
-            'avatar', 'calc', 'choose', 'color', 'emoji-info', 'enlarge-emojis', 'enlarge-reactions', 'guild-icon',
-            'guild-info', 'id', 'id-to-datetime', 'now-as-id', 'ping', 'rawr', 'role-info', 'show-emoji', 'sticker',
-            'sticker-info', 'user', 'welcome-screen'
+            'avatar', 'calc', 'choose', 'color', 'guild-icon', 'guild-info', 'id', 'id-to-datetime', 'now-as-id',
+            'ping', 'rawr', 'role-info', 'snipe', 'snipe-emojis', 'snipe-reactions', 'snipe-stickers', 'sticker',
+            'user', 'welcome-screen'
         ),
     ), (
         'Waifus',

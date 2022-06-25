@@ -20,37 +20,37 @@ SNIPE_COMMANDS = SLASH_CLIENT.interactions(
 )
 
 
-@SNIPE_COMMANDS.interactions
-async def emoji_(
+def try_resolve_emoji(event, raw_emoji):
+    emoji = parse_emoji(raw_emoji)
+    if (emoji is not None):
+        return emoji
+    
+    # Try resolve emoji from guild's.
+    guild = event.guild
+    if (guild is not None):
+        emoji = guild.get_emoji_like(raw_emoji)
+        if (emoji is not None):
+            return emoji
+    
+    abort('Could not resolve emoji')
+    # Use return or the linter derps out
+    return
+
+
+async def emoji_command(
     event,
     raw_emoji: ('str', 'The emoji, or it\'s name.', 'emoji'),
 ):
     """Shows details about the given emoji."""
-    
-    # Use goto
-    while True:
-        emoji = parse_emoji(raw_emoji)
-        if (emoji is not None):
-            break
-        
-        # Try resolve emoji from guild's.
-        guild = event.guild
-        if (guild is not None):
-            emoji = guild.get_emoji_like(raw_emoji)
-            if (emoji is not None):
-                break
-        
-        abort('Could not resolve emoji')
-        # Use return or the linter derps out
-        return
-    
-    
+    emoji = try_resolve_emoji(event, raw_emoji)
     return create_initial_response(
         event, None, [emoji], embed_builder_emoji, option_builder_emoji, CUSTOM_ID_SNIPE_EMOJIS, BUTTON_SNIPE_EMOJI_INFO,
     )
 
+emoji_autocompleted = SNIPE_COMMANDS.interactions(emoji_command, name='emoji-autocompleted')
+emoji_ = SNIPE_COMMANDS.interactions(emoji_command, name='emoji')
 
-@emoji_.autocomplete('emoji')
+@emoji_autocompleted.autocomplete('emoji')
 async def autocomplete_emoji(client, event, emoji_name):
     if emoji_name is None:
         guild = event.guild

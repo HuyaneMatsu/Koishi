@@ -13,7 +13,7 @@ GUILD__KOISHI_CLAN = Guild.precreate(866746184990720020)
 
 async def get_message(client, channel, message_id):
     try:
-        message = await client.message_get(channel, message_id)
+        message = await client.message_get((channel.id, message_id))
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_message:
             abort(f'Unknown message: {message_id}')
@@ -564,7 +564,7 @@ async def add_message_by_id_form_submit(client, event, *, message_id):
         abort(f'Please submit a message\'s id.')
     
     try:
-        message = await client.message_get(event.channel_id, int(message_id))
+        message = await client.message_get((event.channel_id, int(message_id)))
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_message:
             abort('The given id refers to a non-existing message.')

@@ -97,7 +97,7 @@ async def create_auto_react_role(client, event,
         yield
         
         try:
-            target_message = await client.message_get(channel, message_id)
+            target_message = await client.message_get((channel.id, message_id))
         except ConnectionError:
             # No internet
             return
@@ -973,7 +973,7 @@ class AutoReactRoleManager:
         try:
             while True:
                 try:
-                    message = await client.message_get(channel, message_id)
+                    message = await client.message_get((channel.id, message_id))
                 except ConnectionError:
                     pass
                 except DiscordException as err:

@@ -143,9 +143,9 @@ async def test_100_messages(client, message):
 @TEST_COMMANDS
 async def crosspost(client, message, message_id:int):
     """
-    Crossposts, pls pass a mssage id from the current channel!
+    Crossposts, pls pass a message id from the current channel!
     """
-    to_message = await client.message_get(message.channel, message_id)
+    to_message = await client.message_get((message.channel_id, message_id))
     await client.message_crosspost(to_message)
     
     await client.message_create(message.channel, 'success')

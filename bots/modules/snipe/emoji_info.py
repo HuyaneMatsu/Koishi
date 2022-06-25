@@ -1,12 +1,9 @@
 __all__ = ()
 
-from hata import Embed, ZEROUSER, DiscordException, ERROR_CODES, DATETIME_FORMAT_CODE, elapsed_time, GUILDS
-from hata.ext.slash import InteractionResponse, Row
-
-from .constants import BUTTON_SNIPE_CLOSE, BUTTON_SNIPE_DM
+from hata import Embed, ZEROUSER, DATETIME_FORMAT_CODE, elapsed_time, GUILDS
 
 
-async def get_emoji_info(event, emoji):
+def get_emoji_info(emoji):
     if emoji.is_unicode_emoji():
         embed = Embed(
             f'Emoji details',
@@ -181,12 +178,4 @@ async def get_emoji_info(event, emoji):
             inline = True,
         )
     
-    if event.guild_id:
-        components = Row(BUTTON_SNIPE_CLOSE, BUTTON_SNIPE_DM)
-    else:
-        components = Row(BUTTON_SNIPE_CLOSE)
-    
-    return InteractionResponse(
-        embed = embed,
-        components = components
-    )
+    return embed

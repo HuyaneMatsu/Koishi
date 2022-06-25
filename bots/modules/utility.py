@@ -662,21 +662,6 @@ async def status_(user):
     return embed
 
 
-@SLASH_CLIENT.interactions(is_global=True)
-async def show_emoji(
-    emoji: ('str', 'Yes?'),
-):
-    """Shows the given custom emoji."""
-    emoji = parse_emoji(emoji)
-    if emoji is None:
-        return 'That\'s not an emoji.'
-    
-    if emoji.is_unicode_emoji():
-        return 'That\' an unicode emoji, cannot link it.'
-    
-    return f'**Name:** {emoji} **Link:** {emoji.url}'
-
-
 @SLASH_CLIENT.interactions(name='id-to-time', is_global=True)
 async def id_to_datetime_(client, event,
     snowflake: ('int', 'Id please!'),

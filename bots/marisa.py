@@ -375,7 +375,7 @@ async def raffle(client, event,
         yield
         
         try:
-            message = await client.message_get(channel, message_id)
+            message = await client.message_get((channel.id, message_id))
         except ConnectionError:
             # No internet
             return

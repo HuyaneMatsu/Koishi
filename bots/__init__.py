@@ -50,10 +50,11 @@ else:
         config.KOISHI_TOKEN,
         secret = config.KOISHI_SECRET,
         client_id = config.KOISHI_ID,
-        activity = ActivityRich('with Satori'),
+        activity = ActivityRich('with Mama'),
         shard_count = 2,
+        should_request_users = False,
         intents = IntentFlag().update_by_keys(
-            guild_users = False,
+            guild_users = True, # We need this
             guild_presences = False,
         ),
         application_id = config.KOISHI_ID,
