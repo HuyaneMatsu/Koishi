@@ -1,50 +1,23 @@
 __all__ = ()
 
-from hata import Embed, Client, parse_emoji, elapsed_time, DATETIME_FORMAT_CODE, ZEROUSER,  GUILDS, BUILTIN_EMOJIS, \
-    DiscordException, ERROR_CODES
-from hata.ext.slash import abort, Button, InteractionResponse
+from hata import Embed, ZEROUSER, DiscordException, ERROR_CODES, DATETIME_FORMAT_CODE, elapsed_time, GUILDS
+from hata.ext.slash import InteractionResponse, Row
 
-SLASH_CLIENT: Client
-
-CLOSE_EMOJI = BUILTIN_EMOJIS['x']
-
-CUSTOM_ID_EMOJI_INFO_CLOSE = 'emoji_info.close'
-
-BUTTON_EMOJI_INFO_CLOSE = Button(
-    emoji = CLOSE_EMOJI,
-    custom_id = CUSTOM_ID_EMOJI_INFO_CLOSE,
-)
+from .constants import BUTTON_SNIPE_CLOSE, BUTTON_SNIPE_DM
 
 
-@SLASH_CLIENT.interactions(is_global=True)
-async def emoji_info(
-    client,
-    event,
-    raw_emoji: ('str', 'The emoji, or it\'s name.', 'emoji'),
-):
-    """Shows details about the given emoji."""
-    
-    # Use goto
-    while True:
-        emoji = parse_emoji(raw_emoji)
-        if (emoji is not None):
-            break
-        
-        # Try resolve emoji from guild's.
-        guild = event.guild
-        if (guild is not None):
-            emoji = guild.get_emoji_like(raw_emoji)
-            if (emoji is not None):
-                break
-        
-        abort('Could not resolve emoji')
-        # Use return or the linter derps out
-        return
-    
-    
+async def get_emoji_info(event, emoji):
     if emoji.is_unicode_emoji():
         embed = Embed(
-            f'Unicode Emoji: {emoji.name}',
+            f'Emoji details',
+        ).add_field(
+            'Name',
+            (
+                f'```\n'
+                f'{emoji.name}\n'
+                f'```'
+            ),
+            inline = True,
         ).add_field(
             'Internal identifier',
             (
@@ -64,25 +37,21 @@ async def emoji_info(
         )
     
     else:
-        guild = emoji.guild
-        
-        # If the emoji's creator is unknown, try to request it.
-        if (emoji.user is ZEROUSER) and (guild is not None) and (guild in client.guilds) and (not emoji.managed):
-            try:
-                await client.emoji_get(emoji, force_update=True)
-            except DiscordException as err:
-                if err.code not in (
-                    ERROR_CODES.missing_access, # Client removed.
-                ):
-                    raise
-        
         url = emoji.url
         
         embed = Embed(
-            f'Custom emoji: {emoji.name}',
+            f'Emoji details',
             url = url,
         ).add_image(
             url,
+        ).add_field(
+            'Name',
+            (
+                f'```\n'
+                f'{emoji.name}\n'
+                f'```'
+            ),
+            inline = True,
         ).add_field(
             'Identifier',
             (
@@ -212,12 +181,12 @@ async def emoji_info(
             inline = True,
         )
     
+    if event.guild_id:
+        components = Row(BUTTON_SNIPE_CLOSE, BUTTON_SNIPE_DM)
+    else:
+        components = Row(BUTTON_SNIPE_CLOSE)
     
-    return InteractionResponse(embed=embed, components=BUTTON_EMOJI_INFO_CLOSE)
-
-
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_EMOJI_INFO_CLOSE)
-async def close_emoji_info(client, event):
-    if (event.user is event.message.interaction.user):
-        await client.interaction_component_acknowledge(event)
-        await client.interaction_response_message_delete(event)
+    return InteractionResponse(
+        embed = embed,
+        components = components
+    )

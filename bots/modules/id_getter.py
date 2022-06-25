@@ -124,7 +124,6 @@ async def emoji_(client, event,
     
     return str(emoji.id)
 
-
 @emoji_.autocomplete('emoji')
 async def autocomplete_emoji(client, event, emoji_name):
     if emoji_name is None:
@@ -155,25 +154,6 @@ async def autocomplete_emoji(client, event, emoji_name):
     if guild is None:
         return
     
-    start = emoji_name.startswith(':')
-    length = len(emoji_name)
-    end = length - emoji_name.endswith(':')
-    stripped_emoji_name = emoji_name[start:end]
     
-    if end != length:
-        emoji = guild.get_emoji_like(stripped_emoji_name)
-        if emoji is None:
-            return
-        
-        if emoji.name == stripped_emoji_name:
-            return [emoji_name]
-        
-        else:
-            return
-    
-    emojis = guild.get_emojis_like(stripped_emoji_name)
-    emoji_names = sorted(emoji.name for emoji in emojis)
-    if start:
-        emoji_names = [':' + emoji_name for emoji_name in emoji_names]
-    
-    return emoji_names
+    emojis = guild.get_emojis_like(emoji_name)
+    return sorted(emoji.name for emoji in emojis)

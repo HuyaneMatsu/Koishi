@@ -5,6 +5,7 @@ from bot_utils.constants import GUILD__ESTS_HOME, ROLE__ESTS_HOME__STREAM_NOTIFI
 
 Renes: Client
 Koishi: Client
+Satori: Client
 
 @Renes.events
 async def guild_user_add(client, guild, user):
@@ -35,7 +36,7 @@ async def ping_me_hime(client, event):
 
 ALICE_STREAMING_SETUP_IMAGE_URL = 'https://cdn.discordapp.com/attachments/568837922288173058/984793641254015016/est-alice-streaming-0000-cut-0000.png'
 
-@Renes.events
+@Satori.events
 class user_presence_update:
     LAST_STREAM_OVER = 0.0
     STREAM_PING_DIFFERENCE = 10.0 * 60.0 # 10 min
