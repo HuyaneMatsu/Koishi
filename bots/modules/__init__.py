@@ -11,6 +11,7 @@ from .automod import *
 from .baka_ball import *
 from .battleships import *
 from .booru import *
+from .bot_guild_filter import *
 from .bozosort import *
 from .channel_names import *
 from .daily import *
