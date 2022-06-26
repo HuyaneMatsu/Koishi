@@ -1,5 +1,5 @@
 from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed, Color, eventlist, Permission, \
-    ActivityChange, KOKORO, Client
+    KOKORO, Client
 from scarletio import Task, list_difference
 from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
 from hata.ext.prettyprint import pretty_print
@@ -31,7 +31,10 @@ class dispatch_tester:
             self.channel = None
         else:
             try:
-                await client.message_create(message.channel, f'Channel set to {message.channel.name} {message.channel.id}')
+                await client.message_create(
+                    message.channel,
+                    f'Channel set to {message.channel.name} {message.channel.id}',
+                )
             except DiscordException:
                 return
             self.channel = message.channel
@@ -1061,6 +1064,40 @@ class dispatch_tester:
         
         pages = [Embed(description=chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout=120.)
+    
+    
+    @classmethod
+    async def auto_moderation_action_execution(self, client, event):
+        Task(self.old_events['auto_moderation_action_execution'](client, event), KOKORO)
+        if self.channel is None:
+            return
+        
+        await Closer(client, self.channel, Embed('auto_moderation_action_execution', repr(event)))
+    
+    
+    @classmethod
+    async def auto_moderation_rule_create(self, client, rule):
+        Task(self.old_events['auto_moderation_rule_create'](client, rule), KOKORO)
+        if self.channel is None:
+            return
+        
+        await Closer(client, self.channel, Embed('auto_moderation_rule_create', repr(rule)))
+
+    @classmethod
+    async def auto_moderation_rule_edit(self, client, rule, changes):
+        Task(self.old_events['auto_moderation_rule_edit'](client, rule, changes), KOKORO)
+        if self.channel is None:
+            return
+        
+        await Closer(client, self.channel, Embed('auto_moderation_rule_edit', f'{rule!r}\n\n{changes!r}'))
+
+    @classmethod
+    async def auto_moderation_rule_delete(self, client, rule):
+        Task(self.old_events['auto_moderation_rule_delete'](client, rule), KOKORO)
+        if self.channel is None:
+            return
+        
+        await Closer(client, self.channel, Embed('auto_moderation_rule_delete', repr(rule)))
 
 
 async def here_description(client, message):
@@ -1134,6 +1171,10 @@ async def switch_description(client, message):
             '- `sticker_create`\n'
             '- `sticker_delete`\n'
             '- `sticker_edit`\n'
+            '- `auto_moderation_action_execution`\n'
+            '- `auto_moderation_rule_create`\n'
+            '- `auto_moderation_rule_edit`\n'
+            '- `auto_moderation_rule_delete`\n'
             f'For setting channel, use: `{prefix}here`'
         ),
         color = DISPATCH_COLOR

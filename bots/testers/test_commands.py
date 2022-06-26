@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+__all__ = ()
+
 import json, os
 from time import perf_counter
 from random import random
@@ -19,11 +20,10 @@ from scarletio import Future, future_or_timeout, WaitTillAll, sleep, ReuBytesIO,
 from hata.ext.command_utils import ChooseMenu, Pagination, Closer
 from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag, CommandContext
 from hata.discord.events.core import PARSERS
-from hata.ext.prettyprint import pchunkify
-from hata.ext.patchouli import map_module, MAPPED_OBJECTS
+from hata.ext.patchouli import map_module
 
 
-from config import AUDIO_PATH, AUDIO_PLAY_POSSIBLE, MARISA_MODE
+from config import AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
 from bot_utils.constants import PATH__KOISHI
 
@@ -632,52 +632,6 @@ async def set_lower_command_names(client, message):
     client.command_processor.command_name_rule = rule_lower
     await client.message_create(message.channel, 'nya!')
 
-@TEST_COMMANDS(checks=[checks.guild_only()])
-async def test_get_integrations(client, message):
-    """
-    Gets the integrations of the guild.
-    
-    Guild only!
-    """
-    # make sure
-    guild = message.guild
-    if guild is None:
-        return
-    
-    integrations = await client.integration_get_all(guild)
-    pages = [Embed(description=chunk) for chunk in pchunkify(integrations)]
-    await Pagination(client, message.channel, pages,)
-
-@TEST_COMMANDS(checks=[checks.guild_only()])
-async def test_get_webhooks(client, message):
-    """
-    Gets the webhooks of the guild.
-    
-    Guild only!
-    """
-    # make sure
-    guild = message.guild
-    if guild is None:
-        return
-    
-    webhooks = await client.webhook_get_all_guild(guild,)
-    pages = [Embed(description=chunk) for chunk in pchunkify(webhooks)]
-    await Pagination(client, message.channel, pages,)
-
-@TEST_COMMANDS
-async def test_channel_pretty_render(client, message):
-    """
-    Renders the local channels.
-    """
-    channel = message.channel
-    guild = channel.guild
-    if guild is None:
-        to_render = channel
-    else:
-        to_render = guild.channels
-    
-    pages = [Embed(description=chunk) for chunk in pchunkify(to_render)]
-    await Pagination(client, message.channel, pages,)
 
 # DiscordException Forbidden (403), code=20001: Bots cannot use this endpoint
 # 2020 10 09:
@@ -741,22 +695,6 @@ async def test_get_eula(client, message):
     pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
-@TEST_COMMANDS
-async def test_render_application(client, message):
-    """
-    Renders the client's application.
-    """
-    pages = [Embed(description=chunk) for chunk in pchunkify(client.application)]
-    await Pagination(client, message.channel, pages)
-
-@TEST_COMMANDS
-async def test_render_applications(client, message):
-    """
-    Renders the detectable applications.
-    """
-    applications = await client.applications_detectable()
-    pages = [Embed(description=chunk) for chunk in pchunkify(applications)]
-    await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS(checks=[checks.guild_only()])
 async def test_get_welcome_screen(client, message):
@@ -804,18 +742,6 @@ async def test_closer(client, message):
     """
     await Closer(client, message.channel, Embed('cake?'), timeout=5.0)
 
-@TEST_COMMANDS
-async def test_list_invites(client, message):
-    """
-    Lists the invites of the respective guild.
-    """
-    guild = message.guild
-    if guild is None:
-        return
-    
-    invites = await client.invite_get_all_guild(guild)
-    embeds = [Embed('Invites', chunk) for chunk in pchunkify(invites)]
-    await Pagination(client, message.channel, embeds)
 
 @TEST_COMMANDS(separator=',')
 async def autohelp_singles(client, message, name:str, user:'user', *words):
@@ -1198,20 +1124,6 @@ async def test_webhook_message_edit_9(client, message):
     new_message = await client.webhook_message_create(executor_webhook, embed=Embed('cake'), wait=True)
     await client.webhook_message_edit(executor_webhook, new_message, embed=Embed('cake'))
 
-
-@TEST_COMMANDS(checks=checks.guild_only())
-async def update_and_display_roles(client, message):
-    """
-    Syncs the guild's roles then displays them.
-    """
-    guild = message.guild
-    if guild is None:
-        return
-    
-    await client.guild_role_get_all(guild)
-    
-    pages = [Embed(description=chunk) for chunk in pchunkify(guild.role_list, detailed=False)]
-    await Pagination(client, message.channel, pages,)
 
 
 @TEST_COMMANDS
