@@ -1,6 +1,7 @@
 __all__ = ()
 
 from datetime import datetime, timedelta
+from math import log, floor
 from dateutil.relativedelta import relativedelta
 from hata import Client, parse_custom_emojis, Embed, EMOJIS, parse_emoji, USERS
 from hata.ext.slash import abort
@@ -202,6 +203,27 @@ EMOJI_COMMAND_ACTION_TYPES = [
 ]
 
 
+def get_adjust_length(index, page_size, limit):
+    end = index + page_size
+    if end > limit:
+        end = limit
+    
+    return 1 + floor(log(end, 10))
+
+
+def add_emoji_into(into, emoji, index, count, adjust_length):
+    into.append('`')
+    index_string = str(index)
+    into.append(index_string)
+    into.append(' ' * (adjust_length - len(index_string)))
+    into.append('.` ')
+    into.append(emoji.as_emoji)
+    
+    into.append(' `x ')
+    into.append(str(count))
+    into.append('`')
+
+
 @EMOJI_COMMANDS.interactions
 async def user_top(event,
     user: ('user', 'By who?') = None,
@@ -249,9 +271,9 @@ async def user_top(event,
     
     if results:
         description_parts = []
-        start = 1
         limit = len(results)
         index = 0
+        adjust_length = get_adjust_length(index, 10, limit)
         
         while True:
             emoji_id, count = results[index]
@@ -263,20 +285,17 @@ async def user_top(event,
             except KeyError:
                 continue
             
-            description_parts.append(str(index))
-            description_parts.append('.: **')
-            description_parts.append(str(count))
-            description_parts.append('** x ')
-            description_parts.append(emoji.as_emoji)
+            add_emoji_into(description_parts, emoji, index, count, adjust_length)
+
             if (not index % 10) or (index == limit):
                 description = ''.join(description_parts)
                 description_parts.clear()
-                embed.add_field(f'{start} - {index}', description, inline=True)
+                embed.add_field(f'\u200B', description, inline=True)
                 
                 if (index == limit):
                     break
                 
-                start = index + 1
+                adjust_length = get_adjust_length(index, 10, limit)
                 continue
             
             description_parts.append('\n')
