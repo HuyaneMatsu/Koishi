@@ -6493,3 +6493,51 @@ async def rate_limit_test_0180(client, message):
         )
         
         await client.auto_moderation_rule_delete(rule)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0181(client, message, guild_id:str=''):
+    """
+    auto_moderation_rule_create
+    auto_moderation_rule_get <- some why failed
+    auto_moderation_rule_get_all <- some why failed
+    auto_moderation_rule_edit
+    auto_moderation_rule_delete
+    
+    But in 2 guilds!
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0181') as RLT:
+        guild_1 = channel.guild
+        if guild_1 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        try:
+            guild_2 = GUILDS[int(guild_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a guild id as well, where I am as well.')
+        
+        
+        rule_to_create = AutoModerationRule(
+            'meow',
+            actions = [
+                AutoModerationAction(duration=60),
+            ],
+            keywords = ['windows'],
+        )
+        
+        rule_to_edit_to = AutoModerationRule(
+            'moo',
+            actions = [
+                AutoModerationAction(duration=60),
+            ],
+            keywords = ['windows'],
+        )
+        
+        for guild in (guild_1, guild_2):
+            rule = await auto_moderation_rule_create(client, guild_1.id, rule_to_create,)
+            await sleep(1.0) # we are going too fast! lol
+            # await auto_moderation_rule_get(client, guild.id, rule.id)
+            # await auto_moderation_rule_get_all(client, guild.id)
+            await auto_moderation_rule_edit(client, guild_1.id, rule.id, rule_to_edit_to,)
+            await auto_moderation_rule_delete(client, guild_1.id, rule.id)

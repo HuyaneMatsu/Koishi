@@ -65,6 +65,10 @@ async def get_memes(meme_lock):
                 continue
             
             title = meme_children_data['title']
+            
+            if len(title) > 256:
+                title = title[:253] + '...'
+            
             link = meme_children_data['permalink']
             
             meme_lock.queue.append((title, link, url))

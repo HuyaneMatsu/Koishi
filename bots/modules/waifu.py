@@ -39,11 +39,8 @@ WAIFU_CACHE_BY_KEY = {
 }
 
 EMOJI_NEW = BUILTIN_EMOJIS['arrows_counterclockwise']
-
-ACKNOWLEDGE_APPLICATION_COMMAND_INTERACTION_FUNCTION = Client.interaction_application_command_acknowledge
-ACKNOWLEDGE_COMPONENT_INTERACTION_FUNCTION = Client.interaction_component_acknowledge
-
 ERROR_MESSAGE_NO_WAIFU = '*Could not get any images, please try again later.*'
+
 
 async def request_image(client, endpoint, safe, cache):
     url = f'{WAIFU_API_BASE_URL}/many/{"" if safe else "n"}sfw/{endpoint}'
@@ -64,16 +61,20 @@ async def request_image(client, endpoint, safe, cache):
             if cache:
                 return cache.pop()
 
-async def get_waifu_image(client, event, endpoint, safe, cache, is_component):
+async def get_waifu_image(client, event, endpoint, safe, cache, is_component, acknowledge_message, allowed_mentions):
     if cache:
         return cache.pop()
     
     if is_component:
-        acknowledge_function = ACKNOWLEDGE_COMPONENT_INTERACTION_FUNCTION
+        coroutine = client.interaction_component_acknowledge(event, wait=False)
+    elif (acknowledge_message is None):
+        coroutine = client.interaction_application_command_acknowledge(event, wait=False)
     else:
-        acknowledge_function = ACKNOWLEDGE_APPLICATION_COMMAND_INTERACTION_FUNCTION
+        coroutine = client.interaction_response_message_create(
+            event, acknowledge_message, allowed_mentions = allowed_mentions
+        )
     
-    acknowledge_task = Task(acknowledge_function(client, event), KOKORO)
+    acknowledge_task = Task(coroutine, KOKORO)
     request_task = Task(request_image(client, endpoint, safe, cache), KOKORO)
     
     await WaitTillAll([acknowledge_task, request_task], KOKORO)
@@ -101,7 +102,7 @@ async def sfw(client, event,
     if not guild_id:
         abort('Guild only command')
     
-    url = await get_waifu_image(client, event, type_, True, WAIFU_CACHE_BY_KEY[(type_, True)], False)
+    url = await get_waifu_image(client, event, type_, True, WAIFU_CACHE_BY_KEY[(type_, True)], False, None, None)
     if url is None:
         abort(ERROR_MESSAGE_NO_WAIFU)
     
@@ -127,7 +128,7 @@ async def nsfw(client, event,
     if (channel is None) or (not getattr(channel, 'nsfw', False)):
         abort('Nsfw channel only!')
     
-    url = await get_waifu_image(client, event, type_, False, WAIFU_CACHE_BY_KEY[(type_, False)], False)
+    url = await get_waifu_image(client, event, type_, False, WAIFU_CACHE_BY_KEY[(type_, False)], False, None, None)
     if url is None:
         abort(ERROR_MESSAGE_NO_WAIFU)
     
@@ -150,7 +151,7 @@ class NewWaifu:
         if event.user is not event.message.interaction.user:
             return
         
-        url = await get_waifu_image(client, event, *self.get_waifu_parameters)
+        url = await get_waifu_image(client, event, *self.get_waifu_parameters, None, None)
         if url is None:
             source_embed = event.message.embed
             if source_embed is None:
@@ -189,14 +190,6 @@ class Action:
         if not guild_id:
             abort('Guild only command')
         
-        try:
-            url = await get_waifu_image(client, event, self.name, True, self.cache, False)
-        except TimeoutError:
-            abort('*Did not get response in time, please try again later.*')
-            return
-        
-        if url is None:
-            abort('*Could not get any images, please try again later.*')
         
         event_user = event.user
         if (user is None) or (user is event_user):
@@ -206,14 +199,31 @@ class Action:
             caller = event_user
             target = user
         
-        return Embed(
-            f'{caller:f} {self.verb} {target:f}.',
-            color = (event.id >> 22) & 0xffffff
-        ).add_image(
-            url,
-        ).add_footer(
-            PROVIDER_FOOTER,
-        )
+        response = f'> {caller:m} {self.verb} {target:m}.'
+        
+        try:
+            url = await get_waifu_image(client, event, self.name, True, self.cache, False, response, target)
+        except TimeoutError:
+            embed = Embed(None, '*Did not get response in time, please try again later.*')
+        
+        else:
+            if url is None:
+                embed = Embed(None, '*Could not get any images, please try again later.*')
+            
+            else:
+                embed = Embed(
+                    color = (event.id >> 22) & 0xffffff
+                ).add_image(
+                    url,
+                ).add_footer(
+                    PROVIDER_FOOTER,
+                )
+        
+        if event.is_unanswered():
+            await client.interaction_response_message_create(event, response, embed = embed, allowed_mentions = target)
+            
+        else:
+            await client.interaction_response_message_edit(event, response, embed = embed, allowed_mentions = target)
 
 
 for action_name, action_verb, action_description in (
@@ -224,9 +234,9 @@ for action_name, action_verb, action_description in (
     ('lick', 'licks', 'Licking is a favored activity of cat girls.'),
     ('poke', 'pokes', 'It hurts!'),
     ('slap', 'slaps', 'Slapping others is not nice.'),
-    ('smug', 'smugs at', 'SMug face.'),
+    ('smug', 'smugs at', 'Smug face.'),
     ('bully', 'bullies', 'No Bully!'),
-    ('cry', 'cries because of', 'THe saddest.'),
+    ('cry', 'cries because of', 'The saddest.'),
     ('yeet', 'yeets', 'Yeet!'),
     ('blush', 'blushes at', 'Oh.'),
     ('smile', 'smiles at', 'Oh, really?'),
@@ -235,7 +245,7 @@ for action_name, action_verb, action_description in (
     ('handhold', 'holds hands of', 'Lewd!!'),
     ('nom', 'noms', 'Feed your nekogirl, or else'),
     ('bite', 'bites', 'Vampy.'),
-    ('glomp', 'glomps', 'You can rn, but you cant hide!'),
+    ('glomp', 'glomps', 'You can run, but you cant hide!'),
     ('kill', 'murders', 'Finally, some action.'),
     ('happy', 'is happy for', 'If you are happy, clap your..'),
     ('wink', 'winks at', 'Ara-ara'),

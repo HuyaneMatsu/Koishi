@@ -9,13 +9,12 @@ try:
 except ImportError:
     watchdog = None
 
-from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, Emoji, \
+from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
-    mention_channel_by_id, ButtonStyle, format_loop_time, TIMESTAMP_STYLES, CHANNEL_TYPES, \
-    INTERACTION_RESPONSE_TYPES, MessageFlag, InteractionResponseContext, DATETIME_FORMAT_CODE
-from scarletio import sleep, alchemy_incendiary, LOOP_TIME, Task, WaitTillAll, Future, WaitTillExc
-from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, TextInputStyle, \
-    wait_for_component_interaction, Button, Row, iter_component_interactions, configure_parameter, Select, Option
+    ButtonStyle, INTERACTION_RESPONSE_TYPES, MessageFlag, InteractionResponseContext
+from scarletio import sleep, alchemy_incendiary
+from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
+    wait_for_component_interaction, Button, Row, configure_parameter, Select, Option, P
 from scarletio.utils.trace import render_exception_into
 from hata.ext.command_utils import UserMenuFactory, UserPagination
 from hata.ext.slash.menus import Pagination
@@ -1481,6 +1480,12 @@ async def webhook(client, event):
 @Marisa.interactions(guild=GUILD__SUPPORT, required_permissions=2197949382599)
 async def test_required_permissions():
     return 'Hello'
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT)
+async def test_length(value: P(str, min_length=10, max_length=16)):
+    return len(value)
+
 
 @Marisa.interactions(is_global=True, allow_in_dm=False)
 async def not_in_dm():

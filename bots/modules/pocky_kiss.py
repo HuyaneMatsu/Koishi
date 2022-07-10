@@ -3,7 +3,7 @@ __all__ = ()
 from random import choice
 
 from hata import Client, Embed
-from hata.ext.slash import abort
+from hata.ext.slash import abort, InteractionResponse
 
 
 SLASH_CLIENT: Client
@@ -81,9 +81,13 @@ async def pocky_kiss(client, event,
         caller = event_user
         target = user
     
-    return Embed(
-        f'{caller:f} pocky kisses {target:f}.',
-        color = (event.id >> 22) & 0xffffff
-    ).add_image(
-        choice(IMAGE_URLS),
+    
+    return InteractionResponse(
+        f'> {caller:m} pocky kisses {target:m}.',
+        embed = Embed(
+            color = (event.id >> 22) & 0xffffff
+        ).add_image(
+            choice(IMAGE_URLS),
+        ),
+        allowed_mentions = target,
     )
