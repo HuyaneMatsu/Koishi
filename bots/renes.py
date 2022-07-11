@@ -38,14 +38,17 @@ ALICE_STREAMING_SETUP_IMAGE_URL = 'https://cdn.discordapp.com/attachments/568837
 
 @Satori.events
 class user_presence_update:
-    LAST_STREAM_OVER = 0.0
     STREAM_PING_DIFFERENCE = 10.0 * 60.0 # 10 min
+    LAST_STREAM_OVER = -STREAM_PING_DIFFERENCE
     
-    async def __new__(cls, client, user, activity_change):
+    async def __new__(cls, client, user, presence_update):
         if user is not USER__EST:
             return
         
-        await Koishi.message_create(557187647831932938, f'Debug: {activity_change!r}', allowed_mentions=None)
+        try:
+            activity_change = presence_update['activities']
+        except KeyError:
+            return
         
         for activity in activity_change.iter_removed():
             if activity.type == ACTIVITY_TYPES.stream:
@@ -66,7 +69,7 @@ class user_presence_update:
             added_streaming_activity = None
         
         if (added_streaming_activity is not None):
-            if LOOP_TIME() > cls.LAST_STREAM_OVER - cls.STREAM_PING_DIFFERENCE:
+            if LOOP_TIME() > cls.LAST_STREAM_OVER + cls.STREAM_PING_DIFFERENCE:
                 message = await client.message_create(
                     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION,
                     f'> {ROLE__ESTS_HOME__STREAM_NOTIFICATION:m}',

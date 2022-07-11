@@ -585,6 +585,25 @@ async def character_popularity(
     """Returns the name of the touhou character by it's popularity position."""
     return MOST_POPULAR_TOUHOU_CHARACTERS[position - 1]
 
+
+# command end
+# command start slash set-nick
+
+@Nitori.interactions(
+    guild = TEST_GUILD,
+    required_permissions = Permission().update_by_keys(manage_nicknames=True),
+)
+async def set_nick(
+    client,
+    event,
+    user: ('user', 'Who\'s?'),
+    nick: P(str, 'Their new nick', min_length=1, max_length=32) = None,
+):
+    """Edit's the selected user's nick."""
+    yield
+    await client.user_guild_profile_edit(event.guild, user, nick=nick)
+    yield f'{user:f}\'s nick has been updated'
+
 # command end
 # command start context avatar
 
