@@ -4,7 +4,6 @@ from bot_utils.constants import GUILD__ESTS_HOME, ROLE__ESTS_HOME__STREAM_NOTIFI
     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION
 
 Renes: Client
-Koishi: Client
 Satori: Client
 
 @Renes.events
@@ -70,7 +69,7 @@ class user_presence_update:
         
         if (added_streaming_activity is not None):
             if LOOP_TIME() > cls.LAST_STREAM_OVER + cls.STREAM_PING_DIFFERENCE:
-                message = await client.message_create(
+                message = await Renes.message_create(
                     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION,
                     f'> {ROLE__ESTS_HOME__STREAM_NOTIFICATION:m}',
                     embed = Embed(
@@ -87,4 +86,4 @@ class user_presence_update:
                     )
                 )
                 
-                await client.message_crosspost(message)
+                await Renes.message_crosspost(message)

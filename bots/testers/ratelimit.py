@@ -5924,7 +5924,7 @@ async def rate_limit_test_0157(client, message, directory_channel:'channel'=None
         if directory_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not channel.is_diretcory():
+        if not channel.is_directory():
             await RLT.send('Directory channel only.')
         
         if name is None:
@@ -5949,7 +5949,7 @@ async def rate_limit_test_0158(client, message, directory_channel:'channel'=None
         if directory_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not channel.is_diretcory():
+        if not channel.is_directory():
             await RLT.send('Directory channel only.')
         
         await channel_directory_counts(client, directory_channel)
@@ -5971,7 +5971,7 @@ async def rate_limit_test_0159(client, message, directory_channel:'channel'=None
         if directory_channel is None:
             await RLT.send('Please define a channel.')
         
-        if not channel.is_diretcory():
+        if not channel.is_directory():
             await RLT.send('Directory channel only.')
         
         await channel_directory_get_all(client, directory_channel)

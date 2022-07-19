@@ -54,7 +54,7 @@ async def guild_create(client, guild):
         ]
     
     try:
-        channel = client.channel_private_create(guild.owner_id)
+        channel = await client.channel_private_create(guild.owner_id)
         
         try:
             for content in contents:
