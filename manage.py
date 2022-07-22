@@ -31,7 +31,7 @@ if (scarletio_path is not None) and (scarletio_path not in sys.path):
 
 del hata_path
 
-import hata
+import hata.main
 
 # Import things depending on settings and which file is started up.
 #
@@ -40,18 +40,23 @@ import hata
 # If hosting, wsgi will import this file, so the bots will not start up. Those need to be started up separately by an
 # always running task.
 
-CONNECT = ('--no-connect' not in sys.argv)
+@hata.main.register
+def run_webapp():
+    """
+    Runs the webapp of Koishi.
+    """
+    from web import WEBAPP
+    WEBAPP.run()
+    
 
 if __name__ == '__main__':
     import bots
     hata.ext.plugin_loader.load_all_plugin()
-    if CONNECT:
-        hata.start_clients()
     
-    if config.RUN_WEBAPP_AS_MAIN:
-        from web import WEBAPP
-        if CONNECT:
-            WEBAPP.run()
+    
+    hata.main.execute_command_from_system_parameters()
+
+
 else:
     hata.KOKORO.stop()
     from web import WEBAPP

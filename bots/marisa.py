@@ -1002,11 +1002,6 @@ async def count_message_fields(client, message):
     return ''.join(description_parts)
 
 
-@Marisa.events
-async def shutdown(client):
-    await client.message_create(CHANNEL__SUPPORT__DEFAULT_TEST, 'dead')
-
-
 @Marisa.commands
 async def shutdown():
     await Marisa.stop()
