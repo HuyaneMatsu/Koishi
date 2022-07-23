@@ -330,8 +330,8 @@ BAN_COMPONENTS = Row(BAN_BUTTON_CONFIRM, BAN_BUTTON_CANCEL)
 async def ban(client, event,
     user: ('user', 'Select the user to yeet!'),
     reason: ('str', 'Any reason why you would want to yeet?') = None,
-    delete_message_days: (range(8), 'Delete previous messages?') = 0,
     notify_user: ('bool', 'Whether the user should get DM about the ban.') = True,
+    delete_message_days: (range(8), 'Delete previous messages?') = 0,
 ):
     """Yeets someone out of the guild. You must have ban users permission."""
     # Check permissions
@@ -443,7 +443,7 @@ async def ban(client, event,
         caller = event.user
         reason = f'Requested by: {caller.full_name} [{caller.id}]'
     
-    await client.guild_ban_add(guild, user, delete_message_days=delete_message_days, reason=reason)
+    await client.guild_ban_add(guild, user, delete_message_duration=delete_message_days * 24 * 60 * 60, reason=reason)
     
     embed = Embed('Hecatia yeah!', f'{user.full_name} has been yeeted.')
     if (notify_note is not None):

@@ -763,7 +763,7 @@ async def guild_ban_get_all(client, guild,):
         )
 
 async def guild_ban_add(client, guild,user_id,):
-    data={'delete_message_days':0}
+    data={'delete_message_seconds':0}
     guild_id=guild.id
     return await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',

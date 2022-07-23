@@ -57,9 +57,7 @@ async def self_mute(
     seconds: P('int', 'seconds', min_value=0, max_value=60) = 0,
 ):
     """Get a rest."""
-    if days == 28:
-        difference = timedelta(days=28)
-    elif days or hours or minutes or seconds:
+    if days or hours or minutes or seconds:
         difference = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
     else:
         difference = None
@@ -74,7 +72,7 @@ async def self_mute(
             abort('Oke boss.')
         
         yield
-        await client.user_guild_profile_edit(guild, event.user, timed_out_until=datetime.utcnow()+difference)
+        await client.user_guild_profile_edit(guild, event.user, timeout_duration=difference)
     
     
     description_parts = ['Duration: ']
