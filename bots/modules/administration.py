@@ -5,11 +5,10 @@ from functools import partial as partial_func
 
 from hata import Color, Embed, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, parse_emoji, Client, \
     parse_rdelta, datetime_to_id, Emoji, Permission
-from hata.ext.slash.menus import Pagination
 from hata.ext.slash import abort, InteractionResponse, Row, Button, ButtonStyle, wait_for_component_interaction
-from hata.ext.prettyprint import pchunkify
 
 from bot_utils.constants import ROLE__SUPPORT__TESTER
+
 
 ADMINISTRATION_COLOR = Color.from_rgb(148, 0, 211)
 
@@ -248,6 +247,7 @@ def check_guild_invites_pagination_permissions(event):
     
     return True
 
+'''
 PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
     send_messages = True,
     send_messages_in_threads = True,
@@ -310,6 +310,7 @@ async def invites_(client, event,
     
     await Pagination(client, event, pages, timeout=120., check=check)
 
+'''
 
 def check_banner(user, event):
     return user is event.user

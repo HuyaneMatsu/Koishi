@@ -69,21 +69,42 @@ class user_presence_update:
         
         if (added_streaming_activity is not None):
             if LOOP_TIME() > cls.LAST_STREAM_OVER + cls.STREAM_PING_DIFFERENCE:
+                
+                image_url = added_streaming_activity.twitch_preview_image_url
+                if (image_url is None):
+                    image = None
+                else:
+                    async with Renes.http.get(image_url) as response:
+                        if response.status == 200:
+                            image = await response.read()
+                        else:
+                            image = None
+                
+                embed = Embed(
+                    added_streaming_activity.state,
+                    added_streaming_activity.details,
+                ).add_author(
+                    f'{USER__EST.name_at(GUILD__ESTS_HOME)} went live!',
+                    USER__EST.avatar_url_as(size=128),
+                    added_streaming_activity.url,
+                ).add_thumbnail(
+                    ALICE_STREAMING_SETUP_IMAGE_URL,
+                )
+                
+                if (image is not None):
+                    embed.add_image('attachment://image.png')
+                
+                if image is None:
+                    file = None
+                else:
+                    file = ('image.png', image)
+                
+                
                 message = await Renes.message_create(
                     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION,
                     f'> {ROLE__ESTS_HOME__STREAM_NOTIFICATION:m}',
-                    embed = Embed(
-                        added_streaming_activity.state,
-                        added_streaming_activity.details,
-                    ).add_author(
-                        f'{USER__EST.name_at(GUILD__ESTS_HOME)} went live!',
-                        USER__EST.avatar_url_as(size=128),
-                        added_streaming_activity.url,
-                    ).add_image(
-                        added_streaming_activity.twitch_preview_image_url,
-                    ).add_thumbnail(
-                        ALICE_STREAMING_SETUP_IMAGE_URL,
-                    )
+                    embed = embed,
+                    file = file,
                 )
                 
                 await Renes.message_crosspost(message)
