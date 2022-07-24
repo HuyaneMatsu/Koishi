@@ -604,6 +604,7 @@ PACKAGE_MODULES = frozenset((
     'dotenv',
     'brotli',
     'sqlalchemy',
+    'dateutil',
 ))
 
 class ImportStatement:

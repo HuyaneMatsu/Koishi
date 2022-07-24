@@ -1,7 +1,7 @@
 __all__ = ()
 
 from hata import Client, Embed, Emoji
-from datetime import datetime, timedelta
+from datetime import timedelta
 from random import random, randint
 from hata.ext.slash import abort, P
 

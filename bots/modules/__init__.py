@@ -20,6 +20,7 @@ from .dungeon_sweeper_v2 import *
 from .dupe_image_filter import *
 from .emoji_counter import *
 from .events import *
+from .format_time import *
 from .fun import *
 from .gambling import *
 from .game_21 import *

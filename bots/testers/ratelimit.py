@@ -16,7 +16,7 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
 from scarletio import sleep, Task, WaitTillAll, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, WaitTillExc, change_on_switch, to_json, from_json
 
-from scarletio.utils.trace import ExceptionFrameProxy, render_frames_into, render_exception_into
+from scarletio.utils.trace import TracebackFrameProxy, render_frames_into, render_exception_into
 from scarletio.web_common.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, \
     AUTHORIZATION, CONTENT_TYPE
 from scarletio.http_client import RequestContextManager
@@ -277,7 +277,7 @@ class RLTCTX: #rate limit tester context manager
         while True:
             if tb is None:
                 break
-            frame=ExceptionFrameProxy(tb)
+            frame=TracebackFrameProxy(tb)
             frames.append(frame)
             tb=tb.tb_next
         
