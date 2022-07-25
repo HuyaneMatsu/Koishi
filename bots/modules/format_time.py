@@ -15,7 +15,7 @@ P_TIME_ZONE = P('float', 'timezone offset from utc 0', min_value=-26.0, max_valu
 ID_MIN = 0
 ID_MAX = unix_time_to_id(UNIX_TIME_MAX)
 
-COMMAND_CLIENT : Client
+SLASH_CLIENT : Client
 
 FORMAT_STYLES = (
     TIMESTAMP_STYLES.short_time,
@@ -28,7 +28,7 @@ FORMAT_STYLES = (
 )
 
 
-FORMAT_TIME_COMMANDS = COMMAND_CLIENT.interactions(
+FORMAT_TIME_COMMANDS = SLASH_CLIENT.interactions(
     None,
     is_global = True,
     name = 'format-time',
