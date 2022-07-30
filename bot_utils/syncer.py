@@ -2,12 +2,11 @@ import os, re, sys
 from os.path import join, isdir, isfile, getmtime, exists
 from os import mkdir as make_dir
 from datetime import datetime, timedelta
-from io import StringIO
 
 from config import HATA_PATH, SCARLETIO_PATH
 
 from hata import KOKORO, Embed, DiscordException
-from scarletio import Lock, Task, ReuAsyncIO, AsyncIO, WaitTillAll
+from scarletio import Lock, Task, ReuAsyncIO, AsyncIO, WaitTillAll, render_exception_into_async
 from hata.ext.command_utils import wait_for_message, Pagination
 
 from .constants import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
@@ -251,11 +250,12 @@ async def receive_sync(client, partner):
         raise
     
     except BaseException as err:
-        with StringIO() as buffer:
-            await KOKORO.render_exception_async(err, ['```'], file=buffer)
-            
-            buffer.seek(0)
-            lines = buffer.readlines()
+        into = []
+        into.append('```')
+        await render_exception_into_async(err, into, loop=KOKORO)
+        
+        lines = ''.join(into).splitlines()
+        into = None
         
         pages = []
         

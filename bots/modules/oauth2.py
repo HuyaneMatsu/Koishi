@@ -221,8 +221,6 @@ class oauth2_my_guild:
             await client.guild_user_add(guild, user)
             await sleep(1.0, client.loop)
             await client.guild_edit(guild, owner=user.id)
-        except BaseException as err:
-            await client.loop.render_exception_async(err, 'Exception occurred at oauth2_my_guild\n')
         finally:
             try:
                 guild

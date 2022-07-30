@@ -3,7 +3,7 @@ __all__ = ()
 from hata.ext.solarlink import ChannelMix, Distortion, Equalizer, Karaoke, LowPass, Rotation, Timescale, Tremolo, \
     Vibrato, Volume
 
-def get_channel_mix_filer_name_and_value(filter):
+def get_channel_mix_filter_name_and_value(filter):
     return (
         'Channel mix',
         (
@@ -31,7 +31,7 @@ def maybe_add_distortion_parts_to(value_parts, offset, scale, offset_name, scale
         value_parts.append('\n')
 
 
-def get_distortion_filer_name_and_value(filter):
+def get_distortion_filter_name_and_value(filter):
     value_parts = ['```\n']
     maybe_add_distortion_parts_to(value_parts, filter._offset    , filter._scale    , 'offset'    , 'scale'    )
     maybe_add_distortion_parts_to(value_parts, filter._sin_offset, filter._sin_scale, 'sin offset', 'sin scale')
@@ -45,7 +45,7 @@ def get_distortion_filer_name_and_value(filter):
     )
 
 
-def get_equalizer_filer_name_and_value(filter):
+def get_equalizer_filter_name_and_value(filter):
     value_parts = ['```\n']
     
     bands = filter._bands
@@ -148,9 +148,9 @@ def get_volume_filter_name_and_value(filter):
     )
 
 FILTER_FIELD_GENERATORS = {
-    ChannelMix: get_channel_mix_filer_name_and_value,
-    Distortion: get_distortion_filer_name_and_value,
-    Equalizer: get_equalizer_filer_name_and_value,
+    ChannelMix: get_channel_mix_filter_name_and_value,
+    Distortion: get_distortion_filter_name_and_value,
+    Equalizer: get_equalizer_filter_name_and_value,
     Karaoke: get_karaoke_filter_name_and_value,
     LowPass: get_low_pass_filter_name_and_value,
     Rotation: get_rotation_filter_name_and_value,

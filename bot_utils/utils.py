@@ -1,6 +1,6 @@
-from io import StringIO
 from hata import Embed, KOKORO, ERROR_CODES, DiscordException
 from hata.ext.slash.menus import Pagination
+from scarletio import render_exception_into_async
 from random import choice
 from .constants import DEFAULT_CATEGORY_NAME
 
@@ -14,25 +14,28 @@ def category_name_rule(name):
 
 
 async def command_error(client, message, command, content, exception):
-    with StringIO() as buffer:
-        await KOKORO.render_exception_async(exception,[
-            client.full_name,
-            ' ignores an occurred exception at command ',
-            repr(command),
-            '\n\nMessage details:\nGuild: ',
-            repr(message.guild),
-            '\nChannel: ',
-            repr(message.channel),
-            '\nAuthor: ',
-            message.author.full_name,
-            ' (',
-            repr(message.author.id),
-            ')\nContent: ',
-            repr(content),
-            '\n```py\n'], '```', file=buffer)
-        
-        buffer.seek(0)
-        lines = buffer.readlines()
+    into = [
+        client.full_name,
+        ' ignores an occurred exception at command ',
+        repr(command),
+        '\n\nMessage details:\nGuild: ',
+        repr(message.guild),
+        '\nChannel: ',
+        repr(message.channel),
+        '\nAuthor: ',
+        message.author.full_name,
+        ' (',
+        repr(message.author.id),
+        ')\nContent: ',
+        repr(content),
+        '\n```py\n'
+    ]
+    
+    await render_exception_into_async(exception, into, loop=KOKORO)
+    into.append('```')
+    
+    lines = ''.join(into).splitlines()
+    into = None
     
     pages = []
     

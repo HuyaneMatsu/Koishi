@@ -10,7 +10,7 @@ import scarletio
 import scarletio.http_client
 
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath, FunctionUnit, ClassAttributeUnit, \
-    InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths, set_highlight_html_class, highlight
+    InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths, set_highlight_html_class, HIGHLIGHT_TOKEN_TYPES
 
 map_module('hata')
 map_module('scarletio')
@@ -25,32 +25,33 @@ URL_PREFIX = '/project/hata/docs'
 ROUTES = Blueprint('docs', '', url_prefix=URL_PREFIX)
 
 
-set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_OPERATOR, 'c_py_operator')
-set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_MAGIC, 'c_py_magic')
-set_highlight_html_class(highlight.TOKEN_TYPE_NUMERIC, 'c_py_numeric')
-set_highlight_html_class(highlight.TOKEN_TYPE_STRING, 'c_py_string')
-set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_KEYWORD, 'c_py_keyword')
-set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_BUILTIN, 'c_py_builtin')
-set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_BUILTIN_EXCEPTION, 'c_py_builtin_exception')
-set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_PUNCTUATION, 'c_py_punctuation')
-set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_OPERATOR_ATTRIBUTE, 'c_py_operator_attribute')
-set_highlight_html_class(highlight.TOKEN_TYPE_IDENTIFIER_ATTRIBUTE, 'c_py_identifier_attribute')
-set_highlight_html_class(highlight.TOKEN_TYPE_SPECIAL_CONSOLE_PREFIX, 'c_py_identifier_console_prefix')
-set_highlight_html_class(highlight.TOKEN_TYPE_STRING_UNICODE_FORMAT_MARK, 'c_py_format_string_mark')
-set_highlight_html_class(highlight.TOKEN_TYPE_COMMENT, 'c_py_comment')
-set_highlight_html_class(highlight.TOKEN_TYPE_STRING_UNICODE_FORMAT_CODE, 'c_py_format_string_code')
-set_highlight_html_class(highlight.TOKEN_TYPE_STRING_UNICODE_FORMAT_POSTFIX, 'c_py_format_string_postfix')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_SPECIAL_OPERATOR, 'c_py_operator')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_IDENTIFIER_MAGIC, 'c_py_magic')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_NUMERIC, 'c_py_numeric')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_STRING, 'c_py_string')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_IDENTIFIER_KEYWORD, 'c_py_keyword')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_IDENTIFIER_BUILTIN, 'c_py_builtin')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_IDENTIFIER_BUILTIN_EXCEPTION, 'c_py_builtin_exception')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_SPECIAL_PUNCTUATION, 'c_py_punctuation')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_SPECIAL_OPERATOR_ATTRIBUTE, 'c_py_operator_attribute')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_IDENTIFIER_ATTRIBUTE, 'c_py_identifier_attribute')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_SPECIAL_CONSOLE_PREFIX, 'c_py_identifier_console_prefix')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_STRING_UNICODE_FORMAT_MARK, 'c_py_format_string_mark')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_COMMENT, 'c_py_comment')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_STRING_UNICODE_FORMAT_CODE, 'c_py_format_string_code')
+set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_STRING_UNICODE_FORMAT_POSTFIX, 'c_py_format_string_postfix')
 
 
 class DocsWrapper:
-    __slots__ = ('unit',)
+    __slots__ = ('path', 'unit',)
     
     @property
     def __name__(self):
         return self.path
     
-    def __init__(self, unit):
+    def __init__(self, unit, path):
         self.unit = unit
+        self.path = path
     
     def __call__(self):
         search_form = SearchForm()
@@ -83,7 +84,7 @@ ADDED_OBJECTS = set()
 
 def unit_adder(unit):
     path = '/'+'/'.join(unit.path.parts)
-    ROUTES.add_url_rule(path, path, DocsWrapper(unit))
+    ROUTES.add_url_rule(path, path, DocsWrapper(unit, path))
     
     path += '/'
     ROUTES.add_url_rule(path, path, Redirecter('../' + unit.path.parts[-1]))

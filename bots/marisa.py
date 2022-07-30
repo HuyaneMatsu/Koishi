@@ -2,7 +2,6 @@ import sys, re
 from random import random, choice, randint
 from time import perf_counter
 from functools import partial as partial_func
-from io import StringIO
 
 try:
     import watchdog
@@ -12,7 +11,7 @@ except ImportError:
 from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
     parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
     ButtonStyle, INTERACTION_RESPONSE_TYPES, MessageFlag, InteractionResponseContext
-from scarletio import sleep, alchemy_incendiary
+from scarletio import sleep, alchemy_incendiary, render_exception_into_async
 from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
     wait_for_component_interaction, Button, Row, configure_parameter, Select, Option, P
 from scarletio.utils.trace import render_exception_into
@@ -83,25 +82,27 @@ async def command_error_handler(ctx, exception):
     if ctx.guild is not GUILD__SUPPORT:
         return False
     
-    with StringIO() as buffer:
-        await KOKORO.render_exception_async(exception,[
-            ctx.client.full_name,
-            ' ignores an occurred exception at command ',
-            repr(ctx.command),
-            '\n\nMessage details:\nGuild: ',
-            repr(ctx.guild),
-            '\nChannel: ',
-            repr(ctx.channel),
-            '\nAuthor: ',
-            ctx.author.full_name,
-            ' (',
-            repr(ctx.author.id),
-            ')\nContent: ',
-            repr(ctx.content),
-            '\n```py\n'], '```', file=buffer)
-        
-        buffer.seek(0)
-        lines = buffer.readlines()
+    into = [
+        ctx.client.full_name,
+        ' ignores an occurred exception at command ',
+        repr(ctx.command),
+        '\n\nMessage details:\nGuild: ',
+        repr(ctx.guild),
+        '\nChannel: ',
+        repr(ctx.channel),
+        '\nAuthor: ',
+        ctx.author.full_name,
+        ' (',
+        repr(ctx.author.id),
+        ')\nContent: ',
+        repr(ctx.content),
+        '\n```py\n'
+    ]
+    await render_exception_into_async(exception, into, loop=KOKORO)
+    into.append('```')
+    
+    lines = ''.join(into).splitlines()
+    into = None
     
     pages = []
     
