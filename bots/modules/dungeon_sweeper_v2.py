@@ -4072,7 +4072,7 @@ class DungeonSweeperRunner:
         repr_parts = [
             '<', self.__class__.__name__,
             ' client=', repr(self.client),
-            ', at channel=', repr(self.message.channnel),
+            ', at channel=', repr(self.message.channel),
             ', gui_state='
         ]
         

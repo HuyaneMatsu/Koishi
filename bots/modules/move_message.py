@@ -187,7 +187,7 @@ BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED = Button(
 
 BUTTON_MESSAGE_MOVE_SUBMIT_DISABLED = BUTTON_MESSAGE_MOVE_SUBMIT_ENABLED.copy_with(enabled=False)
 
-BUTTON_MESSAGE_MOVE_ADD_BY_ID= Button(
+BUTTON_MESSAGE_MOVE_ADD_BY_ID = Button(
     'Enter message id',
     custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID,
     style = ButtonStyle.blue,
@@ -221,7 +221,7 @@ MESSAGE_MOVER_COMPONENTS_AFTERLIFE = Row(
     BUTTON_MESSAGE_MOVE_CLOSE,
 )
 
-MESSAGE_MODER_ADD_BY_ID_FORM = Form(
+MESSAGE_MOVER_ADD_BY_ID_FORM = Form(
     'Add message by id to move group',
     [
         TextInput(
@@ -555,7 +555,7 @@ async def add_to_move_group(
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
 async def add_message_by_id_button_click(event):
     if event.user_permissions.can_manage_messages:
-        return MESSAGE_MODER_ADD_BY_ID_FORM
+        return MESSAGE_MOVER_ADD_BY_ID_FORM
 
 
 @SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID, target='form')
