@@ -919,16 +919,10 @@ async def markdown():
             'print(\'Hello world\')```\n'
             'Note that character \` is not a quote but a backtick.\n'
             '\n'
-            f'If, however, you have large amounts of code then it\'s better to use [our paste service]({LINK__PASTE}).'
+            f'If, however, you have large amounts of code then upload it as a file.'
         ),
         color = COLOR__KOISHI_HELP,
     )
-
-
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
-async def paste():
-    """A link to our paste service."""
-    return Embed(description=f'[Paste link]({LINK__PASTE})', color=COLOR__KOISHI_HELP)
 
 
 

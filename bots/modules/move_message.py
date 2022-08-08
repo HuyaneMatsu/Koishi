@@ -620,11 +620,24 @@ async def move_channel(
             after_id = messages[0].id
         
         for message in reversed(messages):
+            content = message.content
+            if (content is not None) and (len(content > 2000)):
+                await client.webhook_message_create(
+                    webhook,
+                    content[:2000],
+                    allowed_mentions = None,
+                    name = message.author.name_at(guild_id),
+                    avatar_url = message.author.avatar_url_at(guild_id),
+                    thread = thread_id,
+                )
+                
+                content = content[2000:]
+            
             files = await get_files(client, message)
             
             await client.webhook_message_create(
                 webhook,
-                message.content,
+                content,
                 embed = message.clean_embeds,
                 file = files,
                 allowed_mentions = None,
