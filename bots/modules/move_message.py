@@ -621,7 +621,7 @@ async def move_channel(
         
         for message in reversed(messages):
             content = message.content
-            if (content is not None) and (len(content > 2000)):
+            if (content is not None) and (len(content) > 2000):
                 await client.webhook_message_create(
                     webhook,
                     content[:2000],
