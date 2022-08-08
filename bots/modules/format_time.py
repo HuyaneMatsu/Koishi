@@ -74,7 +74,6 @@ async def format_relative(
     hours: ('number', 'hours') = 0,
     minutes: ('number', 'minutes') = 0,
     seconds: ('number', 'seconds') = 0,
-    time_zone_offset: P_TIME_ZONE = 0.0,
 ):
     """Format the given relative time."""
     if (years < RELATIVE_YEARS_MIN) or (years > RELATIVE_YEARS_MAX):
@@ -108,7 +107,7 @@ async def format_relative(
         seconds = seconds,
     )
     
-    return build_format_embed(maybe_add_time_zone_offset(DateTime.utcnow(), time_zone_offset) + delta)
+    return build_format_embed(DateTime.utcnow() + delta)
 
 
 @FORMAT_TIME_COMMANDS.interactions(name='absolute')
@@ -140,16 +139,14 @@ async def format_absolute(
 @FORMAT_TIME_COMMANDS.interactions(name='unix')
 async def format_unix(
     unix_time: P('number', 'unix time', min_value=UNIX_TIME_MIN, max_value=UNIX_TIME_MAX),
-    time_zone_offset: P_TIME_ZONE = 0.0,
 ):
     """Formats the given unix time."""
-    return build_format_embed(maybe_add_time_zone_offset(unix_time_to_datetime(unix_time), time_zone_offset))
+    return build_format_embed(unix_time_to_datetime(unix_time))
 
 
 @FORMAT_TIME_COMMANDS.interactions(name='snowflake')
 async def format_snowflake(
     snowflake: P('int', 'snowflake'),
-    time_zone_offset: P_TIME_ZONE = 0.0,
 ):
     """Formats the given Discord id."""
     if snowflake < ID_MIN:
@@ -157,15 +154,13 @@ async def format_snowflake(
     elif snowflake > ID_MAX:
         snowflake = ID_MAX
     
-    return build_format_embed(maybe_add_time_zone_offset(id_to_datetime(snowflake), time_zone_offset))
+    return build_format_embed(id_to_datetime(snowflake))
 
 
 @FORMAT_TIME_COMMANDS.interactions(name='now')
-async def format_now(
-    time_zone_offset: P_TIME_ZONE = 0.0,
-):
+async def format_now():
     """Formats he current time"""
-    return build_format_embed(maybe_add_time_zone_offset(DateTime.utcnow(), time_zone_offset))
+    return build_format_embed(DateTime.utcnow())
 
 
 def build_format_embed(date_time):
