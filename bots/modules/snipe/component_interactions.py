@@ -63,7 +63,7 @@ async def snipe_message_dm(client, event):
     try:
         await client.message_create(channel, embed=embed, components=components)
     except DiscordException as err:
-        if err.code != ERROR_CODES.cannot_message_user: # user has dm-s disabled:
+        if err.code == ERROR_CODES.cannot_message_user: # user has dm-s disabled:
             await client.interaction_followup_message_create(
                 event, 'Could not deliver direct message.', show_for_invoking_user_only=True
             )
