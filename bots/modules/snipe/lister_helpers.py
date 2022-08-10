@@ -17,6 +17,12 @@ def embed_builder_sticker(event, sticker, message_url):
     return build_embed(event, sticker, message_url, 'sticker')
 
 
+TYPE_NAME_BY_BUILDER = {
+    embed_builder_emoji: 'emoji',
+    embed_builder_reaction: 'reaction',
+    embed_builder_sticker: 'sticker',
+}
+
 def option_builder_emoji(emoji):
     return Option(emoji.as_emoji, emoji.name, emoji)
 
@@ -67,18 +73,29 @@ def build_embed(event, entity, message_url, type_name):
     if entity_url is not None:
         embed.add_image(entity_url)
     
+    add_embed_author(embed, event, type_name, message_url)
     
+    return embed
+
+
+def add_embed_author(embed, event, type_name, message_url):
     user = event.user
+    
     embed.add_author(
         f'{user.name_at(event.guild_id)}\'s sniped {type_name}s!',
         user.avatar_url,
         message_url,
     )
-    
-    return embed
 
 
 def create_initial_response(event, target, entities, embed_builder, option_builder, custom_id, button_info):
+    embed, components = create_initial_response_parts(
+        event, target, entities, embed_builder, option_builder, custom_id, button_info)
+    
+    return InteractionResponse(embed=embed, components=components)
+
+
+def create_initial_response_parts(event, target, entities, embed_builder, option_builder, custom_id, button_info):
     if target is None:
         target_url = None
     else:
@@ -108,7 +125,7 @@ def create_initial_response(event, target, entities, embed_builder, option_build
             )
         ]
     
-    return InteractionResponse(embed=embed, components=components)
+    return embed, components
 
 
 async def select_option_parser_emoji(client, event):
