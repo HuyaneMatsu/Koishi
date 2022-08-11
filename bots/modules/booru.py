@@ -393,7 +393,7 @@ def generate_touhou_relations():
         ('Lily White'           , 'lily_white'           , 'リリーホワイト', 'Lily', 'Ririi', 'Ririi Howaito'),
         ('Letty Whiterock'      , 'letty_whiterock'      , 'レティ ホワイトロック', 'Reti Howaitorokku',),
         ('Ibaraki Kasen'        , 'ibaraki_kasen'        , '茨木 華扇', 'Kasen', 'Kasen Ibaraki'),
-        ('Ibuki Suika'          , 'ibuki_suika'          , '伊吹 萃香', 'Suika', 'Suika Ibuk'),
+        ('Ibuki Suika'          , 'ibuki_suika'          , '伊吹 萃香', 'Suika', 'Suika Ibuki'),
         ('Iizunamaru Megumu'    , 'iizunamaru_megumu'    , '飯綱丸 龍', 'Megumu Iizunamaru', 'Megumu'),
         ('Imaizumi Kagerou'     , 'imaizumi_kagerou'     , '今泉 影狼', 'Kagerou', 'Kagerou Imaizumi'),
         ('Inaba Tewi'           , 'inaba_tewi'           , '因幡 てゐ', 'Tewi', 'Tewi Inaba'),
