@@ -299,9 +299,9 @@ KOISHI_JOKES = (
     ('Shrimps', 'fried'),
     ('Apples', 'peeled'),
     ('Okuu', 'beatboxing'),
-    ('Fishing rods', 'stolen'),
+    ('Fishing rods', 'wings*'),
     ('Orin', 'dancing'),
-    ('Satori', 'why.mp4'),
+    ('We like', 'older woman'),
     ('KFC', 'Koishi Fried Chicken'),
     ('Koishi', '"Not thinking is fun!"'),
 )
