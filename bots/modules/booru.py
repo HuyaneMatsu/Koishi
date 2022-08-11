@@ -18,26 +18,6 @@ NSFW_BOORU = 'http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags='
 SAFE_BOORU_PROVIDER = 'safebooru'
 NSFW_BOORU_PROVIDER = 'gelbooru'
 
-TOUHOU_REQUIRED = frozenset((
-    'solo',
-))
-
-TOUHOU_BANNED = frozenset((
-    'underwear',
-    'sideboob',
-    'pov_feet',
-    'underboob',
-    'upskirt',
-    'sexually_suggestive',
-    'ass',
-    'bikini',
-    '6%2Bgirls',
-    'comic',
-    'greyscale',
-    'bdsm',
-    'huge_filesize',
-    'lovestruck',
-))
 
 SAFE_BANNED = frozenset((
     'bdsm',
@@ -52,7 +32,25 @@ SAFE_BANNED = frozenset((
     'bikini',
     'clothed_female_nude_male',
     'no_panties',
+    'artificial_vagina',
+    'covering_breasts',
+    'huge_breasts',
+    'blood',
+    'penetration_gesture',
+    'no_bra',
+    'nude',
+    'butt_crack',
+    'naked_apron',
 ))
+
+
+TOUHOU_BANNED = frozenset((
+    *SAFE_BANNED,
+    '6%2Bgirls',
+    'comic',
+    'greyscale',
+))
+
 
 NSFW_BANNED = frozenset((
     'loli',
@@ -61,6 +59,12 @@ NSFW_BANNED = frozenset((
     'shotacon',
     'huge_filesize',
 ))
+
+
+TOUHOU_REQUIRED = frozenset((
+    'solo',
+))
+
 
 def make_url(base, requested_tags, required_tags, banned_tags):
     url_parts = [base]
@@ -379,6 +383,7 @@ def generate_touhou_relations():
         ('Hieda no Akyuu'       , 'hieda_no_akyuu'       , '稗田 阿求', 'Akyuu',),
         ('Hijiri Byakuren'      , 'hijiri_byakuren'      , '聖 白蓮', 'Byakuren', 'Hijiri Byakuren'),
         ('Himekaidou Hatate'    , 'himekaidou_hatate'    , '姫海棠 はたて', 'Hatate', 'Hatate Himekaidou'),
+        ('Himemushi Momoyo'     , 'himemushi_momoyo'     , '姫虫 百々世', 'Momoyo Himemushi', 'Momoyo'),
         ('Hinanawi Tenshi'      , 'hinanawi_tenshi'      , '比那名居 天子', 'Tenshi', 'Tenshi Hinanawi',),
         ('Hong Meiling'         , 'hong_meiling'         , '紅 美鈴', 'Meiling', 'Meirin', 'Hon Meirin', 'Meiling Hong'),
         ('Horikawa Raiko'       , 'horikawa_raiko'       , '堀川 雷鼓', 'Raiko', 'Raiko Horikawa'),
@@ -389,6 +394,7 @@ def generate_touhou_relations():
         ('Letty Whiterock'      , 'letty_whiterock'      , 'レティ ホワイトロック', 'Reti Howaitorokku',),
         ('Ibaraki Kasen'        , 'ibaraki_kasen'        , '茨木 華扇', 'Kasen', 'Kasen Ibaraki'),
         ('Ibuki Suika'          , 'ibuki_suika'          , '伊吹 萃香', 'Suika', 'Suika Ibuk'),
+        ('Iizunamaru Megumu'    , 'iizunamaru_megumu'    , '飯綱丸 龍', 'Megumu Iizunamaru', 'Megumu'),
         ('Imaizumi Kagerou'     , 'imaizumi_kagerou'     , '今泉 影狼', 'Kagerou', 'Kagerou Imaizumi'),
         ('Inaba Tewi'           , 'inaba_tewi'           , '因幡 てゐ', 'Tewi', 'Tewi Inaba'),
         ('Inubashiri Momiji'    , 'inubashiri_momiji'    , '犬走 椛', 'Momiji', 'Momiji Inubashiri'),
@@ -416,6 +422,7 @@ def generate_touhou_relations():
         ('Konngara'             , 'konngara'             , '矜羯羅', 'Konngara',),
         ('Konpaku Youmu'        , 'konpaku_youmu'        , '魂魄 妖夢', 'Youmu', 'Youmu Konpaku'),
         ('Kokuu Haruto'         , 'kokuu_haruto'         , 'Haruto Kokuu',), # no result now
+        ('Kudamaki Tsukasa'     , 'kudamaki_tsukasa'     , '菅牧 典', ' Tsukasa Kudamaki', 'Tsukasa'),
         ('Kumoi Ichirin'        , 'kumoi_ichirin'        , '雲居 一輪', 'Ichirin Kumoi', 'Ichirin',),
         ('Clownpiece'           , 'clownpiece'           , 'クラウンピース', 'Kuraunpiisu', ),
         ('Kurodani Yamame'      , 'kurodani_yamame'      , '黒谷 ヤマメ', 'Yamame Kurodani',),
@@ -445,7 +452,7 @@ def generate_touhou_relations():
         ('Hecatia Lapislazuli'  , 'hecatia_lapislazuli'  , 'ヘカーティア ラピスラズリ', 'Hecatia', 'Hekaatia', 'Hekaatia Rapisurazuri'),
         ('Reisen Udongein Inaba', 'reisen_udongein_inaba', '鈴仙 優曇華院 イナバ', 'Reisen',),
         ('Reiuji Utsuho'        , 'reiuji_utsuho'        , '霊烏路 空', 'Okuu', 'Utsuho Reiuji '),
-        ('Wriggle Nightbug'     , 'wriggle_nightbug'     , 'リグル ナイトバグ', 'Wriggle', 'Riguru Naitobagu'),
+        ('Wriggle Nightbug'     , 'wriggle_nightbug'     , 'リグル ナイトバグ', 'Wriggle', 'Riguru Naitobagu', 'Nightbug Wriggle'),
         ('Ringo'                , 'ringo_(touhou)'       , '鈴瑚', 'Ringo',),
         ('Mystia Lorelei'       , 'mystia_lorelei'       , 'ミスティア ローレライ', 'Misutia Roorerai',),
         ('Rumia'                , 'rumia'                , 'ルーミア', 'Ruumia',),
@@ -458,16 +465,19 @@ def generate_touhou_relations():
         ('Shiki Eiki Yamaxanadu', 'shiki_eiki'           , '四季映姫 ヤマザナドゥ', 'Eiki', 'Shiki Eiki Yamazanadu', 'Eiki Shiki, Yamaxanadu',),
         ('Doremy Sweet'         , 'doremy_sweet'         , 'ドレミー スイート', 'Doremy', 'Doremii Suiito'),
         ('Scarlet Flandre'      , 'flandre_scarlet'      , 'スカーレット フランドール', 'Flandre', 'Flandre Scarlet', 'Flan', 'Sukaaretto Furandooru'),
-        ('Scarlet Remilia'      , 'remilia_scarlet'      , 'スカーレット レミリア', 'Remilia', 'Remilia Scarlet', 'Sukaaretto Remiria'),
-        ('Sukuna Shinmyoumaru'  , 'sukuna_shinmyoumaru'  , '少名 針妙丸', 'Shinmyoumaru Sukuna',),
+        ('Scarlet Remilia'      , 'remilia_scarlet'      , 'スカーレット レミリア', 'Remilia', 'Remilia Scarlet', 'Sukaaretto Remiria', 'Remi'),
+        ('Sukuna Shinmyoumaru'  , 'sukuna_shinmyoumaru'  , '少名 針妙丸', 'Shinmyoumaru Sukuna', 'Sukuna',),
+        ('Tamatsukuri Misumaru' , 'tamatsukuri_misumaru' , '玉造 魅須丸', 'Misumaru Tamatsukuri', 'Misumaru',),
         ('Tatara Kogasa'        , 'tatara_kogasa'        , '多々良 小傘', 'Kogasa Tatara'),
         ('Teireida Mai'         , 'teireida_mai'         , '丁礼田 舞', 'Mai Teireida', 'Mai'),
+        ('Tenkyuu Chimata'      , 'tenkyuu_chimata'      , '天弓 千亦', 'Chimata Tenkyuu', 'Chimata'),
         ('Toramaru Shou'        , 'toramaru_shou'        , '寅丸 星', 'Shou Toramaru',),
+        ('Toutetsu Yuuma'       , 'toutetsu_yuuma'       , '饕餮 尤魔', 'Yuuma Toutetsu', 'Yuuma',),
         ('Toyosatomimi no Miko' , 'toyosatomimi_no_miko' , '豊聡耳 神子', 'Miko',),
         ('Usami Renko'          , 'usami_renko'          , '宇佐見 蓮子', 'Renko', 'Renko Usami'),
         ('Usami Sumireko'       , 'usami_sumireko'       , '宇佐見 菫子', 'Sumireko', 'Sumireko Usami'),
         ('Ushizaki Urumi'       , 'ushizaki_urumi'       , '牛崎 潤美', 'Urumi Ushizaki',),
-        ('Wakasagihime'         , 'wakasagihime'         , 'わかさぎ姫', ),
+        ('Wakasagihime'         , 'wakasagihime'         , 'わかさぎ姫', 'Wakasagi'),
         ('Watatsuki no Toyohime', 'watatsuki_no_toyohime', '綿月 豊姫', 'Toyohime',),
         ('Watatsuki no Yorihime', 'watatsuki_no_yorihime', '綿月 依姫', 'Yorihime',),
         ('Yagokoro Eirin'       , 'yagokoro_eirin'       , '八意 永琳', 'Eirin', 'Eirin Yagokoro'),
@@ -493,10 +503,10 @@ TOUHOU_NAME_RELATIONS, TOUHOU_NAMES, TOUHOU_ALTERNATIVE_NAMES = generate_touhou_
 
 
 MOST_POPULAR_TOUHOU_CHARACTERS = [
+    'Komeiji Koishi',
     'Konpaku Youmu',
     'Kirisame Marisa',
     'Hakurei Reimu',
-    'Komeiji Koishi',
     'Scarlet Flandre',
     'Izayoi Sakuya',
     'Scarlet Remilia',

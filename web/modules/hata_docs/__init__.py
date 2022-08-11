@@ -12,6 +12,7 @@ import scarletio.http_client
 from hata.ext.patchouli import map_module, MAPPED_OBJECTS, ModuleUnit, QualPath, FunctionUnit, ClassAttributeUnit, \
     InstanceAttributeUnit, TypeUnit, PropertyUnit, search_paths, set_highlight_html_class, HIGHLIGHT_TOKEN_TYPES
 
+
 map_module('hata')
 map_module('scarletio')
 
