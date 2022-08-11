@@ -72,7 +72,7 @@ async def _respond_with_emojis(client, event, target, emojis, embed_builder, cus
                 emoji_indexes_to_remove.append(int(matched.group(1)))
                 continue
             
-            if (not emoji_indexes_to_remove) or (len(errors) != emoji_indexes_to_remove):
+            if (not emoji_indexes_to_remove) or (len(errors) != len(emoji_indexes_to_remove)):
                 raise
 
         else:
