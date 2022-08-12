@@ -229,31 +229,31 @@ class dispatch_tester:
         if guild is not None:
             result.append(f'At guild : {guild.name} {guild.id}')
         
-        if flag==3:
+        if flag == 3:
             result.append('Less embeds than before???')
         else:
-            if flag==1:
+            if flag == 1:
                 result.append('Only sizes were update.')
-            elif flag==2:
+            elif flag == 2:
                 result.append('Links! Links everywhere...')
             
-            embeds=message.embeds
+            embeds = message.embeds
             if embeds is None:
                 result.append('This should not happen, there are no embeds...')
             else:
-                if flag==1:
+                if flag == 1:
                     for index, embed in enumerate(embeds,1):
-                        if flag==1:
-                            collected=[]
-                            image=embed.image
+                        if flag == 1:
+                            collected = []
+                            image = embed.image
                             if image is not None:
-                                collected.append(('image.height',image.height))
-                                collected.append(('image.width',image.width))
-                            thumbnail=embed.thumbnail
+                                collected.append(('image.height', image.height))
+                                collected.append(('image.width', image.width))
+                            thumbnail = embed.thumbnail
                             if thumbnail is not None:
-                                collected.append(('thumbnail.height',thumbnail.height))
-                                collected.append(('thumbnail.width',thumbnail.width))
-                            video=embed.video
+                                collected.append(('thumbnail.height', thumbnail.height))
+                                collected.append(('thumbnail.width', thumbnail.width))
+                            video = embed.video
                             if video is not None:
                                 collected.append(('video.height', video.height))
                                 collected.append(('video.width', video.width))
@@ -354,11 +354,11 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'A user was updated: {user:f} {user.id}']
+        result = [f'A user was updated: {user:f} {user.id}']
         for key, value in old. items():
             result.append(f'{key} : {value} -> {getattr(user, key)}')
 
-        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout=120.)
     
     @classmethod
@@ -398,8 +398,8 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text=f'```\nA channel was deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
-        pages=[Embed(description=text)]
+        text = f'```\nA channel was deleted: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})```'
+        pages = [Embed(description=text)]
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
@@ -443,9 +443,9 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=pretty_print(channel)
+        result = pretty_print(channel)
         result.insert(0, f'A channel was created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
-        pages=[Embed(description=chunk) for chunk in cchunkify(result)]
+        pages = [Embed(description=chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
@@ -550,7 +550,9 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        await client.message_create(self.channel, f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!')
+        await client.message_create(
+            self.channel, f'Welcome to the Guild {user:f}!\nThe guild reached {guild.user_count} members!'
+        )
 
     @classmethod
     async def guild_user_delete(self, client, guild, user, profile):
