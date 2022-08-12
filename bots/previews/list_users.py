@@ -45,10 +45,11 @@ def create_user_object(user, guild):
     user_data['name'] = user.name
     
     guild_profile = user.get_guild_profile_for(guild)
+    
+    guild_profile_data = {}
+    user_data['guild_profile'] = guild_profile_data
+
     if (guild_profile is not None):
-        guild_profile_data = {}
-        user_data['guild_profile'] = guild_profile_data
-            
         avatar_type = guild_profile.avatar_type
         if avatar_type:
             guild_profile_data['avatar_hash'] = guild_profile.avatar_hash
