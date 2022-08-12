@@ -23,7 +23,7 @@ RELATIVE_MONTH = relativedelta(months=1)
 
 MONTH = timedelta(days=367, hours=6) / 12
 
-MOST_USED_PER_PAGE = 30
+MOST_USED_PER_PAGE = 90
 
 @Satori.events
 async def message_create(client, message):
@@ -269,43 +269,9 @@ async def user_top(event,
         user.avatar_url,
     )
     
-    if results:
-        description_parts = []
-        limit = len(results)
-        index = 0
-        adjust_length = get_adjust_length(index, 10, limit)
-        
-        while True:
-            emoji_id, count = results[index]
-            
-            index += 1
-            
-            try:
-                emoji = EMOJIS[emoji_id]
-            except KeyError:
-                continue
-            
-            add_emoji_into(description_parts, emoji, index, count, adjust_length)
-
-            if (not index % 10) or (index == limit):
-                description = ''.join(description_parts)
-                description_parts.clear()
-                embed.add_field(f'\u200B', description, inline=True)
-                
-                if (index == limit):
-                    break
-                
-                adjust_length = get_adjust_length(index, 10, limit)
-                continue
-            
-            description_parts.append('\n')
-            continue
-    
-    else:
-        embed.description = '*No recorded data.*'
+    _populate_embed_with_fields(embed, results, EMOJI_MOST_USED_TYPE_ALL, True, 1, count)
     
     return embed
-
 
 
 @EMOJI_COMMANDS.interactions
@@ -497,6 +463,73 @@ EMOJI_MOST_USED_FILTERS = {
     EMOJI_MOST_USED_TYPE_ANIMATED: filter_animated,
 }
 
+
+def _populate_embed_with_fields(embed, query_result, type_, order, page, page_size):
+    emoji_filter = EMOJI_MOST_USED_FILTERS[type_]
+    
+    guild_emojis = set(emoji for emoji in GUILD__SUPPORT.emojis.values() if emoji_filter(emoji))
+    is_new_limit = datetime.utcnow() - MONTH
+    
+    items = []
+    
+    for emoji_id, count in query_result:
+        try:
+            emoji = EMOJIS[emoji_id]
+        except KeyError:
+            continue
+        
+        if not emoji_filter(emoji):
+            continue
+        
+        guild_emojis.discard(emoji)
+        
+        is_new = (emoji.created_at >= is_new_limit)
+        items.append((emoji, count, is_new))
+    
+    for emoji in guild_emojis:
+        is_new = (emoji.created_at >= is_new_limit)
+        items.append((emoji, 0, is_new))
+    
+    items.sort(key=item_sort_key, reverse=order)
+    
+    page_shift = (page - 1) * page_size
+    index = page_shift
+    limit = min(len(items), index + page_size)
+    
+    embed.add_footer(
+        f'Page {page} / {(len(items) // page_size) + 1}',
+    )
+    
+    if index >= limit:
+        embed.add_field('\u200B', '*Page out of range or no recorded data*')
+        return
+    
+    adjust_length = get_adjust_length(index, 10, limit)
+    description_parts = []
+    
+    while True:
+        emoji, count, is_new = items[index]
+        index += 1
+        
+        add_emoji_into(description_parts, emoji, index, count, adjust_length)
+        if is_new:
+            description_parts.append(' *[New!]*')
+
+        if (not index % 10) or (index == limit):
+            description = ''.join(description_parts)
+            description_parts.clear()
+            embed.add_field('\u200B', description, inline=True)
+            
+            if (index == limit):
+                break
+            
+            adjust_length = get_adjust_length(index, 10, limit)
+            continue
+        
+        description_parts.append('\n')
+        continue
+
+
 @EMOJI_COMMANDS.interactions
 async def most_used(
     months: (range(1, 13), 'The months to get') = 1,
@@ -511,7 +544,6 @@ async def most_used(
         abort('Page value can be only positive')
     
     low_date_limit = datetime.utcnow() - RELATIVE_MONTH * months
-    is_new_limit = datetime.utcnow() - MONTH
     
     async with DB_ENGINE.connect() as connector:
         
@@ -534,66 +566,10 @@ async def most_used(
         response = await connector.execute(statement)
         results = await response.fetchall()
     
-    items = []
-    
-    emoji_filter = EMOJI_MOST_USED_FILTERS[type_]
-    
-    guild_emojis = set(emoji for emoji in GUILD__SUPPORT.emojis.values() if emoji_filter(emoji))
-    
-    for emoji_id, count in results:
-        try:
-            emoji = EMOJIS[emoji_id]
-        except KeyError:
-            continue
-        
-        if not emoji_filter(emoji):
-            continue
-        
-        guild_emojis.discard(emoji)
-        
-        is_new = (emoji.created_at >= is_new_limit)
-        items.append((emoji, count, is_new))
-    
-    for emoji in guild_emojis:
-        is_new = (emoji.created_at >= is_new_limit)
-        items.append((emoji, 0, is_new))
-    
-    items.sort(key=item_sort_key, reverse=order)
-    
-    page_shift = (page - 1) * MOST_USED_PER_PAGE
-    
-    index = page_shift
-    limit = min(len(items), index + MOST_USED_PER_PAGE)
-    
-    description_parts = []
-    
-    if index < limit:
-        while True:
-            emoji, count, is_new = items[index]
-            index += 1
-            
-            description_parts.append(str(index))
-            description_parts.append('.: **')
-            description_parts.append(str(count))
-            description_parts.append('** x ')
-            description_parts.append(emoji.as_emoji)
-            
-            if is_new:
-                description_parts.append(' *[New!]*')
-            
-            if index == limit:
-                break
-            
-            description_parts.append('\n')
-            continue
-        
-        description = ''.join(description_parts)
-    else:
-        description = '*No recorded data*'
-    
-    return Embed(
+    embed = Embed(
         'Most used emojis:',
-        description,
-    ).add_footer(
-        f'Page {page} / {(len(items) // MOST_USED_PER_PAGE) + 1}',
     )
+    
+    _populate_embed_with_fields(embed, results, type_, order, page, MOST_USED_PER_PAGE)
+    
+    return embed
