@@ -49,32 +49,32 @@ def create_user_object(user, guild):
             
         avatar_type = guild_profile.avatar_type
         if avatar_type:
-            user_data['avatar_hash'] = guild_profile.avatar_hash
-            user_data['avatar_type'] = avatar_type.value
+            guild_profile_data['avatar_hash'] = guild_profile.avatar_hash
+            guild_profile_data['avatar_type'] = avatar_type.value
         
         boosts_since = guild_profile.boosts_since
         if (boosts_since is not None):
-            user_data['boosts_since'] = datetime_to_timestamp(boosts_since)
+            guild_profile_data['boosts_since'] = datetime_to_timestamp(boosts_since)
         
         joined_at = guild_profile.joined_at
         if (joined_at is not None):
-            user_data['joined_at'] = datetime_to_timestamp(joined_at)
+            guild_profile_data['joined_at'] = datetime_to_timestamp(joined_at)
         
         nick = guild_profile.nick
         if (nick is not None):
-            user_data['nick'] = nick
+            guild_profile_data['nick'] = nick
         
         pending = guild_profile.pending
         if pending:
-            user_data['pending'] = pending
+            guild_profile_data['pending'] = pending
         
         role_ids = guild_profile.role_ids
         if (role_ids is not None):
-            user_data['role_ids'] = [*role_ids]
+            guild_profile_data['role_ids'] = [*role_ids]
         
         timed_out_until = guild_profile.timed_out_until
         if (timed_out_until is not None):
-            user_data['timed_out_until'] = datetime_to_timestamp(timed_out_until)
+            guild_profile_data['timed_out_until'] = datetime_to_timestamp(timed_out_until)
     
     return user_data
 
