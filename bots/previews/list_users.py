@@ -40,6 +40,8 @@ def create_user_object(user, guild):
     if flags:
         user_data['flags'] = flags
    
+    user_data['id'] = user.id
+    
     user_data['name'] = user.name
     
     guild_profile = user.get_guild_profile_for(guild)
