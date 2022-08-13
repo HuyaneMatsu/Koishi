@@ -1,5 +1,7 @@
 __all__ = ()
 
+from io import StringIO
+from csv import writer as CsvWriter
 from scarletio import to_json
 from hata import Client, Permission, Embed, datetime_to_timestamp
 from hata.ext.slash import P, abort, InteractionResponse
@@ -9,7 +11,7 @@ from bot_utils.constants import GUILD__SUPPORT
 SLASH_CLIENT: Client
 
 
-def iterate_user_datas(guild, offset, limit, user_object_creator):
+def iter_users(guild, offset, limit):
     user_iterator = iter(guild.users.values())
     
     while offset > 0:
@@ -17,7 +19,7 @@ def iterate_user_datas(guild, offset, limit, user_object_creator):
         offset -= 1
     
     for user in user_iterator:
-        yield user_object_creator(user, guild)
+        yield user
         
         limit -= 1
         if limit > 0:
@@ -26,7 +28,7 @@ def iterate_user_datas(guild, offset, limit, user_object_creator):
         break
 
 
-def create_user_object_koishi(user, guild):
+def koishi_json_user_create(user, guild):
     user_data = {}
     
     avatar_type = user.avatar_type
@@ -86,7 +88,7 @@ def create_user_object_koishi(user, guild):
     return user_data
 
 
-def create_user_object_discord(user, guild):
+def discord_json_user_create(user, guild):
     member_data = {}
     
     user_data = {}
@@ -162,6 +164,222 @@ def create_user_object_discord(user, guild):
     return member_data
 
 
+def create_json_data(guild, offset, limit, serialisation):
+    if serialisation.startswith('koishi.s'):
+        object_creator = koishi_json_user_create
+    else:
+        object_creator = discord_json_user_create
+    
+    return to_json([object_creator(user, guild) for user in iter_users(guild, offset, limit)])
+
+
+def koishi_csv_header_create():
+    return (
+        'avatar_hash',
+        'avatar_type',
+        'banner_color',
+        'discriminator',
+        'flags',
+        'id',
+        'name',
+        'guild_profile_avatar_hash',
+        'guild_profile_avatar_type',
+        'guild_profile_boosts_since',
+        'guild_profile_joined_at',
+        'guild_profile_nick',
+        'guild_profile_pending',
+        'guild_profile_role_ids',
+        'guild_profile_timed_out_until',
+    )
+
+
+def discord_csv_header_create():
+    return (
+        'user_avatar',
+        'user_accent_color',
+        'user_discriminator',
+        'user_public_flags',
+        'user_id',
+        'user_username',
+        'avatar',
+        'premium_since',
+        'joined_at',
+        'nick',
+        'pending',
+        'roles',
+        'communication_disabled_until',
+    )
+
+
+def koishi_csv_user_create(user, guild):
+    avatar_hash = user.avatar_hash
+    avatar_type = user.avatar_type.value
+    banner_color = user.banner_color
+    discriminator = user.discriminator
+    flags = format(user.flags, 'd')
+    id_ = user.id
+    name = user.name
+    
+    guild_profile = user.get_guild_profile_for(guild)
+    if (guild_profile is None):
+        guild_profile_avatar_hash = 0
+        guild_profile_avatar_type = 0
+        guild_profile_boosts_since = None
+        guild_profile_joined_at = None
+        guild_profile_nick = None
+        guild_profile_pending = False
+        guild_profile_role_ids = None
+        guild_profile_timed_out_until = None
+    
+    else:
+        guild_profile_avatar_hash = guild_profile.avatar_hash
+        guild_profile_avatar_type = guild_profile.avatar_type.value
+        
+        boosts_since = guild_profile.boosts_since
+        if (boosts_since is None):
+            guild_profile_boosts_since = None
+        else:
+            guild_profile_boosts_since = datetime_to_timestamp(boosts_since)
+        
+        joined_at = guild_profile.joined_at
+        if (joined_at is None):
+            guild_profile_joined_at = None
+        else:
+            guild_profile_joined_at = datetime_to_timestamp(joined_at)
+        
+        guild_profile_nick = guild_profile.nick
+        
+        guild_profile_pending = guild_profile.pending
+        
+        role_ids = guild_profile.role_ids
+        if (role_ids is None):
+            guild_profile_role_ids = None
+        else:
+            guild_profile_role_ids = ' '.join([str(role_id) for role_id in role_ids])
+        
+        timed_out_until = guild_profile.timed_out_until
+        if (timed_out_until is None):
+            guild_profile_timed_out_until = None
+        else:
+            guild_profile_timed_out_until = datetime_to_timestamp(timed_out_until)
+    
+    return (
+        avatar_hash,
+        avatar_type,
+        banner_color,
+        discriminator,
+        flags,
+        id_,
+        name,
+        guild_profile_avatar_hash,
+        guild_profile_avatar_type,
+        guild_profile_boosts_since,
+        guild_profile_joined_at,
+        guild_profile_nick,
+        guild_profile_pending,
+        guild_profile_role_ids,
+        guild_profile_timed_out_until,
+    )
+
+
+def discord_csv_user_create(user, guild):
+    avatar = user.avatar
+    if avatar:
+        user_avatar = avatar.as_base16_hash
+    else:
+        user_avatar = None
+    
+    user_accent_color = user.banner_color
+    user_discriminator = user.discriminator
+    user_public_flags = format(user.flags, 'd')
+    user_id = user.id
+    user_username = user.name
+    
+    guild_profile = user.get_guild_profile_for(guild)
+    if (guild_profile is None):
+        avatar = None
+        premium_since = None
+        joined_at = None
+        nick = None
+        pending = False
+        roles = None
+        communication_disabled_until = None
+    
+    else:
+        avatar = guild_profile.avatar
+        if avatar:
+            avatar = avatar.as_base16_hash
+        else:
+            avatar = None
+        
+        boosts_since = guild_profile.boosts_since
+        if boosts_since is None:
+            premium_since = None
+        else:
+            premium_since = datetime_to_timestamp(boosts_since)
+    
+        joined_at = guild_profile.joined_at
+        if (joined_at is None):
+            joined_at = None
+        else:
+            joined_at = datetime_to_timestamp(joined_at)
+        
+        nick = guild_profile.nick
+        pending = guild_profile.pending
+        
+        role_ids = guild_profile.role_ids
+        if (role_ids is None):
+            roles = None
+        else:
+            roles = ' '.join([str(role_id) for role_id in role_ids])
+        
+        timed_out_until = guild_profile.timed_out_until
+        if (timed_out_until is None):
+            communication_disabled_until = None
+        else:
+            communication_disabled_until = datetime_to_timestamp(timed_out_until)
+    
+    
+    return (
+        user_avatar,
+        user_accent_color,
+        user_discriminator,
+        user_public_flags,
+        user_id,
+        user_username,
+        avatar,
+        premium_since,
+        joined_at,
+        nick,
+        pending,
+        roles,
+        communication_disabled_until,
+    )
+
+
+def create_csv_data(guild, offset, limit, serialisation):
+
+    if serialisation.startswith('koishi.'):
+        header_creator = koishi_csv_header_create
+        row_creator = koishi_csv_user_create
+    else:
+        header_creator = discord_csv_header_create
+        row_creator = discord_csv_user_create
+    
+    file = StringIO()
+    
+    writer = CsvWriter(file)
+    writer.writerow(header_creator())
+    
+    for user in iter_users(guild, offset, limit):
+         writer.writerow(row_creator(user, guild))
+    
+    return file.getvalue()
+
+
+SERIALIZATION_MODES = ['koishi.json', 'discord.json', 'koishi.csv', 'discord.csv']
+
+
 @SLASH_CLIENT.interactions(
     guild = GUILD__SUPPORT,
     allow_in_dm = False,
@@ -170,7 +388,7 @@ def create_user_object_discord(user, guild):
 async def list_users(
     client,
     event,
-    serialisation: (['koishi', 'discord'], 'Select on which mode I should serialise the data.'),
+    serialisation: (SERIALIZATION_MODES, 'Select on which mode I should serialise the data.'),
     offset : P('int', 'User listing offset.', min_value=0) = 0,
     limit: P('int', 'The maximal amount of users to list.', min_value=1, max_value=1000) = 1000,
 ):
@@ -194,12 +412,13 @@ async def list_users(
         yield
         await client.request_members(guild)
     
-    if serialisation == 'koishi':
-        user_object_creator = create_user_object_koishi
+    if serialisation.endswith('.json'):
+        data = create_json_data(guild, offset, limit, serialisation)
+        postfix = 'json'
     else:
-        user_object_creator = create_user_object_discord
+        data = create_csv_data(guild, offset, limit, serialisation)
+        postfix = 'csv'
     
-    json = to_json([*iterate_user_datas(guild, offset, limit, user_object_creator)])
     
     yield InteractionResponse(
         embed = Embed(
@@ -231,5 +450,5 @@ async def list_users(
             ),
             inline = True,
         ),
-        file = ('users.json', json),
+        file = (f'users.{postfix}', data),
     )
