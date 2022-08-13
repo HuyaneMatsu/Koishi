@@ -40,8 +40,8 @@ def koishi_json_user_create(user, guild):
     if (banner_color is not None):
         user_data['banner_color'] = banner_color
     
-    if user.is_bot:
-        user_data['is_bot'] = True
+    if user.bot:
+        user_data['bot'] = True
     
     user_data['discriminator'] = user.discriminator
     
@@ -184,7 +184,7 @@ def koishi_csv_header_create():
         'discriminator',
         'flags',
         'id',
-        'is_bot'
+        'bot'
         'name',
         'guild_profile_avatar_hash',
         'guild_profile_avatar_type',
@@ -224,7 +224,7 @@ def koishi_csv_user_create(user, guild):
     flags = format(user.flags, 'd')
     id_ = user.id
     name = user.name
-    is_bot = 'true' if user.is_bot else 'false'
+    bot = 'true' if user.bot else 'false'
     
     guild_profile = user.get_guild_profile_for(guild)
     if (guild_profile is None):
@@ -276,7 +276,7 @@ def koishi_csv_user_create(user, guild):
         discriminator,
         flags,
         id_,
-        is_bot,
+        bot,
         name,
         guild_profile_avatar_hash,
         guild_profile_avatar_type,
@@ -301,7 +301,7 @@ def discord_csv_user_create(user, guild):
     user_public_flags = format(user.flags, 'd')
     user_id = user.id
     user_username = user.name
-    user_bot = 'true' if user.is_bot else 'false'
+    user_bot = 'true' if user.bot else 'false'
     
     guild_profile = user.get_guild_profile_for(guild)
     if (guild_profile is None):

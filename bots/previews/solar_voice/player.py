@@ -48,7 +48,7 @@ class Player(SolarPlayer):
                 if voice_state.self_deaf:
                     continue
                 
-                if voice_state.user.is_bot:
+                if voice_state.user.bot:
                     continue
                 
                 active_users += 1

@@ -123,7 +123,7 @@ class WelcomeState:
         if not self.users:
             return
         
-        if message.author.is_bot:
+        if message.author.bot:
             return
         
         if message.has_stickers():

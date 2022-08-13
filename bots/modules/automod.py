@@ -364,7 +364,7 @@ ESCALATION_NOTIFIERS = {
 
 async def filter_content(client, message):
     user = message.author
-    if user.is_bot or user.has_role(ROLE__SUPPORT__MODERATOR):
+    if user.bot or user.has_role(ROLE__SUPPORT__MODERATOR):
         return False
     
     content = message.content
@@ -411,7 +411,7 @@ async def alter_content(client, message):
     if not message.channel.cached_permissions_for(Koishi) & PERMISSION_MASK_MESSAGING:
         return False
     
-    if message.author.is_bot:
+    if message.author.bot:
         return False
     
     content = message.content

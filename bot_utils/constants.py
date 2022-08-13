@@ -63,7 +63,7 @@ LINK__PASTE = 'https://hastebin.com/'
 LINK__HATA_SLASH = 'https://github.com/HuyaneMatsu/hata/blob/master/docs/topics/slash.md'
 LINK__KOISHI_TOP_GG = f'https://discordbots.org/bot/{config.KOISHI_ID}'
 
-USER__DISBOARD = User.precreate(302050872383242240, is_bot=True)
+USER__DISBOARD = User.precreate(302050872383242240, bot=True)
 USER__EST = User.precreate(277393805601275910)
 
 DEFAULT_CATEGORY_NAME = 'Uncategorized'

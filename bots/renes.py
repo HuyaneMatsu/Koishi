@@ -11,7 +11,7 @@ async def guild_user_add(client, guild, user):
     if guild is not GUILD__ESTS_HOME:
         return
     
-    if user.is_bot:
+    if user.bot:
         return
     
     system_channel = guild.system_channel

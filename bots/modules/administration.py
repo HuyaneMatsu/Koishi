@@ -404,7 +404,7 @@ async def ban(client, event,
     
     # Try to notify the user. Ignore bot notifications.
     if notify_user:
-        if user.is_bot:
+        if user.bot:
             notify_note = None
         else:
             

@@ -31,7 +31,7 @@ async def message_create(client, message):
         return
     
     user = message.author
-    if user.is_bot:
+    if user.bot:
         return
     
     content = message.content
@@ -51,7 +51,7 @@ async def message_edit(client, message, old_attributes):
         return
     
     user = message.author
-    if user.is_bot:
+    if user.bot:
         return
     
     try:
@@ -157,7 +157,7 @@ async def sticker_delete(client, sticker):
 @Satori.events
 async def reaction_add(client, event):
     user = event.user
-    if user.is_bot:
+    if user.bot:
         return
     
     emoji = event.emoji

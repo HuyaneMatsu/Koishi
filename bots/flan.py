@@ -146,7 +146,7 @@ async def guild_user_add(client, guild, user):
     if guild is not CHESUTO_GUILD:
         return
     
-    if user.is_bot:
+    if user.bot:
         return
     
     await client.user_role_add(user, VISITORS_ROLE)
@@ -476,7 +476,7 @@ ADD_IMAGE_CANCEL = BUILTIN_EMOJIS['x']
 ADD_IMAGE_EMOJIS = (ADD_IMAGE_OK, ADD_IMAGE_CANCEL)
 
 def ADD_IMAGE_CHECKER(event):
-    if event.user.is_bot:
+    if event.user.bot:
         return False
     
     if not event.user.has_role(CARDS_ROLE):
@@ -1145,7 +1145,7 @@ class bgms:
 
 def check_has_cards_role(message):
     user = message.author
-    if user.is_bot:
+    if user.bot:
         return False
     
     if user.has_role(CARDS_ROLE):
@@ -1162,7 +1162,7 @@ def check_reaction_cards_role(event):
         return False
     
     user = event.user
-    if user.is_bot:
+    if user.bot:
         return False
     
     if user.has_role(CARDS_ROLE):

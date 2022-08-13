@@ -528,7 +528,7 @@ async def do_transfer(client, event, source_user, target_user, message):
     
     yield embed
     
-    if target_user.is_bot:
+    if target_user.bot:
         return
     
     try:

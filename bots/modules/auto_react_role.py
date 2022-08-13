@@ -613,7 +613,7 @@ class AutoReactRoleGUI:
         return ''.join(result)
     
     async def __call__(self, client, message):
-        if message.author.is_bot:
+        if message.author.bot:
             return
         
         if not self.guild.permissions_for(message.author).can_administrator:

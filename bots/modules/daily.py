@@ -256,7 +256,7 @@ async def claim_daily_for_waifu(client, event, target_user):
                 )
             )
             
-            if (not target_user.is_bot) and target_entry[5]:
+            if (not target_user.bot) and target_entry[5]:
                 await send_embed_to(
                     client,
                     target_user.id,

@@ -781,7 +781,7 @@ async def gift(client, event,
     
     yield embed
     
-    if target_user.is_bot:
+    if target_user.bot:
         return
     
     try:
@@ -918,7 +918,7 @@ async def award(client, event,
     
     yield embed
     
-    if target_user.is_bot:
+    if target_user.bot:
         return
 
     try:

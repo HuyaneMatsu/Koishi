@@ -202,7 +202,7 @@ class auto_pyramid_u:
             
             user = users.pop(randint(0, user_count - 1))
             user_count -= 1
-            if user.is_bot:
+            if user.bot:
                 continue
             
             selected_users.append(user)

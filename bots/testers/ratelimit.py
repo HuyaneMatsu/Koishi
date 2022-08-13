@@ -704,7 +704,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
         content_filter_level=ContentFilterLevel.disabled,
         roles=[],channels=[],):
         
-    if client.is_bot and len(client.guilds)>9:
+    if client.bot and len(client.guilds)>9:
         raise ValueError('Bots cannot create a new server if they have more than 10.')
 
     if not (1<len(name)<101):
@@ -3435,7 +3435,7 @@ async def rate_limit_test_0034(client, message):
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test_0034') as RLT:
         for client_ in CLIENTS.values():
-            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+            if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
         else:
             client_ = None
@@ -3982,7 +3982,7 @@ async def rate_limit_test_0062(client, message):
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test_0062') as RLT:
         for client_ in CLIENTS.values():
-            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+            if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
         else:
             client_ = None
@@ -4028,7 +4028,7 @@ async def rate_limit_test_0066(client, message):
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test_0066') as RLT:
         for client_ in CLIENTS.values():
-            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+            if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
         else:
             client_ = None
@@ -4047,7 +4047,7 @@ async def rate_limit_test_0067(client, message):
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test_0067') as RLT:
         for client_ in CLIENTS.values():
-            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+            if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
         else:
             client_ = None
@@ -4075,7 +4075,7 @@ async def rate_limit_test_0069(client, message):
     channel = message.channel
     with RLTCTX(client,channel,'rate_limit_test_0069') as RLT:
         for client_ in CLIENTS.values():
-            if (type(client_.application.owner) is not Team) and client_.is_bot and (client_.secret is not None):
+            if (type(client_.application.owner) is not Team) and client_.bot and (client_.secret is not None):
                 break
         else:
             client_ = None

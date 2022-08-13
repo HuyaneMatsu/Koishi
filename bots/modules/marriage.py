@@ -427,7 +427,7 @@ async def propose(client, event,
             return
         
         # case 7: Proposing to a bot
-        if user.is_bot:
+        if user.bot:
             love_increase = (amount >> 1)
             if target_entry_id == -1:
                 to_execute = get_create_common_user_expression(
@@ -473,7 +473,7 @@ async def propose(client, event,
             # Notify the divorced if not bot.
             if target_waifu_owner_id:
                 owner = await client.user_get(target_waifu_owner_id)
-                if not owner.is_bot:
+                if not owner.bot:
                     await send_embed_to(
                         client,
                         target_waifu_owner_id,
@@ -727,7 +727,7 @@ async def accept(client, event,
     # Notify the divorced if not bot.
     if waifu_owner_id:
         owner = await client.user_get(waifu_owner_id)
-        if not owner.is_bot:
+        if not owner.bot:
             await send_embed_to(
                 client,
                 waifu_owner_id,
@@ -862,7 +862,7 @@ async def cancel(client, event,
     )
     
     
-    if (not user.is_bot) and target_waifu_notify_proposal:
+    if (not user.bot) and target_waifu_notify_proposal:
         await send_embed_to(
             client,
             target_user_id,
@@ -1155,7 +1155,7 @@ async def divorce_incoming(client, event, source_user_id, target_user):
         components = None,
     )
     
-    if not target_user.is_bot:
+    if not target_user.bot:
         await send_embed_to(
             client,
             target_user.id,
@@ -1220,7 +1220,7 @@ async def divorce_outgoing(client, event, source_user_id, target_user):
         components = None,
     )
     
-    if not target_user.is_bot:
+    if not target_user.bot:
         await send_embed_to(
             client,
             target_user.id,
@@ -1351,7 +1351,7 @@ async def divorce_circular(client, event, source_user_id, target_user):
         components = None,
     )
     
-    if not target_user.is_bot:
+    if not target_user.bot:
         await send_embed_to(
             client,
             target_user.id,
