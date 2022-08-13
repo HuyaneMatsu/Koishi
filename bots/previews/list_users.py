@@ -102,7 +102,7 @@ def discord_json_user_create(user, guild):
     user_data['avatar'] = base16_avatar_hash
     
     user_data['accent_color'] = user.banner_color
-    user_data['discriminator'] = str(user.discriminator)
+    user_data['discriminator'] = format(user.discriminator, '0>4')
     user_data['public_flags'] = user.flags
     user_data['id'] = str(user.id)
     user_data['username'] = user.name
@@ -227,7 +227,7 @@ def koishi_csv_user_create(user, guild):
         guild_profile_boosts_since = None
         guild_profile_joined_at = None
         guild_profile_nick = None
-        guild_profile_pending = False
+        guild_profile_pending = 'false'
         guild_profile_role_ids = None
         guild_profile_timed_out_until = None
     
@@ -249,7 +249,7 @@ def koishi_csv_user_create(user, guild):
         
         guild_profile_nick = guild_profile.nick
         
-        guild_profile_pending = guild_profile.pending
+        guild_profile_pending = 'true' if guild_profile.pending else 'false'
         
         role_ids = guild_profile.role_ids
         if (role_ids is None):
@@ -290,7 +290,7 @@ def discord_csv_user_create(user, guild):
         user_avatar = None
     
     user_accent_color = user.banner_color
-    user_discriminator = user.discriminator
+    user_discriminator = format(user.discriminator, '0>4')
     user_public_flags = format(user.flags, 'd')
     user_id = user.id
     user_username = user.name
@@ -301,7 +301,7 @@ def discord_csv_user_create(user, guild):
         premium_since = None
         joined_at = None
         nick = None
-        pending = False
+        pending = 'false'
         roles = None
         communication_disabled_until = None
     
@@ -325,7 +325,7 @@ def discord_csv_user_create(user, guild):
             joined_at = datetime_to_timestamp(joined_at)
         
         nick = guild_profile.nick
-        pending = guild_profile.pending
+        pending = 'true' if guild_profile.pending else 'false'
         
         role_ids = guild_profile.role_ids
         if (role_ids is None):
