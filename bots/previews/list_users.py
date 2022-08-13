@@ -40,6 +40,9 @@ def koishi_json_user_create(user, guild):
     if (banner_color is not None):
         user_data['banner_color'] = banner_color
     
+    if user.is_bot:
+        user_data['is_bot'] = True
+    
     user_data['discriminator'] = user.discriminator
     
     flags = user.flags
@@ -103,10 +106,10 @@ def discord_json_user_create(user, guild):
     
     user_data['accent_color'] = user.banner_color
     user_data['discriminator'] = format(user.discriminator, '0>4')
+    user_data['bot'] = user.bot
     user_data['public_flags'] = user.flags
     user_data['id'] = str(user.id)
     user_data['username'] = user.name
-    
     
     guild_profile = user.get_guild_profile_for(guild)
     if (guild_profile is None):
@@ -181,6 +184,7 @@ def koishi_csv_header_create():
         'discriminator',
         'flags',
         'id',
+        'is_bot'
         'name',
         'guild_profile_avatar_hash',
         'guild_profile_avatar_type',
@@ -197,6 +201,7 @@ def discord_csv_header_create():
     return (
         'user_avatar',
         'user_accent_color',
+        'user_bot',
         'user_discriminator',
         'user_public_flags',
         'user_id',
@@ -219,6 +224,7 @@ def koishi_csv_user_create(user, guild):
     flags = format(user.flags, 'd')
     id_ = user.id
     name = user.name
+    is_bot = 'true' if user.is_bot else 'false'
     
     guild_profile = user.get_guild_profile_for(guild)
     if (guild_profile is None):
@@ -270,6 +276,7 @@ def koishi_csv_user_create(user, guild):
         discriminator,
         flags,
         id_,
+        is_bot,
         name,
         guild_profile_avatar_hash,
         guild_profile_avatar_type,
@@ -294,6 +301,7 @@ def discord_csv_user_create(user, guild):
     user_public_flags = format(user.flags, 'd')
     user_id = user.id
     user_username = user.name
+    user_bot = 'true' if user.is_bot else 'false'
     
     guild_profile = user.get_guild_profile_for(guild)
     if (guild_profile is None):
@@ -343,6 +351,7 @@ def discord_csv_user_create(user, guild):
     return (
         user_avatar,
         user_accent_color,
+        user_bot,
         user_discriminator,
         user_public_flags,
         user_id,
