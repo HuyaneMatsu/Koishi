@@ -207,6 +207,14 @@ async def list_users(
         ).add_thumbnail(
             guild.icon_url
         ).add_field(
+            'Serialisation',
+            (
+                f'```\n'
+                f'{serialisation}\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
             'Offset',
             (
                 f'```\n'
