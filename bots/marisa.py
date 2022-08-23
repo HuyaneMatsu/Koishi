@@ -1498,6 +1498,20 @@ async def message_context():
 
 
 
+@Marisa.interactions(is_global=True)
+async def test_calc(
+    expression: ('expression', 'Mathematical expression to evaluate')
+):
+    return repr(expression)
+
+
+@Marisa.interactions(guild=GUILD__SUPPORT)
+async def test_double_ack(client, event):
+    await client.interaction_application_command_acknowledge(event, wait=False)
+    await client.interaction_application_command_acknowledge(event)
+    return 'owo?'
+
+
 if (watchdog is not None):
     
     from watchdog.events import FileModifiedEvent
