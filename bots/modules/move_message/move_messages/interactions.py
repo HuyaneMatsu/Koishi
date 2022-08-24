@@ -56,7 +56,7 @@ async def move_messages(
     channel: ('channel_group_messageable', 'Where to move the message.'),
 ):
     """Moves messages | Mod only"""
-    check_move_permissions(client, event, channel)
+    check_move_permissions(client, event, channel, True)
     
     if channel.is_in_group_thread():
         channel_id = channel.parent_id
