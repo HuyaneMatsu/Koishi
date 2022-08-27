@@ -85,8 +85,16 @@ async def clear(client, event,
     if (reason is not None) and (not reason):
         reason = None
     
-    await client.multi_client_message_delete_sequence(channel, after=after, before=before, limit=limit, filter=filter,
-        reason=reason)
+    try:
+        await client.multi_client_message_delete_sequence(
+            channel, after=after, before=before, limit=limit, filter=filter, reason=reason
+        )
+    except DiscordException as err:
+        if err.code not in (
+            ERROR_CODES.unknown_channel,
+        ):
+            raise
+
 
 @SLASH_CLIENT.interactions(
     is_global = True,
