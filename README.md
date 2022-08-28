@@ -63,8 +63,8 @@ And much more!
 - Actions
     
     `bite` • `blush` • `bully` • `cringe` • `cry` • `dance` • `glomp` • `handhold` • `happy` • `highfive` • `hug` •
-    `kill` • `kiss` • `lick` • `nom` • `pat` • `pocky-kiss` • `poke` • `slap` • `smile` • `smug` • `wave` • `wink` •
-    `yeet`
+    `kick` • `kill` • `kiss` • `lick` • `nom` • `pat` • `pocky-kiss` • `poke` • `slap` • `smile` • `smug` • `wave` • 
+    `wink` • `yeet`
 
 - Economy
     
@@ -91,7 +91,7 @@ And much more!
     
     `avatar` • `calc` • `choose` • `create-activity` • `color` • `guild-info` • `guild-icon` • `id` •
     `id-to-datetime` • `now-as-id` • `ping` • `rawr` • `sticker` • `sticker-info` • `role-info` • `snipe` •
-    `snipe-emojis` • `snipe-reactions` • `snipe-stickers` • `user` • `welcome-screen`
+    `snipe-emojis` • `snipe-reactions` • `snipe-stickers` • `style-text` • `user` • `welcome-screen`
 
 - Waifus
     

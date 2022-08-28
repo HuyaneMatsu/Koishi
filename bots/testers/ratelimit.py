@@ -11,7 +11,7 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
-    Achievement, UserOA2, parse_oauth2_redirect_url, cr_pg_channel_object, Channel, Role, GUILDS, CLIENTS, \
+    Achievement, Oauth2User, parse_oauth2_redirect_url, cr_pg_channel_object, Channel, Role, GUILDS, CLIENTS, \
     Team, WebhookType, PermissionOverwrite, Guild
 from scarletio import sleep, Task, WaitTillAll, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, WaitTillExc, change_on_switch, to_json, from_json
@@ -573,7 +573,7 @@ async def client_logout(client,):
 async def permission_overwrite_create(client,channel,target,allow,deny,):
     if type(target) is Role:
         type_='role'
-    elif type(target) in (User,Client,UserOA2):
+    elif type(target) in (User,Client,Oauth2User):
         type_='member'
     else:
         raise TypeError(f'Target expected to be Role or User type, got {type(target)!r}')

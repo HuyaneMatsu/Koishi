@@ -581,8 +581,8 @@ CATEGORIES = (
         EMOJI_MASKS,
         (
             'bite', 'blush', 'bully', 'cringe', 'cry', 'dance', 'glomp', 'handhold', 'happy', 'highfive', 'hug',
-            'kill', 'kiss', 'lick', 'nom', 'pat', 'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'wave', 'wink',
-            'yeet',
+            'kick', 'kill', 'kiss', 'lick', 'nom', 'pat', 'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'wave',
+            'wink', 'yeet',
         ),
     ), (
         'Economy',
@@ -613,7 +613,7 @@ CATEGORIES = (
         (
             'avatar', 'calc', 'choose', 'create-activity', 'color', 'format-time', 'guild-icon', 'guild-info', 'id',
             'id-to-datetime', 'now-as-id', 'ping', 'rawr', 'role-info', 'snipe', 'snipe-emojis', 'snipe-reactions',
-            'snipe-stickers', 'user', 'welcome-screen'
+            'snipe-stickers', 'style-text', 'user', 'welcome-screen'
         ),
     ), (
         'Waifus',

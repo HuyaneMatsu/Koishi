@@ -5,6 +5,8 @@ from random import choice
 from hata import Client, Embed
 from hata.ext.slash import abort, InteractionResponse
 
+from .waifu import build_response_and_allowed_users
+
 
 SLASH_CLIENT: Client
 
@@ -67,27 +69,51 @@ IMAGE_URLS = [
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def pocky_kiss(client, event,
-    user: ('user', 'Select someone.') = None,
+    user_00: ('user', 'Select someone.', 'user-1') = None,
+    user_01: ('user', 'Select someone', 'user-2') = None,
+    user_02: ('user', 'Select someone', 'user-3') = None,
+    user_03: ('user', 'Select someone', 'user-4') = None,
+    user_04: ('user', 'Select someone', 'user-5') = None,
+    user_05: ('user', 'Select someone', 'user-6') = None,
+    user_06: ('user', 'Select someone', 'user-7') = None,
+    user_07: ('user', 'Select someone', 'user-8') = None,
+    user_08: ('user', 'Select someone', 'user-9') = None,
+    user_09: ('user', 'Select someone', 'user-10') = None,
+    user_10: ('user', 'Select someone', 'user-11') = None,
+    user_11: ('user', 'Select someone', 'user-12') = None,
+    user_12: ('user', 'Select someone', 'user-13') = None,
+    user_13: ('user', 'Select someone', 'user-14') = None,
+    user_14: ('user', 'Select someone', 'user-15') = None,
+    user_15: ('user', 'Select someone', 'user-16') = None,
+    user_16: ('user', 'Select someone', 'user-17') = None,
+    user_17: ('user', 'Select someone', 'user-18') = None,
+    user_18: ('user', 'Select someone', 'user-19') = None,
+    user_19: ('user', 'Select someone', 'user-20') = None,
+    user_20: ('user', 'Select someone', 'user-21') = None,
+    user_21: ('user', 'Select someone', 'user-22') = None,
+    user_22: ('user', 'Select someone', 'user-23') = None,
+    user_23: ('user', 'Select someone', 'user-24') = None,
+    user_24: ('user', 'Select someone', 'user-25') = None,
 ):
     guild_id = event.guild_id
     if not guild_id:
         abort('Guild only command')
     
-    event_user = event.user
-    if (user is None) or (user is event_user):
-        caller = client
-        target = event_user
-    else:
-        caller = event_user
-        target = user
-    
+    response, allowed_mentions = build_response_and_allowed_users(
+        client, event, 'pocky kisses',
+        (
+            user_00, user_01, user_02, user_03, user_04, user_05, user_06, user_07, user_08, user_09,
+            user_10, user_11, user_12, user_13, user_14, user_15, user_16, user_17, user_18, user_19,
+            user_20, user_21, user_22, user_23, user_24
+        )
+    )
     
     return InteractionResponse(
-        f'> {caller:m} pocky kisses {target:m}.',
+        response,
         embed = Embed(
             color = (event.id >> 22) & 0xffffff
         ).add_image(
             choice(IMAGE_URLS),
         ),
-        allowed_mentions = target,
+        allowed_mentions = allowed_mentions,
     )

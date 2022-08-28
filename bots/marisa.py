@@ -540,7 +540,11 @@ async def debug_command(client, event,
             text_parts.append('`; id: `')
             text_parts.append(repr(permission_overwrite.target_id))
             
-            target_name = permission_overwrite.target.name
+            target = permission_overwrite.target
+            if target is None:
+                target_name = '*unknown*'
+            else:
+                target_name = permission_overwrite.target.name
             if target_name:
                 text_parts.append('`; name: `')
                 text_parts.append(target_name)

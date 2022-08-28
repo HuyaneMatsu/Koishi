@@ -44,6 +44,7 @@ from .role_info import *
 from .self_moderation import *
 from .stats import *
 from .sticker import *
+from .style_text import *
 from .todo import *
 from .touhou_wiki import *
 from .transfer import *
