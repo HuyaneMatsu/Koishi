@@ -338,7 +338,7 @@ async def safe_booru(client, event,
     return answer_booru(client, event, tags, SAFE_BOORU, SAFE_BANNED, SAFE_BOORU_PROVIDER, True)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global=True, nsfw=True)
 async def nsfw_booru(client, event,
     tags: ('str', 'Some tags to spice it up?') = '',
 ):

@@ -89,13 +89,8 @@ async def get_waifu_image(client, event, endpoint, safe, cache, is_component, ac
     
     return request_task.result()
 
-WAIFU = SLASH_CLIENT.interactions(None,
-    name = 'Waifu',
-    description = 'Waifu pictures!',
-    is_global = True,
-)
 
-@WAIFU.interactions(is_default=True)
+@SLASH_CLIENT.interactions(is_global=True)
 async def sfw(client, event,
     type_ : (SFW_WAIFUS, 'Waifu type!') = SFW_WAIFUS[0],
 ):
@@ -117,7 +112,7 @@ async def sfw(client, event,
     )
 
 
-@WAIFU.interactions
+@SLASH_CLIENT.interactions(is_global=True, nsfw=True)
 async def nsfw(client, event,
     type_ : (NSFW_WAIFUS, 'Waifu type!') = NSFW_WAIFUS[0],
 ):

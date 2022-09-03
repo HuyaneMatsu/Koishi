@@ -1,11 +1,16 @@
-from hata import KOKORO, Embed, cchunkify
-from scarletio import is_awaitable, Lock, write_exception_async
-import hata
-import re
-from io import StringIO
+import re, warnings
 from functools import partial as partial_func
+from io import StringIO
 from types import FunctionType
+
+import hata
+from hata import Embed, KOKORO, cchunkify
 from hata.ext.slash.menus import Pagination
+from scarletio import Lock, is_awaitable, write_exception_async
+from scarletio.utils.trace import (
+    _render_syntax_error_representation_into, CONSOLE_LINE_CACHE, fixup_syntax_error_line_from_buffer,
+    is_syntax_error, render_exception_into
+)
 
 try:
     from ast import PyCF_ALLOW_TOP_LEVEL_AWAIT
@@ -102,25 +107,70 @@ def raw_print(buffer, *args, file=None, flush=False, **kwargs):
     print(*args, file=file, **kwargs)
 
 
+def _ignore_console_frames(file_name, name, line_number, line):
+    """
+    Ignores the frames of the online console (``Interpreter`` type).
+    
+    Parameters
+    ----------
+    file_name : `str`
+        The frame's respective file's name.
+    name : `str`
+        The frame's respective function's name.
+    line_number : `int`
+        The line's index where the exception occurred.
+    line : `str`
+        The frame's respective stripped line.
+    
+    Returns
+    -------
+    should_show_frame : `bool`
+        Whether the frame should be shown.
+    """
+    should_show_frame = True
+    
+    if file_name == __file__:
+        if name == '__call__':
+            if line == 'coroutine = function()':
+                should_show_frame = False
+            
+            elif line == 'await coroutine':
+                should_show_frame = False
+    
+    return should_show_frame
+
+
 class Interpreter:
-    __slots__ = ('locals', 'lock')
-    def __init__(self, locals_):
+    __slots__ = ('_input_index', 'locals', 'lock')
+    
+    def __new__(cls, locals_):
         
         for variable_name in {
-                '__name__',
-                '__package__',
-                '__loader__',
-                '__spec__',
-                '__builtins__',
-                '__file__'
-                    }:
+            '__name__',
+            '__package__',
+            '__loader__',
+            '__spec__',
+            '__builtins__',
+            '__file__'
+        }:
             locals_[variable_name] = getattr(hata, variable_name)
         
         for variable_name in hata.__all__:
             locals_[variable_name] = getattr(hata, variable_name)
         
-        self.lock = Lock(KOKORO)
+        self = object.__new__(cls)
+        
+        self._input_index = 0
         self.locals = locals_
+        self.lock = Lock(KOKORO)
+        
+        return self
+    
+    
+    def _get_new_file_name(self):
+        input_index = self._input_index
+        self._input_index = input_index + 1
+        return f'<online_console[{input_index}]>'
     
     
     async def __call__(self, client, message, content):
@@ -133,22 +183,45 @@ class Interpreter:
             return
         
         async with self.lock:
-            result, is_exception = parse_code_content(content, 'No code to execute.')
+            source, is_exception = parse_code_content(content, 'No code to execute.')
             if is_exception:
-                await client.message_create(message.channel, embed=Embed('Parsing error', result))
+                await client.message_create(message.channel, embed=Embed('Parsing error', source))
                 return
             
             with StringIO() as buffer:
+                file_name = self._get_new_file_name()
+                
                 try:
-                    code_object = compile(result, 'online_interpreter', 'exec', flags=COMPILE_FLAGS)
-                except SyntaxError as err:
-                    buffer.write(
-                        f'{err.__class__.__name__} at line {err.lineno}: {err.msg}\n'
-                        f'{result[err.lineno - 1]}\n'
-                        f'{" "*(err.offset - 1)}^'
-                    )
+                    with warnings.catch_warnings():
+                        warnings.simplefilter('error')
+                        
+                        try:
+                            code_object = compile(source, file_name, 'exec', flags=COMPILE_FLAGS)
+                        except SyntaxError:
+                            raise
+                        
+                        except (MemoryError, ValueError, OverflowError) as err:
+                            raise SyntaxError(*err.args)
+                        
+                except SyntaxError as syntax_error:
+                    # Wer re-raise exceptions of compiling instead of capturing extra exceptions from the warning
+                    # module.
+                    into = []
+                    
+                    if is_syntax_error(syntax_error):
+                        fixup_syntax_error_line_from_buffer(syntax_error, source.splitlines())
+                        _render_syntax_error_representation_into(syntax_error, into, None)
+                        into.append('\n')
+                        
+                    else:
+                        render_exception_into(syntax_error, into)
+                    
+                    buffer.write(''.join(into))
+                    into = None
                 
                 else:
+                    CONSOLE_LINE_CACHE.feed(file_name, source)
+                    
                     locals_ = self.locals
                     locals_['print'] = partial_func(raw_print, buffer)
                     locals_['input'] = partial_func(raw_input)
@@ -158,11 +231,12 @@ class Interpreter:
                         coroutine = function()
                         if is_awaitable(coroutine):
                             await coroutine
+                    
                     except GeneratorExit:
                         raise
                     
                     except BaseException as err:
-                        await write_exception_async(err, file=buffer, loop=KOKORO)
+                        await write_exception_async(err, file=buffer, filter=_ignore_console_frames, loop=KOKORO)
                 
                 page_contents = get_buffer_value(buffer)
             
