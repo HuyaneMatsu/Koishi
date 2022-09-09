@@ -347,10 +347,10 @@ def render_activity(render_to, activity):
                 render_to.append(repr(asset_text_small))
                 render_to.append('\n')
         
-        album_cover_url = activity.album_cover_url
-        if (album_cover_url is not None):
-            render_to.append('**album cover url:** ')
-            render_to.append(repr(album_cover_url))
+        spotify_album_cover_url = activity.spotify_album_cover_url
+        if (spotify_album_cover_url is not None):
+            render_to.append('**spotify album cover url:** ')
+            render_to.append(repr(spotify_album_cover_url))
             render_to.append('\n')
         
         secrets = activity.secrets
@@ -590,8 +590,8 @@ def render_assets_difference(render_to, old_value, activity):
 
 
 def render_album_cover_url_difference(render_to, old_value, activity):
-    render_to.append('**album cover url:** ')
-    render_simple_difference(render_to, old_value, activity.album_cover_url)
+    render_to.append('**spotify album cover url:** ')
+    render_simple_difference(render_to, old_value, activity.spotify_album_cover_url)
 
 
 def render_secret_difference(render_to, old_value, activity):

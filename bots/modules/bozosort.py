@@ -605,6 +605,7 @@ PACKAGE_MODULES = frozenset((
     'brotli',
     'sqlalchemy',
     'dateutil',
+    'vampytest',
 ))
 
 class ImportStatement:

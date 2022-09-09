@@ -571,7 +571,7 @@ CATEGORIES = (
     (
         'Administration',
         EMOJI_TOOLS,
-        ('clear', 'ban', 'bans', 'dupe-image-filter', 'emoji-role', 'invite-create', 'is-banned',),
+        ('clear', 'ban', 'dupe-image-filter', 'emoji-role', 'invite-create', 'is-banned',),
     ), (
         'Anime',
         EMOJI_PILL,
@@ -593,7 +593,7 @@ CATEGORIES = (
         EMOJI_PAPER_DRAGON,
         (
             '9ball', 'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll', 'self-mute',
-            'sex', 'trivia', 'urban', 'waifu-stats', 'yuno'
+            'sex', 'stats', 'trivia', 'urban', 'yuno'
         )
     ), (
         'Games',
@@ -618,7 +618,7 @@ CATEGORIES = (
     ), (
         'Waifus',
         EMOJI_WAIFU,
-        ('nsfw-booru', 'safe-booru', 'touhou-character', 'vocaloid', 'waifu',)
+        ('nsfw-booru', 'safe-booru', 'touhou-character', 'vocaloid', 'waifu-safe', 'waifu-nsfw')
     ),
 )
 

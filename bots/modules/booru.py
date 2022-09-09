@@ -41,6 +41,7 @@ SAFE_BANNED = frozenset((
     'nude',
     'butt_crack',
     'naked_apron',
+    'pantyshot',
 ))
 
 

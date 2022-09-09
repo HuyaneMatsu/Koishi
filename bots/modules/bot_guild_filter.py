@@ -22,7 +22,7 @@ async def guild_create(client, guild):
         await client.request_all_members_of(guild)
         
         bot_count = sum(user.bot for user in guild.users.values())
-        if (bot_count >= 50) or (bot_count >= len(guild.users) >> 1):
+        if (bot_count >= 50) or (bot_count << 1 > len(guild.users)):
             
             should_leave = True
             repeated_leave = guild.owner_id in LEFT_GUILD_OWNER_IDS

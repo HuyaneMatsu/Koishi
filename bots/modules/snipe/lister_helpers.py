@@ -38,7 +38,7 @@ def build_embed(event, entity, message_url, type_name):
         url = None
     
     else:
-        title =  'Click to open'
+        title = 'Click to open'
         url = entity_url
     
     embed = Embed(
@@ -120,8 +120,8 @@ def create_initial_response_parts(event, target, entities, embed_builder, option
                 placeholder = 'Select an emoji!',
             ),
             Row(
-                BUTTON_SNIPE_DM,
                 button_info,
+                BUTTON_SNIPE_DM,
             )
         ]
     

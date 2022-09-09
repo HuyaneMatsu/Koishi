@@ -54,7 +54,7 @@ And much more!
 
 - Administration
     
-    `clear` • `ban` • `bans` • `dupe-image-filter` • `emoji-role` • `invite-create` • `is-banned`
+    `clear` • `ban` • `dupe-image-filter` • `emoji-role` • `invite-create` • `is-banned`
 
 - Anime
     
@@ -73,7 +73,7 @@ And much more!
 - Fun
     
     `9ball` • `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • `self-mute` •
-    `sex` • `trivia` • `urban` • `waifu-stats` • `yuno`
+    `sex` • `stats` • `trivia` • `urban` • `yuno`
 
 - Games
     
@@ -95,7 +95,7 @@ And much more!
 
 - Waifus
     
-    `nsfw-booru` • `safe-booru` • `touhou-character` • `vocaloid` • `waifu`
+    `nsfw-booru` • `safe-booru` • `touhou-character` • `vocaloid` • `waifu-sfw` • `waifu-nsfw`
 
 <h3 align="center">
     Support server only commands
@@ -104,7 +104,7 @@ And much more!
 `add-to-move-group` • `all-users` • `ask` • `award` • `bozosort` • `crywolf` • `daily-event` • `delete-from` •
 `delete-till` • `docs-search` • `emoji` • `events` • `extension` • `github-profile` • `heart-event` • `in-role` •
 `latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules` • `sticker` • `take` • `transfer` • `todo` •
-`move-message` • `move-messages` • `voice`
+`move-channel` • `move-message` • `move-messages` • `voice`
 
 <h1></h1>
 
