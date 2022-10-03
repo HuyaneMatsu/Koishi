@@ -28,7 +28,7 @@ def check_channel_emojis(channel, emoji):
     Returns
     -------
     """
-    if not channel.is_in_group_guild_messageable():
+    if not channel.is_in_group_guild_textual():
         return False
     
     if emoji in parse_all_emojis(channel.name):

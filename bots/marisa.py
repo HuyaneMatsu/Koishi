@@ -1,31 +1,38 @@
-import sys, re
-from random import random, choice, randint
-from time import perf_counter
+import re, sys
 from functools import partial as partial_func
+from random import choice, randint, random
+from time import perf_counter
+
+from hata import (
+    BUILTIN_EMOJIS, ButtonStyle, CHANNELS, Client, ClientWrapper, DiscordException, ERROR_CODES, Embed, GUILDS,
+    INTERACTION_RESPONSE_TYPES, InteractionResponseContext, KOKORO, MESSAGES, MessageFlag, cchunkify, parse_emoji,
+    parse_message_reference, parse_rdelta, parse_tdelta
+)
+from hata.ext.command_utils import UserMenuFactory, UserPagination
+from hata.ext.commands_v2 import CommandCooldownError, checks, cooldown
+from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
+from hata.ext.plugin_loader import PLUGINS, add_default_plugin_variables, get_plugin, reload_plugin
+from hata.ext.slash import (
+    Button, Form, InteractionResponse, Option, P, Row, Select, TextInput, abort, configure_parameter, set_permission,
+    wait_for_component_interaction
+)
+from hata.ext.slash.menus import Pagination
+from scarletio import alchemy_incendiary, catching, render_exception_into_async, sleep
+from scarletio.utils.trace import render_exception_into
+
+from bot_utils.constants import (
+    CHANNEL__SUPPORT__DEFAULT_TEST, COLOR__MARISA_HELP, GUILD__SUPPORT, ROLE__SUPPORT__TESTER
+)
+from bot_utils.interpreter_v2 import Interpreter
+from bot_utils.syncer import sync_request_command
+from bot_utils.utils import command_error
+
 
 try:
     import watchdog
 except ImportError:
     watchdog = None
 
-from hata import Embed, Client, KOKORO, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, CHANNELS, MESSAGES, \
-    parse_message_reference, parse_emoji, parse_rdelta, parse_tdelta, cchunkify, ClientWrapper, GUILDS, \
-    ButtonStyle, INTERACTION_RESPONSE_TYPES, MessageFlag, InteractionResponseContext
-from scarletio import sleep, alchemy_incendiary, render_exception_into_async
-from hata.ext.slash import InteractionResponse, abort, set_permission, Form, TextInput, \
-    wait_for_component_interaction, Button, Row, configure_parameter, Select, Option, P
-from scarletio.utils.trace import render_exception_into
-from hata.ext.command_utils import UserMenuFactory, UserPagination
-from hata.ext.slash.menus import Pagination
-from hata.ext.commands_v2 import checks, cooldown, CommandCooldownError
-from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
-from hata.ext.plugin_loader import get_plugin, reload_plugin, PLUGINS, add_default_plugin_variables
-
-from bot_utils.constants import COLOR__MARISA_HELP, GUILD__SUPPORT, CHANNEL__SUPPORT__DEFAULT_TEST, \
-    ROLE__SUPPORT__TESTER
-from bot_utils.utils import command_error
-from bot_utils.syncer import sync_request_command
-from bot_utils.interpreter_v2 import Interpreter
 
 Marisa: Client
 
@@ -1523,13 +1530,14 @@ if (watchdog is not None):
     
     class WatchEventHandler:
         def dispatch(self, event):
-            extension = get_plugin(event.src_path)
-            if (extension is not None) and (not extension.locked):
-                try:
-                    reload_plugin(extension.name)
-                except ModuleNotFoundError:
-                    # File probably deleted
-                    pass
+            with catching():
+                extension = get_plugin(event.src_path)
+                if (extension is not None) and (not extension.locked):
+                    try:
+                        reload_plugin(extension.name)
+                    except ModuleNotFoundError:
+                        # File probably deleted
+                        pass
     
     @Marisa.events
     async def launch(client):

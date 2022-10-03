@@ -46,8 +46,12 @@ def markdown_name_to_title(name):
 
 
 def find_markdowns():
-    for name in list_directory(TOPICS_FOLDER):
-        
+    try:
+        names = list_directory(TOPICS_FOLDER)
+    except FileNotFoundError:
+        return
+    
+    for name in names:
         case_fold_name = name.casefold()
         if not name.endswith('.md'):
             continue

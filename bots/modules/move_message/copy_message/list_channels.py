@@ -41,7 +41,7 @@ def collect_emojis_to_channels(client, guild):
     emojis_to_channels = {}
     
     for channel in guild.channels.values():
-        if not channel.is_in_group_guild_messageable():
+        if not channel.is_in_group_guild_textual():
             continue
     
         if not channel.cached_permissions_for(client).can_manage_webhooks:

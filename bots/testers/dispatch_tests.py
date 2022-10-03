@@ -393,7 +393,7 @@ class dispatch_tester:
         await Pagination(client, self.channel, pages, timeout=120.)
 
     @classmethod
-    async def channel_delete(self, client,channel, guild):
+    async def channel_delete(self, client, channel, guild):
         Task(self.old_events['channel_delete'](client,channel, guild), KOKORO)
         if self.channel is None:
             return

@@ -578,7 +578,6 @@ async def permission_overwrite_create(client,channel,target,allow,deny,):
     else:
         raise TypeError(f'Target expected to be Role or User type, got {type(target)!r}')
     data = {
-        'target':target.id,
         'allow':allow,
         'deny':deny,
         'type':type_,
@@ -588,8 +587,7 @@ async def permission_overwrite_create(client,channel,target,allow,deny,):
     await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/permissions/{overwrite_id}',
         data,)
-    
-    return PermissionOverwrite.custom(target,allow,deny)
+
 
 async def permission_overwrite_delete(client,channel,overwrite,):
     channel_id=channel.id
@@ -719,7 +717,7 @@ async def guild_create(client,name,icon=None,avatar=b'',
         'explicit_content_filter'       : content_filter_level.value,
         'roles'                         : roles,
         'channels'                      : channels,
-            }
+    }
 
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds',
@@ -1169,7 +1167,7 @@ async def channel_create(client, guild, name, category=None, type_=0):
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         data,)
-    return Channel(data, client, guild_id)
+    return Channel.from_data(data, client, guild_id)
 
 async def emoji_guild_get_all(client, guild,):
     guild_id=guild.id
@@ -3191,7 +3189,7 @@ async def rate_limit_test_0025(client,message):
             if channel is channel_1:
                 continue
             
-            if not channel.is_in_group_guild_main_text():
+            if not channel.is_in_group_guild_system():
                 continue
             
             channel_2 = channel

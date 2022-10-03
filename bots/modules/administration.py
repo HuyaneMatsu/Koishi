@@ -71,7 +71,7 @@ async def clear(client, event,
     else:
         delta = parse_rdelta(after)
         if delta is None:
-            yield Embed('Error', '`after` could not be parsed.')
+            abort('`before` could not be parsed.')
         
         after = datetime_to_id(datetime.utcnow() - delta)
     
@@ -277,7 +277,7 @@ async def invites_(client, event,
     if (client.get_guild_profile_for(guild) is None):
         abort('I must be in the guild to execute the command.')
     
-    if (channel is not None) and (not channel.is_in_group_can_create_invite_to()):
+    if (channel is not None) and (not channel.is_in_group_invitable()):
         abort('Cannot create invite to the selected channel.')
     
     if not event.channel.cached_permissions_for(client) & PERMISSION_MASK_MESSAGING:

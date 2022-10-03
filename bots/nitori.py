@@ -542,12 +542,12 @@ async def thread_channel_name_length(
 # command end
 # command start slash voice-channel-name-length
 
-from hata import CHANNEL_TYPES
+from hata import ChannelType
 from hata.ext.slash import P
 
 @Nitori.interactions(guild=TEST_GUILD)
 async def voice_channel_name_length(
-    channel: P('channel', 'Select a voice channel', channel_types=[CHANNEL_TYPES.guild_voice])
+    channel: P('channel', 'Select a voice channel', channel_types=[ChannelType.guild_voice])
 ):
     """Returns the selected voice channel's name's length."""
     return len(channel.name)
@@ -1885,7 +1885,7 @@ async def show_emoji(
 # command start typing-interactions text-channel-name-length
 
 @Nitori.interactions(guild=TEST_GUILD)
-@configure_parameter('channel', 'channel', 'Select a text channel', channel_types=[CHANNEL_TYPES.guild_text])
+@configure_parameter('channel', 'channel', 'Select a text channel', channel_types=[ChannelType.guild_text])
 async def text_channel_name_length(
     channel: Channel
 ):

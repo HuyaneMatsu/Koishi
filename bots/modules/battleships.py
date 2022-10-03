@@ -846,9 +846,10 @@ async def bs_description(command_context):
             'Guild only!')
 
 COMMAND_CLIENT: Client
-COMMAND_CLIENT.commands(battle_manager,
-    name='bs',
-    checks=checks.guild_only(),
-    category='GAMES',
-    description=bs_description,
-        )
+COMMAND_CLIENT.commands(
+    battle_manager,
+    name = 'bs',
+    checks = checks.guild_only(),
+    category = 'GAMES',
+    description = bs_description,
+)

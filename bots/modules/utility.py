@@ -7,7 +7,7 @@ from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
 from random import choice
 
-from hata import Color, Embed, Client, DiscordException, now_as_id, parse_emoji, CHANNEL_TYPES, GuildFeature, \
+from hata import Color, Embed, Client, DiscordException, now_as_id, GuildFeature, \
     elapsed_time, Status, BUILTIN_EMOJIS, id_to_datetime, ERROR_CODES, cchunkify, ICON_TYPE_NONE, KOKORO, \
     DATETIME_FORMAT_CODE, parse_color, Permission, escape_markdown
 from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
@@ -967,7 +967,7 @@ async def create_activity(
                 pass
             else:
                 channel = voice_state.channel
-                if channel.type == CHANNEL_TYPES.guild_voice:
+                if channel.is_guild_voice():
                     break
         
         abort('Please give a voice channel or be in one.')

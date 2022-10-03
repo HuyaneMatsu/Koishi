@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import Embed, Client, elapsed_time, ICON_TYPE_NONE, DATETIME_FORMAT_CODE, BUILTIN_EMOJIS, CHANNEL_TYPES
+from hata import Embed, Client, elapsed_time, ICON_TYPE_NONE, DATETIME_FORMAT_CODE, BUILTIN_EMOJIS, ChannelType
 from hata.ext.slash import abort
 
 
@@ -11,12 +11,12 @@ EMOJI_HEART_GIFT = BUILTIN_EMOJIS['gift_heart']
 
 
 CHANNEL_TYPES_AND_NAMES = (
-    (CHANNEL_TYPES.guild_text, 'Text'),
-    (CHANNEL_TYPES.guild_announcements, 'Announcements'),
-    (CHANNEL_TYPES.guild_voice, 'Voice'),
-    (CHANNEL_TYPES.guild_stage, 'Stage'),
-    (CHANNEL_TYPES.guild_category, 'Category'),
-    (CHANNEL_TYPES.guild_forum, 'Forum'),
+    (ChannelType.guild_text, 'Text'),
+    (ChannelType.guild_announcements, 'Announcements'),
+    (ChannelType.guild_voice, 'Voice'),
+    (ChannelType.guild_stage, 'Stage'),
+    (ChannelType.guild_category, 'Category'),
+    (ChannelType.guild_forum, 'Forum'),
 )
 
 

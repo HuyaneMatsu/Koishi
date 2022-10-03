@@ -1,6 +1,8 @@
+from .image_handling import *
 from .log import *
-from .waifu_wars import *
+from .move_message import *
 from .snipe import *
+from .waifu_wars import *
 
 from .accessibility import *
 from .administration import *
@@ -10,7 +12,6 @@ from .auto_welcome import *
 from .automod import *
 from .baka_ball import *
 from .battleships import *
-from .booru import *
 from .bot_guild_filter import *
 from .bozosort import *
 from .channel_names import *
@@ -37,9 +38,7 @@ from .lucky_spin import *
 from .marriage import *
 from .marriage_slot import *
 from .memes import *
-from .move_message import *
 from .oauth2 import *
-from .pocky_kiss import *
 from .role_info import *
 from .self_moderation import *
 from .stats import *
@@ -50,9 +49,7 @@ from .touhou_wiki import *
 from .transfer import *
 from .urban import *
 from .utility import *
-from .vocaloid import *
 from .voice import *
-from .waifu import *
 from .welcome import *
 from .xox import *
 

@@ -93,18 +93,20 @@ class CooldownHandler:
         else:
             if notification.channel is message.channel:
                 try:
-                    await client.message_edit(notification,
-                        f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
+                    await client.message_edit(
+                        notification,
+                        f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!',
+                    )
                 except BaseException as err:
                     if isinstance(err, ConnectionError):
                         return
                     
                     if isinstance(err, DiscordException):
                         if err.code in (
-                                ERROR_CODES.unknown_message, # message deleted
-                                ERROR_CODES.unknown_channel, # channel deleted
-                                ERROR_CODES.missing_access, # client removed
-                                    ):
+                            ERROR_CODES.unknown_message, # message deleted
+                            ERROR_CODES.unknown_channel, # channel deleted
+                            ERROR_CODES.missing_access, # client removed
+                        ):
                             return
                     
                     await client.events.error(client, f'{self!r}.__call__', err)
@@ -114,20 +116,22 @@ class CooldownHandler:
             waiter.cancel()
         
         try:
-            notification = await client.message_create(message.channel,
-                f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!')
+            notification = await client.message_create(
+                message.channel,
+                f'**{message.author:f}** please cool down, {time_left:.0f} seconds left!',
+            )
         except BaseException as err:
             if isinstance(err, ConnectionError):
                 return
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.missing_access, # client removed
-                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                        ERROR_CODES.cannot_message_user, # user has dm-s disallowed
-                            ):
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.unknown_channel, # message's channel deleted
+                    ERROR_CODES.missing_access, # client removed
+                    ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ERROR_CODES.cannot_message_user, # user has dm-s disallowed
+                ):
                     return
             
             await client.events.error(client, f'{self!r}.__call__', err)
@@ -152,10 +156,10 @@ class CooldownHandler:
             
             if isinstance(err, DiscordException):
                 if err.code in (
-                        ERROR_CODES.unknown_channel, # message's channel deleted
-                        ERROR_CODES.unknown_message, # message deleted
-                        ERROR_CODES.missing_access, # client removed
-                            ):
+                    ERROR_CODES.unknown_channel, # message's channel deleted
+                    ERROR_CODES.unknown_message, # message deleted
+                    ERROR_CODES.missing_access, # client removed
+                ):
                     return
             
             await client.events.error(client, f'{self!r}.__call__', err)
