@@ -39,6 +39,7 @@ TOUHOU_TAGS_BANNED = frozenset((
     *SAFE_TAGS_BANNED,
     'comic',
     'greyscale',
+    'ronald_mcdonald',
 ))
 
 

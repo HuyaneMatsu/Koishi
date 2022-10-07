@@ -6,13 +6,13 @@ from email._parseaddr import _parsedate_tz
 from datetime import datetime, timedelta, timezone
 
 from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoModerationRule, AutoModerationAction, \
-    DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS,\
+    DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS, CHANNELS, \
     ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, Oauth2User, parse_oauth2_redirect_url, cr_pg_channel_object, Channel, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, PermissionOverwrite, Guild
+    Team, WebhookType, PermissionOverwrite, Guild, ForumTag
 from scarletio import sleep, Task, WaitTillAll, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, WaitTillExc, change_on_switch, to_json, from_json
 
@@ -81,13 +81,14 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
                 else:
                     response_data = ''
         except OSError as err:
-            #os cant handle more, need to wait for the blocking job to be done
+            # os cant handle more, need to wait for the blocking job to be done
             await sleep(0.1, self.loop)
-            #invalid address causes OSError too, but we will let it run 5 times, then raise a ConnectionError
+            # invalid address causes OSError too, but we will let it run 5 times, then raise a ConnectionError
             continue
         
         with RLTPrinterBuffer() as buffer:
             response_headers = response.headers
+            
             status = response.status
             if response_headers['content-type'].startswith('application/json'):
                 response_data = from_json(response_data)
@@ -106,10 +107,14 @@ async def bypass_request(client,method,url,data=None,params=None,reason=None,hea
             if value is not None:
                 delay = parse_header_rate_limit(response_headers)
                 buffer.write(f'reset : {value}, after {delay} seconds\n')
+            
             value = response_headers.get('X-Ratelimit-Reset-After', None)
             if value is not None:
                 buffer.write(f'reset after : {value}\n')
-    
+            
+            rate_limit_hash = response_headers.get('X-ratelimit-bucket', None)
+            if (rate_limit_hash is not None):
+                buffer.write(f'hash: {rate_limit_hash} (ignore this field)\n')
             
             if 199 < status < 305:
                 if response_headers.get('X-Ratelimit-Remaining', '1') == '0':
@@ -1156,41 +1161,51 @@ async def channel_move(client, channel, visual_position, category=..., parent= .
             data.append({'id': channel_.id,'position': position})
     
     guild_id = guild.id
-    return await bypass_request(client,METHOD_PATCH,
+    return await bypass_request(
+        client,
+        METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',data,
-        )
+    )
 
 async def channel_create(client, guild, name, category=None, type_=0):
-    data=cr_pg_channel_object(type_=type_,name=name)
+    data = Channel(channel_type = type_, name = name).to_data()
     data['parent_id'] = category.id if type(category) is Channel else None
-    guild_id=guild.id
-    data = await bypass_request(client,METHOD_POST,
+    guild_id = guild.id
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
-        data,)
+        data,
+    )
     return Channel.from_data(data, client, guild_id)
 
 async def emoji_guild_get_all(client, guild,):
-    guild_id=guild.id
-    return await bypass_request(client,METHOD_GET,
+    guild_id = guild.id
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis',
-        )
+    )
 
 async def emoji_create(client, guild, name, image,):
-    image=image_to_base64(image)
-    name=''.join(re.findall('([0-9A-Za-z_]+)',name))
-    if not (1<len(name)<33):
+    image = image_to_base64(image)
+    name = ''.join(re.findall('([0-9A-Za-z_]+)', name))
+    if not (1 < len(name) < 33):
         raise ValueError(f'The length of the name can be between 2-32, got {len(name)}')
     
     data = {
         'name'      : name,
         'image'     : image,
         'role_ids'  : []
-            }
+    }
         
-    guild_id=guild.id
-    data = await bypass_request(client,METHOD_POST,
+    guild_id = guild.id
+    data = await bypass_request(
+        client,
+        METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis',
-        data,)
+        data,
+    )
     
     return Emoji(data, guild_id)
 
@@ -1198,11 +1213,13 @@ async def emoji_get(client, emoji):
     guild = emoji.guild
     if guild is None:
         return
-    guild_id=guild.id
+    guild_id = guild.id
     emoji_id = emoji.id
-    return await bypass_request(client,METHOD_GET,
+    return await bypass_request(
+        client,
+        METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis/{emoji_id}',
-        )
+    )
 
 async def emoji_delete(client, emoji,):
     guild_id = emoji.guild.id
@@ -2545,6 +2562,38 @@ async def auto_moderation_rule_edit(client, guild_id, rule_id, rule):
 async def auto_moderation_rule_delete(client, guild_id, auto_moderation_rule_id):
     await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/auto-moderation/rules/{auto_moderation_rule_id}',
+    )
+
+
+async def forum_tag_create(client, channel_id, forum_tag):
+    data = forum_tag.to_data()
+    
+    data = await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/channels/{channel_id}/tags',
+        data,
+    )
+    
+    return ForumTag.from_data(data['available_tags'][-1])
+
+
+async def forum_tag_edit(client, channel_id, forum_tag_id, forum_tag):
+    data = forum_tag.to_data()
+    
+    await bypass_request(
+        client,
+        METHOD_PUT,
+        f'{API_ENDPOINT}/channels/{channel_id}/tags/{forum_tag_id}',
+        data,
+    )
+
+
+async def forum_tag_delete(client, channel_id, forum_tag_id):
+    await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/channels/{channel_id}/tags/{forum_tag_id}',
     )
 
 
@@ -4309,6 +4358,7 @@ async def rate_limit_test_0082(client, message, name:str, emoji:'Emoji'):
         await emoji_delete(client, emoji1)
         await emoji_delete(client, emoji2)
 
+
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0083(client, message, name:str, emoji:'Emoji'):
     """
@@ -4336,6 +4386,7 @@ async def rate_limit_test_0083(client, message, name:str, emoji:'Emoji'):
         
         await client.emoji_delete(emoji1)
         await client.emoji_delete(emoji2)
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0084(client, message, name:str, emoji:'Emoji'):
@@ -6539,3 +6590,22 @@ async def rate_limit_test_0181(client, message, guild_id:str=''):
             # await auto_moderation_rule_get_all(client, guild.id)
             await auto_moderation_rule_edit(client, guild_1.id, rule.id, rule_to_edit_to,)
             await auto_moderation_rule_delete(client, guild_1.id, rule.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0182(client, message, forum_id: str = None):
+    """
+    Adds, creates and deletes a forum tag. Please pass forum id as well.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0182') as RLT:
+        try:
+            channel = CHANNELS[int(forum_id)]
+        except (KeyError, ValueError):
+            await RLT.send('Please pass a forum id as well, where I am as well.')
+        
+        forum_tag_schema = ForumTag('hello')
+        
+        forum_tag = await forum_tag_create(client, channel.id, forum_tag_schema)
+        await forum_tag_edit(client, channel.id, forum_tag.id, forum_tag_schema.copy_with(name = 'owo'))
+        await forum_tag_delete(client, channel.id, forum_tag.id)

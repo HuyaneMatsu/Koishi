@@ -1,18 +1,21 @@
 __all__ = ()
 
 import os
-from zlib import compress, decompress
-from json import load as from_json_file, dumps as to_json, loads as from_json
+from json import dumps as to_json, load as from_json_file, loads as from_json
 from math import ceil, floor
-from scarletio import AsyncIO, Lock,  CancelledError, WaitTillAll, Task
-from hata import Emoji, Embed, Color, DiscordException, BUILTIN_EMOJIS, ERROR_CODES, Client, KOKORO
-from hata.ext.slash import abort, Row, Button, ButtonStyle, Timeouter
+from zlib import compress, decompress
 
+from hata import BUILTIN_EMOJIS, Client, Color, DiscordException, ERROR_CODES, Embed, Emoji, KOKORO
+from hata.ext.slash import Button, ButtonStyle, Row, Timeouter, abort
+from scarletio import AsyncIO, CancelledError, Lock, Task, WaitTillAll, copy_docs
 from sqlalchemy.sql import select
 
-from bot_utils.models import DB_ENGINE, DS_V2_TABLE, ds_v2_model, user_common_model, USER_COMMON_TABLE, \
-    ds_v2_result_model, DS_V2_RESULT_TABLE, get_create_common_user_expression
 from bot_utils.constants import PATH__KOISHI
+from bot_utils.models import (
+    DB_ENGINE, DS_V2_RESULT_TABLE, DS_V2_TABLE, USER_COMMON_TABLE, ds_v2_model, ds_v2_result_model,
+    get_create_common_user_expression, user_common_model
+)
+
 
 DUNGEON_SWEEPER_COLOR = Color(0xa000c4)
 DUNGEON_SWEEPER_GAMES = {}
@@ -57,85 +60,81 @@ RUNNER_STATE_VALUE_TO_NAME = {
 }
 
 
-FILE_LOCK            = Lock(KOKORO)
-FILE_NAME            = 'ds_v2.json'
-FILE_PATH            = os.path.join(PATH__KOISHI, 'library', FILE_NAME)
+FILE_LOCK                = Lock(KOKORO)
+FILE_NAME                = 'ds_v2.json'
+FILE_PATH                = os.path.join(PATH__KOISHI, 'library', FILE_NAME)
 
-EMOJI_WEST           = BUILTIN_EMOJIS['arrow_left']
-EMOJI_NORTH          = BUILTIN_EMOJIS['arrow_up']
-EMOJI_SOUTH          = BUILTIN_EMOJIS['arrow_down']
-EMOJI_EAST           = BUILTIN_EMOJIS['arrow_right']
+EMOJI_WEST               = BUILTIN_EMOJIS['arrow_left']
+EMOJI_NORTH              = BUILTIN_EMOJIS['arrow_up']
+EMOJI_SOUTH              = BUILTIN_EMOJIS['arrow_down']
+EMOJI_EAST               = BUILTIN_EMOJIS['arrow_right']
 
-EMOJI_BACK           = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
-EMOJI_RESET          = BUILTIN_EMOJIS['arrows_counterclockwise']
-EMOJI_CANCEL         = BUILTIN_EMOJIS['x']
+EMOJI_NORTH_EAST         = BUILTIN_EMOJIS['arrow_upper_right']
+EMOJI_SOUTH_EAST         = BUILTIN_EMOJIS['arrow_lower_right']
+EMOJI_SOUTH_WEST         = BUILTIN_EMOJIS['arrow_lower_left']
+EMOJI_NORTH_WEST         = BUILTIN_EMOJIS['arrow_upper_left']
 
-EMOJI_UP             = BUILTIN_EMOJIS['arrow_up_small']
-EMOJI_DOWN           = BUILTIN_EMOJIS['arrow_down_small']
-EMOJI_UP2            = BUILTIN_EMOJIS['arrow_double_up']
-EMOJI_DOWN2          = BUILTIN_EMOJIS['arrow_double_down']
-EMOJI_LEFT           = BUILTIN_EMOJIS['arrow_backward']
-EMOJI_RIGHT          = BUILTIN_EMOJIS['arrow_forward']
-EMOJI_SELECT         = BUILTIN_EMOJIS['ok']
+EMOJI_BACK               = BUILTIN_EMOJIS['leftwards_arrow_with_hook']
+EMOJI_RESET              = BUILTIN_EMOJIS['arrows_counterclockwise']
+EMOJI_CANCEL             = BUILTIN_EMOJIS['x']
 
-EMOJI_NEXT           = BUILTIN_EMOJIS['arrow_right']
-EMOJI_CLOSE          = BUILTIN_EMOJIS['x']
-EMOJI_RESTART        = BUILTIN_EMOJIS['arrows_counterclockwise']
+EMOJI_UP                 = BUILTIN_EMOJIS['arrow_up_small']
+EMOJI_DOWN               = BUILTIN_EMOJIS['arrow_down_small']
+EMOJI_UP2                = BUILTIN_EMOJIS['arrow_double_up']
+EMOJI_DOWN2              = BUILTIN_EMOJIS['arrow_double_down']
+EMOJI_LEFT               = BUILTIN_EMOJIS['arrow_backward']
+EMOJI_RIGHT              = BUILTIN_EMOJIS['arrow_forward']
+EMOJI_SELECT             = BUILTIN_EMOJIS['ok']
 
-EMOJI_NOTHING        = Emoji.precreate(568838460434284574, name='0Q')
+EMOJI_NEXT               = BUILTIN_EMOJIS['arrow_right']
+EMOJI_CLOSE              = BUILTIN_EMOJIS['x']
+EMOJI_RESTART            = BUILTIN_EMOJIS['arrows_counterclockwise']
 
-EMOJI_REIMU          = Emoji.precreate(574307645347856384, name='REIMU')
-EMOJI_FLAN           = Emoji.precreate(575387120147890210, name='FLAN')
-EMOJI_YUKARI         = Emoji.precreate(575389643424661505, name='YUKARI')
+EMOJI_NOTHING            = Emoji.precreate(568838460434284574, name = '0Q')
 
-IDENTIFIER_UP        = '1'
-IDENTIFIER_DOWN      = '2'
-IDENTIFIER_UP2       = '3'
-IDENTIFIER_DOWN2     = '4'
-IDENTIFIER_RIGHT     = '5'
-IDENTIFIER_LEFT      = '6'
-IDENTIFIER_SELECT    = '7'
+EMOJI_REIMU              = Emoji.precreate(574307645347856384, name = 'REIMU')
+EMOJI_FLAN               = Emoji.precreate(575387120147890210, name = 'FLAN')
+EMOJI_YUKARI             = Emoji.precreate(575389643424661505, name = 'YUKARI')
 
-IDENTIFIER_WEST      = '8'
-IDENTIFIER_NORTH     = '9'
-IDENTIFIER_SOUTH     = 'A'
-IDENTIFIER_EAST      = 'B'
+CUSTOM_ID_BASE          = 'ds.game.'
 
-IDENTIFIER_BACK      = 'C'
-IDENTIFIER_RESET     = 'D'
-IDENTIFIER_CANCEL    = 'E'
+CUSTOM_ID_UP            = CUSTOM_ID_BASE + '1'
+CUSTOM_ID_DOWN          = CUSTOM_ID_BASE + '2'
+CUSTOM_ID_UP2           = CUSTOM_ID_BASE + '3'
+CUSTOM_ID_DOWN2         = CUSTOM_ID_BASE + '4'
+CUSTOM_ID_RIGHT         = CUSTOM_ID_BASE + '5'
+CUSTOM_ID_LEFT          = CUSTOM_ID_BASE + '6'
+CUSTOM_ID_SELECT        = CUSTOM_ID_BASE + '7'
 
-IDENTIFIER_NEXT      = 'F'
-IDENTIFIER_CLOSE     = 'G'
-IDENTIFIER_RESTART   = 'H'
+CUSTOM_ID_WEST          = CUSTOM_ID_BASE + '8'
+CUSTOM_ID_NORTH         = CUSTOM_ID_BASE + '9'
+CUSTOM_ID_SOUTH         = CUSTOM_ID_BASE + 'A'
+CUSTOM_ID_EAST          = CUSTOM_ID_BASE + 'B'
 
-IDENTIFIER_EMPTY_1   = 'I'
-IDENTIFIER_EMPTY_2   = 'J'
-IDENTIFIER_EMPTY_3   = 'K'
-IDENTIFIER_EMPTY_4   = 'L'
-IDENTIFIER_SKILL     = '0'
+CUSTOM_ID_BACK          = CUSTOM_ID_BASE + 'C'
+CUSTOM_ID_RESET         = CUSTOM_ID_BASE + 'D'
+CUSTOM_ID_CANCEL        = CUSTOM_ID_BASE + 'E'
 
+CUSTOM_ID_NEXT          = CUSTOM_ID_BASE + 'F'
+CUSTOM_ID_CLOSE         = CUSTOM_ID_BASE + 'G'
+CUSTOM_ID_RESTART       = CUSTOM_ID_BASE + 'H'
 
-IDENTIFIERS = frozenset((
-    IDENTIFIER_UP,
-    IDENTIFIER_DOWN,
-    IDENTIFIER_UP2,
-    IDENTIFIER_DOWN2,
-    IDENTIFIER_LEFT,
-    IDENTIFIER_SELECT,
-    IDENTIFIER_WEST,
-    IDENTIFIER_NORTH,
-    IDENTIFIER_SOUTH,
-    IDENTIFIER_EAST,
-    IDENTIFIER_BACK,
-    IDENTIFIER_RESET,
-    IDENTIFIER_CANCEL,
-    IDENTIFIER_EMPTY_1,
-    IDENTIFIER_EMPTY_2,
-    IDENTIFIER_EMPTY_3,
-    IDENTIFIER_EMPTY_4,
-    IDENTIFIER_SKILL,
-))
+CUSTOM_ID_EMPTY_1       = CUSTOM_ID_BASE + 'I'
+CUSTOM_ID_EMPTY_2       = CUSTOM_ID_BASE + 'J'
+CUSTOM_ID_EMPTY_3       = CUSTOM_ID_BASE + 'K'
+CUSTOM_ID_EMPTY_4       = CUSTOM_ID_BASE + 'L'
+
+CUSTOM_ID_NORTH_TO_EAST = CUSTOM_ID_BASE + 'M'
+CUSTOM_ID_NORTH_TO_WEST = CUSTOM_ID_BASE + 'N'
+CUSTOM_ID_SOUTH_TO_EAST = CUSTOM_ID_BASE + 'O'
+CUSTOM_ID_SOUTH_TO_WEST = CUSTOM_ID_BASE + 'P'
+
+CUSTOM_ID_EAST_TO_NORTH = CUSTOM_ID_BASE + 'Q'
+CUSTOM_ID_EAST_TO_SOUTH = CUSTOM_ID_BASE + 'R'
+CUSTOM_ID_WEST_TO_NORTH = CUSTOM_ID_BASE + 'S'
+CUSTOM_ID_WEST_TO_SOUTH = CUSTOM_ID_BASE + 'T'
+
+CUSTOM_ID_SKILL         = CUSTOM_ID_BASE + '0'
 
 BIT_MASK_PASSABLE    = 0b0000000000000111
 
@@ -200,112 +199,115 @@ BIT_MASK_UNPUSHABLE  = BIT_MASK_WALL | BIT_MASK_SPECIAL
 BIT_MASK_BLOCKS_LOS  = BIT_MASK_WALL | BIT_MASK_PUSHABLE | BIT_MASK_OBJECT_U
 
 STYLE_DEFAULT_PARTS = {
-    BIT_MASK_NOTHING                    : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_WALL_E                     : Emoji.precreate(568838488464687169, name='0P').as_emoji,
-    BIT_MASK_WALL_S                     : Emoji.precreate(568838546853462035, name='0N').as_emoji,
-    BIT_MASK_WALL_W                     : Emoji.precreate(568838580278132746, name='0K').as_emoji,
-    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W:
-                                          Emoji.precreate(578678249518006272, name='0X').as_emoji,
-    BIT_MASK_WALL_E | BIT_MASK_WALL_S     : Emoji.precreate(568838557318250499, name='0M').as_emoji,
-    BIT_MASK_WALL_S | BIT_MASK_WALL_W     : Emoji.precreate(568838569087598627, name='0L').as_emoji,
-    BIT_MASK_WALL_N | BIT_MASK_WALL_E     : Emoji.precreate(574312331849498624, name='01').as_emoji,
-    BIT_MASK_WALL_N | BIT_MASK_WALL_W     : Emoji.precreate(574312332453216256, name='00').as_emoji,
-    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S:
-                                          Emoji.precreate(578648597621506048, name='0R').as_emoji,
-    BIT_MASK_WALL_N | BIT_MASK_WALL_S | BIT_MASK_WALL_W:
-                                          Emoji.precreate(578648597546139652, name='0S').as_emoji,
-    BIT_MASK_WALL_N | BIT_MASK_WALL_S     : Emoji.precreate(578654051848421406, name='0T').as_emoji,
-    BIT_MASK_WALL_E | BIT_MASK_WALL_W     : Emoji.precreate(578674409968238613, name='0U').as_emoji,
-    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_W:
-                                          Emoji.precreate(578676096829227027, name='0V').as_emoji,
-    BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W:
-                                          Emoji.precreate(578676650389274646, name='0W').as_emoji,
+    BIT_MASK_NOTHING                      : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_WALL_E                       : Emoji.precreate(568838488464687169, name = '0P').as_emoji,
+    BIT_MASK_WALL_S                       : Emoji.precreate(568838546853462035, name = '0N').as_emoji,
+    BIT_MASK_WALL_W                       : Emoji.precreate(568838580278132746, name = '0K').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W
+                                          : Emoji.precreate(578678249518006272, name = '0X').as_emoji,
+    BIT_MASK_WALL_E | BIT_MASK_WALL_S     : Emoji.precreate(568838557318250499, name = '0M').as_emoji,
+    BIT_MASK_WALL_S | BIT_MASK_WALL_W     : Emoji.precreate(568838569087598627, name = '0L').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E     : Emoji.precreate(574312331849498624, name = '01').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_W     : Emoji.precreate(574312332453216256, name = '00').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_S
+                                          : Emoji.precreate(578648597621506048, name = '0R').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_S | BIT_MASK_WALL_W
+                                          : Emoji.precreate(578648597546139652, name = '0S').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_S     : Emoji.precreate(578654051848421406, name = '0T').as_emoji,
+    BIT_MASK_WALL_E | BIT_MASK_WALL_W     : Emoji.precreate(578674409968238613, name = '0U').as_emoji,
+    BIT_MASK_WALL_N | BIT_MASK_WALL_E | BIT_MASK_WALL_W
+                                          : Emoji.precreate(578676096829227027, name = '0V').as_emoji,
+    BIT_MASK_WALL_E | BIT_MASK_WALL_S | BIT_MASK_WALL_W
+                                          : Emoji.precreate(578676650389274646, name = '0W').as_emoji,
 }
 
-STYLE_REIMU = {**STYLE_DEFAULT_PARTS,
-    BIT_MASK_WALL_N                     : Emoji.precreate(580141387631165450, name='0O').as_emoji,
-    BIT_MASK_FLOOR                      : Emoji.precreate(574211101638656010, name='0H').as_emoji,
-    BIT_MASK_TARGET                     : Emoji.precreate(574234087645249546, name='0A').as_emoji,
-    BIT_MASK_OBJECT_P                   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_HOLE_P                     : Emoji.precreate(574202754134835200, name='0I').as_emoji,
-    BIT_MASK_BOX                        : Emoji.precreate(574212211434717214, name='0G').as_emoji,
-    BIT_MASK_BOX_TARGET                 : Emoji.precreate(574213002190913536, name='0F').as_emoji,
-    BIT_MASK_BOX_HOLE                   : Emoji.precreate(574212211434717214, name='0G').as_emoji,
-    BIT_MASK_BOX_OBJECT                 : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_HOLE_U                     : Emoji.precreate(574187906642477066, name='0J').as_emoji,
-    BIT_MASK_OBJECT_U                   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(574214258871500800, name='0D').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(574213472347226114, name='0E').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(574220751662612502, name='0B').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(574218036156825629, name='0C').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(574249292496371732, name='04').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(574249292026478595, name='07').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(574249292261490690, name='06').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(574249292487720970, name='05').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(574249293662388264, name='02').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(574249291074240523, name='09').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(574249291145543681, name='08').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(574249292957614090, name='03').as_emoji,
+STYLE_REIMU = {
+    **STYLE_DEFAULT_PARTS,
+    BIT_MASK_WALL_N                       : Emoji.precreate(580141387631165450, name = '0O').as_emoji,
+    BIT_MASK_FLOOR                        : Emoji.precreate(574211101638656010, name = '0H').as_emoji,
+    BIT_MASK_TARGET                       : Emoji.precreate(574234087645249546, name = '0A').as_emoji,
+    BIT_MASK_OBJECT_P                     : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_HOLE_P                       : Emoji.precreate(574202754134835200, name = '0I').as_emoji,
+    BIT_MASK_BOX                          : Emoji.precreate(574212211434717214, name = '0G').as_emoji,
+    BIT_MASK_BOX_TARGET                   : Emoji.precreate(574213002190913536, name = '0F').as_emoji,
+    BIT_MASK_BOX_HOLE                     : Emoji.precreate(574212211434717214, name = '0G').as_emoji,
+    BIT_MASK_BOX_OBJECT                   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_HOLE_U                       : Emoji.precreate(574187906642477066, name = '0J').as_emoji,
+    BIT_MASK_OBJECT_U                     : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(574214258871500800, name = '0D').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(574213472347226114, name = '0E').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(574220751662612502, name = '0B').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(574218036156825629, name = '0C').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(574249292496371732, name = '04').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(574249292026478595, name = '07').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(574249292261490690, name = '06').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(574249292487720970, name = '05').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(574249293662388264, name = '02').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(574249291074240523, name = '09').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(574249291145543681, name = '08').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(574249292957614090, name = '03').as_emoji,
     BIT_MASK_CHAR_N | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
     BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
     BIT_MASK_CHAR_S | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
     BIT_MASK_CHAR_W | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
 }
 
-STYLE_FLAN = {**STYLE_DEFAULT_PARTS,
-    BIT_MASK_WALL_N                     : Emoji.precreate(580143707534262282, name='0X').as_emoji,
-    BIT_MASK_FLOOR                      : Emoji.precreate(580150656501940245, name='0Y').as_emoji,
-    BIT_MASK_TARGET                     : Emoji.precreate(580153111545511967, name='0b').as_emoji,
-    BIT_MASK_OBJECT_P                   : Emoji.precreate(580163014045728818, name='0e').as_emoji,
-    BIT_MASK_HOLE_P                     : Emoji.precreate(580159124466303001, name='0d').as_emoji,
-    BIT_MASK_BOX                        : Emoji.precreate(580151963937931277, name='0a').as_emoji,
-    BIT_MASK_BOX_TARGET                 : Emoji.precreate(580188214086598667, name='0f').as_emoji,
-    BIT_MASK_BOX_HOLE                   : Emoji.precreate(580151963937931277, name='0a').as_emoji,
-    BIT_MASK_BOX_OBJECT                 : Emoji.precreate(580151963937931277, name='0a').as_emoji,
-    BIT_MASK_HOLE_U                     : Emoji.precreate(580156463888990218, name='0c').as_emoji,
-    BIT_MASK_OBJECT_U                   : Emoji.precreate(580151385258065925, name='0Z').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(580357693022142485, name='0g').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(580357693093576714, name='0h').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(580357693160685578, name='0i').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(580357693152165900, name='0j').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(580357693018210305, name='0k').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(580357693085188109, name='0l').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(580357693181657089, name='0m').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(580357693361881089, name='0n').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(580357693324132352, name='0o').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(580357693072736257, name='0p').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(580357693131456513, name='0q').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(580357693366337536, name='0r').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693143777300, name='0s').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P   : Emoji.precreate(580357692711763973, name='0t').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693269606410, name='0u').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693387177984, name='0v').as_emoji,
+STYLE_FLAN = {
+    **STYLE_DEFAULT_PARTS,
+    BIT_MASK_WALL_N                       : Emoji.precreate(580143707534262282, name = '0X').as_emoji,
+    BIT_MASK_FLOOR                        : Emoji.precreate(580150656501940245, name = '0Y').as_emoji,
+    BIT_MASK_TARGET                       : Emoji.precreate(580153111545511967, name = '0b').as_emoji,
+    BIT_MASK_OBJECT_P                     : Emoji.precreate(580163014045728818, name = '0e').as_emoji,
+    BIT_MASK_HOLE_P                       : Emoji.precreate(580159124466303001, name = '0d').as_emoji,
+    BIT_MASK_BOX                          : Emoji.precreate(580151963937931277, name = '0a').as_emoji,
+    BIT_MASK_BOX_TARGET                   : Emoji.precreate(580188214086598667, name = '0f').as_emoji,
+    BIT_MASK_BOX_HOLE                     : Emoji.precreate(580151963937931277, name = '0a').as_emoji,
+    BIT_MASK_BOX_OBJECT                   : Emoji.precreate(580151963937931277, name = '0a').as_emoji,
+    BIT_MASK_HOLE_U                       : Emoji.precreate(580156463888990218, name = '0c').as_emoji,
+    BIT_MASK_OBJECT_U                     : Emoji.precreate(580151385258065925, name = '0Z').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(580357693022142485, name = '0g').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(580357693093576714, name = '0h').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(580357693160685578, name = '0i').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(580357693152165900, name = '0j').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(580357693018210305, name = '0k').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(580357693085188109, name = '0l').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(580357693181657089, name = '0m').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(580357693361881089, name = '0n').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(580357693324132352, name = '0o').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(580357693072736257, name = '0p').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(580357693131456513, name = '0q').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(580357693366337536, name = '0r').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693143777300, name = '0s').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P   : Emoji.precreate(580357692711763973, name = '0t').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693269606410, name = '0u').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_OBJECT_P   : Emoji.precreate(580357693387177984, name = '0v').as_emoji,
 }
 
-STYLE_YUKARI = {**STYLE_DEFAULT_PARTS,
-    BIT_MASK_WALL_N                     : Emoji.precreate(593179300270702593, name='0w').as_emoji,
-    BIT_MASK_FLOOR                      : Emoji.precreate(593179300426022914, name='0x').as_emoji,
-    BIT_MASK_TARGET                     : Emoji.precreate(593179300019306556, name='0y').as_emoji,
-    BIT_MASK_OBJECT_P                   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_HOLE_P                     : Emoji.precreate(593179300287479833, name='0z').as_emoji,
-    BIT_MASK_BOX                        : Emoji.precreate(593179300296130561, name='10').as_emoji,
-    BIT_MASK_BOX_TARGET                 : Emoji.precreate(593179300136615936, name='11').as_emoji,
-    BIT_MASK_BOX_HOLE                   : Emoji.precreate(593179300149067790, name='12').as_emoji,
-    BIT_MASK_BOX_OBJECT                 : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_HOLE_U                     : Emoji.precreate(593179300153262196, name='13').as_emoji,
-    BIT_MASK_OBJECT_U                   : EMOJI_NOTHING.as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(593179300161650871, name='14').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(593179300153262257, name='15').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(593179300300324887, name='16').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(593179300237410314, name='17').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(593179300207919125, name='18').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(593179300145135646, name='19').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(593179300170301451, name='1A').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(593179300153262189, name='1B').as_emoji,
-    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(593179300199399531, name='1C').as_emoji,
-    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(593179300300193800, name='1D').as_emoji,
-    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(593179300216176760, name='1E').as_emoji,
-    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(593179300153524224, name='1F').as_emoji,
+STYLE_YUKARI = {
+    **STYLE_DEFAULT_PARTS,
+    BIT_MASK_WALL_N                       : Emoji.precreate(593179300270702593, name = '0w').as_emoji,
+    BIT_MASK_FLOOR                        : Emoji.precreate(593179300426022914, name = '0x').as_emoji,
+    BIT_MASK_TARGET                       : Emoji.precreate(593179300019306556, name = '0y').as_emoji,
+    BIT_MASK_OBJECT_P                     : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_HOLE_P                       : Emoji.precreate(593179300287479833, name = '0z').as_emoji,
+    BIT_MASK_BOX                          : Emoji.precreate(593179300296130561, name = '10').as_emoji,
+    BIT_MASK_BOX_TARGET                   : Emoji.precreate(593179300136615936, name = '11').as_emoji,
+    BIT_MASK_BOX_HOLE                     : Emoji.precreate(593179300149067790, name = '12').as_emoji,
+    BIT_MASK_BOX_OBJECT                   : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_HOLE_U                       : Emoji.precreate(593179300153262196, name = '13').as_emoji,
+    BIT_MASK_OBJECT_U                     : EMOJI_NOTHING.as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_FLOOR      : Emoji.precreate(593179300161650871, name = '14').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_FLOOR      : Emoji.precreate(593179300153262257, name = '15').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_FLOOR      : Emoji.precreate(593179300300324887, name = '16').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_FLOOR      : Emoji.precreate(593179300237410314, name = '17').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_TARGET     : Emoji.precreate(593179300207919125, name = '18').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_TARGET     : Emoji.precreate(593179300145135646, name = '19').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_TARGET     : Emoji.precreate(593179300170301451, name = '1A').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_TARGET     : Emoji.precreate(593179300153262189, name = '1B').as_emoji,
+    BIT_MASK_CHAR_N | BIT_MASK_HOLE_P     : Emoji.precreate(593179300199399531, name = '1C').as_emoji,
+    BIT_MASK_CHAR_E | BIT_MASK_HOLE_P     : Emoji.precreate(593179300300193800, name = '1D').as_emoji,
+    BIT_MASK_CHAR_S | BIT_MASK_HOLE_P     : Emoji.precreate(593179300216176760, name = '1E').as_emoji,
+    BIT_MASK_CHAR_W | BIT_MASK_HOLE_P     : Emoji.precreate(593179300153524224, name = '1F').as_emoji,
     BIT_MASK_CHAR_N | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
     BIT_MASK_CHAR_E | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
     BIT_MASK_CHAR_S | BIT_MASK_OBJECT_P   : EMOJI_NOTHING.as_emoji,
@@ -392,195 +394,213 @@ RULES_HELP = Embed(
 
 BUTTON_UP_ENABLED = Button(
     emoji = EMOJI_UP,
-    custom_id = IDENTIFIER_UP,
+    custom_id = CUSTOM_ID_UP,
     style = ButtonStyle.blue,
 )
 
-BUTTON_UP_DISABLED = BUTTON_UP_ENABLED.copy()
-BUTTON_UP_DISABLED.enabled = False
+BUTTON_UP_DISABLED = BUTTON_UP_ENABLED.copy_with(enabled = False)
 
 BUTTON_DOWN_ENABLED = Button(
     emoji = EMOJI_DOWN,
-    custom_id = IDENTIFIER_DOWN,
+    custom_id = CUSTOM_ID_DOWN,
     style = ButtonStyle.blue,
 )
 
-BUTTON_DOWN_DISABLED = BUTTON_DOWN_ENABLED.copy()
-BUTTON_DOWN_DISABLED.enabled = False
+BUTTON_DOWN_DISABLED = BUTTON_DOWN_ENABLED.copy_with(enabled = False)
 
 BUTTON_UP2_ENABLED = Button(
     emoji = EMOJI_UP2,
-    custom_id = IDENTIFIER_UP2,
+    custom_id = CUSTOM_ID_UP2,
     style = ButtonStyle.blue,
 )
 
-BUTTON_UP2_DISABLED = BUTTON_UP2_ENABLED.copy()
-BUTTON_UP2_DISABLED.enabled = False
+BUTTON_UP2_DISABLED = BUTTON_UP2_ENABLED.copy_with(enabled = False)
 
 BUTTON_DOWN2_ENABLED = Button(
     emoji = EMOJI_DOWN2,
-    custom_id = IDENTIFIER_DOWN2,
+    custom_id = CUSTOM_ID_DOWN2,
     style = ButtonStyle.blue,
 )
 
-BUTTON_DOWN2_DISABLED = BUTTON_DOWN2_ENABLED.copy()
-BUTTON_DOWN2_DISABLED.enabled = False
+BUTTON_DOWN2_DISABLED = BUTTON_DOWN2_ENABLED.copy_with(enabled = False)
 
 BUTTON_LEFT_ENABLED = Button(
     emoji = EMOJI_LEFT,
-    custom_id = IDENTIFIER_LEFT,
+    custom_id = CUSTOM_ID_LEFT,
     style = ButtonStyle.blue,
 )
 
-BUTTON_LEFT_DISABLED = BUTTON_LEFT_ENABLED.copy()
-BUTTON_LEFT_DISABLED.enabled = False
+BUTTON_LEFT_DISABLED = BUTTON_LEFT_ENABLED.copy_with(enabled = False)
 
 BUTTON_RIGHT_ENABLED = Button(
     emoji = EMOJI_RIGHT,
-    custom_id = IDENTIFIER_RIGHT,
+    custom_id = CUSTOM_ID_RIGHT,
     style = ButtonStyle.blue,
 )
 
-BUTTON_RIGHT_DISABLED = BUTTON_RIGHT_ENABLED.copy()
-BUTTON_RIGHT_DISABLED.enabled = False
+BUTTON_RIGHT_DISABLED = BUTTON_RIGHT_ENABLED.copy_with(enabled = False)
 
 BUTTON_SELECT_ENABLED = Button(
     emoji = EMOJI_SELECT,
-    custom_id = IDENTIFIER_SELECT,
+    custom_id = CUSTOM_ID_SELECT,
     style = ButtonStyle.green,
 )
 
-BUTTON_SELECT_DISABLED = BUTTON_SELECT_ENABLED.copy()
-BUTTON_SELECT_DISABLED.enabled = False
+BUTTON_SELECT_DISABLED = BUTTON_SELECT_ENABLED.copy_with(enabled = False)
 
 BUTTON_EMPTY_1 = Button(
     emoji = EMOJI_NOTHING,
-    custom_id = IDENTIFIER_EMPTY_1,
+    custom_id = CUSTOM_ID_EMPTY_1,
     style = ButtonStyle.gray,
     enabled = False,
 )
 
-BUTTON_EMPTY_2 = BUTTON_EMPTY_1.copy_with(custom_id=IDENTIFIER_EMPTY_2)
-BUTTON_EMPTY_3 = BUTTON_EMPTY_1.copy_with(custom_id=IDENTIFIER_EMPTY_3)
-BUTTON_EMPTY_4 = BUTTON_EMPTY_1.copy_with(custom_id=IDENTIFIER_EMPTY_4)
+BUTTON_EMPTY_2 = BUTTON_EMPTY_1.copy_with(custom_id = CUSTOM_ID_EMPTY_2)
+BUTTON_EMPTY_3 = BUTTON_EMPTY_1.copy_with(custom_id = CUSTOM_ID_EMPTY_3)
+BUTTON_EMPTY_4 = BUTTON_EMPTY_1.copy_with(custom_id = CUSTOM_ID_EMPTY_4)
 
 BUTTON_SKILL_REIMU_ENABLED = Button(
     emoji = EMOJI_REIMU,
-    custom_id = IDENTIFIER_SKILL,
+    custom_id = CUSTOM_ID_SKILL,
     style = ButtonStyle.blue,
 )
 
-BUTTON_SKILL_REIMU_DISABLED = BUTTON_SKILL_REIMU_ENABLED.copy()
-BUTTON_SKILL_REIMU_DISABLED.enabled = False
-
-BUTTON_SKILL_REIMU_USED = BUTTON_SKILL_REIMU_DISABLED.copy()
-BUTTON_SKILL_REIMU_USED.style = ButtonStyle.gray
-
-BUTTON_SKILL_REIMU_ACTIVATED = BUTTON_SKILL_REIMU_ENABLED.copy()
-BUTTON_SKILL_REIMU_ACTIVATED.style = ButtonStyle.green
-
-BUTTON_SKILL_FLAN_ENABLED = BUTTON_SKILL_REIMU_ENABLED.copy()
-BUTTON_SKILL_FLAN_ENABLED.emoji = EMOJI_FLAN
-
-BUTTON_SKILL_FLAN_DISABLED = BUTTON_SKILL_FLAN_ENABLED.copy()
-BUTTON_SKILL_FLAN_DISABLED.enabled = False
-
-BUTTON_SKILL_FLAN_USED = BUTTON_SKILL_FLAN_DISABLED.copy()
-BUTTON_SKILL_FLAN_USED.style = ButtonStyle.gray
-
-BUTTON_SKILL_FLAN_ACTIVATED = BUTTON_SKILL_FLAN_ENABLED.copy()
-BUTTON_SKILL_FLAN_ACTIVATED.style = ButtonStyle.green
-
-BUTTON_SKILL_YUKARI_ENABLED = BUTTON_SKILL_REIMU_ENABLED.copy()
-BUTTON_SKILL_YUKARI_ENABLED.emoji = EMOJI_YUKARI
-
-BUTTON_SKILL_YUKARI_DISABLED = BUTTON_SKILL_YUKARI_ENABLED.copy()
-BUTTON_SKILL_YUKARI_DISABLED.enabled = False
-
-BUTTON_SKILL_YUKARI_USED = BUTTON_SKILL_YUKARI_DISABLED.copy()
-BUTTON_SKILL_YUKARI_USED.style = ButtonStyle.gray
-
-BUTTON_SKILL_YUKARI_ACTIVATED = BUTTON_SKILL_YUKARI_ENABLED.copy()
-BUTTON_SKILL_YUKARI_ACTIVATED.style = ButtonStyle.green
+BUTTON_SKILL_REIMU_DISABLED = BUTTON_SKILL_REIMU_ENABLED.copy_with(enabled = False)
+BUTTON_SKILL_REIMU_USED = BUTTON_SKILL_REIMU_DISABLED.copy_with(style = ButtonStyle.gray)
+BUTTON_SKILL_REIMU_ACTIVATED = BUTTON_SKILL_REIMU_ENABLED.copy_with(style = ButtonStyle.green)
+BUTTON_SKILL_FLAN_ENABLED = BUTTON_SKILL_REIMU_ENABLED.copy_with(emoji = EMOJI_FLAN)
+BUTTON_SKILL_FLAN_DISABLED = BUTTON_SKILL_FLAN_ENABLED.copy_with(enabled = False)
+BUTTON_SKILL_FLAN_USED = BUTTON_SKILL_FLAN_DISABLED.copy_with(style = ButtonStyle.gray)
+BUTTON_SKILL_FLAN_ACTIVATED = BUTTON_SKILL_FLAN_ENABLED.copy_with(style = ButtonStyle.green)
+BUTTON_SKILL_YUKARI_ENABLED = BUTTON_SKILL_REIMU_ENABLED.copy_with(emoji = EMOJI_YUKARI)
+BUTTON_SKILL_YUKARI_DISABLED = BUTTON_SKILL_YUKARI_ENABLED.copy_with(enabled = False)
+BUTTON_SKILL_YUKARI_USED = BUTTON_SKILL_YUKARI_DISABLED.copy_with(style = ButtonStyle.gray)
+BUTTON_SKILL_YUKARI_ACTIVATED = BUTTON_SKILL_YUKARI_ENABLED.copy_with(style = ButtonStyle.green)
 
 BUTTON_WEST_ENABLED = Button(
     emoji = EMOJI_WEST,
-    custom_id = IDENTIFIER_WEST,
+    custom_id = CUSTOM_ID_WEST,
     style = ButtonStyle.blue,
 )
 
-BUTTON_WEST_DISABLED = BUTTON_WEST_ENABLED.copy()
-BUTTON_WEST_DISABLED.enabled = False
+BUTTON_WEST_DISABLED = BUTTON_WEST_ENABLED.copy_with(enabled = False)
 
 BUTTON_NORTH_ENABLED = Button(
     emoji = EMOJI_NORTH,
-    custom_id = IDENTIFIER_NORTH,
+    custom_id = CUSTOM_ID_NORTH,
     style = ButtonStyle.blue,
 )
 
-BUTTON_NORTH_DISABLED = BUTTON_NORTH_ENABLED.copy()
-BUTTON_NORTH_DISABLED.enabled = False
+BUTTON_NORTH_DISABLED = BUTTON_NORTH_ENABLED.copy_with(enabled = False)
 
 BUTTON_SOUTH_ENABLED = Button(
     emoji = EMOJI_SOUTH,
-    custom_id = IDENTIFIER_SOUTH,
+    custom_id = CUSTOM_ID_SOUTH,
     style = ButtonStyle.blue,
 )
 
-BUTTON_SOUTH_DISABLED = BUTTON_SOUTH_ENABLED.copy()
-BUTTON_SOUTH_DISABLED.enabled = False
+BUTTON_SOUTH_DISABLED = BUTTON_SOUTH_ENABLED.copy_with(enabled = False)
 
 BUTTON_EAST_ENABLED = Button(
     emoji = EMOJI_EAST,
-    custom_id = IDENTIFIER_EAST,
+    custom_id = CUSTOM_ID_EAST,
     style = ButtonStyle.blue,
 )
 
-BUTTON_EAST_DISABLED = BUTTON_EAST_ENABLED.copy()
-BUTTON_EAST_DISABLED.enabled = False
+BUTTON_EAST_DISABLED = BUTTON_EAST_ENABLED.copy_with(enabled = False)
+
+BUTTON_NORTH_TO_EAST_ENABLED = Button(
+    emoji = EMOJI_NORTH_EAST,
+    custom_id = CUSTOM_ID_NORTH_TO_EAST,
+    style = ButtonStyle.blue,
+)
+
+BUTTON_EAST_TO_NORTH_ENABLED = BUTTON_NORTH_TO_EAST_ENABLED.copy_with(custom_id = CUSTOM_ID_EAST_TO_NORTH)
+
+BUTTON_NORTH_EAST_DISABLED = BUTTON_NORTH_TO_EAST_ENABLED.copy_with(
+    custom_id = CUSTOM_ID_EMPTY_1,
+    enabled = False,
+)
+
+BUTTON_NORTH_TO_WEST_ENABLED = Button(
+    emoji = EMOJI_NORTH_WEST,
+    custom_id = CUSTOM_ID_NORTH_TO_WEST,
+    style = ButtonStyle.blue,
+)
+
+BUTTON_WEST_TO_NORTH_ENABLED = BUTTON_NORTH_TO_WEST_ENABLED.copy_with(custom_id = CUSTOM_ID_WEST_TO_NORTH)
+
+BUTTON_NORTH_WEST_DISABLED = BUTTON_NORTH_TO_WEST_ENABLED.copy_with(
+    custom_id = CUSTOM_ID_EMPTY_2,
+    enabled = False,
+)
+
+
+BUTTON_SOUTH_TO_EAST_ENABLED = Button(
+    emoji = EMOJI_SOUTH_EAST,
+    custom_id = CUSTOM_ID_SOUTH_TO_EAST,
+    style = ButtonStyle.blue,
+)
+
+BUTTON_EAST_TO_SOUTH_ENABLED = BUTTON_SOUTH_TO_EAST_ENABLED.copy_with(custom_id = CUSTOM_ID_EAST_TO_SOUTH)
+
+BUTTON_SOUTH_EAST_DISABLED = BUTTON_SOUTH_TO_EAST_ENABLED.copy_with(
+    custom_id = CUSTOM_ID_EMPTY_3,
+    enabled = False,
+)
+
+BUTTON_SOUTH_TO_WEST_ENABLED = Button(
+    emoji = EMOJI_SOUTH_WEST,
+    custom_id = CUSTOM_ID_SOUTH_TO_WEST,
+    style = ButtonStyle.blue,
+)
+
+BUTTON_WEST_TO_SOUTH_ENABLED = BUTTON_SOUTH_TO_WEST_ENABLED.copy_with(custom_id = CUSTOM_ID_WEST_TO_SOUTH)
+
+BUTTON_SOUTH_WEST_DISABLED = BUTTON_SOUTH_TO_WEST_ENABLED.copy_with(
+    custom_id = CUSTOM_ID_EMPTY_4,
+    enabled = False,
+)
 
 BUTTON_BACK_ENABLED = Button(
     emoji = EMOJI_BACK,
-    custom_id = IDENTIFIER_BACK,
+    custom_id = CUSTOM_ID_BACK,
     style = ButtonStyle.blue,
 )
 
-BUTTON_BACK_DISABLED = BUTTON_BACK_ENABLED.copy()
-BUTTON_BACK_DISABLED.enabled = False
+BUTTON_BACK_DISABLED = BUTTON_BACK_ENABLED.copy_with(enabled = False)
 
 BUTTON_RESET_ENABLED = Button(
     emoji = EMOJI_RESET,
-    custom_id = IDENTIFIER_RESET,
+    custom_id = CUSTOM_ID_RESET,
     style = ButtonStyle.blue,
 )
 
-BUTTON_RESET_DISABLED = BUTTON_RESET_ENABLED.copy()
-BUTTON_RESET_DISABLED.enabled = False
+BUTTON_RESET_DISABLED = BUTTON_RESET_ENABLED.copy_with(enabled = False)
 
 BUTTON_CANCEL = Button(
     emoji = EMOJI_CANCEL,
-    custom_id = IDENTIFIER_CANCEL,
+    custom_id = CUSTOM_ID_CANCEL,
     style = ButtonStyle.blue,
 )
 
 BUTTON_NEXT = Button(
     emoji = EMOJI_NEXT,
-    custom_id = IDENTIFIER_NEXT,
+    custom_id = CUSTOM_ID_NEXT,
     style = ButtonStyle.blue,
 )
 
-BUTTON_NEXT_DISABLED = BUTTON_NEXT.copy()
-BUTTON_NEXT_DISABLED.enabled = False
+BUTTON_NEXT_DISABLED = BUTTON_NEXT.copy_with(enabled = False)
 
 BUTTON_CLOSE = Button(
     emoji = EMOJI_CLOSE,
-    custom_id = IDENTIFIER_CLOSE,
+    custom_id = CUSTOM_ID_CLOSE,
     style = ButtonStyle.blue,
 )
 
 BUTTON_RESTART = Button(
     emoji = EMOJI_RESTART,
-    custom_id = IDENTIFIER_RESTART,
+    custom_id = CUSTOM_ID_RESTART,
     style = ButtonStyle.blue,
 )
 
@@ -740,28 +760,366 @@ def get_reward_difference(stage_id, steps_1, steps_2):
     return reward
 
 
-class MoveDirectories:
+MOVE_DIRECTION_NORTH = 1
+MOVE_DIRECTION_EAST = 2
+MOVE_DIRECTION_SOUTH = 3
+MOVE_DIRECTION_WEST = 4
+MOVE_DIRECTION_NORTH_TO_EAST = 5
+MOVE_DIRECTION_NORTH_TO_WEST = 6
+MOVE_DIRECTION_SOUTH_TO_EAST = 7
+MOVE_DIRECTION_SOUTH_TO_WEST = 8
+MOVE_DIRECTION_EAST_TO_NORTH = 9
+MOVE_DIRECTION_EAST_TO_SOUTH = 10
+MOVE_DIRECTION_WEST_TO_NORTH = 11
+MOVE_DIRECTION_WEST_TO_SOUTH = 12
+
+
+class MoveDirections:
     """
     Container class to store to which positions a character can move or use skill.
     
     Attributes
     ----------
-    north : `bool`
-        Whether the character can move or use skill in north directory.
-    east : `bool`
-        Whether the character can move or use skill in east directory.
-    south : `bool`
-        Whether the character can move or use skill in south directory.
-    west : `bool`
-        Whether the character can move or use skill in west directory.
+    directions : `set`
     """
-    __slots__ = ('north', 'east', 'south', 'west')
+    __slots__ = ('directions',)
+    
+    def __new__(cls):
+        """
+        Creates a new move direction holder.
+        
+        It holds to which directions the player can move.
+        """
+        self = object.__new__(cls)
+        self.directions = set()
+        return self
+    
+    
+    def _set(self, direction, value):
+        """
+        Sets the given direction identifier to the given value.
+        
+        Parameters
+        ----------
+        direction : `int`
+            The direction to set.
+        value : `bool`
+            Whether to enable the direction.
+        """
+        if value:
+            self.directions.add(direction)
+        else:
+            self.directions.discard(direction)
+    
+    
+    def _get(self, direction):
+        """
+        Gets whether the given direction is enabled.
+        
+        Parameters
+        ----------
+        direction : `int`
+            The direction to set.
+        
+        Returns
+        -------
+        value : `bool`
+        """
+        return (direction in self.directions)
+    
+    
+    def set_north(self, value):
+        """
+        Sets the `north` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_NORTH, value)
+    
+    
+    def set_east(self, value):
+        """
+        Sets the `east` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_EAST, value)
+    
+    
+    def set_south(self, value):
+        """
+        Sets the `south` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_SOUTH, value)
+    
+    
+    def set_west(self, value):
+        """
+        Sets the `west` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_WEST, value)
+    
+    
+    def set_north_to_east(self, value):
+        """
+        Sets the `north to east` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_NORTH_TO_EAST, value)
+    
+    
+    def set_north_to_west(self, value):
+        """
+        Sets the `north to west` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_NORTH_TO_WEST, value)
+    
+    
+    def set_south_to_east(self, value):
+        """
+        Sets the `south to west` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_SOUTH_TO_EAST, value)
+    
+    
+    def set_south_to_west(self, value):
+        """
+        Sets the `south to west` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_SOUTH_TO_WEST, value)
 
-SKILL_DIRECTORY_DESCRIPTORS = (
-    MoveDirectories.north.__set__,
-    MoveDirectories.east.__set__,
-    MoveDirectories.south.__set__,
-    MoveDirectories.west.__set__,
+
+    def set_east_to_north(self, value):
+        """
+        Sets the `east to north` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_EAST_TO_NORTH, value)
+    
+    
+    def set_east_to_south(self, value):
+        """
+        Sets the `east to south` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_EAST_TO_SOUTH, value)
+
+
+    def set_west_to_north(self, value):
+        """
+        Sets the `west to north` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_WEST_TO_NORTH, value)
+    
+    
+    def set_west_to_south(self, value):
+        """
+        Sets the `west to south` direction to the given value.
+        
+        Parameters
+        ----------
+        value : `bool`
+            Whether to enable the direction.
+        """
+        self._set(MOVE_DIRECTION_WEST_TO_SOUTH, value)
+    
+    
+    def get_button_north(self):
+        """
+        Gets the `north` button to show depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_NORTH):
+            button = BUTTON_NORTH_ENABLED
+        else:
+            button = BUTTON_NORTH_DISABLED
+        
+        return button
+    
+    
+    def get_button_east(self):
+        """
+        Gets the `east` button depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_EAST):
+            button = BUTTON_EAST_ENABLED
+        else:
+            button = BUTTON_EAST_DISABLED
+        
+        return button
+    
+    
+    def get_button_south(self):
+        """
+        Gets the `south` button depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_SOUTH):
+            button = BUTTON_SOUTH_ENABLED
+        else:
+            button = BUTTON_SOUTH_DISABLED
+        
+        return button
+    
+    
+    def get_button_west(self):
+        """
+        Gets the `west` button depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_WEST):
+            button = BUTTON_WEST_ENABLED
+        else:
+            button = BUTTON_WEST_DISABLED
+        
+        return button
+    
+    
+    def get_button_north_east(self):
+        """
+        gets the `north-east` button depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_NORTH_TO_EAST):
+            button = BUTTON_NORTH_TO_EAST_ENABLED
+        elif self._get(MOVE_DIRECTION_EAST_TO_NORTH):
+            button = BUTTON_EAST_TO_NORTH_ENABLED
+        else:
+            button = BUTTON_NORTH_EAST_DISABLED
+        
+        return button
+    
+    
+    def get_button_north_west(self):
+        """
+        gets the `north-west` button depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_NORTH_TO_WEST):
+            button = BUTTON_NORTH_TO_WEST_ENABLED
+        elif self._get(MOVE_DIRECTION_WEST_TO_NORTH):
+            button = BUTTON_WEST_TO_NORTH_ENABLED
+        else:
+            button = BUTTON_NORTH_WEST_DISABLED
+        
+        return button
+    
+    
+    def get_button_south_east(self):
+        """
+        gets the `south-east` button depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_SOUTH_TO_EAST):
+            button = BUTTON_SOUTH_TO_EAST_ENABLED
+        elif self._get(MOVE_DIRECTION_EAST_TO_SOUTH):
+            button = BUTTON_EAST_TO_SOUTH_ENABLED
+        else:
+            button = BUTTON_SOUTH_EAST_DISABLED
+        
+        return button
+    
+    
+    def get_button_south_west(self):
+        """
+        gets the `south-west` button depending which directions are allowed.
+        
+        Returns
+        -------
+        button : ``ComponentButton``
+        """
+        if self._get(MOVE_DIRECTION_SOUTH_TO_WEST):
+            button = BUTTON_SOUTH_TO_WEST_ENABLED
+        elif self._get(MOVE_DIRECTION_WEST_TO_SOUTH):
+            button = BUTTON_WEST_TO_SOUTH_ENABLED
+        else:
+            button = BUTTON_SOUTH_WEST_DISABLED
+        
+        return button
+
+
+DIRECTION_SETTERS_MAIN = (
+    MoveDirections.set_north,
+    MoveDirections.set_east ,
+    MoveDirections.set_south,
+    MoveDirections.set_west ,
+)
+
+DIRECTION_SETTERS_DIAGONAL = (
+    (MoveDirections.set_north_to_east, MoveDirections.set_east_to_north),
+    (MoveDirections.set_east_to_south, MoveDirections.set_south_to_east),
+    (MoveDirections.set_south_to_west, MoveDirections.set_west_to_south),
+    (MoveDirections.set_west_to_north, MoveDirections.set_north_to_west),
 )
 
 
@@ -798,9 +1156,9 @@ def REIMU_SKILL_CAN_ACTIVATE(game_state):
     return False
 
 
-def REIMU_SKILL_GET_DIRECTORIES(game_state):
+def REIMU_SKILL_GET_DIRECTIONS(game_state):
     """
-    Returns to which directories Reimu's skill could be used.
+    Returns to which directions Reimu's skill could be used.
     
     Parameters
     ----------
@@ -809,15 +1167,15 @@ def REIMU_SKILL_GET_DIRECTORIES(game_state):
     
     Returns
     -------
-    move_directories : ``MoveDirectories``
+    move_directions : ``MoveDirections``
     """
     x_size = game_state.stage.x_size
     position = game_state.position
     map_ = game_state.map
     
-    move_directories = MoveDirectories()
+    move_directions = MoveDirections()
     
-    for step, descriptor in zip(( -x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
+    for step, setter in zip((-x_size, 1, x_size, -1), DIRECTION_SETTERS_MAIN):
         target_tile = map_[position + step]
         
         if target_tile & (BIT_MASK_PUSHABLE | BIT_MASK_SPECIAL):
@@ -830,9 +1188,9 @@ def REIMU_SKILL_GET_DIRECTORIES(game_state):
         else:
             can_go_to_directory = False
         
-        descriptor(move_directories, can_go_to_directory)
+        setter(move_directions, can_go_to_directory)
     
-    return move_directories
+    return move_directions
 
 
 def REIMU_SKILL_USE(game_state, step, align):
@@ -906,9 +1264,9 @@ def FLAN_SKILL_CAN_ACTIVATE(game_state):
     return False
 
 
-def FLAN_SKILL_GET_DIRECTORIES(game_state):
+def FLAN_SKILL_GET_DIRECTIONS(game_state):
     """
-    Returns to which directories Flandre's skill could be used.
+    Returns to which directions Flandre's skill could be used.
     
     Parameters
     ----------
@@ -917,24 +1275,24 @@ def FLAN_SKILL_GET_DIRECTORIES(game_state):
     
     Returns
     -------
-    move_directories : ``MoveDirectories``
+    move_directions : ``MoveDirections``
     """
     x_size = game_state.stage.x_size
     position = game_state.position
     map_ = game_state.map
     
-    move_directories = MoveDirectories()
+    move_directions = MoveDirections()
     
-    for step, descriptor in zip(( -x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
+    for step, setter in zip((-x_size, 1, x_size, -1), DIRECTION_SETTERS_MAIN):
         target_tile = map_[position + step]
         if target_tile == BIT_MASK_OBJECT_U:
             can_go_to_directory = True
         else:
             can_go_to_directory = False
         
-        descriptor(move_directories, can_go_to_directory)
+        setter(move_directions, can_go_to_directory)
     
-    return move_directories
+    return move_directions
 
 
 def FLAN_SKILL_USE(game_state, step, align):
@@ -1000,11 +1358,11 @@ def YUKARI_SKILL_CAN_ACTIVATE(game_state):
     # y_max = x_position + (x_size*(y_size-1))
     
     for step, limit in (
-            (-x_size , -x_size                       ,),
-            (1       , x_size * (y_position + 1) - 1       ,),
-            (x_size  , x_position + (x_size * (y_size - 1)),),
-            ( -1      , x_size * y_position             ,),
-     ):
+        (-x_size , -x_size                             ,),
+        (1       , x_size * (y_position + 1) - 1       ,),
+        (x_size  , x_position + (x_size * (y_size - 1)),),
+        ( -1     , x_size * y_position                 ,),
+    ):
         target_position = position + step
         if target_position == limit:
             continue
@@ -1029,9 +1387,9 @@ def YUKARI_SKILL_CAN_ACTIVATE(game_state):
     return False
 
 
-def YUKARI_SKILL_GET_DIRECTORIES(game_state):
+def YUKARI_SKILL_GET_DIRECTIONS(game_state):
     """
-    Returns to which directories Yukari's skill could be used.
+    Returns to which directions Yukari's skill could be used.
     
     Parameters
     ----------
@@ -1040,14 +1398,14 @@ def YUKARI_SKILL_GET_DIRECTORIES(game_state):
     
     Returns
     -------
-    move_directories : ``MoveDirectories``
+    move_directions : ``MoveDirections``
     """
     map_ = game_state.map
     
     x_size = game_state.stage.x_size
     y_size = len(map_) // x_size
     
-    move_directories = MoveDirectories()
+    move_directions = MoveDirections()
     
     position = game_state.position
     y_position, x_position = divmod(position, x_size)
@@ -1057,14 +1415,14 @@ def YUKARI_SKILL_GET_DIRECTORIES(game_state):
     # y_min = x_position
     # y_max = x_position + (x_size*(y_size-1))
     
-    for (step, limit), descriptor in zip(
+    for (step, limit), setter in zip(
         (
             ( -x_size , -x_size                             ,),
             (1        , x_size * (y_position + 1) - 1       ,),
             (x_size   , x_position + (x_size * (y_size - 1)),),
             ( -1      , x_size * y_position                 ,),
         ),
-        SKILL_DIRECTORY_DESCRIPTORS,
+        DIRECTION_SETTERS_MAIN,
     ):
         
         target_position = position + step
@@ -1091,9 +1449,9 @@ def YUKARI_SKILL_GET_DIRECTORIES(game_state):
             else:
                 can_go_to_directory = False
         
-        descriptor(move_directories, can_go_to_directory)
+        setter(move_directions, can_go_to_directory)
     
-    return move_directories
+    return move_directions
 
 
 def YUKARI_SKILL_USE(game_state, step, align):
@@ -1165,6 +1523,140 @@ def YUKARI_SKILL_USE(game_state, step, align):
     game_state.has_skill = False
     
     return True
+
+
+DIRECTION_MOVE_STATE_NONE = 0
+DIRECTION_MOVE_STATE_CAN  = 1
+DIRECTION_MOVE_STATE_PUSH = 2
+DIRECTION_MOVE_DIAGONAL_1 = 3
+DIRECTION_MOVE_DIAGONAL_2 = 4
+
+
+def can_move_to(map_, position, step):
+    """
+    Returns whether the player can move to the given direction.
+    
+    Parameters
+    ----------
+    map_ : `list` of `int`
+        The map where the player is.
+    position : `int`
+        The player's position on the map.
+    step : `int`
+        The step to do.
+    
+    Returns
+    -------
+    move_state : `int`
+        Whether the player can move.
+        
+        Can be any of the following values:
+        
+        +---------------------------+-------+
+        | Respective name           | Value |
+        +===========================+=======+
+        | DIRECTION_MOVE_STATE_NONE | 0     |
+        +---------------------------+-------+
+        | DIRECTION_MOVE_STATE_CAN  | 1     |
+        +---------------------------+-------+
+        | DIRECTION_MOVE_STATE_PUSH | 2     |
+        +---------------------------+-------+
+    """
+    target_tile = map_[position + step]
+    
+    if target_tile & BIT_MASK_UNPUSHABLE:
+        move_state = DIRECTION_MOVE_STATE_NONE
+    elif target_tile & BIT_MASK_PASSABLE:
+        move_state = DIRECTION_MOVE_STATE_CAN
+    else:
+        after_tile = map_[position + (step << 1)]
+        if target_tile & BIT_MASK_PUSHABLE and after_tile & (BIT_MASK_PASSABLE | BIT_MASK_HOLE_U):
+            move_state = DIRECTION_MOVE_STATE_PUSH
+        else:
+            move_state = DIRECTION_MOVE_STATE_NONE
+    
+    return move_state
+
+
+def can_move_diagonal(map_, position, step_1, step_2):
+    """
+    Returns whether the player can move diagonally.
+    
+    Parameters
+    ----------
+    map_ : `list` of `int`
+        The map where the player is.
+    position : `int`
+        The player's position on the map.
+    step : `int`
+        The step to do.
+    
+    Returns
+    -------
+    move_state : `int`
+        Whether the player can move diagonally.
+        
+        Can be any of the following values:
+        
+        +---------------------------+-------+
+        | Respective name           | Value |
+        +===========================+=======+
+        | DIRECTION_MOVE_STATE_NONE | 0     |
+        +---------------------------+-------+
+        | DIRECTION_MOVE_DIAGONAL_1 | 3     |
+        +---------------------------+-------+
+        | DIRECTION_MOVE_DIAGONAL_2 | 4     |
+        +---------------------------+-------+
+    """
+    step_1_1_state = can_move_to(map_, position, step_1)
+    if step_1_1_state == DIRECTION_MOVE_STATE_NONE:
+        step_1_2_state = DIRECTION_MOVE_STATE_NONE
+    else:
+        step_1_2_state = can_move_to(map_, position + step_1, step_2)
+    
+    step_2_1_state = can_move_to(map_, position, step_2)
+    if step_2_1_state == DIRECTION_MOVE_STATE_NONE:
+        step_2_2_state = DIRECTION_MOVE_STATE_NONE
+    else:
+        step_2_2_state = can_move_to(map_, position + step_2, step_1)
+    
+    
+    if (
+        (step_1_1_state == DIRECTION_MOVE_STATE_CAN) and
+        (step_1_2_state == DIRECTION_MOVE_STATE_CAN)
+    ):
+        move_state = DIRECTION_MOVE_DIAGONAL_1
+    
+    elif (
+        (step_2_1_state == DIRECTION_MOVE_STATE_CAN) and
+        (step_2_2_state == DIRECTION_MOVE_STATE_CAN)
+    ):
+        move_state = DIRECTION_MOVE_DIAGONAL_2
+    
+    elif (
+        (
+            (step_2_1_state == DIRECTION_MOVE_STATE_NONE) or
+            (step_2_2_state == DIRECTION_MOVE_STATE_NONE)
+        ) and
+        (step_1_1_state != DIRECTION_MOVE_STATE_NONE) and
+        (step_1_2_state != DIRECTION_MOVE_STATE_NONE)
+    ):
+        move_state = DIRECTION_MOVE_DIAGONAL_1
+    
+    elif (
+        (
+            (step_1_1_state == DIRECTION_MOVE_STATE_NONE) or
+            (step_1_2_state == DIRECTION_MOVE_STATE_NONE)
+        ) and
+        (step_2_1_state != DIRECTION_MOVE_STATE_NONE) and
+        (step_2_2_state != DIRECTION_MOVE_STATE_NONE)
+    ):
+        move_state = DIRECTION_MOVE_DIAGONAL_2
+    
+    else:
+        move_state = DIRECTION_MOVE_STATE_NONE
+    
+    return move_state
 
 
 class HistoryElement:
@@ -1327,8 +1819,10 @@ class StageSource:
     x_size : `int`
         The map's size on the x axis.
     """
-    __slots__ = ('after_stage_source', 'before_stage_source', 'best', 'chapter_index', 'difficulty_index', 'id',
-        'index', 'map', 'stage_index', 'start', 'target_count', 'x_size')
+    __slots__ = (
+        'after_stage_source', 'before_stage_source', 'best', 'chapter_index', 'difficulty_index', 'id', 'index', 'map',
+        'stage_index', 'start', 'target_count', 'x_size'
+    )
     
     @classmethod
     def from_json(cls, data):
@@ -1560,7 +2054,7 @@ class Chapter:
         | can_active    | `bool`        |
         +---------------+---------------+
     
-    skill_get_move_directories : `Function`
+    skill_get_move_directions : `Function`
         Checks whether the chapter's character's skill can be activated.
         
         Accepts the following parameters.
@@ -1576,7 +2070,7 @@ class Chapter:
         +-------------------+-----------------------+
         | Name              | Type                  |
         +===================+=======================+
-        | move_directories  | ``MoveDirectories``   |
+        | move_directions  | ``MoveDirections``   |
         +-------------------+-----------------------+
     
     skill_use : `Function`
@@ -1610,12 +2104,16 @@ class Chapter:
     next_stage_unlock_id : `int`
         The stage to complete for the next chapter.
     """
-    __slots__ = ('button_skill_activated', 'button_skill_disabled', 'button_skill_enabled', 'button_skill_used',
-        'difficulties', 'emoji', 'id', 'skill_can_activate', 'skill_get_move_directories', 'skill_use',
-        'stages_sorted', 'style', 'next_stage_unlock_id', )
+    __slots__ = (
+        'button_skill_activated', 'button_skill_disabled', 'button_skill_enabled', 'button_skill_used', 'difficulties',
+        'emoji', 'id', 'skill_can_activate', 'skill_get_move_directions', 'skill_use', 'stages_sorted', 'style',
+        'next_stage_unlock_id'
+    )
     
-    def __init__(self, identifier, emoji, style, button_skill_enabled, button_skill_disabled, button_skill_used,
-            button_skill_activated, skill_can_activate, skill_get_move_directories, skill_use):
+    def __init__(
+        self, identifier, emoji, style, button_skill_enabled, button_skill_disabled, button_skill_used,
+        button_skill_activated, skill_can_activate, skill_get_move_directions, skill_use
+    ):
         """
         Creates a new stage from the given parameters.
         
@@ -1637,7 +2135,7 @@ class Chapter:
             The skill button when the next move is a skill.
         skill_can_activate : `Function`
             Checks whether the chapter's character's skill can be activated.
-        skill_get_move_directories : `Function`
+        skill_get_move_directions : `Function`
             Checks whether the chapter's character's skill can be activated.
         skill_use : `Function`
             Uses the skill of the chapter's character.
@@ -1652,7 +2150,7 @@ class Chapter:
         self.button_skill_used = button_skill_used
         self.button_skill_activated = button_skill_activated
         self.skill_can_activate = skill_can_activate
-        self.skill_get_move_directories = skill_get_move_directories
+        self.skill_get_move_directions = skill_get_move_directions
         self.skill_use = skill_use
         self.next_stage_unlock_id = 0
 
@@ -1666,7 +2164,7 @@ CHAPTERS[CHAPTER_REIMU_INDEX] = Chapter(
     BUTTON_SKILL_REIMU_USED,
     BUTTON_SKILL_REIMU_ACTIVATED,
     REIMU_SKILL_CAN_ACTIVATE,
-    REIMU_SKILL_GET_DIRECTORIES,
+    REIMU_SKILL_GET_DIRECTIONS,
     REIMU_SKILL_USE,
 )
 
@@ -1679,7 +2177,7 @@ CHAPTERS[CHAPTER_FLAN_INDEX] = Chapter(
     BUTTON_SKILL_FLAN_USED,
     BUTTON_SKILL_FLAN_ACTIVATED,
     FLAN_SKILL_CAN_ACTIVATE,
-    FLAN_SKILL_GET_DIRECTORIES,
+    FLAN_SKILL_GET_DIRECTIONS,
     FLAN_SKILL_USE,
 )
 
@@ -1692,7 +2190,7 @@ CHAPTERS[CHAPTER_YUKARI_INDEX] = Chapter(
     BUTTON_SKILL_YUKARI_USED,
     BUTTON_SKILL_YUKARI_ACTIVATED,
     YUKARI_SKILL_CAN_ACTIVATE,
-    YUKARI_SKILL_GET_DIRECTORIES,
+    YUKARI_SKILL_GET_DIRECTIONS,
     YUKARI_SKILL_USE,
 )
 
@@ -1855,9 +2353,308 @@ class StageResult:
         self.best = entry.best
         return self
     
+    
     def __repr__(self):
         """Returns the stage result's representation."""
         return f'<{self.__class__.__name__} id={self.id!r}, stage_id={self.stage_id!r}, best={self.best!r}>'
+
+
+async def get_user_state(user_id):
+    """
+    Requests the user's state from the database.
+    
+    This function is a coroutine.
+    
+    Returns
+    -------
+    game_state : `None`, ``GameState``
+        The state of the actual game.
+    stage_results: `dict` of (`int`, ``StageResult``) items
+        Result of each completed stage by the user.
+    selected_stage_id : `int`
+        The selected stage's identifier.
+    field_exists : `bool`
+        Whether the field is stored in the database.
+    entry_id : `int`
+        The field identifier in the database.
+    """
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            DS_V2_TABLE.select(
+                ds_v2_model.user_id == user_id,
+            )
+        )
+        result = await response.fetchone()
+        if result is None:
+            return _return_default_user_state()
+        
+        game_state_data = result.game_state
+        if (game_state_data is None):
+            game_state = None
+        else:
+            game_state_json_data = from_json(decompress(game_state_data))
+            game_state = GameState.from_json(game_state_json_data)
+        
+        selected_stage_id = result.selected_stage_id
+        field_exists = True
+        entry_id = result.id
+        
+        response = await connector.execute(
+            DS_V2_RESULT_TABLE.select(
+                ds_v2_result_model.user_id == user_id,
+            )
+        )
+        
+        results = await response.fetchall()
+        
+        stage_results = {}
+        if results:
+            for result in results:
+                stage_result = StageResult.from_entry(result)
+                stage_results[stage_result.stage_id] = stage_result
+        else:
+            selected_stage_id = CHAPTERS[0].difficulties[0][0].id
+        
+        if (entry_id is not None):
+            await connector.execute(
+                DS_V2_TABLE.update(
+                    ds_v2_model.id == entry_id,
+                ).values(
+                    game_state = None,
+                )
+            )
+        
+    return (
+        game_state,
+        stage_results,
+        selected_stage_id,
+        field_exists,
+        entry_id,
+    )
+
+
+def _return_default_user_state():
+    """
+    Returns a freshly create user state.
+    
+    Returns
+    -------
+    game_state : `None`, ``GameState``
+        The state of the actual game.
+    stage_results: `dict` of (`int`, ``StageResult``) items
+        Result of each completed stage by the user.
+    selected_stage_id : `int`
+        The selected stage's identifier.
+    field_exists : `bool`
+        Whether the field is stored in the database.
+    entry_id : `int`
+        The field identifier in the database.
+    """
+    return (
+        None,
+        {},
+        CHAPTERS[0].difficulties[0][0].id,
+        False,
+        0,
+    )
+
+
+async def game_state_upload_init_failure(entry_id, game_state_data):
+    """
+    Saves the game's state. This function is called when initialization fails.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    entry_id : `int`
+        The field identifier in the database.
+    game_state_data : `bytes`
+        Compressed data storing the current game's state.
+    """
+    async with DB_ENGINE.connect() as connector:
+        await connector.execute(
+            DS_V2_TABLE.update(
+                ds_v2_model.id == entry_id
+            ).values(
+                game_state = game_state_data,
+            )
+        )
+
+
+async def game_state_upload_update(entry_id, game_state_data, selected_stage_id):
+    """
+    Saves the game's state. This function is called when the entry already exists.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    entry_id : `int`
+        The field identifier in the database.
+    game_state_data : `bytes`
+        Compressed data storing the current game's state.
+    selected_stage_id : `int`
+        The currently selected stage's identifier.
+    """
+    async with DB_ENGINE.connect() as connector:
+        await connector.execute(
+            DS_V2_TABLE.update(
+                ds_v2_model.id == entry_id,
+            ).values(
+                game_state = game_state_data,
+                selected_stage_id = selected_stage_id,
+            )
+        )
+
+
+async def game_state_upload_create(user_id, game_state_data, selected_stage_id):
+    """
+    Saves the game's state. This function is called when the entry do not yet exists.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    user_id : `int`
+        The user's identifier who owns the game state.
+    game_state_data : `bytes`
+        Compressed data storing the current game's state.
+    selected_stage_id : `int`
+        The currently selected stage's identifier.
+    
+    Returns
+    -------
+    entry_id : `int`
+        The field identifier in the database.
+    """
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            DS_V2_TABLE.insert().values(
+                user_id = user_id,
+                game_state = game_state_data,
+                selected_stage_id = selected_stage_id,
+            ).returning(
+                ds_v2_model.id,
+            )
+        )
+        result = await response.fetchone()
+        entry_id = result[0]
+        
+    return entry_id
+
+
+async def save_stage_result_and_reward(user_id, stage_id, steps, self_best, stage_result):
+    """
+    Saves stage result and gives reward depending on the delta.
+    
+    This function is a coroutine.
+    
+    Returns
+    -------
+    entry_id : `int`
+        The identifier of the entry in the database.
+    stage_id : `int`
+        The played stage's identifier.
+    steps : `int`
+        The amount of steps the user did.
+    self_best : `int`
+        The amount of steps player did. Defaults to `-1` if not applicable.
+    stage_result : `None`, ``StageResult``
+        The actual result of the user for the given stage.
+    
+    Returns
+    -------
+    stage_result_entry_id : `int`
+        The existing or created database entry's identifier.
+    """
+    async with DB_ENGINE.connect() as connector:
+        if stage_result is None:
+            response = await connector.execute(
+                DS_V2_RESULT_TABLE.insert().values(
+                    user_id = user_id,
+                    stage_id = stage_id,
+                    best = steps,
+                ).returning(
+                    ds_v2_result_model.id,
+                )
+            )
+            
+            result = await response.fetchone()
+            stage_result_entry_id = result[0]
+        
+        else:
+            stage_result_entry_id = stage_result.id
+            
+            await connector.execute(
+                DS_V2_RESULT_TABLE.update(
+                    ds_v2_result_model.id == stage_result_entry_id,
+                ).values(
+                    best = steps,
+                )
+            )
+            
+        
+        if stage_result is None:
+            reward = get_reward_for_steps(stage_id, steps)
+        else:
+            reward = get_reward_difference(stage_id, self_best, steps)
+        
+        if reward:
+            response = await connector.execute(
+                select(
+                    [
+                        user_common_model.id,
+                    ]
+                ).where(
+                    user_common_model.user_id == user_id,
+                )
+            )
+            
+            results = await response.fetchall()
+            if results:
+                entry_id = results[0][0]
+                
+                to_execute = USER_COMMON_TABLE.update(
+                    user_common_model.id == entry_id
+                ).values(
+                    total_love = user_common_model.total_love + reward
+                )
+            else:
+                to_execute = get_create_common_user_expression(
+                    user_id,
+                    total_love = reward,
+                )
+            
+            await connector.execute(to_execute)
+    
+    return stage_result_entry_id
+
+
+# If we have no db support, we yeet all db method.
+if DB_ENGINE is None:
+    @copy_docs(get_user_state)
+    async def get_user_state(user_id):
+        return _return_default_user_state()
+    
+    @copy_docs(game_state_upload_init_failure)
+    async def game_state_upload_init_failure(entry_id, game_state_data):
+        pass
+    
+    
+    @copy_docs(game_state_upload_update)
+    async def game_state_upload_update(entry_id, game_state_data, selected_stage_id):
+        pass
+    
+    
+    @copy_docs(game_state_upload_create)
+    async def game_state_upload_create(user_id, game_state_data, selected_stage_id):
+        return 0
+    
+    
+    @copy_docs(save_stage_result_and_reward)
+    async def save_stage_result_and_reward(user_id, stage_id, steps, self_best, stage_result):
+        return 0
 
 
 class UserState:
@@ -1892,58 +2689,7 @@ class UserState:
         user_id : `int`
             The user' respective identifier.
         """
-        async with DB_ENGINE.connect() as connector:
-            response = await connector.execute(
-                DS_V2_TABLE.select(
-                    ds_v2_model.user_id == user_id,
-                )
-            )
-            results = await response.fetchall()
-            
-            if results:
-                result = results[0]
-                game_state_data = result.game_state
-                if (game_state_data is None):
-                    game_state = None
-                else:
-                    game_state_json_data = from_json(decompress(game_state_data))
-                    game_state = GameState.from_json(game_state_json_data)
-                
-                selected_stage_id = result.selected_stage_id
-                field_exists = True
-                entry_id = result.id
-                
-                response = await connector.execute(
-                    DS_V2_RESULT_TABLE.select(
-                        ds_v2_result_model.user_id == user_id,
-                    )
-                )
-                
-                results = await response.fetchall()
-                
-                stage_results = {}
-                if results:
-                    for result in results:
-                        stage_result = StageResult.from_entry(result)
-                        stage_results[stage_result.stage_id] = stage_result
-                else:
-                    selected_stage_id = CHAPTERS[0].difficulties[0][0].id
-                
-                if (entry_id is not None):
-                    await connector.execute(
-                        DS_V2_TABLE.update(
-                            ds_v2_model.id == entry_id,
-                        ).values(
-                            game_state = None,
-                        )
-                    )
-            
-            else:
-                game_state = None
-                stage_results = {}
-                selected_stage_id = CHAPTERS[0].difficulties[0][0].id
-                field_exists = False
-                entry_id = 0
+        game_state, stage_results, selected_stage_id, field_exists, entry_id = await get_user_state(user_id)
         
         self = object.__new__(cls)
         self.game_state = game_state
@@ -1961,7 +2707,7 @@ class UserState:
         
         Returns
         -------
-        game_state_data : `None`, `dict`
+        game_state_data : `None`, `bytes`
         """
         game_state = self.game_state
         if (game_state is None) or (not game_state.history):
@@ -1982,48 +2728,22 @@ class UserState:
         if self.field_exists:
             game_state_data = self.get_game_state_data()
             if (game_state_data is not None):
-                async with DB_ENGINE.connect() as connector:
-                    await connector.execute(
-                        DS_V2_TABLE.update(
-                            ds_v2_model.id == self.entry_id
-                        ).values(
-                            game_state = game_state_data,
-                        )
-                    )
-    
+                await game_state_upload_init_failure(self.entry_id, game_state_data)
     
     
     async def upload(self):
         """
-        Saves the current state of te game state.
+        Saves the current state of the game state.
         
         This method is a coroutine.
         """
         game_state_data = self.get_game_state_data()
+        if self.field_exists:
+            await game_state_upload_update(self.entry_id, game_state_data, self.selected_stage_id)
         
-        async with DB_ENGINE.connect() as connector:
-            if self.field_exists:
-                await connector.execute(
-                    DS_V2_TABLE.update(
-                        ds_v2_model.id == self.entry_id,
-                    ).values(
-                        game_state = game_state_data,
-                        selected_stage_id = self.selected_stage_id,
-                    )
-                )
-            else:
-                response = await connector.execute(
-                    DS_V2_TABLE.insert().values(
-                        user_id = self.user_id,
-                        game_state = game_state_data,
-                        selected_stage_id = self.selected_stage_id,
-                    ).returning(
-                        ds_v2_model.id,
-                    )
-                )
-                result = await response.fetchone()
-                self.entry_id = result[0]
-                self.field_exists = True
+        else:
+            self.entry_id = await game_state_upload_create(self.user_id, game_state_data, self.selected_stage_id)
+            self.field_exists = True
     
     
     async def set_best(self, stage_id, steps):
@@ -2040,89 +2760,22 @@ class UserState:
             The step count of the user.
         """
         if not self.field_exists:
-            async with DB_ENGINE.connect() as connector:
-                game_state_data = self.get_game_state_data()
-                
-                response = await connector.execute(
-                    DS_V2_TABLE.insert().values(
-                        user_id = self.user_id,
-                        game_state = game_state_data,
-                        selected_stage_id = self.selected_stage_id,
-                    ).returning(
-                        ds_v2_model.id,
-                    )
-                )
-                
-                result = await response.fetchone()
-                self.entry_id = result[0]
-                self.field_exists = True
+            game_state_data = self.get_game_state_data()
+            self.entry_id = await game_state_upload_create(self.user_id, game_state_data, self.selected_stage_id)
+            self.field_exists = True
         
-        state_stage = self.stage_results.get(stage_id, None)
-        if state_stage is None:
+        stage_result = self.stage_results.get(stage_id, None)
+        if stage_result is None:
             self_best = -1
         else:
-            self_best = state_stage.best
+            self_best = stage_result.best
         
         if (self_best == -1) or (steps < self_best):
-            async with DB_ENGINE.connect() as connector:
-                if state_stage is None:
-                    response = await connector.execute(
-                        DS_V2_RESULT_TABLE.insert().values(
-                            user_id = self.user_id,
-                            stage_id = stage_id,
-                            best = steps,
-                        ).returning(
-                            ds_v2_result_model.id,
-                        )
-                    )
-                    
-                    result = await response.fetchone()
-                    entry_id = result[0]
-                    self.stage_results[stage_id] = StageResult(entry_id, stage_id, steps)
-                else:
-                    await connector.execute(
-                        DS_V2_RESULT_TABLE.update(
-                            ds_v2_result_model.id == state_stage.id
-                        ).values(
-                            best = steps,
-                        )
-                    )
-                    
-                    state_stage.best = steps
-                
-                if state_stage is None:
-                    reward = get_reward_for_steps(stage_id, steps)
-                else:
-                    reward = get_reward_difference(stage_id, self_best, steps)
-                
-                if reward:
-                    response = await connector.execute(
-                        select(
-                            [
-                                user_common_model.id,
-                            ]
-                        ).where(
-                            user_common_model.user_id == self.user_id,
-                        )
-                    )
-                    
-                    results = await response.fetchall()
-                    if results:
-                        entry_id = results[0][0]
-                        
-                        to_execute = USER_COMMON_TABLE.update(
-                            user_common_model.id == entry_id
-                        ).values(
-                            total_love = user_common_model.total_love + reward
-                        )
-                    else:
-                        to_execute = get_create_common_user_expression(
-                            self.user_id,
-                            total_love = reward,
-                        )
-                    
-                    await connector.execute(to_execute)
-
+            entry_id = await save_stage_result_and_reward(self.user_id, stage_id, steps, self_best, stage_result)
+            if stage_result is None:
+                self.stage_results[stage_id] = StageResult(entry_id, stage_id, steps)
+            else:
+                stage_result.best = steps
 
 
 class GameState:
@@ -2305,7 +2958,7 @@ class GameState:
         moved : `bool`
             Whether the character move successfully.
         """
-        return self.move( -self.stage.x_size, BIT_MASK_CHAR_N)
+        return self.move(-self.stage.x_size, BIT_MASK_CHAR_N)
     
     
     def move_east(self):
@@ -2341,54 +2994,49 @@ class GameState:
         moved : `bool`
             Whether the character move successfully.
         """
-        return self.move( -1, BIT_MASK_CHAR_W)
+        return self.move(-1, BIT_MASK_CHAR_W)
     
     
-    def get_move_directories(self):
+    def get_move_directions(self):
         """
-        Returns to which directories the character can move.
+        Returns to which directions the character can move.
         
         Returns
         -------
-        move_directories : ``MoveDirectories``
+        move_directions : ``MoveDirections``
         """
         if self.next_skill:
-            return self.chapter.skill_get_move_directories(self)
+            return self.chapter.skill_get_move_directions(self)
         else:
-            return self.get_own_move_directories()
+            return self.get_own_move_directions()
     
     
-    def get_own_move_directories(self):
+    def get_own_move_directions(self):
         """
-        Returns to which directories can the character move, excluding the skill of the character.
+        Returns to which directions can the character move, excluding the skill of the character.
         
         Returns
         -------
-        move_directories : ``MoveDirectories``
+        move_directions : ``MoveDirections``
         """
         x_size = self.stage.x_size
         position = self.position
         map_ = self.map
         
-        move_directories = MoveDirectories()
+        move_directions = MoveDirections()
         
-        for step, descriptor in zip(( -x_size, 1, x_size, -1), SKILL_DIRECTORY_DESCRIPTORS):
-            target_tile = map_[position + step]
-            
-            if target_tile & BIT_MASK_UNPUSHABLE:
-                can_go_to_directory = False
-            elif target_tile & BIT_MASK_PASSABLE:
-                can_go_to_directory = True
-            else:
-                after_tile = map_[position + (step << 1)]
-                if target_tile & BIT_MASK_PUSHABLE and after_tile & (BIT_MASK_PASSABLE | BIT_MASK_HOLE_U):
-                    can_go_to_directory = True
-                else:
-                    can_go_to_directory = False
-            
-            descriptor(move_directories, can_go_to_directory)
+        for step, setter in zip((-x_size, 1, x_size, -1), DIRECTION_SETTERS_MAIN):
+            if can_move_to(map_, position, step) != DIRECTION_MOVE_STATE_NONE:
+                setter(move_directions, True)
         
-        return move_directories
+        for steps, setters in zip(
+            ((-x_size, 1), (1, x_size), (x_size, -1), (-1, -x_size),), DIRECTION_SETTERS_DIAGONAL
+        ):
+            move_state = can_move_diagonal(map_, position, *steps)
+            if move_state != DIRECTION_MOVE_STATE_NONE:
+                setters[move_state == DIRECTION_MOVE_DIAGONAL_2](move_directions, True)
+        
+        return move_directions
     
     
     def move(self, step, align):
@@ -2466,6 +3114,7 @@ class GameState:
             return True
         
         return False
+    
     
     def skill_can_activate(self):
         """
@@ -2611,27 +3260,15 @@ class GameState:
         
         button_skill = self.button_skill_get()
         
-        directories = self.get_move_directories()
-        
-        if directories.west:
-            button_west = BUTTON_WEST_ENABLED
-        else:
-            button_west = BUTTON_WEST_DISABLED
-        
-        if directories.north:
-            button_north = BUTTON_NORTH_ENABLED
-        else:
-            button_north = BUTTON_NORTH_DISABLED
-        
-        if directories.south:
-            button_south = BUTTON_SOUTH_ENABLED
-        else:
-            button_south = BUTTON_SOUTH_DISABLED
-        
-        if directories.east:
-            button_east = BUTTON_EAST_ENABLED
-        else:
-            button_east = BUTTON_EAST_DISABLED
+        directions = self.get_move_directions()
+        button_north = directions.get_button_north()
+        button_north_east = directions.get_button_north_east()
+        button_east = directions.get_button_east()
+        button_south_east = directions.get_button_south_east()
+        button_south = directions.get_button_south()
+        button_south_west = directions.get_button_south_west()
+        button_west = directions.get_button_west()
+        button_north_west = directions.get_button_north_west()
         
         if self.can_back_or_reset():
             button_back = BUTTON_BACK_ENABLED
@@ -2641,9 +3278,9 @@ class GameState:
             button_reset = BUTTON_RESET_DISABLED
         
         components = (
-            Row(BUTTON_EMPTY_1 , button_north , BUTTON_EMPTY_2 , button_back   ,),
-            Row(button_west    , button_skill , button_east    , button_reset  ,),
-            Row(BUTTON_EMPTY_3 , button_south , BUTTON_EMPTY_4 , BUTTON_CANCEL ,),
+            Row(button_north_west , button_north , button_north_east , button_back   ,),
+            Row(button_west       , button_skill , button_east       , button_reset  ,),
+            Row(button_south_west , button_south , button_south_east , BUTTON_CANCEL ,),
         )
         
         return embed, components
@@ -2982,7 +3619,7 @@ def render_menu(user_state):
     return embed, components
 
 
-async def process_identifier_up(dungeon_sweeper_runner):
+async def action_processor_up(dungeon_sweeper_runner):
     """
     Processes `up` button click.
     
@@ -3016,7 +3653,7 @@ async def process_identifier_up(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_up2(dungeon_sweeper_runner):
+async def action_processor_up2(dungeon_sweeper_runner):
     """
     Processes `up2` button click.
     
@@ -3061,7 +3698,7 @@ async def process_identifier_up2(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_down(dungeon_sweeper_runner):
+async def action_processor_down(dungeon_sweeper_runner):
     """
     Processes `down` button click.
     
@@ -3093,7 +3730,7 @@ async def process_identifier_down(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_down2(dungeon_sweeper_runner):
+async def action_processor_down2(dungeon_sweeper_runner):
     """
     Processes `down2` button click.
     
@@ -3131,7 +3768,7 @@ async def process_identifier_down2(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_left(dungeon_sweeper_runner):
+async def action_processor_left(dungeon_sweeper_runner):
     """
     Processes `left` button click.
     
@@ -3171,7 +3808,7 @@ async def process_identifier_left(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_right(dungeon_sweeper_runner):
+async def action_processor_right(dungeon_sweeper_runner):
     """
     Processes `right` button click.
     
@@ -3219,7 +3856,7 @@ async def process_identifier_right(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_select(dungeon_sweeper_runner):
+async def action_processor_select(dungeon_sweeper_runner):
     """
     Processes `select` button click.
     
@@ -3257,7 +3894,7 @@ async def process_identifier_select(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_west(dungeon_sweeper_runner):
+async def action_processor_west(dungeon_sweeper_runner):
     """
     Processes `west` button click.
     
@@ -3287,7 +3924,7 @@ async def process_identifier_west(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_north(dungeon_sweeper_runner):
+async def action_processor_north(dungeon_sweeper_runner):
     """
     Processes `north` button click.
     
@@ -3317,7 +3954,7 @@ async def process_identifier_north(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_south(dungeon_sweeper_runner):
+async def action_processor_south(dungeon_sweeper_runner):
     """
     Processes `south` button click.
     
@@ -3347,7 +3984,7 @@ async def process_identifier_south(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_east(dungeon_sweeper_runner):
+async def action_processor_east(dungeon_sweeper_runner):
     """
     Processes `east` button click.
     
@@ -3377,7 +4014,7 @@ async def process_identifier_east(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_back(dungeon_sweeper_runner):
+async def action_processor_back(dungeon_sweeper_runner):
     """
     Processes `back` button click.
     
@@ -3401,7 +4038,7 @@ async def process_identifier_back(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_reset(dungeon_sweeper_runner):
+async def action_processor_reset(dungeon_sweeper_runner):
     """
     Processes `reset` button click.
     
@@ -3425,7 +4062,7 @@ async def process_identifier_reset(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_cancel(dungeon_sweeper_runner):
+async def action_processor_cancel(dungeon_sweeper_runner):
     """
     Processes `cancel` button click.
     
@@ -3450,7 +4087,7 @@ async def process_identifier_cancel(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_skill(dungeon_sweeper_runner):
+async def action_processor_skill(dungeon_sweeper_runner):
     """
     Processes `skill` button click.
     
@@ -3474,7 +4111,7 @@ async def process_identifier_skill(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_close(dungeon_sweeper_runner):
+async def action_processor_close(dungeon_sweeper_runner):
     """
     Processes `close` button click.
     
@@ -3504,7 +4141,7 @@ async def process_identifier_close(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_next(dungeon_sweeper_runner):
+async def action_processor_next(dungeon_sweeper_runner):
     """
     Processes `next` button click.
     
@@ -3547,7 +4184,7 @@ async def process_identifier_next(dungeon_sweeper_runner):
     return False
 
 
-async def process_identifier_restart(dungeon_sweeper_runner):
+async def action_processor_restart(dungeon_sweeper_runner):
     """
     Processes `restart` button click.
     
@@ -3571,26 +4208,217 @@ async def process_identifier_restart(dungeon_sweeper_runner):
     return False
 
 
+async def action_processor_north_to_east(dungeon_sweeper_runner):
+    """
+    Processes `north -> east` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_north(dungeon_sweeper_runner):
+        await action_processor_east(dungeon_sweeper_runner)
+        return True
+    
+    return False
 
-PROCESS_CUSTOM_ID = {
-    IDENTIFIER_UP: process_identifier_up,
-    IDENTIFIER_DOWN: process_identifier_down,
-    IDENTIFIER_UP2: process_identifier_up2,
-    IDENTIFIER_DOWN2: process_identifier_down2,
-    IDENTIFIER_RIGHT: process_identifier_right,
-    IDENTIFIER_LEFT: process_identifier_left,
-    IDENTIFIER_SELECT: process_identifier_select,
-    IDENTIFIER_WEST: process_identifier_west,
-    IDENTIFIER_NORTH: process_identifier_north,
-    IDENTIFIER_SOUTH: process_identifier_south,
-    IDENTIFIER_EAST: process_identifier_east,
-    IDENTIFIER_BACK: process_identifier_back,
-    IDENTIFIER_RESET: process_identifier_reset,
-    IDENTIFIER_CANCEL: process_identifier_cancel,
-    IDENTIFIER_SKILL: process_identifier_skill,
-    IDENTIFIER_CLOSE: process_identifier_close,
-    IDENTIFIER_NEXT: process_identifier_next,
-    IDENTIFIER_RESTART: process_identifier_restart,
+
+async def action_processor_north_to_west(dungeon_sweeper_runner):
+    """
+    Processes `north -> west` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_north(dungeon_sweeper_runner):
+        await action_processor_west(dungeon_sweeper_runner)
+        return True
+    
+    return False
+
+
+async def action_processor_south_to_east(dungeon_sweeper_runner):
+    """
+    Processes `south -> east` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_south(dungeon_sweeper_runner):
+        await action_processor_east(dungeon_sweeper_runner)
+        return True
+    
+    return False
+
+
+async def action_processor_south_to_west(dungeon_sweeper_runner):
+    """
+    Processes `south -> west` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_south(dungeon_sweeper_runner):
+        await action_processor_west(dungeon_sweeper_runner)
+        return True
+    
+    return False
+
+
+async def action_processor_east_to_north(dungeon_sweeper_runner):
+    """
+    Processes `east -> north` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_east(dungeon_sweeper_runner):
+        await action_processor_north(dungeon_sweeper_runner)
+        return True
+    
+    return False
+
+
+async def action_processor_east_to_south(dungeon_sweeper_runner):
+    """
+    Processes `east -> south` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_east(dungeon_sweeper_runner):
+        await action_processor_south(dungeon_sweeper_runner)
+        return True
+    
+    return False
+
+
+async def action_processor_west_to_north(dungeon_sweeper_runner):
+    """
+    Processes `west -> north` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_west(dungeon_sweeper_runner):
+        await action_processor_north(dungeon_sweeper_runner)
+        return True
+    
+    return False
+
+
+async def action_processor_west_to_south(dungeon_sweeper_runner):
+    """
+    Processes `west -> south` button click.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    dungeon_sweeper_runner : ``DungeonSweeperRunner``
+        The respective dungeon sweeper runner.
+    
+    Returns
+    -------
+    success : `bool`
+        Whether the `west` button could be pressed.
+    """
+    if await action_processor_west(dungeon_sweeper_runner):
+        await action_processor_south(dungeon_sweeper_runner)
+        return True
+    
+    return False
+
+
+ACTION_PROCESSORS = {
+    CUSTOM_ID_UP            : action_processor_up,
+    CUSTOM_ID_DOWN          : action_processor_down,
+    CUSTOM_ID_UP2           : action_processor_up2,
+    CUSTOM_ID_DOWN2         : action_processor_down2,
+    CUSTOM_ID_RIGHT         : action_processor_right,
+    CUSTOM_ID_LEFT          : action_processor_left,
+    CUSTOM_ID_SELECT        : action_processor_select,
+    CUSTOM_ID_WEST          : action_processor_west,
+    CUSTOM_ID_NORTH         : action_processor_north,
+    CUSTOM_ID_SOUTH         : action_processor_south,
+    CUSTOM_ID_EAST          : action_processor_east,
+    CUSTOM_ID_BACK          : action_processor_back,
+    CUSTOM_ID_RESET         : action_processor_reset,
+    CUSTOM_ID_CANCEL        : action_processor_cancel,
+    CUSTOM_ID_SKILL         : action_processor_skill,
+    CUSTOM_ID_CLOSE         : action_processor_close,
+    CUSTOM_ID_NEXT          : action_processor_next,
+    CUSTOM_ID_RESTART       : action_processor_restart,
+    CUSTOM_ID_NORTH_TO_EAST : action_processor_north_to_east,
+    CUSTOM_ID_NORTH_TO_WEST : action_processor_north_to_west,
+    CUSTOM_ID_SOUTH_TO_EAST : action_processor_south_to_east,
+    CUSTOM_ID_SOUTH_TO_WEST : action_processor_south_to_west,
+    CUSTOM_ID_EAST_TO_NORTH : action_processor_east_to_north,
+    CUSTOM_ID_EAST_TO_SOUTH : action_processor_east_to_south,
+    CUSTOM_ID_WEST_TO_NORTH : action_processor_west_to_north,
+    CUSTOM_ID_WEST_TO_SOUTH : action_processor_west_to_south,
 }
 
 
@@ -3758,6 +4586,7 @@ class DungeonSweeperRunner:
         
         return self
     
+    
     async def renew(self, event):
         """
         Renews the interaction gui creating a new message.
@@ -3837,6 +4666,7 @@ class DungeonSweeperRunner:
         if (timeouter is not None):
             timeouter.set_timeout(GUI_TIMEOUT)
     
+    
     async def __call__(self, event):
         """
         Calls the dungeon sweeper runner, processing a component event.
@@ -3861,12 +4691,12 @@ class DungeonSweeperRunner:
         custom_id = event.interaction.custom_id
         
         try:
-            custom_id_processor = PROCESS_CUSTOM_ID[custom_id]
+            action_processor = ACTION_PROCESSORS[custom_id]
         except KeyError:
             return
         
         user_state = self.user_state
-        if not await custom_id_processor(self):
+        if not await action_processor(self):
             return
         
         runner_state = self._runner_state
@@ -3899,8 +4729,9 @@ class DungeonSweeperRunner:
         timeouter = self._timeouter
         if (timeouter is not None):
             timeouter.set_timeout(GUI_TIMEOUT)
-        
-    def cancel(self, exception=None):
+    
+    
+    def cancel(self, exception = None):
         """
         Cancels the dungeon sweeper gui with the given exception if applicable.
         
@@ -4098,7 +4929,8 @@ class DungeonSweeperRunner:
 
 SLASH_CLIENT : Client
 
-DUNGEON_SWEEPER = SLASH_CLIENT.interactions(None,
+DUNGEON_SWEEPER = SLASH_CLIENT.interactions(
+    None,
     name = 'ds',
     description = 'Touhou themed puzzle game.',
     is_global = True,
@@ -4114,7 +4946,7 @@ async def rules(client, event):
     return RULES_HELP
 
 
-@DUNGEON_SWEEPER.interactions(is_default=True)
+@DUNGEON_SWEEPER.interactions(is_default = True)
 async def play(client, event):
     """Starts the game"""
     game = DUNGEON_SWEEPER_GAMES.get(event.user.id, None)

@@ -47,6 +47,10 @@ async def message_create(client, message):
 
 @Satori.events
 async def message_edit(client, message, old_attributes):
+    if (old_attributes is None):
+        # The was not cached, we cannot calculate difference.
+        return
+    
     if message.guild is not GUILD__SUPPORT:
         return
     

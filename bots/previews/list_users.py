@@ -99,7 +99,7 @@ def discord_json_user_create(user, guild):
     
     avatar = user.avatar
     if avatar:
-        base16_avatar_hash = avatar.as_base16_hash
+        base16_avatar_hash = avatar.as_base_16_hash
     else:
         base16_avatar_hash = None
     user_data['avatar'] = base16_avatar_hash
@@ -124,7 +124,7 @@ def discord_json_user_create(user, guild):
     else:
         avatar = guild_profile.avatar
         if avatar:
-            base16_avatar_hash = avatar.as_base16_hash
+            base16_avatar_hash = avatar.as_base_16_hash
         else:
             base16_avatar_hash = None
         
@@ -292,7 +292,7 @@ def koishi_csv_user_create(user, guild):
 def discord_csv_user_create(user, guild):
     avatar = user.avatar
     if avatar:
-        user_avatar = avatar.as_base16_hash
+        user_avatar = avatar.as_base_16_hash
     else:
         user_avatar = None
     
@@ -316,7 +316,7 @@ def discord_csv_user_create(user, guild):
     else:
         avatar = guild_profile.avatar
         if avatar:
-            avatar = avatar.as_base16_hash
+            avatar = avatar.as_base_16_hash
         else:
             avatar = None
         

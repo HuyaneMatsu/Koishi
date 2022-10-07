@@ -19,7 +19,7 @@ STYLE_GREEN = create_ansi_format_code(foreground_color=AnsiForegroundColor.green
 
 MIN_DELTA = elapsed_time(RelativeDelta(seconds = MIN_INTERVAL))
 MAX_DELTA = elapsed_time(RelativeDelta(seconds = MAX_INTERVAL))
-DEFAULT_INTERVAL = elapsed_time(RelativeDelta(seconds = DEFAULT_INTERVAL))
+DEFAULT_DELTA = elapsed_time(RelativeDelta(seconds = DEFAULT_INTERVAL))
 
 EMOJI_PAGE_PREVIOUS = BUILTIN_EMOJIS['arrow_left']
 EMOJI_PAGE_NEXT = BUILTIN_EMOJIS['arrow_right']
@@ -611,7 +611,7 @@ def create_about_interval(client, event):
         (
             f'The feed interval is calculated from the thread\'s slowmode.\n'
             f'\n'
-            f'If a channel has no slowmode, the default interval is **{DEFAULT_INTERVAL}.**\n'
+            f'If a channel has no slowmode, the default interval is **{DEFAULT_DELTA}.**\n'
             f'\n'
             f'If the channel has slowmode, it is multiplied by **{INTERVAL_MULTIPLIER}**. '
             f'This is to prevent complete blockage of the channel, and allow other users to post as well.\n'

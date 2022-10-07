@@ -1523,6 +1523,18 @@ async def test_double_ack(client, event):
     return 'owo?'
 
 
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def description_test():
+    """
+    Hello there.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    return 'response'
+
+
 if (watchdog is not None):
     
     from watchdog.events import FileModifiedEvent
