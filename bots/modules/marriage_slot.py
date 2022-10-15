@@ -1,20 +1,20 @@
 __all__ = ()
 
 from hata import Client, Embed, Emoji
-from hata.ext.slash import InteractionResponse, Button, Row
-
-from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
-from bot_utils.constants import EMOJI__HEART_CURRENCY, MAX_WAIFU_SLOTS, WAIFU_SLOT_2_COST, WAIFU_SLOT_COSTS, \
-    WAIFU_SLOT_COST_DEFAULT
-
+from hata.ext.slash import Button, InteractionResponse, Row
 from sqlalchemy.sql import select
+
+from bot_utils.constants import (
+    EMOJI__HEART_CURRENCY, MAX_WAIFU_SLOTS, WAIFU_SLOT_2_COST, WAIFU_SLOT_COSTS, WAIFU_SLOT_COST_DEFAULT
+)
+from bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
 
 
 SLASH_CLIENT: Client
 
 
-EMOJI_YES = Emoji.precreate(853509920477413386)
-EMOJI_NO = Emoji.precreate(852857883045789707)
+EMOJI_YES = Emoji.precreate(990558169963049041)
+EMOJI_NO = Emoji.precreate(994540311990784041)
 
 
 CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM = 'marriage.buy_waifu_slot.confirm'
