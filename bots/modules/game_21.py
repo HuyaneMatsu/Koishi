@@ -721,7 +721,7 @@ async def game_21_single_player(client, event, amount):
                     USER_COMMON_TABLE.update(
                         user_common_model.id == entry_id,
                     ).values(
-                        total_allocated = user_common_model.total_allocated - amount,
+                        total_allocated = user_common_model.total_allocated + amount,
                     )
                 )
         
@@ -757,10 +757,10 @@ async def game_21_single_player(client, event, amount):
                 expression = USER_COMMON_TABLE.update(user_common_model.user_id == user.id)
                 
                 if amount:
-                    expression = expression.values(total_love=user_common_model.total_love + bonus)
+                    expression = expression.values(total_love = user_common_model.total_love + bonus)
                 
                 if unallocate:
-                    expression = expression.values(total_allocated=user_common_model.total_allocated - amount)
+                    expression = expression.values(total_allocated = user_common_model.total_allocated - amount)
                 
                 await connector.execute(expression)
             
@@ -891,8 +891,9 @@ def create_join_embed(users, amount):
     return Embed('Game 21 multi-player', description, color=COLOR__GAMBLING)
 
 
-async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, joined_user_ids, private_channel,
-        entry_id):
+async def game_21_mp_user_joiner(
+    client, user, guild, source_channel, amount, joined_user_ids, private_channel, entry_id
+):
     try:
         private_channel = await client.channel_private_create(user)
     except GeneratorExit:
@@ -924,11 +925,15 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
     try:
         entry_id, embed = await game_21_postcheck(client, user, private_channel, amount)
         if (embed is None):
-            embed = Embed('21 multi-player game joined.',
-                f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
-                f'Guild: {guild.name}\n'
-                f'Channel: {source_channel.mention}',
-                    color=COLOR__GAMBLING)
+            embed = Embed(
+                '21 multi-player game joined.',
+                (
+                    f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
+                    f'Guild: {guild.name}\n'
+                    f'Channel: {source_channel.mention}'
+                ),
+                color = COLOR__GAMBLING,
+            )
             
             try:
                 await client.message_create(private_channel, embed)
@@ -952,7 +957,7 @@ async def game_21_mp_user_joiner(client, user, guild, source_channel, amount, jo
                         )
                     )
             
-            joined_tuple = user, private_channel, entry_id
+            joined_tuple = (user, private_channel, entry_id)
         
         else:
             IN_GAME_IDS.discard(user.id)

@@ -212,65 +212,6 @@ async def yuno():
         url = 'https://www.youtube.com/watch?v=TaDAn_S_4Y8',
     )
 
-PARANOIA_TITLE = 'Pa-Pa-Pa-Pa-Paranoia'
-PARANOIA_URL = 'https://www.youtube.com/watch?v=wnli28pjsn4'
-PARANOIA_IMAGE_URL = (
-    'https://i.ytimg.com/vi/wnli28pjsn4/hqdefault.jpg?'
-    'sqp=-oaymwEZCPYBEIoBSFXyq4qpAwsIARUAAIhCGAFwAQ==&rs=AOn4CLC27YDJ7qBQhLzq7y5iD85vlIYuHw'
-)
-PARANOIA_COLOR = 0x9f80ad
-
-SADISTIC_PARANOIA_TITLE = 'Sadistic Paranoia'
-SADISTIC_PARANOIA_URL = 'https://www.youtube.com/watch?v=ZjFIt78fCxI'
-SADISTIC_PARANOIA_IMAGE_URL = (
-    'https://i.ytimg.com/vi/ZjFIt78fCxI/hqdefault.jpg?'
-    'sqp=-oaymwEcCPYBEIoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD_5vyQPYLiT5-NXbZ-JkHPfX72Xw'
-)
-SADISTIC_PARANOIA_COLOR = 0x08963c
-
-
-def is_satori(name):
-    name = name.casefold()
-    if 'satori' in name:
-        return True
-    
-    if 'さとり' in name:
-        return True
-    
-    return False
-
-
-@SLASH_CLIENT.interactions(is_global=True)
-async def paranoia(client, event):
-    """Pa-Pa-Pa-Pa-Paranoia!!!"""
-    user = event.user
-    user_name = user.name
-    
-    user_is_satori = is_satori(user_name)
-    if not user_is_satori:
-        user_nick = user.name_at(event.guild_id)
-        if (user_name is not user_nick):
-            user_is_satori = is_satori(user_nick)
-    
-    if user_is_satori:
-        title = SADISTIC_PARANOIA_TITLE
-        color = PARANOIA_COLOR
-        url = SADISTIC_PARANOIA_URL
-        image_url = SADISTIC_PARANOIA_IMAGE_URL
-    else:
-        title = PARANOIA_TITLE
-        color = SADISTIC_PARANOIA_COLOR
-        url = PARANOIA_URL
-        image_url = PARANOIA_IMAGE_URL
-    
-    return Embed(
-        title,
-        color = color,
-        url = url,
-    ).add_image(
-        image_url,
-    )
-
 
 @SLASH_CLIENT.interactions(is_global=True)
 async def random_(

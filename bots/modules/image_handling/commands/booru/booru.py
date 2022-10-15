@@ -119,7 +119,7 @@ def build_booru_disabled_components():
         ),
         Button(
             emoji = EMOJI_TAGS,
-            custom_id = CUSTOM_ID_NEW_DISABLED,
+            custom_id = CUSTOM_ID_TAGS_DISABLED,
             enabled = False,
         ),
     )
