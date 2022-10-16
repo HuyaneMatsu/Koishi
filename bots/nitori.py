@@ -34,7 +34,8 @@ async def perms(event):
 # command start slash cookie
 
 @Nitori.interactions(guild=TEST_GUILD)
-async def cookie(event,
+async def cookie(
+    event,
     user: ('user', 'To who?'),
 ):
     """Gifts a cookie!"""
@@ -67,7 +68,8 @@ GUILD_ICON_CHOICES = [
 ]
 
 @Nitori.interactions(guild=TEST_GUILD)
-async def guild_icon(event,
+async def guild_icon(
+    event,
     choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
 ):
     """Shows the guild's icon."""
@@ -363,7 +365,8 @@ async def is_banned(client, event,
 # command start slash user
 
 @Nitori.interactions(guild=TEST_GUILD)
-async def user_id(event,
+async def user_id(
+    event,
     user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
 ):
     """Shows your or the selected user's id."""
@@ -1057,7 +1060,9 @@ ADD_EMOJI_BUTTON_CANCEL = Button('Nah.', style=ButtonStyle.red)
 ADD_EMOJI_COMPONENTS = Row(ADD_EMOJI_BUTTON_ADD, ADD_EMOJI_BUTTON_CANCEL)
 
 @Nitori.interactions(guild=TEST_GUILD)
-async def add_emoji(client, event,
+async def add_emoji(
+    client,
+    event,
     emoji: ('str', 'The emoji to add.'),
     name: ('str', 'Custom name to add the emoji with.') = None
 ):
@@ -1083,8 +1088,11 @@ async def add_emoji(client, event,
     message = yield InteractionResponse(embed=embed, components=ADD_EMOJI_COMPONENTS)
     
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
-            check=functools.partial(check_is_user_same, event.user))
+        component_interaction = await wait_for_component_interaction(
+            message,
+            timeout = 300.0,
+            check = functools.partial(check_is_user_same, event.user)
+        )
     
     except TimeoutError:
         component_interaction = None

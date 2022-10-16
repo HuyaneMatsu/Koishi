@@ -19,7 +19,7 @@ EMOJI_NO = Emoji.precreate(994540311990784041)
 
 CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM = 'marriage.buy_waifu_slot.confirm'
 CUSTOM_ID_BUY_WAIFU_SLOT_CANCEL = 'marriage.buy_waifu_slot.cancel'
-CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE = 'buy_waifu_slot.invoke'
+CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE = 'marriage.buy_waifu_slot.invoke'
 
 
 GET_NUMBER_TH_ENDING = {

@@ -1,9 +1,10 @@
-from hata import ACTIVITY_TYPES, ActivityRich, Client, IntentFlag, Locale
+from hata import Activity, ActivityType, Client, IntentFlag, Locale
 from hata.ext.plugin_loader import add_default_plugin_variables, register_and_load_plugin, register_plugin
 
 import config
-from bot_utils.constants import DEFAULT_CATEGORY_NAME, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI, GUILD__SUPPORT
+from bot_utils.constants import DEFAULT_CATEGORY_NAME, GUILD__SUPPORT, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI
 from bot_utils.utils import category_name_rule, random_error_message_getter
+
 
 from bot_utils import async_engine # replace sync with async database engine.
 
@@ -55,7 +56,7 @@ else:
         config.KOISHI_TOKEN,
         secret = config.KOISHI_SECRET,
         client_id = config.KOISHI_ID,
-        activity = ActivityRich('with Mama'),
+        activity = Activity('with Mama'),
         shard_count = 2,
         should_request_users = False,
         intents = IntentFlag().update_by_keys(
@@ -73,7 +74,7 @@ else:
         config.SATORI_TOKEN,
         secret = config.SATORI_SECRET,
         client_id = config.SATORI_ID,
-        activity = ActivityRich('with Koishi'),
+        activity = Activity('with Koishi'),
         status = 'dnd',
         application_id = config.SATORI_ID,
         extensions = ('command_utils', 'commands_v2', 'slash',),
@@ -87,7 +88,7 @@ else:
     Flan = Client(
         config.FLAN_TOKEN,
         client_id = config.FLAN_ID,
-        activity = ActivityRich('Chesuto development', type_=ACTIVITY_TYPES.watching),
+        activity = Activity('Chesuto development', type_=ActivityType.watching),
         status = 'idle',
         application_id = config.FLAN_ID,
         intents = IntentFlag() - IntentFlag(0).update_by_keys(message_content=True),

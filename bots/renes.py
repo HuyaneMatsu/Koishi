@@ -1,7 +1,9 @@
+from hata import ActivityType, Client, Embed
 from scarletio import LOOP_TIME
-from hata import Client, ACTIVITY_TYPES, Embed
-from bot_utils.constants import GUILD__ESTS_HOME, ROLE__ESTS_HOME__STREAM_NOTIFICATION, USER__EST, \
-    CHANNEL__ESTS_HOME__STREAM_NOTIFICATION
+
+from bot_utils.constants import (
+    CHANNEL__ESTS_HOME__STREAM_NOTIFICATION, GUILD__ESTS_HOME, ROLE__ESTS_HOME__STREAM_NOTIFICATION, USER__EST
+)
 
 Renes: Client
 Satori: Client
@@ -50,7 +52,7 @@ class user_presence_update:
             return
         
         for activity in activity_change.iter_removed():
-            if activity.type == ACTIVITY_TYPES.stream:
+            if activity.type == ActivityType.stream:
                 removed_streaming_activity = activity
                 break
         else:
@@ -61,7 +63,7 @@ class user_presence_update:
         
         
         for activity in activity_change.iter_added():
-            if activity.type == ACTIVITY_TYPES.stream:
+            if activity.type == ActivityType.stream:
                 added_streaming_activity = activity
                 break
         else:

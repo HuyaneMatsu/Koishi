@@ -23,7 +23,7 @@
     </a>
 </p>
 
-Koishi is a multi functional waifu stuffed out with all the new Discord features. She got over 80 fun and utility
+Koishi is a multi functional waifu stuffed out with all the new Discord features. She got over 100 fun and utility
 commands to get the people together.
 
 To get started with Koishi, use the `/help` command, which lists all the available global commands.
@@ -72,8 +72,8 @@ And much more!
 
 - Fun
     
-    `9ball` • `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • `self-mute` •
-    `sex` • `stats` • `trivia` • `urban` • `yuno`
+    `9ball` • `ascii` • `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • 
+    `self-mute` • `sex` • `stats` • `touhou-feed` • `trivia` • `urban` • `yuno`
 
 - Games
     

@@ -592,8 +592,8 @@ CATEGORIES = (
         'Fun',
         EMOJI_PAPER_DRAGON,
         (
-            '9ball', 'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll', 'self-mute',
-            'sex', 'stats', 'trivia', 'urban', 'yuno'
+            '9ball', 'ascii', 'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll',
+            'self-mute', 'sex', 'stats', 'touhou-feed', 'trivia', 'urban', 'yuno'
         )
     ), (
         'Games',

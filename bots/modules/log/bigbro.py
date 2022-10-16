@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from hata import Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time, ACTIVITY_TYPES
+from hata import ActivityType, Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time
 from hata.discord.utils import DISCORD_EPOCH_START
 from hata.ext.plugin_loader import require
 
 from bot_utils.constants import GUILD__SUPPORT, CATEGORY__SUPPORT__BIG_BRO
+
 
 require(Satori=Client)
 
@@ -273,7 +274,7 @@ def render_activity(render_to, activity):
     render_to.append(')')
     render_to.append('\n')
     
-    if activity_type != ACTIVITY_TYPES.custom:
+    if activity_type != ActivityType.custom:
         timestamps = activity.timestamps
         if (timestamps is not None):
             timestamp_start = activity.start
