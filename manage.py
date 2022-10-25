@@ -3,6 +3,10 @@ os.environ['HATA_DOCS_ENABLED'] = 'True'
 os.environ['HATA_API_VERSION'] = '10'
 os.environ['HATA_RICH_DISCORD_EXCEPTION'] = 'True'
 os.environ['HATA_ALLOW_DEBUG_MESSAGES'] = 'True'
+os.environ['HATA_LIBRARY_AGENT_APPENDIX'] = 'KoiBot'
+os.environ['HATA_LIBRARY_NAME'] = 'discord.js'
+os.environ['HATA_LIBRARY_URL'] = 'https://discord.js.org'
+os.environ['HATA_LIBRARY_VERSION'] = '14.6.0'
 
 # Load config
 config_path = os.path.split(__file__)[0]
@@ -51,8 +55,18 @@ def run_webapp():
 
 if __name__ == '__main__':
     import bots
-    hata.ext.plugin_loader.load_all_plugin()
     
+    from hata import KOKORO
+    from hata.ext.plugin_loader import load_all_plugin, frame_filter
+    from scarletio import write_exception_sync
+    
+    try:
+        load_all_plugin()
+    except BaseException as err:
+        write_exception_sync(err, filter = frame_filter)
+        
+        hata.KOKORO.stop()
+        raise SystemExit
     
     hata.main.execute_command_from_system_parameters()
 

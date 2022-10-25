@@ -4,8 +4,8 @@ from hata import StickerFormat, Embed, DATETIME_FORMAT_CODE, elapsed_time, Stick
 
 
 def get_sticker_info(event, sticker):
-    sticker_url = sticker.url_as(size=4096)
-    embed = Embed('Sticker details',url=sticker_url)
+    sticker_url = sticker.url_as(size = 4096)
+    embed = Embed('Sticker details', url = sticker_url)
     
     sticker_format = sticker.format
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):

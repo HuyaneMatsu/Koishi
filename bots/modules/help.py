@@ -78,7 +78,7 @@ RULES = [
         'NSFW',
         lambda: 'Keep explicit content in nsfw channels.',
     ), (
-        'Earrape and other cursed contents',
+        'Shitposting, earrape and other cursed contents',
         lambda: 'Just no.',
     ), (
         'Advertisements',
@@ -91,7 +91,7 @@ RULES = [
         lambda: 'Unless, you have really good reason, like you were locked out from the original.',
     ), (
         'Deep frying fumos',
-        lambda: 'Fumo frying is bannable offense.',
+        lambda: 'Fumo frying and other related unethical actions are bannable offenses.',
     )
 ]
 

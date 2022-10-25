@@ -6,13 +6,13 @@ from hata import Client, DiscordException, ERROR_CODES, Embed, parse_custom_emoj
 from hata.ext.slash import abort
 
 from .constants import (
-    BUTTON_SNIPE_EMOJI_INFO, BUTTON_SNIPE_STICKER_INFO, CUSTOM_ID_SNIPE_EMOJIS, CUSTOM_ID_SNIPE_REACTIONS,
-    CUSTOM_ID_SNIPE_STICKERS
+    CUSTOM_ID_SNIPE_SELECT_EMOJI, CUSTOM_ID_SNIPE_SELECT_REACTION, CUSTOM_ID_SNIPE_SELECT_STICKER, NAME_BY_SNIPE_TYPE,
+    SNIPE_TYPE_EMOJI, SNIPE_TYPE_REACTION, SNIPE_TYPE_STICKER
 )
 from .lister_helpers import (
-    TYPE_NAME_BY_BUILDER, add_embed_author, create_initial_response, create_initial_response_parts,
-    create_select_response, embed_builder_emoji, embed_builder_reaction, embed_builder_sticker, option_builder_emoji,
-    option_builder_sticker, select_option_parser_emoji, select_option_parser_sticker
+    add_embed_author, create_initial_response, create_initial_response_parts, create_select_response,
+    embed_builder_emoji, embed_builder_reaction, embed_builder_sticker, select_option_parser_emoji,
+    select_option_parser_sticker
 )
 
 
@@ -31,7 +31,7 @@ async def snipe_emojis(client, event, target):
         abort('The message has no emojis.')
     
     
-    await _respond_with_emojis(client, event, target, emojis, embed_builder_emoji, CUSTOM_ID_SNIPE_EMOJIS)
+    await _respond_with_emojis(client, event, target, emojis, SNIPE_TYPE_EMOJI)
 
 
 
@@ -43,19 +43,17 @@ async def snipe_reactions(client, event, target):
     
     emojis = [*reactions.keys()]
     
-    await _respond_with_emojis(client, event, target, emojis, embed_builder_reaction, CUSTOM_ID_SNIPE_REACTIONS)
+    await _respond_with_emojis(client, event, target, emojis, SNIPE_TYPE_REACTION)
 
 
-async def _respond_with_emojis(client, event, target, emojis, embed_builder, custom_id):
-    await client.interaction_application_command_acknowledge(event, wait=False)
+async def _respond_with_emojis(client, event, target, emojis, snipe_type):
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     while True:
-        embed, components = create_initial_response_parts(
-            event, target, emojis, embed_builder, option_builder_emoji, custom_id, BUTTON_SNIPE_EMOJI_INFO
-        )
+        embed, components = create_initial_response_parts(event, target, emojis, snipe_type)
         
         try:
-            await client.interaction_response_message_edit(event, embed=embed, components=components)
+            await client.interaction_response_message_edit(event, embed = embed, components = components)
         except DiscordException as err:
             if err.code != ERROR_CODES.invalid_form_body:
                 raise
@@ -84,7 +82,7 @@ async def _respond_with_emojis(client, event, target, emojis, embed_builder, cus
             del emojis[index]
         
         if not emojis:
-            type_name = TYPE_NAME_BY_BUILDER[embed_builder]
+            type_name = NAME_BY_SNIPE_TYPE[snipe_type]
             embed = Embed(None, f'*No alive {type_name}s where sniped.*')
             add_embed_author(embed, event, target.url, type_name)
             
@@ -101,23 +99,20 @@ async def snipe_stickers(event, target):
     
     stickers = [*stickers]
     
-    return create_initial_response(
-        event, target, stickers, embed_builder_sticker, option_builder_sticker, CUSTOM_ID_SNIPE_STICKERS,
-        BUTTON_SNIPE_STICKER_INFO
-    )
+    return create_initial_response(event, target, stickers, SNIPE_TYPE_STICKER)
 
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_EMOJIS)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_SELECT_EMOJI)
 async def select_emoji(client, event):
     return await create_select_response(client, event, select_option_parser_emoji, embed_builder_emoji)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_REACTIONS)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_SELECT_REACTION)
 async def select_reaction(client, event):
     return await create_select_response(client, event, select_option_parser_emoji, embed_builder_reaction)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SNIPE_STICKERS)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_SELECT_STICKER)
 async def select_stickers(client, event):
     return await create_select_response(client, event, select_option_parser_sticker, embed_builder_sticker)

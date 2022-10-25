@@ -1,9 +1,9 @@
 from random import random
 
 from scarletio import CancelledError, sleep, Task, methodize
-from hata import DiscordException, BUILTIN_EMOJIS, EventWaitforBase, KOKORO, ERROR_CODES,  ComponentButton, \
-    ComponentRow
+from hata import DiscordException, BUILTIN_EMOJIS, EventWaitforBase, KOKORO, ERROR_CODES
 
+from hata.ext.slash import Button, Row
 from hata.ext.slash.menus.menu import Menu
 from hata.ext.slash.menus.helpers import EMOJI_LEFT, EMOJI_RIGHT, EMOJI_CANCEL, get_auto_check, CUSTOM_ID_CANCEL, \
     top_level_check, top_level_get_timeout
@@ -169,15 +169,15 @@ EMOJI_RIGHT_2_10 = BUILTIN_EMOJIS['fast_forward']
 EMOJI_RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
 
 class Pagination10step(Menu):
-    BUTTON_LEFT_2 = ComponentButton(emoji=EMOJI_LEFT_2_10)
-    BUTTON_LEFT = ComponentButton(emoji=EMOJI_LEFT)
-    BUTTON_RIGHT = ComponentButton(emoji=EMOJI_RIGHT)
-    BUTTON_RIGHT_2 = ComponentButton(emoji=EMOJI_RIGHT_2_10)
-    BUTTON_RESET = ComponentButton(emoji=EMOJI_RESET)
-    BUTTON_CANCEL = ComponentButton(emoji=EMOJI_CANCEL, custom_id=CUSTOM_ID_CANCEL)
+    BUTTON_LEFT_2 = Button(emoji=EMOJI_LEFT_2_10)
+    BUTTON_LEFT = Button(emoji=EMOJI_LEFT)
+    BUTTON_RIGHT = Button(emoji=EMOJI_RIGHT)
+    BUTTON_RIGHT_2 = Button(emoji=EMOJI_RIGHT_2_10)
+    BUTTON_RESET = Button(emoji=EMOJI_RESET)
+    BUTTON_CANCEL = Button(emoji=EMOJI_CANCEL, custom_id=CUSTOM_ID_CANCEL)
     
-    BUTTON_ROW_1 = ComponentRow(BUTTON_LEFT_2, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_RIGHT_2, BUTTON_RESET,)
-    BUTTON_ROW_2 = ComponentRow(BUTTON_CANCEL)
+    BUTTON_ROW_1 = Row(BUTTON_LEFT_2, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_RIGHT_2, BUTTON_RESET,)
+    BUTTON_ROW_2 = Row(BUTTON_CANCEL)
     
     __slots__ = ('page_index', 'pages', 'timeout', 'user_check')
     

@@ -59,7 +59,7 @@ def get_preinstanced_repr(value):
 
 
 def get_nullable_container_repr(value):
-    return 'null' if value is None else ''.join([repr(element) for element in value])
+    return 'null' if value is None else ', '.join([repr(element) for element in value])
 
 
 def get_nullable_string_repr(value):

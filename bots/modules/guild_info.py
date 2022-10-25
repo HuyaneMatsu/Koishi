@@ -124,7 +124,7 @@ async def add_guild_stickers_field(client, guild, embed, even_if_empty):
             '**Static stickers: '
         ]
         
-        static_count, animated_count, lottie_count = guild.sticker_count
+        static_count, animated_count, lottie_count = guild.sticker_counts
         
         sections_parts.append(str(static_count))
         sections_parts.append(

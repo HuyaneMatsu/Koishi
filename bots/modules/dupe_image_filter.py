@@ -554,7 +554,7 @@ async def dupe_image_filter(
     event,
     look_back: ('int', 'For how much days it should look back for?')
 ):
-    """Deletes duplicated images (and other files) | ou must have manage messages permission."""
+    """Deletes duplicated images (and other files) | You must have manage messages permission."""
     guild = event.guild
     if guild is None:
         abort('Guild only command.')

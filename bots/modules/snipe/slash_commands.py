@@ -1,13 +1,12 @@
 __all__ = ()
 
-from hata import Client, parse_emoji, is_id
+from hata import Client, is_id, parse_emoji
 from hata.ext.slash import abort
 
-from .constants import CUSTOM_ID_SNIPE_EMOJIS, CUSTOM_ID_SNIPE_STICKERS, BUTTON_SNIPE_EMOJI_INFO, \
-    BUTTON_SNIPE_STICKER_INFO
-from .lister_helpers import create_initial_response, embed_builder_emoji, option_builder_emoji, embed_builder_sticker, \
-    option_builder_sticker
+from .constants import SNIPE_TYPE_EMOJI, SNIPE_TYPE_STICKER
+from .lister_helpers import create_initial_response
 from .sticker_helpers import get_sticker
+
 
 SLASH_CLIENT: Client
 
@@ -43,9 +42,7 @@ async def emoji_command(
 ):
     """Shows details about the given emoji."""
     emoji = try_resolve_emoji(event, raw_emoji)
-    return create_initial_response(
-        event, None, [emoji], embed_builder_emoji, option_builder_emoji, CUSTOM_ID_SNIPE_EMOJIS, BUTTON_SNIPE_EMOJI_INFO,
-    )
+    return create_initial_response(event, None, [emoji], SNIPE_TYPE_EMOJI)
 
 emoji_autocompleted = SNIPE_COMMANDS.interactions(emoji_command, name='emoji-autocompleted')
 emoji_ = SNIPE_COMMANDS.interactions(emoji_command, name='emoji')
@@ -112,10 +109,7 @@ async def sticker_(
             return abort(f'Cannot find sticker in local scope: {sticker_name_or_id}')
         
     
-    return create_initial_response(
-        event, None, [sticker], embed_builder_sticker, option_builder_sticker, CUSTOM_ID_SNIPE_STICKERS,
-        BUTTON_SNIPE_STICKER_INFO
-    )
+    return create_initial_response(event, None, [sticker], SNIPE_TYPE_STICKER)
 
 
 @sticker_.autocomplete('sticker')

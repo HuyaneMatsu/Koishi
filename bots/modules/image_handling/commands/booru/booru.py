@@ -89,7 +89,7 @@ def build_booru_components(cache_id):
     
     Returns
     -------
-    components : ``ComponentBase``
+    components : ``Component``
     """
     return Row(
         Button(
@@ -109,7 +109,7 @@ def build_booru_disabled_components():
     
     Returns
     -------
-    components : ``ComponentBase``
+    components : ``Component``
     """
     return Row(
         Button(

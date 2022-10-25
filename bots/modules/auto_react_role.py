@@ -1203,7 +1203,7 @@ class AutoReactRoleManager:
             await client.events.error(client,f'{self!r}.action_on_emoji_delete', err)
             return
     
-    async def action_on_role_delete(self, client, role, guild):
+    async def action_on_role_delete(self, client, role):
         relations = self.relations
         try:
             emoji = relations.pop(role)
