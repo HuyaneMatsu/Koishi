@@ -1,8 +1,8 @@
 __all__ = ()
 
-from hata import DiscordException, ERROR_CODES, KOKORO, sleep
+from hata import DiscordException, ERROR_CODES, KOKORO
 from hata.ext.slash import abort
-from scarletio import Task, WaitTillExc
+from scarletio import Task, WaitTillExc, sleep
 
 
 async def get_message(client, channel, message_id):

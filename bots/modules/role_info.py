@@ -20,13 +20,13 @@ ROLE_ID_RP = re.compile('```\n(\d+)\n```', re.M)
 
 COMPONENTS_ROLE_INFO = Row(
     Button(
-        emoji = CLOSE_EMOJI,
-        custom_id = CUSTOM_ID_ROLE_INFO_CLOSE,
-    ),
-    Button(
         'Show permissions',
         LIST_EMOJI,
         custom_id = CUSTOM_ID_ROLE_INFO_SHOW_PERMISSIONS,
+    ),
+    Button(
+        emoji = CLOSE_EMOJI,
+        custom_id = CUSTOM_ID_ROLE_INFO_CLOSE,
     ),
 )
 
