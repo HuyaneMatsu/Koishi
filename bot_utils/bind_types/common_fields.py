@@ -14,8 +14,8 @@ class CommonFields(ModelLink, model=user_common_model, table=USER_COMMON_TABLE, 
         self.user_id = user.id
         return self
     
-    user_id = Field(user_common_model.user_id, 0, query_key='user_id')
-    entry_id = Field(user_common_model.id, 0, primary_key=True)
+    user_id = Field(user_common_model.user_id, 0, query_key = 'user_id')
+    entry_id = Field(user_common_model.id, 0, primary_key = True)
     
     total_love = Field(user_common_model.total_love, 0)
     total_allocated = Field(user_common_model.total_allocated, 0)

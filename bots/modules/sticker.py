@@ -320,7 +320,7 @@ async def most_used(
         is_new = (sticker.created_at >= is_new_limit)
         items.append((sticker, 0, is_new))
     
-    items.sort(key=item_sort_key, reverse=order)
+    items.sort(key = item_sort_key, reverse=order)
     
     page_shift = (page - 1) * MOST_USED_PER_PAGE
     
@@ -444,8 +444,8 @@ async def add_(client, event,
 def check_sticker_deleter(user, event):
     return user is event.user
 
-STICKER_DELETE_BUTTON_CONFIRM = Button('Yes', style=ButtonStyle.red)
-STICKER_DELETE_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
+STICKER_DELETE_BUTTON_CONFIRM = Button('Yes', style = ButtonStyle.red)
+STICKER_DELETE_BUTTON_CANCEL = Button('No', style = ButtonStyle.gray)
 
 STICKER_DELETE_COMPONENTS = Row(STICKER_DELETE_BUTTON_CONFIRM, STICKER_DELETE_BUTTON_CANCEL)
 
@@ -464,18 +464,18 @@ async def delete_(client, event,
     
     embed = Embed('Confirmation', f'Are you sure to delete {sticker.name!r} ({sticker.id}) sticker forever?')
     
-    message = yield InteractionResponse(embed=embed, components=STICKER_DELETE_COMPONENTS, allowed_mentions=None)
+    message = yield InteractionResponse(embed = embed, components = STICKER_DELETE_COMPONENTS, allowed_mentions = None)
     
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
-            check=partial_func(check_sticker_deleter, event.user))
+        component_interaction = await wait_for_component_interaction(message, timeout = 300.0,
+            check = partial_func(check_sticker_deleter, event.user))
     
     except TimeoutError:
         embed.title = 'Timeout'
         embed.description = f'Sticker {sticker.name!r} was not deleted.'
         
         # Edit the source message with the source interaction
-        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, message=message)
+        yield InteractionResponse(embed = embed, components = None, allowed_mentions = None, message = message)
         return
     
     if component_interaction.interaction == STICKER_DELETE_BUTTON_CANCEL:
@@ -483,7 +483,7 @@ async def delete_(client, event,
         embed.description = f'Sticker {sticker.name!r} was not deleted.'
         
         # Edit the source message with the component interaction
-        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, event=component_interaction)
+        yield InteractionResponse(embed = embed, components = None, allowed_mentions = None, event = component_interaction)
         return
     
     # Acknowledge the event
@@ -510,14 +510,14 @@ async def delete_(client, event,
         embed.description = f'Sticker {sticker.name!r} has been deleted successfully.'
     
     # Edit the source message
-    yield InteractionResponse(embed=embed, message=message, components=None)
+    yield InteractionResponse(embed = embed, message = message, components = None)
 
 
 def check_sticker_editor(user, event):
     return user is event.user
 
-STICKER_EDIT_BUTTON_CONFIRM = Button('Yes', style=ButtonStyle.blue)
-STICKER_EDIT_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
+STICKER_EDIT_BUTTON_CONFIRM = Button('Yes', style = ButtonStyle.blue)
+STICKER_EDIT_BUTTON_CANCEL = Button('No', style = ButtonStyle.gray)
 
 STICKER_EDIT_COMPONENTS = Row(STICKER_EDIT_BUTTON_CONFIRM, STICKER_EDIT_BUTTON_CANCEL)
 
@@ -597,18 +597,18 @@ async def edit_(client, event,
     if (new_description is not None):
         embed.add_field('Description', f'{sticker.description} -> {new_description}')
     
-    message = yield InteractionResponse(embed=embed, components=STICKER_EDIT_COMPONENTS, allowed_mentions=None)
+    message = yield InteractionResponse(embed = embed, components = STICKER_EDIT_COMPONENTS, allowed_mentions = None)
     
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
-            check=partial_func(check_sticker_editor, event.user))
+        component_interaction = await wait_for_component_interaction(message, timeout = 300.0,
+            check = partial_func(check_sticker_editor, event.user))
     
     except TimeoutError:
         embed.title = 'Timeout'
         embed.description = f'Sticker {sticker.name!r} was not edited.'
         
         # Edit the source message with the source interaction
-        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, message=message)
+        yield InteractionResponse(embed = embed, components = None, allowed_mentions = None, message = message)
         return
     
     if component_interaction.interaction == STICKER_EDIT_BUTTON_CANCEL:
@@ -616,7 +616,7 @@ async def edit_(client, event,
         embed.description = f'Sticker {sticker.name!r} was not edited.'
         
         # Edit the source message with the component interaction
-        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, event=component_interaction)
+        yield InteractionResponse(embed = embed, components = None, allowed_mentions = None, event = component_interaction)
         return
     
     # Acknowledge the event
@@ -654,7 +654,7 @@ async def edit_(client, event,
         embed.description = f'Sticker {sticker.name!r} has been successfully edited.'
     
     # Edit the source message
-    yield InteractionResponse(embed=embed, message=message, components=None)
+    yield InteractionResponse(embed = embed, message = message, components = None)
 
 
 def get_month_keys():

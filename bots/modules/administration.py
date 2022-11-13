@@ -87,7 +87,7 @@ async def clear(client, event,
     
     try:
         await client.multi_client_message_delete_sequence(
-            channel, after=after, before=before, limit=limit, filter=filter, reason=reason
+            channel, after=after, before=before, limit=limit, filter=filter, reason = reason
         )
     except DiscordException as err:
         if err.code not in (
@@ -228,7 +228,7 @@ async def bans(client, event):
         if index == embed_ln:
             break
     
-    await Pagination(client, event, result, check=bans_pagination_check)
+    await Pagination(client, event, result, check = bans_pagination_check)
 '''
 
 def check_channel_invites_pagination_permissions(event):
@@ -309,14 +309,14 @@ async def invites_(client, event,
         coroutine = client.invite_get_all_guild(guild)
     invites = await coroutine
     
-    pages = [Embed(description=chunk) for chunk in pchunkify(invites, write_parents=False)]
+    pages = [Embed(description = chunk) for chunk in pchunkify(invites, write_parents=False)]
     
     if channel is None:
         check = check_guild_invites_pagination_permissions
     else:
         check = check_channel_invites_pagination_permissions
     
-    await Pagination(client, event, pages, timeout=120., check=check)
+    await Pagination(client, event, pages, timeout = 120., check = check)
 
 '''
 
@@ -324,8 +324,8 @@ def check_banner(user, event):
     return user is event.user
 
     
-BAN_BUTTON_CONFIRM = Button('Yes', EMOJI__REIMU_HAMMER, style=ButtonStyle.red)
-BAN_BUTTON_CANCEL = Button('No', style=ButtonStyle.gray)
+BAN_BUTTON_CONFIRM = Button('Yes', EMOJI__REIMU_HAMMER, style = ButtonStyle.red)
+BAN_BUTTON_CANCEL = Button('No', style = ButtonStyle.gray)
 
 BAN_COMPONENTS = Row(BAN_BUTTON_CONFIRM, BAN_BUTTON_CANCEL)
 
@@ -383,20 +383,20 @@ async def ban(client, event,
     )
 
     
-    message = yield InteractionResponse(embed=embed, components=BAN_COMPONENTS, allowed_mentions=None)
+    message = yield InteractionResponse(embed = embed, components = BAN_COMPONENTS, allowed_mentions = None)
     
     # Wait for user input
     
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
-            check=partial_func(check_banner, event.user))
+        component_interaction = await wait_for_component_interaction(message, timeout = 300.0,
+            check = partial_func(check_banner, event.user))
     
     except TimeoutError:
         embed.title = 'Timeout'
         embed.description = f'{user.mention} was not yeeted from {guild.name}.'
         
         # Edit the source message with the source interaction
-        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, message=message)
+        yield InteractionResponse(embed = embed, components = None, allowed_mentions = None, message = message)
         return
     
     if component_interaction.interaction == BAN_BUTTON_CANCEL:
@@ -404,7 +404,7 @@ async def ban(client, event,
         embed.description = f'{user.mention} was not yeeted from {guild.name}.'
         
         # Edit the source message with the component interaction
-        yield InteractionResponse(embed=embed, components=None, allowed_mentions=None, event=component_interaction)
+        yield InteractionResponse(embed = embed, components = None, allowed_mentions = None, event = component_interaction)
         return
     
     # Acknowledge the event
@@ -433,7 +433,7 @@ async def ban(client, event,
             )
             
             try:
-                await client.message_create(channel, embed=embed)
+                await client.message_create(channel, embed = embed)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     return # We cannot help no internet
@@ -451,17 +451,17 @@ async def ban(client, event,
         caller = event.user
         reason = f'Requested by: {caller.full_name} [{caller.id}]'
     
-    await client.guild_ban_add(guild, user, delete_message_duration=delete_message_days * 24 * 60 * 60, reason=reason)
+    await client.guild_ban_add(guild, user, delete_message_duration=delete_message_days * 24 * 60 * 60, reason = reason)
     
     embed = Embed('Hecatia yeah!', f'{user.full_name} has been yeeted.')
     if (notify_note is not None):
         embed.add_footer(notify_note)
     
     # Edit the source message
-    yield InteractionResponse(embed=embed, message=message, components=None)
+    yield InteractionResponse(embed = embed, message = message, components = None)
 
 
-@SLASH_CLIENT.interactions(is_global=True, allow_in_dm=False)
+@SLASH_CLIENT.interactions(is_global = True, allow_in_dm = False)
 async def is_banned(client, event,
     user: ('user', 'Who should I check?')
 ):
@@ -502,8 +502,8 @@ async def is_banned(client, event,
 ROLE_EMOJI_CONFIRM= BUILTIN_EMOJIS['ok_hand']
 ROLE_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 
-EMOJI_ROLE_BUTTON_CONFIRM = Button(emoji=ROLE_EMOJI_CONFIRM, style=ButtonStyle.green)
-EMOJI_ROLE_BUTTON_CANCEL = Button(emoji=ROLE_EMOJI_CANCEL, style=ButtonStyle.blue)
+EMOJI_ROLE_BUTTON_CONFIRM = Button(emoji = ROLE_EMOJI_CONFIRM, style = ButtonStyle.green)
+EMOJI_ROLE_BUTTON_CANCEL = Button(emoji = ROLE_EMOJI_CANCEL, style = ButtonStyle.blue)
 EMOJI_ROLE_COMPONENTS = Row(EMOJI_ROLE_BUTTON_CONFIRM, EMOJI_ROLE_BUTTON_CANCEL)
 
 
@@ -591,10 +591,10 @@ async def emoji_role(client, event,
     
     embed.add_field('After:', role_text)
     
-    message = yield InteractionResponse(embed=embed, components=EMOJI_ROLE_COMPONENTS)
+    message = yield InteractionResponse(embed = embed, components = EMOJI_ROLE_COMPONENTS)
     
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout=300.0, check=role_emoji_checker)
+        component_interaction = await wait_for_component_interaction(message, timeout = 300.0, check = role_emoji_checker)
     
     except TimeoutError:
         component_interaction = None
@@ -616,4 +616,4 @@ async def emoji_role(client, event,
             description = 'Emoji edited successfully.'
     
     embed = Embed(f'Edit {emoji.name}\'s roles', description).add_thumbnail(emoji.url)
-    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)
+    yield InteractionResponse(embed = embed, components = None, message = message, event = component_interaction)

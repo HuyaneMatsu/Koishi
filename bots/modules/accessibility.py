@@ -192,18 +192,18 @@ async def change_notification_button_click(client, event, notification_option, e
     )
 
 
-@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.proposal.enable')
+@SLASH_CLIENT.interactions(custom_id = 'accessibility.change_notification_settings.proposal.enable')
 async def enable_proposal_notification(client, event):
     await change_notification_button_click(client, event, PROPOSAL_NOTIFICATION_OPTION, True)
 
-@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.proposal.disable')
+@SLASH_CLIENT.interactions(custom_id = 'accessibility.change_notification_settings.proposal.disable')
 async def enable_proposal_notification(client, event):
     await change_notification_button_click(client, event, PROPOSAL_NOTIFICATION_OPTION, False)
 
-@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.daily.enable')
+@SLASH_CLIENT.interactions(custom_id = 'accessibility.change_notification_settings.daily.enable')
 async def enable_proposal_notification(client, event):
     await change_notification_button_click(client, event, DAILY_NOTIFICATION_OPTION, True)
 
-@SLASH_CLIENT.interactions(custom_id='accessibility.change_notification_settings.daily.disable')
+@SLASH_CLIENT.interactions(custom_id = 'accessibility.change_notification_settings.daily.disable')
 async def enable_proposal_notification(client, event):
     await change_notification_button_click(client, event, DAILY_NOTIFICATION_OPTION, False)

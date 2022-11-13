@@ -16,7 +16,7 @@ SLASH_CLIENT : Client
 HANDLERS = {character: ImageHandlerMeekMoe(character) for character in VOCALOID_CHARACTERS.values()}
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def vocaloid(
     client,
     event,

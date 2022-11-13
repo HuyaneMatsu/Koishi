@@ -11,7 +11,7 @@ from config import KOISHI_TOP_GG_AUTHORIZATION
 
 URL_PREFIX = '/project/koishi/api'
 
-ROUTES = Blueprint('vote', '', url_prefix=URL_PREFIX)
+ROUTES = Blueprint('vote', '', url_prefix = URL_PREFIX)
 
 
 @ROUTES.route('/top_gg/vote', methods=['POST'])

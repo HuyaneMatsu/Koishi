@@ -108,7 +108,7 @@ class threads:
             
             description.append('**Other thread types**:\n')
             
-            thread_count_by_type = sorted(thread_count_by_type.items(), key=thread_count_type_item_sort_key)
+            thread_count_by_type = sorted(thread_count_by_type.items(), key = thread_count_type_item_sort_key)
             
             total_leftover = 0
             for item in thread_count_by_type:
@@ -148,9 +148,9 @@ class threads:
         description.append('**Total**: ')
         description.append(repr(thread_count))
         
-        embed = Embed('Threads', ''.join(description), color=STAT_COLOR)
+        embed = Embed('Threads', ''.join(description), color = STAT_COLOR)
         
-        await client.message_create(message.channel, embed=embed)
+        await client.message_create(message.channel, embed = embed)
     
     category = 'STATS'
     
@@ -158,7 +158,7 @@ class threads:
         return Embed('threads',(
             'Just shows how my threads are doing.\n'
             f'Usage: `{command_context.prefix}threads`'
-            ), color=STAT_COLOR).add_footer(
+            ), color = STAT_COLOR).add_footer(
                 'Owner only!')
 
 if IS_PYPY:
@@ -187,9 +187,9 @@ if IS_PYPY:
                 f'Total: {stats.memory_allocated_sum}\n'
                 '\n'
                 f'Total time spent in GC: {stats.total_gc_time / 1000.0:.3f}',
-                  color=STAT_COLOR)
+                  color = STAT_COLOR)
             
-            await client.message_create(message.channel, embed=embed)
+            await client.message_create(message.channel, embed = embed)
         
         aliases = ['gc', 'gc-info',]
         category = 'STATS'
@@ -198,7 +198,7 @@ if IS_PYPY:
             return Embed('gc-stats',(
                 'Garbage collector info to check memory usage.\n'
                 f'Usage: `{command_context}gc-stats`'
-                ), color=STAT_COLOR).add_footer(
+                ), color = STAT_COLOR).add_footer(
                     'Owner only!')
 
 
@@ -318,9 +318,9 @@ if (CpuUsage is not None):
             description.append(PROCESS.memory_percent().__format__('.2f'))
             description.append('%')
             
-            embed = Embed('System and Process stats:', ''.join(description), color=STAT_COLOR)
+            embed = Embed('System and Process stats:', ''.join(description), color = STAT_COLOR)
             
-            await client.message_create(message.channel, embed=embed)
+            await client.message_create(message.channel, embed = embed)
         
         category = 'STATS'
         
@@ -328,6 +328,6 @@ if (CpuUsage is not None):
             return Embed('system-stats',(
                 'Shows my system\s and processes\'s stats.\n'
                 f'Usage: `{command_context.prefix}system-stats`'
-                ), color=STAT_COLOR).add_footer(
+                ), color = STAT_COLOR).add_footer(
                     'Owner only!')
 

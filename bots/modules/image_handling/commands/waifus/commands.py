@@ -28,7 +28,7 @@ SAFE_HANDLERS = {waifu_type: Waifu(waifu_type, False) for waifu_type in SAFE_WAI
 NSFW_HANDLERS = {waifu_type: Waifu(waifu_type, True ) for waifu_type in NSFW_WAIFU_TYPES}
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def waifu_safe(
     client,
     event,
@@ -38,7 +38,7 @@ async def waifu_safe(
     await SAFE_HANDLERS[type_](client, event)
 
 
-@SLASH_CLIENT.interactions(is_global=True, nsfw=True)
+@SLASH_CLIENT.interactions(is_global = True, nsfw = True)
 async def waifu_nsfw(
     client,
     event,

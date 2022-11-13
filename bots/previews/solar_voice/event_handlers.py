@@ -37,7 +37,7 @@ async def notify_leave(client, player):
         f'I will leave from the channel after {LEAVE_TIMEOUT:.0f} seconds.',
     )
     
-    await client.message_create(channel, embed=embed)
+    await client.message_create(channel, embed = embed)
 
 
 @SLASH_CLIENT.events
@@ -55,7 +55,7 @@ async def track_end(client, event):
     if not can_send_message_in_channel(client, channel):
         return
     
-    embed = Embed(color=EMBED_COLOR)
+    embed = Embed(color = EMBED_COLOR)
     
     embed.add_field(
         f'{EMOJI_LAST_TRACK} Finished playing',
@@ -84,7 +84,7 @@ async def track_exception(client, event):
     if not can_send_message_in_channel(client, channel):
         return
     
-    embed = Embed(color=EMBED_COLOR)
+    embed = Embed(color = EMBED_COLOR)
     
     embed.add_field(
         f'{EMOJI_LAST_TRACK} Something went wrong meanwhile playing',

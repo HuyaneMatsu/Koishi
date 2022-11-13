@@ -251,7 +251,7 @@ async def try_get_invite_url_of(guild):
     return None
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 class koi_guilds:
     NEXT_CACHE_AT = 0.0
     
@@ -278,7 +278,7 @@ EMOJI_KOISHI_DERP = Emoji.precreate(772498743378575403)
 
 @SLASH_CLIENT.interactions(
     is_global = True,
-    required_permissions = Permission().update_by_keys(administrator=True),
+    required_permissions = Permission().update_by_keys(administrator = True),
 )
 async def koi_guilds_how_to(client, event):
     """How to become the best koi guild!"""
@@ -306,7 +306,7 @@ async def koi_guilds_how_to(client, event):
 
 @SLASH_CLIENT.interactions(
     guild = GUILD__SUPPORT,
-    required_permissions = Permission().update_by_keys(administrator=True),
+    required_permissions = Permission().update_by_keys(administrator = True),
 )
 async def koi_guilds_recache():
     cache_guilds()

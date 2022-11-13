@@ -22,7 +22,7 @@ from bot_utils.cpu_info import CpuUsage, PROCESS
 
 SLASH_CLIENT: Client
 
-@SLASH_CLIENT.events(name='interaction_create')
+@SLASH_CLIENT.events(name = 'interaction_create')
 class interaction_counter:
     __slots__ = ('application_command', 'total')
     
@@ -140,10 +140,10 @@ async def rules(
         embed.add_field(title, description_builder())
         components = None
     
-    return InteractionResponse(embed=embed, components=components, allowed_mentions=None)
+    return InteractionResponse(embed = embed, components = components, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_VERIFIED_CUSTOM_ID)
+@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_VERIFIED_CUSTOM_ID)
 async def claim_verified_role(client, event):
     user = event.user
     if user.has_role(ROLE__SUPPORT__VERIFIED):
@@ -155,7 +155,7 @@ async def claim_verified_role(client, event):
     await client.interaction_response_message_create(event, response, show_for_invoking_user_only=True)
 
 
-@SLASH_CLIENT.interactions(custom_id=CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID)
+@SLASH_CLIENT.interactions(custom_id = CLAIM_ROLE_ANNOUNCEMENTS_CUSTOM_ID)
 async def claim_announcements_role(client, event):
     user = event.user
     if user.has_role(ROLE__SUPPORT__ANNOUNCEMENTS):
@@ -534,7 +534,7 @@ ABOUT_FIELD_NAME_TO_RENDERER = {
 }
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def about(client, event,
     field: (ABOUT_FIELD_CHOICES, 'Choose a field!') = ABOUT_FIELD_NAME_GENERIC,
 ):
@@ -748,7 +748,7 @@ HELP_FIELD_NAME_TO_RENDERER = {
     HELP_FIELD_NAME_HEART_GUIDE: render_help_heart_guide,
 }
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def help_(client, event,
     field: (HELP_FIELD_CHOICES, 'Choose a field!') = HELP_FIELD_NAME_GENERIC,
 ):
@@ -761,7 +761,7 @@ async def help_(client, event,
         return await field_renderer(client, event)
 
 
-@SLASH_CLIENT.interactions(is_global=True, wait_for_acknowledgement=True)
+@SLASH_CLIENT.interactions(is_global = True, wait_for_acknowledgement = True)
 async def ping(client, event):
     """HTTP ping-pong."""
     start = perf_counter()
@@ -792,22 +792,22 @@ async def ping(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
 async def docs_search(client, event,
     search_for: ('str', 'Search term'),
 ):
     """Searchers the given query from hata docs."""
     guild = event.guild
     if guild is None:
-        yield Embed('Error', 'Guild only command', color=COLOR__KOISHI_HELP)
+        yield Embed('Error', 'Guild only command', color = COLOR__KOISHI_HELP)
         return
     
     if (client.get_guild_profile_for(guild) is None):
-        yield Embed('Error', 'I must be in the guild to execute this command.', color=COLOR__KOISHI_HELP)
+        yield Embed('Error', 'I must be in the guild to execute this command.', color = COLOR__KOISHI_HELP)
         return
     
     if len(search_for) < 4:
-        yield Embed('Ohoho', 'Please give a longer query', color=COLOR__KOISHI_HELP)
+        yield Embed('Ohoho', 'Please give a longer query', color = COLOR__KOISHI_HELP)
         return
     
     yield
@@ -816,7 +816,7 @@ async def docs_search(client, event,
         datas = await response.json()
     
     if not datas:
-        embed = Embed(f'No search result for: `{search_for}`', color=COLOR__KOISHI_HELP)
+        embed = Embed(f'No search result for: `{search_for}`', color = COLOR__KOISHI_HELP)
         await Closer(client, event, embed)
         return
     
@@ -878,13 +878,13 @@ async def docs_search(client, event,
     
     embeds = []
     for index, description in enumerate(descriptions, 1):
-        embed = Embed(title, description, color=COLOR__KOISHI_HELP).add_footer(f'Page {index}/{len(descriptions)}')
+        embed = Embed(title, description, color = COLOR__KOISHI_HELP).add_footer(f'Page {index}/{len(descriptions)}')
         embeds.append(embed)
     
-    await Pagination(client, event, embeds, check=partial_func(docs_search_pagination_check, event.user))
+    await Pagination(client, event, embeds, check = partial_func(docs_search_pagination_check, event.user))
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
 async def ask():
     """How to ask!"""
     return Embed(
@@ -902,7 +902,7 @@ async def ask():
     )
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
 async def markdown():
     """How to use markdown."""
     return Embed(
@@ -952,7 +952,7 @@ async def Collectible():
         f'Become favored by Koishi receiving more hearts from her each day.',
     )
     
-    return InteractionResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
 @ROLE_INFO.interactions
@@ -974,4 +974,4 @@ async def events():
         f'notice them one day.'
     )
     
-    return InteractionResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed = embed, allowed_mentions = None)

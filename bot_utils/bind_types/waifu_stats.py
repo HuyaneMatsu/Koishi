@@ -84,8 +84,8 @@ class WaifuStats(ModelLink, model=waifu_stats_model, table=WAIFU_STATS_TABLE, en
         self.user_id = user.id
         return self
     
-    user_id = Field(waifu_stats_model.user_id, 0, query_key='user_id')
-    entry_id = Field(waifu_stats_model.id, 0, primary_key=True)
+    user_id = Field(waifu_stats_model.user_id, 0, query_key = 'user_id')
+    entry_id = Field(waifu_stats_model.id, 0, primary_key = True)
     
     stat_housewife = Field(waifu_stats_model.stat_housewife, 0)
     stat_cuteness = Field(waifu_stats_model.stat_cuteness, 0)

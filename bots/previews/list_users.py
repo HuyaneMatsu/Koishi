@@ -398,8 +398,8 @@ async def list_users(
     client,
     event,
     serialisation: (SERIALIZATION_MODES, 'Select on which mode I should serialise the data.'),
-    offset : P('int', 'User listing offset.', min_value=0) = 0,
-    limit: P('int', 'The maximal amount of users to list.', min_value=1, max_value=1000) = 1000,
+    offset : P('int', 'User listing offset.', min_value = 0) = 0,
+    limit: P('int', 'The maximal amount of users to list.', min_value = 1, max_value = 1000) = 1000,
 ):
     """Lists a chunk of the guild's users."""
     guild = event.guild

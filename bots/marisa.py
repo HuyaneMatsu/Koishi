@@ -5,7 +5,7 @@ from time import perf_counter
 
 from hata import (
     BUILTIN_EMOJIS, ButtonStyle, CHANNELS, Client, ClientWrapper, DiscordException, ERROR_CODES, Embed, GUILDS,
-    INTERACTION_RESPONSE_TYPES, InteractionResponseContext, KOKORO, MESSAGES, MessageFlag, cchunkify, parse_emoji,
+    InteractionResponseType, InteractionResponseContext, KOKORO, MESSAGES, MessageFlag, cchunkify, parse_emoji,
     parse_message_reference, parse_rdelta, parse_tdelta
 )
 from hata.ext.command_utils import UserMenuFactory, UserPagination
@@ -14,7 +14,7 @@ from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 from hata.ext.plugin_loader import PLUGINS, add_default_plugin_variables, get_plugin, reload_plugin
 from hata.ext.slash import (
     Button, Form, InteractionResponse, Option, P, Row, Select, TextInput, abort, configure_parameter, set_permission,
-    wait_for_component_interaction
+    wait_for_component_interaction, UserSelect
 )
 from hata.ext.slash.menus import Pagination
 from scarletio import alchemy_incendiary, catching, render_exception_into_async, sleep
@@ -121,7 +121,7 @@ async def command_error_handler(ctx, exception):
     
     while True:
         if index == limit:
-            embed = Embed(description=''.join(page_contents))
+            embed = Embed(description = ''.join(page_contents))
             pages.append(embed)
             page_contents = None
             break
@@ -140,13 +140,13 @@ async def command_error_handler(ctx, exception):
                 # If we are at the last element, we don\'t need to shard up,
                 # because the last element is always '```'
                 page_contents.append(line)
-                embed = Embed(description=''.join(page_contents))
+                embed = Embed(description = ''.join(page_contents))
                 pages.append(embed)
                 page_contents = None
                 break
             
             page_contents.append('```')
-            embed = Embed(description=''.join(page_contents))
+            embed = Embed(description = ''.join(page_contents))
             pages.append(embed)
             
             page_contents.clear()
@@ -218,7 +218,7 @@ Marisa.commands(
     ],
 )
 
-Marisa.commands(sync_request_command, name='sync', category='UTILITY', checks=[checks.owner_only()])
+Marisa.commands(sync_request_command, name = 'sync', category='UTILITY', checks=[checks.owner_only()])
 
 @ALL.events(overwrite=True)
 async def error(client, name, err):
@@ -251,7 +251,7 @@ SAFE_BOORU = 'http://safebooru.org/index.php?page=dapi&s=post&q=index&tags='
 # Booru also might ban ban you for a time if you do too much requests.
 IMAGE_URL_CACHE = {}
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def retardify(client, event,
     text : ('str', 'Some text to retardify.'),
 ):
@@ -282,11 +282,11 @@ async def retardify(client, event,
     else:
         description = 'Nothing to retardify.'
     
-    embed = Embed(description=description)
+    embed = Embed(description = description)
     user = event.user
     embed.add_author(user.full_name, user.avatar_url)
     
-    await client.interaction_response_message_create(event, embed=embed, allowed_mentions=None)
+    await client.interaction_response_message_create(event, embed = embed, allowed_mentions = None)
 
 
 Marisa@set_permission(GUILD__SUPPORT, ('role',                     0), False)
@@ -305,7 +305,7 @@ Marisa@set_permission(GUILD__SUPPORT, ('channel', 533609128288059392), True )
 Marisa@set_permission(GUILD__SUPPORT, ('channel', 918901494839922689), True )
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_channel_and_role(client, event,
     user : ('user', 'Please input a user') = None,
     channel : ('channel', 'Please input a channel') = None,
@@ -325,7 +325,7 @@ async def test_channel_and_role(client, event,
     )
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
+@Marisa.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def invoking_user_only(client, event):
     """SHows for the invoking user only, maybe?"""
     return 'Beep-boop'
@@ -334,18 +334,18 @@ async def async_gen():
     yield 'beep'
     yield 'boop'
     
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def yield_async_gen(client, event):
     """Yields an async gen."""
     yield async_gen()
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def return_async_gen(client, event):
     """Returns an async gen."""
     return async_gen()
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def raffle(client, event,
     message : ('str', 'The message to raffle from'),
     emoji : ('str', 'The reactor users to raffle from.'),
@@ -418,7 +418,7 @@ async def raffle(client, event,
     yield content
     return
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def loading(client, event):
     """Loading screen nya!"""
     if not client.is_owner(event.user):
@@ -428,7 +428,7 @@ async def loading(client, event):
     await sleep(0.5)
     await client.interaction_response_message_edit(event, content='loaded')
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def number(client, event, number:('number', 'number')):
     """Loading screen nya!"""
     return str(number)
@@ -438,12 +438,12 @@ async def async_gen_2():
     abort('beep')
     yield
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def abort_from_async_gen(client, event):
     """Aborts from an async gen."""
     return async_gen_2()
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def parse_time_delta(client, event,
     delta: (str, 'The delta to parse'),
 ):
@@ -456,7 +456,7 @@ async def parse_time_delta(client, event,
     
     return result
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def parse_relative_delta(client, event,
     delta: (str, 'The delta to parse'),
 ):
@@ -469,7 +469,7 @@ async def parse_relative_delta(client, event,
     
     return result
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def user_id(client, event,
     user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
 ):
@@ -479,7 +479,7 @@ async def user_id(client, event,
     
     return str(user_id)
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def collect_reactions(client, event):
     """Collects reactions"""
     message = yield InteractionResponse('Collecting reactions for 1 minute!')
@@ -496,7 +496,7 @@ async def collect_reactions(client, event):
         yield 'No reactions were collected.'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def debug_command(client, event,
     command_name: (str, 'The command\'s name.')
 ):
@@ -563,7 +563,7 @@ async def debug_command(client, event,
     return ''.join(text_parts)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def roll(client, event,
     dice_count: (set(range(1, 7)), 'With how much dice do you wanna roll with?') = 1,
 ):
@@ -597,7 +597,7 @@ class ZerefPagination(UserPagination):
         
         return await UserPagination.invoke(self, event)
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def zeref_pagination(client, event):
     """Zeref's cake paginator."""
     await ZerefPagination(client, event, ['hi', 'hello'], event.user)
@@ -664,7 +664,7 @@ class CatFeeder:
                 await menu.client.reaction_clear(menu.message)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def cat_feeder(client, event):
     """Feed the cat!"""
     await CatFeeder(client, event)
@@ -674,35 +674,35 @@ def check_user(user, event):
     return user is event.user
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def getting_good(client, event):
     """Getting there."""
     main_component = Row(
-        Button('cake', custom_id='cake', style=ButtonStyle.blue),
-        Button('cat', custom_id='cat', style=ButtonStyle.gray),
-        Button('snake', custom_id='snake', style=ButtonStyle.green),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red),
-        Button('eggplant', custom_id='eggplant', style=ButtonStyle.red, enabled=False),
+        Button('cake', custom_id = 'cake', style = ButtonStyle.blue),
+        Button('cat', custom_id = 'cat', style = ButtonStyle.gray),
+        Button('snake', custom_id = 'snake', style = ButtonStyle.green),
+        Button('eggplant', custom_id = 'eggplant', style = ButtonStyle.red),
+        Button('eggplant', custom_id = 'eggplant', style = ButtonStyle.red, enabled=False),
     )
     
-    yield InteractionResponse(embed=Embed('Choose your poison.'), components=main_component, show_for_invoking_user_only=True)
+    yield InteractionResponse(embed = Embed('Choose your poison.'), components = main_component, show_for_invoking_user_only=True)
     
     try:
         component_interaction = await wait_for_component_interaction(event,
-            timeout=4500., check=partial_func(check_user, event.user))
+            timeout = 4500., check = partial_func(check_user, event.user))
     except TimeoutError:
-        await client.message_edit(event.message, components=None)
+        await client.message_edit(event.message, components = None)
     else:
         emoji = BUILTIN_EMOJIS[component_interaction.interaction.custom_id]
-        await client.message_edit(event.message, emoji.as_emoji, embed=None, components=None)
+        await client.message_edit(event.message, emoji.as_emoji, embed = None, components = None)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def link():
     """Melo Melo!"""
     component = Button(
         'melo melo',
-        url='https://www.youtube.com/watch?v=gYGqcORGqIw&ab_channel=ShoopTouhouEurobeatShoopTouhouEurobeat',
+        url = 'https://www.youtube.com/watch?v=gYGqcORGqIw',
     )
     
     return InteractionResponse('_ _',
@@ -711,21 +711,21 @@ async def link():
     )
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def slash_edit(client, event):
     """Editing slashes, bakana!"""
-    yield InteractionResponse(embed=Embed('Choose your poison.'))
+    yield InteractionResponse(embed = Embed('Choose your poison.'))
     await sleep(2.0, KOKORO)
-    yield InteractionResponse(embed=Embed('Choose your cake.'), message=None)
+    yield InteractionResponse(embed = Embed('Choose your cake.'), message = None)
     await sleep(2.0, KOKORO)
-    yield InteractionResponse(embed=Embed('Choose your neko.'), message=None)
+    yield InteractionResponse(embed = Embed('Choose your neko.'), message = None)
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def embed_abort(client, event):
     """embed abortion."""
-    abort(embed=Embed('cake'))
+    abort(embed = Embed('cake'))
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def mentionable_check(client, event,
     entity: ('mentionable', 'New field hype!'),
 ):
@@ -733,7 +733,7 @@ async def mentionable_check(client, event,
     yield repr(entity)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 @configure_parameter('emoji', str, 'Yes?')
 async def configured_show_emoji(emoji):
     """Shows the given custom emoji."""
@@ -747,11 +747,11 @@ async def configured_show_emoji(emoji):
     return f'**Name:** {emoji} **Link:** {emoji.url}'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def select_test():
     main_component = [
         Select([
-                Option('cake', 'cake', default=True),
+                Option('cake', 'cake', default = True),
                 Option('cat', 'cat'),
                 Option('sugoi', 'sugoi'),
             ],
@@ -781,26 +781,26 @@ async def handle_cooldown_error(command_context, exception):
     return False
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def nine():
     components = [
-        [Button(f'{index_1}x{index_2}', custom_id=f'nine.{index_1}.{index_2}') for index_1 in range(1, 4)]
+        [Button(f'{index_1}x{index_2}', custom_id = f'nine.{index_1}.{index_2}') for index_1 in range(1, 4)]
             for index_2 in range(1, 4)
     ]
     
-    yield InteractionResponse('Select a nyan', components=components)
+    yield InteractionResponse('Select a nyan', components = components)
 
-@Marisa.interactions(custom_id=re.compile('nine\.(\d)\.(\d)'))
+@Marisa.interactions(custom_id = re.compile('nine\.(\d)\.(\d)'))
 async def poison_edit_cake(index_1, index_2):
     return f'You selected: {index_1}x{index_2}'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def pagination_or_something(client, event):
     """Pagination or something"""
     await Pagination(client, event, ['cake', 'lewd'])
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_response_message(client, event):
     await client.interaction_application_command_acknowledge(event)
     message = await client.interaction_followup_message_create(event, 'cake')
@@ -1035,7 +1035,7 @@ async def no_wait():
     
     yield f'{delay:.0f} ms'
 
-@PING.interactions(wait_for_acknowledgement=True)
+@PING.interactions(wait_for_acknowledgement = True)
 async def wait():
     """HTTP ping-pong."""
     start = perf_counter()
@@ -1057,7 +1057,7 @@ async def no_wait_full():
     yield f'{delay:.0f} ms'
 
 
-@PING.interactions(wait_for_acknowledgement=True)
+@PING.interactions(wait_for_acknowledgement = True)
 async def wait_full():
     """HTTP ping-pong."""
     start = perf_counter()
@@ -1117,17 +1117,17 @@ async def extra_4(client, event):
     yield f'{delay:.0f} ms'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_form(event):
     return Form(
         'This does nothing',
         [
-            TextInput('watch neko', custom_id='form_value'),
+            TextInput('watch neko', custom_id = 'form_value'),
         ],
         custom_id = 'watch_neko',
     )
 
-@Marisa.interactions(custom_id='watch_neko', target='form', allowed_mentions=[])
+@Marisa.interactions(custom_id = 'watch_neko', target = 'form', allowed_mentions = [])
 async def watch_neko(*, form_value):
     return form_value
 
@@ -1138,12 +1138,12 @@ TEST_COMPONENT_RESPONSE_BUTTON = Button(
     custom_id = TEST_COMPONENT_RESPONSE_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_component_response():
-    return InteractionResponse('_ _', components=TEST_COMPONENT_RESPONSE_BUTTON)
+    return InteractionResponse('_ _', components = TEST_COMPONENT_RESPONSE_BUTTON)
 
 
-@Marisa.interactions(custom_id=TEST_COMPONENT_RESPONSE_CUSTOM_ID)
+@Marisa.interactions(custom_id = TEST_COMPONENT_RESPONSE_CUSTOM_ID)
 async def test_component_response_click(client, event):
     if event.user.has_role(ROLE__SUPPORT__TESTER):
         await client.interaction_response_message_create(event, 'ayyy', show_for_invoking_user_only=True)
@@ -1158,11 +1158,11 @@ TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_FORM = Form(
     custom_id = TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_form_response_repr_ac():
     return TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_FORM
 
-@Marisa.interactions(custom_id=TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID, target='form')
+@Marisa.interactions(custom_id = TEST_FORM_RESPONSE_REPR_APPLICATION_COMMAND_CUSTOM_ID, target = 'form')
 async def test_form_response_repr_ac_form_submit(event):
     return repr(event)
 
@@ -1181,16 +1181,16 @@ TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON = Button(
     custom_id = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_form_response_repr_mc():
-    return InteractionResponse('_ _', components=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON)
+    return InteractionResponse('_ _', components = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_BUTTON)
 
-@Marisa.interactions(custom_id=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID)
+@Marisa.interactions(custom_id = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID)
 async def test_form_response_repr_mc_call_form(event):
     if event.user.has_role(ROLE__SUPPORT__TESTER):
         return TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_FORM
 
-@Marisa.interactions(custom_id=TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID, target='form')
+@Marisa.interactions(custom_id = TEST_FORM_RESPONSE_REPR_MESSAGE_COMPONENT_CUSTOM_ID, target = 'form')
 async def test_form_response_repr_mc_form_submit(client, event):
     await client.interaction_component_message_edit(event, f'{event.user:f} submitted')
     return repr(event)
@@ -1202,12 +1202,12 @@ TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_BUTTON = Button(
     custom_id = TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_component_responding_double():
-    return InteractionResponse('_ _', components=TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_BUTTON)
+    return InteractionResponse('_ _', components = TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_BUTTON)
 
 
-@Marisa.interactions(custom_id=TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_CUSTOM_ID)
+@Marisa.interactions(custom_id = TEST_COMPONENT_RESPONDING_DOUBLE_YIELD_CUSTOM_ID)
 async def test_component_responding_click(event):
     if event.user.has_role(ROLE__SUPPORT__TESTER):
         yield
@@ -1215,7 +1215,7 @@ async def test_component_responding_click(event):
         yield 'followup'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_double():
     yield 'followup'
     yield 'cake'
@@ -1230,11 +1230,11 @@ TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_FORM = Form(
     custom_id = TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_form_responding_ac_double():
     return TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_FORM
 
-@Marisa.interactions(custom_id=TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_CUSTOM_ID, target='form')
+@Marisa.interactions(custom_id = TEST_FORM_RESPONDING_APPLICATION_COMMAND_DOUBLE_CUSTOM_ID, target = 'form')
 async def test_form_component_response_double(event):
     yield 'submitted from command'
     yield 'double kill'
@@ -1254,23 +1254,23 @@ TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_BUTTON = Button(
     custom_id = TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID,
 )
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_form_responding_mc_double():
-    return InteractionResponse('_ _', components=TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_BUTTON)
+    return InteractionResponse('_ _', components = TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_BUTTON)
 
-@Marisa.interactions(custom_id=TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID)
+@Marisa.interactions(custom_id = TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID)
 async def test_form_response_mc_responding_double_call_form(event):
     if event.user.has_role(ROLE__SUPPORT__TESTER):
         return TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_FORM
 
-@Marisa.interactions(custom_id=TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID, target='form')
+@Marisa.interactions(custom_id = TEST_FORM_RESPONDING_MESSAGE_COMMAND_DOUBLE_CUSTOM_ID, target = 'form')
 async def test_form_responding_mc_double_form_submit(client, event):
     yield 'submitted from component'
     yield 'double kill'
 
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def resend(
     client,
     event,
@@ -1281,24 +1281,24 @@ async def resend(
     yield InteractionResponse(file=(attachment.name, file))
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def locale(event):
     return (
         f'Locale: {event.locale.name}\n'
         f'guild locale: {event.guild_locale.name}'
     )
 
-@Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
+@Marisa.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def test_edit(client, event):
     yield
     yield 'a'
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 @set_permission(GUILD__SUPPORT, ('role', 0), False)
 async def test_permissions():
     return 'beep'
 
-@Marisa.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
+@Marisa.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def test_autocomplete_count(client, event, parameter:str):
     return parameter
 
@@ -1327,7 +1327,7 @@ async def create(client, event):
             'content': TO_SUPPRESS,
             'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
         },
-        'type': INTERACTION_RESPONSE_TYPES.message_and_source,
+        'type': InteractionResponseType.message_and_source.value,
     }
     
     async with InteractionResponseContext(event, False, False):
@@ -1353,7 +1353,7 @@ async def ack_2(client, event):
         'data': {
             'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
         },
-        'type': INTERACTION_RESPONSE_TYPES.source,
+        'type': InteractionResponseType.source.value,
     }
     
     async with InteractionResponseContext(event, True, False):
@@ -1372,7 +1372,7 @@ async def ack_3(client, event):
         'data': {
             'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
         },
-        'type': INTERACTION_RESPONSE_TYPES.source,
+        'type': InteractionResponseType.source.value,
     }
     
     async with InteractionResponseContext(event, True, False):
@@ -1393,7 +1393,7 @@ async def ack_4(client, event):
         'data': {
             'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
         },
-        'type': INTERACTION_RESPONSE_TYPES.source,
+        'type': InteractionResponseType.source.value,
     }
     
     async with InteractionResponseContext(event, True, False):
@@ -1428,7 +1428,7 @@ async def edit(client, event):
             'content': TO_SUPPRESS,
             # 'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
         },
-        'type': INTERACTION_RESPONSE_TYPES.message_and_source,
+        'type': InteractionResponseType.message_and_source.value,
     }
     
     async with InteractionResponseContext(event, True, False):
@@ -1450,7 +1450,7 @@ async def edit_2(client, event):
             'content': TO_SUPPRESS,
             # 'flags': MESSAGE_FLAG_VALUE_SUPPRESS_EMBEDS,
         },
-        'type': INTERACTION_RESPONSE_TYPES.message_and_source,
+        'type': InteractionResponseType.message_and_source.value,
     }
     
     async with InteractionResponseContext(event, True, False):
@@ -1484,39 +1484,39 @@ async def webhook(client, event):
     await client.http.webhook_message_create(executor_webhook.id, executor_webhook.token, data, None)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, required_permissions=2197949382599)
+@Marisa.interactions(guild = GUILD__SUPPORT, required_permissions = 2197949382599)
 async def test_required_permissions():
     return 'Hello'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
-async def test_length(value: P(str, min_length=10, max_length=16)):
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def test_length(value: P(str, min_length = 10, max_length = 16)):
     return len(value)
 
 
-@Marisa.interactions(is_global=True, allow_in_dm=False)
+@Marisa.interactions(is_global = True, allow_in_dm = False)
 async def not_in_dm():
     return 'not in dm'
 
-@Marisa.interactions(is_global=True, allow_in_dm=True)
+@Marisa.interactions(is_global = True, allow_in_dm = True)
 async def in_dm_too():
     return 'try in dm too'
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT, target='message')
+@Marisa.interactions(guild = GUILD__SUPPORT, target = 'message')
 async def message_context():
     return 'I am a message context command'
 
 
 
-@Marisa.interactions(is_global=True)
+@Marisa.interactions(is_global = True)
 async def test_calc(
     expression: ('expression', 'Mathematical expression to evaluate')
 ):
     return repr(expression)
 
 
-@Marisa.interactions(guild=GUILD__SUPPORT)
+@Marisa.interactions(guild = GUILD__SUPPORT)
 async def test_double_ack(client, event):
     await client.interaction_application_command_acknowledge(event, wait=False)
     await client.interaction_application_command_acknowledge(event)
@@ -1533,6 +1533,36 @@ async def description_test():
     response : `str`
     """
     return 'response'
+
+
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def user_select_test():
+    """Tests user select."""
+    return InteractionResponse(
+        components = UserSelect(custom_id = 'user_select_test', max_values = 25)
+    )
+
+
+@Marisa.interactions(custom_id = 'user_select_test')
+async def handle_user_select(event):
+    return 'Users:\n' + '\n'.join(user.full_name for user in event.iter_entities())
+
+
+MENTION_TEST_COMMANDS = Marisa.interactions(
+    None,
+    name = 'mention-test',
+    description = 'ping pong',
+    guild = GUILD__SUPPORT,
+)
+
+@MENTION_TEST_COMMANDS.interactions
+async def main(event):
+    return f'{MENTION_TEST_COMMANDS:m} {MENTION_TEST_COMMANDS.mention_at(event.guild)}'
+
+
+@MENTION_TEST_COMMANDS.interactions
+async def sub(event):
+    return f'{sub:m} {sub.mention_at(event.guild)}'
 
 
 if (watchdog is not None):

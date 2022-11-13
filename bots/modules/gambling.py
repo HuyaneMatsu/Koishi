@@ -32,10 +32,10 @@ EVENT_OK_EMOJI = BUILTIN_EMOJIS['ok_hand']
 EVENT_ABORT_EMOJI = BUILTIN_EMOJIS['x']
 EVENT_DAILY_MIN_AMOUNT = 1
 EVENT_DAILY_MAX_AMOUNT = 7
-EVENT_OK_BUTTON = Button(emoji=EVENT_OK_EMOJI)
-EVENT_ABORT_BUTTON = Button(emoji=EVENT_ABORT_EMOJI)
+EVENT_OK_BUTTON = Button(emoji = EVENT_OK_EMOJI)
+EVENT_ABORT_BUTTON = Button(emoji = EVENT_ABORT_EMOJI)
 EVENT_COMPONENTS = Row(EVENT_OK_BUTTON, EVENT_ABORT_BUTTON)
-EVENT_CURRENCY_BUTTON = Button(emoji=EMOJI__HEART_CURRENCY)
+EVENT_CURRENCY_BUTTON = Button(emoji = EMOJI__HEART_CURRENCY)
 
 
 
@@ -73,7 +73,7 @@ PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
 
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def heart_event(client, event,
     duration : ('str', 'The event\'s duration.'),
     amount : ('int', 'The hearst to earn.'),
@@ -173,15 +173,15 @@ async def heart_event(client, event,
         return
     
     await client.interaction_application_command_acknowledge(event)
-    message = await client.interaction_followup_message_create(event, response, components=EVENT_COMPONENTS)
+    message = await client.interaction_followup_message_create(event, response, components = EVENT_COMPONENTS)
     
     try:
         component_event = await wait_for_component_interaction(message,
-            check=partial_func(heart_event_start_checker, client), timeout=300.)
+            check = partial_func(heart_event_start_checker, client), timeout = 300.)
     except TimeoutError:
         try:
             await client.interaction_response_message_edit(event, 'Heart event cancelled, timeout.',
-                components=None)
+                components = None)
         except ConnectionError:
             pass
         return
@@ -189,7 +189,7 @@ async def heart_event(client, event,
     if component_event.interaction == EVENT_ABORT_BUTTON:
         try:
             await client.interaction_component_message_edit(component_event, 'Heart event cancelled.',
-                components=None)
+                components = None)
         except ConnectionError:
             pass
         return
@@ -217,8 +217,8 @@ class HeartEventGUI:
         self.message = message
         
         try:
-            await client.interaction_response_message_edit(event, content='', embed=self.generate_embed(),
-                components=EVENT_CURRENCY_BUTTON)
+            await client.interaction_response_message_edit(event, content='', embed = self.generate_embed(),
+                components = EVENT_CURRENCY_BUTTON)
         except BaseException as err:
             if isinstance(err, ConnectionError):
                 return
@@ -236,7 +236,7 @@ class HeartEventGUI:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit - len(self.user_ids)} users'
         else:
             description = f'{convert_tdelta(self.duration)} left'
-        return Embed(title, description, color=COLOR__GAMBLING)
+        return Embed(title, description, color = COLOR__GAMBLING)
 
     async def __call__(self, event):
         if event.interaction != EVENT_CURRENCY_BUTTON:
@@ -309,7 +309,7 @@ class HeartEventGUI:
             if self.duration < update_delta:
                 break
             try:
-                await client.message_edit(message, embed=self.generate_embed())
+                await client.message_edit(message, embed = self.generate_embed())
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     break
@@ -361,7 +361,7 @@ class HeartEventGUI:
         Task(connector.close(), KOKORO)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def daily_event(client, event,
     duration: ('str', 'The event\'s duration.'),
     amount: ('int', 'The extra daily steaks to earn.'),
@@ -461,15 +461,15 @@ async def daily_event(client, event,
         return
     
     await client.interaction_application_command_acknowledge(event)
-    message = await client.interaction_followup_message_create(event, response, components=EVENT_COMPONENTS)
+    message = await client.interaction_followup_message_create(event, response, components = EVENT_COMPONENTS)
     
     try:
         component_event = await wait_for_component_interaction(message,
-            check=partial_func(heart_event_start_checker, client), timeout=300.0)
+            check = partial_func(heart_event_start_checker, client), timeout = 300.0)
     except TimeoutError:
         try:
             await client.interaction_response_message_edit(event, message, 'Daily event cancelled, timeout.',
-                components=None)
+                components = None)
         except ConnectionError:
             pass
         return
@@ -477,7 +477,7 @@ async def daily_event(client, event,
     if component_event.interaction == EVENT_ABORT_BUTTON:
         try:
             await client.interaction_component_message_edit(component_event, 'Daily event cancelled.',
-                components=None)
+                components = None)
         except ConnectionError:
             pass
         return
@@ -505,8 +505,8 @@ class DailyEventGUI:
         self.message = message
         
         try:
-            await client.interaction_response_message_edit(event, content='', embed=self.generate_embed(),
-                components=EVENT_CURRENCY_BUTTON)
+            await client.interaction_response_message_edit(event, content='', embed = self.generate_embed(),
+                components = EVENT_CURRENCY_BUTTON)
         except BaseException as err:
             if isinstance(err, ConnectionError):
                 return
@@ -526,7 +526,7 @@ class DailyEventGUI:
             description = f'{convert_tdelta(self.duration)} left or {self.user_limit - len(self.user_ids)} users'
         else:
             description = f'{convert_tdelta(self.duration)} left'
-        return Embed(title, description, color=COLOR__GAMBLING)
+        return Embed(title, description, color = COLOR__GAMBLING)
     
     async def __call__(self, event):
         if event.interaction != EVENT_CURRENCY_BUTTON:
@@ -607,7 +607,7 @@ class DailyEventGUI:
             if self.duration < update_delta:
                 break
             try:
-                await client.message_edit(message,embed=self.generate_embed())
+                await client.message_edit(message, embed = self.generate_embed())
             except BaseException as err:
                 if isinstance(err,ConnectionError):
                     break
@@ -660,7 +660,7 @@ class DailyEventGUI:
 
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def gift(client, event,
     target_user: ('user', 'Who is your heart\'s chosen one?'),
     amount: ('int', 'How much do u love them?'),
@@ -706,11 +706,11 @@ async def gift(client, event,
             source_user_total_allocated = 0
         
         if source_user_total_love == 0:
-            yield Embed('So lonely...', 'You do not have any hearts to gift.', color=COLOR__GAMBLING)
+            yield Embed('So lonely...', 'You do not have any hearts to gift.', color = COLOR__GAMBLING)
             return
         
         if source_user_total_love == source_user_total_allocated:
-            yield Embed('Like a flower', 'Whithering to the dust.', color=COLOR__GAMBLING)
+            yield Embed('Like a flower', 'Whithering to the dust.', color = COLOR__GAMBLING)
             return
         
         response = await connector.execute(
@@ -801,7 +801,7 @@ async def gift(client, event,
         embed.add_field('Message:', message)
     
     try:
-        await client.message_create(target_user_channel, embed=embed)
+        await client.message_create(target_user_channel, embed = embed)
     except ConnectionError:
         return
     except DiscordException as err:
@@ -817,7 +817,7 @@ AWARD_TYPES = [
 ]
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def award(client, event,
     target_user: ('user', 'Who do you want to award?'),
     amount: ('int', 'With how much love do you wanna award them?'),
@@ -939,7 +939,7 @@ async def award(client, event,
         embed.add_field('Message:', message)
     
     try:
-        await client.message_create(target_user_channel, embed=embed)
+        await client.message_create(target_user_channel, embed = embed)
     except ConnectionError:
         return
     except DiscordException as err:
@@ -950,7 +950,7 @@ async def award(client, event,
 
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(administrator=True))
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
 async def take(client, event,
     target_user: ('user', 'From who do you want to take love away?'),
     amount: ('int', 'How much love do you want to take away?'),
@@ -1007,7 +1007,7 @@ async def take(client, event,
     return
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def top_list(client, event,
     page : ('number', 'page?') = 1,
 ):
@@ -1139,7 +1139,7 @@ async def increase_user_total_love(user_id, increase):
         
 
 # yup, we are generating hearts
-@SLASH_CLIENT.events(name='interaction_create')
+@SLASH_CLIENT.events(name = 'interaction_create')
 async def heart_generator(client, event):
     user_id = event.user.id
     if user_id in HEART_GENERATOR_COOLDOWNS:

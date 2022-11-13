@@ -76,7 +76,7 @@ async def guild_user_add(client, guild, user):
     )
 
 
-@Koishi.interactions(custom_id=re.compile(f'welcome\.(\d+)\.create_response_message'))
+@Koishi.interactions(custom_id = re.compile(f'welcome\.(\d+)\.create_response_message'))
 async def welcome_user(client, event, user_id):
     yield
     
@@ -88,7 +88,7 @@ async def welcome_user(client, event, user_id):
     await client.webhook_message_create(
         executor_webhook,
         mention_user_by_id(user_id),
-        embed = Embed(color=3092790).add_image(choice(WELCOME_IMAGES)),
+        embed = Embed(color = 3092790).add_image(choice(WELCOME_IMAGES)),
         name = event.user.name_at(event.guild_id),
-        avatar_url = event.user.avatar_url_at_as(event.guild_id, size=4096)
+        avatar_url = event.user.avatar_url_at_as(event.guild_id, size = 4096)
     )

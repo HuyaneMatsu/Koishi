@@ -635,7 +635,7 @@ async def save_stage_sources():
     This function is a coroutine.
     """
     async with FILE_LOCK:
-        stage_sources = sorted(STAGES_BY_ID.values(), key=stage_source_sort_key)
+        stage_sources = sorted(STAGES_BY_ID.values(), key = stage_source_sort_key)
         data = pretty_dump_stage_sources(stage_sources)
         with await AsyncIO(FILE_PATH, 'w') as file:
             await file.write(data)
@@ -3247,7 +3247,7 @@ class GameState:
         description = self.render_description()
         color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
         
-        embed = Embed(title, description, color=color)
+        embed = Embed(title, description, color = color)
         
         steps = len(self.history)
         best = self.best
@@ -3314,7 +3314,7 @@ class GameState:
         description = self.render_description()
         color = DIFFICULTY_COLORS.get(stage.difficulty_index, DUNGEON_SWEEPER_COLOR)
         
-        embed = Embed(title, description, color=color).add_footer(f'steps : {steps}, best : {best}')
+        embed = Embed(title, description, color = color).add_footer(f'steps : {steps}, best : {best}')
         
         if self.stage.after_stage_source is None:
             button_next = BUTTON_NEXT_DISABLED
@@ -4563,7 +4563,7 @@ class DungeonSweeperRunner:
             user = event.user
             embed.add_author(user.full_name, user.avatar_url_as('png', 32))
             
-            message = await client.interaction_followup_message_create(event, embed=embed, components=components)
+            message = await client.interaction_followup_message_create(event, embed = embed, components = components)
         except:
             if (user_state is not None):
                 await user_state.upload_game_state_on_init_failure()
@@ -4618,7 +4618,7 @@ class DungeonSweeperRunner:
         client = self.client
         try:
             await client.interaction_response_message_create(event)
-            message = await client.interaction_followup_message_create(event, embed=embed, components=components)
+            message = await client.interaction_followup_message_create(event, embed = embed, components = components)
         
         except BaseException as err:
             
@@ -4638,7 +4638,7 @@ class DungeonSweeperRunner:
         
         
         try:
-            await client.message_edit(self.message, components=None)
+            await client.message_edit(self.message, components = None)
         except BaseException as err:
             if not (
                 isinstance(err, ConnectionError) or
@@ -4718,7 +4718,7 @@ class DungeonSweeperRunner:
         
         self._gui_state = GUI_STATE_EDITING
         try:
-            await client.interaction_component_message_edit(event, embed=embed, components=components)
+            await client.interaction_component_message_edit(event, embed = embed, components = components)
         except BaseException as err:
             self.cancel(err)
             raise
@@ -4837,7 +4837,7 @@ class DungeonSweeperRunner:
         
         if isinstance(exception, TimeoutError):
             try:
-                await client.message_edit(message, components=None)
+                await client.message_edit(message, components = None)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     # no internet
@@ -4873,7 +4873,7 @@ class DungeonSweeperRunner:
             )
             
             try:
-                await client.message_edit(message, embed=embed, components=None)
+                await client.message_edit(message, embed = embed, components = None)
             except BaseException as err:
                 if isinstance(err, ConnectionError):
                     # no internet
@@ -4902,9 +4902,9 @@ class DungeonSweeperRunner:
         """Returns the dungeon sweep runner's representation."""
         repr_parts = [
             '<', self.__class__.__name__,
-            ' client=', repr(self.client),
-            ', at channel=', repr(self.message.channel),
-            ', gui_state='
+            ' client = ', repr(self.client),
+            ', channel = ', repr(self.message.channel),
+            ', gui_state = '
         ]
         
         gui_state = self._gui_state

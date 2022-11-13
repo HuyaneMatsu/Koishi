@@ -97,7 +97,7 @@ async def get_meme(client, event, meme_lock):
     return None
 
 
-@SLASH_CLIENT.interactions(is_global=True, name='meme')
+@SLASH_CLIENT.interactions(is_global = True, name = 'meme')
 async def meme_(client, event):
     """Shows a meme."""
     if not event.guild_id:
@@ -108,12 +108,12 @@ async def meme_(client, event):
         abort('No memes for now.')
     
     title, link, url = meme
-    embed = Embed(title, url=f'{URL_BASE}{link}').add_image(url)
+    embed = Embed(title, url = f'{URL_BASE}{link}').add_image(url)
     
-    return InteractionResponse(embed=embed, components=COMPONENTS_GOOD_ANIME_MEMES)
+    return InteractionResponse(embed = embed, components = COMPONENTS_GOOD_ANIME_MEMES)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_GOOD_ANIME_MEMES)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_GOOD_ANIME_MEMES)
 async def send_new_good_anime_meme(client, event):
     if event.user is not event.message.interaction.user:
         return
@@ -129,6 +129,6 @@ async def send_new_good_anime_meme(client, event):
         )
     else:
         title, link, url = meme
-        embed = Embed(title, url=f'{URL_BASE}{link}').add_image(url)
+        embed = Embed(title, url = f'{URL_BASE}{link}').add_image(url)
     
     return embed

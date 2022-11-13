@@ -218,7 +218,7 @@ async def close_message(client, event):
     
     
     if not delete:
-        await client.interactions_followup_message_create(
+        await client.interaction_followup_message_create(
             event,
             'You must be the invoker of the interaction, or have manage messages permission to do this.',
             show_for_invoking_user_only = True,

@@ -699,7 +699,7 @@ class GameState:
         try:
             embed, components = self.render()
             
-            await client.interaction_response_message_create(event, embed=embed, components=components)
+            await client.interaction_response_message_create(event, embed = embed, components = components)
             message = await client.interaction_response_message_get(event)
         except:
             try:
@@ -742,7 +742,7 @@ class GameState:
             embed.add_field(answer.ask(), answer.answer())
         
         components = [
-            Button(question.ask(), custom_id=f'{CUSTOM_ID_QUESTION_BASE}.{index}')
+            Button(question.ask(), custom_id = f'{CUSTOM_ID_QUESTION_BASE}.{index}')
             for index, question in enumerate(self.questions)
         ]
         
@@ -784,7 +784,7 @@ CATEGORIES = [
 
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
 async def rember_preview(
     client,
     event,
@@ -799,9 +799,9 @@ async def rember_preview(
         if message is None:
             components = None
         else:
-            components = Button('Go there', url=message.url)
+            components = Button('Go there', url = message.url)
             
-        abort('You are already in a game', components=components)
+        abort('You are already in a game', components = components)
         return
     
     await GameState(client, event, category)
@@ -810,7 +810,7 @@ async def rember_preview(
 CUSTOM_ID_QUESTION_BASE = 'help_me_rember.question'
 
 
-@SLASH_CLIENT.interactions(custom_id=re.compile(f'{re.escape(CUSTOM_ID_QUESTION_BASE)}\.(\d+)'))
+@SLASH_CLIENT.interactions(custom_id = re.compile(f'{re.escape(CUSTOM_ID_QUESTION_BASE)}\.(\d+)'))
 async def select_question(event, index):
     user = event.user
     if event.message.interaction.user is not user:
@@ -819,6 +819,6 @@ async def select_question(event, index):
     try:
         active_game = ACTIVE_GAMES[event.user.id]
     except KeyError:
-        return InteractionResponse(components=None) # KEKW
+        return InteractionResponse(components = None) # KEKW
     
     await active_game.select_question(event, index)

@@ -577,7 +577,7 @@ async def queue(client, event_or_message, guild):
     color = VOICE_COLORS.get(client, None)
     
     title = f'Playing queue for {guild}'
-    page = Embed(title, color=color)
+    page = Embed(title, color = color)
     pages = [page]
     while True:
         if voice_client is None:
@@ -602,7 +602,7 @@ async def queue(client, event_or_message, guild):
                     break
                 
                 if index % 10 == 0:
-                    page = Embed(title, color=color)
+                    page = Embed(title, color = color)
                     pages.append(page)
             
         else:
@@ -709,7 +709,7 @@ async def command_join_description(command_context):
     )
 
 
-@VOICE_COMMAND_CLIENT.commands(name='join', description=command_join_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'join', description = command_join_description, category='VOICE')
 async def command_join(client, message, volume:int=None):
     async for content in join(client, message.author, message.guild, volume):
         if (content is not None):
@@ -727,7 +727,7 @@ async def command_pause_description(command_context):
     )
 
 
-@VOICE_COMMAND_CLIENT.commands(name='pause', description=command_pause_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'pause', description = command_pause_description, category='VOICE')
 async def command_resume(client, message):
     return await pause(client, message)
 
@@ -742,7 +742,7 @@ async def command_resume_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name='resume', description=command_resume_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'resume', description = command_resume_description, category='VOICE')
 async def command_resume(client, message):
     return await resume(client, message)
 
@@ -757,7 +757,7 @@ async def command_leave_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name='leave', description=command_leave_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'leave', description = command_leave_description, category='VOICE')
 async def command_leave(client, message):
     async for content in leave(client, message):
         if (content is not None):
@@ -797,7 +797,7 @@ async def command_move_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name='move', description=command_move_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'move', description = command_move_description, category='VOICE')
 async def command_move(client, message, voice_channel: 'channel'=None):
     if (voice_channel is not None) and (not voice_channel.is_in_group_guild_connectable()):
         yield 'Please select a voice channel.'
@@ -813,13 +813,13 @@ async def party_is_over_description(command_context):
     return Embed('party-is-over', (
         'Should I mark the talking party as done?\n'
         f'Usage: `{command_context.prefix}party-is-over`'
-        ), color=MAIN_VOICE_COLOR).add_footer(
+        ), color = MAIN_VOICE_COLOR).add_footer(
             'Administrator only!')
 
 @VOICE_COMMAND_CLIENT.commands(
     name = 'party-is-over',
     description = party_is_over_description,
-    checks = checks.owner_or_has_guild_permissions(administrator=True),
+    checks = checks.owner_or_has_guild_permissions(administrator = True),
     aliases = 'partyisover',
     category = 'VOICE',
 )
@@ -834,7 +834,7 @@ if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
             'Plays a local audio from my collection.\n'
             f'Usage: `{command_context.prefix}local <name>`\n'
             'If you do not say anything to play, I ll tell, want I am currently playing instead > <.'
-            ), color=MAIN_VOICE_COLOR)
+            ), color = MAIN_VOICE_COLOR)
     
     @VOICE_COMMAND_CLIENT.commands(
         name = 'local',
@@ -855,9 +855,9 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
             f'Usage: `{command_context.prefix}play <name>`\n'
             '\n'
             'Note that the given name can be also given as the position of the track.'
-                ), color=COLOR__FLAN_HELP)
+                ), color = COLOR__FLAN_HELP)
     
-    @Flan.commands(name='play', description=command_chesuto_chesuto_play_by_name_description, category='VOICE')
+    @Flan.commands(name = 'play', description = command_chesuto_chesuto_play_by_name_description, category='VOICE')
     async def command_chesuto_play(command_context, name):
         if not name:
             yield await command_chesuto_chesuto_play_by_name_description(command_context)
@@ -872,9 +872,9 @@ if AUDIO_PLAY_POSSIBLE and (not MARISA_MODE):
         return Embed('play', (
             'Plays a random chesuto bgm.\n'
             f'Usage: `{command_context.prefix}random`\n'
-                ), color=COLOR__FLAN_HELP)
+                ), color = COLOR__FLAN_HELP)
     
-    @Flan.commands(name='random', description=command_chesuto_play_random_description, category='VOICE')
+    @Flan.commands(name = 'random', description = command_chesuto_play_random_description, category='VOICE')
     async def command_chesuto_random(client, message):
         async for content in chesuto_play_random(client, message):
             if (content is not None):
@@ -884,9 +884,9 @@ async def command_loop_description(command_context):
     return Embed('loop', (
         'Sets the voice client\'s looping behaviour or returns the current one.\n'
         f'Usage: `{command_context.prefix}loop <queue|actual|stop>`\n'
-        ), color=VOICE_COLORS.get(command_context.client, None))
+        ), color = VOICE_COLORS.get(command_context.client, None))
 
-@VOICE_COMMAND_CLIENT.commands(name='loop', description=command_loop_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'loop', description = command_loop_description, category='VOICE')
 async def command_loop(client, message, behaviour:'str' = None):
     if (behaviour is not None):
         state = behaviour.lower()
@@ -900,10 +900,10 @@ async def command_queue_description(command_context):
     return Embed('queue', (
         'Shows the voice client\'s queue of the guild.\n'
         f'Usage: `{command_context.prefix}queue`'
-        ), color=VOICE_COLORS.get(command_context.client, None))
+        ), color = VOICE_COLORS.get(command_context.client, None))
 
 
-@VOICE_COMMAND_CLIENT.commands(name='queue', description=command_queue_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'queue', description = command_queue_description, category='VOICE')
 async def command_queue(client, message):
     guild = message.guild
     if guild is None:
@@ -925,7 +925,7 @@ async def command_volume_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name='volume', description=command_volume_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'volume', description = command_volume_description, category='VOICE')
 async def command_volume(client, message, volume: int = None):
     return await volume_(client, message, volume)
 
@@ -941,7 +941,7 @@ async def command_stop_description(command_context):
     )
 
 
-@VOICE_COMMAND_CLIENT.commands(name='stop', description=command_stop_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'stop', description = command_stop_description, category='VOICE')
 async def command_stop(client, message):
     return await stop(client, message)
 
@@ -956,7 +956,7 @@ async def command_skip_description(command_context):
         color = VOICE_COLORS.get(command_context.client, None),
     )
 
-@VOICE_COMMAND_CLIENT.commands(name='skip', description=command_skip_description, category='VOICE')
+@VOICE_COMMAND_CLIENT.commands(name = 'skip', description = command_skip_description, category='VOICE')
 async def command_skip(client, message, index: int = 0):
     return await skip(client, message, index)
 
@@ -970,45 +970,45 @@ if SLASH_CLIENT is not None:
         guild = GUILD__SUPPORT,
     )
     
-    @VOICE_COMMANDS.interactions(name='join')
+    @VOICE_COMMANDS.interactions(name = 'join')
     async def slash_join(client, interaction_event,
         volume: ('int', 'Any preset volume?') = None,
     ):
         """Joins the voice channel."""
         return join(client, interaction_event.user, interaction_event.guild, volume)
     
-    @VOICE_COMMANDS.interactions(name='pause')
+    @VOICE_COMMANDS.interactions(name = 'pause')
     async def slash_pause(client, interaction_event):
         """Pauses the currently playing audio."""
         return await pause(client, interaction_event)
     
-    @VOICE_COMMANDS.interactions(name='resume')
+    @VOICE_COMMANDS.interactions(name = 'resume')
     async def slash_resume(client, interaction_event):
         """Resumes the currently playing audio."""
         return await resume(client, interaction_event)
     
-    @VOICE_COMMANDS.interactions(name='leave')
+    @VOICE_COMMANDS.interactions(name = 'leave')
     async def slash_leave(client, interaction_event):
         """Leaves me from the voice channel."""
         return leave(client, interaction_event)
     
     
     if AUDIO_PLAY_POSSIBLE:
-        @VOICE_COMMANDS.interactions(name='play')
+        @VOICE_COMMANDS.interactions(name = 'play')
         async def slash_yt_play(client, interaction_event,
             name: ('str', 'The name of the audio to play.') = '',
         ):
             """Plays the chosen audio or shows what is playing right now."""
             return yt_play(client, interaction_event, name)
     
-    @VOICE_COMMANDS.interactions(name='move')
+    @VOICE_COMMANDS.interactions(name = 'move')
     async def slash_move(client, interaction_event,
         voice_channel: ('channel_group_guild_connectable', 'To which channel should I move to?') = None
     ):
         """Moves to the selected channel or next to You, my Love?"""
         return move(client, interaction_event, interaction_event.user, voice_channel)
     
-    @VOICE_COMMANDS.interactions(name='party-is-over')
+    @VOICE_COMMANDS.interactions(name = 'party-is-over')
     async def slash_party_is_over(client, interaction_event):
         """I mark the talking party as done?"""
         if not interaction_event.user_permissions.can_administrator:
@@ -1017,50 +1017,50 @@ if SLASH_CLIENT is not None:
         return party_is_over(client, interaction_event)
     
     if (AUDIO_PATH is not None) and AUDIO_PLAY_POSSIBLE:
-        @VOICE_COMMANDS.interactions(name='local')
+        @VOICE_COMMANDS.interactions(name = 'local')
         async def slash_local(client, interaction_event,
             name: ('str', 'The audio\'s name') = '',
         ):
             """Plays a local audio file from my own collection UwU."""
             return local_play(client, interaction_event, name)
     
-    @VOICE_COMMANDS.interactions(name='loop')
+    @VOICE_COMMANDS.interactions(name = 'loop')
     async def slash_loop(client, interaction_event,
         behaviour: (VOICE_LOOPER_BEHAVIOURS_PAIRS, 'Set looping as?') = None,
     ):
         """Sets the voice client's looping behaviour or returns the current one."""
         return await loop(client, interaction_event, behaviour)
     
-    @VOICE_COMMANDS.interactions(name='queue')
+    @VOICE_COMMANDS.interactions(name = 'queue')
     async def slash_queue(client, interaction_event):
         """Shows the voice client\'s queue of the guild."""
         return queue(client, interaction_event, GUILD__SUPPORT)
     
-    @VOICE_COMMANDS.interactions(name='volume')
+    @VOICE_COMMANDS.interactions(name = 'volume')
     async def slash_volume(client, interaction_event,
         volume: ('number', 'Percentage?') = None,
     ):
         """Sets my volume to the given percentage."""
         return await volume_(client, interaction_event, volume)
     
-    @VOICE_COMMANDS.interactions(name='stop')
+    @VOICE_COMMANDS.interactions(name = 'stop')
     async def slash_stop(client, interaction_event):
         """Nyahh, if you really want I can stop playing audio."""
         return await stop(client, interaction_event)
     
-    @VOICE_COMMANDS.interactions(name='skip')
+    @VOICE_COMMANDS.interactions(name = 'skip')
     async def slash_skip(client, interaction_event,
         index: ('int', 'Which audio to skip?') = 0,
     ):
         """I skip the audio at the given index."""
         return await skip(client, interaction_event, index)
     
-    @VOICE_COMMANDS.interactions(name='join-speakers')
+    @VOICE_COMMANDS.interactions(name = 'join-speakers')
     async def slash_join_speakers(client, interaction_event):
         """Joins the speakers in a stage channel."""
         return join_speakers(client, interaction_event)
     
-    @VOICE_COMMANDS.interactions(name='join-audience')
+    @VOICE_COMMANDS.interactions(name = 'join-audience')
     async def slash_join_audience(client, interaction_event):
         """Joins the audience in a stage channel."""
         return join_audience(client, interaction_event)

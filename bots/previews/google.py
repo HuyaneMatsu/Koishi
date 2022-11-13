@@ -160,7 +160,7 @@ def create_search_results(data, image_search):
     return results
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
 async def google(client, event, query:(str, 'query')):
     yield
     

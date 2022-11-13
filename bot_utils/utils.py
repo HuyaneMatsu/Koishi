@@ -47,7 +47,7 @@ async def command_error(client, message, command, content, exception):
     
     while True:
         if index == limit:
-            embed = Embed(description=''.join(page_contents))
+            embed = Embed(description = ''.join(page_contents))
             pages.append(embed)
             page_contents = None
             break
@@ -66,13 +66,13 @@ async def command_error(client, message, command, content, exception):
                 # If we are at the last element, we don\'t need to shard up,
                 # because the last element is always '```'
                 page_contents.append(line)
-                embed = Embed(description=''.join(page_contents))
+                embed = Embed(description = ''.join(page_contents))
                 pages.append(embed)
                 page_contents = None
                 break
             
             page_contents.append('```')
-            embed = Embed(description=''.join(page_contents))
+            embed = Embed(description = ''.join(page_contents))
             pages.append(embed)
             
             page_contents.clear()
@@ -108,7 +108,7 @@ def random_error_message_getter():
     return choice(ERROR_MESSAGES)
 
 
-async def send_embed_to(client, user_id, embed, components=None):
+async def send_embed_to(client, user_id, embed, components = None):
     try:
         user_channel = await client.channel_private_create(user_id)
     except ConnectionError:

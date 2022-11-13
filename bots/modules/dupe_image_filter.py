@@ -52,7 +52,7 @@ class ProcessedUrl:
         return True
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} url={self.url!r}>'
+        return f'<{self.__class__.__name__} url = {self.url!r}>'
 
 
 class ProcessedMessage:
@@ -409,7 +409,7 @@ class DupeImageFilter:
             self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
             embed = self.get_embed()
             embed.add_footer(footer)
-            await client.message_edit(message, embed=embed)
+            await client.message_edit(message, embed = embed)
             embed = None
     
     
@@ -429,7 +429,7 @@ class DupeImageFilter:
             await self.client.message_create(
                 channel,
                 f'Your dupe message filtering finished.\n\n{description}',
-                components = Button('Go to message', url=message.url),
+                components = Button('Go to message', url = message.url),
             )
         except ConnectionError:
             return
@@ -449,7 +449,7 @@ class DupeImageFilter:
             
             embed = self.get_embed()
             embed.add_footer('Requesting and processing messages')
-            await client.interaction_response_message_create(event, embed=embed)
+            await client.interaction_response_message_create(event, embed = embed)
             message = await client.interaction_response_message_get(event)
             self.message = message
             
@@ -467,7 +467,7 @@ class DupeImageFilter:
                     f'Expires after 15 minutes | {format_loop_time(LOOP_TIME()+900.0, TIMESTAMP_STYLES.relative_time)}'
                 )
                 
-                await client.message_edit(message, embed=embed, components=COMPONENTS_APPROVE)
+                await client.message_edit(message, embed = embed, components = COMPONENTS_APPROVE)
                 embed = None
                 
                 try:
@@ -479,14 +479,14 @@ class DupeImageFilter:
                 except TimeoutError:
                     embed = self.get_embed()
                     embed.add_footer('Timed out')
-                    await client.message_edit(message, embed=embed, components=BUTTON_CLOSE)
+                    await client.message_edit(message, embed = embed, components = BUTTON_CLOSE)
                     embed = None
                     return
                 
                 if event.interaction == BUTTON_CANCEL:
                     embed = self.get_embed()
                     embed.add_footer('Edit cancelled')
-                    await client.interaction_component_message_edit(event, embed=embed, components=BUTTON_CLOSE)
+                    await client.interaction_component_message_edit(event, embed = embed, components = BUTTON_CLOSE)
                     embed = None
                     return
                 
@@ -496,11 +496,11 @@ class DupeImageFilter:
                 
                 embed = self.get_embed()
                 embed.add_footer('Deleting dupes')
-                await client.interaction_component_message_edit(event, embed=embed, components=None)
+                await client.interaction_component_message_edit(event, embed = embed, components = None)
                 
                 await self.message_update_loop(client, message, 'Deleting dupes')
                 
-            await client.message_edit(message, embed=self.get_embed(), components=BUTTON_CLOSE)
+            await client.message_edit(message, embed = self.get_embed(), components = BUTTON_CLOSE)
         
         except:
             self.update_waiter.cancel()
@@ -577,7 +577,7 @@ async def dupe_image_filter(
     DupeImageFilter(client, event, look_back)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_CLOSE)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
 async def close_dupe_image_filter(client, event):
     if event.user_permissions.can_manage_messages:
         await client.interaction_component_acknowledge(event)

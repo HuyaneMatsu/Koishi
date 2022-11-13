@@ -32,7 +32,7 @@ def get_multiplier(user_id_1, user_id_2):
     return 2.1 - (((user_id_1 & 0x1111111111111111111111) + (user_id_2 & 0x1111111111111111111111)) % 101 * 0.01)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def waifu_info(event,
     user: ('user', 'The user to get') = None,
 ):
@@ -154,10 +154,10 @@ async def waifu_info(event,
         icon_url = event_user.avatar_url,
     )
     
-    yield InteractionResponse(embed=embed, allowed_mentions=None)
+    yield InteractionResponse(embed = embed, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def propose(client, event,
     user: ('user', 'The user to propose to.'),
     amount: ('int', 'The amount of love to propose with.'),
@@ -616,7 +616,7 @@ async def list_proposals(event, user, outgoing):
         user.avatar_url,
     )
     
-    return InteractionResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
 @PROPOSAL.interactions
@@ -873,7 +873,7 @@ async def cancel(client, event,
         )
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def divorce(client, event,
     user: ('user', 'Who do you want to divorce?'),
 ):
@@ -1021,7 +1021,7 @@ async def divorce(client, event,
         )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_DIVORCE_CANCEL)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_DIVORCE_CANCEL)
 async def divorce_cancelled(event):
     if event.user is not event.message.interaction.user:
         return

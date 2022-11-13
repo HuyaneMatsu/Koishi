@@ -51,7 +51,7 @@ STATUS_VALUE_TO_HEART_EMOJI = {
 
 PLATFORMS = ('desktop', 'mobile', 'web')
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def rawr(client, event):
     """Sends a message with everyone from my universe."""
     channel = event.channel
@@ -75,7 +75,7 @@ async def rawr(client, event):
         raise
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def color_(client, event,
     color: ('str', 'Beauty!')
 ):
@@ -88,7 +88,7 @@ async def color_(client, event,
     
     yield
     
-    embed = Embed(color=color)
+    embed = Embed(color = color)
     embed.add_field('hex', f'#{color:06X}', inline=True)
     embed.add_field('rgb', f'{color >> 16} r\n{(color >> 8) & 255} g\n{color & 255} b', inline=True)
     r, g, b = color.as_rgb_float_tuple
@@ -105,7 +105,7 @@ async def color_(client, event,
         image.save(buffer,'png')
         buffer.seek(0)
         
-        await client.interaction_followup_message_create(event, embed=embed, file=('color.png', buffer))
+        await client.interaction_followup_message_create(event, embed = embed, file=('color.png', buffer))
 
 
 @SLASH_CLIENT.interactions(
@@ -121,7 +121,7 @@ async def raw(client, event):
     data = await client.http.message_get(event.channel_id, event.interaction.target_id)
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
     
-    pages = [Embed(description=chunk) for chunk in chunks]
+    pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, event, pages)
 
 
@@ -183,7 +183,7 @@ PERMISSION_MASK_REACT = Permission().update_by_keys(
     add_reactions = True,
 )
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def roles_(client, event):
     """Lists the roles of the guild for my cutie!"""
     guild = event.guild
@@ -200,7 +200,7 @@ async def roles_(client, event):
     await Pagination10step(client, event, RoleCache(guild))
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def welcome_screen_(client, event):
     """Shows the guild's welcome screen."""
     guild = event.guild
@@ -226,7 +226,7 @@ async def welcome_screen_(client, event):
                 raise
     
     if welcome_screen is None:
-        yield Embed(description=f'**{guild.name}** *has no welcome screen enabled*.')
+        yield Embed(description = f'**{guild.name}** *has no welcome screen enabled*.')
         return
     
     
@@ -253,7 +253,7 @@ async def welcome_screen_(client, event):
     yield embed
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def now_as_id_(client, event):
     """Returns the current time as discord snowflake."""
     return str(now_as_id())
@@ -272,7 +272,7 @@ def shared_guilds_pagination_check(user, event):
     return False
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def shared_guilds(client, event):
     """Returns the shared guilds between you and me."""
     pages = []
@@ -307,13 +307,13 @@ async def shared_guilds(client, event):
     embed_title = f'Shared guilds with {user.full_name}:'
     
     for page in pages:
-        embed = Embed(embed_title, page, color=UTILITY_COLOR)
+        embed = Embed(embed_title, page, color = UTILITY_COLOR)
         embeds.append(embed)
     
-    await Pagination(client, event, embeds, check=partial_func(shared_guilds_pagination_check, user))
+    await Pagination(client, event, embeds, check = partial_func(shared_guilds_pagination_check, user))
 '''
 
-@SLASH_CLIENT.interactions(name='user', is_global=True)
+@SLASH_CLIENT.interactions(name = 'user', is_global = True)
 async def user_(client, event,
     user: ('user', 'Check out someone other user?') = None,
 ):
@@ -349,8 +349,8 @@ async def user_(client, event,
         embed.color = color
         
         components = Row(
-            Button('Show avatar', custom_id=f'user_info.{user.id}.avatar'),
-            Button('Show banner', custom_id=f'user_info.{user.id}.banner'),
+            Button('Show avatar', custom_id = f'user_info.{user.id}.avatar'),
+            Button('Show banner', custom_id = f'user_info.{user.id}.banner'),
         )
     
     else:
@@ -383,15 +383,15 @@ async def user_(client, event,
         embed.add_field('In guild profile', '\n'.join(text))
         
         components = Row(
-            Button('Show avatar', custom_id=f'user_info.{user.id}.avatar'),
-            Button('Show in-guild avatar', custom_id=f'user_info.{user.id}.in-guild avatar'),
-            Button('Show banner', custom_id=f'user_info.{user.id}.banner'),
+            Button('Show avatar', custom_id = f'user_info.{user.id}.avatar'),
+            Button('Show in-guild avatar', custom_id = f'user_info.{user.id}.in-guild avatar'),
+            Button('Show banner', custom_id = f'user_info.{user.id}.banner'),
         )
     
-    return InteractionResponse(embed=embed, components=components)
+    return InteractionResponse(embed = embed, components = components)
 
 
-@SLASH_CLIENT.interactions(custom_id=re.compile('user_info\.(\d+)\.(avatar|banner|in-guild avatar)'))
+@SLASH_CLIENT.interactions(custom_id = re.compile('user_info\.(\d+)\.(avatar|banner|in-guild avatar)'))
 async def show_user_icon(client, event, user_id, icon_type):
     user_id = int(user_id)
     
@@ -400,7 +400,7 @@ async def show_user_icon(client, event, user_id, icon_type):
     user = await client.user_get(user_id, force_update=True)
     
     if icon_type == 'avatar':
-        icon_url = user.avatar_url_as(size=4096)
+        icon_url = user.avatar_url_as(size = 4096)
         
         if user.avatar:
             color = user.avatar_hash & 0xffffff
@@ -408,7 +408,7 @@ async def show_user_icon(client, event, user_id, icon_type):
             color = user.default_avatar.color
     
     elif icon_type == 'banner':
-        icon_url = user.banner_url_as(size=4096)
+        icon_url = user.banner_url_as(size = 4096)
         
         if icon_url is None:
             color = None
@@ -416,7 +416,7 @@ async def show_user_icon(client, event, user_id, icon_type):
             color = user.banner_hash & 0xffffff
     
     elif icon_type == 'in-guild avatar':
-        icon_url = user.avatar_url_for_as(event.guild_id, size=4096)
+        icon_url = user.avatar_url_for_as(event.guild_id, size = 4096)
         if icon_url is None:
             color = None
         else:
@@ -441,7 +441,7 @@ async def show_user_icon(client, event, user_id, icon_type):
             icon_url,
         )
     
-    await client.interaction_followup_message_create(event, embed=embed, show_for_invoking_user_only=True)
+    await client.interaction_followup_message_create(event, embed = embed, show_for_invoking_user_only=True)
 
 
 
@@ -540,7 +540,7 @@ def in_role_pagination_check(user, event):
     
     return False
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
 async def in_role(client, event,
     role_1: ('role', 'Select a role.'),
     role_2: ('role', 'Double role!') = None,
@@ -585,7 +585,7 @@ async def in_role(client, event,
     
     pages = InRolePageGetter(users, guild, roles)
     
-    await Pagination(client, event, pages, check=partial_func(in_role_pagination_check, event.user))
+    await Pagination(client, event, pages, check = partial_func(in_role_pagination_check, event.user))
 
 
 AVATAR_TYPE_LOCAL = 'local'
@@ -600,7 +600,7 @@ AVATAR_CHOICES = [
     AVATAR_TYPE_DEFAULT,
 ]
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def avatar(
     event,
     user : ('user', 'Choose a user!') = None,
@@ -611,13 +611,13 @@ async def avatar(
         user = event.user
     
     if type_ == AVATAR_TYPE_LOCAL:
-        url = user.avatar_url_at_as(event.guild_id, size=4096)
+        url = user.avatar_url_at_as(event.guild_id, size = 4096)
     
     elif type_ == AVATAR_TYPE_GUILD:
-        url = user.avatar_url_for_as(event.guild_id, size=4096)
+        url = user.avatar_url_for_as(event.guild_id, size = 4096)
     
     elif type_ == AVATAR_TYPE_GLOBAL:
-        url = user.avatar_url_as(size=4096)
+        url = user.avatar_url_as(size = 4096)
     
     else:
         url = user.default_avatar_url
@@ -627,10 +627,10 @@ async def avatar(
     else:
         color = user.default_avatar.color
     
-    return Embed(f'{user:f}\'s {type_} avatar', color=color, url=url).add_image(url)
+    return Embed(f'{user:f}\'s {type_} avatar', color = color, url = url).add_image(url)
 
 
-@SLASH_CLIENT.interactions(is_global=True, target='user')
+@SLASH_CLIENT.interactions(is_global = True, target = 'user')
 async def status_(user):
     status = user.status
     emoji = STATUS_VALUE_TO_HEART_EMOJI.get(status.value, EMOJI_HEART_BLACK)
@@ -662,7 +662,7 @@ async def status_(user):
     return embed
 
 
-@SLASH_CLIENT.interactions(name='id-to-time', is_global=True)
+@SLASH_CLIENT.interactions(name = 'id-to-time', is_global = True)
 async def id_to_datetime_(client, event,
     snowflake: ('int', 'Id please!'),
 ):
@@ -678,10 +678,10 @@ GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH = 'guild_icon.discovery_splash'
 GUILD_ICON_CUSTOM_ID_INVITE_SPLASH = 'guild_icon.invite_splash'
 
 
-BUTTON_ICON = Button('Icon', custom_id=GUILD_ICON_CUSTOM_ID_ICON)
-BUTTON_BANNER = Button('Banner', custom_id=GUILD_ICON_CUSTOM_ID_BANNER)
-BUTTON_DISCOVERY_SPLASH = Button('Discovery splash', custom_id=GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
-BUTTON_INVITE_SPLASH = Button('Invite splash', custom_id=GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
+BUTTON_ICON = Button('Icon', custom_id = GUILD_ICON_CUSTOM_ID_ICON)
+BUTTON_BANNER = Button('Banner', custom_id = GUILD_ICON_CUSTOM_ID_BANNER)
+BUTTON_DISCOVERY_SPLASH = Button('Discovery splash', custom_id = GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
+BUTTON_INVITE_SPLASH = Button('Invite splash', custom_id = GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
 
 
 GUILD_ICON_ICON_COMPONENTS = Row(
@@ -716,10 +716,10 @@ GUILD_ICON_INVITE_SPLASH_COMPONENTS = Row(
 def create_embed(guild, name, url, hash_value):
     if url is None:
         color = (guild.id >> 22) & 0xFFFFFF
-        embed = Embed(f'{guild.name} has no {name}', color=color)
+        embed = Embed(f'{guild.name} has no {name}', color = color)
     else:
         color = hash_value & 0xFFFFFF
-        embed = Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
+        embed = Embed(f'{guild.name}\'s {name}', color = color, url = url).add_image(url)
     
     return embed
 
@@ -731,7 +731,7 @@ GUILD_ICON_CHOICES = [
     ('Invite-splash'    , 'invite_splash'    ),
 ]
 
-@SLASH_CLIENT.interactions(is_global=True, allow_in_dm=False)
+@SLASH_CLIENT.interactions(is_global = True, allow_in_dm = False)
 async def guild_icon(event,
     choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
 ):
@@ -742,63 +742,63 @@ async def guild_icon(event,
     
     if choice == 'icon':
         name = 'icon'
-        url = guild.icon_url_as(size=4096)
+        url = guild.icon_url_as(size = 4096)
         hash_value = guild.icon_hash
         components = GUILD_ICON_ICON_COMPONENTS
     
     elif choice == 'banner':
         name = 'banner'
-        url = guild.banner_url_as(size=4096)
+        url = guild.banner_url_as(size = 4096)
         hash_value = guild.banner_hash
         components = GUILD_ICON_BANNER_COMPONENTS
     
     elif choice == 'discovery_splash':
         name = 'discovery splash'
-        url = guild.discovery_splash_url_as(size=4096)
+        url = guild.discovery_splash_url_as(size = 4096)
         hash_value = guild.discovery_splash_hash
         components = GUILD_ICON_ICON_COMPONENTS
     
     else:
         name = 'invite splash'
-        url = guild.invite_splash_url_as(size=4096)
+        url = guild.invite_splash_url_as(size = 4096)
         hash_value = guild.invite_splash_hash
         components = GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS
     
     embed = create_embed(guild, name, url, hash_value)
-    return InteractionResponse(embed=embed, components=components)
+    return InteractionResponse(embed = embed, components = components)
 
 
-@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_ICON)
+@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_ICON)
 async def handle_guild_icon(event):
     guild = event.guild
     if (guild is not None):
-        embed = create_embed(guild, 'icon', guild.icon_url_as(size=4096), guild.icon_hash)
-        return InteractionResponse(embed=embed, components=GUILD_ICON_ICON_COMPONENTS)
+        embed = create_embed(guild, 'icon', guild.icon_url_as(size = 4096), guild.icon_hash)
+        return InteractionResponse(embed = embed, components = GUILD_ICON_ICON_COMPONENTS)
 
 
-@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_BANNER)
+@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_BANNER)
 async def handle_guild_banner(event):
     guild = event.guild
     if (guild is not None):
-        embed = create_embed(guild, 'banner', guild.banner_url_as(size=4096), guild.banner_hash)
-        return InteractionResponse(embed=embed, components=GUILD_ICON_BANNER_COMPONENTS)
+        embed = create_embed(guild, 'banner', guild.banner_url_as(size = 4096), guild.banner_hash)
+        return InteractionResponse(embed = embed, components = GUILD_ICON_BANNER_COMPONENTS)
 
 
-@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
+@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
 async def handle_guild_discovery_splash(event):
     guild = event.guild
     if (guild is not None):
-        embed = create_embed(guild, 'discovery splash', guild.discovery_splash_url_as(size=4096),
+        embed = create_embed(guild, 'discovery splash', guild.discovery_splash_url_as(size = 4096),
             guild.discovery_splash_hash)
-        return InteractionResponse(embed=embed, components=GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS)
+        return InteractionResponse(embed = embed, components = GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS)
     
 
-@SLASH_CLIENT.interactions(custom_id=GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
+@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
 async def handle_guild_invite_splash(event):
     guild = event.guild
     if (guild is not None):
-        embed = create_embed(guild, 'invite splash', guild.invite_splash_url_as(size=4096), guild.invite_splash_hash)
-        return InteractionResponse(embed=embed, components=GUILD_ICON_INVITE_SPLASH_COMPONENTS)
+        embed = create_embed(guild, 'invite splash', guild.invite_splash_url_as(size = 4096), guild.invite_splash_hash)
+        return InteractionResponse(embed = embed, components = GUILD_ICON_INVITE_SPLASH_COMPONENTS)
 
 
 def add_user_field(embed, index, joined_at, user):
@@ -815,7 +815,7 @@ def add_user_field(embed, index, joined_at, user):
         ),
     )
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(kick_users=True))
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(kick_users=True))
 async def latest_users(client, event):
     """Shows the new users of the guild."""
     if not event.user_permissions.can_kick_users:
@@ -842,10 +842,10 @@ async def latest_users(client, event):
     else:
         embed.description = '*none*'
     
-    return InteractionResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, required_permissions=Permission().update_by_keys(kick_users=True))
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(kick_users=True))
 async def all_users(client, event):
     """Shows the new users of the guild."""
     if not event.user_permissions.can_kick_users:
@@ -873,7 +873,7 @@ async def all_users(client, event):
     await Pagination(client, event, embeds)
 
 
-@SLASH_CLIENT.interactions(is_global=True, target='message')
+@SLASH_CLIENT.interactions(is_global = True, target = 'message')
 async def escape(message):
     content = message.content
     if content is None:
@@ -883,17 +883,17 @@ async def escape(message):
     if len(content) > 2000:
         content = content[:1997]+'...'
     
-    return InteractionResponse(content, allowed_mentions=None)
+    return InteractionResponse(content, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def calc(
     expression: ('expression', 'Mathematical expression to evaluate')
 ):
     return repr(expression)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def choose(
     choice_1: (str, 'choice'),
     choice_2: (str, 'another one') = None,
@@ -940,7 +940,7 @@ CREATE_EMBEDDED_ACTIVITY_PERMISSIONS = Permission().update_by_keys(
     create_instant_invite = True,
 )
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def create_activity(
     client,
     event,

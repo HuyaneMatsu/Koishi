@@ -1,15 +1,43 @@
 __all__ = ()
 
+from itertools import chain
+
 from hata import Client, DiscordException, ERROR_CODES, Embed, KOKORO, now_as_id
 from scarletio import CancelledError, LOOP_TIME, Task
 
 from ..touhou import TouhouHandlerKey, get_touhou_character_like, parse_touhou_characters_from_tags
 
 from .constants import (
-    DEFAULT_INTERVAL, FEEDERS, INTERVAL_MULTIPLIER, MAX_INTERVAL, MIN_INTERVAL, TAG_NAME_REQUIRED, TAG_NAME_SOLO
+    DEFAULT_INTERVAL, FEEDERS, INTERVAL_MULTIPLIER, MAX_INTERVAL, MIN_INTERVAL, TAG_NAME_REQUIRED, TAG_NAME_SOLO,
+    TAG_REQUIRED_RP, TAG_RP
 )
 
+
 SLASH_CLIENT: Client
+
+
+def iter_tag_names_of(channel):
+    """
+    Iterates over the tags' names of the given channel.
+    
+    This method is an iterable generator.
+    
+    Parameters
+    ----------
+    channel : ``Channel``
+        Channel to iterate it's tags over.
+    """
+    yield channel.name
+    
+    if channel.is_guild_text():
+        topic = channel.topic
+        if (topic is not None):
+            yield from TAG_RP.findall(topic)
+    
+    elif channel.is_guild_thread_public():
+        for tag in channel.iter_applied_tags():
+            yield tag.name
+
 
 
 def get_channel_handler_key(channel):
@@ -28,13 +56,8 @@ def get_channel_handler_key(channel):
     solo = False
     characters = []
     
-    touhou_character = get_touhou_character_like(channel.name)
-    if (touhou_character is not None):
-        characters.append(touhou_character)
-    
-    
-    for tag in channel.iter_applied_tags():
-        tag_name = tag.name
+    for tag_name in iter_tag_names_of(channel):
+        touhou_character = get_touhou_character_like(tag_name)
         if tag_name == TAG_NAME_SOLO:
             solo = True
             continue
@@ -42,37 +65,11 @@ def get_channel_handler_key(channel):
         if tag_name == TAG_NAME_REQUIRED:
             continue
         
-        character = get_touhou_character_like(tag_name)
-        if (character is not None):
-            characters.append(character)
+        if (touhou_character is not None):
+            characters.append(touhou_character)
     
     if characters:
         return TouhouHandlerKey(*characters, solo = solo)
-
-
-def has_channel_any_character(channel):
-    """
-    Returns whether the channel contains any characters.
-    
-    Parameters
-    ----------
-    channel : ``Channel``
-        The channel to check.
-    """
-    touhou_character = get_touhou_character_like(channel.name)
-    if (touhou_character is not None):
-        return True
-    
-    for tag in channel.iter_applied_tags():
-        tag_name = tag.name
-        if (tag_name == TAG_NAME_SOLO) or (tag_name == TAG_NAME_REQUIRED):
-            continue
-        
-        character = get_touhou_character_like(channel.name)
-        if (character is not None):
-            return True
-    
-    return False
 
 
 def get_feed_interval(channel):
@@ -171,12 +168,14 @@ def join_names_of_touhou_characters(characters, join_with):
     return ''.join(built)
 
 
-def should_auto_post_in_channel(channel):
+def should_auto_post_in_channel(client, channel):
     """
     Returns whether the client should try to auto post in the given channel.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would post in the channel.
     channel : ``Channel``
         The channel to check.
     
@@ -184,19 +183,35 @@ def should_auto_post_in_channel(channel):
     -------
     should : `bool`
     """
-    if not channel.is_guild_thread_public():
-        return False
-    
-    parent = channel.parent
-    if (parent is None):
-        return False
-    
-    if not parent.is_guild_forum():
-        return False
-    
-    for tag in channel.iter_applied_tags():
-        if tag.name == TAG_NAME_REQUIRED:
+    if channel.is_guild_text():
+        topic = channel.topic
+        if topic is None:
+            return False
+        
+        if not channel.cached_permissions_for(client).can_send_messages:
+            return False
+        
+        if TAG_REQUIRED_RP.search(topic) is not None:
             return True
+        
+        return False
+    
+    if channel.is_guild_thread_public():
+        parent = channel.parent
+        if (parent is None):
+            return False
+        
+        if not parent.is_guild_forum():
+            return False
+        
+        if not parent.cached_permissions_for(client).can_send_messages_in_threads:
+            return False
+        
+        for tag in channel.iter_applied_tags():
+            if tag.name == TAG_NAME_REQUIRED:
+                return True
+        
+        return False
     
     return False
 
@@ -244,10 +259,10 @@ class Feeder:
         """Returns the feeder's representation."""
         repr_parts = ['<', self.__class__.__name__]
         
-        repr_parts.append(' channel=')
+        repr_parts.append(' channel = ')
         repr_parts.append(repr(self.channel))
         
-        repr_parts.append(', handler_key=')
+        repr_parts.append(', handler_key = ')
         repr_parts.append(repr(self.handler_key))
         
         handle = self.handle
@@ -398,25 +413,32 @@ def try_remove_channel(channel):
         feeder.cancel()
 
 
-def reset_auto_posters():
+def reset_auto_posters(client):
     """
     Resets all auto posters. Removing the old ones and adding the new ones.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who would post.
     """
     for guild in SLASH_CLIENT.guilds:
-        for channel in guild.threads.values():
-            reset_channel(channel)
+        for channel in chain(guild.channels.values(), guild.threads.values()):
+            reset_channel(client, channel)
 
 
-def reset_channel(channel):
+def reset_channel(client, channel):
     """
     Resets the given channel of auto posting.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would post.
     channel : ``Channel``
         The channel to reset.
     """
-    if should_auto_post_in_channel(channel):
+    if should_auto_post_in_channel(client, channel):
         try_update_channel(channel)
     else:
         try_remove_channel(channel)
@@ -431,7 +453,7 @@ def setup(lib):
     lib : `ModuleType`
         This module.
     """
-    reset_auto_posters()
+    reset_auto_posters(SLASH_CLIENT)
 
 
 def teardown(lib):

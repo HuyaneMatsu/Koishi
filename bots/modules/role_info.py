@@ -31,7 +31,7 @@ COMPONENTS_ROLE_INFO = Row(
 )
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def role_info(
     client,
     event,
@@ -161,17 +161,17 @@ async def role_info(
             embed.add_image(icon_url)
     
     
-    return InteractionResponse(embed=embed, components=COMPONENTS_ROLE_INFO)
+    return InteractionResponse(embed = embed, components = COMPONENTS_ROLE_INFO)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_ROLE_INFO_CLOSE)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ROLE_INFO_CLOSE)
 async def close_role_info(client, event):
     if (event.user is event.message.interaction.user):
         await client.interaction_component_acknowledge(event)
         await client.interaction_response_message_delete(event)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_ROLE_INFO_SHOW_PERMISSIONS)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ROLE_INFO_SHOW_PERMISSIONS)
 async def close_role_info(client, event):
     embed = event.message.embed
     if embed is None:
@@ -201,7 +201,7 @@ async def close_role_info(client, event):
         
         for permission_name, has_permission in role.permissions.items():
             description_parts.append('+' if has_permission else '-')
-            description_parts.append(permission_name.replace("_", "-"))
+            description_parts.append(permission_name.replace('_', '-'))
             description_parts.append('\n')
         
         description_parts.append('```')
@@ -214,6 +214,6 @@ async def close_role_info(client, event):
     
     await client.interaction_response_message_create(
         event,
-        embed = Embed(title, description, color=color),
+        embed = Embed(title, description, color = color),
         show_for_invoking_user_only = True,
     )

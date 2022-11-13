@@ -223,11 +223,11 @@ async def emoji_create(client, emoji):
     
     emoji_url = emoji.url
     
-    embed = Embed(f'Emoji created: {emoji.name} ({emoji.id})', url=emoji_url).add_thumbnail(emoji_url)
+    embed = Embed(f'Emoji created: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
     add_emoji_fields_to(emoji, embed)
     add_context_fields_to(emoji, embed)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
 
 
 @Satori.events
@@ -238,7 +238,7 @@ async def emoji_edit(client, emoji, old_attributes):
     
     emoji_url = emoji.url
     
-    embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', url=emoji_url).add_thumbnail(emoji_url)
+    embed = Embed(f'Emoji edited: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
     add_context_fields_to(emoji, embed)
     
     maybe_add_modified_string_field(embed, emoji, old_attributes, 'name', 'Name')
@@ -283,7 +283,7 @@ async def emoji_edit(client, emoji, old_attributes):
     
     maybe_add_modified_bool_field(embed, emoji, old_attributes, 'require_colons', 'Require colons')
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
 
 
 @Satori.events
@@ -294,7 +294,7 @@ async def emoji_delete(client, emoji):
     embed = Embed(f'Emoji deleted: {emoji.name} ({emoji.id})')
     embed = add_emoji_fields_to(emoji, embed)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
 
 
 def add_sticker_fields_to(sticker, embed):
@@ -328,7 +328,7 @@ async def sticker_create(client, sticker):
     
     sticker_url = sticker.url
     
-    embed = Embed(f'Sticker created: {sticker.name} ({sticker.id})', url=sticker_url)
+    embed = Embed(f'Sticker created: {sticker.name} ({sticker.id})', url = sticker_url)
     add_sticker_fields_to(sticker, embed)
     add_context_fields_to(sticker, embed)
     
@@ -336,7 +336,7 @@ async def sticker_create(client, sticker):
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
         embed.add_image(sticker_url)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
 
 
 @Satori.events
@@ -345,7 +345,7 @@ async def sticker_edit(client, sticker, old_attributes):
         return
     
     sticker_url = sticker.url
-    embed = Embed(f'Sticker edited: {sticker.name} ({sticker.id})', url=sticker_url)
+    embed = Embed(f'Sticker edited: {sticker.name} ({sticker.id})', url = sticker_url)
     add_context_fields_to(sticker, embed)
     
     maybe_add_modified_string_field(embed, sticker, old_attributes, 'name', 'Name')
@@ -357,7 +357,7 @@ async def sticker_edit(client, sticker, old_attributes):
     if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
         embed.add_image(sticker_url)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
 
 
 @Satori.events
@@ -369,10 +369,10 @@ async def sticker_delete(client, sticker):
     add_sticker_fields_to(sticker, embed)
     add_context_fields_to(sticker, embed)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
 
 
-@Satori.events(name='ready')
+@Satori.events(name = 'ready')
 async def initial_request_stickers(client):
     try:
         await client.sticker_guild_get_all(GUILD__SUPPORT)
@@ -380,9 +380,9 @@ async def initial_request_stickers(client):
         # No internet connection
         return
 
-    client.events.remove(initial_request_stickers, name='ready')
+    client.events.remove(initial_request_stickers, name = 'ready')
 
-@Satori.events(name='ready')
+@Satori.events(name = 'ready')
 async def initial_request_emmojis(client):
     try:
         await client.emoji_guild_get_all(GUILD__SUPPORT)
@@ -390,4 +390,4 @@ async def initial_request_emmojis(client):
         # No internet connection
         return
     
-    client.events.remove(initial_request_emmojis, name='ready')
+    client.events.remove(initial_request_emmojis, name = 'ready')

@@ -20,4 +20,4 @@ async def filter_remove_(client, event,
         abort(f'The player has no: {type_} filter')
     
     await player.apply_filters()
-    return add_filter_field_to(Embed('Filter removed', color=EMBED_COLOR), filter)
+    return add_filter_field_to(Embed('Filter removed', color = EMBED_COLOR), filter)

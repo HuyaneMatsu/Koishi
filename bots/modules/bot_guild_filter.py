@@ -4,7 +4,7 @@ from hata import Client, DiscordException, ERROR_CODES, Sticker, Emoji
 
 Koishi: Client
 
-STICKER_KOISHI_KNIFE = Sticker.precreate(990556966298464297)
+STICKER_KOISHI_SPRING = Sticker.precreate(861178095319253002)
 STICKER_KOISHI_HONK = Sticker.precreate(990556669161406504)
 EMOJI_KOISHI_DEAL = Emoji.precreate(990558169963049041)
 
@@ -40,7 +40,12 @@ async def guild_create(client, guild):
     
     
     if repeated_leave:
-        contents = [STICKER_KOISHI_KNIFE.url]
+        contents = [
+            (
+                f'Please invite more (non-bot) users before inviting me again. I will wait here chilling.'
+            ),
+            STICKER_KOISHI_SPRING.url,
+        ]
     
     else:
         contents = [

@@ -8,68 +8,68 @@ from bot_utils.constants import PATH__KOISHI
 # Emojis are not used, but we will keep them for a time now
 
 # Rook
-#Emoji.precreate(604652042635706416,name='a0').as_emoji
-#Emoji.precreate(604657343950487562,name='a1').as_emoji
-#Emoji.precreate(604652042669129788,name='a2').as_emoji
-#Emoji.precreate(604652042652483591,name='a3').as_emoji
+#Emoji.precreate(604652042635706416,name = 'a0').as_emoji
+#Emoji.precreate(604657343950487562,name = 'a1').as_emoji
+#Emoji.precreate(604652042669129788,name = 'a2').as_emoji
+#Emoji.precreate(604652042652483591,name = 'a3').as_emoji
 
 # Knight
-#Emoji.precreate(604652042350362625,name='a4').as_emoji
-#Emoji.precreate(604652042413146113,name='a5').as_emoji
-#Emoji.precreate(604652042853548042,name='a6').as_emoji
-#Emoji.precreate(604652042740301835,name='a7').as_emoji
+#Emoji.precreate(604652042350362625,name = 'a4').as_emoji
+#Emoji.precreate(604652042413146113,name = 'a5').as_emoji
+#Emoji.precreate(604652042853548042,name = 'a6').as_emoji
+#Emoji.precreate(604652042740301835,name = 'a7').as_emoji
 
 # Bishop
-#Emoji.precreate(604652042694426634,name='a8').as_emoji,
-#Emoji.precreate(604652042715398144,name='a9').as_emoji,
-#Emoji.precreate(604652042253762571,name='aa').as_emoji,
-#Emoji.precreate(604652042581180425,name='ab').as_emoji,
+#Emoji.precreate(604652042694426634,name = 'a8').as_emoji,
+#Emoji.precreate(604652042715398144,name = 'a9').as_emoji,
+#Emoji.precreate(604652042253762571,name = 'aa').as_emoji,
+#Emoji.precreate(604652042581180425,name = 'ab').as_emoji,
 
 # Queen
-#Emoji.precreate(604657915038793728,name='ac').as_emoji
-#Emoji.precreate(604657914820558849,name='ad').as_emoji
-#Emoji.precreate(604652042732175390,name='ae').as_emoji
-#Emoji.precreate(604652042639638550,name='af').as_emoji
+#Emoji.precreate(604657915038793728,name = 'ac').as_emoji
+#Emoji.precreate(604657914820558849,name = 'ad').as_emoji
+#Emoji.precreate(604652042732175390,name = 'ae').as_emoji
+#Emoji.precreate(604652042639638550,name = 'af').as_emoji
 
 # King
-#Emoji.precreate(604658587117027328,name='ag').as_emoji
-#Emoji.precreate(604658587121221642,name='ah').as_emoji
-#Emoji.precreate(604652042790895616,name='ai').as_emoji
-#Emoji.precreate(604658586978746378,name='aj').as_emoji
+#Emoji.precreate(604658587117027328,name = 'ag').as_emoji
+#Emoji.precreate(604658587121221642,name = 'ah').as_emoji
+#Emoji.precreate(604652042790895616,name = 'ai').as_emoji
+#Emoji.precreate(604658586978746378,name = 'aj').as_emoji
 
 # Pawn
-#Emoji.precreate(604652042656677918,name='ak').as_emoji
-#Emoji.precreate(604652042731913216,name='al').as_emoji
-#Emoji.precreate(604652042702815313,name='am').as_emoji
-#Emoji.precreate(604652042484711424,name='an').as_emoji
+#Emoji.precreate(604652042656677918,name = 'ak').as_emoji
+#Emoji.precreate(604652042731913216,name = 'al').as_emoji
+#Emoji.precreate(604652042702815313,name = 'am').as_emoji
+#Emoji.precreate(604652042484711424,name = 'an').as_emoji
 
 
 # Empty tiles
-#Emoji.precreate(604652042639900672,name='ao').as_emoji
-#Emoji.precreate(604652044246188065,name='ap').as_emoji
+#Emoji.precreate(604652042639900672,name = 'ao').as_emoji
+#Emoji.precreate(604652044246188065,name = 'ap').as_emoji
 
 # Numbers
-#Emoji.precreate(604698116427350016,name='aq').as_emoji
-#Emoji.precreate(604698116444258469,name='ar').as_emoji
-#Emoji.precreate(604698116431675406,name='as').as_emoji
-#Emoji.precreate(604698116444258475,name='at').as_emoji
-#Emoji.precreate(604698116226285589,name='au').as_emoji
-#Emoji.precreate(604698116578476149,name='av').as_emoji
-#Emoji.precreate(604698116448452674,name='aw').as_emoji
-#Emoji.precreate(604698116494590202,name='ax').as_emoji
+#Emoji.precreate(604698116427350016,name = 'aq').as_emoji
+#Emoji.precreate(604698116444258469,name = 'ar').as_emoji
+#Emoji.precreate(604698116431675406,name = 'as').as_emoji
+#Emoji.precreate(604698116444258475,name = 'at').as_emoji
+#Emoji.precreate(604698116226285589,name = 'au').as_emoji
+#Emoji.precreate(604698116578476149,name = 'av').as_emoji
+#Emoji.precreate(604698116448452674,name = 'aw').as_emoji
+#Emoji.precreate(604698116494590202,name = 'ax').as_emoji
 
 # Letters
-#Emoji.precreate(604698116129816586,name='ay').as_emoji
-#Emoji.precreate(604698116675076106,name='az').as_emoji
-#Emoji.precreate(604698116482007194,name='aA').as_emoji
-#Emoji.precreate(604698116435738625,name='aB').as_emoji
-#Emoji.precreate(604698116163371009,name='aC').as_emoji
-#Emoji.precreate(604698116490264586,name='aD').as_emoji
-#Emoji.precreate(604698116548984832,name='aE').as_emoji
-#Emoji.precreate(604698116540596252,name='aF').as_emoji
+#Emoji.precreate(604698116129816586,name = 'ay').as_emoji
+#Emoji.precreate(604698116675076106,name = 'az').as_emoji
+#Emoji.precreate(604698116482007194,name = 'aA').as_emoji
+#Emoji.precreate(604698116435738625,name = 'aB').as_emoji
+#Emoji.precreate(604698116163371009,name = 'aC').as_emoji
+#Emoji.precreate(604698116490264586,name = 'aD').as_emoji
+#Emoji.precreate(604698116548984832,name = 'aE').as_emoji
+#Emoji.precreate(604698116540596252,name = 'aF').as_emoji
 
 # Edge
-#Emoji.precreate(604698116658167808,name='aG').as_emoji
+#Emoji.precreate(604698116658167808,name = 'aG').as_emoji
 
 EMBED_COLOR = Color.from_rgb(73,245,73)
 EMBED_NAME_LENGTH = 200
@@ -231,7 +231,7 @@ class Card:
     def __init__(self, description, id_, name, rarity, flags = 0, image_name = None):
         self.id         = id_
         self.name       = name
-        self.description= description
+        self.description =  description
         self.rarity     = rarity
         self.flags      = CardFlag(flags)
         self.image_name = image_name
@@ -257,7 +257,7 @@ class Card:
         
         title=''.join(title_parts)
         
-        description=self.description
+        description = self.description
         description_parts = []
         if len(description)<=EMBED_DESCRIPTION_LENGTH:
             description_parts.append(description)
@@ -291,7 +291,7 @@ class Card:
         
         parts.append('\n\n')
         
-        description=self.description
+        description = self.description
         if len(description)<=EMBED_DESCRIPTION_LENGTH:
             parts.append(description)
         else:
@@ -350,7 +350,7 @@ class Card:
             Card(description,id_,name,rarity)
             result = True
         else:
-            card.description=description
+            card.description = description
             card.name=name
             card.rarity=rarity
             card._length_hint=0
@@ -417,7 +417,7 @@ class Card:
                     break
                 
                 try:
-                    description=card_data['description']
+                    description = card_data['description']
                 except KeyError:
                     exception='No \'description\' key'
                     break

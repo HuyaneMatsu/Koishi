@@ -132,7 +132,7 @@ async def info(event,
     
     if (relationship_members_by_category is not None):
         for field_name, relation_member_ids in sorted(
-            relationship_members_by_category.items(), key=relationship_members_by_category_sort_key,
+            relationship_members_by_category.items(), key = relationship_members_by_category_sort_key,
         ):
             field_name = field_name.title()
             
@@ -179,4 +179,4 @@ async def info(event,
         icon_url = event_user.avatar_url,
     )
     
-    yield InteractionResponse(embed=embed, allowed_mentions=None)
+    yield InteractionResponse(embed = embed, allowed_mentions = None)

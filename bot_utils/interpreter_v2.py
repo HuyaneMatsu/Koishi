@@ -185,7 +185,7 @@ class Interpreter:
         async with self.lock:
             source, is_exception = parse_code_content(content, 'No code to execute.')
             if is_exception:
-                await client.message_create(message.channel, embed=Embed('Parsing error', source))
+                await client.message_create(message.channel, embed = Embed('Parsing error', source))
                 return
             
             with StringIO() as buffer:
@@ -251,4 +251,4 @@ class Interpreter:
             else:
                 pages.append(Embed('No output'))
         
-        await Pagination(client, message.channel, pages, timeout=240.)
+        await Pagination(client, message.channel, pages, timeout = 240.)

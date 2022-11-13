@@ -61,43 +61,43 @@ if (DB_ENGINE is not None):
     class user_common_model(BASE):
         __tablename__   = 'CURRENCY'
         # Generic
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64, unique=True)
         
         # Love
-        total_love      = Column(Int64, default=0)
-        total_allocated = Column(Int64, default=0)
+        total_love      = Column(Int64, default = 0)
+        total_allocated = Column(Int64, default = 0)
         
         # Daily
-        daily_next      = Column(DateTime, default=func.utc_timestamp())
-        daily_streak    = Column(Int32, default=0)
+        daily_next      = Column(DateTime, default = func.utc_timestamp())
+        daily_streak    = Column(Int32, default = 0)
         
         # Counters
-        count_daily_self = Column(Int32, default=0)
-        count_daily_by_waifu = Column(Int32, default=0)
-        count_daily_for_waifu = Column(Int32, default=0)
-        count_top_gg_vote = Column(Int32, default=0)
+        count_daily_self = Column(Int32, default = 0)
+        count_daily_by_waifu = Column(Int32, default = 0)
+        count_daily_for_waifu = Column(Int32, default = 0)
+        count_top_gg_vote = Column(Int32, default = 0)
         
         # Waifu
-        waifu_cost      = Column(Int64, default=0)
-        waifu_divorces  = Column(Int32, default=0)
-        waifu_slots     = Column(Int32, default=1)
-        waifu_owner_id  = Column(Int64, default=0)
+        waifu_cost      = Column(Int64, default = 0)
+        waifu_divorces  = Column(Int32, default = 0)
+        waifu_slots     = Column(Int32, default = 1)
+        waifu_owner_id  = Column(Int64, default = 0)
         
         # notification settings
-        notify_proposal = Column(Boolean, default=True)
-        notify_daily = Column(Boolean, default=True)
+        notify_proposal = Column(Boolean, default = True)
+        notify_daily = Column(Boolean, default = True)
         
         # Notify voters that they can vote on top.gg if they can. We base this on a top.gg vote timer and whether they
         # voted before
-        top_gg_last_vote = Column(DateTime, default=func.utc_timestamp())
+        top_gg_last_vote = Column(DateTime, default = func.utc_timestamp())
         
     
     USER_COMMON_TABLE = user_common_model.__table__
     
     class waifu_list_model(BASE):
         __tablename__   = 'WAIFU_LIST'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64)
         waifu_id        = Column(Int64)
     
@@ -106,7 +106,7 @@ if (DB_ENGINE is not None):
     
     class waifu_proposal_model(BASE):
         __tablename__   = 'WAIFU_PROPOSAL'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         source_id       = Column(Int64)
         target_id       = Column(Int64)
         investment      = Column(Int64)
@@ -116,7 +116,7 @@ if (DB_ENGINE is not None):
     
     class auto_react_role_model(BASE):
         __tablename__   = 'AUTO_REACT_ROLE'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         message_id      = Column(Int64, unique=True)
         channel_id      = Column(Int64)
         data            = Column(Binary(320))
@@ -128,17 +128,17 @@ if (DB_ENGINE is not None):
     
     class item_model(BASE):
         __tablename__   = 'ITEM'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64)
-        amount          = Column(Int64, default=0)
-        type            = Column(Int32, default=0)
+        amount          = Column(Int64, default = 0)
+        type            = Column(Int32, default = 0)
     
     ITEM_TABLE = item_model.__table__
     
     
     class emoji_counter_model(BASE):
         __tablename__   = 'EMOJI_COUNTER'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64)
         emoji_id        = Column(Int64)
         timestamp       = Column(DateTime)
@@ -149,7 +149,7 @@ if (DB_ENGINE is not None):
     
     class sticker_counter_model(BASE):
         __tablename__   = 'STICKER_COUNTER'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64)
         sticker_id      = Column(Int64)
         timestamp       = Column(DateTime)
@@ -159,7 +159,7 @@ if (DB_ENGINE is not None):
     
     class ds_v2_model(BASE):
         __tablename__   = 'DS_V2'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64, unique=True)
         game_state      = Column(Binary(), nullable=True)
         selected_stage_id = Column(Int32)
@@ -169,7 +169,7 @@ if (DB_ENGINE is not None):
     
     class ds_v2_result_model(BASE):
         __tablename__   = 'DS_V2_RESULT'
-        id              = Column(Int64, primary_key=True)
+        id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64)
         stage_id        = Column(Int64)
         best            = Column(Int32)
@@ -179,7 +179,7 @@ if (DB_ENGINE is not None):
     
     class todo_model(BASE):
         __tablename__ = 'TODO'
-        id = Column(Int64, primary_key=True)
+        id = Column(Int64, primary_key = True)
         name = Column(Unicode)
         description = Column(Unicode)
         created_at = Column(DateTime)
@@ -191,7 +191,7 @@ if (DB_ENGINE is not None):
     class waifu_stats_model(BASE):
         __tablename__ = 'WAIFU_STATS'
         
-        id = Column(Int64, primary_key=True)
+        id = Column(Int64, primary_key = True)
         user_id = Column(Int64, unique=True)
         
         stat_housewife = Column(Int32)

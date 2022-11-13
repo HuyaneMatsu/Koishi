@@ -267,7 +267,7 @@ async def receive_sync(client, partner):
         
         while True:
             if index == limit:
-                embed = Embed(description=''.join(page_contents))
+                embed = Embed(description = ''.join(page_contents))
                 pages.append(embed)
                 page_contents = None
                 break
@@ -286,13 +286,13 @@ async def receive_sync(client, partner):
                     # If we are at the last element, we don't need to shard up,
                     # because the last element is always '```'
                     page_contents.append(line)
-                    embed = Embed(description=''.join(page_contents))
+                    embed = Embed(description = ''.join(page_contents))
                     pages.append(embed)
                     page_contents = None
                     break
                 
                 page_contents.append('```')
-                embed = Embed(description=''.join(page_contents))
+                embed = Embed(description = ''.join(page_contents))
                 pages.append(embed)
                 
                 page_contents.clear()

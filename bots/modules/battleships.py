@@ -276,11 +276,11 @@ class user_profile:
         if new:
             if text is not None:
                 self.text = text
-            self.message = await client.message_create(self.channel, embed=self.render_state_0())
+            self.message = await client.message_create(self.channel, embed = self.render_state_0())
         else:
             if self.text != text:
                 self.text = text
-                await client.message_edit(self.message, embed=self.render_state_0())
+                await client.message_edit(self.message, embed = self.render_state_0())
     
     async def process_state_1(self, new, text):
         client = self.client
@@ -293,14 +293,14 @@ class user_profile:
             client.events.reaction_add.remove(message, self)
             client.events.reaction_delete.remove(message, self)
             
-            message = await client.message_create(self.channel, embed=self.render_state_1())
+            message = await client.message_create(self.channel, embed = self.render_state_1())
             self.message = message
             Task(client.reaction_add(message, SWITCH), KOKORO)
             
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
         else:
-            await client.message_edit(message, embed=self.render_state_1())
+            await client.message_edit(message, embed = self.render_state_1())
 
         self.last_switch = 0.
     
@@ -308,7 +308,7 @@ class user_profile:
         self.process = self.process_state_0
         
         self.text = 'Good luck!'
-        self.message = await self.client.message_create(self.channel, embed=self.render_state_0())
+        self.message = await self.client.message_create(self.channel, embed = self.render_state_0())
         
     async def set_state_1(self, starts):
         self.process = self.process_state_1
@@ -323,7 +323,7 @@ class user_profile:
         
         client = self.client
         
-        message = await client.message_create(self.channel, embed=self.render_state_1())
+        message = await client.message_create(self.channel, embed = self.render_state_1())
         self.message = message
         Task(client.reaction_add(self.message, SWITCH), KOKORO)
         
@@ -345,7 +345,7 @@ class user_profile:
         client.events.reaction_add.remove(message, self)
         client.events.reaction_delete.remove(message, self)
         
-        message = await client.message_create(self.channel, embed=self.render_state_2())
+        message = await client.message_create(self.channel, embed = self.render_state_2())
         self.message = message
         Task(client.reaction_add(message, SWITCH), KOKORO)
         
@@ -369,7 +369,7 @@ class user_profile:
         else:
             embed = self.render_state_1()
         
-        await self.client.message_edit(self.message, embed=embed)
+        await self.client.message_edit(self.message, embed = embed)
 
 
     def cancel(self):
@@ -842,7 +842,7 @@ async def bs_description(command_context):
     return Embed('bs', (
         'Requests a battleship game with the given user.\n'
         f'Usage: `{command_context.prefix}bs *user*`'
-        ), color=BS_COLOR).add_footer(
+        ), color = BS_COLOR).add_footer(
             'Guild only!')
 
 COMMAND_CLIENT: Client

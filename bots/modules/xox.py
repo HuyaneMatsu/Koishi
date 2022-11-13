@@ -357,7 +357,7 @@ def click_p2(array, identifier_p1, identifier_p2):
     array[should_click_at] = identifier_p2
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def xox(client, event,
     mode : ([('single-player', 'sg'), ('multi-player', 'mp')], 'Game mode') = 'sg',
 ):
@@ -389,13 +389,13 @@ async def xox_single_player(client, event):
     
     buttons = render_array(array, False)
     
-    await client.interaction_response_message_create(event, title, components=buttons)
+    await client.interaction_response_message_create(event, title, components = buttons)
     
     component_interaction_event = None
     
     try:
-        async for component_interaction_event in iter_component_interactions(event, timeout=300.0,
-                check=partial_func(check_event_user, event.user)):
+        async for component_interaction_event in iter_component_interactions(event, timeout = 300.0,
+                check = partial_func(check_event_user, event.user)):
             
             if not click(array, component_interaction_event.interaction.custom_id, identifier_user):
                 await client.interaction_component_acknowledge(component_interaction_event)
@@ -407,7 +407,7 @@ async def xox_single_player(client, event):
                 game_state = get_game_state(array, identifier_user)
                 if game_state == GAME_STATE_NONE:
                     buttons = render_array(array, False)
-                    await client.interaction_component_message_edit(component_interaction_event, components=buttons)
+                    await client.interaction_component_message_edit(component_interaction_event, components = buttons)
                     continue
             
             if game_state == GAME_STATE_DRAW:
@@ -418,7 +418,7 @@ async def xox_single_player(client, event):
                 title = f'{client.full_name} won'
             
             buttons = render_array(array, True)
-            await client.interaction_component_message_edit(component_interaction_event, title, components=buttons)
+            await client.interaction_component_message_edit(component_interaction_event, title, components = buttons)
             break
     
     except TimeoutError:
@@ -429,7 +429,7 @@ async def xox_single_player(client, event):
             event = component_interaction_event
         
         try:
-            await client.interaction_response_message_edit(event, title, components=buttons)
+            await client.interaction_response_message_edit(event, title, components = buttons)
         except DiscordException as err:
             if err.code not in (
                 ERROR_CODES.unknown_message,
@@ -497,7 +497,7 @@ async def xox_multi_player(client, event):
     )
     
     await client.interaction_application_command_acknowledge(event)
-    message = await client.interaction_followup_message_create(event, embed=embed, components=BUTTON_CHALLENGE_ENABLED)
+    message = await client.interaction_followup_message_create(event, embed = embed, components = BUTTON_CHALLENGE_ENABLED)
     
     try:
         event = await wait_for_component_interaction(
@@ -516,7 +516,7 @@ async def xox_multi_player(client, event):
             'This message timed out.',
         )
         
-        await client.interaction_response_message_edit(event, embed=embed, components=BUTTON_CHALLENGE_DISABLED)
+        await client.interaction_response_message_edit(event, embed = embed, components = BUTTON_CHALLENGE_DISABLED)
         
         return
     
@@ -546,7 +546,7 @@ async def xox_multi_player(client, event):
     
     buttons = render_array(array, False)
     
-    await client.interaction_component_message_edit(event, title, embed=None, components=buttons)
+    await client.interaction_component_message_edit(event, title, embed = None, components = buttons)
     
     while True:
         try:
@@ -559,7 +559,7 @@ async def xox_multi_player(client, event):
             title = 'Timeout occurred.'
             buttons = render_array(array, True)
             
-            await client.interaction_response_message_edit(event, title, components=buttons)
+            await client.interaction_response_message_edit(event, title, components = buttons)
             break
         
         if not click(array, event.interaction.custom_id, identifier):
@@ -581,7 +581,7 @@ async def xox_multi_player(client, event):
             title = f'It is your turn {user.mention} | {emoji.as_emoji}'
             
             buttons = render_array(array, False)
-            await client.interaction_component_message_edit(event, title, components=buttons)
+            await client.interaction_component_message_edit(event, title, components = buttons)
             continue
         
         if game_state == GAME_STATE_DRAW:
@@ -592,5 +592,5 @@ async def xox_multi_player(client, event):
             title = f'{user_2.full_name} won against {user_1.full_name}'
         
         buttons = render_array(array, True)
-        await client.interaction_component_message_edit(event, title, components=buttons)
+        await client.interaction_component_message_edit(event, title, components = buttons)
         break

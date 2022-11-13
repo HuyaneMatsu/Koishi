@@ -169,19 +169,19 @@ EMOJI_RIGHT_2_10 = BUILTIN_EMOJIS['fast_forward']
 EMOJI_RESET = BUILTIN_EMOJIS['arrows_counterclockwise']
 
 class Pagination10step(Menu):
-    BUTTON_LEFT_2 = Button(emoji=EMOJI_LEFT_2_10)
-    BUTTON_LEFT = Button(emoji=EMOJI_LEFT)
-    BUTTON_RIGHT = Button(emoji=EMOJI_RIGHT)
-    BUTTON_RIGHT_2 = Button(emoji=EMOJI_RIGHT_2_10)
-    BUTTON_RESET = Button(emoji=EMOJI_RESET)
-    BUTTON_CANCEL = Button(emoji=EMOJI_CANCEL, custom_id=CUSTOM_ID_CANCEL)
+    BUTTON_LEFT_2 = Button(emoji = EMOJI_LEFT_2_10)
+    BUTTON_LEFT = Button(emoji = EMOJI_LEFT)
+    BUTTON_RIGHT = Button(emoji = EMOJI_RIGHT)
+    BUTTON_RIGHT_2 = Button(emoji = EMOJI_RIGHT_2_10)
+    BUTTON_RESET = Button(emoji = EMOJI_RESET)
+    BUTTON_CANCEL = Button(emoji = EMOJI_CANCEL, custom_id = CUSTOM_ID_CANCEL)
     
     BUTTON_ROW_1 = Row(BUTTON_LEFT_2, BUTTON_LEFT, BUTTON_RIGHT, BUTTON_RIGHT_2, BUTTON_RESET,)
     BUTTON_ROW_2 = Row(BUTTON_CANCEL)
     
     __slots__ = ('page_index', 'pages', 'timeout', 'user_check')
     
-    def __init__(self, client, event, pages, *, check=..., timeout=300.0):
+    def __init__(self, client, event, pages, *, check = ..., timeout = 300.0):
         if check is ...:
             check = get_auto_check(event)
         

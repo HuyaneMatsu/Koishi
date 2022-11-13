@@ -47,14 +47,14 @@ def create_random_durations():
     return (days, hours, minutes, seconds)
 
 
-@SLASH_CLIENT.interactions(is_global=True, allow_in_dm=False)
+@SLASH_CLIENT.interactions(is_global = True, allow_in_dm = False)
 async def self_mute(
     client,
     event,
-    days: P('int', 'days', min_value=0, max_value=28) = 0,
-    hours: P('int', 'hours', min_value=0, max_value=24) = 0,
-    minutes: P('int', 'minutes', min_value=0, max_value=60) = 0,
-    seconds: P('int', 'seconds', min_value=0, max_value=60) = 0,
+    days: P('int', 'days', min_value = 0, max_value = 28) = 0,
+    hours: P('int', 'hours', min_value = 0, max_value = 24) = 0,
+    minutes: P('int', 'minutes', min_value = 0, max_value = 60) = 0,
+    seconds: P('int', 'seconds', min_value = 0, max_value = 60) = 0,
 ):
     """Get a rest."""
     if days or hours or minutes or seconds:

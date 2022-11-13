@@ -3349,7 +3349,7 @@ CHARACTER_MESCAL = OJCharacter(78,
 SLASH_CLIENT: Client
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__STORAGE)
+@SLASH_CLIENT.interactions(guild = GUILD__STORAGE)
 async def create_images(client, event):
     await client.interaction_response_message_create(event, 'Starting to create images.\nIt may take some time.')
     
@@ -3701,7 +3701,7 @@ def get_auto_complete_results(value, container):
             
             name_matches.append((entity, parsed.start()))
         
-        name_matches.sort(key=autocomplete_key)
+        name_matches.sort(key = autocomplete_key)
         
         names = []
         
@@ -3765,12 +3765,12 @@ def filter_entities_by(filters, container, select_custom_id_enabled, select_cust
         )
     else:
         select = Select(
-            [Option('_', 'No result', default=True)],
+            [Option('_', 'No result', default = True)],
             select_custom_id_disabled,
             placeholder = 'No result',
         )
     
-    return InteractionResponse(embed=embed, components=select)
+    return InteractionResponse(embed = embed, components = select)
 
 
 OJ_COMMANDS = SLASH_CLIENT.interactions(
@@ -3882,7 +3882,7 @@ async def filter_characters(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SELECT_CHARACTER)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SELECT_CHARACTER)
 async def select_character(event):
     if event.message.interaction.user is not event.user:
         return
@@ -4083,7 +4083,7 @@ async def autocomplete_card_rarity(value):
     return get_simple_autocomplete_results(value, CARD_RARITY_FILTERABLE_NAMES)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_SELECT_CARD)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SELECT_CARD)
 async def select_card(event):
     if event.message.interaction.user is not event.user:
         return

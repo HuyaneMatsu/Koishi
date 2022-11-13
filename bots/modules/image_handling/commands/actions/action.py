@@ -208,7 +208,9 @@ class Action:
         
         expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(allowed_mentions))
         if expire_after > 0.0:
-            abort(f'Koishi got bored of enacting your {event.interaction.name} try again in {expire_after:.f} seconds.')
+            abort(
+                f'Koishi got bored of enacting your {event.interaction.name} try again in {expire_after:.2f} seconds.'
+            )
         
         response = build_response(
             client, event, self.verb, allowed_mentions, client_in_users

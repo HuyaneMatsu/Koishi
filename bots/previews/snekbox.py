@@ -222,11 +222,11 @@ if IS_UNIX:
         
         user_id = ctx.author.id
         if user_id in ACTIVE_EXECUTORS:
-            await ctx.send(embed=Embed('You have an eval job queued up', 'Please be patient.', color=SNEKBOX_COLOR))
+            await ctx.send(embed = Embed('You have an eval job queued up', 'Please be patient.', color = SNEKBOX_COLOR))
             return
         
         if is_exception:
-            await ctx.send(embed=Embed('Parsing error', code, color=SNEKBOX_COLOR))
+            await ctx.send(embed = Embed('Parsing error', code, color = SNEKBOX_COLOR))
             return
         
         with ctx.keep_typing(), EvalUserLock(user_id) as user_lock:
@@ -267,17 +267,17 @@ if IS_UNIX:
                     description = build_output(output, return_code)
         
         author = ctx.message.author
-        embed = Embed(title, description, color=SNEKBOX_COLOR).add_author(author.full_name, author.avatar_url)
-        await Closer(ctx.client, ctx.message.channel, embed, check=partial_func(check_reactor, author))
+        embed = Embed(title, description, color = SNEKBOX_COLOR).add_author(author.full_name, author.avatar_url)
+        await Closer(ctx.client, ctx.message.channel, embed, check = partial_func(check_reactor, author))
     
-    @COMMAND_CLIENT.commands(name='eval', aliases='e', description=eval_description, category='SNEKBOX')
+    @COMMAND_CLIENT.commands(name = 'eval', aliases='e', description = eval_description, category='SNEKBOX')
     async def eval_3_8(ctx, content):
         await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_3_8, NSJAIL_CONFIG_3_8)
 
-    @COMMAND_CLIENT.commands(name='eval_3.10', aliases='e10', description=eval_description, category='SNEKBOX')
+    @COMMAND_CLIENT.commands(name = 'eval_3.10', aliases='e10', description = eval_description, category='SNEKBOX')
     async def eval_3_10(ctx, content):
         await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_3_10, NSJAIL_CONFIG_3_10)
 
-    @COMMAND_CLIENT.commands(name='c_eval_3.6', aliases='chad', description=eval_description, category='SNEKBOX')
+    @COMMAND_CLIENT.commands(name = 'c_eval_3.6', aliases='chad', description = eval_description, category='SNEKBOX')
     async def c_eval_3_6(ctx, content):
         await snake_box(ctx, content, PATH__PYTHON_EXECUTABLE_C_3_6, NSJAIL_CONFIG_C_3_6)

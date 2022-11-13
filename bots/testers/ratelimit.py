@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoModerationRule, AutoModerationAction, \
     DiscoveryCategory, Emoji, KOKORO, Webhook, eventlist, DiscordException, BUILTIN_EMOJIS, CHANNELS, \
-    ApplicationCommand, INTERACTION_RESPONSE_TYPES, VerificationScreen, WelcomeScreen, \
+    ApplicationCommand, InteractionResponseType, VerificationScreen, WelcomeScreen, \
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
@@ -55,7 +55,7 @@ def parse_header_rate_limit(headers):
     delay2=float(headers[RATE_LIMIT_RESET_AFTER])
     return (delay1 if delay1 < delay2 else delay2)
 
-async def bypass_request(client,method,url,data=None,params=None,reason=None,headers=None,decode=True,):
+async def bypass_request(client,method,url,data=None,params=None,reason = None,headers=None,decode=True,):
     self=client.http
     if headers is None:
         headers=self.headers.copy()
@@ -151,7 +151,7 @@ class RLTCTX: #rate limit tester context manager
         self = object.__new__(cls)
         self.task=current_task
         self.client=client
-        self.channel=channel
+        self.channel = channel
         self.title=title
         return self
 
@@ -428,7 +428,7 @@ async def reaction_user_get_chunk(client,message,emoji,):
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}',
         params={'limit':100},)
 
-async def message_create(client, channel, content=None, embed=None,):
+async def message_create(client, channel, content=None, embed = None,):
     data = {}
     if content is not None and content:
         data['content'] = content
@@ -459,7 +459,7 @@ async def message_delete_multiple(client,messages,):
         f'{API_ENDPOINT}/channels/{channel_id}/messages/bulk-delete',
         data,)
 
-async def message_edit(client,message,content=None,embed=None,):
+async def message_edit(client,message,content=None,embed = None,):
     data={}
     if content is not None:
         data['content']=content
@@ -505,9 +505,9 @@ async def message_get(client, channel, message_id,):
 
 async def download_attachment(client,attachment,):
     if attachment.proxy_url.startswith('https://cdn.discordapp.com/'):
-        url=attachment.proxy_url
+        url = attachment.proxy_url
     else:
-        url=attachment.url
+        url = attachment.url
     return await bypass_request(client,METHOD_GET,url,headers=IgnoreCaseMultiValueDictionary(),decode=False,
         )
 
@@ -518,7 +518,7 @@ async def typing(client,channel,):
         f'{API_ENDPOINT}/channels/{channel_id}/typing',
         )
 
-async def client_edit(client, name='', avatar=...,):
+async def client_edit(client, name = '', avatar=...,):
     data={}
     if name:
         if not (1<len(name)<33):
@@ -601,7 +601,7 @@ async def permission_overwrite_delete(client,channel,overwrite,):
         f'{API_ENDPOINT}/channels/{channel_id}/permissions/{overwrite_id}',
         )
 
-async def channel_edit(client,channel,name='',topic='',nsfw=None,slowmode=None,user_limit=None,bitrate=None,type_=128,):
+async def channel_edit(client,channel,name = '',topic='',nsfw = None,slowmode=None,user_limit=None,bitrate=None,type_=128,):
     data={}
     value=channel.type
     if name:
@@ -741,7 +741,7 @@ async def guild_delete(client, guild,):
         f'{API_ENDPOINT}/guilds/{guild_id}',
         )
 
-async def guild_edit(client, guild, afk_channel=...): #keep it short
+async def guild_edit(client, guild, afk_channel = ...): #keep it short
     data = {}
     
     if (afk_channel is not ...):
@@ -784,8 +784,8 @@ async def guild_ban_get(client, guild,user_id,):
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         )
 
-async def channel_move(client, channel, visual_position, category=..., parent= ..., lock_permissions=False,
-        reason=None):
+async def channel_move(client, channel, visual_position, category=..., parent= ..., lock_permissions = False,
+        reason = None):
     
     if parent is not ...:
         category = parent
@@ -1302,8 +1302,8 @@ async def guild_prune_estimate(client, guild,):
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
         params={'days':30},)
 
-async def role_create(client, guild,name=None,permissions=None,color=None,
-        separated=None,mentionable=None,reason=None,):
+async def role_create(client, guild,name=None,permissions = None,color = None,
+        separated=None,mentionable=None,reason = None,):
 
     data={}
     if name is not None:
@@ -1324,17 +1324,17 @@ async def role_create(client, guild,name=None,permissions=None,color=None,
 
 async def role_move(client,role,new_position,):
     guild = role.guild
-    data= change_on_switch(guild.role_list, role, new_position, key=role_move_key)
+    data= change_on_switch(guild.role_list, role, new_position, key = role_move_key)
     guild_id=role.guild.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
         data=data,)
 
-async def role_edit(client,role,color=None,separated=None,mentionable=None,
-        name=None,permissions=None,):
+async def role_edit(client,role,color = None,separated=None,mentionable=None,
+        name=None,permissions = None,):
     
     if color is None:
-        color=role.color
+        color = role.color
     if separated is None:
         separated=role.separated
     if mentionable is None:
@@ -1342,7 +1342,7 @@ async def role_edit(client,role,color=None,separated=None,mentionable=None,
     if name is None:
         name=role.name
     if permissions is None:
-        permissions=role.permissions
+        permissions = role.permissions
 
     data = {
         'name'        : name,
@@ -1612,7 +1612,7 @@ async def achievement_delete(client,achievement,):
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
         )
 
-async def achievement_edit(client,achievement,name=None,description=None,secret=None,secure=None,icon=...,):
+async def achievement_edit(client,achievement,name=None,description = None,secret=None,secure=None,icon=...,):
     data={}
     if (name is not None):
         data['name'] = {
@@ -1839,7 +1839,7 @@ async def application_command_guild_delete(client, guild, application_command):
         f'{API_ENDPOINT}/applications/{application_id}/guilds/{guild_id}/commands/{application_command_id}',
     )
 
-async def interaction_response_message_create(client, interaction, content=None, embed=None):
+async def interaction_response_message_create(client, interaction, content=None, embed = None):
     message_data = {}
     contains_content = False
     
@@ -1855,11 +1855,11 @@ async def interaction_response_message_create(client, interaction, content=None,
     if contains_content:
         data['data'] = message_data
         
-        response_type = INTERACTION_RESPONSE_TYPES.message_and_source
+        response_type = InteractionResponseType.message_and_source
     else:
-        response_type = INTERACTION_RESPONSE_TYPES.source
+        response_type = InteractionResponseType.source
     
-    data['type'] = response_type
+    data['type'] = response_type.value
     
     interaction_id = interaction.id
     interaction_token = interaction.token
@@ -1870,7 +1870,7 @@ async def interaction_response_message_create(client, interaction, content=None,
     
     return None
 
-async def interaction_response_message_edit(client, interaction, content=None, embed=None):
+async def interaction_response_message_edit(client, interaction, content=None, embed = None):
     message_data = {}
     
     if (content is not None):
@@ -1903,7 +1903,7 @@ async def interaction_response_message_get(client, interaction):
         f'{API_ENDPOINT}/webhooks/{application_id}/{interaction_token}/messages/@original',
     )
 
-async def interaction_followup_message_create(client, interaction, content=None, embed=None):
+async def interaction_followup_message_create(client, interaction, content=None, embed = None):
     message_data = {}
     
     if (content is not None):
@@ -1921,7 +1921,7 @@ async def interaction_followup_message_create(client, interaction, content=None,
     
     return interaction.channel._create_new_message(data)
 
-async def interaction_followup_message_edit(client, interaction, message, content=None, embed=None):
+async def interaction_followup_message_edit(client, interaction, message, content=None, embed = None):
     message_data = {}
     
     if (content is not None):
@@ -2335,7 +2335,7 @@ async def sticker_guild_create(client, guild, name, description, file, tags):
     form.add_field('name', name)
     form.add_field('description', description)
     form.add_field('tags', ', '.join(tags))
-    form.add_field('file', file, filename='file.png', content_type='image/png')
+    form.add_field('file', file, filename = 'file.png', content_type='image/png')
     
     guild_id = guild.id
     
@@ -2363,7 +2363,7 @@ async def sticker_get(client, sticker_id):
     return Sticker(sticker_data)
 
 
-async def sticker_guild_edit(client, guild, sticker, name=None, description=None, tags=None):
+async def sticker_guild_edit(client, guild, sticker, name=None, description = None, tags=None):
     if tags is None:
         tags = ', '.join(sticker.tags)
     else:
@@ -2695,7 +2695,7 @@ async def rate_limit_test_0003(client,message):
         
         achievements=[]
         for name in ('Cake','Neko'):
-            description=name+' are love'
+            description = name+' are love'
             achievement = await client.achievement_create(name,description,image)
             achievements.append(achievement)
         
@@ -2725,10 +2725,10 @@ async def rate_limit_test_0004(client,message):
         loop=client.loop
         tasks = []
         
-        task = Task(achievement_edit(client,achievement,name='Hana'),loop)
+        task = Task(achievement_edit(client,achievement,name = 'Hana'),loop)
         tasks.append(task)
         
-        task = Task(achievement_edit(client,achievement,name='Phantom'),loop)
+        task = Task(achievement_edit(client,achievement,name = 'Phantom'),loop)
         tasks.append(task)
         
         await WaitTillAll(tasks,loop)
@@ -2747,14 +2747,14 @@ async def rate_limit_test_0005(client,message):
         
         achievements=[]
         for name in ('Kokoro','Koishi'):
-            description='UwUwUwU'
+            description = 'UwUwUwU'
             achievement = await client.achievement_create(name,description,image)
             achievements.append(achievement)
     
         loop=client.loop
         tasks = []
         for achievement in achievements:
-            task = Task(achievement_edit(client,achievement,name='Yura'),loop)
+            task = Task(achievement_edit(client,achievement,name = 'Yura'),loop)
             tasks.append(task)
         
         await WaitTillAll(tasks,loop)
@@ -2776,7 +2776,7 @@ async def rate_limit_test_0006(client,message):
         
         achievement = await achievement_create(client,'Kokoro','is love',image)
         await achievement_get(client,achievement.id)
-        await achievement_edit(client,achievement,name='Yurika')
+        await achievement_edit(client,achievement,name = 'Yurika')
         await achievement_delete(client,achievement)
     
     # achievement_create, achievement_get, achievement_edit, achievement_delete are NOT grouped
@@ -2999,9 +2999,9 @@ async def rate_limit_test_0013(client,message):
         for day,(message_own, message_other) in enumerate(messages):
             result.append(f'{day:>3} | {("YES", "NO")[message_own is None]} | {("YES", "NO")[message_other is None]}\n')
         result.append('```\nShould we start?')
-        embed=Embed('Found messages',''.join(result))
+        embed = Embed('Found messages',''.join(result))
         
-        message = await client.message_create(channel,embed=embed)
+        message = await client.message_create(channel, embed = embed)
         
         for emoji in rate_limit_test_0013_EMOJIS:
             await client.reaction_add(message,emoji)
@@ -3017,7 +3017,7 @@ async def rate_limit_test_0013(client,message):
         
         if emoji is rate_limit_test_0013_CANCEL:
             embed.add_footer('rate_limit_test_0020 cancelled')
-            await client.message_edit(message,embed=embed)
+            await client.message_edit(message, embed = embed)
             raise CancelledError()
         
         if emoji is rate_limit_test_0013_OK:
@@ -3119,7 +3119,7 @@ async def rate_limit_test_0019(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        nsfw=channel.nsfw
+        nsfw = channel.nsfw
         
         await channel_edit(client, channel, nsfw = (not nsfw))
         await channel_edit(client, channel, nsfw = nsfw)
@@ -3156,7 +3156,7 @@ async def rate_limit_test_0021(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        channel = await client.channel_create(guild, name='Kanako', type_=0)
+        channel = await client.channel_create(guild, name = 'Kanako', type_=0)
         await channel_delete(client, channel)
 
 @RATE_LIMIT_COMMANDS
@@ -3173,8 +3173,8 @@ async def rate_limit_test_0022(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        role = await client.role_create(guild,name='Sanae')
-        await role_edit(client, role, name='Chiruno')
+        role = await client.role_create(guild,name = 'Sanae')
+        await role_edit(client, role, name = 'Chiruno')
         await client.role_delete(role)
 
 @RATE_LIMIT_COMMANDS
@@ -3191,7 +3191,7 @@ async def rate_limit_test_0023(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        data = await role_create(client, guild, name='Yukari')
+        data = await role_create(client, guild, name = 'Yukari')
         role_id=int(data['id'])
         await client.http.role_delete(guild.id,role_id,None)
 
@@ -3213,7 +3213,7 @@ async def rate_limit_test_0024(client, message):
         if (top_role is not None) and (top_role.position < 2):
             await RLT.send('My top role\'s position is not enough high.')
         
-        role = await client.role_create(guild,name='Sakuya')
+        role = await client.role_create(guild,name = 'Sakuya')
         await role_delete(client, role)
 
 @RATE_LIMIT_COMMANDS
@@ -3270,15 +3270,15 @@ async def rate_limit_test_0026(client,message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        role_1 = await client.role_create(guild,name='Sanae')
-        role_2 = await client.role_create(guild,name='Reimu')
-        await role_edit(client, role_1, name='Chiruno')
-        await role_edit(client, role_2, name='Ririi')
+        role_1 = await client.role_create(guild,name = 'Sanae')
+        role_2 = await client.role_create(guild,name = 'Reimu')
+        await role_edit(client, role_1, name = 'Chiruno')
+        await role_edit(client, role_2, name = 'Ririi')
         await client.role_delete(role_1)
         await client.role_delete(role_2)
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0027(client, message, guild_id:str=''):
+async def rate_limit_test_0027(client, message, guild_id:str = ''):
     """
     Edits 1-1 roles at separate guilds.
     """
@@ -3299,15 +3299,15 @@ async def rate_limit_test_0027(client, message, guild_id:str=''):
         if not guild_2.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
-        role_1 = await client.role_create(guild_1,name='Sanae')
-        role_2 = await client.role_create(guild_2,name='Reimu')
-        await role_edit(client, role_1, name='Chiruno')
-        await role_edit(client, role_2, name='Ririi')
+        role_1 = await client.role_create(guild_1,name = 'Sanae')
+        role_2 = await client.role_create(guild_2,name = 'Reimu')
+        await role_edit(client, role_1, name = 'Chiruno')
+        await role_edit(client, role_2, name = 'Ririi')
         await client.role_delete(role_1)
         await client.role_delete(role_2)
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0028(client, message, guild_id:str=''):
+async def rate_limit_test_0028(client, message, guild_id:str = ''):
     """
     Creates 1-1 roles at separate guilds
     """
@@ -3328,8 +3328,8 @@ async def rate_limit_test_0028(client, message, guild_id:str=''):
         if not guild_2.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission at the other guild as well')
             
-        role_1_data = await role_create(client, guild_1, name='Yuyuko')
-        role_2_data = await role_create(client, guild_2, name='Yoshika')
+        role_1_data = await role_create(client, guild_1, name = 'Yuyuko')
+        role_2_data = await role_create(client, guild_2, name = 'Yoshika')
         role_1_id = int(role_1_data['id'])
         role_2_id = int(role_2_data['id'])
         await client.http.role_delete(guild_1.id, role_1_id, None)
@@ -3353,7 +3353,7 @@ async def rate_limit_test_0029(client,message):
         if (top_role is not None) and (top_role.position < 3):
             await RLT.send('My top role\'s position is not enough high.')
         
-        role = await client.role_create(guild, name='Sakuya')
+        role = await client.role_create(guild, name = 'Sakuya')
         await role_move(client,role,2)
         await client.role_delete(role)
 
@@ -3753,8 +3753,8 @@ async def rate_limit_test_0045(client, message):
         if afk_channel is target_channel: #both is None
             await RLT.send('The guild should have at least 1 voice channel.')
 
-        await guild_edit(client, guild, afk_channel=target_channel)
-        await client.guild_edit(guild, afk_channel=afk_channel)
+        await guild_edit(client, guild, afk_channel = target_channel)
+        await client.guild_edit(guild, afk_channel = afk_channel)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0046(client, message):
@@ -3842,7 +3842,7 @@ async def rate_limit_test_0050(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        target_channel = await client.channel_create(guild, name='tesuto_next:gen', parent=channel.parent, type_=0)
+        target_channel = await client.channel_create(guild, name = 'tesuto_next:gen', parent=channel.parent, type_=0)
         if channel.position == 0:
             position = 1
         else:
@@ -3866,7 +3866,7 @@ async def rate_limit_test_0051(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        created_channel = await channel_create(client, guild, name='tesuto_next:gen2', type_=0)
+        created_channel = await channel_create(client, guild, name = 'tesuto_next:gen2', type_=0)
         
         await client.channel_delete(created_channel)
 
@@ -4160,7 +4160,7 @@ async def rate_limit_test_0070(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        webhook = await client.webhook_create(channel,name='Suzuya')
+        webhook = await client.webhook_create(channel,name = 'Suzuya')
         await webhook_edit(client, webhook, 'Saki')
         await client.webhook_delete(webhook)
 
@@ -4178,7 +4178,7 @@ async def rate_limit_test_0071(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        webhook = await client.webhook_create(channel, name='Suzuya')
+        webhook = await client.webhook_create(channel, name = 'Suzuya')
         await webhook_edit_token(client, webhook, 'Saki')
         await client.webhook_delete(webhook)
 
@@ -4427,7 +4427,7 @@ async def rate_limit_test_0085(client, message, name:str, emoji:'Emoji'):
             emoji_data = await response.read()
         
         emoji = await client.emoji_create( guild, name, emoji_data)
-        await emoji_edit(client, emoji, name='cake_hater')
+        await emoji_edit(client, emoji, name = 'cake_hater')
         await client.emoji_delete(emoji)
 
 @RATE_LIMIT_COMMANDS
@@ -4735,7 +4735,7 @@ async def rate_limit_test_0100(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(channel, message.author, application_command), timeout=300.0)
+                check_interacter(channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await RLT.send('timeout occurred.')
         else:
@@ -4770,7 +4770,7 @@ async def rate_limit_test_0101(client, message):
         try:
             try:
                 interaction1 = await client.wait_for('interaction_create',
-                    check_interacter(channel, message.author, application_command), timeout=300.0)
+                    check_interacter(channel, message.author, application_command), timeout = 300.0)
             except TimeoutError:
                 await RLT.send('timeout occurred.')
             
@@ -4778,7 +4778,7 @@ async def rate_limit_test_0101(client, message):
             
             try:
                 interaction2 = await client.wait_for('interaction_create',
-                    check_interacter(channel, message.author, application_command), timeout=300.0)
+                    check_interacter(channel, message.author, application_command), timeout = 300.0)
             except TimeoutError:
                 await RLT.send('timeout occurred.')
             
@@ -4818,7 +4818,7 @@ async def rate_limit_test_0102(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(channel, message.author, application_command), timeout=300.0)
+                check_interacter(channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await RLT.send('timeout occurred.')
         else:
@@ -5484,7 +5484,7 @@ async def rate_limit_test_0128(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(channel, message.author, application_command), timeout=300.0)
+                check_interacter(channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await RLT.send('timeout occurred.')
         else:
@@ -5856,7 +5856,7 @@ async def rate_limit_test_0149(client, message, name:str,):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0150(client, message, name:str, guild_id:str=''):
+async def rate_limit_test_0150(client, message, name:str, guild_id:str = ''):
     """
     Edits my nick in 2 guilds. Please give a name and the second guild.
     """
@@ -5876,7 +5876,7 @@ async def rate_limit_test_0150(client, message, name:str, guild_id:str=''):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0151(client, message, sticker_id:int=None, name:str=None):
+async def rate_limit_test_0151(client, message, sticker_id:int=None, name:str = None):
     """
     Edits a sticker.
     """
@@ -6142,7 +6142,7 @@ async def rate_limit_test_0166(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0167(client, message, guild_id:str=''):
+async def rate_limit_test_0167(client, message, guild_id:str = ''):
     """
     scheduled_event_get_all_guild | 2 guilds, please pass a second guild_id
     """
@@ -6182,7 +6182,7 @@ async def rate_limit_test_0168(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0169(client, message, guild_id:str=''):
+async def rate_limit_test_0169(client, message, guild_id:str = ''):
     """
     scheduled_event_create | 2 guilds, please pass a second guild_id
     """
@@ -6234,7 +6234,7 @@ async def rate_limit_test_0170(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0171(client, message, guild_id:str=''):
+async def rate_limit_test_0171(client, message, guild_id:str = ''):
     """
     scheduled_event_get | 2 guild
     """
@@ -6290,7 +6290,7 @@ async def rate_limit_test_0172(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0173(client, message, guild_id:str=''):
+async def rate_limit_test_0173(client, message, guild_id:str = ''):
     """
     scheduled_event_edit | 2 guild
     """
@@ -6330,7 +6330,7 @@ async def rate_limit_test_0173(client, message, guild_id:str=''):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0174(client, message, guild_id:str=''):
+async def rate_limit_test_0174(client, message, guild_id:str = ''):
     """
     scheduled_event_delete | 2 guild
     """
@@ -6387,7 +6387,7 @@ async def rate_limit_test_0175(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0176(client, message, guild_id:str=''):
+async def rate_limit_test_0176(client, message, guild_id:str = ''):
     """
     scheduled_event_user_get_chunk | 2 guild
     """
@@ -6545,7 +6545,7 @@ async def rate_limit_test_0180(client, message):
 
 
 @RATE_LIMIT_COMMANDS
-async def rate_limit_test_0181(client, message, guild_id:str=''):
+async def rate_limit_test_0181(client, message, guild_id:str = ''):
     """
     auto_moderation_rule_create
     auto_moderation_rule_get <- some why failed

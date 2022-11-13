@@ -16,7 +16,7 @@ EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
     name = 'plugin',
     description = 'plugin related commands',
     guild = GUILD__SUPPORT,
-    required_permissions = Permission().update_by_keys(administrator=True),
+    required_permissions = Permission().update_by_keys(administrator = True),
 )
 
 EXTENSION_LIST_PER_GUILD_CUSTOM_ID = 'plugin.list_per_client'
@@ -36,7 +36,7 @@ async def list_per_client(event):
 
 
 
-@SLASH_CLIENT.interactions(custom_id=EXTENSION_LIST_PER_GUILD_CUSTOM_ID)
+@SLASH_CLIENT.interactions(custom_id = EXTENSION_LIST_PER_GUILD_CUSTOM_ID)
 async def handle_list_per_client_component(event):
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         return
@@ -115,14 +115,14 @@ def list_per_client_get_response(selected_client, clients):
 
     components = Select(
         [
-            Option(str(client.id), client.full_name, default=(client is selected_client))
+            Option(str(client.id), client.full_name, default = (client is selected_client))
             for client in clients
         ],
         custom_id = EXTENSION_LIST_PER_GUILD_CUSTOM_ID,
         placeholder = 'Select a client',
     )
     
-    return InteractionResponse(embed=embed, components=components)
+    return InteractionResponse(embed = embed, components = components)
 
 
 EXTENSION_LIMIT = 40

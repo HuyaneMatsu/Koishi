@@ -1727,4 +1727,4 @@ async def bozosort_(
         content = None
         file = ('output.py', output)
     
-    yield InteractionResponse(content, allowed_mentions=None, file=file)
+    yield InteractionResponse(content, allowed_mentions = None, file=file)

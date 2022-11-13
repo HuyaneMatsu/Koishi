@@ -46,7 +46,7 @@ async def nsfw_booru(
         
         abort(description)
     
-    cache = ImageCache(True, tags)
+    cache = ImageCache(False, tags)
     await cache.invoke_initial(client, event)
 
 

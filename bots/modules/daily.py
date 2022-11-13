@@ -341,7 +341,7 @@ async def get_waifus_with_name(event, value):
     return waifus
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def daily(client, event,
     target_user_name: ('str', 'Anyone to gift your daily love?', 'waifu') = None,
 ):

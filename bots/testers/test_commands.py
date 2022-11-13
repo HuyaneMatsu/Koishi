@@ -69,7 +69,7 @@ async def test_allowed_edit(client, message):
     """
     user = message.author
     message = await client.message_create(message.channel, 'Test')
-    await client.message_edit(message, user.mention, allowed_mentions=None)
+    await client.message_edit(message, user.mention, allowed_mentions = None)
 
 @TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_rate_limit(client, message):
@@ -97,7 +97,7 @@ async def test_rate_limit(client, message):
             return
         
         proxy.keep_alive = True
-        task = client.loop.create_task(client.role_edit(role, color=role.color))
+        task = client.loop.create_task(client.role_edit(role, color = role.color))
         future_or_timeout(task, 2.5)
         try:
             await task
@@ -122,7 +122,7 @@ async def test_user_data(client, message, user:User):
     Prints out user data as received json
     """
     data = await client.http.user_get(user.id)
-    await Pagination(client, message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
+    await Pagination(client, message.channel,[Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
 
 @TEST_COMMANDS
 async def test_100_messages(client, message):
@@ -160,7 +160,7 @@ async def get_guild(client, message):
         await client.message_create(message.channel, 'Please use this command at a guild.')
     
     data = await client.http.guild_get(guild.id)
-    await Pagination(client, message.channel,[Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
+    await Pagination(client, message.channel,[Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())])
 
 @TEST_COMMANDS
 async def test_webhook_response(client, message, user:User, use_user_avatar:int=1):
@@ -210,7 +210,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     else:
         avatar_url = None
     
-    message = await client.webhook_message_create(executor_webhook,content,avatar_url=avatar_url, wait=True)
+    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait=True)
     
     http_type.webhook_message_create = original_webhook_message_create
     
@@ -219,7 +219,7 @@ async def test_webhook_response(client, message, user:User, use_user_avatar:int=
     if PARSERS['MESSAGE_CREATE'] is replace_MESSAGE_CREATE:
         PARSERS['MESSAGE_CREATE'] = source_MESSAGE_CREATE
     
-    await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
+    await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
 
 @TEST_COMMANDS
 async def test_webhook_response_with_url(client, message, url):
@@ -263,7 +263,7 @@ async def test_webhook_response_with_url(client, message, url):
     if PARSERS['MESSAGE_CREATE'] is replace_MESSAGE_CREATE:
         PARSERS['MESSAGE_CREATE'] = source_MESSAGE_CREATE
     
-    await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
+    await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
 
 @TEST_COMMANDS
 async def test_webhook_response_avatar_url(client, message, avatar_url):
@@ -300,7 +300,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     
     PARSERS['MESSAGE_CREATE'] = replace_MESSAGE_CREATE
     
-    message = await client.webhook_message_create(executor_webhook,content,avatar_url=avatar_url, wait=True)
+    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait=True)
     
     http_type.webhook_message_create = original_webhook_message_create
     
@@ -309,7 +309,7 @@ async def test_webhook_response_avatar_url(client, message, avatar_url):
     if PARSERS['MESSAGE_CREATE'] is replace_MESSAGE_CREATE:
         PARSERS['MESSAGE_CREATE'] = source_MESSAGE_CREATE
     
-    await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
+    await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
 
 @TEST_COMMANDS
 async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
@@ -335,14 +335,14 @@ async def test_webhook_response_avatar_url_nowait(client, message, avatar_url):
     
     PARSERS['MESSAGE_CREATE'] = replace_MESSAGE_CREATE
     
-    message = await client.webhook_message_create(executor_webhook,content,avatar_url=avatar_url, wait=False)
+    message = await client.webhook_message_create(executor_webhook,content,avatar_url = avatar_url, wait=False)
     
     await sleep(1.0)
     
     if PARSERS['MESSAGE_CREATE'] is replace_MESSAGE_CREATE:
         PARSERS['MESSAGE_CREATE'] = source_MESSAGE_CREATE
     
-    await Pagination(client, channel, [Embed(description=description) for description in chunkify(result)])
+    await Pagination(client, channel, [Embed(description = description) for description in chunkify(result)])
 
 @TEST_COMMANDS
 async def discovery_validate_randoms(client, message):
@@ -642,7 +642,7 @@ async def test_start_channel_thread(client, message):
     Does a post request to the channel's threads.
     """
     data = await client.http.thread_create_private(message.channel.id, None)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 # DiscordException Not Found (404): 404: Not Found
@@ -652,7 +652,7 @@ async def test_get_channel_thread_user_get_all(client, message):
     Gets the channel's threads' users probably, no clue.
     """
     data = await client.http.thread_user_get_all(message.channel.id)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 # DiscordException Not Found (404): 404: Not Found
@@ -662,7 +662,7 @@ async def test_add_channel_thread_user(client, message):
     Adds you to the channel's threads.
     """
     data = await client.http.thread_user_add(message.channel.id, message.author.id)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 # DiscordException Not Found (404): 404: Not Found
@@ -672,7 +672,7 @@ async def test_delete_channel_thread_user(client, message):
     Deletes you to the channel's threads.
     """
     data = await client.http.thread_user_delete(message.channel.id, message.author.id)
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
@@ -682,7 +682,7 @@ async def test_application_get_all_detectable(client, message):
     """
     data = await client.http.applications_detectable()
     
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
@@ -692,7 +692,7 @@ async def test_get_eula(client, message):
     """
     data = await client.http.eula_get(542074049984200704)
     
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 
@@ -707,7 +707,7 @@ async def test_get_welcome_screen(client, message):
     
     data = await client.http.welcome_screen_get(guild.id)
     
-    pages = [Embed(description=chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
+    pages = [Embed(description = chunk) for chunk in cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())]
     await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
@@ -723,9 +723,9 @@ async def test_regions(client, message):
     
     difference = new_ones - old_ones
     if not difference:
-        embeds = [Embed(description='*There are no new voice regions added*')]
+        embeds = [Embed(description = '*There are no new voice regions added*')]
     else:
-        embeds = [Embed(description= (
+        embeds = [Embed(description = (
             f'Voice region : {region.name!r}\n'
             f'id : {region.value!r}\n'
             f'vip : {region.vip!r}\n'
@@ -740,7 +740,7 @@ async def test_closer(client, message):
     """
     Creates a new closer.
     """
-    await Closer(client, message.channel, Embed('cake?'), timeout=5.0)
+    await Closer(client, message.channel, Embed('cake?'), timeout = 5.0)
 
 
 @TEST_COMMANDS(separator=',')
@@ -748,7 +748,7 @@ async def autohelp_singles(client, message, name:str, user:'user', *words):
     pass
 
 @TEST_COMMANDS(aliases=['autohelp-defaulted-alt'])
-async def autohelp_defaulted(client, message, name:str=None, channel:Channel=None, rest=None):
+async def autohelp_defaulted(client, message, name:str = None, channel:Channel=None, rest=None):
     pass
 
 @TEST_COMMANDS(separator=('[', ']'))
@@ -811,11 +811,11 @@ async def avatar_1(client, message, user: 'user' = None):
     else:
         color = user.default_avatar.color
     
-    url = user.avatar_url_as(size=4096)
-    embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
+    url = user.avatar_url_as(size = 4096)
+    embed = Embed(f'{user:f}\'s avatar', color = color, url = url)
     embed.add_image(url)
     
-    await client.message_create(message.channel, embed=embed)
+    await client.message_create(message.channel, embed = embed)
 
 @TEST_COMMANDS
 async def what_is_it_1(client, message, entity: {'user', 'channel', 'role'} = None):
@@ -841,11 +841,11 @@ async def avatar_2(client, message, user: 'user'=None):
     else:
         color = user.default_avatar.color
     
-    url = user.avatar_url_as(size=4096)
-    embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
+    url = user.avatar_url_as(size = 4096)
+    embed = Embed(f'{user:f}\'s avatar', color = color, url = url)
     embed.add_image(url)
     
-    await client.message_create(message.channel, embed=embed)
+    await client.message_create(message.channel, embed = embed)
 
 @TEST_COMMANDS
 @configure_converter('user', ConverterFlag.user_all)
@@ -858,11 +858,11 @@ async def avatar_3(client, message, user: 'user'=None):
     else:
         color = user.default_avatar.color
     
-    url = user.avatar_url_as(size=4096)
-    embed = Embed(f'{user:f}\'s avatar', color=color, url=url)
+    url = user.avatar_url_as(size = 4096)
+    embed = Embed(f'{user:f}\'s avatar', color = color, url = url)
     embed.add_image(url)
     
-    await client.message_create(message.channel, embed=embed)
+    await client.message_create(message.channel, embed = embed)
 
 
 @TEST_COMMANDS
@@ -887,12 +887,12 @@ async def owner_1(client, message):
 async def owner_2(client, message):
     await client.message_create(message.channel, f'My masuta is {client.owner:f} !')
 
-@TEST_COMMANDS(name='print_1')
+@TEST_COMMANDS(name = 'print_1')
 async def print_1_(client, message, content):
     if content:
         await client.message_create(message.channel, content)
 
-@TEST_COMMANDS(name='print_2', aliases=['say_2'])
+@TEST_COMMANDS(name = 'print_2', aliases=['say_2'])
 async def print_2_(client, message, content):
     if content:
         await client.message_create(message.channel, content)
@@ -986,7 +986,7 @@ async def test_webhook_message_edit_0(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
     await client.webhook_message_edit(executor_webhook, new_message, None)
 
 @TEST_COMMANDS
@@ -999,7 +999,7 @@ async def test_webhook_message_edit_1(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
     await client.webhook_message_edit(executor_webhook, new_message, 'ayaya')
 
 @TEST_COMMANDS
@@ -1012,8 +1012,8 @@ async def test_webhook_message_edit_2(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
-    await client.webhook_message_edit(executor_webhook, new_message, None, embed=Embed('cake'))
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    await client.webhook_message_edit(executor_webhook, new_message, None, embed = Embed('cake'))
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_3(client, message):
@@ -1025,8 +1025,8 @@ async def test_webhook_message_edit_3(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
-    await client.webhook_message_edit(executor_webhook, new_message, embed=None)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    await client.webhook_message_edit(executor_webhook, new_message, embed = None)
 
 
 @TEST_COMMANDS
@@ -1054,7 +1054,7 @@ async def test_webhook_message_edit_5(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
     await client.webhook_message_edit(executor_webhook, new_message, None, None)
 
 @TEST_COMMANDS
@@ -1067,8 +1067,8 @@ async def test_webhook_message_edit_6(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
-    await client.webhook_message_edit(executor_webhook, new_message, embed=None)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
+    await client.webhook_message_edit(executor_webhook, new_message, embed = None)
 
 @TEST_COMMANDS
 async def test_webhook_message_delete(client, message):
@@ -1080,7 +1080,7 @@ async def test_webhook_message_delete(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed=Embed('cake'), wait=True)
+    new_message = await client.webhook_message_create(executor_webhook, 'testing', embed = Embed('cake'), wait=True)
     await client.webhook_message_delete(executor_webhook, new_message)
 
 @TEST_COMMANDS
@@ -1095,8 +1095,8 @@ async def test_webhook_message_edit_7(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, message.author.mention, allowed_mentions=None, wait=True)
-    await client.webhook_message_edit(executor_webhook, new_message, allowed_mentions=None,)
+    new_message = await client.webhook_message_create(executor_webhook, message.author.mention, allowed_mentions = None, wait=True)
+    await client.webhook_message_edit(executor_webhook, new_message, allowed_mentions = None,)
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_8(client, message):
@@ -1121,8 +1121,8 @@ async def test_webhook_message_edit_9(client, message):
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel, 'testing')
     
-    new_message = await client.webhook_message_create(executor_webhook, embed=Embed('cake'), wait=True)
-    await client.webhook_message_edit(executor_webhook, new_message, embed=Embed('cake'))
+    new_message = await client.webhook_message_create(executor_webhook, embed = Embed('cake'), wait=True)
+    await client.webhook_message_edit(executor_webhook, new_message, embed = Embed('cake'))
 
 
 
@@ -1211,7 +1211,7 @@ async def test_application_command_response_twice(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1244,7 +1244,7 @@ async def test_application_command_response_multiple_embeds(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1275,7 +1275,7 @@ async def test_application_command_followup_first(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1307,7 +1307,7 @@ async def test_application_command_followup(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1341,13 +1341,13 @@ async def test_application_command_followup_alt_name(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
         
         await client.interaction_response_message_create(interaction)
-        await client.interaction_followup_message_create(interaction, 'ayaya', name='Not Marisa')
+        await client.interaction_followup_message_create(interaction, 'ayaya', name = 'Not Marisa')
     finally:
         await client.application_command_guild_delete(guild, application_command)
 '''
@@ -1380,7 +1380,7 @@ async def test_application_command_option_value_1(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1435,7 +1435,7 @@ async def test_application_command_option_choice_type_1(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1474,7 +1474,7 @@ async def test_application_command_option_choice_type_2(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1513,7 +1513,7 @@ async def test_application_command_option_choice_type_3(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1552,7 +1552,7 @@ async def test_application_command_option_choice_type_4(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1596,7 +1596,7 @@ async def test_application_command_option_choice_type_5(client, message):
         # Wait
         try:
             interaction = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1628,7 +1628,7 @@ async def test_application_command_normal_edit(client, message):
         # Wait
         try:
             interaction_event = await client.wait_for('interaction_create',
-                check_interacter(message.channel, message.author, application_command), timeout=300.0)
+                check_interacter(message.channel, message.author, application_command), timeout = 300.0)
         except TimeoutError:
             await client.message_create(message.channel, 'timeout occurred')
             return
@@ -1651,7 +1651,7 @@ async def voice_state(client, message):
         f'Usage: `{prefix}voice-state`\n'
         )).add_footer('Owner only!')
 
-@TEST_COMMANDS(description=voice_state, checks=checks.owner_only(), category='VOICE')
+@TEST_COMMANDS(description = voice_state, checks=checks.owner_only(), category='VOICE')
 async def voice_state(client, message):
     voice_client = client.voice_client_for(message)
     lines = []
@@ -1867,7 +1867,7 @@ async def test_stage_discovery_get(client, message):
     """
     data = await client.http.stage_discovery_get()
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
-    pages = [Embed(description=chunk) for chunk in chunks]
+    pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
 
@@ -1878,7 +1878,7 @@ async def test_stage_get_all(client, message):
     """
     data = await client.http.stage_get_all()
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
-    pages = [Embed(description=chunk) for chunk in chunks]
+    pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
 
@@ -1890,7 +1890,7 @@ async def test_stage_edit(client, message):
     data = {'topic':'Ayaya'}
     data = await client.http.stage_edit(826912003452436510, data)
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
-    pages = [Embed(description=chunk) for chunk in chunks]
+    pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
 @TEST_COMMANDS
@@ -1901,7 +1901,7 @@ async def test_stage_create(client, message):
     data = {'channel_id':826912003452436510, 'topic':'Ayaya', 'privacy_level': PrivacyLevel.guild_only.value}
     data = await client.http.stage_create(data)
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
-    pages = [Embed(description=chunk) for chunk in chunks]
+    pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
 
@@ -1912,7 +1912,7 @@ async def test_stage_delete(client, message):
     """
     data = await client.http.stage_delete(826912003452436510)
     chunks = cchunkify(json.dumps(data, indent=4, sort_keys=True).splitlines())
-    pages = [Embed(description=chunk) for chunk in chunks]
+    pages = [Embed(description = chunk) for chunk in chunks]
     await Pagination(client, message.channel, pages)
 
 

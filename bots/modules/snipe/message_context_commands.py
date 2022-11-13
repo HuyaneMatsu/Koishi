@@ -24,7 +24,7 @@ DELETED_EMOJI_RP = re.compile(
 SLASH_CLIENT: Client
 
 
-@SLASH_CLIENT.interactions(is_global=True, target='message')
+@SLASH_CLIENT.interactions(is_global = True, target = 'message')
 async def snipe_emojis(client, event, target):
     emojis = parse_custom_emojis_ordered(target.content)
     if not emojis:
@@ -35,7 +35,7 @@ async def snipe_emojis(client, event, target):
 
 
 
-@SLASH_CLIENT.interactions(is_global=True, target='message')
+@SLASH_CLIENT.interactions(is_global = True, target = 'message')
 async def snipe_reactions(client, event, target):
     reactions = target.reactions
     if (reactions is None) or (not reactions):
@@ -86,12 +86,12 @@ async def _respond_with_emojis(client, event, target, emojis, snipe_type):
             embed = Embed(None, f'*No alive {type_name}s where sniped.*')
             add_embed_author(embed, event, target.url, type_name)
             
-            await client.interaction_response_message_edit(event, embed=embed)
+            await client.interaction_response_message_edit(event, embed = embed)
             
             return
 
 
-@SLASH_CLIENT.interactions(is_global=True, target='message')
+@SLASH_CLIENT.interactions(is_global = True, target = 'message')
 async def snipe_stickers(event, target):
     stickers = target.stickers
     if (stickers is None):

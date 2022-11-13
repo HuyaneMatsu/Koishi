@@ -7,7 +7,7 @@ from ..helpers import get_player_or_abort
 
 
 async def volume_(client, event,
-    volume: P('number', 'Percentage?', min_value=0, max_value=200) = None,
+    volume: P('number', 'Percentage?', min_value = 0, max_value = 200) = None,
 ):
     """Gets or sets my volume to the given percentage."""
     player = get_player_or_abort(client, event)

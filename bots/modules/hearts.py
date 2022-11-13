@@ -61,7 +61,7 @@ def create_hearts_short_embed(event, target_user, total_love, daily_streak, read
     else:
         description = None
     
-    return Embed(title, description, color=COLOR__GAMBLING)
+    return Embed(title, description, color = COLOR__GAMBLING)
 
 
 async def get_generic_fields(target_user):
@@ -232,7 +232,7 @@ async def render_hearts_daily_extended(client, event, target_user):
     
     embed.add_field('Daily reward calculation:', field_value)
     
-    return InteractionResponse(embed=embed, allowed_mentions=None)
+    return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
 async def render_hearts_vote_extended(client, event, target_user):
@@ -302,7 +302,7 @@ async def render_hearts_vote_extended(client, event, target_user):
     else:
         description = None
     
-    embed = Embed(title, description, color=COLOR__GAMBLING)
+    embed = Embed(title, description, color = COLOR__GAMBLING)
     
 
     field_value_parts = [
@@ -502,7 +502,7 @@ HEARTS_FIELD_NAME_TO_RENDERER = {
     HEARTS_FIELD_NAME_STATS: (False, render_hearts_stats),
 }
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def hearts(client, event,
     target_user: ('user', 'Do you wanna know some1 else\'s hearts?') = None,
     field: (HEARTS_FIELD_CHOICES, 'Choose a field!') = HEARTS_FIELD_NAME_SHORT,

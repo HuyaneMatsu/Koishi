@@ -186,13 +186,13 @@ async def submit(client, event,
             f'command.')
     
     if datetime.utcnow() >= QUALIFIER_DEADLINE:
-        return Embed('Oh No!', 'Qualifier over', color=COLOR__EVENT)
+        return Embed('Oh No!', 'Qualifier over', color = COLOR__EVENT)
     
     user = event.user
     await client.message_create(CHANNEL__SUPPORT__EVENT, f'{user:f}, [{user.id}] submitted:\n'
         f'`{submission_reference_url}`')
     
-    return Embed('Success', 'Noice', color=COLOR__EVENT)
+    return Embed('Success', 'Noice', color = COLOR__EVENT)
 
 @EVENTS.interactions
 async def countdown(client, event):

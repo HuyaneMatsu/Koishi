@@ -99,7 +99,7 @@ async def emojify(client, message, content):
     
     result = '\u200b'.join(result)
     # If the message is empty, we will check that anyways
-    await client.message_create(message, result, allowed_mentions=None)
+    await client.message_create(message, result, allowed_mentions = None)
     return
 
 PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
@@ -214,7 +214,7 @@ class auto_pyramid_u:
         
         for user, count in zip(selected_users, chain(range(1, size), range(size, 0, -1))):
             await client.webhook_message_create(executor_webhook, ' '.join(emoji.as_emoji for _ in range(count)),
-                name=user.name_at(message.guild), avatar_url=user.avatar_url_as(size=4096), wait=True)
+                name=user.name_at(message.guild), avatar_url = user.avatar_url_as(size=4096), wait=True)
     
     checks = checks.has_guild_permissions(manage_messages=True)
     
@@ -235,7 +235,7 @@ class auto_pyramid_u:
 class reverse:
     async def command(client, message, content):
         if content:
-            await client.message_create(message, content[::-1], allowed_mentions=None)
+            await client.message_create(message, content[::-1], allowed_mentions = None)
     
     async def description(command_context):
         return Embed(

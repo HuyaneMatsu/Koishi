@@ -124,7 +124,7 @@ async def _try_resolve_entries(value):
     todo_entries = await get_entries()
     
     if value is None:
-        entries = sorted(todo_entries.values(), key=_entry_id_sort_key)
+        entries = sorted(todo_entries.values(), key = _entry_id_sort_key)
     
     else:
         parsed = ENTRY_BY_ID_RP.fullmatch(value)
@@ -136,7 +136,7 @@ async def _try_resolve_entries(value):
                 if sort_key is not None:
                     to_sort.append((sort_key, entry))
             
-            to_sort.sort(key=_entry_by_value_sort_key)
+            to_sort.sort(key = _entry_by_value_sort_key)
             
             entries = [item[1] for item in to_sort]
         else:
@@ -150,7 +150,7 @@ async def _try_resolve_entries(value):
                 else:
                     entries = [entry]
             else:
-                entries = sorted(todo_entries.values(), key=_entry_id_sort_key)
+                entries = sorted(todo_entries.values(), key = _entry_id_sort_key)
     
     return entries
 
@@ -242,7 +242,7 @@ async def add(event):
     return ADD_TODO_FORM
 
 
-@SLASH_CLIENT.interactions(custom_id=TODO_FORM_SUBMIT_CUSTOM_ID, target='form')
+@SLASH_CLIENT.interactions(custom_id = TODO_FORM_SUBMIT_CUSTOM_ID, target = 'form')
 async def todo_add_form_submit(
     event,
     *,
@@ -303,11 +303,11 @@ async def list_(
     todo_entries = await get_entries()
     
     if creator is None:
-        entries = sorted(todo_entries.values(), key=_entry_id_sort_key)
+        entries = sorted(todo_entries.values(), key = _entry_id_sort_key)
     else:
         creator_id = creator.id
         entries = [entry for entry in todo_entries if entry.creator_id == creator_id]
-        entries.sort(key=_entry_id_sort_key)
+        entries.sort(key = _entry_id_sort_key)
     
     page_count = ceil(len(entries) / ENTRY_PER_PAGE)
     
@@ -387,13 +387,13 @@ async def del_(
     return InteractionResponse(
         embed = embed,
         components = Row(
-            DELETE_ENTRY_APPROVE.copy_with(custom_id=f'{DELETE_ENTRY_BASE}.{entry.entry_id}.1'),
-            DELETE_ENTRY_CANCEL.copy_with(custom_id=f'{DELETE_ENTRY_BASE}.{entry.entry_id}.0'),
+            DELETE_ENTRY_APPROVE.copy_with(custom_id = f'{DELETE_ENTRY_BASE}.{entry.entry_id}.1'),
+            DELETE_ENTRY_CANCEL.copy_with(custom_id = f'{DELETE_ENTRY_BASE}.{entry.entry_id}.0'),
         )
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=DELETE_ENTRY_RP)
+@SLASH_CLIENT.interactions(custom_id = DELETE_ENTRY_RP)
 async def del_approval(
     client,
     event,
@@ -432,7 +432,7 @@ async def del_approval(
     else:
         embed.add_author('Deleting entry cancelled')
     
-    return InteractionResponse(embed=embed, components=None)
+    return InteractionResponse(embed = embed, components = None)
 
 
 CUSTOM_ID_EDIT_BASE = 'todo.edit'
@@ -462,7 +462,7 @@ async def edit(
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_EDIT_RP, target='form')
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_EDIT_RP, target = 'form')
 async def edit_form_submit(
     client,
     entry_id,

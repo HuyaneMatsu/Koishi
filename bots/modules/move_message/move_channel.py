@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client, Permission
 
 from .constants import ALLOWED_GUILDS
-from .helpers import check_move_permissions, get_files, get_webhook
+from .helpers import check_move_permissions, get_webhook, _create_webhook_message
 
 
 SLASH_CLIENT : Client
@@ -12,7 +12,7 @@ SLASH_CLIENT : Client
 @SLASH_CLIENT.interactions(
     guild = ALLOWED_GUILDS,
     show_for_invoking_user_only = True,
-    required_permissions = Permission().update_by_keys(administrator=True),
+    required_permissions = Permission().update_by_keys(administrator = True),
 )
 async def move_channel(
     client,
@@ -47,30 +47,4 @@ async def move_channel(
             after_id = messages[0].id
         
         for message in reversed(messages):
-            content = message.content
-            if (content is not None) and (len(content) > 2000):
-                await client.webhook_message_create(
-                    webhook,
-                    content[:2000],
-                    allowed_mentions = None,
-                    name = message.author.name_at(guild_id),
-                    avatar_url = message.author.avatar_url_at(guild_id),
-                    thread = thread_id,
-                )
-                
-                content = content[2000:]
-            
-            files = await get_files(client, message)
-            
-            await client.webhook_message_create(
-                webhook,
-                content,
-                embed = message.clean_embeds,
-                file = files,
-                allowed_mentions = None,
-                name = message.author.name_at(guild_id),
-                avatar_url = message.author.avatar_url_at(guild_id),
-                thread = thread_id,
-            )
-            
-            files = None
+            await _create_webhook_message(client, webhook, message, guild_id, thread_id)

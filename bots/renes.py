@@ -20,10 +20,14 @@ async def guild_user_add(client, guild, user):
     if system_channel is None:
         return
     
-    await client.message_create(system_channel, f'Thanks for coming {user:m}, enjoy your stay~')
+    await client.message_create(
+        system_channel,
+        f'Thanks for coming {user:m}, enjoy your stay~\n'
+        f'If you wish to get notification every time Est goes live please use the {ping_me_hime:m} command.'
+    )
 
 
-@Renes.interactions(guild=GUILD__ESTS_HOME)
+@Renes.interactions(guild = GUILD__ESTS_HOME)
 async def ping_me_hime(client, event):
     user = event.user
     if user.has_role(ROLE__ESTS_HOME__STREAM_NOTIFICATION):

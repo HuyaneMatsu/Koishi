@@ -65,7 +65,7 @@ def check_for_trivia_emoji(user, event):
     return True
 
 
-@SLASH_CLIENT.interactions(is_global=True, name='trivia')
+@SLASH_CLIENT.interactions(is_global = True, name = 'trivia')
 async def trivia_(client, event):
     """Asks a trivia."""
     guild = event.guild
@@ -134,7 +134,7 @@ async def trivia_(client, event):
         TRIVIA_USER_LOCK.discard(user.id)
 
 
-@SLASH_CLIENT.interactions(show_for_invoking_user_only=True, is_global=True)
+@SLASH_CLIENT.interactions(show_for_invoking_user_only=True, is_global = True)
 async def message_me(client, event):
     """Messages you!"""
     yield
@@ -152,7 +152,7 @@ async def message_me(client, event):
     yield ':3'
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def roll(client, event,
     dice_count: ([(str(v), v) for v in range(1, 7)], 'With how much dice do you wanna roll?') = 1,
 ):
@@ -164,7 +164,7 @@ async def roll(client, event,
     return str(amount)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def rate(client, event,
     target_user: ('user', 'Do you want me to rate someone else?') = None,
 ):
@@ -180,7 +180,7 @@ async def rate(client, event,
     return f'I rate {target_user.name_at(event.guild)} {result}/10'
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def yuno():
     """Your personal yandere!"""
     return Embed(
@@ -213,7 +213,7 @@ async def yuno():
     )
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def random_(
     n1: ('int', 'Number limit.'),
     n2: ('int', 'Other number limit!') = 0,
@@ -374,7 +374,7 @@ def generate_love_level():
 LOVE_VALUES = tuple(generate_love_level())
 del generate_love_level
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def love(client, event,
     user_1: ('user', 'Select your heart\'s chosen one!', 'user') = None,
     user_2: ('user', 'Check some else\'s love life?', 'with') = None,
@@ -430,7 +430,7 @@ MINE_X_SIZE = 9
 MINE_Y_SIZE = 9
 MINE_SIZE = MINE_X_SIZE * MINE_Y_SIZE
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def minesweeper(
     bomb_count: ([(str(x), x) for x in range(7, 15)], 'How much bombs should be on the field?') = 10,
     raw: ('bool', 'Raw text?') = False,
@@ -504,11 +504,11 @@ async def minesweeper(
     return '\n'.join(result)
 
 
-EMOJI_1 = Emoji.precreate(814618830106132511, name='T90Salute')
-EMOJI_2 = Emoji.precreate(588052578214871053, name='tatohaHola')
+EMOJI_1 = Emoji.precreate(814618830106132511, name = 'T90Salute')
+EMOJI_2 = Emoji.precreate(588052578214871053, name = 'tatohaHola')
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT, show_for_invoking_user_only=True)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only=True)
 async def crywolf_(client, event):
     """Crywolf is a bot"""
     yield 'crywolf is a sus'
@@ -580,7 +580,7 @@ SEX_IMAGES = [
     'https://cdn.discordapp.com/attachments/568837922288173058/927858614226526228/sex_2_0.png',
 ]
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def sex(event):
     """You horny?"""
     value = random()

@@ -39,7 +39,7 @@ BAKA_BALL_IMAGE = 'https://cdn.discordapp.com/attachments/568837922288173058/939
 
 EMBED_COLOR = Color(0x2e93ff)
 
-@SLASH_CLIENT.interactions(is_global=True, name='9ball')
+@SLASH_CLIENT.interactions(is_global = True, name = '9ball')
 async def baka_ball(
     event,
     question: str,
@@ -54,7 +54,7 @@ async def baka_ball(
     response = BAKA_BALL_RESPONSES[(hash_string(question.casefold()) ^ user.id) % len(BAKA_BALL_RESPONSES)]
     
     embed = Embed(
-        description=question,
+        description = question,
         color = EMBED_COLOR,
     ).add_author(
         user.full_name,

@@ -10,23 +10,23 @@ PATTERN = re.compile('(?<!\\\\)<([a-z]{0,2})>')
 
 RESET = create_ansi_format_code()
 
-STYLE_DECORATION_NONE = create_ansi_format_code(text_decoration=AnsiTextDecoration.none)
-STYLE_DECORATION_BOLD = create_ansi_format_code(text_decoration=AnsiTextDecoration.bold)
-STYLE_DECORATION_UNDERLINE = create_ansi_format_code(text_decoration=AnsiTextDecoration.underline)
-STYLE_BACKGROUND_BLACK = create_ansi_format_code(background_color=AnsiBackgroundColor.black)
-STYLE_BACKGROUND_RED = create_ansi_format_code(background_color=AnsiBackgroundColor.red)
-STYLE_BACKGROUND_GRAY = create_ansi_format_code(background_color=AnsiBackgroundColor.gray)
-STYLE_BACKGROUND_BLUE = create_ansi_format_code(background_color=AnsiBackgroundColor.blue)
-STYLE_BACKGROUND_SILVER = create_ansi_format_code(background_color=AnsiBackgroundColor.silver)
-STYLE_BACKGROUND_WHITE = create_ansi_format_code(background_color=AnsiBackgroundColor.white)
-STYLE_FOREGROUND_BLACK = create_ansi_format_code(foreground_color=AnsiForegroundColor.black)
-STYLE_FOREGROUND_RED = create_ansi_format_code(foreground_color=AnsiForegroundColor.red)
-STYLE_FOREGROUND_GREEN = create_ansi_format_code(foreground_color=AnsiForegroundColor.green)
-STYLE_FOREGROUND_ORANGE = create_ansi_format_code(foreground_color=AnsiForegroundColor.orange)
-STYLE_FOREGROUND_BLUE = create_ansi_format_code(foreground_color=AnsiForegroundColor.blue)
-STYLE_FOREGROUND_PINK = create_ansi_format_code(foreground_color=AnsiForegroundColor.pink)
-STYLE_FOREGROUND_TEAL = create_ansi_format_code(foreground_color=AnsiForegroundColor.teal)
-STYLE_FOREGROUND_WHITE = create_ansi_format_code(foreground_color=AnsiForegroundColor.white)
+STYLE_DECORATION_NONE = create_ansi_format_code(text_decoration = AnsiTextDecoration.none)
+STYLE_DECORATION_BOLD = create_ansi_format_code(text_decoration = AnsiTextDecoration.bold)
+STYLE_DECORATION_UNDERLINE = create_ansi_format_code(text_decoration = AnsiTextDecoration.underline)
+STYLE_BACKGROUND_BLACK = create_ansi_format_code(background_color = AnsiBackgroundColor.black)
+STYLE_BACKGROUND_RED = create_ansi_format_code(background_color = AnsiBackgroundColor.red)
+STYLE_BACKGROUND_GRAY = create_ansi_format_code(background_color = AnsiBackgroundColor.gray)
+STYLE_BACKGROUND_BLUE = create_ansi_format_code(background_color = AnsiBackgroundColor.blue)
+STYLE_BACKGROUND_SILVER = create_ansi_format_code(background_color = AnsiBackgroundColor.silver)
+STYLE_BACKGROUND_WHITE = create_ansi_format_code(background_color = AnsiBackgroundColor.white)
+STYLE_FOREGROUND_BLACK = create_ansi_format_code(foreground_color = AnsiForegroundColor.black)
+STYLE_FOREGROUND_RED = create_ansi_format_code(foreground_color = AnsiForegroundColor.red)
+STYLE_FOREGROUND_GREEN = create_ansi_format_code(foreground_color = AnsiForegroundColor.green)
+STYLE_FOREGROUND_ORANGE = create_ansi_format_code(foreground_color = AnsiForegroundColor.orange)
+STYLE_FOREGROUND_BLUE = create_ansi_format_code(foreground_color = AnsiForegroundColor.blue)
+STYLE_FOREGROUND_PINK = create_ansi_format_code(foreground_color = AnsiForegroundColor.pink)
+STYLE_FOREGROUND_TEAL = create_ansi_format_code(foreground_color = AnsiForegroundColor.teal)
+STYLE_FOREGROUND_WHITE = create_ansi_format_code(foreground_color = AnsiForegroundColor.white)
 
 STYLE_CODES = {
     '': RESET,
@@ -50,7 +50,7 @@ STYLE_CODES = {
 }
 
 
-@SLASH_CLIENT.interactions(is_global=True, target='message', allowed_mentions=None)
+@SLASH_CLIENT.interactions(is_global = True, target = 'message', allowed_mentions = None)
 async def style_text(target):
     content = target.content
     if content is None:

@@ -66,7 +66,7 @@ class oauth2_link:
             f'- `{prefix}oauth2_guilds <user_id>`\n'
             f'- `{prefix}oauth2_my_guild <user_id>`\n'
             f'- `{prefix}oauth2_renew <user_id>`'
-                ), color=OAUTH2_COLOR).add_footer(
+                ), color = OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 @COMMAND_CLIENT.commands.from_class
@@ -114,7 +114,7 @@ class oauth2_feed:
             f'- `{prefix}oauth2_guilds <user_id>`\n'
             f'- `{prefix}oauth2_my_guild <user_id>`\n'
             f'- `{prefix}oauth2_renew <user_id>`'
-                ), color=OAUTH2_COLOR).add_footer(
+                ), color = OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
@@ -126,7 +126,7 @@ class oauth2_user:
             await client.message_create(message.channel,'Could not find that user')
             return
         
-        await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(user)])
+        await Pagination(client, message.channel, [Embed(description = chunk) for chunk in pchunkify(user)])
     
     category = 'OAUTH2'
     
@@ -140,7 +140,7 @@ class oauth2_user:
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color=OAUTH2_COLOR).add_footer(
+                ), color = OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
@@ -154,7 +154,7 @@ class oauth2_connections:
         
         connections = await client.user_connection_get_all(user.access)
         
-        await Pagination(client, message.channel, [Embed(description=chunk) for chunk in pchunkify(connections)])
+        await Pagination(client, message.channel, [Embed(description = chunk) for chunk in pchunkify(connections)])
     
     category = 'OAUTH2'
     
@@ -168,7 +168,7 @@ class oauth2_connections:
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color=OAUTH2_COLOR).add_footer(
+                ), color = OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
@@ -182,7 +182,7 @@ class oauth2_guilds:
         
         guilds = await client.user_guild_get_all(user.access)
         
-        await Pagination(client, message.channel,[Embed(description=chunk) for chunk in pchunkify(guilds)])
+        await Pagination(client, message.channel,[Embed(description = chunk) for chunk in pchunkify(guilds)])
     
     category = 'OAUTH2'
     
@@ -196,7 +196,7 @@ class oauth2_guilds:
             'so take care, you can not trust them! *Only me!*\n'
             'If you don\'t know how to authorize yourself; use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color=OAUTH2_COLOR).add_footer(
+                ), color = OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
@@ -242,7 +242,7 @@ class oauth2_my_guild:
             'take care!\n'
             'If you don\'t know how to authorize yourself, use : '
             f'`{command_context.prefix}help oauth2_link`'
-                ), color=OAUTH2_COLOR).add_footer(
+                ), color = OAUTH2_COLOR).add_footer(
                 'Owner only!')
 
 
@@ -274,5 +274,5 @@ class oauth2_renew:
             'Other owners can renew it for you as well!\n'
             'If you don\'t know how to authorize yourself;\n'
             f'Use : `{command_context.prefix}help oauth2_link`'
-                ), color=OAUTH2_COLOR).add_footer(
+                ), color = OAUTH2_COLOR).add_footer(
                 'Owner only!')

@@ -1,5 +1,6 @@
 __all__ = ()
 
+from itertools import chain
 from re import I as re_ignore_case, U as re_unicode, compile as re_compile, escape as re_escape
 
 from dateutil.relativedelta import relativedelta as RelativeDelta
@@ -14,8 +15,8 @@ SLASH_CLIENT: Client
 
 
 STYLE_RESET = create_ansi_format_code()
-STYLE_RED = create_ansi_format_code(foreground_color=AnsiForegroundColor.red)
-STYLE_GREEN = create_ansi_format_code(foreground_color=AnsiForegroundColor.green)
+STYLE_RED = create_ansi_format_code(foreground_color = AnsiForegroundColor.red)
+STYLE_GREEN = create_ansi_format_code(foreground_color = AnsiForegroundColor.green)
 
 MIN_DELTA = elapsed_time(RelativeDelta(seconds = MIN_INTERVAL))
 MAX_DELTA = elapsed_time(RelativeDelta(seconds = MAX_INTERVAL))
@@ -101,14 +102,17 @@ def _channel_sort_key(channel):
     return channel.name
 
 
-def iter_channels(guild):
+def iter_channels(client, guild):
     """
     Iterates over the forum's channels.
     
-    This method is an iterable generator.
+    This function is an iterable generator.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would auto post.
+    
     guild : ``Guild``
         The guild's identifier which channel to iterate.
     
@@ -116,17 +120,20 @@ def iter_channels(guild):
     ------
     channel : ``Channel``
     """
-    for channel in guild.threads.values():
-        if should_auto_post_in_channel(channel):
+    for channel in chain(guild.channels.values(), guild.threads.values()):
+        if should_auto_post_in_channel(client, channel):
             yield channel
 
 
-def get_channels(guild):
+def get_channels(client, guild):
     """
     Gets all the channels of the forum.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would auto post.
+    
     guild : ``Guild``
         The guild's identifier which channel to iterate.
     
@@ -134,7 +141,7 @@ def get_channels(guild):
     -------
     channels : `list` of ``Channel``
     """
-    return [*iter_channels(guild)]
+    return [*iter_channels(client, guild)]
 
 
 def _channel_match_sort_key(item):
@@ -154,14 +161,18 @@ def _channel_match_sort_key(item):
     return (start, channel.name, channel.id)
 
 
-def _channel_match_priority_queue(guild, channel_name):
+def _channel_match_priority_queue(client, guild, channel_name):
     """
     Produces priority queue of channels which match the given input value.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would auto post.
+    
     guild : ``Guild``
         The guild's identifier which channel to iterate.
+    
     channel_name : `str`
         The channel name to match.
     
@@ -172,7 +183,7 @@ def _channel_match_priority_queue(guild, channel_name):
     priority_queue = []
     
     pattern = re_compile(re_escape(channel_name), re_ignore_case | re_unicode)
-    for channel in iter_channels(guild):
+    for channel in iter_channels(client, guild):
         match = pattern.search(channel.name)
         if (match is not None):
             priority_queue.append((match.start, channel))
@@ -182,14 +193,18 @@ def _channel_match_priority_queue(guild, channel_name):
     return priority_queue
 
 
-def get_channels_like(guild, channel_name):
+def get_channels_like(client, guild, channel_name):
     """
     Gets channels which match the given input value.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would auto post.
+    
     guild : ``Guild``
         The guild's identifier which channel to iterate.
+    
     channel_name : `str`
         The channel name to match.
     
@@ -197,17 +212,21 @@ def get_channels_like(guild, channel_name):
     -------
     channels : `list` of ``Channel``
     """
-    return [channel for start, channel in _channel_match_priority_queue(guild, channel_name)]
+    return [channel for start, channel in _channel_match_priority_queue(client, guild, channel_name)]
 
 
-def get_channel_like(guild, channel_name):
+def get_channel_like(client, guild, channel_name):
     """
     Gets the channel which matches the input value the most.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would auto post.
+    
     guild : ``Guild``
         The guild's identifier which channel to iterate.
+    
     channel_name : `str`
         The channel name to match.
     
@@ -216,20 +235,24 @@ def get_channel_like(guild, channel_name):
     channel : `None`, ``Channel``
         The matched channel.
     """
-    priority_queue = _channel_match_priority_queue(guild, channel_name)
+    priority_queue = _channel_match_priority_queue(client, guild, channel_name)
     if priority_queue:
         return priority_queue[0][1]
 
 
 
-def built_listing_page_embed(guild, page):
+def built_listing_page_embed(client, guild, page):
     """
     Builds listing page embed for the given page index.
     
     Parameters
     ----------
+    client : ``Client``
+        The client who would auto post.
+    
     guild : ``Guild``
         The guild's identifier which channel to iterate.
+    
     page : `int`
         The selected page.
     
@@ -238,7 +261,7 @@ def built_listing_page_embed(guild, page):
     response : ``InteractionResponse``
         Response instance.
     """
-    channels = get_channels(guild)
+    channels = get_channels(client, guild)
     channels.sort(key = _channel_sort_key)
     
     channel_count = len(channels)
@@ -339,6 +362,7 @@ TOUHOU_FEED_COMMANDS = SLASH_CLIENT.interactions(
 
 @TOUHOU_FEED_COMMANDS.interactions
 async def list_channels(
+    client,
     event,
     page: P('int', 'Select a page', min_value = 1, max_value = 100) = 1,
 ):
@@ -350,7 +374,7 @@ async def list_channels(
     if not event.user_permissions & REQUIRED_PERMISSIONS:
         abort(f'Insufficient permissions.')
     
-    return built_listing_page_embed(guild, page)
+    return built_listing_page_embed(client, guild, page)
 
 
 @SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
@@ -359,10 +383,10 @@ async def disabled_page_move():
 
 
 @SLASH_CLIENT.interactions(custom_id = re_compile(re_escape(CUSTOM_ID_PAGE_BASE) + '(\d+)'))
-async def page_move(event, page):
+async def page_move(client, event, page):
     guild = event.guild
     if (guild is not None) and (event.user_permissions & REQUIRED_PERMISSIONS):
-        return built_listing_page_embed(guild, int(page))
+        return built_listing_page_embed(client, guild, int(page))
 
 
 @TOUHOU_FEED_COMMANDS.interactions
@@ -382,7 +406,7 @@ async def set_interval(
     if not event.user_permissions & REQUIRED_PERMISSIONS:
         abort(f'Insufficient permissions.')
     
-    channel = get_channel_like(guild, channel_name)
+    channel = get_channel_like(client, guild, channel_name)
     if channel is None:
         abort(f'Unknown channel: {channel_name}')
     
@@ -449,7 +473,7 @@ async def set_interval(
 
 
 @set_interval.autocomplete('channel')
-async def auto_complete_channel_name(event, value):
+async def auto_complete_channel_name(client, event, value):
     """
     Auto completes the `channel` parameter of the `touhou-feed set-interval` command.
     
@@ -469,10 +493,10 @@ async def auto_complete_channel_name(event, value):
         return None
     
     if value is None:
-        channels = get_channels(guild)
+        channels = get_channels(client, guild)
         channels.sort(key = _channel_sort_key)
     else:
-        channels = get_channels_like(guild, value)
+        channels = get_channels_like(client, guild, value)
     
     return [channel.name for channel in channels]
 
@@ -498,16 +522,23 @@ def create_about_main(client, event):
     embed = Embed(
         f'{client_name} posts images',
         (
-            f'{client_name} helps you to have `touhou-feed` in your forum threads.\n'
+            f'{client_name} helps you to have `touhou-feed` in your forum threads **and** text channels.\n'
             f'\n'
-            f'To get started create a forum channel with a `touhou-feed` tag in it.\n'
-            f'By assigning `touhou-feed` tag to a channel {client_name} will know, she should send images there.\n'
+            f'To enable the feed feature and let {client_name} know where she should send images.\n'
+            f'• For a forum thread, add `touhou-feed` tag in it.\n'
+            f'• For a text channel, put `#touhou-feed` into it\'s topic.\n'
             f'\n'
-            f'To define which character\'s images should be sent, name the channel to the character\'s name '
-            f'(like `koishi`) or assign a tag to it .\n'
+            f'To define which character\'s images should be sent:\n'
+            f'• Name the channel after a character.\n'
+            f'• For a forum thread, assign a tag with the character\'s name to it.\n'
+            f'• For a text channel, put the character\'s name into the channel\'s topic (like `#koishi`).\n'
             f'\n'
-            f'To tell {client_name} that you want one character on a image, assign an additional `solo` tag to the '
-            f'channel.'
+            f'To tell {client_name} that you want only one character on a image:\n'
+            f'• For a forum thread, assign an additional `solo` tag.\n'
+            f'• For a text channel, put `#solo` into it\'s topic.\n'
+            f'\n'
+            f'By listing multiple characters, only images showcasing all of character will be polled. '
+            f'If `solo` tag is present this behavior changes and one character will be randomly selected each time.'
         ),
         color = color,
     )

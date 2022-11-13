@@ -146,7 +146,7 @@ async def user_presence_update(client, user, old_attributes):
         chunks = make_chunks(content_parts)
         
         for chunk in chunks:
-            await client.message_create(channel, embed=Embed(description=chunk))
+            await client.message_create(channel, embed = Embed(description = chunk))
     except BaseException as err:
         await client.events.error(client, 'log.user_presence_update', err)
 

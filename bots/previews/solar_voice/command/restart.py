@@ -17,6 +17,6 @@ async def restart_(client, event):
     
     await player.seek(0.0)
 
-    embed = Embed('Track restarted.', color=EMBED_COLOR)
+    embed = Embed('Track restarted.', color = EMBED_COLOR)
     add_current_track_field(embed, player)
     return embed

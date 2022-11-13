@@ -27,7 +27,7 @@ def touhou_wiki_result_sort_key(item):
 
 SLASH_CLIENT: Client
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def touhou_wiki(client, event,
     search_for : ('str', 'Search term'),
 ):
@@ -57,7 +57,7 @@ async def touhou_wiki(client, event,
         json_data = from_json(response_data)
         
         results = list(zip(json_data[1], json_data[3]))
-        results.sort(key=touhou_wiki_result_sort_key)
+        results.sort(key = touhou_wiki_result_sort_key)
     
     else:
         results = None
@@ -70,12 +70,12 @@ async def touhou_wiki(client, event,
         )
         return
     
-    embed = Embed(f'Search results for `{search_for}`', color=TOUHOU_WIKI_COLOR)
-    await ChooseMenu(client, event, results, wiki_page_selected, embed=embed, prefix='>>')
+    embed = Embed(f'Search results for `{search_for}`', color = TOUHOU_WIKI_COLOR)
+    await ChooseMenu(client, event, results, wiki_page_selected, embed = embed, prefix = '>>')
 
 async def wiki_page_selected(client, channel, message, title, url):
     pages = await download_wiki_page(client, title, url)
-    await Pagination(client, channel, pages, timeout=600.0, message=message)
+    await Pagination(client, channel, pages, timeout = 600.0, message = message)
 
 
 async def download_wiki_page(client, title_, url):
@@ -305,7 +305,7 @@ async def download_wiki_page(client, title_, url):
             else:
                 embed_title = name
             embed_content = sections[0]
-            pages.append(Embed(embed_title, embed_content, color=TOUHOU_WIKI_COLOR))
+            pages.append(Embed(embed_title, embed_content, color = TOUHOU_WIKI_COLOR))
         else:
             index = 0
             while True:
@@ -315,7 +315,7 @@ async def download_wiki_page(client, title_, url):
                     embed_title = f'{title} ({index} / {limit})'
                 else:
                     embed_title = f'{name} ({index} / {limit})'
-                pages.append(Embed(embed_title, embed_content, color=TOUHOU_WIKI_COLOR))
+                pages.append(Embed(embed_title, embed_content, color = TOUHOU_WIKI_COLOR))
                 if index == limit:
                     break
         

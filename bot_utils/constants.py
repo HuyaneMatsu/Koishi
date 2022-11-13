@@ -14,7 +14,7 @@ PREFIX__SATORI = config.SATORI_PREFIX
 PREFIX__FLAN = config.FLAN_PREFIX
 PREFIX__MARISA = config.MARISA_PREFIX
 
-GUILD__SUPPORT = Guild.precreate(388267636661682178, name='Koishi Wonderland')
+GUILD__SUPPORT = Guild.precreate(388267636661682178, name = 'Koishi Wonderland')
 GUILD__STORAGE = Guild.precreate(568837922288173056)
 GUILD__ESTS_HOME = Guild.precreate(982172577260793866)
 
@@ -48,7 +48,7 @@ INVITE__SUPPORT = Invite.precreate('3cH2r5d')
 CATEGORY__SUPPORT__BOTS = Channel.precreate(445191611727478795)
 CATEGORY__SUPPORT__BIG_BRO = Channel.precreate(829104265049538620)
 
-EMOJI__HEART_CURRENCY = Emoji.precreate(603533301516599296, name='youkai_kokoro')
+EMOJI__HEART_CURRENCY = Emoji.precreate(603533301516599296, name = 'youkai_kokoro')
 
 COLOR__SATORI_HELP = Color.from_rgb(118, 0, 161)
 COLOR__KOISHI_HELP = Color.from_html('#ffd21e')

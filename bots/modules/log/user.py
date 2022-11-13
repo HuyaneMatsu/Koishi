@@ -101,7 +101,7 @@ async def guild_user_add(client, guild, user):
     
     embed = create_user_embed(user, user.get_guild_profile_for(guild), True)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_USER, embed=embed)
+    await client.message_create(CHANNEL__SUPPORT__LOG_USER, embed = embed)
 
 
 @Satori.events
@@ -111,4 +111,4 @@ async def guild_user_delete(client, guild, user, guild_profile):
     
     embed = create_user_embed(user, guild_profile, False)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_USER, embed=embed)
+    await client.message_create(CHANNEL__SUPPORT__LOG_USER, embed = embed)

@@ -169,12 +169,12 @@ class ping:
         return Embed('ping',(
             'Ping - Pong?\n'
             f'Usage: `{command_context.prefix}ping`'
-            ), color=COLOR__FLAN_HELP)
+            ), color = COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
 class sync_avatar:
     async def command(client, message):
-        avatar_url = client.application.icon_url_as(ext='png', size=4096)
+        avatar_url = client.application.icon_url_as(ext='png', size = 4096)
         if avatar_url is None:
             await client.message_create(message.channel, 'The application has no avatar set.')
             return
@@ -196,7 +196,7 @@ class sync_avatar:
             'bot\'s avatar the other way, so I made a command for it.\n'
             'Have a nice day!\n'
             f'Usage: `{command_context.prefix}sync_avatar`'
-            ), color=COLOR__FLAN_HELP)
+            ), color = COLOR__FLAN_HELP)
 
 @Flan.commands.from_class
 class massadd:
@@ -236,7 +236,7 @@ class massadd:
                     line=''
                 
                 if not line and description_parts:
-                    description='\n'.join(description_parts)
+                    description = '\n'.join(description_parts)
                     description_parts.clear()
                     
                     if Card.update(description,next_id,name,rarity):
@@ -290,7 +290,7 @@ class massadd:
                     continue
         
             if description_parts:
-                description='\n'.join(description_parts)
+                description = '\n'.join(description_parts)
                 description_parts.clear()
                 if Card.update(description,next_id,name,rarity):
                     new_ += 1
@@ -303,7 +303,7 @@ class massadd:
             await Card.dump_cards(KOKORO)
         
         message = await client.message_create(message.channel,
-            embed = Embed(None,f'modified: {modified_}\nnew: {new_}', color=CHESUTO_COLOR))
+            embed = Embed(None,f'modified: {modified_}\nnew: {new_}', color = CHESUTO_COLOR))
         await sleep(30., KOKORO)
         await client.message_delete(message)
         return
@@ -316,7 +316,7 @@ class massadd:
             'searching for card definitions. If it finds one, then updates it, if '
             'already added, or creates a new one.\n'
             f'Usage: `{command_context.prefix}massadd`'
-            ), color=COLOR__FLAN_HELP).add_footer(
+            ), color = COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 @Flan.commands.from_class
@@ -332,14 +332,14 @@ class showcard:
         
         image_name = card.image_name
         if image_name is None:
-            await client.message_create(message.channel,embed=embed)
+            await client.message_create(message.channel,embed = embed)
             return
         
         embed.add_image(f'attachment://{image_name}')
         
         with client.keep_typing(message.channel):
             with (await ReuAsyncIO(os.path.join(CHESUTO_FOLDER,image_name),'rb')) as file:
-                await client.message_create(message.channel,embed=embed,file=file)
+                await client.message_create(message.channel,embed = embed,file=file)
     
     async def description(command_context):
         return Embed(
@@ -385,12 +385,12 @@ class showcards:
                 result = None
                 break
             
-            filtered.sort(key=card_sort_key)
+            filtered.sort(key = card_sort_key)
             result = filtered
             break
         
         if result is None:
-            pages=[Embed(f'No search results for : `{content}`', color=CHESUTO_COLOR)]
+            pages=[Embed(f'No search results for : `{content}`', color = CHESUTO_COLOR)]
         else:
             pages=CardPaginator(title,result)
         
@@ -400,7 +400,7 @@ class showcards:
         return Embed('showcards',(
             'Searches all the cards, which contain the specified string.\n'
             f'Usage: `{command_context.prefix}showcards *name*`'
-            ), color=COLOR__FLAN_HELP)
+            ), color = COLOR__FLAN_HELP)
 
 class CardPaginator:
     __slots__ = ('title', 'rendered', 'collected', 'page_information')
@@ -468,7 +468,7 @@ class CardPaginator:
             page_parts.append('\n\n')
             continue
         
-        return Embed(self.title,''.join(page_parts), color=CHESUTO_COLOR).add_footer(
+        return Embed(self.title,''.join(page_parts), color = CHESUTO_COLOR).add_footer(
             f'Page: {page_index + 1}/{len(self.page_information)}. Results {start + 1}-{end}/{len(self.collected)}')
 
 ADD_IMAGE_OK = BUILTIN_EMOJIS['ok_hand']
@@ -542,7 +542,7 @@ class add_image:
             
             if (content is not None):
                 message = await client.message_create(message.channel,
-                    embed = Embed(description=content, color=CHESUTO_COLOR))
+                    embed = Embed(description = content, color = CHESUTO_COLOR))
                 
                 for emoji in ADD_IMAGE_EMOJIS:
                     await client.reaction_add(message,emoji)
@@ -572,7 +572,7 @@ class add_image:
             break
         
         message = await client.message_create(message.channel,
-            embed = Embed(description=content, color=CHESUTO_COLOR))
+            embed = Embed(description = content, color = CHESUTO_COLOR))
         
         await sleep(30.)
         await client.message_delete(message)
@@ -585,7 +585,7 @@ class add_image:
             'Adds or updates an image of a card.\n'
             f'Usage: `{command_context.prefix}add_image <card name>`\n'
             'Also include an image as attachment.'
-            ), color=COLOR__FLAN_HELP).add_footer(
+            ), color = COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 @Flan.commands.from_class
@@ -598,7 +598,7 @@ class checklist:
             if rarity is None:
                 if len(content) > 50:
                     content = content[:50]+'...'
-                result.append(Embed(f'{content!r} is not a rarity', color=CHESUTO_COLOR))
+                result.append(Embed(f'{content!r} is not a rarity', color = CHESUTO_COLOR))
                 
             else:
                 filtered=[]
@@ -642,7 +642,7 @@ class checklist:
                         
                         length=length + name_ln + 1
                         if length>2000:
-                            result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
+                            result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
                             length=name_ln
                             parts.clear()
                             parts.append(name)
@@ -653,11 +653,11 @@ class checklist:
                         continue
                     
                     if parts:
-                        result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
+                        result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
                     
                     parts=None
                 else:
-                    result.append(Embed(title, color=CHESUTO_COLOR))
+                    result.append(Embed(title, color = CHESUTO_COLOR))
                 
         else:
             filtered=tuple([] for x in range(len(Rarity.INSTANCES)))
@@ -682,7 +682,7 @@ class checklist:
                     continue
                 
                 if length>1500:
-                    result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
+                    result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
                     length=0
                     parts.clear()
                 else:
@@ -718,7 +718,7 @@ class checklist:
                     
                     length = length + 1 + name_ln
                     if length>2000:
-                        result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
+                        result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
                         length=len(rarity_name) + name_ln
                         parts.clear()
                         parts.append(rarity_name)
@@ -730,7 +730,7 @@ class checklist:
                     continue
                 
             if parts:
-                result.append(Embed(title,''.join(parts), color=CHESUTO_COLOR))
+                result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
             
             parts=None
         
@@ -740,7 +740,7 @@ class checklist:
             if index==limit:
                 break
             
-            embed=result[index]
+            embed = result[index]
             index=index + 1
             embed.add_footer(f'Page: {index}/{limit}')
         
@@ -754,7 +754,7 @@ class checklist:
             'Lists the cards of the given rarity, which have images added to them.\n'
             'If no rarity is provided, I will list all the cards with images.\n'
             f'Usage: `{command_context.prefix}checklist *rarity*`\n'
-            ), color=COLOR__FLAN_HELP).add_footer(
+            ), color = COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
@@ -790,12 +790,12 @@ class dump_all_card:
                 break
         
         cards = list(CARDS_BY_NAME.values())
-        cards.sort(key=card_sort_key)
+        cards.sort(key = card_sort_key)
         
         for card, client in zip(cards,cycle(clients),):
             embed = card.render_to_embed()
             
-            await client.message_create(channel, embed=embed)
+            await client.message_create(channel, embed = embed)
     
     checks = checks.has_role(CARDS_ROLE)
     
@@ -803,7 +803,7 @@ class dump_all_card:
         return Embed('dump-all-card',(
             'Lists all the cards to this channel.\n'
             f'Usage: `{command_context.prefix}dump-all-card`\n'
-            ), color=COLOR__FLAN_HELP).add_footer(
+            ), color = COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 REMOVE_CARD_OK = BUILTIN_EMOJIS['ok_hand']
@@ -816,7 +816,7 @@ class remove_card:
         card = get_card(content)
         
         if card is None:
-            await client.message_create(message.channel, embed=Embed(None, '*Nothing found.*', CHESUTO_COLOR))
+            await client.message_create(message.channel, embed = Embed(None, '*Nothing found.*', CHESUTO_COLOR))
             return
         
         message = await client.message_create(message.channel, embed = Embed(
@@ -842,7 +842,7 @@ class remove_card:
             content = f'{card.name!r} successfully removed.'
         
         message = await client.message_create(message.channel,
-            embed = Embed(description=content, color=CHESUTO_COLOR))
+            embed = Embed(description = content, color = CHESUTO_COLOR))
         
         await sleep(30., KOKORO)
         await client.message_delete(message)
@@ -854,7 +854,7 @@ class remove_card:
         return Embed('remove-card',(
             'Removes the specific card\n'
             f'Usage: `{command_context.prefix}remove-card <name>`\n'
-            ), color=COLOR__FLAN_HELP).add_footer(
+            ), color = COLOR__FLAN_HELP).add_footer(
                 f'You must have `{CARDS_ROLE}` role to use this command.')
 
 @Flan.events
@@ -1067,7 +1067,7 @@ async def bgminfo_description(command_context):
         f'Usage: `{command_context.prefix}bgminfo <name>`\n'
         '\n'
         'Note that the given name can be also given as the position of the track.'
-            ), color=COLOR__FLAN_HELP)
+            ), color = COLOR__FLAN_HELP)
 
 async def bgminfo_command(command_context, content):
     if not content:
@@ -1083,10 +1083,10 @@ async def bgminfo_command(command_context, content):
         title = bgm.display_name
         description = bgm.description
     
-    embed = Embed(title, description, color=CHESUTO_COLOR)
-    await command_context.client.message_create(command_context.message.channel, embed=embed)
+    embed = Embed(title, description, color = CHESUTO_COLOR)
+    await command_context.client.message_create(command_context.message.channel, embed = embed)
 
-Flan.commands(bgminfo_command, name='bgminfo', description=bgminfo_description, category='VOICE')
+Flan.commands(bgminfo_command, name = 'bgminfo', description = bgminfo_description, category='VOICE')
 
 BGM_NOTE = 'Note: If a bgm\'s name has no specified route, it highly likely belongs in the good route.\n\n'
 
@@ -1127,7 +1127,7 @@ class bgms:
         limit = len(chunks)
         index = 0
         while index < limit:
-            embed = Embed('Chesuto BGMs:', color=COLOR__FLAN_HELP, description=chunks[index])
+            embed = Embed('Chesuto BGMs:', color = COLOR__FLAN_HELP, description = chunks[index])
             index += 1
             embed.add_footer(f'page {index}/{limit}')
             embeds.append(embed)
@@ -1140,7 +1140,7 @@ class bgms:
         return Embed('bgms', (
             'Lists the chesuto bgms.\n'
             f'Usage: `{command_context.prefix}bgms`'
-            ), color=COLOR__FLAN_HELP)
+            ), color = COLOR__FLAN_HELP)
 
 
 def check_has_cards_role(message):
@@ -1175,21 +1175,21 @@ async def set_bgm_name_description(command_context):
         'Changes a bgm\'s name\n'
         f'Usage: `{command_context.prefix}set-bgm-name <bgm name>`\n'
         'After it please define the new name and react with the OK emoji.'
-        ), color=COLOR__FLAN_HELP).add_footer(
+        ), color = COLOR__FLAN_HELP).add_footer(
             f'You must have `{CARDS_ROLE}` role to use this command.')
 
-@Flan.commands(checks=checks.has_role(CARDS_ROLE), category='VOICE', description=set_bgm_name_description)
+@Flan.commands(checks=checks.has_role(CARDS_ROLE), category='VOICE', description = set_bgm_name_description)
 async def set_bgm_name(client, message, content):
     bgm = get_bgm(content)
     
     if bgm is None:
-        await client.message_create(message.channel, embed=Embed(None, '*Nothing found.*', CHESUTO_COLOR))
+        await client.message_create(message.channel, embed = Embed(None, '*Nothing found.*', CHESUTO_COLOR))
         return
     
-    embed = Embed(f'Renaming: *{bgm.display_name}*', bgm.description, color=CHESUTO_COLOR) \
+    embed = Embed(f'Renaming: *{bgm.display_name}*', bgm.description, color = CHESUTO_COLOR) \
         .add_footer('Your next message will be captured as the new display name of the bgm.')
     
-    message = await client.message_create(message.channel, embed=embed)
+    message = await client.message_create(message.channel, embed = embed)
     
     try:
         response = await wait_for_message(client, message.channel, check_has_cards_role, 300.0)
@@ -1206,7 +1206,7 @@ async def set_bgm_name(client, message, content):
             footer = f'Are you sure to set the bgm\'s display name as: {content!r}?'
     
     embed.add_footer(footer)
-    await client.message_edit(message, embed=embed)
+    await client.message_edit(message, embed = embed)
     if content is None:
         return
     
@@ -1269,4 +1269,4 @@ async def set_bgm_name(client, message, content):
         footer = 'Rename cancelled.'
     
     embed.add_footer(footer)
-    await client.message_edit(message, embed=embed)
+    await client.message_edit(message, embed = embed)

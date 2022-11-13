@@ -119,7 +119,7 @@ def draw(buffer, text):
     return buffer
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__STORAGE)
+@SLASH_CLIENT.interactions(guild = GUILD__STORAGE)
 async def create_images(client, event):
     await client.interaction_response_message_create(event, 'Starting to create images.\nIt may take some time.')
     
@@ -513,7 +513,7 @@ class GameStatistics:
         win_medians = [value[len(value) // 2] if value else CIRCLE_TIME for value in win_times]
         lose_medians = [value[len(value) // 2] if value else CIRCLE_TIME for value in lose_times]
         
-        embed = Embed('Statistics', color=KANAKO_COLOR)
+        embed = Embed('Statistics', color = KANAKO_COLOR)
         
         for index, user in enumerate(self.users):
             win_count = win_counts[index]
@@ -555,7 +555,7 @@ class GameStatistics:
         if end > len(self.history):
             end = len(self.history)
         
-        embed = Embed('Statistics', f'{start} - {end}', color=KANAKO_COLOR)
+        embed = Embed('Statistics', f'{start} - {end}', color = KANAKO_COLOR)
         
         field_value_parts = []
         
@@ -711,7 +711,7 @@ def create_kanako_join_message(event, map_name, length):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_KANAKO_JOIN_OR_LEAVE)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_KANAKO_JOIN_OR_LEAVE)
 async def handle_join_or_leave(event):
     try:
         join_group = KANAKO_JOIN_GROUPS[event.message.interaction.id]
@@ -751,7 +751,7 @@ async def handle_join_or_leave(event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_KANAKO_CANCEL)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_KANAKO_CANCEL)
 async def handle_cancel(client, event):
     interaction = event.message.interaction
     if event.user is not interaction.user:
@@ -768,7 +768,7 @@ async def handle_cancel(client, event):
     await client.interaction_response_message_delete(event)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_KANAKO_START)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_KANAKO_START)
 async def handle_start(client, event):
     interaction = event.message.interaction
     if event.user is not interaction.user:
@@ -823,7 +823,7 @@ class KanakoRunner:
         self.map = map_ = [full_map.pop(randint(0, limit)) for limit in range(limit, limit - length, -1)]
         self.romajis = {element[1] for element in map_}
         self.options = None
-        self.embed = Embed(color=KANAKO_COLOR)
+        self.embed = Embed(color = KANAKO_COLOR)
         
         client.slasher.add_component_interaction_waiter(event.message, self)
         
@@ -943,7 +943,7 @@ class KanakoRunner:
                 )
                 
                 try:
-                    await client.interaction_component_message_edit(self.event, embed=embed, components=components)
+                    await client.interaction_component_message_edit(self.event, embed = embed, components = components)
                 except BaseException as err:
                     self.cancel()
                     if isinstance(err, ConnectionError):
@@ -1064,7 +1064,7 @@ class KanakoRunner:
             self.waiter.set_result_if_pending(None)
         else:
             self.build_unanswered_leftover_description()
-            await self.client.interaction_component_message_edit(event, embed=self.embed)
+            await self.client.interaction_component_message_edit(event, embed = self.embed)
     
     
     def build_base_leftover_description(self):

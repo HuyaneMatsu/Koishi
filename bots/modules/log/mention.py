@@ -204,4 +204,4 @@ async def mention_logger(client, message):
         
         embed.add_field('Role mentions', field_value)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_MENTION, embed=embed, allowed_mentions=None)
+    await client.message_create(CHANNEL__SUPPORT__LOG_MENTION, embed = embed, allowed_mentions = None)

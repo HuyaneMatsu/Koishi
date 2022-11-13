@@ -17,17 +17,17 @@ from .context import MessageMoverContext
 SLASH_CLIENT: Client
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_SUBMIT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_SUBMIT)
 async def submit_message_mover(event):
     await maybe_call_message_mover_method(event, MessageMoverContext.submit)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_CANCEL)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_CANCEL)
 async def cancel_message_mover(event):
     await maybe_call_message_mover_method(event, MessageMoverContext.cancel)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_CLOSE)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_CLOSE)
 async def close_message_mover(client, event):
     if event.user_permissions.can_manage_messages:
         await client.interaction_component_acknowledge(event)
@@ -82,13 +82,13 @@ async def add_to_move_group(
     await add_message_to_move_group(event, message)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID)
 async def add_message_by_id_button_click(event):
     if event.user_permissions.can_manage_messages:
         return MESSAGE_MOVER_ADD_BY_ID_FORM
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID, target='form')
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID, target = 'form')
 async def add_message_by_id_form_submit(client, event, *, message_id):
     if not is_id(message_id):
         abort(f'Please submit a message\'s id.')

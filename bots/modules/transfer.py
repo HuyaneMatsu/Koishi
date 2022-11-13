@@ -36,7 +36,7 @@ TRANSFER = SLASH_CLIENT.interactions(
     name = 'transfer',
     description = 'Transfers all of someone\'s hearts to an other person.',
     guild = GUILD__SUPPORT,
-    required_permissions = Permission().update_by_keys(administrator=True),
+    required_permissions = Permission().update_by_keys(administrator = True),
 )
 
 @TRANSFER.interactions
@@ -63,7 +63,7 @@ async def user_id(client, event,
         source_user = await client.user_get(source_user_id)
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_user:
-            source_user = User.precreate(source_user_id, name='Deleted User')
+            source_user = User.precreate(source_user_id, name = 'Deleted User')
         else:
             raise
     
@@ -71,7 +71,7 @@ async def user_id(client, event,
         target_user = await client.user_get(target_user_id)
     except DiscordException as err:
         if err.code == ERROR_CODES.unknown_user:
-            target_user = User.precreate(target_user_id, name='Deleted User')
+            target_user = User.precreate(target_user_id, name = 'Deleted User')
         else:
             raise
     
@@ -80,7 +80,7 @@ async def user_id(client, event,
 
 async def do_transfer(client, event, source_user, target_user, message):
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
-        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions=None)
+        abort(f'{ROLE__SUPPORT__ADMIN.mention} only!', allowed_mentions = None)
     
     if source_user.id in IN_GAME_IDS:
         abort(f'{source_user:m} is in a game, cannot transfer now.')
@@ -545,7 +545,7 @@ async def do_transfer(client, event, source_user, target_user, message):
         embed.add_field('Message:', message)
     
     try:
-        await client.message_create(target_user_channel, embed=embed)
+        await client.message_create(target_user_channel, embed = embed)
     except ConnectionError:
         return
     except DiscordException as err:

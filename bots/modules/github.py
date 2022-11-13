@@ -380,7 +380,7 @@ GET_ORGANIZATIONS = GitHubQuery(build_get_organizations_url, SLASH_CLIENT.http, 
     limit=GET_USER_AND_ORGANIZATIONS_LIMIT)
 
 
-@SLASH_CLIENT.interactions(guild=GUILD__SUPPORT)
+@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
 async def github_profile(client, event,
     user: ('str', 'The user\'s name to get'),
 ):

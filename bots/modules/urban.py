@@ -94,7 +94,7 @@ def embrace_urban_markdown(text, text_length_limit):
     return ''.join(string_parts_connectible)
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def urban(
     client,
     event,
@@ -108,7 +108,7 @@ async def urban(
     
     async with client.http.get(URBAN_DICTIONARY_API_URL, params={'term': term}) as response:
         if response.status != 200:
-            abort(f'Something went wrong: status={response.status!r} reason={response.reason!r}.')
+            abort(f'Something went wrong: status = {response.status!r} reason = {response.reason!r}.')
         
         data = await response.json()
     
@@ -126,7 +126,7 @@ async def urban(
     
     definition = embrace_urban_markdown(definition, 2000)
     
-    embed = Embed(word, definition, url=url, color=URBAN_COLOR)
+    embed = Embed(word, definition, url = url, color = URBAN_COLOR)
     
     # Add example
     example = result['example']

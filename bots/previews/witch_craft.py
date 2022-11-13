@@ -479,7 +479,7 @@ def item_name_sort_key(item):
     return item.name
 
     
-BUYABLE.sort(key=item_name_sort_key)
+BUYABLE.sort(key = item_name_sort_key)
 
 def load_file():
     if not os.exists(COST_FILE_PATH):
@@ -582,7 +582,7 @@ def calculate_buyable_and_cost(market_cost, n, usable):
     return n, cost
 
 
-SHOP = SLASH_CLIENT.interactions(None, 'shop', 'Witch shop ~ Nya!', guild=GUILD__SUPPORT)
+SHOP = SLASH_CLIENT.interactions(None, 'shop', 'Witch shop ~ Nya!', guild = GUILD__SUPPORT)
 
 @SHOP.interactions
 async def prices(client, event):
@@ -675,11 +675,11 @@ async def buy(client, event,
         BUTTON_CANCEL,
     )
     
-    message = yield InteractionResponse(embed=embed, components=components)
+    message = yield InteractionResponse(embed = embed, components = components)
     
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
-            check=partial_func(check_is_user_same, event.user))
+        component_interaction = await wait_for_component_interaction(message, timeout = 300.0,
+            check = partial_func(check_is_user_same, event.user))
     except TimeoutError:
         component_interaction = None
         cancelled = True
@@ -769,7 +769,7 @@ async def buy(client, event,
             f'Hearts: {total_love} {EMOJI__HEART_CURRENCY} -> {new_love} {EMOJI__HEART_CURRENCY}'
         )
     
-    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)
+    yield InteractionResponse(embed = embed, components = None, message = message, event = component_interaction)
 
 
 

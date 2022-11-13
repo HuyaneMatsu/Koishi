@@ -44,7 +44,7 @@ DECK_SIZE   = len(CARD_TYPES) * len(CARD_NUMBERS)
 ACE_INDEX   = len(CARD_NUMBERS) - 1
 BET_MIN     = 10
 
-@SLASH_CLIENT.interactions(name='21', is_global=True)
+@SLASH_CLIENT.interactions(name = '21', is_global = True)
 async def game_21(client, event,
     amount : ('int', 'The amount of hearts to bet'),
     mode : ([('single-player', 'sg'), ('multi-player', 'mp')], 'Game mode, yayyy') = 'sg',
@@ -56,7 +56,7 @@ async def game_21(client, event,
     if (embed is None):
         await client.interaction_application_command_acknowledge(event)
     else:
-        await client.interaction_response_message_create(event, embed=embed)
+        await client.interaction_response_message_create(event, embed = embed)
         return
     
     if is_multi_player:
@@ -246,7 +246,7 @@ class Game21Player:
     def create_gamble_embed(self, amount):
         embed = Embed(f'How to gamble {amount} {EMOJI__HEART_CURRENCY.as_emoji}',
             f'You have cards equal to {self.total} weight at your hand.',
-            color=COLOR__GAMBLING)
+            color = COLOR__GAMBLING)
         
         self.add_hand(embed)
         
@@ -368,7 +368,7 @@ class Game21PlayerRunner:
     __slots__ = ('player', 'message', 'waiter', 'channel', 'client', 'amount', '_timeouter', 'canceller', '_gui_state',
         'render_after', 'event',)
     
-    async def __new__(cls, client, base, user, channel, amount, render_after, event=None):
+    async def __new__(cls, client, base, user, channel, amount, render_after, event = None):
         player = base.create_user_player(user)
         
         waiter = Future(KOKORO)
@@ -447,7 +447,7 @@ class Game21PlayerRunner:
             self.canceller = None
             self._gui_state = GUI_STATE_SWITCHING_CONTEXT
         else:
-            self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
+            self._timeouter = Timeouter(self, timeout = GAME_21_TIMEOUT)
             self.canceller = cls._canceller
             self._gui_state = GUI_STATE_READY
             
@@ -656,7 +656,7 @@ def game_21_precheck(client, user, channel, amount, require_guild):
     else:
         return
     
-    return Embed('Ohoho', error_message, color=COLOR__GAMBLING)
+    return Embed('Ohoho', error_message, color = COLOR__GAMBLING)
 
 
 async def game_21_postcheck(client, user, channel, amount):
@@ -686,7 +686,7 @@ async def game_21_postcheck(client, user, channel, amount):
         else:
             return entry_id, None
     
-    return entry_id, Embed('Ohoho', error_message, color=COLOR__GAMBLING)
+    return entry_id, Embed('Ohoho', error_message, color = COLOR__GAMBLING)
 
 
 async def game_21_single_player(client, event, amount):
@@ -698,7 +698,7 @@ async def game_21_single_player(client, event, amount):
         entry_id, embed = await game_21_postcheck(client, event.user, event.channel, amount)
         if (embed is not None):
             try:
-                await client.interaction_followup_message_create(event, embed=embed)
+                await client.interaction_followup_message_create(event, embed = embed)
             except GeneratorExit:
                 raise
             except BaseException as err:
@@ -710,7 +710,7 @@ async def game_21_single_player(client, event, amount):
         
         player_client = base.create_bot_player(client)
         
-        player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False, event=event)
+        player_runner = await Game21PlayerRunner(client, base, user, channel, amount, False, event = event)
         player_user_waiter = player_runner.waiter
         if player_user_waiter.is_done() or (entry_id == -1):
             unallocate = False
@@ -771,7 +771,7 @@ async def game_21_single_player(client, event, amount):
             else:
                 title = f'How to win {amount} {EMOJI__HEART_CURRENCY.as_emoji}'
             
-            embed = Embed(title, color=COLOR__GAMBLING)
+            embed = Embed(title, color = COLOR__GAMBLING)
             player_runner.player.add_done_embed_field(embed)
             player_client.add_done_embed_field(embed)
             
@@ -840,9 +840,9 @@ async def game_21_single_player(client, event, amount):
             embed = Embed(f'Timeout occurred, you lost your {amount} {EMOJI__HEART_CURRENCY.as_emoji} forever.')
             
             if player_runner.message is None:
-                coroutine = client.interaction_followup_message_create(event, embed=embed)
+                coroutine = client.interaction_followup_message_create(event, embed = embed)
             else:
-                coroutine = client.message_edit(player_runner.message, embed=embed)
+                coroutine = client.message_edit(player_runner.message, embed = embed)
             
             try:
                 await coroutine
@@ -888,7 +888,7 @@ def create_join_embed(users, amount):
     
     description = ''.join(description_parts)
     
-    return Embed('Game 21 multi-player', description, color=COLOR__GAMBLING)
+    return Embed('Game 21 multi-player', description, color = COLOR__GAMBLING)
 
 
 async def game_21_mp_user_joiner(
@@ -905,9 +905,9 @@ async def game_21_mp_user_joiner(
         return
     
     if user.id in IN_GAME_IDS:
-        embed = Embed('Ohoho', 'You are already at a game.', color=COLOR__GAMBLING)
+        embed = Embed('Ohoho', 'You are already at a game.', color = COLOR__GAMBLING)
         try:
-            await client.message_create(private_channel, embed=embed)
+            await client.message_create(private_channel, embed = embed)
         except GeneratorExit:
             raise
         except BaseException as err:
@@ -989,10 +989,10 @@ async def game_21_mp_user_leaver(client, user, guild, source_channel, amount, jo
         f'Bet amount: {amount} {EMOJI__HEART_CURRENCY.as_emoji}\n'
         f'Guild: {guild.name}\n'
         f'Channel: {source_channel.mention}',
-            color=COLOR__GAMBLING)
+            color = COLOR__GAMBLING)
     
     try:
-        await client.message_create(private_channel, embed=embed)
+        await client.message_create(private_channel, embed = embed)
     except GeneratorExit:
         raise
     except BaseException as err:
@@ -1093,7 +1093,7 @@ class Game21JoinGUI:
             self.canceller = None
             self._gui_state = GUI_STATE_SWITCHING_CONTEXT
         else:
-            self._timeouter = Timeouter(self, timeout=GAME_21_TIMEOUT)
+            self._timeouter = Timeouter(self, timeout = GAME_21_TIMEOUT)
             self.canceller = cls._canceller
             self._gui_state = GUI_STATE_READY
             
@@ -1423,10 +1423,10 @@ async def game_21_multi_player(client, event, amount):
             private_open = True
         
         if (not private_open):
-            embed = Embed('Error', 'I cannot send private message to you.', color=COLOR__GAMBLING)
+            embed = Embed('Error', 'I cannot send private message to you.', color = COLOR__GAMBLING)
             
             try:
-                await client.interaction_response_message_edit(event, embed=embed)
+                await client.interaction_response_message_edit(event, embed = embed)
             except GeneratorExit:
                 raise
             
@@ -1443,10 +1443,10 @@ async def game_21_multi_player(client, event, amount):
         event = join_gui.event
         
         if game_state == GAME_21_RESULT_CANCELLED_TIMEOUT:
-            embed = Embed('Timeout', 'Timeout occurred, the hearts were refund', color=COLOR__GAMBLING)
+            embed = Embed('Timeout', 'Timeout occurred, the hearts were refund', color = COLOR__GAMBLING)
             
             try:
-                await client.interaction_response_message_edit(event, embed=embed)
+                await client.interaction_response_message_edit(event, embed = embed)
             except BaseException as err:
                 if should_render_exception(err):
                     await client.events.error(client, 'game_21_multi_player', err)
@@ -1725,7 +1725,7 @@ async def game_21_multi_player(client, event, amount):
         
         description = ''.join(description_parts)
         
-        embed = Embed('Game ended', description, color=COLOR__GAMBLING)
+        embed = Embed('Game ended', description, color = COLOR__GAMBLING)
         for runner in waiters_to_runners.values():
             runner.player.add_done_embed_field(embed)
         

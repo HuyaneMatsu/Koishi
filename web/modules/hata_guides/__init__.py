@@ -5,7 +5,7 @@ from .utils import get_markdown, has_markdown, TOPICS_ASSETS_FOLDER
 
 URL_PREFIX = '/project/hata/guides'
 
-ROUTES = Blueprint('guides', '', url_prefix=URL_PREFIX)
+ROUTES = Blueprint('guides', '', url_prefix = URL_PREFIX)
 
 
 @ROUTES.route('/<name>')

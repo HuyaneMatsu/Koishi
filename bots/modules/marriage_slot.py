@@ -51,7 +51,7 @@ BUY_WAIFU_SLOT_INVOKE_COMPONENT = Button(
 )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_INVOKE)
 async def buy_waifu_slot_in_inline(event):
     if event.message.interaction.user is event.user:
         return await buy_waifu_slot_invoke(event)
@@ -121,7 +121,7 @@ async def buy_waifu_slot_invoke(event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_BUY_WAIFU_SLOT_CANCEL)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_CANCEL)
 async def buy_marriage_slot_cancel(event):
     if event.user is not event.message.interaction.user:
         return
@@ -134,7 +134,7 @@ async def buy_marriage_slot_cancel(event):
         components = None,
     )
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_BUY_WAIFU_SLOT_CONFIRM)
 async def buy_marriage_slot_confirm(event):
     user = event.user
     if user is not event.message.interaction.user:

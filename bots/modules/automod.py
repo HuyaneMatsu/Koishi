@@ -162,7 +162,7 @@ class TrieNode:
         
         nodes = self.nodes
         if (nodes is not None):
-            nodes = sorted(nodes.values(), key=trie_node_sort_key)
+            nodes = sorted(nodes.values(), key = trie_node_sort_key)
             
             node_count = len(nodes)
             if node_count == 1:
@@ -435,7 +435,7 @@ async def alter_content(client, message):
         }
         pattern = re.compile('|'.join(replace.keys()))
         result = pattern.sub(partial_func(sanitise_mention_escaper, replace), content)
-        await Koishi.message_create(message.channel, result, allowed_mentions=[author])
+        await Koishi.message_create(message.channel, result, allowed_mentions = [author])
         return True
         
     if message.channel.cached_permissions_for(Koishi).can_add_reactions and (_KOISHI_NOU_RP.match(content) is not None):

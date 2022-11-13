@@ -42,7 +42,7 @@ URL_BASE_ANIME = 'https://anilist.co/anime/'
 URL_BASE_MANGA = 'https://anilist.co/manga/'
 
 SELECT_FIND_CHARACTER_NO_RESULT = Select(
-    [Option('_', 'No result', default=True)],
+    [Option('_', 'No result', default = True)],
     CUSTOM_ID_FIND_CHARACTER_SELECT_DISABLED,
     placeholder = 'No result',
 )
@@ -497,7 +497,7 @@ ARRAY_WORK_SET_CHARACTER = ArrayResponseBuilderWorkSetType(
         enabled = False,
     ),
     Select(
-        [Option('_', 'No result', default=True)],
+        [Option('_', 'No result', default = True)],
         CUSTOM_ID_FIND_CHARACTER_SELECT_DISABLED,
         placeholder = 'No result',
     ),
@@ -529,7 +529,7 @@ ARRAY_WORK_SET_ANIME = ArrayResponseBuilderWorkSetType(
     ),
 
     Select(
-        [Option('_', 'No result', default=True)],
+        [Option('_', 'No result', default = True)],
         CUSTOM_ID_FIND_ANIME_SELECT_DISABLED,
         placeholder = 'No result',
     ),
@@ -560,7 +560,7 @@ ARRAY_WORK_SET_MANGA = ArrayResponseBuilderWorkSetType(
         enabled = False,
     ),
     Select(
-        [Option('_', 'No result', default=True)],
+        [Option('_', 'No result', default = True)],
         CUSTOM_ID_FIND_MANGA_SELECT_DISABLED,
         placeholder = 'No result',
     ),
@@ -955,7 +955,7 @@ async def search(client, json_query, response_builder, extra):
 
 def character_response_builder(data, extra):
     if data is None:
-        return Embed(description='No result.')
+        return Embed(description = 'No result.')
     
     character_data = data['data'][KEY_CHARACTER]
     
@@ -980,7 +980,7 @@ def character_response_builder(data, extra):
 
 def character_response_builder_no_components(data, extra):
     embed = character_response_builder(data, extra)
-    return InteractionResponse(embed=embed, components=None)
+    return InteractionResponse(embed = embed, components = None)
 
 
 def build_media_description(anime_data):
@@ -1109,7 +1109,7 @@ def build_manga_stat_fields(embed, manga_data):
 
 def anime_response_builder(data, extra):
     if data is None:
-        return Embed(description='No result.')
+        return Embed(description = 'No result.')
     
     anime_data = data['data'][KEY_MEDIA]
     
@@ -1131,11 +1131,11 @@ def anime_response_builder(data, extra):
 
 def anime_response_builder_no_components(data, extra):
     embed = anime_response_builder(data, extra)
-    return InteractionResponse(embed=embed, components=None)
+    return InteractionResponse(embed = embed, components = None)
 
 def manga_response_builder(data, extra):
     if data is None:
-        return Embed(description='No result.')
+        return Embed(description = 'No result.')
     
     manga_data = data['data'][KEY_MEDIA]
     
@@ -1157,7 +1157,7 @@ def manga_response_builder(data, extra):
 
 def manga_response_builder_no_components(data, extra):
     embed = manga_response_builder(data, extra)
-    return InteractionResponse(embed=embed, components=None)
+    return InteractionResponse(embed = embed, components = None)
 
 
 def array_response_builder_character(data, extra):
@@ -1216,7 +1216,7 @@ async def handle_disabled_component_interaction():
     pass
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def character(client, event,
         name_or_id: ('str', 'The character\'s name or it\'s id.')
             ):
@@ -1245,7 +1245,7 @@ async def character(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def find_character(client, event,
     name: ('str', 'The character\'s name to try to find.')
 ):
@@ -1265,7 +1265,7 @@ async def find_character(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_CHARACTER_LEFT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_CHARACTER_LEFT)
 async def find_character_page_left(client, event):
     message = event.message
     if message.interaction.user is not event.user:
@@ -1290,7 +1290,7 @@ async def find_character_page_left(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_CHARACTER_RIGHT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_CHARACTER_RIGHT)
 async def find_character_page_right(client, event):
     message = event.message
     if message.interaction.user is not event.user:
@@ -1318,7 +1318,7 @@ async def find_character_page_right(client, event):
 
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_CHARACTER_SELECT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_CHARACTER_SELECT)
 async def find_character_select(client, event):
     interaction = event.interaction
     if event.message.interaction.user is not event.user:
@@ -1348,7 +1348,7 @@ async def find_character_select(client, event):
 
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def anime_(client, event,
         name_or_id: ('str', 'The anime\'s name or it\'s id.')
             ):
@@ -1377,7 +1377,7 @@ async def anime_(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def find_anime(client, event,
         name: ('str', 'The anime\'s name to try to find.')
             ):
@@ -1397,7 +1397,7 @@ async def find_anime(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_ANIME_LEFT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_ANIME_LEFT)
 async def find_anime_page_left(client, event):
     message = event.message
     if message.interaction.user is not event.user:
@@ -1422,7 +1422,7 @@ async def find_anime_page_left(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_ANIME_RIGHT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_ANIME_RIGHT)
 async def find_anime_page_right(client, event):
     message = event.message
     if message.interaction.user is not event.user:
@@ -1450,7 +1450,7 @@ async def find_anime_page_right(client, event):
 
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_ANIME_SELECT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_ANIME_SELECT)
 async def find_anime_select(client, event):
     interaction = event.interaction
     if event.message.interaction.user is not event.user:
@@ -1479,7 +1479,7 @@ async def find_anime_select(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def manga_(client, event,
         name_or_id: ('str', 'The manga\'s name or it\'s id.')
             ):
@@ -1508,7 +1508,7 @@ async def manga_(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(is_global=True)
+@SLASH_CLIENT.interactions(is_global = True)
 async def find_manga(client, event,
         name: ('str', 'The manga\'s name to try to find.')
             ):
@@ -1528,7 +1528,7 @@ async def find_manga(client, event,
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_MANGA_LEFT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_MANGA_LEFT)
 async def find_manga_page_left(client, event):
     message = event.message
     if message.interaction.user is not event.user:
@@ -1553,7 +1553,7 @@ async def find_manga_page_left(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_MANGA_RIGHT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_MANGA_RIGHT)
 async def find_manga_page_right(client, event):
     message = event.message
     if message.interaction.user is not event.user:
@@ -1581,7 +1581,7 @@ async def find_manga_page_right(client, event):
 
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_FIND_MANGA_SELECT)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_MANGA_SELECT)
 async def find_manga_select(client, event):
     interaction = event.interaction
     if event.message.interaction.user is not event.user:

@@ -112,7 +112,7 @@ async def burn_divorce_papers(client, event):
     )
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_YES)
 async def reduce_divorce_yes(event):
     user = event.user
     if event.message.interaction.user is not user:
@@ -190,16 +190,16 @@ async def reduce_divorce_yes(event):
     if (thumbnail_image_url is not None):
         embed.add_thumbnail(thumbnail_image_url)
     
-    return InteractionResponse(embed=embed, components=None)
+    return InteractionResponse(embed = embed, components = None)
 
 
-@SLASH_CLIENT.interactions(custom_id=CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO)
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_REDUCE_DIVORCE_PAPER_NO)
 async def reduce_divorce_yes(event):
     user = event.user
     if event.message.interaction.user is not user:
         return
     
-    return InteractionResponse(embed=Embed(None, 'Divorce paper exploration cancelled'), components=None)
+    return InteractionResponse(embed = Embed(None, 'Divorce paper exploration cancelled'), components = None)
 
 
 NSFW_ACCESS_IDENTIFIER = '0'

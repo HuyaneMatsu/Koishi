@@ -86,7 +86,7 @@ async def play_(client, event,
             emojis = [choice(TRACK_EMOJIS) for index in range(length)]
             
             for (track, emoji) in zip(tracks, emojis):
-                await player.append(track, requester=user, emoji=emoji)
+                await player.append(track, requester=user, emoji = emoji)
             
             title_parts.append(str(length))
             title_parts.append(' track from playlist ')
@@ -138,7 +138,7 @@ async def play_(client, event,
             
             emoji = choice(TRACK_EMOJIS)
             track = tracks[selected_track_index]
-            await player.append(track, requester=user, emoji=emoji)
+            await player.append(track, requester=user, emoji = emoji)
             
             title_parts.append('Track from ')
             
@@ -164,7 +164,7 @@ async def play_(client, event,
         
         track = tracks[0]
         emoji = choice(TRACK_EMOJIS)
-        await player.append(track, requester=user, emoji=emoji)
+        await player.append(track, requester=user, emoji = emoji)
         
         description_parts.append(emoji.as_emoji)
         description_parts.append(' ')
@@ -213,7 +213,7 @@ async def play_(client, event,
     
     select = create_track_select(tracks, length)
     
-    message = yield InteractionResponse(embed=embed, components=select)
+    message = yield InteractionResponse(embed = embed, components = select)
     
     try:
         component_interaction = await wait_for_component_interaction(
@@ -259,7 +259,7 @@ async def play_(client, event,
             player = await client.solarlink.join_voice(channel, cls=Player)
         
         for track, emoji in selected_tracks_and_emojis:
-            await player.append(track, requester=user, emoji=emoji)
+            await player.append(track, requester=user, emoji = emoji)
         
         description_parts = []
         

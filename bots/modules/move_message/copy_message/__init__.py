@@ -29,5 +29,5 @@ COPY_MESSAGE_COMMANDS = SLASH_CLIENT.interactions(
     required_permissions = Permission().update_by_keys(manage_messages=True),
 )
 
-COPY_MESSAGE_COMMANDS.interactions(copy_message_about, name='about')
-COPY_MESSAGE_COMMANDS.interactions(copy_message_list_channels, name='list-channels')
+COPY_MESSAGE_COMMANDS.interactions(copy_message_about, name = 'about')
+COPY_MESSAGE_COMMANDS.interactions(copy_message_list_channels, name = 'list-channels')

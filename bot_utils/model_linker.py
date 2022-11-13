@@ -64,7 +64,7 @@ class CodeBuilder(RichAttributeErrorBaseType):
 class Field(RichAttributeErrorBaseType):
     __slots__ = ('field', 'default', 'primary_key', 'query_key')
     
-    def __new__(cls, field, default=None, *, primary_key=False, query_key=None):
+    def __new__(cls, field, default = None, *, primary_key = False, query_key = None):
         self = object.__new__(cls)
         self.field = field
         self.default = default

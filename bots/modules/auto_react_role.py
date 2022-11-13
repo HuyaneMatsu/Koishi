@@ -60,7 +60,7 @@ AUTO_REACT_ROLE = SLASH_CLIENT.interactions(None,
     is_global = True,
 )
 
-@AUTO_REACT_ROLE.interactions(name='create', show_for_invoking_user_only=True)
+@AUTO_REACT_ROLE.interactions(name = 'create', show_for_invoking_user_only=True)
 async def create_auto_react_role(client, event,
         message: ('str', 'Please reference a message!'),
             ):
@@ -536,7 +536,7 @@ class AutoReactRoleGUI:
     __slots__ = ('target_message', 'changes', 'manager', 'message', 'client', 'guild', )
     def render(self):
         message = self.target_message
-        embed = Embed(render_message_content(message), self.changes.render(), color=AUTO_REACT_ROLE_COLOR)
+        embed = Embed(render_message_content(message), self.changes.render(), color = AUTO_REACT_ROLE_COLOR)
         embed.add_author(message.author.full_name, message.author.avatar_url, message.url)
         embed.add_field(AUTO_REACT_ROLE_GUI_EMBED_FIELD_NAME, AUTO_REACT_ROLE_GUI_EMBED_FIELD_VALUE)
         return embed
@@ -565,14 +565,14 @@ class AutoReactRoleGUI:
             embed = self.render()
             if message is None:
                 if isinstance(channel_or_event, Channel):
-                    message = await client.message_create(channel_or_event, embed=embed)
+                    message = await client.message_create(channel_or_event, embed = embed)
                 else:
                     if channel_or_event.is_unanswered():
                         await client.interaction_application_command_acknowledge(channel_or_event)
                     
-                    message = await client.interaction_followup_message_create(channel_or_event, embed=embed)
+                    message = await client.interaction_followup_message_create(channel_or_event, embed = embed)
             else:
-                await client.message_edit(message, embed=embed)
+                await client.message_edit(message, embed = embed)
         except BaseException as err:
             if isinstance(err,ConnectionError):
                 return
@@ -603,7 +603,7 @@ class AutoReactRoleGUI:
             repr(self.client),
             ', changes=',
             repr(self.changes),
-            ', target_message=',
+            ', target_message = ',
             repr(self.target_message),
             ', manager=',
             repr(self.manager),
@@ -741,7 +741,7 @@ class AutoReactRoleGUI:
         if (emoji is None):
             return
         
-        role = parse_role(split[1], message=message)
+        role = parse_role(split[1], message = message)
         if (role is None):
             return
         
@@ -777,7 +777,7 @@ class AutoReactRoleGUI:
         if (object_ is None):
             return
         
-        object_ = parse_role(split[0], message=message)
+        object_ = parse_role(split[0], message = message)
         if (object_ is None):
             return
         
@@ -822,7 +822,7 @@ class AutoReactRoleGUI:
     async def update(self):
         client = self.client
         try:
-            await client.message_edit(self.message, embed=self.render())
+            await client.message_edit(self.message, embed = self.render())
         except BaseException as err:
             client.command_processor.remove(self.message.channel, self)
             
@@ -1400,7 +1400,7 @@ class load_auto_react_roles:
                 async for query in result:
                     await scarlet.add(AutoReactRoleManager.from_query(query, connector))
 
-ClientWrapper().events(load_auto_react_roles, name='ready')
+ClientWrapper().events(load_auto_react_roles, name = 'ready')
 
 async def auto_react_roles_description(client, message):
     prefix = client.command_processor.get_prefix_for(message)
@@ -1409,7 +1409,7 @@ async def auto_react_roles_description(client, message):
         'If the message has active auto react role on it, will display that, and if it has active GUI too, will cancel '
         'that.\n'
         f'Usage: `{prefix}auto-react-roles *channel* <message_id>`'
-            ), color=AUTO_REACT_ROLE_COLOR).add_footer(
+            ), color = AUTO_REACT_ROLE_COLOR).add_footer(
                 'Guild only! You must have administrator permission to use this command.')
 
 PERMISSION_MASK_MESSAGING = Permission().update_by_keys(
@@ -1421,7 +1421,7 @@ PERMISSION_MASK_REACT = Permission().update_by_keys(
     add_reactions = True,
 )
 
-@AUTO_REACT_ROLE.interactions(name='show')
+@AUTO_REACT_ROLE.interactions(name = 'show')
 async def show_auto_react_roles(client, event):
     """Lists the currently active `auto-react-roles` in the guild. (Admin only)"""
     guild = event.guild
@@ -1440,7 +1440,7 @@ async def show_auto_react_roles(client, event):
     
     managers = client.events.guild_delete.get_waiters(guild, AutoReactRoleManager, by_type=True, is_method=True)
     
-    embed = Embed(f'Auto role managers for: {guild}', color=AUTO_REACT_ROLE_COLOR)
+    embed = Embed(f'Auto role managers for: {guild}', color = AUTO_REACT_ROLE_COLOR)
     if not managers:
         embed.description = '*none*'
         await Closer(client, event, embed)
@@ -1452,22 +1452,22 @@ async def show_auto_react_roles(client, event):
         title = f'{message.channel:m} {message.id}'
         results.append((title, manager),)
     
-    await ChooseMenu(client, event, results, select_auto_react_role_gui, embed=embed, prefix='¤')
+    await ChooseMenu(client, event, results, select_auto_react_role_gui, embed = embed, prefix = '¤')
 
 async def select_auto_react_role_gui(client, channel_or_event, message, title, manager):
     guild = manager.message.guild
     if manager.destroy_called or (guild is None):
-        embed = Embed('The selected entity was already destroyed', color=AUTO_REACT_ROLE_COLOR)
+        embed = Embed('The selected entity was already destroyed', color = AUTO_REACT_ROLE_COLOR)
         if isinstance(channel_or_event, Channel):
-            await client.message_create(channel_or_event, embed=embed)
+            await client.message_create(channel_or_event, embed = embed)
         else:
             if channel_or_event.is_unanswered():
-                await client.interaction_response_message_create(channel_or_event, embed=embed)
+                await client.interaction_response_message_create(channel_or_event, embed = embed)
             elif channel_or_event.is_deffered():
-                await client.interaction_response_message_edit(channel_or_event, embed=embed)
+                await client.interaction_response_message_edit(channel_or_event, embed = embed)
             else:
-                await client.interaction_followup_message_create(channel_or_event, embed=embed)
+                await client.interaction_followup_message_create(channel_or_event, embed = embed)
         
         return
     
-    await AutoReactRoleGUI(client, manager.message, channel_or_event, guild, message=message)
+    await AutoReactRoleGUI(client, manager.message, channel_or_event, guild, message = message)

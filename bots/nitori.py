@@ -19,7 +19,7 @@ Nitori: Client
 
 # command start slash perms
 
-@Nitori.interactions(guild=TEST_GUILD, show_for_invoking_user_only=True)
+@Nitori.interactions(guild = TEST_GUILD, show_for_invoking_user_only=True)
 async def perms(event):
     """Shows your permissions."""
     user_permissions = event.user_permissions
@@ -33,13 +33,13 @@ async def perms(event):
 # command end
 # command start slash cookie
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def cookie(
     event,
     user: ('user', 'To who?'),
 ):
     """Gifts a cookie!"""
-    return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !')
+    return Embed(description = f'{event.user:f} just gifted a cookie to {user:f} !')
 
 # command end
 # command start slash cake
@@ -50,12 +50,12 @@ CAKES = [
     'https://tenor.com/view/cake-fat-slice-gif-4931308',
 ]
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def cake(event,
     user: P('user', 'To who?'),
 ):
     """Gifts a cake!"""
-    return Embed(description=f'{event.user:f} just gifted a cookie to {user:f} !').add_image(choice(CAKES))
+    return Embed(description = f'{event.user:f} just gifted a cookie to {user:f} !').add_image(choice(CAKES))
 
 # command end
 # command start slash guild-icon
@@ -67,7 +67,7 @@ GUILD_ICON_CHOICES = [
     ('Invite-splash'    , 'invite_splash'    ),
 ]
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def guild_icon(
     event,
     choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
@@ -79,42 +79,42 @@ async def guild_icon(
     
     if choice == 'icon':
         name = 'icon'
-        url = guild.icon_url_as(size=4096)
+        url = guild.icon_url_as(size = 4096)
         hash_value = guild.icon_hash
     
     elif choice == 'banner':
         name = 'banner'
-        url = guild.banner_url_as(size=4096)
+        url = guild.banner_url_as(size = 4096)
         hash_value = guild.banner_hash
     
     elif choice == 'discovery_splash':
         name = 'discovery splash'
-        url = guild.discovery_splash_url_as(size=4096)
+        url = guild.discovery_splash_url_as(size = 4096)
         hash_value = guild.discovery_splash_hash
     
     else:
         name = 'invite splash'
-        url = guild.invite_splash_url_as(size=4096)
+        url = guild.invite_splash_url_as(size = 4096)
         hash_value = guild.invite_splash_hash
     
     if url is None:
         color = (event.id >> 22) & 0xFFFFFF
-        return Embed(f'{guild.name} has no {name}', color=color)
+        return Embed(f'{guild.name} has no {name}', color = color)
     
     color = hash_value & 0xFFFFFF
-    return Embed(f'{guild.name}\'s {name}', color=color, url=url).add_image(url)
+    return Embed(f'{guild.name}\'s {name}', color = color, url = url).add_image(url)
 
 # command end
 # command start slash roll
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def roll(
     dice_count: (range(1, 7), 'With how much dice do you wanna roll?') = 1,
 ):
     """Rolls with dices."""
     amount = 0
     for _ in range(dice_count):
-        amount += round(1.+(random() * 5.))
+        amount += round(1.0 + (random() * 5.0))
     
     return str(amount)
 
@@ -132,7 +132,7 @@ def create_pet_info_field(field, user):
      return f'**{field.value}**: {(user.id >> (22 + len(field.value))) % 101}'
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def pet_info(client, event, field: PetInfoFieldType = PetInfoFieldType.all):
     user = event.user
     
@@ -154,7 +154,7 @@ async def pet_info(client, event, field: PetInfoFieldType = PetInfoFieldType.all
 # command end
 # command start slash id-to-time
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def id_to_datetime_(
     snowflake: ('int', 'Id please!'),
 ):
@@ -184,7 +184,7 @@ class Action:
             source_user = event.user
             target_user = user
         
-        return Embed(description=f'{source_user:f} {self.action_name}s {target_user:f} !', color=self.embed_color)
+        return Embed(description = f'{source_user:f} {self.action_name}s {target_user:f} !', color = self.embed_color)
 
 for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 0x7840c3), ('slap', 0xdff1dc),):
     Nitori.interactions(Action(action_name, embed_color),
@@ -196,7 +196,7 @@ for action_name, embed_color in (('pat', 0x325b34), ('hug', 0xa4b51b), ('lick', 
 # command end
 # command start slash repeat
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def repeat(
     text: ('str', 'The content to repeat')
 ):
@@ -204,12 +204,12 @@ async def repeat(
     if not text:
         text = 'nothing to repeat'
     
-    return InteractionResponse(text, allowed_mentions=None)
+    return InteractionResponse(text, allowed_mentions = None)
 
 # command end
 # command start slash guild-features
 
-@Nitori.interactions(is_global=True, allow_in_dm=False)
+@Nitori.interactions(is_global = True, allow_in_dm = False)
 async def guild_features(event):
     """Shows the guild's features."""
     guild = event.guild
@@ -223,7 +223,7 @@ async def guild_features(event):
 
 # command end
 # command start slash channel-create
-@Nitori.interactions(guild=TEST_GUILD, required_permissions=Permission().update_by_keys(manage_channel=True))
+@Nitori.interactions(guild = TEST_GUILD, required_permissions = Permission().update_by_keys(manage_channel = True))
 async def channel_create(
     client, event, name: (str, 'The channel\'s name to create.')
 ):
@@ -260,7 +260,7 @@ IMPROVISATION_CHOICES = [
     'Marisa\'s underskirt shrooms are poggers'
 ]
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def improvise():
     """Improvises some derpage"""
     yield '*Thinks*'
@@ -270,7 +270,7 @@ async def improvise():
 # command end
 # command start slash collect-reactions
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def collect_reactions():
     """Collects reactions"""
     message = yield InteractionResponse('Collecting reactions for 1 minute!')
@@ -308,7 +308,7 @@ async def get_neko_life(client, keyword):
 # command end
 # command start slash text-cat
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def text_cat(client):
     """I will send text cats :3"""
     return get_neko_life(client, 'cat')
@@ -316,7 +316,7 @@ async def text_cat(client):
 # command end
 # command start slash why
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def why(client):
     """why are you using this commands?"""
     yield get_neko_life(client, 'why')
@@ -324,7 +324,7 @@ async def why(client):
 # command end
 # command start slash is-banned
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def is_banned(client, event,
     user: ('user', 'Who should I check?')
 ):
@@ -364,7 +364,7 @@ async def is_banned(client, event,
 # command end
 # command start slash user
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def user_id(
     event,
     user_id: ('user_id', 'Get the id of an other user?', 'user') = None,
@@ -378,7 +378,7 @@ async def user_id(
 # command end
 # command start slash ping
 
-@Nitori.interactions(wait_for_acknowledgement=True)
+@Nitori.interactions(wait_for_acknowledgement = True)
 async def ping():
     """HTTP ping-pong."""
     start = perf_counter()
@@ -390,7 +390,7 @@ async def ping():
 # command end
 # command start slash enable-ping
 
-@Nitori.interactions(is_global=True)
+@Nitori.interactions(is_global = True)
 async def enable_ping(
     client,
     event,
@@ -447,7 +447,7 @@ async def get_image_embed(client, tags, name, color):
         # Request image information
         async with client.http.get(SAFE_BOORU + tags) as response:
             if response.status != 200:
-                return Embed('Error', 'Safe-booru unavailable', color=color)
+                return Embed('Error', 'Safe-booru unavailable', color = color)
             
             result = await response.read()
         
@@ -456,18 +456,18 @@ async def get_image_embed(client, tags, name, color):
         image_urls = [post['file_url'] for post in soup.find_all('post')]
         
         if not image_urls:
-            return Embed('Error', 'No images found.\nPlease try again later.', color=color)
+            return Embed('Error', 'No images found.\nPlease try again later.', color = color)
         
         # If we received image urls, cache them
         IMAGE_URL_CACHE[tags] = image_urls
     
     image_url = choice(image_urls)
-    return Embed(name, color=color, url=image_url).add_image(image_url)
+    return Embed(name, color = color, url = image_url).add_image(image_url)
 
 
-SCARLET = Nitori.interactions(None, name='scarlet', description='Scarlet?', guild=TEST_GUILD)
+SCARLET = Nitori.interactions(None, name = 'scarlet', description = 'Scarlet?', guild = TEST_GUILD)
 
-@SCARLET.interactions(is_default=True)
+@SCARLET.interactions(is_default = True)
 async def devil(client, event):
     """Flandre & Remilia!"""
     yield
@@ -488,7 +488,7 @@ async def remilia(client):
 # command end
 # command start slash kaboom
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def kaboom(client, event):
     """Kabooom!!"""
     await client.interaction_application_command_acknowledge(event)
@@ -508,7 +508,7 @@ async def kaboom(client, event):
 # command end
 # command start slash kaboom-mixed
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def kaboom_mixed(client, event):
     """Kabooom!!"""
     yield
@@ -528,14 +528,14 @@ async def kaboom_mixed(client, event):
 # command end
 # command start slash about
 
-@Nitori.interactions(is_global=True)
+@Nitori.interactions(is_global = True)
 async def about(client):
-    return Embed('about', client.application.description, color=0x508CB5).add_thumbnail(client.avatar_url)
+    return Embed('about', client.application.description, color = 0x508CB5).add_thumbnail(client.avatar_url)
 
 # command end
 # command start slash thread-channel-name-length
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def thread_channel_name_length(
     channel: ('channel_group_thread', 'Select a thread channel.')
 ):
@@ -548,9 +548,9 @@ async def thread_channel_name_length(
 from hata import ChannelType
 from hata.ext.slash import P
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def voice_channel_name_length(
-    channel: P('channel', 'Select a voice channel', channel_types=[ChannelType.guild_voice])
+    channel: P('channel', 'Select a voice channel', channel_types = [ChannelType.guild_voice])
 ):
     """Returns the selected voice channel's name's length."""
     return len(channel.name)
@@ -581,9 +581,9 @@ MOST_POPULAR_TOUHOU_CHARACTERS = [
     'Tatara Kogasa',
 ]
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def character_popularity(
-    position: P('number', 'Please select a number between 1 and 20', min_value=1, max_value=20)
+    position: P('number', 'Please select a number between 1 and 20', min_value = 1, max_value = 20)
 ):
     """Returns the name of the touhou character by it's popularity position."""
     return MOST_POPULAR_TOUHOU_CHARACTERS[position - 1]
@@ -594,13 +594,13 @@ async def character_popularity(
 
 @Nitori.interactions(
     guild = TEST_GUILD,
-    required_permissions = Permission().update_by_keys(manage_nicknames=True),
+    required_permissions = Permission().update_by_keys(manage_nicknames = True),
 )
 async def set_nick(
     client,
     event,
     user: ('user', 'Who\'s?'),
-    nick: P(str, 'Their new nick', min_length=1, max_length=32) = None,
+    nick: P(str, 'Their new nick', min_length = 1, max_length = 32) = None,
 ):
     """Edit's the selected user's nick."""
     yield
@@ -610,22 +610,22 @@ async def set_nick(
 # command end
 # command start context avatar
 
-@Nitori.interactions(guild=TEST_GUILD, target='user')
+@Nitori.interactions(guild = TEST_GUILD, target = 'user')
 async def avatar(target):
-    avatar_url = target.avatar_url_as(size=4096)
-    return Embed(f'{target.full_name}\'s avatar', url=avatar_url).add_image(avatar_url)
+    avatar_url = target.avatar_url_as(size = 4096)
+    return Embed(f'{target.full_name}\'s avatar', url = avatar_url).add_image(avatar_url)
 
 # command end
 # command start context length
 
-@Nitori.interactions(guild=TEST_GUILD, target='message')
+@Nitori.interactions(guild = TEST_GUILD, target = 'message')
 async def length(target):
     return len(target)
 
 # command end
 # command start slash command-count
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def command_count(client, event):
     global_command_count = client.slasher.get_global_command_count()
     
@@ -672,7 +672,7 @@ EMOJI_CAKE = BUILTIN_EMOJIS['cake']
 
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def cake_love(
     cake_name: ('str', 'Please pick a cake.')
 ):
@@ -707,7 +707,7 @@ def get_cake_names_like(name):
     return [cake_name for cake_name in CAKE_NAMES if (name in cake_name)]
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def pick_cake(
     cake_name_1: ('str', 'Select a cake!'),
     cake_name_2: ('str', 'Another one.'),
@@ -780,7 +780,7 @@ def get_options_like(options, name):
     return [option for option in options if name in option]
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def shop(
     product: ([*PRODUCT_TYPES], 'Select a product to buy.'),
     type_: ('str', 'Select a type'),
@@ -894,7 +894,7 @@ async def autocomplete_sticker_name(event, value):
     return sorted(sticker.name for sticker in guild.get_stickers_like(value))
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def get_sticker_id(
     event,
     sticker: P('str', 'Sticker\'s name', autocomplete=autocomplete_sticker_name),
@@ -917,27 +917,27 @@ EMOJI_PING_PONG = BUILTIN_EMOJIS['ping_pong']
 CUSTOM_ID_PING = 'ping_pong.ping'
 CUSTOM_ID_PONG = 'ping_pong.pong'
 
-BUTTON_PING = Button('ping', EMOJI_PING_PONG, custom_id=CUSTOM_ID_PING, style=ButtonStyle.green)
-BUTTON_PONG = Button('pong', EMOJI_PING_PONG, custom_id=CUSTOM_ID_PONG, style=ButtonStyle.blue)
+BUTTON_PING = Button('ping', EMOJI_PING_PONG, custom_id = CUSTOM_ID_PING, style = ButtonStyle.green)
+BUTTON_PONG = Button('pong', EMOJI_PING_PONG, custom_id = CUSTOM_ID_PONG, style = ButtonStyle.blue)
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def ping_pong():
     if random() < 0.5:
         button = BUTTON_PING
     else:
         button = BUTTON_PONG
     
-    return InteractionResponse(f'**ping {EMOJI_PING_PONG} pong**', components=button)
+    return InteractionResponse(f'**ping {EMOJI_PING_PONG} pong**', components = button)
 
 
-@Nitori.interactions(custom_id=CUSTOM_ID_PING)
+@Nitori.interactions(custom_id = CUSTOM_ID_PING)
 async def ping_pong_ping():
-    return InteractionResponse(components=BUTTON_PONG)
+    return InteractionResponse(components = BUTTON_PONG)
 
-@Nitori.interactions(custom_id=CUSTOM_ID_PONG)
+@Nitori.interactions(custom_id = CUSTOM_ID_PONG)
 async def ping_pong_pong():
-    return InteractionResponse(components=BUTTON_PING)
+    return InteractionResponse(components = BUTTON_PING)
 
 # command end
 # command start components cat-feeder
@@ -949,17 +949,19 @@ CAT_FEEDER_CUSTOM_ID = 'cat_feeder.click'
 
 
 # Command
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def cat_feeder():
     """Hungry cat feeder!"""
     return InteractionResponse(
         f'Please feed my cat {CAT_FEEDER_CAT_EMOJI}, she is hungry.',
-        components=Button('Feed cat', CAT_FEEDER_FOOD_EMOJI, custom_id=CAT_FEEDER_CUSTOM_ID, style=ButtonStyle.green)
+        components = Button(
+            'Feed cat', CAT_FEEDER_FOOD_EMOJI, custom_id = CAT_FEEDER_CUSTOM_ID, style = ButtonStyle.green
+        )
     )
 
 
 # Component interaction
-@Nitori.interactions(custom_id=CAT_FEEDER_CUSTOM_ID)
+@Nitori.interactions(custom_id = CAT_FEEDER_CUSTOM_ID)
 async def cat_fed(event):
     return (
         f'Please feed my cat {CAT_FEEDER_CAT_EMOJI}, she is hungry.\n'
@@ -974,8 +976,8 @@ async def cat_fed(event):
 ROLE_NSFW_ACCESS = Role.precreate(828576094776590377)
 ROLE_ANNOUNCEMENTS = Role.precreate(538397994421190657)
 
-BUTTON_NSFW_ACCESS = Button('Nsfw access', custom_id=f'role_claimer.{ROLE_NSFW_ACCESS.id}')
-BUTTON_ANNOUNCEMENTS = Button('Announcements', custom_id=f'role_claimer.{ROLE_ANNOUNCEMENTS.id}')
+BUTTON_NSFW_ACCESS = Button('Nsfw access', custom_id = f'role_claimer.{ROLE_NSFW_ACCESS.id}')
+BUTTON_ANNOUNCEMENTS = Button('Announcements', custom_id = f'role_claimer.{ROLE_ANNOUNCEMENTS.id}')
 
 ROLE_CLAIMER_COMPONENTS = Row(BUTTON_NSFW_ACCESS, BUTTON_ANNOUNCEMENTS)
 
@@ -985,7 +987,7 @@ ROLE_CLAIMER_ROLES = {
 }
 
 
-@Nitori.interactions(guild=TEST_GUILD, required_permissions=Permission().update_by_keys(administrator=True))
+@Nitori.interactions(guild = TEST_GUILD, required_permissions = Permission().update_by_keys(administrator = True))
 async def role_claimer(event):
     """Role claimer message. (Owner only)"""
     
@@ -993,10 +995,10 @@ async def role_claimer(event):
     if not event.user_permissions.can_administrator:
         abort('Admin only')
     
-    return InteractionResponse('Claim role by clicking on it', components=ROLE_CLAIMER_COMPONENTS)
+    return InteractionResponse('Claim role by clicking on it', components = ROLE_CLAIMER_COMPONENTS)
 
 
-@Nitori.interactions(custom_id=re.compile('role_claimer\.(\d+)'))
+@Nitori.interactions(custom_id = re.compile('role_claimer\.(\d+)'))
 async def give_role(client, event, role_id):
     role_id = int(role_id)
     
@@ -1018,10 +1020,10 @@ EMOJI_SNAKE = BUILTIN_EMOJIS['snake']
 EMOJI_EGGPLANT = BUILTIN_EMOJIS['eggplant']
 
 CHOOSE_YOUR_POISON_ROW = Row(
-    Button('cake', custom_id=CUSTOM_ID_CAKE, style=ButtonStyle.blue),
-    Button('cat', custom_id=CUSTOM_ID_CAT, style=ButtonStyle.gray),
-    Button('snake', custom_id=CUSTOM_ID_SNAKE, style=ButtonStyle.green),
-    Button('eggplant', custom_id=CUSTOM_ID_EGGPLANT, style=ButtonStyle.red),
+    Button('cake', custom_id = CUSTOM_ID_CAKE, style = ButtonStyle.blue),
+    Button('cat', custom_id = CUSTOM_ID_CAT, style = ButtonStyle.gray),
+    Button('snake', custom_id = CUSTOM_ID_SNAKE, style = ButtonStyle.green),
+    Button('eggplant', custom_id = CUSTOM_ID_EGGPLANT, style = ButtonStyle.red),
 )
 
 CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI = {
@@ -1032,13 +1034,13 @@ CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI = {
 }
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def choose_your_poison():
     """What is your weakness?"""
-    return InteractionResponse(embed=Embed('Choose your poison'), components=CHOOSE_YOUR_POISON_ROW)
+    return InteractionResponse(embed = Embed('Choose your poison'), components = CHOOSE_YOUR_POISON_ROW)
 
 
-@Nitori.interactions(custom_id=[CUSTOM_ID_CAKE, CUSTOM_ID_CAT, CUSTOM_ID_SNAKE, CUSTOM_ID_EGGPLANT])
+@Nitori.interactions(custom_id = [CUSTOM_ID_CAKE, CUSTOM_ID_CAT, CUSTOM_ID_SNAKE, CUSTOM_ID_EGGPLANT])
 async def poison_edit_cake(event):
     emoji = CHOOSE_YOUR_POISON_CUSTOM_ID_TO_EMOJI.get(event.interaction.custom_id, None)
     if (emoji is not None):
@@ -1054,12 +1056,12 @@ def check_is_user_same(user, event):
 # command end
 # command start components add-emoji
 
-ADD_EMOJI_BUTTON_ADD = Button('Add!', style=ButtonStyle.green)
-ADD_EMOJI_BUTTON_CANCEL = Button('Nah.', style=ButtonStyle.red)
+ADD_EMOJI_BUTTON_ADD = Button('Add!', style = ButtonStyle.green)
+ADD_EMOJI_BUTTON_CANCEL = Button('Nah.', style = ButtonStyle.red)
 
 ADD_EMOJI_COMPONENTS = Row(ADD_EMOJI_BUTTON_ADD, ADD_EMOJI_BUTTON_CANCEL)
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def add_emoji(
     client,
     event,
@@ -1085,7 +1087,7 @@ async def add_emoji(
     
     embed = Embed('Are you sure to add this emoji?').add_field('Name:', name).add_image(emoji.url)
     
-    message = yield InteractionResponse(embed=embed, components=ADD_EMOJI_COMPONENTS)
+    message = yield InteractionResponse(embed = embed, components = ADD_EMOJI_COMPONENTS)
     
     try:
         component_interaction = await wait_for_component_interaction(
@@ -1113,12 +1115,12 @@ async def add_emoji(
         
         await client.emoji_create(event.guild, name, emoji_data)
     
-    yield InteractionResponse(embed=embed, components=None, message=message, event=component_interaction)
+    yield InteractionResponse(embed = embed, components = None, message = message, event = component_interaction)
 
 # command end
 # command start components pick
 
-BUTTON_ATTEND = Button('Attend', style=ButtonStyle.green)
+BUTTON_ATTEND = Button('Attend', style = ButtonStyle.green)
 
 def check_is_user_unique(users, event):
     return (event.user not in users)
@@ -1154,15 +1156,15 @@ def pick_most_liked(client, users):
     return most_liked
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def pick(client, event):
     """Picks who I like the most from the attenders."""
     users = [event.user]
-    message = yield InteractionResponse(render_joined_users(users), allowed_mentions=None, components=BUTTON_ATTEND)
+    message = yield InteractionResponse(render_joined_users(users), allowed_mentions = None, components = BUTTON_ATTEND)
     
     try:
         async for component_interaction in iter_component_interactions(
-            message, timeout=60.0, check=functools.partial(check_is_user_unique, users)
+            message, timeout = 60.0, check = functools.partial(check_is_user_unique, users)
         ):
             users.append(component_interaction.user)
             
@@ -1171,7 +1173,7 @@ async def pick(client, event):
                 break
             
             yield InteractionResponse(
-                render_joined_users(users), allowed_mentions=None, event=component_interaction
+                render_joined_users(users), allowed_mentions = None, event = component_interaction
             )
     
     except TimeoutError:
@@ -1191,7 +1193,7 @@ async def pick(client, event):
     content = ''.join(content_parts)
     
     yield InteractionResponse(
-        content, allowed_mentions=most_liked, components=None, message=message, event=component_interaction
+        content, allowed_mentions = most_liked, components = None, message = message, event = component_interaction
     )
 
 # command end
@@ -1218,7 +1220,7 @@ WAIFU_TYPES = [
 WAIFU_CACHE_BY_KEY = {waifu_type: [] for waifu_type in WAIFU_TYPES}
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def waifu():
     """Ships waifus!"""
     embed = Embed('Please select a waifu type to ship.')
@@ -1227,10 +1229,10 @@ async def waifu():
         custom_id = WAIFU_CUSTOM_ID,
     )
     
-    return InteractionResponse(embed=embed, components=select)
+    return InteractionResponse(embed = embed, components = select)
 
 
-@Nitori.interactions(custom_id=WAIFU_CUSTOM_ID)
+@Nitori.interactions(custom_id = WAIFU_CUSTOM_ID)
 async def handle_waifu_select(client, event):
     # We filter out 3rd party users based on original and current invoking user.
     if event.message.interaction.user is not event.user:
@@ -1284,7 +1286,7 @@ async def handle_waifu_select(client, event):
     
     
     # Url defaults to `None`, so passing it to `url` field is fine.
-    embed = Embed('Please select a waifu type to ship.', url=url)
+    embed = Embed('Please select a waifu type to ship.', url = url)
     
     if url is None:
         embed.description = (
@@ -1296,11 +1298,11 @@ async def handle_waifu_select(client, event):
     
     # We re-build the select again with one difference, we mark the used one as default.
     select = Select(
-        [Option(waifu_type, waifu_type, default=(waifu_type == selected_waifu_type)) for waifu_type in WAIFU_TYPES],
+        [Option(waifu_type, waifu_type, default = (waifu_type == selected_waifu_type)) for waifu_type in WAIFU_TYPES],
         custom_id = WAIFU_CUSTOM_ID,
     )
     
-    yield InteractionResponse(embed=embed, components=select)
+    yield InteractionResponse(embed = embed, components = select)
 
 # command end
 # command start components zoo
@@ -1334,9 +1336,9 @@ ANIMAL_IDENTIFIER_TO_DESCRIPTION = {
 
 ZOO_SELECT = Select(
     [
-        Option(LABEL_ELEPHANT, LABEL_ELEPHANT, emoji=EMOJI_ELEPHANT),
-        Option(LABEL_LION, LABEL_LION, emoji=EMOJI_LION),
-        Option(LABEL_ZEBRA, LABEL_ZEBRA, emoji=EMOJI_ZEBRA),
+        Option(LABEL_ELEPHANT, LABEL_ELEPHANT, emoji = EMOJI_ELEPHANT),
+        Option(LABEL_LION, LABEL_LION, emoji = EMOJI_LION),
+        Option(LABEL_ZEBRA, LABEL_ZEBRA, emoji = EMOJI_ZEBRA),
     ],
     placeholder = 'Select animals!',
     min_values = 0,
@@ -1344,15 +1346,16 @@ ZOO_SELECT = Select(
 )
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def zoo(event):
     """Visiting zoo!"""
     
-    message = yield InteractionResponse('Please select animals to visit!', components=ZOO_SELECT)
+    message = yield InteractionResponse('Please select animals to visit!', components = ZOO_SELECT)
 
     try:
-        component_interaction = await wait_for_component_interaction(message, timeout=300.0,
-            check=functools.partial(check_is_user_same, event.user))
+        component_interaction = await wait_for_component_interaction(
+            message, timeout = 300.0, check = functools.partial(check_is_user_same, event.user)
+        )
     
     except TimeoutError:
         content = 'You didn\'t decide which animals to visit and the zoo closed, see ya tomorrow!'
@@ -1374,7 +1377,7 @@ async def zoo(event):
             
             content = '\n\n'.join(content_parts)
     
-    yield InteractionResponse(content, components=None, message=message, event=component_interaction)
+    yield InteractionResponse(content, components = None, message = message, event = component_interaction)
 
 # command end
 # command start components user-info
@@ -1388,10 +1391,12 @@ BUTTON_USER_INFO_CLOSE = Button(
     custom_id = CUSTOM_ID_USER_INFO_CLOSE,
 )
 
-@Nitori.interactions(guild=TEST_GUILD)
-async def user_info(client, event,
-        user: ('user', 'Check out someone other user?') = None,
-            ):
+@Nitori.interactions(guild = TEST_GUILD)
+async def user_info(
+    client,
+    event,
+    user: ('user', 'Check out someone other user?') = None,
+):
     if user is None:
         user = event.user
     
@@ -1418,7 +1423,7 @@ async def user_info(client, event,
         components = BUTTON_USER_INFO_CLOSE,
     )
 
-@Nitori.interactions(custom_id=CUSTOM_ID_USER_INFO_CLOSE)
+@Nitori.interactions(custom_id = CUSTOM_ID_USER_INFO_CLOSE)
 async def close_user_info(client, event):
     # Allow closing for the source user
     if event.user is not event.message.interaction.user:
@@ -1449,14 +1454,14 @@ BUTTON_ORIN_DANCE = Button(
     style = ButtonStyle.green,
 )
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def orindance():
     return InteractionResponse(
-        embed = Embed('Party!', url='https://orindance.party/').add_image(choice(ORIN_DANCE_IMAGES)),
+        embed = Embed('Party!', url = 'https://orindance.party/').add_image(choice(ORIN_DANCE_IMAGES)),
         components = BUTTON_ORIN_DANCE,
     )
 
-@Nitori.interactions(custom_id=CUSTOM_ID_ORIN_DANCE)
+@Nitori.interactions(custom_id = CUSTOM_ID_ORIN_DANCE)
 async def party(client, event):
     if event.user is event.message.interaction.user:
         
@@ -1467,7 +1472,7 @@ async def party(client, event):
         except ValueError:
             pass
         
-        return Embed('Party!', url='https://orindance.party/').add_image(choice(orin_dance_images))
+        return Embed('Party!', url = 'https://orindance.party/').add_image(choice(orin_dance_images))
     
     # Notify the user
     await client.interaction_response_message_create(
@@ -1500,13 +1505,13 @@ INTRODUCTION_FORM = Form(
 )
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def introduce_myself():
     """Creates an introduction embed after filling a form."""
     return INTRODUCTION_FORM
 
 
-@Nitori.interactions(custom_id='introduction', target='form')
+@Nitori.interactions(custom_id = 'introduction', target = 'form')
 async def introduction_form_submit(event, *, name, bio):
     return Embed(
         f'Hi, my name is {name}',
@@ -1533,7 +1538,7 @@ ADD_ROLE_FORM = Form(
 )
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def add_role(
     client,
     event,
@@ -1561,14 +1566,14 @@ async def add_role(
     )
 
 
-@Nitori.interactions(custom_id=re.compile('add_role\.(\d+)\.(\d+)'), target='form')
+@Nitori.interactions(custom_id = re.compile('add_role\.(\d+)\.(\d+)'), target = 'form')
 async def add_role(client, event, user_id, role_id, *, message):
     user_id = int(user_id)
     role_id = int(role_id)
     
     yield # acknowledge the even
     
-    await client.user_role_add(user_id, (event.guild_id, role_id), reason=message)
+    await client.user_role_add(user_id, (event.guild_id, role_id), reason = message)
     
     # Try to send DM to the poor being.
     channel = await client.channel_private_create(user_id)
@@ -1588,7 +1593,7 @@ async def add_role(client, event, user_id, role_id, *, message):
         )
     
     try:
-        await client.message_create(channel, embed=embed)
+        await client.message_create(channel, embed = embed)
     except DiscordException as err:
         # Ignore the exception if the user has dm-s disabled.
         if err.code != ERROR_CODES.cannot_message_user: # user has dm-s disabled
@@ -1692,13 +1697,13 @@ WAIFU_FORM = Form(
 )
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def add_waifu():
     """Add a new waifu to the database!"""
     return WAIFU_FORM
 
 
-@Nitori.interactions(custom_id=CUSTOM_ID_WAIFU_FORM, target='form')
+@Nitori.interactions(custom_id = CUSTOM_ID_WAIFU_FORM, target = 'form')
 async def waifu_add_form_submit(
     event,
     *,
@@ -1718,7 +1723,7 @@ async def waifu_add_form_submit(
 # command end
 # command start get-waifu
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def get_waifu(
     name: ('str', 'Their name?')
 ):
@@ -1760,7 +1765,7 @@ FIELD_TO_ATTRIBUTE = {
 }
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def edit_waifu(
     event,
     name: ('str', 'Their name?'),
@@ -1800,7 +1805,7 @@ async def autocomplete_waifu_name(event, value):
     return [waifu.name for key, waifu in WAIFUS.items() if value in key and waifu.user is user]
 
 
-@Nitori.interactions(custom_id=CUSTOM_ID_WAIFU_EDIT_REGEX, target='form')
+@Nitori.interactions(custom_id = CUSTOM_ID_WAIFU_EDIT_REGEX, target = 'form')
 async def waifu_edit_form_submit(
     key,
     *,
@@ -1824,7 +1829,7 @@ CUSTOM_ID_RATE_CAKE = 'rate_cake'
 CUSTOM_ID_RATE_CAKE_FIELD = 'rate_cake.field'
 
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def rate_cakes(
     cake_1: ('str', 'Please rate this cake'),
     cake_2: ('str', 'Please rate this cake') = None,
@@ -1858,7 +1863,7 @@ async def autocomplete_cake_name(value):
     return [cake_name for cake_name in CAKE_NAMES if (value in cake_name)]
 
 
-@Nitori.interactions(custom_id=CUSTOM_ID_RATE_CAKE, target='form')
+@Nitori.interactions(custom_id = CUSTOM_ID_RATE_CAKE, target = 'form')
 async def rate_cake_form_submit(
     event,
     *cakes: re.compile(f'{CUSTOM_ID_RATE_CAKE_FIELD}\[(\w+)\]'),
@@ -1874,7 +1879,7 @@ async def rate_cake_form_submit(
 # command end
 # command start typing-interactions show-emoji
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 @configure_parameter('emoji_name', 'str', 'Yes?', 'emoji')
 async def show_emoji(
     emoji_name: str
@@ -1892,8 +1897,8 @@ async def show_emoji(
 # command end
 # command start typing-interactions text-channel-name-length
 
-@Nitori.interactions(guild=TEST_GUILD)
-@configure_parameter('channel', 'channel', 'Select a text channel', channel_types=[ChannelType.guild_text])
+@Nitori.interactions(guild = TEST_GUILD)
+@configure_parameter('channel', 'channel', 'Select a text channel', channel_types = [ChannelType.guild_text])
 async def text_channel_name_length(
     channel: Channel
 ):
@@ -1930,12 +1935,12 @@ class Annotated(metaclass=TypingMeta):
 
 # command start typing-interactions grocery-bag
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def grocery_bag(
-    cucumber: Annotated[int, P('int', 'How much cucumbers to buy?', min_value=0, max_value=1000)] = 0,
-    strawberry: Annotated[int, P('int', 'How much oranges to buy?', min_value=0, max_value=1000)] = 0,
-    orange: Annotated[int, P('int', 'How much oranges to buy?', min_value=0, max_value=1000)] = 0,
-    watermelon: Annotated[int, P('int', 'How much watermelons to buy?', min_value=0, max_value=1000)] = 0,
+    cucumber: Annotated[int, P('int', 'How much cucumbers to buy?', min_value = 0, max_value = 1000)] = 0,
+    strawberry: Annotated[int, P('int', 'How much oranges to buy?', min_value = 0, max_value = 1000)] = 0,
+    orange: Annotated[int, P('int', 'How much oranges to buy?', min_value = 0, max_value = 1000)] = 0,
+    watermelon: Annotated[int, P('int', 'How much watermelons to buy?', min_value = 0, max_value = 1000)] = 0,
 ):
     in_bag = []
     
@@ -1959,7 +1964,7 @@ async def grocery_bag(
 # command end
 # command start typing-interactions set-difficulty
 
-@Nitori.interactions(guild=TEST_GUILD)
+@Nitori.interactions(guild = TEST_GUILD)
 async def set_difficulty(
     difficulty: Annotated[str, ['easy', 'lunatic'], 'difficulty'],
 ):
@@ -2163,7 +2168,7 @@ class InteractionCommandSource:
         else:
             components = None
         
-        yield InteractionResponse(page, components=components)
+        yield InteractionResponse(page, components = components)
 
 class AutoCompleteInteractionCommandSource:
     __slots__ = ('command_names', )
@@ -2196,7 +2201,7 @@ for command_type, command_type_commands in COLLECTED_COMMANDS.items():
         function = AutoCompleteInteractionCommandSource(command_type_commands)
     )
 
-@Nitori.interactions(custom_id=re.compile('source\.([a-z\-]+)\.([a-z\-]+)\.(_|[0-9]+)'))
+@Nitori.interactions(custom_id = re.compile('source\.([a-z\-]+)\.([a-z\-]+)\.(_|[0-9]+)'))
 async def switch_page(event, command_type, command_name, page_index):
     # Check for the same user
     if event.message.interaction.user is not event.user:
@@ -2252,4 +2257,4 @@ async def switch_page(event, command_type, command_name, page_index):
         ),
     )
     
-    return InteractionResponse(page, components=components)
+    return InteractionResponse(page, components = components)

@@ -56,7 +56,7 @@ async def queue_(client, event,
         else:
             description = None
         
-        embed = Embed(None, description, color=EMBED_COLOR)
+        embed = Embed(None, description, color = EMBED_COLOR)
         
         page_count = ceil(length / TRACK_PER_PAGE)
         embed.add_footer(f'Page {page} / {page_count}')

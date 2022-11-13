@@ -44,8 +44,8 @@ async def emoji_command(
     emoji = try_resolve_emoji(event, raw_emoji)
     return create_initial_response(event, None, [emoji], SNIPE_TYPE_EMOJI)
 
-emoji_autocompleted = SNIPE_COMMANDS.interactions(emoji_command, name='emoji-autocompleted')
-emoji_ = SNIPE_COMMANDS.interactions(emoji_command, name='emoji')
+emoji_autocompleted = SNIPE_COMMANDS.interactions(emoji_command, name = 'emoji-autocompleted')
+emoji_ = SNIPE_COMMANDS.interactions(emoji_command, name = 'emoji')
 
 @emoji_autocompleted.autocomplete('emoji')
 async def autocomplete_emoji(client, event, emoji_name):

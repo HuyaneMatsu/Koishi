@@ -23,7 +23,7 @@ from .utils import get_back_path, get_searched_info, UNIT_TYPE_ORDER_PRIORITY_TY
     build_html_structure, search_info_sort_key
 
 URL_PREFIX = '/project/hata/docs'
-ROUTES = Blueprint('docs', '', url_prefix=URL_PREFIX)
+ROUTES = Blueprint('docs', '', url_prefix = URL_PREFIX)
 
 
 set_highlight_html_class(HIGHLIGHT_TOKEN_TYPES.TOKEN_TYPE_SPECIAL_OPERATOR, 'c_py_operator')
@@ -135,7 +135,7 @@ def search():
             found = []
             for index, path in enumerate(results):
                 found.append(get_searched_info(path, index))
-            found.sort(key=search_info_sort_key)
+            found.sort(key = search_info_sort_key)
             
             first = found[0]
             if first[3] == 'class' and first[1] == search_for:
@@ -174,7 +174,7 @@ def api_search():
         found = []
         for index, path in  enumerate(search_paths(search_for, limit=limit)):
             found.append(get_searched_info(path, index))
-        found.sort(key=search_info_sort_key)
+        found.sort(key = search_info_sort_key)
         
         for order_priority, name, url, type_, preview in found:
             element = {

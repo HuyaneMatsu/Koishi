@@ -283,8 +283,8 @@ def check_staff_role(event):
 ADD_EMOJI_OK = BUILTIN_EMOJIS['ok_hand']
 ADD_EMOJI_CANCEL = BUILTIN_EMOJIS['x']
 
-ADD_BUTTON_OK = Button(emoji=ADD_EMOJI_OK)
-ADD_BUTTON_CANCEL = Button(emoji=ADD_EMOJI_CANCEL)
+ADD_BUTTON_OK = Button(emoji = ADD_EMOJI_OK)
+ADD_BUTTON_CANCEL = Button(emoji = ADD_EMOJI_CANCEL)
 
 ADD_COMPONENTS = Row(ADD_BUTTON_OK, ADD_BUTTON_CANCEL)
 
@@ -335,10 +335,10 @@ async def add_bot_channel_name(client, message, weight:int, name):
                 ),
             )
         
-        message = await client.message_create(message.channel, embed=embed, components=ADD_COMPONENTS)
+        message = await client.message_create(message.channel, embed = embed, components = ADD_COMPONENTS)
         
         try:
-            event = await wait_for_component_interaction(message, timeout=300., check=check_staff_role)
+            event = await wait_for_component_interaction(message, timeout = 300., check = check_staff_role)
         except TimeoutError:
             event = None
             cancelled = False
@@ -363,9 +363,9 @@ async def add_bot_channel_name(client, message, weight:int, name):
         embed.add_footer(footer)
         
         if event is None:
-            await client.message_edit(message, embed=embed, components=None)
+            await client.message_edit(message, embed = embed, components = None)
         else:
-            await client.interaction_component_message_edit(event, embed=embed, components=None)
+            await client.interaction_component_message_edit(event, embed = embed, components = None)
 
 
 @COMMAND_CLIENT.commands(category='CHANNEL NAMES')
@@ -376,4 +376,4 @@ async def do_bot_channel_rename(client, message):
     When adding a command please also define weight and not only name as: `weight | name`
     """
     await do_rename()
-    await Closer(client, message.channel, Embed(description='Rename done'))
+    await Closer(client, message.channel, Embed(description = 'Rename done'))

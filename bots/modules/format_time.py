@@ -11,7 +11,7 @@ from hata.discord.utils import DATETIME_MAX, DATETIME_MIN, UNIX_TIME_MAX, UNIX_T
 from hata.ext.slash import P, abort
 
 
-P_TIME_ZONE = P('float', 'timezone offset from utc 0', min_value=-26.0, max_value=+26.0)
+P_TIME_ZONE = P('float', 'timezone offset from utc 0', min_value = -26.0, max_value = +26.0)
 ID_MIN = 0
 ID_MAX = unix_time_to_id(UNIX_TIME_MAX)
 
@@ -65,7 +65,7 @@ RELATIVE_SECONDS_MIN = RELATIVE_MINUTES_MIN * 60
 RELATIVE_SECONDS_MAX = RELATIVE_MINUTES_MAX * 60
 
 
-@FORMAT_TIME_COMMANDS.interactions(name='relative')
+@FORMAT_TIME_COMMANDS.interactions(name = 'relative')
 async def format_relative(
     years : ('number', 'years') = 0,
     months: ('number', 'days') = 0,
@@ -110,14 +110,14 @@ async def format_relative(
     return build_format_embed(DateTime.utcnow() + delta)
 
 
-@FORMAT_TIME_COMMANDS.interactions(name='absolute')
+@FORMAT_TIME_COMMANDS.interactions(name = 'absolute')
 async def format_absolute(
-    year : P('number', 'year', min_value=DATETIME_MIN.year, max_value=DATETIME_MAX.year) = 0,
-    month: P('number', 'days', min_value=1, max_value=12) = 1,
-    day: P('number', 'days', min_value=1, max_value=31) = 1,
-    hour: P('number', 'hours', min_value=0, max_value=23) = 0,
-    minute: P('number', 'minutes', min_value=0, max_value=59) = 0,
-    second: P('number', 'seconds', min_value=0, max_value=59) = 0,
+    year : P('number', 'year', min_value = DATETIME_MIN.year, max_value = DATETIME_MAX.year) = 0,
+    month: P('number', 'days', min_value = 1, max_value = 12) = 1,
+    day: P('number', 'days', min_value = 1, max_value = 31) = 1,
+    hour: P('number', 'hours', min_value = 0, max_value = 23) = 0,
+    minute: P('number', 'minutes', min_value = 0, max_value = 59) = 0,
+    second: P('number', 'seconds', min_value = 0, max_value = 59) = 0,
     time_zone_offset: P_TIME_ZONE = 0.0,
 ):
     """Formats the given time."""
@@ -136,15 +136,15 @@ async def format_absolute(
     return build_format_embed(date_time)
 
 
-@FORMAT_TIME_COMMANDS.interactions(name='unix')
+@FORMAT_TIME_COMMANDS.interactions(name = 'unix')
 async def format_unix(
-    unix_time: P('number', 'unix time', min_value=UNIX_TIME_MIN, max_value=UNIX_TIME_MAX),
+    unix_time: P('number', 'unix time', min_value = UNIX_TIME_MIN, max_value = UNIX_TIME_MAX),
 ):
     """Formats the given unix time."""
     return build_format_embed(unix_time_to_datetime(unix_time))
 
 
-@FORMAT_TIME_COMMANDS.interactions(name='snowflake')
+@FORMAT_TIME_COMMANDS.interactions(name = 'snowflake')
 async def format_snowflake(
     snowflake: P('int', 'snowflake'),
 ):
@@ -157,7 +157,7 @@ async def format_snowflake(
     return build_format_embed(id_to_datetime(snowflake))
 
 
-@FORMAT_TIME_COMMANDS.interactions(name='now')
+@FORMAT_TIME_COMMANDS.interactions(name = 'now')
 async def format_now():
     """Formats he current time"""
     return build_format_embed(DateTime.utcnow())
