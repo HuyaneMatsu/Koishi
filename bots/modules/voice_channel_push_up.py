@@ -152,6 +152,8 @@ async def ready(client):
     client : ``Client``
         The client who received the event.
     """
+    client.events.remove(ready)
+    
     for channel in GUILD__KOISHI_CLAN.channels.values():
         if should_process_action_in_channel(channel):
             await update_channel_push_up(channel)
