@@ -8,9 +8,12 @@ SLASH_CLIENT: Client
 
 GUILD__KOISHI_CLAN = Guild.precreate(866746184990720020)
 VOICE_CATEGORY = Channel.precreate(914407653114011648)
+RADIO_CATEGORY = Channel.precreate(1016357856540373102)
 
 PULL_DOWN_HANDLES = {}
 PULL_DOWN_TIMEOUT = 60.0
+
+MOVABLE_PARENT_IDS = {0, VOICE_CATEGORY.id, RADIO_CATEGORY.id}
 
 
 def should_channel_be_pushed_up(channel):
@@ -28,6 +31,8 @@ def should_channel_be_pushed_up(channel):
     """
     channel_id = channel.id
     
+    user_count = 0
+    
     for voice_state in GUILD__KOISHI_CLAN.voice_states.values():
         if voice_state.channel_id != channel_id:
             continue
@@ -37,6 +42,12 @@ def should_channel_be_pushed_up(channel):
         
         if voice_state.self_stream:
             return True
+        
+        user_count += 1
+        continue
+    
+    if user_count >= 2:
+        return True
     
     return False
 
@@ -59,12 +70,7 @@ def should_process_action_in_channel(channel):
     
     parent_id = channel.parent_id
     
-    # Moved channel
-    if parent_id == 0:
-        return True
-    
-    # Not yet moved channel.
-    if parent_id == VOICE_CATEGORY.id:
+    if parent_id in MOVABLE_PARENT_IDS:
         return True
     
     return False
@@ -126,7 +132,29 @@ async def pull_down(channel):
     channel : ``Channel``
         The channel to pull down.
     """
-    await SLASH_CLIENT.channel_edit(channel, position = 0, parent_id = VOICE_CATEGORY.id)
+    if 'radio' in channel.name.casefold():
+        target_category = RADIO_CATEGORY
+    else:
+        target_category = VOICE_CATEGORY
+    
+    await SLASH_CLIENT.channel_edit(channel, position = 0, parent_id = target_category)
+
+
+@SLASH_CLIENT.events
+async def ready(client):
+    """
+    Handles a ready event of the client.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    """
+    for channel in GUILD__KOISHI_CLAN.channels.values():
+        if should_process_action_in_channel(channel):
+            await update_channel_push_up(channel)
 
 
 @SLASH_CLIENT.events
@@ -247,7 +275,6 @@ async def user_voice_update(client, voice_state, old_attributes):
         await update_channel_push_up(channel)
 
 
-
 def teardown(module):
     """
     Called when the plugin is being unloaded.
@@ -261,3 +288,17 @@ def teardown(module):
         handle.cancel()
     
     PULL_DOWN_HANDLES.clear()
+
+
+async def setup(module):
+    """
+    Called when the plugin is being loaded.
+    
+    Parameters
+    ----------
+    module : `ModuleType`
+        This file.
+    """
+    for channel in GUILD__KOISHI_CLAN.channels.values():
+        if should_process_action_in_channel(channel):
+            await update_channel_push_up(channel)
