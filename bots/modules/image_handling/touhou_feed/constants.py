@@ -13,4 +13,4 @@ MAX_INTERVAL =   24 * 3600
 INTERVAL_MULTIPLIER = 50
 
 TAG_REQUIRED_RP = re.compile(f'(?:\\s|^)#{TAG_NAME_REQUIRED}', re.M | re.U)
-TAG_RP = re.compile(f'(?:\\s|^)#([\\w\\-]+)', re.M | re.U)
+TAG_RP = re.compile(f'(?:\\s|^)#([\\w\\-\\_]+)', re.M | re.U)

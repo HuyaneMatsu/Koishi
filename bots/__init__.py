@@ -22,7 +22,7 @@ if MARISA_MODE:
             'command_utils',
             'slash',
             'commands_v2',
-        #    'solarlink',
+            'solarlink',
         ),
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,

@@ -40,6 +40,7 @@ TOUHOU_TAGS_BANNED = frozenset((
     'comic',
     'greyscale',
     'ronald_mcdonald',
+    'simplified_chinese_text',
 ))
 
 

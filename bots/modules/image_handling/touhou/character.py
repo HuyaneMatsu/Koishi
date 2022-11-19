@@ -92,6 +92,8 @@ def get_touhou_character_like(name):
     if name_length == 0:
         return None
     
+    name = name.replace('-', ' ').replace('_', ' ')
+    
     if name_length > 10:
         name_length = 10
     
