@@ -571,7 +571,7 @@ CATEGORIES = (
     (
         'Administration',
         EMOJI_TOOLS,
-        ('clear', 'ban', 'dupe-image-filter', 'emoji-role', 'invite-create', 'is-banned',),
+        ('clear', 'dupe-image-filter', 'emoji-role', 'invite-create', 'mod', 'self-mod'),
     ), (
         'Anime',
         EMOJI_PILL,
@@ -593,7 +593,7 @@ CATEGORIES = (
         EMOJI_PAPER_DRAGON,
         (
             '9ball', 'ascii', 'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll',
-            'self-mute', 'sex', 'stats', 'touhou-feed', 'trivia', 'urban', 'yuno'
+            'sex', 'stats', 'touhou-feed', 'trivia', 'urban', 'yuno'
         )
     ), (
         'Games',
@@ -935,7 +935,7 @@ ROLE_INFO = SLASH_CLIENT.interactions(
 
 
 @ROLE_INFO.interactions
-async def Collectible():
+async def collectible():
     """A list of collectible roles in KW."""
     embed = Embed(
         'Collectible roles:',
