@@ -410,6 +410,9 @@ async def set_interval(
     if channel is None:
         abort(f'Unknown channel: {channel_name}')
     
+    if not channel.get_cached_permissions_for(client).can_manage_channel:
+        abort('I require `manager channel` permission to do this.')
+    
     yield
     
     old_slowmode = channel.slowmode

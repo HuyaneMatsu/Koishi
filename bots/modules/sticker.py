@@ -622,19 +622,19 @@ async def edit_(client, event,
     # Acknowledge the event
     await client.interaction_component_acknowledge(component_interaction)
     
-    kwargs = {}
+    keyword_parameters = {}
     
     if (new_name is not None):
-        kwargs['name'] = new_name
+        keyword_parameters['name'] = new_name
     
     if (new_emoji is not None):
-        kwargs['emoji_representation'] = new_emoji
+        keyword_parameters['tags'] = new_emoji
     
     if (new_description is not None):
-        kwargs['description'] = new_description
+        keyword_parameters['description'] = new_description
     
     try:
-        await client.sticker_guild_edit(sticker, **kwargs)
+        await client.sticker_guild_edit(sticker, **keyword_parameters)
     except ConnectionError:
         # No internet, let it be
         return

@@ -41,17 +41,17 @@ async def handle_list_per_client_component(event):
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         return
     
-    options = event.interaction.options
+    values = event.values
     
     client_detected = False
     while True:
-        if options is None:
+        if values is None:
             break
         
-        option = options[0]
+        value = values[0]
     
         try:
-            client_id = int(option)
+            client_id = int(value)
         except ValueError:
             break
         

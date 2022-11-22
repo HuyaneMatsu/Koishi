@@ -469,7 +469,7 @@ async def add_sticker(client, event, sticker_id, *, name, tags, description):
             event.guild_id,
             name = name,
             image = data,
-            emoji_representation = tags,
+            tags = tags,
             description = description,
         )
     except ConnectionError:

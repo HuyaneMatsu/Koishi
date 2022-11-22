@@ -162,7 +162,7 @@ def create_initial_response_parts(event, target, entities, snipe_type):
 
 
 async def select_option_parser_emoji(client, event):
-    selected_emojis = event.interaction.options
+    selected_emojis = event.values
     if (selected_emojis is None):
         return None
     
@@ -171,7 +171,7 @@ async def select_option_parser_emoji(client, event):
 
 
 async def select_option_parser_sticker(client, event):
-    selected_stickers = event.interaction.options
+    selected_stickers = event.values
     if (selected_stickers is None):
         return None
     

@@ -3887,7 +3887,7 @@ async def select_character(event):
     if event.message.interaction.user is not event.user:
         return
     
-    selected_character_ids = event.interaction.options
+    selected_character_ids = event.values
     if (selected_character_ids is None):
         return
     
@@ -4088,7 +4088,7 @@ async def select_card(event):
     if event.message.interaction.user is not event.user:
         return
     
-    selected_card_ids = event.interaction.options
+    selected_card_ids = event.values
     if (selected_card_ids is None):
         return
     

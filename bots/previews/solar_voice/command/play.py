@@ -241,18 +241,16 @@ async def play_(client, event,
         )
     
     else:
-        options = component_interaction.interaction.options
-        
         selected_tracks_and_emojis = []
-        for option in options:
+        for value in component_interaction.iter_values():
             try:
-                option = int(option)
+                value = int(value)
             except ValueError:
                 pass
             else:
                 selected_tracks_and_emojis.append((
-                    tracks[option],
-                    emojis[option],
+                    tracks[value],
+                    emojis[value],
                 ))
         
         if join_player:

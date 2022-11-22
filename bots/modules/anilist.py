@@ -1320,17 +1320,16 @@ async def find_character_page_right(client, event):
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_CHARACTER_SELECT)
 async def find_character_select(client, event):
-    interaction = event.interaction
     if event.message.interaction.user is not event.user:
         return
     
-    options = interaction.options
-    if options is None:
+    values = event.values
+    if values is None:
         return
     
-    option = options[0]
+    value = values[0]
     try:
-        character_id = int(option)
+        character_id = int(value)
     except ValueError:
         return
     
@@ -1452,17 +1451,16 @@ async def find_anime_page_right(client, event):
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_ANIME_SELECT)
 async def find_anime_select(client, event):
-    interaction = event.interaction
     if event.message.interaction.user is not event.user:
         return
     
-    options = interaction.options
-    if options is None:
+    values = event.values
+    if values is None:
         return
     
-    option = options[0]
+    value = values[0]
     try:
-        anime_id = int(option)
+        anime_id = int(value)
     except ValueError:
         return
     
@@ -1583,17 +1581,16 @@ async def find_manga_page_right(client, event):
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_FIND_MANGA_SELECT)
 async def find_manga_select(client, event):
-    interaction = event.interaction
     if event.message.interaction.user is not event.user:
         return
     
-    options = interaction.options
-    if options is None:
+    values = event.values
+    if values is None:
         return
     
-    option = options[0]
+    value = values[0]
     try:
-        manga_id = int(option)
+        manga_id = int(value)
     except ValueError:
         return
     

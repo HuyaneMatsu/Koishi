@@ -268,6 +268,18 @@ async def improvise():
     yield choice(IMPROVISATION_CHOICES)
 
 # command end
+# command start slash resend
+
+@Nitori.interactions(guild = TEST_GUILD)
+async def resend(
+    client,
+    attachment: ('attachment', 'File!'),
+):
+    yield
+    file = await client.download_attachment(attachment)
+    yield InteractionResponse(file = (attachment.name, file))
+
+# command end
 # command start slash collect-reactions
 
 @Nitori.interactions(guild = TEST_GUILD)
@@ -1240,7 +1252,7 @@ async def handle_waifu_select(client, event):
     
     # Second we filter out incorrect selected values.
     # You can change the command over time and the can return bad option as well.
-    selected_waifu_types = event.interaction.options
+    selected_waifu_types = event.values
     if (selected_waifu_types is None):
         return
     
@@ -1361,7 +1373,7 @@ async def zoo(event):
         content = 'You didn\'t decide which animals to visit and the zoo closed, see ya tomorrow!'
         component_interaction = None
     else:
-        selected_animals = component_interaction.interaction.options
+        selected_animals = component_interaction.values
         if selected_animals is None:
             content = 'Going to zoo only to buy icecream?'
         else:
