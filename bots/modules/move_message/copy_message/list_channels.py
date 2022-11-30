@@ -1,5 +1,7 @@
 __all__ = ()
 
+from itertools import chain
+
 from hata import Embed, parse_all_emojis
 from hata.ext.slash import abort
 
@@ -40,10 +42,10 @@ def collect_emojis_to_channels(client, guild):
     """
     emojis_to_channels = {}
     
-    for channel in guild.channels.values():
+    for channel in chain(guild.channels.values(), guild.threads.values()):
         if not channel.is_in_group_guild_textual():
             continue
-    
+        
         if not channel.cached_permissions_for(client).can_manage_webhooks:
             continue
         

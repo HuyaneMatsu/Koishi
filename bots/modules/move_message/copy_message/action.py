@@ -1,6 +1,7 @@
 __all__ = ()
 
 from collections import deque
+from itertools import chain
 
 from hata import Client, KOKORO, parse_all_emojis
 from scarletio import Task, WaitTillExc
@@ -11,7 +12,7 @@ from ..helpers import get_message_and_files, get_webhook
 
 SLASH_CLIENT: Client
 
-ACTION_QUEUE = deque(maxlen=100)
+ACTION_QUEUE = deque(maxlen = 100)
 
 
 def check_channel_emojis(channel, emoji):
@@ -64,7 +65,11 @@ async def reaction_add(client, event):
     else:
         return
     
-    target_channels = [channel for channel in guild.channels.values() if check_channel_emojis(channel, emoji)]
+    target_channels = [
+        channel for channel
+        in chain(guild.channels.values(), guild.threads.values())
+        if check_channel_emojis(channel, emoji)
+    ]
     if len(target_channels) != 1:
         return
     
