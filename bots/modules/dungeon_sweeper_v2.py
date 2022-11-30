@@ -1900,64 +1900,64 @@ def pretty_dump_stage_sources(stage_sources):
     
     for stage_source in stage_sources:
         if is_first:
-            json_parts.append(' '*4)
+            json_parts.append(' ' * 4)
             is_first = False
         else:
             json_parts.append(' ')
         
         json_parts.append('{')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('\n')
         
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_CHAPTER_INDEX)
         json_parts.append('": ')
-        json_parts.append(stage_source.chapter_index)
+        json_parts.append(repr(stage_source.chapter_index))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_DIFFICULTY_INDEX)
         json_parts.append('": ')
         json_parts.append(repr(stage_source.difficulty_index))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_STAGE_INDEX)
         json_parts.append('": ')
         json_parts.append(repr(stage_source.stage_index))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_ID)
         json_parts.append('": ')
         json_parts.append(repr(stage_source.id))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_START)
         json_parts.append('": ')
         json_parts.append(repr(stage_source.start))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_TARGET_COUNT)
         json_parts.append('": ')
         json_parts.append(repr(stage_source.target_count))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_X_SIZE)
         json_parts.append('": ')
         json_parts.append(repr(stage_source.x_size))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_BEST)
         json_parts.append('": ')
-        json_parts.append(repr(999))
+        json_parts.append(repr(stage_source.best))
         json_parts.append(',\n')
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append('"')
         json_parts.append(JSON_KEY_STAGE_SOURCE_MAP)
         json_parts.append('": [\n')
@@ -1978,7 +1978,7 @@ def pretty_dump_stage_sources(stage_sources):
                 json_parts.append('"')
                 json_parts.append(tile_name)
                 json_parts.append('"')
-                json_parts.append(' '*(10 - len(tile_name)))
+                json_parts.append(' ' * (10 - len(tile_name)))
                 json_parts.append(',')
             
             json_parts.append('\n')
@@ -1986,9 +1986,9 @@ def pretty_dump_stage_sources(stage_sources):
         if (json_parts[-1] == '\n') and (json_parts[-2] == ','):
             del json_parts[-2]
         
-        json_parts.append(' '*8)
+        json_parts.append(' ' * 8)
         json_parts.append(']\n')
-        json_parts.append(' '*4)
+        json_parts.append(' ' * 4)
         json_parts.append('}')
         json_parts.append(',')
     
@@ -1998,6 +1998,7 @@ def pretty_dump_stage_sources(stage_sources):
     json_parts.append('\n]\n')
     
     return ''.join(json_parts)
+
 
 CHAPTER_REIMU_NAME = 'REIMU'
 CHAPTER_FLAN_NAME = 'FLAN'

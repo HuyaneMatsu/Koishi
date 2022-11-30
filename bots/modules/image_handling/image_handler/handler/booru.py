@@ -66,6 +66,60 @@ def make_url(api_endpoint, required_tags, banned_tags, requested_tags):
     return ''.join(url_parts)
 
 
+def booru_post_parser_generic(post):
+    """
+    Parses a generic booru post.
+    
+    Parameters
+    ----------
+    post : ``BeautifulSoup``
+        Response post.
+    
+    Returns
+    -------
+    file_url : `str`
+    tags : `str`
+    """
+    return post.get('file_url'), post.get('tags')
+
+
+def booru_post_parser_gel(post):
+    """
+    Parses a gebbooru post.
+    
+    Parameters
+    ----------
+    post : ``BeautifulSoup``
+        Response post.
+    
+    Returns
+    -------
+    file_url : `str`
+    tags : `str`
+    """
+    return post.find('file_url').string, post.find('tags').string
+
+
+
+def get_post_parser(api_endpoint):
+    """
+    Gets the post parser of the given endpoint.
+    
+    Parameters
+    ----------
+    api_endpoint : `str`
+        Base url of the service.
+    
+    Returns
+    -------
+    post_parser : `FunctionType`
+    """
+    if 'gelbooru.com' in api_endpoint:
+        return booru_post_parser_gel
+    
+    return booru_post_parser_generic
+
+
 class ImageHandlerBooru(ImageHandlerRequestBase):
     """
     Image handler requesting images from `waifu.pics`.
@@ -80,6 +134,8 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         Active request loop.
     _page : `int`
         The next page to request.
+    _post_parser : `FunctionType`
+        Function type to use to parse a post. Different services might have different post format.
     _provider : `str`
         Specific provider added to image details.
     _random_order : `bool`
@@ -87,10 +143,12 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
     _url : `str`
         The url to do request towards.
     """
-    __slots__ = ('_page', '_provider', '_random_order', '_url',)
+    __slots__ = ('_page', '_post_parser', '_provider', '_random_order', '_url',)
     
     def __new__(cls, provider, api_endpoint, required_tags, banned_tags, requested_tags, random_order):
         """
+        Creates a booru image handler.
+        
         Parameters
         ----------
         provider : `str`
@@ -107,8 +165,10 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
             Whether images should be shown in random order.
         """
         url = make_url(api_endpoint, required_tags, banned_tags, requested_tags)
+        post_parser = get_post_parser(api_endpoint)
         self = ImageHandlerRequestBase.__new__(cls)
         self._page = 0
+        self._post_parser = post_parser
         self._provider = provider
         self._random_order = random_order
         self._url = url
@@ -163,18 +223,11 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         
         image_details = []
         # Process data
+        post_parser = self._post_parser
         for post in soup.find_all('post'):
-            try:
-                url = post['file_url']
-            except KeyError:
-                continue
-            
-            try:
-                tags = post['tags']
-            except KeyError:
-                continue
-            
-            image_details.append(ImageDetail(url, frozenset(tags.split()), self._provider))
+            url, tags = post_parser(post)
+            if (url is not None) and (tags is not None):
+                image_details.append(ImageDetail(url, frozenset(tags.split()), self._provider))
         
         if random_order:
             shuffle(image_details)

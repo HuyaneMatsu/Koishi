@@ -805,7 +805,7 @@
         "p": 10,
         "t": 2,
         "x": 7,
-        "b": 49,
+        "b": 33,
         "m": [
 "WALL_W"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_N"    , "WALL_E"    ,
 "WALL_W"    , "FLOOR"     , "TARGET"    , "CS_FLOOR"  , "TARGET"    , "FLOOR"     , "WALL_E"    ,

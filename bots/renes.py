@@ -112,7 +112,7 @@ async def discord_stream_started():
     
     This function is a coroutine.
     """
-    if LOOP_TIME() > STREAM_DETAILS.DISCORD_STREAM_ENDED + STREAM_PING_DIFFERENCE:
+    if LOOP_TIME() < STREAM_DETAILS.DISCORD_STREAM_ENDED + STREAM_PING_DIFFERENCE:
         return
     
     invite = await Renes.stream_invite_create(GUILD__ESTS_HOME, USER__EST, max_age = INVITE_MAX_AGE)
@@ -140,7 +140,7 @@ async def twitch_stream_started(activity):
     activity : ``Activity``
         The started activity.
     """
-    if LOOP_TIME() > STREAM_DETAILS.TWITCH_STREAM_ENDED + STREAM_PING_DIFFERENCE:
+    if LOOP_TIME() < STREAM_DETAILS.TWITCH_STREAM_ENDED + STREAM_PING_DIFFERENCE:
         return
     
     image_url = activity.twitch_preview_image_url
