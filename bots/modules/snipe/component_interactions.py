@@ -284,6 +284,10 @@ async def add_emoji(client, event):
             error_message = 'Failed to re-parse emoji.'
             break
         
+        if not emoji.is_custom_emoji():
+            error_message = 'Only custom emojis can be borrowed.'
+            break
+        
         error_message = check_emoji_requirements(event.guild, emoji)
         break
     

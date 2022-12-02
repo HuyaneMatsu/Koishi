@@ -1,6 +1,7 @@
 __all__ = ()
 
 from itertools import chain
+from random import choice
 
 from hata import Client, DiscordException, ERROR_CODES, Embed, KOKORO, now_as_id
 from scarletio import CancelledError, LOOP_TIME, Task
@@ -8,8 +9,8 @@ from scarletio import CancelledError, LOOP_TIME, Task
 from ..touhou import TouhouHandlerKey, get_touhou_character_like, parse_touhou_characters_from_tags
 
 from .constants import (
-    DEFAULT_INTERVAL, FEEDERS, INTERVAL_MULTIPLIER, MAX_INTERVAL, MIN_INTERVAL, TAG_NAME_REQUIRED, TAG_NAME_SOLO,
-    TAG_REQUIRED_RP, TAG_RP
+    DEFAULT_INTERVAL, FEEDERS, INTERVAL_RP, INTERVAL_UNIT_RP, MAX_INTERVAL, MIN_INTERVAL, TAG_NAME_REQUIRED,
+    TAG_NAME_SOLO, TAG_REQUIRED_RP, TAG_ITER_RP
 )
 
 
@@ -32,15 +33,98 @@ def iter_tag_names_of(channel):
     if channel.is_guild_text():
         topic = channel.topic
         if (topic is not None):
-            yield from TAG_RP.findall(topic)
+            yield from TAG_ITER_RP.findall(topic)
     
     elif channel.is_guild_thread_public():
         for tag in channel.iter_applied_tags():
             yield tag.name
 
 
+def try_parse_handler_key(tag_name):
+    """
+    Parses the given tag name and returns a created handler key from it if applicable.
+    
+    Parameters
+    ----------
+    tag_name : `str`
+        The tag's name.
+    
+    Returns
+    -------
+    handler_key : `None`, ``TouhouHandlerKey``
+    """
+    solo = False
+    characters = None
+    
+    for split in tag_name.split('+'):
+        split = split.strip()
+        if split == TAG_NAME_SOLO:
+            solo = True
+            continue
+        
+        character = get_touhou_character_like(split)
+        if (character is not None):
+            if characters is None:
+                characters = []
+            
+            characters.append(character)
+    
+    if characters is not None:
+        return TouhouHandlerKey(*characters, solo = solo)
 
-def get_channel_handler_key(channel):
+
+def try_parse_interval(tag_name):
+    """
+    Tries to parse interval out from the given tag name.
+    
+    Parameters
+    ----------
+    tag_name : `str`
+        The tag's name.
+    
+    Returns
+    -------
+    interval : `int`
+    """
+    match = INTERVAL_RP.fullmatch(tag_name)
+    if match is None:
+        return 0
+    
+    interval = match.group(1)
+    
+    hours = 0
+    minutes = 0
+    seconds = 0
+    
+    for math in INTERVAL_UNIT_RP.finditer(interval):
+        duration, unit = math.groups()
+        if len(duration) > 2:
+            duration = 99
+        else:
+            duration = int(duration)
+        
+        if unit == 'h':
+            if duration > 24:
+                hours = 24
+            else:
+                hours = duration
+        
+        elif unit == 'm':
+            if duration > 59:
+                minutes = 0
+            else:
+                minutes = duration
+        
+        elif unit == 's':
+            if duration > 59:
+                seconds = 0
+            else:
+                seconds = duration
+    
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def parse_channel_tags(channel):
     """
     Gets the handler key for the given channel.
     
@@ -51,67 +135,62 @@ def get_channel_handler_key(channel):
     
     Returns
     -------
-    handler_key : `None`, ``TouhouHandlerKey``
+    handler_keys_and_interval : `None`, `tuple` ((`tuple` of ``TouhouHandlerKey``), `int`)
     """
-    solo = False
-    characters = []
+    handler_keys = None
+    final_interval = 0
+    solo_only = False
     
     for tag_name in iter_tag_names_of(channel):
-        touhou_character = get_touhou_character_like(tag_name)
-        if tag_name == TAG_NAME_SOLO:
-            solo = True
-            continue
-        
         if tag_name == TAG_NAME_REQUIRED:
             continue
         
-        if (touhou_character is not None):
-            characters.append(touhou_character)
+        if tag_name == TAG_NAME_SOLO:
+            solo_only = True
+        
+        interval = try_parse_interval(tag_name)
+        if interval:
+            final_interval = interval
+            continue
+        
+        handler_key = try_parse_handler_key(tag_name)
+        if (handler_key is not None):
+            if (handler_keys is None):
+                handler_keys = []
+            
+            handler_keys.append(handler_key)
+            continue
     
-    if characters:
-        return TouhouHandlerKey(*characters, solo = solo)
+    
+    if (handler_keys is not None):
+        if solo_only:
+            for handler_key in handler_keys:
+                handler_key.apply_solo_preference()
+        
+        return tuple(handler_keys), normalise_interval(final_interval)
 
 
-def get_feed_interval(channel):
+def normalise_interval(interval):
     """
-    Gets the post interval of a channel.
+    Normalises the given interval.
     
     Parameters
     ----------
-    channel : ``Channel``
-        The respective channel.
+    interval : `int`
+        The defined interval.
     
     Returns
     -------
     interval : `int`
     """
-    return slowmode_to_interval(channel.slowmode)
-
-
-def slowmode_to_interval(slowmode):
-    """
-    Converts the given slowmode to interval.
-    
-    Parameters
-    ----------
-    slowmode : `int`
-        A channel's slowmode.
-    
-    Returns
-    -------
-    interval : `int`
-    """
-    if not slowmode:
+    if interval == 0:
         interval = DEFAULT_INTERVAL
     
-    else:
-        interval = slowmode * INTERVAL_MULTIPLIER
-        
-        if interval < MIN_INTERVAL:
-            interval = MIN_INTERVAL
-        
-        elif interval > MAX_INTERVAL:
-            interval = MAX_INTERVAL
+    elif interval < MIN_INTERVAL:
+        interval = MIN_INTERVAL
+    
+    elif interval > MAX_INTERVAL:
+        interval = MAX_INTERVAL
     
     return interval
 
@@ -216,6 +295,23 @@ def should_auto_post_in_channel(client, channel):
     return False
 
 
+def get_interval_only(channel):
+    """
+    Gets the channel interval only.
+    """
+    final_interval = 0
+    
+    for tag_name in iter_tag_names_of(channel):
+        if tag_name == TAG_NAME_REQUIRED:
+            continue
+        
+        interval = try_parse_interval(tag_name)
+        if interval:
+            final_interval = interval
+    
+    return normalise_interval(final_interval)
+
+
 class Feeder:
     """
     Auto channel feeder.
@@ -226,10 +322,12 @@ class Feeder:
         The channel to auto post at.
     handle : `None`, ``TimerHandle``
         The current handle of the auto poster.
-    handler_key : ``TouhouHandlerKey``
-        Handler key which handles which characters should be posted.
+    handler_keys : `tuple` ``TouhouHandlerKey``
+        Handler keys which handle which characters should be posted.
+    interval : `int`
+        The interval between posting in seconds.
     """
-    __slots__ = ('channel', 'handle', 'handler_key',)
+    __slots__ = ('channel', 'handle', 'handler_keys', 'interval')
     
     def __new__(cls, channel):
         """
@@ -240,14 +338,14 @@ class Feeder:
         channel : ``Channel``
             The channel to auto post at.
         """
-        handler_key = get_channel_handler_key(channel)
-        if handler_key is None:
+        handler_keys_and_interval = parse_channel_tags(channel)
+        if handler_keys_and_interval is None:
             return
         
         self = object.__new__(cls)
         self.channel = channel
         self.handle = None
-        self.handler_key = handler_key
+        self.handler_keys, self.interval = handler_keys_and_interval
         
         self.schedule()
         FEEDERS[channel.id] = self
@@ -262,8 +360,11 @@ class Feeder:
         repr_parts.append(' channel = ')
         repr_parts.append(repr(self.channel))
         
-        repr_parts.append(', handler_key = ')
-        repr_parts.append(repr(self.handler_key))
+        repr_parts.append(', handler_keys = ')
+        repr_parts.append(repr(self.handler_keys))
+        
+        repr_parts.append(', interval = ')
+        repr_parts.append(repr(self.interval))
         
         handle = self.handle
         if (handle is not None) and (not handle.cancelled):
@@ -279,12 +380,12 @@ class Feeder:
         """
         Updates the feeder.
         """
-        handler_key = get_channel_handler_key(self.channel)
-        if handler_key is None:
+        handler_keys_and_interval = parse_channel_tags(self.channel)
+        if handler_keys_and_interval is None:
             self.cancel()
         
         else:
-            self.handler_key = handler_key
+            self.handler_keys, self.interval = handler_keys_and_interval
             self.re_schedule()
     
     
@@ -294,7 +395,7 @@ class Feeder:
         
         If called while scheduled, it will break the scheduled.
         """
-        self.handle = KOKORO.call_later(get_feed_interval(self.channel), self.invoke)
+        self.handle = KOKORO.call_later(self.interval, self.invoke)
     
     
     def re_schedule(self):
@@ -303,12 +404,14 @@ class Feeder:
         
         If the feeder is already scheduled, it might cancel the old scheduling.
         """
-        call_at = LOOP_TIME() + get_feed_interval(self.channel)
+        call_at = LOOP_TIME() + self.interval
         
         current_handle = self.handle
         if (current_handle is not None) and (not current_handle.cancelled):
-            if current_handle.when < call_at:
-                current_handle.cancel()
+            if current_handle.when >= call_at:
+                return
+            
+            current_handle.cancel()
         
         self.handle = KOKORO.call_at(call_at, self.invoke)
     
@@ -342,7 +445,7 @@ class Feeder:
         This method is a coroutine.
         """
         try:
-            image_detail = await self.handler_key.get_handler().get_image(SLASH_CLIENT, None)
+            image_detail = await choice(self.handler_keys).get_handler().get_image(SLASH_CLIENT, None)
             if (image_detail is None):
                 return
             

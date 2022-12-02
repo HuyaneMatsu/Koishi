@@ -5,7 +5,9 @@ from hata import Client, Embed
 from ..shared_constants import PERMISSIONS__KICK, WORD_CONFIG__KICK
 from ..shared_helpers import add_reason_field, create_auto_reason, process_reason
 
-from .helpers import build_action_completed_embed, check_required_permissions, create_response_form
+from .helpers import (
+    build_action_completed_embed, check_required_permissions, check_user_remove_safety, create_response_form
+)
 
 
 SLASH_CLIENT: Client
@@ -40,6 +42,7 @@ async def kick_command(client, event):
     """Wanna kick yourself?"""
     guild = event.guild
     check_required_permissions(client, event, guild, PERMISSIONS__KICK, WORD_CONFIG__KICK)
+    check_user_remove_safety(event)
     return create_response_form('Self kick confirmation', 'Kick', CUSTOM_ID_SELF_KICK)
 
 

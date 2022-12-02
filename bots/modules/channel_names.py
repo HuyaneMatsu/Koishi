@@ -208,7 +208,7 @@ async def write_channels(names):
 
 async def do_rename():
     async with EDIT_LOCK:
-        if not CATEGORY__SUPPORT__BOTS.guild.permissions_for(COMMAND_CLIENT).can_manage_channel:
+        if not CATEGORY__SUPPORT__BOTS.guild.permissions_for(COMMAND_CLIENT).can_manage_channels:
             return
         
         channels = CATEGORY__SUPPORT__BOTS.channel_list

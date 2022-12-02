@@ -5,8 +5,9 @@ from hata import Client, Embed
 from ..shared_constants import PERMISSIONS__BAN, WORD_CONFIG__BAN
 from ..shared_helpers import add_reason_field, create_auto_reason, process_reason
 
-from .helpers import build_action_completed_embed, check_required_permissions, create_response_form
-
+from .helpers import (
+    build_action_completed_embed, check_required_permissions, check_user_remove_safety, create_response_form
+)
 
 SLASH_CLIENT: Client
 CUSTOM_ID_SELF_BAN = 'mod.self.form.ban'
@@ -40,6 +41,7 @@ async def ban_command(client, event):
     """Wanna ban yourself?"""
     guild = event.guild
     check_required_permissions(client, event, guild, PERMISSIONS__BAN, WORD_CONFIG__BAN)
+    check_user_remove_safety(event)
     return create_response_form('Self ban confirmation', 'Ban', CUSTOM_ID_SELF_BAN)
 
 

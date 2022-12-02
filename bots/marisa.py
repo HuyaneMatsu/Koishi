@@ -1565,6 +1565,12 @@ async def sub(event):
     return f'{sub:m} {sub.mention_at(event.guild)}'
 
 
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def test_booster(event, user = None):
+    if user is None: user = event.user
+    return str(user.is_boosting(event.guild_id))
+
+
 if (watchdog is not None):
     
     from watchdog.events import FileModifiedEvent

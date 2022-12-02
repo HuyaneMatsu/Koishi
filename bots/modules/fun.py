@@ -1,137 +1,13 @@
 __all__ = ()
 
 from random import random, randint, choice
-from html import unescape as html_unescape
-from functools import partial as partial_func
 
-from scarletio import Lock
 from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO, DiscordException, ERROR_CODES, Emoji
-from hata.ext.command_utils import wait_for_reaction
 from hata.ext.slash import abort
 
 from bot_utils.constants import GUILD__SUPPORT
 
 SLASH_CLIENT : Client
-
-
-TRIVIA_QUEUE = []
-TRIVIA_URL = 'https://opentdb.com/api.php'
-TRIVIA_REQUEST_LOCK = Lock(KOKORO)
-TRIVIA_USER_LOCK = set()
-
-async def get_trivias():
-    if TRIVIA_REQUEST_LOCK.is_locked():
-        await TRIVIA_REQUEST_LOCK
-        return
-    
-    async with TRIVIA_REQUEST_LOCK:
-        async with SLASH_CLIENT.http.get(TRIVIA_URL, params={'amount': 100, 'category': 31}) as response:
-            json = await response.json()
-        
-        for trivia_data in json['results']:
-            trivia = (
-                html_unescape(trivia_data['question']),
-                html_unescape(trivia_data['correct_answer']),
-                [html_unescape(element) for element in trivia_data['incorrect_answers']],
-            )
-            
-            TRIVIA_QUEUE.append(trivia)
-
-async def get_trivia():
-    if TRIVIA_QUEUE:
-        return TRIVIA_QUEUE.pop()
-    
-    await get_trivias()
-    
-    if TRIVIA_QUEUE:
-        return TRIVIA_QUEUE.pop()
-    
-    return None
-
-TRIVIA_OPTIONS = (
-    BUILTIN_EMOJIS['regional_indicator_a'],
-    BUILTIN_EMOJIS['regional_indicator_b'],
-    BUILTIN_EMOJIS['regional_indicator_c'],
-    BUILTIN_EMOJIS['regional_indicator_d'],
-)
-
-def check_for_trivia_emoji(user, event):
-    if event.user is not user:
-        return False
-    
-    if event.emoji not in TRIVIA_OPTIONS:
-        return False
-    
-    return True
-
-
-@SLASH_CLIENT.interactions(is_global = True, name = 'trivia')
-async def trivia_(client, event):
-    """Asks a trivia."""
-    guild = event.guild
-    if guild is None:
-        abort('Guild only command.')
-    
-    if client.get_guild_profile_for(guild) is None:
-        abort('I must be in the guild to execute this command.')
-    
-    if not event.channel.cached_permissions_for(client).can_add_reactions:
-        abort('I need add `reactions permission` to execute this command.')
-    
-    user = event.user
-    if user.id in TRIVIA_USER_LOCK:
-        abort('You are already in a trivia game.')
-    
-    TRIVIA_USER_LOCK.add(user.id)
-    try:
-        yield
-        
-        trivia = await get_trivia()
-        if trivia is None:
-            abort('No memes for now.')
-            return
-        
-        question, correct, wrong = trivia
-        possibilities = [correct, *wrong]
-        correct_emoji = TRIVIA_OPTIONS[possibilities.index(correct)]
-        
-        description_parts = []
-        for emoji, possibility in zip(TRIVIA_OPTIONS, possibilities):
-            description_parts.append(emoji.as_emoji)
-            description_parts.append(' ')
-            description_parts.append(possibility)
-            description_parts.append('\n')
-        
-        del description_parts[-1]
-        
-        description = ''.join(description_parts)
-        
-       
-        message = yield Embed(question, description).add_author(user.full_name, user.avatar_url)
-        
-        for emoji in TRIVIA_OPTIONS:
-            await client.reaction_add(message, emoji)
-        
-        try:
-           reaction_add_event = await wait_for_reaction(client, message, partial_func(check_for_trivia_emoji, user), 300.)
-        except TimeoutError:
-            title = 'Oof'
-            description = 'Timeout occurred.'
-        else:
-            if reaction_add_event.emoji is correct_emoji:
-                title = 'Noice'
-                description = f'I raised that neko.\n\n{correct_emoji.as_emoji} {correct}'
-            else:
-                title = 'Oof'
-                description = f'The correct answer is:\n\n{correct_emoji.as_emoji} {correct}'
-        
-        yield Embed(title, description).add_author(user.full_name, user.avatar_url)
-        
-        if message.channel.cached_permissions_for(client).can_manage_messages:
-            await client.reaction_clear(message)
-    
-    finally:
-        TRIVIA_USER_LOCK.discard(user.id)
 
 
 @SLASH_CLIENT.interactions(show_for_invoking_user_only=True, is_global = True)

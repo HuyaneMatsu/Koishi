@@ -33,9 +33,10 @@ class TouhouCharacter:
         self.name = name
         self.nicks = nicks
         
-        TOUHOU_CHARACTER_NAMES.extend(self.iter_names())
-        
         for name in self.iter_names():
+            name = name.casefold()
+            
+            TOUHOU_CHARACTER_NAMES.append(name)
             TOUHOU_CHARACTER_LOOKUP[name] = self
         
         TOUHOU_CHARACTERS_UNIQUE.add(self)
@@ -92,7 +93,7 @@ def get_touhou_character_like(name):
     if name_length == 0:
         return None
     
-    name = name.replace('-', ' ').replace('_', ' ')
+    name = name.replace('-', ' ').replace('_', ' ').casefold()
     
     if name_length > 10:
         name_length = 10

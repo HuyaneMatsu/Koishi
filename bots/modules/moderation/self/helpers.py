@@ -35,6 +35,19 @@ def check_required_permissions(client, event, guild, required_permission, word_c
         abort(f'I must have higher role than you to {word_config.name} you.')
 
 
+def check_user_remove_safety(event):
+    """
+    Checks whether removing the event's user would not damage the guild.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    """
+    if event.user.is_boosting(event.guild_id):
+        abort(f'Action forbidden for boosters.')
+
+
 def build_action_completed_embed(user, embed_builder, word_config, *position_parameters):
     """
     Builds an action done embed.

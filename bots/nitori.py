@@ -223,7 +223,7 @@ async def guild_features(event):
 
 # command end
 # command start slash channel-create
-@Nitori.interactions(guild = TEST_GUILD, required_permissions = Permission().update_by_keys(manage_channel = True))
+@Nitori.interactions(guild = TEST_GUILD, required_permissions = Permission().update_by_keys(manage_channels = True))
 async def channel_create(
     client, event, name: (str, 'The channel\'s name to create.')
 ):

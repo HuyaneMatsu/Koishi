@@ -7,8 +7,8 @@ from dateutil.relativedelta import relativedelta as RelativeDelta
 from hata import AnsiForegroundColor, BUILTIN_EMOJIS, Client, Embed, Permission, create_ansi_format_code, elapsed_time
 from hata.ext.slash import Button, InteractionResponse, P, Row, abort
 
-from .constants import DEFAULT_INTERVAL, FEEDERS, INTERVAL_MULTIPLIER, MAX_INTERVAL, MIN_INTERVAL
-from .logic import get_feed_interval, join_names_of_touhou_characters, should_auto_post_in_channel, slowmode_to_interval
+from .constants import DEFAULT_INTERVAL, FEEDERS, MAX_INTERVAL, MIN_INTERVAL
+from .logic import get_interval_only, join_names_of_touhou_characters, should_auto_post_in_channel
 
 
 SLASH_CLIENT: Client
@@ -24,6 +24,9 @@ DEFAULT_DELTA = elapsed_time(RelativeDelta(seconds = DEFAULT_INTERVAL))
 
 EMOJI_PAGE_PREVIOUS = BUILTIN_EMOJIS['arrow_left']
 EMOJI_PAGE_NEXT = BUILTIN_EMOJIS['arrow_right']
+EMOJI_CLOSE = BUILTIN_EMOJIS['x']
+
+CUSTOM_ID_CLOSE = 'auto_post.close'
 
 CUSTOM_ID_PAGE_BASE = 'auto_post.page.'
 
@@ -47,6 +50,11 @@ BUTTON_NEXT_DISABLED = Button(
     enabled = False,
 )
 
+BUTTON_CLOSE = Button(
+    emoji = EMOJI_CLOSE,
+    custom_id = CUSTOM_ID_CLOSE,
+)
+
 BUTTON_ABOUT_MAIN = Button(
     'About',
     custom_id = CUSTOM_ID_ABOUT_MAIN,
@@ -66,24 +74,27 @@ COMPONENTS_ABOUT_MAIN = Row(
     BUTTON_ABOUT_MAIN.copy_with(enabled = False),
     BUTTON_ABOUT_EXAMPLES,
     BUTTON_ABOUT_INTERVAL,
+    BUTTON_CLOSE,
 )
 
 COMPONENTS_ABOUT_EXAMPLES = Row(
     BUTTON_ABOUT_MAIN,
     BUTTON_ABOUT_EXAMPLES.copy_with(enabled = False),
     BUTTON_ABOUT_INTERVAL,
+    BUTTON_CLOSE,
 )
 
 COMPONENTS_ABOUT_INTERVAL = Row(
     BUTTON_ABOUT_MAIN,
     BUTTON_ABOUT_EXAMPLES,
     BUTTON_ABOUT_INTERVAL.copy_with(enabled = False),
+    BUTTON_CLOSE,
 )
 
 
 REQUIRED_PERMISSIONS = Permission().update_by_keys(manage_messages = True)
 
-DISPLAY_PER_PAGE = 25 // 4
+DISPLAY_PER_PAGE = min(25 // 3, 4)
 
 
 def _channel_sort_key(channel):
@@ -186,7 +197,7 @@ def _channel_match_priority_queue(client, guild, channel_name):
     for channel in iter_channels(client, guild):
         match = pattern.search(channel.name)
         if (match is not None):
-            priority_queue.append((match.start, channel))
+            priority_queue.append((match.start(), channel))
     
     priority_queue.sort(key = _channel_match_sort_key)
     
@@ -240,8 +251,42 @@ def get_channel_like(client, guild, channel_name):
         return priority_queue[0][1]
 
 
+def join_handler_keys(handler_keys):
+    """
+    Joins the given handler keys together into one string.
+    
+    Parameters
+    ----------
+    handler_keys : `tuple` of ``TouhouHandlerKey``
+        The handler keys to join.
+    
+    Returns
+    -------
+    joined : `str`
+    """
+    join_parts = []
+    handler_key_index = 0
+    handler_key_count = len(handler_keys)
+    
+    while True:
+        handler_key = handler_keys[handler_key_index]
+        
+        join_parts.append(join_names_of_touhou_characters(handler_key.characters, ' + '))
+        
+        if handler_key.solo:
+            join_parts.append(' (solo)')
+        
+        handler_key_index += 1
+        if handler_key_index >= handler_key_count:
+            break
+        
+        join_parts.append('\n')
+        continue
+    
+    return ''.join(join_parts)
 
-def built_listing_page_embed(client, guild, page):
+
+def build_listing_page_embed(client, guild, page):
     """
     Builds listing page embed for the given page index.
     
@@ -290,14 +335,14 @@ def built_listing_page_embed(client, guild, page):
             feeder = FEEDERS[channel.id]
         except KeyError:
             character_name = 'unknown'
-            solo = False
             style = STYLE_RED
+            interval = get_interval_only(channel)
         else:
-            character_name = join_names_of_touhou_characters(feeder.handler_key.characters, '\n')
-            solo = feeder.handler_key.solo
+            character_name = join_handler_keys(feeder.handler_keys)
             style = STYLE_GREEN
-        
-        delta = elapsed_time(RelativeDelta(seconds = get_feed_interval(channel)))
+            interval = feeder.interval
+            
+        delta = elapsed_time(RelativeDelta(seconds = interval))
         
         embed.add_field(
             f'\u200b',
@@ -309,7 +354,6 @@ def built_listing_page_embed(client, guild, page):
                 f'{STYLE_RESET}{style}{character_name}\n'
                 f'```'
             ),
-            inline = True,
         ).add_field(
             'Interval',
             (
@@ -317,15 +361,6 @@ def built_listing_page_embed(client, guild, page):
                 f'{delta}\n'
                 f'```'
             ),
-            inline = True,
-        ).add_field(
-            'Solo',
-            (
-                f'```\n'
-                f'{"true" if solo else "false"}'
-                f'```'
-            ),
-            inline = True,
         )
     
     
@@ -347,7 +382,7 @@ def built_listing_page_embed(client, guild, page):
     
     return InteractionResponse(
         embed = embed,
-        components = Row(button_previous_page, button_next_page),
+        components = Row(button_previous_page, button_next_page, BUTTON_CLOSE),
     )
 
 
@@ -374,7 +409,7 @@ async def list_channels(
     if not event.user_permissions & REQUIRED_PERMISSIONS:
         abort(f'Insufficient permissions.')
     
-    return built_listing_page_embed(client, guild, page)
+    return build_listing_page_embed(client, guild, page)
 
 
 @SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
@@ -386,122 +421,14 @@ async def disabled_page_move():
 async def page_move(client, event, page):
     guild = event.guild
     if (guild is not None) and (event.user_permissions & REQUIRED_PERMISSIONS):
-        return built_listing_page_embed(client, guild, int(page))
+        return build_listing_page_embed(client, guild, int(page))
 
 
-@TOUHOU_FEED_COMMANDS.interactions
-async def set_interval(
-    client,
-    event,
-    channel_name: P('str', 'Select the channel', 'channel', min_length = 2, max_length = 100),
-    hours: P('int', 'Interval (hours)', min_value = 0, max_value = 24) = 0,
-    minutes: P('int', 'Interval (minutes)', min_value = 0, max_value = 59) = 0,
-    seconds: P('int', 'Interval (seconds)', min_value = 0, max_value = 59) = 0,
-):
-    """Enables you to set interval by modifying channel slowmode."""
-    guild = event.guild
-    if (guild is None):
-        abort('Guild only command.')
-    
-    if not event.user_permissions & REQUIRED_PERMISSIONS:
-        abort(f'Insufficient permissions.')
-    
-    channel = get_channel_like(client, guild, channel_name)
-    if channel is None:
-        abort(f'Unknown channel: {channel_name}')
-    
-    if not channel.get_cached_permissions_for(client).can_manage_channel:
-        abort('I require `manager channel` permission to do this.')
-    
-    yield
-    
-    old_slowmode = channel.slowmode
-    
-    interval = seconds + minutes * 60 + hours * 3600
-    if interval == 0:
-        interval = DEFAULT_INTERVAL
-        new_slowmode = 0
-    else:
-        if interval > MAX_INTERVAL:
-            interval = MAX_INTERVAL
-        elif interval < MIN_INTERVAL:
-            interval = MIN_INTERVAL
-        
-        new_slowmode = interval // INTERVAL_MULTIPLIER
-    
-    await client.channel_edit(channel, slowmode = new_slowmode)
-    
-    yield Embed(
-        'Channel slowmode edited',
-        channel.mention,
-    ).add_field(
-        f'\u200b',
-        'From',
-    ).add_field(
-        'Interval',
-        (
-            f'```\n'
-            f'{elapsed_time(RelativeDelta(seconds = slowmode_to_interval(old_slowmode)))}\n'
-            f'```'
-        ),
-        inline = True,
-    ).add_field(
-        'Slowmode',
-        (
-            f'```\n'
-            f'{elapsed_time(RelativeDelta(seconds = old_slowmode))}\n'
-            f'```'
-        ),
-        inline = True,
-    ).add_field(
-        f'\u200b',
-        'To',
-    ).add_field(
-        'Interval',
-        (
-            f'```\n'
-            f'{elapsed_time(RelativeDelta(seconds = interval))}\n'
-            f'```'
-        ),
-        inline = True,
-    ).add_field(
-        'Slowmode',
-        (
-            f'```\n'
-            f'{elapsed_time(RelativeDelta(seconds = new_slowmode))}\n'
-            f'```'
-        ),
-        inline = True,
-    )
-
-
-@set_interval.autocomplete('channel')
-async def auto_complete_channel_name(client, event, value):
-    """
-    Auto completes the `channel` parameter of the `touhou-feed set-interval` command.
-    
-    Parameters
-    ----------
-    event : ``InteractionEvent``
-        The received interaction event instance.
-    value : `None`, `str`
-        The value the user typed.
-    
-    Returns
-    -------
-    channel_names : `None`, `list` of `str`
-    """
-    guild = event.guild
-    if guild is None:
-        return None
-    
-    if value is None:
-        channels = get_channels(client, guild)
-        channels.sort(key = _channel_sort_key)
-    else:
-        channels = get_channels_like(client, guild, value)
-    
-    return [channel.name for channel in channels]
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+async def close_message(client, event):
+    if event.user_permissions.can_manage_messages:
+        await client.interaction_component_acknowledge(event)
+        await client.interaction_response_message_delete(event)
 
 
 def create_about_main(client, event):
@@ -523,27 +450,40 @@ def create_about_main(client, event):
     color = client.color_at(event.guild_id)
     
     embed = Embed(
-        f'{client_name} posts images',
+        f'{client_name} touhou-feed',
+        f'{client_name} helps you to have `touhou-feed` in your **forum threads** and **text channels**.',
+        color = color,
+    ).add_field(
+        f'Enable the touhou-feed feature in channels',
         (
-            f'{client_name} helps you to have `touhou-feed` in your forum threads **and** text channels.\n'
-            f'\n'
-            f'To enable the feed feature and let {client_name} know where she should send images.\n'
             f'• For a forum thread, add `touhou-feed` tag in it.\n'
-            f'• For a text channel, put `#touhou-feed` into it\'s topic.\n'
-            f'\n'
-            f'To define which character\'s images should be sent:\n'
+            f'• For a text channel, put `#touhou-feed` into it\'s topic.'
+        ),
+    ).add_field(
+        f'Define which character\'s images should be sent',
+        (
             f'• Name the channel after a character.\n'
             f'• For a forum thread, assign a tag with the character\'s name to it.\n'
             f'• For a text channel, put the character\'s name into the channel\'s topic (like `#koishi`).\n'
-            f'\n'
-            f'To tell {client_name} that you want only one character on a image:\n'
+            f'• If multiple tags (like `#satori` & `#koishi`) are present in one channel then one of them '
+            f'will be randomly chosen each time (so either Satori or Koishi).'
+        ),
+    ).add_field(
+        f'Tell {client_name} that you want only one character on a image',
+        (
             f'• For a forum thread, assign an additional `solo` tag.\n'
             f'• For a text channel, put `#solo` into it\'s topic.\n'
-            f'\n'
-            f'By listing multiple characters, only images showcasing all of character will be polled. '
-            f'If `solo` tag is present this behavior changes and one character will be randomly selected each time.'
+            f'This will apply a solo modifier for each defined character.'
         ),
-        color = color,
+    ).add_field(
+        'Combined tags using the `+` sign',
+        (
+            f'• To apply solo tag only to 1 character you may do `#character+solo` (like `#koishi+solo`)\n'
+            f'• To receive a combination of characters at once, use `#character+character` syntax '
+            f'(like `#koishi+satori`).\n'
+            f'• If multiple group tags (like `#satori+koishi` & `#kokoro-solo`) are present then one group will be '
+            f'selected randomly every time (so either Satori and Koishi together **or** Kokoro alone).'
+        ),
     )
     
     return InteractionResponse(
@@ -574,7 +514,7 @@ def create_about_examples(client, event):
         color = color,
     ).add_field(
         'Komeiji sisters',
-        'This setup will post the komeiji sisters.',
+        'This setup will send komeiji sisters.',
     ).add_field(
         'Channel name',
         (
@@ -589,14 +529,13 @@ def create_about_examples(client, event):
         (
             f'```\n'
             f'touhou-feed\n'
-            f'koishi\n'
-            f'satori\n'
+            f'koishi+satori\n'
             f'```'
         ),
         inline = True,
     ).add_field(
         'Mokou',
-        'This setup will post Mokou solo pictures (They are all hot).'
+        'This setup will send Mokou solo pictures (They are all hot).'
     ).add_field(
         'Channel name',
         (
@@ -612,6 +551,31 @@ def create_about_examples(client, event):
             f'\n'
             f'touhou-feed\n'
             f'solo\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Cuties',
+        'This setup will send a Koishi, Flandre and Kokoro pictures with 2 hour interval.'
+    ).add_field(
+        'Channel name',
+        (
+            f'```\n'
+            f'N/A\n'
+            f'```'
+            f'*anything allowed'
+        ),
+        inline = True,
+    ).add_field(
+        'Tags',
+        (
+            f'```\n'
+            f'\n'
+            f'touhou-feed\n'
+            f'koishi\n'
+            f'flandre\n'
+            f'kokoro\n'
+            f'interval:2h\n'
             f'```'
         ),
         inline = True,
@@ -643,14 +607,20 @@ def create_about_interval(client, event):
     embed = Embed(
         'Touhou-feed interval',
         (
-            f'The feed interval is calculated from the thread\'s slowmode.\n'
+            f'The feed interval is determined based on tags.\n'
             f'\n'
-            f'If a channel has no slowmode, the default interval is **{DEFAULT_DELTA}.**\n'
+            f'If a channel has no interval determining tag, then **{DEFAULT_DELTA}** is used.\n'
             f'\n'
-            f'If the channel has slowmode, it is multiplied by **{INTERVAL_MULTIPLIER}**. '
-            f'This is to prevent complete blockage of the channel, and allow other users to post as well.\n'
+            f'To determine feed interval of a channel use the `#interval:` tag with the intervallum following it after.\n'
             f'\n'
-            f'Minimum interval is **{MIN_DELTA}** and max is **{MAX_DELTA}**.'
+            f'**Examples:**'
+            f'```'
+            f'#interval:12h -> 12 hours\n'
+            f'#interval:6h30m -> 6 hours and 30 minutes\n'
+            f'#interval:16s14h2m -> 14 hours, 2 minutes and 16 seconds\n'
+            f'```\n'
+            f'\n'
+            f'Minimum interval is **{MIN_DELTA}** and maximum is **{MAX_DELTA}**.'
         ),
         color = color,
     )

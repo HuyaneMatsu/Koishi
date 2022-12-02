@@ -27,6 +27,9 @@ class TouhouHandlerKey:
     def __init__(self, character, *characters, solo = True):
         characters = frozenset((character, *characters))
         
+        if len(characters) > 1:
+            solo = False
+        
         hash_value = hash(characters) ^ solo
         
         self.characters = characters
@@ -65,6 +68,14 @@ class TouhouHandlerKey:
             return False
         
         return True
+    
+    
+    def apply_solo_preference(self):
+        """
+        Applies solo preference if applicable.
+        """
+        if len(self.characters) == 1:
+            self.solo = True
     
     
     def get_handler(self):
