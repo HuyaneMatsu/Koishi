@@ -15,4 +15,4 @@ TAG_REQUIRED_RP = re.compile(f'(?:\\s|^)#{TAG_NAME_REQUIRED}', re.M | re.U)
 TAG_ITER_RP = re.compile(f'(?:\\s|^)#([\\w\\-\\_\\+\\:]+)', re.M | re.U)
 
 INTERVAL_RP = re.compile(f'interval(?:lum)?\\s*\\:((?:\\s*\\d+\\s*[hms])+)')
-INTERVAL_UNIT_RP = re.compile('0*?(\\d)\\s*([hms])')
+INTERVAL_UNIT_RP = re.compile('0*?(\\d+)\\s*([hms])')
