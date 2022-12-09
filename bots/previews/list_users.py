@@ -397,7 +397,7 @@ SERIALIZATION_MODES = ['koishi.json', 'discord.json', 'koishi.csv', 'discord.csv
 async def list_users(
     client,
     event,
-    serialisation: (SERIALIZATION_MODES, 'Select on which mode I should serialise the data.'),
+    serialisation: (SERIALIZATION_MODES, 'Select on which mode I should serialize the data.'),
     offset : P('int', 'User listing offset.', min_value = 0) = 0,
     limit: P('int', 'The maximal amount of users to list.', min_value = 1, max_value = 1000) = 1000,
 ):

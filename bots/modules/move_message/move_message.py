@@ -4,7 +4,7 @@ from hata import Client, KOKORO, Permission
 from scarletio import Task, WaitTillExc
 
 from .constants import ALLOWED_GUILDS
-from .helpers import check_move_permissions, get_message_and_files, get_webhook, message_delete
+from .helpers import check_move_permissions, create_webhook_message, get_message_and_files, get_webhook, message_delete, get_message
 
 
 SLASH_CLIENT: Client
@@ -12,7 +12,7 @@ SLASH_CLIENT: Client
 
 @SLASH_CLIENT.interactions(
     guild = ALLOWED_GUILDS,
-    required_permissions = Permission().update_by_keys(manage_messages=True),
+    required_permissions = Permission().update_by_keys(manage_messages = True),
 )
 async def move_message(
     client,
@@ -30,6 +30,8 @@ async def move_message(
         channel_id = channel.id
         thread_id = 0
     
+    message = await get_message(client, channel, message_id)
+    
     get_message_and_files_task = Task(get_message_and_files(client, event.channel, message_id), KOKORO)
     get_webhook_task = Task(get_webhook(client, channel_id), KOKORO)
     
@@ -37,7 +39,7 @@ async def move_message(
         [
             get_message_and_files_task,
             get_webhook_task,
-            Task(client.interaction_application_command_acknowledge(event, show_for_invoking_user_only=True), KOKORO)
+            Task(client.interaction_application_command_acknowledge(event, show_for_invoking_user_only = True), KOKORO)
         ],
         KOKORO,
     )
@@ -56,18 +58,10 @@ async def move_message(
             webhook = result
             continue
     
-    await client.webhook_message_create(
-        webhook,
-        message.content,
-        embed = message.clean_embeds,
-        file = files,
-        allowed_mentions = None,
-        name = message.author.name_at(event.guild_id),
-        avatar_url = message.author.avatar_url_at(event.guild_id),
-        thread = thread_id,
-    )
-    
-    files = None
+    try:
+        await create_webhook_message(client, webhook, message, thread_id, files)
+    finally:
+        files = None
     
     Task(message_delete(client, message), KOKORO)
     

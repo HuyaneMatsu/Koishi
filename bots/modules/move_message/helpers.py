@@ -6,6 +6,31 @@ from scarletio import Task, WaitTillExc, sleep
 
 
 async def get_message(client, channel, message_id):
+    """
+    Requests the message for the given identifier.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The respective client.
+    channel : ``Channel``
+        The channel where the message is.
+    message_id : `int`
+        The message's id to request.
+    
+    Returns
+    -------
+    message : ``Message``
+    
+    Raises
+    ------
+    ConnectionError
+        No internet connection
+    DiscordException
+        Client removed.
+    """
     try:
         message = await client.message_get((channel.id, message_id))
     except DiscordException as err:
@@ -18,11 +43,46 @@ async def get_message(client, channel, message_id):
 
 
 async def get_attachment(client, attachment):
+    """
+    Requests the given attachment's file.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The respective client.
+    attachment : ``Attachment``
+        The attachment to request.
+    
+    Returns
+    -------
+    attachment : ``Attachment``
+        The requested attachment to reproduce their order.
+    file : `bytes`
+        The requested file.
+    """
     file = await client.download_attachment(attachment)
     return attachment, file
 
 
 async def get_attachments(client, attachments):
+    """
+    Requests the given attachments.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The respective client.
+    attachments : `tuple` of ``Attachment``
+        The attachments to request.
+    
+    Returns
+    -------
+    attachments : `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
+    """
     tasks = []
     for attachment in attachments:
         tasks.append(Task(get_attachment(client, attachment), KOKORO))
@@ -44,6 +104,33 @@ async def get_attachments(client, attachments):
 
 
 async def get_message_and_files(client, channel, message_id):
+    """
+    Gets the given message by their identifier and requests it's attachments too.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The respective client.
+    channel : ``Channel``
+        The channel where the message is.
+    message_id : `int`
+        The message's id to request.
+    
+    
+    Returns
+    -------
+    message : ``Message``
+    files : `None`, `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
+    
+    Raises
+    ------
+    ConnectionError
+        No internet connection
+    DiscordException
+        Client removed.
+    """
     message = await get_message(client, channel, message_id)
     files = await get_files(client, message)
     
@@ -51,6 +138,20 @@ async def get_message_and_files(client, channel, message_id):
 
 
 async def get_webhook(client, channel_id):
+    """
+    Gets the optimal webhook to use for the given channel by it's identifier.
+    
+    This function is a coroutine.
+    
+    client : ``Client``
+        The respective client.
+    channel_id : `int`
+        The respective channel's identifier.
+    
+    Returns
+    -------
+    webhook : ``Webhook``
+    """
     executor_webhook = await client.webhook_get_own_channel(channel_id)
     if (executor_webhook is None):
         executor_webhook = await client.webhook_create(channel_id, 'Koishi hook')
@@ -59,6 +160,18 @@ async def get_webhook(client, channel_id):
 
 
 async def message_delete(client, message):
+    """
+    Deletes the given message with the client.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The respective client.
+    message : ``Message``
+        The message to delete.
+    """
     try:
         await client.message_delete(message)
     except DiscordException as err:
@@ -72,6 +185,23 @@ async def message_delete(client, message):
 
 
 async def get_files(client, message):
+    """
+    Requests the files of the given messages.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The respective client.
+    message : ``Message``
+        The message to the files of.
+    
+    Returns
+    -------
+    files : `None`, `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
+        Files of the message.
+    """
     attachments = message.attachments
     if (attachments is None):
         files = None
@@ -82,6 +212,20 @@ async def get_files(client, message):
 
 
 def check_move_permissions(client, event, channel, require_admin_permissions):
+    """
+    Checks the user's permissions whether the user can move messages.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The respective client who is moving the messages.
+    event : ``InteractionEvent``
+        The received interaction event.
+    channel : ``Channel``
+        The target channel of moving.
+    require_admin_permissions : `bool`
+        Whether we should require admin permission and not manage messages.
+    """
     user_permissions = event.user_permissions
     if require_admin_permissions:
         if (not user_permissions.can_administrator):
@@ -99,7 +243,7 @@ def check_move_permissions(client, event, channel, require_admin_permissions):
         return abort('I need manage webhook permission in the target channel to execute this this command.')
 
 
-async def _create_webhook_message(client, webhook, message, guild_id, thread_id):
+async def create_webhook_message(client, webhook, message, thread_id, files):
     """
     Sends the given message with the given webhook.
     
@@ -113,13 +257,13 @@ async def _create_webhook_message(client, webhook, message, guild_id, thread_id)
         The webhook to send the message with.
     message : ``Message``
         The message to send.
-    guild_id : `int`
-        The respective guild's identifier.
     thread_id : `int`
         Thread identifier to send if sending to a thread if applicable.
+    files : `None`, `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
+        Files of the message.
     """
-    name = message.author.name_at(guild_id)
-    avatar_url = message.author.avatar_url_at(guild_id)
+    name = _get_user_name(message)
+    avatar_url = message.author.avatar_url_at(message.guild_id)
     
     content = message.content
     if (content is not None):
@@ -130,15 +274,32 @@ async def _create_webhook_message(client, webhook, message, guild_id, thread_id)
             
             content = content[2000:]
     
-    files = await get_files(client, message)
-    
     try:
         await _repeat_create_webhook_message(
             client, webhook, content, message.clean_embeds, files, name, avatar_url, thread_id,
         )
-    finally:
+    except:
         # Unallocate files if any exception occurs.
         files = None
+        raise
+
+
+def _get_user_name(message):
+    """
+    Gets the message's author's name.
+    
+    Parameters
+    ----------
+    message : ``Message``
+        The respective message.
+    
+    Returns
+    -------
+    name : `str`
+    """
+    name = message.author.name_at(message.guild_id)
+    name = name[:80]
+    return name
 
 
 async def _repeat_create_webhook_message(client, webhook, content, embeds, files, name, avatar_url, thread_id):

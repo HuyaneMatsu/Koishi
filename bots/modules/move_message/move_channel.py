@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client, Permission
 
 from .constants import ALLOWED_GUILDS
-from .helpers import check_move_permissions, get_webhook, _create_webhook_message
+from .helpers import check_move_permissions, create_webhook_message, get_files, get_webhook
 
 
 SLASH_CLIENT : Client
@@ -47,4 +47,10 @@ async def move_channel(
             after_id = messages[0].id
         
         for message in reversed(messages):
-            await _create_webhook_message(client, webhook, message, guild_id, thread_id)
+            files = await get_files(client, message)
+            try:
+                await create_webhook_message(client, webhook, message, thread_id, files)
+            except:
+                # Unallocate files if exception occurs
+                files = None
+                raise
