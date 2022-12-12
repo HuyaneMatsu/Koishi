@@ -1,14 +1,14 @@
 __all__ = ()
 
-import json, re
+import json
 from math import ceil
 from functools import partial as partial_func
 from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
 from random import choice
 
-from hata import Color, Embed, Client, DiscordException, now_as_id, GuildFeature, \
-    elapsed_time, Status, BUILTIN_EMOJIS, id_to_datetime, ERROR_CODES, cchunkify, ICON_TYPE_NONE, KOKORO, \
+from hata import Color, Embed, Client, DiscordException, GuildFeature, \
+    elapsed_time, Status, BUILTIN_EMOJIS, ERROR_CODES, cchunkify, ICON_TYPE_NONE, KOKORO, \
     DATETIME_FORMAT_CODE, parse_color, Permission, escape_markdown
 from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from scarletio import WaitTillExc, ReuBytesIO
@@ -253,12 +253,6 @@ async def welcome_screen_(client, event):
     yield embed
 
 
-@SLASH_CLIENT.interactions(is_global = True)
-async def now_as_id_(client, event):
-    """Returns the current time as discord snowflake."""
-    return str(now_as_id())
-
-
 # Koishi user caching will be disabled, so this command would not work.
 '''
 def shared_guilds_pagination_check(user, event):
@@ -312,137 +306,6 @@ async def shared_guilds(client, event):
     
     await Pagination(client, event, embeds, check = partial_func(shared_guilds_pagination_check, user))
 '''
-
-@SLASH_CLIENT.interactions(name = 'user', is_global = True)
-async def user_(client, event,
-    user: ('user', 'Check out someone other user?') = None,
-):
-    """Shows some information about your or about the selected user."""
-    if user is None:
-        user = event.user
-    
-    guild = event.guild
-    
-    embed = Embed(
-        user.full_name,
-    ).add_thumbnail(
-        user.avatar_url,
-    )
-    
-    created_at = user.created_at
-    embed.add_field(
-        'User Information',
-        (
-            f'Created: {created_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(created_at)} ago*]\n'
-            f'Profile: {user:m}\n'
-            f'ID: {user.id}'
-        ),
-    )
-    
-    guild_profile = user.get_guild_profile_for(guild)
-    
-    if guild_profile is None:
-        if user.avatar_type is ICON_TYPE_NONE:
-            color = user.default_avatar.color
-        else:
-            color = user.avatar_hash & 0xFFFFFF
-        embed.color = color
-        
-        components = Row(
-            Button('Show avatar', custom_id = f'user_info.{user.id}.avatar'),
-            Button('Show banner', custom_id = f'user_info.{user.id}.banner'),
-        )
-    
-    else:
-        embed.color = user.color_at(guild)
-        roles = guild_profile.roles
-        if roles is None:
-            roles = '*none*'
-        else:
-            roles = ', '.join(role.mention for role in reversed(roles))
-        
-        text = []
-        if guild_profile.nick is not None:
-            text.append(f'Nick: {guild_profile.nick}')
-        
-        
-        # Joined at can be `None` if the user is in lurking mode.
-        joined_at = guild_profile.joined_at
-        if joined_at is not None:
-            text.append(f'Joined: {joined_at:{DATETIME_FORMAT_CODE}} [*{elapsed_time(joined_at)} ago*]')
-        
-        boosts_since = guild_profile.boosts_since
-        if (boosts_since is not None):
-            text.append(f'Booster since: {boosts_since:{DATETIME_FORMAT_CODE}} [*{elapsed_time(boosts_since)}*]')
-        
-        timed_out_until = guild_profile.timed_out_until
-        if (timed_out_until is not None) and (timed_out_until > datetime.utcnow()):
-            text.append(f'Timed out until: {timed_out_until:{DATETIME_FORMAT_CODE}} [*{elapsed_time(timed_out_until)}*]')
-        
-        text.append(f'Roles: {roles}')
-        embed.add_field('In guild profile', '\n'.join(text))
-        
-        components = Row(
-            Button('Show avatar', custom_id = f'user_info.{user.id}.avatar'),
-            Button('Show in-guild avatar', custom_id = f'user_info.{user.id}.in-guild avatar'),
-            Button('Show banner', custom_id = f'user_info.{user.id}.banner'),
-        )
-    
-    return InteractionResponse(embed = embed, components = components)
-
-
-@SLASH_CLIENT.interactions(custom_id = re.compile('user_info\.(\d+)\.(avatar|banner|in-guild avatar)'))
-async def show_user_icon(client, event, user_id, icon_type):
-    user_id = int(user_id)
-    
-    yield
-    
-    user = await client.user_get(user_id, force_update=True)
-    
-    if icon_type == 'avatar':
-        icon_url = user.avatar_url_as(size = 4096)
-        
-        if user.avatar:
-            color = user.avatar_hash & 0xffffff
-        else:
-            color = user.default_avatar.color
-    
-    elif icon_type == 'banner':
-        icon_url = user.banner_url_as(size = 4096)
-        
-        if icon_url is None:
-            color = None
-        else:
-            color = user.banner_hash & 0xffffff
-    
-    elif icon_type == 'in-guild avatar':
-        icon_url = user.avatar_url_for_as(event.guild_id, size = 4096)
-        if icon_url is None:
-            color = None
-        else:
-            color = user.get_guild_profile_for(event.guild_id).avatar_hash & 0xffffff
-    
-    else:
-        icon_url = None
-        color = None
-    
-    embed = Embed(
-        f'{user:f}\'s {icon_type}',
-        url = icon_url,
-        color = color,
-    )
-    
-    if icon_url is None:
-        embed.add_footer(
-            f'The user has no {icon_type}.',
-        )
-    else:
-        embed.add_image(
-            icon_url,
-        )
-    
-    await client.interaction_followup_message_create(event, embed = embed, show_for_invoking_user_only=True)
-
 
 
 USER_PER_PAGE = 16
@@ -588,48 +451,6 @@ async def in_role(client, event,
     await Pagination(client, event, pages, check = partial_func(in_role_pagination_check, event.user))
 
 
-AVATAR_TYPE_LOCAL = 'local'
-AVATAR_TYPE_GUILD = 'guild'
-AVATAR_TYPE_GLOBAL = 'global'
-AVATAR_TYPE_DEFAULT = 'default'
-
-AVATAR_CHOICES = [
-    AVATAR_TYPE_LOCAL,
-    AVATAR_TYPE_GUILD,
-    AVATAR_TYPE_GLOBAL,
-    AVATAR_TYPE_DEFAULT,
-]
-
-@SLASH_CLIENT.interactions(is_global = True)
-async def avatar(
-    event,
-    user : ('user', 'Choose a user!') = None,
-    type_ : (AVATAR_CHOICES, 'Which avatar of the user?') = AVATAR_TYPE_LOCAL,
-):
-    """Shows your or the chosen user's avatar."""
-    if user is None:
-        user = event.user
-    
-    if type_ == AVATAR_TYPE_LOCAL:
-        url = user.avatar_url_at_as(event.guild_id, size = 4096)
-    
-    elif type_ == AVATAR_TYPE_GUILD:
-        url = user.avatar_url_for_as(event.guild_id, size = 4096)
-    
-    elif type_ == AVATAR_TYPE_GLOBAL:
-        url = user.avatar_url_as(size = 4096)
-    
-    else:
-        url = user.default_avatar_url
-    
-    if user.avatar:
-        color = user.avatar_hash & 0xffffff
-    else:
-        color = user.default_avatar.color
-    
-    return Embed(f'{user:f}\'s {type_} avatar', color = color, url = url).add_image(url)
-
-
 @SLASH_CLIENT.interactions(is_global = True, target = 'user')
 async def status_(user):
     status = user.status
@@ -660,16 +481,6 @@ async def status_(user):
     
     
     return embed
-
-
-@SLASH_CLIENT.interactions(name = 'id-to-time', is_global = True)
-async def id_to_datetime_(client, event,
-    snowflake: ('int', 'Id please!'),
-):
-    """Converts the given Discord snowflake to time."""
-    time = id_to_datetime(snowflake)
-    return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'
-
 
 
 GUILD_ICON_CUSTOM_ID_ICON = 'guild_icon.icon'

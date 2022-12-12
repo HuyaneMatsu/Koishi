@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import Client, parse_emoji
+from hata import Client, DATETIME_FORMAT_CODE, elapsed_time, id_to_datetime, now_as_id, parse_emoji
 from hata.ext.slash import abort
 
 
@@ -15,7 +15,9 @@ ID_GETTER_COMMANDS = SLASH_CLIENT.interactions(
 
 
 @ID_GETTER_COMMANDS.interactions
-async def user_(client, event,
+async def user_(
+    client,
+    event,
     user: ('user', 'Who\'s id do you want to see?') = None,
 ):
     """Returns your or the selected user's identifier."""
@@ -26,7 +28,9 @@ async def user_(client, event,
 
 
 @ID_GETTER_COMMANDS.interactions
-async def channel_(client, event,
+async def channel_(
+    client,
+    event,
     channel: ('channel', 'Which channel\'s id do you want to see?') = None,
 ):
     """Returns this or the selected channel's identifier."""
@@ -47,7 +51,9 @@ async def guild_(client, event):
 
 
 @ID_GETTER_COMMANDS.interactions
-async def role_(client, event,
+async def role_(
+    client,
+    event,
     role: ('role', 'Which role\'s id do you want to see?') = None,
 ):
     """Returns this or the guild\'s default role's identifier."""
@@ -65,8 +71,10 @@ async def role_(client, event,
 
 
 @ID_GETTER_COMMANDS.interactions
-async def sticker_(client, event,
-    sticker_name: ('str', 'Select a sticker', 'sticker'),
+async def sticker_(
+    client,
+    event,
+    sticker_name: (str, 'Select a sticker', 'sticker'),
 ):
     guild = event.guild
     if guild is None:
@@ -95,8 +103,10 @@ async def autocomplete_sticker(client, event, value):
 
 
 @ID_GETTER_COMMANDS.interactions
-async def emoji_(client, event,
-    emoji_name: ('str', 'Select an emoji', 'emoji'),
+async def emoji_(
+    client,
+    event,
+    emoji_name: (str, 'Select an emoji', 'emoji'),
 ):
     while True:
         emoji = parse_emoji(emoji_name)
@@ -123,6 +133,7 @@ async def emoji_(client, event,
     
     
     return str(emoji.id)
+
 
 @emoji_.autocomplete('emoji')
 async def autocomplete_emoji(client, event, emoji_name):
@@ -157,3 +168,18 @@ async def autocomplete_emoji(client, event, emoji_name):
     
     emojis = guild.get_emojis_like(emoji_name)
     return sorted(emoji.name for emoji in emojis)
+
+
+@ID_GETTER_COMMANDS.interactions
+async def now():
+    """Returns the current time as discord snowflake."""
+    return str(now_as_id())
+
+
+@ID_GETTER_COMMANDS.interactions
+async def to_time(
+    snowflake: ('int', 'Id please!'),
+):
+    """Converts the given Discord snowflake to time."""
+    time = id_to_datetime(snowflake)
+    return f'{time:{DATETIME_FORMAT_CODE}}\n{elapsed_time(time)} ago'

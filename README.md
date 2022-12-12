@@ -89,8 +89,8 @@ And much more!
 
 - Utility
     
-    `avatar` • `calc` • `choose` • `create-activity` • `color` • `guild-info` • `guild-icon` • `id` •
-    `id-to-datetime` • `now-as-id` • `ping` • `rawr` • `sticker` • `sticker-info` • `role-info` • `snipe` •
+    `calc` • `choose` • `create-activity` • `color` • `guild-info` • `guild-icon` • `id` •
+    `ping` • `rawr` • `sticker` • `sticker-info` • `role-info` • `snipe` •
     `snipe-emojis` • `snipe-reactions` • `snipe-stickers` • `style-text` • `user` • `welcome-screen`
 
 - Waifus

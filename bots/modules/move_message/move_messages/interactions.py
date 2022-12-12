@@ -6,10 +6,9 @@ from hata.ext.slash import abort
 from ..constants import ALLOWED_GUILDS
 from ..helpers import check_move_permissions
 
-from .components import MESSAGE_MOVER_ADD_BY_ID_FORM
 from .constants import (
     CUSTOM_ID_MESSAGE_MOVER_ADD_BY_ID, CUSTOM_ID_MESSAGE_MOVER_CANCEL, CUSTOM_ID_MESSAGE_MOVER_CLOSE,
-    CUSTOM_ID_MESSAGE_MOVER_SUBMIT, MESSAGE_MOVER_CONTEXTS
+    CUSTOM_ID_MESSAGE_MOVER_SUBMIT, MESSAGE_MOVER_ADD_BY_ID_FORM, MESSAGE_MOVER_CONTEXTS
 )
 from .context import MessageMoverContext
 

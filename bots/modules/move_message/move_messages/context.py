@@ -5,9 +5,10 @@ from scarletio import Future, LOOP_TIME, Task, WaitTillAll
 
 from ..helpers import get_files, get_webhook, message_delete
 
-from .components import MESSAGE_MOVER_COMPONENTS_AFTERLIFE, MESSAGE_MOVER_COMPONENTS_ENABLED
-from .constants import MESSAGE_MOVER_CONTEXTS, MESSAGE_MOVER_CONTEXT_TIMEOUT, MESSAGE_MOVER_SUBMITTING_EMOJI
-
+from .constants import (
+    MESSAGE_MOVER_COMPONENTS_AFTERLIFE, MESSAGE_MOVER_COMPONENTS_ENABLED, MESSAGE_MOVER_CONTEXTS,
+    MESSAGE_MOVER_CONTEXT_TIMEOUT, MESSAGE_MOVER_SUBMITTING_EMOJI
+)
 
 MESSAGE_MOVER_FINALIZATION_REASON_NONE = 0
 MESSAGE_MOVER_FINALIZATION_REASON_CANCELLED = 1
@@ -275,4 +276,3 @@ class MessageMoverContext:
         files = None
         
         Task(message_delete(self.client, message), KOKORO)
-

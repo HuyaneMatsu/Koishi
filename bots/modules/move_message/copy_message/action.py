@@ -7,7 +7,7 @@ from hata import Client, KOKORO, parse_all_emojis
 from scarletio import Task, WaitTillExc
 
 from ..constants import ALLOWED_GUILDS, ROLE__MEDIA_SORTER
-from ..helpers import get_message_and_files, get_webhook
+from ..helpers import create_webhook_message, get_message_and_files, get_webhook
 
 
 SLASH_CLIENT: Client
@@ -121,18 +121,10 @@ async def reaction_add(client, event):
                 webhook = result
                 continue
         
-        await client.webhook_message_create(
-            webhook,
-            message.content,
-            embed = message.clean_embeds,
-            file = files,
-            allowed_mentions = None,
-            name = message.author.name_at(guild.id),
-            avatar_url = message.author.avatar_url_at(guild.id),
-            thread = thread_id,
-        )
-        
-        files = None
+        try:
+            await create_webhook_message(client, webhook, message, thread_id, files)
+        finally:
+            files = None
     
     except:
         ACTION_QUEUE.remove(key)

@@ -37,8 +37,8 @@ if MARISA_MODE:
                 'Feed the cat!': 'Owner hungry!'
             },
         },
-        assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
-        enforce_application_command_permissions = True,
+        # assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
+        # enforce_application_command_permissions = True,
     )
     
     add_default_plugin_variables(Marisa = Marisa, COMMAND_CLIENT = Marisa, SLASH_CLIENT = Marisa)

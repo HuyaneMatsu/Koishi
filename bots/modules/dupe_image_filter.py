@@ -370,7 +370,7 @@ class DupeImageFilter:
             'Elapsed time',
             (
                 f'```\n'
-                f'{seconds_to_elapsed_time(LOOP_TIME()-self.started_at)}\n'
+                f'{seconds_to_elapsed_time(LOOP_TIME() - self.started_at)}\n'
                 f'```'
             ),
         )
