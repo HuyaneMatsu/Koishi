@@ -1,25 +1,25 @@
 __all__ = ()
 
 import json
-from math import ceil
-from functools import partial as partial_func
-from colorsys import rgb_to_hsv, rgb_to_yiq
 from datetime import datetime, timedelta
+from functools import partial as partial_func
+from math import ceil
 from random import choice
 
-from hata import Color, Embed, Client, DiscordException, GuildFeature, \
-    elapsed_time, Status, BUILTIN_EMOJIS, ERROR_CODES, cchunkify, ICON_TYPE_NONE, KOKORO, \
-    DATETIME_FORMAT_CODE, parse_color, Permission, escape_markdown
+from dateutil.relativedelta import relativedelta
+from hata import (
+    BUILTIN_EMOJIS, Client, Color, DATETIME_FORMAT_CODE, Embed, ICON_TYPE_NONE, KOKORO, Permission, Status, cchunkify,
+    elapsed_time, escape_markdown, parse_color
+)
 from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
-from scarletio import WaitTillExc, ReuBytesIO
+from hata.ext.slash import InteractionResponse, abort
 from hata.ext.slash.menus import Pagination
-from hata.ext.slash import abort, InteractionResponse, Button, Row
+from scarletio import ReuBytesIO, WaitTillExc
 
 from PIL import Image as PIL
-from dateutil.relativedelta import relativedelta
-
-from bot_utils.tools import Pagination10step
 from bot_utils.constants import GUILD__SUPPORT
+from bot_utils.tools import Pagination10step
+from colorsys import rgb_to_hsv, rgb_to_yiq
 
 UTILITY_COLOR = Color(0x5dc66f)
 
@@ -198,59 +198,6 @@ async def roles_(client, event):
         abort('I require `send messages` and `add reactions` permissions to execute this command.')
     
     await Pagination10step(client, event, RoleCache(guild))
-
-
-@SLASH_CLIENT.interactions(is_global = True)
-async def welcome_screen_(client, event):
-    """Shows the guild's welcome screen."""
-    guild = event.guild
-    if guild is None:
-        abort('Guild only command.')
-    
-    if (client.get_guild_profile_for(guild) is None):
-        abort('I must be in the guild to execute this command')
-    
-    if GuildFeature.welcome_screen_enabled not in guild.features:
-        welcome_screen = None
-    else:
-        yield
-        
-        try:
-            welcome_screen = await client.welcome_screen_get(guild)
-        except DiscordException as err:
-            # If the guild's settings were changed meanwhile, this can drop up.
-            if err.code == ERROR_CODES.unknown_guild_welcome_screen:
-                welcome_screen = None
-            
-            else:
-                raise
-    
-    if welcome_screen is None:
-        yield Embed(description = f'**{guild.name}** *has no welcome screen enabled*.')
-        return
-    
-    
-    description = welcome_screen.description
-    if (description is None):
-        description = '*TOP THINGS TO DO HERE*'
-    else:
-        description = f'{welcome_screen.description}\n\n*TOP THINGS TO DO HERE*'
-    
-    embed = Embed(f'Welcome to **{guild.name}**', description)
-    
-    icon_url = guild.icon_url
-    if (icon_url is not None):
-        embed.add_thumbnail(icon_url)
-    
-    welcome_channels = welcome_screen.welcome_channels
-    if (welcome_channels is not None):
-        for welcome_channel in welcome_channels:
-            embed.add_field(
-                f'{welcome_channel.emoji} {welcome_channel.description}',
-                f'#{welcome_channel.channel:d}',
-            )
-    
-    yield embed
 
 
 # Koishi user caching will be disabled, so this command would not work.
@@ -481,135 +428,6 @@ async def status_(user):
     
     
     return embed
-
-
-GUILD_ICON_CUSTOM_ID_ICON = 'guild_icon.icon'
-GUILD_ICON_CUSTOM_ID_BANNER = 'guild_icon.banner'
-GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH = 'guild_icon.discovery_splash'
-GUILD_ICON_CUSTOM_ID_INVITE_SPLASH = 'guild_icon.invite_splash'
-
-
-BUTTON_ICON = Button('Icon', custom_id = GUILD_ICON_CUSTOM_ID_ICON)
-BUTTON_BANNER = Button('Banner', custom_id = GUILD_ICON_CUSTOM_ID_BANNER)
-BUTTON_DISCOVERY_SPLASH = Button('Discovery splash', custom_id = GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
-BUTTON_INVITE_SPLASH = Button('Invite splash', custom_id = GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
-
-
-GUILD_ICON_ICON_COMPONENTS = Row(
-    BUTTON_ICON.copy_with(enabled=False),
-    BUTTON_BANNER,
-    BUTTON_DISCOVERY_SPLASH,
-    BUTTON_INVITE_SPLASH,
-)
-
-GUILD_ICON_BANNER_COMPONENTS = Row(
-    BUTTON_ICON,
-    BUTTON_BANNER.copy_with(enabled=False),
-    BUTTON_DISCOVERY_SPLASH,
-    BUTTON_INVITE_SPLASH,
-)
-
-GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS = Row(
-    BUTTON_ICON,
-    BUTTON_BANNER,
-    BUTTON_DISCOVERY_SPLASH.copy_with(enabled=False),
-    BUTTON_INVITE_SPLASH,
-)
-
-GUILD_ICON_INVITE_SPLASH_COMPONENTS = Row(
-    BUTTON_ICON,
-    BUTTON_BANNER,
-    BUTTON_DISCOVERY_SPLASH,
-    BUTTON_INVITE_SPLASH.copy_with(enabled=False),
-)
-
-
-def create_embed(guild, name, url, hash_value):
-    if url is None:
-        color = (guild.id >> 22) & 0xFFFFFF
-        embed = Embed(f'{guild.name} has no {name}', color = color)
-    else:
-        color = hash_value & 0xFFFFFF
-        embed = Embed(f'{guild.name}\'s {name}', color = color, url = url).add_image(url)
-    
-    return embed
-
-
-GUILD_ICON_CHOICES = [
-    ('Icon'             , 'icon'             ),
-    ('Banner'           , 'banner'           ),
-    ('Discovery-splash' , 'discovery_splash' ),
-    ('Invite-splash'    , 'invite_splash'    ),
-]
-
-@SLASH_CLIENT.interactions(is_global = True, allow_in_dm = False)
-async def guild_icon(event,
-    choice: (GUILD_ICON_CHOICES, 'Which icon of the guild?' ) = 'icon',
-):
-    """Shows the guild's icon."""
-    guild = event.guild
-    if (guild is None) or guild.partial:
-        abort('The command unavailable in guilds, where the application\'s bot is not in.')
-    
-    if choice == 'icon':
-        name = 'icon'
-        url = guild.icon_url_as(size = 4096)
-        hash_value = guild.icon_hash
-        components = GUILD_ICON_ICON_COMPONENTS
-    
-    elif choice == 'banner':
-        name = 'banner'
-        url = guild.banner_url_as(size = 4096)
-        hash_value = guild.banner_hash
-        components = GUILD_ICON_BANNER_COMPONENTS
-    
-    elif choice == 'discovery_splash':
-        name = 'discovery splash'
-        url = guild.discovery_splash_url_as(size = 4096)
-        hash_value = guild.discovery_splash_hash
-        components = GUILD_ICON_ICON_COMPONENTS
-    
-    else:
-        name = 'invite splash'
-        url = guild.invite_splash_url_as(size = 4096)
-        hash_value = guild.invite_splash_hash
-        components = GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS
-    
-    embed = create_embed(guild, name, url, hash_value)
-    return InteractionResponse(embed = embed, components = components)
-
-
-@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_ICON)
-async def handle_guild_icon(event):
-    guild = event.guild
-    if (guild is not None):
-        embed = create_embed(guild, 'icon', guild.icon_url_as(size = 4096), guild.icon_hash)
-        return InteractionResponse(embed = embed, components = GUILD_ICON_ICON_COMPONENTS)
-
-
-@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_BANNER)
-async def handle_guild_banner(event):
-    guild = event.guild
-    if (guild is not None):
-        embed = create_embed(guild, 'banner', guild.banner_url_as(size = 4096), guild.banner_hash)
-        return InteractionResponse(embed = embed, components = GUILD_ICON_BANNER_COMPONENTS)
-
-
-@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_DISCOVERY_SPLASH)
-async def handle_guild_discovery_splash(event):
-    guild = event.guild
-    if (guild is not None):
-        embed = create_embed(guild, 'discovery splash', guild.discovery_splash_url_as(size = 4096),
-            guild.discovery_splash_hash)
-        return InteractionResponse(embed = embed, components = GUILD_ICON_DISCOVERY_SPLASH_COMPONENTS)
-    
-
-@SLASH_CLIENT.interactions(custom_id = GUILD_ICON_CUSTOM_ID_INVITE_SPLASH)
-async def handle_guild_invite_splash(event):
-    guild = event.guild
-    if (guild is not None):
-        embed = create_embed(guild, 'invite splash', guild.invite_splash_url_as(size = 4096), guild.invite_splash_hash)
-        return InteractionResponse(embed = embed, components = GUILD_ICON_INVITE_SPLASH_COMPONENTS)
 
 
 def add_user_field(embed, index, joined_at, user):

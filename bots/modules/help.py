@@ -611,9 +611,9 @@ CATEGORIES = (
         'Utility',
         EMOJI_MAGIC_WAND,
         (
-            'calc', 'choose', 'create-activity', 'color', 'format-time', 'guild-icon', 'guild-info', 'id',
+            'calc', 'choose', 'create-activity', 'color', 'format-time', 'guild', 'id',
             'ping', 'rawr', 'role-info', 'snipe', 'snipe-emojis', 'snipe-reactions',
-            'snipe-stickers', 'style-text', 'user', 'welcome-screen'
+            'snipe-stickers', 'style-text', 'user'
         ),
     ), (
         'Waifus',

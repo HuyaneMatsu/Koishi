@@ -1,14 +1,8 @@
 __all__ = ()
-
-from hata import Embed, Client, elapsed_time, ICON_TYPE_NONE, DATETIME_FORMAT_CODE, BUILTIN_EMOJIS, ChannelType
-from hata.ext.slash import abort
-
-
-SLASH_CLIENT: Client
+from hata import BUILTIN_EMOJIS, ChannelType, DATETIME_FORMAT_CODE, elapsed_time
 
 
 EMOJI_HEART_GIFT = BUILTIN_EMOJIS['gift_heart']
-
 
 CHANNEL_TYPES_AND_NAMES = (
     (ChannelType.guild_text, 'Text'),
@@ -20,14 +14,47 @@ CHANNEL_TYPES_AND_NAMES = (
 )
 
 
-async def add_guild_generic_field(client, guild, embed, even_if_empty):
+async def add_guild_all_field(client, guild, embed, even_if_empty):
+    """
+    Adds every field to the given embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild in context.
+    embed : ``Embed``
+        The embed to extend.
+    even_if_empty : `bool`
+        Whether the field should be added even if it would be empty. Not applicable for this function.
+    """
     await add_guild_info_field(client, guild, embed, False)
     await add_guild_counts_field(client, guild, embed, False)
     await add_guild_emojis_field(client, guild, embed, False)
     await add_guild_stickers_field(client, guild, embed, False)
+    await add_guild_boosters_field(client, guild, embed, False)
 
 
 async def add_guild_info_field(client, guild, embed, even_if_empty):
+    """
+    Adds generic guild info field to the given embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild in context.
+    embed : ``Embed``
+        The embed to extend.
+    even_if_empty : `bool`
+        Whether the field should be added even if it would be empty. Not applicable for this function.
+    """
     created_at = guild.created_at
     sections_parts = [
         '**Created**: ', created_at.__format__(DATETIME_FORMAT_CODE), ' [*', elapsed_time(created_at), ' ago*]'
@@ -46,6 +73,22 @@ async def add_guild_info_field(client, guild, embed, even_if_empty):
 
 
 async def add_guild_counts_field(client, guild, embed, even_if_empty):
+    """
+    Adds generic guild counts field to the given embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild in context.
+    embed : ``Embed``
+        The embed to extend.
+    even_if_empty : `bool`
+        Whether the field should be added even if it would be empty. Not applicable for this function.
+    """
     approximate_user_count = guild.approximate_user_count
     if approximate_user_count == 0:
         await client.guild_get(guild)
@@ -79,6 +122,22 @@ async def add_guild_counts_field(client, guild, embed, even_if_empty):
 
 
 async def add_guild_emojis_field(client, guild, embed, even_if_empty):
+    """
+    Adds emojis field to the given embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild in context.
+    embed : ``Embed``
+        The embed to extend.
+    even_if_empty : `bool`
+        Whether the field should be added even if there are no emojis.
+    """
     emoji_count = len(guild.emojis)
     if emoji_count:
         sections_parts = [
@@ -117,6 +176,22 @@ async def add_guild_emojis_field(client, guild, embed, even_if_empty):
 
 
 async def add_guild_stickers_field(client, guild, embed, even_if_empty):
+    """
+    Adds stickers field to the given embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild in context.
+    embed : ``Embed``
+        The embed to extend.
+    even_if_empty : `bool`
+        Whether the field should be added even if there are no stickers.
+    """
     sticker_count = len(guild.stickers)
     if sticker_count:
         sections_parts = [
@@ -146,6 +221,22 @@ async def add_guild_stickers_field(client, guild, embed, even_if_empty):
 
 
 async def add_guild_boosters_field(client, guild, embed, even_if_empty):
+    """
+    Adds guild boosters field to the given embed.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild in context.
+    embed : ``Embed``
+        The embed to extend.
+    even_if_empty : `bool`
+        Whether the field should be added even if there are no boosters.
+    """
     boost_count = guild.boost_count
     if boost_count:
         
@@ -168,35 +259,3 @@ async def add_guild_boosters_field(client, guild, embed, even_if_empty):
             f'Most awesome people of the guild',
             '*The guild has no chicken nuggets.*',
         )
-
-
-DEFAULT_GUILD_FILED = 'generic'
-
-GUILD_FIELDS = {
-    DEFAULT_GUILD_FILED : add_guild_generic_field  ,
-    'info'              : add_guild_info_field     ,
-    'counts'            : add_guild_counts_field   ,
-    'emojis'            : add_guild_emojis_field   ,
-    'stickers'          : add_guild_stickers_field ,
-    'boosters'          : add_guild_boosters_field ,
-}
-
-@SLASH_CLIENT.interactions(name = 'guild', is_global = True, allow_in_dm = False)
-async def guild_info(client, event,
-    field: (list(GUILD_FIELDS.keys()), 'Which fields should I show?') = DEFAULT_GUILD_FILED,
-):
-    """Shows some information about the guild."""
-    guild = event.guild
-    if (guild is None) or guild.partial:
-        abort('I must be in the guild to execute this command.')
-    
-    embed = Embed(
-        guild.name,
-        color = (guild.icon_hash & 0xFFFFFF if (guild.icon_type is ICON_TYPE_NONE) else (guild.id >> 22) & 0xFFFFFF),
-    ).add_thumbnail(
-        guild.icon_url_as(size=128),
-    )
-    
-    await GUILD_FIELDS[field](client, guild, embed, True)
-    
-    return embed

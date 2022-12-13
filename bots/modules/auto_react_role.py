@@ -16,7 +16,7 @@ require('cake')
 SLASH_CLIENT: Client
 
 async def teardown(lib):
-    async with ScarletExecutor(limit=20) as executor:
+    async with ScarletExecutor(limit = 20) as executor:
         for gui in AUTO_REACT_ROLE_GUIS.values():
             await executor.add(gui.cancel())
     
