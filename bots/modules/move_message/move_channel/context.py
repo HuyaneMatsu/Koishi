@@ -223,7 +223,7 @@ class ChannelMoverContext:
         if message_id >= now_id:
             return 100.0
         
-        channel_id = self.target_channel.id
+        channel_id = self.source_channel.id
         if channel_id >= message_id:
             return 0.0
         

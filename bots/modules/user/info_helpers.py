@@ -66,7 +66,7 @@ def put_date_time_into(date_time, into, add_ago):
     into : `list` of `str`
         Container.
     add_ago : `bool`
-        Whether ago should be added to teh relative representation.
+        Whether ago should be added to the relative representation.
     
     Returns
     -------
@@ -104,7 +104,9 @@ def add_user_info_embed_field(embed, user):
     """
     value_parts = ['Created: ']
     put_date_time_into(user.created_at, value_parts, True)
-    value_parts.append('\nID:')
+    value_parts.append('\nProfile: ')
+    value_parts.append(user.mention)
+    value_parts.append('\nID: ')
     value_parts.append(str(user.id))
     
     return embed.add_field('User Information', ''.join(value_parts))

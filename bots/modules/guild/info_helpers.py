@@ -89,13 +89,13 @@ async def add_guild_counts_field(client, guild, embed, even_if_empty):
     even_if_empty : `bool`
         Whether the field should be added even if it would be empty. Not applicable for this function.
     """
-    approximate_user_count = guild.approximate_user_count
-    if approximate_user_count == 0:
-        await client.guild_get(guild)
-        approximate_user_count = guild.approximate_user_count
+    # approximate_user_count = guild.approximate_user_count
+    # if approximate_user_count == 0:
+    #     await client.guild_get(guild)
+    #     approximate_user_count = guild.approximate_user_count
     
     sections_parts = [
-        '**Users: ', str(approximate_user_count), '**\n'
+        '**Users: ', str(guild.user_count), '**\n'
         '**Roles: ', str(len(guild.roles)), '**'
     ]
     

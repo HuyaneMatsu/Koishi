@@ -3,7 +3,7 @@ __all__ = ()
 from hata import Client
 
 from ...image_handler import ImageHandlerStatic, ImageHandlerWaifuPics
-from ...touhou import TOUHOU_ACTION_POCKY_KISS
+from ...touhou import TOUHOU_ACTION_POCKY_KISS, TOUHOU_ACTION_POCKY_KISS_SELF
 
 from .action import Action
 
@@ -266,6 +266,7 @@ POCKY_KISS = SLASH_CLIENT.interactions(
     Action(
         ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS),
         'pocky kisses',
+        handler_self = ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS_SELF),
     ),
     name = 'pocky-kiss',
     description = 'Will they bale?',

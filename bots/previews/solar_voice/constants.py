@@ -38,6 +38,7 @@ TRACK_EMOJIS = [
     Emoji.precreate(853685522303680512),
     Emoji.precreate(855417900764626994),
     Emoji.precreate(858609857568964618),
+    Emoji.precreate(1053001885075910726),
 ]
 
 EMBED_COLOR = Color(0xFF9612)

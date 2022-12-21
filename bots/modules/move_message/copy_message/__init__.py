@@ -26,7 +26,7 @@ COPY_MESSAGE_COMMANDS = SLASH_CLIENT.interactions(
     guild = ALLOWED_GUILDS,
     name = 'copy-message',
     description = 'Utility for copying messages over channels.',
-    required_permissions = Permission().update_by_keys(manage_messages=True),
+    required_permissions = Permission().update_by_keys(manage_messages = True),
 )
 
 COPY_MESSAGE_COMMANDS.interactions(copy_message_about, name = 'about')

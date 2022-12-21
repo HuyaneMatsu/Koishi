@@ -225,10 +225,10 @@ ABOUT_COMPONENTS = Row(
         'Support server',
         url = INVITE__SUPPORT.url,
     ),
-    Button(
-        'Source code',
-        url = LINK__KOISHI_GIT,
-    ),
+    # Button(
+    #     'Source code',
+    #     url = LINK__KOISHI_GIT,
+    # ),
 )
 
 

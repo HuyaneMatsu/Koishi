@@ -1,11 +1,10 @@
 __all__ = ('STATS_COMMAND',)
 
-from . import show
-
-
 import warnings
 
 from hata import Client
+
+from . import show
 
 
 SLASH_CLIENT: Client

@@ -258,6 +258,12 @@ HOURAISAN_KAGUYA = TouhouCharacter(
     ),
 )
 
+LILY_BLACK = TouhouCharacter(
+    'lily_black',
+    'Lily black',
+    (),
+)
+
 LILY_WHITE = TouhouCharacter(
     'lily_white',
     'Lily White',

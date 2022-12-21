@@ -115,7 +115,7 @@ async def color_(client, event,
 )
 async def raw(client, event):
     """Shows up the message's payload."""
-    if not event.user_permissions.can_administrator:
+    if not event.user_permissions.can_manage_messages:
         abort('You must have manage messages permission to invoke this command.')
     
     data = await client.http.message_get(event.channel_id, event.interaction.target_id)

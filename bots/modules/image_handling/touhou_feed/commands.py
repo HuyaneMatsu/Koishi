@@ -481,7 +481,7 @@ def create_about_main(client, event):
             f'• To apply solo tag only to 1 character you may do `#character+solo` (like `#koishi+solo`)\n'
             f'• To receive a combination of characters at once, use `#character+character` syntax '
             f'(like `#koishi+satori`).\n'
-            f'• If multiple group tags (like `#satori+koishi` & `#kokoro-solo`) are present then one group will be '
+            f'• If multiple group tags (like `#satori+koishi` & `#kokoro+solo`) are present then one group will be '
             f'selected randomly every time (so either Satori and Koishi together **or** Kokoro alone).'
         ),
     )

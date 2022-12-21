@@ -2,7 +2,6 @@ from hata import DiscordException,  cchunkify, Status, EXTRA_EMBED_TYPES, Embed,
     KOKORO, Client
 from scarletio import Task, list_difference
 from hata.discord.events.core import DEFAULT_EVENT_HANDLER, EVENT_HANDLER_NAME_TO_PARSER_NAMES
-from hata.ext.prettyprint import pretty_print
 from hata.ext.slash.menus import Pagination, Closer
 from types import MethodType
 from hata.ext.commands_v2 import Command
@@ -88,7 +87,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text = pretty_print(message)
+        text = [repr(message)]
         text.insert(0, f'Message {message.id} got deleted')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -100,7 +99,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=[f'Message {message.id} was edited']
+        result = [f'Message {message.id} was edited']
         
         channel = message.channel
         result.append(f'At channel : {channel:d} {channel.id}')
@@ -136,12 +135,12 @@ class dispatch_tester:
                     if value is None:
                         result.append('From None')
                     else:
-                        result.extend(pretty_print(value))
+                        result.append(repr(value))
                     value = getattr(message, key)
                     if value is None:
                         result.append('To None')
                     else:
-                        result.extend(pretty_print(value))
+                        result.append(repr(value))
                     continue
                 if key in ('content',):
                     result.append(f'{key} changed from:')
@@ -265,7 +264,7 @@ class dispatch_tester:
                     for index, embed in enumerate(embeds,1):
                         if embed.type in EXTRA_EMBED_TYPES:
                             result.append(f'New embed appeared at index {index}:')
-                            result.extend(pretty_print(embed))
+                            result.append(repr(embed))
 
         text=cchunkify(result)
         pages=[Embed(description = chunk) for chunk in text]
@@ -281,7 +280,7 @@ class dispatch_tester:
         if old is None:
             text = []
         else:
-            text = pretty_print(old)
+            text = [repr(old)]
         text.insert(0, f'Reactions got cleared from message {message.id}:')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -295,7 +294,7 @@ class dispatch_tester:
         if users is None:
             text = []
         else:
-            text = pretty_print(users)
+            text = [repr(users)]
         text.insert(0, f'{emoji} were removed from message {message.id}:')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -331,7 +330,7 @@ class dispatch_tester:
             if (added is not None):
                 for activity in added:
                     result.append('Added activity:')
-                    result.extend(pretty_print(activity))
+                    result.append(repr(activity))
             
             if (updated is not None):
                 for activity_change in updated:
@@ -343,7 +342,7 @@ class dispatch_tester:
             if (removed is not None):
                 for activity in removed:
                     result.append('Removed activity:')
-                    result.extend(pretty_print(activity))
+                    result.append(repr(activity))
         
         pages = [Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -443,7 +442,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result = pretty_print(channel)
+        result = [repr(channel)]
         result.insert(0, f'A channel was created: {channel.name} {channel.id}\nchannel type: {channel.__class__.__name__} ({channel.type})')
         pages = [Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -464,7 +463,7 @@ class dispatch_tester:
         if self.channel is None:
             return
     
-        result=pretty_print(emoji)
+        result = [repr(emoji)]
         result.insert(0, f'Emoji created: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         pages=[Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -475,7 +474,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=pretty_print(emoji)
+        result = [repr(emoji)]
         result.insert(0, f'Emoji deleted: {emoji.name} {emoji.id} at guild {emoji.guild!r}')
         pages=[Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -578,7 +577,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result = pretty_print(guild)
+        result =  [repr(guild)]
         result.insert(0, f'Guild created: {guild.id}')
         pages = [Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -665,7 +664,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=pretty_print(guild)
+        result = [repr(guild)]
         result.insert(0, f'Guild deleted {guild.id}')
         result.insert(1, f'I had {len(profile.roles)} roles there')
         result.insert(2, 'At least i did not boost' if (profile.boosts_since is None) else 'Rip by boost ahhhh...')
@@ -705,7 +704,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        result=pretty_print(role)
+        result = [repr(role)]
         result.insert(0, f'A role got created at {role.guild.name} {role.guild.id}')
         pages=[Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -795,7 +794,7 @@ class dispatch_tester:
         
         result = []
         result.append('User voice join')
-        result.extend(pretty_print(voice_state))
+        result.append(repr(voice_state))
         
         pages = [Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -808,7 +807,7 @@ class dispatch_tester:
         
         result = []
         result.append('User voice leave')
-        result.extend(pretty_print(voice_state))
+        result.append(repr(voice_state))
         
         pages = [Embed(description = chunk) for chunk in cchunkify(result)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -848,7 +847,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text = pretty_print(invite)
+        text = [repr(invite)]
         text.insert(0, f'Invite created:')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -859,7 +858,7 @@ class dispatch_tester:
         if self.channel is None:
             return
     
-        text = pretty_print(invite)
+        text = [repr(invite)]
         text.insert(0, f'Invite deleted:')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -870,7 +869,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text = pretty_print(integration)
+        text = [repr(integration)]
         text.insert(0, f'integration_create at {guild.name} ({guild.id}):')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         
@@ -886,7 +885,7 @@ class dispatch_tester:
             f'integration_delete at {guild.name} ({guild.id}):',
             f'- integration_id : {integration_id}',
             f'- application_id : {application_id}',
-                ]
+        ]
         
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -897,7 +896,7 @@ class dispatch_tester:
         if self.channel is None:
             return
         
-        text = pretty_print(integration)
+        text = [integration]
         text.insert(0, f'integration_edit at {guild.name} ({guild.id}):')
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         
@@ -911,7 +910,7 @@ class dispatch_tester:
         
         text = [
             f'integration_update at {guild.name} ({guild.id}):',
-                ]
+        ]
         
         pages = [Embed(description = chunk) for chunk in cchunkify(text)]
         await Pagination(client, self.channel, pages, timeout = 120.)

@@ -1,8 +1,16 @@
 __all__ = ()
 
-from hata import DiscordException, ERROR_CODES, KOKORO
+import re
+
+from hata import DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, KOKORO, WebhookBase
 from hata.ext.slash import abort
 from scarletio import Task, WaitTillExc, sleep
+
+DATE_CONNECTOR = ' - '
+NAME_WITH_DATE_RP = re.compile(
+    f'.*?{re.escape(DATE_CONNECTOR)}\\d{{4}}\\-\\d{{2}}\\-\\d{{2}} \\d{{2}}\\:\\d{{2}}\\:\\d{{2}}'
+)
+NAME_LENGTH_MAX = 80 - (19 + len(DATE_CONNECTOR))
 
 
 async def get_message(client, channel, message_id):
@@ -318,9 +326,16 @@ def _get_user_name(message):
     -------
     name : `str`
     """
-    name = message.author.name_at(message.guild_id)
-    name = name[:80]
-    return name
+    user = message.author
+    name = user.name_at(message.guild_id)
+    
+    if isinstance(user, WebhookBase) and (NAME_WITH_DATE_RP.fullmatch(name) is not None):
+        return name
+    
+    if len(name) > NAME_LENGTH_MAX:
+        name = name[: NAME_LENGTH_MAX - len(' ...')] + ' ...'
+    
+    return f'{name}{DATE_CONNECTOR}{message.created_at:{DATETIME_FORMAT_CODE}}'
 
 
 async def _repeat_create_webhook_message(client, webhook, content, embeds, files, name, avatar_url, thread_id):

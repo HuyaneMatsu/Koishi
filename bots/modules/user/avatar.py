@@ -2,14 +2,14 @@ __all__ = ()
 
 from hata import Embed, User
 
-from .constants import ICON_SOURCES, ICON_SOURCES_REVERSED
+from .constants import ICON_SOURCE_LOCAL, ICON_SOURCES, ICON_SOURCES_REVERSED
 from .icon_helpers import get_avatar_of
 
 
 async def user_avatar_command(
     event,
     user : (User, 'Choose a user!') = None,
-    icon_source : (ICON_SOURCES, 'Which avatar of the user?', 'type') = ICON_SOURCES,
+    icon_source : (ICON_SOURCES, 'Which avatar of the user?', 'type') = ICON_SOURCE_LOCAL,
 ):
     """Shows your or the chosen user's avatar."""
     if user is None:

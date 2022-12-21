@@ -28,6 +28,18 @@ class TouhouCharacter:
     __slots__ = ('system_name', 'name', 'nicks')
     
     def __new__(cls, system_name, name, nicks):
+        """
+        Creates a new touhou character.
+        
+        Parameters
+        ----------
+        system_name : `str`
+            The character's system name. Used to identify the character.
+        name : `str`
+            The character's name.
+        nicks : `tuple` of `str`
+            Additional nick names of the character.
+        """
         self = object.__new__(cls)
         self.system_name = system_name
         self.name = name

@@ -1694,7 +1694,7 @@ async def guild_discovery_get(client, guild):
     guild_id = guild.id
     guild_discovery_data = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/discovery-metadata')
-    return GuildDiscovery(guild_discovery_data, guild)
+    return GuildDiscovery.from_data(guild_discovery_data)
 
 async def guild_discovery_edit(client, guild, primary_category_id=..., keywords=...,
             emoji_discovery=...):

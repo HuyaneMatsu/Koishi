@@ -11,7 +11,7 @@ from ...helpers import add_provider
 
 EMOJI_FLUSHED = Emoji.precreate(965960651853926480)
 
-COOLDOWN_HANDLER = CooldownHandler('user', 1800, 30)
+COOLDOWN_HANDLER = CooldownHandler('user', 1800, 20)
 
 
 def get_allowed_users(client, event, input_users):
@@ -31,13 +31,21 @@ def get_allowed_users(client, event, input_users):
         The mentioned users by the event.
     client_in_users : `bool`
         Whether the client is in the mentioned users.
+    user_in_users : `bool`
+        Whether the user in in the mentioned users as well.
     """
     users = set()
     for user in input_users:
         if user is not None:
             users.add(user)
     
-    users.discard(event.user)
+    try:
+        users.remove(event.user)
+    except KeyError:
+        user_in_users = False
+    else:
+        user_in_users = True
+    
     try:
         users.remove(client)
     except KeyError:
@@ -45,7 +53,7 @@ def get_allowed_users(client, event, input_users):
     else:
         client_in_users = True
     
-    return users, client_in_users
+    return users, client_in_users, user_in_users
 
 
 def build_response(client, event, verb, users, client_in_users):
@@ -118,6 +126,37 @@ def build_response(client, event, verb, users, client_in_users):
     return response
 
 
+def build_response_self(event, verb):
+    """
+    Builds action response text and allowed mentions.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    verb : `str`
+        The verb to use in the response.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    if random() < 0.2:
+        target_word = 'herself'
+    else:
+        target_word = 'themselves'
+    
+    sign_chance = random()
+    if sign_chance < 0.1:
+        end_sign = '!!'
+    elif sign_chance < 0.55:
+        end_sign = '!?'
+    else:
+        end_sign = '?!'
+    
+    return ''.join(['> ', event.user.mention, ' ', verb, ' ', target_word, ' ', end_sign])
+
+
 class Action:
     """
     Represents an action.
@@ -125,13 +164,15 @@ class Action:
     Attributes
     ----------
     handler : ``ImageHandlerBase``
+        Image handler to use when invoking self-action.
+    handler : ``ImageHandlerBase``
         Image handler to use.
     verb : `str`
         Verb used in the action.
     """
-    __slots__ = ('handler', 'verb')
+    __slots__ = ('handler', 'handler_self', 'verb')
     
-    def __new__(cls, handler, verb):
+    def __new__(cls, handler, verb, *, handler_self = None):
         """
         Creates a new action.
         
@@ -141,10 +182,13 @@ class Action:
             Image handler to use.
         verb : `str`
             Verb used in the action.
+        handler_self : `None`, ``ImageHandlerBase`` = `None`, Optional (Keyword only)
+            Image handler to use when invoking self-action.
         """
         self = object.__new__(cls)
-        self.verb = verb
         self.handler = handler
+        self.handler_self = handler_self
+        self.verb = verb
         return self
     
     
@@ -196,7 +240,7 @@ class Action:
         if not guild_id:
             abort('Guild only command')
         
-        allowed_mentions, client_in_users = get_allowed_users(
+        allowed_mentions, client_in_users, user_in_users = get_allowed_users(
             client,
             event,
             (
@@ -209,14 +253,24 @@ class Action:
         expire_after = COOLDOWN_HANDLER.get_cooldown(event, len(allowed_mentions))
         if expire_after > 0.0:
             abort(
-                f'Koishi got bored of enacting your {event.interaction.name} try again in {expire_after:.2f} seconds.'
+                f'{client.name_at(event.guild_id)} got bored of enacting your {event.interaction.name} try again in '
+                f'{expire_after:.2f} seconds.'
             )
         
-        response = build_response(
-            client, event, self.verb, allowed_mentions, client_in_users
-        )
+        if (
+            user_in_users and
+            (not allowed_mentions) and
+            (self.handler_self is not None)
+            and ((random() < 0.5) if client_in_users else True)
+        ):
+            response = build_response_self(event, self.verb)
+            handler = self.handler_self
+            
+        else:
+            response = build_response(client, event, self.verb, allowed_mentions, client_in_users)
+            handler = self.handler
         
-        image_detail = await self.handler.get_image(
+        image_detail = await handler.get_image(
             client, event, content = response, allowed_mentions = allowed_mentions
         )
         

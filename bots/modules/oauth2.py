@@ -4,7 +4,6 @@ from scarletio import sleep
 from hata import Color, Embed, parse_oauth2_redirect_url, DiscordException, ERROR_CODES, Channel, Client, ChannelType
 from hata.ext.commands_v2 import checks
 from hata.ext.slash.menus import Pagination
-from hata.ext.prettyprint import pchunkify
 
 OAUTH2_COLOR = Color.from_rgb(148, 0, 211)
 
@@ -126,7 +125,7 @@ class oauth2_user:
             await client.message_create(message.channel,'Could not find that user')
             return
         
-        await Pagination(client, message.channel, [Embed(description = chunk) for chunk in pchunkify(user)])
+        await Pagination(client, message.channel, [Embed(description = repr(user))])
     
     category = 'OAUTH2'
     
@@ -154,7 +153,7 @@ class oauth2_connections:
         
         connections = await client.user_connection_get_all(user.access)
         
-        await Pagination(client, message.channel, [Embed(description = chunk) for chunk in pchunkify(connections)])
+        await Pagination(client, message.channel, [Embed(description = repr(connections))])
     
     category = 'OAUTH2'
     
@@ -182,7 +181,7 @@ class oauth2_guilds:
         
         guilds = await client.user_guild_get_all(user.access)
         
-        await Pagination(client, message.channel,[Embed(description = chunk) for chunk in pchunkify(guilds)])
+        await Pagination(client, message.channel, [Embed(description = repr(guilds))])
     
     category = 'OAUTH2'
     
