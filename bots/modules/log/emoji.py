@@ -291,7 +291,8 @@ async def emoji_delete(client, emoji):
     if emoji.guild_id != GUILD__SUPPORT.id:
         return
     
-    embed = Embed(f'Emoji deleted: {emoji.name} ({emoji.id})')
+    emoji_url = emoji.url
+    embed = Embed(f'Emoji deleted: {emoji.name} ({emoji.id})', url = emoji_url).add_thumbnail(emoji_url)
     embed = add_emoji_fields_to(emoji, embed)
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
@@ -316,7 +317,7 @@ async def sticker_create(client, sticker):
     
     # We get the creator of the sticker.
     try:
-        await client.sticker_guild_get(sticker, force_update=True)
+        await client.sticker_guild_get(sticker, force_update = True)
     except ConnectionError:
         # No internet connection
         return
@@ -365,9 +366,14 @@ async def sticker_delete(client, sticker):
     if sticker.guild_id != GUILD__SUPPORT.id:
         return
     
-    embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})')
+    sticker_url = sticker.url
+    embed = Embed(f'Sticker deleted: {sticker.name} ({sticker.id})', url = sticker_url)
     add_sticker_fields_to(sticker, embed)
     add_context_fields_to(sticker, embed)
+    
+    sticker_format = sticker.format
+    if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
+        embed.add_image(sticker_url)
     
     await client.message_create(CHANNEL__SUPPORT__LOG_EMOJI, embed = embed, allowed_mentions = None)
 

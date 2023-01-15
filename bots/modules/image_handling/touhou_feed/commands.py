@@ -17,6 +17,7 @@ SLASH_CLIENT: Client
 STYLE_RESET = create_ansi_format_code()
 STYLE_RED = create_ansi_format_code(foreground_color = AnsiForegroundColor.red)
 STYLE_GREEN = create_ansi_format_code(foreground_color = AnsiForegroundColor.green)
+STYLE_BLUE = create_ansi_format_code(foreground_color = AnsiForegroundColor.blue)
 
 MIN_DELTA = elapsed_time(RelativeDelta(seconds = MIN_INTERVAL))
 MAX_DELTA = elapsed_time(RelativeDelta(seconds = MAX_INTERVAL))
@@ -338,10 +339,19 @@ def build_listing_page_embed(client, guild, page):
             style = STYLE_RED
             interval = get_interval_only(channel)
         else:
-            character_name = join_handler_keys(feeder.handler_keys)
-            style = STYLE_GREEN
-            interval = feeder.interval
+            handler_keys = feeder.handler_keys
+            if handler_keys[0].characters:
+                character_name = join_handler_keys(handler_keys)
+                style = STYLE_GREEN
+            else:
+                character_name = '*all*'
+                if handler_keys[0].solo:
+                    character_name += ' (solo)'
+                
+                style = STYLE_BLUE
             
+            interval = feeder.interval
+        
         delta = elapsed_time(RelativeDelta(seconds = interval))
         
         embed.add_field(
@@ -466,7 +476,8 @@ def create_about_main(client, event):
             f'• For a forum thread, assign a tag with the character\'s name to it.\n'
             f'• For a text channel, put the character\'s name into the channel\'s topic (like `#koishi`).\n'
             f'• If multiple tags (like `#satori` & `#koishi`) are present in one channel then one of them '
-            f'will be randomly chosen each time (so either Satori or Koishi).'
+            f'will be randomly chosen each time (so either Satori or Koishi).\n'
+            f'If no character is specified {client_name} will select one of them each time randomly.'
         ),
     ).add_field(
         f'Tell {client_name} that you want only one character on a image',

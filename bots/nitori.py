@@ -216,7 +216,7 @@ async def guild_features(event):
     
     return Embed(
         f'{guild.name}\'s features',
-        ', '.join(sorted(feature.name for feature in guild.features)),
+        ', '.join(sorted(feature.name for feature in guild.iter_features())),
     ).add_thumbnail(
         guild.icon_url
     )

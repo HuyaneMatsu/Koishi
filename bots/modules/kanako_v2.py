@@ -405,7 +405,7 @@ def render_showcase(name,map_):
                 element_index += 1
                 field_text.append(f'{element_index}.: **{element[0]} - {element[1]}**')
             
-            embed.add_field(f'{element_index - 9} - {element_index}', '\n'.join(field_text),inline=True)
+            embed.add_field(f'{element_index - 9} - {element_index}', '\n'.join(field_text),inline = True)
             field_text.clear()
         
         result.append(embed)

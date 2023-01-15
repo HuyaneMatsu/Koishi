@@ -741,7 +741,7 @@ class AutoReactRoleGUI:
         if (emoji is None):
             return
         
-        role = parse_role(split[1], message = message)
+        role = parse_role(split[1], message.guild)
         if (role is None):
             return
         
@@ -777,7 +777,7 @@ class AutoReactRoleGUI:
         if (object_ is None):
             return
         
-        object_ = parse_role(split[0], message = message)
+        object_ = parse_role(split[0], message.guild)
         if (object_ is None):
             return
         

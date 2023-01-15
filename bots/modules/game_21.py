@@ -235,7 +235,7 @@ class Game21Player:
             field_content.append('\n')
         
         embed.add_field(f'{self.user.name_at(self.parent.guild)}\'s cards\'\nWeight: {self.total}',
-            ''.join(field_content), inline=True)
+            ''.join(field_content), inline = True)
     
     def add_hand(self, embed):
         for round_, card in enumerate(self.hand, 1):

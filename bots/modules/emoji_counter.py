@@ -522,7 +522,7 @@ def _populate_embed_with_fields(embed, query_result, type_, order, page, page_si
         if (not index % 10) or (index == limit):
             description = ''.join(description_parts)
             description_parts.clear()
-            embed.add_field('\u200B', description, inline=True)
+            embed.add_field('\u200B', description, inline = True)
             
             if (index == limit):
                 break

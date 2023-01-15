@@ -61,13 +61,22 @@ async def add_guild_info_field(client, guild, embed, even_if_empty):
     ]
     
     features = guild.features
-    if features:
+    if (features is not None) and features:
         sections_parts.append('\n**Features**: ')
-        for feature in features:
-            sections_parts.append(feature.name)
-            sections_parts.append(', ')
         
-        del sections_parts[-1]
+        index = 0
+        limit = len(features)
+        
+        while True:
+            feature = features[index]
+            index += 1
+            
+            sections_parts.append(feature.name)
+            if index == limit:
+                break
+            
+            sections_parts.append(', ')
+            continue
     
     embed.add_field('Guild information', ''.join(sections_parts))
 
@@ -145,7 +154,12 @@ async def add_guild_emojis_field(client, guild, embed, even_if_empty):
             '**Static emojis: '
         ]
         
-        normal_static, normal_animated, managed_static, managed_animated = guild.emoji_counts
+        emoji_counts = guild.emoji_counts
+        normal_static = emoji_counts.normal_static
+        normal_animated = emoji_counts.normal_animated
+        managed_static = emoji_counts.managed_static
+        managed_animated = emoji_counts.managed_animated
+        
         emoji_limit = guild.emoji_limit
         sections_parts.append(str(normal_static))
         sections_parts.append('** [')
@@ -199,7 +213,10 @@ async def add_guild_stickers_field(client, guild, embed, even_if_empty):
             '**Static stickers: '
         ]
         
-        static_count, animated_count, lottie_count = guild.sticker_counts
+        sticker_counts = guild.sticker_counts
+        static_count = sticker_counts.static
+        animated_count = sticker_counts.animated
+        lottie_count = sticker_counts.lottie
         
         sections_parts.append(str(static_count))
         sections_parts.append(

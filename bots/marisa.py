@@ -1571,6 +1571,16 @@ async def test_booster(event, user = None):
     return str(user.is_boosting(event.guild_id))
 
 
+@Marisa.interactions(guild = GUILD__SUPPORT, show_for_invoking_user_only = True)
+async def invoking_user_component():
+    return InteractionResponse(content = 'message_content', components = Button('a', custom_id = 'test.invoking'))
+
+
+@Marisa.interactions(custom_id = 'test.invoking')
+async def invoking_user_component_response():
+    return 'ara'
+
+
 if (watchdog is not None):
     
     from watchdog.events import FileModifiedEvent

@@ -140,13 +140,16 @@ def parse_channel_tags(channel):
     handler_keys = None
     final_interval = 0
     solo_only = False
+    required_tag_found = False
     
     for tag_name in iter_tag_names_of(channel):
         if tag_name == TAG_NAME_REQUIRED:
+            required_tag_found = True
             continue
         
         if tag_name == TAG_NAME_SOLO:
             solo_only = True
+            continue
         
         interval = try_parse_interval(tag_name)
         if interval:
@@ -168,6 +171,9 @@ def parse_channel_tags(channel):
                 handler_key.apply_solo_preference()
         
         return tuple(handler_keys), normalise_interval(final_interval)
+    
+    if required_tag_found:
+        return (TouhouHandlerKey(solo = solo_only),), normalise_interval(final_interval)
 
 
 def normalise_interval(interval):
@@ -212,7 +218,7 @@ def join_names_of_touhou_characters(characters, join_with):
     """
     character_count = len(characters)
     if character_count == 0:
-        return None
+        return '*none*'
     
     characters = sorted(characters)
     

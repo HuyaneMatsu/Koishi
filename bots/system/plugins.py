@@ -241,7 +241,7 @@ async def load(event,
     yield await run_plugin_coroutine(
         name,
         'load',
-        load_plugin(name, deep=deep),
+        load_plugin(name, deep = deep),
     )
 
 
@@ -259,7 +259,7 @@ async def reload(event,
     yield await run_plugin_coroutine(
         name,
         'reload',
-        reload_plugin(name, deep=deep),
+        reload_plugin(name, deep = deep),
     )
 
 
@@ -277,7 +277,7 @@ async def unload(event,
     yield await run_plugin_coroutine(
         name,
         'unload',
-        unload_plugin(name, deep=deep),
+        unload_plugin(name, deep = deep),
     )
 
 

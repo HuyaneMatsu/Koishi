@@ -1207,7 +1207,7 @@ async def emoji_create(client, guild, name, image,):
         data,
     )
     
-    return Emoji(data, guild_id)
+    return Emoji.from_data(data, guild_id)
 
 async def emoji_get(client, emoji):
     guild = emoji.guild
@@ -2300,7 +2300,7 @@ async def sticker_guild_get_all(client, guild):
         f'{API_ENDPOINT}/guilds/{guild_id}/stickers'
     )
     
-    return [Sticker(sticker_data) for sticker_data in sticker_datas]
+    return [Sticker.from_data(sticker_data) for sticker_data in sticker_datas]
 
 
 async def sticker_pack_get_all(client):
@@ -2310,7 +2310,7 @@ async def sticker_pack_get_all(client):
     
     sticker_pack_datas = data['sticker_packs']
     
-    return [StickerPack(sticker_pack_data) for sticker_pack_data in sticker_pack_datas]
+    return [StickerPack.from_data(sticker_pack_data) for sticker_pack_data in sticker_pack_datas]
 
 
 async def sticker_pack_get(client, sticker_pack_id):
@@ -2318,7 +2318,7 @@ async def sticker_pack_get(client, sticker_pack_id):
         f'{API_ENDPOINT}/sticker-packs/{sticker_pack_id}'
     )
     
-    return StickerPack(data)
+    return StickerPack.from_data(data)
 
 
 async def sticker_guild_get(client, guild, sticker_id):
@@ -2328,7 +2328,7 @@ async def sticker_guild_get(client, guild, sticker_id):
         f'{API_ENDPOINT}/guilds/{guild_id}/stickers/{sticker_id}'
     )
     
-    return Sticker(sticker_data)
+    return Sticker.from_data(sticker_data)
 
 async def sticker_guild_create(client, guild, name, description, file, tags):
     form = Formdata()
@@ -2344,7 +2344,7 @@ async def sticker_guild_create(client, guild, name, description, file, tags):
         form,
     )
     
-    return Sticker(sticker_data)
+    return Sticker.from_data(sticker_data)
 
 
 async def sticker_guild_delete(client, guild, sticker_id):
@@ -2360,7 +2360,7 @@ async def sticker_get(client, sticker_id):
         f'{API_ENDPOINT}/stickers/{sticker_id}'
     )
     
-    return Sticker(sticker_data)
+    return Sticker.from_data(sticker_data)
 
 
 async def sticker_guild_edit(client, guild, sticker, name=None, description = None, tags=None):

@@ -161,7 +161,7 @@ if (DB_ENGINE is not None):
         __tablename__   = 'DS_V2'
         id              = Column(Int64, primary_key = True)
         user_id         = Column(Int64, unique=True)
-        game_state      = Column(Binary(), nullable=True)
+        game_state      = Column(Binary(), nullable = True)
         selected_stage_id = Column(Int32)
     
     DS_V2_TABLE = ds_v2_model.__table__
@@ -203,9 +203,9 @@ if (DB_ENGINE is not None):
         level = Column(Int32)
         experience = Column(Int32)
         
-        raw_species = Column(Binary(), nullable=True)
-        raw_weapon = Column(Binary(), nullable=True)
-        raw_costume = Column(Binary(), nullable=True)
+        raw_species = Column(Binary(), nullable = True)
+        raw_weapon = Column(Binary(), nullable = True)
+        raw_costume = Column(Binary(), nullable = True)
     
     
     WAIFU_STATS_TABLE = waifu_stats_model.__table__

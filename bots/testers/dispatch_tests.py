@@ -607,7 +607,7 @@ class dispatch_tester:
                 continue
             
             if key=='features':
-                removed, added = list_difference(value, guild.features)
+                removed, added = list_difference(value, [*guild.iter_features()])
                 if removed:
                     result.append(f'Features removed: ({len(removed)}')
                     for feature in removed:

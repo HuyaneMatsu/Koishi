@@ -4,6 +4,7 @@ import re, reprlib
 from math import floor
 
 from scarletio import copy_docs, RichAttributeErrorBaseType
+from hata import datetime_to_unix_time
 from hata.discord.utils import PARSE_TIMESTAMP_RP, DISCORD_EPOCH_START
 
 
@@ -28,6 +29,8 @@ ENUM_EXPECTED_STR_MIN_LENGTH = 1
 ENUM_EXPECTED_STR_MAX_LENGTH = 128
 
 ENUM_GUESS_CHANCE_MAX = 2
+
+DISCORD_EPOCH_START_UNIX_TIME = datetime_to_unix_time(DISCORD_EPOCH_START)
 
 
 def guess_is_enum(name, value):
@@ -489,12 +492,13 @@ def guess_is_unix_time(name, value):
     
     elif isinstance(value, int):
         chance = 1
+        
+        if value > DISCORD_EPOCH_START_UNIX_TIME:
+            chance += 1
     
     else:
         return -1
     
-    if value > DISCORD_EPOCH_START:
-        chance += 1
     
     for expected_name_part in UNIX_TIME_EXPECTED_NAME_PARTS:
         if expected_name_part in name:

@@ -1034,6 +1034,8 @@ TATARA_KOGASA = TouhouCharacter(
     (
         '多々良 小傘',
         'Kogasa Tatara',
+        'Kogasa',
+        'Tatara',
     ),
 )
 

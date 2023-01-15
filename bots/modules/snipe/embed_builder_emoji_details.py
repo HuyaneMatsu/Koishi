@@ -1,29 +1,29 @@
 __all__ = ()
 
-from hata import Embed, ZEROUSER, DATETIME_FORMAT_CODE, elapsed_time, GUILDS
+from hata import DATETIME_FORMAT_CODE, Embed, GUILDS, ZEROUSER, elapsed_time
+
+from .embed_builder_base import create_base_embed
 
 
-def get_emoji_info(emoji):
+def build_emoji_details(emoji, type_name):
+    """
+    Creates a detailed emoji embed.
+    
+    Parameters
+    ----------
+    sticker : ``Emoji``
+        The emoji to create the embed for.
+    type_name : `str`
+        The name to call the emoji (capitalised).
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    embed = create_base_embed(emoji, f'{type_name} details')
+    
     if emoji.is_unicode_emoji():
-        embed = Embed(
-            f'Emoji details',
-        ).add_field(
-            'Name',
-            (
-                f'```\n'
-                f'{emoji.name}\n'
-                f'```'
-            ),
-            inline = True,
-        ).add_field(
-            'Internal identifier',
-            (
-                f'```\n'
-                f'{emoji.id}\n'
-                f'```'
-            ),
-            inline = True,
-        ).add_field(
+        embed.add_field(
             'Unicode',
             (
                 f'```\n'
@@ -34,30 +34,7 @@ def get_emoji_info(emoji):
         )
     
     else:
-        url = emoji.url
-        
-        embed = Embed(
-            f'Emoji details',
-            url = url,
-        ).add_image(
-            url,
-        ).add_field(
-            'Name',
-            (
-                f'```\n'
-                f'{emoji.name}\n'
-                f'```'
-            ),
-            inline = True,
-        ).add_field(
-            'Identifier',
-            (
-                f'```\n'
-                f'{emoji.id}\n'
-                f'```'
-            ),
-            inline = True,
-        ).add_field(
+        embed.add_field(
             'Animated',
             (
                 f'```\n'

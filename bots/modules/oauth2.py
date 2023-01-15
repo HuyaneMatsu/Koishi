@@ -146,7 +146,7 @@ class oauth2_user:
 @COMMAND_CLIENT.commands.from_class
 class oauth2_connections:
     async def command(client, message, content):
-        user=_oauth2_query(message,content)
+        user = _oauth2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
             return
@@ -248,7 +248,7 @@ class oauth2_my_guild:
 @COMMAND_CLIENT.commands.from_class
 class oauth2_renew:
     async def command(client,message,content):
-        user=_oauth2_query(message,content)
+        user = _oauth2_query(message,content)
         if user is None:
             await client.message_create(message.channel,'Could not find that user')
             return

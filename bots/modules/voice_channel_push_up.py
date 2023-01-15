@@ -1,19 +1,21 @@
 __all__ = ()
 
 from hata import Guild, Channel, Client, CHANNELS, KOKORO
-from scarletio import Task
+from scarletio import Lock, Task
 
 
 SLASH_CLIENT: Client
 
 GUILD__KOISHI_CLAN = Guild.precreate(866746184990720020)
-VOICE_CATEGORY = Channel.precreate(914407653114011648)
-RADIO_CATEGORY = Channel.precreate(1016357856540373102)
+CATEGORY__VOICE = Channel.precreate(914407653114011648)
+CATEGORY__RADIO = Channel.precreate(1016357856540373102)
+CHANNEL__EXCEPTION = Channel.precreate(1007940975861182507)
 
 PULL_DOWN_HANDLES = {}
 PULL_DOWN_TIMEOUT = 60.0
 
-MOVABLE_PARENT_IDS = {0, VOICE_CATEGORY.id, RADIO_CATEGORY.id}
+MOVE_LOCK = Lock(KOKORO)
+MOVABLE_PARENT_IDS = {0, CATEGORY__VOICE.id, CATEGORY__RADIO.id}
 
 
 def should_channel_be_pushed_up(channel):
@@ -65,12 +67,13 @@ def should_process_action_in_channel(channel):
     -------
     should_process_action_in_channel : `bool`
     """
+    if channel is CHANNEL__EXCEPTION:
+        return False
+    
     if not channel.is_guild_voice():
         return False
     
-    parent_id = channel.parent_id
-    
-    if parent_id in MOVABLE_PARENT_IDS:
+    if channel.parent_id in MOVABLE_PARENT_IDS:
         return True
     
     return False
@@ -87,20 +90,21 @@ async def update_channel_push_up( channel):
     channel : ``Channel``
         The channel which states to update.
     """
-    if should_channel_be_pushed_up(channel):
-        if channel.parent_id:
-            try:
-                handle = PULL_DOWN_HANDLES[channel.id]
-            except KeyError:
-                pass
-            else:
-                handle.cancel()
-            
-            await SLASH_CLIENT.channel_edit(channel, position = 0, parent_id = 0)
-    
-    else:
-        if (not channel.parent_id) and (channel.id not in PULL_DOWN_HANDLES):
-            PULL_DOWN_HANDLES[channel.id] = KOKORO.call_later(PULL_DOWN_TIMEOUT, invoke_pull_down, channel)
+    async with MOVE_LOCK:
+        if should_channel_be_pushed_up(channel):
+            if channel.parent_id:
+                try:
+                    handle = PULL_DOWN_HANDLES[channel.id]
+                except KeyError:
+                    pass
+                else:
+                    handle.cancel()
+                
+                await SLASH_CLIENT.channel_edit(channel, position = 0, parent_id = 0)
+        
+        else:
+            if (not channel.parent_id) and (channel.id not in PULL_DOWN_HANDLES):
+                PULL_DOWN_HANDLES[channel.id] = KOKORO.call_later(PULL_DOWN_TIMEOUT, invoke_pull_down, channel)
 
 
 def invoke_pull_down(channel):
@@ -133,9 +137,9 @@ async def pull_down(channel):
         The channel to pull down.
     """
     if 'radio' in channel.name.casefold():
-        target_category = RADIO_CATEGORY
+        target_category = CATEGORY__RADIO
     else:
-        target_category = VOICE_CATEGORY
+        target_category = CATEGORY__VOICE
     
     await SLASH_CLIENT.channel_edit(channel, position = 0, parent_id = target_category)
 

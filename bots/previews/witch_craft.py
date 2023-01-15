@@ -594,7 +594,7 @@ async def prices(client, event):
         embed_field_value = f'Sell for: {floor(market_cost * (1.0 - MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}\n' \
                             f'Buy for: {floor(market_cost * (1.0 + MARKET_COST_FEE))} {EMOJI__HEART_CURRENCY}'
         
-        embed.add_field(embed_field_name, embed_field_value, inline=True)
+        embed.add_field(embed_field_name, embed_field_value, inline = True)
     
     return embed
 

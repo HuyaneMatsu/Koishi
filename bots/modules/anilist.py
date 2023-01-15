@@ -1033,12 +1033,12 @@ def build_media_description(anime_data):
 
 def add_generic_media_fields(embed, media_data):
     media_status = convert_media_status(media_data[KEY_MEDIA_STATUS])
-    embed.add_field('Status', media_status, inline=True)
+    embed.add_field('Status', media_status, inline = True)
     
     # line 2
     
     media_format = convert_media_format(media_data[KEY_MEDIA_FORMAT])
-    embed.add_field('Format', media_format, inline=True)
+    embed.add_field('Format', media_format, inline = True)
     
     start_date_value = build_fuzzy_date(media_data[KEY_MEDIA_START_DATE])
     end_date_value = build_fuzzy_date(media_data[KEY_MEDIA_END_DATE])
@@ -1063,11 +1063,11 @@ def add_generic_media_fields(embed, media_data):
                 field_value = f'Between {start_date_value} and {end_date_value}'
     
     if (field_name is not None):
-        embed.add_field(field_name, field_value, inline=True)
+        embed.add_field(field_name, field_value, inline = True)
     
     average_score = media_data[KEY_MEDIA_AVERAGE_SCORE]
     if (average_score is not None):
-        embed.add_field('Average score', f'{average_score} / 100', inline=True)
+        embed.add_field('Average score', f'{average_score} / 100', inline = True)
 
 
 def build_anime_stat_fields(embed, anime_data):
@@ -1076,7 +1076,7 @@ def build_anime_stat_fields(embed, anime_data):
     
     episode_count = anime_data[KEY_MEDIA_EPISODE_COUNT]
     if (episode_count is not None) and (episode_count != 1):
-        embed.add_field('Episodes', str(episode_count), inline=True)
+        embed.add_field('Episodes', str(episode_count), inline = True)
     
     
     episode_length = anime_data[KEY_MEDIA_EPISODE_LENGTH]
@@ -1086,7 +1086,7 @@ def build_anime_stat_fields(embed, anime_data):
         else:
             field_name = 'Episode length'
         
-        embed.add_field(field_name, f'{episode_length} minute', inline=True)
+        embed.add_field(field_name, f'{episode_length} minute', inline = True)
     
     add_generic_media_fields(embed, anime_data)
 
@@ -1097,12 +1097,12 @@ def build_manga_stat_fields(embed, manga_data):
     
     volume_count = manga_data[KEY_MEDIA_VOLUME_COUNT]
     if (volume_count is not None):
-        embed.add_field('Volumes', str(volume_count), inline=True)
+        embed.add_field('Volumes', str(volume_count), inline = True)
     
     
     chapter_count = manga_data[KEY_MEDIA_CHAPTER_COUNT]
     if (chapter_count is not None):
-        embed.add_field('Chapters', chapter_count, inline=True)
+        embed.add_field('Chapters', chapter_count, inline = True)
     
     add_generic_media_fields(embed, manga_data)
 

@@ -3,6 +3,7 @@ __all__ = ('TouhouHandlerKey',)
 from ..constants import SAFE_BOORU_ENDPOINT, SAFE_BOORU_PROVIDER, SOLO_REQUIRED_TAGS, TOUHOU_TAGS_BANNED
 from ..image_handler import ImageHandlerBooru, ImageHandlerGroup
 
+from .character import TOUHOU_CHARACTERS_UNIQUE
 from .safe_booru_tags import TOUHOU_SAFE_BOORU_TAGS
 
 
@@ -24,8 +25,8 @@ class TouhouHandlerKey:
     """
     __slots__ = ('characters', 'hash_value', 'solo')
     
-    def __init__(self, character, *characters, solo = True):
-        characters = frozenset((character, *characters))
+    def __init__(self, *characters, solo = True):
+        characters = frozenset(characters)
         
         if len(characters) > 1:
             solo = False
@@ -41,10 +42,10 @@ class TouhouHandlerKey:
         """Returns the handler key's representation."""
         repr_parts = ['<', self.__class__.__name__]
         
-        repr_parts.append(' characters=')
+        repr_parts.append(' characters = ')
         repr_parts.append(repr(self.characters))
         
-        repr_parts.append(', solo=')
+        repr_parts.append(', solo = ')
         repr_parts.append(repr(self.solo))
         
         repr_parts.append('>')
@@ -103,15 +104,33 @@ class TouhouHandlerKey:
         -------
         handler : ``HandlerBase``
         """
-        if self.solo:
-            if len(self.characters) == 1:
-                handler = self.create_solo_single_handler()
-            else:
-                handler = self.create_solo_poly_handler()
+        characters_length = len(self.characters)
+        if characters_length == 0:
+            handler = self.create_all_handler()
         else:
-            handler = self.create_wide_handler()
+            if self.solo:
+                if characters_length == 1:
+                    handler = self.create_solo_single_handler()
+                else:
+                    handler = self.create_solo_poly_handler()
+            else:
+                handler = self.create_wide_handler()
         
         return handler
+    
+    
+    def create_all_handler(self):
+        """
+        Creates an all character handler.
+        
+        Returns
+        -------
+        handler : ``HandlerBase``
+        """
+        solo = self.solo
+        return ImageHandlerGroup(*(
+            TouhouHandlerKey(character, solo = solo).get_handler() for character in TOUHOU_CHARACTERS_UNIQUE
+        ))
     
     
     def create_solo_single_handler(self):

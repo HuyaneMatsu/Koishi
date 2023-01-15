@@ -23,7 +23,7 @@ async def get_guild_welcome_screen(client, event, guild):
     -------
     welcome_screen : `None`, ``WelcomeScreen``
     """
-    if GuildFeature.welcome_screen_enabled not in guild.features:
+    if not guild.has_feature(GuildFeature.welcome_screen_enabled):
         welcome_screen = None
     else:
         await client.interaction_application_command_acknowledge(event)

@@ -1,35 +1,28 @@
 __all__ = ()
 
-from hata import StickerFormat, Embed, DATETIME_FORMAT_CODE, elapsed_time, StickerType, ZEROUSER, GUILDS
+from hata import DATETIME_FORMAT_CODE, Embed, GUILDS, StickerFormat, StickerType, ZEROUSER, elapsed_time
+
+from .embed_builder_base import create_base_embed
 
 
-def get_sticker_info(event, sticker):
-    sticker_url = sticker.url_as(size = 4096)
-    embed = Embed('Sticker details', url = sticker_url)
+def build_sticker_details(sticker, type_name):
+    """
+    Creates a detailed sticker embed.
+    
+    Parameters
+    ----------
+    sticker : ``Sticker``
+        The sticker to create the embed for.
+    type_name : `str`
+        The name to call the sticker (capitalised).
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
+    embed = create_base_embed(sticker, f'{type_name} details')
     
     sticker_format = sticker.format
-    if (sticker_format is StickerFormat.png) or (sticker_format is StickerFormat.apng):
-        embed.add_image(sticker_url)
-    
-    # Row 1 | name | id | animated
-    embed.add_field(
-        'Name',
-        (
-            f'```\n'
-            f'{sticker.name}\n'
-            f'```'
-        ),
-        inline = True,
-    ).add_field(
-        'Identifier',
-        (
-            f'```\n'
-            f'{sticker.id}\n'
-            f'```'
-        ),
-        inline = True,
-    )
-    
     if sticker_format is StickerFormat.apng:
         is_sticker_animated = True
     elif sticker_format is StickerFormat.lottie:

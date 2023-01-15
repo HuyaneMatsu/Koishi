@@ -104,7 +104,7 @@ async def user_top(event,
             if (not index % 10) or (index == limit):
                 description = ''.join(description_parts)
                 description_parts.clear()
-                embed.add_field(f'{start} - {index}', description, inline=True)
+                embed.add_field(f'{start} - {index}', description, inline = True)
                 
                 if (index == limit):
                     break
