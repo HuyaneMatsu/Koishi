@@ -571,7 +571,7 @@ CATEGORIES = (
     (
         'Administration',
         EMOJI_TOOLS,
-        ('clear', 'dupe-image-filter', 'emoji-role', 'invite-create', 'mod', 'self-mod'),
+        ('clear', 'dupe-image-filter', 'invite-create', 'mod', 'self-mod'),
     ), (
         'Anime',
         EMOJI_PILL,
