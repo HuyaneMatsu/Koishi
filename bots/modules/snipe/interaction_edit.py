@@ -4,8 +4,8 @@ from hata import Client, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import Form, TextInput, TextInputStyle
 
 from .action_helpers import (
-    check_emoji_type, check_is_emoji_name_valid, check_sticker_type_modify, join_roles, join_sticker_tags,
-    parse_and_join_tags, parse_roles
+    check_emoji_guild, check_emoji_type, check_is_emoji_name_valid, check_sticker_guild, check_sticker_type_modify,
+    join_roles, join_sticker_tags, parse_and_join_tags, parse_roles
 )
 from .cache_sticker import get_sticker
 from .constants import (
@@ -78,6 +78,9 @@ async def snipe_interaction_edit_emoji(client, event):
         return
     
     if not await check_emoji_type(client, event, emoji):
+        return
+    
+    if not await check_emoji_guild(client, event, emoji):
         return
     
     return Form(
@@ -210,6 +213,9 @@ async def snipe_interaction_edit_sticker(client, event):
         return
     
     if not await check_sticker_type_modify(client, event, sticker):
+        return
+    
+    if not await check_sticker_guild(client, event, sticker):
         return
     
     return Form(

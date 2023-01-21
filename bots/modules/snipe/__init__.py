@@ -7,7 +7,6 @@ from .constants import *
 from .embed_builder_base import *
 from .embed_builder_common import *
 from .embed_builder_emoji_details import *
-from .embed_builder_select import *
 from .embed_builder_sticker_details import *
 from .embed_parsers import *
 from .helpers import *
@@ -21,6 +20,7 @@ from .interaction_remove import *
 from .interaction_reveal import *
 from .interaction_select import *
 from .response_builder import *
+from .response_builder_select import *
 
 
 __all__ = (
@@ -33,7 +33,6 @@ __all__ = (
     *embed_builder_base.__all__,
     *embed_builder_common.__all__,
     *embed_builder_emoji_details.__all__,
-    *embed_builder_select.__all__,
     *embed_builder_sticker_details.__all__,
     *embed_parsers.__all__,
     *helpers.__all__,
@@ -47,4 +46,5 @@ __all__ = (
     *interaction_reveal.__all__,
     *interaction_select.__all__,
     *response_builder.__all__,
+    *response_builder_select.__all__,
 )

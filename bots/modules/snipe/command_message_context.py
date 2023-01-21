@@ -162,7 +162,7 @@ def respond_with_emojis_factory(response_parts_builder, embed_builder_entities_d
             try:
                 await client.interaction_response_message_edit(event, embed = embed, components = components)
             except DiscordException as err:
-                if not remove_deleted_emojis(entities, err.errors):
+                if not remove_deleted_emojis(entities, err):
                     raise
             else:
                 break

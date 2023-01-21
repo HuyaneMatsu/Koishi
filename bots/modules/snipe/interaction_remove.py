@@ -3,7 +3,9 @@ __all__ = ()
 from hata import Client, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import Form, TextInput, TextInputStyle
 
-from .action_helpers import check_emoji_type, check_sticker_type_modify, process_reason
+from .action_helpers import (
+    check_emoji_guild, check_emoji_type, check_sticker_guild, check_sticker_type_modify, process_reason
+)
 from .cache_sticker import get_sticker
 from .constants import (
     BUTTON_SNIPE_EDIT_DISABLED, BUTTON_SNIPE_REMOVE_DISABLED, CUSTOM_ID_SNIPE_EDIT_EMOJI, CUSTOM_ID_SNIPE_EDIT_STICKER,
@@ -14,7 +16,8 @@ from .constants import (
 from .embed_builder_base import create_base_embed
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
 from .helpers import (
-    check_has_manage_emojis_and_stickers_permission, propagate_check_error_message, translate_components
+    check_has_manage_emojis_and_stickers_permission, discard_entity_from_components, propagate_check_error_message,
+    translate_components
 )
 
 
@@ -48,6 +51,9 @@ async def snipe_interaction_remove_emoji(client, event):
         return
     
     if not await check_emoji_type(client, event, emoji):
+        return
+    
+    if not await check_emoji_guild(client, event, emoji):
         return
     
     return Form(
@@ -100,7 +106,10 @@ async def snipe_confirm_remove_emoji(client, event, emoji_id, emoji_name, emoji_
     except DiscordException as err:
         error_code = err.code
         
-        if error_code == ERROR_CODES.missing_access:
+        if error_code == ERROR_CODES.unknown_emoji:
+            error_message = 'Emoji already deleted.'
+        
+        elif error_code == ERROR_CODES.missing_access:
             return
         
         elif error_code == ERROR_CODES.missing_permissions:
@@ -130,7 +139,10 @@ async def snipe_confirm_remove_emoji(client, event, emoji_id, emoji_name, emoji_
     await client.interaction_followup_message_edit(
         event,
         event.message,
-        components = translate_components(event.message.iter_components(), DISABLED_TABLE_REMOVE),
+        components = discard_entity_from_components(
+            translate_components(event.message.iter_components(), DISABLED_TABLE_REMOVE),
+            emoji.id,
+        ),
     )
 
 
@@ -157,6 +169,9 @@ async def snipe_interaction_remove_sticker(client, event):
         return
     
     if not await check_sticker_type_modify(client, event, sticker):
+        return
+    
+    if not await check_sticker_guild(client, event, sticker):
         return
     
     return Form(
@@ -205,7 +220,10 @@ async def snipe_confirm_remove_sticker(client, event, sticker_id, *, reason):
     except DiscordException as err:
         error_code = err.code
         
-        if error_code == ERROR_CODES.missing_access:
+        if error_code == ERROR_CODES.unknown_sticker:
+            error_message = 'Sticker already deleted.'
+        
+        elif error_code == ERROR_CODES.missing_access:
             return
         
         elif error_code == ERROR_CODES.missing_permissions:
@@ -235,5 +253,8 @@ async def snipe_confirm_remove_sticker(client, event, sticker_id, *, reason):
     await client.interaction_followup_message_edit(
         event,
         event.message,
-        components = translate_components(event.message.iter_components(), DISABLED_TABLE_REMOVE),
+        components = discard_entity_from_components(
+            translate_components(event.message.iter_components(), DISABLED_TABLE_REMOVE),
+            sticker.id,
+        ),
     )

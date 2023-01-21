@@ -11,7 +11,9 @@ from .constants import (
     CUSTOM_ID_SNIPE_ACTIONS_STICKER
 )
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
-from .helpers import check_has_manage_emojis_and_stickers_permission, translate_components
+from .helpers import (
+    are_actions_allowed_for_entity, check_has_manage_emojis_and_stickers_permission, translate_components
+)
 
 
 SLASH_CLIENT: Client
@@ -62,15 +64,13 @@ def iter_action_components_factory(button_add, button_edit, button_remove):
         nonlocal button_edit
         nonlocal button_remove
         
-        event_guild_id = event.guild_id
-        entity_guild_id = entity.guild_id
-        
-        if (event_guild_id == 0):
+        guild_id = event.guild_id
+        if (guild_id == 0) or (not are_actions_allowed_for_entity(entity)):
             yield BUTTON_SNIPE_ADD_DISABLED
             yield BUTTON_SNIPE_EDIT_DISABLED
             yield BUTTON_SNIPE_REMOVE_DISABLED
         
-        elif (event_guild_id == entity_guild_id):
+        elif (guild_id == entity.guild_id):
             yield BUTTON_SNIPE_ADD_DISABLED
             yield button_edit
             yield button_remove

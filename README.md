@@ -34,7 +34,6 @@ To get started with Koishi, use the `/help` command, which lists all the availab
 
 Koishi excels in a variety of areas, just to mention a few featured commands:
 
-- `/emoji-role` - Enables you to lock emojis behind roles.
 - `/find-anime` - Search for your long forgotten anime.
 - `/hug` - Hug your best homies.
 - `/meme` - Shows up a good anime meme.
@@ -54,7 +53,7 @@ And much more!
 
 - Administration
     
-    `clear` • `dupe-image-filter` • `emoji-role` • `invite-create` • `mod` • `self-mod`
+    `clear` • `dupe-image-filter` • `invite-create` • `mod` • `self-mod`
 
 - Anime
     

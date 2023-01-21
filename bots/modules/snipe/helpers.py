@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import ComponentType
+from hata import ComponentType, Emoji, Sticker, StickerType
 from hata.ext.slash import Row
 
 from .constants import EMBED_AUTHOR_ID_PATTERN
@@ -83,6 +83,62 @@ def translate_components(components, table):
     return [translate_component(component, table) for component in components]
 
 
+def discard_entity_from_component(string_select, entity_id):
+    """
+    Removes the given `entity`'s representation from the string select.
+    Returns `None` if there are no other options left either.
+    
+    Parameters
+    ----------
+    string_select : ``Component``
+        The string select to discard the entity id from.
+    entity_id : `int`
+        The entity's identifier.
+    
+    Returns
+    -------
+    new_string_select : `None`, ``Component``
+    """
+    entity_id = str(entity_id)
+    new_options = []
+    
+    for option in string_select.iter_options():
+        if entity_id not in option.value:
+            new_options.append(option)
+    
+    if new_options:
+        return string_select.copy_with(options = new_options)
+
+
+def discard_entity_from_components(components, entity_id):
+    """
+    Removes the given `entity`'s representation from a string selects inside of the components.
+    
+    Parameters
+    ----------
+    components : `GeneratorType`
+        Component generator.
+    entity_id : `int`
+        The entity's identifier.
+    """
+    new_components = []
+    
+    for row_component in components:
+        sub_components = row_component.components
+        if (sub_components is not None) and len(sub_components) == 1:
+            sub_component = sub_components[0]
+            if sub_component.type is ComponentType.string_select:
+                sub_component = discard_entity_from_component(sub_component, entity_id)
+                if (sub_component is None):
+                    continue
+                
+                row_component = Row(sub_component)
+        
+        new_components.append(row_component)
+    
+    return new_components
+
+
 async def propagate_check_error_message(client, event, error_message):
     """
     Propagates the given check error message to the user.
@@ -139,3 +195,25 @@ async def check_has_manage_emojis_and_stickers_permission(client, event):
         return False
     
     return True
+
+
+def are_actions_allowed_for_entity(entity):
+    """
+    Returns whether actions are allowed for the given entity.
+    
+    Parameters
+    ----------
+    entity : ``Emoji``, ``Sticker``
+        The entity to check.
+    
+    Returns
+    -------
+    are_actions_allowed : `bool`
+    """
+    if isinstance(entity, Emoji):
+        return entity.is_custom_emoji()
+    
+    if isinstance(entity, Sticker):
+        return entity.type is StickerType.guild
+    
+    return False

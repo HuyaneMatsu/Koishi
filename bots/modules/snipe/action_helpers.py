@@ -64,6 +64,37 @@ async def check_emoji_type(client, event, emoji):
     return True
 
 
+async def check_emoji_guild(client, event, emoji):
+    """
+    Checks whether the emoji's guild is the event's.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    emoji : ``Emoji``
+        The emoji in context.
+    
+    Returns
+    -------
+    passed : `bool`
+        Whether all checks passed.
+    """
+    guild_id = emoji.guild_id
+    if (guild_id == 0) or (guild_id != event.guild_id):
+        await propagate_check_error_message(
+            client, event, 'Cannot perform the action on an emoji from an other guild.'
+        )
+        return False
+    
+    return True
+
+
+
 async def check_sticker_type_create(client, event, sticker):
     """
     Checks sticker type for creation.
@@ -118,6 +149,36 @@ async def check_sticker_type_modify(client, event, sticker):
     return True
 
 
+async def check_sticker_guild(client, event, sticker):
+    """
+    Checks whether the sticker's guild is the event's.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    sticker : ``Sticker``
+        The sticker in context.
+    
+    Returns
+    -------
+    passed : `bool`
+        Whether all checks passed.
+    """
+    guild_id = sticker.guild_id
+    if (guild_id == 0) or (guild_id != event.guild_id):
+        await propagate_check_error_message(
+            client, event, 'Cannot perform the action on a sticker from an other guild.'
+        )
+        return False
+    
+    return True
+
+
 def produce_limit_error_message(count, limit, name):
     """
     Checks the whether the limits are fine. If not returns an error message.
@@ -166,11 +227,11 @@ async def check_emoji_counts(client, event, emoji):
     
     if emoji.animated:
         count = emoji_counts.normal_animated
-        name = 'static emoji'
+        name = 'animated emoji'
     
     else:
         count = emoji_counts.normal_static
-        name = 'animated emoji'
+        name = 'static emoji'
     
     error_message = produce_limit_error_message(count, guild.emoji_limit, name)
     if (error_message is not None):

@@ -9,7 +9,7 @@ from PIL import Image, ImageOps
 
 SLASH_CLIENT : Client
 
-SCALE = '@%#*+=-:. '
+SCALE = ' .:-=+*#%@'
 SCALE_RATIO = (len(SCALE) - 1 ) / 255
 
 
