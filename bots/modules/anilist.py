@@ -895,8 +895,7 @@ def array_response_builder(data, extra, work_set):
 
 
 async def search(client, json_query, response_builder, extra):
-    if RATE_LIMIT_LOCK.is_locked():
-        yield
+    yield
     
     await RATE_LIMIT_LOCK.acquire()
     
@@ -1349,8 +1348,8 @@ async def find_character_select(client, event):
 
 @SLASH_CLIENT.interactions(is_global = True)
 async def anime_(client, event,
-        name_or_id: ('str', 'The anime\'s name or it\'s id.')
-            ):
+    name_or_id: ('str', 'The anime\'s name or it\'s id.')
+):
     name_or_id = validate_parameter(name_or_id)
     
     if name_or_id.isdecimal():
@@ -1378,8 +1377,8 @@ async def anime_(client, event,
 
 @SLASH_CLIENT.interactions(is_global = True)
 async def find_anime(client, event,
-        name: ('str', 'The anime\'s name to try to find.')
-            ):
+    name: ('str', 'The anime\'s name to try to find.')
+):
     name = validate_parameter(name)
     
     return search(
