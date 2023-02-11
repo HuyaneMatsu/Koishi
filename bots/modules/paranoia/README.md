@@ -13,7 +13,7 @@ Song title: Paranoia
 
 - Album: **RAVER'S NEST 1 TOHO RAVE PARTY**
 - Circle: **DiGiTAL WiNG**
-- Release Date: **Aug 12, 2013 (C84)**
+- Release Date: **2013 August 12 (C84)**
 
 
 - Original: **ZUN**
@@ -33,7 +33,7 @@ Song title: **Sadistic Paranoia**
 
 - Album: **Split Theory**
 - Circle: **EastNewSound**
-- Release date: **December 30th, 2010 (C79)**
+- Release date: **2010 December 30th (C79)**
 
 
 - Original: **ZUN**

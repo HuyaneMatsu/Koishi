@@ -2,7 +2,7 @@ __all__ = ()
 
 from random import random, randint, choice
 
-from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO, DiscordException, ERROR_CODES, Emoji
+from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import abort
 
 from bot_utils.constants import GUILD__SUPPORT
@@ -287,99 +287,6 @@ async def love(client, event,
     )
 
 
-MINE_MINE_CLEAR = (
-    BUILTIN_EMOJIS['white_large_square'].as_emoji,
-    BUILTIN_EMOJIS['one'].as_emoji,
-    BUILTIN_EMOJIS['two'].as_emoji,
-    BUILTIN_EMOJIS['three'].as_emoji,
-    BUILTIN_EMOJIS['four'].as_emoji,
-    BUILTIN_EMOJIS['five'].as_emoji,
-    BUILTIN_EMOJIS['six'].as_emoji,
-    BUILTIN_EMOJIS['seven'].as_emoji,
-    BUILTIN_EMOJIS['eight'].as_emoji,
-    BUILTIN_EMOJIS['bomb'].as_emoji,
-)
-
-MINE_MINE = tuple(f'||{e}||' for e in MINE_MINE_CLEAR)
-
-MINE_X_SIZE = 9
-MINE_Y_SIZE = 9
-MINE_SIZE = MINE_X_SIZE * MINE_Y_SIZE
-
-@SLASH_CLIENT.interactions(is_global = True)
-async def minesweeper(
-    bomb_count: ([(str(x), x) for x in range(7, 15)], 'How much bombs should be on the field?') = 10,
-    raw: ('bool', 'Raw text?') = False,
-):
-    """Minesweeping is fun!? (not in irl)"""
-    
-    data = [0 for x in range(MINE_SIZE)]
-    
-    while bomb_count:
-        x = randint(0, 8)
-        y = randint(0, 8)
-        position = x + y * MINE_X_SIZE
-        
-        value = data[position]
-        if value == 9:
-            continue
-        
-        local_count = 0
-
-        for c_x, c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
-            local_x = x + c_x
-            local_y = y + c_y
-            if (
-                    local_x != MINE_X_SIZE and
-                    local_x != -1 and
-                    local_y != MINE_Y_SIZE and
-                    local_y != -1 and
-                    data[local_x + local_y * MINE_X_SIZE] == 9
-            ):
-                local_count += 1
-        
-        if local_count > 3:
-            continue
-
-        for c_x,c_y in ((-1, -1), (0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0)):
-            local_x = x + c_x
-            local_y = y + c_y
-            if local_x != MINE_X_SIZE and local_x != -1 and local_y != MINE_Y_SIZE and local_y != -1:
-                local_position = local_x + local_y * MINE_X_SIZE
-                local_value = data[local_position]
-                if local_value == 9:
-                    continue
-                data[local_position] = local_value + 1
-        
-        data[position] = 9
-        
-        bomb_count -= 1
-    
-    result = []
-    if raw:
-        result.append('```')
-    
-    result_sub = []
-    y = 0
-    while True:
-        x = 0
-        while True:
-            result_sub.append(MINE_MINE[data[x + y]])
-            x += 1
-            if x == MINE_X_SIZE:
-                break
-        result.append(''.join(result_sub))
-        result_sub.clear()
-        y += MINE_X_SIZE
-        if y == MINE_SIZE:
-            break
-    
-    if raw:
-        result.append('```')
-    
-    return '\n'.join(result)
-
-
 EMOJI_1 = Emoji.precreate(814618830106132511, name = 'T90Salute')
 EMOJI_2 = Emoji.precreate(588052578214871053, name = 'tatohaHola')
 
@@ -409,75 +316,3 @@ async def crywolf_(client, event):
         avatar_url = crywolf.avatar_url,
         wait = True,
     )
-
-
-SEX_RESET_AFTER = 600
-
-SEX_SPAM_LOCK = {}
-
-class SexSpamLock:
-    __slots__ = ('channel_id', 'expires_at', 'max_level')
-    
-    def __new__(cls, channel_id, max_level):
-        self = object.__new__(cls)
-        self.channel_id = channel_id
-        self.max_level = max_level
-        self.expires_at = 0.0
-        
-        KOKORO.call_later(SEX_RESET_AFTER, self)
-        return self
-    
-    def __call__(self):
-        expires_at = self.expires_at
-        if expires_at:
-            KOKORO.call_at(expires_at+SEX_RESET_AFTER, self)
-        else:
-            try:
-                del SEX_SPAM_LOCK[self.channel_id]
-            except KeyError:
-                pass
-    
-    
-    def set_max_level(self, level):
-        max_level = self.max_level
-        if level > max_level:
-            level = max_level
-        elif level < max_level:
-            self.max_level = level
-        
-        return level
-
-
-SEX_IMAGES = [
-    'https://cdn.discordapp.com/attachments/568837922288173058/927858207764918284/no-sex-0000.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/944868502676865144/chiruno-maybe-sex.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/837747879497433158/yes-sex.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/840676567180771348/yes-sex-hyper-opti.gif',
-    'https://cdn.discordapp.com/attachments/568837922288173058/927858614226526228/sex_2_0.png',
-]
-
-@SLASH_CLIENT.interactions(is_global = True)
-async def sex(event):
-    """You horny?"""
-    value = random()
-    if value > 0.14:
-        level = 0
-    elif value > 0.09:
-        level = 1
-    elif value > 0.05:
-        level = 2
-    elif value > 0.02:
-        level = 3
-    else:
-        level = 4
-    
-    channel_id = event.channel_id
-    try:
-        spam_lock = SEX_SPAM_LOCK[channel_id]
-    except KeyError:
-        SEX_SPAM_LOCK[channel_id] = SexSpamLock(channel_id, level)
-    else:
-        level = spam_lock.set_max_level(level)
-    
-    
-    return Embed().add_image(SEX_IMAGES[level])

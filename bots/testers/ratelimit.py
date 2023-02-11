@@ -692,7 +692,7 @@ async def webhook_create(client,channel,name,avatar=b'',):
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/webhooks',
         data,)
-    return Webhook(data)
+    return Webhook.from_data(data)
 
 async def webhook_get_all_channel(client,channel,):
     channel_id=channel.id
@@ -1727,7 +1727,7 @@ async def guild_discovery_delete_subcategory(client, guild, category_id):
 async def discovery_category_get_all(client):
     discovery_category_datas = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/discovery/categories')
-    return [DiscoveryCategory(discovery_category_data) for discovery_category_data in discovery_category_datas]
+    return [DiscoveryCategory.from_data(discovery_category_data) for discovery_category_data in discovery_category_datas]
 
 async def discovery_validate_term(client, term):
     data = await bypass_request(client, METHOD_GET,
@@ -3138,7 +3138,7 @@ async def rate_limit_test_0020(client,message):
         if not channel.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission to complete this command.')
         
-        data = await channel_create(client, guild)
+        data = await channel_create(client, guild, 'channel_name')
         channel_id = int(data['id'])
         await client.http.channel_delete(channel_id, None)
 
