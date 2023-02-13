@@ -1581,6 +1581,26 @@ async def invoking_user_component_response():
     return 'ara'
 
 
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def silent_test_interaction(client, event):
+    return InteractionResponse(event.user.mention, silent = True)
+
+
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def silent_test_webhook(client, event):
+    webhook = await client.webhook_get_own_channel(event.channel)
+    if (webhook is None):
+        webhook = await client.webhook_create(event.channel, 'marisad')
+    
+    await client.webhook_message_create(webhook, event.user.mention, silent = True)
+    return 'owo'
+
+
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def silent_test_abort(client, event):
+    abort(event.user.mention, silent = True)
+
+
 if (watchdog is not None):
     
     from watchdog.events import FileModifiedEvent

@@ -2280,7 +2280,7 @@ async def channel_thread_get_chunk_active(client, channel):
     )
 
 
-async def thread_user_get_all(client, channel):
+async def thread_user_get_chunk(client, channel):
     channel_id = channel.id
     
     await bypass_request(client, METHOD_GET,
@@ -6091,7 +6091,7 @@ async def rate_limit_test_0163(client, message):
         if not guild.cached_permissions_for(client).can_administrator:
             await RLT.send('I need admin permission in the second guild as well to complete this command.')
         
-        await thread_user_get_all(client, channel)
+        await thread_user_get_chunk(client, channel)
 
 
 @RATE_LIMIT_COMMANDS

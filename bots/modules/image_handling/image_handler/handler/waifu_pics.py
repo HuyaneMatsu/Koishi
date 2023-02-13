@@ -50,11 +50,14 @@ class ImageHandlerWaifuPics(ImageHandlerRequestBase):
     
     @copy_docs(ImageHandlerRequestBase._request)
     async def _request(self, client):
-        async with client.http.post(self._url, headers=HEADERS, data=DATA) as response:
-            if response.status == 200:
-                data = await response.json()
-            else:
-                data = None
+        try:
+            async with client.http.post(self._url, headers = HEADERS, data = DATA) as response:
+                if response.status == 200:
+                    data = await response.json()
+                else:
+                    data = None
+        except TimeoutError:
+            data = None
         
         return data
     

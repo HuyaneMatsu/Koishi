@@ -23,7 +23,9 @@ FILTER_ADD_GROUP_PARAMETERS = {
     'description': 'add a filter',
 }
 
-async def channel_mix(client, event,
+async def channel_mix(
+    client,
+    event,
     left_to_left  : P('float', 'left to left factor'  , min_value = 0.0, max_value = 5.0),
     left_to_right : P('float', 'left to right factor' , min_value = 0.0, max_value = 5.0),
     right_to_right: P('float', 'right to right factor', min_value = 0.0, max_value = 5.0),
@@ -39,7 +41,9 @@ async def channel_mix(client, event,
     return create_filter_added_embed(filter)
 
 
-async def distortion(client, event,
+async def distortion(
+    client,
+    event,
     offset    : P('float', 'offset'    , min_value = 0.0, max_value = 100.0) = 0.0,
     scale     : P('float', 'scale'     , min_value = 0.0, max_value = 100.0) = 1.0,
     sin_offset: P('float', 'sin offset', min_value = 0.0, max_value = 100.0) = 0.0,
@@ -68,7 +72,9 @@ async def distortion(client, event,
     return create_filter_added_embed(filter)
 
 
-async def equalizer(client, event,
+async def equalizer(
+    client,
+    event,
     band_00: P('float', 'band 0' , min_value = -0.25, max_value = 1.0) = 0.0,
     band_01: P('float', 'band 1' , min_value = -0.25, max_value = 1.0) = 0.0,
     band_02: P('float', 'band 2' , min_value = -0.25, max_value = 1.0) = 0.0,
@@ -111,23 +117,27 @@ async def equalizer(client, event,
     return create_filter_added_embed(filter)
 
 
-async def karaoke(client, event,
+async def karaoke(
+    client,
+    event,
     filter_band : P('float', 'Filter band'      , min_value = 0.0, max_value = 48000.0) = 220.0,
     filter_width: P('float', 'Filter width'     , min_value = 0.0, max_value = 48000.0) = 100.0,
-    level       : P('float', 'Effect level'     , min_value = 0.0, max_value = 5.0    ) = 1.0  ,
-    mono_level  : P('float', 'Effect mono level', min_value = 0.0, max_value = 5.0    ) = 1.0  ,
+    level       : P('float', 'Effect level'     , min_value = 0.0, max_value =     5.0) =   1.0,
+    mono_level  : P('float', 'Effect mono level', min_value = 0.0, max_value =     5.0) =   1.0,
 ):
     """Eliminates part of a band"""
     player = get_player_or_abort(client, event)
     
-    filter = Karaoke(filter_band=filter_band, filter_width=filter_width, level=level, mono_level=mono_level)
+    filter = Karaoke(filter_band = filter_band, filter_width = filter_width, level = level, mono_level = mono_level)
     player.add_filter(filter)
     await player.apply_filters()
     
     return create_filter_added_embed(filter)
 
 
-async def low_pass(client, event,
+async def low_pass(
+    client,
+    event,
     smoothing: P('float', 'smoothing', min_value = 0.0, max_value = 5.0),
 ):
     """Higher frequencies get suppressed, lower pass through"""
@@ -140,7 +150,9 @@ async def low_pass(client, event,
     return create_filter_added_embed(filter)
 
 
-async def rotation(client, event,
+async def rotation(
+    client,
+    event,
     rotation: P('float', 'rotation / second', min_value = 0.0, max_value = 20.0),
 ):
     """Rotates the sound around the stereo channels"""
@@ -153,7 +165,9 @@ async def rotation(client, event,
     return create_filter_added_embed(filter)
 
 
-async def timescale(client, event,
+async def timescale(
+    client,
+    event,
     pitch: P('float', 'pitch', min_value = 0.0, max_value = 5.0) = 1.0,
     rate : P('float', 'rate' , min_value = 0.0, max_value = 5.0) = 1.0,
     speed: P('float', 'speed', min_value = 0.0, max_value = 5.0) = 1.0,
@@ -161,16 +175,18 @@ async def timescale(client, event,
     """Changes the speed, pitch, and rate"""
     player = get_player_or_abort(client, event)
     
-    filter = Timescale(pitch=pitch, rate=rate, speed=speed)
+    filter = Timescale(pitch = pitch, rate = rate, speed = speed)
     player.add_filter(filter)
     await player.apply_filters()
     
     return create_filter_added_embed(filter)
 
 
-async def tremolo(client, event,
-    frequency: P('float', 'frequency', min_value = 0.0, max_value = 5.0),
-    depth    : P('float', 'depth'    , min_value = 0.0, max_value = 5.0),
+async def tremolo(
+    client,
+    event,
+    frequency: P('float', 'frequency', min_value = 0.0001, max_value = 5.0),
+    depth    : P('float', 'depth'    , min_value = 0.0001, max_value = 1.0),
 ):
     """Uses amplification to create a shuddering effect"""
     player = get_player_or_abort(client, event)
@@ -182,9 +198,11 @@ async def tremolo(client, event,
     return create_filter_added_embed(filter)
 
 
-async def vibrato(client, event,
-    frequency: P('float', 'frequency', min_value = 0.0, max_value = 5.0),
-    depth    : P('float', 'depth'    , min_value = 0.0, max_value = 5.0),
+async def vibrato(
+    client,
+    event,
+    frequency: P('float', 'frequency', min_value = 0.0001, max_value = 14.0),
+    depth    : P('float', 'depth'    , min_value = 0.0001, max_value =  1.0),
 ):
     """Similar to tremolo, but oscillates the pitch"""
     player = get_player_or_abort(client, event)
@@ -195,7 +213,9 @@ async def vibrato(client, event,
     return create_filter_added_embed(filter)
 
 
-async def volume__(client, event,
+async def volume_(
+    client,
+    event,
     volume: P('float', 'volume', min_value = 0.0, max_value = 5.0),
 ):
     """Float value where 1.0 is 100%"""
