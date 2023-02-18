@@ -260,5 +260,5 @@ class Pagination10step(Menu):
 
 class Cell:
     __slots__ = ('value', )
-    def __init__(self, value=None):
+    def __init__(self, value = None):
         self.value = value

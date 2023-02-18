@@ -227,7 +227,7 @@ class massadd:
         for message_ in messages:
             lines=message_.content.split('\n')
             
-            next_id=message_.id
+            next_id = message_.id
             state=0 #parse header
             description_parts.clear()
             
@@ -501,7 +501,7 @@ class add_image:
                 break
             
             attachment = attachments[0]
-            name=attachment.name
+            name = attachment.name
             extension=os.path.splitext(name)[1].lower()
             
             if extension not in ('.png','.jpg','.jpeg','.bmp','.mp4','.gif'): # are there more?
@@ -618,8 +618,8 @@ class checklist:
                     parts=[]
                     index=1
                     
-                    card=filtered[0]
-                    name=card.name
+                    card = filtered[0]
+                    name = card.name
                     length=len(name)
                     if length>EMBED_NAME_LENGTH:
                         name = name[:EMBED_NAME_LENGTH]+'...'
@@ -633,7 +633,7 @@ class checklist:
                         
                         card=filtered[index]
                         index=index + 1
-                        name=card.name
+                        name = card.name
                         
                         name_ln=len(name)
                         if name_ln>EMBED_NAME_LENGTH:
@@ -655,7 +655,7 @@ class checklist:
                     if parts:
                         result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
                     
-                    parts=None
+                    parts = None
                 else:
                     result.append(Embed(title, color = CHESUTO_COLOR))
                 
@@ -689,12 +689,12 @@ class checklist:
                     parts.append('\n\n')
                     length = length + 2
                 
-                rarity_name=f'**{Rarity.INSTANCES[rarity_index].name}**\n\n'
+                rarity_name = f'**{Rarity.INSTANCES[rarity_index].name}**\n\n'
                 length = length + len(rarity_name)
                 parts.append(rarity_name)
                 
                 card=container[0]
-                name=card.name
+                name = card.name
                 name_ln=len(name)
                 if name_ln>EMBED_NAME_LENGTH:
                     name = name[:EMBED_NAME_LENGTH]+'...'
@@ -710,7 +710,7 @@ class checklist:
                     
                     card=container[index]
                     index=index + 1
-                    name=card.name
+                    name = card.name
                     name_ln=len(name)
                     if name_ln>EMBED_NAME_LENGTH:
                         name = name[:EMBED_NAME_LENGTH]+'...'
@@ -732,7 +732,7 @@ class checklist:
             if parts:
                 result.append(Embed(title,''.join(parts), color = CHESUTO_COLOR))
             
-            parts=None
+            parts = None
         
         index=0
         limit=len(result)

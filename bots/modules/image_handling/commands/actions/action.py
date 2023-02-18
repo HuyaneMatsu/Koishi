@@ -271,7 +271,7 @@ class Action:
             handler = self.handler
         
         image_detail = await handler.get_image(
-            client, event, content = response, allowed_mentions = allowed_mentions
+            client, event, content = response, allowed_mentions = allowed_mentions, silent = True,
         )
         
         color = (event.id >> 22) & 0xffffff
@@ -293,8 +293,10 @@ class Action:
         
         
         if event.is_unanswered():
-            function = type(client).interaction_response_message_create
+            await client.interaction_response_message_create(
+                event, response, allowed_mentions = allowed_mentions, embed = embed, silent = True
+            )
         else:
-            function = type(client).interaction_response_message_edit
-        
-        await function(client, event, response, embed = embed, allowed_mentions = allowed_mentions)
+            await client.interaction_response_message_edit(
+                event, response, allowed_mentions = allowed_mentions, embed = embed
+            )

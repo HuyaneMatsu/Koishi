@@ -710,7 +710,7 @@ async def command_join_description(command_context):
 
 
 @VOICE_COMMAND_CLIENT.commands(name = 'join', description = command_join_description, category='VOICE')
-async def command_join(client, message, volume:int=None):
+async def command_join(client, message, volume: int = None):
     async for content in join(client, message.author, message.guild, volume):
         if (content is not None):
             yield content
@@ -798,7 +798,7 @@ async def command_move_description(command_context):
     )
 
 @VOICE_COMMAND_CLIENT.commands(name = 'move', description = command_move_description, category='VOICE')
-async def command_move(client, message, voice_channel: 'channel'=None):
+async def command_move(client, message, voice_channel: 'channel' = None):
     if (voice_channel is not None) and (not voice_channel.is_in_group_guild_connectable()):
         yield 'Please select a voice channel.'
         return

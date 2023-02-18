@@ -1876,7 +1876,7 @@ class StageSource:
     
     def __repr__(self):
         """Returns the stage source's representation."""
-        return f'<{self.__class__.__name__} id={self.id!r}>'
+        return f'<{self.__class__.__name__} id = {self.id!r}>'
 
 
 def pretty_dump_stage_sources(stage_sources):
@@ -2357,7 +2357,7 @@ class StageResult:
     
     def __repr__(self):
         """Returns the stage result's representation."""
-        return f'<{self.__class__.__name__} id={self.id!r}, stage_id={self.stage_id!r}, best={self.best!r}>'
+        return f'<{self.__class__.__name__} id = {self.id!r}, stage_id = {self.stage_id!r}, best = {self.best!r}>'
 
 
 async def get_user_state(user_id):

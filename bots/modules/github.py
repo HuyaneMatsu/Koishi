@@ -37,7 +37,7 @@ class GitHubQueryLimit:
 
 class GitHubQuery:
     __slots__ = ('active', 'limit', 'http', 'query_builder', 'cache', 'object_type')
-    def __new__(cls, query_builder, http, object_type, limit=None):
+    def __new__(cls, query_builder, http, object_type, limit = None):
         if limit is None:
             limit = GitHubQueryLimit()
         

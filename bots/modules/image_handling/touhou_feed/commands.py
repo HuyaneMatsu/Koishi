@@ -25,11 +25,13 @@ DEFAULT_DELTA = elapsed_time(RelativeDelta(seconds = DEFAULT_INTERVAL))
 
 EMOJI_PAGE_PREVIOUS = BUILTIN_EMOJIS['arrow_left']
 EMOJI_PAGE_NEXT = BUILTIN_EMOJIS['arrow_right']
+EMOJI_REFRESH = BUILTIN_EMOJIS['arrows_counterclockwise']
 EMOJI_CLOSE = BUILTIN_EMOJIS['x']
 
 CUSTOM_ID_CLOSE = 'auto_post.close'
 
 CUSTOM_ID_PAGE_BASE = 'auto_post.page.'
+CUSTOM_ID_REFRESH_BASE = 'auto_post.refresh.'
 
 CUSTOM_ID_PAGE_PREVIOUS_DISABLED = CUSTOM_ID_PAGE_BASE + 'd1'
 CUSTOM_ID_PAGE_NEXT_DISABLED = CUSTOM_ID_PAGE_BASE + 'd2'
@@ -51,8 +53,14 @@ BUTTON_NEXT_DISABLED = Button(
     enabled = False,
 )
 
+BUTTON_REFRESH_BASE = Button(
+    'Refresh',
+    EMOJI_REFRESH,
+)
+    
 BUTTON_CLOSE = Button(
-    emoji = EMOJI_CLOSE,
+    'Close',
+    EMOJI_CLOSE,
     custom_id = CUSTOM_ID_CLOSE,
 )
 
@@ -287,7 +295,7 @@ def join_handler_keys(handler_keys):
     return ''.join(join_parts)
 
 
-def build_listing_page_embed(client, guild, page):
+def build_listing_page_response(client, guild, page):
     """
     Builds listing page embed for the given page index.
     
@@ -392,7 +400,12 @@ def build_listing_page_embed(client, guild, page):
     
     return InteractionResponse(
         embed = embed,
-        components = Row(button_previous_page, button_next_page, BUTTON_CLOSE),
+        components = Row(
+            button_previous_page,
+            button_next_page,
+            BUTTON_REFRESH_BASE.copy_with(custom_id = f'{CUSTOM_ID_REFRESH_BASE}{page}'),
+            BUTTON_CLOSE,
+        ),
     )
 
 
@@ -419,7 +432,7 @@ async def list_channels(
     if not event.user_permissions & REQUIRED_PERMISSIONS:
         abort(f'Insufficient permissions.')
     
-    return build_listing_page_embed(client, guild, page)
+    return build_listing_page_response(client, guild, page)
 
 
 @SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_PAGE_PREVIOUS_DISABLED, CUSTOM_ID_PAGE_NEXT_DISABLED])
@@ -431,7 +444,14 @@ async def disabled_page_move():
 async def page_move(client, event, page):
     guild = event.guild
     if (guild is not None) and (event.user_permissions & REQUIRED_PERMISSIONS):
-        return build_listing_page_embed(client, guild, int(page))
+        return build_listing_page_response(client, guild, int(page))
+
+
+@SLASH_CLIENT.interactions(custom_id = re_compile(re_escape(CUSTOM_ID_REFRESH_BASE) + '(\d+)'))
+async def page_refresh(client, event, page):
+    guild = event.guild
+    if (guild is not None) and (event.user_permissions & REQUIRED_PERMISSIONS):
+        return build_listing_page_response(client, guild, int(page))
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)

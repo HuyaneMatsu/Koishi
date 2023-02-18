@@ -388,41 +388,41 @@ class RLTPrinterBuffer:
         
         
 async def reaction_add(client,message,emoji,):
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     reaction=emoji.as_reaction
     return await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
         )
         
 async def reaction_delete(client,message,emoji,user,):
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     reaction=emoji.as_reaction
-    user_id=user.id
+    user_id = user.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/{user_id}',
         )
 
 async def reaction_delete_own(client,message,emoji,):
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     reaction=emoji.as_reaction
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
         )
 
 async def reaction_clear(client,message,):
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions',)
 
 async def reaction_user_get_chunk(client,message,emoji,):
     if message.reactions is None:
         return []
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     reaction=emoji.as_reaction
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}',
@@ -443,8 +443,8 @@ async def message_create(client, channel, content=None, embed = None,):
     return channel._create_new_message(data)
 
 async def message_delete(client,message,):
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',)
 
@@ -454,7 +454,7 @@ async def message_delete_multiple(client,messages,):
     if len(messages)==1:
         return message_delete(client,messages[0])
     data={'messages':[message.id for message in messages]}
-    channel_id=messages[0].channel.id
+    channel_id = messages[0].channel.id
     return await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/bulk-delete',
         data,)
@@ -465,28 +465,28 @@ async def message_edit(client,message,content=None,embed = None,):
         data['content']=content
     if embed is not None:
         data['embed']=embed.to_data()
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}',
         data,)
 
 async def message_pin(client,message,):
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     return await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/pins/{message_id}',
         )
 
 async def message_unpin(client,message,):
-    channel_id=message.channel.id
-    message_id=message.id
+    channel_id = message.channel.id
+    message_id = message.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/pins/{message_id}',
         )
 
 async def message_pinneds(client,channel,):
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/pins',
         )
@@ -513,7 +513,7 @@ async def download_attachment(client,attachment,):
 
 
 async def typing(client,channel,):
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/typing',
         )
@@ -543,13 +543,13 @@ async def client_connection_get_all(client,):
         )
 
 async def client_guild_profile_nick_edit(client, guild, nick,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client, METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/@me/nick',
         {'nick':nick},)
 
 async def client_guild_profile_edit(client, guild, nick,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client, METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/@me',
         {'nick':nick},)
@@ -587,23 +587,23 @@ async def permission_overwrite_create(client,channel,target,allow,deny,):
         'deny':deny,
         'type':type_,
     }
-    channel_id=channel.id
-    overwrite_id=target.id
+    channel_id = channel.id
+    overwrite_id = target.id
     await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/permissions/{overwrite_id}',
         data,)
 
 
 async def permission_overwrite_delete(client,channel,overwrite,):
-    channel_id=channel.id
-    overwrite_id=overwrite.target.id
+    channel_id = channel.id
+    overwrite_id = overwrite.target.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/permissions/{overwrite_id}',
         )
 
 async def channel_edit(client,channel,name = '',topic='',nsfw = None,slowmode=None,user_limit=None,bitrate=None,type_=128,):
     data={}
-    value=channel.type
+    value = channel.type
     if name:
         if not 1<len(name)<101:
             raise ValueError(f'Invalid nam length {len(name)}, should be 2-100')
@@ -621,7 +621,7 @@ async def channel_edit(client,channel,name = '',topic='',nsfw = None,slowmode=No
             if type_!=value:
                 data['type']=type_
         
-    if value==0:
+    if value == 0:
         if nsfw is not None:
             data['nsfw']=nsfw
             
@@ -630,7 +630,7 @@ async def channel_edit(client,channel,name = '',topic='',nsfw = None,slowmode=No
                 raise ValueError(f'Invalid slowmode {slowmode}, should be 0-120')
             data['rate_limit_per_user']=slowmode
 
-    elif value==2:
+    elif value == 2:
         if bitrate<8000 or bitrate>(96000,128000)['VIP' in channel.guild.feautres]:
             raise ValueError(f'Invalid bitrate {bitrate!r}, should be 8000-96000 (128000 for vip)')
         data['bitrate']=bitrate
@@ -640,13 +640,13 @@ async def channel_edit(client,channel,name = '',topic='',nsfw = None,slowmode=No
                 raise ValueError(f'Invalid user_limit {user_limit!r}, should be 0 for unlimited or 1-99')
             data['user_limit']=user_limit
 
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/channels/{channel_id}',
         data,)
 
 async def channel_delete(client,channel,):
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}',
         )
@@ -672,13 +672,13 @@ async def invite_create(client,channel,):
         'temporary' : False,
         'unique'    : True,
             }
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/invites',
         data,)
 
 async def invite_get_channel(client,channel,):
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/invites',
         )
@@ -688,14 +688,14 @@ async def webhook_create(client,channel,name,avatar=b'',):
     if avatar:            
         data['avatar']=image_to_base64(avatar)
             
-    channel_id=channel.id
+    channel_id = channel.id
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/webhooks',
         data,)
     return Webhook.from_data(data)
 
 async def webhook_get_all_channel(client,channel,):
-    channel_id=channel.id
+    channel_id = channel.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/channels/{channel_id}/webhooks',
         )
@@ -736,7 +736,7 @@ async def guild_get(client, guild_id,):
         )
 
 async def guild_delete(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}',
         )
@@ -747,39 +747,39 @@ async def guild_edit(client, guild, afk_channel = ...): #keep it short
     if (afk_channel is not ...):
         data['afk_channel'] = None if afk_channel is None else afk_channel.id
     
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}',
         data,)
 
 async def audit_log_get_chunk(client, guild,):
     data={'limit':100}
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/audit-logs',
         params=data,)
 
 async def guild_ban_get_all(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans',
         )
 
 async def guild_ban_add(client, guild,user_id,):
     data={'delete_message_seconds':0}
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         params=data,)
 
 async def guild_ban_delete(client, guild,user_id,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         )
 
 async def guild_ban_get(client, guild,user_id,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/bans/{user_id}',
         )
@@ -1237,13 +1237,13 @@ async def emoji_edit(client,emoji,name,): #keep it short
         data,)
 
 async def integration_get_all(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/integrations',
         )
 
 async def invite_get_all_guild(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/invites',
         )
@@ -1256,8 +1256,8 @@ async def guild_user_delete(client, guild, user,):
         )
 
 async def user_edit(client, guild,user,nick,mute=False,):
-    guild_id=guild.id
-    user_id=user.id
+    guild_id = guild.id
+    user_id = user.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
         data={'nick':nick,'mute':mute},)
@@ -1275,34 +1275,34 @@ async def guild_user_add(client, guild, user,):
     )
 
 async def user_role_add(client,user,role,):
-    guild_id=role.guild.id
-    user_id=user.id
-    role_id=role.id
+    guild_id = role.guild.id
+    user_id = user.id
+    role_id = role.id
     return await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
         )
 
 async def user_role_delete(client,user,role,):
-    guild_id=role.guild.id
-    user_id=user.id
-    role_id=role.id
+    guild_id = role.guild.id
+    user_id = user.id
+    role_id = role.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}/roles/{role_id}',
         )
 
 async def guild_prune(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
         params={'days':30},)
 
 async def guild_prune_estimate(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/prune',
         params={'days':30},)
 
-async def role_create(client, guild,name=None,permissions = None,color = None,
+async def role_create(client, guild,name = None,permissions = None,color = None,
         separated=None,mentionable=None,reason = None,):
 
     data={}
@@ -1317,7 +1317,7 @@ async def role_create(client, guild,name=None,permissions = None,color = None,
     if mentionable is not None:
         data['mentionable']=mentionable
 
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
         data=data,)
@@ -1325,13 +1325,13 @@ async def role_create(client, guild,name=None,permissions = None,color = None,
 async def role_move(client,role,new_position,):
     guild = role.guild
     data= change_on_switch(guild.role_list, role, new_position, key = role_move_key)
-    guild_id=role.guild.id
+    guild_id = role.guild.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
         data=data,)
 
 async def role_edit(client,role,color = None,separated=None,mentionable=None,
-        name=None,permissions = None,):
+        name = None,permissions = None,):
     
     if color is None:
         color = role.color
@@ -1340,7 +1340,7 @@ async def role_edit(client,role,color = None,separated=None,mentionable=None,
     if mentionable is None:
         mentionable=role.mentionable
     if name is None:
-        name=role.name
+        name = role.name
     if permissions is None:
         permissions = role.permissions
 
@@ -1351,28 +1351,28 @@ async def role_edit(client,role,color = None,separated=None,mentionable=None,
         'hoist'       : separated,
         'mentionable' : mentionable,
             }
-    guild_id=role.guild.id
-    role_id=role.id
+    guild_id = role.guild.id
+    role_id = role.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles/{role_id}',
         data=data,)
 
 async def role_delete(client,role,):
-    guild_id=role.guild.id
-    role_id=role.id
+    guild_id = role.guild.id
+    role_id = role.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles/{role_id}',
         )
 
 
 async def webhook_get_all_guild(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/webhooks',
         )
 
 async def guild_widget_image(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/widget.png',
         params={'style':'shield'},decode=False,headers={},)
@@ -1434,25 +1434,25 @@ async def guild_get_all(client,):
         params={'after':0},)
 
 async def user_get(client,user,):
-    user_id=user.id
+    user_id = user.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/users/{user_id}',
         )
 
 async def webhook_get(client,webhook,):
-    webhook_id=webhook.id
+    webhook_id = webhook.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/webhooks/{webhook_id}',
         )
 
 async def webhook_delete(client,webhook,):
-    webhook_id=webhook.id
+    webhook_id = webhook.id
     return  bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/webhooks/{webhook_id}',
         )
 
 async def webhook_edit(client,webhook,name,): #keep it short
-    webhook_id=webhook.id
+    webhook_id = webhook.id
     return await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/webhooks/{webhook_id}',
         data={'name':name},)
@@ -1497,31 +1497,31 @@ async def webhook_message_get(client, webhook, message_id):
         headers={},)
 
 async def guild_user_get_chunk(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members',
         )
 
 async def guild_voice_region_get_all(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/regions',
         )
 
 async def guild_channels(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/channels',
         )
 
 async def guild_role_get_all(client, guild,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/roles',
         )
 
 async def guild_user_get(client, guild,user_id,):
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
         )
@@ -1537,7 +1537,7 @@ async def guild_user_search(client, guild, query, limit=1):
     else:
         raise ValueError('`limit` can be between 1 and 1000, got `{limit}`')
     
-    guild_id=guild.id
+    guild_id = guild.id
     return await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/search', params = data,
             )
@@ -1548,8 +1548,8 @@ async def guild_widget_get(client, guild_id,):
         headers={},)
 
 async def message_suppress_embeds(client,message,suppress=True,):
-    message_id=message.id
-    channel_id=message.channel.id
+    message_id = message.id
+    channel_id = message.channel.id
     return await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/suppress-embeds',
         data={'suppress':suppress},)
@@ -1564,7 +1564,7 @@ async def channel_follow(client,source_channel,target_channel,):
         'webhook_channel_id': target_channel.id,
             }
     
-    channel_id=source_channel.id
+    channel_id = source_channel.id
     
     data = await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/channels/{channel_id}/followers',
@@ -1573,7 +1573,7 @@ async def channel_follow(client,source_channel,target_channel,):
     return webhook
 
 async def achievement_get(client,achievement_id,):
-    application_id=client.application.id
+    application_id = client.application.id
         
     data = await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
@@ -1597,7 +1597,7 @@ async def achievement_create(client,name,description,icon,secret=False,secure=Fa
         'icon'          : icon_data,
     }
 
-    application_id=client.application.id
+    application_id = client.application.id
         
     data =  await bypass_request(client,METHOD_POST,
         f'{API_ENDPOINT}/applications/{application_id}/achievements',
@@ -1606,13 +1606,13 @@ async def achievement_create(client,name,description,icon,secret=False,secure=Fa
     return Achievement(data)
 
 async def achievement_delete(client,achievement,):
-    application_id=client.application.id
-    achievement_id=achievement.id
+    application_id = client.application.id
+    achievement_id = achievement.id
     await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
         )
 
-async def achievement_edit(client,achievement,name=None,description = None,secret=None,secure=None,icon=...,):
+async def achievement_edit(client,achievement,name = None,description = None,secret=None,secure=None,icon=...,):
     data={}
     if (name is not None):
         data['name'] = {
@@ -1631,8 +1631,8 @@ async def achievement_edit(client,achievement,name=None,description = None,secre
     if (icon is not ...):
         data['icon'] = image_to_base64(icon)
     
-    application_id=client.application.id
-    achievement_id=achievement.id
+    application_id = client.application.id
+    achievement_id = achievement.id
     
     data = await bypass_request(client,METHOD_PATCH,
         f'{API_ENDPOINT}/applications/{application_id}/achievements/{achievement_id}',
@@ -1642,7 +1642,7 @@ async def achievement_edit(client,achievement,name=None,description = None,secre
     return achievement
 
 async def achievement_get_all(client,):
-    application_id=client.application.id
+    application_id = client.application.id
     
     data = await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/applications/{application_id}/achievements',
@@ -1653,9 +1653,9 @@ async def achievement_get_all(client,):
 async def user_achievement_update(client,user,achievement,percent_complete,):
     data={'percent_complete':percent_complete}
     
-    user_id=user.id
-    application_id=client.application.id
-    achievement_id=achievement.id
+    user_id = user.id
+    application_id = client.application.id
+    achievement_id = achievement.id
     
     await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/users/{user_id}/applications/{application_id}/achievements/{achievement_id}',
@@ -1665,7 +1665,7 @@ async def user_achievements(client,access,):
     headers=IgnoreCaseMultiValueDictionary()
     headers[AUTHORIZATION]=f'Bearer {access.access_token}'
     
-    application_id=client.application.id
+    application_id = client.application.id
     
     data = await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/users/@me/applications/{application_id}/achievements',
@@ -1696,7 +1696,7 @@ async def guild_discovery_get(client, guild):
         f'{API_ENDPOINT}/guilds/{guild_id}/discovery-metadata')
     return GuildDiscovery.from_data(guild_discovery_data)
 
-async def guild_discovery_edit(client, guild, primary_category_id=..., keywords=...,
+async def guild_discovery_edit(client, guild, primary_category_id = ..., keywords=...,
             emoji_discovery=...):
     
     guild_id = guild.id
@@ -2363,7 +2363,7 @@ async def sticker_get(client, sticker_id):
     return Sticker.from_data(sticker_data)
 
 
-async def sticker_guild_edit(client, guild, sticker, name=None, description = None, tags=None):
+async def sticker_guild_edit(client, guild, sticker, name = None, description = None, tags=None):
     if tags is None:
         tags = ', '.join(sticker.tags)
     else:
@@ -2901,7 +2901,7 @@ async def rate_limit_test_0012(client,message):
     with RLTCTX(client,channel,'rate_limit_test_0012') as RLT:
         await client.message_create(channel, (
             'Please authorize yourself and resend the redirected url after it\n'
-            'https://discordapp.com/oauth2/authorize?client_id=486565096164687885'
+            'https://discordapp.com/oauth2/authorize?client_id = 486565096164687885'
             '&redirect_uri=https%3A%2F%2Fgithub.com%2FHuyaneMatsu'
             '&response_type=code&scope=identify%20applications.store.update'))
         
@@ -3192,7 +3192,7 @@ async def rate_limit_test_0023(client,message):
             await RLT.send('I need admin permission to complete this command.')
         
         data = await role_create(client, guild, name = 'Yukari')
-        role_id=int(data['id'])
+        role_id = int(data['id'])
         await client.http.role_delete(guild.id,role_id,None)
 
 @RATE_LIMIT_COMMANDS
@@ -4620,7 +4620,7 @@ async def rate_limit_test_0095(client, message):
             await RLT.send('I need admin permission to complete this command.')
         
         for name in ('ayaya', 'nyan', 'ahaha'):
-            await channel_edit(client, channel, name=name)
+            await channel_edit(client, channel, name = name)
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0096(client, message):
@@ -5897,7 +5897,7 @@ async def rate_limit_test_0151(client, message, sticker_id:int=None, name:str = 
         
         sticker = await client.sticker_get(sticker_id)
         
-        await sticker_guild_edit(client, guild, sticker, name=name)
+        await sticker_guild_edit(client, guild, sticker, name = name)
 
 
 @RATE_LIMIT_COMMANDS

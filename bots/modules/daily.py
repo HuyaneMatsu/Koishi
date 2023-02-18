@@ -342,7 +342,9 @@ async def get_waifus_with_name(event, value):
 
 
 @SLASH_CLIENT.interactions(is_global = True)
-async def daily(client, event,
+async def daily(
+    client,
+    event,
     target_user_name: ('str', 'Anyone to gift your daily love?', 'waifu') = None,
 ):
     """Claim a share of my love every day for yourself or for your waifu."""

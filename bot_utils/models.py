@@ -187,7 +187,7 @@ if (DB_ENGINE is not None):
     
     TODO_TABLE = todo_model.__table__
     
-        
+    
     class waifu_stats_model(BASE):
         __tablename__ = 'WAIFU_STATS'
         

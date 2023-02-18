@@ -132,8 +132,8 @@ BS_GAMES = {}
 BS_REQUESTERS = set()
 BS_REQUESTS = {}
 
-@configure_converter('user', everywhere=True)
-async def battle_manager(client, message, target:'user'=None):
+@configure_converter('user', everywhere = True)
+async def battle_manager(client, message, target: 'user' = None):
     text = None
     while True:
         if target is None:

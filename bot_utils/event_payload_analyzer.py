@@ -704,12 +704,12 @@ class Guesser(RichAttributeErrorBaseType):
         """Returns the guesser's representation."""
         repr_parts = ['<', self.__class__.__name__]
         
-        repr_parts.append(' name=')
+        repr_parts.append(' name = ')
         repr_parts.append(repr(self.name))
         
         sub_node_type = self.sub_node_type
         if (sub_node_type is not None):
-            repr_parts.append(', sub_node_type=')
+            repr_parts.append(', sub_node_type = ')
             repr_parts.append(repr(sub_node_type))
         
         repr_parts.append('>')

@@ -866,9 +866,9 @@ async def avatar_3(client, message, user: 'user'=None):
 
 
 @TEST_COMMANDS
-@configure_converter('user', 0, name=True)
-@configure_converter('channel', 0, name=True)
-@configure_converter('role', 0, name=True)
+@configure_converter('user', 0, name = True)
+@configure_converter('channel', 0, name = True)
+@configure_converter('role', 0, name = True)
 async def what_is_it_2(client, message, entity: {'user', 'channel', 'role'}):
     if isinstance(entity, UserBase):
         result = 'user'
@@ -943,19 +943,19 @@ async def estimate_fast_delete_before_2020_02_00(client, message):
 async def do_delete(client, message):
     """
     from config import KOISHI_ID, SATORI_ID, KOISHI_TOKEN, SATORI_TOKEN
-    Koishi = Client(KOISHI_TOKEN, client_id=KOISHI_ID)
+    Koishi = Client(KOISHI_TOKEN, client_id = KOISHI_ID)
     await Koishi.start()
-    Satori = Client(SATORI_TOKEN, client_id=SATORI_ID)
+    Satori = Client(SATORI_TOKEN, client_id = SATORI_ID)
     await Satori.start()
-    await sleep(5., )
+    await sleep(5.0)
     """
     start = perf_counter()
-    await client.multi_client_message_delete_sequence(message.channel, before=datetime(2020, 2, 1))
+    await client.multi_client_message_delete_sequence(message.channel, before = datetime(2020, 2, 1))
     end = perf_counter()
     """
     await Koishi.stop()
     await Satori.stop()
-    await sleep(1., KOKORO)
+    await sleep(1.0, KOKORO)
     Koishi._delete()
     Satori._delete()
     Koishi = None
@@ -974,7 +974,7 @@ async def test_2_attachments(client, message):
     """
     with await ReuAsyncIO(os.path.join(PATH__KOISHI, 'images', '0000001E_yakumo_yukari_chen.gif')) as file1:
         with await ReuAsyncIO(os.path.join(PATH__KOISHI, 'images', '0000001F_yuri_hug.gif')) as file2:
-            await client.message_create(message.channel, file=[file1, file2])
+            await client.message_create(message.channel, file = [file1, file2])
 
 @TEST_COMMANDS
 async def test_webhook_message_edit_0(client, message):

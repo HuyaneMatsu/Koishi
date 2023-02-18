@@ -455,8 +455,8 @@ async def edit(
     return Form(
         f'Editing todo entry #{entry.entry_id}',
         [
-            TEXT_INPUT_NAME.copy_with(value=entry.name),
-            TEXT_INPUT_DESCRIPTION.copy_with(value=entry.description),
+            TEXT_INPUT_NAME.copy_with(value = entry.name),
+            TEXT_INPUT_DESCRIPTION.copy_with(value = entry.description),
         ],
         custom_id = f'{CUSTOM_ID_EDIT_BASE}.{entry.entry_id}.form',
     )

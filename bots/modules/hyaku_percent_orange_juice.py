@@ -314,7 +314,8 @@ class OJEntityBase:
         return self.id < other.id
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} id={self.id}, name={self.name!r}>'
+        return f'<{self.__class__.__name__} id = {self.id}, name = {self.name!r}>'
+
 
 class OJOrigin(OJEntityBase):
     __slots__ = ()
@@ -337,12 +338,26 @@ class OJEvent(OJEntityBase):
         EVENTS[identifier] =self
         return self
 
+
 class OJCharacter(OJEntityBase):
-    __slots__ = ('description', 'hyper_cards', 'origin', 'attack', 'defense', 'evasion', 'recovery', 'hp',
-        'card_name',)
+    __slots__ = (
+        'description', 'hyper_cards', 'origin', 'attack', 'defense', 'evasion', 'recovery', 'hp', 'card_name'
+    )
     
-    def __new__(cls, identifier, name, hp, attack, defense, evasion, recovery, origin, description, hyper_cards,
-            card_name=None):
+    def __new__(
+        cls,
+        identifier,
+        name,
+        hp,
+        attack,
+        defense,
+        evasion,
+        recovery,
+        origin,
+        description,
+        hyper_cards,
+        card_name = None,
+    ):
         self = object.__new__(cls)
         self.id = identifier
         self.name = name

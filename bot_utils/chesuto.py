@@ -96,7 +96,7 @@ class Rarity:
         self.BY_NAME[name.lower()] = self
 
     def __repr__(self):
-        return f'{self.__class__.__name__}(name={self.name}, index={self.index})'
+        return f'{self.__class__.__name__}(name = {self.name}, index = {self.index})'
     
     
     def __gt__(self, other):
@@ -244,7 +244,7 @@ class Card:
     
     def render_to_embed(self):
         title_parts=['**']
-        name=self.name
+        name = self.name
         if len(name)>EMBED_NAME_LENGTH:
             title=name[:EMBED_NAME_LENGTH]
             title_parts.append(title)
@@ -278,7 +278,7 @@ class Card:
     def render_to(self, parts):
         parts.append('**')
         
-        name=self.name
+        name = self.name
         if len(name)<=EMBED_NAME_LENGTH:
             parts.append(name)
         else:
@@ -343,7 +343,7 @@ class Card:
     
     @classmethod
     def update(cls,description,id_,name,rarity):
-        lower_name=name.lower()
+        lower_name = name.lower()
         try:
             card=CARDS_BY_NAME[lower_name]
         except KeyError:
@@ -351,7 +351,7 @@ class Card:
             result = True
         else:
             card.description = description
-            card.name=name
+            card.name = name
             card.rarity=rarity
             card._length_hint=0
             result = False
@@ -397,14 +397,14 @@ class Card:
             with open(CARDS_FILE,'r') as file:
                 cards_data = json.load(file)
         except FileNotFoundError:
-            exception='file not found'
+            exception = 'file not found'
         except OSError as err:
-            exception=err.strerror
+            exception = err.strerror
         else:
             if type(cards_data) is list:
-                exception=None
+                exception = None
             else:
-                exception=f'Expected type \'list\' for \'cards_data\', got \'{cards_data.__class__.__name__}\''
+                exception = f'Expected type \'list\' for \'cards_data\', got \'{cards_data.__class__.__name__}\''
         
         if exception is not None:
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n')
@@ -413,7 +413,7 @@ class Card:
         for card_data in cards_data:
             while True:
                 if type(card_data) is not dict:
-                    exception=f'Expcted type \'dict\' for \'card_data\', got \'{card_data.__class__.__name__}\''
+                    exception = f'Expected type \'dict\' for \'card_data\', got \'{card_data.__class__.__name__}\''
                     break
                 
                 try:
@@ -433,42 +433,42 @@ class Card:
                     break
                 
                 if type(id_) is not int:
-                    exception=f'Expected type \'int\' for \'id\', got \'{id_.__class__.__name__}\''
+                    exception = f'Expected type \'int\' for \'id\', got \'{id_.__class__.__name__}\''
                     break
                 
                 image_name = card_data.get('image_name', None)
                 if (image_name is not None):
                     if type(image_name) is not str:
-                        exception=f'Expected type \'str\' or None for \'image_name\', got \'{image_name.__class__.__name__}\''
+                        exception = f'Expected type \'str\' or None for \'image_name\', got \'{image_name.__class__.__name__}\''
                         break
                     
                     if not os.path.isfile(os.path.join(CHESUTO_FOLDER,image_name)):
-                        image_name=None
+                        image_name = None
                 
                 try:
-                    name=card_data['name']
+                    name = card_data['name']
                 except KeyError:
                     exception='No \'name\' key'
                     break
                 
                 if type(name) is not str:
-                    exception=f'Expected type \'str\' for \'name\', got \'{name.__class__.__name__}\''
+                    exception = f'Expected type \'str\' for \'name\', got \'{name.__class__.__name__}\''
                     break
                 
                 try:
-                    rarity=card_data['rarity']
+                    rarity = card_data['rarity']
                 except KeyError:
-                    exception='No \'rarity\' key'
+                    exception = 'No \'rarity\' key'
                     break
 
                 if type(rarity) is not int:
-                    exception=f'Expected type \'int\' for \'rarity\', got \'{rarity.__class__.__name__}\''
+                    exception = f'Expected type \'int\' for \'rarity\', got \'{rarity.__class__.__name__}\''
                     break
 
                 try:
-                    rarity=Rarity.INSTANCES[rarity]
+                    rarity = Rarity.INSTANCES[rarity]
                 except IndexError:
-                    exception=f'No such \'rarity\' index: {rarity}'
+                    exception = f'No such \'rarity\' index: {rarity}'
                     break
                 
                 flags=card_data.get('flags',0)
@@ -479,12 +479,12 @@ class Card:
                 continue
             
             sys.stderr.write(f'Exception at loading cards:\n{exception}\n At data part:\n{card_data}\n')
-            exception=None
+            exception = None
             continue
 
 
 def get_card(value):
-    if not 2<len(value)<2001:
+    if not 2 < len(value) < 2001:
         return
         
     value = value.lower()

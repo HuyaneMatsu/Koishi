@@ -393,26 +393,26 @@ class Item:
         """Returns the item's representation."""
         result = ['<', self.__class__.__name__]
         
-        result.append(' id=')
+        result.append(' id = ')
         result.append(repr(self.id))
         
-        result.append(', name=')
+        result.append(', name = ')
         result.append(repr(self.name))
         
-        result.append(', emoji=')
+        result.append(', emoji = ')
         result.append(repr(self.emoji.name))
         
-        result.append(', cost=')
+        result.append(', cost = ')
         result.append(repr(self.cost))
         
         cooking = self.cooking
         if (cooking is not None):
-            result.append(', cooking=')
+            result.append(', cooking = ')
             result.append(repr(cooking))
         
         edibility = self.edibility
         if (edibility is not None):
-            result.append(', edibility=')
+            result.append(', edibility = ')
             result.append(repr(edibility))
         
         result.append('>')

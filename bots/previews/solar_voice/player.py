@@ -27,7 +27,7 @@ class Player(SolarPlayer):
         return duration
     
     
-    def check_auto_leave(self, channel_id=0):
+    def check_auto_leave(self, channel_id = 0):
         try:
             guild = GUILDS[self.guild_id]
         except KeyError:

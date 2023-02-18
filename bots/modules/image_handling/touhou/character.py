@@ -58,7 +58,7 @@ class TouhouCharacter:
     
     def __repr__(self):
         """Returns the touhou character's representation."""
-        return ''.join(['<', self.__class__.__name__, ' name=', repr(self.name), '>'])
+        return ''.join(['<', self.__class__.__name__, ' name = ', repr(self.name), '>'])
     
     
     def __hash__(self):

@@ -533,12 +533,31 @@ def reset_auto_posters(client):
     """
     for guild in SLASH_CLIENT.guilds:
         for channel in chain(guild.channels.values(), guild.threads.values()):
-            reset_channel(client, channel)
+            reset_channel_single(client, channel)
 
 
 def reset_channel(client, channel):
     """
-    Resets the given channel of auto posting.
+    Resets the given channel of auto posting. If the channel is a guild forum, it goes through all of its threads.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who would post.
+    channel : ``Channel``
+        The channel to reset.
+    """
+    if channel.is_guild_forum():
+        for thread in channel.iter_threads():
+            reset_channel_single(client, thread)
+    
+    else:
+        reset_channel_single(client, channel)
+
+
+def reset_channel_single(client, channel):
+    """
+    Resets the given channel of auto posting. Not like ``reset_channel`` this does check only the channel.
     
     Parameters
     ----------

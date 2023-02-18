@@ -1022,21 +1022,21 @@ class AutoReactRoleManager:
                 re_do = True
                 continue
             
-            relations[emoji]=role
+            relations[emoji] = role
         
         if re_do:
             if relations:
                 data = bytearray(320)
                 position = 0
                 for emoji, role in relations.items():
-                    data[position:position + 8]=emoji.id.to_bytes(8, byteorder='big')
-                    position +=8
-                    data[position:position + 8]=role.id.to_bytes(8, byteorder='big')
-                    position +=8
+                    data[position:position + 8] = emoji.id.to_bytes(8, byteorder = 'big')
+                    position += 8
+                    data[position:position + 8] = role.id.to_bytes(8, byteorder = 'big')
+                    position += 8
                 
                 await connector.execute(AUTO_REACT_ROLE_TABLE.update().values(
                     data  = data,
-                        ).where(auto_react_role_model.id==query.id))
+                ).where(auto_react_role_model.id == query.id))
             else:
                 await connector.execute(AUTO_REACT_ROLE_TABLE.delete().where(
                     auto_react_role_model.id == query.id))

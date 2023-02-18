@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Title -->
+    <title>{{ title }}</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='core_shared_20230216.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='markdown_shared_20220411.css') }}">
+    
+    <!-- JS -->
+    <script type="module">
+        var theme = localStorage.getItem('theme');
+        if (theme != null){
+            document.documentElement.setAttribute('variable-theme', theme);
+        }
+    </script>
+
+</head>
+<body>
+    <div class="background"></div>
+
+    <section class="main_block no_headers" style>
+        <div class="md">
+            {{ markdown|safe }}
+        </div>
+    </section>
+</body>

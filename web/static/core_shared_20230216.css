@@ -994,7 +994,10 @@ hr {
     margin-top: var(--size-header-height);
 }
 
-
+.main_block[class~="no_headers"] {
+    margin-top: 0;
+    padding-top: var(--size-header-height);
+}
 
 table tbody tr:nth-child(even) {
     background-color: var(--color-generic-table-line-even-background);

@@ -27,6 +27,7 @@ for path in (
     'hata_index',
     'hata_guides',
     'koishi_api',
+    'koishi_static',
 ):
     
     ROUTES = __import__(

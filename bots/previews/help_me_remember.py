@@ -66,7 +66,7 @@ class Detail:
     """
     __slots__ = ('name', 'category', 'mutually_exclusive_with', 'value_by_question_type', 'sort_value')
     
-    def __new__(cls, category, name, *, value_by_question_type=None):
+    def __new__(cls, category, name, *, value_by_question_type = None):
         self = object.__new__(cls)
         self.category = category
         self.name = name
@@ -86,7 +86,7 @@ class Detail:
     
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} name={self.name!r}>'
+        return f'<{self.__class__.__name__} name = {self.name!r}>'
     
     
     def __eq__(self, other):
@@ -215,7 +215,7 @@ class DescribedObject:
     
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} name={self.object.name}, details={self.details!r}>'
+        return f'<{self.__class__.__name__} name = {self.object.name}, details = {self.details!r}>'
 
 
 class Object:
@@ -263,7 +263,7 @@ class Object:
     
     
     def __repr__(self):
-        return f'<{self.__class__.__name__} name={self.name!r}>'
+        return f'<{self.__class__.__name__} name = {self.name!r}>'
     
     
     def __eq__(self, other):

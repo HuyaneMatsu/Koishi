@@ -183,6 +183,7 @@ async def ready(client):
         f'channel count: {len(CHANNELS)}\n'
     )
 
+
 async def execute_description(client, message):
     prefix = client.command_processor.get_prefix_for(message)
     return Embed(

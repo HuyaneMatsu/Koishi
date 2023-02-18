@@ -219,7 +219,7 @@ async def do_rename():
         names = await get_random_names(count)
         
         for channel, name in zip(channels, names):
-            await COMMAND_CLIENT.channel_edit(channel, name=name)
+            await COMMAND_CLIENT.channel_edit(channel, name = name)
 
 
 def cycle_rename():
@@ -229,7 +229,7 @@ def cycle_rename():
 NAME_CYCLER_HANDLER = Cell()
 
 COMMAND_CLIENT: Client
-COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks=[checks.has_role(ROLE__SUPPORT__MODERATOR)])
+COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks = [checks.has_role(ROLE__SUPPORT__MODERATOR)])
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(

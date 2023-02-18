@@ -582,7 +582,7 @@ class Game21PlayerRunner:
         
         # We do nothing.
     
-    def cancel(self, exception=None):
+    def cancel(self, exception = None):
         canceller = self.canceller
         if canceller is None:
             return
@@ -1266,7 +1266,7 @@ class Game21JoinGUI:
             timeouter.cancel()
     
     
-    def cancel(self, exception=None):
+    def cancel(self, exception = None):
         canceller = self.canceller
         if canceller is None:
             return

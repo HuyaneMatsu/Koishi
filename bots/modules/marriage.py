@@ -10,7 +10,7 @@ from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE, ge
     waifu_list_model, WAIFU_LIST_TABLE, waifu_proposal_model, WAIFU_PROPOSAL_TABLE
 from bot_utils.constants import EMOJI__HEART_CURRENCY, WAIFU_COST_DEFAULT
 from bot_utils.utils import send_embed_to
-from bot_utils.user_getter import get_user
+from bot_utils.user_getter import get_user, get_users_unordered
 
 from sqlalchemy import func as alchemy_function, and_, or_
 from sqlalchemy.sql import select
@@ -158,7 +158,9 @@ async def waifu_info(event,
 
 
 @SLASH_CLIENT.interactions(is_global = True)
-async def propose(client, event,
+async def propose(
+    client,
+    event,
     user: ('user', 'The user to propose to.'),
     amount: ('int', 'The amount of love to propose with.'),
 ):
@@ -532,7 +534,8 @@ PROPOSAL = SLASH_CLIENT.interactions(
 )
 
 @PROPOSAL.interactions
-async def list_outgoing(event,
+async def list_outgoing(
+    event,
     user: ('user', 'The user to list proposals of.') = None,
 ):
     """Lists outgoing proposals."""
@@ -541,7 +544,8 @@ async def list_outgoing(event,
 
 
 @PROPOSAL.interactions
-async def list_incoming(event,
+async def list_incoming(
+    event,
     user: ('user', 'The user to list proposals of.') = None,
 ):
     """Lists incoming proposals."""
@@ -619,10 +623,67 @@ async def list_proposals(event, user, outgoing):
     return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
+async def get_proposing_ids(user_id, outgoing):
+    async with DB_ENGINE.connect() as connector:
+        if outgoing:
+            to_execute = select(
+                [
+                    waifu_proposal_model.target_id,
+                ]
+            ).where(
+                waifu_proposal_model.source_id == user_id,
+            )
+        else:
+            to_execute = select(
+                [
+                    waifu_proposal_model.source_id,
+                ]
+            ).where(
+                waifu_proposal_model.target_id == user_id,
+            )
+        
+        response = await connector.execute(to_execute)
+        
+        results = await response.fetchall()
+        
+        return [waifu_id for (waifu_id,) in results]
+
+
+async def get_one_proposing_with_name(event, name, outgoing):
+    user_id = event.user.id
+    waifu_ids = await get_proposing_ids(user_id, outgoing)
+    waifus = await get_users_unordered(waifu_ids)
+    
+    for waifu in waifus:
+        if waifu.has_name_like_at(name, event.guild_id):
+            return waifu
+
+
+async def get_all_proposing_with_name(event, value, outgoing):
+    user_id = event.user.id
+    waifu_ids = await get_proposing_ids(user_id, outgoing)
+    waifus = await get_users_unordered(waifu_ids)
+    
+    if value is not None:
+        waifus = [waifu for waifu in waifus if waifu.has_name_like_at(value, event.guild_id)]
+    
+    return waifus
+
+
 @PROPOSAL.interactions
-async def accept(client, event,
-    user: ('user', 'Who\'s proposal to accept?'),
+async def accept(
+    client,
+    event,
+    target_user_name: (str, 'Who\'s proposal to accept?', 'user'),
 ):
+    user = await get_one_proposing_with_name(event, target_user_name, False)
+    if (user is None):
+        if len(target_user_name) > 100:
+            target_user_name = target_user_name[:100] + '...'
+        
+        abort(f'User not found: `{target_user_name}`')
+        return
+    
     source_user_id = event.user.id
     target_user_id = user.id
     
@@ -738,10 +799,26 @@ async def accept(client, event,
             )
 
 
+@accept.autocomplete('target_user_name')
+async def autocomplete_accept_user_name(event, value):
+    waifus = await get_all_proposing_with_name(event, value, False)
+    return sorted(waifu.full_name for waifu in waifus)
+
+
 @PROPOSAL.interactions
-async def reject(client, event,
-    user: ('user', 'The user, who\'s proposal you want to reject.'),
+async def reject(
+    client,
+    event,
+    target_user_name: (str, 'The user, who\'s proposal you want to reject.', 'user'),
 ):
+    user = await get_one_proposing_with_name(event, target_user_name, False)
+    if (user is None):
+        if len(target_user_name) > 100:
+            target_user_name = target_user_name[:100] + '...'
+        
+        abort(f'User not found: `{target_user_name}`')
+        return
+    
     target_user_id = user.id
     source_user_id = event.user.id
     
@@ -798,10 +875,26 @@ async def reject(client, event,
     )
 
 
+@reject.autocomplete('target_user_name')
+async def autocomplete_reject_user_name(event, value):
+    waifus = await get_all_proposing_with_name(event, value, False)
+    return sorted(waifu.full_name for waifu in waifus)
+
+
 @PROPOSAL.interactions
-async def cancel(client, event,
-    user: ('user', 'The user, who\'s proposal you want to cancel.'),
+async def cancel(
+    client,
+    event,
+    target_user_name: (str, 'The user, who\'s proposal you want to cancel.', 'user'),
 ):
+    user = await get_one_proposing_with_name(event, target_user_name, True)
+    if (user is None):
+        if len(target_user_name) > 100:
+            target_user_name = target_user_name[:100] + '...'
+        
+        abort(f'User not found: `{target_user_name}`')
+        return
+    
     source_user_id = event.user.id
     target_user_id = user.id
     
@@ -873,10 +966,79 @@ async def cancel(client, event,
         )
 
 
+@reject.autocomplete('target_user_name')
+async def autocomplete_reject_user_name(event, value):
+    waifus = await get_all_proposing_with_name(event, value, True)
+    return sorted(waifu.full_name for waifu in waifus)
+
+
+async def get_waifu_ids(user_id):
+    async with DB_ENGINE.connect() as connector:
+        response = await connector.execute(
+            select(
+                [
+                    user_common_model.user_id,
+                ]
+            ).where(
+                user_common_model.user_id.in_(
+                    select(
+                        [
+                            waifu_list_model.user_id,
+                        ]
+                    ).where(
+                        waifu_list_model.waifu_id == user_id,
+                    ).union(
+                        select(
+                            [
+                                waifu_list_model.waifu_id,
+                            ]
+                        ).where(
+                            waifu_list_model.user_id == user_id,
+                        )
+                    )
+                )
+            )
+        )
+        
+        results = await response.fetchall()
+        return [waifu_id for (waifu_id,) in results]
+
+
+async def get_one_divorce_with_name(event, name):
+    user_id = event.user.id
+    waifu_ids = await get_waifu_ids(user_id)
+    waifus = await get_users_unordered(waifu_ids)
+    
+    for waifu in waifus:
+        if waifu.has_name_like_at(name, event.guild_id):
+            return waifu
+
+
+async def get_all_divorce_with_name(event, value):
+    user_id = event.user.id
+    waifu_ids = await get_waifu_ids(user_id)
+    waifus = await get_users_unordered(waifu_ids)
+    
+    if value is not None:
+        waifus = [waifu for waifu in waifus if waifu.has_name_like_at(value, event.guild_id)]
+    
+    return waifus
+
+
 @SLASH_CLIENT.interactions(is_global = True)
-async def divorce(client, event,
-    user: ('user', 'Who do you want to divorce?'),
+async def divorce(
+    client,
+    event,
+    target_user_name: (str, 'Who do you want to divorce?', 'user'),
 ):
+    user = await get_one_divorce_with_name(event, target_user_name)
+    if (user is None):
+        if len(target_user_name) > 100:
+            target_user_name = target_user_name[:100] + '...'
+        
+        abort(f'Waifu not found: `{target_user_name}`')
+        return
+    
     source_user_id = event.user.id
     target_user_id = user.id
     
@@ -1019,6 +1181,12 @@ async def divorce(client, event,
             None,
             f'You are not married to {user:f}.'
         )
+
+
+@divorce.autocomplete('target_user_name')
+async def autocomplete_divorce_name(event, value):
+    divorces = await get_all_divorce_with_name(event, value)
+    return sorted(divorce.full_name for divorce in divorces)
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_DIVORCE_CANCEL)
