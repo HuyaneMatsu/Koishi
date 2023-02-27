@@ -3,22 +3,14 @@ __all__ = ()
 from hata import Client
 
 from .cache_sticker import get_sticker
-from .constants import (
-    BUTTON_SNIPE_DETAILS_DISABLED, CUSTOM_ID_SNIPE_DETAILS_EMOJI, CUSTOM_ID_SNIPE_DETAILS_REACTION,
-    CUSTOM_ID_SNIPE_DETAILS_STICKER
-)
+from .component_translate_tables import DETAILS_DISABLE
+from .constants import CUSTOM_ID_SNIPE_DETAILS_EMOJI, CUSTOM_ID_SNIPE_DETAILS_STICKER
 from .embed_builder_common import embed_builder_emoji, embed_builder_reaction, embed_builder_sticker
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event, parse_source_message_url
 from .helpers import translate_components
 
 
 SLASH_CLIENT: Client
-
-DISABLED_TABLE_DETAILS = {
-    CUSTOM_ID_SNIPE_DETAILS_EMOJI: BUTTON_SNIPE_DETAILS_DISABLED,
-    CUSTOM_ID_SNIPE_DETAILS_REACTION: BUTTON_SNIPE_DETAILS_DISABLED,
-    CUSTOM_ID_SNIPE_DETAILS_STICKER: BUTTON_SNIPE_DETAILS_DISABLED,
-}
 
 
 async def parse_back_emoji(client, event):
@@ -110,7 +102,7 @@ async def snipe_interaction_respond_common(client, event, entity_back_parser, em
     await client.interaction_response_message_edit(
         event,
         embed = embed,
-        components = translate_components(event.message.iter_components(), DISABLED_TABLE_DETAILS),
+        components = translate_components(event.message.iter_components(), DETAILS_DISABLE),
     )
 
 

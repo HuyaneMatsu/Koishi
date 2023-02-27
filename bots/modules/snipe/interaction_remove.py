@@ -7,8 +7,8 @@ from .action_helpers import (
     check_emoji_guild, check_emoji_type, check_sticker_guild, check_sticker_type_modify, process_reason
 )
 from .cache_sticker import get_sticker
+from .component_translate_tables import REMOVE_DISABLE
 from .constants import (
-    BUTTON_SNIPE_EDIT_DISABLED, BUTTON_SNIPE_REMOVE_DISABLED, CUSTOM_ID_SNIPE_EDIT_EMOJI, CUSTOM_ID_SNIPE_EDIT_STICKER,
     CUSTOM_ID_SNIPE_REMOVE_EMOJI, CUSTOM_ID_SNIPE_REMOVE_STICKER, EMOJI_REMOVE_FORM_PATTERN,
     ROW_SNIPE_ACTION_RESPONSE, STICKER_REMOVE_FORM_PATTERN, create_emoji_remove_form_custom_id,
     create_sticker_remove_form_custom_id
@@ -22,14 +22,6 @@ from .helpers import (
 
 
 SLASH_CLIENT : Client
-
-
-DISABLED_TABLE_REMOVE = {
-    CUSTOM_ID_SNIPE_REMOVE_EMOJI: BUTTON_SNIPE_REMOVE_DISABLED,
-    CUSTOM_ID_SNIPE_REMOVE_STICKER: BUTTON_SNIPE_REMOVE_DISABLED,
-    CUSTOM_ID_SNIPE_EDIT_EMOJI: BUTTON_SNIPE_EDIT_DISABLED,
-    CUSTOM_ID_SNIPE_EDIT_STICKER: BUTTON_SNIPE_EDIT_DISABLED,
-}
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_REMOVE_EMOJI)
@@ -140,7 +132,7 @@ async def snipe_confirm_remove_emoji(client, event, emoji_id, emoji_name, emoji_
         event,
         event.message,
         components = discard_entity_from_components(
-            translate_components(event.message.iter_components(), DISABLED_TABLE_REMOVE),
+            translate_components(event.message.iter_components(), REMOVE_DISABLE),
             emoji.id,
         ),
     )
@@ -254,7 +246,7 @@ async def snipe_confirm_remove_sticker(client, event, sticker_id, *, reason):
         event,
         event.message,
         components = discard_entity_from_components(
-            translate_components(event.message.iter_components(), DISABLED_TABLE_REMOVE),
+            translate_components(event.message.iter_components(), REMOVE_DISABLE),
             sticker.id,
         ),
     )

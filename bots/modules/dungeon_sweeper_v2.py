@@ -4719,7 +4719,13 @@ class DungeonSweeperRunner:
         
         self._gui_state = GUI_STATE_EDITING
         try:
-            await client.interaction_component_message_edit(event, embed = embed, components = components)
+            try:
+                await client.interaction_component_message_edit(event, embed = embed, components = components)
+            except DiscordException as err:
+                if err.code != ERROR_CODES.unknown_interaction:
+                    raise
+                
+                await client.message_edit(self.message, embed = embed, components = components)
         except BaseException as err:
             self.cancel(err)
             raise

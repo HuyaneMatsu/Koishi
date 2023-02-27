@@ -21,7 +21,7 @@ def add_embed_author(embed, event, type_name, message_url):
     user = event.user
     
     embed.add_author(
-        f'{user.name_at(event.guild_id)}\'s sniped {type_name}s! ({user.id})',
+        f'{user.name_at(event.guild_id)}\'s sniped {type_name}! ({user.id})',
         user.avatar_url,
         message_url,
     )

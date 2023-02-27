@@ -1,53 +1,16 @@
 __all__ = ()
 
-from hata import parse_emoji
+import re
+
+from hata import Emoji, UNICODE_TO_EMOJI, parse_emoji
 from hata.ext.slash import InteractionResponse
 
 from .cache_sticker import get_sticker
-from .constants import (
-    BUTTON_SNIPE_ADD_DISABLED, BUTTON_SNIPE_ADD_EMOJI, BUTTON_SNIPE_ADD_STICKER, BUTTON_SNIPE_EDIT_DISABLED,
-    BUTTON_SNIPE_EDIT_EMOJI, BUTTON_SNIPE_EDIT_STICKER, BUTTON_SNIPE_REMOVE_EMOJI, BUTTON_SNIPE_REMOVE_STICKER,
-    CUSTOM_ID_SNIPE_ADD_DISABLED, CUSTOM_ID_SNIPE_ADD_EMOJI, CUSTOM_ID_SNIPE_ADD_STICKER, CUSTOM_ID_SNIPE_EDIT_DISABLED,
-    CUSTOM_ID_SNIPE_EDIT_EMOJI, CUSTOM_ID_SNIPE_EDIT_STICKER, CUSTOM_ID_SNIPE_REMOVE_DISABLED,
-    BUTTON_SNIPE_REMOVE_DISABLED, CUSTOM_ID_SNIPE_REMOVE_EMOJI, CUSTOM_ID_SNIPE_REMOVE_STICKER
-)
-from .embed_builder_common import embed_builder_emoji, embed_builder_reaction, embed_builder_sticker
+from .choice import CHOICE_TYPE_EMOJI, CHOICE_TYPE_REACTION, CHOICE_TYPE_STICKER, Choice
 from .embed_parsers import parse_source_message_url
 from .helpers import are_actions_allowed_for_entity, is_event_user_same, translate_components
 
-
-EMOJI_OUTSIDE_TABLE = {
-    CUSTOM_ID_SNIPE_ADD_DISABLED: BUTTON_SNIPE_ADD_EMOJI,
-    CUSTOM_ID_SNIPE_EDIT_EMOJI: BUTTON_SNIPE_EDIT_DISABLED,
-    CUSTOM_ID_SNIPE_REMOVE_EMOJI: BUTTON_SNIPE_REMOVE_DISABLED,   
-}
-
-EMOJI_INSIDE_TABLE = {
-    CUSTOM_ID_SNIPE_ADD_EMOJI: BUTTON_SNIPE_ADD_DISABLED,
-    CUSTOM_ID_SNIPE_EDIT_DISABLED: BUTTON_SNIPE_EDIT_EMOJI,
-    CUSTOM_ID_SNIPE_REMOVE_DISABLED: BUTTON_SNIPE_REMOVE_EMOJI,
-}
-
-STICKER_OUTSIDE_TABLE = {
-    CUSTOM_ID_SNIPE_ADD_DISABLED: BUTTON_SNIPE_ADD_STICKER,
-    CUSTOM_ID_SNIPE_EDIT_STICKER: BUTTON_SNIPE_EDIT_DISABLED,
-    CUSTOM_ID_SNIPE_REMOVE_STICKER: BUTTON_SNIPE_REMOVE_DISABLED,
-}
-
-STICKER_INSIDE_TABLE = {
-    CUSTOM_ID_SNIPE_ADD_STICKER: BUTTON_SNIPE_ADD_DISABLED,
-    CUSTOM_ID_SNIPE_EDIT_DISABLED: BUTTON_SNIPE_EDIT_STICKER,
-    CUSTOM_ID_SNIPE_REMOVE_DISABLED: BUTTON_SNIPE_REMOVE_STICKER,
-}
-
-ALL_DISABLE_TABLE = {
-    CUSTOM_ID_SNIPE_ADD_EMOJI: BUTTON_SNIPE_ADD_DISABLED,
-    CUSTOM_ID_SNIPE_EDIT_EMOJI: BUTTON_SNIPE_EDIT_DISABLED,
-    CUSTOM_ID_SNIPE_REMOVE_EMOJI: BUTTON_SNIPE_REMOVE_DISABLED,   
-    CUSTOM_ID_SNIPE_ADD_STICKER: BUTTON_SNIPE_ADD_DISABLED,
-    CUSTOM_ID_SNIPE_EDIT_STICKER: BUTTON_SNIPE_EDIT_DISABLED,
-    CUSTOM_ID_SNIPE_REMOVE_STICKER: BUTTON_SNIPE_REMOVE_DISABLED,
-}
+CHOICE_RP = re.compile('(e|s|r)\\:(\\d+)\\:([^\\:]*)\\:(|0|1)')
 
 
 def is_message_detailed(message):
@@ -72,6 +35,65 @@ def is_message_detailed(message):
         return False
     
     return (len(fields) > 2)
+
+
+ANIMATED_RESOLUTION = {
+    '0': False, 
+    '1': True,
+}
+
+
+async def choice_parser(client, event):
+    """
+    Parses the choice out from the given event's select option.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``Event``
+        The received event.
+    
+    Returns
+    -------
+    choice : `None`, ``Choice``
+    """
+    selected_values = event.values
+    if (selected_values is None):
+        return None
+    
+    match = CHOICE_RP.fullmatch(selected_values[0])
+    if match is None:
+        return None
+    
+    entity_kind, entity_id, entity_name, animated = match.groups()
+    
+    entity_id = int(entity_id)
+    
+    if entity_kind in ('e', 'r'):
+        if entity_id:
+            entity = Emoji._create_partial(entity_id, entity_name, ANIMATED_RESOLUTION.get(animated, False))
+        else:
+            try:
+                entity = UNICODE_TO_EMOJI.get(entity_name, None)
+            except KeyError:
+                return None
+        
+        if entity_kind == 'e':
+            choice_type = CHOICE_TYPE_EMOJI
+        else:
+            choice_type = CHOICE_TYPE_REACTION
+    
+    else:
+        entity = await get_sticker(client, entity_id)
+        if entity is None:
+            return None
+        
+        choice_type = CHOICE_TYPE_STICKER
+    
+    return Choice(choice_type, entity)
 
 
 async def select_option_parser_emoji(client, event):
@@ -129,109 +151,51 @@ async def select_option_parser_sticker(client, event):
     return await get_sticker(client, selected_sticker_id)
 
 
-def select_response_response_builder_factory(select_option_parser, embed_builder, table_inside, table_outside):
+async def select_response_builder(client, event):
     """
-    Creates a select response builder.
+    Creates a select response.
+    
+    This function is a coroutine.
     
     Parameters
     ----------
-    select_option_parser : `CoroutineFunctionType`
-        Parses the selected option out from the given event.
-        
-        The accepted implementations are:
-        - `(Client, InteractionEvent) -> Coroutine<Emoji>`
-        - `(Client, InteractionEvent) -> Coroutine<Sticker>`
-        
-        Actual implementations:
-        - ``select_option_parser_emoji``
-        - ``select_option_parser_sticker``
-    
-    embed_builder : `CoroutineFunctionType`
-        An embed builder to build the response with.
-        
-        The accepted implementations are:
-        - `(Client, InteractionEvent, Emoji, None | str, bool) -> Coroutine<Embed>`
-        - `(Client, InteractionEvent, Sticker, None | str, bool) -> Coroutine<Embed>`
-        
-        Actual implementations:
-        - ``embed_builder_emoji``
-        - ``embed_builder_reaction``
-        - ``embed_builder_sticker``
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received event.
     
     Returns
     -------
-    response_builder : `CoroutineFunctionType`
-        The returned response builder is implemented as:
-        - `(Client, InteractionEvent) -> Coroutine<None | InteractionResponse>`.
-    
-    table_inside : `dict` of (`str`, ``Component``) items
-        Component translate table to use if new entity is from inside.
-    
-    table_outside : `dict` of (`str`, ``Component``) items
-        Component translate table to use if new entity is from outside.
-    
+    response : `None`, ``InteractionResponse``
     """
-    async def select_response_response_builder_generic(client, event):
-        """
-        Creates a select response.
-        
-        This function is a coroutine.
-        
-        Parameters
-        ----------
-        client : ``Client``
-            The client who received the event.
-        event : ``InteractionEvent``
-            The received event.
-        
-        Returns
-        -------
-        response : `None`, ``InteractionResponse``
-        """
-        nonlocal select_option_parser
-        nonlocal embed_builder
-        nonlocal table_inside
-        nonlocal table_outside
-        
-        message = event.message
-        if message is None:
-            return
-        
-        if not is_event_user_same(event, message):
-            return
-        
-        detailed = is_message_detailed(message)
-        
-        entity = await select_option_parser(client, event)
-        if entity is None:
-            return
-        
-        embed = await embed_builder(client, event, entity, parse_source_message_url(message), detailed)
-        
-        guild_id = event.guild_id
-        if (guild_id == 0) or (not are_actions_allowed_for_entity(entity)):
-            translate_table = ALL_DISABLE_TABLE
-        elif (guild_id == entity.guild_id):
-            translate_table = table_inside
-        else:
-            translate_table = table_outside
-        
-        return InteractionResponse(
-            embed = embed,
-            components = translate_components(message.iter_components(), translate_table),
-        )
+    message = event.message
+    if message is None:
+        return
+    
+    if not is_event_user_same(event, message):
+        return
+    
+    detailed = is_message_detailed(message)
+    
+    choice = await choice_parser(client, event)
+    if choice is None:
+        return
+    
+    choice_type, entity = choice
+    
+    embed = await choice_type.embed_builder(client, event, entity, parse_source_message_url(message), detailed)
+    
+    guild_id = event.guild_id
+    if (guild_id == 0) or (not are_actions_allowed_for_entity(entity)):
+        translate_table = choice_type.select_table_disabled
+    elif (guild_id == entity.guild_id):
+        translate_table = choice_type.select_table_inside
+    else:
+        translate_table = choice_type.select_table_outside
+    
+    return InteractionResponse(
+        embed = embed,
+        components = translate_components(message.iter_components(), translate_table),
+    )
     
     return select_response_response_builder_generic
-
-
-select_response_response_builder_emoji = select_response_response_builder_factory(
-    select_option_parser_emoji, embed_builder_emoji, EMOJI_INSIDE_TABLE, EMOJI_OUTSIDE_TABLE
-)
-
-select_response_response_builder_reaction = select_response_response_builder_factory(
-    select_option_parser_emoji, embed_builder_reaction, EMOJI_INSIDE_TABLE, EMOJI_OUTSIDE_TABLE
-)
-
-select_response_response_builder_sticker = select_response_response_builder_factory(
-    select_option_parser_sticker, embed_builder_sticker, STICKER_INSIDE_TABLE, STICKER_OUTSIDE_TABLE
-)

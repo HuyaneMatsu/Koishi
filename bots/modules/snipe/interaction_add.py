@@ -8,10 +8,10 @@ from .action_helpers import (
     join_sticker_tags, parse_and_join_tags, parse_roles
 )
 from .cache_sticker import get_sticker
+from .component_translate_tables import ADD_DISABLE
 from .constants import (
-    BUTTON_SNIPE_ADD_DISABLED, CUSTOM_ID_SNIPE_ADD_EMOJI, CUSTOM_ID_SNIPE_ADD_STICKER, EMOJI_ADD_FORM_PATTERN,
-    ROW_SNIPE_ACTION_RESPONSE, STICKER_ADD_FORM_PATTERN, create_emoji_add_form_custom_id,
-    create_sticker_add_form_custom_id
+    CUSTOM_ID_SNIPE_ADD_EMOJI, CUSTOM_ID_SNIPE_ADD_STICKER, EMOJI_ADD_FORM_PATTERN, ROW_SNIPE_ACTION_RESPONSE,
+    STICKER_ADD_FORM_PATTERN, create_emoji_add_form_custom_id, create_sticker_add_form_custom_id
 )
 from .embed_builder_base import create_base_embed
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
@@ -21,12 +21,6 @@ from .helpers import (
 
 
 SLASH_CLIENT : Client
-
-
-DISABLED_TABLE_ADD = {
-    CUSTOM_ID_SNIPE_ADD_EMOJI: BUTTON_SNIPE_ADD_DISABLED,
-    CUSTOM_ID_SNIPE_ADD_STICKER: BUTTON_SNIPE_ADD_DISABLED,
-}
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_ADD_EMOJI)
@@ -164,7 +158,7 @@ async def snipe_confirm_add_emoji(client, event, emoji_id, emoji_name, emoji_ani
     await client.interaction_followup_message_edit(
         event,
         event.message,
-        components = translate_components(event.message.iter_components(), DISABLED_TABLE_ADD),
+        components = translate_components(event.message.iter_components(), ADD_DISABLE),
     )
 
 
@@ -316,5 +310,5 @@ async def snipe_confirm_add_sticker(client, event, sticker_id, *, name, tags, de
     await client.interaction_followup_message_edit(
         event,
         event.message,
-        components = translate_components(event.message.iter_components(), DISABLED_TABLE_ADD),
+        components = translate_components(event.message.iter_components(), ADD_DISABLE),
     )

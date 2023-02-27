@@ -193,7 +193,7 @@ async def check_has_manage_emojis_and_stickers_permission(client, event):
             '**I** require to have `manage emojis and stickers` permission to **execute** any action.',
         )
         return False
-    
+        
     return True
 
 

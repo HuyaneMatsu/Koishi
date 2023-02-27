@@ -1,3 +1,5 @@
+__all__ = ()
+
 from random import random
 
 from hata import Client, Embed

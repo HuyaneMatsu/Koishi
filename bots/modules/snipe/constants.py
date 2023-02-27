@@ -6,9 +6,7 @@ from hata import BUILTIN_EMOJIS, Emoji
 from hata.ext.slash import Button, Row
 
 
-CUSTOM_ID_SNIPE_SELECT_EMOJI = 'snipe.select.emoji'
-CUSTOM_ID_SNIPE_SELECT_REACTION = 'snipe.select.reaction'
-CUSTOM_ID_SNIPE_SELECT_STICKER = 'snipe.select.sticker'
+CUSTOM_ID_SNIPE_SELECT = 'snipe.select'
 
 CUSTOM_ID_SNIPE_DETAILS_EMOJI = 'snipe.details.emoji'
 CUSTOM_ID_SNIPE_DETAILS_REACTION = 'snipe.details.reaction'

@@ -966,7 +966,7 @@ async def cancel(
         )
 
 
-@reject.autocomplete('target_user_name')
+@cancel.autocomplete('target_user_name')
 async def autocomplete_reject_user_name(event, value):
     waifus = await get_all_proposing_with_name(event, value, True)
     return sorted(waifu.full_name for waifu in waifus)

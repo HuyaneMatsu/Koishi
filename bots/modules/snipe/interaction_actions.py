@@ -4,11 +4,11 @@ from hata import Client
 from hata.ext.slash import Row
 
 from .cache_sticker import get_sticker
+from .component_translate_tables import ACTIONS_DISABLE
 from .constants import (
-    BUTTON_SNIPE_ACTIONS_DISABLED, BUTTON_SNIPE_ADD_DISABLED, BUTTON_SNIPE_ADD_EMOJI, BUTTON_SNIPE_ADD_STICKER,
-    BUTTON_SNIPE_EDIT_DISABLED, BUTTON_SNIPE_EDIT_EMOJI, BUTTON_SNIPE_EDIT_STICKER, BUTTON_SNIPE_REMOVE_DISABLED,
-    BUTTON_SNIPE_REMOVE_EMOJI, BUTTON_SNIPE_REMOVE_STICKER, CUSTOM_ID_SNIPE_ACTIONS_EMOJI,
-    CUSTOM_ID_SNIPE_ACTIONS_STICKER
+    BUTTON_SNIPE_ADD_DISABLED, BUTTON_SNIPE_ADD_EMOJI, BUTTON_SNIPE_ADD_STICKER, BUTTON_SNIPE_EDIT_DISABLED,
+    BUTTON_SNIPE_EDIT_EMOJI, BUTTON_SNIPE_EDIT_STICKER, BUTTON_SNIPE_REMOVE_DISABLED, BUTTON_SNIPE_REMOVE_EMOJI,
+    BUTTON_SNIPE_REMOVE_STICKER, CUSTOM_ID_SNIPE_ACTIONS_EMOJI, CUSTOM_ID_SNIPE_ACTIONS_STICKER
 )
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
 from .helpers import (
@@ -17,11 +17,6 @@ from .helpers import (
 
 
 SLASH_CLIENT: Client
-
-DISABLED_TABLE_ACTIONS = {
-    CUSTOM_ID_SNIPE_ACTIONS_EMOJI: BUTTON_SNIPE_ACTIONS_DISABLED,
-    CUSTOM_ID_SNIPE_ACTIONS_STICKER: BUTTON_SNIPE_ACTIONS_DISABLED,
-}
 
 
 def iter_action_components_factory(button_add, button_edit, button_remove):
@@ -177,7 +172,7 @@ async def respond_with_actions(client, event, entity_parser, action_component_it
     if event is None:
         return
     
-    components = translate_components(event.message.iter_components(), DISABLED_TABLE_ACTIONS)
+    components = translate_components(event.message.iter_components(), ACTIONS_DISABLE)
     components.append(Row(*action_component_iterator(event, entity)))
     
     await client.interaction_response_message_edit(

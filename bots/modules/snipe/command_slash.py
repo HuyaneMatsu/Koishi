@@ -4,7 +4,8 @@ from hata import Client, is_id, parse_emoji
 from hata.ext.slash import abort
 
 from .cache_sticker import get_sticker
-from .response_builder import build_initial_response_emoji, build_initial_response_sticker
+from .choice import CHOICE_TYPE_EMOJI, CHOICE_TYPE_STICKER, Choice
+from .response_builder import build_initial_response
 
 
 SLASH_CLIENT: Client
@@ -124,7 +125,8 @@ async def snipe_emoji(
     interaction_response : ``InteractionResponse``
     """
     emojis = try_resolve_emojis(event, emoji_name)
-    return await build_initial_response_emoji(client, event, None, emojis, not reveal, detailed)
+    choices = [Choice(CHOICE_TYPE_EMOJI, emoji) for emoji in emojis]
+    return await build_initial_response(client, event, None, choices, not reveal, detailed)
 
 
 snipe_emoji_plain = SNIPE_COMMANDS.interactions(snipe_emoji, name = 'emoji')
@@ -212,7 +214,8 @@ async def snipe_sticker(
     interaction_response : ``InteractionResponse``
     """
     stickers = await try_resolve_stickers(client, event, sticker_name_or_id)
-    return await build_initial_response_sticker(client, event, None, stickers, not reveal, detailed)
+    choices = [Choice(CHOICE_TYPE_STICKER, sticker) for sticker in stickers]
+    return await build_initial_response(client, event, None, choices, not reveal, detailed)
 
 
 @snipe_sticker.autocomplete('sticker')

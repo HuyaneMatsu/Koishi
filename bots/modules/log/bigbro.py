@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime as DateTime
 
 from hata import ActivityType, Client, Embed, DATETIME_FORMAT_CODE, Status, elapsed_time
 from hata.discord.utils import DISCORD_EPOCH_START
@@ -147,6 +147,9 @@ async def user_presence_update(client, user, old_attributes):
         
         for chunk in chunks:
             await client.message_create(channel, embed = Embed(description = chunk))
+    except GeneratorExit:
+        raise
+    
     except BaseException as err:
         await client.events.error(client, 'log.user_presence_update', err)
 
@@ -177,7 +180,7 @@ def render_contents(user, old_attributes):
     content_parts.append(')\n')
     
     content_parts.append('At: ')
-    content_parts.append(datetime.utcnow().__format__(DATETIME_FORMAT_CODE))
+    content_parts.append(DateTime.utcnow().__format__(DATETIME_FORMAT_CODE))
     content_parts.append('\n')
     content_parts.append('\n')
     
@@ -205,9 +208,15 @@ def render_contents(user, old_attributes):
         for key in ('desktop', 'mobile', 'web'):
             content_parts.append(key)
             content_parts.append(': ')
-            content_parts.append(statuses.get(key, OFFLINE))
+            content_parts.append(OFFLINE if statuses is None else statuses.get(key, OFFLINE))
             content_parts.append(' -> ')
-            content_parts.append(user.statuses.get(key, OFFLINE))
+            
+            user_statuses = user.statuses
+            if user_statuses is None:
+                status_by_platform = OFFLINE
+            else:
+                status_by_platform = user_statuses.get(key, OFFLINE)
+            content_parts.append(status_by_platform)
             content_parts.append('\n')
         
         content_parts.append('\n')

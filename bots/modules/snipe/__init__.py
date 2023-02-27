@@ -1,8 +1,11 @@
 from .action_helpers import *
 from .cache_emoji import *
 from .cache_sticker import *
+from .choice import *
 from .command_message_context import *
 from .command_slash import *
+from .component_builder_select_option import *
+from .component_translate_tables import *
 from .constants import *
 from .embed_builder_base import *
 from .embed_builder_common import *
@@ -27,8 +30,11 @@ __all__ = (
     *action_helpers.__all__,
     *cache_emoji.__all__,
     *cache_sticker.__all__,
+    *choice.__all__,
     *command_message_context.__all__,
     *command_slash.__all__,
+    *component_builder_select_option.__all__,
+    *component_translate_tables.__all__,
     *constants.__all__,
     *embed_builder_base.__all__,
     *embed_builder_common.__all__,
