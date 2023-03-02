@@ -56,7 +56,7 @@ else:
         config.KOISHI_TOKEN,
         secret = config.KOISHI_SECRET,
         client_id = config.KOISHI_ID,
-        activity = Activity('with Mama'),
+        activity = Activity('with Kokoro'),
         shard_count = 2,
         should_request_users = False,
         intents = IntentFlag().update_by_keys(

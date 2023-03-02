@@ -8,7 +8,7 @@ from scarletio import Task
 
 
 ORIN_IMAGE_URL = (
-    'https://cdn.discordapp.com/attachments/568837922288173058/1076490582454714528/orin_body_collecting.png'
+    'https://cdn.discordapp.com/attachments/568837922288173058/1080519059663241378/orin_body_collecting.png'
 )
 ORIN_COLOR = Color(0x9E4D4C)
 

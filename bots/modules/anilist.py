@@ -661,9 +661,9 @@ DESCRIPTION_RP = re_compile(
         '!~|' # Spoiler tag ending
         '__|' # bold
         ' \(\d+\'(?:\d+\")?\)|' # US shit
-        '<br>(?:<br>)?|' # They don't know what not html format means
+        '<br/?>(?:<br>)?|' # They don't know what not html format means
         '&#039|' # They don't know what not html format means
-        '</?i>' # They don't know what not html format means
+        '</?(?:i|em)/?>' # They don't know what not html format means
     ),
     re_multi_line | re_unicode | re_dotall,
 )
@@ -674,9 +674,13 @@ DESCRIPTION_RELATION = {
     '__': '**',
     '<br><br>': '\n',
     '<br>': '\n',
+    '<br/>': '\n',
     '&#039': '\'',
     '<i>': '*',
     '</i>': '*',
+    '<i/>': '*',
+    '<em>': '˙',
+    '</em>': '`',
 }
 
 def DESCRIPTION_REPLACER(match):
@@ -750,7 +754,7 @@ def build_character_description(character_data):
     description = ''.join(description_parts)
     
     if len(description) > 4000:
-        description = description[:4000]+'...'
+        description = description[:4000] + '...'
     
     return description
 
@@ -842,7 +846,7 @@ def array_response_builder(data, extra, work_set):
             description_parts.append(')')
             
             if len(name) > 80:
-                name = name[:77]+'...'
+                name = name[:77] + '...'
             
             options.append(Option(entity_id_str, name))
             if array_index == array_length:

@@ -191,19 +191,17 @@ class ImageCache:
     
     __slots__ = ('cache_id', 'handler', 'last', 'last_call')
     
-    def __new__(cls, safe, raw_tags):
+    def __new__(cls, requested_tags, safe):
         """
         Creates a new image cache for booru commands.
         
         Parameters
         ----------
+        requested_tags : `set` of `str`
+            The requested tags.
         safe : `bool`
             Whether we want safe images.
-        raw_tags : `str`
-            Joined tags to query for.
         """
-        requested_tags = {*raw_tags.split()}
-        
         if safe:
             endpoint = SAFE_BOORU_ENDPOINT
             provider = SAFE_BOORU_PROVIDER

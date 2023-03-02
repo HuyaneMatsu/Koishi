@@ -1602,6 +1602,26 @@ async def silent_test_abort(client, event):
     abort(event.user.mention, silent = True)
 
 
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def test_safe_autocomplete(value: str):
+    return value
+
+
+@test_safe_autocomplete.autocomplete('value')
+async def autocomplete_safe(client, event, value):
+    if value is None:
+        return
+    
+    async with client.http.get('http://safebooru.org/autocomplete.php', params = {'q': value}) as response:
+        if response.status != 200:
+            return
+        
+        result = await response.json()
+        print(len(result))
+    
+    return [item['label'] for item in result]
+
+
 if (watchdog is not None):
     
     from watchdog.events import FileModifiedEvent

@@ -59,12 +59,17 @@ SOLO_REQUIRED_TAGS = frozenset((
 ))
 
 
-SAFE_BOORU_ENDPOINT = 'http://safebooru.org'
+SAFE_BOORU_ENDPOINT = 'https://safebooru.org'
 SAFE_BOORU_PROVIDER = 'safebooru'
+SAFE_BOORU_AUTOCOMPLETE_ENDPOINT = f'{SAFE_BOORU_ENDPOINT}/autocomplete.php'
+SAFE_BOORU_AUTOCOMPLETE_PARAMETERS = {}
+SAFE_BOORU_AUTOCOMPLETE_QUERY_KEY = 'q'
 
-NSFW_BOORU_ENDPOINT = 'http://gelbooru.com'
+NSFW_BOORU_ENDPOINT = 'https://gelbooru.com/'
 NSFW_BOORU_PROVIDER = 'gelbooru'
-
+NSFW_BOORU_AUTOCOMPLETE_ENDPOINT = f'{NSFW_BOORU_ENDPOINT}/index.php'
+NSFW_BOORU_AUTOCOMPLETE_PARAMETERS = {'page': 'autocomplete2', 'type': 'tag_query', 'limit': '10'}
+NSFW_BOORU_AUTOCOMPLETE_QUERY_KEY = 'term'
 
 BOORU_COLOR = Color(0x138a50)
 TOUHOU_COLOR = Color(0xffc0dd)

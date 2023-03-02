@@ -24,8 +24,8 @@ from bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, get_create_common_use
 SLASH_CLIENT: Client
 
 
-EVENT_MAX_DURATION = timedelta(hours=24)
-EVENT_MIN_DURATION = timedelta(minutes=30)
+EVENT_MAX_DURATION = timedelta(hours = 24)
+EVENT_MIN_DURATION = timedelta(minutes = 30)
 EVENT_HEART_MIN_AMOUNT = 50
 EVENT_HEART_MAX_AMOUNT = 3000
 EVENT_OK_EMOJI = BUILTIN_EMOJIS['ok_hand']

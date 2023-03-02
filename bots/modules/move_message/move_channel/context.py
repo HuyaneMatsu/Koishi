@@ -298,6 +298,10 @@ class ChannelMoverContext:
             
             raise
         
+        # We sent an empty message -> should not happen.
+        if message is None:
+            return False
+        
         self.status_message = message
         return True
     
@@ -385,9 +389,10 @@ class ChannelMoverContext:
         except CancelledError:
             raise
         
-        except:
+        except BaseException as err:
             self.set_status_update_waiter_error()
-            raise
+            await self.client.events.error(self.client, repr(self), err)
+            return
         
         finally:
             self.discard()
