@@ -22,7 +22,7 @@ if MARISA_MODE:
             'command_utils',
             'slash',
             'commands_v2',
-            'solarlink',
+            # 'solarlink',
         ),
         prefix = PREFIX__MARISA,
         default_category_name = DEFAULT_CATEGORY_NAME,
@@ -37,6 +37,7 @@ if MARISA_MODE:
                 'Feed the cat!': 'Owner hungry!'
             },
         },
+        # intents = 0,
         # assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
         # enforce_application_command_permissions = True,
     )

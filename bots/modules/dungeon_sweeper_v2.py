@@ -7,7 +7,7 @@ from zlib import compress, decompress
 
 from hata import BUILTIN_EMOJIS, Client, Color, DiscordException, ERROR_CODES, Embed, Emoji, KOKORO
 from hata.ext.slash import Button, ButtonStyle, Row, Timeouter, abort
-from scarletio import AsyncIO, CancelledError, Lock, Task, WaitTillAll, copy_docs
+from scarletio import AsyncIO, CancelledError, Lock, Task, TaskGroup, copy_docs
 from sqlalchemy.sql import select
 
 from bot_utils.constants import PATH__KOISHI
@@ -4528,12 +4528,12 @@ class DungeonSweeperRunner:
         try:
             task_user_state_create = Task(UserState(user_id), KOKORO)
             task_interaction_acknowledge = Task(client.interaction_response_message_create(event), KOKORO)
-            await WaitTillAll([task_user_state_create, task_interaction_acknowledge], KOKORO)
+            await TaskGroup(KOKORO, [task_user_state_create, task_interaction_acknowledge]).wait_all()
             
-            user_state = task_user_state_create.result()
+            user_state = task_user_state_create.get_result()
             
             try:
-                task_interaction_acknowledge.result()
+                task_interaction_acknowledge.get_result()
             except BaseException as err:
                 if (
                     isinstance(err, ConnectionError) or
@@ -4977,4 +4977,4 @@ async def shutdown(client):
     game = None
     
     if tasks:
-        await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()

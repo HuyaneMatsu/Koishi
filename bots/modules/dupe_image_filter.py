@@ -1,6 +1,6 @@
 __all__ = ()
 
-from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError, WaitTillAll
+from scarletio import Task, IgnoreCaseString, LOOP_TIME, sleep, CancelledError, TaskGroup
 from scarletio.web_common.headers import CONTENT_LENGTH
 from hata import Embed, KOKORO, seconds_to_elapsed_time, Client, Message, DiscordException, ERROR_CODES, now_as_id, \
     seconds_to_id_difference, format_loop_time, TIMESTAMP_STYLES, Permission
@@ -595,4 +595,4 @@ async def shutdown(client):
     
     cancel_task = None
     
-    await WaitTillAll(cancel_tasks, KOKORO)
+    await TaskGroup(KOKORO, cancel_tasks).wait_all()

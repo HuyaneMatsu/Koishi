@@ -5,7 +5,7 @@ from random import randint
 
 from hata import Color, filter_content, is_user_mention, DiscordException, BUILTIN_EMOJIS, Embed, KOKORO, ERROR_CODES, \
     Client
-from scarletio import ResultGatheringFuture, future_or_timeout, Future, sleep, Task
+from scarletio import Future, sleep, Task
 from hata.ext.command_utils import WaitAndContinue, Closer
 from hata.ext.commands_v2 import checks, configure_converter
 
@@ -254,8 +254,10 @@ class ship_type:
                 yield n_x + n_y
 
 class user_profile:
-    __slots__ = ('channel', 'client', 'data', 'last_switch', 'message', 'other', 'page', 'process', 'ship_positions',
-        'ships_left', 'state', 'text', 'user')
+    __slots__ = (
+        'channel', 'client', 'data', 'last_switch', 'message', 'other', 'page', 'process', 'ship_positions',
+        'ships_left', 'state', 'text', 'user'
+    )
     ships = [0, 2, 1, 1]
     def __init__(self, user, client):
         self.user = user
@@ -500,9 +502,9 @@ class battleships_game:
             client.events.message_create.append(player1.channel, self)
             client.events.message_create.append(player2.channel, self)
             
-            #game starts            
-            self.future = ResultGatheringFuture(KOKORO, 2)
-            future_or_timeout(self.future, 300.)
+            # game starts
+            self.future = Future(KOKORO)
+            self.future.apply_timeout(300.0)
             
             #startup
             self.process = self.process_state_0
@@ -540,7 +542,7 @@ class battleships_game:
             
             while self.process is not None:
                 self.future = Future(KOKORO)
-                future_or_timeout(self.future, 300.)
+                self.future.apply_timeout(300.0)
                 try:
                     result = await self.future
                 except TimeoutError:
@@ -665,7 +667,7 @@ class battleships_game:
                         text = (
                             f'Can not set ship to {1 + x}/{chr(65 + y)}, because coordinate '
                             f'{1 + n_x}/{chr(65 + n_y // 10)} is already used.'
-                                )
+                        )
                         break
             if text:
                 break
@@ -686,14 +688,17 @@ class battleships_game:
             
             player.ships_left[type_] -= 1
             
+            
             if sum(player.ships_left) == 0:
-                self.future.set_result(None)
+                if sum(self.player1.ships_left) == 0 and sum(self.player2.ships_left) == 0:
+                    self.future.set_result(None)
+                
                 text = (
                     f'You placed all of your ships. Last ship placed at: {", ".join(cords)}; waiting on the other '
                     'player.'
-                            )
+                )
             else:
-                text = f'You placed the ship succesfully at: {", ".join(cords)}.'
+                text = f'You placed the ship successfully at: {", ".join(cords)}.'
             
             break
         
@@ -799,14 +804,14 @@ class battleships_game:
             for cord in ship:
                 data[cord] = 7
             if sum(other.ships_left):
-                text1 = f'You shot {chr(65 + y)}/{1 + x} and you sinked 1 of your opponents ships!\n'
-                text2 = f'Your opponent shot {chr(65 + y)}/{1 + x} and your ship sinked :c\n'
+                text1 = f'You shot {chr(65 + y)}/{1 + x} and you sunk 1 of your opponents ships!\n'
+                text2 = f'Your opponent shot {chr(65 + y)}/{1 + x} and your ship sunk :c\n'
             else:
                 self.process = None
                 await player.set_state_2(True,
-                    f'You shot {chr(65 + y)}/{1 + x} and you sinked your opponents last ship!')
+                    f'You shot {chr(65 + y)}/{1 + x} and you sunk your opponents last ship!')
                 await other.set_state_2(False,
-                    f'Your opponent shot {chr(65 + y)}/{1 + x} and your last ship sinked :c')
+                    f'Your opponent shot {chr(65 + y)}/{1 + x} and your last ship sunk :c')
                 self.future.set_result(False)
                 return
         else:

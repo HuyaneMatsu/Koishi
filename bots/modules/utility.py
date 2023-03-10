@@ -14,10 +14,10 @@ from hata import (
 from hata.discord.invite.invite import EMBEDDED_ACTIVITY_NAME_TO_APPLICATION_ID
 from hata.ext.slash import InteractionResponse, abort
 from hata.ext.slash.menus import Pagination
-from scarletio import ReuBytesIO, WaitTillExc
+from scarletio import ReuBytesIO, TaskGroup
 
 from PIL import Image as PIL
-from bot_utils.constants import GUILD__SUPPORT
+from bot_utils.constants import GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT
 from bot_utils.tools import Pagination10step
 from colorsys import rgb_to_hsv, rgb_to_yiq
 
@@ -67,16 +67,18 @@ async def rawr(client, event):
             coroutine = client_.message_create(channel, 'Rawrr !')
         tasks.append(KOKORO.create_task(coroutine))
     
-    try:
-        await WaitTillExc(tasks, KOKORO)
-    except:
-        for task in tasks:
-            task.cancel()
-        raise
+    task_group = TaskGroup(KOKORO, tasks)
+    failed_task = await task_group.wait_exception()
+    if (failed_task is not None):
+        # Cancel all and propagate the exception of the first failed task.
+        task_group.cancel_all()
+        failed_task.get_result()
 
 
 @SLASH_CLIENT.interactions(is_global = True)
-async def color_(client, event,
+async def color_(
+    client,
+    event,
     color: ('str', 'Beauty!')
 ):
     """Shows the given color"""
@@ -350,8 +352,10 @@ def in_role_pagination_check(user, event):
     
     return False
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT)
-async def in_role(client, event,
+@SLASH_CLIENT.interactions(guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT])
+async def in_role(
+    client,
+    event,
     role_1: ('role', 'Select a role.'),
     role_2: ('role', 'Double role!') = None,
     role_3: ('role', 'Triple role!') = None,
@@ -444,7 +448,10 @@ def add_user_field(embed, index, joined_at, user):
         ),
     )
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(kick_users=True))
+@SLASH_CLIENT.interactions(
+    guild = [GUILD__SUPPORT, GUILD__ORIN_PARTY_HOUSE],
+    required_permissions = Permission().update_by_keys(kick_users = True),
+)
 async def latest_users(client, event):
     """Shows the new users of the guild."""
     if not event.user_permissions.can_kick_users:
@@ -474,7 +481,10 @@ async def latest_users(client, event):
     return InteractionResponse(embed = embed, allowed_mentions = None)
 
 
-@SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(kick_users=True))
+@SLASH_CLIENT.interactions(
+    guild = [GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT],
+    required_permissions = Permission().update_by_keys(kick_users = True),
+)
 async def all_users(client, event):
     """Shows the new users of the guild."""
     if not event.user_permissions.can_kick_users:

@@ -1,9 +1,8 @@
 __all__ = ()
 
 from random import random
-from itertools import chain
 
-from scarletio import Task, Future, WaitTillAll, future_or_timeout
+from scarletio import Task, Future, TaskGroup
 from hata import Client, Embed, BUILTIN_EMOJIS, DiscordException, KOKORO, ERROR_CODES, InteractionType
 from hata.ext.slash import Button, Row
 from hata.ext.slash.menus.menu import GUI_STATE_READY, GUI_STATE_EDITING, GUI_STATE_CANCELLING, \
@@ -1283,10 +1282,11 @@ class Game21JoinGUI:
     async def _wait_for_cancellation(self):
         workers = self.workers
         if workers:
-            future = WaitTillAll(workers, KOKORO)
-            future_or_timeout(future, GAME_21_CANCELLATION_TIMEOUT)
-            done, pending = await future
-            for future in chain(done, pending):
+            task_group = TaskGroup(KOKORO, workers)
+            future = task_group.wait_all()
+            future.apply_timeout(GAME_21_CANCELLATION_TIMEOUT)
+            await future
+            for future in task_group.iter_futures():
                 future.cancel()
     
     def maybe_message_sync(self, interaction_event):
@@ -1599,22 +1599,22 @@ async def game_21_multi_player(client, event, amount):
             task = Task(Game21PlayerRunner(client, base, tuple_user, tuple_channel, amount, True), KOKORO)
             tasks.append(task)
         
-        done, pending = await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()
         
         waiters_to_runners = {}
         
-        for task in done:
-            runner = await task
-            waiter = runner.waiter
-            waiters_to_runners[waiter] = runner
+        for task in tasks:
+            runner = task.get_result()
+            waiters_to_runners[runner.waiter] = runner
         
-        done, pending = await WaitTillAll(waiters_to_runners, KOKORO)
+        tasks = [*waiters_to_runners.keys()]
+        await TaskGroup(KOKORO, tasks).wait_all()
         
         max_point = 0
         losers = []
         winners = []
-        for waiter in done:
-            game_state = waiter.result()
+        for waiter in tasks:
+            game_state = waiter.get_result()
             runner = waiters_to_runners[waiter]
             if game_state != GAME_21_RESULT_FINISH:
                 losers.append(user)

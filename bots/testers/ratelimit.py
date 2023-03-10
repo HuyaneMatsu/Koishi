@@ -11,10 +11,10 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     ApplicationCommandPermission, ApplicationCommandPermissionOverwrite, PrivacyLevel, \
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
-    Achievement, Oauth2User, parse_oauth2_redirect_url, cr_pg_channel_object, Channel, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, PermissionOverwrite, Guild, ForumTag
-from scarletio import sleep, Task, WaitTillAll, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
-    alchemy_incendiary,  EventThread, WaitTillExc, change_on_switch, to_json, from_json
+    Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
+    Team, WebhookType, Guild, ForumTag
+from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
+    alchemy_incendiary,  EventThread, change_on_switch, to_json, from_json
 
 from scarletio.utils.trace import TracebackFrameProxy, render_frames_into, render_exception_into
 from scarletio.web_common.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, \
@@ -196,7 +196,7 @@ class RLTCTX: #rate limit tester context manager
                 unit_result.extend(buffer)
                 unit_result.append('\n')
                 
-            exception=task.exception()
+            exception = task.get_exception()
             if exception is None:
                 continue
             
@@ -2620,7 +2620,7 @@ async def rate_limit_test_0000(client, message):
             task = Task(achievement_get(client, achievement_id), KOKORO)
             tasks.append(task)
         
-        await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()
     #achievement_get limited. limit:5, reset:5
     
 @RATE_LIMIT_COMMANDS
@@ -2652,7 +2652,7 @@ async def rate_limit_test_0001(client,message):
             task = Task(achievement_get(client,achievement_id_2), KOKORO)
             tasks.append(task)
         
-        await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()
     #achievement_get limited globally
     
 @RATE_LIMIT_COMMANDS
@@ -2672,11 +2672,11 @@ async def rate_limit_test_0002(client,message):
             task = Task(achievement_create(client,name,description,image), KOKORO)
             tasks.append(task)
             
-        await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()
         
         for task in tasks:
             try:
-                achievement = task.result()
+                achievement = task.get_result()
             except:
                 pass
             else:
@@ -2703,10 +2703,10 @@ async def rate_limit_test_0003(client,message):
         
         tasks = []
         for achievement in achievements:
-            task = Task(achievement_delete(client,achievement),loop)
+            task = Task(achievement_delete(client, achievement),loop)
             tasks.append(task)
         
-        await WaitTillAll(tasks,loop)
+        await TaskGroup(loop, tasks).wait_all()
     #achievement_delete limited. limit:5, reset:5, globally
 
 @RATE_LIMIT_COMMANDS
@@ -2731,7 +2731,7 @@ async def rate_limit_test_0004(client,message):
         task = Task(achievement_edit(client,achievement,name = 'Phantom'),loop)
         tasks.append(task)
         
-        await WaitTillAll(tasks,loop)
+        await TaskGroup(loop, tasks).wait_all()
         await client.achievement_delete(achievement)
     #achievement_edit limited. limit:5, reset:5
     
@@ -2751,13 +2751,13 @@ async def rate_limit_test_0005(client,message):
             achievement = await client.achievement_create(name,description,image)
             achievements.append(achievement)
     
-        loop=client.loop
+        loop = client.loop
         tasks = []
         for achievement in achievements:
-            task = Task(achievement_edit(client,achievement,name = 'Yura'),loop)
+            task = Task(achievement_edit(client, achievement, name = 'Yura'),loop)
             tasks.append(task)
         
-        await WaitTillAll(tasks,loop)
+        await TaskGroup(loop, tasks).wait_all()
         
         for achievement in achievements:
             await client.achievement_delete(achievement)
@@ -2794,7 +2794,7 @@ async def rate_limit_test_0007(client,message):
             task = Task(achievement_get_all(client),loop)
             tasks.append(task)
         
-        await WaitTillAll(tasks,loop)
+        await TaskGroup(loop, tasks).wait_all()
     
     #achievement_get_all limited. limit:5, reset:5, globally
 
@@ -2878,7 +2878,7 @@ async def rate_limit_test_0011(client,message):
             task = Task(user_achievement_update(client,user,achievement,100), KOKORO)
             tasks.append(task)
         
-        await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()
         await client.achievement_delete(achievement)
     
     # DiscordException NOT FOUND (404), code=10029: Unknown Entitlement
@@ -4130,21 +4130,21 @@ async def rate_limit_test_0069(client, message):
         if client_ is None:
             await RLT.send('Needs a bot client which is not owned by a team and with secret set.')
         
-        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random acess
+        access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
         tasks = []
-        loop = client.loop
-        task = Task(user_guild_get_all(client_, access), loop)
+        task = Task(user_guild_get_all(client_, access), KOKORO)
         tasks.append(task)
-        task = Task(guild_get_all(client), loop)
+        task = Task(guild_get_all(client), KOKORO)
         tasks.append(task)
         
-        done, pending = await WaitTillExc(tasks, loop)
         
-        for task in pending:
-            task.cancel()
-        
-        for task in done:
-            task.result()
+        task_group = TaskGroup(KOKORO, tasks)
+        failed_task = await task_group.wait_exception()
+        if (failed_task is not None):
+            # Cancel all tasks and propagate the exception of the first failed task
+            await task_group.cancel_all()
+            failed_task.get_result() 
+
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0070(client, message):
@@ -5269,7 +5269,7 @@ async def rate_limit_test_0119(client, message, guild2:'guild'=None):
             task = Task(rate_limit_test_0119_parallel(client, stage_channel), KOKORO)
             tasks.append(task)
         
-        await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()
 
 async def rate_limit_test_0120_parallel(client, stage_channel, user):
     voice_client = await client.join_voice(stage_channel)
@@ -5325,7 +5325,7 @@ async def rate_limit_test_0120(client, message, guild2:'guild'=None):
             task = Task(rate_limit_test_0120_parallel(client, stage_channel, user), KOKORO)
             tasks.append(task)
         
-        await WaitTillAll(tasks, KOKORO)
+        await TaskGroup(KOKORO, tasks).wait_all()
 
 
 @RATE_LIMIT_COMMANDS

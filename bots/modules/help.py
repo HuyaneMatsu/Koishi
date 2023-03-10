@@ -2,22 +2,26 @@ __all__ = ()
 
 import sys
 from functools import partial as partial_func
-from platform import platform as get_platform
-from os.path import join as join_paths, isdir as is_directory, isfile as is_file
 from os import listdir as list_directory
-from time import perf_counter
+from os.path import isdir as is_directory, isfile as is_file, join as join_paths
+from platform import platform as get_platform
 from random import choice, random
+from time import perf_counter
 
-from hata import CLIENTS, USERS, GUILDS, Embed, Client, __version__, Emoji, elapsed_time, BUILTIN_EMOJIS, CHANNELS, \
-    EMOJIS, __package__, MESSAGES, ROLES, STICKERS, InteractionType
-from hata.ext.slash.menus import Pagination, Closer
-from hata.ext.slash import InteractionResponse, Button, Row, abort
+from hata import (
+    BUILTIN_EMOJIS, CHANNELS, CLIENTS, Client, EMOJIS, Embed, Emoji, GUILDS, InteractionType, MESSAGES, ROLES, STICKERS,
+    USERS, __package__, __version__, elapsed_time
+)
+from hata.ext.slash import Button, InteractionResponse, Row, abort
+from hata.ext.slash.menus import Closer, Pagination
 
-from bot_utils.constants import LINK__KOISHI_GIT, INVITE__SUPPORT, GUILD__SUPPORT, LINK__PASTE, \
-    ROLE__SUPPORT__ANNOUNCEMENTS, COLOR__KOISHI_HELP, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__VERIFIED, \
-    ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_WINNER, \
-    ROLE__SUPPORT__EVENT_PARTICIPANT, EMOJI__HEART_CURRENCY, ROLE__SUPPORT__HEART_BOOST, STARTUP, PATH__KOISHI, \
-    LINK__KOISHI_TOP_GG
+from bot_utils.constants import (
+    COLOR__KOISHI_HELP, EMOJI__HEART_CURRENCY, GUILD__ORIN_PARTY_HOUSE, GUILD__SUPPORT, INVITE__SUPPORT,
+    LINK__KOISHI_GIT, LINK__KOISHI_TOP_GG, LINK__PASTE, PATH__KOISHI, ROLE__SUPPORT__ANNOUNCEMENTS,
+    ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__EVENT_MANAGER, ROLE__SUPPORT__EVENT_PARTICIPANT,
+    ROLE__SUPPORT__EVENT_WINNER, ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS, ROLE__SUPPORT__VERIFIED,
+    STARTUP
+)
 from bot_utils.cpu_info import CpuUsage, PROCESS
 
 SLASH_CLIENT: Client
@@ -445,6 +449,166 @@ async def render_about_generic(client, event):
     )
 
 
+async def render_about_js(client, event):
+    """
+    Renders a javascript about because why not.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received event.
+    
+    Returns
+    -------
+    response : ``InteractionResponse``
+    """
+    embed = Embed(
+        None,
+        get_koishi_header(),
+        color = COLOR__KOISHI_HELP,
+        timestamp = event.created_at,
+    ).add_author(
+        client.full_name,
+        client.avatar_url,
+    ).add_field(
+        UPTIME_TITLE,
+        (
+            f'```\n'
+            f'{elapsed_time(STARTUP)}\n'
+            f'```'
+        )
+    ).add_field(
+        'Hosting',
+        PLATFORM_FIELD_VALUE,
+    )
+    
+    if (CpuUsage is not None):
+        cpu_usage = await CpuUsage()
+        embed.add_field(
+            'CPU usage',
+            (
+                f'```\n'
+                f'{cpu_usage.cpu_percent:.2f}%\n'
+                '```'
+            ),
+            inline = True,
+        ).add_field(
+            'CPU frequency',
+            (
+                f'```\n'
+                f'{cpu_usage.average_cpu_frequency:.2f} MHz\n'
+                f'```'
+            ),
+            inline = True,
+        ).add_field(
+            'Memory usage',
+            (
+                f'```\n'
+                f'{(PROCESS.memory_info().rss / (1 << 20)):.2f} MB\n'
+                f'```'
+            ),
+            inline = True,
+        )
+    
+    embed.add_field(
+        'Library',
+        (
+            f'```\n'
+            f'discord.js\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Version',
+        (
+            f'```\n'
+            f'14.6.0\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Line count',
+        LINE_COUNT_FIELD_VALUE,
+    )
+    
+    guild_id = event.guild_id
+    if guild_id:
+        command_count = client.slasher.get_guild_command_count(guild_id)
+        command_count_with_sub_commands = client.slasher.get_guild_command_count_with_sub_commands(guild_id)
+    else:
+        command_count = 0
+        command_count_with_sub_commands = 0
+    
+    command_count += client.slasher.get_global_command_count()
+    command_count_with_sub_commands += client.slasher.get_global_command_count_with_sub_commands()
+    
+    command_count = min(command_count, 105)
+    
+    embed.add_field(
+        'Global command count',
+        (
+            f'```\n'
+            f'{command_count}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Including sub commands',
+        (
+            f'```\n'
+            f'{command_count_with_sub_commands}\n'
+            f'```'
+        ),
+        inline = True
+    )
+        
+    field_title = 'Koishi'
+    field_value = 'The bot who borrows your fishing rods and eats your shrimp fry.'
+    
+    embed.add_field(
+        field_title,
+        (
+            f'```\n'
+            f'{field_value}\n'
+            f'```'
+        ),
+    ).add_field(
+        'Guild count',
+        (
+            f'```\n'
+            f'{len(client.guilds)}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Used commands',
+        (
+            f'```\n'
+            f'{interaction_counter.application_command}\n'
+            f'```'
+        ),
+        inline = True,
+    ).add_field(
+        'Total interactions',
+        (
+            f'```\n'
+            f'{interaction_counter.total}\n'
+            f'```'
+        ),
+        inline = True,
+    )
+    
+    add_user_footer(embed, event.user)
+    
+    return InteractionResponse(
+        embed = embed,
+        components = ABOUT_COMPONENTS,
+    )
+
 async def render_about_cache(client, event):
     embed = Embed(
         color = COLOR__KOISHI_HELP,
@@ -535,7 +699,9 @@ ABOUT_FIELD_NAME_TO_RENDERER = {
 
 
 @SLASH_CLIENT.interactions(is_global = True)
-async def about(client, event,
+async def about(
+    client,
+    event,
     field: (ABOUT_FIELD_CHOICES, 'Choose a field!') = ABOUT_FIELD_NAME_GENERIC,
 ):
     """My secrets and stats. Simpers only!"""
@@ -544,6 +710,9 @@ async def about(client, event,
     except KeyError:
         abort(f'Unknown field: {field!r}.')
     else:
+        if (field_renderer is render_about_generic) and (event.guild is GUILD__ORIN_PARTY_HOUSE):
+            field_renderer = render_about_js
+        
         return await field_renderer(client, event)
 
 
@@ -572,10 +741,15 @@ CATEGORIES = (
         'Administration',
         EMOJI_TOOLS,
         ('clear', 'dupe-image-filter', 'invite-create', 'mod', 'self-mod'),
+        (
+            'all-users', 'automation', 'copy-message', 'in-role','latest-users', 'move-message', 'move-channel',
+            'move-messages'
+        ),
     ), (
         'Anime',
         EMOJI_PILL,
         ('anime', 'character', 'find-anime', 'find-character', 'find-manga', 'manga',),
+        (),
     ), (
         'Actions',
         EMOJI_MASKS,
@@ -584,48 +758,59 @@ CATEGORIES = (
             'kick', 'kill', 'kiss', 'lick', 'nom', 'pat', 'pocky-kiss', 'poke', 'slap', 'smile', 'smug', 'wave',
             'wink', 'yeet',
         ),
+        (),
     ), (
         'Economy',
         EMOJI__HEART_CURRENCY,
         ('daily', 'gift', 'heart-shop', 'hearts', 'top-list',),
+        (),
     ), (
         'Fun',
         EMOJI_PAPER_DRAGON,
         (
             '9ball', 'ascii', 'meme', 'message-me', 'minesweeper', 'oj', 'paranoia', 'random', 'rate', 'roll',
-            'sex', 'stats', 'touhou-feed', 'trivia', 'urban', 'yuno'
-        )
+            'sex', 'stats', 'trivia', 'urban', 'yuno'
+        ),
+        (),
     ), (
         'Games',
         EMOJI_VIDEO_GAME,
         ('21', 'ds', 'kanako', 'lucky-spin', 'xox',),
+        (),
     ), (
         'Help',
         EMOJI_SPEECH_BUBBLE,
         ('about', 'help',),
+        (),
     ), (
         'Marriage',
         EMOJI_RING,
-        ('divorce', 'love', 'propose', 'proposals', 'waifu-info',)
+        ('divorce', 'love', 'propose', 'proposals', 'waifu-info',),
+        (),
     ), (
         'Utility',
         EMOJI_MAGIC_WAND,
         (
             'calc', 'choose', 'create-activity', 'color', 'format-time', 'guild', 'id',
-            'ping', 'rawr', 'role-info', 'snipe', 'snipe-emojis', 'snipe-reactions',
+            'ping', 'rawr', 'role-info', 'roles', 'snipe', 'snipe-emojis', 'snipe-reactions',
             'snipe-stickers', 'style-text', 'user'
         ),
+        (),
     ), (
         'Waifus',
         EMOJI_WAIFU,
-        ('nsfw-booru', 'safe-booru', 'touhou-character', 'vocaloid', 'waifu-safe', 'waifu-nsfw')
+        (
+            'nsfwbooru', 'safebooru', 'touhou-calendar', 'touhou-character', 'touhou-feed', 'vocaloid', 'waifu-safe',
+            'waifu-nsfw'
+        ),
+        (),
     ),
 )
 
 
 NOT_LISTED_COMMANDS = ('koi-guilds', 'koi-guilds-how-to')
 
-
+"""
 def build_category_into(extend, category_name, emoji, command_names):
     extend.append(emoji.as_emoji)
     extend.append(' **')
@@ -654,7 +839,7 @@ def build_category_into(extend, category_name, emoji, command_names):
     return extend
 
 
-def build_command_list_embed(header):
+def build_command_list_embed(header, extended):
     length = len(CATEGORIES)
     
     description_parts = []
@@ -669,7 +854,11 @@ def build_command_list_embed(header):
             category = CATEGORIES[index]
             index += 1
             
-            build_category_into(description_parts, *category)
+            commands = category[2]
+            if extended:
+                commands = sorted(commands + category[3])
+            
+            build_category_into(description_parts, category[0], category[1], commands)
             
             if index == length:
                 break
@@ -684,10 +873,31 @@ def build_command_list_embed(header):
         description,
         color = COLOR__KOISHI_HELP,
     )
+"""
+
+def build_command_list_embed(header, extended):
+    embed = Embed(
+        'Help',
+        header,
+        color = COLOR__KOISHI_HELP,
+    )
+    
+    for (name, emoji, command_names, extra) in CATEGORIES:
+        if extended:
+            command_names = sorted(command_names + extra)
+        
+        embed.add_field(
+            f'{name} {emoji}',
+            ' **•** '.join([f'`{command_name}`' for command_name in command_names]),
+        )
+    
+    return embed
 
 
-COMMAND_LIST_EMBED = build_command_list_embed(KOISHI_HEADER)
-COMMAND_LIST_EMBED_EASTER_EGG = build_command_list_embed(KOISHI_HEADER_EASTER_EGG)
+COMMAND_LIST_EMBED = build_command_list_embed(KOISHI_HEADER, False)
+COMMAND_LIST_EMBED_EASTER_EGG = build_command_list_embed(KOISHI_HEADER_EASTER_EGG, False)
+COMMAND_LIST_EMBED_EXTENDED = build_command_list_embed(KOISHI_HEADER, True)
+
 
 HEARD_GUIDE_EMBED = Embed(
     'Heart Guide',
@@ -721,14 +931,18 @@ HEARD_GUIDE_EMBED = Embed(
 )
 
 async def render_help_generic(client, event):
-    if random() < 0.01:
-        embed = COMMAND_LIST_EMBED_EASTER_EGG
+    if event.guild is GUILD__ORIN_PARTY_HOUSE:
+        embed = COMMAND_LIST_EMBED_EXTENDED
     else:
-        embed = COMMAND_LIST_EMBED
+        if random() <= 0.01:
+            embed = COMMAND_LIST_EMBED_EASTER_EGG
+        else:
+            embed = COMMAND_LIST_EMBED
     
     embed = embed.copy()
     add_user_footer(embed, event.user)
     return embed
+
 
 async def render_help_heart_guide(client, event):
     embed = HEARD_GUIDE_EMBED.copy()

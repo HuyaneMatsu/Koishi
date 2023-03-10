@@ -1,14 +1,30 @@
+__all__ = ()
+
 from datetime import datetime
-from hata import Client, Embed, DATETIME_FORMAT_CODE, elapsed_time
+
 from dateutil.relativedelta import relativedelta
-from bot_utils.constants import CHANNEL__SUPPORT__LOG_USER, GUILD__SUPPORT
-from hata.ext.plugin_loader import require
+from hata import DATETIME_FORMAT_CODE, Embed, elapsed_time
 
-require(Satori=Client)
 
-Satori: Client
-
-def create_user_embed(user, guild_profile, join):
+def build_user_embed(guild, user, guild_profile, join):
+    """
+    Builds a user join or leave embed.
+    
+    Parameters
+    ----------
+    guild : ``Guild``
+        The guild in context.
+    user : ``ClientUserBase``
+        The user who joined or left.
+    guild_profile : `None`, ``GuildProfile``
+        The user's guild profile in the guild.
+    join : `bool`
+        Whether the user joined or left.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
     created_at = user.created_at
     description_parts = [
         'Created: ',
@@ -88,27 +104,7 @@ def create_user_embed(user, guild_profile, join):
         state = 'left from'
     
     embed.add_author(
-        f'User {state} {GUILD__SUPPORT.name}'
+        f'User {state} {guild.name}'
     )
     
     return embed
-
-
-@Satori.events
-async def guild_user_add(client, guild, user):
-    if guild is not GUILD__SUPPORT:
-        return
-    
-    embed = create_user_embed(user, user.get_guild_profile_for(guild), True)
-    
-    await client.message_create(CHANNEL__SUPPORT__LOG_USER, embed = embed)
-
-
-@Satori.events
-async def guild_user_delete(client, guild, user, guild_profile):
-    if guild is not GUILD__SUPPORT:
-        return
-    
-    embed = create_user_embed(user, guild_profile, False)
-    
-    await client.message_create(CHANNEL__SUPPORT__LOG_USER, embed = embed)

@@ -4,7 +4,7 @@ import os
 from random import randint, choice
 from itertools import chain
 
-from scarletio import ReuBytesIO, future_or_timeout, Future, Task, LOOP_TIME, any_to_any
+from scarletio import ReuBytesIO, Future, Task, LOOP_TIME, any_to_any
 from hata import Color, Embed, Client, KOKORO
 
 from hata.ext.slash import abort, Row, Button, ButtonStyle, InteractionResponse
@@ -957,7 +957,7 @@ class KanakoRunner:
                 
                 circle_start = LOOP_TIME()
                 self.waiter = waiter = Future(KOKORO)
-                future_or_timeout(waiter, CIRCLE_TIME)
+                waiter.apply_timeout(CIRCLE_TIME)
                 
                 try:
                     await waiter

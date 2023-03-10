@@ -36,16 +36,19 @@ except ImportError:
 
 Marisa: Client
 
+'''
 try:
     SOLARLINK_VOICE = Marisa.solarlink.add_node('127.0.0.1', 2333, 'youshallnotpass', None)
 except BaseException as err:
     sys.stderr.write(f'Failed to connect to lavalink server: {err!r}.\n')
     SOLARLINK_VOICE = False
 
-add_default_plugin_variables(SOLARLINK_VOICE=SOLARLINK_VOICE)
+add_default_plugin_variables(SOLARLINK_VOICE = SOLARLINK_VOICE)
+'''
 
-Marisa.command_processor.create_category('TEST COMMANDS', checks=checks.owner_only())
-Marisa.command_processor.create_category('VOICE', checks=checks.guild_only())
+
+Marisa.command_processor.create_category('TEST COMMANDS', checks = checks.owner_only())
+Marisa.command_processor.create_category('VOICE', checks = checks.guild_only())
 Marisa.command_processor.get_default_category().checks = checks.owner_only()
 
 def marisa_help_embed_postprocessor(command_context, embed):
@@ -1280,6 +1283,12 @@ async def resend(
     yield
     file = await client.download_attachment(attachment)
     yield InteractionResponse(file=(attachment.name, file))
+
+
+
+@Marisa.interactions(guild = GUILD__SUPPORT, target = 'message')
+async def test_resend_content(client, event, target):
+    return InteractionResponse(target.content, allowed_mentions = None)
 
 
 @Marisa.interactions(guild = GUILD__SUPPORT)

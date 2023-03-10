@@ -295,16 +295,16 @@ class HeartEventGUI:
         
         sleep_time = (self.duration % update_delta).seconds
         if sleep_time:
-            self.duration -= timedelta(seconds=sleep_time)
+            self.duration -= timedelta(seconds = sleep_time)
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
-            waiter.clear()
+            self.waiter = waiter = Future(KOKORO)
         
         sleep_time = self._update_time
         while True:
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
-            waiter.clear()
+            self.waiter = waiter = Future(KOKORO)
             self.duration -= update_delta
             if self.duration < update_delta:
                 break
@@ -596,13 +596,13 @@ class DailyEventGUI:
             self.duration -= timedelta(seconds=sleep_time)
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
-            waiter.clear()
+            self.waiter = waiter = Future(KOKORO)
         
         sleep_time = self._update_time
         while True:
             KOKORO.call_later(sleep_time, waiter.__class__.set_result_if_pending, waiter, None)
             await waiter
-            waiter.clear()
+            self.waiter = waiter = Future(KOKORO)
             self.duration -= update_delta
             if self.duration < update_delta:
                 break

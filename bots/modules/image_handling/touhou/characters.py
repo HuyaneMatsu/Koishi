@@ -974,6 +974,16 @@ SHIKI_EIKI_YAMAXANADU = TouhouCharacter(
     ),
 )
 
+SOGA_NO_TOJIKO = TouhouCharacter(
+    'soga_no_tojiko',
+    'Soga no Tojiko',
+    (
+        '蘇我 屠自古',
+        'Soga',
+        'Tojiko',
+    ),
+)
+
 DOREMY_SWEET = TouhouCharacter(
     'doremy_sweet',
     'Doremy Sweet',

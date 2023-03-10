@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from config import HATA_PATH, SCARLETIO_PATH
 
 from hata import KOKORO, Embed, DiscordException
-from scarletio import Lock, Task, ReuAsyncIO, AsyncIO, WaitTillAll, render_exception_into_async
+from scarletio import Lock, Task, ReuAsyncIO, AsyncIO, TaskGroup, render_exception_into_async
 from hata.ext.command_utils import wait_for_message, Pagination
 
 from .constants import CHANNEL__SYSTEM__SYNC, PATH__KOISHI
@@ -152,10 +152,10 @@ async def request_sync(client, days_allowed):
             sending_task = Task(send_file(client, file), KOKORO)
             response_task = wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_received, 60.)
             
-            await WaitTillAll([sending_task, response_task], KOKORO)
+            await TaskGroup(KOKORO, [sending_task, response_task]).wait_all()
             
             try:
-                sent = sending_task.result()
+                sent = sending_task.get_result()
             except GeneratorExit:
                 raise
             
@@ -167,7 +167,7 @@ async def request_sync(client, days_allowed):
             
             if sent:
                 try:
-                    response_task.result()
+                    response_task.get_result()
                 except TimeoutError:
                     sys.stderr.write('Sync failed, timeout.\n')
                     return

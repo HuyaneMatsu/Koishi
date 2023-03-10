@@ -1,10 +1,12 @@
 __all__ = ()
 
 from hata import BUILTIN_EMOJIS, Color
+from hata.ext.slash import Button
 
 
 EMOJI_NEW = BUILTIN_EMOJIS['arrows_counterclockwise']
 EMOJI_TAGS = BUILTIN_EMOJIS['notepad_spiral']
+EMOJI_CLOSE = BUILTIN_EMOJIS['x']
 
 
 SAFE_TAGS_BANNED = frozenset((
@@ -65,7 +67,7 @@ SAFE_BOORU_AUTOCOMPLETE_ENDPOINT = f'{SAFE_BOORU_ENDPOINT}/autocomplete.php'
 SAFE_BOORU_AUTOCOMPLETE_PARAMETERS = {}
 SAFE_BOORU_AUTOCOMPLETE_QUERY_KEY = 'q'
 
-NSFW_BOORU_ENDPOINT = 'https://gelbooru.com/'
+NSFW_BOORU_ENDPOINT = 'https://gelbooru.com'
 NSFW_BOORU_PROVIDER = 'gelbooru'
 NSFW_BOORU_AUTOCOMPLETE_ENDPOINT = f'{NSFW_BOORU_ENDPOINT}/index.php'
 NSFW_BOORU_AUTOCOMPLETE_PARAMETERS = {'page': 'autocomplete2', 'type': 'tag_query', 'limit': '10'}

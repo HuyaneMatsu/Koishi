@@ -9,7 +9,9 @@ from .booru import (
     CACHES, CUSTOM_ID_NEW_DISABLED, CUSTOM_ID_TAGS_DISABLED, ImageCache, SESSION_ID, build_booru_disabled_components,
     build_tag_embed
 )
+from .constants import AUTOCOMPLETE_VALUE_LENGTH_MAX, CUSTOM_ID_CLOSE
 from .helpers import iter_split_tags_safe_booru, iter_split_tags_gel_booru, split_down_full_tags, split_tags
+from .parsers import event_user_matches, parse_image_url
 from .tag_cache import get_tag_auto_completion
 
 
@@ -17,10 +19,9 @@ SLASH_CLIENT: Client
 
 
 TAG_DESCRIPTION = 'Some tags to spice it up?'
-AUTOCOMPLETE_VALUE_LENGTH_MAX = 100
 
 
-@SLASH_CLIENT.interactions(is_global = True)
+@SLASH_CLIENT.interactions(is_global = True, name = 'safebooru')
 async def safe_booru(
     client,
     event,
@@ -66,7 +67,7 @@ async def safe_booru(
     await cache.invoke_initial(client, event)
 
 
-@SLASH_CLIENT.interactions(is_global = True, nsfw = True)
+@SLASH_CLIENT.interactions(is_global = True, nsfw = True, name = 'nsfwbooru')
 async def nsfw_booru(
     client,
     event,
@@ -230,6 +231,11 @@ async def autocomplete_nsfw_tags(client, event, input_value):
 
 @SLASH_CLIENT.interactions(custom_id = [CUSTOM_ID_NEW_DISABLED, CUSTOM_ID_TAGS_DISABLED])
 async def booru_disabled():
+    """
+    Handles a disabled component click. So does nothing.
+    
+    This function is a coroutine.
+    """
     pass
 
 
@@ -248,7 +254,7 @@ async def notify_session_expiration(client, event):
     """
     await client.interaction_component_message_edit(
         event,
-        components = build_booru_disabled_components(),
+        components = build_booru_disabled_components(parse_image_url(event)),
     )
     
     await client.interaction_followup_message_create(
@@ -260,6 +266,22 @@ async def notify_session_expiration(client, event):
 
 @SLASH_CLIENT.interactions(custom_id = re.compile('booru\.(\d+)\.(\d+)\.new'))
 async def booru_new(client, event, session_id, cache_id):
+    """
+    Gets the defined cache by the parameters and responds with an another image pulled from it.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    session_id : `str`
+        The current session's identifier. A new is generated on each startup. Later converted to `int`.
+    cache_id : `int`
+        The cache's identifier. Incremental. Later converted to `int`.
+    """
     if event.user is not event.message.interaction.user:
         return
     
@@ -279,6 +301,22 @@ async def booru_new(client, event, session_id, cache_id):
 
 @SLASH_CLIENT.interactions(custom_id = re.compile('booru\.(\d+)\.(\d+)\.tags'))
 async def booru_tags(client, event, session_id, cache_id):
+    """
+    Gets the defined cache by the parameters and responds with the current image's tags.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    session_id : `str`
+        The current session's identifier. A new is generated on each startup. Later converted to `int`.
+    cache_id : `int`
+        The cache's identifier. Incremental. Later converted to `int`.
+    """
     session_id = int(session_id)
     if session_id == SESSION_ID:
         cache_id = int(cache_id)
@@ -295,3 +333,28 @@ async def booru_tags(client, event, session_id, cache_id):
             return
     
     await notify_session_expiration(client, event)
+
+
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_CLOSE)
+async def booru_close(client, event):
+    """
+    Deletes the booru message if applicable.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    """
+    await client.interaction_component_acknowledge(event)
+    
+    if event.user_permissions.can_manage_messages or event_user_matches(event):
+        await client.interaction_response_message_delete(event)
+    
+    else:
+        await client.interaction_followup_message_create(
+            event,
+            'You must be the invoker of the interaction, or have manage messages permission to do this.',
+            show_for_invoking_user_only = True,
+        )

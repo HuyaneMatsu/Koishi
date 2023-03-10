@@ -1,7 +1,7 @@
 __all__ = ()
 
 from hata import ChannelType, Client, KOKORO, Permission, create_partial_channel_from_id
-from scarletio import WaitTillAll
+from scarletio import TaskGroup
 
 from ..constants import ALLOWED_GUILDS
 from ..helpers import check_move_permissions, check_move_permissions_custom
@@ -88,4 +88,4 @@ async def shutdown(client):
     
     cancel_task = None
     
-    await WaitTillAll(cancel_tasks, KOKORO)
+    await TaskGroup(KOKORO, cancel_tasks).wait_all()

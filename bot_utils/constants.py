@@ -1,6 +1,9 @@
-from datetime import datetime
+__all__ = ()
+
 import os
-from hata import Guild, Role, Invite, Color, Channel, Emoji, User
+from datetime import datetime as DateTime
+
+from hata import Channel, Color, Emoji, Guild, Invite, Role, User
 
 
 import config
@@ -17,16 +20,20 @@ PREFIX__MARISA = config.MARISA_PREFIX
 GUILD__SUPPORT = Guild.precreate(388267636661682178, name = 'Koishi Wonderland')
 GUILD__STORAGE = Guild.precreate(568837922288173056)
 GUILD__ESTS_HOME = Guild.precreate(982172577260793866)
+GUILD__ORIN_PARTY_HOUSE = Guild.precreate(1082278732850536568)
 
 CHANNEL__SUPPORT__SYSTEM = Channel.precreate(445191707491958784)
 CHANNEL__SUPPORT__EVENT = Channel.precreate(798911148292309002)
 CHANNEL__SUPPORT__DEFAULT_TEST = Channel.precreate(557187647831932938)
 CHANNEL__SUPPORT__LOG_MENTION = Channel.precreate(828552266374053889)
 CHANNEL__SUPPORT__LOG_EMOJI = Channel.precreate(864748017726259210)
+CHANNEL__SUPPORT__LOG_STICKER = Channel.precreate(864748017726259210)
 CHANNEL__SUPPORT__LOG_USER = Channel.precreate(929468601050738688)
+CHANNEL__SUPPORT__LOG_SATORI = Channel.precreate(829104265049538620)
 CHANNEL__ESTS_HOME__STREAM_NOTIFICATION = Channel.precreate(983676417046904872)
 CHANNEL__SYSTEM__SYNC = Channel.precreate(568837922288173058)
 CHANNEL__SUPPORT__TOUHOU = Channel.precreate(1023233466634096650)
+CHANNEL__SUPPORT__WELCOME = Channel.precreate(445191707491958784)
 
 ROLE__SUPPORT__VERIFIED = Role.precreate(445189164703678464)
 ROLE__SUPPORT__ANNOUNCEMENTS = Role.precreate(538397994421190657)
@@ -46,7 +53,6 @@ ROLE__ESTS_HOME__STREAM_NOTIFICATION = Role.precreate(983718322753384488)
 INVITE__SUPPORT = Invite.precreate('3cH2r5d')
 
 CATEGORY__SUPPORT__BOTS = Channel.precreate(445191611727478795)
-CATEGORY__SUPPORT__BIG_BRO = Channel.precreate(829104265049538620)
 
 EMOJI__HEART_CURRENCY = Emoji.precreate(603533301516599296, name = 'youkai_kokoro')
 
@@ -68,7 +74,7 @@ USER__EST = User.precreate(277393805601275910)
 
 DEFAULT_CATEGORY_NAME = 'Uncategorized'
 
-STARTUP = datetime.utcnow()
+STARTUP = DateTime.utcnow()
 
 IN_GAME_IDS = set()
 

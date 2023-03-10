@@ -3,7 +3,7 @@ __all__ = ('ImageHandlerRequestBase',)
 from collections import deque as Deque
 
 from hata import KOKORO, InteractionType
-from scarletio import copy_docs, Future, Task, WaitTillAll
+from scarletio import copy_docs, Future, Task, TaskGroup
 
 from .base import ImageHandlerBase
 
@@ -67,7 +67,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
         
         acknowledge_task = Task(coroutine, KOKORO)
         
-        await WaitTillAll([acknowledge_task, waiter], KOKORO)
+        await TaskGroup(KOKORO, [acknowledge_task, waiter]).wait_all()
         
         try:
             acknowledge_task.get_result()

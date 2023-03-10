@@ -2,7 +2,7 @@ __all__ = ()
 
 import re, os
 
-from scarletio import Task, AsyncIO, WaitTillAll
+from scarletio import Task, AsyncIO, TaskGroup
 from hata import Client, Embed, eventlist, Color, YTAudio, DownloadError, LocalAudio, VoiceClient, \
     KOKORO, is_url, InteractionEvent
 from hata.ext.slash.menus import Pagination
@@ -564,7 +564,7 @@ async def party_is_over(client, event_or_message):
         task = Task(client.user_voice_kick(user, GUILD__SUPPORT), KOKORO)
         tasks.append(task)
     
-    await WaitTillAll(tasks, KOKORO)
+    await TaskGroup(KOKORO, tasks).wait_all()
     
     yield 'Nooo, the party is over nyaaa~~h!'
     return

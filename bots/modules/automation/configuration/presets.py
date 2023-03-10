@@ -1,0 +1,21 @@
+__all__ = ()
+
+from .automation_configuration import AutomationConfiguration
+from .operations import set_automation_configuration
+
+from bot_utils.constants import (
+    CHANNEL__SUPPORT__LOG_EMOJI, CHANNEL__SUPPORT__LOG_MENTION, CHANNEL__SUPPORT__LOG_SATORI,
+    CHANNEL__SUPPORT__LOG_STICKER, CHANNEL__SUPPORT__LOG_USER, GUILD__SUPPORT
+)
+
+
+SUPPORT_GUILD_CONFIGURATION = AutomationConfiguration(GUILD__SUPPORT.id)
+
+SUPPORT_GUILD_CONFIGURATION.log_emoji_channel_id = CHANNEL__SUPPORT__LOG_EMOJI.id
+SUPPORT_GUILD_CONFIGURATION.log_mention_channel_id = CHANNEL__SUPPORT__LOG_MENTION.id
+SUPPORT_GUILD_CONFIGURATION.log_satori_channel_id = CHANNEL__SUPPORT__LOG_SATORI.id
+SUPPORT_GUILD_CONFIGURATION.log_sticker_channel_id = CHANNEL__SUPPORT__LOG_STICKER.id
+SUPPORT_GUILD_CONFIGURATION.log_user_channel_id = CHANNEL__SUPPORT__LOG_USER.id
+SUPPORT_GUILD_CONFIGURATION.welcome_channel_id = 0
+
+set_automation_configuration(SUPPORT_GUILD_CONFIGURATION)

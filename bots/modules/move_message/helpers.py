@@ -4,7 +4,7 @@ import re
 
 from hata import DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, KOKORO, WebhookBase
 from hata.ext.slash import abort
-from scarletio import Task, WaitTillExc, sleep
+from scarletio import Task, TaskGroup, sleep
 
 DATE_CONNECTOR = ' - '
 NAME_WITH_DATE_RP = re.compile(
@@ -91,20 +91,18 @@ async def get_attachments(client, attachments):
     -------
     attachments : `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
     """
-    tasks = []
-    for attachment in attachments:
-        tasks.append(Task(get_attachment(client, attachment), KOKORO))
-    
-    done, pending = await WaitTillExc(tasks, KOKORO)
-    
-    # We do not care about the pending ones
-    for task in pending:
-        task.cancel()
+    task_group = TaskGroup(KOKORO, (Task(get_attachment(client, attachment), KOKORO) for attachment in attachments))
+    failed_task = await task_group.wait_exception()
+    if (failed_task is not None):
+        # Cancel all and propagate the first failing one
+        task_group.cancel_all()
+        failed_task.get_result()
+        return
     
     attachment_map = {}
-    for task in done:
+    for task in task_group.done:
         # This line might raise
-        attachment, file = task.result()
+        attachment, file = task.get_result()
         
         attachment_map[attachment] = file
     

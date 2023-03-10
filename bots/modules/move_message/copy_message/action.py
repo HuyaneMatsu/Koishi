@@ -4,7 +4,7 @@ from collections import deque
 from itertools import chain
 
 from hata import Client, KOKORO, parse_all_emojis
-from scarletio import Task, WaitTillExc
+from scarletio import Task, TaskGroup
 
 from ..constants import ALLOWED_GUILDS, ROLE__MEDIA_SORTER
 from ..helpers import create_webhook_message, get_message_and_files, get_webhook
@@ -99,19 +99,23 @@ async def reaction_add(client, event):
         get_message_and_files_task = Task(get_message_and_files(client, source_channel, message.id), KOKORO)
         get_webhook_task = Task(get_webhook(client, channel_id), KOKORO)
         
-        done, pending = await WaitTillExc(
+        task_group =  TaskGroup(
+            KOKORO,
             [
                 get_message_and_files_task,
                 get_webhook_task,
             ],
-            KOKORO,
         )
         
-        for task in pending:
-            task.cancel()
+        failed_task = await task_group.wait_exception()
+        if (failed_task is not None):
+            # Cancel all and propagate the first failing.
+            task_group.cancel_all()
+            failed_task.get_result()
+            return
         
-        for task in done:
-            result = task.result()
+        for task in task_group.done:
+            result = task.get_result()
             
             if task is get_message_and_files_task:
                 message, files = result

@@ -1,7 +1,7 @@
 __all__ = ()
 
 from hata import Embed, KOKORO, TIMESTAMP_STYLES, format_loop_time, mention_channel_by_id
-from scarletio import Future, LOOP_TIME, Task, WaitTillAll
+from scarletio import Future, LOOP_TIME, Task, TaskGroup
 
 from ..helpers import get_files, get_webhook, message_delete
 
@@ -223,16 +223,8 @@ class MessageMoverContext:
     
     async def move_messages_parallelly(self):
         self.get_webhook_waiter()
-        
-        tasks = []
-        for message in self.messages:
-            task = Task(self.move_message(message), KOKORO)
-            tasks.append(task)
-        
-        await WaitTillAll(
-            tasks,
-            KOKORO,
-        )
+        await TaskGroup(KOKORO, (Task(self.move_message(message), KOKORO) for message in self.messages)).wait_all()
+    
     
     def get_webhook_waiter(self):
         webhook_waiter = self.webhook_waiter

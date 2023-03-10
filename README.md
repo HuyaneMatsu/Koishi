@@ -71,12 +71,12 @@ And much more!
 
 - Fun
     
-    `9ball` • `ascii` • `meme` • `message-me` • `minesweeper` • `oj` • `paranoia` • `random` • `rate` • `roll` • 
-    `sex` • `stats` • `touhou-feed` • `trivia` • `urban` • `yuno`
+    `9ball` • `ascii` • `meme` • `message-me` • `oj` • `paranoia` • `random` • `rate` • `roll` •
+    `sex` • `stats` • `trivia` • `urban` • `yuno`
 
 - Games
     
-    `21` • `ds` • `kanako` • `lucky-spin` • `xox`
+    `21` • `ds` • `kanako` • `lucky-spin` • `minesweeper` • `xox`
 
 -  Help
     
@@ -89,12 +89,13 @@ And much more!
 - Utility
     
     `calc` • `choose` • `create-activity` • `color` • `guild` • `id` •
-    `ping` • `rawr` • `sticker` • `sticker-info` • `role-info` • `snipe` •
+    `ping` • `rawr` • `sticker` • `sticker-info` • `role-info` • `roles` • `snipe` •
     `snipe-emojis` • `snipe-reactions` • `snipe-stickers` • `style-text` • `user`
 
 - Waifus
     
-    `nsfw-booru` • `safe-booru` • `touhou-character` • `vocaloid` • `waifu-sfw` • `waifu-nsfw`
+    `nsfwbooru` • `safebooru` • `touhou-calendar` • `touhou-character` • `touhou-feed` • `vocaloid` • `waifu-sfw` •
+    `waifu-nsfw`
 
 <h3 align="center">
     Support server only commands

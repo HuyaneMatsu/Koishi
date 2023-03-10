@@ -15,7 +15,7 @@ from hata import eventlist, RATE_LIMIT_GROUPS, Embed, cchunkify, User, random_id
     ApplicationCommand, ApplicationCommandOption, ApplicationCommandOptionType, \
     ApplicationCommandOptionChoice, LocalAudio, AudioSource, OpusDecoder, PrivacyLevel
 
-from scarletio import Future, future_or_timeout, WaitTillAll, sleep, ReuBytesIO, ReuAsyncIO, enter_executor
+from scarletio import Future, TaskGroup, sleep, ReuBytesIO, ReuAsyncIO, enter_executor
 
 from hata.ext.command_utils import ChooseMenu, Pagination, Closer
 from hata.ext.commands_v2 import Command, checks, configure_converter, ConverterFlag, CommandContext
@@ -25,9 +25,9 @@ from hata.ext.patchouli import map_module
 
 from config import AUDIO_PLAY_POSSIBLE, MARISA_MODE
 
-from bot_utils.constants import PATH__KOISHI
+from bot_utils.constants import GUILD__SUPPORT, PATH__KOISHI
 
-TEST_COMMANDS = eventlist(type_=Command, category='TEST COMMANDS',)
+TEST_COMMANDS = eventlist(type_ = Command, category = 'TEST COMMANDS',)
 
 MAIN_CLIENT : Client
 
@@ -97,8 +97,9 @@ async def test_rate_limit(client, message):
             return
         
         proxy.keep_alive = True
-        task = client.loop.create_task(client.role_edit(role, color = role.color))
-        future_or_timeout(task, 2.5)
+        task = KOKORO.create_task(client.role_edit(role, color = role.color))
+        task.apply_timeout(2.5)
+        
         try:
             await task
         except TimeoutError:
@@ -135,7 +136,7 @@ async def test_100_messages(client, message):
         tasks.append(task)
     
     start = perf_counter()
-    await WaitTillAll(tasks,client.loop)
+    await TaskGroup(KOKORO, tasks).wait_all()
     end = perf_counter()
     
     await client.message_create(message.channel, repr(end - start))
@@ -363,7 +364,7 @@ async def discovery_validate_randoms(client, message):
     
     await client.message_create(message.channel, '\n'.join(collected))
 
-@TEST_COMMANDS(checks=[checks.guild_only()])
+@TEST_COMMANDS(checks = [checks.guild_only()])
 async def test_receive_voice(client, message, target: User = None):
     """
     Receives 10 seconds of sound, then plays it. Also please define a user as well, who I will listen to.
@@ -410,100 +411,92 @@ async def test_receive_voice(client, message, target: User = None):
     
     voice_client.append(audio_stream)
 
-@TEST_COMMANDS(checks=[checks.guild_only()])
-async def test_receive_voice_decoded(client, message, target: User = None):
-    """
-    Receives 10 seconds of sound, then plays it. Also please define a user as well, who I will listen to.
-    """
-    channel = message.channel
+
+@MAIN_CLIENT.interactions(guild = GUILD__SUPPORT)
+async def test_receive_voice_decoded(client, event, target: User):
+    """Receives 10 seconds of sound, then plays it."""
+    channel = event.channel
     guild = channel.guild
     if guild is None:
         return
     
-    if target is None:
-        await client.message_create(channel, 'Please define a user as well')
-        return
-    
-    state = guild.voice_states.get(message.author.id, None)
+    state = guild.voice_states.get(event.user.id, None)
     if state is None:
-        await client.message_create(channel, 'You are not at a voice channel!')
+        yield 'You are not at a voice channel!' 
         return
     
     channel = state.channel
     if not channel.cached_permissions_for(client).can_connect:
-        await client.message_create(message.channel, 'I have no permissions to connect to that channel')
+        yield 'I have no permissions to connect to that channel'
         return
     
-    voice_client = client.voice_client_for(message)
+    yield
+    
+    voice_client = client.voice_client_for(event)
     if voice_client is None:
         try:
             voice_client = await client.join_voice(channel)
         except BaseException as err:
             if isinstance(err, TimeoutError):
-                text = 'Timed out meanwhile tried to connect.'
+                yield 'Timed out meanwhile tried to connect.'
             elif isinstance(err, RuntimeError):
-                text = 'The client cannot play voice, some libraries are not loaded'
+                yield 'The client cannot play voice, some libraries are not loaded'
             else:
-                text = repr(err)
-            
-            await client.message_create(message.channel, text)
+                yield repr(err)
             return
     
-    audio_stream = voice_client.listen_to(target, auto_decode=True, yield_decoded=True)
+    audio_stream = voice_client.listen_to(target, auto_decode = True, yield_decoded = True)
     
-    await client.message_create(message.channel, 'Started listening')
+    yield 'Started listening'
     await sleep(10.0, KOKORO)
     audio_stream.stop()
     
     voice_client.append(audio_stream)
 
-@TEST_COMMANDS(checks=[checks.guild_only()])
-async def test_receive_voice_repeat(client, message, target: User = None):
-    """
-    Repeats your audio for 30 seconds. Please define who's audio to repeat as well.
-    """
-    channel = message.channel
+
+@MAIN_CLIENT.interactions(guild = GUILD__SUPPORT)
+async def test_receive_voice_repeat(client, event, target: User):
+    """Repeats your audio for 30 seconds."""
+    channel = event.channel
     guild = channel.guild
     if guild is None:
         return
     
-    if target is None:
-        await client.message_create(channel, 'Please define a user as well')
-        return
-    
-    state = guild.voice_states.get(message.author.id, None)
+    state = guild.voice_states.get(event.user.id, None)
     if state is None:
-        await client.message_create(channel, 'You are not at a voice channel!')
+        yield 'You are not at a voice channel!'
         return
     
     channel = state.channel
     if not channel.cached_permissions_for(client).can_connect:
-        await client.message_create(message.channel, 'I have no permissions to connect to that channel')
+        yield 'I have no permissions to connect to that channel'
         return
     
-    voice_client = client.voice_client_for(message)
+    yield
+    
+    voice_client = client.voice_client_for(event)
     if voice_client is None:
         try:
             voice_client = await client.join_voice(channel)
         except BaseException as err:
             if isinstance(err, TimeoutError):
-                text = 'Timed out meanwhile tried to connect.'
+                yield 'Timed out meanwhile tried to connect.'
             elif isinstance(err, RuntimeError):
-                text = 'The client cannot play voice, some libraries are not loaded'
+                yield 'The client cannot play voice, some libraries are not loaded'
             else:
-                text = repr(err)
+                yield repr(err)
             
-            await client.message_create(message.channel, text)
             return
     
     audio_stream = voice_client.listen_to(target)
     
-    await client.message_create(message.channel, 'Started listening')
+    yield 'Started listening'
     voice_client.append(audio_stream)
     
     await sleep(30.0, KOKORO)
     audio_stream.stop()
-    
+
+
 @TEST_COMMANDS
 async def test_raise(client, message):
     """
@@ -1834,7 +1827,7 @@ if MARISA_MODE and AUDIO_PLAY_POSSIBLE:
                 if user is client:
                     continue
                 
-                source = other_voice_client.listen_to(user, yield_decoded=True)
+                source = other_voice_client.listen_to(user, yield_decoded = True)
                 await mixer.add(source)
             
             if self_voice_client.append(mixer):

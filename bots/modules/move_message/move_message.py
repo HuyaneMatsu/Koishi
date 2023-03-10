@@ -1,10 +1,12 @@
 __all__ = ()
 
 from hata import Client, KOKORO, Permission
-from scarletio import Task, WaitTillExc
+from scarletio import Task, TaskGroup
 
 from .constants import ALLOWED_GUILDS
-from .helpers import check_move_permissions, create_webhook_message, get_message_and_files, get_webhook, message_delete, get_message
+from .helpers import (
+    check_move_permissions, create_webhook_message, get_message, get_message_and_files, get_webhook, message_delete
+)
 
 
 SLASH_CLIENT: Client
@@ -35,20 +37,25 @@ async def move_message(
     get_message_and_files_task = Task(get_message_and_files(client, event.channel, message_id), KOKORO)
     get_webhook_task = Task(get_webhook(client, channel_id), KOKORO)
     
-    done, pending = await WaitTillExc(
+    task_group = TaskGroup(
+        KOKORO,
         [
             get_message_and_files_task,
             get_webhook_task,
             Task(client.interaction_application_command_acknowledge(event, show_for_invoking_user_only = True), KOKORO)
         ],
-        KOKORO,
     )
     
-    for task in pending:
-        task.cancel()
+    failed_tasks = await task_group.wait_exception()
+    if (failed_tasks is not None):
+        # Cancel all and propagate the exception of the first failed task
+        task_group.cancel_all()
+        failed_tasks.get_result()
+        return
     
-    for task in done:
-        result = task.result()
+    
+    for task in task_group.done:
+        result = task.get_result()
         
         if task is get_message_and_files_task:
             message, files = result

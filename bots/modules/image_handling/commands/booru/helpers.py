@@ -1,12 +1,6 @@
 __all__ = ()
 
-import re
-
-from ...constants import NSFW_TAGS_BANNED, SAFE_TAGS_BANNED
-
-
-NOTE_TAG_RP = re.compile('\\(\\d*\\)')
-SPACE_CHARACTERS = (' ', '\t', '\n', '\r')
+from .constants import NOTE_TAG_RP, SPACE_CHARACTERS
 
 
 def split_down_full_tags(input_value):

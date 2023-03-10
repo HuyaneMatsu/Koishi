@@ -1,34 +1,27 @@
-from hata import Client, Embed, DATETIME_FORMAT_CODE
-from hata.ext.plugin_loader import require
+__all__ = ()
 
-from bot_utils.constants import CHANNEL__SUPPORT__LOG_MENTION, GUILD__SUPPORT
-
-require(Satori=Client)
+from hata import DATETIME_FORMAT_CODE, Embed
 
 
 CLEAN_CONTENT_MAX_LENGTH = 1000
 USER_MENTION_MAX = 7
 ROLE_MENTION_MAX = 5
-SEPARATOR_LINE = '\\_'*30
+SEPARATOR_LINE = '\\_' * 30
 
 
-Satori: Client
-
-def setup(lib):
-    Satori.events.message_create.append(GUILD__SUPPORT, mention_logger)
-
-
-def teardown(lib):
-    Satori.events.message_create.remove(GUILD__SUPPORT, mention_logger)
-
-
-async def mention_logger(client, message):
-    everyone_mention = message.everyone_mention
-    user_mentions = message.user_mentions
-    role_mentions = message.role_mentions
-    if (not everyone_mention) and (user_mentions is None) and (role_mentions is None):
-        return
+def build_mention_embed(message):
+    """
+    Builds a mention embed.
     
+    Parameters
+    ----------
+    message : ``Message``
+        The received message.
+    
+    Returns
+    -------
+    embed : ``Embed``
+    """
     content_parts = []
     
     author = message.author
@@ -102,9 +95,10 @@ async def mention_logger(client, message):
     description = ''.join(content_parts)
     embed = Embed('Ping Log!', description)
     
-    if everyone_mention:
+    if message.everyone_mention:
         embed.add_field('Everyone mention', 'Hecatia Yeah!')
     
+    user_mentions = message.user_mentions
     if (user_mentions is not None):
         content_parts = []
         
@@ -160,6 +154,7 @@ async def mention_logger(client, message):
         
         embed.add_field('User mentions', field_value)
     
+    role_mentions = message.role_mentions
     if (role_mentions is not None):
         content_parts = []
         
@@ -204,4 +199,4 @@ async def mention_logger(client, message):
         
         embed.add_field('Role mentions', field_value)
     
-    await client.message_create(CHANNEL__SUPPORT__LOG_MENTION, embed = embed, allowed_mentions = None)
+    return embed
