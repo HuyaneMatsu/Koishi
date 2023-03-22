@@ -86,7 +86,7 @@ def compile_and_get(variable_name, code, globals=None):
     
     locals_ = {}
     
-    exec(compile(code, COMPILATION_FILE_NAME, 'exec', optimize=2), globals, locals_)
+    exec(compile(code, COMPILATION_FILE_NAME, 'exec', optimize = 2), globals, locals_)
     
     return locals_[variable_name]
 
@@ -211,8 +211,9 @@ def get_save_method_string(fields, engine):
                                 
                                 code(')')
                             code(')')
+                            code('continue')
                         
-                        with code('elif entry_id == ', str(ENTRY_ID_MISSING), ':'):
+                        with code('if entry_id == ', str(ENTRY_ID_MISSING), ':'):
                             with code('response = await connector.execute('):
                                 with code('TABLE.insert().values('):
                                     for field in fields:
@@ -231,13 +232,12 @@ def get_save_method_string(fields, engine):
                             
                             code('result = await response.fetchone()')
                             code('self.', primary_key_field.attribute_name, ' = result[0]')
+                            code('continue')
                         
-                        with code('else:'):
-                            code('return')
+                        code('return')
             
             with code('finally:'):
                 code('self._saving = False')
-    
     
     return code.build()
 
@@ -259,7 +259,8 @@ def get_load_method_string(fields, engine):
     code = CodeBuilder()
     with code('async def __load__(self):'):
         if engine is None:
-            code('pass')
+            code('self.', primary_key_field.attribute_name, ' = ', str(ENTRY_ID_MISSING))
+            code('self.__set_initial_values__()')
         
         else:
             with code('try:'):
@@ -313,7 +314,12 @@ class FieldDescriptor(RichAttributeErrorBaseType):
     
     def __new__(cls, attribute_name, field):
         data_base_field = field.field
-        field_name = data_base_field.property.key
+        
+        if data_base_field is None:
+            field_name = attribute_name
+        else:
+            field_name = data_base_field.property.key
+        
         default = field.default
         primary_key = field.primary_key
         query_key = field.query_key
@@ -339,7 +345,7 @@ class FieldDescriptor(RichAttributeErrorBaseType):
         return self
     
     
-    def __get__(self, instance, type_):
+    def __get__(self, instance, instance_type):
         if instance is None:
             return self
         
@@ -348,9 +354,9 @@ class FieldDescriptor(RichAttributeErrorBaseType):
     
     def __set__(self, instance, value):
         if instance is None:
-            return self
+            return
         
-        return self.setter(instance, value, self)
+        self.setter(instance, value, self)
     
     
     def is_require_internal_field(self):
@@ -358,7 +364,7 @@ class FieldDescriptor(RichAttributeErrorBaseType):
 
 
 class ModelLinkType(type):
-    def __new__(cls, class_name, class_parents, class_attributes, *, model, table, engine, is_base=False):
+    def __new__(cls, class_name, class_parents, class_attributes, *, model, table, engine, is_base = False):
         
         if not is_base:
             collected_fields = []
@@ -417,7 +423,9 @@ class ModelLinkType(type):
         return type.__new__(cls, class_name, class_parents, class_attributes)
 
 
-class ModelLink(RichAttributeErrorBaseType, metaclass=ModelLinkType, model=None, table=None, engine=None, is_base=True):
+class ModelLink(
+    RichAttributeErrorBaseType, metaclass = ModelLinkType, model = None, table = None, engine = None, is_base = True
+):
     __slots__ = ('__weakref__', '_load_task', '_fields_modified', '_saving')
     
     

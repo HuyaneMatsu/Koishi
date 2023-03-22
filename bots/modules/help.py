@@ -920,7 +920,8 @@ HEARD_GUIDE_EMBED = Embed(
         '**•** `/propose` - Propose to your heart\'s chosen one.\n'
         '**•** `/divorce` - Less waifus.\n'
         '**•** `/heart-shop roles` - Buy roles inside of my support server.\n'
-        '**•** `/heart-shop waifu-slot` - More waifus.'
+        '**•** `/heart-shop waifu-slot` - More waifus.\n'
+        '**•** `/stats upgrade` - Upgrade your waifus stats.'
     ),
 ).add_field(
     'Gambling hearts',

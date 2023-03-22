@@ -157,6 +157,7 @@ async def request_sync(client, days_allowed):
             try:
                 sent = sending_task.get_result()
             except GeneratorExit:
+                response_task.cancel()
                 raise
             
             except BaseException as err:

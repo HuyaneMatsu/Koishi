@@ -321,7 +321,7 @@ def render_representation_difference_into(into, old_value, new_value):
     """
     into.append('null' if old_value is None else repr(old_value))
     into.append(' -> ')
-    into.append('null' if old_value is None else repr(new_value))
+    into.append('null' if new_value is None else repr(new_value))
     into.append('\n')
     return into
 
@@ -854,6 +854,55 @@ def render_id_difference_into(into, old_activity_id, activity):
     return into
 
 
+def render_emoji_into(into, emoji):
+    """
+    Renders the emoji into the given container.
+    
+    Parameters
+    ----------
+    into : `list` of `str`
+        The container to render into.
+    emoji : `None`, ``Emoji``
+        The emoji to render.
+    
+    Returns
+    -------
+    into : `list` of `str`
+    """
+    if emoji is None:
+        into.append('null')
+    else:
+        into.append(emoji.name)
+        into.append(' ~ ')
+        into.append(str(emoji.id))
+    
+    return into
+
+
+def render_emoji_difference_into(into, old_emoji, new_emoji):
+    """
+    Renders the given old and new emojis as a difference.
+    
+    Parameters
+    ----------
+    into : `list` of `str`
+        The container to render into.
+    old_emoji : `None`, ``Emoji``
+        The old emoji to render.
+    new_emoji : `None`, ``Emoji``
+        The new emoji to render.
+    
+    Returns
+    -------
+    into : `list` of `str`
+    """
+    render_emoji_into(into, old_emoji)
+    into.append(' -> ')
+    render_emoji_into(into, new_emoji)
+    into.append('\n')
+    return into
+
+
 ACTIVITY_DIFFERENCE_RENDERERS = {
     'name': render_name_difference_into,
     'type': render_type_difference_into,
@@ -871,6 +920,7 @@ ACTIVITY_DIFFERENCE_RENDERERS = {
     'application_id': render_application_id_difference_into,
     'created_at': render_created_at_difference_into,
     'id': render_id_difference_into,
+    'emoji': render_emoji_difference_into,
 }
 
 

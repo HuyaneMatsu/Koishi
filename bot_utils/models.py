@@ -117,7 +117,7 @@ if (DB_ENGINE is not None):
     class auto_react_role_model(BASE):
         __tablename__   = 'AUTO_REACT_ROLE'
         id              = Column(Int64, primary_key = True)
-        message_id      = Column(Int64, unique=True)
+        message_id      = Column(Int64, unique = True)
         channel_id      = Column(Int64)
         data            = Column(Binary(320))
         behaviour       = Column(Int32)
@@ -160,7 +160,7 @@ if (DB_ENGINE is not None):
     class ds_v2_model(BASE):
         __tablename__   = 'DS_V2'
         id              = Column(Int64, primary_key = True)
-        user_id         = Column(Int64, unique=True)
+        user_id         = Column(Int64, unique = True)
         game_state      = Column(Binary(), nullable = True)
         selected_stage_id = Column(Int32)
     
@@ -192,7 +192,7 @@ if (DB_ENGINE is not None):
         __tablename__ = 'WAIFU_STATS'
         
         id = Column(Int64, primary_key = True)
-        user_id = Column(Int64, unique=True)
+        user_id = Column(Int64, unique = True)
         
         stat_housewife = Column(Int32)
         stat_cuteness = Column(Int32)

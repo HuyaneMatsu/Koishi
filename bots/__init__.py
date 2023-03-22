@@ -37,6 +37,7 @@ if MARISA_MODE:
                 'Feed the cat!': 'Owner hungry!'
             },
         },
+        shard_count = 2,
         # intents = 0,
         # assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
         # enforce_application_command_permissions = True,
@@ -58,11 +59,11 @@ else:
         secret = config.KOISHI_SECRET,
         client_id = config.KOISHI_ID,
         activity = Activity('with Kokoro'),
-        shard_count = 2,
+        shard_count = 1,
         should_request_users = False,
         intents = IntentFlag().update_by_keys(
             guild_users = True, # We need this
-            guild_presences = False,
+            guild_presences = True, # Now this too, :KoishiFail:
         ),
         application_id = config.KOISHI_ID,
         extensions = ('command_utils', 'slash', 'top_gg'),

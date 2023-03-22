@@ -69,6 +69,8 @@ def get_default_user_stats(user_id):
         value = value + bonus
         if value > 10:
             value = 10
+        elif value < 0:
+            value = 0
         
         stats[index] = value
     
@@ -76,7 +78,7 @@ def get_default_user_stats(user_id):
 
 
 
-class WaifuStats(ModelLink, model=waifu_stats_model, table=WAIFU_STATS_TABLE, engine=DB_ENGINE):
+class WaifuStats(ModelLink, model = waifu_stats_model, table = WAIFU_STATS_TABLE, engine = DB_ENGINE):
     __slots__ = ()
     
     def __new__(cls, user):
@@ -84,21 +86,21 @@ class WaifuStats(ModelLink, model=waifu_stats_model, table=WAIFU_STATS_TABLE, en
         self.user_id = user.id
         return self
     
-    user_id = Field(waifu_stats_model.user_id, 0, query_key = 'user_id')
-    entry_id = Field(waifu_stats_model.id, 0, primary_key = True)
+    user_id = Field(getattr(waifu_stats_model, 'user_id', None), 0, query_key = 'user_id')
+    entry_id = Field(getattr(waifu_stats_model, 'id', None), 0, primary_key = True)
     
-    stat_housewife = Field(waifu_stats_model.stat_housewife, 0)
-    stat_cuteness = Field(waifu_stats_model.stat_cuteness, 0)
-    stat_bedroom = Field(waifu_stats_model.stat_bedroom, 0)
-    stat_charm = Field(waifu_stats_model.stat_charm, 0)
-    stat_loyalty = Field(waifu_stats_model.stat_loyalty, 0)
+    stat_housewife = Field(getattr(waifu_stats_model, 'stat_housewife', None), 0)
+    stat_cuteness = Field(getattr(waifu_stats_model, 'stat_cuteness', None), 0)
+    stat_bedroom = Field(getattr(waifu_stats_model, 'stat_bedroom', None), 0)
+    stat_charm = Field(getattr(waifu_stats_model, 'stat_charm', None), 0)
+    stat_loyalty = Field(getattr(waifu_stats_model, 'stat_loyalty', None), 0)
     
-    level = Field(waifu_stats_model.level, 0)
-    experience = Field(waifu_stats_model.experience, 0)
+    level = Field(getattr(waifu_stats_model, 'level', None), 0)
+    experience = Field(getattr(waifu_stats_model, 'experience', None), 0)
     
-    raw_species = Field(waifu_stats_model.raw_species, 0)
-    raw_weapon = Field(waifu_stats_model.raw_weapon, 0)
-    raw_costume = Field(waifu_stats_model.raw_costume, 0)
+    raw_species = Field(getattr(waifu_stats_model, 'raw_species', None), b'')
+    raw_weapon = Field(getattr(waifu_stats_model, 'raw_weapon', None), b'')
+    raw_costume = Field(getattr(waifu_stats_model, 'raw_costume', None), b'')
     
     
     def __set_initial_values__(self):

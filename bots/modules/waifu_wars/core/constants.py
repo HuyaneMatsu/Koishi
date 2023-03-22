@@ -1,19 +1,40 @@
-__all__ = ('WAIFU_SCORE_GRAPH_CHART_LABELS', )
+__all__ = ()
 
-from math import log2
+from hata import Color
 
-WAIFU_SCORE_GRAPH_CHART_LABELS = ['Housewife capabilities', 'Cuteness', 'Bedroom skills', 'Charm', 'Loyalty']
+STAT_NAME_FULL_HOUSEWIFE = 'Housewife capabilities'
+STAT_NAME_FULL_CUTENESS = 'Cuteness'
+STAT_NAME_FULL_BEDROOM = 'Bedroom skills'
+STAT_NAME_FULL_CHARM = 'Charm'
+STAT_NAME_FULL_LOYALTY = 'Loyalty'
+
+STAT_NAME_SHORT_HOUSEWIFE = 'Housewife'
+STAT_NAME_SHORT_CUTENESS = 'Cuteness'
+STAT_NAME_SHORT_BEDROOM = 'Bedroom'
+STAT_NAME_SHORT_CHARM = 'Charm'
+STAT_NAME_SHORT_LOYALTY = 'Loyalty'
 
 
-def get_embed_color(user_id):
-    return (user_id >> 22) & 0xffffff
+STAT_NAMES_FULL = (
+    STAT_NAME_FULL_HOUSEWIFE,
+    STAT_NAME_FULL_CUTENESS,
+    STAT_NAME_FULL_BEDROOM,
+    STAT_NAME_FULL_CHARM,
+    STAT_NAME_FULL_LOYALTY,
+)
 
-def get_user_graph_colors(user_id):
-    return (
-        str((user_id >> 38) & 0xff),
-        str((user_id >> 30) & 0xff),
-        str((user_id >> 22) & 0xff),
-    )
 
-def calculate_stat_upgrade_cost(all_, next_):
-    return (next_ * 100) * log2(2.0 + all_)
+STAT_COLOR_HOUSEWIFE = Color.from_hsl((0.0 / 5.0) * 360.0 + 36.0, 100, 50)
+STAT_COLOR_CUTENESS = Color.from_hsl((4.0 / 5.0) * 360.0 + 36.0, 100, 50)
+STAT_COLOR_BEDROOM = Color.from_hsl((3.0 / 5.0) * 360.0 + 36.0, 100, 50)
+STAT_COLOR_CHARM = Color.from_hsl((2.0 / 5.0) * 360.0 + 36.0, 100, 50)
+STAT_COLOR_LOYALTY = Color.from_hsl((1.0 / 5.0) * 360.0 + 36.0, 100, 50)
+
+
+STAT_COLORS = (
+    STAT_COLOR_HOUSEWIFE,
+    STAT_COLOR_CUTENESS,
+    STAT_COLOR_BEDROOM,
+    STAT_COLOR_CHARM,
+    STAT_COLOR_LOYALTY,
+)

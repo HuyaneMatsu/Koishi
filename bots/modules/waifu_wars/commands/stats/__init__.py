@@ -5,6 +5,7 @@ import warnings
 from hata import Client
 
 from . import show
+from . import upgrade
 
 
 SLASH_CLIENT: Client
@@ -19,6 +20,7 @@ STATS_COMMAND = SLASH_CLIENT.interactions(
 
 for sub_module in (
     show,
+    upgrade,
 ):
     sub_module_attributes = sub_module.__all__
     sub_module_attribute_count = len(sub_module_attributes)

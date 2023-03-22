@@ -2,19 +2,18 @@ __all__ = ()
 
 from datetime import datetime
 
-from hata import Client, Embed, DiscordException, ERROR_CODES, Sticker
-from hata.ext.slash import abort, Button, Row, InteractionResponse
+from hata import Client, DiscordException, ERROR_CODES, Embed, Sticker
+from hata.ext.slash import Button, InteractionResponse, Row, abort
 from sqlalchemy.sql import select
 
-from bot_utils.models import DB_ENGINE, user_common_model, USER_COMMON_TABLE
+from .marriage_slot import EMOJI_NO, EMOJI_YES, buy_waifu_slot_invoke
 
-from bot_utils.constants import ROLE__SUPPORT__ELEVATED, GUILD__SUPPORT, EMOJI__HEART_CURRENCY, \
-    ROLE__SUPPORT__HEART_BOOST, ROLE__SUPPORT__NSFW_ACCESS
-
-from bot_utils.daily import calculate_daily_new, NSFW_ACCESS_COST, ELEVATED_COST, HEART_BOOST_COST
-
-
-from .marriage_slot import buy_waifu_slot_invoke, EMOJI_YES, EMOJI_NO
+from bot_utils.constants import (
+    EMOJI__HEART_CURRENCY, GUILD__SUPPORT, ROLE__SUPPORT__ELEVATED, ROLE__SUPPORT__HEART_BOOST,
+    ROLE__SUPPORT__NSFW_ACCESS
+)
+from bot_utils.daily import ELEVATED_COST, HEART_BOOST_COST, NSFW_ACCESS_COST, calculate_daily_new
+from bot_utils.models import DB_ENGINE, USER_COMMON_TABLE, user_common_model
 
 
 SLASH_CLIENT: Client
@@ -82,10 +81,7 @@ async def burn_divorce_papers(client, event):
             total_allocated = 0
             waifu_divorces = 0
         else:
-            total_love, \
-            total_allocated, \
-            waifu_divorces, \
-                = result
+            total_love, total_allocated, waifu_divorces = result
     
     if waifu_divorces <= 0:
         return Embed(None, 'You do not have divorces')
@@ -139,11 +135,7 @@ async def reduce_divorce_yes(event):
             total_allocated = 0
             waifu_divorces = 0
         else:
-            entry_id, \
-            total_love, \
-            total_allocated, \
-            waifu_divorces, \
-                = result
+            entry_id, total_love, total_allocated, waifu_divorces = result
         
         while True:
             if waifu_divorces <= 0:
@@ -289,7 +281,7 @@ async def roles(client, event,
     embed = Embed(
         f'Buying {role.name} for {cost} {EMOJI__HEART_CURRENCY}'
     ).add_thumbnail(
-        client.avatar_url,
+        user.avatar_url,
     )
     
     if can_buy:
@@ -297,7 +289,11 @@ async def roles(client, event,
             embed.description = 'Was successful.'
             embed.add_field(
                 f'Your {EMOJI__HEART_CURRENCY}',
-                f'{total_love} -> {total_love - cost}',
+                (
+                    f'```\n'
+                    f'{total_love} -> {total_love - cost}\n'
+                    f'```'
+                )
             )
         else:
             embed.description = 'Was unsuccessful; user not in guild.'
@@ -305,7 +301,11 @@ async def roles(client, event,
         embed.description = 'You have insufficient amount of hearts.'
         embed.add_field(
             f'Your {EMOJI__HEART_CURRENCY}',
-            str(total_love),
+            (
+                f'```\n'
+                f'{total_love}\n'
+                f'```'
+            ),
         )
     
     yield embed
@@ -321,12 +321,12 @@ async def roles(client, event,
 # (d * d + d + (-d * d + d * a - d + d * a - a * a + a)) >> 1
 # (d * d + d - d * d + d * a - d + d * a - a * a + a) >> 1
 # (d + d * a - d + d * a - a * a + a) >> 1
-# (d * a + d * a - a*a + a) >> 1
-# (d * a + d * a - a*a + a) >> 1
+# (d * a + d * a - a * a + a) >> 1
+# (d * a + d * a - a * a + a) >> 1
 # (2 * d * a - a * a + a) >> 1
-# (a*(2 * d - a + 1)) >> 1
+# (a * (2 * d - a + 1)) >> 1
 # (a * ((d << 1) - a + 1)) >> 1
-# (a * ((d << 1)-a + 1)) >> 1
+# (a * ((d << 1) - a + 1)) >> 1
 
 DAILY_REFUND_MIN = 124
 
@@ -409,24 +409,36 @@ async def sell_daily(client, event,
     embed = Embed(
         f'Selling {amount} daily for {EMOJI__HEART_CURRENCY}'
     ).add_thumbnail(
-        client.avatar_url,
+        event.user.avatar_url,
     )
     
     if sold:
         embed.description = 'Great success!'
         embed.add_field(
             f'Your daily streak',
-            f'{daily_streak} -> {daily_streak - amount}',
+            (
+                f'```\n'
+                f'{daily_streak} -> {daily_streak - amount}\n'
+                f'```'
+            ),
         )
         embed.add_field(
             f'Your {EMOJI__HEART_CURRENCY}',
-            f'{total_love} -> {total_love + sell_price}',
+            (
+                f'```\n'
+                f'{total_love} -> {total_love + sell_price}\n'
+                f'```'
+            ),
         )
     else:
         embed.description = 'You have insufficient amount of daily streak.'
         embed.add_field(
-            f'Your daily streak',
-            str(daily_streak),
+            f'Daily streak',
+            (
+                f'```\n'
+                f'{daily_streak}\n'
+                f'```'
+            ),
         )
     
     return embed
