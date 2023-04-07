@@ -8,6 +8,7 @@ os.environ['HATA_LIBRARY_NAME'] = 'discord.js'
 os.environ['HATA_LIBRARY_URL'] = 'https://discord.js.org'
 os.environ['HATA_LIBRARY_VERSION'] = '14.6.0'
 
+
 # Load config
 config_path = os.path.split(__file__)[0]
 if config_path:

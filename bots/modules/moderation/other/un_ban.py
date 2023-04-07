@@ -124,7 +124,7 @@ async def un_ban_command(
     guild = event.guild
     check_required_permissions_only(client, event, guild, PERMISSIONS__BAN, WORD_CONFIG__UN_BAN)
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     # Ask, whether the user should be banned.
     component_interaction = await confirm_action(

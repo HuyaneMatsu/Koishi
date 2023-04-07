@@ -59,7 +59,7 @@ def get_entity_id_from_embed(embed):
     
     Parameters
     ----------
-    embed : ``EmbedCore``
+    embed : ``Embed``
         The embed to parse from.
     
     Returns
@@ -84,7 +84,7 @@ def get_emoji_name_and_animated_from_embed(embed):
     
     Parameters
     ----------
-    embed : ``EmbedCore``
+    embed : ``Embed``
         The embed to parse from.
     
     Returns

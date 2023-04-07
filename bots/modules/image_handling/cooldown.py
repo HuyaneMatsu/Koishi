@@ -1,6 +1,6 @@
 __all__ = ('CooldownHandler',)
 
-from hata import KOKORO
+from hata import KOKORO, Message
 from scarletio import LOOP_TIME
 
 
@@ -36,7 +36,7 @@ class CooldownUnit:
         return f'{self.__class__.__name__}(expires_at={self.expires_at}, uses_left={self.uses_left})'
 
 
-def _check_user(cooldown_handler, event, weight):
+def _check_user(cooldown_handler, event_or_message, weight):
     """
     Executes user cooldown check.
     
@@ -46,8 +46,8 @@ def _check_user(cooldown_handler, event, weight):
     ----------
     cooldown_handler : ``CooldownHandler``
         The parent cooldown handler.
-    event : ``InteractionEvent``
-        The received interaction event.
+    event_or_message : ``InteractionEvent``, ``Message``
+        The event or message to get the cooldown for.
     weight : `int`
         The weight to use.
     
@@ -56,7 +56,10 @@ def _check_user(cooldown_handler, event, weight):
     expires_at : `int`
         When the cooldown for the given entity will expire.
     """
-    user_id = event.user.id
+    if isinstance(event_or_message, Message):
+        user_id = event_or_message.author.id
+    else:
+        user_id = event_or_message.user.id
     
     cache = cooldown_handler.cache
     try:
@@ -75,7 +78,7 @@ def _check_user(cooldown_handler, event, weight):
     return unit.expires_at
 
 
-def _check_channel(cooldown_handler, event, weight):
+def _check_channel(cooldown_handler, event_or_message, weight):
     """
     Executes channel cooldown check.
     
@@ -85,8 +88,8 @@ def _check_channel(cooldown_handler, event, weight):
     ----------
     cooldown_handler : ``CooldownHandler``
         The parent cooldown handler.
-    event : ``InteractionEvent``
-        The received interaction event.
+    event_or_message : ``InteractionEvent``, ``Message``
+        The event or message to get the cooldown for.
     weight : `int`
         The weight to use.
     
@@ -95,7 +98,7 @@ def _check_channel(cooldown_handler, event, weight):
     expires_at : `int`
         When the cooldown for the given entity will expire.
     """
-    channel_id = event.channel_id
+    channel_id = event_or_message.channel_id
     
     cache = cooldown_handler.cache
     try:
@@ -114,7 +117,7 @@ def _check_channel(cooldown_handler, event, weight):
     return unit.expires_at
 
 
-def _check_guild(cooldown_handler, event, weight):
+def _check_guild(cooldown_handler, event_or_message, weight):
     """
     Executes guild based cooldown check.
     
@@ -124,8 +127,8 @@ def _check_guild(cooldown_handler, event, weight):
     ----------
     cooldown_handler : ``CooldownHandler``
         The parent cooldown handler.
-    event : ``InteractionEvent``
-        The received interaction event.
+    event_or_message : ``InteractionEvent``, ``Message``
+        The event or message to get the cooldown for.
     weight : `int`
         The weight to use.
     
@@ -136,7 +139,7 @@ def _check_guild(cooldown_handler, event, weight):
         
         If the cooldown limitation is not applicable for the given entity, returns `-1.0`.
     """
-    guild_id = event.guild_id
+    guild_id = event_or_message.guild_id
     if not guild_id:
         return -1.0
     
@@ -272,14 +275,14 @@ class CooldownHandler:
         return self
     
     
-    def get_cooldown(self, event, weight = -1):
+    def get_cooldown(self, event_or_message, weight = -1):
         """
         Returns for how long the cooldown is triggered.
         
         Parameters
         ----------
-        command_context : ``CommandHandler``
-            The received command's context.
+        event_or_message : ``InteractionEvent``, ``Message``
+            The event or message to get the cooldown for.
         
         Returns
         -------
@@ -289,7 +292,7 @@ class CooldownHandler:
         if weight < 0:
             weight = self.weight
         
-        expires_at = self.checker(self, event, weight)
+        expires_at = self.checker(self, event_or_message, weight)
         if not expires_at:
             return 0.0
             

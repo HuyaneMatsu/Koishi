@@ -54,7 +54,7 @@ async def self_ban(client, event, *, reason = None):
         return
     
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     await client.guild_ban_add(guild, event.user, reason = create_auto_reason(event, reason))
     

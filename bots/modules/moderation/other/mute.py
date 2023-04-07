@@ -85,7 +85,7 @@ async def mute_command(
     reason = process_reason(reason)
     duration_string = build_duration_string(duration)
     
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     # Ask, whether the user should be muted.
     component_interaction = await confirm_action(

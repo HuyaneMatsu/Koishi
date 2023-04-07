@@ -12,7 +12,7 @@ from .constants import (
 )
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
 from .helpers import (
-    are_actions_allowed_for_entity, check_has_manage_emojis_and_stickers_permission, translate_components
+    are_actions_allowed_for_entity, check_has_manage_guild_expressions_permission, translate_components
 )
 
 
@@ -163,7 +163,7 @@ async def respond_with_actions(client, event, entity_parser, action_component_it
         - ``iter_action_components_emoji``
         - ``iter_action_components_sticker``
     """
-    if not await check_has_manage_emojis_and_stickers_permission(client, event):
+    if not await check_has_manage_guild_expressions_permission(client, event):
         return
     
     await client.interaction_component_acknowledge(event, wait = False)

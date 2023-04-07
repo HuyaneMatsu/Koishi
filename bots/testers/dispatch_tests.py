@@ -6,7 +6,7 @@ from hata.ext.slash.menus import Pagination, Closer
 from types import MethodType
 from hata.ext.commands_v2 import Command
 
-DISPATCH_TESTS = eventlist(type_=Command)
+DISPATCH_TESTS = eventlist(type_ = Command)
 DISPATCH_COLOR = Color.from_rgb(120, 108, 128)
 MAIN_CLIENT : Client
 
@@ -597,7 +597,7 @@ class dispatch_tester:
             if key in ('name', 'icon', 'invite_splash', 'user_count', 'afk_timeout', 'available',
                     'description', 'vanity_code', 'banner', 'max_members', 'max_presences', 'premium_tier',
                     'boost_count', 'widget_enabled', 'preferred_language', 'discovery_splash',
-                    'max_video_channel_users', ):
+                    'max_voice_video_users', 'max_stage_video_users'):
                 result.append(f'- {key} : {value} - > {getattr(guild, key)}')
                 continue
             

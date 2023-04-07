@@ -91,7 +91,7 @@ async def un_mute_command(
     check_required_permissions(client, event, guild, user, PERMISSIONS__MUTE, WORD_CONFIG__UN_MUTE)
     check_can_un_mute(user, guild)
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     # Ask, whether the user should be un-muted.
     component_interaction = await confirm_action(

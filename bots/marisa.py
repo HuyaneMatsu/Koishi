@@ -1662,7 +1662,7 @@ if (watchdog is not None):
     
     @Marisa.events
     async def shutdown(client):
-        observer = getattr(client, 'observer')
+        observer = getattr(client, 'observer', None)
         if (observer is not None):
             client.observer = None
             observer.stop()

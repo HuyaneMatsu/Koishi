@@ -19,9 +19,9 @@ SLASH_CLIENT: Client
 EMOJI_ACTION_TYPE_MESSAGE_CONTENT = 1
 EMOJI_ACTION_TYPE_REACTION = 2
 
-RELATIVE_MONTH = relativedelta(months=1)
+RELATIVE_MONTH = relativedelta(months = 1)
 
-MONTH = timedelta(days=367, hours=6) / 12
+MONTH = timedelta(days = 367, hours = 6) / 12
 
 MOST_USED_PER_PAGE = 90
 

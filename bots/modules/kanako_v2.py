@@ -378,7 +378,7 @@ RELATIONS = {
 }
 
 
-def render_showcase(name,map_):
+def render_showcase(name, map_):
     result = []
     element_index = 0
     element_limit = len(map_)
@@ -392,7 +392,7 @@ def render_showcase(name,map_):
         if page_index > page_limit:
             break
         
-        embed = Embed(name.capitalize(), '', KANAKO_COLOR)
+        embed = Embed(name.capitalize(), '', color = KANAKO_COLOR)
         embed.add_footer(f'page {page_index} / {page_limit}')
         
         for _ in range(((element_limit % 30) + 9) // 10 if (page_index == page_limit) else 3):
@@ -400,12 +400,12 @@ def render_showcase(name,map_):
             if field_index_limit > element_limit:
                 field_index_limit = element_limit
             
-            while element_index<field_index_limit:
+            while element_index < field_index_limit:
                 element = map_[element_index]
                 element_index += 1
                 field_text.append(f'{element_index}.: **{element[0]} - {element[1]}**')
             
-            embed.add_field(f'{element_index - 9} - {element_index}', '\n'.join(field_text),inline = True)
+            embed.add_field(f'{element_index - 9} - {element_index}', '\n'.join(field_text), inline = True)
             field_text.clear()
         
         result.append(embed)

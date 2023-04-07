@@ -204,7 +204,7 @@ async def sticker_top(
 
 
 def assert_user_permissions(event):
-    if not event.user_permissions.can_manage_emojis_and_stickers:
+    if not event.user_permissions.can_manage_guild_expressions:
         abort(f'You must have manage emojis & stickers permissions to invoke this command.')
 
 
@@ -213,7 +213,7 @@ STICKER_SYNC_COMMANDS = STICKER_COMMANDS.interactions(
     guild = GUILD__SUPPORT,
     name = 'sync',
     description = 'Syncs sticker table. (You must have emoji-council role)',
-    required_permissions = Permission().update_by_keys(manage_emojis_and_stickers=True)
+    required_permissions = Permission().update_by_keys(manage_guild_expressions = True)
 )
 
 @STICKER_SYNC_COMMANDS.interactions

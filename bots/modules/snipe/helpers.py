@@ -160,7 +160,7 @@ async def propagate_check_error_message(client, event, error_message):
     await client.interaction_followup_message_create(event, error_message, show_for_invoking_user_only = True)
 
 
-async def check_has_manage_emojis_and_stickers_permission(client, event):
+async def check_has_manage_guild_expressions_permission(client, event):
     """
     Checks whether the user has manage emojis and sticker permission.
     
@@ -177,20 +177,20 @@ async def check_has_manage_emojis_and_stickers_permission(client, event):
     -------
     has_permissions : `bool`
     """
-    if not event.user_permissions.can_manage_emojis_and_stickers:
+    if not event.user_permissions.can_manage_guild_expressions:
         await propagate_check_error_message(
             client,
             event,
-            '**You** are required to have `manage emojis and stickers` permission to **invoke** any action.',
+            '**You** are required to have `manage guild expressions` permission to **invoke** any action.',
         )
         return False
     
     guild = event.guild
-    if (guild is None) or (not guild.cached_permissions_for(client).can_manage_emojis_and_stickers):
+    if (guild is None) or (not guild.cached_permissions_for(client).can_manage_guild_expressions):
         await propagate_check_error_message(
             client,
             event,
-            '**I** require to have `manage emojis and stickers` permission to **execute** any action.',
+            '**I** require to have `manage guild expressions` permission to **execute** any action.',
         )
         return False
         

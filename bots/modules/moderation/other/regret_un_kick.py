@@ -77,7 +77,7 @@ async def regret_un_kick_command(
     check_regret_permissions(client, guild)
     check_regret_cooldown(event.user)
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     regret_mode = await can_regret(client, guild, user, AuditLogEvent.member_kick)
     if regret_mode == -1:

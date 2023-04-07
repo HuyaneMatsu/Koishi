@@ -44,8 +44,8 @@
     .main_block {
         margin-left: auto;
         margin-right: auto;
-        width: calc(var(--size-content-max-width) - var(--size-content-border-side) * 2);
-        max-width: calc(var(--size-content-max-width) - var(--size-content-border-side) * 2);
+        width: calc(100% - var(--size-border-default) * 2);
+        max-width: var(--size-content-max-width);
     }
 }
 

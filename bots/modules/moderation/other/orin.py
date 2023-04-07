@@ -1,10 +1,11 @@
 __all__ = ()
 
-import re
 from datetime import datetime as DateTime, timedelta as TimeDelta
 
-from hata import AuditLogEvent, Color, DiscordException, ERROR_CODES, ID_RP, KOKORO
-from scarletio import Task
+from hata import AuditLogEvent, Color, DiscordException, ERROR_CODES, KOKORO
+from scarletio import TaskGroup
+
+from ..shared_constants import REASON_RP
 
 
 ORIN_IMAGE_URL = (
@@ -13,8 +14,6 @@ ORIN_IMAGE_URL = (
 ORIN_COLOR = Color(0x9E4D4C)
 
 ALLOWED_INTERVAL = TimeDelta(days = 7)
-
-REASON_RP = re.compile(f'[\\s\\S]*\\[{ID_RP.pattern}\\]', re.M | re.U)
 
 
 def apply_orin_mode(embed):
@@ -45,6 +44,11 @@ def is_entry_from_user(entry, user):
     -------
     is_entry_from_user : `bool`
     """
+    # If the user banned
+    if entry.user_id == user.id:
+        return True
+    
+    # If the client banned
     reason = entry.reason
     if (reason is None):
         return False
@@ -82,38 +86,43 @@ async def should_show_orin(client, guild, user):
     
     after = DateTime.utcnow() - ALLOWED_INTERVAL
     
-    task_request_kick = Task(
-        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEvent.member_kick),
-        KOKORO,
+    task_group = TaskGroup(KOKORO)
+    task_group.create_task(
+        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEvent.member_kick)
+    )
+    task_group.create_task(
+        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEvent.member_ban_add)
+    )
+    task_group.create_task(
+        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEvent.member_kick)
+    )
+    task_group.create_task(
+        client.audit_log_get_chunk(guild, after = after, user = user, event = AuditLogEvent.member_ban_add)
     )
     
-    task_request_ban = Task(
-        client.audit_log_get_chunk(guild, after = after, user = client, event = AuditLogEvent.member_ban_add),
-        KOKORO,
-    )
+    failed_task = await task_group.wait_exception()
+    if (failed_task is not None):
+        task_group.cancel_all()
+        
+        try:
+            failed_task.get_result()
+        except ConnectionError:
+            return False
+        
+        except DiscordException as err:
+            if err.code in (
+                ERROR_CODES.missing_access, # client removed
+                ERROR_CODES.missing_permissions, # permissions changed meanwhile
+            ):
+                return False
+            
+            raise
     
     count = 0
     
-    try:
-        for task in (task_request_kick, task_request_ban):
-            audit_log = await task
-            for entry in audit_log:
-                count += is_entry_from_user(entry, user)
-            
-    except BaseException as err:
-        # Cancel tasks if unexpected exception occurs.
-        for task in (task_request_kick, task_request_ban):
-            task.cancel()
-        
-        if isinstance(err, ConnectionError):
-            return False
-        
-        if isinstance(err, DiscordException) and err.code in (
-            ERROR_CODES.missing_access, # client removed
-            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-        ):
-            return False
-        
-        raise
+    for task in task_group.done:
+        audit_log = task.get_result()
+        for entry in audit_log:
+            count += is_entry_from_user(entry, user)
     
     return count == 5

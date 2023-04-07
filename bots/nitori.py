@@ -58,6 +58,25 @@ async def cake(event,
     return Embed(description = f'{event.user:f} just gifted a cookie to {user:f} !').add_image(choice(CAKES))
 
 # command end
+# command start slash cola
+
+@Nitori.interactions(guild = TEST_GUILD)
+async def cola(
+    client,
+    event,
+    user: ('user', 'To who?') = None,
+):
+    """Gifts a bottle of cola!"""
+    if user is None:
+        source_user = client
+        target_user = event.user
+    else:
+        source_user = event.user
+        target_user = user
+    
+    return Embed(description = f'{source_user:f} just gifted a bottle of cola to {target_user:f} !')
+
+# command end
 # command start slash guild-icon
 
 GUILD_ICON_CHOICES = [

@@ -56,7 +56,7 @@ def get_allowed_users(client, event, input_users):
     return users, client_in_users, user_in_users
 
 
-def build_response(client, event, verb, users, client_in_users):
+def build_response(client, verb, source_user, users, client_in_users):
     """
     Builds action response text and allowed mentions.
     
@@ -64,10 +64,10 @@ def build_response(client, event, verb, users, client_in_users):
     ----------
     client : ``Client``
         The client who received the event.
-    event : ``InteractionEvent``
-        The received interaction event.
     verb : `str`
         The verb to use in the response.
+    source_user : ``ClientUserBase``
+        The user source user who invoked the event.
     users : `set` of ``ClientUserBase``
         The mentioned users by the event.
     client_in_users : `bool`
@@ -85,7 +85,7 @@ def build_response(client, event, verb, users, client_in_users):
     if (user_count == 0) and (not client_in_users):
         response_parts.append(client.mention)
     else:
-        response_parts.append(event.user.mention)
+        response_parts.append(source_user.mention)
     
     response_parts.append(' ')
     response_parts.append(verb)
@@ -99,7 +99,7 @@ def build_response(client, event, verb, users, client_in_users):
             else:
                 response_parts.append(client.mention)
         else:
-            response_parts.append(event.user.mention)
+            response_parts.append(source_user.mention)
     
     elif user_count == 1 and not client_in_users:
             response_parts.append(users[0].mention)
@@ -126,16 +126,16 @@ def build_response(client, event, verb, users, client_in_users):
     return response
 
 
-def build_response_self(event, verb):
+def build_response_self(verb, source_user):
     """
     Builds action response text and allowed mentions.
     
     Parameters
     ----------
-    event : ``InteractionEvent``
-        The received interaction event.
     verb : `str`
         The verb to use in the response.
+    source_user : ``ClientUserBase``
+        The user source user who invoked the event.
     
     Returns
     -------
@@ -154,7 +154,7 @@ def build_response_self(event, verb):
     else:
         end_sign = '?!'
     
-    return ''.join(['> ', event.user.mention, ' ', verb, ' ', target_word, ' ', end_sign])
+    return ''.join(['> ', source_user.mention, ' ', verb, ' ', target_word, ' ', end_sign])
 
 
 class Action:
@@ -257,24 +257,70 @@ class Action:
                 f'{expire_after:.2f} seconds.'
             )
         
+        content, embed = await self.create_response_content_and_embed(
+            client, event, event.id, event.user, allowed_mentions, client_in_users, user_in_users
+        )
+        
+        if event.is_unanswered():
+            await client.interaction_response_message_create(
+                event, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
+            )
+        else:
+            await client.interaction_response_message_edit(
+                event, content, allowed_mentions = allowed_mentions, embed = embed
+            )
+    
+    
+    async def create_response_content_and_embed(
+        self, client, event, color_seed, source_user, allowed_mentions, client_in_users, user_in_users
+    ):
+        """
+        Creates response content and embed.
+        
+        This function is a coroutine.
+        
+        Parameters
+        ----------
+        client : ``Client``
+            The client who received the event.
+        event : `None`, ``InteractionEvent``
+            The received interaction event if called from a command.
+        color_seed : `int`
+            Seed to generate the embed color from.
+        source_user : ``ClientUserBase``
+            The user source user who invoked the event.
+        allowed_users : `set` of ``ClientUserBase``
+            The mentioned users by the event.
+        client_in_users : `bool`
+            Whether the client is in the mentioned users.
+        user_in_users : `bool`
+            Whether the user in in the mentioned users as well.
+        
+        Returns
+        -------
+        content : `str`
+            Response content.
+        embed : ``Embed``
+            Response embed.
+        """
         if (
             user_in_users and
             (not allowed_mentions) and
             (self.handler_self is not None)
             and ((random() < 0.5) if client_in_users else True)
         ):
-            response = build_response_self(event, self.verb)
+            content = build_response_self(self.verb, source_user)
             handler = self.handler_self
             
         else:
-            response = build_response(client, event, self.verb, allowed_mentions, client_in_users)
+            content = build_response(client, self.verb, source_user, allowed_mentions, client_in_users)
             handler = self.handler
         
         image_detail = await handler.get_image(
-            client, event, content = response, allowed_mentions = allowed_mentions, silent = True,
+            client, event, content = content, allowed_mentions = allowed_mentions, silent = True,
         )
         
-        color = (event.id >> 22) & 0xffffff
+        color = (color_seed >> 22) & 0xffffff
         if image_detail is None:
             embed = Embed(
                 None,
@@ -291,12 +337,4 @@ class Action:
             
             add_provider(embed, image_detail)
         
-        
-        if event.is_unanswered():
-            await client.interaction_response_message_create(
-                event, response, allowed_mentions = allowed_mentions, embed = embed, silent = True
-            )
-        else:
-            await client.interaction_response_message_edit(
-                event, response, allowed_mentions = allowed_mentions, embed = embed
-            )
+        return content, embed

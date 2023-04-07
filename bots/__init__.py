@@ -2,7 +2,7 @@ from hata import Activity, ActivityType, Client, IntentFlag, Locale
 from hata.ext.plugin_loader import add_default_plugin_variables, register_and_load_plugin, register_plugin
 
 import config
-from bot_utils.constants import DEFAULT_CATEGORY_NAME, GUILD__SUPPORT, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI
+from bot_utils.constants import DEFAULT_CATEGORY_NAME, PREFIX__FLAN, PREFIX__MARISA, PREFIX__SATORI
 from bot_utils.utils import category_name_rule, random_error_message_getter
 
 
@@ -38,7 +38,7 @@ if MARISA_MODE:
             },
         },
         shard_count = 2,
-        # intents = 0,
+        intents = IntentFlag().update_by_keys(_17 = 1, _18 = 1, _19 = 1, _21 = 1),
         # assert_application_command_permission_missmatch_at = [GUILD__SUPPORT],
         # enforce_application_command_permissions = True,
     )
@@ -59,11 +59,15 @@ else:
         secret = config.KOISHI_SECRET,
         client_id = config.KOISHI_ID,
         activity = Activity('with Kokoro'),
-        shard_count = 1,
+        shard_count = 2,
         should_request_users = False,
         intents = IntentFlag().update_by_keys(
             guild_users = True, # We need this
             guild_presences = True, # Now this too, :KoishiFail:
+            _17 = 1,
+            _18 = 1,
+            _19 = 1,
+            _21 = 1, # Gonna catch them all
         ),
         application_id = config.KOISHI_ID,
         extensions = ('command_utils', 'slash', 'top_gg'),

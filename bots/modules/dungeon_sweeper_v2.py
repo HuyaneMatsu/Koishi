@@ -1962,8 +1962,7 @@ def pretty_dump_stage_sources(stage_sources):
         json_parts.append(JSON_KEY_STAGE_SOURCE_MAP)
         json_parts.append('": [\n')
         
-        map_ = stage_source.map
-        map_.reverse()
+        map_ = stage_source.map[::-1]
         while map_:
             is_first_in_line = True
             for _ in range(stage_source.x_size):

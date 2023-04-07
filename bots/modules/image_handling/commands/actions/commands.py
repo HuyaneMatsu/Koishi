@@ -2,20 +2,19 @@ __all__ = ()
 
 from hata import Client
 
-from ...image_handler import ImageHandlerStatic, ImageHandlerWaifuPics
-from ...touhou import TOUHOU_ACTION_POCKY_KISS, TOUHOU_ACTION_POCKY_KISS_SELF
-
-from .action import Action
+from .actions import (
+    ACTION_BITE, ACTION_BLUSH, ACTION_BULLY, ACTION_CRINGE, ACTION_CRY, ACTION_CUDDLE, ACTION_DANCE, ACTION_GLOMP,
+    ACTION_HANDHOLD, ACTION_HAPPY, ACTION_HIGHFIVE, ACTION_HUG, ACTION_KICK, ACTION_KILL, ACTION_KISS, ACTION_LICK,
+    ACTION_NOM, ACTION_PAT, ACTION_POCKY, ACTION_POKE, ACTION_SLAP, ACTION_SMILE, ACTION_SMUG, ACTION_WAVE, ACTION_WINK,
+    ACTION_YEET
+)
 
 
 SLASH_CLIENT: Client
 
 
 PAT = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('pat', False),
-        'pats',
-    ),
+    ACTION_PAT,
     name = 'pat',
     description = 'Do you like pats as well?',
     is_global = True,
@@ -23,251 +22,175 @@ PAT = SLASH_CLIENT.interactions(
 
 
 KISS = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('kiss', False),
-        'kisses',
-    ),
+    ACTION_KISS,
     name = 'kiss',
     description = 'If you really really like your onee, give her a kiss <3',
     is_global = True,
 )
 
 HUG = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('hug', False),
-        'hugs',
-    ),
+    ACTION_HUG,
     name = 'hug',
     description = 'Huh.. Huggu? HUGG YOUUU!!!',
     is_global = True,
 )
 
 CUDDLE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('cuddle', False),
-        'cuddles',
-    ),
+    ACTION_CUDDLE,
     name = 'cuddle',
     description = 'Come here, you little qtie pie.',
     is_global = True,
 )
 
 LICK = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('lick', False),
-        'licks',
-    ),
+    ACTION_LICK,
     name = 'lick',
     description = 'Licking is a favored activity of neko girls.',
     is_global = True,
 )
 
 POKE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('poke', False),
-        'pokes',
-    ),
+    ACTION_POKE,
     name = 'poke',
     description = 'It hurts!',
     is_global = True,
 )
 
 SLAP = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('slap', False),
-        'slaps',
-    ),
+    ACTION_SLAP,
     name = 'slap',
     description = 'Slapping others is not nice.',
     is_global = True,
 )
 
 SMUG = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('smug', False),
-        'smugs at',
-    ),
+    ACTION_SMUG,
     name = 'smug',
     description = 'Smug face.',
     is_global = True,
 )
 
 BULLY = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('bully', False),
-        'bullies',
-    ),
+    ACTION_BULLY,
     name = 'bully',
     description = 'No Bully!',
     is_global = True,
 )
 
 CRY = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('cry', False),
-        'cries because of',
-    ),
+    ACTION_CRY,
     name = 'cry',
     description = 'The saddest.',
     is_global = True,
 )
 
 YEET = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('yeet', False),
-        'yeets',
-    ),
+    ACTION_YEET,
     name = 'yeet',
     description = 'Yeet!',
     is_global = True,
 )
 
 BLUSH = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('blush', False),
-        'blushes at',
-    ),
+    ACTION_BLUSH,
     name = 'blush',
     description = 'Oh.',
     is_global = True,
 )
 
 SMILE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('smile', False),
-        'smiles at',
-    ),
+    ACTION_SMILE,
     name = 'smile',
     description = 'Oh, really?',
     is_global = True,
 )
 
 WAVE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('wave', False),
-        'waves at',
-    ),
+    ACTION_WAVE,
     name = 'wave',
     description = 'Flap flap',
     is_global = True,
 )
 
 HIGHFIVE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('highfive', False),
-        'highfives',
-    ),
+    ACTION_HIGHFIVE,
     name = 'highfive',
     description = 'Lets go boiz!',
     is_global = True,
 )
 
 HANDHOLD = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('handhold', False),
-        'holds hands of',
-    ),
+    ACTION_HANDHOLD,
     name = 'handhold',
     description = 'Lewd!!',
     is_global = True,
 )
 
 NOM = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('nom', False),
-        'noms',
-    ),
+    ACTION_NOM,
     name = 'nom',
     description = 'Feed your fumo, or else',
     is_global = True,
 )
 
 BITE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('bite', False),
-        'bites',
-    ),
+    ACTION_BITE,
     name = 'bite',
     description = 'Vampy.',
     is_global = True,
 )
 
 GLOMP = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('glomp', False),
-        'glomps',
-    ),
+    ACTION_GLOMP,
     name = 'glomp',
     description = 'You can run, but you cant hide!',
     is_global = True,
 )
 
 KILL = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('kill', False),
-        'murders',
-    ),
+    ACTION_KILL,
     name = 'kill',
     description = 'Finally, some action.',
     is_global = True,
 )
 
 HAPPY = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('happy', False),
-        'is happy for',
-    ),
+    ACTION_HAPPY,
     name = 'happy',
     description = 'If you are happy, clap your..',
     is_global = True,
 )
 
 WINK = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('wink', False),
-        'winks at',
-    ),
+    ACTION_WINK,
     name = 'wink',
     description = 'Ara-ara',
     is_global = True,
 )
 
 DANCE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('dance', False),
-        'dancing with',
-    ),
+    ACTION_DANCE,
     name = 'dance',
     description = 'Dancy, dancy.',
     is_global = True,
 )
 
 CRINGE = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('cringe', False),
-        'cringes at',
-    ),
+    ACTION_CRINGE,
     name = 'cringe',
     description = 'Cringe, run!',
     is_global = True,
 )
 
 KICK = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerWaifuPics('kick', False),
-        'kicks',
-    ),
+    ACTION_KICK,
     name = 'kick',
     description = 'Kicks butt!',
     is_global = True,
 )
 
 POCKY_KISS = SLASH_CLIENT.interactions(
-    Action(
-        ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS),
-        'pocky kisses',
-        handler_self = ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS_SELF),
-    ),
+    ACTION_POCKY,
     name = 'pocky-kiss',
     description = 'Will they bale?',
     is_global = True,

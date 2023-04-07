@@ -72,11 +72,30 @@ async def ban_command(
     notify_user: (bool, 'Whether the user should get DM about the ban.') = True,
     delete_message_days: (range(8), 'Delete previous messages?') = 0,
 ):
-    """Yeets someone out of the guild. You must have ban users permission."""
+    """
+    Yeets someone out of the guild. You must have ban users permission.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    user : ``ClientUserBase``
+        The user to ban.
+    reason : `None`, `str` = `None`, Optional
+        Ban reason. Will show up in the guild's audit logs.
+    notify_user : `bool` = `False`, Optional
+        Whether the user should be notified.
+    delete_message_days : `int` = `0`, Optional
+        How hold old messages should be also deleted of the user.
+    """
     guild = event.guild
     check_required_permissions(client, event, guild, user, PERMISSIONS__BAN, WORD_CONFIG__BAN)
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     orin_mode = await should_show_orin(client, guild, event.user)
     
     # Ask, whether the user should be banned.

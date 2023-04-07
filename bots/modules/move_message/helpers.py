@@ -350,7 +350,7 @@ async def _repeat_create_webhook_message(client, webhook, content, embeds, files
         The webhook to send the message with.
     content : `None`, `str`
         The message's content.
-    embeds : `None`, `list` of ``EmbedCore``
+    embeds : `None`, `list` of ``Embed``
         Embeds to send the message with.
     files : `None`, `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
         Attachments of the message.

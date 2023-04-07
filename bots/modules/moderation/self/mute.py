@@ -77,7 +77,7 @@ async def self_mute(client, event, duration_seconds, *, reason = None):
     
     duration = TimeDelta(seconds = int(duration_seconds))
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     await client.user_guild_profile_edit(
         guild,

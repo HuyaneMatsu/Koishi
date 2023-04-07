@@ -55,7 +55,7 @@ async def self_kick(client, event, *, reason = None):
         return
     
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     
     await client.guild_user_delete(guild, event.user, reason = create_auto_reason(event, reason))
     

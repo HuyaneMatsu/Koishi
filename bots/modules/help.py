@@ -792,8 +792,7 @@ CATEGORIES = (
         EMOJI_MAGIC_WAND,
         (
             'calc', 'choose', 'create-activity', 'color', 'format-time', 'guild', 'id',
-            'ping', 'rawr', 'role-info', 'roles', 'snipe', 'snipe-emojis', 'snipe-reactions',
-            'snipe-stickers', 'style-text', 'user'
+            'ping', 'rawr', 'role-info', 'roles', 'snipe', 'style-text', 'user'
         ),
         (),
     ), (
@@ -912,7 +911,7 @@ HEARD_GUIDE_EMBED = Embed(
         f'**•** `/proposal accept` - Accept marriage proposals.\n'
         f'**•** `/heart-shop sell-daily` - Sell your daily streak.\n'
         f'**•** [Vote]({LINK__KOISHI_TOP_GG}) on me on top.gg\n'
-        f'**•** Use any command, to get hearts randomly.'
+        f'**•** Use any command to get hearts randomly.'
     ),
 ).add_field(
     'Spending hearts',

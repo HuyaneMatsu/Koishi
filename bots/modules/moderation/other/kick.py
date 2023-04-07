@@ -71,7 +71,7 @@ async def kick_command(
     guild = event.guild
     check_required_permissions(client, event, guild, user, PERMISSIONS__KICK, WORD_CONFIG__KICK)
     reason = process_reason(reason)
-    await client.interaction_application_command_acknowledge(event)
+    await client.interaction_application_command_acknowledge(event, wait = False)
     orin_mode = await should_show_orin(client, guild, event.user)
     
     # Ask, whether the user should be kicked.

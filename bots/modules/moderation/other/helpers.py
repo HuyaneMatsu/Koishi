@@ -10,6 +10,55 @@ from ..shared_helpers import add_reason_field
 from .constants import COMPONENT__CANCEL, COMPONENT__ROW
 
 
+def check_required_permissions_only_guild(guild):
+    """
+    Checks whether the guild is not `None`.
+    
+    Parameters
+    ----------
+    guild : ``Guild``
+        The guild where the action would be executed.
+    """
+    if guild is None:
+        abort('Guild only command.')
+
+
+def check_required_permissions_only_user(event, required_permission, required_permissions_name):
+    """
+    Checks whether the user has the required permissions.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    required_permission : ``Permission``
+        The required permissions to execute the action.
+    required_permissions_name : `str`
+       The name of the required permissions.
+    """
+    if (event.user_permissions & required_permission) != required_permission:
+        abort(f'You must have {required_permissions_name} permission to use this command.')
+
+
+def check_required_permissions_only_client(client, guild, required_permission, required_permissions_name):
+    """
+    Checks whether the client has the required permissions.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The guild where the action would be executed.
+    required_permission : ``Permission``
+        The required permissions to execute the action.
+    required_permissions_name : `str`
+       The name of the required permissions.
+    """
+    if (guild.cached_permissions_for(client) & required_permission) != required_permission:
+        abort(f'{client.name_at(guild)} requires {required_permissions_name} permission for this action.')
+
+
 def check_required_permissions_only(client, event, guild, required_permission, word_config):
     """
     Checks whether only the permissions requirements are met.
@@ -27,14 +76,9 @@ def check_required_permissions_only(client, event, guild, required_permission, w
     word_config : ``WordConfig``
         Words to use for filling up the error messages about the action to be executed.
     """
-    if guild is None:
-        abort('Guild only command.')
-    
-    if not (event.user_permissions & required_permission):
-        abort(f'You must have {word_config.permission} users permission to use this command.')
-    
-    if not (guild.cached_permissions_for(client) & required_permission):
-        abort(f'{client.name_at(guild)} requires {word_config.permission} users permission for this action.')
+    check_required_permissions_only_guild(guild)
+    check_required_permissions_only_user(event, required_permission, word_config.permission)
+    check_required_permissions_only_client(client, guild, required_permission, word_config.permission)
 
 
 def check_required_permissions(client, event, guild, user, required_permission, word_config):

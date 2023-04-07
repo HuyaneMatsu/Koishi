@@ -46,12 +46,12 @@ for char in (' ', '-', '\t', '\n', '~'):
     CHANNEL_CHAR_TABLE[char] = SPACE_CHAR
 
 # Add lowercase letters
-for char in range(b'a'[0], b'z'[0]+1):
+for char in range(b'a'[0], b'z'[0] + 1):
     char = chr(char)
     CHANNEL_CHAR_TABLE[char] = char
 
 # Add uppercase letters
-for shift in range(0, b'Z'[0] - b'A'[0]+1):
+for shift in range(0, b'Z'[0] - b'A'[0] + 1):
     source = chr(b'A'[0] + shift)
     target = chr(ord('𝖠') + shift)
     CHANNEL_CHAR_TABLE[source] = target

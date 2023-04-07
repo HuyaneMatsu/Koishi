@@ -70,7 +70,7 @@ TRANSFORMATIONS = {
     '9': BUILTIN_EMOJIS['nine'].as_emoji,
 }
     
-for char in range(b'a'[0], b'z'[0]+1):
+for char in range(b'a'[0], b'z'[0] + 1):
     emoji = BUILTIN_EMOJIS['regional_indicator_' + chr(char)].as_emoji
     TRANSFORMATIONS[chr(char)] = emoji
     TRANSFORMATIONS[chr(char - 32)] = emoji
