@@ -288,7 +288,9 @@ async def message_create(client, message):
     )
     
     try:
-        await client.message_create(referenced_message, content, allowed_mentions = allowed_mentions, embed = embed)
+        await client.message_create(
+            referenced_message, content, allowed_mentions = allowed_mentions, embed = embed, silent = True
+        )
     except ConnectionError:
         # No internet connect
         return

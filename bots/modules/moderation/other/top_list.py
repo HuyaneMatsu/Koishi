@@ -41,14 +41,14 @@ TYPES = [
     (NAME_MUTE, TYPE_MUTE),
 ]
 
-TYPE_TO_NAME = {value: key for value, key in TYPES}
+TYPE_TO_NAME = {value: name for name, value in TYPES}
 
-SORT_KEY_ALL = lambda item: (item[1].ban, 0 - item[0].id)
+SORT_KEY_ALL = lambda item: (item[1].all, 0 - item[0].id)
 
 SORT_KEYS_BY_TYPE = {
     TYPE_BAN: lambda item: (item[1].ban, 0 - item[0].id),
-    TYPE_KICK: lambda item: (item[1].ban, 0 - item[0].id),
-    TYPE_MUTE: lambda item: (item[1].ban, 0 - item[0].id),
+    TYPE_KICK: lambda item: (item[1].kick, 0 - item[0].id),
+    TYPE_MUTE: lambda item: (item[1].mute, 0 - item[0].id),
     TYPE_ALL: SORT_KEY_ALL,
 }
 
@@ -248,7 +248,11 @@ async def request_bans(client, guild, after, actions):
         elif source_user.bot:
             continue
         
-        actions.add((TYPE_BAN, source_user, audit_log_entry.target))
+        target_user = audit_log_entry.target
+        if source_user is target_user:
+            continue
+        
+        actions.add((TYPE_BAN, source_user, target_user))
 
 
 async def request_kicks(client, guild, after, actions):
@@ -284,7 +288,11 @@ async def request_kicks(client, guild, after, actions):
         elif source_user.bot:
             continue
         
-        actions.add((TYPE_KICK, source_user, audit_log_entry.target))
+        target_user = audit_log_entry.target
+        if source_user is target_user:
+            continue
+        
+        actions.add((TYPE_KICK, source_user, target_user))
 
 
 async def request_mutes(client, guild, after, actions):
@@ -333,7 +341,11 @@ async def request_mutes(client, guild, after, actions):
         elif source_user.bot:
             continue
         
-        actions.add((TYPE_MUTE, source_user, audit_log_entry.target))
+        target_user = audit_log_entry.target
+        if source_user is target_user:
+            continue
+        
+        actions.add((TYPE_MUTE, source_user, target_user))
 
 
 async def request_actions(client, guild, after):

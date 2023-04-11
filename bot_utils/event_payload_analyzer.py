@@ -1682,8 +1682,8 @@ def render_payload_states():
     
     for guesser in GUESSERS_BY_EVENT.values():
         guesser.render_into(into, 0, False)
+        into.append('\n')
     
-    into.append('\n')
     return ''.join(into)
 
 

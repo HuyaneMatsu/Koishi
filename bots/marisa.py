@@ -1631,6 +1631,15 @@ async def autocomplete_safe(client, event, value):
     return [item['label'] for item in result]
 
 
+@Marisa.interactions(guild = GUILD__SUPPORT)
+async def test_component_command_abort():
+    return InteractionResponse(components = Button('test', custom_id = 'marisa.test_component_command_abort'))
+
+@Marisa.interactions(custom_id = 'marisa.test_component_command_abort')
+async def handle_test_component_command_abort():
+    abort('testing')
+
+
 if (watchdog is not None):
     
     from watchdog.events import FileModifiedEvent

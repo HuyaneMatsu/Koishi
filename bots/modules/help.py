@@ -293,12 +293,6 @@ def get_koishi_header():
     return header
 
 
-def add_user_footer(embed, user):
-    return embed.add_footer(
-        f'Requested by {user.full_name}',
-        icon_url = user.avatar_url,
-    )
-
 KOISHI_JOKES = (
     ('Shrimps', 'fried'),
     ('Apples', 'peeled'),
@@ -316,10 +310,6 @@ async def render_about_generic(client, event):
         None,
         get_koishi_header(),
         color = COLOR__KOISHI_HELP,
-        timestamp = event.created_at,
-    ).add_author(
-        client.full_name,
-        client.avatar_url,
     ).add_field(
         UPTIME_TITLE,
         (
@@ -441,8 +431,6 @@ async def render_about_generic(client, event):
         inline = True,
     )
     
-    add_user_footer(embed, event.user)
-    
     return InteractionResponse(
         embed = embed,
         components = ABOUT_COMPONENTS,
@@ -470,10 +458,6 @@ async def render_about_js(client, event):
         None,
         get_koishi_header(),
         color = COLOR__KOISHI_HELP,
-        timestamp = event.created_at,
-    ).add_author(
-        client.full_name,
-        client.avatar_url,
     ).add_field(
         UPTIME_TITLE,
         (
@@ -602,8 +586,6 @@ async def render_about_js(client, event):
         inline = True,
     )
     
-    add_user_footer(embed, event.user)
-    
     return InteractionResponse(
         embed = embed,
         components = ABOUT_COMPONENTS,
@@ -612,7 +594,6 @@ async def render_about_js(client, event):
 async def render_about_cache(client, event):
     embed = Embed(
         color = COLOR__KOISHI_HELP,
-        timestamp = event.created_at,
     ).add_field(
         'Emojis',
         (
@@ -678,8 +659,6 @@ async def render_about_cache(client, event):
         ),
         inline = True,
     )
-    
-    add_user_footer(embed, event.user)
     
     return embed
 
@@ -868,7 +847,6 @@ def build_command_list_embed(header, extended):
     description = ''.join(description_parts)
     
     return Embed(
-        'Help',
         description,
         color = COLOR__KOISHI_HELP,
     )
@@ -876,7 +854,6 @@ def build_command_list_embed(header, extended):
 
 def build_command_list_embed(header, extended):
     embed = Embed(
-        'Help',
         header,
         color = COLOR__KOISHI_HELP,
     )
@@ -939,15 +916,12 @@ async def render_help_generic(client, event):
         else:
             embed = COMMAND_LIST_EMBED
     
-    embed = embed.copy()
-    add_user_footer(embed, event.user)
     return embed
 
 
 async def render_help_heart_guide(client, event):
-    embed = HEARD_GUIDE_EMBED.copy()
-    add_user_footer(embed, event.user)
-    return embed
+    return HEARD_GUIDE_EMBED
+
 
 HELP_FIELD_NAME_GENERIC = 'generic'
 HELP_FIELD_NAME_HEART_GUIDE = 'heart-guide'
@@ -982,27 +956,24 @@ async def ping(client, event):
     yield
     delay = (perf_counter() - start) * 1000.0
     
-    yield add_user_footer(
-        Embed(
-            'Ping',
-        ).add_field(
-            'Acknowledge latency',
-            (
-                f'```\n'
-                f'{delay:.0f} ms\n'
-                f'```'
-            ),
-            inline = True,
-        ).add_field(
-            'Gateway latency',
-            (
-                f'```\n'
-                f'{client.gateway.latency * 1000.:.0f} ms\n'
-                f'```'
-            ),
-            inline = True,
+    yield Embed(
+        'Ping',
+    ).add_field(
+        'Acknowledge latency',
+        (
+            f'```\n'
+            f'{delay:.0f} ms\n'
+            f'```'
         ),
-        event.user,
+        inline = True,
+    ).add_field(
+        'Gateway latency',
+        (
+            f'```\n'
+            f'{client.gateway.latency * 1000.:.0f} ms\n'
+            f'```'
+        ),
+        inline = True,
     )
 
 

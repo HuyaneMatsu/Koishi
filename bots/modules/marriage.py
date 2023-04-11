@@ -141,18 +141,10 @@ async def waifu_info(event,
     event_user = event.user
     event_user_id = event_user.id
     if (user_id != event_user_id) and (waifu_owner_id != event_user_id):
-        footer_text = (
-            f'To buy {user:f} you need at least {floor(get_multiplier(event_user_id, user_id) * waifu_cost)} '
-            f'love.\n'
-            f'Requested by {event_user:f}'
+        embed.add_footer(
+            f'To buy {user:f} you need at least {floor(get_multiplier(event_user_id, user_id) * waifu_cost)} love.',
+            icon_url = event_user.avatar_url,
         )
-    else:
-        footer_text = f'Requested by {event_user:f}'
-    
-    embed.add_footer(
-        footer_text,
-        icon_url = event_user.avatar_url,
-    )
     
     yield InteractionResponse(embed = embed, allowed_mentions = None)
 
