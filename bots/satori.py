@@ -1,19 +1,40 @@
-import signal, sys
+__all__ = ('Satori',)
+
+from itertools import chain, cycle
 from random import randint
-from itertools import cycle, chain
 from threading import main_thread
 
-from hata import DiscordException, Embed, ERROR_CODES, BUILTIN_EMOJIS, Emoji, KOKORO, Client, CLIENTS, Permission
+from hata import (
+    Activity, BUILTIN_EMOJIS, CLIENTS, Client, DiscordException, ERROR_CODES, Embed, Emoji, KOKORO, Permission
+)
 from hata.ext.commands_v2 import checks
 from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
 
-from bot_utils.constants import COLOR__SATORI_HELP, CHANNEL__SYSTEM__SYNC
-from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor, ChannelDeleteWaitfor, ChannelCreateWaitfor, \
-    ChannelEditWaitfor
+import config
+import signal, sys
+from bot_utils.constants import CHANNEL__SYSTEM__SYNC, COLOR__SATORI_HELP, DEFAULT_CATEGORY_NAME, PREFIX__SATORI
 from bot_utils.interpreter_v2 import Interpreter
 from bot_utils.syncer import sync_request_waiter
+from bot_utils.tools import (
+    ChannelCreateWaitfor, ChannelDeleteWaitfor, ChannelEditWaitfor, MessageDeleteWaitfor, MessageEditWaitfor
+)
+from bot_utils.utils import category_name_rule
 
-Satori : Client
+
+
+Satori = Client(
+    config.SATORI_TOKEN,
+    secret = config.SATORI_SECRET,
+    client_id = config.SATORI_ID,
+    activity = Activity('with Koishi'),
+    status = 'dnd',
+    application_id = config.SATORI_ID,
+    extensions = ('command_utils', 'commands_v2', 'slash',),
+    prefix = PREFIX__SATORI,
+    category_name_rule = category_name_rule,
+    default_category_name = DEFAULT_CATEGORY_NAME,
+)
+
 
 Satori.events.message_create.append(CHANNEL__SYSTEM__SYNC, sync_request_waiter)
 

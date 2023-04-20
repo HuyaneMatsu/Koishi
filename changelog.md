@@ -1,3 +1,8 @@
+### 2023-04-14
+
+- Remove redundant embed fields (example: embed footer that tells who called the command).
+- Add `close` button to `/about`.
+
 ### 2023-04-11
 
 - Fix `/mod top-list` rendered `sorted by` embed field incorrectly.

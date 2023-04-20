@@ -1,20 +1,37 @@
-import re, functools
-from random import random, choice
-from time import perf_counter
-from enum import Enum
+__all__ = ('Nitori',)
 
+import functools, re
+from enum import Enum
+from random import choice, random
+from time import perf_counter
+
+from hata import (
+    BUILTIN_EMOJIS, Channel, Client, DATETIME_FORMAT_CODE, DiscordException, ERROR_CODES, Embed, Emoji, IntentFlag,
+    Permission, Role, elapsed_time, id_to_datetime, parse_emoji
+)
+from hata.ext.slash import (
+    Button, ButtonStyle, Form, InteractionResponse, Option, P, Row, Select, TextInput, TextInputStyle, abort,
+    configure_parameter, iter_component_interactions, wait_for_component_interaction
+)
+from scarletio import sleep
+
+import config
+from bot_utils.constants import GUILD__SUPPORT as TEST_GUILD, ROLE__SUPPORT__MODERATOR
+from bot_utils.utils import random_error_message_getter
 from bs4 import BeautifulSoup
 
-from scarletio import sleep
-from hata import Client, Embed, parse_emoji, id_to_datetime, DATETIME_FORMAT_CODE, elapsed_time, Channel, Role, \
-    DiscordException, ERROR_CODES, BUILTIN_EMOJIS, Emoji, Permission
-from hata.ext.slash import configure_parameter, InteractionResponse, abort, Button, Row, ButtonStyle, \
-    wait_for_component_interaction, iter_component_interactions, Select, Option, P, Form, TextInput, TextInputStyle
 
-from bot_utils.constants import GUILD__SUPPORT as TEST_GUILD, ROLE__SUPPORT__MODERATOR
+Nitori = Client(
+    config.NITORI_TOKEN,
+    client_id = config.NITORI_ID,
+    application_id = config.NITORI_ID,
+    intents = IntentFlag().update_by_keys(message_content = False),
+    extensions = 'slash',
+    random_error_message_getter = random_error_message_getter,
+)
+
+
 MODERATOR_ROLE_ID = ROLE__SUPPORT__MODERATOR.id
-
-Nitori: Client
 
 
 # command start slash perms

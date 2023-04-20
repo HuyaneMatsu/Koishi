@@ -55,19 +55,43 @@ def run_webapp():
     
 
 if __name__ == '__main__':
-    import bots
-    
     from hata import KOKORO
-    from hata.ext.plugin_loader import load_all_plugin, frame_filter
+    from hata.ext.plugin_loader import add_default_plugin_variables, load_all_plugin, frame_filter, register_plugin
     from scarletio import write_exception_sync
+    
+    from bot_utils import async_engine
+    from bots import *
+    
+    MARISA_MODE = config.MARISA_MODE
+    
+    add_default_plugin_variables(
+        MARISA_MODE = MARISA_MODE,
+        SOLARLINK_VOICE = MARISA_MODE,
+        SOLARLINK_VOICE_ENABLED = False,
+        SLASH_CLIENT = SLASH_CLIENT,
+        COMMAND_CLIENT = COMMAND_CLIENT,
+        MAIN_CLIENT = MAIN_CLIENT,
+    )
+    
+    register_plugin('modules_system')
+    if MARISA_MODE:
+        register_plugin('modules_previews')
+        register_plugin('modules_testers')
+    else:
+        register_plugin('modules')
     
     try:
         load_all_plugin()
     except BaseException as err:
         write_exception_sync(err, filter = frame_filter)
         
-        hata.KOKORO.stop()
+        KOKORO.stop()
         raise SystemExit
+    
+    if MARISA_MODE:
+        from hata.ext.plugin_auto_reloader import start_auto_reloader, warn_auto_reloader_availability
+        warn_auto_reloader_availability()
+        start_auto_reloader()
     
     hata.main.execute_command_from_system_parameters()
 

@@ -1,6 +1,6 @@
 __all__ = (
     'FILTER_ADD_GROUP_PARAMETERS', 'channel_mix', 'distortion', 'equalizer', 'karaoke', 'low_pass', 'rotation',
-    'timescale', 'tremolo', 'vibrato', 'volume__'
+    'timescale', 'tremolo', 'vibrato', 'volume_'
 )
 
 from hata import Embed

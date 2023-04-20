@@ -1,3 +1,5 @@
+__all__ = ()
+
 from hata.ext.plugin_loader import register_plugin, load_plugin, get_plugin, reload_plugin, unload_plugin, \
     get_plugins_like, PLUGINS, PluginError, get_plugin_like
 from hata import Embed, Client, CLIENTS, Permission
@@ -10,6 +12,7 @@ SLASH_CLIENT : Client
 def check_permission(event):
     if not event.user.has_role(ROLE__SUPPORT__ADMIN):
         abort(f'You must have {ROLE__SUPPORT__ADMIN.mention} to invoke this command.')
+
 
 EXTENSION_COMMANDS = SLASH_CLIENT.interactions(
     None,

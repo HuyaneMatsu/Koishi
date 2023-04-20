@@ -8,7 +8,7 @@ from scarletio import Lock
 from hata.ext.slash.menus import Pagination
 from hata.ext.plugin_loader import require
 
-require(GOOGLE_API_KEYS=list)
+require(GOOGLE_API_KEYS = list)
 
 SLASH_CLIENT : Client
 

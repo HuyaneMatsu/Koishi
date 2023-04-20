@@ -1,11 +1,21 @@
+__all__ = ('Renes',)
+
 from hata import ActivityType, Client, Embed
 from scarletio import LOOP_TIME
 
+import config
 from bot_utils.constants import (
     CHANNEL__ESTS_HOME__STREAM_NOTIFICATION, GUILD__ESTS_HOME, ROLE__ESTS_HOME__STREAM_NOTIFICATION, USER__EST
 )
 
-Renes: Client
+
+Renes = Client(
+    config.RENES_TOKEN,
+    client_id = config.RENES_ID,
+    application_id = config.RENES_ID,
+    extensions = 'slash',
+)
+
 
 STREAM_PING_DIFFERENCE = 10.0 * 60.0 # 10 min
 EST_DEFAULT_IMAGE_URL = 'https://cdn.discordapp.com/attachments/568837922288173058/1043516469218119791/est-0001.png'

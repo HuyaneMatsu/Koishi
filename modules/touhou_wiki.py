@@ -14,7 +14,7 @@ from hata.ext.plugin_loader import require
 from bot_utils.tools import BeautifulSoup
 
 # Touhou wiki blocks us, so this is always disabled
-require(TOUHOU_WIKI_ENABLED=True)
+require(TOUHOU_WIKI_ENABLED = True)
 
 WORD_MATCH_RP = re_compile('[^a-zA-z0-9]+')
 
@@ -79,11 +79,11 @@ async def wiki_page_selected(client, channel, message, title, url):
 
 
 async def download_wiki_page(client, title_, url):
-    async with client.http.get(url, headers=HEADERS) as response:
+    async with client.http.get(url, headers = HEADERS) as response:
         response_data = await response.text()
     soup = BeautifulSoup(response_data, 'html.parser')
     
-    block = soup.find_all('div', class_='mw-parser-output')[2]
+    block = soup.find_all('div', class_ = 'mw-parser-output')[2]
     
     last = []
     title_parts = [title_]
@@ -93,7 +93,7 @@ async def download_wiki_page(client, title_, url):
     for element in block.contents:
         element_name = element.name
         if element_name is None:
-            continue #linebreak
+            continue # linebreak
         
         if element_name == 'dl':
             for element in element.contents:
@@ -106,7 +106,7 @@ async def download_wiki_page(client, title_, url):
                 if element_name == 'dd':
                     # check links
                     subs = element.findAll(recursive=False)
-                    # if len(1)==1, then it might be a div
+                    # if len(1) == 1, then it might be a div
                     if len(subs) == 1:
                         sub = subs[0]
                         # is it div?
@@ -125,7 +125,7 @@ async def download_wiki_page(client, title_, url):
                     if text.startswith('"') and text.endswith('"'):
                         text = f'*{text}*\n'
                     else:
-                        text = text+'\n'
+                        text = text + '\n'
                     
                     last.append(text)
                     continue
@@ -153,7 +153,7 @@ async def download_wiki_page(client, title_, url):
             continue
         
         if element_name == 'h3':
-            element = element.find('span', class_='mw-headline')
+            element = element.find('span', class_ = 'mw-headline')
             text = element.text
             del title_parts[2:]
             title_parts.append(text)
@@ -164,10 +164,10 @@ async def download_wiki_page(client, title_, url):
         if element_name == 'div':
             
             if title_parts[-1] == 'References': #keep reference
-                for index, element in enumerate(element.findAll('span', class_='reference-text'), 1):
+                for index, element in enumerate(element.findAll('span', class_ = 'reference-text'), 1):
                 
                     # check for error message from the wiki
-                    subs = element.findAll(recursive=False)
+                    subs = element.findAll(recursive = False)
                     for index_ in range(len(subs)):
                         sub = subs[index_]
                         classes = sub.attrs.get('class')
@@ -182,7 +182,7 @@ async def download_wiki_page(client, title_, url):
                             continue
                         
                         # `[n]`-s are missing, lets put them back
-                        parts=['[', str(index), ']']
+                        parts = ['[', str(index), ']']
                         for index_ in range(index_):
                             parts.append(' ')
                             parts.append(subs[index_].text)
@@ -244,10 +244,10 @@ async def download_wiki_page(client, title_, url):
                     collected.append(block)
                     section_ln = len(block)
                 else:
-                    section_ln=section_ln + len(block)
+                    section_ln = section_ln + len(block)
                     collected.append(block)
                 
-                index +=1
+                index += 1
                 if index == limit:
                     if collected:
                         sections.append('\n'.join(collected))
@@ -271,11 +271,11 @@ async def download_wiki_page(client, title_, url):
                     break_point = block.find(' ', max_ln)
                     if break_point == -1 or break_point + 80 > max_ln:
                         # too long word (lol category)
-                        pre_part = block[:max_ln]+' ...'
+                        pre_part = block[:max_ln] + ' ...'
                         post_part = '... ' + block[max_ln:]
                     else:
                         # space found, brake next to it
-                        pre_part = block[:break_point]+' ...'
+                        pre_part = block[:break_point] + ' ...'
                         post_part = '...' + block[break_point:]
                     
                     index += 1

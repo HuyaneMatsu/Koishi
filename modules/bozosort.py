@@ -592,6 +592,7 @@ BUILTIN_MODULES = frozenset((
     'code',
     'contextlib',
     'enum',
+    'csv',
 ))
 
 # We cheat more

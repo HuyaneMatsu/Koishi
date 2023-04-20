@@ -124,7 +124,7 @@ ACTION_WINK = Action(
 
 ACTION_DANCE = Action(
     IMAGE_HANDLER_DANCE,
-    'dancing with',
+    'dancing for',
 )
 
 ACTION_CRINGE = Action(

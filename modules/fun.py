@@ -280,7 +280,7 @@ async def love(client, event,
     return Embed(
         choice(element['titles']),
         f'{source_user:f} {BUILTIN_EMOJIS["heart"]} {target_user:f} scored {percent}%!',
-        0xad1457,
+        color = 0xad1457,
     ).add_field(
         'My advice:',
         element['text'],

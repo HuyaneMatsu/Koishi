@@ -58,7 +58,7 @@ def clear_satori_channel(satori_channel):
     satori_channel : ``Channel``
         The channel to clear.
     """
-    for channel in satori_channel.channel_list:
+    for channel in satori_channel.iter_channels():
         try:
             user_id = int(channel.name)
         except ValueError:
@@ -76,7 +76,7 @@ def discover_satori_channel(satori_channel):
     satori_channel : ``Channel``
         The channel to discover.
     """
-    for watcher_channel in satori_channel.channel_list:
+    for watcher_channel in satori_channel.iter_channels():
         try:
             user_id = int(watcher_channel.name)
         except ValueError:

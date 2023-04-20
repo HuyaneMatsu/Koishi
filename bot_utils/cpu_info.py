@@ -61,9 +61,9 @@ else:
                             sys.stdout.write(f'Unknown CPU model: {CPU_MODEL!r}.')
                         else:
                             break
-                    
-                    CPU_MAX_FREQUENCY = cpu_frequency.current
-                    break
+                
+                CPU_MAX_FREQUENCY = cpu_frequency.current
+                break
             
             return CPU_MAX_FREQUENCY
         

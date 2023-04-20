@@ -1,5 +1,5 @@
 from hata.ext.plugin_loader import require
-require(SOLARLINK_VOICE=True)
+require(SOLARLINK_VOICE = True, SOLARLINK_VOICE_ENABLED = True)
 
 from .command import *
 

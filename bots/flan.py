@@ -1,20 +1,41 @@
-import re, os
+__all__ = ('Flan',)
+
+import os, re
+from csv import reader as CSVReader, writer as CSVWriter
 from itertools import cycle
 from random import choice
 
-from scarletio import sleep, ReuAsyncIO, AsyncIO, Lock, alchemy_incendiary
-from hata import Guild, Embed, Color, Role, BUILTIN_EMOJIS, Channel, KOKORO, Client, DiscordException, \
-    ERROR_CODES, Permission
-from scarletio import SortedList
-from hata.ext.command_utils import Pagination, wait_for_reaction, wait_for_message
-from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
+from hata import (
+    Activity, ActivityType, BUILTIN_EMOJIS, Channel, Client, Color, DiscordException, ERROR_CODES, Embed, Guild,
+    IntentFlag, KOKORO, Permission, Role
+)
+from hata.ext.command_utils import Pagination, wait_for_message, wait_for_reaction
 from hata.ext.commands_v2 import checks
+from hata.ext.commands_v2.helps.subterranean import SubterraneanHelpCommand
+from scarletio import AsyncIO, Lock, ReuAsyncIO, SortedList, alchemy_incendiary, sleep
 
-from bot_utils.constants import COLOR__FLAN_HELP, PATH__KOISHI
+import config
+from bot_utils.chesuto import (
+    CARDS_BY_NAME, CHESUTO_FOLDER, Card, EMBED_NAME_LENGTH, PROTECTED_FILE_NAMES, Rarity, get_card
+)
+from bot_utils.constants import COLOR__FLAN_HELP, PATH__KOISHI, PREFIX__FLAN
 from bot_utils.tools import MessageDeleteWaitfor, MessageEditWaitfor
-from bot_utils.chesuto import Rarity, CARDS_BY_NAME, Card, PROTECTED_FILE_NAMES, CHESUTO_FOLDER, EMBED_NAME_LENGTH, \
-    get_card
-from csv import reader as CSVReader, writer as CSVWriter
+from bot_utils.utils import category_name_rule
+
+
+Flan = Client(
+    config.FLAN_TOKEN,
+    client_id = config.FLAN_ID,
+    activity = Activity('Chesuto development', activity_type = ActivityType.watching),
+    status = 'idle',
+    application_id = config.FLAN_ID,
+    intents = IntentFlag().update_by_keys(message_content = False),
+    extensions = ('command_utils', 'commands_v2',),
+    default_category_name = 'GENERAL COMMANDS',
+    category_name_rule = category_name_rule,
+    prefix = PREFIX__FLAN,
+)
+
 
 CHESUTO_GUILD = Guild.precreate(598706074115244042)
 CHESUTO_COLOR = Color.from_rgb(73, 245, 73)
@@ -129,7 +150,6 @@ def get_auto_bgm_name(name):
     
     return ' '.join(parts)
 
-Flan: Client
 
 Flan.events(MessageDeleteWaitfor)
 Flan.events(MessageEditWaitfor)
@@ -138,8 +158,8 @@ def flan_help_embed_postprocessor(command_context, embed):
     if embed.color is None:
         embed.color = COLOR__FLAN_HELP
 
-Flan.commands(SubterraneanHelpCommand(embed_postprocessor=flan_help_embed_postprocessor), 'help')
-Flan.command_processor.create_category('VOICE', checks=checks.guild_only())
+Flan.commands(SubterraneanHelpCommand(embed_postprocessor = flan_help_embed_postprocessor), 'help')
+Flan.command_processor.create_category('VOICE', checks = checks.guild_only())
 
 @Flan.events
 async def guild_user_add(client, guild, user):
@@ -1249,11 +1269,11 @@ async def set_bgm_name(client, message, content):
                 
                 if isinstance(err, DiscordException):
                     if err.code in (
-                            ERROR_CODES.missing_access, # client removed
-                            ERROR_CODES.unknown_message, # message deleted
-                            ERROR_CODES.unknown_channel, # channel deleted
-                            ERROR_CODES.missing_permissions, # permissions changed meanwhile
-                                ):
+                        ERROR_CODES.missing_access, # client removed
+                        ERROR_CODES.unknown_message, # message deleted
+                        ERROR_CODES.unknown_channel, # channel deleted
+                        ERROR_CODES.missing_permissions, # permissions changed meanwhile
+                    ):
                         return
                 
                 raise
