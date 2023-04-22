@@ -84,7 +84,7 @@ async def un_mute_command(
     event,
     user: (User, 'Select the user to mute!'),
     reason: (str, 'Any reason why you would want to mute?') = None,
-    notify_user: (bool, 'Whether the user should get DM about the mute.') = True,
+    notify_user: (bool, 'Whether the user should get DM about the mute.') = False,
 ):
     """Un-mutes someone. You must have moderate users permission."""
     guild = event.guild

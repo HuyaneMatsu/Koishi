@@ -69,7 +69,7 @@ async def ban_command(
     event,
     user: (User, 'Select the user to ban!'),
     reason: (str, 'Any reason why you would want to ban?') = None,
-    notify_user: (bool, 'Whether the user should get DM about the ban.') = True,
+    notify_user: (bool, 'Whether the user should get DM about the ban.') = False,
     delete_message_days: (range(8), 'Delete previous messages?') = 0,
 ):
     """

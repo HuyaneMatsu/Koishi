@@ -118,7 +118,7 @@ async def un_ban_command(
     event,
     user: (User, 'Select the user to un.ban.'),
     reason: (str, 'Un-ban reason?') = None,
-    notify_user: (bool, 'Whether the user should get DM about the un-ban.') = True,
+    notify_user: (bool, 'Whether the user should get DM about the un-ban.') = False,
 ):
     """Un-bans the user. You must have ban users permission."""
     guild = event.guild

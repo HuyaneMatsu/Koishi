@@ -3,6 +3,9 @@ __all__ = ()
 from hata import Client
 from hata.ext.slash import abort
 
+from bots import SLASH_CLIENT
+
+from .base_command import GUILD_COMMANDS
 from .constants import (
     CUSTOM_ID_GUILD_BANNER, CUSTOM_ID_GUILD_DISCOVERY_SPLASH, CUSTOM_ID_GUILD_ICON, CUSTOM_ID_GUILD_INVITE_SPLASH,
     ICON_KINDS, ICON_KIND_BANNER, ICON_KIND_DISCOVERY_SPLASH, ICON_KIND_ICON, ICON_KIND_INVITE_SPLASH
@@ -10,10 +13,8 @@ from .constants import (
 from .icon_helpers import build_icon_embed, build_icon_interaction_response, is_command_invoker_same
 
 
-SLASH_CLIENT: Client
-
-
-async def guild_icon_command(event,
+@GUILD_COMMANDS.interactions(name = 'icon')
+async def guild_icon_slash_command(event,
     icon_kind: (ICON_KINDS, 'Which icon of the guild?', 'icon') = ICON_KIND_ICON,
 ):
     """Shows the guild's icon."""

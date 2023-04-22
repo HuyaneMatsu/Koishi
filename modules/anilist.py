@@ -1220,9 +1220,10 @@ async def handle_disabled_component_interaction():
 
 
 @SLASH_CLIENT.interactions(is_global = True)
-async def character(client, event,
-        name_or_id: ('str', 'The character\'s name or it\'s id.')
-            ):
+async def character(
+    client,
+    name_or_id: ('str', 'The character\'s name or it\'s id.')
+):
     name_or_id = validate_parameter(name_or_id)
     
     if name_or_id.isdecimal():
@@ -1249,7 +1250,8 @@ async def character(client, event,
 
 
 @SLASH_CLIENT.interactions(is_global = True)
-async def find_character(client, event,
+async def find_character(
+    client,
     name: ('str', 'The character\'s name to try to find.')
 ):
     name = validate_parameter(name)

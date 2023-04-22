@@ -1,3 +1,7 @@
+### 2023-04-20
+
+- Fix `touhou-feed` now handles gateway-timeout and other server side errors.
+
 ### 2023-04-14
 
 - Remove redundant embed fields (example: embed footer that tells who called the command).

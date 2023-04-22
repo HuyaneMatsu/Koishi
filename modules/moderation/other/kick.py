@@ -65,7 +65,7 @@ async def kick_command(
     event,
     user: (User, 'Select the user to kick!'),
     reason: (str, 'Any reason why you would want to kick?') = None,
-    notify_user: (bool, 'Whether the user should get DM about the kick.') = True,
+    notify_user: (bool, 'Whether the user should get DM about the kick.') = False,
 ):
     """Kicks someone out of the guild. You must have kick users permission."""
     guild = event.guild

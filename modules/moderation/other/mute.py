@@ -74,7 +74,7 @@ async def mute_command(
     minutes: PARAMETER_MINUTES = 0,
     seconds: PARAMETER_SECONDS = 0,
     reason: (str, 'Any reason why you would want to mute?') = None,
-    notify_user: (bool, 'Whether the user should get DM about the mute.') = True,
+    notify_user: (bool, 'Whether the user should get DM about the mute.') = False,
 ):
     """Mutes someone. You must have moderate users permission."""
     # Check permissions

@@ -471,15 +471,18 @@ class Feeder:
                 pass
             
             except DiscordException as err:
-                if err.code not in (
+                if err.status >= 500:
+                    return
+                
+                if err.code in (
                     ERROR_CODES.unknown_channel, # message deleted
                     ERROR_CODES.missing_access, # client removed
                     ERROR_CODES.missing_permissions, # permissions changed meanwhile
                     ERROR_CODES.rate_limit_slowmode, # slowmode
                 ):
-                    raise
+                    self.cancel()
                 
-                self.cancel()
+                raise
         
         except (GeneratorExit, CancelledError):
             raise
