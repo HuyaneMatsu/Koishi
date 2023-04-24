@@ -30,12 +30,12 @@ def add_month_field(embed, year, month_number):
     month_name = MONTH_NAMES[month_number]
     
     description_parts = []
-    description_parts.append('```ansi\n')
+    description_parts.append('```')
     
     by_day_length = len(by_day)
     if by_day_length:
+        description_parts.append('ansi\n')
         by_day_index = 0
-        
         
         while True:
             day_number, in_day = by_day[by_day_index]
@@ -69,6 +69,9 @@ def add_month_field(embed, year, month_number):
             
             description_parts.append('\n')
             continue
+    
+    else:
+        description_parts.append('\n\u200b')
     
     description_parts.append('\n```')
     
