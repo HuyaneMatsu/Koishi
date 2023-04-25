@@ -25,7 +25,8 @@ COMPONENTS_ROLE_INFO = Row(
         custom_id = CUSTOM_ID_ROLE_INFO_SHOW_PERMISSIONS,
     ),
     Button(
-        emoji = CLOSE_EMOJI,
+        'Close',
+        CLOSE_EMOJI,
         custom_id = CUSTOM_ID_ROLE_INFO_CLOSE,
     ),
 )
@@ -125,15 +126,27 @@ async def role_info(
     manager_type = role.manager_type
     if manager_type is not RoleManagerType.none:
         if manager_type is RoleManagerType.unset:
+            yield
             await client.sync_roles(role.guild)
             manager_type = role.manager_type
         
-        if manager_type is RoleManagerType.bot:
+        if (
+            manager_type is RoleManagerType.integration or
+            manager_type is RoleManagerType.application_role_connection
+        ):
+            yield
+            integration = role.manager
+            await client.integration_get_all(role.guild)
+            
+            if manager_type is RoleManagerType.integration:
+                managed_description = f'Special role for integration: {integration.name}'
+            else: # if manager_type is RoleManagerType.application_role_connection:
+                managed_description = f'Role managed by an application role connection: {integration.name}'
+        
+        elif manager_type is RoleManagerType.bot:
             managed_description = f'Special role for bot: {role.manager:f}'
         elif manager_type is RoleManagerType.booster:
             managed_description = 'Role for the boosters of the guild.'
-        elif manager_type is RoleManagerType.integration:
-            managed_description = f'Special role for integration: {role.manager.name}'
         elif manager_type is RoleManagerType.unknown:
             managed_description = 'Some new things.. Never heard of them.'
         else:
@@ -161,7 +174,7 @@ async def role_info(
             embed.add_image(icon_url)
     
     
-    return InteractionResponse(embed = embed, components = COMPONENTS_ROLE_INFO)
+    yield InteractionResponse(embed = embed, components = COMPONENTS_ROLE_INFO)
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_ROLE_INFO_CLOSE)

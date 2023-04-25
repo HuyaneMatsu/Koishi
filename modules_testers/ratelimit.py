@@ -1226,7 +1226,7 @@ async def emoji_delete(client, emoji,):
     emoji_id = emoji.id
     return await bypass_request(client, METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis/{emoji_id}',
-        )
+    )
 
 async def emoji_edit(client,emoji,name,): #keep it short
     data = {'name':name}
@@ -1236,24 +1236,24 @@ async def emoji_edit(client,emoji,name,): #keep it short
         f'{API_ENDPOINT}/guilds/{guild_id}/emojis/{emoji_id}',
         data,)
 
-async def integration_get_all(client, guild,):
+async def integration_get_all(client, guild):
     guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/integrations',
-        )
+    )
 
 async def invite_get_all_guild(client, guild,):
     guild_id = guild.id
     return await bypass_request(client,METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/invites',
-        )
+    )
 
 async def guild_user_delete(client, guild, user,):
     guild_id = guild.id
     user_id = user.id
     return await bypass_request(client,METHOD_DELETE,
         f'{API_ENDPOINT}/guilds/{guild_id}/members/{user_id}',
-        )
+    )
 
 async def user_edit(client, guild,user,nick,mute=False,):
     guild_id = guild.id

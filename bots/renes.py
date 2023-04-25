@@ -38,8 +38,8 @@ async def guild_user_add(client, guild, user):
     await client.message_create(
         system_channel,
         f'Thanks for coming {user:m}, enjoy your stay~\n'
-        f'If you wish to get notification every time {USER__EST.name_at(GUILD__ESTS_HOME)} goes live '
-        f'please use the {ping_me_hime:m} command.'
+        f'If you wish to get notifications every time {USER__EST.name_at(GUILD__ESTS_HOME)} goes live '
+        f'or wants to share something with you, please use the {ping_me_hime:m} command.'
     )
 
 

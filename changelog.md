@@ -1,9 +1,10 @@
-### 2023-04-24
+### 2023-04-25
 
 - Fix `touhou-feed` now handles gateway-timeout and other server side errors.
 - Fix `/touhou-calendar` now handles the case correctly when there are 0 users in a month.
   In case someone wanna copy and modify it.
 - Fix `renes` (bot) now reads `Est`'s name instead of using a hardcoded one.
+- Fix `/role-info` now shows integration name as intended.
 
 ### 2023-04-14
 
