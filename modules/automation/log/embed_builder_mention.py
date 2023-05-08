@@ -95,14 +95,14 @@ def build_mention_embed(message):
     description = ''.join(content_parts)
     embed = Embed('Ping Log!', description)
     
-    if message.everyone_mention:
+    if message.mentioned_everyone:
         embed.add_field('Everyone mention', 'Hecatia Yeah!')
     
-    user_mentions = message.user_mentions
-    if (user_mentions is not None):
+    mentioned_users = message.mentioned_users
+    if (mentioned_users is not None):
         content_parts = []
         
-        mention_count = len(user_mentions)
+        mention_count = len(mentioned_users)
         if mention_count > USER_MENTION_MAX:
             truncated = mention_count - USER_MENTION_MAX
         else:
@@ -122,7 +122,7 @@ def build_mention_embed(message):
         limit = mention_count - truncated
         
         while True:
-            user = user_mentions[index]
+            user = mentioned_users[index]
             index += 1
             
             guild_profile = user.get_guild_profile_for(guild)
@@ -154,11 +154,11 @@ def build_mention_embed(message):
         
         embed.add_field('User mentions', field_value)
     
-    role_mentions = message.role_mentions
-    if (role_mentions is not None):
+    mentioned_roles = message.mentioned_roles
+    if (mentioned_roles is not None):
         content_parts = []
         
-        mention_count = len(role_mentions)
+        mention_count = len(mentioned_roles)
         if mention_count > ROLE_MENTION_MAX:
             truncated = mention_count - ROLE_MENTION_MAX
         else:
@@ -178,7 +178,7 @@ def build_mention_embed(message):
         limit = mention_count - truncated
         
         while True:
-            role = role_mentions[index]
+            role = mentioned_roles[index]
             index += 1
             
             content_parts.append('**')

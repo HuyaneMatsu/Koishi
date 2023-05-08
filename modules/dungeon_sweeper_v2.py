@@ -4721,7 +4721,13 @@ class DungeonSweeperRunner:
             try:
                 await client.interaction_component_message_edit(event, embed = embed, components = components)
             except DiscordException as err:
-                if err.code != ERROR_CODES.unknown_interaction:
+                if err.status >= 500:
+                    pass
+                
+                elif err.code != ERROR_CODES.unknown_interaction:
+                    pass
+                
+                else:
                     raise
                 
                 await client.message_edit(self.message, embed = embed, components = components)

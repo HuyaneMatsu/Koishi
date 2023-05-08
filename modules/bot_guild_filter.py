@@ -1,8 +1,9 @@
 __all__ = ()
 
-from hata import Client, DiscordException, ERROR_CODES, Sticker, Emoji
+from hata import DiscordException, ERROR_CODES, Sticker, Emoji
 
-Koishi: Client
+from bots import Koishi
+
 
 STICKER_KOISHI_SPRING = Sticker.precreate(861178095319253002)
 STICKER_KOISHI_HONK = Sticker.precreate(990556669161406504)

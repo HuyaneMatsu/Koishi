@@ -161,7 +161,7 @@ class dispatch_tester:
                         content = getattr(message, key)
                         result.append('To:')
                     continue
-                if key in ('user_mentions', 'role_mentions', 'cross_mentions'):
+                if key in ('mentioned_users', 'mentioned_roles', 'mentioned_channels_cross_guild'):
                     removed, added = list_difference(value, getattr(message, key))
                     if removed:
                         result.append(f'{key} removed : {len(removed)}')

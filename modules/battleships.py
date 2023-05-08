@@ -107,8 +107,8 @@ class wait_on_reply:
         
         content = content[1]
         
-        if is_user_mention(content) and (message.user_mentions is not None):
-            user = message.user_mentions[0]
+        if is_user_mention(content) and (message.mentioned_users is not None):
+            user = message.mentioned_users[0]
         else:
             user = self.guild.get_user(content)
         

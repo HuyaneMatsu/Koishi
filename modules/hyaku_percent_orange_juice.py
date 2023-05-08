@@ -6,14 +6,13 @@ from functools import partial as partial_func
 
 from scarletio.web_common import quote
 from scarletio import ReuAsyncIO
-from hata import Client, BUILTIN_EMOJIS, Embed
+from hata import BUILTIN_EMOJIS, Embed
 from hata.ext.slash import abort, Select, Option, InteractionResponse
 
 from bot_utils.constants import GUILD__STORAGE, PATH__KOISHI
+from bots import SLASH_CLIENT
 
 EMOJI_STAR = BUILTIN_EMOJIS['star']
-
-Koishi: Client
 
 ORIGINS = {}
 EVENTS = {}
@@ -3359,10 +3358,6 @@ CHARACTER_MESCAL = OJCharacter(78,
 
 
 #### #### #### #### COMMANDS #### #### #### ####
-
-
-SLASH_CLIENT: Client
-
 
 @SLASH_CLIENT.interactions(guild = GUILD__STORAGE)
 async def create_images(client, event):

@@ -22,15 +22,14 @@ VOICE_COLORS = {}
 SLASH_CLIENT : [type(None), Client]
 
 if MARISA_MODE:
-    Marisa: Client
+    from bots import Marisa
     VOICE_COMMANDS_MARISA = eventlist(category='VOICE', )
     VOICE_COMMAND_CLIENT = Marisa
     
     MAIN_VOICE_COLOR = Color.from_rgb(121, 231, 78)
     VOICE_COLORS[Marisa] = MAIN_VOICE_COLOR
 else:
-    Flan: Client
-    Koishi: Client
+    from bots import Flan, Koishi
     VOICE_COMMANDS_FLAN = eventlist(checks=checks.guild_only())
     VOICE_COMMAND_CLIENT = Flan
     

@@ -1,20 +1,21 @@
 __all__ = ()
 
 from datetime import datetime, timedelta
-from math import log, floor
+from math import floor, log
+
 from dateutil.relativedelta import relativedelta
-from hata import Client, parse_custom_emojis, Embed, EMOJIS, parse_emoji, USERS
+from hata import EMOJIS, Embed, USERS, parse_custom_emojis, parse_emoji
 from hata.ext.slash import abort
+from sqlalchemy import and_, func as alchemy_function
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy import func as alchemy_function, and_
-from sqlalchemy.sql import select, desc
+from sqlalchemy.sql import desc, select
 
-from bot_utils.models import DB_ENGINE, emoji_counter_model, EMOJI_COUNTER_TABLE, sticker_counter_model, \
-    STICKER_COUNTER_TABLE
 from bot_utils.constants import GUILD__SUPPORT, ROLE__SUPPORT__EMOJI_MANAGER
+from bot_utils.models import (
+    DB_ENGINE, EMOJI_COUNTER_TABLE, STICKER_COUNTER_TABLE, emoji_counter_model, sticker_counter_model
+)
+from bots import Koishi, Satori
 
-Satori: Client
-SLASH_CLIENT: Client
 
 EMOJI_ACTION_TYPE_MESSAGE_CONTENT = 1
 EMOJI_ACTION_TYPE_REACTION = 2
@@ -24,6 +25,7 @@ RELATIVE_MONTH = relativedelta(months = 1)
 MONTH = timedelta(days = 367, hours = 6) / 12
 
 MOST_USED_PER_PAGE = 90
+
 
 @Satori.events
 async def message_create(client, message):
@@ -190,7 +192,7 @@ ORDERS = [
     
 ]
 
-EMOJI_COMMANDS = SLASH_CLIENT.interactions(
+EMOJI_COMMANDS = Koishi.interactions(
     None,
     name = 'emoji',
     description = 'Emoji counter commands.',

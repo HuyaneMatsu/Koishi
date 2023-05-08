@@ -29,7 +29,7 @@ async def message_create(client, message):
     if (channel is None):
         return
     
-    if (not message.everyone_mention) and (message.user_mentions is None) and (message.role_mentions is None):
+    if (not message.mentioned_everyone) and (message.mentioned_users is None) and (message.mentioned_roles is None):
         return
     
     await client.message_create(

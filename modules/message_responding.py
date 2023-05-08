@@ -2,14 +2,14 @@ __all__ = ()
 
 import re
 from functools import partial as partial_func
-
 from re import escape as re_escape
-from hata import Client, Permission, BUILTIN_EMOJIS
-from bot_utils.constants import GUILD__SUPPORT
+
+from hata import BUILTIN_EMOJIS, Permission
 from hata.discord.utils import sanitise_mention_escaper
 
-Satori: Client
-Koishi: Client
+from bot_utils.constants import GUILD__SUPPORT
+from bots import Koishi, Satori
+
 
 _KOISHI_NOU_RP = re.compile('n+\s*o+\s*u+', re.I)
 _KOISHI_OWO_RP = re.compile('(owo|uwu|0w0)', re.I)
@@ -44,8 +44,8 @@ async def alter_content(client, message):
     if content is None:
         return False
     
-    user_mentions = message.user_mentions
-    if (user_mentions is not None) and (Koishi in user_mentions):
+    mentioned_users = message.mentioned_users
+    if (mentioned_users is not None) and (Koishi in mentioned_users):
         author = message.author
         m1 = author.mention
         m2 = Koishi.mention

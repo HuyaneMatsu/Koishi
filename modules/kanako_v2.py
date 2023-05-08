@@ -439,8 +439,8 @@ async def create_(client, event,
 
 @KANAKO.interactions
 async def show_map(client, event,
-        map_ : ([NAME_HIRAGANA, NAME_KATAKANA], 'Choose a map to display!')
-            ):
+    map_ : ([NAME_HIRAGANA, NAME_KATAKANA], 'Choose a map to display!')
+):
     """Shows the selected map!"""
     pages = MAP_SHOWCASES[map_]
     await Pagination10step(client, event, pages)
@@ -881,18 +881,8 @@ class KanakoRunner:
                         if any_to_any(chars, key):
                             chances[key] += 1
             
-            goods = []
-            maximal = 0
-            for key, value in chances.items():
-                if value < maximal:
-                    continue
-                
-                if value > maximal:
-                    goods.clear()
-                    maximal = value
-                
-                goods.append(key)
-            
+            maximal = max(chances.values())
+            goods = [key for key, value in chances.items() if value == maximal]
             target = choice(goods)
             
             result.append(target)
@@ -907,6 +897,7 @@ class KanakoRunner:
                 chances[key] = randint(0, 2)
         
         return [result.pop(randint(0, limit)) for limit in range(4, -1, -1)]
+    
     
     async def runner(self, waiter):
         try:

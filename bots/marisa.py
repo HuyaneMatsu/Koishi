@@ -415,7 +415,7 @@ async def count_message_fields(client, message):
     field_count_attachments = 0
     field_count_components = 0
     field_count_content = 0
-    field_count_cross_mentions = 0
+    field_count_mentioned_channels_cross_guild = 0
     field_count_referenced_message = 0
     field_count_deleted = 0
     field_count_edited_at = 0
@@ -425,11 +425,11 @@ async def count_message_fields(client, message):
     field_count_nonce = 0
     field_count_pinned = 0
     field_count_reactions = 0
-    field_count_role_mention_ids = 0
+    field_count_mentioned_role_ids = 0
     field_count_stickers = 0
     field_count_thread = 0
     field_count_tts = 0
-    field_count_user_mentions = 0
+    field_count_mentioned_users = 0
     
     total_fields_by_count = {}
     
@@ -461,8 +461,8 @@ async def count_message_fields(client, message):
             field_count_content += 1
             total_fields += 1
         
-        if message.has_cross_mentions():
-            field_count_cross_mentions += 1
+        if message.has_mentioned_channels_cross_guild():
+            field_count_mentioned_channels_cross_guild += 1
             total_fields += 1
         
         if message.has_referenced_message():
@@ -501,8 +501,8 @@ async def count_message_fields(client, message):
             field_count_reactions += 1
             total_fields += 1
         
-        if message.has_role_mention_ids():
-            field_count_role_mention_ids += 1
+        if message.has_mentioned_role_ids():
+            field_count_mentioned_role_ids += 1
             total_fields += 1
         
         if message.has_stickers():
@@ -517,8 +517,8 @@ async def count_message_fields(client, message):
             field_count_tts += 1
             total_fields += 1
         
-        if message.has_user_mentions():
-            field_count_user_mentions += 1
+        if message.has_mentioned_users():
+            field_count_mentioned_users += 1
             total_fields += 1
         
         try:
@@ -542,7 +542,7 @@ async def count_message_fields(client, message):
         (field_count_attachments, 'attachments'),
         (field_count_components, 'components'),
         (field_count_content, 'content'),
-        (field_count_cross_mentions, 'cross_mentions'),
+        (field_count_mentioned_channels_cross_guild, 'mentioned_channels_cross_guild'),
         (field_count_referenced_message, 'referenced_message'),
         (field_count_deleted, 'deleted'),
         (field_count_edited_at, 'edited_at'),
@@ -552,11 +552,11 @@ async def count_message_fields(client, message):
         (field_count_nonce, 'nonce'),
         (field_count_pinned, 'pinned'),
         (field_count_reactions, 'reactions'),
-        (field_count_role_mention_ids, 'role_mention_ids'),
+        (field_count_mentioned_role_ids, 'mentioned_role_ids'),
         (field_count_stickers, 'stickers'),
         (field_count_thread, 'thread'),
         (field_count_tts, 'tts'),
-        (field_count_user_mentions, 'user_mentions'),
+        (field_count_mentioned_users, 'mentioned_users'),
     ]
     
     fields_array.sort(reverse=True)

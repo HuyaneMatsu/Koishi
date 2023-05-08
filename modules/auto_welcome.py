@@ -1,12 +1,13 @@
 __all__ = ()
 
-from scarletio import Task, sleep
-from hata import Client, Sticker, KOKORO, Emoji, parse_emoji
-from bot_utils.constants import GUILD__SUPPORT, CHANNEL__SUPPORT__SYSTEM
-from random import random, choice
+from random import choice, random
 
-Satori: Client
-Koishi: Client
+from hata import Emoji, KOKORO, Sticker, parse_emoji
+from scarletio import Task, sleep
+
+from bot_utils.constants import CHANNEL__SUPPORT__SYSTEM, GUILD__SUPPORT
+from bots import Koishi, Satori
+
 
 STICKER__WELCOME = Sticker.precreate(914216876819767347)
 

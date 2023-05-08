@@ -1,3 +1,11 @@
+### 2023-05-08
+
+- Rewrite `/trivia`. Now it is fully Koishi themed.
+- Fix broken channel name changer (support guild only feature).
+- Booru image handler now handles connection reset. Added retry too.
+- Booru image handler now handles better if the response structure is invalid.
+- `/ds` now handles discord server errors better. It will try to edit the message instead of destructing the game.
+
 ### 2023-04-25
 
 - Fix `touhou-feed` now handles gateway-timeout and other server side errors.
@@ -5,6 +13,7 @@
   In case someone wanna copy and modify it.
 - Fix `renes` (bot) now reads `Est`'s name instead of using a hardcoded one.
 - Fix `/role-info` now shows integration name as intended.
+- `/mod` commands now have `
 
 ### 2023-04-14
 

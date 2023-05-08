@@ -14,7 +14,7 @@ from .request_base import ImageHandlerRequestBase
 
 
 PAGE_SIZE = 100
-
+RETRIES_MAX = 5
 
 def make_url(api_endpoint, required_tags, banned_tags, requested_tags):
     """
@@ -177,13 +177,25 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
     
     @copy_docs(ImageHandlerRequestBase._request)
     async def _request(self, client):
-        async with client.http.get(f'{self._url}&pid={self._page}') as response:
-            if response.status == 200:
-                data = await response.read()
-            else:
-                data = None
+        retries_left = RETRIES_MAX
         
-        return data
+        while True:
+            try:
+                async with client.http.get(f'{self._url}&pid={self._page}') as response:
+                    if response.status == 200:
+                        data = await response.read()
+                    else:
+                        data = None
+            
+            except ConnectionResetError:
+                pass
+            
+            else:
+                return data
+            
+            retries_left -= 1
+            if retries_left <= 0:
+                break
     
     
     @copy_docs(ImageHandlerRequestBase._process_data)
@@ -192,8 +204,13 @@ class ImageHandlerBooru(ImageHandlerRequestBase):
         
         random_order = self._random_order
         
+        posts = soup.find('posts')
+        # Bad structure ?
+        if posts is None:
+            return None
+        
         # Increment page index
-        total = int(soup.find('posts')['count'])
+        total = int(posts['count'])
         
         page = self._page
         

@@ -1927,17 +1927,5 @@ async def test_message_interaction(ctx, message:'message'):
 
 
 @TEST_COMMANDS
-async def show_help_for(ctx, user:'user', content):
-    """
-    Shows help for the given user.
-    """
-    client = ctx.client
-    message = ctx.message.custom(author=user)
-    command = client.command_processor.command_name_to_command['help']
-    context = CommandContext(client, message, ctx.prefix, content, command)
-    await context.invoke()
-
-
-@TEST_COMMANDS
 async def voice_channels_only(channel: 'guild_voice' = None):
     return repr(channel)

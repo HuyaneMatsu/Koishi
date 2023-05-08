@@ -18,7 +18,7 @@ from hata.ext.commands_v2 import checks
 
 FILE_NAME = 'channel_names.csv'
 
-FILE_PATH = os.path.join(PATH__KOISHI, 'bots', 'modules', FILE_NAME)
+FILE_PATH = os.path.join(PATH__KOISHI, 'modules', FILE_NAME)
 FILE_LOCK = Lock(KOKORO)
 EDIT_LOCK = Lock(KOKORO)
 
