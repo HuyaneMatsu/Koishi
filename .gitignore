@@ -11,3 +11,6 @@ __pycache__/
 
 # Some data files
 /chesuto_data/*.mp3
+
+# Hata
+.profiles

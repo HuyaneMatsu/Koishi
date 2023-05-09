@@ -778,7 +778,6 @@ CATEGORY_KOISHI_KKHTA = TriviaCategory(
                 'The cut pieces were able to reassemble once Yukari was defeated.',
             ),
         ),
-    
     ),
 )
 

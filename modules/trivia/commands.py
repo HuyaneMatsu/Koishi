@@ -1,4 +1,5 @@
 __all__ = ()
+
 import re
 from random import choice, randint, shuffle
 
