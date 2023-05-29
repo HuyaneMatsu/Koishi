@@ -1,9 +1,10 @@
-### 2023-05-??
+### 2023-05-29
 
 - Add 3 new items to `/trivia`.
 - Add `/snipe message`.
 - `snipe / detials` and `snipe / actions` will not drop exception if the entity is yeeted.
 - `/automation log user` now colors embeds + add new `Guild profile flags` field.
+- Fix `/help` command's header formatting.
 
 ### 2023-05-08
 
