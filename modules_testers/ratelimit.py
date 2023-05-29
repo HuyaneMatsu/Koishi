@@ -1,5 +1,6 @@
 import os, re
-join = os.path.join
+from os.path import join
+from base64 import b64encode
 from threading import current_thread
 from time import time as time_now
 from email._parseaddr import _parsedate_tz
@@ -12,13 +13,13 @@ from hata import Embed, ScheduledEventEntityType, datetime_to_timestamp, AutoMod
     ERROR_CODES, ComponentType, Sticker, StickerPack, Permission, \
     VoiceRegion, VerificationLevel, MessageNotificationLevel, ContentFilterLevel, DISCORD_EPOCH, User, Client, \
     Achievement, Oauth2User, parse_oauth2_redirect_url, Channel, Role, GUILDS, CLIENTS, \
-    Team, WebhookType, Guild, ForumTag
+    Team, WebhookType, Guild, ForumTag, SoundboardSound
 from scarletio import sleep, Task, TaskGroup, AsyncIO, CancelledError, IgnoreCaseMultiValueDictionary, \
     alchemy_incendiary,  EventThread, change_on_switch, to_json, from_json
 
 from scarletio.utils.trace import TracebackFrameProxy, render_frames_into, render_exception_into
 from scarletio.web_common.headers import DATE, METHOD_PATCH, METHOD_GET, METHOD_DELETE, METHOD_POST, METHOD_PUT, \
-    AUTHORIZATION, CONTENT_TYPE
+    AUTHORIZATION, CONTENT_TYPE, METHOD_OPTIONS, ALLOW
 from scarletio.http_client import RequestContextManager
 from scarletio.web_common import quote, BasicAuth, Formdata
 from hata.discord.utils import image_to_base64
@@ -32,10 +33,10 @@ from hata.ext.commands_v2 import Command, checks, configure_converter
 from hata.ext.slash.menus import Pagination
 
 MAIN_CLIENT: Client
-RATE_LIMIT_COMMANDS = eventlist(type_=Command, category='RATE_LIMIT TESTS')
+RATE_LIMIT_COMMANDS = eventlist(type_ = Command, category = 'RATE_LIMIT TESTS')
 
 def setup(lib):
-    MAIN_CLIENT.command_processor.create_category('RATE_LIMIT TESTS', checks=[checks.owner_only()])
+    MAIN_CLIENT.command_processor.create_category('RATE_LIMIT TESTS', checks = [checks.owner_only()])
     MAIN_CLIENT.commands.extend(RATE_LIMIT_COMMANDS)
     
 def teardown(lib):
@@ -45,22 +46,22 @@ def parse_date_to_datetime(data):
     *date_tuple, tz = _parsedate_tz(data)
     if tz is None:
         return datetime(*date_tuple[:6])
-    return datetime(*date_tuple[:6], tzinfo=timezone(timedelta(seconds=tz)))
+    return datetime(*date_tuple[:6], tzinfo = timezone(timedelta(seconds = tz)))
 
 def parse_header_rate_limit(headers):
     delay1 = (
         datetime.fromtimestamp(float(headers[RATE_LIMIT_RESET]), timezone.utc)
         - parse_date_to_datetime(headers[DATE])
     ).total_seconds()
-    delay2=float(headers[RATE_LIMIT_RESET_AFTER])
+    delay2 = float(headers[RATE_LIMIT_RESET_AFTER])
     return (delay1 if delay1 < delay2 else delay2)
 
-async def bypass_request(client,method,url,data=None,params=None,reason = None,headers=None,decode=True,):
-    self=client.http
+async def bypass_request(client, method, url, data = None, params = None, reason = None, headers = None, decode = True,):
+    self = client.http
     if headers is None:
-        headers=self.headers.copy()
+        headers = self.headers.copy()
     
-    if CONTENT_TYPE not in headers and data and isinstance(data,(dict,list)):
+    if CONTENT_TYPE not in headers and data and isinstance(data, (dict, list)):
         headers[CONTENT_TYPE] = 'application/json'
         #converting data to json
         data = to_json(data)
@@ -77,7 +78,7 @@ async def bypass_request(client,method,url,data=None,params=None,reason = None,h
         try:
             async with RequestContextManager(self._request(method, url, headers, data, params)) as response:
                 if decode:
-                    response_data = await response.text(encoding='utf-8')
+                    response_data = await response.text(encoding = 'utf-8')
                 else:
                     response_data = ''
         except OSError as err:
@@ -116,13 +117,20 @@ async def bypass_request(client,method,url,data=None,params=None,reason = None,h
             if (rate_limit_hash is not None):
                 buffer.write(f'hash: {rate_limit_hash} (ignore this field)\n')
             
+            if method == METHOD_OPTIONS:
+                allow = response_headers.get(ALLOW, None)
+                if allow is None:
+                    allow = 'N/A'
+                
+                buffer.write(f'allowed methods : {allow}\n')
+            
             if 199 < status < 305:
                 if response_headers.get('X-Ratelimit-Remaining', '1') == '0':
                     buffer.write(f'reached 0\n try again after {delay}\n',)
                 return response_data
             
             if status == 429:
-                retry_after=response_data['retry_after']
+                retry_after = response_data['retry_after']
                 buffer.write(f'RATE LIMITED\nretry after : {retry_after}\n',)
                 await sleep(retry_after,self.loop)
                 continue
@@ -156,11 +164,11 @@ class RLTCTX: #rate limit tester context manager
         return self
 
     def __enter__(self):
-        active_ctx=type(self).active_ctx
+        active_ctx = type(self).active_ctx
         if (active_ctx is not None):
             raise RuntimeError(f'There is an already active {self.__class__.__name__} right now.')
         
-        type(self).active_ctx=self
+        type(self).active_ctx = self
         return self
     
     def __exit__(self,exc_type,exc_val,exc_tb):
@@ -169,10 +177,10 @@ class RLTCTX: #rate limit tester context manager
             return True
         
         if exc_type is None:
-            Task(self._render_exit_result(),self.client.loop)
+            Task(self._render_exit_result(), KOKORO)
             return True
         
-        Task(self._render_exit_exc(exc_val,exc_tb),self.client.loop)
+        Task(self._render_exit_exc(exc_val, exc_tb), KOKORO)
         return True
     
     async def _render_exit_result(self):
@@ -184,11 +192,11 @@ class RLTCTX: #rate limit tester context manager
                 unit_result.append('\n')
                 continue
             
-            task=unit.task
+            task = unit.task
             unit_result.append(f'Task `{task.name}`')
             unit_result.append('\n')
             
-            for date,buffer in unit.buffer:
+            for date, buffer in unit.buffer:
                 date=date.__format__('%Y.%m.%d-%H:%M:%S-%f')
                 unit_result.append(date)
                 unit_result.append(':\n')
@@ -206,7 +214,7 @@ class RLTCTX: #rate limit tester context manager
                 continue
             
             unit_result.append('```')
-            await self.client.loop.run_in_executor(alchemy_incendiary(render_exception_into,(exception,unit_result,),))
+            await KOKORO.run_in_executor(alchemy_incendiary(render_exception_into, (exception, unit_result,),))
             unit_result.append('\n')
             unit_result.append('```')
             unit_result.append('\n')
@@ -216,61 +224,61 @@ class RLTCTX: #rate limit tester context manager
         pages = []
         contents = []
         page_content_length = 0
-        in_code_block=0
+        in_code_block = 0
         
         for str_ in unit_result:
-            local_length=len(str_)
+            local_length = len(str_)
             
-            page_content_length+=local_length
-            if page_content_length<1996:
+            page_content_length += local_length
+            if page_content_length < 1996:
                 if str_=='```':
-                    in_code_block^=1
+                    in_code_block ^= 1
                 contents.append(str_)
                 continue
             
-            if contents[-1]=='\n':
+            if contents[-1] == '\n':
                 del contents[-1]
             
             if in_code_block:
-                if contents[-1]=='```':
+                if contents[-1] == '```':
                     del contents[-1]
                 else:
-                    if str_=='```':
-                        in_code_block=0
+                    if str_ == '```':
+                        in_code_block = 0
                     contents.append('\n```')
             else:
-                if str_=='```':
-                    in_code_block=2
+                if str_ == '```':
+                    in_code_block = 2
             
-            pages.append(Embed(self.title,''.join(contents)))
+            pages.append(Embed(self.title, ''.join(contents)))
             contents.clear()
-            if in_code_block==1:
+            if in_code_block == 1:
                 contents.append('```\n')
-                local_length+=4
-            elif in_code_block==2:
+                local_length += 4
+            elif in_code_block == 2:
                 contents.append('```')
-                local_length+=3
-                in_code_block=1
+                local_length += 3
+                in_code_block = 1
             
-            if str_=='\n':
-                page_content_length=0
+            if str_ == '\n':
+                page_content_length = 0
                 continue
             
             contents.append(str_)
-            page_content_length=local_length
+            page_content_length = local_length
             continue
 
         if page_content_length:
-            pages.append(Embed(self.title,''.join(contents)))
+            pages.append(Embed(self.title, ''.join(contents)))
             
         del unit_result
         del contents
         
         if pages:
-            page_count=len(pages)
-            index=0
+            page_count = len(pages)
+            index = 0
             for page in pages:
-                index=index + 1
+                index = index + 1
                 page.add_footer(f'Page {index}/{page_count}')
         else:
             pages.append(Embed(self.title,).add_footer('Page 1/1'))
@@ -278,17 +286,17 @@ class RLTCTX: #rate limit tester context manager
         await Pagination(self.client, self.channel, pages)
         
     async def _render_exit_exc(self,exception,tb):
-        frames=[]
+        frames = []
         while True:
             if tb is None:
                 break
-            frame=TracebackFrameProxy(tb)
+            frame = TracebackFrameProxy(tb)
             frames.append(frame)
-            tb=tb.tb_next
+            tb = tb.tb_next
         
-        extend=[]
+        extend = []
         extend.append('```Traceback (most recent call last):\n')
-        await self.client.loop.run_in_executor(alchemy_incendiary(render_frames_into,(frames,),{'extend':extend}))
+        await KOKORO.run_in_executor(alchemy_incendiary(render_frames_into, (frames,), {'extend':extend}))
         extend.append(repr(exception))
         extend.append('\n```')
         pages = []
@@ -296,74 +304,74 @@ class RLTCTX: #rate limit tester context manager
         page_content_length = 0
     
         for str_ in extend:
-            local_length=len(str_)
-            page_content_length+=local_length
-            if page_content_length<1996:
+            local_length = len(str_)
+            page_content_length += local_length
+            if page_content_length < 1996:
                 contents.append(str_)
                 continue
                 
-            if contents[-1]=='\n':
+            if contents[-1] == '\n':
                 del contents[-1]
             
             contents.append('\n```')
-            pages.append(Embed(self.title,''.join(contents)))
+            pages.append(Embed(self.title, ''.join(contents)))
             contents.clear()
             contents.append('```\n')
             
-            if str_=='\n':
-                page_content_length=0
+            if str_ == '\n':
+                page_content_length = 0
                 continue
             
             contents.append(str_)
-            page_content_length=local_length
+            page_content_length = local_length
             continue
 
         if page_content_length:
-            pages.append(Embed(self.title,''.join(contents)))
+            pages.append(Embed(self.title, ''.join(contents)))
             
         del contents
         
-        page_count=len(pages)
-        index=0
+        page_count = len(pages)
+        index = 0
         for page in pages:
-            index=index + 1
+            index = index + 1
             page.add_footer(f'Page {index}/{page_count}')
         
-        await Pagination(self.client,self.channel,pages)
+        await Pagination(self.client, self.channel, pages)
     
     def write(self,content):
         RLTPrinterBuffer.buffers.append(content)
     
     async def send(self,description):
-        await Pagination(self.client,self.channel,[Embed(self.title,description).add_footer('Page 1/1')])
+        await Pagination(self.client, self.channel, [Embed(self.title, description).add_footer('Page 1/1')])
         raise CancelledError()
             
 class RLTPrinterUnit:
-    __slots__=('task','buffer','start_new_block',)
-    def __init__(self,task):
-        self.task=task
-        self.buffer=[]
-        self.start_new_block=True
+    __slots__ = ('task','buffer','start_new_block',)
+    def __init__(self, task):
+        self.task = task
+        self.buffer = []
+        self.start_new_block = True
     
     def write(self,content):
         if self.start_new_block:
-            buffer=[]
-            self.buffer.append((datetime.utcnow(),buffer),)
-            self.start_new_block=False
+            buffer = []
+            self.buffer.append((datetime.utcnow(), buffer),)
+            self.start_new_block = False
         else:
-            buffer=self.buffer[-1][1]
+            buffer = self.buffer[-1][1]
         
         buffer.append(content)
     
 class RLTPrinterBuffer:
-    buffers=[]
-    __slots__=('buffer',)
+    buffers = []
+    __slots__ = ('buffer',)
     
     def __init__(self):
-        thread=current_thread()
+        thread = current_thread()
         if type(thread) is not EventThread:
             raise RuntimeError(f'{self.__name__}.__enter__ can be used only at an {EventThread.__name__}')
-        current_task=thread.current_task
+        current_task = thread.current_task
         if current_task is None:
             raise RuntimeError(f'{self.__name__}.__enter__ was used outside of a task')
         
@@ -371,29 +379,29 @@ class RLTPrinterBuffer:
             if type(buffer) is str:
                 continue
             if buffer.task is current_task:
-                buffer.start_new_block=True
+                buffer.start_new_block = True
                 break
         else:
-            buffer=RLTPrinterUnit(current_task)
+            buffer = RLTPrinterUnit(current_task)
             self.buffers.append(buffer)
         
-        self.buffer=buffer
+        self.buffer = buffer
     
     def __enter__(self):
         return self.buffer
     
-    def __exit__(self,exc_type,exc_val,exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.buffer.start_new_block = True
         return False
         
         
-async def reaction_add(client,message,emoji,):
+async def reaction_add(client, message, emoji,):
     channel_id = message.channel.id
     message_id = message.id
-    reaction=emoji.as_reaction
+    reaction = emoji.as_reaction
     return await bypass_request(client,METHOD_PUT,
         f'{API_ENDPOINT}/channels/{channel_id}/messages/{message_id}/reactions/{reaction}/@me',
-        )
+    )
         
 async def reaction_delete(client,message,emoji,user,):
     channel_id = message.channel.id
@@ -2294,7 +2302,7 @@ async def servers_get(client):
     )
 
 
-async def sticker_guild_get_all(client, guild):
+async def sticker_get_all_guild(client, guild):
     guild_id = guild.id
     sticker_datas = await bypass_request(client, METHOD_GET,
         f'{API_ENDPOINT}/guilds/{guild_id}/stickers'
@@ -2321,7 +2329,7 @@ async def sticker_pack_get(client, sticker_pack_id):
     return StickerPack.from_data(data)
 
 
-async def sticker_guild_get(client, guild, sticker_id):
+async def sticker_get_guild(client, guild, sticker_id):
     guild_id = guild.id
     
     sticker_data = await bypass_request(client, METHOD_GET,
@@ -2330,7 +2338,7 @@ async def sticker_guild_get(client, guild, sticker_id):
     
     return Sticker.from_data(sticker_data)
 
-async def sticker_guild_create(client, guild, name, description, file, tags):
+async def sticker_create(client, guild, name, description, file, tags):
     form = Formdata()
     form.add_field('name', name)
     form.add_field('description', description)
@@ -2347,7 +2355,7 @@ async def sticker_guild_create(client, guild, name, description, file, tags):
     return Sticker.from_data(sticker_data)
 
 
-async def sticker_guild_delete(client, guild, sticker_id):
+async def sticker_delete(client, guild, sticker_id):
     guild_id = guild.id
     
     await bypass_request(client, METHOD_DELETE,
@@ -2363,7 +2371,7 @@ async def sticker_get(client, sticker_id):
     return Sticker.from_data(sticker_data)
 
 
-async def sticker_guild_edit(client, guild, sticker, name = None, description = None, tags=None):
+async def sticker_edit(client, guild, sticker, name = None, description = None, tags=None):
     if tags is None:
         tags = ', '.join(sticker.tags)
     else:
@@ -2594,6 +2602,74 @@ async def forum_tag_delete(client, channel_id, forum_tag_id):
         client,
         METHOD_DELETE,
         f'{API_ENDPOINT}/channels/{channel_id}/tags/{forum_tag_id}',
+    )
+
+
+async def soundboard_sound_get_all_default(client):
+    sound_datas = await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/soundboard-default-sounds',
+    )
+    
+    return [SoundboardSound.from_data(sound_data) for sound_data in sound_datas]
+
+
+async def soundboard_sound_create(client, guild_id, sound, name):
+    data = {
+        'sound': 'data:audio/mp3;base64,' + b64encode(sound).decode('ascii'),
+        'name': name,
+        'volume': 1.0,
+    }
+    
+    sound_data = await bypass_request(
+        client,
+        METHOD_POST,
+        f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds',
+        data,
+    )
+    
+    return SoundboardSound.from_data(sound_data)
+
+
+async def soundboard_sound_options(client, guild_id):
+    await bypass_request(
+        client,
+        METHOD_OPTIONS,
+        f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds',
+    )
+
+async def soundboard_sound_delete(client, guild_id, sound_id):
+    await bypass_request(
+        client,
+        METHOD_DELETE,
+        f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds/{sound_id}',
+    )
+
+
+async def soundboard_sound_edit(client, guild_id, sound_id, name):
+    await bypass_request(
+        client,
+        METHOD_PATCH,
+        f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds/{sound_id}',
+        {
+            'name': name,
+        }
+    )
+
+async def soundboard_sound_get(client, guild_id, sound_id):
+    await bypass_request(
+        client,
+        METHOD_GET,
+        f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds/{sound_id}',
+    )
+
+
+async def soundboard_sound_operation_options(client, guild_id, sound_id):
+    await bypass_request(
+        client,
+        METHOD_OPTIONS,
+        f'{API_ENDPOINT}/guilds/{guild_id}/soundboard-sounds/{sound_id}',
     )
 
 
@@ -5741,7 +5817,7 @@ async def rate_limit_test_0143(client, message):
         if guild is None:
             await RLT.send('Please use this command at a guild.')
         
-        await sticker_guild_get_all(client, guild)
+        await sticker_get_all_guild(client, guild)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5768,7 +5844,7 @@ async def rate_limit_test_0145(client, message, sticker_id:int=None):
         if sticker_id is None:
             await RLT.send('`sticker_id` parameter not satisfied.')
         
-        await sticker_guild_get(client, guild, sticker_id)
+        await sticker_get_guild(client, guild, sticker_id)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5804,7 +5880,7 @@ async def rate_limit_test_0146(client, message, emoji1: 'emoji' = None, emoji2: 
         description = name
         tags = [emoji2.name, 'egg']
         
-        await sticker_guild_create(client, guild, name, description, file, tags)
+        await sticker_create(client, guild, name, description, file, tags)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5824,7 +5900,7 @@ async def rate_limit_test_0147(client, message, sticker_id:int=None):
         if sticker_id is None:
             await RLT.send('`sticker_id` parameter not satisfied.')
         
-        await sticker_guild_delete(client, guild, sticker_id)
+        await sticker_delete(client, guild, sticker_id)
 
 
 @RATE_LIMIT_COMMANDS
@@ -5897,7 +5973,7 @@ async def rate_limit_test_0151(client, message, sticker_id:int=None, name:str = 
         
         sticker = await client.sticker_get(sticker_id)
         
-        await sticker_guild_edit(client, guild, sticker, name = name)
+        await sticker_edit(client, guild, sticker, name = name)
 
 
 @RATE_LIMIT_COMMANDS
@@ -6609,3 +6685,244 @@ async def rate_limit_test_0182(client, message, forum_id: str = None):
         forum_tag = await forum_tag_create(client, channel.id, forum_tag_schema)
         await forum_tag_edit(client, channel.id, forum_tag.id, forum_tag_schema.copy_with(name = 'owo'))
         await forum_tag_delete(client, channel.id, forum_tag.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0183(client, message):
+    """
+    Gets the default soundboard sounds.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0183') as RLT:
+        sounds = await soundboard_sound_get_all_default(client)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0184(client, message):
+    """
+    Creates a new soundboard sounds.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0184') as RLT:
+        
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        sounds = await client.soundboard_sound_get_all_default()
+        async with client.http.get(sounds[0].url) as response:
+            sound_data = await response.read()
+        
+        await soundboard_sound_create(client, guild_0.id, sound_data, 'hell')
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0185(client, message):
+    """
+    Guild soundboard options.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0185') as RLT:
+        
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await soundboard_sound_options(client, guild_0.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0186(client, message, name = None):
+    """
+    Deletes soundboard sound by name.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0186') as RLT:
+        
+        if (name is None) or (not name):
+            await RLT.send('Please pass a name')
+            
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await client.request_soundboard_sounds([guild_0])
+        
+        soundboard_sounds = guild_0.soundboard_sounds
+        
+        if soundboard_sounds is None:
+            matched_sound = None
+        else:
+            for sound in soundboard_sounds.values():
+                if sound.name == name:
+                    matched_sound = sound
+                    break
+            
+            else:
+                matched_sound = None
+        
+        if matched_sound is None:
+            await RLT.send('No sound matched.')
+            
+        await soundboard_sound_delete(client, guild_0.id, matched_sound.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0187(client, message, name = None, new_name = None):
+    """
+    Deletes soundboard sound by name.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0187') as RLT:
+        
+        if (name is None) or (not name):
+            await RLT.send('Please pass a name')
+        
+        if (new_name is None) or (not new_name):
+            await RLT.send('Please pass a new name.')
+        
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await client.request_soundboard_sounds([guild_0])
+        
+        soundboard_sounds = guild_0.soundboard_sounds
+        
+        if soundboard_sounds is None:
+            matched_sound = None
+        else:
+            for sound in soundboard_sounds.values():
+                if sound.name == name:
+                    matched_sound = sound
+                    break
+            
+            else:
+                matched_sound = None
+        
+        if matched_sound is None:
+            await RLT.send('No sound matched.')
+            
+        await soundboard_sound_edit(client, guild_0.id, matched_sound.id, new_name)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0188(client, message, name = None):
+    """
+    Gets sound by id. But define it by name still please.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0188') as RLT:
+        
+        if (name is None) or (not name):
+            await RLT.send('Please pass a name')
+        
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await client.request_soundboard_sounds([guild_0])
+        
+        soundboard_sounds = guild_0.soundboard_sounds
+        
+        if soundboard_sounds is None:
+            matched_sound = None
+        else:
+            for sound in soundboard_sounds.values():
+                if sound.name == name:
+                    matched_sound = sound
+                    break
+            
+            else:
+                matched_sound = None
+        
+        if matched_sound is None:
+            await RLT.send('No sound matched.')
+            
+        await soundboard_sound_get(client, guild_0.id, matched_sound.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0189(client, message, name = None):
+    """
+    Gets sound operations by name.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0189') as RLT:
+        
+        if (name is None) or (not name):
+            await RLT.send('Please pass a name')
+        
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+        
+        await client.request_soundboard_sounds([guild_0])
+        
+        soundboard_sounds = guild_0.soundboard_sounds
+        
+        if soundboard_sounds is None:
+            matched_sound = None
+        else:
+            for sound in soundboard_sounds.values():
+                if sound.name == name:
+                    matched_sound = sound
+                    break
+            
+            else:
+                matched_sound = None
+        
+        if matched_sound is None:
+            await RLT.send('No sound matched.')
+        
+        await soundboard_sound_operation_options(client, guild_0.id, matched_sound.id)
+
+
+@RATE_LIMIT_COMMANDS
+async def rate_limit_test_0190(client, message):
+    """
+    Tests sticker endpoints parallel.
+    
+    This includes:
+    - sticker get all default,
+    - sticker options,
+    - sticker operation options.
+    """
+    channel = message.channel
+    with RLTCTX(client, channel, 'rate_limit_test_0190') as RLT:
+        guild_0 = channel.guild
+        if guild_0 is None:
+            await RLT.send('Please use this command at a guild.')
+            
+        await client.request_soundboard_sounds([guild_0])
+        
+        soundboard_sounds = guild_0.soundboard_sounds
+        if soundboard_sounds is None:
+            matched_sound = None
+        else:
+            matched_sound = next(iter(soundboard_sounds.values()))
+        
+        if matched_sound is None:
+            await RLT.send('NThe guild has no sounds.')
+        
+        # We want to create 3 connections.
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(client.typing(channel))
+        task_group.create_task(client.typing(channel))
+        task_group.create_task(client.typing(channel))
+        
+        task = await task_group.wait_exception()
+        if task is not None:
+            task_group.cancel_all()
+            task.get_result()
+        
+        # Now we use all 3 connections.
+        task_group = TaskGroup(KOKORO)
+        task_group.create_task(soundboard_sound_get_all_default(client))
+        task_group.create_task(soundboard_sound_options(client, guild_0.id))
+        task_group.create_task(soundboard_sound_operation_options(client, guild_0.id, matched_sound.id))
+        
+        task = await task_group.wait_exception()
+        if task is not None:
+            task_group.cancel_all()
+            task.get_result()

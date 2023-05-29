@@ -2,10 +2,9 @@ __all__ = ()
 
 from hata import Client, DiscordException, ERROR_CODES
 
+from bots import SLASH_CLIENT
+
 from .constants import CUSTOM_ID_SNIPE_CLOSE
-
-
-SLASH_CLIENT: Client
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_CLOSE)

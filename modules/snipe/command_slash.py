@@ -1,14 +1,15 @@
 __all__ = ()
 
-from hata import Client, is_id, parse_emoji
+from hata import Client, DiscordException, ERROR_CODES, is_id, parse_emoji, parse_message_jump_url
 from hata.ext.slash import abort
 
+from bots import SLASH_CLIENT
+
 from .cache_sticker import get_sticker
-from .choice import CHOICE_TYPE_EMOJI, CHOICE_TYPE_STICKER, Choice
+from .choice import Choice
+from .choice_type import ChoiceTypeEmoji, ChoiceTypeSticker
+from .command_helpers_snipe_whole_message import respond_snipe_whole_message
 from .response_builder import build_initial_response
-
-
-SLASH_CLIENT: Client
 
 
 SNIPE_COMMANDS = SLASH_CLIENT.interactions(
@@ -115,8 +116,8 @@ async def snipe_emoji(
         The received interaction event.
     emoji_name : `str`
         The emoji's name to resolve.
-    show_for_invoking_user_only : `bool` = `True`, Optional
-        Whether the message should show up only for the invoking user.
+    reveal : `bool` = `False`, Optional
+        Whether the message should be revealed for other users as well.
     detailed : `bool` = `False`, Optional
         Whether detailed view should be shown.
     
@@ -125,7 +126,7 @@ async def snipe_emoji(
     interaction_response : ``InteractionResponse``
     """
     emojis = try_resolve_emojis(event, emoji_name)
-    choices = [Choice(CHOICE_TYPE_EMOJI, emoji) for emoji in emojis]
+    choices = [Choice(emoji, ChoiceTypeEmoji) for emoji in emojis]
     return await build_initial_response(client, event, None, choices, not reveal, detailed)
 
 
@@ -204,8 +205,8 @@ async def snipe_sticker(
         The received interaction event.
     sticker_name_or_id : `str`
         The sticker's identifier or name to resolve.
-    show_for_invoking_user_only : `bool` = `True`, Optional
-        Whether the message should show up only for the invoking user.
+    reveal : `bool` = `False`, Optional
+        Whether the message should be revealed for other users as well.
     detailed : `bool` = `False`, Optional
         Whether detailed view should be shown.
     
@@ -214,7 +215,7 @@ async def snipe_sticker(
     interaction_response : ``InteractionResponse``
     """
     stickers = await try_resolve_stickers(client, event, sticker_name_or_id)
-    choices = [Choice(CHOICE_TYPE_STICKER, sticker) for sticker in stickers]
+    choices = [Choice(sticker, ChoiceTypeSticker) for sticker in stickers]
     return await build_initial_response(client, event, None, choices, not reveal, detailed)
 
 
@@ -246,3 +247,61 @@ async def snipe_sticker_autocomplete_sticker_name_or_id(event, value):
         stickers = guild.get_stickers_like(value)
     
     return [sticker.name for sticker in stickers]
+
+
+@SNIPE_COMMANDS.interactions(name = 'message')
+async def snipe_message_with_url(
+    client,
+    event,
+    message_jump_url: ('str', 'Message\'s url.'),
+    reveal: (bool, 'Should others see it too?') = False,
+    detailed: (bool, 'Show detailed view by default?') = False,
+):
+    """
+    Snipes the message defined by its url.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client receiving the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    message_jump_url : `str`
+        The message's url to resolve.
+    reveal : `bool` = `False`, Optional
+        Whether the message should be revealed for other users as well.
+    detailed : `bool` = `False`, Optional
+        Whether detailed view should be shown.
+    """
+    guild_id, channel_id, message_id = parse_message_jump_url(message_jump_url)
+    if not message_id:
+        abort('The given message url is invalid.')
+    
+    # TODO: Maybe add pre-validation?
+    
+    try:
+        message = await client.message_get((channel_id, message_id))
+    except ConnectionError:
+        return
+    
+    except DiscordException as err:
+        if err.code in (
+            ERROR_CODES.unknown_channel, # message deleted
+            ERROR_CODES.unknown_message, # channel deleted
+        ):
+            # The message is already deleted.
+            return abort('The message has been already deleted.')
+        
+        # Client not in the guild
+        if err.code == ERROR_CODES.missing_access: # client removed
+            return abort('I am not in the guild.' if guild_id else 'I am not in the channel.')
+        
+        # No permissions?
+        if err.code == ERROR_CODES.missing_permissions: # no permissions
+            return abort('I lack permission to get that message.')
+        
+        raise
+    
+    return await respond_snipe_whole_message(client, event, message, not reveal, detailed)

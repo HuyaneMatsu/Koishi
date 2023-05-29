@@ -1,18 +1,20 @@
 __all__ = ()
 
-from hata import Client
+from hata import ChannelType, Client, DiscordException, ERROR_CODES
+from hata.ext.slash import Button, Row
 from scarletio import CancelledError
 
-from ..configuration.operations import get_log_satori_channel
+from bots import SLASH_CLIENT
+
+from ..configuration.operations import get_log_satori_channel, get_log_satori_channel_if_auto_start
 from ..configuration.satori import (
     clear_satori_channel, clear_satori_channels, discover_satori_channels, get_watcher_channels_for,
     remove_watcher_channel, reset_satori_channels, set_satori_channel
 )
 
+from .components_satori_auto_start import build_satori_auto_start_component_row
 from .embed_builder_satori import build_presence_update_embeds
-
-
-SLASH_CLIENT: Client
+from .embed_builder_satori_auto_start import build_satori_auto_start_embed
 
 
 # Hata best wrapper
@@ -229,13 +231,120 @@ async def user_presence_update(client, user, old_attributes):
     embeds = build_presence_update_embeds(user, old_attributes)
     
     for channel in channels:
+        if not channel.cached_permissions_for(client).can_send_messages:
+            continue
+        
         try:
-            await client.message_create(channel, embed = embeds)
-        except GeneratorExit:
+            await client.message_create(
+                channel,
+                allowed_mentions = None,
+                embed = embeds,
+            )
+        except (GeneratorExit, CancelledError):
             raise
         
-        except CancelledError:
-            raise
+        except ConnectionError:
+            break
         
         except BaseException as err:
-            await client.events.error(client, 'log.user_presence_update', err)
+            if isinstance(err, DiscordException) and err.code in (
+                ERROR_CODES.unknown_channel, # channel deleted
+                ERROR_CODES.missing_access, # client removed
+                ERROR_CODES.missing_permissions, # permissions changed
+            ):
+                continue
+            
+            await client.events.error(client, 'log.satori.user_presence_update', err)
+            continue
+
+
+@SLASH_CLIENT.events
+async def guild_user_add(client, guild, user):
+    """ 
+    Handles a user guild add event. If the guild has satori channel set with auto start then creates a new channel for
+    the user and sends a starting message.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    guild : ``Guild``
+        The joined guild..
+    user : ``ClientUserBase``
+        The user who joined.
+    """
+    # Bots are invited, so we do not really care about them
+    if user.bot:
+        return
+    
+    satori_channel = get_log_satori_channel_if_auto_start(guild.id)
+    if satori_channel is None:
+        return
+    
+    # Try to find the channel
+    channel_name = str(user.id)
+    for channel in satori_channel.iter_channels():
+        if channel.name == channel_name:
+            break
+    
+    else:
+        # Channel not found -> create
+        
+        # Check channel permissions
+        if not satori_channel.cached_permissions_for(client).can_manage_channels:
+            return
+        
+        try:
+            # No need to pass permission overwrites, seems like it is auto inherited from parent.
+            channel = await client.channel_create(
+                guild,
+                channel_type = ChannelType.guild_text,
+                name = channel_name,
+                parent_id = satori_channel.id,
+            )
+        except (GeneratorExit, CancelledError):
+            raise
+        
+        except ConnectionError:
+            return
+        
+        except BaseException as err:
+            if isinstance(err, DiscordException) and err.code in (
+                ERROR_CODES.unknown_channel, # channel deleted
+                ERROR_CODES.missing_access, # client removed
+                ERROR_CODES.missing_permissions, # permissions changed
+            ):
+                return
+            
+            await client.events.error(client, 'log.satori.guild_user_add', err)
+            return
+    
+    # Check permissions of the new channel
+    if not channel.cached_permissions_for(client).can_send_messages:
+        return
+    
+    try:
+        await client.message_create(
+            channel,
+            allowed_mentions = None,
+            components = build_satori_auto_start_component_row(user),
+            embed = build_satori_auto_start_embed(guild, user),
+        )
+    except (GeneratorExit, CancelledError):
+        raise
+    
+    except ConnectionError:
+        return
+    
+    except BaseException as err:
+        if isinstance(err, DiscordException) and err.code in (
+            ERROR_CODES.unknown_channel, # channel deleted
+            ERROR_CODES.missing_access, # client removed
+            ERROR_CODES.missing_permissions, # permissions changed
+        ):
+            return
+        
+        await client.events.error(client, 'log.satori.guild_user_add', err)
+        return

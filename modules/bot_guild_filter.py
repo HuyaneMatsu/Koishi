@@ -20,7 +20,7 @@ async def guild_create(client, guild):
         repeated_leave = True
     
     else:
-        await client.request_all_members_of(guild)
+        await client.request_all_users_of(guild)
         
         bot_count = sum(user.bot for user in guild.users.values())
         user_count = len(guild.users) - bot_count

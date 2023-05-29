@@ -310,6 +310,7 @@ def build_command_list_embed(header, extended):
 
 def build_command_list_embed(header, extended):
     embed = Embed(
+        None,
         header,
         color = COLOR__KOISHI_HELP,
     )

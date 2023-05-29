@@ -3,6 +3,8 @@ __all__ = ()
 from hata import Client, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import Form, TextInput, TextInputStyle
 
+from bots import SLASH_CLIENT
+
 from .action_helpers import (
     check_emoji_guild, check_emoji_type, check_is_emoji_name_valid, check_sticker_guild, check_sticker_type_modify,
     join_roles, join_sticker_tags, parse_and_join_tags, parse_roles
@@ -15,9 +17,6 @@ from .constants import (
 from .embed_builder_base import create_base_embed
 from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
 from .helpers import check_has_manage_guild_expressions_permission, propagate_check_error_message
-
-
-SLASH_CLIENT : Client
 
 
 def add_change_field(embed, field_name, old_value, new_value):
@@ -290,7 +289,7 @@ async def snipe_confirm_edit_sticker(client, event, sticker_id, *, name, tags, d
         tags = parse_and_join_tags(tags)
     
     try:
-        await client.sticker_guild_edit(sticker, name = name, tags = tags, description = description)
+        await client.sticker_edit(sticker, name = name, tags = tags, description = description)
     except ConnectionError:
         return
     

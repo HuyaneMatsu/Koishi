@@ -5,16 +5,16 @@ from datetime import datetime as DateTime
 from hata import DATETIME_FORMAT_CODE, Embed, elapsed_time
 
 
-def put_roles_into(roles, into):
+def render_roles_into(into, roles):
     """
     Puts the given roles representation into the given string container. 
     
     Parameters
     ----------
-    roles : `None`, `tuple` of ``Role``
-        Date time to convert.
     into : `list` of `str`
         Container.
+    roles : `None`, `tuple` of ``Role``
+        Date time to convert.
     
     Returns
     -------
@@ -55,16 +55,16 @@ def put_roles_into(roles, into):
     return into
 
 
-def put_date_time_into(date_time, into, add_ago):
+def render_date_time_into(into, date_time, add_ago):
     """
     Puts the given date time's string value into the given string container. 
     
     Parameters
     ----------
-    date_time : `None`, `DateTime`
-        Date time to convert.
     into : `list` of `str`
         Container.
+    date_time : `None`, `DateTime`
+        Date time to convert.
     add_ago : `bool`
         Whether ago should be added to the relative representation.
     
@@ -103,7 +103,7 @@ def add_user_info_embed_field(embed, user):
     embed : ``Embed``
     """
     value_parts = ['Created: ']
-    put_date_time_into(user.created_at, value_parts, True)
+    render_date_time_into(value_parts, user.created_at, True)
     value_parts.append('\nProfile: ')
     value_parts.append(user.mention)
     value_parts.append('\nID: ')
@@ -128,9 +128,9 @@ def add_user_guild_profile_info_embed_field(embed, guild_profile):
     embed : ``Embed``
     """
     value_parts = ['Joined: ']
-    put_date_time_into(guild_profile.joined_at, value_parts, True)
+    render_date_time_into(value_parts, guild_profile.joined_at, True)
     value_parts.append('\nRoles: ')
-    put_roles_into(guild_profile.roles, value_parts)
+    render_roles_into(value_parts, guild_profile.roles)
     
     nick = guild_profile.nick
     if (nick is not None):
@@ -141,13 +141,13 @@ def add_user_guild_profile_info_embed_field(embed, guild_profile):
     boosts_since = guild_profile.boosts_since
     if (boosts_since is not None):
         value_parts.append('\nBooster since: ')
-        put_date_time_into(boosts_since, value_parts, False)
+        render_date_time_into(value_parts, boosts_since, False)
     
     
     timed_out_until = guild_profile.timed_out_until
     if (timed_out_until is not None) and (timed_out_until > DateTime.utcnow()):
         value_parts.append('\nTimed out until: ')
-        put_date_time_into(timed_out_until, value_parts, False)
+        render_date_time_into(value_parts, timed_out_until, False)
     
     return embed.add_field('In guild profile', ''.join(value_parts))
 

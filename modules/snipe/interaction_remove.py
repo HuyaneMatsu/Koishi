@@ -3,6 +3,8 @@ __all__ = ()
 from hata import Client, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import Form, TextInput, TextInputStyle
 
+from bots import SLASH_CLIENT
+
 from .action_helpers import (
     check_emoji_guild, check_emoji_type, check_sticker_guild, check_sticker_type_modify, process_reason
 )
@@ -19,9 +21,6 @@ from .helpers import (
     check_has_manage_guild_expressions_permission, discard_entity_from_components, propagate_check_error_message,
     translate_components
 )
-
-
-SLASH_CLIENT : Client
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_REMOVE_EMOJI)
@@ -205,7 +204,7 @@ async def snipe_confirm_remove_sticker(client, event, sticker_id, *, reason):
     reason = process_reason(event, reason)
     
     try:
-        await client.sticker_guild_delete(sticker, reason = reason)
+        await client.sticker_delete(sticker, reason = reason)
     except ConnectionError:
         return
     

@@ -134,11 +134,9 @@ def get_emoji_from_event(event):
         return None
     
     emoji_id = get_entity_id_from_embed(embed)
-    if emoji_id == 0:
-        return
     
     emoji = EMOJIS.get(emoji_id, None)
-    if emoji is not None:
-        return emoji
+    if emoji is None:
+        emoji = Emoji._create_partial(int(emoji_id), *get_emoji_name_and_animated_from_embed(embed))
     
-    return Emoji._create_partial(int(emoji_id), *get_emoji_name_and_animated_from_embed(embed))
+    return emoji

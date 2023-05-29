@@ -6,7 +6,7 @@ from hata import DATETIME_FORMAT_CODE, ROLES, ZEROUSER
 
 def get_role_name(role_id):
     """
-    Gets the role's name for teh given identifier.
+    Gets the role's name for the given identifier.
     
     Parameters
     ----------

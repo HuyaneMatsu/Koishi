@@ -376,12 +376,12 @@ async def disable(
     """
     Disables satori logging.
     
+    This function is a coroutine.
+    
     Parameters
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    
-    This function is a coroutine.
     
     Returns
     -------
@@ -398,6 +398,34 @@ async def disable(
         set_automation_configuration(automation_configuration)
     
     return f'Satori (presence) log messages will not be sent anymore.'
+
+
+@LOG_SATORI_COMMANDS.interactions(show_for_invoking_user_only = True)
+async def auto_start(
+    event,
+    value: (bool, 'Whether satori channels should be auto started.'),
+):
+    """
+    Enable or disable auto starting satori channels when a user joins.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    value : `bool`
+        Whether auto start should be enabled.
+    
+    Returns
+    -------
+    response : `str`
+    """
+    check_user_permissions(event)
+    
+    automation_configuration = get_automation_configuration_for(event.guild_id)
+    automation_configuration.log_satori_auto_start = value
+    set_automation_configuration(automation_configuration)
+    
+    return f'Satori channels {"will" if value else "wont"} be auto started when a user joins.'
 
 
 # Sticker Logging

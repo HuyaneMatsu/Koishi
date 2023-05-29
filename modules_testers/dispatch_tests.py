@@ -1101,8 +1101,33 @@ class dispatch_tester:
         await Closer(client, self.channel, Embed('auto_moderation_rule_delete', repr(rule)))
 
 
+    @classmethod
+    async def soundboard_sound_create(self, client, sound):
+        Task(self.old_events['soundboard_sound_create'](client, sound), KOKORO)
+        if self.channel is None:
+            return
+        
+        await Closer(client, self.channel, Embed('soundboard_sound_create', repr(sound)))
+
+    @classmethod
+    async def soundboard_sound_update(self, client, sound, changes):
+        Task(self.old_events['soundboard_sound_update'](client, sound, changes), KOKORO)
+        if self.channel is None:
+            return
+        
+        await Closer(client, self.channel, Embed('soundboard_sound_update', f'{sound!r}\n\n{changes!r}'))
+
+    @classmethod
+    async def soundboard_sound_delete(self, client, sound):
+        Task(self.old_events['soundboard_sound_delete'](client, sound), KOKORO)
+        if self.channel is None:
+            return
+        
+        await Closer(client, self.channel, Embed('soundboard_sound_delete', repr(sound)))
+
+
 async def here_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+    prefix = await client.command_processor.get_prefix(message)
     return Embed(
         'here',
         (
@@ -1120,7 +1145,7 @@ async def here_description(client, message):
     )
 
 async def switch_description(client, message):
-    prefix = client.command_processor.get_prefix_for(message)
+    prefix = await client.command_processor.get_prefix(message)
     return Embed(
         'here',
         (
@@ -1176,6 +1201,9 @@ async def switch_description(client, message):
             '- `auto_moderation_rule_create`\n'
             '- `auto_moderation_rule_edit`\n'
             '- `auto_moderation_rule_delete`\n'
+            '- `soundboard_sound_create`\n'
+            '- `soundboard_sound_delete`\n'
+            '- `soundboard_sound_update`\n'
             f'For setting channel, use: `{prefix}here`'
         ),
         color = DISPATCH_COLOR
@@ -1183,5 +1211,5 @@ async def switch_description(client, message):
         'Owner only!',
     )
 
-DISPATCH_TESTS(dispatch_tester.here, description = here_description, category='TEST COMMANDS')
-DISPATCH_TESTS(dispatch_tester.switch, description = switch_description, category='TEST COMMANDS')
+DISPATCH_TESTS(dispatch_tester.here, description = here_description, category = 'TEST COMMANDS')
+DISPATCH_TESTS(dispatch_tester.switch, description = switch_description, category = 'TEST COMMANDS')

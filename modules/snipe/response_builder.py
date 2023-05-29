@@ -22,7 +22,7 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
         The received interaction event.
     target : `None`, ``Message``
         The target message type.
-    choices : `list` of ``Choice``
+    choices : `list` of ``ChoiceBase``
         Entities in context.
     show_for_invoking_user_only : `bool`
         Whether the message is an invoking user only message.
@@ -36,9 +36,9 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
     else:
         target_url = target.url
     
-    choice_type, entity = choices[0]
+    entity, choice_type = choices[0]
     
-    embed = await choice_type.embed_builder(client, event, entity, target_url, detailed)
+    embed = await choice_type.build_embed(entity, client, event, target_url, detailed)
     
     if show_for_invoking_user_only:
         button_reveal = BUTTON_SNIPE_REVEAL
@@ -97,7 +97,7 @@ async def build_initial_response(client, event, target, choices, show_for_invoki
         The received interaction event.
     target : `None`, ``Message``
         The target message type.
-    choices : `list` of ``Choice``
+    choices : `list` of ``ChoiceBase``
         The choices in context.
     show_for_invoking_user_only : `bool`
         Whether the message is an invoking user only message.

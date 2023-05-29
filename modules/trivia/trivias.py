@@ -368,11 +368,11 @@ CATEGORY_KOISHI_CANON = TriviaCategory(
         ),
         TriviaItem(
             'What was Koishi\'s main motivation to continue the series of battles in Hopeless Masquerade?',
-            'She liked the attention she was getting from winning.',
+            'Liked the attention she was getting from winning.',
             (
-                'She tried to gain more masks from Kokoro.',
-                'She wanted to get a fishing rod.',
-                'She was sent by Satori to investigate the events.',
+                'Tried to gain more masks from Kokoro.',
+                'Wanted to get a fishing rod.',
+                'Was sent by Satori to investigate the events.',
             ),
         ),
         TriviaItem(
@@ -485,11 +485,11 @@ CATEGORY_KOISHI_CANON = TriviaCategory(
         ),
         TriviaItem(
             'What role does Koishi have in the Myoren temple?',
-            'She is an ordained laywoman.',
+            'An ordained laywoman.',
             (
-                'She is a meditation instructor.',
-                'She is known thief of food there.',
-                'She is it\'s protector deity.',
+                'A meditation instructor.',
+                'Known thief of food there.',
+                'It\'s protector deity.',
             ),
         ),
         TriviaItem(
@@ -576,11 +576,11 @@ CATEGORY_KOISHI_CANON = TriviaCategory(
         ),
         TriviaItem(
             'What is remarkable about Koishi\'s gameplay mechanics in the fighting games?',
-            'She can store and automatically unleash some of her attacks.',
+            'Can store and automatically unleash some of her attacks.',
             (
-                'She has overall the strongest ranged attacks.',
-                'She has overall the strongest close range attacks.',
-                'She can CC lock enemies.',
+                'Has overall the strongest ranged attacks.',
+                'Has overall the strongest close range attacks.',
+                'Can CC lock enemies.',
             ),
         ),
         TriviaItem(
@@ -608,6 +608,33 @@ CATEGORY_KOISHI_CANON = TriviaCategory(
                 'Becoming invisible.',
                 'Extending tentacles out of her arms.',
                 'Attacking with a knife.',
+            ),
+        ),
+        TriviaItem(
+            'How many tentacles do we ever see Koishi using at the same time in the fighting games?',
+            '8.',
+            (
+                '6.',
+                '4.',
+                '2.',
+            ),
+        ),
+        TriviaItem(
+            'What color is the pupil of Koishi\'s 3rd eye canonically?',
+            'Unknown.',
+            (
+                'Green.',
+                'Purple.',
+                'Red.',
+            ),
+        ),
+        TriviaItem(
+            'What does Koishi do with her hat in a winning animation of Urban Legend in Limbo?',
+            'Spins it around and throws it away.',
+            (
+                'Throws it at the opponent and laughs.',
+                'Talks to it while looking up.',
+                'Takes it off and hugs it.',
             ),
         ),
     ),
@@ -762,10 +789,10 @@ CATEGORY_KOISHI_KKHTA = TriviaCategory(
         ),
         TriviaItem(
             'How did Koishi prepare for the battle with Yukari in KKHTA?',
-            'She retracted her 3rd eye inside her body.',
+            'Retracted her 3rd eye inside her body.',
             (
-                'She enlarged her claws.',
-                'She pulled out Mr. knife.',
+                'Enlarged her claws.',
+                'Pulled out Mr. knife.',
                 'T posed for dominance.',
             ),
         ),

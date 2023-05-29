@@ -1,3 +1,10 @@
+### 2023-05-??
+
+- Add 3 new items to `/trivia`.
+- Add `/snipe message`.
+- `snipe / detials` and `snipe / actions` will not drop exception if the entity is yeeted.
+- `/automation log user` now colors embeds + add new `Guild profile flags` field.
+
 ### 2023-05-08
 
 - Rewrite `/trivia`. Now it is fully Koishi themed.
@@ -13,7 +20,7 @@
   In case someone wanna copy and modify it.
 - Fix `renes` (bot) now reads `Est`'s name instead of using a hardcoded one.
 - Fix `/role-info` now shows integration name as intended.
-- `/mod` commands now have `
+- `/mod` commands now have `notify-user` parameter as `false` by default.
 
 ### 2023-04-14
 

@@ -154,6 +154,41 @@ def get_log_satori_channel(guild_id):
     return None
 
 
+def get_log_satori_channel_if_auto_start(guild_id):
+    """
+    Gets satori log channel for the given guild if they should be auto created.
+    
+    Parameters
+    ----------
+    guild_id : `int`
+        The guild's identifier.
+    
+    Returns
+    -------
+    channel : `None`, ``Channel``
+    """
+    try:
+        automation_configuration = AUTOMATION_CONFIGURATIONS[guild_id]
+    except KeyError:
+        return None
+    
+    if not automation_configuration.log_satori_auto_start:
+        return None
+    
+    log_satori_channel_id = automation_configuration.log_satori_channel_id
+    if not log_satori_channel_id:
+        return None
+    
+    try:
+        return CHANNELS[log_satori_channel_id]
+    except KeyError:
+        pass
+    
+    automation_configuration.log_satori_channel_id = 0
+    set_automation_configuration(automation_configuration)
+    return None
+
+
 def iter_log_satori_channels():
     """
     Iterates over the satori channels. Will not remove them if they arent found.

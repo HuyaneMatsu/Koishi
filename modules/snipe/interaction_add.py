@@ -3,6 +3,8 @@ __all__ = ()
 from hata import Client, DiscordException, ERROR_CODES, Emoji
 from hata.ext.slash import Form, TextInput, TextInputStyle
 
+from bots import SLASH_CLIENT
+
 from .action_helpers import (
     check_emoji_counts, check_emoji_type, check_is_emoji_name_valid, check_sticker_counts, check_sticker_type_create,
     join_sticker_tags, parse_and_join_tags, parse_roles
@@ -18,9 +20,6 @@ from .embed_parsers import get_emoji_from_event, get_entity_id_from_event
 from .helpers import (
     check_has_manage_guild_expressions_permission, propagate_check_error_message, translate_components
 )
-
-
-SLASH_CLIENT : Client
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_ADD_EMOJI)
@@ -261,7 +260,7 @@ async def snipe_confirm_add_sticker(client, event, sticker_id, *, name, tags, de
         data = await response.read()
     
     try:
-        new_sticker = await client.sticker_guild_create(
+        new_sticker = await client.sticker_create(
             event.guild_id,
             name = name,
             image = data,

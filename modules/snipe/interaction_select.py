@@ -2,11 +2,10 @@ __all__ = ()
 
 from hata import Client
 
+from bots import SLASH_CLIENT
+
 from .constants import CUSTOM_ID_SNIPE_SELECT
 from .response_builder_select import select_response_builder
-
-
-SLASH_CLIENT: Client
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_SELECT)

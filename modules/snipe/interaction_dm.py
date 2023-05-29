@@ -2,12 +2,11 @@ __all__ = ()
 
 from hata import Client, DiscordException, ERROR_CODES
 
+from bots import SLASH_CLIENT
+
 from .component_translate_tables import DM_DISABLE
 from .constants import CUSTOM_ID_SNIPE_DM
 from .helpers import translate_components
-
-
-SLASH_CLIENT: Client
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_DM)

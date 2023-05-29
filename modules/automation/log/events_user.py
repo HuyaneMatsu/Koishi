@@ -2,12 +2,11 @@ __all__ = ()
 
 from hata import Client
 
+from bots import SLASH_CLIENT
+
 from ..configuration.operations import get_log_user_channel
 
 from .embed_builder_user import build_user_embed
-
-
-SLASH_CLIENT: Client
 
 
 @SLASH_CLIENT.events
@@ -32,8 +31,8 @@ async def guild_user_add(client, guild, user):
     
     await client.message_create(
         channel,
-        embed = build_user_embed(guild, user, user.get_guild_profile_for(guild), True),
         allowed_mentions = None,
+        embed = build_user_embed(guild, user, user.get_guild_profile_for(guild), True),
     )
 
 
@@ -51,7 +50,7 @@ async def guild_user_delete(client, guild, user, guild_profile):
     guild : ``Guild``
         The joined guild.
     user : ``ClientUserBase``
-        The user who joined.
+        The user who left.
     guild_profile : ``GuildProfile``
         The user's ex - guild profile at the guild.
     """
@@ -65,6 +64,6 @@ async def guild_user_delete(client, guild, user, guild_profile):
     
     await client.message_create(
         channel,
-        embed = build_user_embed(guild, user, guild_profile, False),
         allowed_mentions = None,
+        embed = build_user_embed(guild, user, guild_profile, False),
     )

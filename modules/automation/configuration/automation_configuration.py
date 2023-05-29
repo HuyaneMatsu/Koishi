@@ -16,6 +16,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         The channel's identifier where the emoji log messages will be sent.
     log_mention_channel_id : `int`
         The channel's identifier where the mention log messages will be sent.
+    log_satori_auto_start : `bool`
+        Whether satori channels should be automatically started.
     log_satori_channel_id : `int`
         The channel's identifier where the satori log messages will be sent. Must be a guild category channel.
     log_sticker_channel_id : `int`
@@ -26,8 +28,8 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         The channel's identifier where the welcome messages will be sent.
     """
     __slots__ = (
-        'guild_id', 'log_emoji_channel_id', 'log_mention_channel_id', 'log_satori_channel_id', 'log_sticker_channel_id',
-        'log_user_channel_id', 'welcome_channel_id'
+        'guild_id', 'log_emoji_channel_id', 'log_mention_channel_id', 'log_satori_auto_start',
+        'log_satori_channel_id', 'log_sticker_channel_id', 'log_user_channel_id', 'welcome_channel_id'
     )
     
     def __new__(cls, guild_id):
@@ -43,6 +45,7 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         self.log_emoji_channel_id = 0
         self.guild_id = guild_id
         self.log_mention_channel_id = 0
+        self.log_satori_auto_start = False
         self.log_satori_channel_id = 0
         self.log_sticker_channel_id = 0
         self.log_user_channel_id = 0
@@ -75,6 +78,11 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
         if log_satori_channel_id:
             repr_parts.append(', log_satori_channel_id = ')
             repr_parts.append(repr(log_satori_channel_id))
+            
+            log_satori_auto_start = self.log_satori_auto_start
+            if log_satori_auto_start:
+                repr_parts.append(', log_satori_auto_start = ')
+                repr_parts.append(repr(log_satori_auto_start))
         
         # log_sticker_channel_id
         log_sticker_channel_id = self.log_sticker_channel_id
@@ -107,6 +115,9 @@ class AutomationConfiguration(RichAttributeErrorBaseType):
             return True
         
         if self.log_satori_channel_id:
+            return True
+        
+        if self.log_satori_auto_start:
             return True
         
         if self.log_sticker_channel_id:

@@ -6,7 +6,8 @@ from hata import Emoji, UNICODE_TO_EMOJI, parse_emoji
 from hata.ext.slash import InteractionResponse
 
 from .cache_sticker import get_sticker
-from .choice import CHOICE_TYPE_EMOJI, CHOICE_TYPE_REACTION, CHOICE_TYPE_STICKER, Choice
+from .choice import Choice
+from .choice_type import ChoiceTypeEmoji, ChoiceTypeReaction, ChoiceTypeSticker
 from .embed_parsers import parse_source_message_url
 from .helpers import are_actions_allowed_for_entity, is_event_user_same, translate_components
 
@@ -58,7 +59,7 @@ async def choice_parser(client, event):
     
     Returns
     -------
-    choice : `None`, ``Choice``
+    choice : `None`, ``ChoiceBase``
     """
     selected_values = event.values
     if (selected_values is None):
@@ -82,18 +83,18 @@ async def choice_parser(client, event):
                 return None
         
         if entity_kind == 'e':
-            choice_type = CHOICE_TYPE_EMOJI
+            choice_type = ChoiceTypeEmoji
         else:
-            choice_type = CHOICE_TYPE_REACTION
+            choice_type = ChoiceTypeReaction
     
     else:
         entity = await get_sticker(client, entity_id)
         if entity is None:
             return None
         
-        choice_type = CHOICE_TYPE_STICKER
+        choice_type = ChoiceTypeSticker
     
-    return Choice(choice_type, entity)
+    return Choice(entity, choice_type)
 
 
 async def select_option_parser_emoji(client, event):
@@ -181,17 +182,15 @@ async def select_response_builder(client, event):
     if choice is None:
         return
     
-    choice_type, entity = choice
-    
-    embed = await choice_type.embed_builder(client, event, entity, parse_source_message_url(message), detailed)
+    embed = await choice.build_embed(client, event, parse_source_message_url(message), detailed)
     
     guild_id = event.guild_id
-    if (guild_id == 0) or (not are_actions_allowed_for_entity(entity)):
-        translate_table = choice_type.select_table_disabled
-    elif (guild_id == entity.guild_id):
-        translate_table = choice_type.select_table_inside
+    if (guild_id == 0) or (not are_actions_allowed_for_entity(choice.entity)):
+        translate_table = choice.select_table_disabled
+    elif (guild_id == choice.entity.guild_id):
+        translate_table = choice.select_table_inside
     else:
-        translate_table = choice_type.select_table_outside
+        translate_table = choice.select_table_outside
     
     return InteractionResponse(
         embed = embed,

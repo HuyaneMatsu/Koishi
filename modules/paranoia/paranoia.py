@@ -25,8 +25,8 @@ SADISTIC_PARANOIA_COLOR = 0x08963c
 
 
 DIRECTORY_PATH = get_directory_name(__spec__.origin)
-PARANOIA_PATH = join_paths(DIRECTORY_PATH, 'Paranoia.mp3')
-SADISTIC_PARANOIA_PATH = join_paths(DIRECTORY_PATH, 'Sadistic Paranoia.mp3')
+PARANOIA_PATH = join_paths(DIRECTORY_PATH, 'assets', 'Paranoia.mp3')
+SADISTIC_PARANOIA_PATH = join_paths(DIRECTORY_PATH, 'assets', 'Sadistic Paranoia.mp3')
 
 
 def is_name_satori(name):

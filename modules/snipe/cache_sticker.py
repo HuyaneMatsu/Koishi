@@ -78,7 +78,7 @@ async def request_sticker(client, sticker_id):
     # Try to request the sticker first from it's guild.
     if request_local:
         try:
-            sticker = await client.sticker_guild_get(sticker, force_update = True)
+            sticker = await client.sticker_get_guild(sticker, force_update = True)
         except BaseException as err:
             if isinstance(err, ConnectionError):
                 return

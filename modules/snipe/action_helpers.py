@@ -7,6 +7,9 @@ from hata import StickerType, StickerFormat, parse_role
 from .helpers import propagate_check_error_message
 
 
+TAG_PATTERN = re.compile('\\w+')
+
+
 def process_reason(event, reason):
     """
     Processes the given reason.
@@ -92,7 +95,6 @@ async def check_emoji_guild(client, event, emoji):
         return False
     
     return True
-
 
 
 async def check_sticker_type_create(client, event, sticker):
@@ -407,15 +409,13 @@ def join_sticker_tags(sticker):
     return ', '.join(sorted(tags))
 
 
-TAG_PATTERN = re.compile('\\w+')
-
 def parse_and_join_tags(raw_tags):
     """
     Parses the given tags and joins them.
     
     Parameters
     ----------
-    tags : `str`
+    raw_tags : `str`
         Tags to join.
     
     Returns

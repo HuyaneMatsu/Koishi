@@ -90,7 +90,7 @@ async def create_auto_react_role(client, event,
             channel = event.channel
         
         if not channel.cached_permissions_for(client).can_read_message_history:
-            abort('Ohoho', 'I have no permission to get that message.')
+            abort('I have no permission to get that message.')
             return
         
         # We only really need `channel_id` and `guild_id`, so we can ignore `guild_id`.
@@ -103,9 +103,9 @@ async def create_auto_react_role(client, event,
             return
         except DiscordException as err:
             if err.code in (
-                    ERROR_CODES.unknown_channel, # message deleted
-                    ERROR_CODES.unknown_message, # channel deleted
-                        ):
+                ERROR_CODES.unknown_channel, # message deleted
+                ERROR_CODES.unknown_message, # channel deleted
+            ):
                 # The message is already deleted.
                 abort('The referenced message is already yeeted.')
             

@@ -77,7 +77,7 @@ def build_action_completed_embed(user, embed_builder, word_config, *position_par
 
 def create_response_form(title, reason_name, custom_id):
     """
-    Creates a response form confirming the user's decision and inputting their reason why they wan to suffer.
+    Creates a response form confirming the user's decision and inputting their reason why they want to suffer.
     
     Parameters
     ----------

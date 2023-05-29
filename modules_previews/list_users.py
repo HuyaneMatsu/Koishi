@@ -419,7 +419,7 @@ async def list_users(
     
     if guild.user_count > len(guild.users):
         yield
-        await client.request_members(guild)
+        await client.request_all_users_of(guild)
     
     if serialisation.endswith('.json'):
         data = create_json_data(guild, offset, limit, serialisation)

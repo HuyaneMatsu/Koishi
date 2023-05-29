@@ -345,7 +345,7 @@ async def get_waifus_with_name(event, value):
 async def daily(
     client,
     event,
-    target_user_name: ('str', 'Anyone to gift your daily love?', 'waifu') = None,
+    target_user_name: ('str', 'Claiming daily for a waifu?', 'waifu') = None,
 ):
     """Claim a share of my love every day for yourself or for your waifu."""
     if target_user_name is None:

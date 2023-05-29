@@ -196,7 +196,7 @@ class Interpreter:
                         warnings.simplefilter('error')
                         
                         try:
-                            code_object = compile(source, file_name, 'exec', flags=COMPILE_FLAGS)
+                            code_object = compile(source, file_name, 'exec', flags = COMPILE_FLAGS)
                         except SyntaxError:
                             raise
                         
@@ -236,7 +236,7 @@ class Interpreter:
                         raise
                     
                     except BaseException as err:
-                        await write_exception_async(err, file=buffer, filter=_ignore_console_frames, loop=KOKORO)
+                        await write_exception_async(err, file = buffer, filter = _ignore_console_frames, loop = KOKORO)
                 
                 page_contents = get_buffer_value(buffer)
             

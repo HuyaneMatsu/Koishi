@@ -31,7 +31,7 @@ async def sticker_create(client, sticker):
     
     # We get the creator of the sticker.
     try:
-        await client.sticker_guild_get(sticker, force_update = True)
+        await client.sticker_get_guild(sticker, force_update = True)
     except ConnectionError:
         # No internet connection
         return
@@ -117,7 +117,7 @@ async def initial_request_stickers(client):
             automation_configuration for automation_configuration in AUTOMATION_CONFIGURATIONS.values()
             if automation_configuration.log_sticker_channel_id
         ]:
-            await client.sticker_guild_get_all(automation_configuration.guild_id)
+            await client.sticker_get_all_guild(automation_configuration.guild_id)
     
     except ConnectionError:
         # No internet connection

@@ -422,7 +422,7 @@ async def add_(client, event,
         
         
         try:
-            sticker = await client.sticker_guild_create(event.guild, name, image, emoji, description)
+            sticker = await client.sticker_create(event.guild, name, image, emoji, description)
         except ConnectionError:
             return
         
@@ -490,7 +490,7 @@ async def delete_(client, event,
     await client.interaction_component_acknowledge(component_interaction)
     
     try:
-        await client.sticker_guild_delete(sticker)
+        await client.sticker_delete(sticker)
     except ConnectionError:
         # No internet, let it be
         return
@@ -634,7 +634,7 @@ async def edit_(client, event,
         keyword_parameters['description'] = new_description
     
     try:
-        await client.sticker_guild_edit(sticker, **keyword_parameters)
+        await client.sticker_edit(sticker, **keyword_parameters)
     except ConnectionError:
         # No internet, let it be
         return
