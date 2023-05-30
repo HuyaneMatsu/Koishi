@@ -131,7 +131,7 @@ async def channel_create(client, channel):
     
     try:
         user_id = int(channel.name)
-    except KeyError:
+    except ValueError:
         pass
     else:
         set_satori_channel(channel.id, user_id)
@@ -195,14 +195,14 @@ async def channel_edit(client, channel, old_attributes):
     else:
         try:
             user_id = int(name)
-        except KeyError:
+        except ValueError:
             pass
         else:
             remove_watcher_channel(channel.id, user_id)
     
     try:
         user_id = int(channel.name)
-    except KeyError:
+    except ValueError:
         pass
     else:
         set_satori_channel(channel.id, user_id)

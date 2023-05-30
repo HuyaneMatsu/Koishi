@@ -283,8 +283,7 @@ class shutdown:
         
         await client.message_create(message.channel, 'Clients stopped, stopping process.')
         KOKORO.stop()
-        thread_id = main_thread().ident
-        signal.pthread_kill(thread_id, signal.SIGKILL)
+        signal.pthread_kill(main_thread().ident, signal.SIGKILL)
     
     category = 'UTILITY'
     checks = checks.owner_only()

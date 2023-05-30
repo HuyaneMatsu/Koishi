@@ -29,7 +29,12 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
     
     Returns
     -------
-    interaction_response : ``InteractionResponse``
+    embed : ``Embed``
+        Embed to send.
+    components : `list` of ``Component``
+        Components to send.
+    file : `None`, `tuple` (`str`, `bytes`)
+        File attachment if any.
     """
     if target is None:
         target_url = None
@@ -80,7 +85,9 @@ async def build_initial_response_parts(client, event, target, choices, show_for_
         )
     )
     
-    return embed, components
+    file = await choice_type.get_file(entity, client)
+    
+    return embed, components, file
 
 
 async def build_initial_response(client, event, target, choices, show_for_invoking_user_only, detailed):
@@ -108,9 +115,12 @@ async def build_initial_response(client, event, target, choices, show_for_invoki
     -------
     interaction_response : ``InteractionResponse``
     """
-    embed, components = await build_initial_response_parts(
+    embed, components, file = await build_initial_response_parts(
         client, event, target, choices, show_for_invoking_user_only, detailed
     )
     return InteractionResponse(
-        embed = embed, components = components, show_for_invoking_user_only = show_for_invoking_user_only
+        embed = embed,
+        components = components,
+        file = file,
+        show_for_invoking_user_only = show_for_invoking_user_only,
     )

@@ -7,7 +7,7 @@ from bots import SLASH_CLIENT
 
 from .cache_sticker import get_sticker
 from .choice import Choice
-from .choice_type import ChoiceTypeEmoji, ChoiceTypeSticker
+from .choice_type import ChoiceTypeEmoji, ChoiceTypeSoundboardSound, ChoiceTypeSticker
 from .command_helpers_snipe_whole_message import respond_snipe_whole_message
 from .response_builder import build_initial_response
 
@@ -50,7 +50,7 @@ def try_resolve_emojis(event, emoji_name):
         if emojis:
             return emojis
     
-    abort('Could not resolve emoji')
+    return abort('Could not resolve emoji')
 
 
 async def try_resolve_stickers(client, event, sticker_name_or_id):
@@ -81,7 +81,7 @@ async def try_resolve_stickers(client, event, sticker_name_or_id):
         if (sticker is not None):
             return [sticker]
         
-        abort(f'Unknown or deleted sticker: {sticker_name_or_id}')
+        return abort(f'Unknown or deleted sticker: {sticker_name_or_id}')
     
     guild = event.guild
     if (guild is not None):
@@ -94,7 +94,46 @@ async def try_resolve_stickers(client, event, sticker_name_or_id):
         sticker_name_or_id = sticker_name_or_id[:100]
     
     return abort(f'Cannot find sticker in local scope: {sticker_name_or_id}.')
+
+
+async def try_resolve_soundboard_sounds(client, event, soundboard_sound_name):
+    """
+    Tres to resolve the sound by its name.
     
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    soundboard_sound_name : `str`
+        The sound's name.
+    
+    Returns
+    -------
+    soundboard_sounds : `list` of ``SoundboardSound``
+    
+    Notes
+    -----
+    Aborts the interaction if no soundboard sound is found.
+    """
+    guild = event.guild
+    if guild is not None:
+        await client.request_soundboard_sounds([guild])
+        
+        soundboard_sounds = guild.get_soundboard_sounds_like(soundboard_sound_name)
+        if soundboard_sounds:
+            return soundboard_sounds
+    
+    # Users can pass long strings as well. For this case limit the length of the returned value.
+    if len(soundboard_sound_name) > 100:
+        soundboard_sound_name = soundboard_sound_name[:100]
+    
+    return abort(f'Cannot find soundboard sound in local scope: {soundboard_sound_name}.')
+        
+
 
 async def snipe_emoji(
     client,
@@ -184,6 +223,75 @@ async def snipe_emoji_autocomplete_emoji_name(event, emoji_name):
     return sorted(emoji.name for emoji in emojis)
 
 
+@SNIPE_COMMANDS.interactions(name = 'soundboard-sound')
+async def snipe_soundboard_sound(
+    client,
+    event,
+    soundboard_sound_name: ('str', 'SoundboardSound to show', 'soundboard-sound'),
+    reveal: (bool, 'Should others see it too?') = False,
+    detailed: (bool, 'Show detailed view by default?') = False,
+):
+    """
+    Shows details about the given soundboard sound.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client receiving the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    soundboard_sound_name : `str`
+        The soundboard sound's name.
+    reveal : `bool` = `False`, Optional
+        Whether the message should be revealed for other users as well.
+    detailed : `bool` = `False`, Optional
+        Whether detailed view should be shown.
+    
+    Returns
+    -------
+    interaction_response : ``InteractionResponse``
+    """
+    soundboard_sounds = await try_resolve_soundboard_sounds(client, event, soundboard_sound_name)
+    choices = [Choice(soundboard_sound, ChoiceTypeSoundboardSound) for soundboard_sound in soundboard_sounds]
+    return await build_initial_response(client, event, None, choices, not reveal, detailed)
+
+
+@snipe_soundboard_sound.autocomplete('soundboard_sound')
+async def snipe_soundboard_sound_autocomplete_soundboard_sound_name(client, event, soundboard_sound_name):
+    """
+    Tries to autocomplete the soundboard sound by its name.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client receiving the event.
+    event : ``InteractionEvent``
+        The received interaction event.
+    soundboard_sound_name : `None`, `str`
+        The typed value.
+    
+    Returns
+    -------
+    suggestions : `None`, `list` of `str`
+    """
+    guild = event.guild
+    if guild is None:
+        return None
+    
+    await client.request_soundboard_sounds([guild])
+        
+    if soundboard_sound_name is None:
+       soundboard_sounds = sorted(guild.iter_soundboard_sounds())
+    else:
+        soundboard_sounds = guild.get_soundboard_sounds_like(soundboard_sound_name)
+    
+    return [soundboard_sound.name for soundboard_sound in soundboard_sounds]
+
+
 @SNIPE_COMMANDS.interactions(name = 'sticker')
 async def snipe_sticker(
     client,
@@ -220,7 +328,7 @@ async def snipe_sticker(
 
 
 @snipe_sticker.autocomplete('sticker')
-async def snipe_sticker_autocomplete_sticker_name_or_id(event, value):
+async def snipe_sticker_autocomplete_sticker_name_or_id(event, sticker_name):
     """
     Tries to autocomplete the sticker by its name.
     
@@ -230,7 +338,7 @@ async def snipe_sticker_autocomplete_sticker_name_or_id(event, value):
     ----------
     event : ``InteractionEvent``
         The received interaction event.
-    emoji_name : `None`, `str`
+    sticker_name : `None`, `str`
         The typed value.
     
     Returns
@@ -241,10 +349,10 @@ async def snipe_sticker_autocomplete_sticker_name_or_id(event, value):
     if guild is None:
         return None
     
-    if value is None:
+    if sticker_name is None:
        stickers = sorted(guild.stickers.values())
     else:
-        stickers = guild.get_stickers_like(value)
+        stickers = guild.get_stickers_like(sticker_name)
     
     return [sticker.name for sticker in stickers]
 

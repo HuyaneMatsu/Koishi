@@ -43,7 +43,7 @@ def add_embed_footer(embed, entity):
         footer_text = 'Unknown guild'
         footer_icon_url = None
     else:
-        footer_text = f'from {guild.name}'
+        footer_text = f'from {guild.name} ({guild.id})'
         footer_icon_url = guild.icon_url
     
     embed.add_footer(

@@ -9,7 +9,7 @@ class Choice(RichAttributeErrorBaseType):
     
     Attributes
     ----------
-    entity : ``Emoji``, ``Sticker``
+    entity : ``Emoji``, ``SoundboardSound``, ``Sticker``
         The entity's type.
     type : `type<ChoiceTypeBase>`
         The choice's type.
@@ -20,7 +20,7 @@ class Choice(RichAttributeErrorBaseType):
         """
         Parameters
         ----------
-        entity : ``Emoji``, ``Sticker``
+        entity : ``Emoji``, ``SoundboardSound``, ``Sticker``
             The entity's type.
         choice_type : `type<ChoiceTypeBase>`
             The choice's type.
@@ -47,7 +47,7 @@ class Choice(RichAttributeErrorBaseType):
         
         Yields
         ------
-        entity / choice_type : ``Emoji`` |  ``Sticker`` / `type<ChoiceTypeBase>`
+        entity / choice_type : ``Emoji`` |  ``SoundboardSound`` | ``Sticker`` / `type<ChoiceTypeBase>`
         """
         yield self.entity
         yield self.type

@@ -1,73 +1,75 @@
 __all__ = ()
 
-from hata import DATETIME_FORMAT_CODE, GUILDS, StickerFormat, StickerType, ZEROUSER, elapsed_time
+from hata import DATETIME_FORMAT_CODE, GUILDS, ZEROUSER, elapsed_time
 from hata.ext.slash import Option
 from scarletio import class_property, copy_docs
 
-from ..cache_sticker import get_sticker
-from ..component_translate_tables import SELECT_STICKER_DISABLED, SELECT_STICKER_INSIDE, SELECT_STICKER_OUTSIDE
+from ..cache_soundboard_sound import get_soundboard_sound, update_soundboard_sound_details
+from ..component_translate_tables import (
+    SELECT_SOUNDBOARD_SOUND_DISABLED, SELECT_SOUNDBOARD_SOUND_INSIDE, SELECT_SOUNDBOARD_SOUND_OUTSIDE
+)
 from ..constants import (
-    BUTTON_SNIPE_ACTIONS_STICKER, BUTTON_SNIPE_ADD_STICKER, BUTTON_SNIPE_DETAILS_STICKER, BUTTON_SNIPE_EDIT_STICKER,
-    BUTTON_SNIPE_REMOVE_STICKER
+    BUTTON_SNIPE_ACTIONS_SOUNDBOARD_SOUND, BUTTON_SNIPE_ADD_SOUNDBOARD_SOUND, BUTTON_SNIPE_DETAILS_SOUNDBOARD_SOUND,
+    BUTTON_SNIPE_EDIT_SOUNDBOARD_SOUND, BUTTON_SNIPE_REMOVE_SOUNDBOARD_SOUND
 )
 from ..embed_builder_base import create_base_embed
-from ..embed_parsers import get_entity_id_from_event
+from ..embed_parsers import get_guild_and_entity_id_from_event
 
 from .base import ChoiceTypeBase
 
 
 @copy_docs(ChoiceTypeBase)
-class ChoiceTypeSticker(ChoiceTypeBase):
+class ChoiceTypeSoundboardSound(ChoiceTypeBase):
     __slots__ = ()
     
     @class_property
     def name(cls):
-        return 'sticker'
+        return 'soundboard sound'
     
     
     @class_property
     def prefix(cls):
-        return 's'
+        return 'o'
     
     
     @class_property
     def button_actions_enabled(cls):
-        return BUTTON_SNIPE_ACTIONS_STICKER
+        return BUTTON_SNIPE_ACTIONS_SOUNDBOARD_SOUND
     
     
     @class_property
     def button_details_enabled(cls):
-        return BUTTON_SNIPE_DETAILS_STICKER
+        return BUTTON_SNIPE_DETAILS_SOUNDBOARD_SOUND
     
     
     @class_property
     def button_action_add(cls):
-        return BUTTON_SNIPE_ADD_STICKER
+        return BUTTON_SNIPE_ADD_SOUNDBOARD_SOUND
     
     
     @class_property
     def button_action_edit(cls):
-        return BUTTON_SNIPE_EDIT_STICKER
+        return BUTTON_SNIPE_EDIT_SOUNDBOARD_SOUND
     
     
     @class_property
     def button_action_remove(cls):
-        return BUTTON_SNIPE_REMOVE_STICKER
+        return BUTTON_SNIPE_REMOVE_SOUNDBOARD_SOUND
     
     
     @class_property
     def select_table_disabled(cls):
-        return SELECT_STICKER_DISABLED
+        return SELECT_SOUNDBOARD_SOUND_DISABLED
     
     
     @class_property
     def select_table_inside(cls):
-        return SELECT_STICKER_INSIDE
+        return SELECT_SOUNDBOARD_SOUND_INSIDE
     
     
     @class_property
     def select_table_outside(cls):
-        return SELECT_STICKER_OUTSIDE
+        return SELECT_SOUNDBOARD_SOUND_OUTSIDE
     
     
     @classmethod
@@ -79,7 +81,7 @@ class ChoiceTypeSticker(ChoiceTypeBase):
     @classmethod
     @copy_docs(ChoiceTypeBase.update_entity_details)
     async def update_entity_details(cls, entity, client):
-        await get_sticker(client, entity.id)
+        await update_soundboard_sound_details(client, entity)
 
 
     @classmethod
@@ -87,28 +89,9 @@ class ChoiceTypeSticker(ChoiceTypeBase):
     def build_embed_detailed(cls, entity):
         embed = create_base_embed(entity, f'{cls.name.capitalize()} details')
         
-        sticker_format = entity.format
-        if sticker_format is StickerFormat.apng:
-            is_sticker_animated = True
-        elif sticker_format is StickerFormat.lottie:
-            is_sticker_animated = True
-        else:
-            is_sticker_animated = False
-        
-        embed.add_field(
-            'Animated',
-            (
-                f'```\n'
-                f'{"true" if is_sticker_animated else "false"}\n'
-                f'```'
-            ),
-            inline = True,
-        )
-        
         # Row 2 | created_at
         
         created_at = entity.created_at
-        
         embed.add_field(
             'Created at',
             (
@@ -118,86 +101,56 @@ class ChoiceTypeSticker(ChoiceTypeBase):
             ),
         )
         
-        # Row 3 | description
-        
-        description = entity.description
-        if description is None:
-            description = 'N / A'
+        # Row 3 | volume | emoji
         
         embed.add_field(
-            'Description',
+            'Volume',
             (
                 f'```\n'
-                f'{description}\n'
+                f'{entity.volume:.02f}\n'
                 f'```'
             ),
+            inline = True,
         )
         
-        # Row 4 | type | format
+        emoji = entity.emoji
+        if emoji is None:
+            emoji_name = 'N / A'
+        else:
+            emoji_name = emoji.name
         
-        sticker_type = entity.type
+        embed.add_field(
+            'Emoji',
+            (
+                f'```\n'
+                f'{emoji_name}\n'
+                f'```'
+            ),
+            inline = True,
+        )
+        
+        # Row 4 | Type
+        
+        if entity.is_custom_sound():
+            type_name = 'custom'
+        elif entity.is_default_sound():
+            type_name = 'default'
+        else:
+            type_name = 'unknown'
         
         embed.add_field(
             'Type',
             (
                 f'```\n'
-                f'{sticker_type.name}\n'
-                f'```'
-            ),
-            inline = True,
-        ).add_field(
-            'Format',
-            (
-                f'```\n'
-                f'{sticker_format.name}\n'
-                f'```'
-            ),
-            inline = True,
-        )
-        
-        # Row 5 | tags
-        
-        tags = entity.tags
-        if tags is None:
-            tags_listed = 'N / A'
-        
-        else:
-            tags_listed = ', '.join(sorted(tags))
-        
-        embed.add_field(
-            'Tags',
-            (
-                f'```\n'
-                f'{tags_listed}\n'
+                f'{type_name}\n'
                 f'```'
             ),
         )
         
-        if sticker_type is StickerType.standard:
-            
-            # Row 6 | pack id | sort value
-            
-            embed.add_field(
-                'Pack id',
-                (
-                    f'```\n'
-                    f'{entity.pack_id}\n'
-                    f'```'
-                ),
-                inline = True,
-            ).add_field(
-                'Sort value',
-                (
-                    f'```\n'
-                    f'{entity.sort_value}\n'
-                    f'```'
-                ),
-                inline = True,
-            )
         
-        elif sticker_type is StickerType.guild:
+        if entity.is_custom_sound():
             
-            # Row 6 | creator | guild
+            # Row 5 | creator | guild
             
             user = entity.user
             if user is ZEROUSER:
@@ -238,15 +191,20 @@ class ChoiceTypeSticker(ChoiceTypeBase):
             )
         
         return embed
-
-
+    
+    
     @classmethod
     @copy_docs(ChoiceTypeBase.parse_and_get_entity_id_and_entity)
     async def parse_and_get_entity_id_and_entity(cls, client, event):
-        sticker_id = get_entity_id_from_event(event)
-        if sticker_id:
-            sticker = await get_sticker(client, sticker_id)
-        else:
-            sticker = None
+        guild_id, sound_id = get_guild_and_entity_id_from_event(event)
+        sound = await get_soundboard_sound(client, guild_id, sound_id)
+        return sound_id, sound
+    
+    
+    @classmethod
+    @copy_docs(ChoiceTypeBase.get_file)
+    async def get_file(cls, entity, client):
+        async with client.http.get(entity.url) as response:
+            data = await response.read()
         
-        return sticker_id, sticker
+        return 'sound.mp3', data

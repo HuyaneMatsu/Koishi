@@ -4,9 +4,12 @@ from hata import Client
 
 from bots import SLASH_CLIENT
 
-from .choice_type import ChoiceTypeEmoji, ChoiceTypeReaction, ChoiceTypeSticker
+from .choice_type import ChoiceTypeEmoji, ChoiceTypeReaction, ChoiceTypeSoundboardSound, ChoiceTypeSticker
 from .component_translate_tables import DETAILS_DISABLE
-from .constants import CUSTOM_ID_SNIPE_DETAILS_EMOJI, CUSTOM_ID_SNIPE_DETAILS_REACTION, CUSTOM_ID_SNIPE_DETAILS_STICKER
+from .constants import (
+    CUSTOM_ID_SNIPE_DETAILS_EMOJI, CUSTOM_ID_SNIPE_DETAILS_REACTION, CUSTOM_ID_SNIPE_DETAILS_SOUNDBOARD_SOUND,
+    CUSTOM_ID_SNIPE_DETAILS_STICKER
+)
 from .embed_parsers import parse_source_message_url
 from .helpers import translate_components
 
@@ -77,6 +80,24 @@ async def snipe_interaction_reaction_details(client, event):
         The received interaction event.
     """
     await snipe_interaction_respond_with_details(client, event, ChoiceTypeReaction)
+
+
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_DETAILS_SOUNDBOARD_SOUND)
+async def snipe_interaction_soundboard_sound_details(client, event):
+    """
+    Changes the embed to show the soundboard sound's details. Also disabled the `details` button.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the event.
+    
+    event : ``InteractionEvent``
+        The received interaction event.
+    """
+    await snipe_interaction_respond_with_details(client, event, ChoiceTypeSoundboardSound)
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_DETAILS_STICKER)

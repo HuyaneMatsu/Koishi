@@ -18,6 +18,11 @@ class ChoiceTypeReaction(ChoiceTypeEmoji):
     
     
     @class_property
+    def prefix(cls):
+        return 'r'
+    
+    
+    @class_property
     def button_details_enabled(cls):
         return BUTTON_SNIPE_DETAILS_REACTION
     

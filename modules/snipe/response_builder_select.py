@@ -5,13 +5,15 @@ import re
 from hata import Emoji, UNICODE_TO_EMOJI, parse_emoji
 from hata.ext.slash import InteractionResponse
 
+from .cache_soundboard_sound import get_soundboard_sound
 from .cache_sticker import get_sticker
 from .choice import Choice
-from .choice_type import ChoiceTypeEmoji, ChoiceTypeReaction, ChoiceTypeSticker
+from .choice_type import ChoiceTypeEmoji, ChoiceTypeReaction, ChoiceTypeSoundboardSound, ChoiceTypeSticker
 from .embed_parsers import parse_source_message_url
 from .helpers import are_actions_allowed_for_entity, is_event_user_same, translate_components
 
-CHOICE_RP = re.compile('(e|s|r)\\:(\\d+)\\:([^\\:]*)\\:(|0|1)')
+
+CHOICE_RP = re.compile('(e|s|r|o)\\:(?:(\\d+)\\:)?(\\d+)\\:([^\\:]*)\\:(|0|1)')
 
 
 def is_message_detailed(message):
@@ -59,7 +61,7 @@ async def choice_parser(client, event):
     
     Returns
     -------
-    choice : `None`, ``ChoiceBase``
+    choice : `None`, ``Choice``
     """
     selected_values = event.values
     if (selected_values is None):
@@ -69,9 +71,15 @@ async def choice_parser(client, event):
     if match is None:
         return None
     
-    entity_kind, entity_id, entity_name, animated = match.groups()
+    entity_kind, guild_id, entity_id, entity_name, animated = match.groups()
     
     entity_id = int(entity_id)
+    
+    # At the case of old choices, `guild_id` can be matched as `None`.
+    if guild_id is None:
+        guild_id = 0
+    else:
+        guild_id = int(guild_id)
     
     if entity_kind in ('e', 'r'):
         if entity_id:
@@ -87,69 +95,24 @@ async def choice_parser(client, event):
         else:
             choice_type = ChoiceTypeReaction
     
-    else:
+    elif entity_kind == 's':
         entity = await get_sticker(client, entity_id)
         if entity is None:
             return None
         
         choice_type = ChoiceTypeSticker
     
+    elif entity_kind == 'o':
+        entity = await get_soundboard_sound(client, guild_id, entity_id)
+        if entity is None:
+            return None
+        
+        choice_type = ChoiceTypeSoundboardSound
+        
+    else:
+        return None
+    
     return Choice(entity, choice_type)
-
-
-async def select_option_parser_emoji(client, event):
-    """
-    Parses the emoji out from the given event's select option.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the event.
-    event : ``Event``
-        The received event.
-    
-    Returns
-    -------
-    emoji : `None`, ``Emoji``
-    """
-    selected_emojis = event.values
-    if (selected_emojis is None):
-        return None
-    
-    selected_emoji = selected_emojis[0]
-    return parse_emoji(selected_emoji)
-
-
-async def select_option_parser_sticker(client, event):
-    """
-    Parses the sticker out from the given event's select option.
-    
-    This function is a coroutine.
-    
-    Parameters
-    ----------
-    client : ``Client``
-        The client who received the event.
-    event : ``Event``
-        The received event.
-    
-    Returns
-    -------
-    sticker : `None`, ``Sticker``
-    """
-    selected_stickers = event.values
-    if (selected_stickers is None):
-        return None
-    
-    selected_sticker = selected_stickers[0]
-    try:
-        selected_sticker_id = int(selected_sticker)
-    except ValueError:
-        return None
-    
-    return await get_sticker(client, selected_sticker_id)
 
 
 async def select_response_builder(client, event):
@@ -182,19 +145,21 @@ async def select_response_builder(client, event):
     if choice is None:
         return
     
-    embed = await choice.build_embed(client, event, parse_source_message_url(message), detailed)
+    entity, choice_type = choice
+    embed = await choice_type.build_embed(entity, client, event, parse_source_message_url(message), detailed)
+    
+    file = await choice_type.get_file(entity, client)
     
     guild_id = event.guild_id
-    if (guild_id == 0) or (not are_actions_allowed_for_entity(choice.entity)):
-        translate_table = choice.select_table_disabled
-    elif (guild_id == choice.entity.guild_id):
-        translate_table = choice.select_table_inside
+    if (guild_id == 0) or (not are_actions_allowed_for_entity(entity)):
+        translate_table = choice_type.select_table_disabled
+    elif (guild_id == entity.guild_id):
+        translate_table = choice_type.select_table_inside
     else:
-        translate_table = choice.select_table_outside
+        translate_table = choice_type.select_table_outside
     
     return InteractionResponse(
         embed = embed,
         components = translate_components(message.iter_components(), translate_table),
+        file = file,
     )
-    
-    return select_response_response_builder_generic

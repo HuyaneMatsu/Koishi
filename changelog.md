@@ -1,3 +1,9 @@
+### 2023-06-30
+
+- Fix `satori log` channel check. When channel's name was not decimal the conversion was handled incorrectly.
+- Fix `/snipe` when switching between choices. (From previous update.)
+- Add `/snipe soundboard-sound`.
+
 ### 2023-05-29
 
 - Add 3 new items to `/trivia`.

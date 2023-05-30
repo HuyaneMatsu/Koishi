@@ -90,6 +90,22 @@ def get_channel_mention(channel_id):
     return 'unset'
 
 
+def get_bool(value):
+    """
+    Gets the boolean's representation.
+    
+    Parameters
+    ----------
+    value : `bool`
+        The value to get its representation of.
+    
+    Returns
+    -------
+    representation : `str`
+    """
+    return 'true' if value else 'false'
+
+
 AUTOMATION_COMMANDS = SLASH_CLIENT.interactions(
     None,
     name = 'automation',
@@ -126,6 +142,7 @@ async def show_all(
         f'- Emoji: {get_channel_mention(automation_configuration.log_emoji_channel_id)}\n'
         f'- Mention: {get_channel_mention(automation_configuration.log_mention_channel_id)}\n'
         f'- Satori: {get_channel_mention(automation_configuration.log_satori_channel_id)}\n'
+        f'  - Auto start: {get_bool(automation_configuration.log_satori_auto_start)}\n'
         f'- Sticker: {get_channel_mention(automation_configuration.log_sticker_channel_id)}\n'
         f'- User: {get_channel_mention(automation_configuration.log_user_channel_id)}\n'
         f'\n'

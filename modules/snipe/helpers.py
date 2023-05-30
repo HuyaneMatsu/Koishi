@@ -1,6 +1,6 @@
 __all__ = ()
 
-from hata import ComponentType, Emoji, Sticker, StickerType
+from hata import ComponentType, Emoji, SoundboardSound, Sticker, StickerType
 from hata.ext.slash import Row
 
 from .constants import EMBED_AUTHOR_ID_PATTERN
@@ -216,4 +216,34 @@ def are_actions_allowed_for_entity(entity):
     if isinstance(entity, Sticker):
         return entity.type is StickerType.guild
     
+    if isinstance(entity, SoundboardSound):
+        return False
+    
     return False
+
+
+async def get_message_attachment(client, message):
+    """
+    Gets the message's attachment.
+    
+    This function is a coroutine.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client to request the attachment with.
+    message : ``Message``
+        The message to request its attachment of.
+    
+    Returns
+    -------
+    file : `None`, `tuple` (`str`, `bytes`)
+    """
+    attachment = message.attachment
+    if attachment is None:
+        return None
+    
+    async with client.http.get(attachment.url) as response:
+        data = await response.read()
+    
+    return attachment.name, data

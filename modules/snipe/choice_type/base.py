@@ -30,6 +30,18 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
     
     
     @class_property
+    def prefix(cls):
+        """
+        The choice's prefix.
+        
+        Returns
+        -------
+        prefix : `str`
+        """
+        raise NotImplemented
+        
+    
+    @class_property
     def button_actions_enabled(cls):
         """
         Enabled `actions` button.
@@ -165,12 +177,14 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
     
     
     @classmethod
-    def _create_select_option_value(cls, entity_id, name, animated):
+    def _create_select_option_value(cls, guild_id, entity_id, name, animated):
         """
         Creates an option value. Helper method of ``.select_option_builder``.
         
         Parameters
         ----------
+        guild_id : `int`
+            The entity's guild's identifier.
         entity_id : `int`
             The entity's identifier. Can differ if the entity is a unicode emoji.
         name : `str`
@@ -180,7 +194,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
             Whether the entity is animated. Emoji only.
             Passed as empty string if the entity is a sticker.
         """
-        return f'{cls.name[0]}:{entity_id}:{name}:{animated}'
+        return f'{cls.prefix}:{guild_id}:{entity_id}:{name}:{animated}'
     
     
     @classmethod
@@ -190,7 +204,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``Sticker`` 
+        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
             The entity to create option for.
         
         Returns
@@ -209,7 +223,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``Sticker`` 
+        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
             The entity to update for.
         client : ``Client``
             Client to update the entity with.
@@ -224,7 +238,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``Sticker`` 
+        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
             The entity to build the detailed embed for.
         
         Returns
@@ -241,7 +255,7 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        entity : ``Emoji``, ``Sticker``
+        entity : ``Emoji``, ``SoundboardSound``, ``Sticker``
             The entity in context.
         event : ``InteractionEvent``
             The received interaction event.
@@ -285,7 +299,29 @@ class ChoiceTypeBase(RichAttributeErrorBaseType):
         -------
         entity_id : `int`
             The entity's identifier. Can be used to remove the entity's choice from select if the entity was not found.
-        entity : `None`, ``Emoji``, ``Sticker``
+        entity : `None`, ``Emoji``, ``SoundboardSound``, ``Sticker``
             The back-parsed entity.
         """
         raise NotImplemented
+    
+    
+    @classmethod
+    async def get_file(cls, entity, client):
+        """
+        Gets file attachment for the given entity.
+        
+        This function is a coroutine.
+        
+        Parameters
+        ----------
+        entity : ``Emoji``, ``SoundboardSound``, ``Sticker`` 
+            The entity to get file of as required.
+        client : ``Client``
+            The client who received the interaction event.
+        
+        Returns
+        -------
+        file : `None`, `tuple` (`str`, `bytes`)
+            File attachment if any.
+        """
+        return None

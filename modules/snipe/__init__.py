@@ -2,6 +2,7 @@ from .choice_type import *
 
 from .action_helpers import *
 from .cache_emoji import *
+from .cache_soundboard_sound import *
 from .cache_sticker import *
 from .choice import *
 from .command_helpers_snipe_whole_message import *
@@ -30,6 +31,7 @@ __all__ = (
     
     *action_helpers.__all__,
     *cache_emoji.__all__,
+    *cache_soundboard_sound.__all__,
     *cache_sticker.__all__,
     *choice.__all__,
     *command_helpers_snipe_whole_message.__all__,

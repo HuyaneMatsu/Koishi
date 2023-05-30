@@ -5,9 +5,11 @@ from hata.ext.slash import Row
 
 from bots import SLASH_CLIENT
 
-from .choice_type import ChoiceTypeEmoji, ChoiceTypeSticker
+from .choice_type import ChoiceTypeEmoji, ChoiceTypeSoundboardSound, ChoiceTypeSticker
 from .component_translate_tables import ACTIONS_DISABLE
-from .constants import CUSTOM_ID_SNIPE_ACTIONS_EMOJI, CUSTOM_ID_SNIPE_ACTIONS_STICKER
+from .constants import (
+    CUSTOM_ID_SNIPE_ACTIONS_EMOJI, CUSTOM_ID_SNIPE_ACTIONS_SOUNDBOARD_SOUND, CUSTOM_ID_SNIPE_ACTIONS_STICKER
+)
 from .helpers import check_has_manage_guild_expressions_permission, translate_components
 
 
@@ -63,7 +65,27 @@ async def snipe_interaction_actions_emoji(client, event):
     event : ``InteractionEvent``
         The received interaction event.
     """
-    await respond_with_actions(client, event, ChoiceTypeEmoji)
+    await respond_with_actions(client, event,
+        ChoiceTypeEmoji)
+
+@SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_SOUNDBOARD_SOUND)
+async def snipe_interaction_actions_soundboard_sound(client, event):
+    """
+    Adds the possible actions to the message as additional operations.
+    
+    > SoundboardSound version.
+    
+    This function is a generator.
+    
+    Parameters
+    ----------
+    client : ``Client``
+        The client who received the interaction event.
+    
+    event : ``InteractionEvent``
+        The received interaction event.
+    """
+    await respond_with_actions(client, event, ChoiceTypeSoundboardSound)
 
 
 @SLASH_CLIENT.interactions(custom_id = CUSTOM_ID_SNIPE_ACTIONS_STICKER)

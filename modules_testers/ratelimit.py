@@ -1878,7 +1878,7 @@ async def interaction_response_message_create(client, interaction, content=None,
     
     return None
 
-async def interaction_response_message_edit(client, interaction, content=None, embed = None):
+async def interaction_response_message_edit(client, interaction, content = None, embed = None):
     message_data = {}
     
     if (content is not None):

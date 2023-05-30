@@ -2,7 +2,7 @@ __all__ = ()
 
 from hata import EMOJIS, Emoji
 
-from .constants import MATCH_ID_IN_FIELD_VALUE, MATCH_NAME_IN_FIELD_VALUE
+from .constants import MATCH_GUILD_ID_IN_FOOTER, MATCH_ID_IN_FIELD_VALUE, MATCH_NAME_IN_FIELD_VALUE
 
 
 def parse_source_message_url(message):
@@ -53,6 +53,31 @@ def get_entity_id_from_event(event):
     return get_entity_id_from_embed(embed)
 
 
+def get_guild_and_entity_id_from_event(event):
+    """
+    Parses the guild's and the entity's identifier from the given event's message.
+    
+    Parameters
+    ----------
+    event : ``InteractionEvent``
+        The received interaction event.
+    
+    Returns
+    -------
+    guild_id : `int`
+    entity_id : `int`
+    """
+    message = event.message
+    if message is None:
+        return 0, 0
+    
+    embed = message.embed
+    if embed is None:
+        return 0, 0
+    
+    return get_guild_id_from_embed(embed), get_entity_id_from_embed(embed)
+    
+
 def get_entity_id_from_embed(embed):
     """
     Parses the entity's identifier from the given embed.
@@ -76,6 +101,34 @@ def get_entity_id_from_embed(embed):
         return 0
     
     return int(match.group(0))
+
+
+def get_guild_id_from_embed(embed):
+    """
+    Parses out the guild's identifier from the given embed.
+    
+    Parameters
+    ----------
+    embed : ``Embed``
+        The embed to parse from.
+    
+    Returns
+    -------
+    guild_id : `int`
+    """
+    footer = embed.footer
+    if footer is None:
+        return 0
+    
+    footer_text = footer.text
+    if footer_text is None:
+        return 0
+    
+    match = MATCH_GUILD_ID_IN_FOOTER.fullmatch(footer_text)
+    if match is None:
+        return 0
+    
+    return int(match.group(1))
 
 
 def get_emoji_name_and_animated_from_embed(embed):
@@ -134,9 +187,11 @@ def get_emoji_from_event(event):
         return None
     
     emoji_id = get_entity_id_from_embed(embed)
+    if not emoji_id:
+        return None
     
     emoji = EMOJIS.get(emoji_id, None)
     if emoji is None:
-        emoji = Emoji._create_partial(int(emoji_id), *get_emoji_name_and_animated_from_embed(embed))
+        emoji = Emoji._create_partial(emoji_id, *get_emoji_name_and_animated_from_embed(embed))
     
     return emoji

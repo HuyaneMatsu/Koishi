@@ -26,6 +26,11 @@ class ChoiceTypeEmoji(ChoiceTypeBase):
     
     
     @class_property
+    def prefix(cls):
+        return 'e'
+    
+    
+    @class_property
     def button_actions_enabled(cls):
         return BUTTON_SNIPE_ACTIONS_EMOJI
     
@@ -88,7 +93,7 @@ class ChoiceTypeEmoji(ChoiceTypeBase):
             name = entity.name
             animated = format(entity.animated, 'd')
         
-        return cls._create_select_option_value(emoji_id, name, animated)
+        return cls._create_select_option_value(entity.guild_id, emoji_id, name, animated)
     
     
     @classmethod

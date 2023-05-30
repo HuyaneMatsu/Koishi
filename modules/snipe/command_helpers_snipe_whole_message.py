@@ -147,12 +147,12 @@ async def respond_snipe_whole_message(client, event, message, show_for_invoking_
     )
     
     while True:
-        embed, components = await build_initial_response_parts(
+        embed, components, file = await build_initial_response_parts(
             client, event, message, choices, show_for_invoking_user_only, detailed
         )
         
         try:
-            await client.interaction_response_message_edit(event, embed = embed, components = components)
+            await client.interaction_response_message_edit(event, embed = embed, components = components, file = file)
         except DiscordException as err:
             if not remove_deleted_emojis(choices, err):
                 raise
