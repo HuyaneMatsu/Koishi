@@ -2,6 +2,8 @@ __all__ = ()
 
 from .constants import NOTE_TAG_RP, SPACE_CHARACTERS, TAG_SPLIT
 
+SPACE_CHARACTERS_STRING = ''.join(SPACE_CHARACTERS)
+
 
 def split_down_full_tags(input_value):
     """
@@ -34,7 +36,7 @@ def split_down_full_tags(input_value):
     if (NOTE_TAG_RP.fullmatch(input_last) is not None):
         return input_value, None
     
-    full_tags = input_value[:index]
+    full_tags = input_value[:index].strip(SPACE_CHARACTERS_STRING)
     if not full_tags:
         full_tags = None
     
