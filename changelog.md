@@ -1,10 +1,10 @@
-### 2023-07-05
+### 2023-06-05
 
 - `booru` tags are now separated by `,` (from `|`).
 - Fix `booru` command autocompletion ignored already defined tags.
 - Parsing multiple `booru` tags improved. Now they handle more amount and more different characters too.
 
-### 2023-06-30
+### 2023-05-30
 
 - Fix `satori log` channel check. When channel's name was not decimal the conversion was handled incorrectly.
 - Fix `/snipe` when switching between choices. (From previous update.)
