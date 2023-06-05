@@ -29,7 +29,7 @@ CACHES = {}
 
 
 NOTE_TAG_RP = re.compile('\\(\\d*\\)')
-SPACE_CHARACTERS = (' ', '\t', '\n', '\r')
-
+SPACE_CHARACTERS = (' ', '\t', '\n', '\r', ',')
+TAG_SPLIT = re.compile('[^ ,\\t\\r\\n]+')
 
 AUTOCOMPLETE_VALUE_LENGTH_MAX = 100

@@ -186,7 +186,7 @@ def build_tag_embed(image_detail):
     if tags is None:
         description = '*none*'
     else:
-        description = ' | '.join([tag.replace('_', '\_') for tag in tags])
+        description = ', '.join([tag.replace('_', '\_') for tag in tags])
     
     if image_detail is None:
         url = None

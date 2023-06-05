@@ -160,7 +160,7 @@ async def autocomplete_input(client, event, input_value, safe):
         return None
     
     if (full_tags is not None):
-        suggestions = [tag_name for tag_name in suggestions]
+        suggestions = [f'{full_tags}, {tag_name}' for tag_name in suggestions]
     
     omitted = 0
     

@@ -1,6 +1,6 @@
 __all__ = ()
 
-from .constants import NOTE_TAG_RP, SPACE_CHARACTERS
+from .constants import NOTE_TAG_RP, SPACE_CHARACTERS, TAG_SPLIT
 
 
 def split_down_full_tags(input_value):
@@ -124,7 +124,7 @@ def iter_split_tags_safe_booru(raw_tags):
     """
     tags = set()
     
-    for raw_tag in raw_tags.split():
+    for raw_tag in TAG_SPLIT.findall(raw_tags):
         if NOTE_TAG_RP.fullmatch(raw_tag) is None:
             raw_tag = quote_tag_safe_booru(raw_tag)
             tags.add(raw_tag)
@@ -149,7 +149,7 @@ def iter_split_tags_gel_booru(raw_tags):
     """
     tags = set()
     
-    for raw_tag in raw_tags.split():
+    for raw_tag in TAG_SPLIT.findall(raw_tags):
         if NOTE_TAG_RP.fullmatch(raw_tag) is None:
             tags.add(raw_tag)
     
