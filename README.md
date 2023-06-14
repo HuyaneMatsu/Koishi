@@ -28,15 +28,17 @@ commands to get the people together.
 
 To get started with Koishi, use the `/help` command, which lists all the available global commands.
 
+<h1></h1>
+
 <h3 align="center">
-    What she does?
+    Highlights
 </h3>
 
 Koishi excels in a variety of areas, just to mention a few highlighted features:
 
-- Games with multiplayer support and progression saving! Examples:
+- Games with multiplayer support and progression saving!
   - from simple games like XoX and Minesweeper (both supporting multiplayer) to advanced games like `ds` which is
-  - a fully featured clone of Dungeon Sweeper but with Touhou theme (includes progression saving) and many more!
+  a fully featured clone of Dungeon Sweeper but with Touhou theme (includes progression saving) and many more!
 
 - Economy system
   - get your daily coins with daily command or voting for the bot.
@@ -44,12 +46,12 @@ Koishi excels in a variety of areas, just to mention a few highlighted features:
   - upgrade your waifu stats by buying better stats (bragging rights) or have more slots for waifus (more harem).
   - get to the top of the `/top-list` with the biggest coin bank!
 
-Advanced commands
-- `dupe-image-filter` find and remove duplicate images in the last X days to prevent spam!
-- `/snipe` for emoji hoarders who want to save those rare emojis, snipe the message and get all wanted emojis/reactions/stickers to your DMs
-- `touhou-feed` Touhou image feed for text channels and forum threads with advanced options such as multiple characters, specific interval and tags.
-- advanced selfbot detection
-- ... And much more!
+- Advanced commands
+  - `dupe-image-filter` find and remove duplicate images in the last X days to prevent spam!
+  - `/snipe` for emoji hoarders who want to save those rare emojis, snipe the message and get all wanted emojis/reactions/stickers to your DMs
+  - `touhou-feed` Touhou image feed for text channels and forum threads with advanced options such as multiple characters, specific interval and tags.
+  - advanced selfbot detection
+  - ... And much more!
 
 
 <h1></h1>
@@ -148,7 +150,7 @@ be forgotten by everyone. That will make her sad.**
 #### # Required intents
 - Presence Intent
   - Koishi has advanced, admin only, functionality that allows us to see how often the user changes status and presence.
-  - this allows us to determine whether they are automated accounts or alts.
+  This allows us to determine whether they are automated accounts or alts.
   - also used for some misc commands, such as `/status`
 
 - Server Members Intent
