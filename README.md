@@ -32,18 +32,25 @@ To get started with Koishi, use the `/help` command, which lists all the availab
     What she does?
 </h3>
 
-Koishi excels in a variety of areas, just to mention a few featured commands:
+Koishi excels in a variety of areas, just to mention a few highlighted features:
 
-- `/find-anime` - Search for your long forgotten anime.
-- `/hug` - Hug your best homies.
-- `/meme` - Shows up a good anime meme.
-- `/ds` - A box pushing cute puzzle game.
-- `/propose` - Propose to your best homies to marry them.
-- `/guild` - Get generic information of the guild.
-- `/user` - Checkout anyone.
-- `/waifu` - Get one from our curated list of waifus.
+- Games with multiplayer support and progression saving! Examples:
+  - from simple games like XoX and Minesweeper (both supporting multiplayer) to advanced games like `ds` which is
+  - a fully featured clone of Dungeon Sweeper but with Touhou theme (includes progression saving) and many more!
 
-And much more!
+- Economy system
+  - get your daily coins with daily command or voting for the bot.
+  - marry and divorce other users, make them your waifus!
+  - upgrade your waifu stats by buying better stats (bragging rights) or have more slots for waifus (more harem).
+  - get to the top of the `/top-list` with the biggest coin bank!
+
+Advanced commands
+- `dupe-image-filter` find and remove duplicate images in the last X days to prevent spam!
+- `/snipe` for emoji hoarders who want to save those rare emojis, snipe the message and get all wanted emojis/reactions/stickers to your DMs
+- `touhou-feed` Touhou image feed for text channels and forum threads with advanced options such as multiple characters, specific interval and tags.
+- advanced selfbot detection
+- ... And much more!
+
 
 <h1></h1>
 
@@ -72,7 +79,7 @@ And much more!
 - Fun
     
     `9ball` • `ascii` • `meme` • `message-me` • `oj` • `paranoia` • `random` • `rate` • `roll` •
-    `sex` • `stats` • `trivia` • `urban` • `yuno`
+    `sex` • `stats` • `touhou-feed` • `trivia` • `urban` • `yuno`
 
 - Games
     
@@ -106,34 +113,54 @@ And much more!
 `latest-users` • `markdown` • `paste` • `raw` • `roles` • `rules` • `sticker` • `take` • `transfer` • `todo` •
 `move-channel` • `move-message` • `move-messages` • `voice`
 
+
+<h4>Note: All NSFW commands are only usable in NSFW channels.</h4>
+
 <h1></h1>
 
 <h3 align="center">
     FAQ
 </h3>
 
-##### Prefix
+#### # Prefix
 
-Koishi has no old-style chat commands. Only slash (*and other application commands*)!
+Koishi doesn't have old-style chat commands, only slash (*and other application commands*)!
 
-##### Not in member list, but her commands are present
+#### # Not in member list, but her commands are present
 
-This can happen if Koishi has no view-channel permission, but you have use-application-commands.
+This can happen if Koishi does not have view-channel permission, but you have use-application-commands.
 
 Since Koishi is added without any permissions, make sure to assign a role to her, **else she will stay invisible and
 be forgotten by everyone. That will make her sad.**
 
 *Koishi so meta!*
 
-##### Commands do not show up
+#### # Commands do not show up
 
 - Koishi was invited without `applications.commands` scope.
 
-- You have no `use-application-commands` permission.
+- You don't have `use-application-commands` permission.
 
 - The guild has 50+ bots.
 
 - Discord client is derping, give it a restart.
+
+#### # Required intents
+- Presence Intent
+  - Koishi has advanced, admin only, functionality that allows us to see how often the user changes status and presence.
+  - this allows us to determine whether they are automated accounts or alts.
+  - also used for some misc commands, such as `/status`
+
+- Server Members Intent
+  - to welcome a user after they join a guild.
+  - to keep the cache up-to-date without extra API requests (for example command `latest-users` filters latest users from user cache).
+  - when the bot joins any guild it will check if it is a bot guild (more bots than users) and if so it will leave.
+
+- Message Content Intent
+  - duplicate image filter.
+  - for ping logs (who pinged who).
+  - for some misc commands, like `copy-message`, `move-channel`, `move-message` etc, which copy and send a message to previously set channel based on user emoji reaction.
+
 
 <h1></h1>
 
