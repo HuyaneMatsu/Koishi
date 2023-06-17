@@ -66,7 +66,7 @@ class dispatch_tester:
     
     @classmethod
     async def client_edit(self, client, old):
-        Task(self.old_events['client_edit'](client, old), KOKORO)
+        Task(KOKORO, self.old_events['client_edit'](client, old))
         if self.channel is None:
             return
         
@@ -83,7 +83,7 @@ class dispatch_tester:
     
     @classmethod
     async def message_delete(self, client, message):
-        Task(self.old_events['message_delete'](client, message), KOKORO)
+        Task(KOKORO, self.old_events['message_delete'](client, message))
         if self.channel is None:
             return
         
@@ -95,7 +95,7 @@ class dispatch_tester:
     
     @classmethod
     async def message_edit(self, client, message, old):
-        Task(self.old_events['message_edit'](client, message, old), KOKORO)
+        Task(KOKORO, self.old_events['message_edit'](client, message, old))
         if self.channel is None:
             return
         
@@ -216,7 +216,7 @@ class dispatch_tester:
 
     @classmethod
     async def embed_update(self, client, message, flag):
-        Task(self.old_events['embed_update'](client, message, flag), KOKORO)
+        Task(KOKORO, self.old_events['embed_update'](client, message, flag))
         if self.channel is None:
             return
         
@@ -273,7 +273,7 @@ class dispatch_tester:
     
     @classmethod
     async def reaction_clear(self, client, message, old):
-        Task(self.old_events['reaction_clear'](client, message, old), KOKORO)
+        Task(KOKORO, self.old_events['reaction_clear'](client, message, old))
         if self.channel is None:
             return
         
@@ -287,7 +287,7 @@ class dispatch_tester:
 
     @classmethod
     async def reaction_delete_emoji(self, client, message, emoji, users):
-        Task(self.old_events['reaction_delete_emoji'](client, message, emoji, users), KOKORO)
+        Task(KOKORO, self.old_events['reaction_delete_emoji'](client, message, emoji, users))
         if self.channel is None:
             return
         
@@ -301,7 +301,7 @@ class dispatch_tester:
         
     @classmethod
     async def user_presence_update(self, client, user, old):
-        Task(self.old_events['user_presence_update'](client, user, old), KOKORO)
+        Task(KOKORO, self.old_events['user_presence_update'](client, user, old))
         if self.channel is None:
             return
         
@@ -349,7 +349,7 @@ class dispatch_tester:
 
     @classmethod
     async def user_edit(self, client, user, old):
-        Task(self.old_events['user_edit'](client, user, old), KOKORO)
+        Task(KOKORO, self.old_events['user_edit'](client, user, old))
         if self.channel is None:
             return
         
@@ -362,7 +362,7 @@ class dispatch_tester:
     
     @classmethod
     async def guild_user_edit(self, client, user, guild, old):
-        Task(self.old_events['guild_user_edit'](client, user, old, guild), KOKORO)
+        Task(KOKORO, self.old_events['guild_user_edit'](client, user, old, guild))
         if self.channel is None:
             return
         
@@ -393,7 +393,7 @@ class dispatch_tester:
 
     @classmethod
     async def channel_delete(self, client, channel, guild):
-        Task(self.old_events['channel_delete'](client,channel, guild), KOKORO)
+        Task(KOKORO, self.old_events['channel_delete'](client,channel, guild))
         if self.channel is None:
             return
         
@@ -404,7 +404,7 @@ class dispatch_tester:
     @classmethod
     async def channel_edit(self, client, channel, old):
         print(client, channel, old)
-        Task(self.old_events['channel_edit'](client, channel, old), KOKORO)
+        Task(KOKORO, self.old_events['channel_edit'](client, channel, old))
         if self.channel is None:
             return
         
@@ -438,7 +438,7 @@ class dispatch_tester:
 
     @classmethod
     async def channel_create(self, client,channel):
-        Task(self.old_events['channel_create'](client,channel), KOKORO)
+        Task(KOKORO, self.old_events['channel_create'](client,channel))
         if self.channel is None:
             return
         
@@ -449,7 +449,7 @@ class dispatch_tester:
 
     @classmethod
     async def channel_pin_update(self, client,channel):
-        Task(self.old_events['channel_pin_update'](client,channel), KOKORO)
+        Task(KOKORO, self.old_events['channel_pin_update'](client,channel))
         if self.channel is None:
             return
         
@@ -459,7 +459,7 @@ class dispatch_tester:
     
     @classmethod
     async def emoji_create(self, client, emoji):
-        Task(self.old_events['emoji_create'](client, emoji), KOKORO)
+        Task(KOKORO, self.old_events['emoji_create'](client, emoji))
         if self.channel is None:
             return
     
@@ -470,7 +470,7 @@ class dispatch_tester:
     
     @classmethod
     async def emoji_delete(self, client, emoji):
-        Task(self.old_events['emoji_delete'](client, emoji), KOKORO)
+        Task(KOKORO, self.old_events['emoji_delete'](client, emoji))
         if self.channel is None:
             return
         
@@ -481,7 +481,7 @@ class dispatch_tester:
         
     @classmethod
     async def emoji_edit(self, client, emoji, old):
-        Task(self.old_events['emoji_edit'](client, emoji, old), KOKORO)
+        Task(KOKORO, self.old_events['emoji_edit'](client, emoji, old))
         if self.channel is None:
             return
     
@@ -512,7 +512,7 @@ class dispatch_tester:
     
     @classmethod
     async def sticker_create(self, client, sticker):
-        Task(self.old_events['sticker_create'](client, sticker), KOKORO)
+        Task(KOKORO, self.old_events['sticker_create'](client, sticker))
         if self.channel is None:
             return
         
@@ -521,7 +521,7 @@ class dispatch_tester:
     
     @classmethod
     async def sticker_delete(self, client, sticker):
-        Task(self.old_events['sticker_delete'](client, sticker), KOKORO)
+        Task(KOKORO, self.old_events['sticker_delete'](client, sticker))
         if self.channel is None:
             return
         
@@ -530,7 +530,7 @@ class dispatch_tester:
     
     @classmethod
     async def sticker_edit(self, client, sticker, old):
-        Task(self.old_events['sticker_edit'](client, sticker, old), KOKORO)
+        Task(KOKORO, self.old_events['sticker_edit'](client, sticker, old))
         if self.channel is None:
             return
         
@@ -545,7 +545,7 @@ class dispatch_tester:
     
     @classmethod
     async def guild_user_add(self, client, guild, user):
-        Task(self.old_events['guild_user_add'](client, guild, user), KOKORO)
+        Task(KOKORO, self.old_events['guild_user_add'](client, guild, user))
         if self.channel is None:
             return
         
@@ -555,7 +555,7 @@ class dispatch_tester:
 
     @classmethod
     async def guild_user_delete(self, client, guild, user, profile):
-        Task(self.old_events['guild_user_delete'](client, guild, user, profile), KOKORO)
+        Task(KOKORO, self.old_events['guild_user_delete'](client, guild, user, profile))
         if self.channel is None:
             return
         
@@ -573,7 +573,7 @@ class dispatch_tester:
         
     @classmethod
     async def guild_create(self, client, guild):
-        Task(self.old_events['guild_create'](client, guild,), KOKORO)
+        Task(KOKORO, self.old_events['guild_create'](client, guild,))
         if self.channel is None:
             return
         
@@ -588,7 +588,7 @@ class dispatch_tester:
     @classmethod
     async def guild_edit(self, client, guild, old):
         
-        Task(self.old_events['guild_edit'](client, guild, old), KOKORO)
+        Task(KOKORO, self.old_events['guild_edit'](client, guild, old))
         if self.channel is None:
             return
         
@@ -660,7 +660,7 @@ class dispatch_tester:
         
     @classmethod
     async def guild_delete(self, client, guild, profile):
-        Task(self.old_events['guild_delete'](client, guild, profile), KOKORO)
+        Task(KOKORO, self.old_events['guild_delete'](client, guild, profile))
         if self.channel is None:
             return
         
@@ -675,7 +675,7 @@ class dispatch_tester:
 
     @classmethod
     async def guild_ban_add(self, client, guild, user):
-        Task(self.old_events['guild_ban_add'](client, guild, user), KOKORO)
+        Task(KOKORO, self.old_events['guild_ban_add'](client, guild, user))
         if self.channel is None:
             return
         
@@ -685,7 +685,7 @@ class dispatch_tester:
 
     @classmethod
     async def guild_ban_delete(self, client, guild, user):
-        Task(self.old_events['guild_ban_delete'](client, guild, user), KOKORO)
+        Task(KOKORO, self.old_events['guild_ban_delete'](client, guild, user))
         if self.channel is None:
             return
         
@@ -700,7 +700,7 @@ class dispatch_tester:
 
     @classmethod
     async def role_create(self, client,role):
-        Task(self.old_events['role_create'](client,role,), KOKORO)
+        Task(KOKORO, self.old_events['role_create'](client,role,))
         if self.channel is None:
             return
         
@@ -711,7 +711,7 @@ class dispatch_tester:
 
     @classmethod
     async def role_delete(self, client,role, guild):
-        Task(self.old_events['role_delete'](client,role, guild), KOKORO)
+        Task(KOKORO, self.old_events['role_delete'](client,role, guild))
         if self.channel is None:
             return
         
@@ -721,7 +721,7 @@ class dispatch_tester:
 
     @classmethod
     async def role_edit(self, client, role, old):
-        Task(self.old_events['role_edit'](client, role, old), KOKORO)
+        Task(KOKORO, self.old_events['role_edit'](client, role, old))
         if self.channel is None:
             return
         
@@ -748,7 +748,7 @@ class dispatch_tester:
     
     @classmethod
     async def webhook_update(self, client,channel):
-        Task(self.old_events['webhook_update'](client,channel), KOKORO)
+        Task(KOKORO, self.old_events['webhook_update'](client,channel))
         if self.channel is None:
             return
         
@@ -758,7 +758,7 @@ class dispatch_tester:
     
     @classmethod
     async def user_voice_update(self, client, voice_state, old_attributes):
-        Task(self.old_events['user_voice_update'](client, voice_state, old_attributes), KOKORO)
+        Task(KOKORO, self.old_events['user_voice_update'](client, voice_state, old_attributes))
         if self.channel is None:
             return
         
@@ -788,7 +788,7 @@ class dispatch_tester:
     
     @classmethod
     async def user_voice_join(self, client, voice_state):
-        Task(self.old_events['user_voice_join'](client, voice_state), KOKORO)
+        Task(KOKORO, self.old_events['user_voice_join'](client, voice_state))
         if self.channel is None:
             return
         
@@ -801,7 +801,7 @@ class dispatch_tester:
     
     @classmethod
     async def user_voice_leave(self, client, voice_state):
-        Task(self.old_events['user_voice_leave'](client, voice_state), KOKORO)
+        Task(KOKORO, self.old_events['user_voice_leave'](client, voice_state))
         if self.channel is None:
             return
         
@@ -814,7 +814,7 @@ class dispatch_tester:
             
     @classmethod
     async def typing(self, client,channel, user,timestamp):
-        Task(self.old_events['typing'](client,channel, user,timestamp), KOKORO)
+        Task(KOKORO, self.old_events['typing'](client,channel, user,timestamp))
         if self.channel is None:
             return
         
@@ -831,7 +831,7 @@ class dispatch_tester:
     
     @classmethod
     async def client_edit_settings(self, client, old):
-        Task(self.old_events['client_edit_settings'](client, old), KOKORO)
+        Task(KOKORO, self.old_events['client_edit_settings'](client, old))
         if self.channel is None:
             return
         
@@ -843,7 +843,7 @@ class dispatch_tester:
     
     @classmethod
     async def invite_create(self, client, invite):
-        Task(self.old_events['invite_create'](client, invite), KOKORO)
+        Task(KOKORO, self.old_events['invite_create'](client, invite))
         if self.channel is None:
             return
         
@@ -854,7 +854,7 @@ class dispatch_tester:
     
     @classmethod
     async def invite_delete(self, client,invite):
-        Task(self.old_events['invite_delete'](client, invite), KOKORO)
+        Task(KOKORO, self.old_events['invite_delete'](client, invite))
         if self.channel is None:
             return
     
@@ -865,7 +865,7 @@ class dispatch_tester:
     
     @classmethod
     async def integration_create(self, client, guild, integration):
-        Task(self.old_events['integration_create'](client, guild, integration), KOKORO)
+        Task(KOKORO, self.old_events['integration_create'](client, guild, integration))
         if self.channel is None:
             return
         
@@ -877,7 +877,7 @@ class dispatch_tester:
     
     @classmethod
     async def integration_delete(self, client, guild, integration_id, application_id):
-        Task(self.old_events['integration_delete'](client, guild, integration_id, application_id), KOKORO)
+        Task(KOKORO, self.old_events['integration_delete'](client, guild, integration_id, application_id))
         if self.channel is None:
             return
         
@@ -892,7 +892,7 @@ class dispatch_tester:
     
     @classmethod
     async def integration_edit(self, client, guild, integration):
-        Task(self.old_events['integration_edit'](client, guild, integration), KOKORO)
+        Task(KOKORO, self.old_events['integration_edit'](client, guild, integration))
         if self.channel is None:
             return
         
@@ -904,7 +904,7 @@ class dispatch_tester:
     
     @classmethod
     async def integration_update(self, client, guild):
-        Task(self.old_events['integration_update'](client, guild), KOKORO)
+        Task(KOKORO, self.old_events['integration_update'](client, guild))
         if self.channel is None:
             return
         
@@ -917,7 +917,7 @@ class dispatch_tester:
     
     @classmethod
     async def application_command_permission_update(self, client, permission):
-        Task(self.old_events['application_command_permission_update'](client, permission), KOKORO)
+        Task(KOKORO, self.old_events['application_command_permission_update'](client, permission))
         if self.channel is None:
             return
         
@@ -940,7 +940,7 @@ class dispatch_tester:
     
     @classmethod
     async def stage_create(self, client, stage):
-        Task(self.old_events['stage_create'](client, stage), KOKORO)
+        Task(KOKORO, self.old_events['stage_create'](client, stage))
         
         pages = [Embed(description = f'Stage create: {stage!r}')]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -948,7 +948,7 @@ class dispatch_tester:
 
     @classmethod
     async def stage_delete(self, client, stage):
-        Task(self.old_events['stage_delete'](client, stage), KOKORO)
+        Task(KOKORO, self.old_events['stage_delete'](client, stage))
         
         pages = [Embed(description = f'Stage delete: {stage!r}')]
         await Pagination(client, self.channel, pages, timeout = 120.)
@@ -956,7 +956,7 @@ class dispatch_tester:
     
     @classmethod
     async def stage_edit(self, client, stage, old_attributes):
-        Task(self.old_events['stage_edit'](client, stage), KOKORO)
+        Task(KOKORO, self.old_events['stage_edit'](client, stage))
         
         text = [
             f'Stage: {stage.id}'
@@ -972,7 +972,7 @@ class dispatch_tester:
     
     @classmethod
     async def embedded_activity_create(self, client, embedded_activity_state):
-        Task(self.old_events['embedded_activity_create'](client, embedded_activity_state), KOKORO)
+        Task(KOKORO, self.old_events['embedded_activity_create'](client, embedded_activity_state))
         if self.channel is None:
             return
         
@@ -990,7 +990,7 @@ class dispatch_tester:
     
     @classmethod
     async def embedded_activity_update(self, client, embedded_activity_state, old_attributes):
-        Task(self.old_events['embedded_activity_update'](client, embedded_activity_state, old_attributes), KOKORO)
+        Task(KOKORO, self.old_events['embedded_activity_update'](client, embedded_activity_state, old_attributes))
         if self.channel is None:
             return
         
@@ -1013,7 +1013,7 @@ class dispatch_tester:
 
     @classmethod
     async def embedded_activity_delete(self, client, embedded_activity_state):
-        Task(self.old_events['embedded_activity_delete'](client, embedded_activity_state), KOKORO)
+        Task(KOKORO, self.old_events['embedded_activity_delete'](client, embedded_activity_state))
         if self.channel is None:
             return
         
@@ -1031,7 +1031,7 @@ class dispatch_tester:
     
     @classmethod
     async def embedded_activity_user_add(self, client, embedded_activity_state, user_id):
-        Task(self.old_events['embedded_activity_user_add'](client, embedded_activity_state, user_id), KOKORO)
+        Task(KOKORO, self.old_events['embedded_activity_user_add'](client, embedded_activity_state, user_id))
         if self.channel is None:
             return
         
@@ -1050,7 +1050,7 @@ class dispatch_tester:
     
     @classmethod
     async def embedded_activity_user_delete(self, client, embedded_activity_state, user_id):
-        Task(self.old_events['embedded_activity_user_delete'](client, embedded_activity_state, user_id), KOKORO)
+        Task(KOKORO, self.old_events['embedded_activity_user_delete'](client, embedded_activity_state, user_id))
         if self.channel is None:
             return
         
@@ -1069,7 +1069,7 @@ class dispatch_tester:
     
     @classmethod
     async def auto_moderation_action_execution(self, client, event):
-        Task(self.old_events['auto_moderation_action_execution'](client, event), KOKORO)
+        Task(KOKORO, self.old_events['auto_moderation_action_execution'](client, event))
         if self.channel is None:
             return
         
@@ -1078,7 +1078,7 @@ class dispatch_tester:
     
     @classmethod
     async def auto_moderation_rule_create(self, client, rule):
-        Task(self.old_events['auto_moderation_rule_create'](client, rule), KOKORO)
+        Task(KOKORO, self.old_events['auto_moderation_rule_create'](client, rule))
         if self.channel is None:
             return
         
@@ -1086,7 +1086,7 @@ class dispatch_tester:
 
     @classmethod
     async def auto_moderation_rule_edit(self, client, rule, changes):
-        Task(self.old_events['auto_moderation_rule_edit'](client, rule, changes), KOKORO)
+        Task(KOKORO, self.old_events['auto_moderation_rule_edit'](client, rule, changes))
         if self.channel is None:
             return
         
@@ -1094,7 +1094,7 @@ class dispatch_tester:
 
     @classmethod
     async def auto_moderation_rule_delete(self, client, rule):
-        Task(self.old_events['auto_moderation_rule_delete'](client, rule), KOKORO)
+        Task(KOKORO, self.old_events['auto_moderation_rule_delete'](client, rule))
         if self.channel is None:
             return
         
@@ -1103,7 +1103,7 @@ class dispatch_tester:
 
     @classmethod
     async def soundboard_sound_create(self, client, sound):
-        Task(self.old_events['soundboard_sound_create'](client, sound), KOKORO)
+        Task(KOKORO, self.old_events['soundboard_sound_create'](client, sound))
         if self.channel is None:
             return
         
@@ -1111,7 +1111,7 @@ class dispatch_tester:
 
     @classmethod
     async def soundboard_sound_update(self, client, sound, changes):
-        Task(self.old_events['soundboard_sound_update'](client, sound, changes), KOKORO)
+        Task(KOKORO, self.old_events['soundboard_sound_update'](client, sound, changes))
         if self.channel is None:
             return
         
@@ -1119,7 +1119,7 @@ class dispatch_tester:
 
     @classmethod
     async def soundboard_sound_delete(self, client, sound):
-        Task(self.old_events['soundboard_sound_delete'](client, sound), KOKORO)
+        Task(KOKORO, self.old_events['soundboard_sound_delete'](client, sound))
         if self.channel is None:
             return
         

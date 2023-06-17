@@ -465,7 +465,7 @@ class ModelLink(
     def __load_synchronised__(self):
         load_task = self._load_task
         if (load_task is None):
-            load_task = Task(self.__load__(), KOKORO)
+            load_task = Task(KOKORO, self.__load__())
             self._load_task = load_task
         
         yield from shield(load_task, KOKORO)
@@ -516,4 +516,4 @@ class ModelLink(
     def save(self):
         if not self._saving:
             self._saving = True
-            Task(self.__save__(), KOKORO)
+            Task(KOKORO, self.__save__())

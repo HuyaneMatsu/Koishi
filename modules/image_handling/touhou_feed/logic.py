@@ -414,7 +414,7 @@ class Feeder:
         
         current_handle = self.handle
         if (current_handle is not None) and (not current_handle.cancelled):
-            if current_handle.when >= call_at:
+            if current_handle.when <= call_at:
                 return
             
             current_handle.cancel()
@@ -441,7 +441,7 @@ class Feeder:
         Triggers a feed.
         """
         self.schedule()
-        Task(self.execute(), KOKORO)
+        Task(KOKORO, self.execute())
     
     
     async def execute(self):

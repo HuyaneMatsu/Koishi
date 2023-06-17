@@ -149,7 +149,7 @@ async def request_sync(client, days_allowed):
         files = get_modified_files(days_allowed)
         
         for file in files:
-            sending_task = Task(send_file(client, file), KOKORO)
+            sending_task = Task(KOKORO, send_file(client, file))
             response_task = wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_received, 60.)
             
             await TaskGroup(KOKORO, [sending_task, response_task]).wait_all()
@@ -186,7 +186,7 @@ async def receive_sync(client, partner):
             message_to_send = REQUEST_APPROVED
             
             while True:
-                Task(client.message_create(CHANNEL__SYSTEM__SYNC, message_to_send), KOKORO)
+                Task(KOKORO, client.message_create(CHANNEL__SYSTEM__SYNC, message_to_send))
                 
                 try:
                     message = await wait_for_message(client, CHANNEL__SYSTEM__SYNC, check_any(partner), 60.)
@@ -337,4 +337,4 @@ async def sync_request_waiter(client, message):
     if SYNC_LOCK.is_locked():
         return
     
-    Task(receive_sync(client, message.author), KOKORO)
+    Task(KOKORO, receive_sync(client, message.author))

@@ -593,7 +593,7 @@ class Game21PlayerRunner:
             self._timeouter = None
             timeouter.cancel()
         
-        return Task(canceller(self, exception), KOKORO)
+        return Task(KOKORO, canceller(self, exception))
     
     
     async def _canceller_render_after(self):
@@ -1031,10 +1031,10 @@ async def game_21_mp_cancelled(client, user, guild, source_channel, amount, priv
 
 
 def game_21_mp_notify_cancellation(client, joined_tuples, amount, channel, guild, joined_user_ids):
-    Task(game_21_refund(joined_tuples[0][2], amount), KOKORO)
+    Task(KOKORO, game_21_refund(joined_tuples[0][2], amount))
     for notify_user, private_channel, entry_id in joined_tuples[1:]:
-        Task(game_21_mp_cancelled(client, notify_user, guild, channel, amount, private_channel,
-            joined_user_ids, entry_id), KOKORO)
+        Task(KOKORO, game_21_mp_cancelled(client, notify_user, guild, channel, amount, private_channel,
+            joined_user_ids, entry_id))
 
 GAME_21_MP_MAX_USERS = 10
 GAME_21_MP_FOOTER = f'Max {GAME_21_MP_MAX_USERS} users allowed.'
@@ -1141,10 +1141,10 @@ class Game21JoinGUI:
                 else:
                     coroutine_function = game_21_mp_user_leaver
                 
-                task = Task(coroutine_function(client, user, self.guild, self.channel, self.amount,
-                    self.joined_user_ids, private_channel, entry_id), KOKORO)
+                task = Task(KOKORO, coroutine_function(client, user, self.guild, self.channel, self.amount,
+                    self.joined_user_ids, private_channel, entry_id))
                 
-                Task(self.do_acknowledge(interaction_event), KOKORO)
+                Task(KOKORO, self.do_acknowledge(interaction_event))
                 
                 self.workers.add(task)
                 try:
@@ -1276,7 +1276,7 @@ class Game21JoinGUI:
         if (timeouter is not None):
             timeouter.cancel()
         
-        return Task(canceller(self, exception), KOKORO)
+        return Task(KOKORO, canceller(self, exception))
     
     
     async def _wait_for_cancellation(self):
@@ -1292,11 +1292,11 @@ class Game21JoinGUI:
     def maybe_message_sync(self, interaction_event):
         if self.message_sync_in_progress:
             if interaction_event.is_unanswered():
-                Task(self.do_acknowledge(interaction_event), KOKORO)
+                Task(KOKORO, self.do_acknowledge(interaction_event))
         
         else:
             self.message_sync_in_progress = True
-            Task(self.do_message_sync(), KOKORO)
+            Task(KOKORO, self.do_message_sync())
     
     async def do_acknowledge(self, interaction_event):
         client = self.client
@@ -1356,7 +1356,7 @@ class Game21JoinGUI:
                 else:
                     return
             
-            task = Task(coroutine, KOKORO)
+            task = Task(KOKORO, coroutine)
             self.workers.add(task)
             try:
                 try:
@@ -1596,7 +1596,7 @@ async def game_21_multi_player(client, event, amount):
         base = Game21Base(guild)
         tasks = []
         for tuple_user, tuple_channel, entry_id in joined_tuples:
-            task = Task(Game21PlayerRunner(client, base, tuple_user, tuple_channel, amount, True), KOKORO)
+            task = Task(KOKORO, Game21PlayerRunner(client, base, tuple_user, tuple_channel, amount, True))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()

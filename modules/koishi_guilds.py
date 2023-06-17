@@ -85,7 +85,7 @@ async def build_embed(page):
     
     task = EMBED_BUILDER_TASKS.get(page, None)
     if task is None:
-        task = Task(build_embed_task(page), KOKORO)
+        task = Task(KOKORO, build_embed_task(page))
         EMBED_BUILDER_TASKS[page] = task
         
         embeds = None

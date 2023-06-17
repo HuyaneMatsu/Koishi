@@ -54,7 +54,7 @@ async def get_users_unordered(user_ids):
             if tasks is None:
                 tasks = []
             
-            task = Task(_get_user_async(user_id), KOKORO)
+            task = Task(KOKORO, _get_user_async(user_id))
             tasks.append(task)
         
         else:

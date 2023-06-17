@@ -34,15 +34,15 @@ async def move_message(
     
     message = await get_message(client, channel, message_id)
     
-    get_message_and_files_task = Task(get_message_and_files(client, event.channel, message_id), KOKORO)
-    get_webhook_task = Task(get_webhook(client, channel_id), KOKORO)
+    get_message_and_files_task = Task(KOKORO, get_message_and_files(client, event.channel, message_id))
+    get_webhook_task = Task(KOKORO, get_webhook(client, channel_id))
     
     task_group = TaskGroup(
         KOKORO,
         [
             get_message_and_files_task,
             get_webhook_task,
-            Task(client.interaction_application_command_acknowledge(event, show_for_invoking_user_only = True), KOKORO)
+            Task(KOKORO, client.interaction_application_command_acknowledge(event, show_for_invoking_user_only = True))
         ],
     )
     
@@ -70,6 +70,6 @@ async def move_message(
     finally:
         files = None
     
-    Task(message_delete(client, message), KOKORO)
+    Task(KOKORO, message_delete(client, message))
     
     await client.interaction_response_message_edit(event, 'Message moved successfully.')

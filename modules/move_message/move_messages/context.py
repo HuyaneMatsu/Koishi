@@ -141,7 +141,7 @@ class MessageMoverContext:
     def trigger_timeout(self):
         next_update = self.next_update
         if next_update <= LOOP_TIME():
-            Task(self.do_timeout(), KOKORO)
+            Task(KOKORO, self.do_timeout())
             timeout_handle = None
         else:
             timeout_handle = KOKORO.call_at(next_update, timeout_message_mover_context, self.key)
@@ -194,7 +194,7 @@ class MessageMoverContext:
     async def submit(self, event):
         self._cancel()
         
-        move_messages_task = Task(self.move_messages_parallelly(), KOKORO)
+        move_messages_task = Task(KOKORO, self.move_messages_parallelly())
         try:
             await self.client.interaction_component_message_edit(
                 event,
@@ -223,7 +223,7 @@ class MessageMoverContext:
     
     async def move_messages_parallelly(self):
         self.get_webhook_waiter()
-        await TaskGroup(KOKORO, (Task(self.move_message(message), KOKORO) for message in self.messages)).wait_all()
+        await TaskGroup(KOKORO, (Task(KOKORO, self.move_message(message)) for message in self.messages)).wait_all()
     
     
     def get_webhook_waiter(self):
@@ -231,7 +231,7 @@ class MessageMoverContext:
         if (webhook_waiter is None):
             webhook_waiter = Future(KOKORO)
             self.webhook_waiter = webhook_waiter
-            Task(self.get_webhook_task(webhook_waiter), KOKORO)
+            Task(KOKORO, self.get_webhook_task(webhook_waiter))
         
         return webhook_waiter
     
@@ -267,4 +267,4 @@ class MessageMoverContext:
         
         files = None
         
-        Task(message_delete(self.client, message), KOKORO)
+        Task(KOKORO, message_delete(self.client, message))

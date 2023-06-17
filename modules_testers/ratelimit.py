@@ -177,10 +177,10 @@ class RLTCTX: #rate limit tester context manager
             return True
         
         if exc_type is None:
-            Task(self._render_exit_result(), KOKORO)
+            Task(KOKORO, self._render_exit_result())
             return True
         
-        Task(self._render_exit_exc(exc_val, exc_tb), KOKORO)
+        Task(KOKORO, self._render_exit_exc(exc_val, exc_tb))
         return True
     
     async def _render_exit_result(self):
@@ -2693,7 +2693,7 @@ async def rate_limit_test_0000(client, message):
         
         tasks = []
         for _ in range(6):
-            task = Task(achievement_get(client, achievement_id), KOKORO)
+            task = Task(KOKORO, achievement_get(client, achievement_id))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()
@@ -2722,10 +2722,10 @@ async def rate_limit_test_0001(client,message):
         
         tasks = []
         for _ in range(4):
-            task = Task(achievement_get(client,achievement_id_1), KOKORO)
+            task = Task(KOKORO, achievement_get(client,achievement_id_1))
             tasks.append(task)
             
-            task = Task(achievement_get(client,achievement_id_2), KOKORO)
+            task = Task(KOKORO, achievement_get(client,achievement_id_2))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()
@@ -2745,7 +2745,7 @@ async def rate_limit_test_0002(client,message):
         names = ('Yura','Hana','Neko','Kaze','Scarlet','Yukari')
         for name in names:
             description = name+'boroshi'
-            task = Task(achievement_create(client,name,description,image), KOKORO)
+            task = Task(KOKORO, achievement_create(client,name,description,image))
             tasks.append(task)
             
         await TaskGroup(KOKORO, tasks).wait_all()
@@ -2779,7 +2779,7 @@ async def rate_limit_test_0003(client,message):
         
         tasks = []
         for achievement in achievements:
-            task = Task(achievement_delete(client, achievement),loop)
+            task = Task(loop, achievement_delete(client, achievement))
             tasks.append(task)
         
         await TaskGroup(loop, tasks).wait_all()
@@ -2801,10 +2801,10 @@ async def rate_limit_test_0004(client,message):
         loop=client.loop
         tasks = []
         
-        task = Task(achievement_edit(client,achievement,name = 'Hana'),loop)
+        task = Task(loop, achievement_edit(client,achievement,name = 'Hana'))
         tasks.append(task)
         
-        task = Task(achievement_edit(client,achievement,name = 'Phantom'),loop)
+        task = Task(loop, achievement_edit(client,achievement,name = 'Phantom'))
         tasks.append(task)
         
         await TaskGroup(loop, tasks).wait_all()
@@ -2830,7 +2830,7 @@ async def rate_limit_test_0005(client,message):
         loop = client.loop
         tasks = []
         for achievement in achievements:
-            task = Task(achievement_edit(client, achievement, name = 'Yura'),loop)
+            task = Task(loop, achievement_edit(client, achievement, name = 'Yura'))
             tasks.append(task)
         
         await TaskGroup(loop, tasks).wait_all()
@@ -2867,7 +2867,7 @@ async def rate_limit_test_0007(client,message):
         loop=client.loop
         tasks = []
         for _ in range(2):
-            task = Task(achievement_get_all(client),loop)
+            task = Task(loop, achievement_get_all(client))
             tasks.append(task)
         
         await TaskGroup(loop, tasks).wait_all()
@@ -2942,16 +2942,16 @@ async def rate_limit_test_0011(client,message):
     """
     
     with RLTCTX(client,message.channel,'rate_limit_test_0011') as RLT:
-        image_path=join(os.path.abspath(''),'images','0000000C_touhou_komeiji_koishi.png')
+        image_path=join(os.path.abspath(''), 'images', '0000000C_touhou_komeiji_koishi.png')
         with (await AsyncIO(image_path)) as file:
             image = await file.read()
         
-        achievement = await client.achievement_create('Koishi','Kokoro',image,secure=True)
+        achievement = await client.achievement_create('Koishi', 'Kokoro', image, secure = True)
         
         tasks = []
         for member in client.application.owner.members:
             user = member.user
-            task = Task(user_achievement_update(client,user,achievement,100), KOKORO)
+            task = Task(KOKORO, user_achievement_update(client,user,achievement,100))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()
@@ -2986,7 +2986,7 @@ async def rate_limit_test_0012(client,message):
         except TimeoutError:
             await RLT.send('Timeout meanwhile waiting for redirect url.')
     
-        Task(client.message_delete(message), KOKORO)
+        Task(KOKORO, client.message_delete(message))
         try:
             result = parse_oauth2_redirect_url(message.content)
         except ValueError:
@@ -3100,11 +3100,11 @@ async def rate_limit_test_0013(client,message):
             for day,(message_own, message_other) in enumerate(messages):
                 if (message_own is not None):
                     RLT.write(f'day {day}, own:')
-                    await Task(message_delete(client, message_own), KOKORO)
+                    await Task(KOKORO, message_delete(client, message_own))
                 
                 if (message_other is not None):
                     RLT.write(f'day {day}, other:')
-                    await Task(message_delete(client, message_other), KOKORO)
+                    await Task(KOKORO, message_delete(client, message_other))
             
             return
             
@@ -3128,7 +3128,7 @@ async def rate_limit_test_0014(client,message):
             message_ = await client.message_create(channel,f'testing rate_limit: message {index}')
             messages.append(message_)
         
-        await Task(message_delete_multiple(client,messages),client.loop)
+        await Task(KOKORO, message_delete_multiple(client,messages))
 
 @RATE_LIMIT_COMMANDS
 async def rate_limit_test_0015(client,message):
@@ -4208,9 +4208,9 @@ async def rate_limit_test_0069(client, message):
         
         access = await client_.owners_access(['email', 'bot', 'connections', 'guilds', 'identify']) # random access
         tasks = []
-        task = Task(user_guild_get_all(client_, access), KOKORO)
+        task = Task(KOKORO, user_guild_get_all(client_, access))
         tasks.append(task)
-        task = Task(guild_get_all(client), KOKORO)
+        task = Task(KOKORO, guild_get_all(client))
         tasks.append(task)
         
         
@@ -5342,7 +5342,7 @@ async def rate_limit_test_0119(client, message, guild2:'guild'=None):
         
         tasks = []
         for stage_channel in (stage_channels_1[0], stage_channels_2[0]):
-            task = Task(rate_limit_test_0119_parallel(client, stage_channel), KOKORO)
+            task = Task(KOKORO, rate_limit_test_0119_parallel(client, stage_channel))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()
@@ -5398,7 +5398,7 @@ async def rate_limit_test_0120(client, message, guild2:'guild'=None):
         
         tasks = []
         for stage_channel, user in ((stage_channel_1, user_1), (stage_channel_2, user_2)):
-            task = Task(rate_limit_test_0120_parallel(client, stage_channel, user), KOKORO)
+            task = Task(KOKORO, rate_limit_test_0120_parallel(client, stage_channel, user))
             tasks.append(task)
         
         await TaskGroup(KOKORO, tasks).wait_all()

@@ -227,7 +227,7 @@ class HeartEventGUI:
         
         self.connector = await DB_ENGINE.connect()
         client.slasher.add_component_interaction_waiter(message, self)
-        Task(self.countdown(client, message), KOKORO)
+        Task(KOKORO, self.countdown(client, message))
         return
     
     def generate_embed(self):
@@ -358,7 +358,7 @@ class HeartEventGUI:
             return
         
         self.connector = None
-        Task(connector.close(), KOKORO)
+        Task(KOKORO, connector.close())
 
 
 @SLASH_CLIENT.interactions(guild = GUILD__SUPPORT, required_permissions = Permission().update_by_keys(administrator = True))
@@ -517,7 +517,7 @@ class DailyEventGUI:
         
         self.connector = await DB_ENGINE.connect()
         client.slasher.add_component_interaction_waiter(message, self)
-        Task(self.countdown(client, message), KOKORO)
+        Task(KOKORO, self.countdown(client, message))
         return
     
     def generate_embed(self):
@@ -656,7 +656,7 @@ class DailyEventGUI:
             return
         
         self.connector = None
-        Task(connector.close(), KOKORO)
+        Task(KOKORO, connector.close())
 
 
 

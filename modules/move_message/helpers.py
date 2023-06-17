@@ -91,7 +91,7 @@ async def get_attachments(client, attachments):
     -------
     attachments : `list` of `tuple` (`str`, `bytes`, (`None`, `str`))
     """
-    task_group = TaskGroup(KOKORO, (Task(get_attachment(client, attachment), KOKORO) for attachment in attachments))
+    task_group = TaskGroup(KOKORO, (Task(KOKORO, get_attachment(client, attachment)) for attachment in attachments))
     failed_task = await task_group.wait_exception()
     if (failed_task is not None):
         # Cancel all and propagate the first failing one

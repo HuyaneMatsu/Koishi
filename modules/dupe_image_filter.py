@@ -144,7 +144,7 @@ class DupeImageFilter:
         
         self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
         
-        self.task = Task(self.state_update_loop(client, event), KOKORO)
+        self.task = Task(KOKORO, self.state_update_loop(client, event))
         
         FILTERERS[self.channel_id] = self
     
@@ -155,13 +155,13 @@ class DupeImageFilter:
             
             try:
                 while self.request_more:
-                    messages = await self.client.message_get_chunk(self.channel_id, after=self.after_id)
+                    messages = await self.client.message_get_chunk(self.channel_id, after = self.after_id)
                     if len(messages) < 100:
                         self.request_more = False
                     else:
                         self.after_id = messages[0].id
                     
-                    task = Task(self.scan_messages(messages, task), KOKORO)
+                    task = Task(KOKORO, self.scan_messages(messages, task))
                     continue
             except:
                 task.cancel()
@@ -445,7 +445,7 @@ class DupeImageFilter:
     
     async def state_update_loop(self, client, event):
         try:
-            Task(self.message_request_loop(), KOKORO)
+            Task(KOKORO, self.message_request_loop())
             
             embed = self.get_embed()
             embed.add_footer('Requesting and processing messages')
@@ -492,7 +492,7 @@ class DupeImageFilter:
                 
                 # Reset update waiter
                 self.update_waiter = sleep(UPDATE_INTERVAL, KOKORO)
-                Task(self.message_delete_loop(), KOKORO)
+                Task(KOKORO, self.message_delete_loop())
                 
                 embed = self.get_embed()
                 embed.add_footer('Deleting dupes')
@@ -530,12 +530,12 @@ class DupeImageFilter:
                 )
                 
                 return Task(
+                    KOKORO,
                     self.client.message_edit(
                         message,
                         embed = embed,
                         components = BUTTON_CLOSE,
                     ),
-                    KOKORO,
                 )
 
 

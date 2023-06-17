@@ -1,7 +1,7 @@
 __all__ = ()
 
 from ...image_handler import ImageHandlerStatic, ImageHandlerWaifuPics
-from ...touhou import TOUHOU_ACTION_POCKY_KISS, TOUHOU_ACTION_POCKY_KISS_SELF
+from ...touhou import TOUHOU_ACTION_LIKE, TOUHOU_ACTION_POCKY_KISS, TOUHOU_ACTION_POCKY_KISS_SELF
 
 
 IMAGE_HANDLER_PAT = ImageHandlerWaifuPics('pat', False)
@@ -32,3 +32,4 @@ IMAGE_HANDLER_KICK = ImageHandlerWaifuPics('kick', False)
 IMAGE_HANDLER_POCKY = ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS)
 
 IMAGE_HANDLER_POCKY_SELF = ImageHandlerStatic(TOUHOU_ACTION_POCKY_KISS_SELF)
+IMAGE_HANDLER_LIKE = ImageHandlerStatic(TOUHOU_ACTION_LIKE)

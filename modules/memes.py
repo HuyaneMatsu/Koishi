@@ -1,6 +1,7 @@
 __all__ = ()
 
 from scarletio import Lock, Task
+from scarletio.web_common.headers import USER_AGENT
 from hata import Client, Embed, BUILTIN_EMOJIS, KOKORO, InteractionType
 from hata.ext.slash import abort, Button, Row, InteractionResponse
 
@@ -20,6 +21,8 @@ COMPONENTS_GOOD_ANIME_MEMES = Row(
 )
 
 URL_BASE = 'https://www.reddit.com/'
+
+HEADERS = {USER_AGENT: 'Hata Discord bot; KoiBot'}
 
 class MemeLock:
     __slots__ = ('last_meme_after', 'queue', 'url', 'lock')
@@ -45,6 +48,7 @@ async def get_memes(meme_lock):
         
         async with SLASH_CLIENT.http.get(
             meme_lock.url,
+            headers = HEADERS,
             params = {
                 'limit': 100,
                 'after': after,
@@ -81,7 +85,7 @@ async def get_meme(client, event, meme_lock):
     if meme_queue:
         return meme_queue.pop()
     
-    get_meme_task = Task(get_memes(meme_lock), KOKORO)
+    get_meme_task = Task(KOKORO, get_memes(meme_lock))
     
     if event.type is InteractionType.application_command:
         await client.interaction_application_command_acknowledge(event)

@@ -33,7 +33,7 @@ class DeleteRangeContext:
     
     def timeout(self):
         self.cancel()
-        Task(self.notify_timeout(), KOKORO)
+        Task(KOKORO, self.notify_timeout())
     
     
     def cancel(self):

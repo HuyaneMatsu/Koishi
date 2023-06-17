@@ -1,3 +1,11 @@
+### 2023-06-17
+
+- When replying on an interaction (such as: `hug`, `kiss`, ...) now supports an additional `like` action.
+
+### 2023-06-11
+
+- Fix `/meme` got `forbidden` back from reddit.
+
 ### 2023-06-05
 
 - `booru` tags are now separated by `,` (from `|`).

@@ -136,7 +136,7 @@ class CooldownHandler:
             
             await client.events.error(client, f'{self!r}.__call__', err)
         
-        waiter = Task(self.waiter(client, user_id, notification), KOKORO)
+        waiter = Task(KOKORO, self.waiter(client, user_id, notification))
         self.cache[user_id] = (notification, waiter)
     
     async def waiter(self, client, user_id, notification):

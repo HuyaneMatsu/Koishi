@@ -96,8 +96,8 @@ async def reaction_add(client, event):
             channel_id = target_channel.id
             thread_id = 0
         
-        get_message_and_files_task = Task(get_message_and_files(client, source_channel, message.id), KOKORO)
-        get_webhook_task = Task(get_webhook(client, channel_id), KOKORO)
+        get_message_and_files_task = Task(KOKORO, get_message_and_files(client, source_channel, message.id))
+        get_webhook_task = Task(KOKORO, get_webhook(client, channel_id))
         
         task_group =  TaskGroup(
             KOKORO,

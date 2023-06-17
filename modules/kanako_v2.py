@@ -627,7 +627,7 @@ class KanakoJoinGroup:
         return self
     
     def __call__(self):
-        Task(self.close(), KOKORO)
+        Task(KOKORO, self.close())
     
     async def close(self):
         self.cancel()
@@ -828,7 +828,7 @@ class KanakoRunner:
         client.slasher.add_component_interaction_waiter(event.message, self)
         
         waiter = Future(KOKORO)
-        Task(self.runner(waiter), KOKORO)
+        Task(KOKORO, self.runner(waiter))
         return waiter
         
     def generate_options(self, answer):

@@ -123,7 +123,7 @@ def invoke_pull_down(channel):
     except KeyError:
         pass
     
-    Task(pull_down(channel), KOKORO)
+    Task(KOKORO, pull_down(channel))
 
 
 async def pull_down(channel):

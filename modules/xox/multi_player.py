@@ -155,7 +155,7 @@ async def xox_multi_player(client, event):
     
     player_index = (random() < 0.5)
     
-    Task(try_send_notification(client, event, message, user_1, user_2, timestamp, user_1_settings.emoji), KOKORO)
+    Task(KOKORO, try_send_notification(client, event, message, user_1, user_2, timestamp, user_1_settings.emoji))
     
     title = f'It is your turn {users[player_index].mention} | {user_settings[player_index].emoji}'
     

@@ -297,7 +297,7 @@ class user_profile:
             
             message = await client.message_create(self.channel, embed = self.render_state_1())
             self.message = message
-            Task(client.reaction_add(message, SWITCH), KOKORO)
+            Task(KOKORO, client.reaction_add(message, SWITCH))
             
             client.events.reaction_add.append(message, self)
             client.events.reaction_delete.append(message, self)
@@ -327,7 +327,7 @@ class user_profile:
         
         message = await client.message_create(self.channel, embed = self.render_state_1())
         self.message = message
-        Task(client.reaction_add(self.message, SWITCH), KOKORO)
+        Task(KOKORO, client.reaction_add(self.message, SWITCH))
         
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
@@ -349,7 +349,7 @@ class user_profile:
         
         message = await client.message_create(self.channel, embed = self.render_state_2())
         self.message = message
-        Task(client.reaction_add(message, SWITCH), KOKORO)
+        Task(KOKORO, client.reaction_add(message, SWITCH))
         
         client.events.reaction_add.append(message, self)
         client.events.reaction_delete.append(message, self)
@@ -377,7 +377,7 @@ class user_profile:
     def cancel(self):
         client = self.client
         if self.process is None:
-            Task(self.cancel_later(), KOKORO)
+            Task(KOKORO, self.cancel_later())
             return
         
         self.other = None
@@ -400,7 +400,7 @@ class user_profile:
             'Type "A-J" "1-10" for coordinate.'
             'And "1-3" "1-3" for ship placement'
             'It always places the ship right-down from the source coordinate'
-                ]
+        ]
         text.extend(render_map(self.data, SHIP_VALUES))
         embed = Embed('', '\n'.join(text), 0x010101)
         embed.add_author(f'vs.: {other.user.full_name}', other.user.avatar_url_as(size=64))
@@ -483,7 +483,7 @@ class battleships_game:
         self.player2 = user_profile(user2, client)
         self.player2.channel = channel2
         
-        Task(self.start(), KOKORO)
+        Task(KOKORO, self.start())
     
     #compability
     async def start(self):
@@ -508,8 +508,8 @@ class battleships_game:
             
             #startup
             self.process = self.process_state_0
-            Task(player1.set_state_0(), KOKORO)
-            Task(player2.set_state_0(), KOKORO)
+            Task(KOKORO, player1.set_state_0())
+            Task(KOKORO, player2.set_state_0())
             
             try:
                 await self.future
@@ -523,8 +523,8 @@ class battleships_game:
                 else:
                     text1 = text2 ='The time is over, both players timed out'
                 
-                Task(client.message_create(player1.channel, text1), KOKORO)
-                Task(client.message_create(player2.channel, text2), KOKORO)
+                Task(KOKORO, client.message_create(player1.channel, text1))
+                Task(KOKORO, client.message_create(player2.channel, text2))
                 return
             
             self.process = self.process_state_1

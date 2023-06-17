@@ -97,7 +97,7 @@ class WelcomeState:
             return
         
         self.cancel()
-        Task(self.auto_welcome(), KOKORO)
+        Task(KOKORO, self.auto_welcome())
     
     
     async def auto_welcome(self):

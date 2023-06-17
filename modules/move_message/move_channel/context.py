@@ -132,8 +132,8 @@ class ChannelMoverContext:
             )
             return
         
-        self.move_channel_task = Task(self.move_channel_loop(), KOKORO)
-        self.status_update_task = Task(self.status_update_loop(), KOKORO)
+        self.move_channel_task = Task(KOKORO, self.move_channel_loop())
+        self.status_update_task = Task(KOKORO, self.status_update_loop())
         
         CHANNEL_MOVER_BY_STATUS_MESSAGE_ID[self.status_message.id] = self
         

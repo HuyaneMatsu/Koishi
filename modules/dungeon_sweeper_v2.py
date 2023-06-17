@@ -653,7 +653,7 @@ def set_new_best(stage, steps):
         The stage's new best rating.
     """
     stage.best = steps
-    Task(save_stage_sources(), KOKORO)
+    Task(KOKORO, save_stage_sources())
 
 
 def get_rating_for(stage, steps):
@@ -4525,8 +4525,8 @@ class DungeonSweeperRunner:
         DUNGEON_SWEEPER_GAMES[user_id] = None
         user_state = None
         try:
-            task_user_state_create = Task(UserState(user_id), KOKORO)
-            task_interaction_acknowledge = Task(client.interaction_response_message_create(event), KOKORO)
+            task_user_state_create = Task(KOKORO, UserState(user_id))
+            task_interaction_acknowledge = Task(KOKORO, client.interaction_response_message_create(event))
             await TaskGroup(KOKORO, [task_user_state_create, task_interaction_acknowledge]).wait_all()
             
             user_state = task_user_state_create.get_result()
@@ -4769,7 +4769,7 @@ class DungeonSweeperRunner:
         if (timeouter is not None):
             timeouter.cancel()
         
-        return Task(canceller(self, exception), KOKORO)
+        return Task(KOKORO, canceller(self, exception))
     
     
     async def _canceller_function(self, exception):

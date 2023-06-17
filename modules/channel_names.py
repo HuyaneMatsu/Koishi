@@ -224,7 +224,7 @@ async def do_rename():
 
 def cycle_rename():
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(DAY, cycle_rename)
-    Task(do_rename(), KOKORO)
+    Task(KOKORO, do_rename())
 
 NAME_CYCLER_HANDLER = Cell()
 
@@ -233,7 +233,7 @@ COMMAND_CLIENT.command_processor.create_category('CHANNEL NAMES', checks = [chec
 
 def setup(lib):
     NAME_CYCLER_HANDLER.value = KOKORO.call_later(
-        datetime.utcnow().replace(microsecond=0, second=0, minute=0, hour=0).timestamp() - time_now() + DAY,
+        datetime.utcnow().replace(microsecond = 0, second = 0, minute = 0, hour = 0).timestamp() - time_now() + DAY,
         cycle_rename,
     )
 
@@ -244,7 +244,7 @@ def teardown(lib):
         value.cancel()
 
 
-@COMMAND_CLIENT.commands(category='CHANNEL NAMES')
+@COMMAND_CLIENT.commands(category = 'CHANNEL NAMES')
 async def list_bot_channel_names(client, message):
     """
     Lists the already added bot channel names.

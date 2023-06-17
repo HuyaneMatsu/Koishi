@@ -545,7 +545,7 @@ async def party_is_over(client, event_or_message):
     
     yield
     tasks = []
-    task = Task(voice_client.disconnect(), KOKORO)
+    task = Task(KOKORO, voice_client.disconnect())
     tasks.append(task)
     
     users = []
@@ -560,7 +560,7 @@ async def party_is_over(client, event_or_message):
         users.append(user)
     
     for user in users:
-        task = Task(client.user_voice_kick(user, GUILD__SUPPORT), KOKORO)
+        task = Task(KOKORO, client.user_voice_kick(user, GUILD__SUPPORT))
         tasks.append(task)
     
     await TaskGroup(KOKORO, tasks).wait_all()

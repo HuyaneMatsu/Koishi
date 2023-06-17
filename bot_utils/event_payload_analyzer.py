@@ -41,7 +41,7 @@ def guess_is_enum(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -104,7 +104,7 @@ def guess_is_icon(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -153,7 +153,7 @@ def guess_is_color(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -205,7 +205,7 @@ def guess_is_snowflake(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -266,7 +266,7 @@ def guess_is_discriminator(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -317,7 +317,7 @@ def guess_is_string_field(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -358,7 +358,7 @@ def guess_is_int_field(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -398,7 +398,7 @@ def guess_is_float_field(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -438,7 +438,7 @@ def guess_is_timestamp(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -480,7 +480,7 @@ def guess_is_unix_time(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -522,7 +522,7 @@ def guess_is_multi_type_value(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -556,7 +556,7 @@ def guess_is_object(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -586,7 +586,7 @@ def guess_is_array(name, value):
     ----------
     name : `str`
         The parameter's name.
-    value : `Any`
+    value : `object`
         The received value.
     
     Returns
@@ -748,7 +748,7 @@ class SubNodeBase(RichAttributeErrorBaseType):
         
         Parameters
         ----------
-        value : `Any`
+        value : `object`
             The fed value.
         """
         pass
@@ -758,6 +758,8 @@ class SubNodeBase(RichAttributeErrorBaseType):
         """
         Renders the sub-node to the given list.
         
+        Parameters
+        ----------
         into : `list` of `str`
             The list to render the string parts to.
         indent : `int`
@@ -1353,7 +1355,7 @@ class GuesserState(RichAttributeErrorBaseType):
         The node state's name.
     received_count : `int`
         The total amount of received values passed to this node.
-    received_values : `None`, `dict` of (`object`, `Any`) items
+    received_values : `None`, `dict` of (`object`, `object`) items
         The already received values.
     """
     __slots__ = ('guessers', 'name', 'received_count', 'received_values')

@@ -65,7 +65,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
         if coroutine is None:
             return await waiter
         
-        acknowledge_task = Task(coroutine, KOKORO)
+        acknowledge_task = Task(KOKORO, coroutine)
         
         await TaskGroup(KOKORO, [acknowledge_task, waiter]).wait_all()
         
@@ -88,7 +88,7 @@ class ImageHandlerRequestBase(ImageHandlerBase):
             The respective client who received the event.
         """
         if (self._request_task is None):
-            self._request_task = Task(self._request_loop(client), KOKORO)
+            self._request_task = Task(KOKORO, self._request_loop(client))
     
     
     async def _request_loop(self, client):
